@@ -70,7 +70,7 @@ class TestGeoArrowSerde(TestBase):
             metadata = json.loads(field.metadata[b"ARROW:extension:metadata"])
             assert "crs" in metadata
             assert "id" in metadata["crs"]
-            assert metadata["crs"]["id"] == {"authority": "EPSG", "code": "4326"}
+            assert metadata["crs"]["id"] == {"authority": "EPSG", "code": 4326}
 
 
 TEST_WKT = [
