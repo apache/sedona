@@ -18,14 +18,29 @@
 # We may be able to achieve streaming rather than complete materialization by using
 # with the ArrowStreamSerializer (instead of the ArrowCollectSerializer)
 
-import pyarrow as pa
-import pyarrow.compute as pc
 
 from sedona.sql.types import GeometryType
 from sedona.sql.st_functions import ST_AsEWKB
 
 
 def dataframe_to_arrow(df, crs=None):
+    """
+    Collect a DataFrame as a PyArrow Table
+
+    In the output Table, geometry will be encoded as a GeoArrow extension type.
+    The resulting output is compatible with `lonboard.viz()`,
+    `geopandas.GeoDataFrame.from_arrow()`, or any library compatible with
+    GeoArrow extension types.
+
+    :param df: A Spark DataFrame
+    :param crs: A CRS-like object (e.g., `pyproj.CRS` or string interpretable by
+      `pyproj.CRS`). If provided, this will override any CRS present in the output
+      geometries. If omitted, the CRS will be inferred from the values present in
+      the output if exactly one CRS is present in the output.
+    :return:
+    """
+    import pyarrow as pa
+
     col_is_geometry = [isinstance(f.dataType, GeometryType) for f in df.schema.fields]
 
     if not any(col_is_geometry):
@@ -132,6 +147,9 @@ def crs_to_json(crs):
 
 
 def unique_srid_from_ewkb(obj):
+    import pyarrow as pa
+    import pyarrow.compute as pc
+
     if len(obj) == 0:
         return None
 
