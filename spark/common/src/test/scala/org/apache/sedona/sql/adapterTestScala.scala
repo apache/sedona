@@ -554,6 +554,20 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen {
       }
     }
 
-    // TODO: Add test for toDfPartitioned
+    it("can convert spatial RDD to Dataframe preserving spatial partitioning") {
+      var srcDF = sparkSession.read
+        .format("csv")
+        .option("delimiter", "\t")
+        .option("header", "false")
+        .load(csvPointInputLocation)
+      var srcRDD = Adapter.toSpatialRdd(srcDF)
+      srcRDD.analyze()
+      srcRDD.spatialPartitioning(GridType.KDBTREE, 16)
+      assert(srcRDD.spatialPartitionedRDD.getNumPartitions() >= 16)
+
+      var partitionedDF = Adapter.toDfPartitioned(srcRDD, sparkSession)
+
+      // TODO: test the partitioning of the partitionedDF
+    }
   }
 }
