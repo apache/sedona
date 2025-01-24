@@ -16,11 +16,15 @@
 #  under the License.
 
 import logging
+import random
+import tempfile
+import glob
 
 import pyspark
 import pytest
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col, expr
+from pyspark.sql.types import DoubleType, StructType, IntegerType
 from tests import (
     area_lm_point_input_location,
     geojson_id_input_location,
@@ -403,4 +407,22 @@ class TestAdapter(TestBase):
         assert spatial_df.columns == ["geometry", *spatial_columns]
         assert spatial_df.count() == 1001
 
-    # TODO: Add test for Adpater.toDfPartitioned()
+    def test_to_df_partitioned(self):
+        random.seed(1234)
+        xys = [(i, random.random(), random.random()) for i in range(1_000)]
+        df = self.spark.createDataFrame(xys, ["id", "x", "y"]).selectExpr(
+            "id", "ST_Point(x, y) AS geom"
+        )
+
+        rdd = Adapter.toSpatialRdd(df, "geom")
+        rdd.analyze()
+        rdd.spatialPartitioning(GridType.KDBTREE, num_partitions=16)
+        n_spatial_partitions = rdd.spatialPartitionedRDD.getNumPartitions()
+        assert n_spatial_partitions >= 16
+
+        partitioned_df = Adapter.toDfPartitioned(rdd, self.spark)
+
+        with tempfile.TemporaryDirectory() as td:
+            out = td + "/out"
+            partitioned_df.write.format("geoparquet").save(out)
+            assert len(glob.glob("*.parquet", root_dir=out)) == n_spatial_partitions
