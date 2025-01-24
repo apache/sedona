@@ -169,7 +169,9 @@ def unique_srid_from_ewkb(obj):
         pc.binary_slice(obj, 4, 5) if is_little_endian else pc.binary_slice(obj, 1, 2)
     )
     has_srid = pc.is_in(high_byte, pa.array([b"\x20", b"\x60", b"\xa0", b"\xe0"]))
-    unique_srids = pc.if_else(has_srid, pc.binary_slice(obj, 5, 9), None).unique()
+    unique_srids = (
+        pc.if_else(has_srid, pc.binary_slice(obj, 5, 9), None).unique().drop_null()
+    )
     if len(unique_srids) != 1:
         return None
 
