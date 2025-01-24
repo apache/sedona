@@ -410,9 +410,7 @@ class TestAdapter(TestBase):
     def test_to_df_partitioned(self):
         random.seed(1234)
         xys = [(i, random.random(), random.random()) for i in range(1_000)]
-        df = self.spark.createDataFrame(xys, ["id", "x", "y"]).selectExpr(
-            "id", "ST_Point(x, y) AS geom"
-        )
+        df = self.spark.createDataFrame(xys, ["id", "x", "y"]).selectExpr("id", "ST_Point(x, y) AS geom")
 
         rdd = Adapter.toSpatialRdd(df, "geom")
         rdd.analyze()
@@ -425,4 +423,4 @@ class TestAdapter(TestBase):
         with tempfile.TemporaryDirectory() as td:
             out = td + "/out"
             partitioned_df.write.format("geoparquet").save(out)
-            assert len(glob.glob("*.parquet", root_dir=out)) == n_spatial_partitions
+            assert len(glob.glob(out + "/*.parquet")) == n_spatial_partitions
