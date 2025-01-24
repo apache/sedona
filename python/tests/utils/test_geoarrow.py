@@ -15,6 +15,8 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+import json
+
 import pyarrow as pa
 from tests.test_base import TestBase
 from pyspark.sql.types import StringType, StructType
@@ -64,9 +66,11 @@ class TestGeoArrowSerde(TestBase):
             assert field.metadata is not None
             assert b"ARROW:extension:name" in field.metadata
             assert field.metadata[b"ARROW:extension:name"] == b"geoarrow.wkb"
-            assert (
-                field.metadata[b"ARROW:extension:metadata"] == b'{"crs": "EPSG:4326"}'
-            )
+
+            metadata = json.loads(field.metadata[b"ARROW:extension:metadata"])
+            assert "crs" in metadata
+            assert "id" in metadata["crs"]
+            assert metadata["crs"]["id"] == {"authority": "EPSG", "code": "4326"}
 
 
 TEST_WKT = [
