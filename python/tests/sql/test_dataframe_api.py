@@ -683,6 +683,14 @@ test_configurations = [
         "",
         "LINESTRING (0 0, 1 0, 1 1, 0 0)",
     ),
+    (stf.ST_LineSegments, ("line",), "linestring_geom", "array_size(geom)", 5),
+    (
+        stf.ST_LineSegments,
+        ("geom", True),
+        "polygon_unsimplified",
+        "array_size(geom)",
+        0,
+    ),
     (
         stf.ST_LineSubstring,
         ("line", 0.5, 1.0),

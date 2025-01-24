@@ -1450,6 +1450,22 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualRadius == expectedRadius)
     }
 
+    it("Passed ST_LineSegments") {
+      val baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('LINESTRING(120 140, 60 120, 30 20)') AS line, ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 0, 0 0))') AS poly")
+      var resultSize = baseDf
+        .select(ST_LineSegments("line", false))
+        .first()
+        .getAs[WrappedArray[Geometry]](0)
+        .length
+      val expected = 2
+      assertEquals(expected, resultSize)
+
+      resultSize =
+        baseDf.select(ST_LineSegments("poly")).first().getAs[WrappedArray[Geometry]](0).length
+      assertEquals(0, resultSize)
+    }
+
     it("Passed ST_LineSubstring") {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 2 0)') AS line")
       val df = baseDf.select(ST_LineSubstring("line", 0.5, 1.0))

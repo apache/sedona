@@ -1130,6 +1130,24 @@ public class Functions {
     }
   }
 
+  public static class ST_LineSegments extends ScalarFunction {
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry[].class)
+    public Geometry[] eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+            Object o) {
+      Geometry geometry = (Geometry) o;
+      return org.apache.sedona.common.Functions.lineSegments(geometry);
+    }
+
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry[].class)
+    public Geometry[] eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        @DataTypeHint(value = "Boolean") Boolean lenient) {
+      Geometry geometry = (Geometry) o;
+      return org.apache.sedona.common.Functions.lineSegments(geometry, lenient);
+    }
+  }
+
   public static class ST_LineMerge extends ScalarFunction {
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
     public Geometry eval(

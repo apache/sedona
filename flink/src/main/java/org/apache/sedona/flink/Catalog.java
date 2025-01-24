@@ -157,6 +157,7 @@ public class Catalog {
       new Functions.ST_SetPoint(),
       new Functions.ST_LineFromMultiPoint(),
       new Functions.ST_LineMerge(),
+      new Functions.ST_LineSegments(),
       new Functions.ST_LineSubstring(),
       new Functions.ST_HasZ(),
       new Functions.ST_HasM(),
