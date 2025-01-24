@@ -19,12 +19,13 @@
 # with the ArrowStreamSerializer (instead of the ArrowCollectSerializer)
 
 import pyarrow as pa
+import pyarrow.compute as pc
 
 from sedona.sql.types import GeometryType
-from sedona.sql.st_functions import ST_AsBinary
+from sedona.sql.st_functions import ST_AsEWKB
 
 
-def dataframe_to_arrow(df):
+def dataframe_to_arrow(df, crs=None):
     col_is_geometry = [isinstance(f.dataType, GeometryType) for f in df.schema.fields]
 
     if not any(col_is_geometry):
@@ -34,7 +35,7 @@ def dataframe_to_arrow(df):
     df_column_names = df.schema.fieldNames()
     for i, is_geom in enumerate(col_is_geometry):
         if is_geom:
-            df_columns[i] = ST_AsBinary(df_columns[i]).alias(df_column_names[i])
+            df_columns[i] = ST_AsEWKB(df_columns[i]).alias(df_column_names[i])
 
     df_projected = df.select(*df_columns)
     table = dataframe_to_arrow_raw(df_projected)
@@ -50,7 +51,7 @@ def dataframe_to_arrow(df):
         target_type = gat.wkb().to_pyarrow()
 
         new_cols = [
-            target_type.wrap_array(col) if is_geom else col
+            wrap_geoarrow_extension(col, target_type, crs) if is_geom else col
             for is_geom, col in zip(col_is_geometry, table.columns)
         ]
 
@@ -62,7 +63,7 @@ def dataframe_to_arrow(df):
         # DuckDB as long as no intermediate transformations were applied).
         new_fields = [
             (
-                wrap_geoarrow_wkb(table.schema.field(i))
+                wrap_geoarrow_field(table.schema.field(i), table[i], crs)
                 if is_geom
                 else table.schema.field(i)
             )
@@ -97,7 +98,67 @@ def dataframe_to_arrow_raw(df):
     return table
 
 
-def wrap_geoarrow_wkb(field):
+def wrap_geoarrow_extension(col, wkb_type, crs):
+    if crs is None:
+        crs = unique_srid_from_ewkb(col)
+
+    return wkb_type.with_crs(crs).wrap_array(col)
+
+
+def wrap_geoarrow_field(field, col, crs):
+    if crs is None:
+        crs = unique_srid_from_ewkb(col)
+
+    if crs is not None:
+        metadata = f'"crs": {crs_to_json(crs)}'
+    else:
+        metadata = ""
+
     return field.with_metadata(
-        {"ARROW:extension:name": "geoarrow.wkb", "ARROW:extension:metadata": "{}"}
+        {
+            "ARROW:extension:name": "geoarrow.wkb",
+            "ARROW:extension:metadata": "{" + metadata + "}",
+        }
     )
+
+
+def crs_to_json(crs):
+    if hasattr(crs, "to_json"):
+        return crs.to_json()
+    else:
+        import pyproj
+
+        return pyproj.CRS(crs).to_json()
+
+
+def unique_srid_from_ewkb(obj):
+    if len(obj) == 0:
+        return None
+
+    # Output shouldn't have mixed endian here
+    endian = pc.binary_slice(obj, 0, 1).unique()
+    if len(endian) != 1:
+        return None
+
+    # WKB Z high byte is 0x80
+    # WKB M high byte is is 0x40
+    # EWKB SRID high byte is 0x20
+    # High bytes where the SRID is set would be
+    # [0x20, 0x20 | 0x40, 0x20 | 0x80, 0x20 | 0x40 | 0x80]
+    # == [0x20, 0x60, 0xa0, 0xe0]
+    is_little_endian = endian[0].as_py() == b"\x01"
+    high_byte = (
+        pc.binary_slice(obj, 4, 5) if is_little_endian else pc.binary_slice(obj, 1, 2)
+    )
+    has_srid = pc.is_in(high_byte, pa.array([b"\x20", b"\x60", b"\xa0", b"\xe0"]))
+    unique_srids = pc.if_else(has_srid, pc.binary_slice(obj, 5, 9), None).unique()
+    if len(unique_srids) != 1:
+        return None
+
+    srid_bytes = unique_srids[0].as_py()
+    endian = "little" if is_little_endian else "big"
+    epsg_code = int.from_bytes(srid_bytes, endian)
+
+    import pyproj
+
+    return pyproj.CRS(f"EPSG:{epsg_code}")

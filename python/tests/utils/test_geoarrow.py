@@ -40,11 +40,31 @@ class TestGeoArrowSerde(TestBase):
         geom = geo_table["geom"]
         if isinstance(geom.type, pa.ExtensionType):
             assert geom.type.extension_name == "geoarrow.wkb"
+            assert geom.type.crs is None
         else:
             field = geo_table.field("geom")
             assert field.metadata is not None
             assert b"ARROW:extension:name" in field.metadata
             assert field.metadata[b"ARROW:extension:name"] == b"geoarrow.wkb"
+            assert field.metadata[b"ARROW:extension:metadata"] == b"{}"
+
+    def test_to_geoarrow_with_geometry_with_srid(self):
+        schema = StructType().add("wkt", StringType())
+        wkt_df = TestGeoArrowSerde.spark.createDataFrame(zip(TEST_WKT), schema)
+        geo_df = wkt_df.selectExpr("ST_SetSRID(ST_GeomFromText(wkt), 4326) AS geom")
+
+        geo_table = dataframe_to_arrow(geo_df)
+        geom = geo_table["geom"]
+        if isinstance(geom.type, pa.ExtensionType):
+            assert geom.type.extension_name == "geoarrow.wkb"
+            # CRS handling in geoarrow-types was updated in 0.2, but this should work for both
+            assert "EPSG:4326" in repr(geom.type.crs)
+        else:
+            field = geo_table.field("geom")
+            assert field.metadata is not None
+            assert b"ARROW:extension:name" in field.metadata
+            assert field.metadata[b"ARROW:extension:name"] == b"geoarrow.wkb"
+            assert field.metadata[b"ARROW:extension:metadata"] == b'{"crs": "EPSG:4326"}'
 
 
 TEST_WKT = [
