@@ -64,7 +64,9 @@ class TestGeoArrowSerde(TestBase):
             assert field.metadata is not None
             assert b"ARROW:extension:name" in field.metadata
             assert field.metadata[b"ARROW:extension:name"] == b"geoarrow.wkb"
-            assert field.metadata[b"ARROW:extension:metadata"] == b'{"crs": "EPSG:4326"}'
+            assert (
+                field.metadata[b"ARROW:extension:metadata"] == b'{"crs": "EPSG:4326"}'
+            )
 
 
 TEST_WKT = [
