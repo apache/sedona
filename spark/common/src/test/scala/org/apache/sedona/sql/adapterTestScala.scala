@@ -563,12 +563,12 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen {
       pointCsvDF.createOrReplaceTempView("pointtable")
       var pointDf = sparkSession.sql(
         "select ST_Point(cast(pointtable._c0 as Decimal(24,20)), cast(pointtable._c1 as Decimal(24,20))) as arealandmark from pointtable")
-      var pointDf = Adapter.toSpatialRdd(srcDF, "arealandmark")
-      pointDf.analyze()
-      pointDf.spatialPartitioning(GridType.KDBTREE, 16)
-      assert(pointDf.spatialPartitionedRDD.getNumPartitions() >= 16)
+      var srcRdd = Adapter.toSpatialRdd(pointDf, "arealandmark")
+      srcRdd.analyze()
+      srcRdd.spatialPartitioning(GridType.KDBTREE, 16)
+      assert(srcRdd.spatialPartitionedRDD.getNumPartitions >= 16)
 
-      var partitionedDF = Adapter.toDfPartitioned(pointDf, sparkSession)
+      var partitionedDF = Adapter.toDfPartitioned(srcRdd, sparkSession)
 
       // TODO: test the partitioning of the partitionedDF
     }
