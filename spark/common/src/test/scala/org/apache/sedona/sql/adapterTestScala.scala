@@ -25,9 +25,11 @@ import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader
 import org.apache.sedona.core.spatialOperator.JoinQuery
 import org.apache.sedona.core.spatialRDD.{CircleRDD, PointRDD, PolygonRDD}
 import org.apache.sedona.sql.utils.Adapter
+import org.apache.spark.sql.Row
+import org.apache.spark.sql.functions.expr
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
-import org.locationtech.jts.geom.Point
+import org.locationtech.jts.geom.{Geometry, Point}
 import org.scalatest.GivenWhenThen
 
 class adapterTestScala extends TestBaseScala with GivenWhenThen {
@@ -552,6 +554,56 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen {
           assert(row.get(5).asInstanceOf[String] == "attr2")
         }
       }
+
+    }
+
+    it("can convert an RDD of Rows to a spatialRDD and back") {
+      val srcRdd = sparkSession.read
+        .format("csv")
+        .option("delimiter", "\t")
+        .option("header", "false")
+        .load(mixedWktGeometryInputLocation)
+        .withColumn("geom", expr("ST_GeomFromWKT(_c0)"))
+        .withColumn(
+          "structColumn",
+          expr("named_struct('structtext', 'spark', 'structint', 5, 'structbool', false)"))
+        .rdd
+      val spatialRDD = Adapter.toRowEncodedSpatialRdd(srcRdd, 18)
+      assert(
+        spatialRDD.rawSpatialRDD
+          .take(1)
+          .get(0)
+          .asInstanceOf[Geometry]
+          .getUserData
+          .asInstanceOf[Row]
+          .schema == srcRdd.take(1)(0).schema)
+      val roundTripRdd = Adapter.fromRowEncodedGeomRdd(spatialRDD.rawSpatialRDD)
+      assert(roundTripRdd.collect() sameElements srcRdd.collect())
+    }
+
+    it("can convert an RDD of Rows to a spatialRDD and back without geometry") {
+      val srcRdd = sparkSession.read
+        .format("csv")
+        .option("delimiter", "\t")
+        .option("header", "false")
+        .load(mixedWktGeometryInputLocation)
+        .withColumn("geom", expr("ST_GeomFromWKT(_c0)"))
+        .withColumn(
+          "structColumn",
+          expr("named_struct('structtext', 'spark', 'structint', 5, 'structbool', false)"))
+        .rdd
+      val geomIndex = 18
+      val spatialRDD = Adapter.toRowEncodedSpatialRdd(srcRdd, geomIndex, deduplicateGeom = true)
+      assert(
+        spatialRDD.rawSpatialRDD
+          .take(1)
+          .get(0)
+          .asInstanceOf[Geometry]
+          .getUserData
+          .asInstanceOf[Row]
+          .schema == StructType(srcRdd.take(1)(0).schema.patch(geomIndex, Nil, 1)))
+      val roundTripRdd = Adapter.fromRowEncodedGeomRdd(spatialRDD.rawSpatialRDD, geomIndex)
+      assert(roundTripRdd.collect() sameElements srcRdd.collect())
     }
   }
 }

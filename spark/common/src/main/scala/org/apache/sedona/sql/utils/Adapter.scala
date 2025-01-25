@@ -76,7 +76,7 @@ object Adapter {
     val fieldList = dataFrame.schema.toList.map(f => f.name)
     val geomColId = fieldList.indexOf(geometryFieldName)
     assert(geomColId >= 0)
-    toRdd(dataFrame, geomColId)
+    toStringEncodedRdd(dataFrame.rdd, geomColId)
   }
 
   /**
@@ -93,7 +93,7 @@ object Adapter {
       geometryColId: Int,
       fieldNames: Seq[String]): SpatialRDD[Geometry] = {
     var spatialRDD = new SpatialRDD[Geometry]
-    spatialRDD.rawSpatialRDD = toRdd(dataFrame, geometryColId).toJavaRDD()
+    spatialRDD.rawSpatialRDD = toStringEncodedRdd(dataFrame.rdd, geometryColId).toJavaRDD()
     import scala.jdk.CollectionConverters._
     if (fieldNames.nonEmpty) spatialRDD.fieldNames = fieldNames.asJava
     else spatialRDD.fieldNames = null
@@ -283,10 +283,10 @@ object Adapter {
     leftGeom ++ leftUserData ++ rightGeom ++ rightUserData
   }
 
-  private def toRdd(dataFrame: DataFrame, geometryColId: Int): RDD[Geometry] = {
-    dataFrame.rdd.map[Geometry](f => {
-      var geometry = f.get(geometryColId).asInstanceOf[Geometry]
-      var fieldSize = f.size
+  private def toStringEncodedRdd(rdd: RDD[Row], geometryColId: Int): RDD[Geometry] = {
+    rdd.map[Geometry](f => {
+      val geometry = f.get(geometryColId).asInstanceOf[Geometry]
+      val fieldSize = f.size
       var userData: String = null
       if (fieldSize > 1) {
         userData = ""
@@ -298,6 +298,99 @@ object Adapter {
       geometry.setUserData(userData)
       geometry
     })
+  }
+
+  /**
+   * Convert an RDD of Rows to a SpatialRDD with a geometry column at a specified index.
+   *
+   * columns other than the geometry column are serialized into the geometry's user data as tab
+   * separated strings. The fieldnames field is not set on the SpatialRDD because they are not
+   * available in the input RDD.
+   *
+   * @param rdd
+   *   the RDD of Rows to convert
+   * @param geometryColId
+   *   the index of the geometry column in the Row to make the spatial RDD of
+   * @param deduplicateGeom
+   *   whether to remove the geometry from the user data to avoid duplication
+   * @return
+   *   the SpatialRDD where the geometry column is the geometry and the user data is the other
+   *   columns
+   */
+  def toStringEncodedSpatialRDD(rdd: RDD[Row], geometryColId: Int): SpatialRDD[Geometry] = {
+    val spatialRDD = new SpatialRDD[Geometry]
+    spatialRDD.setRawSpatialRDD(toStringEncodedRdd(rdd, geometryColId))
+    spatialRDD
+  }
+
+  private def toRowEncodedRdd(
+      rdd: RDD[Row],
+      geometryColId: Int,
+      deduplicateGeom: Boolean): RDD[Geometry] = {
+    rdd.map(f => {
+      if (deduplicateGeom) {
+        val withoutGeom = new GenericRowWithSchema(
+          f.toSeq.patch(geometryColId, Nil, 1).toArray,
+          StructType(f.schema.patch(geometryColId, Nil, 1)))
+
+        val geometry = f.getAs[Geometry](geometryColId)
+        geometry.setUserData(withoutGeom)
+        geometry
+      } else {
+        val geometry = f.getAs[Geometry](geometryColId)
+        geometry.setUserData(f)
+        geometry
+      }
+    })
+  }
+
+  /**
+   * Convert an RDD of Rows to a SpatialRDD with a geometry column at a specified index.
+   *
+   * The original Row is stored as the geometry's user data. This should make it easier to work
+   * with and convert back to a DataFrame. The fieldNames field is not set in the output
+   * SpatialRDD because they are encoded in the user data.
+   *
+   * @param rdd
+   *   the RDD of Rows to convert
+   * @param geometryColId
+   *   the index of the geometry column in the Row to make the spatial RDD of
+   * @return
+   *   the SpatialRDD where the geometry column is the geometry and the user data is the Row
+   */
+  def toRowEncodedSpatialRdd(
+      rdd: RDD[Row],
+      geometryColId: Int,
+      deduplicateGeom: Boolean = false): SpatialRDD[Geometry] = {
+    val spatialRdd = new SpatialRDD[Geometry]
+    spatialRdd.setRawSpatialRDD(toRowEncodedRdd(rdd, geometryColId, deduplicateGeom))
+    spatialRdd
+  }
+
+  /**
+   * Convert an RDD of Geometries where the userData is a Row to an RDD of Rows.
+   *
+   * This is the inverse of toRowEncodedSpatialRdd.
+   *
+   * @param rdd
+   *   the RDD of Geometries to convert
+   * @param geomColId
+   *   the index in which to replace the geometry column in the Row. Only use if the geometry was
+   *   removed from the user data at creation time.
+   * @return
+   *   the RDD of Rows
+   */
+  def fromRowEncodedGeomRdd(rdd: RDD[Geometry], geomColId: Integer = null): RDD[Row] = {
+    if (geomColId == null) {
+      rdd.map(geom => Row.fromSeq(geom.getUserData.asInstanceOf[Row].toSeq))
+    } else {
+      rdd.map(geom => {
+        val userData = geom.getUserData.asInstanceOf[Row]
+        val geomWithoutUserData = geom.copy
+        geomWithoutUserData.setUserData(null)
+        Row.fromSeq(userData.toSeq.patch(geomColId, Seq(geomWithoutUserData), 0))
+      })
+    }
   }
 
   private def getGeomAndFields(
