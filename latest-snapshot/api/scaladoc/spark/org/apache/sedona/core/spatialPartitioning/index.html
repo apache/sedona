@@ -319,12 +319,16 @@
                         <a href="EqualPartitioning.html" title="The Class EqualPartitioning.">EqualPartitioning</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="FlatGridPartitioner.html" title=""></a>
-                        <a href="FlatGridPartitioner.html" title="">FlatGridPartitioner</a>
+                        <a class="class" href="FlatGridPartitioner.html" title="The FlatGridPartitioner is used when there is already a set of grids which the data should be partitioned into."></a>
+                        <a href="FlatGridPartitioner.html" title="The FlatGridPartitioner is used when there is already a set of grids which the data should be partitioned into.">FlatGridPartitioner</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
                         <a class="class" href="HilbertPartitioning.html" title=""></a>
                         <a href="HilbertPartitioning.html" title="">HilbertPartitioning</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="IndexedGridPartitioner.html" title="The IndexedGridPartitioner is used when there is already a set of grids which the data should be partitioned into."></a>
+                        <a href="IndexedGridPartitioner.html" title="The IndexedGridPartitioner is used when there is already a set of grids which the data should be partitioned into.">IndexedGridPartitioner</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
                         <a class="class" href="KDB.html" title="see &lt;a href=&quot;https://en.wikipedia.org/wiki/K-D-B-tree&quot;&gt;https://en.wikipedia.org/wiki/K-D-B-tree"></a>
@@ -506,7 +510,7 @@ reduce the size of serialized tasks.
       </span>
       
       <p class="shortcomment cmt">The Class EqualPartitioning.</p>
-    </li><li name="org.apache.sedona.core.spatialPartitioning.FlatGridPartitioner" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="org.apache.sedona.core.spatialPartitioning.FlatGridPartitioner" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="FlatGridPartitionerextendsSpatialPartitioner"></a><a id="FlatGridPartitioner:FlatGridPartitioner"></a>
       <span class="permalink">
       <a href="../../../../../org/apache/sedona/core/spatialPartitioning/FlatGridPartitioner.html" title="Permalink">
@@ -518,10 +522,17 @@ reduce the size of serialized tasks.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="" href="FlatGridPartitioner.html"><span class="name">FlatGridPartitioner</span></a><span class="result"> extends <a href="SpatialPartitioner.html" class="extype" name="org.apache.sedona.core.spatialPartitioning.SpatialPartitioner">SpatialPartitioner</a></span>
+        <a title="The FlatGridPartitioner is used when there is already a set of grids which the data should be partitioned into." href="FlatGridPartitioner.html"><span class="name">FlatGridPartitioner</span></a><span class="result"> extends <a href="SpatialPartitioner.html" class="extype" name="org.apache.sedona.core.spatialPartitioning.SpatialPartitioner">SpatialPartitioner</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">The FlatGridPartitioner is used when there is already a set of grids which the data should be
+partitioned into.</p><div class="fullcomment"><div class="comment cmt"><p>The FlatGridPartitioner is used when there is already a set of grids which the data should be
+partitioned into. It iterates through all the grids to find the grids to place a geometry into.
+Unless you have very few objects to place, it may make more sense to use the
+IndexedGridPartitioner. If you do not have a strict requirement to use a specific set of grids,
+it may make more sense to use another partitioner that generates its own grids from a
+space-partitioning tree, e.g. the KDBTreePartitioner or the QuadTreePartitioner.
+</p></div></div>
     </li><li name="org.apache.sedona.core.spatialPartitioning.HilbertPartitioning" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="HilbertPartitioningextendsSerializable"></a><a id="HilbertPartitioning:HilbertPartitioning"></a>
       <span class="permalink">
@@ -538,6 +549,29 @@ reduce the size of serialized tasks.
       </span>
       
       
+    </li><li name="org.apache.sedona.core.spatialPartitioning.IndexedGridPartitioner" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="IndexedGridPartitionerextendsFlatGridPartitioner"></a><a id="IndexedGridPartitioner:IndexedGridPartitioner"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/IndexedGridPartitioner.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The IndexedGridPartitioner is used when there is already a set of grids which the data should be partitioned into." href="IndexedGridPartitioner.html"><span class="name">IndexedGridPartitioner</span></a><span class="result"> extends <a href="FlatGridPartitioner.html" class="extype" name="org.apache.sedona.core.spatialPartitioning.FlatGridPartitioner">FlatGridPartitioner</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">The IndexedGridPartitioner is used when there is already a set of grids which the data should be
+partitioned into.</p><div class="fullcomment"><div class="comment cmt"><p>The IndexedGridPartitioner is used when there is already a set of grids which the data should be
+partitioned into. It leverages an STRTree to quickly find the grids to place a geometry into. If
+you have very few objects to place, it may make more sense to use the FlatGridPartitioner. If you
+do not have a strict requirement to use a specific set of grids, it may make more sense to use
+another partitioner that generates its own grids from space-partitioning tree, e.g. the
+KDBTreePartitioner or the QuadTreePartitioner.
+</p></div></div>
     </li><li name="org.apache.sedona.core.spatialPartitioning.KDB" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="KDBextendsPartitioningUtilswithSerializable"></a><a id="KDB:KDB"></a>
       <span class="permalink">
