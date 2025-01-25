@@ -904,6 +904,8 @@ The output will look like this:
 +----------------+---+------+-------+
 ```
 
+See [this page](../concepts/clustering-algorithms) for more information on the DBSCAN algorithm.
+
 ## Calculate the Local Outlier Factor (LOF)
 
 Sedona provides an implementation of the [Local Outlier Factor](https://en.wikipedia.org/wiki/Local_outlier_factor) algorithm to identify anomalous data.
