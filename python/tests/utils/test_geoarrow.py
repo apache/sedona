@@ -78,7 +78,7 @@ class TestGeoArrow(TestBase):
             assert "id" in metadata["crs"]
             assert metadata["crs"]["id"] == {"authority": "EPSG", "code": 4326}
 
-    def test_wrap_field():
+    def test_wrap_field(self):
         col_empty = pa.array([], pa.binary())
         field = pa.field("foofy", col_empty.type)
 
@@ -103,7 +103,7 @@ class TestGeoArrow(TestBase):
         assert wrapped.metadata[b"ARROW:extension:name"] == b"geoarrow.wkb"
         assert b"WGS 84" in wrapped.metadata[b"ARROW:extension:metadata"]
 
-    def test_wrap_extension():
+    def test_wrap_extension(self):
         gat = pytest.importorskip("geoarrow.types")
 
         col_empty = pa.array([], pa.binary())
@@ -130,7 +130,7 @@ class TestGeoArrow(TestBase):
         assert wrapped.type.encoding == gat.Encoding.WKB
         assert "WGS 84" in wrapped.type.crs.to_json()
 
-    def test_unique_srid():
+    def test_unique_srid(self):
         # Zero size should return None
         assert unique_srid_from_ewkb(pa.array([], pa.binary())) is None
 
