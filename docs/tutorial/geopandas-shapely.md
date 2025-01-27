@@ -115,6 +115,26 @@ gdf.plot(
 <br>
 <br>
 
+You may also wish to try converting to GeoPandas via GeoArrow, which can be
+significantly faster for large results (requires geopandas >= 1.0).
+
+```python
+import geopandas as gpd
+from sedona.spark import dataframe_to_arrow
+
+config = SedonaContext.builder().
+	getOrCreate()
+
+sedona = SedonaContext.create(config)
+
+test_wkt = ["POINT (0 1)", "LINESTRING (0 1, 2 3)"]
+df = sedona.createDataFrame(zip(test_wkt), ["wkt"]).selectExpr(
+    "ST_GeomFromText(wkt) as geom"
+)
+
+gpd.GeoDataFrame.from_arrow(dataframe_to_arrow(df))
+```
+
 ## Interoperate with shapely objects
 
 ### Supported Shapely objects
