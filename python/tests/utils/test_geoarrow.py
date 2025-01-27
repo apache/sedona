@@ -92,7 +92,7 @@ class TestGeoArrow(TestBase):
         assert wrapped.metadata[b"ARROW:extension:name"] == b"geoarrow.wkb"
         assert b"WGS 84 (CRS84)" in wrapped.metadata[b"ARROW:extension:metadata"]
 
-        # With no ouput CRS
+        # With no output CRS
         wrapped = wrap_geoarrow_field(field, col_empty, None)
         assert wrapped.metadata[b"ARROW:extension:name"] == b"geoarrow.wkb"
         assert wrapped.metadata[b"ARROW:extension:metadata"] == b"{}"
@@ -114,7 +114,7 @@ class TestGeoArrow(TestBase):
         assert wrapped.type.encoding == gat.Encoding.WKB
         assert "WGS 84 (CRS84)" in wrapped.type.crs.to_json()
 
-        # With no ouput CRS
+        # With no output CRS
         wrapped = wrap_geoarrow_extension(col_empty, spec, None)
         assert wrapped.type.encoding == gat.Encoding.WKB
         assert wrapped.type.crs is None
