@@ -18,9 +18,16 @@
 import json
 
 import pyarrow as pa
+import pyproj
+import pytest
 from tests.test_base import TestBase
 from pyspark.sql.types import StringType, StructType
-from sedona.utils.geoarrow import dataframe_to_arrow, unique_srid_from_ewkb
+from sedona.utils.geoarrow import (
+    dataframe_to_arrow,
+    unique_srid_from_ewkb,
+    wrap_geoarrow_field,
+    wrap_geoarrow_extension,
+)
 
 
 class TestGeoArrow(TestBase):
@@ -70,6 +77,58 @@ class TestGeoArrow(TestBase):
             assert "crs" in metadata
             assert "id" in metadata["crs"]
             assert metadata["crs"]["id"] == {"authority": "EPSG", "code": 4326}
+
+    def test_wrap_field():
+        col_empty = pa.array([], pa.binary())
+        field = pa.field("foofy", col_empty.type)
+
+        # With pyproj object crs override
+        wrapped = wrap_geoarrow_field(field, col_empty, pyproj.CRS("OGC:CRS84"))
+        assert wrapped.metadata[b"ARROW:extension:name"] == b"geoarrow.wkb"
+        assert b"WGS 84 (CRS84)" in wrapped.metadata[b"ARROW:extension:metadata"]
+
+        # With arbitrary string override
+        wrapped = wrap_geoarrow_field(field, col_empty, "OGC:CRS84")
+        assert wrapped.metadata[b"ARROW:extension:name"] == b"geoarrow.wkb"
+        assert b"WGS 84 (CRS84)" in wrapped.metadata[b"ARROW:extension:metadata"]
+
+        # With no ouput CRS
+        wrapped = wrap_geoarrow_field(field, col_empty, None)
+        assert wrapped.metadata[b"ARROW:extension:name"] == b"geoarrow.wkb"
+        assert wrapped.metadata[b"ARROW:extension:metadata"] == b"{}"
+
+        # With inferred crs
+        col = pa.array(TEST_WKB["ewkb_srid_little_endian"])
+        wrapped = wrap_geoarrow_field(field, col, None)
+        assert wrapped.metadata[b"ARROW:extension:name"] == b"geoarrow.wkb"
+        assert b"WGS 84" in wrapped.metadata[b"ARROW:extension:metadata"]
+
+    def test_wrap_extension():
+        gat = pytest.importorskip("geoarrow.types")
+
+        col_empty = pa.array([], pa.binary())
+        spec = gat.wkb()
+
+        # With pyproj object crs override
+        wrapped = wrap_geoarrow_extension(col_empty, spec, pyproj.CRS("OGC:CRS84"))
+        assert wrapped.type.encoding == gat.Encoding.WKB
+        assert "WGS 84 (CRS84)" in wrapped.type.crs.to_json()
+
+        # With no ouput CRS
+        wrapped = wrap_geoarrow_extension(col_empty, spec, None)
+        assert wrapped.type.encoding == gat.Encoding.WKB
+        assert wrapped.type.crs is None
+
+        # With arbitrary string override
+        wrapped = wrap_geoarrow_extension(col_empty, spec, "OGC:CRS84")
+        assert wrapped.type.encoding == gat.Encoding.WKB
+        assert "WGS 84 (CRS84)" in wrapped.type.crs.to_json()
+
+        # With inferred crs
+        col = pa.array(TEST_WKB["ewkb_srid_little_endian"])
+        wrapped = wrap_geoarrow_extension(col, spec, None)
+        assert wrapped.type.encoding == gat.Encoding.WKB
+        assert "WGS 84" in wrapped.type.crs.to_json()
 
     def test_unique_srid():
         # Zero size should return None

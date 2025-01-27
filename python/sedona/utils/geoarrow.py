@@ -63,10 +63,10 @@ def dataframe_to_arrow(df, crs=None):
         from geoarrow.types.type_pyarrow import register_extension_types
 
         register_extension_types()
-        target_type = gat.wkb().to_pyarrow()
+        spec = gat.wkb()
 
         new_cols = [
-            wrap_geoarrow_extension(col, target_type, crs) if is_geom else col
+            wrap_geoarrow_extension(col, spec, crs) if is_geom else col
             for is_geom, col in zip(col_is_geometry, table.columns)
         ]
 
@@ -113,11 +113,15 @@ def dataframe_to_arrow_raw(df):
     return table
 
 
-def wrap_geoarrow_extension(col, wkb_type, crs):
+def wrap_geoarrow_extension(col, spec, crs):
     if crs is None:
         crs = unique_srid_from_ewkb(col)
+    elif not hasattr(crs, "to_json"):
+        import pyproj
 
-    return wkb_type.with_crs(crs).wrap_array(col)
+        crs = pyproj.CRS(crs)
+
+    return spec.override(crs=crs).to_pyarrow().wrap_array(col)
 
 
 def wrap_geoarrow_field(field, col, crs):
