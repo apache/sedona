@@ -10,10 +10,10 @@ import org.locationtech.jts.geom.Geometry;
 
 import scala.Tuple2;
 
-class GenericUniquePartitioner extends SpatialPartitioner {
+public class GenericUniquePartitioner extends SpatialPartitioner {
     private SpatialPartitioner parent;
 
-    protected GenericUniquePartitioner(SpatialPartitioner parent) {
+    public GenericUniquePartitioner(SpatialPartitioner parent) {
         super(parent.getGridType(), parent.getGrids());
         this.parent = parent;
     }
