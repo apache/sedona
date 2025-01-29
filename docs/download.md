@@ -17,6 +17,11 @@
  under the License.
  -->
 
+---
+hide:
+  - navigation
+---
+
 ## GitHub repository
 
 Latest source code: [GitHub repository](https://github.com/apache/sedona/)

@@ -135,7 +135,7 @@ nav:
           - Make a release: community/publish.md
           - Vote a release: community/vote.md
       - Publications: community/publication.md
-  - Use cases:
+  - Use Cases:
       - Spatially aggregate airports per country: usecases/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb
       - Match foot traffic to Seattle coffee shops: usecases/contrib/foot-traffic.ipynb
       - Raster image manipulation: usecases/ApacheSedonaRaster.ipynb
@@ -212,7 +212,7 @@ markdown_extensions:
   - pymdownx.critic
   - pymdownx.details
   - pymdownx.emoji:
-      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.inlinehilite
   - pymdownx.magiclink
   - pymdownx.mark
