@@ -18,14 +18,12 @@
  */
 package org.apache.spark.sql.sedona_sql.io.stac
 
-import org.apache.spark.sql.SparkSession
+import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.sql.catalyst.InternalRow
-import org.scalatest.BeforeAndAfterAll
-import org.scalatest.funsuite.AnyFunSuite
 
 import scala.jdk.CollectionConverters._
 
-class StacPartitionReaderTest extends AnyFunSuite with BeforeAndAfterAll {
+class StacPartitionReaderTest extends TestBaseScala {
 
   val TEST_DATA_FOLDER: String =
     System.getProperty("user.dir") + "/src/test/resources/datasource_stac"
@@ -36,23 +34,7 @@ class StacPartitionReaderTest extends AnyFunSuite with BeforeAndAfterAll {
   val HTTPS_STAC_ITEM_FEATURES: String =
     "https://earth-search.aws.element84.com/v1/collections/sentinel-2-pre-c1-l2a/items"
 
-  private var spark: SparkSession = _
-
-  override def beforeAll(): Unit = {
-    spark = SparkSession
-      .builder()
-      .appName("StacPartitionReaderTest")
-      .master("local[*]")
-      .getOrCreate()
-  }
-
-  override def afterAll(): Unit = {
-    if (spark != null) {
-      spark.stop()
-    }
-  }
-
-  test("StacPartitionReader should read feature files from local files") {
+  it("StacPartitionReader should read feature files from local files") {
     val jsonFiles =
       Seq(JSON_STAC_ITEM_SIMPLE, JSON_STAC_ITEM_CORE, JSON_STAC_ITEM_EXTENDED).toArray
     val partition = StacPartition(0, jsonFiles, Map.empty[String, String].asJava)
@@ -74,7 +56,7 @@ class StacPartitionReaderTest extends AnyFunSuite with BeforeAndAfterAll {
     reader.close()
   }
 
-  test("StacPartitionReader should read features collection file from local files") {
+  it("StacPartitionReader should read features collection file from local files") {
     val jsonFiles = Seq(JSON_STAC_ITEM_FEATURES).toArray
     val partition = StacPartition(0, jsonFiles, Map.empty[String, String].asJava)
     val reader =
@@ -95,7 +77,7 @@ class StacPartitionReaderTest extends AnyFunSuite with BeforeAndAfterAll {
     reader.close()
   }
 
-  test("StacPartitionReader should read features collection file from https endpoint") {
+  it("StacPartitionReader should read features collection file from https endpoint") {
     val jsonFiles = Seq(HTTPS_STAC_ITEM_FEATURES).toArray
     val partition = StacPartition(0, jsonFiles, Map.empty[String, String].asJava)
     val reader =

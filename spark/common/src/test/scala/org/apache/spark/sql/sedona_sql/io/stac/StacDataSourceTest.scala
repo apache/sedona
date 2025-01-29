@@ -25,7 +25,7 @@ import org.scalatest.BeforeAndAfterAll
 
 import java.util.TimeZone
 
-class StacDataSourceTest extends TestBaseScala with BeforeAndAfterAll {
+class StacDataSourceTest extends TestBaseScala {
 
   val STAC_COLLECTION_LOCAL: String = resourceFolder + "datasource_stac/collection.json"
   val STAC_ITEM_LOCAL: String = resourceFolder + "geojson/core-item.json"
@@ -36,16 +36,6 @@ class StacDataSourceTest extends TestBaseScala with BeforeAndAfterAll {
     "https://storage.googleapis.com/cfo-public/wildfire/collection.json",
     "https://earthdatahub.destine.eu/api/stac/v1/collections/copernicus-dem",
     "https://planetarycomputer.microsoft.com/api/stac/v1/collections/naip")
-
-  override def beforeAll(): Unit = {
-    super.beforeAll()
-    TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
-  }
-
-  override def afterAll(): Unit = {
-    TimeZone.setDefault(null) // Reset to the system default time zone
-    super.afterAll()
-  }
 
   it("basic df load from local file should work") {
     val dfStac = sparkSession.read.format("stac").load(STAC_COLLECTION_LOCAL)
@@ -86,7 +76,7 @@ class StacDataSourceTest extends TestBaseScala with BeforeAndAfterAll {
     val dfSelect = sparkSession.sql(
       "SELECT id, datetime as dt, geometry, bbox " +
         "FROM STACTBL " +
-        "WHERE datetime BETWEEN '2020-01-01' AND '2020-12-13'")
+        "WHERE datetime BETWEEN '2020-01-01T00:00:00Z' AND '2020-12-13T00:00:00Z'")
 
     dfSelect.explain(true)
 
@@ -123,7 +113,7 @@ class StacDataSourceTest extends TestBaseScala with BeforeAndAfterAll {
 
     val dfSelect = sparkSession.sql("SELECT id, datetime as dt, geometry, bbox " +
       "FROM STACTBL " +
-      "WHERE datetime BETWEEN '2020-01-01' AND '2020-12-13' " +
+      "WHERE datetime BETWEEN '2020-01-01T00:00:00Z' AND '2020-12-13T00:00:00Z' " +
       "AND st_contains(ST_GeomFromText('POLYGON((17 10, 18 10, 18 11, 17 11, 17 10))'), geometry)")
 
     dfSelect.explain(true)
@@ -163,7 +153,7 @@ class StacDataSourceTest extends TestBaseScala with BeforeAndAfterAll {
     val dfSelect = sparkSession.sql("SELECT id, datetime as dt, geometry, bbox " +
       "FROM STACTBL " +
       "WHERE id = 'some-id' " +
-      "AND datetime BETWEEN '2020-01-01' AND '2020-12-13' " +
+      "AND datetime BETWEEN '2020-01-01T00:00:00Z' AND '2020-12-13T00:00:00Z' " +
       "AND st_contains(ST_GeomFromText('POLYGON((17 10, 18 10, 18 11, 17 11, 17 10))'), geometry)")
 
     dfSelect.explain(true)
