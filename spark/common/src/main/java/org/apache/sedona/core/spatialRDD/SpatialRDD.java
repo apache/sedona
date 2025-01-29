@@ -168,7 +168,8 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
     return true;
   }
 
-  public void spatialPartitioningWithoutDuplicates(GridType gridType, int numPartitions) throws Exception {
+  public void spatialPartitioningWithoutDuplicates(GridType gridType, int numPartitions)
+      throws Exception {
     calc_partitioner(gridType, numPartitions);
     partitioner = new GenericUniquePartitioner(partitioner);
     this.spatialPartitionedRDD = partition(partitioner);

@@ -420,6 +420,7 @@ class SpatialRDD:
         self,
         partitioning: Union[str, GridType, SpatialPartitioner, List[Envelope]],
         num_partitions: Optional[int] = None,
+        introduce_duplicates: bool = True,
     ) -> bool:
         """
 
@@ -445,10 +446,15 @@ class SpatialRDD:
 
         self._spatial_partitioned = True
 
-        if num_partitions:
-            return self._srdd.spatialPartitioning(grid, num_partitions)
+        if introduce_duplicates:
+            method = self._srdd.spatialPartitioning
         else:
-            return self._srdd.spatialPartitioning(grid)
+            method = self._srdd.spatialPartitioningWithoutDuplicates
+
+        if num_partitions:
+            return method(grid, num_partitions)
+        else:
+            return method(grid)
 
     def set_srdd(self, srdd):
         self._srdd = srdd
