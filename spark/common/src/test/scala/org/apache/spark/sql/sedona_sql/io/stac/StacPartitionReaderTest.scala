@@ -23,7 +23,7 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
 
-import scala.jdk.CollectionConverters.mapAsJavaMapConverter
+import scala.jdk.CollectionConverters._
 
 class StacPartitionReaderTest extends AnyFunSuite with BeforeAndAfterAll {
 

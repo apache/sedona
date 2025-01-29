@@ -19,7 +19,6 @@
 package org.apache.spark.sql.sedona_sql.io.stac
 
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
-import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.connector.read.{Batch, InputPartition, PartitionReaderFactory}
 import org.apache.spark.sql.execution.datasource.stac.TemporalFilter
 import org.apache.spark.sql.execution.datasources.parquet.{GeoParquetSpatialFilter, GeometryFieldMetaData}
@@ -29,7 +28,7 @@ import org.apache.spark.sql.types.StructType
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
-import scala.jdk.CollectionConverters.asScalaIteratorConverter
+import scala.jdk.CollectionConverters._
 
 /**
  * The `StacBatch` class represents a batch of partitions for reading data in the SpatioTemporal
