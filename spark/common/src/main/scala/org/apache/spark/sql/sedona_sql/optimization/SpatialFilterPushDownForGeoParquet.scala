@@ -92,7 +92,7 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
     lr.relation.isInstanceOf[HadoopFsRelation] &&
       lr.relation.asInstanceOf[HadoopFsRelation].fileFormat.isInstanceOf[GeoParquetFileFormatBase]
 
-  private def translateToGeoParquetSpatialFilters(
+  def translateToGeoParquetSpatialFilters(
       predicates: Seq[Expression]): Seq[GeoParquetSpatialFilter] = {
     val pushableColumn = PushableColumn(nestedPredicatePushdownEnabled = false)
     predicates.flatMap { predicate =>
