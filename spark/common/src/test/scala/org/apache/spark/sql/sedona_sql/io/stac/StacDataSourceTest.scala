@@ -39,7 +39,6 @@ class StacDataSourceTest extends TestBaseScala {
 
   it("basic df load from local file should work") {
     val dfStac = sparkSession.read.format("stac").load(STAC_COLLECTION_LOCAL)
-    dfStac.printSchema()
     dfStac.show(false)
   }
 
@@ -47,8 +46,6 @@ class StacDataSourceTest extends TestBaseScala {
     STAC_COLLECTION_REMOTE.foreach { endpoint =>
       val dfStac = sparkSession.read.format("stac").load(endpoint)
       assertSchema(dfStac.schema)
-      dfStac.printSchema()
-      dfStac.show(true)
     }
   }
 
@@ -59,7 +56,6 @@ class StacDataSourceTest extends TestBaseScala {
     val dfSelect =
       sparkSession.sql("SELECT id, datetime as dt, geometry, bbox FROM STACTBL")
 
-    dfSelect.printSchema()
     assert(dfSelect.schema.fieldNames.contains("id"))
     assert(dfSelect.schema.fieldNames.contains("dt"))
     assert(dfSelect.schema.fieldNames.contains("geometry"))
@@ -97,8 +93,6 @@ class StacDataSourceTest extends TestBaseScala {
         "FROM STACTBL " +
         "WHERE st_contains(ST_GeomFromText('POLYGON((17 10, 18 10, 18 11, 17 11, 17 10))'), geometry)")
 
-    dfSelect.explain(true)
-
     val physicalPlan = dfSelect.queryExecution.executedPlan.toString()
     assert(physicalPlan.contains(
       "PushedSpatialFilters -> LeafFilter(geometry,INTERSECTS,POLYGON ((17 10, 18 10, 18 11, 17 11, 17 10)))"))
@@ -115,8 +109,6 @@ class StacDataSourceTest extends TestBaseScala {
       "FROM STACTBL " +
       "WHERE datetime BETWEEN '2020-01-01T00:00:00Z' AND '2020-12-13T00:00:00Z' " +
       "AND st_contains(ST_GeomFromText('POLYGON((17 10, 18 10, 18 11, 17 11, 17 10))'), geometry)")
-
-    dfSelect.explain(true)
 
     val physicalPlan = dfSelect.queryExecution.executedPlan.toString()
     assert(physicalPlan.contains(
@@ -137,8 +129,6 @@ class StacDataSourceTest extends TestBaseScala {
         "FROM STACTBL " +
         "WHERE id = 'some-id'")
 
-    dfSelect.explain(true)
-
     val physicalPlan = dfSelect.queryExecution.executedPlan.toString()
     assert(physicalPlan.contains("PushedSpatialFilters -> None, PushedTemporalFilters -> None"))
 
@@ -155,8 +145,6 @@ class StacDataSourceTest extends TestBaseScala {
       "WHERE id = 'some-id' " +
       "AND datetime BETWEEN '2020-01-01T00:00:00Z' AND '2020-12-13T00:00:00Z' " +
       "AND st_contains(ST_GeomFromText('POLYGON((17 10, 18 10, 18 11, 17 11, 17 10))'), geometry)")
-
-    dfSelect.explain(true)
 
     val physicalPlan = dfSelect.queryExecution.executedPlan.toString()
     assert(physicalPlan.contains(
