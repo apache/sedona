@@ -39,7 +39,8 @@ class StacDataSourceTest extends TestBaseScala {
 
   it("basic df load from local file should work") {
     val dfStac = sparkSession.read.format("stac").load(STAC_COLLECTION_LOCAL)
-    dfStac.show(false)
+    val rowCount = dfStac.count()
+    assert(rowCount > 0)
   }
 
   it("basic df load from remote service endpoints should work") {
@@ -73,8 +74,6 @@ class StacDataSourceTest extends TestBaseScala {
       "SELECT id, datetime as dt, geometry, bbox " +
         "FROM STACTBL " +
         "WHERE datetime BETWEEN '2020-01-01T00:00:00Z' AND '2020-12-13T00:00:00Z'")
-
-    dfSelect.explain(true)
 
     val physicalPlan = dfSelect.queryExecution.executedPlan.toString()
     assert(physicalPlan.contains(

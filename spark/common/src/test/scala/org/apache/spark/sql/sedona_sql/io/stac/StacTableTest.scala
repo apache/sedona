@@ -24,33 +24,6 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class StacTableTest extends AnyFunSuite {
 
-  def printSchema(schema: StructType): Unit = {
-    def printFields(fields: Array[StructField], indent: String): Unit = {
-      fields.foreach { field =>
-        println(
-          s"$indent- ${field.name}: ${field.dataType.simpleString} (nullable = ${field.nullable})")
-        field.dataType match {
-          case structType: StructType => printFields(structType.fields, indent + "  ")
-          case arrayType: ArrayType =>
-            println(s"$indent  - elementType: ${arrayType.elementType.simpleString}")
-            arrayType.elementType match {
-              case structType: StructType => printFields(structType.fields, indent + "    ")
-              case _ => // Do nothing
-            }
-          case mapType: MapType =>
-            println(s"$indent  - keyType: ${mapType.keyType.simpleString}")
-            println(s"$indent  - valueType: ${mapType.valueType.simpleString}")
-            mapType.valueType match {
-              case structType: StructType => printFields(structType.fields, indent + "    ")
-              case _ => // Do nothing
-            }
-          case _ => // Do nothing
-        }
-      }
-    }
-    printFields(schema.fields, "")
-  }
-
   test("addAssetStruct should add a new asset to an existing assets struct") {
     val initialSchema = StructType(
       Seq(
@@ -88,9 +61,7 @@ class StacTableTest extends AnyFunSuite {
 
   test("addAssetStruct should not modify other fields") {
     val initialSchema = SCHEMA_GEOPARQUET
-
     val updatedSchema = addAssetsStruct(initialSchema, Array("thumbnail", "preview"))
-    printSchema(updatedSchema)
 
     assert(updatedSchema.fieldNames.contains("id"))
     assert(updatedSchema.fieldNames.contains("stac_version"))
