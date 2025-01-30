@@ -20,8 +20,11 @@ package org.apache.sedona.core.spatialPartitioning;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import javax.annotation.Nullable;
+import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.joinJudgement.DedupParams;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import scala.Tuple2;
 
@@ -29,8 +32,15 @@ public class GenericUniquePartitioner extends SpatialPartitioner {
   private SpatialPartitioner parent;
 
   public GenericUniquePartitioner(SpatialPartitioner parent) {
-    super(parent.getGridType(), parent.getGrids());
     this.parent = parent;
+  }
+
+  public GridType getGridType() {
+    return parent.gridType;
+  }
+
+  public List<Envelope> getGrids() {
+    return parent.grids;
   }
 
   @Override
