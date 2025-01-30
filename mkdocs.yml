@@ -90,6 +90,7 @@ nav:
                   - Query optimization: api/sql/Optimizer.md
                   - Nearest-Neighbour searching: api/sql/NearestNeighbourSearching.md
                   - "Spider:Spatial Data Generator": api/sql/Spider.md
+                  - Reading STAC Data Source: api/sql/Stac.md
                   - Reading Legacy Parquet Files: api/sql/Reading-legacy-parquet.md
                   - Visualization:
                       - SedonaPyDeck: api/sql/Visualization_SedonaPyDeck.md
