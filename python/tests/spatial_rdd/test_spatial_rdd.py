@@ -26,6 +26,7 @@ from tests.tools import tests_resource
 
 from sedona.core.enums import FileDataSplitter, GridType, IndexType
 from sedona.core.formatMapper.geo_json_reader import GeoJsonReader
+from sedona.utils.adapter import Adapter
 from sedona.core.geom.envelope import Envelope
 from sedona.core.SpatialRDD import PointRDD
 
@@ -126,6 +127,10 @@ class TestSpatialRDD(TestBase):
             else:
                 assert spatial_rdd.getPartitioner().name == "FlatGridPartitioner"
 
+            grids = spatial_rdd.getPartitioner().getGrids()
+            assert len(grids) > 0
+            assert all(isinstance(grid, Envelope) for grid in grids)
+
     def test_get_raw_spatial_rdd(self):
         spatial_rdd = self.create_spatial_rdd()
         assert isinstance(spatial_rdd.getRawSpatialRDD(), RDD)
@@ -154,3 +159,24 @@ class TestSpatialRDD(TestBase):
         spatial_rdd.spatialPartitioning(GridType.QUADTREE)
 
         print(spatial_rdd.getPartitioner())
+
+    def test_partition_unique(self):
+        grids = [
+            Envelope(0, 10, 0, 10),
+            Envelope(10, 20, 0, 10),
+            Envelope(0, 10, 10, 20),
+            Envelope(10, 20, 10, 20),
+        ]
+
+        df = self.spark.createDataFrame(
+            [("POLYGON ((5 5, 15 5, 15 15, 5 15, 5 5))",)], ["wkt"]
+        ).selectExpr("ST_GeomFromText(wkt) as geometry")
+        spatial_rdd = Adapter.toSpatialRdd(df, "geometry")
+
+        spatial_rdd.spatialPartitioning(grids)
+        assert spatial_rdd.spatialPartitionedRDD.count() == 5
+        assert spatial_rdd.getPartitioner().getGrids() == grids
+
+        spatial_rdd.spatialPartitioning(grids, introduce_duplicates=False)
+        assert spatial_rdd.spatialPartitionedRDD.count() == 1
+        spatial_rdd.getPartitioner().getGrids() == grids

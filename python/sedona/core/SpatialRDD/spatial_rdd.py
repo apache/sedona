@@ -19,7 +19,7 @@ import pickle
 from typing import List, Optional, Union
 
 import attr
-from py4j.java_gateway import get_field
+from py4j.java_gateway import get_field, get_method
 from pyspark import RDD, SparkContext, StorageLevel
 from pyspark.sql import SparkSession
 
@@ -50,6 +50,15 @@ class SpatialPartitioner:
             partitioner = None
 
         return cls(partitioner, jvm_partitioner)
+
+    def getGrids(self) -> List[Envelope]:
+        jvm_grids = get_method(self.jvm_partitioner, "getGrids")()
+        number_of_grids = jvm_grids.size()
+        envelopes = [
+            Envelope.from_jvm_instance(jvm_grids[index])
+            for index in range(number_of_grids)
+        ]
+        return envelopes
 
 
 @attr.s

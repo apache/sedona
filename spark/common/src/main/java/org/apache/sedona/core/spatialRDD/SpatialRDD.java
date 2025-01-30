@@ -180,6 +180,14 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
     this.spatialPartitionedRDD = partition(partitioner);
   }
 
+  /** @deprecated Use spatialPartitioningWithoutDuplicates(SpatialPartitioner partitioner) */
+  public boolean spatialPartitioningWithoutDuplicates(final List<Envelope> otherGrids)
+      throws Exception {
+    this.partitioner = new GenericUniquePartitioner(new IndexedGridPartitioner(otherGrids));
+    this.spatialPartitionedRDD = partition(partitioner);
+    return true;
+  }
+
   /**
    * Spatial partitioning.
    *
@@ -299,7 +307,7 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
 
   /** @deprecated Use spatialPartitioning(SpatialPartitioner partitioner) */
   public boolean spatialPartitioning(final List<Envelope> otherGrids) throws Exception {
-    this.partitioner = new FlatGridPartitioner(otherGrids);
+    this.partitioner = new IndexedGridPartitioner(otherGrids);
     this.spatialPartitionedRDD = partition(partitioner);
     return true;
   }
