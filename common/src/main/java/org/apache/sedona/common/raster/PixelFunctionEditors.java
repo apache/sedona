@@ -19,6 +19,7 @@
 package org.apache.sedona.common.raster;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
@@ -121,13 +122,19 @@ public class PixelFunctionEditors {
    * @param band Band of the raster to be edited
    * @param geom Geometry region to update
    * @param value Value to updated in the said region
+   * @param allTouched When set to true, sets value for all pixels touched by geom
    * @param keepNoData To keep no data value or not
    * @return An updated raster
    * @throws FactoryException
    * @throws TransformException
    */
   public static GridCoverage2D setValues(
-      GridCoverage2D raster, int band, Geometry geom, double value, boolean keepNoData)
+      GridCoverage2D raster,
+      int band,
+      Geometry geom,
+      double value,
+      boolean allTouched,
+      boolean keepNoData)
       throws FactoryException, TransformException {
     RasterUtils.ensureBand(raster, band);
 
@@ -141,6 +148,9 @@ public class PixelFunctionEditors {
           "The provided geometry is not intersecting the raster. Please provide a geometry that is in the raster's extent.");
     }
 
+    //    System.out.println(
+    //        "\nGeom from setValues after transformation of srid: \n" + Functions.asEWKT(geom));
+
     String bandDataType = RasterBandAccessors.getBandType(raster, band);
 
     GridCoverage2D rasterizedGeom;
@@ -148,16 +158,23 @@ public class PixelFunctionEditors {
 
     if (keepNoData) {
       noDataValue = RasterBandAccessors.getBandNoDataValue(raster, band);
-      rasterizedGeom = RasterConstructors.asRaster(geom, raster, bandDataType, value, noDataValue);
+      rasterizedGeom =
+          RasterConstructors.asRaster(geom, raster, bandDataType, allTouched, value, noDataValue);
     } else {
-      rasterizedGeom = RasterConstructors.asRaster(geom, raster, bandDataType, value);
+      rasterizedGeom = RasterConstructors.asRaster(geom, raster, bandDataType, allTouched, value);
     }
 
     Raster rasterizedGeomData = RasterUtils.getRaster(rasterizedGeom.getRenderedImage());
     double colX = RasterAccessors.getUpperLeftX(rasterizedGeom),
         rowY = RasterAccessors.getUpperLeftY(rasterizedGeom);
+    //    System.out.println("\nsetValues - rasterizedGeom colX, rowY: " + colX + ", " + rowY);
     int heightGeometryRaster = RasterAccessors.getHeight(rasterizedGeom),
         widthGeometryRaster = RasterAccessors.getWidth(rasterizedGeom);
+    //    System.out.println(
+    //        "setValues - rasterizedGeom heightGeometryRaster, widthGeometryRaster: "
+    //            + heightGeometryRaster
+    //            + ", "
+    //            + widthGeometryRaster);
     int heightOriginalRaster = RasterAccessors.getHeight(raster),
         widthOriginalRaster = RasterAccessors.getWidth(raster);
     WritableRaster rasterCopied = makeCopiedRaster(raster);
@@ -165,8 +182,10 @@ public class PixelFunctionEditors {
     String geometryType = geom.getGeometryType();
 
     // Taking a shortcut if the provided geometry is a Point or MultiPoint, then taking the lat lon
-    if (geometryType.equalsIgnoreCase(Geometry.TYPENAME_POINT)
-        || geometryType.equalsIgnoreCase(Geometry.TYPENAME_MULTIPOINT)) {
+    if ((geometryType.equalsIgnoreCase(Geometry.TYPENAME_POINT)
+            || geometryType.equalsIgnoreCase(Geometry.TYPENAME_MULTIPOINT))
+        & false) {
+      System.out.println("\nsetValues calls shortcut for Point and MultiPoint...\n");
       Coordinate[] coordinates = geom.getCoordinates();
       for (Coordinate pointCoordinate : coordinates) {
         int[] pointLocation =
@@ -183,6 +202,7 @@ public class PixelFunctionEditors {
     else {
       int[] pixelLocation = RasterUtils.getGridCoordinatesFromWorld(raster, colX, rowY);
       int x = pixelLocation[0], y = pixelLocation[1];
+      //      System.out.println("setValues - x, y: " + x + ", " + y);
 
       // rasterX & rasterY are the starting pixels for the target raster
       int rasterX = Math.max(x, 0);
@@ -190,9 +210,13 @@ public class PixelFunctionEditors {
       // geometryX & geometryY are the starting pixels for the geometry raster
       int geometryX = rasterX - x;
       int geometryY = rasterY - y;
+      //      System.out.println("setValues - geometryX, geometryY: " + geometryX + ", " +
+      // geometryY);
       // widthRegion & heightRegion are the size of the region to update
       int widthRegion = Math.min(widthGeometryRaster - geometryX, widthOriginalRaster - rasterX);
       int heightRegion = Math.min(heightGeometryRaster - geometryY, heightOriginalRaster - rasterY);
+      //      System.out.println(
+      //          "setValues - widthRegion, heightRegion: " + widthRegion + ", " + heightRegion);
 
       for (int j = 0; j < heightRegion; j++) {
         for (int i = 0; i < widthRegion; i++) {
@@ -200,6 +224,26 @@ public class PixelFunctionEditors {
           // [0] as only one band in the rasterized Geometry
           double pixelNew =
               rasterizedGeomData.getPixel(geometryX + i, geometryY + j, (double[]) null)[0];
+
+          Point2D worldCoords =
+              RasterUtils.getWorldCornerCoordinates(raster, rasterX + i, rasterY + j);
+          double worldX = worldCoords.getX();
+          double worldY = worldCoords.getY();
+          //          System.out.println(
+          //              "setValues - (rasterX + i, rasterY + j), (worldX, worldY), pixelNew: "
+          //                  + "("
+          //                  + (rasterX + i)
+          //                  + ", "
+          //                  + (rasterY + j)
+          //                  + ")"
+          //                  + ", ("
+          //                  + worldX
+          //                  + ", "
+          //                  + worldY
+          //                  + ")"
+          //                  + ", "
+          //                  + pixelNew);
+
           // skipping 0 from the rasterized geometry as
           if (pixelNew == 0
               || keepNoData && noDataValue != null && noDataValue == pixel[band - 1]) {
@@ -207,6 +251,7 @@ public class PixelFunctionEditors {
           } else {
             pixel[band - 1] = pixelNew;
           }
+
           rasterCopied.setPixel(rasterX + i, rasterY + j, pixel);
         }
       }
@@ -227,6 +272,25 @@ public class PixelFunctionEditors {
    * @param band Band of the raster to be edited
    * @param geom Geometry region to update
    * @param value Value to updated in the said region
+   * @param allTouched When set to true, sets value for all pixels touched by geom
+   * @return An updated raster
+   * @throws FactoryException
+   * @throws TransformException
+   */
+  public static GridCoverage2D setValues(
+      GridCoverage2D raster, int band, Geometry geom, double value, boolean allTouched)
+      throws FactoryException, TransformException {
+    return setValues(raster, band, geom, value, allTouched, false);
+  }
+
+  /**
+   * Returns a raster by replacing the values of pixels in a specified geometry region. It converts
+   * the Geometry to a raster using RS_AsRaster. A convenience function with keepNoData as false.
+   *
+   * @param raster Input raster to be updated
+   * @param band Band of the raster to be edited
+   * @param geom Geometry region to update
+   * @param value Value to updated in the said region
    * @return An updated raster
    * @throws FactoryException
    * @throws TransformException
@@ -234,7 +298,7 @@ public class PixelFunctionEditors {
   public static GridCoverage2D setValues(
       GridCoverage2D raster, int band, Geometry geom, double value)
       throws FactoryException, TransformException {
-    return setValues(raster, band, geom, value, false);
+    return setValues(raster, band, geom, value, false, false);
   }
 
   /**

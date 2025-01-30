@@ -182,13 +182,18 @@ case class RS_ZonalStatsAll(inputExpressions: Seq[Expression])
     } else {
       1
     }
-    val noData = if (inputExpressions.length >= 4) {
+    val allTouched = if (inputExpressions.length >= 4) {
       inputExpressions(3).eval(input).asInstanceOf[Boolean]
+    } else {
+      false
+    }
+    val noData = if (inputExpressions.length >= 5) {
+      inputExpressions(4).eval(input).asInstanceOf[Boolean]
     } else {
       true
     }
-    val lenient = if (inputExpressions.length >= 5) {
-      inputExpressions(4).eval(input).asInstanceOf[Boolean]
+    val lenient = if (inputExpressions.length >= 6) {
+      inputExpressions(5).eval(input).asInstanceOf[Boolean]
     } else {
       true
     }
@@ -198,7 +203,7 @@ case class RS_ZonalStatsAll(inputExpressions: Seq[Expression])
       null
     } else {
       val zonalStatsAll =
-        RasterBandAccessors.getZonalStatsAll(rasterGeom, roi, band, noData, lenient)
+        RasterBandAccessors.getZonalStatsAll(rasterGeom, roi, band, allTouched, noData, lenient)
       // Create an InternalRow with the zonalStatsAll
       if (zonalStatsAll == null) {
         return null

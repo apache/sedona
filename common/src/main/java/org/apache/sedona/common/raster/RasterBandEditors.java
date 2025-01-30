@@ -343,7 +343,8 @@ public class RasterBandEditors {
       }
 
       // rasterize the geometry to iterate over the clipped raster
-      GridCoverage2D rasterized = RasterConstructors.asRaster(geometry, raster, bandType, 150);
+      GridCoverage2D rasterized =
+          RasterConstructors.asRaster(geometry, raster, bandType, false, 150);
       Raster rasterizedData = RasterUtils.getRaster(rasterized.getRenderedImage());
       double[] metadataRasterized = RasterAccessors.metadata(rasterized);
       int widthRasterized = (int) metadataRasterized[2],

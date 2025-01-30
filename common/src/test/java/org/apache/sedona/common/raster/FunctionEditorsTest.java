@@ -20,7 +20,9 @@ package org.apache.sedona.common.raster;
 
 import static org.junit.Assert.*;
 
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import org.apache.sedona.common.Constructors;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
@@ -61,17 +63,70 @@ public class FunctionEditorsTest extends RasterTestBase {
   @Test
   public void testSetValuesWithGeomInRaster()
       throws IOException, ParseException, FactoryException, TransformException {
+    GridCoverage2D emptyRaster =
+        RasterConstructors.makeEmptyRaster(1, 10, 10, 0, 0, 1, -1, 0, 0, 0);
+
+    //        String polygon =
+    //            "GEOMETRYCOLLECTION(POINT(1.5 -4.5), POINT(2 -2), MULTIPOINT((4 -4), (6 -6)),
+    //     LINESTRING(1 -1, 8 -1), MULTILINESTRING((2 -8, 7 -8), (3 -6, 5 -6)), POLYGON((3 -3, 5 -3,
+    // 5
+    //     -5, 3 -5, 3 -3)), MULTIPOLYGON(((6 -2, 8 -2, 8 -4, 6 -4, 6 -2)),((1 -7, 2 -7, 2 -9, 1 -9,
+    // 1
+    //     -7))))";
+    //        String polygon = "POLYGON((3 3, 5 3, 5 5, 3 5, 3 3))";
+    //        String polygon = "POLYGON((3 -3, 5 -3, 5 -5, 3 -5, 3 -3))";
+    String polygon = "LINESTRING(3 -3, 4.5 -4.5, 2 -2)";
+    //        String polygon = "POINT(1.5 -4.5)";
+    //        String polygon = "POINT(2 -4)";
+
+    //        System.out.println(
+    //            "\nOriginal Raster metadata: " +
+    //     Arrays.toString(RasterAccessors.metadata(emptyRaster)));
+    //        System.out.println(
+    //            "Original Raster band 1: " + Arrays.toString(MapAlgebra.bandAsArray(emptyRaster,
+    // 1)));
+    //
+    Geometry geom = Constructors.geomFromWKT(polygon, 0);
+    //        GridCoverage2D result = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 10,
+    // false,
+    //     false);
+    //
+    //        System.out.println(
+    //            "\nfinal Rasterized metadata: " +
+    // Arrays.toString(RasterAccessors.metadata(result)));
+    //        System.out.println(
+    //            "final Rasterized band 1: " + Arrays.toString(MapAlgebra.bandAsArray(result, 1)));
+
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
-    String polygon =
+    polygon =
         "POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 236722 4197590, 236722 4204770))";
-    Geometry geom = Constructors.geomFromWKT(polygon, 26918);
+    geom = Constructors.geomFromWKT(polygon, 26918);
 
-    GridCoverage2D result = PixelFunctionEditors.setValues(raster, 1, geom, 10, false);
+    //    System.out.println("\nRaster metadata: " +
+    // Arrays.toString(RasterAccessors.metadata(raster)));
 
-    Geometry point = Constructors.geomFromWKT("POINT (243700 4197797)", 26918);
+    GridCoverage2D result = PixelFunctionEditors.setValues(raster, 1, geom, 10, true, false);
+
+    System.out.println(
+        "\nOG Raster metadata: " + Arrays.toString(RasterAccessors.metadata(result)));
+
+    //    Path to the output CSV file
+    String filePath = "/Users/pranavtoggi/Downloads/rasterized_output.csv";
+
+    // Save the double array as a CSV file
+    saveDoubleArrayAsCSV(MapAlgebra.bandAsArray(result, 1), filePath);
+
+    Geometry point = Constructors.geomFromWKT("POINT (236698.272 4204794.5)", 26918);
     double actual = PixelFunctions.value(result, point, 1);
     double expected = 10.0;
+    assertEquals(expected, actual, 0d);
+
+    result = PixelFunctionEditors.setValues(raster, 1, geom, 10, false);
+
+    point = Constructors.geomFromWKT("POINT (243700 4197797)", 26918);
+    actual = PixelFunctions.value(result, point, 1);
+    expected = 10.0;
     assertEquals(expected, actual, 0d);
 
     point = Constructors.geomFromWKT("POINT (240311 4202806)", 26918);
@@ -92,11 +147,17 @@ public class FunctionEditorsTest extends RasterTestBase {
         "POLYGON ((-77.9148 37.9545, -77.9123 37.8898, -77.9938 37.8878, -77.9964 37.9524, -77.9148 37.9545))";
     Geometry geom = Constructors.geomFromWKT(polygon, 0);
 
-    GridCoverage2D result = PixelFunctionEditors.setValues(raster, 1, geom, 10, false);
-
+    GridCoverage2D result = PixelFunctionEditors.setValues(raster, 1, geom, 10, true, false);
     Geometry point = Constructors.geomFromWKT("POINT (-77.9146 37.8916)", 0);
     double actual = PixelFunctions.value(result, point, 1);
     double expected = 10.0;
+    assertEquals(expected, actual, 0d);
+
+    result = PixelFunctionEditors.setValues(raster, 1, geom, 10, false);
+
+    point = Constructors.geomFromWKT("POINT (-77.9146 37.8916)", 0);
+    actual = PixelFunctions.value(result, point, 1);
+    expected = 10.0;
     assertEquals(expected, actual, 0d);
 
     point = Constructors.geomFromWKT("POINT (-77.9549 37.9357)", 0);
@@ -113,11 +174,26 @@ public class FunctionEditorsTest extends RasterTestBase {
         "POLYGON ((-8682522.873537656 4572703.890837922, -8673439.664183248 4572993.532747675, -8673155.57366801 4563873.2099182755, -8701890.325907696 4562931.7093397, -8682522.873537656 4572703.890837922))";
     Geometry geom = Constructors.geomFromWKT(polygon, 3857);
 
-    GridCoverage2D result = PixelFunctionEditors.setValues(raster, 1, geom, 10, false);
-
+    GridCoverage2D result = PixelFunctionEditors.setValues(raster, 1, geom, 10, true, false);
     Geometry point = Constructors.geomFromWKT("POINT (243700 4197797)", 26918);
     double actual = PixelFunctions.value(result, point, 1);
     double expected = 10.0;
+    assertEquals(expected, actual, 0d);
+
+    System.out.println(
+        "\nOG raster metadata: " + Arrays.toString(RasterAccessors.metadata(result)));
+
+    //    Path to the output CSV file
+    String filePath = "/Users/pranavtoggi/Downloads/rasterized_output.csv";
+
+    // Save the double array as a CSV file
+    saveDoubleArrayAsCSV(MapAlgebra.bandAsArray(raster, 1), filePath);
+
+    result = PixelFunctionEditors.setValues(raster, 1, geom, 10, false);
+
+    point = Constructors.geomFromWKT("POINT (243700 4197797)", 26918);
+    actual = PixelFunctions.value(result, point, 1);
+    expected = 10.0;
     assertEquals(expected, actual, 0d);
 
     point = Constructors.geomFromWKT("POINT (235749.0869 4200557.7397)", 26918);
@@ -137,6 +213,24 @@ public class FunctionEditorsTest extends RasterTestBase {
     assertEquals(expected, actual, 0d);
   }
 
+  public static void saveDoubleArrayAsCSV(double[] array, String filePath) {
+    try (FileWriter writer = new FileWriter(filePath)) {
+      // Convert double array to a CSV format
+      String csvString =
+          Arrays.toString(array)
+              .replace("[", "") // Remove opening bracket
+              .replace("]", ""); // Remove closing bracket
+
+      // Write to file
+      writer.write(csvString);
+      writer.flush();
+
+      System.out.println("Array successfully saved as a CSV in: " + filePath);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
   @Test
   public void testSetValuesGeomVariant()
       throws FactoryException, ParseException, TransformException {
@@ -150,18 +244,23 @@ public class FunctionEditorsTest extends RasterTestBase {
     double[] actual = MapAlgebra.bandAsArray(raster, 1);
     double[] expected =
         new double[] {
-          4235.0, 0.0, 0.0, 0.0, 4235.0, 4235.0, 0.0, 0.0, 4235.0, 4235.0, 4235.0, 0.0, 4235.0, 0.0,
+          4235.0, 0.0, 0.0, 0.0, 4235.0, 4235.0, 0.0, 0.0, 4235.0, 0.0, 4235.0, 0.0, 4235.0, 0.0,
           0.0, 4235.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
         };
     assertArrayEquals(expected, actual, 0.1d);
 
     // Point
     geom = Constructors.geomFromWKT("POINT(5 -5)", 0);
+    System.out.println(
+        "\nOG Raster metadata: " + Arrays.toString(RasterAccessors.metadata(raster)));
+    System.out.println("OG raster band 1: " + Arrays.toString(MapAlgebra.bandAsArray(raster, 1)));
+
     raster = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 35);
     actual = MapAlgebra.bandAsArray(raster, 1);
+
     expected =
         new double[] {
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 35.0, 0.0, 0.0,
           0.0, 35.0, 0.0, 0.0, 0.0, 0.0
         };
     assertArrayEquals(expected, actual, 0.1d);
@@ -170,10 +269,14 @@ public class FunctionEditorsTest extends RasterTestBase {
     geom = Constructors.geomFromWKT("MULTIPOINT((2 -2), (2 -1), (3 -3), (4 -7))", 0);
     raster = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 400, false);
     actual = MapAlgebra.bandAsArray(raster, 1);
+
+    System.out.println("\nRaster metadata: " + Arrays.toString(RasterAccessors.metadata(raster)));
+    System.out.println("raster band 1: " + Arrays.toString(MapAlgebra.bandAsArray(raster, 1)));
+
     expected =
         new double[] {
-          0.0, 400.0, 0.0, 0.0, 0.0, 400.0, 0.0, 0.0, 0.0, 0.0, 400.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 400.0
+          0.0, 400.0, 0.0, 0.0, 0.0, 400.0, 400.0, 0.0, 0.0, 400.0, 400.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 400.0, 0.0
         };
     assertArrayEquals(expected, actual, 0.1d);
 
@@ -192,10 +295,15 @@ public class FunctionEditorsTest extends RasterTestBase {
     geom = Constructors.geomFromWKT("POLYGON((-1 1, 3 4, 4 -4, 5 -5, 9 -9, -1 1))", 0);
     raster = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 56);
     actual = MapAlgebra.bandAsArray(raster, 1);
+
+    System.out.println(
+        "\nRasterized metadata: " + Arrays.toString(RasterAccessors.metadata(raster)));
+    System.out.println("Rasterized band 1: " + Arrays.toString(MapAlgebra.bandAsArray(raster, 1)));
+
     expected =
         new double[] {
-          56.0, 56.0, 56.0, 0.0, 0.0, 56.0, 56.0, 0.0, 0.0, 0.0, 56.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+          56.0, 56.0, 56.0, 0.0, 0.0, 56.0, 56.0, 0.0, 0.0, 0.0, 56.0, 0.0, 0.0, 0.0, 0.0, 56.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
         };
     assertArrayEquals(expected, actual, 0.1d);
   }
