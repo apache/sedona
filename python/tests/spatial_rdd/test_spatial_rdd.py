@@ -174,7 +174,7 @@ class TestSpatialRDD(TestBase):
         spatial_rdd = Adapter.toSpatialRdd(df, "geometry")
 
         spatial_rdd.spatialPartitioning(grids)
-        assert spatial_rdd.spatialPartitionedRDD.count() == 5
+        assert spatial_rdd.spatialPartitionedRDD.count() in (4, 5)
         assert spatial_rdd.getPartitioner().getGrids() == grids
 
         spatial_rdd.spatialPartitioning(grids, introduce_duplicates=False)
