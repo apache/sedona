@@ -24,11 +24,8 @@ import org.apache.sedona.sql.RasterRegistrator
 import org.apache.sedona.sql.UDF.UdfRegistrator
 import org.apache.sedona.sql.UDT.UdtRegistrator
 import org.apache.spark.serializer.KryoSerializer
-import org.apache.spark.sql.sedona_sql.optimization.SpatialFilterPushDownForGeoParquet
-
-import org.apache.spark.sql.sedona_sql.optimization.ExtractGeoStatsFunctions
+import org.apache.spark.sql.sedona_sql.optimization.{ExtractGeoStatsFunctions, SpatialFilterPushDownForGeoParquet, SpatialTemporalFilterPushDownForStacScan}
 import org.apache.spark.sql.sedona_sql.strategy.geostats.EvalGeoStatsFunctionStrategy
-
 import org.apache.spark.sql.sedona_sql.strategy.join.JoinQueryDetector
 import org.apache.spark.sql.{SQLContext, SparkSession}
 
@@ -40,6 +37,12 @@ class InternalApi(
     extends StaticAnnotation
 
 object SedonaContext {
+
+  private def customOptimizationsWithSession(sparkSession: SparkSession) =
+    Seq(
+      new SpatialFilterPushDownForGeoParquet(sparkSession),
+      new SpatialTemporalFilterPushDownForStacScan(sparkSession))
+
   def create(sqlContext: SQLContext): SQLContext = {
     create(sqlContext.sparkSession)
     sqlContext
@@ -60,10 +63,14 @@ object SedonaContext {
     if (!sparkSession.experimental.extraStrategies.exists(_.isInstanceOf[JoinQueryDetector])) {
       sparkSession.experimental.extraStrategies ++= Seq(new JoinQueryDetector(sparkSession))
     }
-    if (!sparkSession.experimental.extraOptimizations.exists(
-        _.isInstanceOf[SpatialFilterPushDownForGeoParquet])) {
-      sparkSession.experimental.extraOptimizations ++= Seq(
-        new SpatialFilterPushDownForGeoParquet(sparkSession))
+
+    customOptimizationsWithSession(sparkSession).foreach { opt =>
+      if (!sparkSession.experimental.extraOptimizations.exists {
+          case _: opt.type => true
+          case _ => false
+        }) {
+        sparkSession.experimental.extraOptimizations ++= Seq(opt)
+      }
     }
 
     // Support geostats functions

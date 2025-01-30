@@ -1,3 +1,4 @@
 org.apache.spark.sql.sedona_sql.io.raster.RasterFileFormat
 org.apache.spark.sql.sedona_sql.io.geojson.GeoJSONFileFormat
 org.apache.sedona.sql.datasources.spider.SpiderDataSource
+org.apache.spark.sql.sedona_sql.io.stac.StacDataSource
