@@ -10,6 +10,11 @@
   </a>
 {% endblock %}
 
+{% block extrahead %}
+  {{ super() }}
+  <meta name="google-site-verification" content="o2riomKLozYKc2IQivWGsrI2unuyQs7hXiAD4kGMCTQ" />
+{% endblock %}
+
 {% block content %}
   {% if page.is_homepage %}
   <!-- {{ super() }} -->
@@ -115,9 +120,4 @@
   {% else %}
     {{ super() }}
   {% endif %}
-{% endblock %}
-
-{% block extrahead %}
-{{ super() }}
-<meta name="google-site-verification" content="o2riomKLozYKc2IQivWGsrI2unuyQs7hXiAD4kGMCTQ" />
 {% endblock %}
