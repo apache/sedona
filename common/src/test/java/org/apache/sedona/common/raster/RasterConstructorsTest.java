@@ -78,7 +78,7 @@ public class RasterConstructorsTest extends RasterTestBase {
 
   @Test
   public void profileAsRaster() throws FactoryException, ParseException {
-    for (int i = 0; i < 100000; i++) {
+    for (int i = 0; i < 1000000; i++) {
       testAsRasterWithEmptyRaster();
     }
   }
@@ -89,19 +89,22 @@ public class RasterConstructorsTest extends RasterTestBase {
     GridCoverage2D raster =
         RasterConstructors.makeEmptyRaster(2, 255, 255, 1, -1, 2, -2, 0, 0, 4326);
 
-    Geometry geom =
-        Constructors.geomFromWKT("POLYGON((15 -15, 18 -20, 15 -24, 24 -25, 15 -15))", 0);
-    GridCoverage2D rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 3d);
-
-    double[] actual = MapAlgebra.bandAsArray(rasterized, 1);
-    //    System.out.println("\nActual: " + Arrays.toString(actual));
-    double[] expected =
-        new double[] {
-          3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          3093151.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
-        };
-    assertArrayEquals(expected, actual, 0.1d);
-
+    //    Geometry geom =
+    //        Constructors.geomFromWKT("POLYGON((15 -15, 18 -20, 15 -24, 24 -25, 15 -15))", 0);
+    //    GridCoverage2D rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151,
+    // 3d);
+    //
+    //    double[] actual = MapAlgebra.bandAsArray(rasterized, 1);
+    //    //    System.out.println("\nActual: " + Arrays.toString(actual));
+    //    double[] expected =
+    //        new double[] {
+    //          3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    // 0.0, 0.0,
+    //          3093151.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    // 0.0
+    //        };
+    //    assertArrayEquals(expected, actual, 0.1d);
+    //
     //    rasterized = RasterConstructors.asRaster(geom, raster, "d");
     //    actual = MapAlgebra.bandAsArray(rasterized, 1);
     //    expected =
@@ -111,24 +114,22 @@ public class RasterConstructorsTest extends RasterTestBase {
     //          0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
     //        };
     //    assertArrayEquals(expected, actual, 0.1d);
-    //
-    //    // MultiPolygon
-    //    geom =
-    //        Constructors.geomFromWKT(
-    //            "MULTIPOLYGON ( ((2 -2, 4 -2, 4 -4, 2 -4, 2 -2)), ((4 -4, 6 -4, 6 -6, 5 -7, 4 -6,
-    // 4 -4)), ((6 -6, 8 -6, 8 -8, 6 -8, 6 -6)), ((8 -6, 10 -6, 10 -4, 9 -3, 8 -4, 8 -6)) )",
-    //            0);
-    //    rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 3d);
-    //    actual = MapAlgebra.bandAsArray(rasterized, 1);
-    //
-    //    expected =
-    //        new double[] {
-    //          3093151.0, 0.0, 0.0, 3093151.0, 0.0, 3093151.0, 0.0, 3093151.0, 0.0, 3093151.0,
-    // 3093151.0,
-    //          0.0
-    //        };
-    //    assertArrayEquals(expected, actual, 0.1d);
-    //
+
+    // MultiPolygon
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "MULTIPOLYGON ( ((2 -2, 4 -2, 4 -4, 2 -4, 2 -2)), ((4 -4, 6 -4, 6 -6, 5 -7, 4 -6, 4 -4)), ((6 -6, 8 -6, 8 -8, 6 -8, 6 -6)), ((8 -6, 10 -6, 10 -4, 9 -3, 8 -4, 8 -6)) )",
+            0);
+    GridCoverage2D rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 3d);
+    double[] actual = MapAlgebra.bandAsArray(rasterized, 1);
+
+    double[] expected =
+        new double[] {
+          3093151.0, 0.0, 0.0, 3093151.0, 0.0, 3093151.0, 0.0, 3093151.0, 0.0, 3093151.0, 3093151.0,
+          0.0
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+
     //    rasterized = RasterConstructors.asRaster(geom, raster, "d");
     //    actual = MapAlgebra.bandAsArray(rasterized, 1);
     //
@@ -145,8 +146,8 @@ public class RasterConstructorsTest extends RasterTestBase {
     //    //        "\nFinal rastererized metadata: " +
     //    // Arrays.toString(RasterAccessors.metadata(rasterized)));
     //    //    System.out.println(
-    //    //        "Final rasterized band 1: " + Arrays.toString(MapAlgebra.bandAsArray(rasterized,
-    // 1)));
+    //    //        "Final rasterized band 1: " +
+    // Arrays.toString(MapAlgebra.bandAsArray(rasterized,1)));
     //    //    System.out.println(
     //    //        "\nFinal rasterized metadata: " +
     //    // Arrays.toString(RasterAccessors.metadata(rasterized)));
@@ -260,8 +261,8 @@ public class RasterConstructorsTest extends RasterTestBase {
     //    //        "\nFinal rastererized metadata: " +
     //    // Arrays.toString(RasterAccessors.metadata(rasterized)));
     //    //    System.out.println(
-    //    //        "Final rasterized band 1: " + Arrays.toString(MapAlgebra.bandAsArray(rasterized,
-    // 1)));
+    //    //        "Final rasterized band 1: " +
+    // Arrays.toString(MapAlgebra.bandAsArray(rasterized,1)));
     //    assertArrayEquals(expected, actual, 0.1d);
     //
     //    // Point
@@ -269,11 +270,11 @@ public class RasterConstructorsTest extends RasterTestBase {
     //    rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 3d);
     //
     //    //    System.out.println(
-    //    //        "\nRasterized metadata: " +
-    // Arrays.toString(RasterAccessors.metadata(rasterized)));
+    //    //        "\nRasterized metadata: "
+    // +Arrays.toString(RasterAccessors.metadata(rasterized)));
     //    //    System.out.println(
-    //    //        "\nRasterized band 1: " + Arrays.toString(MapAlgebra.bandAsArray(rasterized,
-    // 1)));
+    //    //        "\nRasterized band 1: " +
+    // Arrays.toString(MapAlgebra.bandAsArray(rasterized,1)));
     //
     //    actual = MapAlgebra.bandAsArray(rasterized, 1);
     //    expected = new double[] {3093151.0};
