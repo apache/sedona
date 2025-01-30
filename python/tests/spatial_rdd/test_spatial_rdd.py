@@ -162,10 +162,10 @@ class TestSpatialRDD(TestBase):
 
     def test_partition_unique(self):
         grids = [
-            Envelope(0, 10, 0, 10),
-            Envelope(10, 20, 0, 10),
-            Envelope(0, 10, 10, 20),
-            Envelope(10, 20, 10, 20),
+            Envelope(0.0, 10.0, 0.0, 10.0),
+            Envelope(10.0, 20.0, 0.0, 10.0),
+            Envelope(0.0, 10.0, 10.0, 20.0),
+            Envelope(10.0, 20.0, 10.0, 20.0),
         ]
 
         df = self.spark.createDataFrame(
