@@ -76,12 +76,12 @@ public class RasterConstructorsTest extends RasterTestBase {
     assertEquals(4, gridCoverage2D.getNumSampleDimensions());
   }
 
-  //  @Test
-  //  public void profileAsRaster() throws FactoryException, ParseException {
-  //    for (int i = 0; i < 10000; i++) {
-  //      testAsRasterWithEmptyRaster();
-  //    }
-  //  }
+  @Test
+  public void profileAsRaster() throws FactoryException, ParseException {
+    for (int i = 0; i < 10000; i++) {
+      testAsRasterWithEmptyRaster();
+    }
+  }
 
   @Test
   public void testAsRasterWithEmptyRaster() throws FactoryException, ParseException {

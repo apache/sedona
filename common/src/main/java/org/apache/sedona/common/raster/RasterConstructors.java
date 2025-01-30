@@ -29,7 +29,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.media.jai.RasterFactory;
-import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.raster.inputstream.ByteArrayImageInputStream;
 import org.apache.sedona.common.raster.netcdf.NetCdfReader;
@@ -145,9 +144,9 @@ public class RasterConstructors {
       boolean useGeometryExtent)
       throws FactoryException {
 
-    System.out.println("\nnoDataValue: " + noDataValue);
-    System.out.println("value: " + value);
-    System.out.println("useGeometryExtent: " + useGeometryExtent);
+    //    System.out.println("\nnoDataValue: " + noDataValue);
+    //    System.out.println("value: " + value);
+    //    System.out.println("useGeometryExtent: " + useGeometryExtent);
 
     List<Object> objects1 =
         Rasterization.rasterize(geom, raster, pixelType, value, useGeometryExtent, allTouched);
@@ -205,7 +204,7 @@ public class RasterConstructors {
     //            false); // no need to original raster metadata since this is a new raster.
 
     if (noDataValue != null) {
-      System.out.println("\nnoDataValue != null");
+      //      System.out.println("\nnoDataValue != null");
       resultRaster1 = RasterBandEditors.setBandNoDataValue(resultRaster1, 1, noDataValue);
     }
 
@@ -623,8 +622,8 @@ public class RasterConstructors {
       boolean allTouched)
       throws FactoryException {
 
-    System.out.println("Custom Rasterization...");
-    System.out.println("allTouched = " + allTouched);
+    //    System.out.println("Custom Rasterization...");
+    //    System.out.println("allTouched = " + allTouched);
 
     // Step 1: Validate the input geometry and raster metadata
     double[] metadata = RasterAccessors.metadata(raster);
@@ -665,13 +664,13 @@ public class RasterConstructors {
         RasterFactory.createBandedRaster(
             RasterUtils.getDataTypeCode(pixelType), rasterWidth, rasterHeight, 1, null);
 
-    System.out.println("  Raster extent min: " + alignedMinX + "," + alignedMinY + " - ");
-    System.out.println("  Raster extent max: " + alignedMaxX + "," + alignedMaxY + " - ");
-
-    System.out.println("\nupperLeftX: " + metadata[0]);
-    System.out.println("upperLeftY: " + metadata[1]);
-    System.out.println("rasterHeight: " + rasterHeight);
-    System.out.println("rasterWidth: " + rasterWidth);
+    //    System.out.println("  Raster extent min: " + alignedMinX + "," + alignedMinY + " - ");
+    //    System.out.println("  Raster extent max: " + alignedMaxX + "," + alignedMaxY + " - ");
+    //
+    //    System.out.println("\nupperLeftX: " + metadata[0]);
+    //    System.out.println("upperLeftY: " + metadata[1]);
+    //    System.out.println("rasterHeight: " + rasterHeight);
+    //    System.out.println("rasterWidth: " + rasterWidth);
 
     // Step 3: Iterate over raster grid and rasterize the geometry
     for (int y = 0; y < rasterHeight; y++) {
@@ -689,15 +688,15 @@ public class RasterConstructors {
         //        double cellMaxY = alignedMinY + yIndex * scaleY;
         //        double cellMinY = cellMaxY + scaleY;
 
-        System.out.println(
-            "\ncellMinX = "
-                + cellMinX
-                + "; cellMaxX = "
-                + cellMaxX
-                + "; cellMinY = "
-                + cellMinY
-                + "; cellMaxY = "
-                + cellMaxY);
+        //        System.out.println(
+        //            "\ncellMinX = "
+        //                + cellMinX
+        //                + "; cellMaxX = "
+        //                + cellMaxX
+        //                + "; cellMinY = "
+        //                + cellMinY
+        //                + "; cellMaxY = "
+        //                + cellMaxY);
 
         Envelope cellEnvelope = new Envelope(cellMinX, cellMaxX, cellMinY, cellMaxY);
         Geometry cellGeometry = JTS.toGeometry(cellEnvelope);
@@ -709,29 +708,29 @@ public class RasterConstructors {
                 : geom.intersects(
                     cellGeometry.getCentroid()); // Mark cell only if centroid is inside
 
-        System.out.println(
-            "Cell centroid for "
-                + cellMinX
-                + ","
-                + cellMinY
-                + ": "
-                + Functions.asEWKT(cellGeometry.getCentroid())
-                + "; x,y = "
-                + x
-                + ","
-                + y
-                + "; intersects geom"
-                + " = "
-                + geom.intersects(cellGeometry)
-                + "; intersects centroid = "
-                + geom.intersects(cellGeometry.getCentroid())
-                + "; intersects"
-                + " = "
-                + intersects
-                + "; "
-                + (int) (cellMinX / scaleX)
-                + ", "
-                + (int) (-cellMinY / scaleY));
+        //        System.out.println(
+        //            "Cell centroid for "
+        //                + cellMinX
+        //                + ","
+        //                + cellMinY
+        //                + ": "
+        //                + Functions.asEWKT(cellGeometry.getCentroid())
+        //                + "; x,y = "
+        //                + x
+        //                + ","
+        //                + y
+        //                + "; intersects geom"
+        //                + " = "
+        //                + geom.intersects(cellGeometry)
+        //                + "; intersects centroid = "
+        //                + geom.intersects(cellGeometry.getCentroid())
+        //                + "; intersects"
+        //                + " = "
+        //                + intersects
+        //                + "; "
+        //                + (int) (cellMinX / scaleX)
+        //                + ", "
+        //                + (int) (-cellMinY / scaleY));
 
         if (intersects) {
           //          writableRaster.setSample(
