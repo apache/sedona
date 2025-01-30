@@ -29,6 +29,7 @@ import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.geometry.jts.JTS;
 import org.locationtech.jts.geom.*;
+import org.locationtech.jts.operation.predicate.RectangleIntersects;
 import org.opengis.referencing.FactoryException;
 
 public class Rasterization {
@@ -188,12 +189,12 @@ public class Rasterization {
         double cellMaxY = cellMinY + params.scaleY;
 
         Envelope cellEnvelope = new Envelope(cellMinX, cellMaxX, cellMinY, cellMaxY);
-        Geometry cellGeometry = JTS.toGeometry(cellEnvelope);
+        Polygon cellPolygon = JTS.toGeometry(cellEnvelope);
 
         boolean intersects =
             allTouched
-                ? geom.intersects(cellGeometry)
-                : geom.intersects(cellGeometry.getCentroid());
+                ? RectangleIntersects.intersects(cellPolygon, geom)
+                : geom.intersects(cellPolygon.getCentroid());
 
         if (intersects) {
           params.writableRaster.setSample(x, yIndex, 0, value);
