@@ -66,18 +66,15 @@ public class FunctionEditorsTest extends RasterTestBase {
     GridCoverage2D emptyRaster =
         RasterConstructors.makeEmptyRaster(1, 10, 10, 0, 0, 1, -1, 0, 0, 0);
 
-    //        String polygon =
-    //            "GEOMETRYCOLLECTION(POINT(1.5 -4.5), POINT(2 -2), MULTIPOINT((4 -4), (6 -6)),
-    //     LINESTRING(1 -1, 8 -1), MULTILINESTRING((2 -8, 7 -8), (3 -6, 5 -6)), POLYGON((3 -3, 5 -3,
-    // 5
-    //     -5, 3 -5, 3 -3)), MULTIPOLYGON(((6 -2, 8 -2, 8 -4, 6 -4, 6 -2)),((1 -7, 2 -7, 2 -9, 1 -9,
-    // 1
-    //     -7))))";
+    String polygon =
+        "GEOMETRYCOLLECTION(POINT(1.5 -4.5), POINT(2 -2), MULTIPOINT((4 -4), (6 -6)), LINESTRING(1 -1, 8 -1), MULTILINESTRING((2 -8, 7 -8), (3 -6, 5 -6)), POLYGON((3 -3, 5 -3, 5 -5, 3 -5, 3 -3)), MULTIPOLYGON(((6 -2, 8 -2, 8 -4, 6 -4, 6 -2)),((1 -7, 2 -7, 2 -9, 1 -9, 1 -7))))";
     //        String polygon = "POLYGON((3 3, 5 3, 5 5, 3 5, 3 3))";
     //        String polygon = "POLYGON((3 -3, 5 -3, 5 -5, 3 -5, 3 -3))";
-    String polygon = "LINESTRING(3 -3, 4.5 -4.5, 2 -2)";
+    //    polygon = "LINESTRING(2 -2, 3.5 -3.5, 5 -3, 6 -2)";
     //        String polygon = "POINT(1.5 -4.5)";
     //        String polygon = "POINT(2 -4)";
+    //    polygon = "MULTILINESTRING((2 -8, 7 -8), (3 -6, 5 -6))";
+    //    polygon = "LINESTRING(2 -8, 7 -8)";
 
     //        System.out.println(
     //            "\nOriginal Raster metadata: " +
@@ -87,15 +84,13 @@ public class FunctionEditorsTest extends RasterTestBase {
     // 1)));
     //
     Geometry geom = Constructors.geomFromWKT(polygon, 0);
-    //        GridCoverage2D result = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 10,
-    // false,
-    //     false);
-    //
-    //        System.out.println(
-    //            "\nfinal Rasterized metadata: " +
-    // Arrays.toString(RasterAccessors.metadata(result)));
-    //        System.out.println(
-    //            "final Rasterized band 1: " + Arrays.toString(MapAlgebra.bandAsArray(result, 1)));
+    //    GridCoverage2D result = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 10, false,
+    // false);
+
+    //    System.out.println(
+    //        "\nfinal Rasterized metadata: " + Arrays.toString(RasterAccessors.metadata(result)));
+    //    System.out.println(
+    //        "final Rasterized band 1: " + Arrays.toString(MapAlgebra.bandAsArray(result, 1)));
 
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
@@ -265,18 +260,25 @@ public class FunctionEditorsTest extends RasterTestBase {
         };
     assertArrayEquals(expected, actual, 0.1d);
 
+    System.out.println(
+        "\nOG raster metadata: " + Arrays.toString(RasterAccessors.metadata(emptyRaster)));
+    System.out.println(
+        "OG raster band 1: " + Arrays.toString(MapAlgebra.bandAsArray(emptyRaster, 1)));
+
     // MultiPoint
     geom = Constructors.geomFromWKT("MULTIPOINT((2 -2), (2 -1), (3 -3), (4 -7))", 0);
     raster = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 400, false);
     actual = MapAlgebra.bandAsArray(raster, 1);
 
-    System.out.println("\nRaster metadata: " + Arrays.toString(RasterAccessors.metadata(raster)));
-    System.out.println("raster band 1: " + Arrays.toString(MapAlgebra.bandAsArray(raster, 1)));
+    System.out.println(
+        "\nFinal rastererized metadata: " + Arrays.toString(RasterAccessors.metadata(raster)));
+    System.out.println(
+        "Final rasterized band 1: " + Arrays.toString(MapAlgebra.bandAsArray(raster, 1)));
 
     expected =
         new double[] {
-          0.0, 400.0, 0.0, 0.0, 0.0, 400.0, 400.0, 0.0, 0.0, 400.0, 400.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 400.0, 0.0
+          400.0, 400.0, 0.0, 0.0, 400.0, 400.0, 400.0, 0.0, 0.0, 400.0, 400.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 400.0, 400.0
         };
     assertArrayEquals(expected, actual, 0.1d);
 

@@ -24,7 +24,6 @@ import static org.junit.Assert.assertEquals;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -32,7 +31,6 @@ import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.Constructors;
-import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -90,21 +88,13 @@ public class RasterConstructorsTest extends RasterTestBase {
     // Polygon
     GridCoverage2D raster =
         RasterConstructors.makeEmptyRaster(2, 255, 255, 1, -1, 2, -2, 0, 0, 4326);
-    //    System.out.println(
-    //        "\nOG Raster metadata: " + Arrays.toString(RasterAccessors.metadata(raster)));
-    //
-    //    //    Path to the output CSV file
-    //    String filePath = "/Users/pranavtoggi/Downloads/rasterized_output.csv";
-    //
-    //    // Save the double array as a CSV file
-    //    saveDoubleArrayAsCSV(MapAlgebra.bandAsArray(raster, 1), filePath);
 
     Geometry geom =
         Constructors.geomFromWKT("POLYGON((15 -15, 18 -20, 15 -24, 24 -25, 15 -15))", 0);
     GridCoverage2D rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 3d);
 
     double[] actual = MapAlgebra.bandAsArray(rasterized, 1);
-    System.out.println("\nActual: " + Arrays.toString(actual));
+    //    System.out.println("\nActual: " + Arrays.toString(actual));
     double[] expected =
         new double[] {
           3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -146,25 +136,46 @@ public class RasterConstructorsTest extends RasterTestBase {
     geom =
         Constructors.geomFromWKT("MULTILINESTRING ((5 -5, 10 -10), (10 -10, 15 -15, 20 -20))", 0);
     rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 3d);
+
+    //    System.out.println(
+    //        "\nFinal rastererized metadata: " +
+    // Arrays.toString(RasterAccessors.metadata(rasterized)));
+    //    System.out.println(
+    //        "Final rasterized band 1: " + Arrays.toString(MapAlgebra.bandAsArray(rasterized, 1)));
+    //    System.out.println(
+    //        "\nFinal rasterized metadata: " +
+    // Arrays.toString(RasterAccessors.metadata(rasterized)));
+
+    //    //    Path to the output CSV file
+    //    String filePath = "/Users/pranavtoggi/Downloads/rasterized_output.csv";
+    //
+    //    // Save the double array as a CSV file
+    //    saveDoubleArrayAsCSV(MapAlgebra.bandAsArray(rasterized, 1), filePath);
+
     actual = MapAlgebra.bandAsArray(rasterized, 1);
     expected =
         new double[] {
-          3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0,
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          0.0, 0.0, 0.0, 3093151.0
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 3093151.0
         };
     assertArrayEquals(expected, actual, 0.1d);
 
     rasterized = RasterConstructors.asRaster(geom, raster, "d");
+
     actual = MapAlgebra.bandAsArray(rasterized, 1);
     expected =
         new double[] {
-          1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0
         };
     assertArrayEquals(expected, actual, 0.1d);
 
@@ -199,26 +210,29 @@ public class RasterConstructorsTest extends RasterTestBase {
     actual = MapAlgebra.bandAsArray(rasterized, 1);
     expected =
         new double[] {
-          3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0,
-          3093151.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
         };
     assertArrayEquals(expected, actual, 0.1d);
 
     rasterized = RasterConstructors.asRaster(geom, raster, "d");
     actual = MapAlgebra.bandAsArray(rasterized, 1);
 
-    //    System.out.println(
-    //        "\nRasterized metadata: " + Arrays.toString(RasterAccessors.metadata(rasterized)));
-    //    System.out.println(
-    //        "\nRasterized band 1: " + Arrays.toString(MapAlgebra.bandAsArray(rasterized, 1)));
-
     expected =
         new double[] {
-          1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0,
-          0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+          1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
         };
-    assertArrayEquals(expected, actual, 0.1d);
+    //    System.out.println(
+    //        "\nFinal rastererized metadata: " +
+    // Arrays.toString(RasterAccessors.metadata(rasterized)));
+    //    System.out.println(
+    //        "Final rasterized band 1: " + Arrays.toString(MapAlgebra.bandAsArray(rasterized, 1)));
+    //    assertArrayEquals(expected, actual, 0.1d);
 
     // Point
     geom = Constructors.geomFromWKT("POINT (5 -5)", 0);
@@ -239,23 +253,23 @@ public class RasterConstructorsTest extends RasterTestBase {
     assertArrayEquals(expected, actual, 0.1d);
   }
 
-  public static void saveDoubleArrayAsCSV(double[] array, String filePath) {
-    try (FileWriter writer = new FileWriter(filePath)) {
-      // Convert double array to a CSV format
-      String csvString =
-          Arrays.toString(array)
-              .replace("[", "") // Remove opening bracket
-              .replace("]", ""); // Remove closing bracket
-
-      // Write to file
-      writer.write(csvString);
-      writer.flush();
-
-      System.out.println("Array successfully saved as a CSV in: " + filePath);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
+  //  public static void saveDoubleArrayAsCSV(double[] array, String filePath) {
+  //    try (FileWriter writer = new FileWriter(filePath)) {
+  //      // Convert double array to a CSV format
+  //      String csvString =
+  //          Arrays.toString(array)
+  //              .replace("[", "") // Remove opening bracket
+  //              .replace("]", ""); // Remove closing bracket
+  //
+  //      // Write to file
+  //      writer.write(csvString);
+  //      writer.flush();
+  //
+  //      System.out.println("Array successfully saved as a CSV in: " + filePath);
+  //    } catch (IOException e) {
+  //      e.printStackTrace();
+  //    }
+  //  }
 
   @Test
   public void testAsRasterLingString() throws FactoryException, ParseException {
@@ -302,14 +316,14 @@ public class RasterConstructorsTest extends RasterTestBase {
       0.0, 0.0, 0.0, 0.0
     };
 
-    System.out.println(
-        "\nRasterized metadata: " + Arrays.toString(RasterAccessors.metadata(rasterized)));
+    //    System.out.println(
+    //        "\nRasterized metadata: " + Arrays.toString(RasterAccessors.metadata(rasterized)));
 
     //    Path to the output CSV file
-    String filePath = "/Users/pranavtoggi/Downloads/rasterized_output.csv";
+    //    String filePath = "/Users/pranavtoggi/Downloads/rasterized_output.csv";
 
     // Save the double array as a CSV file
-    saveDoubleArrayAsCSV(MapAlgebra.bandAsArray(rasterized, 1), filePath);
+    //    saveDoubleArrayAsCSV(MapAlgebra.bandAsArray(rasterized, 1), filePath);
 
     assertArrayEquals(expected, actual, 0.1d);
 
@@ -335,9 +349,10 @@ public class RasterConstructorsTest extends RasterTestBase {
       throws IOException, ParseException, FactoryException, TransformException {
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
-    System.out.println("\nRaster metadata: " + Arrays.toString(RasterAccessors.metadata(raster)));
-    System.out.println(
-        "\nRaster envelope: \n" + Functions.asEWKT(GeometryFunctions.envelope(raster)));
+    //    System.out.println("\nRaster metadata: " +
+    // Arrays.toString(RasterAccessors.metadata(raster)));
+    //    System.out.println(
+    //        "\nRaster envelope: \n" + Functions.asEWKT(GeometryFunctions.envelope(raster)));
     Geometry geom =
         Constructors.geomFromWKT(
             "POLYGON((1.5 1.5, 3.8 3.0, 4.5 4.4, 3.4 3.5, 1.5 1.5))", RasterAccessors.srid(raster));
@@ -376,18 +391,19 @@ public class RasterConstructorsTest extends RasterTestBase {
     Geometry geom =
         Constructors.geomFromWKT("POLYGON((0.1 0.1, 0.1 0.4, 0.4 0.4, 0.4 0.1, 0.1 0.1))", 0);
 
-    System.out.println(
-        "\nOriginal raster metadata: " + Arrays.toString(RasterAccessors.metadata(raster)));
-    System.out.println(
-        "Original raster band 1: " + Arrays.toString(MapAlgebra.bandAsArray(raster, 1)));
+    //    System.out.println(
+    //        "\nOriginal raster metadata: " + Arrays.toString(RasterAccessors.metadata(raster)));
+    //    System.out.println(
+    //        "Original raster band 1: " + Arrays.toString(MapAlgebra.bandAsArray(raster, 1)));
 
     GridCoverage2D rasterized =
         RasterConstructors.asRasterWithRasterExtent(geom, raster, "d", false, 100d, 0d);
 
-    System.out.println(
-        "\nFinal Rasterized metadata: " + Arrays.toString(RasterAccessors.metadata(rasterized)));
-    System.out.println(
-        "Final Rasterized band 1: " + Arrays.toString(MapAlgebra.bandAsArray(rasterized, 1)));
+    //    System.out.println(
+    //        "\nFinal Rasterized metadata: " +
+    // Arrays.toString(RasterAccessors.metadata(rasterized)));
+    //    System.out.println(
+    //        "Final Rasterized band 1: " + Arrays.toString(MapAlgebra.bandAsArray(rasterized, 1)));
 
     assertEquals(0, rasterized.getEnvelope2D().x, 1e-6);
     assertEquals(0, rasterized.getEnvelope2D().y, 1e-6);
