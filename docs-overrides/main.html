@@ -5,7 +5,7 @@
 
 {% block outdated %}
   You're not viewing the latest stable version.
-  <a href="{{ '../' ~ base_url }}"> 
+  <a href="{{ '../' ~ base_url }}">
     <strong>Click here to go to the latest stable version.</strong>
   </a>
 {% endblock %}
@@ -15,10 +15,10 @@
   <!-- {{ super() }} -->
   <style>
     .md-header{position:initial}.md-main__inner{margin-left:15%}.md-content{display:display}@media screen and (min-width:60em){.md-sidebar--secondary{display:display}}@media screen and (min-width:76.25em){.md-sidebar--primary{display:none}}
-    .br { 
-            display: block; 
-            margin-bottom: 14em; 
-        }  
+    .br {
+            display: block;
+            margin-bottom: 14em;
+        }
 </style>
     <section class="tx-container">
       <div class="md-grid md-typeset">
@@ -41,7 +41,7 @@
               <img src="https://dcbadge.vercel.app/api/server/9A3k5dEBsY" alt="Apache Sedona Discord server">
             </a>
             </p>
-            
+
           </div>
 
           <br><br><br>
@@ -56,35 +56,35 @@
           <br><br><br><br>
 
           <div class="tx-hero__content">
-            <h1>High Speed</h1>            
+            <h1>High Speed</h1>
             <div style="width: 100%;">
               <div style="width: 45%; height: 160px; float: left;">
                 According to <a href="./community/publication/">our benchmark and third-party research papers</a>, Sedona runs 2X - 10X faster than other Spark-based geospatial data systems on computation-intensive query workloads.
               </div>
-              <div style="margin-left: 45%; height: 160px;"> 
+              <div style="margin-left: 45%; height: 160px;">
                 <figure>
                     <img src="image/jointime.png" width="350">
-                    <figcaption>Execution time of spatial join with polygons</figcaption>                   
-                </figure>                 
+                    <figcaption>Execution time of spatial join with polygons</figcaption>
+                </figure>
               </div>
-            </div>            
+            </div>
           </div>
 
           <br><br><br><br>
 
           <div class="tx-hero__content">
-            <h1>Low Memory Consumption</h1>            
+            <h1>Low Memory Consumption</h1>
             <div style="width: 100%;">
               <div style="width: 45%; height: 160px; float: left;">
                 According to <a href="./community/publication/">our benchmark and third-party research papers</a>, Sedona has 50% less peak memory consumption than other Spark-based geospatial data systems for large-scale in-memory query processing.
               </div>
-              <div style="margin-left: 45%; height: 160px;"> 
+              <div style="margin-left: 45%; height: 160px;">
                 <figure>
                     <img src="image/joinmem.png" width="350">
-                    <figcaption>Peak memory consumption of spatial join with polygons</figcaption>           
-                </figure>                 
+                    <figcaption>Peak memory consumption of spatial join with polygons</figcaption>
+                </figure>
               </div>
-            </div>            
+            </div>
           </div>
 
           <br><br><br><br>
@@ -92,21 +92,21 @@
           <div class="tx-hero__content">
             <h1>Ease of Use</h1>
             <div style="width: 100%;">
-              <div style="width: 45%; height: 160px; float: left;"> 
+              <div style="width: 45%; height: 160px; float: left;">
                 Sedona offers Scala, Java, Spatial SQL, Python, and R APIs and integrates them into underlying system kernels with care. You can simply create spatial analytics and data mining applications and run them in any cloud environments.
               </div>
-              <div style="margin-left: 45%; height: 160px;"> 
+              <div style="margin-left: 45%; height: 160px;">
 <pre class="hljs" style="display: block; overflow-x: auto; background: rgb(235, 248, 255); color: rgb(81, 109, 123); padding: 0.5em;"><span class="hljs-keyword" style="color: rgb(107, 107, 184);">SELECT</span> superhero.name
 <span class="hljs-keyword" style="color: rgb(107, 107, 184);">FROM</span> city, superhero
 <span class="hljs-keyword" style="color: rgb(107, 107, 184);">WHERE</span> ST_Contains(city.geom, superhero.geom)
 <span class="hljs-keyword" style="color: rgb(107, 107, 184);">AND</span> city.name = <span class="hljs-string" style="color: rgb(86, 140, 59);">'Gotham'</span></pre>
               </div>
-            </div>            
+            </div>
           </div>
 
           <br><br><br><br>
-          
-          <span class="br"></span> 
+
+          <span class="br"></span>
 
         </div>
       </div>
@@ -115,4 +115,9 @@
   {% else %}
     {{ super() }}
   {% endif %}
+{% endblock %}
+
+{% block extrahead %}
+{{ super() }}
+<meta name="google-site-verification" content="o2riomKLozYKc2IQivWGsrI2unuyQs7hXiAD4kGMCTQ" />
 {% endblock %}
