@@ -77,6 +77,13 @@ public class RasterConstructorsTest extends RasterTestBase {
   }
 
   @Test
+  public void profileAsRaster() throws FactoryException, ParseException {
+    for (int i = 0; i < 10000; i++) {
+      testAsRasterWithEmptyRaster();
+    }
+  }
+
+  @Test
   public void testAsRasterWithEmptyRaster() throws FactoryException, ParseException {
     // Polygon
     GridCoverage2D raster =

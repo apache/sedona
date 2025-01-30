@@ -545,7 +545,7 @@
                         <failOnWarning>false</failOnWarning>
                         <sourceDirectory>${project.basedir}/src/main/scala</sourceDirectory>
                         <testSourceDirectory>${project.basedir}/src/test/scala</testSourceDirectory>
-                        <configLocation>tools/maven/scalastyle_config.xml</configLocation>
+                        <configLocation>/Users/pranavtoggi/Documents/sedona/tools/maven/scalastyle_config.xml</configLocation>
                         <outputFile>${project.basedir}/target/scalastyle-output.xml</outputFile>
                         <outputEncoding>UTF-8</outputEncoding>
                     </configuration>
@@ -650,17 +650,17 @@
                             <version>1.7</version>
                         </googleJavaFormat>
                         <licenseHeader>
-                            <file>tools/maven/license-header.txt</file>
+                            <file>/Users/pranavtoggi/Documents/sedona/tools/maven/license-header.txt</file>
                         </licenseHeader>
                     </java>
                     <scala>
                         <scalafmt>
                             <version>3.7.5</version>
-                            <file>tools/maven/scalafmt.conf</file>
+                            <file>/Users/pranavtoggi/Documents/sedona/tools/maven/scalafmt.conf</file>
                             <scalaMajorVersion>2.12</scalaMajorVersion>
                         </scalafmt>
                         <licenseHeader>
-                            <file>tools/maven/license-header.txt</file>
+                            <file>/Users/pranavtoggi/Documents/sedona/tools/maven/license-header.txt</file>
                         </licenseHeader>
                     </scala>
                 </configuration>
