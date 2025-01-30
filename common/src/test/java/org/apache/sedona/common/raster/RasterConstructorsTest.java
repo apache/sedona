@@ -232,7 +232,7 @@ public class RasterConstructorsTest extends RasterTestBase {
     // Arrays.toString(RasterAccessors.metadata(rasterized)));
     //    System.out.println(
     //        "Final rasterized band 1: " + Arrays.toString(MapAlgebra.bandAsArray(rasterized, 1)));
-    //    assertArrayEquals(expected, actual, 0.1d);
+    assertArrayEquals(expected, actual, 0.1d);
 
     // Point
     geom = Constructors.geomFromWKT("POINT (5 -5)", 0);
