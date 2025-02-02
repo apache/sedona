@@ -68,7 +68,7 @@ object DBSCAN {
       clusterColumnName: String = "cluster"): DataFrame = {
 
     val geometryCol = geometry match {
-      case null => getGeometryColumnName(dataframe)
+      case null => getGeometryColumnName(dataframe.schema)
       case _ => geometry
     }
 

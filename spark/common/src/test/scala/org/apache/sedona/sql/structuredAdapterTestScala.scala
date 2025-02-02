@@ -21,6 +21,7 @@ package org.apache.sedona.sql
 import org.apache.sedona.core.enums.{GridType, IndexType}
 import org.apache.sedona.core.spatialOperator.{JoinQuery, SpatialPredicate}
 import org.apache.sedona.core.spatialRDD.CircleRDD
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.sedona_sql.adapters.StructuredAdapter
 import org.junit.Assert.assertEquals
 import org.scalatest.GivenWhenThen
@@ -86,6 +87,20 @@ class structuredAdapterTestScala extends TestBaseScala with GivenWhenThen {
       val spatialRdd = StructuredAdapter.toSpatialRdd(dfOrigin.rdd)
       val rowRdd = StructuredAdapter.toRowRdd(spatialRdd)
       assertEquals(seq.size, StructuredAdapter.toSpatialRdd(rowRdd).rawSpatialRDD.count())
+    }
+
+    it("Should not be able to convert an empty Row RDD to SpatialRDD if schema is not provided") {
+      val rdd = sparkSession.sparkContext.parallelize(Seq.empty[Row])
+      intercept[IllegalArgumentException] {
+        StructuredAdapter.toSpatialRdd(rdd)
+      }
+    }
+
+    it("Should convert an empty Row RDD to SpatialRDD if schema is provided") {
+      val rdd = sparkSession.sparkContext.parallelize(Seq.empty[Row])
+      val spatialRdd = StructuredAdapter.toSpatialRdd(rdd, null)
+      assertEquals(0, spatialRdd.rawSpatialRDD.count())
+      assertEquals(0, spatialRdd.schema.size)
     }
   }
 

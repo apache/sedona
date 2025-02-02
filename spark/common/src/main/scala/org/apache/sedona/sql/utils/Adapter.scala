@@ -29,6 +29,13 @@ import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.locationtech.jts.geom.Geometry
 
+/**
+ * Adapter for converting between DataFrame and SpatialRDD. It provides methods to convert
+ * DataFrame to SpatialRDD and vice versa. The schema information is lost during conversion. It is
+ * different from [[org.apache.spark.sql.sedona_sql.adapters.StructuredAdapter]] which does not
+ * lose the schema information during conversion. This should be used if your data starts as a
+ * SpatialRDD and you want to convert it to DataFrame.
+ */
 object Adapter {
 
   /**
@@ -38,7 +45,6 @@ object Adapter {
    * @param geometryFieldName
    * @return
    */
-  @deprecated("Use StructuredAdapter instead", since = "1.7.1")
   def toSpatialRdd(dataFrame: DataFrame, geometryFieldName: String): SpatialRDD[Geometry] = {
     // Delete the field that have geometry
     if (dataFrame.schema.size == 1) {
@@ -61,7 +67,6 @@ object Adapter {
    * @param fieldNames
    * @return
    */
-  @deprecated("Use StructuredAdapter instead", since = "1.7.1")
   def toSpatialRdd(
       dataFrame: DataFrame,
       geometryFieldName: String,
@@ -90,7 +95,6 @@ object Adapter {
    * @param fieldNames
    * @return
    */
-  @deprecated("Use StructuredAdapter instead", since = "1.7.1")
   def toSpatialRdd(
       dataFrame: DataFrame,
       geometryColId: Int,
@@ -110,7 +114,6 @@ object Adapter {
    * @param geometryColId
    * @return
    */
-  @deprecated("Use StructuredAdapter instead", since = "1.7.1")
   def toSpatialRdd(dataFrame: DataFrame, geometryColId: Int): SpatialRDD[Geometry] = {
     // Delete the field that have geometry
     if (dataFrame.schema.size == 1) {
@@ -125,7 +128,6 @@ object Adapter {
     }
   }
 
-  @deprecated("Use StructuredAdapter instead", since = "1.7.1")
   def toDf[T <: Geometry](spatialRDD: SpatialRDD[T], sparkSession: SparkSession): DataFrame = {
     import scala.jdk.CollectionConverters._
     if (spatialRDD.fieldNames != null)
@@ -133,7 +135,6 @@ object Adapter {
     toDf(spatialRDD = spatialRDD, fieldNames = null, sparkSession = sparkSession)
   }
 
-  @deprecated("Use StructuredAdapter instead", since = "1.7.1")
   def toDf[T <: Geometry](
       spatialRDD: SpatialRDD[T],
       fieldNames: Seq[String],
@@ -164,7 +165,6 @@ object Adapter {
    * @return
    *   DataFrame with the specified schema
    */
-  @deprecated("Use StructuredAdapter instead", since = "1.7.1")
   def toDf[T <: Geometry](
       spatialRDD: SpatialRDD[T],
       schema: StructType,
@@ -177,14 +177,12 @@ object Adapter {
     sparkSession.sqlContext.createDataFrame(rdd, schema)
   }
 
-  @deprecated("Use StructuredAdapter instead", since = "1.7.1")
   def toDf(
       spatialPairRDD: JavaPairRDD[Geometry, Geometry],
       sparkSession: SparkSession): DataFrame = {
     toDf(spatialPairRDD, null, null, sparkSession)
   }
 
-  @deprecated("Use StructuredAdapter instead", since = "1.7.1")
   def toDf(
       spatialPairRDD: JavaPairRDD[Geometry, Geometry],
       leftFieldnames: Seq[String],
@@ -227,7 +225,6 @@ object Adapter {
    * @return
    *   Spatial pair RDD as a DataFrame with the desired schema
    */
-  @deprecated("Use StructuredAdapter instead", since = "1.7.1")
   def toDf(
       spatialPairRDD: JavaPairRDD[Geometry, Geometry],
       schema: StructType,

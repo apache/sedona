@@ -20,6 +20,7 @@ package org.apache.spark.sql.sedona_sql.adapters
 
 import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.sedona.sql.utils.GeometrySerializer
+import org.apache.sedona.util.DfUtils
 import org.apache.spark.api.java.JavaPairRDD
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
@@ -28,6 +29,12 @@ import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.locationtech.jts.geom.Geometry
 import org.slf4j.{Logger, LoggerFactory}
 
+/**
+ * Adapter for converting between DataFrame and SpatialRDD. It provides methods to convert
+ * DataFrame to SpatialRDD and vice versa without losing schema. It is different from
+ * [[org.apache.sedona.sql.utils.Adapter]] which loses the schema information during conversion.
+ * This should be used if your data starts as a DataFrame and you want to convert it to SpatialRDD
+ */
 object StructuredAdapter {
   val logger: Logger = LoggerFactory.getLogger(getClass)
 
@@ -39,14 +46,15 @@ object StructuredAdapter {
    */
   def toSpatialRdd(rdd: RDD[Row], geometryFieldName: String): SpatialRDD[Geometry] = {
     val spatialRDD = new SpatialRDD[Geometry]
-    spatialRDD.schema = rdd.first().schema
+    if (rdd.isEmpty()) {
+      spatialRDD.schema = StructType(Seq())
+    } else spatialRDD.schema = rdd.first().schema
     spatialRDD.rawSpatialRDD = rdd
       .map(row => {
         val geom = row.getAs[Geometry](geometryFieldName)
         geom.setUserData(row.copy())
         geom
       })
-      .toJavaRDD()
     spatialRDD
   }
 
@@ -58,7 +66,8 @@ object StructuredAdapter {
    * @return
    */
   def toSpatialRdd(rdd: RDD[Row]): SpatialRDD[Geometry] = {
-    toSpatialRdd(rdd, firstGeomColName(rdd.first().schema))
+    require(rdd.count() > 0, "Input RDD cannot be empty.")
+    toSpatialRdd(rdd, DfUtils.getGeometryColumnName(rdd.first().schema))
   }
 
   /**
@@ -90,7 +99,6 @@ object StructuredAdapter {
         geom.setUserData(row.copy())
         geom
       })
-      .toJavaRDD()
     spatialRDD
   }
 
@@ -102,7 +110,7 @@ object StructuredAdapter {
    * @return
    */
   def toSpatialRdd(dataFrame: DataFrame): SpatialRDD[Geometry] = {
-    toSpatialRdd(dataFrame, firstGeomColName(dataFrame.schema))
+    toSpatialRdd(dataFrame, DfUtils.getGeometryColumnName(dataFrame.schema))
   }
 
   /**
@@ -195,12 +203,5 @@ object StructuredAdapter {
       originalLeftSpatialRdd.schema,
       originalRightSpatialRdd.schema,
       sparkSession)
-  }
-
-  private def firstGeomColName(schema: StructType): String = {
-    schema.fields
-      .find(_.dataType.typeName == "geometry")
-      .map(_.name)
-      .getOrElse(throw new IllegalArgumentException("No geometry column found in DataFrame"))
   }
 }

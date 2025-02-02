@@ -85,7 +85,7 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
   /** The raw spatial RDD. */
   public JavaRDD<T> rawSpatialRDD;
 
-  @Deprecated public List<String> fieldNames;
+  public List<String> fieldNames;
 
   public StructType schema;
   /** The CR stransformation. */

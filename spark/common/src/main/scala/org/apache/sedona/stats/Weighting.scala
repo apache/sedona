@@ -79,7 +79,7 @@ object Weighting {
     require(alpha < 0, "Alpha must be less than 0")
 
     val geometryColumn = geometry match {
-      case null => getGeometryColumnName(dataframe)
+      case null => getGeometryColumnName(dataframe.schema)
       case _ =>
         require(
           dataframe.schema.fields.exists(_.name == geometry),
