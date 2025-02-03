@@ -45,6 +45,9 @@ public class GenericUniquePartitioner extends SpatialPartitioner {
 
   @Override
   public Iterator<Tuple2<Integer, Geometry>> placeObject(Geometry spatialObject) throws Exception {
+    // Rather than take the first result from the parent, consume the entire iterator
+    // and return the partition with the minimum ID. This ensures that given the same
+    // (parent) partitioner, the output partitions from this method will be consistent.
     Iterator<Tuple2<Integer, Geometry>> it = parent.placeObject(spatialObject);
     int minParitionId = Integer.MAX_VALUE;
     Geometry minGeometry = null;
