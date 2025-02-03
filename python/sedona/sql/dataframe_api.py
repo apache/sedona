@@ -21,6 +21,7 @@ import itertools
 import typing
 from typing import Any, Callable, Iterable, List, Mapping, Tuple, Type, Union
 
+from pyspark import SparkContext
 from pyspark.sql import Column, SparkSession
 from pyspark.sql import functions as f
 
@@ -57,12 +58,6 @@ def _convert_argument_to_java_column(arg: Any) -> Column:
 def call_sedona_function(
     object_name: str, function_name: str, args: Union[Any, Tuple[Any]]
 ) -> Column:
-    spark = SparkSession.getActiveSession()
-    if spark is None:
-        raise ValueError(
-            "No active spark session was detected. Unable to call sedona function."
-        )
-
     # apparently a Column is an Iterable so we need to check for it explicitly
     if (not isinstance(args, Iterable)) or isinstance(
         args, (str, Column, ConnectColumn)
@@ -75,7 +70,12 @@ def call_sedona_function(
 
     args = map(_convert_argument_to_java_column, args)
 
-    jobject = getattr(spark._jvm, object_name)
+    jvm = SparkContext._jvm
+    if jvm is None:
+        raise ValueError(
+            "No active spark context was detected. Unable to call sedona function."
+        )
+    jobject = getattr(jvm, object_name)
     jfunc = getattr(jobject, function_name)
 
     jc = jfunc(*args)
