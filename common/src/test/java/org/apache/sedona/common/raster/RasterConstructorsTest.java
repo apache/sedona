@@ -76,12 +76,12 @@ public class RasterConstructorsTest extends RasterTestBase {
     assertEquals(4, gridCoverage2D.getNumSampleDimensions());
   }
 
-  //  @Test
-  //  public void profileAsRaster() throws FactoryException, ParseException {
-  //    for (int i = 0; i < 1000000; i++) {
-  //      testAsRasterWithEmptyRaster();
-  //    }
-  //  }
+  @Test
+  public void profileAsRaster() throws FactoryException, ParseException {
+    for (int i = 0; i < 1000000; i++) {
+      testAsRasterWithEmptyRaster();
+    }
+  }
 
   @Test
   public void testAsRasterWithEmptyRaster() throws FactoryException, ParseException {
@@ -106,7 +106,7 @@ public class RasterConstructorsTest extends RasterTestBase {
 
     rasterized = RasterConstructors.asRaster(geom, raster, "d");
     actual = MapAlgebra.bandAsArray(rasterized, 1);
-    System.out.println("\nActual: " + Arrays.toString(actual));
+    //    System.out.println("\nActual: " + Arrays.toString(actual));
     expected =
         new double[] {
           0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0,
@@ -154,10 +154,11 @@ public class RasterConstructorsTest extends RasterTestBase {
     rasterized = RasterConstructors.asRaster(geom, raster, "d");
     actual = MapAlgebra.bandAsArray(rasterized, 1);
 
-    System.out.println(
-        "\nFinal rastererized metadata: " + Arrays.toString(RasterAccessors.metadata(rasterized)));
-    System.out.println(
-        "Final rasterized band 1: " + Arrays.toString(MapAlgebra.bandAsArray(rasterized, 1)));
+    //    System.out.println(
+    //        "\nFinal rastererized metadata: " +
+    // Arrays.toString(RasterAccessors.metadata(rasterized)));
+    //    System.out.println(
+    //        "Final rasterized band 1: " + Arrays.toString(MapAlgebra.bandAsArray(rasterized, 1)));
 
     expected =
         new double[] {

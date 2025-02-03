@@ -20,11 +20,9 @@ package org.apache.sedona.common.raster;
 
 import java.awt.image.WritableRaster;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import javax.media.jai.RasterFactory;
-import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
