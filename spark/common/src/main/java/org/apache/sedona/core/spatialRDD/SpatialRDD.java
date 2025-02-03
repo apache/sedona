@@ -171,8 +171,8 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
   /**
    * Calculate non-duplicate inducing partitioning
    *
-   * Note that non-duplicating partitioners are intended for use by distributed
-   * partitioned writers and not able to be used for spatial joins.
+   * <p>Note that non-duplicating partitioners are intended for use by distributed partitioned
+   * writers and not able to be used for spatial joins.
    *
    * @param gridType The target GridType
    * @param numPartitions The target number of partitions
@@ -188,11 +188,11 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
   /**
    * Calculate non-duplicate inducing partitioning from an existing SpatialPartitioner
    *
-   * Note that non-duplicating partitioners are intended for use by distributed
-   * partitioned writers and not able to be used for spatial joins.
+   * <p>Note that non-duplicating partitioners are intended for use by distributed partitioned
+   * writers and not able to be used for spatial joins.
    *
-   * @param partitioner An existing partitioner obtained from the partitioning
-   *   of another SpatialRDD.
+   * @param partitioner An existing partitioner obtained from the partitioning of another
+   *     SpatialRDD.
    * @throws Exception
    */
   public void spatialPartitioningWithoutDuplicates(SpatialPartitioner partitioner) {
@@ -203,13 +203,13 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
   /**
    * Calculate non-duplicate inducing partitioning based on a list of existing envelopes
    *
-   * This is shorthand for spatialPartitioningWithoutDuplicates(new IndexedGridPartitioner()).
+   * <p>This is shorthand for spatialPartitioningWithoutDuplicates(new IndexedGridPartitioner()).
    * Using spatialPartitioningWithoutDuplicates(gridType, numPartitions) is typically more
-   * appropriate because it is able to adapt to the content of the partition and is able
-   * to produce more consistently balanced partitions.
+   * appropriate because it is able to adapt to the content of the partition and is able to produce
+   * more consistently balanced partitions.
    *
-   * Note that non-duplicating partitioners are intended for use by distributed
-   * partitioned writers and not able to be used for spatial joins.
+   * <p>Note that non-duplicating partitioners are intended for use by distributed partitioned
+   * writers and not able to be used for spatial joins.
    *
    * @param otherGrids A list of existing envelopes
    * @return true on success
