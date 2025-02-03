@@ -15,6 +15,9 @@
 #  specific language governing permissions and limitations
 #  under the License.
 from math import radians
+import os
+import threading
+import concurrent.futures
 from typing import Callable, Tuple
 
 import pytest
@@ -1732,6 +1735,26 @@ class TestDataFrameAPI(TestBase):
         ):
             func(*args)
 
+    def test_multi_thread(self):
+        df = self.spark.range(0, 100)
+
+        def run_spatial_query():
+            result = df.select(
+                stf.ST_Buffer(stc.ST_Point("id", f.col("id") + 1), 1.0).alias("geom")
+            ).collect()
+            assert len(result) == 100
+
+        # Create and run 4 threads
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+            futures = [executor.submit(run_spatial_query) for _ in range(4)]
+            concurrent.futures.wait(futures)
+        for future in futures:
+            future.result()
+
+    @pytest.mark.skipif(
+        os.getenv("SPARK_REMOTE") is not None,
+        reason="Checkpoint dir is not available in Spark Connect",
+    )
     def test_dbscan(self):
         df = self.spark.createDataFrame([{"id": 1, "x": 2, "y": 3}]).withColumn(
             "geometry", f.expr("ST_Point(x, y)")
@@ -1739,6 +1762,10 @@ class TestDataFrameAPI(TestBase):
 
         df.withColumn("dbscan", ST_DBSCAN("geometry", 1.0, 2, False)).collect()
 
+    @pytest.mark.skipif(
+        os.getenv("SPARK_REMOTE") is not None,
+        reason="Checkpoint dir is not available in Spark Connect",
+    )
     def test_lof(self):
         df = self.spark.createDataFrame([{"id": 1, "x": 2, "y": 3}]).withColumn(
             "geometry", f.expr("ST_Point(x, y)")
