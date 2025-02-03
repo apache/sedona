@@ -177,6 +177,6 @@ class TestSpatialRDD(TestBase):
         assert spatial_rdd.spatialPartitionedRDD.count() == 5
         assert spatial_rdd.getPartitioner().getGrids() == grids
 
-        spatial_rdd.spatialPartitioning(grids, introduce_duplicates=False)
+        spatial_rdd.spatialPartitioningWithoutDuplicates(grids)
         assert spatial_rdd.spatialPartitionedRDD.count() == 1
         spatial_rdd.getPartitioner().getGrids() == grids
