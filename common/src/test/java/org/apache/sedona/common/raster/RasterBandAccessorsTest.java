@@ -124,19 +124,19 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     //    // Save the double array as a CSV file
     //    saveDoubleArrayAsCSV(MapAlgebra.bandAsArray(rasterized, 1), filePath);
 
-    double expected = 1.0784462E7;
+    double expected = 1.0875064E7;
     assertEquals(expected, actual, 0d);
 
     actual = RasterBandAccessors.getZonalStats(raster, geom, 2, "mean", false, false);
-    expected = 220.80012541151868;
+    expected = 220.81145343140577;
     assertEquals(expected, actual, FP_TOLERANCE);
 
     actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "count");
-    expected = 184991.0;
+    expected = 185726.0;
     assertEquals(expected, actual, 0.1d);
 
     actual = RasterBandAccessors.getZonalStats(raster, geom, 3, "variance", false, false);
-    expected = 13550.906035582844;
+    expected = 13555.74907572951;
     assertEquals(expected, actual, FP_TOLERANCE);
 
     actual = RasterBandAccessors.getZonalStats(raster, geom, "max");
@@ -148,7 +148,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     assertEquals(expected, actual, 1E-1);
 
     actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "sd", false, false);
-    expected = 92.3527587110362;
+    expected = 92.48405030729849;
     assertEquals(expected, actual, FP_TOLERANCE);
 
     geom =
@@ -230,13 +230,13 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     System.out.println("\nActual ZonalStatsAll: " + Arrays.toString(actual));
     double[] expected =
         new double[] {
-          184991.0,
-          1.0784462E7,
-          58.29722527041684,
+          185726.0,
+          1.0875064E7,
+          58.554343495236125,
           0.0,
           0.0,
-          92.3527587110362,
-          8529.032041538874,
+          92.48405030729849,
+          8553.299561242919,
           0.0,
           255.0
         };

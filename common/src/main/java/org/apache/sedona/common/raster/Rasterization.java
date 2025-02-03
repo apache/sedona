@@ -20,9 +20,11 @@ package org.apache.sedona.common.raster;
 
 import java.awt.image.WritableRaster;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import javax.media.jai.RasterFactory;
+import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
@@ -325,14 +327,20 @@ public class Rasterization {
     // Extract scale values
     double scaleX = Math.abs(metadata[4]);
     double scaleY = Math.abs(metadata[5]);
+    double upperLeftX = metadata[0];
+    double upperLeftY = metadata[1];
 
     // Compute the aligned min/max values
-    double alignedMinX = Math.floor(rasterExtent.getMinX() / scaleX) * scaleX;
-    double alignedMinY = Math.floor(rasterExtent.getMinY() / scaleY) * scaleY;
-    double alignedMaxX = Math.ceil(rasterExtent.getMaxX() / scaleX) * scaleX;
-    double alignedMaxY = Math.ceil(rasterExtent.getMaxY() / scaleY) * scaleY;
+    double alignedMinX =
+        (Math.floor((rasterExtent.getMinX() + upperLeftX) / scaleX) * scaleX) - upperLeftX;
+    double alignedMinY =
+        (Math.floor((rasterExtent.getMinY() + upperLeftY) / scaleY) * scaleY) - upperLeftY;
+    double alignedMaxX =
+        (Math.ceil((rasterExtent.getMaxX() + upperLeftX) / scaleX) * scaleX) - upperLeftX;
+    double alignedMaxY =
+        (Math.ceil((rasterExtent.getMaxY() + upperLeftY) / scaleY) * scaleY) - upperLeftY;
 
-    // For points at intersection of 2 or more pixels,
+    // For points and LineStrings at intersection of 2 or more pixels,
     // extend search grid by 1 pixel in each direction
     if (alignedMaxX == alignedMinX) {
       //      System.out.println("\nFound alignedMaxX == alignedMinX ...");
@@ -351,13 +359,13 @@ public class Rasterization {
     double originalMaxX = raster.getEnvelope().getMaximum(0);
     double originalMaxY = raster.getEnvelope().getMaximum(1);
 
-    // Extend the aligned extent by 1 pixel if allTouched is true,
-    // while keeping within the original raster bounds
+    // Extend the aligned extent by 1 pixel if allTouched is true and if any geometry extent meets
+    // the aligned extent
     if (allTouched) {
-      alignedMinX = alignedMinX - scaleX;
-      alignedMinY = alignedMinY - scaleY;
-      alignedMaxX = alignedMaxX + scaleX;
-      alignedMaxY = alignedMaxY + scaleY;
+      alignedMinX -= (rasterExtent.getMinX() == alignedMinX) ? scaleX : 0;
+      alignedMinY -= (rasterExtent.getMinY() == alignedMinY) ? scaleY : 0;
+      alignedMaxX += (rasterExtent.getMaxX() == alignedMaxX) ? scaleX : 0;
+      alignedMaxY += (rasterExtent.getMaxY() == alignedMaxY) ? scaleY : 0;
     }
 
     alignedMinX = Math.max(alignedMinX, originalMinX);
@@ -432,14 +440,14 @@ public class Rasterization {
         writableRaster, pixelType, scaleX, scaleY, upperLeftX, upperLeftY);
   }
 
-  private static void validateRasterMetadata(double[] metadata) {
-    if (metadata[4] < 0) {
+  private static void validateRasterMetadata(double[] rasterMetadata) {
+    if (rasterMetadata[4] < 0) {
       throw new IllegalArgumentException("ScaleX cannot be negative");
     }
-    if (metadata[5] > 0) {
+    if (rasterMetadata[5] > 0) {
       throw new IllegalArgumentException("ScaleY must be negative");
     }
-    if (metadata[6] != 0 || metadata[7] != 0) {
+    if (rasterMetadata[6] != 0 || rasterMetadata[7] != 0) {
       throw new IllegalArgumentException("SkewX and SkewY must be zero");
     }
   }
