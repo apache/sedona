@@ -76,8 +76,11 @@ class structuredAdapterTestScala extends TestBaseScala with GivenWhenThen {
       circleRDD.buildIndex(IndexType.QUADTREE, true)
       val pairRdd =
         JoinQuery.DistanceJoinQueryFlat(pointRdd, circleRDD, true, SpatialPredicate.INTERSECTS)
-      val resultDf =
+      var resultDf =
         StructuredAdapter.toDf(pairRdd, pointRdd.schema, pointRdd.schema, sparkSession)
+      assertEquals(pointRdd.rawSpatialRDD.count(), resultDf.count())
+      resultDf =
+        StructuredAdapter.toDf(pairRdd, pointRdd.schema.json, pointRdd.schema.json, sparkSession)
       assertEquals(pointRdd.rawSpatialRDD.count(), resultDf.count())
     }
 

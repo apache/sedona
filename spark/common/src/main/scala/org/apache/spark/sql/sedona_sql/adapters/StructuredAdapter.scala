@@ -24,7 +24,7 @@ import org.apache.sedona.util.DfUtils
 import org.apache.spark.api.java.JavaPairRDD
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.types.StructType
+import org.apache.spark.sql.types.{DataType, StructType}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.locationtech.jts.geom.Geometry
 import org.slf4j.{Logger, LoggerFactory}
@@ -157,10 +157,32 @@ object StructuredAdapter {
    * convert the result of spatial join to DataFrame.
    * @param spatialPairRDD
    *   The JavaPairRDD to convert.
+   * @param leftSchemaJson
+   *   Schema of the left side. In a json format.
+   * @param rightSchemaJson
+   *   Schema of the right side. In a json format.
+   * @param sparkSession
+   * @return
+   */
+  def toDf(
+      spatialPairRDD: JavaPairRDD[Geometry, Geometry],
+      leftSchemaJson: String,
+      rightSchemaJson: String,
+      sparkSession: SparkSession): DataFrame = {
+    val leftSchema = DataType.fromJson(leftSchemaJson).asInstanceOf[StructType]
+    val rightSchema = DataType.fromJson(rightSchemaJson).asInstanceOf[StructType]
+    toDf(spatialPairRDD, leftSchema, rightSchema, sparkSession)
+  }
+
+  /**
+   * Convert JavaPairRDD[Geometry, Geometry] to DataFrame This method is useful when you want to
+   * convert the result of spatial join to DataFrame.
+   * @param spatialPairRDD
+   *   The JavaPairRDD to convert.
    * @param leftSchema
-   *   Schema of the left side.
+   *   The schema of the left side.
    * @param rightSchema
-   *   Schema of the right side.
+   *   The schema of the right side.
    * @param sparkSession
    * @return
    */

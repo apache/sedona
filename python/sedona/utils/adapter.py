@@ -29,16 +29,14 @@ from sedona.utils.meta import MultipleMeta
 class Adapter(metaclass=MultipleMeta):
     """
     Class which allow to convert between Spark DataFrame and SpatialRDD and reverse.
+    This class is used to convert between PySpark DataFrame and SpatialRDD. Schema
+    is lost during the conversion. This should be used if your data starts as a
+    SpatialRDD and you want to convert it to a DataFrame for further processing.
     """
 
     @staticmethod
     def _create_dataframe(jdf, sparkSession: SparkSession) -> DataFrame:
-        if hasattr(sparkSession, "_wrapped"):
-            # In Spark < 3.3, use the _wrapped SQLContext
-            return DataFrame(jdf, sparkSession._wrapped)
-        else:
-            # In Spark >= 3.3, use the session directly
-            return DataFrame(jdf, sparkSession)
+        return DataFrame(jdf, sparkSession)
 
     @classmethod
     def toRdd(cls, dataFrame: DataFrame) -> "JvmSpatialRDD":
