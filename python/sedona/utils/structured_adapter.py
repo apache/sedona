@@ -23,8 +23,6 @@ from sedona.core.spatialOperator.rdd import SedonaPairRDD
 
 
 class StructuredAdapter:
-
-
     """
     Class which allow to convert between Spark DataFrame and SpatialRDD and reverse.
     This class is used to convert between PySpark DataFrame and SpatialRDD. Schema
@@ -37,7 +35,9 @@ class StructuredAdapter:
         return DataFrame(jdf, sparkSession)
 
     @classmethod
-    def toSpatialRdd(cls, dataFrame: DataFrame, geometryFieldName: str = None) -> SpatialRDD:
+    def toSpatialRdd(
+        cls, dataFrame: DataFrame, geometryFieldName: str = None
+    ) -> SpatialRDD:
         """
         Convert a DataFrame to a SpatialRDD
         :param dataFrame:
@@ -74,7 +74,9 @@ class StructuredAdapter:
         return df
 
     @classmethod
-    def toSpatialPartitionedDf(cls, spatialRDD: SpatialRDD, sparkSession: SparkSession) -> DataFrame:
+    def toSpatialPartitionedDf(
+        cls, spatialRDD: SpatialRDD, sparkSession: SparkSession
+    ) -> DataFrame:
         """
         Convert a SpatialRDD to a DataFrame. This DataFrame will be spatially partitioned
         :param spatialRDD:
@@ -84,14 +86,22 @@ class StructuredAdapter:
         sc = spatialRDD._sc
         jvm = sc._jvm
 
-        jdf = jvm.StructuredAdapter.toSpatialPartitionedDf(spatialRDD._srdd, sparkSession._jsparkSession)
+        jdf = jvm.StructuredAdapter.toSpatialPartitionedDf(
+            spatialRDD._srdd, sparkSession._jsparkSession
+        )
 
         df = StructuredAdapter._create_dataframe(jdf, sparkSession)
 
         return df
 
     @classmethod
-    def pairRddToDf(cls, rawPairRDD: SedonaPairRDD, left_schema: StructType, right_schema: StructType, sparkSession: SparkSession) -> DataFrame:
+    def pairRddToDf(
+        cls,
+        rawPairRDD: SedonaPairRDD,
+        left_schema: StructType,
+        right_schema: StructType,
+        sparkSession: SparkSession,
+    ) -> DataFrame:
         """
         Convert a raw pair RDD to a DataFrame. This is useful when you have a Spatial join result
         Args:
@@ -106,6 +116,11 @@ class StructuredAdapter:
         jvm = sparkSession._jvm
         left_schema_json = left_schema.json()
         right_schema_json = right_schema.json()
-        jdf = jvm.StructuredAdapter.toDf(rawPairRDD.jsrdd, left_schema_json, right_schema_json, sparkSession._jsparkSession)
+        jdf = jvm.StructuredAdapter.toDf(
+            rawPairRDD.jsrdd,
+            left_schema_json,
+            right_schema_json,
+            sparkSession._jsparkSession,
+        )
         df = StructuredAdapter._create_dataframe(jdf, sparkSession)
         return df

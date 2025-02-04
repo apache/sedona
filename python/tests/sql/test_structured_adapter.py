@@ -26,17 +26,13 @@ from tests.test_base import TestBase
 class TestStructuredAdapter(TestBase):
 
     def test_df_rdd(self):
-        spatial_df: DataFrame = self.spark.sql(
-            "select ST_MakePoint(1, 1) as geom"
-        )
+        spatial_df: DataFrame = self.spark.sql("select ST_MakePoint(1, 1) as geom")
         srdd = StructuredAdapter.toSpatialRdd(spatial_df, "geom")
         spatial_df = StructuredAdapter.toDf(srdd, self.spark)
         assert spatial_df.count() == 1
 
     def test_spatial_partitioned_df(self):
-        spatial_df: DataFrame = self.spark.sql(
-            "select ST_MakePoint(1, 1) as geom"
-        )
+        spatial_df: DataFrame = self.spark.sql("select ST_MakePoint(1, 1) as geom")
         srdd = StructuredAdapter.toSpatialRdd(spatial_df, "geom")
         srdd.analyze()
         srdd.spatialPartitioning(GridType.KDBTREE, 1)
@@ -44,9 +40,7 @@ class TestStructuredAdapter(TestBase):
         assert spatial_df.count() == 1
 
     def test_distance_join_result_to_dataframe(self):
-        spatial_df: DataFrame = self.spark.sql(
-            "select ST_MakePoint(1, 1) as geom"
-        )
+        spatial_df: DataFrame = self.spark.sql("select ST_MakePoint(1, 1) as geom")
         schema = spatial_df.schema
         srdd = StructuredAdapter.toSpatialRdd(spatial_df, "geom")
         srdd.analyze()
@@ -60,5 +54,7 @@ class TestStructuredAdapter(TestBase):
             srdd, circle_rdd, False, True
         )
 
-        join_result_df = StructuredAdapter.pairRddToDf(join_result_pair_rdd, schema, schema, self.spark)
+        join_result_df = StructuredAdapter.pairRddToDf(
+            join_result_pair_rdd, schema, schema, self.spark
+        )
         assert join_result_df.count() == 1

@@ -565,10 +565,6 @@ The character encoding of string attributes are inferred from the `.cpg` file. I
     df = sedona.read.format("shapefile").option("charset", "UTF-8").load("/path/to/shapefile")
     ```
 
-### (Deprecated) Loading Shapefile using SpatialRDD
-
-If you are using Sedona earlier than v`1.7.0`, you can load shapefiles as SpatialRDD and converted to DataFrame using Adapter. Please read [Load SpatialRDD](rdd.md#create-a-generic-spatialrdd) and [DataFrame <-> RDD](#convert-between-dataframe-and-spatialrdd).
-
 ## Load GeoParquet
 
 Since v`1.3.0`, Sedona natively supports loading GeoParquet file. Sedona will infer geometry fields using the "geo" metadata in GeoParquet files.
@@ -1594,32 +1590,29 @@ my_postgis_db# alter table my_table alter column geom type geometry;
 
 ### DataFrame to SpatialRDD
 
-Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read [Adapter Scaladoc](../api/scaladoc/spark/org/apache/sedona/sql/utils/index.html)
+Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD.
 
 === "Scala"
 
 	```scala
-	var spatialRDD = Adapter.toSpatialRdd(spatialDf, "usacounty")
+	var spatialRDD = StructuredAdapter.toSpatialRdd(spatialDf, "usacounty")
 	```
 
 === "Java"
 
 	```java
-	SpatialRDD spatialRDD = Adapter.toSpatialRdd(spatialDf, "usacounty")
+	SpatialRDD spatialRDD = StructuredAdapter.toSpatialRdd(spatialDf, "usacounty")
 	```
 
 === "Python"
 
 	```python
-	from sedona.utils.adapter import Adapter
+	from sedona.utils.structured_adapter import StructuredAdapter
 
-	spatialRDD = Adapter.toSpatialRdd(spatialDf, "usacounty")
+	spatialRDD = StructuredAdapter.toSpatialRdd(spatialDf, "usacounty")
 	```
 
-"usacounty" is the name of the geometry column
-
-!!!warning
-	Only one Geometry type column is allowed per DataFrame.
+"usacounty" is the name of the geometry column. It is an optional parameter. If you don't provide it, the first geometry column will be used.
 
 ### SpatialRDD to DataFrame
 
@@ -1628,109 +1621,42 @@ Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Ple
 === "Scala"
 
 	```scala
-	var spatialDf = Adapter.toDf(spatialRDD, sedona)
+	var spatialDf = StructuredAdapter.toDf(spatialRDD, sedona)
 	```
 
 === "Java"
 
 	```java
-	Dataset<Row> spatialDf = Adapter.toDf(spatialRDD, sedona)
+	Dataset<Row> spatialDf = StructuredAdapter.toDf(spatialRDD, sedona)
 	```
 
 === "Python"
 
 	```python
-	from sedona.utils.adapter import Adapter
+	from sedona.utils.adapter import StructuredAdapter
 
-	spatialDf = Adapter.toDf(spatialRDD, sedona)
-	```
-
-All other attributes such as price and age will be also brought to the DataFrame as long as you specify ==carryOtherAttributes== (see [Read other attributes in an SpatialRDD](rdd.md#read-other-attributes-in-an-spatialrdd)).
-
-You may also manually specify a schema for the resulting DataFrame in case you require different column names or data
-types. Note that string schemas and not all data types are supported&mdash;please check the
-[Adapter Scaladoc](../api/javadoc/sql/org/apache/sedona/sql/utils/index.html) to confirm what is supported for your use
-case. At least one column for the user data must be provided.
-
-=== "Scala"
-
-	```scala
-	val schema = StructType(Array(
-	  StructField("county", GeometryUDT, nullable = true),
-	  StructField("name", StringType, nullable = true),
-	  StructField("price", DoubleType, nullable = true),
-	  StructField("age", IntegerType, nullable = true)
-	))
-	val spatialDf = Adapter.toDf(spatialRDD, schema, sedona)
+	spatialDf = StructuredAdapter.toDf(spatialRDD, sedona)
 	```
 
 ### SpatialPairRDD to DataFrame
 
-PairRDD is the result of a spatial join query or distance join query. SedonaSQL DataFrame-RDD Adapter can convert the result to a DataFrame. But you need to provide the name of other attributes.
+PairRDD is the result of a spatial join query or distance join query. SedonaSQL DataFrame-RDD Adapter can convert the result to a DataFrame. But you need to provide the schema of the left and right RDDs.
 
 === "Scala"
 
 	```scala
-	var joinResultDf = Adapter.toDf(joinResultPairRDD, Seq("left_attribute1", "left_attribute2"), Seq("right_attribute1", "right_attribute2"), sedona)
+	var joinResultDf = StructuredAdapter.toDf(joinResultPairRDD, leftDf.schema, rightDf.schema, sedona)
 	```
 
 === "Java"
 
 	```java
-	import scala.collection.JavaConverters;
-
-	List leftFields = new ArrayList<>(Arrays.asList("c1", "c2", "c3"));
-	List rightFields = new ArrayList<>(Arrays.asList("c4", "c5", "c6"));
-	Dataset joinResultDf = Adapter.toDf(joinResultPairRDD, JavaConverters.asScalaBuffer(leftFields).toSeq(), JavaConverters.asScalaBuffer(rightFields).toSeq(), sedona);
-	```
-
-=== "Python"
-
-	```python
-	from sedona.utils.adapter import Adapter
-
-	joinResultDf = Adapter.toDf(jvm_sedona_rdd, ["poi_from_id", "poi_from_name"], ["poi_to_id", "poi_to_name"], spark))
-	```
-or you can use the attribute names directly from the input RDD
-
-=== "Scala"
-
-	```scala
-	import scala.collection.JavaConversions._
-	var joinResultDf = Adapter.toDf(joinResultPairRDD, leftRdd.fieldNames, rightRdd.fieldNames, sedona)
-	```
-
-=== "Java"
-
-	```java
-	import scala.collection.JavaConverters;
-	Dataset joinResultDf = Adapter.toDf(joinResultPairRDD, JavaConverters.asScalaBuffer(leftRdd.fieldNames).toSeq(), JavaConverters.asScalaBuffer(rightRdd.fieldNames).toSeq(), sedona);
+	Dataset joinResultDf = StructuredAdapter.toDf(joinResultPairRDD, leftDf.schema, rightDf.schema, sedona);
 	```
 === "Python"
 
 	```python
-	from sedona.utils.adapter import Adapter
+	from sedona.utils.adapter import StructuredAdapter
 
-	joinResultDf = Adapter.toDf(result_pair_rdd, leftRdd.fieldNames, rightRdd.fieldNames, spark)
-	```
-
-All other attributes such as price and age will be also brought to the DataFrame as long as you specify ==carryOtherAttributes== (see [Read other attributes in an SpatialRDD](rdd.md#read-other-attributes-in-an-spatialrdd)).
-
-You may also manually specify a schema for the resulting DataFrame in case you require different column names or data
-types. Note that string schemas and not all data types are supported&mdash;please check the
-[Adapter Scaladoc](../api/javadoc/sql/org/apache/sedona/sql/utils/index.html) to confirm what is supported for your use
-case. Columns for the left and right user data must be provided.
-
-=== "Scala"
-
-	```scala
-	val schema = StructType(Array(
-	  StructField("leftGeometry", GeometryUDT, nullable = true),
-	  StructField("name", StringType, nullable = true),
-	  StructField("price", DoubleType, nullable = true),
-	  StructField("age", IntegerType, nullable = true),
-	  StructField("rightGeometry", GeometryUDT, nullable = true),
-	  StructField("category", StringType, nullable = true)
-	))
-	val joinResultDf = Adapter.toDf(joinResultPairRDD, schema, sedona)
+	joinResultDf = StructuredAdapter.pairRddToDf(result_pair_rdd, leftDf.schema, rightDf.schema, spark)
 	```
