@@ -48,6 +48,9 @@ public class Rasterization {
     // Validate the input geometry and raster metadata
     double[] metadata = RasterAccessors.metadata(raster);
     validateRasterMetadata(metadata);
+    if (!RasterPredicates.rsIntersects(raster, geom)) {
+      throw new IllegalArgumentException("Geometry does not intersect Raster.");
+    }
 
     Envelope2D rasterExtent = raster.getEnvelope2D();
 
@@ -391,7 +394,6 @@ public class Rasterization {
             alignedMaxX - alignedMinX,
             alignedMaxY - alignedMinY);
 
-    //    System.out.println("geomRasterExtent: " + alignedRasterExtent);
     return alignedRasterExtent;
   }
 
@@ -417,11 +419,8 @@ public class Rasterization {
 
     WritableRaster writableRaster;
     if (useGeometryExtent) {
-      int geomExtentWidth = (int) (Math.ceil(geomExtent.getWidth() / scaleX));
-      int geomExtentHeight = (int) (Math.ceil(geomExtent.getHeight() / scaleY));
-      //      System.out.println(
-      //          "\ngeomExtentWidth, geomExtentHeight: " + geomExtentWidth + ", " +
-      // geomExtentHeight);
+      int geomExtentWidth = (int) (Math.round(geomExtent.getWidth() / scaleX));
+      int geomExtentHeight = (int) (Math.round(geomExtent.getHeight() / scaleY));
 
       writableRaster =
           RasterFactory.createBandedRaster(

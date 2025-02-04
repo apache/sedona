@@ -225,8 +225,10 @@ case class RS_ZonalStatsAll(inputExpressions: Seq[Expression])
       Seq(RasterUDT, GeometryUDT, IntegerType)
     } else if (inputExpressions.length == 4) {
       Seq(RasterUDT, GeometryUDT, IntegerType, BooleanType)
-    } else if (inputExpressions.length >= 5) {
-      Seq(RasterUDT, GeometryUDT, IntegerType, BooleanType)
+    } else if (inputExpressions.length == 5) {
+      Seq(RasterUDT, GeometryUDT, IntegerType, BooleanType, BooleanType)
+    } else if (inputExpressions.length >= 6) {
+      Seq(RasterUDT, GeometryUDT, IntegerType, BooleanType, BooleanType, BooleanType)
     } else {
       Seq(RasterUDT, GeometryUDT)
     }

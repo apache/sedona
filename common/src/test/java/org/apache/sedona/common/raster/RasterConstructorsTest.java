@@ -386,13 +386,6 @@ public class RasterConstructorsTest extends RasterTestBase {
           0.0, 0.0, 5484.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
         };
 
-    System.out.println(
-        "\nOG raster metadata: " + Arrays.toString(RasterAccessors.metadata(raster)));
-    System.out.println(
-        "Final rastererized metadata: " + Arrays.toString(RasterAccessors.metadata(rasterized)));
-    System.out.println(
-        "Final rasterized band 1: " + Arrays.toString(MapAlgebra.bandAsArray(rasterized, 1)));
-
     assertArrayEquals(expected, actual, 0.1d);
   }
 
