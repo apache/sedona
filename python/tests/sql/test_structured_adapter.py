@@ -70,7 +70,7 @@ class TestStructuredAdapter(TestBase):
 
         rdd = StructuredAdapter.toSpatialRdd(df, "geom")
         rdd.analyze()
-        rdd.spatialPartitioning(GridType.KDBTREE, num_partitions=16)
+        rdd.spatialPartitioningWithoutDuplicates(GridType.KDBTREE, num_partitions=16)
         n_spatial_partitions = rdd.spatialPartitionedRDD.getNumPartitions()
         assert n_spatial_partitions >= 16
 
