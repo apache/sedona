@@ -18,12 +18,12 @@
  */
 package org.apache.sedona.util
 
-import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.types.StructType
 
 object DfUtils {
-  def getGeometryColumnName(dataframe: DataFrame): String = {
-    val geomFields = dataframe.schema.fields.filter(_.dataType == GeometryUDT)
+  def getGeometryColumnName(schema: StructType): String = {
+    val geomFields = schema.fields.filter(_.dataType == GeometryUDT)
 
     if (geomFields.isEmpty)
       throw new IllegalArgumentException(
