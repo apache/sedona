@@ -199,8 +199,8 @@
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.sql">sql</a></dd></dl></div>
     </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="object" href="Adapter$.html" title=""></a>
-                        <a href="Adapter$.html" title="">Adapter</a>
+                        <a class="object" href="Adapter$.html" title="Adapter for converting between DataFrame and SpatialRDD."></a>
+                        <a href="Adapter$.html" title="Adapter for converting between DataFrame and SpatialRDD.">Adapter</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
                         <a class="object" href="GeoToolsCoverageAvailability$.html" title="A helper object to check if GeoTools GridCoverage2D is available on the classpath."></a>
@@ -289,7 +289,7 @@
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="org.apache.sedona.sql.utils.Adapter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+                <li name="org.apache.sedona.sql.utils.Adapter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Adapter"></a><a id="Adapter:Adapter"></a>
       <span class="permalink">
       <a href="../../../../../org/apache/sedona/sql/utils/Adapter$.html" title="Permalink">
@@ -301,10 +301,15 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="Adapter$.html"><span class="name">Adapter</span></a>
+        <a title="Adapter for converting between DataFrame and SpatialRDD." href="Adapter$.html"><span class="name">Adapter</span></a>
       </span>
       
-      
+      <p class="shortcomment cmt">Adapter for converting between DataFrame and SpatialRDD.</p><div class="fullcomment"><div class="comment cmt"><p>Adapter for converting between DataFrame and SpatialRDD. It provides methods to convert
+DataFrame to SpatialRDD and vice versa. The schema information is lost during conversion. It is
+different from <a href="../../../spark/sql/sedona_sql/adapters/StructuredAdapter$.html" class="extype" name="org.apache.spark.sql.sedona_sql.adapters.StructuredAdapter">org.apache.spark.sql.sedona_sql.adapters.StructuredAdapter</a> which does not
+lose the schema information during conversion. This should be used if your data starts as a
+SpatialRDD and you want to convert it to DataFrame.
+</p></div></div>
     </li><li name="org.apache.sedona.sql.utils.GeoToolsCoverageAvailability" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="GeoToolsCoverageAvailability"></a><a id="GeoToolsCoverageAvailability:GeoToolsCoverageAvailability"></a>
       <span class="permalink">
