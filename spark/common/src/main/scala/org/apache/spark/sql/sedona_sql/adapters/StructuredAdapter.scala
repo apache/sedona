@@ -28,6 +28,7 @@ import org.apache.spark.sql.types.{DataType, StructType}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.locationtech.jts.geom.Geometry
 import org.slf4j.{Logger, LoggerFactory}
+import org.apache.sedona.core.spatialPartitioning.GenericUniquePartitioner
 
 /**
  * Adapter for converting between DataFrame and SpatialRDD. It provides methods to convert
@@ -143,8 +144,11 @@ object StructuredAdapter {
     if (spatialRDD.spatialPartitionedRDD == null)
       throw new RuntimeException(
         "SpatialRDD is not spatially partitioned. Please call spatialPartitioning method before calling this method.")
-    logger.warn(
-      "SpatialPartitionedRDD might have duplicate geometries. Please make sure you are aware of it.")
+
+    if (!spatialRDD.getPartitioner().isInstanceOf[GenericUniquePartitioner]) {
+      logger.warn(
+        "SpatialPartitionedRDD might have duplicate geometries. Please make sure you are aware of it.")
+    }
     val rowRdd = spatialRDD.spatialPartitionedRDD.map(geometry => {
       val row = geometry.getUserData.asInstanceOf[InternalRow]
       row
