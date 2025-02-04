@@ -16,26 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.stats
+package org.apache.spark.sql.sedona_sql.io.stac
 
-import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.connector.read.InputPartition
 
-private[stats] object Util {
-  def getGeometryColumnName(dataframe: DataFrame): String = {
-    val geomFields = dataframe.schema.fields.filter(_.dataType == GeometryUDT)
-
-    if (geomFields.isEmpty)
-      throw new IllegalArgumentException(
-        "No GeometryType column found. Provide a dataframe containing a geometry column.")
-
-    if (geomFields.length == 1)
-      return geomFields.head.name
-
-    if (geomFields.length > 1 && !geomFields.exists(_.name == "geometry"))
-      throw new IllegalArgumentException(
-        "Multiple GeometryType columns found. Provide the column name as an argument.")
-
-    "geometry"
-  }
-}
+case class StacPartition(index: Int, items: Array[String], opts: java.util.Map[String, String])
+    extends InputPartition

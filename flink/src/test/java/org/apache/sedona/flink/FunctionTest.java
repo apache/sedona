@@ -1611,6 +1611,30 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testLineSegments() {
+    Table baseTable =
+        tableEnv.sqlQuery(
+            "SELECT ST_GeomFromWKT('LINESTRING(120 140, 60 120, 30 20)') AS line, ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 0, 0 0))') AS poly");
+    Geometry[] result =
+        (Geometry[])
+            first(
+                    baseTable.select(
+                        call(Functions.ST_LineSegments.class.getSimpleName(), $("line"))))
+                .getField(0);
+    int actualSize = result.length;
+    int expectedSize = 2;
+    assertEquals(expectedSize, actualSize);
+
+    result =
+        (Geometry[])
+            first(
+                    baseTable.select(
+                        call(Functions.ST_LineSegments.class.getSimpleName(), $("poly"), true)))
+                .getField(0);
+    assertEquals(0, result.length);
+  }
+
+  @Test
   public void testLineSubString() {
     Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING (0 0, 2 0)') AS line");
     table =

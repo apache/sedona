@@ -42,6 +42,7 @@ import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
+import org.apache.spark.sql.types.StructType;
 import org.apache.spark.storage.StorageLevel;
 import org.apache.spark.util.random.SamplingUtils;
 import org.locationtech.jts.geom.Coordinate;
@@ -85,6 +86,8 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
   public JavaRDD<T> rawSpatialRDD;
 
   public List<String> fieldNames;
+
+  public StructType schema;
   /** The CR stransformation. */
   protected boolean CRStransformation = false;
   /** The source epsg code. */

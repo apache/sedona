@@ -1156,6 +1156,36 @@ public class Functions {
     return geometry.getFactory().createGeometryCollection();
   }
 
+  public static Geometry[] lineSegments(Geometry geometry, boolean lenient) {
+    if (!(geometry instanceof LineString)) {
+      if (lenient) {
+        return new Geometry[] {};
+      } else {
+        throw new IllegalArgumentException(
+            "Geometry is not a LineString. This function expects input geometry to be a LineString.");
+      }
+    }
+
+    LineString line = (LineString) geometry;
+    Coordinate[] coords = line.getCoordinates();
+    if (coords.length == 2 || coords.length == 0) {
+      return new Geometry[] {line};
+    }
+
+    GeometryFactory geometryFactory = geometry.getFactory();
+    Geometry[] resultArray = new Geometry[coords.length - 1];
+    for (int i = 1; i < coords.length; i++) {
+      resultArray[i - 1] =
+          geometryFactory.createLineString(new Coordinate[] {coords[i - 1], coords[i]});
+    }
+
+    return resultArray;
+  }
+
+  public static Geometry[] lineSegments(Geometry geometry) {
+    return lineSegments(geometry, true);
+  }
+
   public static Geometry minimumBoundingCircle(Geometry geometry, int quadrantSegments) {
     MinimumBoundingCircle minimumBoundingCircle = new MinimumBoundingCircle(geometry);
     Coordinate centre = minimumBoundingCircle.getCentre();

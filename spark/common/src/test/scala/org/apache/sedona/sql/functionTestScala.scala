@@ -1948,6 +1948,13 @@ class functionTestScala
       .get(0)
     expected = "LINESTRING (0 0, 5 5, 2 2)"
     assertEquals(expected, actual)
+
+    actual = sparkSession
+      .sql("SELECT ST_AsText(ST_RemoveRepeatedPoints(ST_GeomFromWKT('POLYGON ((40 40, 70 70, 70 70, 40 40))')))")
+      .first()
+      .get(0)
+    expected = "POLYGON ((40 40, 70 70, 70 70, 40 40))"
+    assertEquals(expected, actual)
   }
 
   it("Should correctly set using ST_SetPoint") {
@@ -2339,6 +2346,17 @@ class functionTestScala
       .as[Double]
       .collect()
       .toList should contain theSameElementsAs List(0, 1, 1)
+  }
+
+  it("Should pass ST_LineSegments") {
+    val baseDf = sparkSession.sql(
+      "SELECT ST_GeomFromWKT('LINESTRING(120 140, 60 120, 30 20)') AS line, ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 0, 0 0))') AS poly")
+    var resultSize = baseDf.selectExpr("array_size(ST_LineSegments(line, false))").first().get(0)
+    val expected = 2
+    assertEquals(expected, resultSize)
+
+    resultSize = baseDf.selectExpr("array_size(ST_LineSegments(poly))").first().get(0)
+    assertEquals(0, resultSize)
   }
 
   it("Should pass ST_LineSubstring") {

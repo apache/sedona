@@ -1854,6 +1854,24 @@ public class FunctionsTest extends TestBase {
     actual = Functions.asWKT(Functions.removeRepeatedPoints(geom, 2000));
     expected = "MULTIPOINT ((1 1))";
     assertEquals(expected, actual);
+
+    // The minimum number of coordinates in valid geometry shouldn't result in an empty geometry
+    geom = Constructors.geomFromWKT("POLYGON ((40 40, 70 70, 70 70, 40 40))", 0);
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom));
+    expected = "POLYGON ((40 40, 70 70, 70 70, 40 40))";
+    assertEquals(expected, actual);
+
+    geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((40 40, 70 70, 70 70, 40 40), (40 40, 70 70, 50 50, 70 70, 40 40))", 0);
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom));
+    expected = "POLYGON ((40 40, 70 70, 70 70, 40 40), (40 40, 70 70, 50 50, 70 70, 40 40))";
+    assertEquals(expected, actual);
+
+    geom = Constructors.geomFromWKT("LINESTRING(0 0, 1 1)", 0);
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom));
+    expected = "LINESTRING (0 0, 1 1)";
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -2411,6 +2429,45 @@ public class FunctionsTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Functions.makeLine(polygon1, polygon2));
     assertEquals(
         "ST_MakeLine only supports Point, MultiPoint and LineString geometries", e.getMessage());
+  }
+
+  @Test
+  public void lineSegments() throws ParseException {
+    Geometry geom = Constructors.geomFromWKT("LINESTRING (0 0, 1 1, 2 2, 3 3, 3 4)", 0);
+    Geometry[] actual = Functions.lineSegments(geom, false);
+    int actualSize = actual.length;
+    int expectedSize = 4;
+    assertEquals(expectedSize, actualSize);
+
+    geom = Constructors.geomFromWKT("LINESTRING (0 0, 1 1)", 0);
+    actual = Functions.lineSegments(geom);
+    actualSize = actual.length;
+    expectedSize = 1;
+    assertEquals(expectedSize, actualSize);
+
+    geom = Constructors.geomFromWKT("LINESTRING (0 0, 1 1, 2 2, 3 3, 3 4, 4 4)", 4326);
+    actual = Functions.lineSegments(geom);
+    actualSize = actual.length;
+    expectedSize = 5;
+    assertEquals(expectedSize, actualSize);
+
+    // Check SRID
+    Geometry resultCheck = actual[0];
+    assertEquals(4326, resultCheck.getSRID());
+
+    geom = GEOMETRY_FACTORY.createLineString();
+    actual = Functions.lineSegments(geom);
+    String actualString = Arrays.toString(actual);
+    String expectedString = "[LINESTRING EMPTY]";
+    assertEquals(expectedString, actualString);
+
+    geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((65.10498 18.625425, 62.182617 16.36231, 64.863281 16.40447, 62.006836 14.157882, 65.522461 14.008696, 65.10498 18.625425))",
+            0);
+    actual = Functions.lineSegments(geom, true);
+    actualSize = actual.length;
+    assertEquals(0, actualSize);
   }
 
   @Test

@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.stats
 
-import org.apache.sedona.stats.Util.getGeometryColumnName
+import org.apache.sedona.util.DfUtils.getGeometryColumnName
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.sedona_sql.expressions.st_functions.{ST_Distance, ST_DistanceSpheroid}
 import org.apache.spark.sql.{Column, DataFrame}
@@ -79,7 +79,7 @@ object Weighting {
     require(alpha < 0, "Alpha must be less than 0")
 
     val geometryColumn = geometry match {
-      case null => getGeometryColumnName(dataframe)
+      case null => getGeometryColumnName(dataframe.schema)
       case _ =>
         require(
           dataframe.schema.fields.exists(_.name == geometry),

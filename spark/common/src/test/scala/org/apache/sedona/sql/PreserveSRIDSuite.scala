@@ -59,6 +59,7 @@ class PreserveSRIDSuite extends TestBaseScala with TableDrivenPropertyChecks {
       ("ST_StartPoint(geom3)", 1000),
       ("ST_Snap(geom3, geom3, 0.1)", 1000),
       ("ST_Boundary(geom1)", 1000),
+      ("ST_LineSegments(geom3)[0]", 1000),
       ("ST_LineSubstring(geom3, 0.1, 0.9)", 1000),
       ("ST_LineInterpolatePoint(geom3, 0.1)", 1000),
       ("ST_EndPoint(geom3)", 1000),

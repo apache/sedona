@@ -333,6 +333,13 @@ object st_functions extends DataFrameAPI {
   def ST_LineMerge(multiLineString: String): Column =
     wrapExpression[ST_LineMerge](multiLineString)
 
+  def ST_LineSegments(geom: Column): Column = wrapExpression[ST_LineSegments](geom)
+  def ST_LineSegments(geom: String): Column = wrapExpression[ST_LineSegments](geom)
+  def ST_LineSegments(geom: Column, lenient: Column): Column =
+    wrapExpression[ST_LineSegments](geom, lenient)
+  def ST_LineSegments(geom: String, lenient: Boolean): Column =
+    wrapExpression[ST_LineSegments](geom, lenient)
+
   def ST_LineSubstring(lineString: Column, startFraction: Column, endFraction: Column): Column =
     wrapExpression[ST_LineSubstring](lineString, startFraction, endFraction)
   def ST_LineSubstring(lineString: String, startFraction: Double, endFraction: Double): Column =

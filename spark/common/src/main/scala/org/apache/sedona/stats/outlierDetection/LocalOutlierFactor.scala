@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.stats.outlierDetection
 
-import org.apache.sedona.stats.Util.getGeometryColumnName
+import org.apache.sedona.util.DfUtils.getGeometryColumnName
 import org.apache.spark.sql.sedona_sql.expressions.st_functions.{ST_Distance, ST_DistanceSphere}
 import org.apache.spark.sql.{Column, DataFrame, SparkSession, functions => f}
 
@@ -73,7 +73,8 @@ object LocalOutlierFactor {
       if (useSphere) ST_DistanceSphere else ST_Distance
     val useSpheroidString = if (useSphere) "True" else "False" // for the SQL expression
 
-    val geometryColumn = if (geometry == null) getGeometryColumnName(dataframe) else geometry
+    val geometryColumn =
+      if (geometry == null) getGeometryColumnName(dataframe.schema) else geometry
 
     val KNNFunction = "ST_KNN"
 

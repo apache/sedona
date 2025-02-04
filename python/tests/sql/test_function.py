@@ -2162,6 +2162,19 @@ class TestPredicateJoin(TestBase):
             )
             assert areal_geom.take(1)[0][0] == expected_geom
 
+    def test_st_line_segments(self):
+        baseDf = self.spark.sql(
+            "SELECT ST_GeomFromWKT('LINESTRING(120 140, 60 120, 30 20)') AS line, ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 0, 0 0))') AS poly"
+        )
+        resultSize = baseDf.selectExpr(
+            "array_size(ST_LineSegments(line, false))"
+        ).first()[0]
+        expected = 2
+        assert expected == resultSize
+
+        resultSize = baseDf.selectExpr("array_size(ST_LineSegments(poly))").first()[0]
+        assert 0 == resultSize
+
     def test_st_line_from_multi_point(self):
         test_cases = {
             "'POLYGON((-1 0 0, 1 0 0, 0 0 1, 0 1 0, -1 0 0))'": None,

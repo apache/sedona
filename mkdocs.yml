@@ -75,6 +75,8 @@ nav:
       - Examples:
           - Scala/Java: tutorial/demo.md
           - Python: tutorial/jupyter-notebook.md
+      - Concepts:
+          - Clustering Algorithms: tutorial/concepts/clustering-algorithms.md
   - API Docs:
       - Sedona with Apache Spark:
           - SQL:
@@ -88,6 +90,7 @@ nav:
                   - Query optimization: api/sql/Optimizer.md
                   - Nearest-Neighbour searching: api/sql/NearestNeighbourSearching.md
                   - "Spider:Spatial Data Generator": api/sql/Spider.md
+                  - Reading STAC Data Source: api/sql/Stac.md
                   - Reading Legacy Parquet Files: api/sql/Reading-legacy-parquet.md
                   - Visualization:
                       - SedonaPyDeck: api/sql/Visualization_SedonaPyDeck.md
@@ -151,6 +154,7 @@ nav:
       - Telemetry: asf/telemetry.md
 repo_url: https://github.com/apache/sedona
 repo_name: apache/sedona
+edit_uri: edit/master/docs/
 theme:
   font: false
   name: 'material'
@@ -165,12 +169,14 @@ theme:
     repo: fontawesome/brands/github
   features:
     - content.code.copy
+    - content.action.edit
     - search.highlight
     - search.share
     - search.suggest
     - navigation.footer
     - navigation.instant
     - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.top
 extra:
   version:

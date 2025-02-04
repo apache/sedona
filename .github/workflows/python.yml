@@ -163,13 +163,9 @@ jobs:
       - name: Run Spark Connect tests
         env:
           PYTHON_VERSION: ${{ matrix.python }}
+          SPARK_VERSION: ${{ matrix.spark }}
+        if: ${{ matrix.spark >= '3.4.0' }}
         run: |
-          if [ ! -f "${VENV_PATH}/lib/python${PYTHON_VERSION}/site-packages/pyspark/sbin/start-connect-server.sh" ]
-          then
-            echo "Skipping connect tests for Spark $SPARK_VERSION"
-            exit
-          fi
-
           export SPARK_HOME=${VENV_PATH}/lib/python${PYTHON_VERSION}/site-packages/pyspark
           export SPARK_REMOTE=local
 

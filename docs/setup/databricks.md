@@ -36,8 +36,9 @@ org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
 
 ```
 apache-sedona=={{ sedona.current_version }}
-keplergl==0.3.2
-pydeck==0.8.0
+geopandas==1.0.1
+keplergl==0.3.7
+pydeck==0.9.1
 ```
 
 ### Initialize
@@ -138,9 +139,9 @@ For enabling python support, from the Libraries tab install from PyPI
 
 ```
 apache-sedona=={{ sedona.current_version }}
-geopandas==0.11.1
-keplergl==0.3.2
-pydeck==0.8.0
+geopandas==1.0.1
+keplergl==0.3.7
+pydeck==0.9.1
 ```
 
 !!!tips
