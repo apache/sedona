@@ -681,7 +681,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val df = dfFile.selectExpr(
         "RS_FromGeoTiff(content) as raster",
         "ST_GeomFromWKT('POLYGON ((-8682522.873537656 4572703.890837922, -8673439.664183248 4572993.532747675, -8673155.57366801 4563873.2099182755, -8701890.325907696 4562931.7093397, -8682522.873537656 4572703.890837922))', 3857) as geom")
-      val resultDf = df.selectExpr("RS_SetValues(raster, 1, geom, 10, false) as result")
+      val resultDf = df.selectExpr("RS_SetValues(raster, 1, geom, 10, false, false) as result")
 
       var actual = resultDf
         .selectExpr("RS_Value(result, ST_GeomFromWKT('POINT (-77.9146 37.8916)'))")
