@@ -579,7 +579,7 @@
       </span>
       
       <p class="shortcomment cmt">Spatial partitioning.</p><div class="fullcomment"><div class="comment cmt"><p>Spatial partitioning.
-</p></div><dl class="paramcmts block"><dt class="param">gridType</dt><dd class="cmt"><p>the grid type</p></dd><dt>returns</dt><dd class="cmt"><p>true, if successful</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="SpatialRDD.html" class="extype" name="org.apache.sedona.core.spatialRDD.SpatialRDD">SpatialRDD</a></dd><dt>Exceptions thrown</dt><dd><span class="cmt"><p><span class="extype" name="Exception"><code>Exception</code></span> the exception</p></span></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">gridType</dt><dd class="cmt"><p>the grid type</p></dd><dt class="param">numPartitions</dt><dd class="cmt"><p>the target number of partitions</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="SpatialRDD.html" class="extype" name="org.apache.sedona.core.spatialRDD.SpatialRDD">SpatialRDD</a></dd><dt>Exceptions thrown</dt><dd><span class="cmt"><p><span class="extype" name="Exception"><code>Exception</code></span> the exception</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
@@ -1034,6 +1034,22 @@
       
       <p class="shortcomment cmt">Sets the sample number.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the sample number.
 </p></div><dl class="paramcmts block"><dt class="param">sampleNumber</dt><dd class="cmt"><p>the new sample number</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="SpatialRDD.html" class="extype" name="org.apache.sedona.core.spatialRDD.SpatialRDD">SpatialRDD</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.spatialRDD.SpatialRDD#spatialParitioningWithoutDuplicates" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="spatialParitioningWithoutDuplicates(gridType:org.apache.sedona.core.enums.GridType):Boolean"></a><a id="spatialParitioningWithoutDuplicates(GridType):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialRDD/PointRDD.html#spatialParitioningWithoutDuplicates(gridType:org.apache.sedona.core.enums.GridType):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">spatialParitioningWithoutDuplicates</span><span class="params">(<span name="gridType">gridType: <a href="../enums/GridType.html" class="extype" name="org.apache.sedona.core.enums.GridType">GridType</a></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="SpatialRDD.html" class="extype" name="org.apache.sedona.core.spatialRDD.SpatialRDD">SpatialRDD</a></dd></dl></div>
     </li><li name="org.apache.sedona.core.spatialRDD.SpatialRDD#spatialPartitioning" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="spatialPartitioning(partitioner:org.apache.sedona.core.spatialPartitioning.SpatialPartitioner):Unit"></a><a id="spatialPartitioning(SpatialPartitioner):Unit"></a>
       <span class="permalink">
@@ -1082,6 +1098,64 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="SpatialRDD.html" class="extype" name="org.apache.sedona.core.spatialRDD.SpatialRDD">SpatialRDD</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.spatialRDD.SpatialRDD#spatialPartitioningWithoutDuplicates" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="spatialPartitioningWithoutDuplicates(otherGrids:java.util.List[org.locationtech.jts.geom.Envelope]):Boolean"></a><a id="spatialPartitioningWithoutDuplicates(List[Envelope]):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialRDD/PointRDD.html#spatialPartitioningWithoutDuplicates(otherGrids:java.util.List[org.locationtech.jts.geom.Envelope]):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">spatialPartitioningWithoutDuplicates</span><span class="params">(<span name="otherGrids">otherGrids: <span class="extype" name="java.util.List">List</span>[<span class="extype" name="org.locationtech.jts.geom.Envelope">Envelope</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Calculate non-duplicate inducing partitioning based on a list of existing envelopes</p><div class="fullcomment"><div class="comment cmt"><p>Calculate non-duplicate inducing partitioning based on a list of existing envelopes</p><p>This is shorthand for spatialPartitioningWithoutDuplicates(new IndexedGridPartitioner()).
+Using spatialPartitioningWithoutDuplicates(gridType, numPartitions) is typically more
+appropriate because it is able to adapt to the content of the partition and is able to produce
+more consistently balanced partitions.</p><p>Note that non-duplicating partitioners are intended for use by distributed partitioned
+writers and not able to be used for spatial joins.
+</p></div><dl class="paramcmts block"><dt class="param">otherGrids</dt><dd class="cmt"><p>A list of existing envelopes</p></dd><dt>returns</dt><dd class="cmt"><p>true on success</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="SpatialRDD.html" class="extype" name="org.apache.sedona.core.spatialRDD.SpatialRDD">SpatialRDD</a></dd><dt>Exceptions thrown</dt><dd><span class="cmt"></span></dd></dl></div>
+    </li><li name="org.apache.sedona.core.spatialRDD.SpatialRDD#spatialPartitioningWithoutDuplicates" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="spatialPartitioningWithoutDuplicates(partitioner:org.apache.sedona.core.spatialPartitioning.SpatialPartitioner):Unit"></a><a id="spatialPartitioningWithoutDuplicates(SpatialPartitioner):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialRDD/PointRDD.html#spatialPartitioningWithoutDuplicates(partitioner:org.apache.sedona.core.spatialPartitioning.SpatialPartitioner):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">spatialPartitioningWithoutDuplicates</span><span class="params">(<span name="partitioner">partitioner: <a href="../spatialPartitioning/SpatialPartitioner.html" class="extype" name="org.apache.sedona.core.spatialPartitioning.SpatialPartitioner">SpatialPartitioner</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Calculate non-duplicate inducing partitioning from an existing SpatialPartitioner</p><div class="fullcomment"><div class="comment cmt"><p>Calculate non-duplicate inducing partitioning from an existing SpatialPartitioner</p><p>Note that non-duplicating partitioners are intended for use by distributed partitioned
+writers and not able to be used for spatial joins.
+</p></div><dl class="paramcmts block"><dt class="param">partitioner</dt><dd class="cmt"><p>An existing partitioner obtained from the partitioning of another
+    SpatialRDD.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="SpatialRDD.html" class="extype" name="org.apache.sedona.core.spatialRDD.SpatialRDD">SpatialRDD</a></dd><dt>Exceptions thrown</dt><dd><span class="cmt"></span></dd></dl></div>
+    </li><li name="org.apache.sedona.core.spatialRDD.SpatialRDD#spatialPartitioningWithoutDuplicates" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="spatialPartitioningWithoutDuplicates(gridType:org.apache.sedona.core.enums.GridType,numPartitions:Int):Unit"></a><a id="spatialPartitioningWithoutDuplicates(GridType,Int):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialRDD/PointRDD.html#spatialPartitioningWithoutDuplicates(gridType:org.apache.sedona.core.enums.GridType,numPartitions:Int):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">spatialPartitioningWithoutDuplicates</span><span class="params">(<span name="gridType">gridType: <a href="../enums/GridType.html" class="extype" name="org.apache.sedona.core.enums.GridType">GridType</a></span>, <span name="numPartitions">numPartitions: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Calculate non-duplicate inducing partitioning</p><div class="fullcomment"><div class="comment cmt"><p>Calculate non-duplicate inducing partitioning</p><p>Note that non-duplicating partitioners are intended for use by distributed partitioned
+writers and not able to be used for spatial joins.
+</p></div><dl class="paramcmts block"><dt class="param">gridType</dt><dd class="cmt"><p>The target GridType</p></dd><dt class="param">numPartitions</dt><dd class="cmt"><p>The target number of partitions</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="SpatialRDD.html" class="extype" name="org.apache.sedona.core.spatialRDD.SpatialRDD">SpatialRDD</a></dd><dt>Exceptions thrown</dt><dd><span class="cmt"></span></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
