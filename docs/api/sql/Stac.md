@@ -87,7 +87,6 @@ root
  |    |    |-- title: string (nullable = true)
  |    |    |-- roles: array (nullable = true)
  |    |    |    |-- element: string (containsNull = true)
- |    |    |-- rast: raster (nullable = true)
 
 +------------+--------------------+-------+--------------------+--------------------+--------------------+-----+-----------+--------------------+--------------+------------+--------------------+--------------------+-----------+-----------+-------------+-------+----+--------------------+--------------------+--------------------+
 |stac_version|     stac_extensions|   type|                  id|                bbox|            geometry|title|description|            datetime|start_datetime|end_datetime|             created|             updated|   platform|instruments|constellation|mission| gsd|          collection|               links|              assets|
