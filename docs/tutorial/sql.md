@@ -1651,7 +1651,9 @@ You can use `StructuredAdapter` and the `spatialRDD.spatialPartitioningWithoutDu
 === "Scala"
 
 	```scala
-	spatialRDD.spatialPartitioning(GridType.KDBTREE)
+	spatialRDD.spatialParitioningWithoutDuplicates(GridType.KDBTREE)
+	// Specify the desired number of partitions as 10, though the actual number may vary
+	// spatialRDD.spatialParitioningWithoutDuplicates(GridType.KDBTREE, 10)
 	var spatialDf = StructuredAdapter.toSpatialPartitionedDf(spatialRDD, sedona)
 	```
 
