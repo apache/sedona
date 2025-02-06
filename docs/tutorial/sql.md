@@ -1646,6 +1646,8 @@ are introduced on purpose to ensure correctness when performing a spatial join;
 however, when using Sedona to prepare a dataset for distribution this is not typically
 desired.
 
+You can use `StructuredAdapter` and the `spatialRDD.spatialPartitioningWithoutDuplicates` function to obtain a Sedona DataFrame that is spatially partitioned without duplicates. This is especially useful for generating balanced GeoParquet files while preserving spatial proximity within files, which is crucial for optimizing filter pushdown performance in GeoParquet files.
+
 === "Scala"
 
 	```scala
