@@ -1660,7 +1660,9 @@ You can use `StructuredAdapter` and the `spatialRDD.spatialPartitioningWithoutDu
 === "Java"
 
 	```java
-	spatialRDD.spatialPartitioning(GridType.KDBTREE)
+	spatialRDD.spatialParitioningWithoutDuplicates(GridType.KDBTREE)
+	// Specify the desired number of partitions as 10, though the actual number may vary
+	// spatialRDD.spatialParitioningWithoutDuplicates(GridType.KDBTREE, 10)	
 	Dataset<Row> spatialDf = StructuredAdapter.toSpatialPartitionedDf(spatialRDD, sedona)
 	```
 
