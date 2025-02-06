@@ -1638,6 +1638,45 @@ Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Ple
 	spatialDf = StructuredAdapter.toDf(spatialRDD, sedona)
 	```
 
+### SpatialRDD to DataFrame with spatial partitioning
+
+By default, `StructuredAdapter.toDf()` does not preserve spatial partitions because doing so
+may introduce duplicate features for most types of spatial data. These duplicates
+are introduced on purpose to ensure correctness when performing a spatial join;
+however, when using Sedona to prepare a dataset for distribution this is not typically
+desired.
+
+You can use `StructuredAdapter` and the `spatialRDD.spatialPartitioningWithoutDuplicates` function to obtain a Sedona DataFrame that is spatially partitioned without duplicates. This is especially useful for generating balanced GeoParquet files while preserving spatial proximity within files, which is crucial for optimizing filter pushdown performance in GeoParquet files.
+
+=== "Scala"
+
+	```scala
+	spatialRDD.spatialParitioningWithoutDuplicates(GridType.KDBTREE)
+	// Specify the desired number of partitions as 10, though the actual number may vary
+	// spatialRDD.spatialParitioningWithoutDuplicates(GridType.KDBTREE, 10)
+	var spatialDf = StructuredAdapter.toSpatialPartitionedDf(spatialRDD, sedona)
+	```
+
+=== "Java"
+
+	```java
+	spatialRDD.spatialParitioningWithoutDuplicates(GridType.KDBTREE)
+	// Specify the desired number of partitions as 10, though the actual number may vary
+	// spatialRDD.spatialParitioningWithoutDuplicates(GridType.KDBTREE, 10)
+	Dataset<Row> spatialDf = StructuredAdapter.toSpatialPartitionedDf(spatialRDD, sedona)
+	```
+
+=== "Python"
+
+	```python
+	from sedona.utils.structured_adapter import StructuredAdapter
+
+	spatialRDD.spatialPartitioningWithoutDuplicates(GridType.KDBTREE)
+	# Specify the desired number of partitions as 10, though the actual number may vary
+	# spatialRDD.spatialParitioningWithoutDuplicates(GridType.KDBTREE, 10)
+	spatialDf = StructuredAdapter.toSpatialPartitionedDf(spatialRDD, sedona)
+	```
+
 ### SpatialPairRDD to DataFrame
 
 PairRDD is the result of a spatial join query or distance join query. SedonaSQL DataFrame-RDD Adapter can convert the result to a DataFrame. But you need to provide the schema of the left and right RDDs.

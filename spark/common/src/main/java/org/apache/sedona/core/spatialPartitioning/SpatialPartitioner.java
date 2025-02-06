@@ -35,6 +35,11 @@ public abstract class SpatialPartitioner extends Partitioner implements Serializ
   protected final GridType gridType;
   protected final List<Envelope> grids;
 
+  protected SpatialPartitioner() {
+    gridType = null;
+    grids = null;
+  }
+
   protected SpatialPartitioner(GridType gridType, List<Envelope> grids) {
     this.gridType = gridType;
     this.grids = Objects.requireNonNull(grids, "grids");

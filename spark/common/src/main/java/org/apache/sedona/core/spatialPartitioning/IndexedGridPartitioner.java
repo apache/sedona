@@ -48,7 +48,7 @@ public class IndexedGridPartitioner extends FlatGridPartitioner {
   }
 
   public IndexedGridPartitioner(GridType gridType, List<Envelope> grids) {
-    this(gridType, grids, false);
+    this(gridType, grids, true);
   }
 
   public IndexedGridPartitioner(List<Envelope> grids, Boolean preserveUncontainedGeometries) {
