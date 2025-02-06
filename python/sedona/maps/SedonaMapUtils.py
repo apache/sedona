@@ -17,7 +17,10 @@
 
 import json
 
+import geopandas
+
 from sedona.sql.types import GeometryType
+from sedona.utils.geoarrow import dataframe_to_arrow
 
 
 class SedonaMapUtils:
@@ -34,7 +37,12 @@ class SedonaMapUtils:
         """
         if geometry_col is None:
             geometry_col = SedonaMapUtils.__get_geometry_col__(df)
-        pandas_df = df.toPandas()
+
+        # Convert the dataframe to arrow format, then to geopandas dataframe
+        # This is faster than converting directly to geopandas dataframe via toPandas
+        data_pyarrow = dataframe_to_arrow(df)
+        pandas_df = geopandas.GeoDataFrame.from_arrow(data_pyarrow)
+
         if (
             geometry_col is None
         ):  # No geometry column found even after searching schema, return Pandas Dataframe

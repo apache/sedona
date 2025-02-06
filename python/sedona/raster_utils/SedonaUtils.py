@@ -15,10 +15,18 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+import geopandas
+
+from sedona.utils.geoarrow import dataframe_to_arrow
+
 
 class SedonaUtils:
     @classmethod
     def display_image(cls, df):
         from IPython.display import HTML, display
 
-        display(HTML(df.toPandas().to_html(escape=False)))
+        # Convert the dataframe to arrow format, then to geopandas dataframe
+        # This is faster than converting directly to geopandas dataframe via toPandas
+        data_pyarrow = dataframe_to_arrow(df)
+        pdf = geopandas.GeoDataFrame.from_arrow(data_pyarrow)
+        display(HTML(pdf.to_html(escape=False)))
