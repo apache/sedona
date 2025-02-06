@@ -1667,7 +1667,9 @@ You can use `StructuredAdapter` and the `spatialRDD.spatialPartitioningWithoutDu
 	```python
 	from sedona.utils.structured_adapter import StructuredAdapter
 
-	spatialRDD.spatialPartitioning(GridType.KDBTREE)
+	spatialRDD.spatialPartitioningWithoutDuplicates(GridType.KDBTREE)
+	# Specify the desired number of partitions as 10, though the actual number may vary
+	# spatialRDD.spatialParitioningWithoutDuplicates(GridType.KDBTREE, 10)
 	spatialDf = StructuredAdapter.toSpatialPartitionedDf(spatialRDD, sedona)
 	```
 
