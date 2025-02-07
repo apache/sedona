@@ -964,7 +964,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .selectExpr(
           "RS_FromGeoTiff(content) as raster",
           "ST_GeomFromWKT('POLYGON ((-8682522.873537656 4572703.890837922, -8673439.664183248 4572993.532747675, -8673155.57366801 4563873.2099182755, -8701890.325907696 4562931.7093397, -8682522.873537656 4572703.890837922))', 3857) as geom")
-      val clippedDf = df.selectExpr("RS_Clip(raster, 1, geom, 200, false) as clipped")
+      val clippedDf = df.selectExpr("RS_Clip(raster, 1, geom, false, 200, false) as clipped")
 
       // Extract the metadata for the original raster
       val clippedMetadata = df
@@ -1005,7 +1005,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .selectExpr(
           "RS_FromGeoTiff(content) as raster",
           "ST_GeomFromWKT('POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))', 26918) as geom")
-      val clippedDf = df.selectExpr("RS_Clip(raster, 1, geom, 200, false) as clipped")
+      val clippedDf = df.selectExpr("RS_Clip(raster, 1, geom, false, 200, false) as clipped")
 
       val clippedMetadata =
         df.selectExpr("RS_Metadata(raster)").first().getStruct(0).toSeq.slice(0, 9)
@@ -1024,7 +1024,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       var expectedValues = Seq(null, null, 0.0, 0.0, null)
       assertTrue(expectedValues.equals(actualValues))
 
-      val croppedDf = df.selectExpr("RS_Clip(raster, 1, geom, 200, false) as cropped")
+      val croppedDf = df.selectExpr("RS_Clip(raster, 1, geom, false, 200, false) as cropped")
       actualValues = croppedDf
         .selectExpr(
           "RS_Values(cropped, " +

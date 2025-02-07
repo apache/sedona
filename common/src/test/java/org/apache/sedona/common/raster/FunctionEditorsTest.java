@@ -194,24 +194,6 @@ public class FunctionEditorsTest extends RasterTestBase {
     assertEquals(expected, actual, 0d);
   }
 
-  public static void saveDoubleArrayAsCSV(double[] array, String filePath) {
-    try (FileWriter writer = new FileWriter(filePath)) {
-      // Convert double array to a CSV format
-      String csvString =
-          Arrays.toString(array)
-              .replace("[", "") // Remove opening bracket
-              .replace("]", ""); // Remove closing bracket
-
-      // Write to file
-      writer.write(csvString);
-      writer.flush();
-
-      System.out.println("Array successfully saved as a CSV in: " + filePath);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
   @Test
   public void testSetValuesGeomVariant()
       throws FactoryException, ParseException, TransformException {
@@ -232,13 +214,8 @@ public class FunctionEditorsTest extends RasterTestBase {
 
     // Point
     geom = Constructors.geomFromWKT("POINT(5 -5)", 0);
-    System.out.println(
-        "\nOG Raster metadata: " + Arrays.toString(RasterAccessors.metadata(raster)));
-    System.out.println("OG raster band 1: " + Arrays.toString(MapAlgebra.bandAsArray(raster, 1)));
-
     raster = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 35);
     actual = MapAlgebra.bandAsArray(raster, 1);
-
     expected =
         new double[] {
           0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 35.0, 0.0, 0.0,
@@ -246,21 +223,10 @@ public class FunctionEditorsTest extends RasterTestBase {
         };
     assertArrayEquals(expected, actual, 0.1d);
 
-    System.out.println(
-        "\nOG raster metadata: " + Arrays.toString(RasterAccessors.metadata(emptyRaster)));
-    System.out.println(
-        "OG raster band 1: " + Arrays.toString(MapAlgebra.bandAsArray(emptyRaster, 1)));
-
     // MultiPoint
     geom = Constructors.geomFromWKT("MULTIPOINT((2 -2), (2 -1), (3 -3), (4 -7))", 0);
     raster = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 400, false);
     actual = MapAlgebra.bandAsArray(raster, 1);
-
-    System.out.println(
-        "\nFinal rastererized metadata: " + Arrays.toString(RasterAccessors.metadata(raster)));
-    System.out.println(
-        "Final rasterized band 1: " + Arrays.toString(MapAlgebra.bandAsArray(raster, 1)));
-
     expected =
         new double[] {
           400.0, 400.0, 0.0, 0.0, 400.0, 400.0, 400.0, 0.0, 0.0, 400.0, 400.0, 0.0, 0.0, 0.0, 0.0,
@@ -283,11 +249,6 @@ public class FunctionEditorsTest extends RasterTestBase {
     geom = Constructors.geomFromWKT("POLYGON((-1 1, 3 4, 4 -4, 5 -5, 9 -9, -1 1))", 0);
     raster = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 56);
     actual = MapAlgebra.bandAsArray(raster, 1);
-
-    System.out.println(
-        "\nRasterized metadata: " + Arrays.toString(RasterAccessors.metadata(raster)));
-    System.out.println("Rasterized band 1: " + Arrays.toString(MapAlgebra.bandAsArray(raster, 1)));
-
     expected =
         new double[] {
           56.0, 56.0, 56.0, 0.0, 0.0, 56.0, 56.0, 0.0, 0.0, 0.0, 56.0, 0.0, 0.0, 0.0, 0.0, 56.0,

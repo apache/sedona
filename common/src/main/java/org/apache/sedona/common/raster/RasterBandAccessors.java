@@ -92,6 +92,7 @@ public class RasterBandAccessors {
    * @param raster Raster to use for computing stats
    * @param roi Geometry to define the region of interest
    * @param band Band to be used for computation
+   * @param allTouched Include pixels touched by roi geometry
    * @param excludeNoData Specifies whether to exclude no-data value or not
    * @param lenient Return null if the raster and roi do not intersect when set to true, otherwise
    *     will throw an exception
@@ -133,6 +134,7 @@ public class RasterBandAccessors {
    * @param raster Raster to use for computing stats
    * @param roi Geometry to define the region of interest
    * @param band Band to be used for computation
+   * @param allTouched Include pixels touched by roi geometry
    * @param excludeNoData Specifies whether to exclude no-data value or not
    * @return An array with all the stats for the region
    * @throws FactoryException
@@ -147,6 +149,7 @@ public class RasterBandAccessors {
    * @param raster Raster to use for computing stats
    * @param roi Geometry to define the region of interest
    * @param band Band to be used for computation
+   * @param allTouched Include pixels touched by roi geometry
    * @return An array with all the stats for the region, excludeNoData is set to true
    * @throws FactoryException
    */
@@ -184,6 +187,7 @@ public class RasterBandAccessors {
    * @param roi Geometry to define the region of interest
    * @param band Band to be used for computation
    * @param statType Define the statistic to be computed
+   * @param allTouched Include pixels touched by roi geometry
    * @param excludeNoData Specifies whether to exclude no-data value or not
    * @param lenient Return null if the raster and roi do not intersect when set to true, otherwise
    *     will throw an exception
@@ -235,6 +239,17 @@ public class RasterBandAccessors {
     }
   }
 
+  /**
+   * @param raster Raster to use for computing stats
+   * @param roi Geometry to define the region of interest
+   * @param band Band to be used for computation
+   * @param statType Define the statistic to be computed
+   * @param allTouched Include pixels touched by roi geometry
+   * @param excludeNoData Specifies whether to exclude no-data value or not
+   * @return A double precision floating point number representing the requested statistic
+   *     calculated over the specified region.
+   * @throws FactoryException
+   */
   public static Double getZonalStats(
       GridCoverage2D raster,
       Geometry roi,
@@ -251,6 +266,7 @@ public class RasterBandAccessors {
    * @param roi Geometry to define the region of interest
    * @param band Band to be used for computation
    * @param statType Define the statistic to be computed
+   * @param allTouched Include pixels touched by roi geometry
    * @return A double precision floating point number representing the requested statistic
    *     calculated over the specified region. The excludeNoData is set to true.
    * @throws FactoryException
@@ -305,6 +321,7 @@ public class RasterBandAccessors {
    * @param raster Raster to use for computing stats
    * @param roi Geometry to define the region of interest
    * @param band Band to be used for computation
+   * @param allTouched Include pixels touched by roi geometry
    * @param excludeNoData Specifies whether to exclude no-data value or not
    * @param lenient Return null if the raster and roi do not intersect when set to true, otherwise
    *     will throw an exception
@@ -327,7 +344,6 @@ public class RasterBandAccessors {
       // have to set the SRID as RasterUtils.convertCRSIfNeeded doesn't set it even though the
       // geometry is in raster's CRS
       roi = Functions.setSRID(roi, RasterAccessors.srid(raster));
-      System.out.println("\nConverted crs roi: " + Functions.asEWKT(roi));
     }
 
     // checking if the raster contains the geometry
@@ -349,10 +365,6 @@ public class RasterBandAccessors {
     Raster rasterziedData = RasterUtils.getRaster(rasterizedGeom.getRenderedImage());
     int width = RasterAccessors.getWidth(rasterizedGeom),
         height = RasterAccessors.getHeight(rasterizedGeom);
-
-    System.out.println("\ngetStatObjects Width: " + width);
-    System.out.println("getStatObjects Height: " + height);
-
     double[] rasterizedPixelData =
         rasterziedData.getSamples(0, 0, width, height, 0, (double[]) null);
     double[] rasterPixelData =

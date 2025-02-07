@@ -19,7 +19,6 @@
 package org.apache.sedona.common.raster;
 
 import java.awt.*;
-import java.awt.geom.Point2D;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
@@ -27,8 +26,6 @@ import javax.media.jai.RasterFactory;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.geometry.DirectPosition2D;
-import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
@@ -148,9 +145,6 @@ public class PixelFunctionEditors {
           "The provided geometry is not intersecting the raster. Please provide a geometry that is in the raster's extent.");
     }
 
-    //    System.out.println(
-    //        "\nGeom from setValues after transformation of srid: \n" + Functions.asEWKT(geom));
-
     String bandDataType = RasterBandAccessors.getBandType(raster, band);
 
     GridCoverage2D rasterizedGeom;
@@ -167,95 +161,42 @@ public class PixelFunctionEditors {
     Raster rasterizedGeomData = RasterUtils.getRaster(rasterizedGeom.getRenderedImage());
     double colX = RasterAccessors.getUpperLeftX(rasterizedGeom),
         rowY = RasterAccessors.getUpperLeftY(rasterizedGeom);
-    //    System.out.println("\nsetValues - rasterizedGeom colX, rowY: " + colX + ", " + rowY);
     int heightGeometryRaster = RasterAccessors.getHeight(rasterizedGeom),
         widthGeometryRaster = RasterAccessors.getWidth(rasterizedGeom);
-    //    System.out.println(
-    //        "setValues - rasterizedGeom heightGeometryRaster, widthGeometryRaster: "
-    //            + heightGeometryRaster
-    //            + ", "
-    //            + widthGeometryRaster);
     int heightOriginalRaster = RasterAccessors.getHeight(raster),
         widthOriginalRaster = RasterAccessors.getWidth(raster);
     WritableRaster rasterCopied = makeCopiedRaster(raster);
 
-    String geometryType = geom.getGeometryType();
-
-    // Taking a shortcut if the provided geometry is a Point or MultiPoint, then taking the lat lon
-    if ((geometryType.equalsIgnoreCase(Geometry.TYPENAME_POINT)
-            || geometryType.equalsIgnoreCase(Geometry.TYPENAME_MULTIPOINT))
-        & false) {
-      System.out.println("\nsetValues calls shortcut for Point and MultiPoint...\n");
-      Coordinate[] coordinates = geom.getCoordinates();
-      for (Coordinate pointCoordinate : coordinates) {
-        int[] pointLocation =
-            raster
-                .getGridGeometry()
-                .worldToGrid(new DirectPosition2D(pointCoordinate.x, pointCoordinate.y))
-                .getCoordinateValues();
-        double[] pixel = rasterCopied.getPixel(pointLocation[0], pointLocation[1], (double[]) null);
-        pixel[band - 1] = rasterizedGeomData.getPixel(0, 0, (double[]) null)[0];
-        rasterCopied.setPixel(pointLocation[0], pointLocation[1], pixel);
-      }
-    }
     // Converting geometry to raster and then iterating through them
-    else {
-      int[] pixelLocation = RasterUtils.getGridCoordinatesFromWorld(raster, colX, rowY);
-      int x = pixelLocation[0], y = pixelLocation[1];
-      //      System.out.println("setValues - x, y: " + x + ", " + y);
+    int[] pixelLocation = RasterUtils.getGridCoordinatesFromWorld(raster, colX, rowY);
+    int x = pixelLocation[0], y = pixelLocation[1];
 
-      // rasterX & rasterY are the starting pixels for the target raster
-      int rasterX = Math.max(x, 0);
-      int rasterY = Math.max(y, 0);
-      // geometryX & geometryY are the starting pixels for the geometry raster
-      int geometryX = rasterX - x;
-      int geometryY = rasterY - y;
-      //      System.out.println("setValues - geometryX, geometryY: " + geometryX + ", " +
-      // geometryY);
-      // widthRegion & heightRegion are the size of the region to update
-      int widthRegion = Math.min(widthGeometryRaster - geometryX, widthOriginalRaster - rasterX);
-      int heightRegion = Math.min(heightGeometryRaster - geometryY, heightOriginalRaster - rasterY);
-      //      System.out.println(
-      //          "setValues - widthRegion, heightRegion: " + widthRegion + ", " + heightRegion);
+    // rasterX & rasterY are the starting pixels for the target raster
+    int rasterX = Math.max(x, 0);
+    int rasterY = Math.max(y, 0);
+    // geometryX & geometryY are the starting pixels for the geometry raster
+    int geometryX = rasterX - x;
+    int geometryY = rasterY - y;
+    // widthRegion & heightRegion are the size of the region to update
+    int widthRegion = Math.min(widthGeometryRaster - geometryX, widthOriginalRaster - rasterX);
+    int heightRegion = Math.min(heightGeometryRaster - geometryY, heightOriginalRaster - rasterY);
 
-      for (int j = 0; j < heightRegion; j++) {
-        for (int i = 0; i < widthRegion; i++) {
-          double[] pixel = rasterCopied.getPixel(rasterX + i, rasterY + j, (double[]) null);
-          // [0] as only one band in the rasterized Geometry
-          double pixelNew =
-              rasterizedGeomData.getPixel(geometryX + i, geometryY + j, (double[]) null)[0];
-
-          Point2D worldCoords =
-              RasterUtils.getWorldCornerCoordinates(raster, rasterX + i, rasterY + j);
-          double worldX = worldCoords.getX();
-          double worldY = worldCoords.getY();
-          //          System.out.println(
-          //              "setValues - (rasterX + i, rasterY + j), (worldX, worldY), pixelNew: "
-          //                  + "("
-          //                  + (rasterX + i)
-          //                  + ", "
-          //                  + (rasterY + j)
-          //                  + ")"
-          //                  + ", ("
-          //                  + worldX
-          //                  + ", "
-          //                  + worldY
-          //                  + ")"
-          //                  + ", "
-          //                  + pixelNew);
-
-          // skipping 0 from the rasterized geometry as
-          if (pixelNew == 0
-              || keepNoData && noDataValue != null && noDataValue == pixel[band - 1]) {
-            continue;
-          } else {
-            pixel[band - 1] = pixelNew;
-          }
-
-          rasterCopied.setPixel(rasterX + i, rasterY + j, pixel);
+    for (int j = 0; j < heightRegion; j++) {
+      for (int i = 0; i < widthRegion; i++) {
+        double[] pixel = rasterCopied.getPixel(rasterX + i, rasterY + j, (double[]) null);
+        // [0] as only one band in the rasterized Geometry
+        double pixelNew =
+            rasterizedGeomData.getPixel(geometryX + i, geometryY + j, (double[]) null)[0];
+        // skipping 0 from the rasterized geometry as
+        if (pixelNew == 0 || keepNoData && noDataValue != null && noDataValue == pixel[band - 1]) {
+          continue;
+        } else {
+          pixel[band - 1] = pixelNew;
         }
+        rasterCopied.setPixel(rasterX + i, rasterY + j, pixel);
       }
     }
+
     return RasterUtils.clone(
         rasterCopied,
         raster.getSampleDimensions(),

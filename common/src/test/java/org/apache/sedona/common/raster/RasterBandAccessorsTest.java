@@ -86,24 +86,6 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     assertEquals("Provided band index 2 is not present in the raster", exception.getMessage());
   }
 
-  public static void saveDoubleArrayAsCSV(double[] array, String filePath) {
-    try (FileWriter writer = new FileWriter(filePath)) {
-      // Convert double array to a CSV format
-      String csvString =
-          Arrays.toString(array)
-              .replace("[", "") // Remove opening bracket
-              .replace("]", ""); // Remove closing bracket
-
-      // Write to file
-      writer.write(csvString);
-      writer.flush();
-
-      System.out.println("Array successfully saved as a CSV in: " + filePath);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
   @Test
   public void testZonalStats()
       throws FactoryException, ParseException, IOException, TransformException {
@@ -113,17 +95,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         "POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))";
     Geometry geom = Constructors.geomFromWKT(polygon, RasterAccessors.srid(raster));
 
-    System.out.println(
-        "\nOG raster metadata: " + Arrays.toString(RasterAccessors.metadata(raster)));
-
     double actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "sum", false, false);
-    GridCoverage2D rasterized = PixelFunctionEditors.setValues(raster, 1, geom, 175, false, true);
-    //    // Path to the output CSV file
-    //    String filePath = "/Users/pranavtoggi/Downloads/rasterized_output.csv";
-    //
-    //    // Save the double array as a CSV file
-    //    saveDoubleArrayAsCSV(MapAlgebra.bandAsArray(rasterized, 1), filePath);
-
     double expected = 1.0875064E7;
     assertEquals(expected, actual, 0d);
 
@@ -221,13 +193,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         "POLYGON ((-8673439.6642 4572993.5327, -8673155.5737 4563873.2099, -8701890.3259 4562931.7093, -8682522.8735 4572703.8908, -8673439.6642 4572993.5327))";
     Geometry geom = Constructors.geomFromWKT(polygon, 3857);
 
-    System.out.println(
-        "\nOG Raster metadata: " + Arrays.toString(RasterAccessors.metadata(raster)));
-    System.out.println(
-        "OG Raster Envelope: " + Functions.asEWKT(GeometryFunctions.envelope(raster)));
-
     double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false, false, false);
-    System.out.println("\nActual ZonalStatsAll: " + Arrays.toString(actual));
     double[] expected =
         new double[] {
           185726.0,
@@ -268,20 +234,11 @@ public class RasterBandAccessorsTest extends RasterTestBase {
       throws IOException, FactoryException, ParseException, TransformException {
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
-
-    //    System.out.println(
-    //        "\nOG Raster metadata: " + Arrays.toString(RasterAccessors.metadata(raster)));
-    //    System.out.println("OG Raster noDataValue: " +
-    // RasterBandAccessors.getBandNoDataValue(raster));
-
     String polygon =
         "POLYGON((-167.750000 87.750000, -155.250000 87.750000, -155.250000 40.250000, -180.250000 40.250000, -167.750000 87.750000))";
     Geometry geom = Constructors.geomFromWKT(polygon, RasterAccessors.srid(raster));
 
     double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false, true);
-
-    System.out.println("\nActual ZonalStatsAll: " + Arrays.toString(actual));
-
     double[] expected =
         new double[] {
           14249.0,
@@ -308,7 +265,6 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         };
     raster = MapAlgebra.addBandFromArray(raster, bandValue, 1);
     raster = RasterBandEditors.setBandNoDataValue(raster, 1, 0d);
-    System.out.println("Raster Matrix: \n" + RasterOutputs.asMatrix(raster, 1));
     // Testing implicit CRS transformation
     Geometry geom = Constructors.geomFromWKT("POLYGON((2 -2, 2 -6, 6 -6, 6 -2, 2 -2))", 0);
 

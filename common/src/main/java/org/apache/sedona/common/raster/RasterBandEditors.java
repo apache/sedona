@@ -272,6 +272,7 @@ public class RasterBandEditors {
    * @param raster Raster to clip
    * @param band Band number to perform clipping
    * @param geometry Specify ROI
+   * @param allTouched Include all pixels touched by roi geometry
    * @param noDataValue no-Data value for empty cells
    * @param crop Specifies to keep the original extent or not
    * @param lenient Return null if the raster and geometry do not intersect when set to true,
@@ -282,6 +283,7 @@ public class RasterBandEditors {
       GridCoverage2D raster,
       int band,
       Geometry geometry,
+      boolean allTouched,
       double noDataValue,
       boolean crop,
       boolean lenient)
@@ -344,7 +346,7 @@ public class RasterBandEditors {
 
       // rasterize the geometry to iterate over the clipped raster
       GridCoverage2D rasterized =
-          RasterConstructors.asRaster(geometry, raster, bandType, false, 150);
+          RasterConstructors.asRaster(geometry, raster, bandType, allTouched, 150);
       Raster rasterizedData = RasterUtils.getRaster(rasterized.getRenderedImage());
       double[] metadataRasterized = RasterAccessors.metadata(rasterized);
       int widthRasterized = (int) metadataRasterized[2],
@@ -407,14 +409,20 @@ public class RasterBandEditors {
    * @param raster Raster to clip
    * @param band Band number to perform clipping
    * @param geometry Specify ROI
+   * @param allTouched Include all pixels touched by roi geometry
    * @param noDataValue no-Data value for empty cells
    * @param crop Specifies to keep the original extent or not
    * @return A clip Raster with defined ROI by the geometry
    */
   public static GridCoverage2D clip(
-      GridCoverage2D raster, int band, Geometry geometry, double noDataValue, boolean crop)
+      GridCoverage2D raster,
+      int band,
+      Geometry geometry,
+      boolean allTouched,
+      double noDataValue,
+      boolean crop)
       throws FactoryException, TransformException {
-    return clip(raster, band, geometry, noDataValue, crop, true);
+    return clip(raster, band, geometry, allTouched, noDataValue, crop, true);
   }
 
   /**
@@ -423,13 +431,40 @@ public class RasterBandEditors {
    * @param raster Raster to clip
    * @param band Band number to perform clipping
    * @param geometry Specify ROI
+   * @param allTouched Include all pixels touched by roi geometry
    * @param noDataValue no-Data value for empty cells
    * @return A clip Raster with defined ROI by the geometry
    */
   public static GridCoverage2D clip(
-      GridCoverage2D raster, int band, Geometry geometry, double noDataValue)
+      GridCoverage2D raster, int band, Geometry geometry, boolean allTouched, double noDataValue)
       throws FactoryException, TransformException {
-    return clip(raster, band, geometry, noDataValue, true);
+    return clip(raster, band, geometry, allTouched, noDataValue, true);
+  }
+
+  /**
+   * Return a clipped raster with the specified ROI by the geometry. No-data value will be taken as
+   * the lowest possible value for the data type and crop will be `true`.
+   *
+   * @param raster Raster to clip
+   * @param band Band number to perform clipping
+   * @param geometry Specify ROI
+   * @param allTouched Include all pixels touched by roi geometry
+   * @return A clip Raster with defined ROI by the geometry
+   */
+  public static GridCoverage2D clip(
+      GridCoverage2D raster, int band, Geometry geometry, boolean allTouched)
+      throws FactoryException, TransformException {
+    boolean isDataTypeIntegral =
+        RasterUtils.isDataTypeIntegral(
+            RasterUtils.getDataTypeCode(RasterBandAccessors.getBandType(raster, band)));
+
+    double noDataValue;
+    if (isDataTypeIntegral) {
+      noDataValue = Integer.MIN_VALUE;
+    } else {
+      noDataValue = Double.MIN_VALUE;
+    }
+    return clip(raster, band, geometry, allTouched, noDataValue, true);
   }
 
   /**
@@ -443,16 +478,6 @@ public class RasterBandEditors {
    */
   public static GridCoverage2D clip(GridCoverage2D raster, int band, Geometry geometry)
       throws FactoryException, TransformException {
-    boolean isDataTypeIntegral =
-        RasterUtils.isDataTypeIntegral(
-            RasterUtils.getDataTypeCode(RasterBandAccessors.getBandType(raster, band)));
-
-    double noDataValue;
-    if (isDataTypeIntegral) {
-      noDataValue = Integer.MIN_VALUE;
-    } else {
-      noDataValue = Double.MIN_VALUE;
-    }
-    return clip(raster, band, geometry, noDataValue, true);
+    return clip(raster, band, geometry, false);
   }
 }
