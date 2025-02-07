@@ -15,11 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-import geopandas as gpd
-
 from sedona.maps.SedonaMapUtils import SedonaMapUtils
-from sedona.utils.geoarrow import dataframe_to_arrow
-from packaging.version import parse
 
 
 class SedonaUtils:
@@ -27,17 +23,5 @@ class SedonaUtils:
     def display_image(cls, df):
         from IPython.display import HTML, display
 
-        # Convert the dataframe to arrow format, then to geopandas dataframe
-        # This is faster than converting directly to geopandas dataframe via toPandas
-        geometry_col = SedonaMapUtils.__get_geometry_col__(df)
-        if geometry_col is None:
-            data_pyarrow = dataframe_to_arrow(df)
-            pdf = data_pyarrow.to_pandas()
-        else:
-            # From GeoPandas 1.0.0 onwards, the from_arrow method is available
-            if parse(gpd.__version__) >= parse("1.0.0"):
-                data_pyarrow = dataframe_to_arrow(df)
-                pdf = gpd.GeoDataFrame.from_arrow(data_pyarrow)
-            else:
-                pdf = gpd.GeoDataFrame(df.toPandas(), geometry=geometry_col)
+        pdf = SedonaMapUtils.__convert_to_gdf_or_pdf__(df, rename=False)
         display(HTML(pdf.to_html(escape=False)))
