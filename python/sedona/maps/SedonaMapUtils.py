@@ -17,8 +17,6 @@
 
 import json
 
-import geopandas
-
 from sedona.sql.types import GeometryType
 from sedona.utils.geoarrow import dataframe_to_arrow
 
@@ -41,18 +39,17 @@ class SedonaMapUtils:
         # Convert the dataframe to arrow format, then to geopandas dataframe
         # This is faster than converting directly to geopandas dataframe via toPandas
         data_pyarrow = dataframe_to_arrow(df)
-        pandas_df = geopandas.GeoDataFrame.from_arrow(data_pyarrow)
 
         if (
             geometry_col is None
         ):  # No geometry column found even after searching schema, return Pandas Dataframe
-            return pandas_df
+            return data_pyarrow.to_pandas()
         try:
             import geopandas as gpd
         except ImportError:
             msg = "GeoPandas is missing. You can install it manually or via apache-sedona[kepler-map] or apache-sedona[pydeck-map]."
             raise ImportError(msg) from None
-        geo_df = gpd.GeoDataFrame(pandas_df, geometry=geometry_col)
+        geo_df = gpd.GeoDataFrame.from_arrow(data_pyarrow)
         if geometry_col != "geometry" and rename is True:
             geo_df.rename_geometry("geometry", inplace=True)
         return geo_df

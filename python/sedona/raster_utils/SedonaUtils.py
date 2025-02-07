@@ -17,6 +17,7 @@
 
 import geopandas
 
+from sedona.maps.SedonaMapUtils import SedonaMapUtils
 from sedona.utils.geoarrow import dataframe_to_arrow
 
 
@@ -27,6 +28,10 @@ class SedonaUtils:
 
         # Convert the dataframe to arrow format, then to geopandas dataframe
         # This is faster than converting directly to geopandas dataframe via toPandas
+        geometry_col = SedonaMapUtils.__get_geometry_col__(df)
         data_pyarrow = dataframe_to_arrow(df)
-        pdf = geopandas.GeoDataFrame.from_arrow(data_pyarrow)
+        if geometry_col is None:
+            pdf = data_pyarrow.to_pandas()
+        else:
+            pdf = geopandas.GeoDataFrame.from_arrow(data_pyarrow)
         display(HTML(pdf.to_html(escape=False)))
