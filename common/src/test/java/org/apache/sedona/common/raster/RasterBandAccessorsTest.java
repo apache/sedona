@@ -20,11 +20,9 @@ package org.apache.sedona.common.raster;
 
 import static org.junit.Assert.*;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import org.apache.sedona.common.Constructors;
-import org.apache.sedona.common.Functions;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
