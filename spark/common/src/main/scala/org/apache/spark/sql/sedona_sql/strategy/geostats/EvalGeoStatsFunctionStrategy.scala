@@ -16,26 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.stats
+package org.apache.spark.sql.sedona_sql.strategy.geostats
 
-import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.Strategy
+import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
+import org.apache.spark.sql.execution.SparkPlan
+import org.apache.spark.sql.sedona_sql.plans.logical.EvalGeoStatsFunction
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction
 
-private[stats] object Util {
-  def getGeometryColumnName(dataframe: DataFrame): String = {
-    val geomFields = dataframe.schema.fields.filter(_.dataType == GeometryUDT)
+class EvalGeoStatsFunctionStrategy(spark: SparkSession) extends Strategy {
 
-    if (geomFields.isEmpty)
-      throw new IllegalArgumentException(
-        "No GeometryType column found. Provide a dataframe containing a geometry column.")
-
-    if (geomFields.length == 1)
-      return geomFields.head.name
-
-    if (geomFields.length > 1 && !geomFields.exists(_.name == "geometry"))
-      throw new IllegalArgumentException(
-        "Multiple GeometryType columns found. Provide the column name as an argument.")
-
-    "geometry"
+  override def apply(plan: LogicalPlan): Seq[SparkPlan] = {
+    plan match {
+      case EvalGeoStatsFunction(function: ST_GeoStatsFunction, resultAttrs, child) =>
+        EvalGeoStatsFunctionExec(function, planLater(child), resultAttrs) :: Nil
+      case _ => Nil
+    }
   }
 }

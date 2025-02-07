@@ -45,3 +45,4 @@ from sedona.sql.st_predicates import *
 from sedona.sql.types import GeometryType, RasterType
 from sedona.utils import KryoSerializer, SedonaKryoRegistrator
 from sedona.utils.adapter import Adapter
+from sedona.utils.geoarrow import dataframe_to_arrow

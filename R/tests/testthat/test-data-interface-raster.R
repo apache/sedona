@@ -33,7 +33,7 @@ test_that("Passed RS_FromGeoTiff from binary", {
     mutate(raster = RS_FromGeoTiff(content))
 
   expect_equal(
-    raster_sdf %>% sdf_schema() ,
+    raster_sdf %>% sdf_schema(),
     list(
       path             = list(name = "path", type = "StringType"),
       modificationTime = list(name = "modificationTime", type = "TimestampType"),
@@ -65,7 +65,7 @@ test_that("Passed RS_FromArcInfoAsciiGrid from binary", {
     mutate(raster = RS_FromArcInfoAsciiGrid(content))
 
   expect_equal(
-    raster_sdf %>% sdf_schema() ,
+    raster_sdf %>% sdf_schema(),
     list(
       path             = list(name = "path", type = "StringType"),
       modificationTime = list(name = "modificationTime", type = "TimestampType"),
@@ -101,7 +101,7 @@ test_that("Passed RS_Envelope with raster", {
     )
 
   expect_equal(
-    raster_sdf %>% sdf_schema() ,
+    raster_sdf %>% sdf_schema(),
     list(
       path             = list(name = "path", type = "StringType"),
       modificationTime = list(name = "modificationTime", type = "TimestampType"),

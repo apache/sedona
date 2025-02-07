@@ -19,7 +19,7 @@ import pickle
 from typing import List, Optional, Union
 
 import attr
-from py4j.java_gateway import get_field
+from py4j.java_gateway import get_field, get_method
 from pyspark import RDD, SparkContext, StorageLevel
 from pyspark.sql import SparkSession
 
@@ -50,6 +50,15 @@ class SpatialPartitioner:
             partitioner = None
 
         return cls(partitioner, jvm_partitioner)
+
+    def getGrids(self) -> List[Envelope]:
+        jvm_grids = get_method(self.jvm_partitioner, "getGrids")()
+        number_of_grids = jvm_grids.size()
+        envelopes = [
+            Envelope.from_jvm_instance(jvm_grids[index])
+            for index in range(number_of_grids)
+        ]
+        return envelopes
 
 
 @attr.s
@@ -422,11 +431,49 @@ class SpatialRDD:
         num_partitions: Optional[int] = None,
     ) -> bool:
         """
+        Calculate partitions and assign items in this RDD to a partition.
 
-        :param partitioning: partitioning type
-        :param num_partitions: number of partitions
-        :return:
+        :param partitioning: Partitioning type or existing SpatialPartitioner
+          (e.g., one obtained from another SpatialRDD to align partitions among
+          input data)
+        :param num_partitions: If partitioning is a GridType, the target
+          number of partitions into which the RDD should be split.
+        :return: True on success
         """
+        return self._spatial_partitioning_impl(
+            partitioning, num_partitions, self._srdd.spatialPartitioning
+        )
+
+    def spatialPartitioningWithoutDuplicates(
+        self,
+        partitioning: Union[str, GridType, SpatialPartitioner, List[Envelope]],
+        num_partitions: Optional[int] = None,
+    ) -> bool:
+        """
+        Calculate partitions and assign items in this RDD to a partition without
+        introducing duplicates. This is not the desired behaviour for
+        executing joins but is the correct option when partitioning in
+        preparation for a distributed write.
+
+        :param partitioning: Partitioning type or existing SpatialPartitioner
+          (e.g., one obtained from another SpatialRDD to align partitions among
+          input data)
+        :param num_partitions: If partitioning is a GridType, the target
+          number of partitions into which the RDD should be split.
+        :return: True on success
+        """
+        return self._spatial_partitioning_impl(
+            partitioning,
+            num_partitions,
+            self._srdd.spatialPartitioningWithoutDuplicates,
+        )
+
+    def _spatial_partitioning_impl(
+        self,
+        partitioning: Union[str, GridType, SpatialPartitioner, List[Envelope]],
+        num_partitions: Optional[int],
+        java_method,
+    ) -> bool:
         if type(partitioning) == str:
             grid = GridTypeJvm(self._jvm, GridType.from_str(partitioning)).jvm_instance
         elif type(partitioning) == GridType:
@@ -446,9 +493,9 @@ class SpatialRDD:
         self._spatial_partitioned = True
 
         if num_partitions:
-            return self._srdd.spatialPartitioning(grid, num_partitions)
+            return java_method(grid, num_partitions)
         else:
-            return self._srdd.spatialPartitioning(grid)
+            return java_method(grid)
 
     def set_srdd(self, srdd):
         self._srdd = srdd

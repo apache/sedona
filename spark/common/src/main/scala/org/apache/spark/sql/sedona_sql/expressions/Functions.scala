@@ -35,6 +35,17 @@ import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.unsafe.types.UTF8String
 import org.apache.spark.util.Utils
 
+case class ST_LabelPoint(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction1(Functions.labelPoint),
+      inferrableFunction2(Functions.labelPoint),
+      inferrableFunction3(Functions.labelPoint)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 /**
  * Return the distance between two geometries.
  *
@@ -719,6 +730,15 @@ case class ST_MMax(inputExpressions: Seq[Expression])
   }
 }
 
+case class ST_LineSegments(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction2(Functions.lineSegments),
+      inferrableFunction1(Functions.lineSegments)) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 /**
  * Return a linestring being a substring of the input one starting and ending at the given
  * fractions of total 2d length. Second and third arguments are Double values between 0 and 1.
@@ -994,6 +1014,17 @@ case class ST_MakeLine(inputExpressions: Seq[Expression])
 }
 
 case class ST_Perimeter(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction3(Functions.perimeter),
+      inferrableFunction2(Functions.perimeter),
+      inferrableFunction1(Functions.perimeter)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_Perimeter2D(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction3(Functions.perimeter),
       inferrableFunction2(Functions.perimeter),

@@ -64,6 +64,41 @@ public class FunctionsTest extends TestBase {
   private final WKTReader wktReader = new WKTReader();
 
   @Test
+  public void labelPoint() throws Exception {
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((-112.637484 33.440546, -112.546852 33.477209, -112.489177 33.550488, -112.41777 33.751684, -111.956371 33.719707, -111.766868 33.616843, -111.775107 33.527595, -111.640533 33.504695, -111.440044 33.463462, -111.415326 33.374055, -111.514197 33.309809, -111.643279 33.222542, -111.893203 33.174278, -111.96461 33.250109, -112.123903 33.261593, -112.252985 33.35341, -112.406784 33.346527, -112.667694 33.316695, -112.637484 33.440546))",
+            4326);
+    String labelPoint = Functions.asEWKT(Functions.labelPoint(geom));
+    String expected = "SRID=4326;POINT (-112.04278737349767 33.46420809489905)";
+    assertEquals(expected, labelPoint);
+
+    geom =
+        Constructors.geomFromWKT(
+            "GEOMETRYCOLLECTION(POLYGON ((-112.840785 33.435962, -112.840785 33.708284, -112.409597 33.708284, -112.409597 33.435962, -112.840785 33.435962)), POLYGON ((-112.309264 33.398167, -112.309264 33.746007, -111.787444 33.746007, -111.787444 33.398167, -112.309264 33.398167)))",
+            4326);
+    labelPoint = Functions.asEWKT(Functions.labelPoint(geom, 32));
+    expected = "SRID=4326;POINT (-112.04835399999999 33.57208699999999)";
+    assertEquals(expected, labelPoint);
+
+    geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((-112.654072 33.114485, -112.313516 33.653431, -111.63515 33.314399, -111.497829 33.874913, -111.692825 33.431378, -112.376684 33.788215, -112.654072 33.114485))",
+            4326);
+    labelPoint = Functions.asEWKT(Functions.labelPoint(geom, 32, 0.01));
+    expected = "SRID=4326;POINT (-112.0722602222832 33.53914975012836)";
+    assertEquals(expected, labelPoint);
+
+    geom =
+        Constructors.geomFromWKT(
+            "GEOMETRYCOLLECTION(GEOMETRYCOLLECTION(POLYGON ((-112.840785 33.435962, -112.840785 33.708284, -112.409597 33.708284, -112.409597 33.435962, -112.840785 33.435962)), POLYGON ((-112.309264 33.398167, -112.309264 33.746007, -111.787444 33.746007, -111.787444 33.398167, -112.309264 33.398167))), POLYGON ((-113.001222 33.223156, -112.991385 33.565242, -112.650316 33.452315, -113.001222 33.223156)))",
+            4326);
+    labelPoint = Functions.asEWKT(Functions.labelPoint(geom));
+    expected = "SRID=4326;POINT (-112.04835399999999 33.57208699999999)";
+    assertEquals(expected, labelPoint);
+  }
+
+  @Test
   public void asEWKT() throws Exception {
     GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4236);
     Geometry geometry = geometryFactory.createPoint(new Coordinate(1.0, 2.0));
@@ -1819,6 +1854,24 @@ public class FunctionsTest extends TestBase {
     actual = Functions.asWKT(Functions.removeRepeatedPoints(geom, 2000));
     expected = "MULTIPOINT ((1 1))";
     assertEquals(expected, actual);
+
+    // The minimum number of coordinates in valid geometry shouldn't result in an empty geometry
+    geom = Constructors.geomFromWKT("POLYGON ((40 40, 70 70, 70 70, 40 40))", 0);
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom));
+    expected = "POLYGON ((40 40, 70 70, 70 70, 40 40))";
+    assertEquals(expected, actual);
+
+    geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((40 40, 70 70, 70 70, 40 40), (40 40, 70 70, 50 50, 70 70, 40 40))", 0);
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom));
+    expected = "POLYGON ((40 40, 70 70, 70 70, 40 40), (40 40, 70 70, 50 50, 70 70, 40 40))";
+    assertEquals(expected, actual);
+
+    geom = Constructors.geomFromWKT("LINESTRING(0 0, 1 1)", 0);
+    actual = Functions.asWKT(Functions.removeRepeatedPoints(geom));
+    expected = "LINESTRING (0 0, 1 1)";
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -2376,6 +2429,45 @@ public class FunctionsTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Functions.makeLine(polygon1, polygon2));
     assertEquals(
         "ST_MakeLine only supports Point, MultiPoint and LineString geometries", e.getMessage());
+  }
+
+  @Test
+  public void lineSegments() throws ParseException {
+    Geometry geom = Constructors.geomFromWKT("LINESTRING (0 0, 1 1, 2 2, 3 3, 3 4)", 0);
+    Geometry[] actual = Functions.lineSegments(geom, false);
+    int actualSize = actual.length;
+    int expectedSize = 4;
+    assertEquals(expectedSize, actualSize);
+
+    geom = Constructors.geomFromWKT("LINESTRING (0 0, 1 1)", 0);
+    actual = Functions.lineSegments(geom);
+    actualSize = actual.length;
+    expectedSize = 1;
+    assertEquals(expectedSize, actualSize);
+
+    geom = Constructors.geomFromWKT("LINESTRING (0 0, 1 1, 2 2, 3 3, 3 4, 4 4)", 4326);
+    actual = Functions.lineSegments(geom);
+    actualSize = actual.length;
+    expectedSize = 5;
+    assertEquals(expectedSize, actualSize);
+
+    // Check SRID
+    Geometry resultCheck = actual[0];
+    assertEquals(4326, resultCheck.getSRID());
+
+    geom = GEOMETRY_FACTORY.createLineString();
+    actual = Functions.lineSegments(geom);
+    String actualString = Arrays.toString(actual);
+    String expectedString = "[LINESTRING EMPTY]";
+    assertEquals(expectedString, actualString);
+
+    geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((65.10498 18.625425, 62.182617 16.36231, 64.863281 16.40447, 62.006836 14.157882, 65.522461 14.008696, 65.10498 18.625425))",
+            0);
+    actual = Functions.lineSegments(geom, true);
+    actualSize = actual.length;
+    assertEquals(0, actualSize);
   }
 
   @Test

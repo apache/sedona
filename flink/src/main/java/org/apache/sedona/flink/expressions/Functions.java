@@ -40,6 +40,33 @@ public class Functions {
     }
   }
 
+  public static class ST_LabelPoint extends ScalarFunction {
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+            Object o) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.labelPoint(geom);
+    }
+
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        @DataTypeHint("Integer") Integer gridResolution) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.labelPoint(geom, gridResolution);
+    }
+
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        @DataTypeHint("Integer") Integer gridResolution,
+        @DataTypeHint("Double") Double goodnessThreshold) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.labelPoint(geom, gridResolution, goodnessThreshold);
+    }
+  }
+
   public static class ST_Area extends ScalarFunction {
     @DataTypeHint("Double")
     public Double eval(
@@ -595,6 +622,33 @@ public class Functions {
     }
   }
 
+  public static class ST_Perimeter2D extends ScalarFunction {
+    @DataTypeHint(value = "Double")
+    public Double eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+            Object o) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.perimeter(geom);
+    }
+
+    @DataTypeHint(value = "Double")
+    public Double eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        Boolean use_spheroid) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.perimeter(geom, use_spheroid);
+    }
+
+    @DataTypeHint(value = "Double")
+    public Double eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        Boolean use_spheroid,
+        boolean lenient) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.perimeter(geom, use_spheroid, lenient);
+    }
+  }
+
   public static class ST_PointOnSurface extends ScalarFunction {
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
     public Geometry eval(
@@ -1073,6 +1127,24 @@ public class Functions {
             Object o) {
       Geometry geom = (Geometry) o;
       return org.apache.sedona.common.Functions.lineFromMultiPoint(geom);
+    }
+  }
+
+  public static class ST_LineSegments extends ScalarFunction {
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry[].class)
+    public Geometry[] eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+            Object o) {
+      Geometry geometry = (Geometry) o;
+      return org.apache.sedona.common.Functions.lineSegments(geometry);
+    }
+
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry[].class)
+    public Geometry[] eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        @DataTypeHint(value = "Boolean") Boolean lenient) {
+      Geometry geometry = (Geometry) o;
+      return org.apache.sedona.common.Functions.lineSegments(geometry, lenient);
     }
   }
 

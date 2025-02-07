@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.stats.clustering
 
-import org.apache.sedona.stats.Util.getGeometryColumnName
+import org.apache.sedona.util.DfUtils.getGeometryColumnName
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.st_functions.{ST_Distance, ST_DistanceSpheroid}
@@ -48,6 +48,11 @@ object DBSCAN {
    *   whether to include outliers in the output. Default is false
    * @param useSpheroid
    *   whether to use a cartesian or spheroidal distance calculation. Default is false
+   * @param isCoreColumnName
+   *   what the name of the column indicating if this is a core point should be. Default is
+   *   "isCore"
+   * @param clusterColumnName
+   *   what the name of the column indicating the cluster id should be. Default is "cluster"
    * @return
    *   The input DataFrame with the cluster label added to each row. Outlier will have a cluster
    *   value of -1 if included.
@@ -58,10 +63,12 @@ object DBSCAN {
       minPts: Int,
       geometry: String = null,
       includeOutliers: Boolean = true,
-      useSpheroid: Boolean = false): DataFrame = {
+      useSpheroid: Boolean = false,
+      isCoreColumnName: String = "isCore",
+      clusterColumnName: String = "cluster"): DataFrame = {
 
     val geometryCol = geometry match {
-      case null => getGeometryColumnName(dataframe)
+      case null => getGeometryColumnName(dataframe.schema)
       case _ => geometry
     }
 
@@ -89,12 +96,12 @@ object DBSCAN {
         first(struct("left.*")).alias("leftContents"),
         count(col(s"right.id")).alias("neighbors_count"),
         collect_list(col(s"right.id")).alias("neighbors"))
-      .withColumn("isCore", col("neighbors_count") >= lit(minPts))
-      .select("leftContents.*", "neighbors", "isCore")
+      .withColumn(isCoreColumnName, col("neighbors_count") >= lit(minPts))
+      .select("leftContents.*", "neighbors", isCoreColumnName)
       .checkpoint()
 
-    val corePointsDF = isCorePointsDF.filter(col("isCore"))
-    val borderPointsDF = isCorePointsDF.filter(!col("isCore"))
+    val corePointsDF = isCorePointsDF.filter(col(isCoreColumnName))
+    val borderPointsDF = isCorePointsDF.filter(!col(isCoreColumnName))
 
     val coreEdgesDf = corePointsDF
       .select(col("id").alias("src"), explode(col("neighbors")).alias("dst"))
@@ -117,14 +124,14 @@ object DBSCAN {
 
     val outliersDf = idDataframe
       .join(clusteredPointsDf, Seq("id"), "left_anti")
-      .withColumn("isCore", lit(false))
+      .withColumn(isCoreColumnName, lit(false))
       .withColumn("component", lit(-1))
       .withColumn("neighbors", array().cast("array<string>"))
 
     val completedDf = (
       if (includeOutliers) clusteredPointsDf.unionByName(outliersDf)
       else clusteredPointsDf
-    ).withColumnRenamed("component", "cluster")
+    ).withColumnRenamed("component", clusterColumnName)
 
     val returnDf = if (hasIdColumn) {
       completedDf.drop("neighbors", "id").withColumnRenamed(ID_COLUMN, "id")

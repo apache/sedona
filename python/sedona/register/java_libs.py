@@ -21,6 +21,7 @@ from enum import Enum
 class SedonaJvmLib(Enum):
     JoinParams = "org.apache.sedona.python.wrapper.adapters.JoinParamsAdapter"
     Adapter = "org.apache.sedona.sql.utils.Adapter"
+    StructuredAdapter = "org.apache.spark.sql.sedona_sql.adapters.StructuredAdapter"
     JoinQuery = "org.apache.sedona.core.spatialOperator.JoinQuery"
     KNNQuery = "org.apache.sedona.core.spatialOperator.KNNQuery"
     RangeQuery = "org.apache.sedona.core.spatialOperator.RangeQuery"

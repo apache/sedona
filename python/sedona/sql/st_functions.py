@@ -20,6 +20,7 @@ from functools import partial
 from typing import Optional, Union
 
 from pyspark.sql import Column
+from pyspark.sql.functions import lit
 
 from sedona.sql.dataframe_api import (
     ColumnOrName,
@@ -98,6 +99,36 @@ def ST_AddPoint(
     """
     args = (line_string, point) if index is None else (line_string, point, index)
     return _call_st_function("ST_AddPoint", args)
+
+
+@validate_argument_types
+def ST_LabelPoint(
+    geometry: ColumnOrName,
+    gridResolution: Optional[Union[ColumnOrNameOrNumber, int]] = None,
+    goodnessThreshold: Optional[Union[ColumnOrNameOrNumber, float]] = None,
+) -> Column:
+    """Calculate an anchor point for a given geometry column.
+
+    :param geometry: Input geometry column to calculate the anchor for.
+    :type geometry: ColumnOrName
+    :param gridResolution: Optional step size for grid search when determining the best anchor point.
+                     Defaults to 2 if not provided.
+    :type gridResolution: Optional[Union[ColumnOrNameOrNumber, int]], optional
+    :param goodnessThreshold: Optional threshold for the minimum "goodness" value.
+                              Determines when to stop refining the anchor search.
+                              Defaults to 0.2 if not provided.
+    :type goodnessThreshold: Optional[Union[ColumnOrNameOrNumber, float]], optional
+    :return: Anchor point as a geometry column.
+    :rtype: Column
+    """
+    if gridResolution is None and goodnessThreshold is None:
+        args = (geometry,)
+    elif goodnessThreshold is None:
+        args = (geometry, gridResolution)
+    else:
+        args = (geometry, gridResolution, goodnessThreshold)
+
+    return _call_st_function("ST_LabelPoint", args)
 
 
 @validate_argument_types
@@ -1039,6 +1070,24 @@ def ST_LineMerge(multi_line_string: ColumnOrName) -> Column:
 
 
 @validate_argument_types
+def ST_LineSegments(
+    geom: ColumnOrName, lenient: Optional[Union[ColumnOrName, bool]] = None
+) -> Column:
+    """
+    Convert multi-coordinate LineString into an array of LineStrings that contain exactly 2 points.
+
+    @param geom: input LineString geometry column.
+    @param lenient: suppresses exception
+    @return: array of LineStrings
+    """
+    args = (geom, lenient)
+    if lenient is None:
+        args = (geom,)
+
+    return _call_st_function("ST_LineSegments", args)
+
+
+@validate_argument_types
 def ST_LineSubstring(
     line_string: ColumnOrName,
     start_fraction: ColumnOrNameOrNumber,
@@ -1192,6 +1241,30 @@ def ST_Perimeter(
         else:
             args = (geom, use_spheroid)
     return _call_st_function("ST_Perimeter", args)
+
+
+@validate_argument_types
+def ST_Perimeter2D(
+    geom: ColumnOrName,
+    use_spheroid: Optional[Union[ColumnOrName, bool]] = None,
+    lenient: Optional[Union[ColumnOrName, bool]] = None,
+) -> Column:
+    """Returns the perimeter of a Polygon/MultiPolygon geometries. Otherwise, returns 0
+
+    @param geom: Polygonal geometry
+    @param use_spheroid: Use Spheroid
+    @param lenient: suppresses the exception
+    @return: Perimeter of a Polygon/MultiPolygon geometries
+    """
+
+    args = (geom, use_spheroid, lenient)
+
+    if lenient is None:
+        if use_spheroid is None:
+            args = (geom,)
+        else:
+            args = (geom, use_spheroid)
+    return _call_st_function("ST_Perimeter2D", args)
 
 
 @validate_argument_types
@@ -2430,6 +2503,188 @@ def ST_InterpolatePoint(geom1: ColumnOrName, geom2: ColumnOrName) -> Column:
 
     args = (geom1, geom2)
     return _call_st_function("ST_InterpolatePoint", args)
+
+
+@validate_argument_types
+def ST_DBSCAN(
+    geometry: ColumnOrName,
+    epsilon: Union[ColumnOrName, float],
+    min_pts: Union[ColumnOrName, int],
+    use_spheroid: Optional[Union[ColumnOrName, bool]] = False,
+) -> Column:
+    """Perform DBSCAN clustering on the given geometry column.
+
+    @param geometry: Geometry column or name
+    :type geometry: ColumnOrName
+    @param epsilon: the distance between two points to be considered neighbors
+    :type epsilon: ColumnOrName
+    @param min_pts: the number of neighbors a point should have to form a cluster
+    :type min_pts: ColumnOrName
+    @param use_spheroid: whether to use spheroid for distance calculation
+    :type use_spheroid: ColumnOrName
+    @return: A struct indicating the cluster to which the point belongs and whether it is a core point
+    """
+
+    if isinstance(epsilon, float):
+        epsilon = lit(epsilon)
+
+    if isinstance(min_pts, int):
+        min_pts = lit(min_pts)
+
+    if isinstance(use_spheroid, bool):
+        use_spheroid = lit(use_spheroid)
+
+    return _call_st_function("ST_DBSCAN", (geometry, epsilon, min_pts, use_spheroid))
+
+
+@validate_argument_types
+def ST_LocalOutlierFactor(
+    geometry: ColumnOrName,
+    k: Union[ColumnOrName, int],
+    use_spheroid: Optional[Union[ColumnOrName, bool]] = False,
+) -> Column:
+    """Calculate the local outlier factor on the given geometry column.
+
+    @param geometry: Geometry column or name
+    :type geometry: ColumnOrName
+    @param k: the number of neighbors to use for LOF calculation
+    :type k: ColumnOrName
+    @param use_spheroid: whether to use spheroid for distance calculation
+    :type use_spheroid: ColumnOrName
+    @return: A Double indicating the local outlier factor of the point
+    """
+
+    if isinstance(k, int):
+        k = lit(k)
+
+    if isinstance(use_spheroid, bool):
+        use_spheroid = lit(use_spheroid)
+
+    return _call_st_function("ST_LocalOutlierFactor", (geometry, k, use_spheroid))
+
+
+@validate_argument_types
+def ST_GLocal(
+    x: ColumnOrName,
+    weights: ColumnOrName,
+    star: Optional[Union[ColumnOrName, bool]] = False,
+) -> Column:
+    """Calculate Getis Ord Gi(*) statistics on the given column.
+
+    @param x: The variable we want to compute Gi statistics for
+    :type x: ColumnOrName
+    @param weights: the weights array containing the neighbors, their weights, and their values of x
+    :type weights: ColumnOrName
+    @param star: whether to use the focal observation in the calculations
+    :type star: ColumnOrName
+    @return: A struct containing the Gi statistics including a p value
+    """
+
+    if isinstance(star, bool):
+        star = lit(star)
+
+    return _call_st_function("ST_GLocal", (x, weights, star))
+
+
+@validate_argument_types
+def ST_BinaryDistanceBandColumn(
+    geometry: ColumnOrName,
+    threshold: ColumnOrName,
+    include_zero_distance_neighbors: Union[ColumnOrName, bool] = True,
+    include_self: Union[ColumnOrName, bool] = False,
+    use_spheroid: Union[ColumnOrName, bool] = False,
+    attributes: ColumnOrName = None,
+) -> Column:
+    """Creates a weights column containing the other records within the threshold and their weight.
+
+    Weights will always be 1.0.
+
+
+    @param geometry: name of the geometry column
+    @param threshold: Distance threshold for considering neighbors
+    @param include_zero_distance_neighbors: whether to include neighbors that are 0 distance.
+    @param include_self: whether to include self in the list of neighbors
+    @param use_spheroid: whether to use a cartesian or spheroidal distance calculation. Default is false
+    @param attributes: the attributes to save in the neighbor column.
+
+    """
+    if isinstance(include_zero_distance_neighbors, bool):
+        include_zero_distance_neighbors = lit(include_zero_distance_neighbors)
+
+    if isinstance(include_self, bool):
+        include_self = lit(include_self)
+
+    if isinstance(use_spheroid, bool):
+        use_spheroid = lit(use_spheroid)
+
+    return _call_st_function(
+        "ST_BinaryDistanceBandColumn",
+        (
+            geometry,
+            threshold,
+            include_zero_distance_neighbors,
+            include_self,
+            use_spheroid,
+            attributes,
+        ),
+    )
+
+
+@validate_argument_types
+def ST_WeightedDistanceBandColumn(
+    geometry: ColumnOrName,
+    threshold: ColumnOrName,
+    alpha: Union[ColumnOrName, float],
+    include_zero_distance_neighbors: Union[ColumnOrName, bool] = True,
+    include_self: Union[ColumnOrName, bool] = False,
+    self_weight: Union[ColumnOrName, float] = 1.0,
+    use_spheroid: Union[ColumnOrName, bool] = False,
+    attributes: ColumnOrName = None,
+) -> Column:
+    """Creates a weights column containing the other records within the threshold and their weight.
+
+    Weights will be distance^alpha.
+
+
+    @param geometry: name of the geometry column
+    @param threshold: Distance threshold for considering neighbors
+    @param alpha: alpha to use for inverse distance weights. Computation is dist^alpha. Default is -1.0
+    @param include_zero_distance_neighbors: whether to include neighbors that are 0 distance. If 0 distance neighbors are
+        included, values are infinity as per the floating point spec (divide by 0)
+    @param include_self: whether to include self in the list of neighbors
+    @param self_weight: the value to use for the self weight. Default is 1.0
+    @param use_spheroid: whether to use a cartesian or spheroidal distance calculation. Default is false
+    @param attributes: the attributes to save in the neighbor column.
+
+    """
+    if isinstance(alpha, float):
+        alpha = lit(alpha)
+
+    if isinstance(include_zero_distance_neighbors, bool):
+        include_zero_distance_neighbors = lit(include_zero_distance_neighbors)
+
+    if isinstance(include_self, bool):
+        include_self = lit(include_self)
+
+    if isinstance(self_weight, float):
+        self_weight = lit(self_weight)
+
+    if isinstance(use_spheroid, bool):
+        use_spheroid = lit(use_spheroid)
+
+    return _call_st_function(
+        "ST_WeightedDistanceBandColumn",
+        (
+            geometry,
+            threshold,
+            alpha,
+            include_zero_distance_neighbors,
+            include_self,
+            self_weight,
+            use_spheroid,
+            attributes,
+        ),
+    )
 
 
 # Automatically populate __all__
