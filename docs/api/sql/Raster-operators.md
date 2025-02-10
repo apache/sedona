@@ -1160,6 +1160,10 @@ Output:
 
 Introduction: This returns a statistic value specified by `statType` over the region of interest defined by `zone`. It computes the statistic from the pixel values within the ROI geometry and returns the result. If the `excludeNoData` parameter is not specified, it will default to `true`. This excludes NoData values from the statistic calculation. Additionally, if the `band` parameter is not provided, band 1 will be used by default for the statistic computation. The valid options for `statType` are:
 
+The `allTouched` parameter (Since `v1.7.1`) determines how pixels are selected:
+- When true, any pixel touched by the geometry will be included.
+- When false (default), only pixels whose centroid intersects with the geometry will be included.
+
 - `count`: Number of pixels in the region.
 - `sum`: Sum of pixel values.
 - `mean|average|avg`: Arithmetic mean.
@@ -1183,15 +1187,19 @@ Introduction: This returns a statistic value specified by `statType` over the re
 Format:
 
 ```
-RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String, excludeNoData: Boolean, lenient: Boolean)
+RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String, allTouched: Boolean, excludeNoData: Boolean, lenient: Boolean)
 ```
 
 ```
-RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String, excludeNoData: Boolean)
+RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String, allTouched: Boolean, excludeNoData: Boolean)
 ```
 
 ```
-RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String)
+RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String, allTouched: Boolean)
+```
+
+```
+RS_ZonalStats(raster: Raster, zone: Geometry, statType: String, allTouched: Boolean)
 ```
 
 ```
@@ -1203,7 +1211,7 @@ Since: `v1.5.1`
 SQL Example
 
 ```sql
-RS_ZonalStats(rast1, geom1, 1, 'sum', false)
+RS_ZonalStats(rast1, geom1, 1, 'sum', true, false)
 ```
 
 Output:
@@ -1215,7 +1223,7 @@ Output:
 SQL Example
 
 ```sql
-RS_ZonalStats(rast2, geom2, 1, 'mean', true)
+RS_ZonalStats(rast2, geom2, 1, 'mean', false, true)
 ```
 
 Output:
@@ -1227,6 +1235,10 @@ Output:
 ### RS_ZonalStatsAll
 
 Introduction: Returns a struct of statistic values, where each statistic is computed over a region defined by the `zone` geometry. The struct has the following schema:
+
+The `allTouched` parameter (Since `v1.7.1`) determines how pixels are selected:
+- When true, any pixel touched by the geometry will be included.
+- When false (default), only pixels whose centroid intersects with the geometry will be included.
 
 - count: Count of the pixels.
 - sum: Sum of the pixel values.
@@ -1251,11 +1263,15 @@ Introduction: Returns a struct of statistic values, where each statistic is comp
 Format:
 
 ```
-RS_ZonalStatsAll(raster: Raster, zone: Geometry, band: Integer, excludeNodata: Boolean, lenient: Boolean)
+RS_ZonalStatsAll(raster: Raster, zone: Geometry, band: Integer, allTouched: Boolean, excludeNodata: Boolean, lenient: Boolean)
 ```
 
 ```
-RS_ZonalStatsAll(raster: Raster, zone: Geometry, band: Integer, excludeNodata: Boolean)
+RS_ZonalStatsAll(raster: Raster, zone: Geometry, band: Integer, allTouched: Boolean, excludeNodata: Boolean)
+```
+
+```
+RS_ZonalStatsAll(raster: Raster, zone: Geometry, band: Integer, allTouched: Boolean)
 ```
 
 ```
@@ -1271,7 +1287,7 @@ Since: `v1.5.1`
 SQL Example
 
 ```sql
-RS_ZonalStatsAll(rast1, geom1, 1, false)
+RS_ZonalStatsAll(rast1, geom1, 1, true, false)
 ```
 
 Output:
@@ -1283,7 +1299,7 @@ Output:
 SQL Example
 
 ```sql
-RS_ZonalStatsAll(rast2, geom2, 1, true)
+RS_ZonalStatsAll(rast2, geom2, 1, false, true)
 ```
 
 Output:
@@ -1446,6 +1462,10 @@ Introduction: Returns a raster that is clipped by the given geometry.
 
 If `crop` is not specified then it will default to `true`, meaning it will make the resulting raster shrink to the geometry's extent and if `noDataValue` is not specified then the resulting raster will have the minimum possible value for the band pixel data type.
 
+The `allTouched` parameter (Since `v1.7.1`) determines how pixels are selected:
+- When true, any pixel touched by the geometry will be included.
+- When false (default), only pixels whose centroid intersects with the geometry will be included.
+
 !!!Note
     - Since `v1.5.1`, if the coordinate reference system (CRS) of the input `geom` geometry differs from that of the `raster`, then `geom` will be transformed to match the CRS of the `raster`. If the `raster` or `geom` doesn't have a CRS then it will default to `4326/WGS84`.
     - Since `v1.7.0`, `RS_Clip` function will return `null` if the `raster` and `geometry` geometry do not intersect. If you want to throw an exception in this case, you can set the `lenient` parameter to `false`.
@@ -1453,15 +1473,19 @@ If `crop` is not specified then it will default to `true`, meaning it will make 
 Format:
 
 ```
-RS_Clip(raster: Raster, band: Integer, geom: Geometry, noDataValue: Double, crop: Boolean, lenient: Boolean)
+RS_Clip(raster: Raster, band: Integer, geom: Geometry, allTouched: Boolean, noDataValue: Double, crop: Boolean, lenient: Boolean)
 ```
 
 ```
-RS_Clip(raster: Raster, band: Integer, geom: Geometry, noDataValue: Double, crop: Boolean)
+RS_Clip(raster: Raster, band: Integer, geom: Geometry, allTouched: Boolean, noDataValue: Double, crop: Boolean)
 ```
 
 ```
-RS_Clip(raster: Raster, band: Integer, geom: Geometry, noDataValue: Double)
+RS_Clip(raster: Raster, band: Integer, geom: Geometry, allTouched: Boolean, noDataValue: Double)
+```
+
+```
+RS_Clip(raster: Raster, band: Integer, geom: Geometry, allTouched: Boolean)
 ```
 
 ```
@@ -1480,7 +1504,7 @@ SQL Example
 SELECT RS_Clip(
         RS_FromGeoTiff(content), 1,
         ST_GeomFromWKT('POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))'),
-        200, true
+        false, 200, true
     )
 ```
 
@@ -1494,7 +1518,7 @@ SQL Example
 SELECT RS_Clip(
         RS_FromGeoTiff(content), 1,
         ST_GeomFromWKT('POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))'),
-        200, false
+        false, 200, false
     )
 ```
 
@@ -2039,14 +2063,14 @@ to this function.
 !!!Note
     Since `v1.5.1`, if the coordinate reference system (CRS) of the input `geom` geometry differs from that of the `raster`, then `geom` will be transformed to match the CRS of the `raster`. If the `raster` or `geom` doesn't have a CRS then it will default to `4326/WGS84`.
 
-Format:
+Format without ROI `geom`:
 
 ```
 RS_SetValues(raster: Raster, bandIndex: Integer, colX: Integer, rowY: Integer, width: Integer, height: Integer, newValues: ARRAY[Double], keepNoData: Boolean = false)
 ```
 
 ```
-RS_SetValues(raster: Raster, bandIndex: Integer, geom: Geometry, newValue: Double, keepNoData: Boolean = false)
+RS_SetValues(raster: Raster, bandIndex: Integer, colX: Integer, rowY: Integer, width: Integer, height: Integer, newValues: ARRAY[Double])
 ```
 
 Since: `v1.5.0`
@@ -2056,11 +2080,29 @@ set to the corresponding value in `newValues`. The `newValues` should be provide
 
 The geometry variant of this function accepts all types of Geometries, and it sets the `newValue` in the specified region under the `geom`.
 
+The `allTouched` parameter (Since `v1.7.1`) determines how pixels are selected:
+- When true, any pixel touched by the geometry will be included.
+- When false (default), only pixels whose centroid intersects with the geometry will be included.
+
 !!!note
     If the shape of `newValues` doesn't match with provided `width` and `height`, `IllegalArgumentException` is thrown.
 
 !!!Note
     If the mentioned `bandIndex` doesn't exist, this will throw an `IllegalArgumentException`.
+
+Format with ROI `geom`:
+
+```
+RS_SetValues(raster: Raster, bandIndex: Integer, geom: Geometry, newValue: Double, allTouched: Boolean = false, keepNoData: Boolean = false)
+```
+
+```
+RS_SetValues(raster: Raster, bandIndex: Integer, geom: Geometry, newValue: Double, allTouched: Boolean = false)
+```
+
+```
+RS_SetValues(raster: Raster, bandIndex: Integer, geom: Geometry, newValue: Double)
+```
 
 SQL Example
 
@@ -2091,7 +2133,7 @@ SELECT RS_BandAsArray(
                 RS_MakeEmptyRaster(1, 5, 5, 1, -1, 1, -1, 0, 0, 0),
                 Array(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0), 1
                 ),
-            1, ST_GeomFromWKT('POLYGON((1 -1, 3 -3, 6 -6, 4 -1, 1 -1))'), 255, false
+            1, ST_GeomFromWKT('POLYGON((1 -1, 3 -3, 6 -6, 4 -1, 1 -1))'), 255, false, false
             )
            )
 ```
