@@ -75,14 +75,23 @@ Start your notebook with:
 ```python
 from sedona.spark import SedonaContext
 
-config = SedonaContext.builder() \
-    .config('spark.jars.packages',
-            'org.apache.sedona:sedona-spark-shaded-3.4_2.12-1.6.1,'
-            'org.datasyslab:geotools-wrapper-1.6.1-28.2') \
-    .config("spark.serializer","org.apache.spark.serializer.KryoSerializer") \
-    .config("spark.kryo.registrator", "org.apache.sedona.core.serde.SedonaKryoRegistrator") \
-    .config("spark.sql.extensions", "org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions") \
+config = (
+    SedonaContext.builder()
+    .config(
+        "spark.jars.packages",
+        "org.apache.sedona:sedona-spark-shaded-3.4_2.12-1.6.1,"
+        "org.datasyslab:geotools-wrapper-1.6.1-28.2",
+    )
+    .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+    .config(
+        "spark.kryo.registrator", "org.apache.sedona.core.serde.SedonaKryoRegistrator"
+    )
+    .config(
+        "spark.sql.extensions",
+        "org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions",
+    )
     .getOrCreate()
+)
 
 sedona = SedonaContext.create(config)
 ```
