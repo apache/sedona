@@ -20,11 +20,12 @@ package org.apache.sedona.spark
 
 import org.apache.sedona.common.utils.TelemetryCollector
 import org.apache.sedona.core.serde.SedonaKryoRegistrator
-import org.apache.sedona.sql.{ParserRegistrator, RasterRegistrator}
+import org.apache.sedona.sql.RasterRegistrator
 import org.apache.sedona.sql.UDF.UdfRegistrator
 import org.apache.sedona.sql.UDT.UdtRegistrator
 import org.apache.spark.serializer.KryoSerializer
-import org.apache.spark.sql.sedona_sql.optimization.SpatialFilterPushDownForGeoParquet
+import org.apache.spark.sql.sedona_sql.optimization.{ExtractGeoStatsFunctions, SpatialFilterPushDownForGeoParquet, SpatialTemporalFilterPushDownForStacScan}
+import org.apache.spark.sql.sedona_sql.strategy.geostats.EvalGeoStatsFunctionStrategy
 import org.apache.spark.sql.sedona_sql.strategy.join.JoinQueryDetector
 import org.apache.spark.sql.{SQLContext, SparkSession}
 
@@ -36,6 +37,12 @@ class InternalApi(
     extends StaticAnnotation
 
 object SedonaContext {
+
+  private def customOptimizationsWithSession(sparkSession: SparkSession) =
+    Seq(
+      new SpatialFilterPushDownForGeoParquet(sparkSession),
+      new SpatialTemporalFilterPushDownForStacScan(sparkSession))
+
   def create(sqlContext: SQLContext): SQLContext = {
     create(sqlContext.sparkSession)
     sqlContext
@@ -56,18 +63,30 @@ object SedonaContext {
     if (!sparkSession.experimental.extraStrategies.exists(_.isInstanceOf[JoinQueryDetector])) {
       sparkSession.experimental.extraStrategies ++= Seq(new JoinQueryDetector(sparkSession))
     }
-    if (!sparkSession.experimental.extraOptimizations.exists(
-        _.isInstanceOf[SpatialFilterPushDownForGeoParquet])) {
-      sparkSession.experimental.extraOptimizations ++= Seq(
-        new SpatialFilterPushDownForGeoParquet(sparkSession))
+
+    customOptimizationsWithSession(sparkSession).foreach { opt =>
+      if (!sparkSession.experimental.extraOptimizations.exists {
+          case _: opt.type => true
+          case _ => false
+        }) {
+        sparkSession.experimental.extraOptimizations ++= Seq(opt)
+      }
     }
+
+    // Support geostats functions
+    if (!sparkSession.experimental.extraOptimizations.contains(ExtractGeoStatsFunctions)) {
+      sparkSession.experimental.extraOptimizations ++= Seq(ExtractGeoStatsFunctions)
+    }
+    if (!sparkSession.experimental.extraStrategies.exists(
+        _.isInstanceOf[EvalGeoStatsFunctionStrategy])) {
+      sparkSession.experimental.extraStrategies ++= Seq(
+        new EvalGeoStatsFunctionStrategy(sparkSession))
+    }
+
     addGeoParquetToSupportNestedFilterSources(sparkSession)
     RasterRegistrator.registerAll(sparkSession)
     UdtRegistrator.registerAll()
     UdfRegistrator.registerAll(sparkSession)
-    if (sparkSession.conf.get("spark.sedona.enableParserExtension", "true").toBoolean) {
-      ParserRegistrator.register(sparkSession)
-    }
     sparkSession
   }
 

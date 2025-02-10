@@ -220,6 +220,12 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency> <!-- Generally this will be provided by the runtime's spark install -->
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-graphx_${scala.compat.version}</artifactId>
+            <version>${spark.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 	<build>
         <sourceDirectory>src/main/java</sourceDirectory>

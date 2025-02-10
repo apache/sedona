@@ -33,7 +33,7 @@ public class GeometryDuplicateCoordinateRemover {
 
     double distance = Double.MAX_VALUE;
 
-    if (numPoint <= minPoints) return new Coordinate[0];
+    if (numPoint < minPoints) return new Coordinate[0];
 
     Coordinate lastPoint = coords[0];
     int writeIndex = 1;

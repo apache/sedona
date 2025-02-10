@@ -26,12 +26,14 @@ repos:
   - repo: meta
     hooks:
       - id: identity
+        name: run identity check
       - id: check-hooks-apply
+        name: run check hooks apply
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
       - id: insert-license
-        name: Add license for all Markdown files
+        name: add license for all Markdown files
         files: \.md$
         args:
           - --comment-style
@@ -41,7 +43,7 @@ repos:
           - --fuzzy-match-generates-todo
         exclude: ^docs/index\.md$|^\.github/pull_request_template\.md$|\.github/issue_template\.md$
       - id: insert-license
-        name: Add license for all Makefile files
+        name: add license for all Makefile files
         files: ^Makefile$
         args:
           - --comment-style
@@ -50,7 +52,7 @@ repos:
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
       - id: insert-license
-        name: Add license for all TOML files
+        name: add license for all TOML files
         files: \.toml$
         args:
           - --comment-style
@@ -59,7 +61,7 @@ repos:
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
       - id: insert-license
-        name: Add license for all YAML files
+        name: add license for all YAML files
         files: \.ya?ml$
         args:
           - --comment-style
@@ -71,33 +73,43 @@ repos:
     rev: 24.10.0
     hooks:
       - id: black-jupyter
+        name: run black-jupyter
+        description: format Python files and Jupyter Notebooks with black
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v19.1.4
     hooks:
       - id: clang-format
+        name: run clang-format
+        description: format C files with clang-format
         args: [--style=Google]
         types_or: [c]
   - repo: https://github.com/PyCQA/bandit
     rev: 1.7.10
     hooks:
       - id: bandit
+        name: run bandit
+        description: check Python code for security issues
         args: ["-c=pyproject.toml", "-r"]
   - repo: https://github.com/codespell-project/codespell
     rev: v2.3.0
     hooks:
       - id: codespell
-        name: Run codespell
-        description: Check spelling with codespell
+        name: run codespell
+        description: check spelling with codespell
         args: [--ignore-words=.github/linters/codespell.txt]
         exclude: ^docs/image|^spark/common/src/test/resources|^docs/usecases|^tools/maven/scalafmt
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.21.2
     hooks:
       - id: gitleaks
+        name: run gitleaks
+        description: check for secrets with gitleaks
   - repo: https://github.com/shssoichiro/oxipng
     rev: v9.1.2
     hooks:
       - id: oxipng
+        name: run oxipng
+        description: check PNG files with oxipng
         args: ["-o", "4", "--strip", "safe", "--alpha"]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -151,8 +163,8 @@ repos:
     rev: v0.43.0
     hooks:
       - id: markdownlint
-        name: Run markdownlint
-        description: Check Markdown files with markdownlint
+        name: run markdownlint
+        description: check Markdown files with markdownlint
         args: [--config=.github/linters/.markdown-lint.yml]
         exclude: ^\.github/.*$
         types: [markdown]
@@ -161,12 +173,14 @@ repos:
     rev: v0.10.0.1
     hooks:
       - id: shellcheck
+        name: run shellcheck
+        description: check Shell scripts with shellcheck
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.35.1
     hooks:
       - id: yamllint
-        name: Run yamllint
-        description: Check YAML files with yamllint
+        name: run yamllint
+        description: check YAML files with yamllint
         args: [--strict, -c=.github/linters/.yaml-lint.yml]
         types: [yaml]
         files: \.ya?ml$

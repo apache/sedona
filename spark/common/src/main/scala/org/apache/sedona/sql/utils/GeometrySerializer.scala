@@ -19,7 +19,7 @@
 package org.apache.sedona.sql.utils
 
 import org.apache.sedona.common.geometrySerde
-import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.geom.{Geometry, GeometryFactory}
 
 /**
  * SerDe using the WKB reader and writer objects
@@ -47,6 +47,9 @@ object GeometrySerializer {
    *   JTS geometry
    */
   def deserialize(value: Array[Byte]): Geometry = {
+    if (value == null) {
+      return new GeometryFactory().createGeometryCollection()
+    }
     geometrySerde.GeometrySerializer.deserialize(value)
   }
 }

@@ -179,6 +179,80 @@ Input: `POLYGON ((1 0 1, 1 1 1, 2 2 2, 1 0 1))`
 
 Output: `POLYGON Z((2 3 1, 4 5 1, 7 8 2, 2 3 1))`
 
+## ST_LabelPoint
+
+Introduction: `ST_LabelPoint` computes and returns a label point for a given polygon or geometry collection. The label point is chosen to be sufficiently far from boundaries of the geometry. For a regular Polygon this will be the
+centroid.
+
+The algorithm is derived from Tippecanoe’s `polygon_to_anchor`, an approximate solution for label point generation, designed to be faster than optimal algorithms like `polylabel`. It searches for a “good enough” label point within a limited number of iterations. For geometry collections, only the largest Polygon by area is considered. While `ST_Centroid` is a fast algorithm to calculate the center of mass of a (Multi)Polygon, it may place the point outside of the Polygon or near a boundary for concave shapes, polygons with holes, or MultiPolygons.
+
+`ST_LabelPoint` takes up to 3 arguments,
+
+- `geometry`: input geometry (e.g., a Polygon or GeometryCollection) for which the anchor point is to be calculated.
+- `gridResolution` (Optional, default is 16): Controls the resolution of the search grid for refining the label point. A higher resolution increases the grid density, providing a higher chance of finding a good enough result at the cost of runtime. For example, a gridResolution of 16 divides the bounding box of the polygon into a 16x16 grid.
+- `goodnessThreshold` (Optional, default is 0.2): Determines the minimum acceptable “goodness” value for the anchor point. Higher thresholds prioritize points farther from boundaries but may require more computation.
+
+!!!note
+    - `ST_LabelPoint` throws an `IllegalArgumentException` if the input geometry has an area of zero or less.
+    - Holes within polygons are respected. Points within a hole are given a goodness of 0.
+    - For GeometryCollections, only the largest polygon by area is considered.
+
+!!!tip
+    - Use `ST_LabelPoint` for tasks such as label placement, identifying representative points for polygons, or other spatial analyses where an internal reference point is preferred but not required. If intersection of the point and the original geometry is required, use of an algorithm like `polylabel` should be considered.
+    - `ST_LabelPoint` offers a faster, approximate solution for label point generation, making it ideal for large datasets or real-time applications.
+
+Format:
+
+```sql
+ST_LabelPoint(geometry: Geometry)
+```
+
+```sql
+ST_LabelPoint(geometry: Geometry, gridResolution: Integer)
+```
+
+```sql
+ST_LabelPoint(geometry: Geometry, gridResolution: Integer, goodnessThreshold: Double)
+```
+
+Since: `v1.7.1`
+
+SQL Example:
+
+```
+SELECT ST_LabelPoint(ST_GeomFromWKT('POLYGON((0 0, 4 0, 4 4, 0 4, 0 0))'))
+```
+
+Output:
+
+```
+POINT (2 2)
+```
+
+SQL Example:
+
+```
+SELECT ST_LabelPoint(ST_GeomFromWKT('GEOMETRYCOLLECTION(POLYGON ((-112.840785 33.435962, -112.840785 33.708284, -112.409597 33.708284, -112.409597 33.435962, -112.840785 33.435962)), POLYGON ((-112.309264 33.398167, -112.309264 33.746007, -111.787444 33.746007, -111.787444 33.398167, -112.309264 33.398167)))'))
+```
+
+Output:
+
+```
+POINT (-112.04835399999999 33.57208699999999)
+```
+
+SQL Example:
+
+```
+SELECT ST_LabelPoint(ST_GeomFromWKT('POLYGON ((-112.654072 33.114485, -112.313516 33.653431, -111.63515 33.314399, -111.497829 33.874913, -111.692825 33.431378, -112.376684 33.788215, -112.654072 33.114485))', 4326))
+```
+
+Output:
+
+```
+SRID=4326;POINT (-112.0722602222832 33.53914975012836)
+```
+
 ## ST_Angle
 
 Introduction: Computes and returns the angle between two vectors represented by the provided points or linestrings.
@@ -634,6 +708,31 @@ Output:
 32618
 ```
 
+## ST_BinaryDistanceBandColumn
+
+Introduction: Introduction: Returns a `weights` column containing every record in a dataframe within a specified `threshold` distance.
+
+The `weights` column is an array of structs containing the `attributes` from each neighbor and that neighbor's weight. Since this is a binary distance band function, weights of neighbors within the threshold will always be
+`1.0`.
+
+Format: `ST_BinaryDistanceBandColumn(geometry:Geometry, threshold: Double, includeZeroDistanceNeighbors: boolean, includeSelf: boolean, useSpheroid: boolean, attributes: Struct)`
+
+Since: `v1.7.1`
+
+SQL Example
+
+```sql
+ST_BinaryDistanceBandColumn(geometry, 1.0, true, true, false, struct(id, geometry))
+```
+
+Output:
+
+```sql
+{% raw %}
+[{{15, POINT (3 1.9)}, 1.0}, {{16, POINT (3 2)}, 1.0}, {{17, POINT (3 2.1)}, 1.0}, {{18, POINT (3 2.2)}, 1.0}]
+{% endraw %}
+```
+
 ## ST_Boundary
 
 Introduction: Returns the closure of the combinatorial boundary of this Geometry.
@@ -1032,6 +1131,31 @@ true
 
 !!!Warning
     For geometries that span more than 180 degrees in longitude without actually crossing the Date Line, this function may still return true, indicating a crossing.
+
+## ST_DBSCAN
+
+Introduction: Performs a DBSCAN clustering across the entire dataframe.
+
+Returns a struct containing the cluster ID and a boolean indicating if the record is a core point in the cluster.
+
+- `epsilon` is the maximum distance between two points for them to be considered as part of the same cluster.
+- `minPoints` is the minimum number of neighbors a single record must have to form a cluster.
+
+Format: `ST_DBSCAN(geom: Geometry, epsilon: Double, minPoints: Integer)`
+
+Since: `v1.7.1`
+
+SQL Example
+
+```sql
+SELECT ST_DBSCAN(geom, 1.0, 2)
+```
+
+Output:
+
+```
+{true, 85899345920}
+```
 
 ## ST_Degrees
 
@@ -1800,6 +1924,31 @@ Output:
 ST_LINESTRING
 ```
 
+## ST_GLocal
+
+Introduction: Runs Getis and Ord's G Local (Gi or Gi*) statistic on the geometry given the `weights` and `level`.
+
+Getis and Ord's Gi and Gi* statistics are used to identify data points with locally high values (hot spots) and low
+values (cold spots) in a spatial dataset.
+
+The `ST_WeightedDistanceBand` and `ST_BinaryDistanceBand` functions can be used to generate the `weights` column.
+
+Format: `ST_GLocal(geom: Geometry, weights: Struct, level: Int)`
+
+Since: `v1.7.1`
+
+SQL Example
+
+```sql
+ST_GLocal(myVariable, ST_BinaryDistanceBandColumn(geometry, 1.0, true, true, false, struct(myVariable, geometry)), true)
+```
+
+Output:
+
+```
+{0.5238095238095238, 0.4444444444444444, 0.001049802637104223, 2.4494897427831814, 0.00715293921771476}
+```
+
 ## ST_H3CellDistance
 
 Introduction: return result of h3 function [gridDistance(cel1, cell2)](https://h3geo.org/docs/api/traversal#griddistance).
@@ -2561,6 +2710,47 @@ Output:
 LINESTRING (-29 -27, -30 -29.7, -45 -33, -46 -32)
 ```
 
+## ST_LineSegments
+
+Introduction: This function transforms a LineString containing multiple coordinates into an array of LineStrings, each with precisely two coordinates. The `lenient` argument, true by default, prevents an exception from being raised if the input geometry is not a LineString.
+
+Format:
+
+`ST_LineSegments(geom: Geometry, lenient: Boolean)`
+
+`ST_LineSegments(geom: Geometry)`
+
+Since: `v1.7.1`
+
+SQL Example:
+
+```sql
+SELECT ST_LineSegments(
+        ST_GeomFromWKT('LINESTRING(0 0, 10 10, 20 20, 30 30, 40 40, 50 50)'),
+       false
+    )
+```
+
+Output:
+
+```
+[LINESTRING (0 0, 10 10), LINESTRING (10 10, 20 20), LINESTRING (20 20, 30 30), LINESTRING (30 30, 40 40), LINESTRING (40 40, 50 50)]
+```
+
+SQL Example:
+
+```sql
+SELECT ST_LineSegments(
+        ST_GeomFromWKT('POLYGON((0 0, 10 0, 10 10, 0 10, 0 0))')
+    )
+```
+
+Output:
+
+```
+[]
+```
+
 ## ST_LineSubstring
 
 Introduction: Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length. Second and third arguments are Double values between 0 and 1. This only works with LINESTRINGs.
@@ -2581,6 +2771,34 @@ Output:
 
 ```
 LINESTRING (69.28469348539744 94.28469348539744, 100 125, 111.70035626068274 140.21046313888758)
+```
+
+## ST_LocalOutlierFactor
+
+Introduction: Computes the Local Outlier Factor (LOF) for each point in the input dataset.
+
+Local Outlier Factor is an algorithm for determining the degree to which a single record is an inlier or outlier. It is
+based on how close a record is to its `k` nearest neighbors vs how close those neighbors are to their `k` nearest
+neighbors. Values substantially less than `1` imply that the record is an inlier, while values greater than `1` imply that
+the record is an outlier.
+
+!!!Note
+    ST_LocalOutlierFactor has a useSphere parameter rather than a useSpheroid parameter. This function thus uses a spherical model of the earth rather than an ellipsoidal model when calculating distance.
+
+Format: `ST_LocalOutlierFactor(geometry: Geometry, k: Int, useSphere: Boolean)`
+
+Since: `v1.7.1`
+
+SQL Example
+
+```sql
+SELECT ST_LocalOutlierFactor(geometry, 5, true)
+```
+
+Output:
+
+```
+1.0009256283408587
 ```
 
 ## ST_LocateAlong
@@ -3191,6 +3409,54 @@ SQL Example:
 
 ```sql
 SELECT ST_Perimeter(
+        ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))', 4326),
+        true, false
+)
+```
+
+Output:
+
+```
+2216860.5497177234
+```
+
+## ST_Perimeter2D
+
+Introduction: This function calculates the 2D perimeter of a given geometry. It supports Polygon, MultiPolygon, and GeometryCollection geometries (as long as the GeometryCollection contains polygonal geometries). For other types, it returns 0. To measure lines, use [ST_Length](#st_length).
+
+To get the perimeter in meters, set `use_spheroid` to `true`. This calculates the geodesic perimeter using the WGS84 spheroid. When using `use_spheroid`, the `lenient` parameter defaults to true, assuming the geometry uses EPSG:4326. To throw an exception instead, set `lenient` to `false`.
+
+!!!Info
+    This function is an alias for [ST_Perimeter](#st_perimeter).
+
+Format:
+
+`ST_Perimeter2D(geom: Geometry)`
+
+`ST_Perimeter2D(geom: Geometry, use_spheroid: Boolean)`
+
+`ST_Perimeter2D(geom: Geometry, use_spheroid: Boolean, lenient: Boolean = True)`
+
+Since: `v1.7.1`
+
+SQL Example:
+
+```sql
+SELECT ST_Perimeter2D(
+        ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))')
+)
+```
+
+Output:
+
+```
+20.0
+```
+
+SQL Example:
+
+```sql
+SELECT ST_Perimeter2D(
         ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))', 4326),
         true, false
 )
@@ -4340,6 +4606,30 @@ Output:
 
 ```
 GEOMETRYCOLLECTION(POLYGON((-1 2,2 -1,-1 -1,-1 2)),POLYGON((-1 2,2 2,2 -1,-1 2)))
+```
+
+## ST_WeightedDistanceBandColumn
+
+Introduction: Introduction: Returns a `weights` column containing every record in a dataframe within a specified `threshold` distance.
+
+The `weights` column is an array of structs containing the `attributes` from each neighbor and that neighbor's weight. Since this is a distance weighted distance band, weights will be distance^alpha.
+
+Format: `ST_WeightedDistanceBandColumn(geometry:Geometry, threshold: Double, alpha: Double, includeZeroDistanceNeighbors: boolean, includeSelf: boolean, selfWeight: Double, useSpheroid: boolean, attributes: Struct)`
+
+Since: `v1.7.1`
+
+SQL Example
+
+```sql
+ST_WeightedDistanceBandColumn(geometry, 1.0, -1.0, true, true, 1.0, false, struct(id, geometry))
+```
+
+Output:
+
+```sql
+{% raw %}
+[{{15, POINT (3 1.9)}, 1.0}, {{16, POINT (3 2)}, 9.999999999999991}, {{17, POINT (3 2.1)}, 4.999999999999996}, {{18, POINT (3 2.2)}, 3.3333333333333304}]
+{% endraw %}
 ```
 
 ## ST_X

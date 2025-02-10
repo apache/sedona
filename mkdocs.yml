@@ -16,6 +16,7 @@
 # under the License.
 
 site_name: Apache Sedona&trade;
+site_url: https://sedona.apache.org
 site_description: Apache Sedona&trade; is a cluster computing system for processing large-scale spatial data. Sedona extends existing cluster computing systems, such as Apache Spark, Apache Flink, and Snowflake, with a set of out-of-the-box distributed Spatial Datasets and Spatial SQL that efficiently load, process, and analyze large-scale spatial data across machines.
 nav:
   - Home: index.md
@@ -74,6 +75,8 @@ nav:
       - Examples:
           - Scala/Java: tutorial/demo.md
           - Python: tutorial/jupyter-notebook.md
+      - Concepts:
+          - Clustering Algorithms: tutorial/concepts/clustering-algorithms.md
   - API Docs:
       - Sedona with Apache Spark:
           - SQL:
@@ -87,6 +90,7 @@ nav:
                   - Query optimization: api/sql/Optimizer.md
                   - Nearest-Neighbour searching: api/sql/NearestNeighbourSearching.md
                   - "Spider:Spatial Data Generator": api/sql/Spider.md
+                  - Reading STAC Data Source: api/sql/Stac.md
                   - Reading Legacy Parquet Files: api/sql/Reading-legacy-parquet.md
                   - Visualization:
                       - SedonaPyDeck: api/sql/Visualization_SedonaPyDeck.md
@@ -150,6 +154,7 @@ nav:
       - Telemetry: asf/telemetry.md
 repo_url: https://github.com/apache/sedona
 repo_name: apache/sedona
+edit_uri: edit/master/docs/
 theme:
   font: false
   name: 'material'
@@ -164,16 +169,20 @@ theme:
     repo: fontawesome/brands/github
   features:
     - content.code.copy
+    - content.action.edit
     - search.highlight
     - search.share
     - search.suggest
     - navigation.footer
     - navigation.instant
     - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.top
 extra:
   version:
     provider: mike
+    default:
+      - latest
   social:
     - icon: fontawesome/brands/github-alt
       link: 'https://github.com/apache/sedona'
@@ -225,3 +234,5 @@ plugins:
       type: datetime
   - mkdocs-jupyter:
       include_source: True
+  - mike:
+      canonical_version: "latest"

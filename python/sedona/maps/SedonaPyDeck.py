@@ -385,7 +385,7 @@ def _try_import_pydeck() -> ModuleType:
         import pydeck as pdk
 
     except ImportError:
-        msg = "Install sedona[pydeck-map] to convert sedona dataframes to pydeck maps."
+        msg = "Install apache-sedona[pydeck-map] to convert sedona dataframes to pydeck maps."
         raise ImportError(msg) from None
 
     return pdk

@@ -1,0 +1,55 @@
+{
+  "id": "nested-item",
+  "type": "Feature",
+  "stac_version": "1.1.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/eo/v2.0.0/schema.json",
+    "https://stac-extensions.github.io/projection/v2.0.0/schema.json",
+    "https://stac-extensions.github.io/view/v1.0.0/schema.json"
+  ],
+  "bbox": [
+    17.91173669923782,
+    10.3438851951615003,
+    17.95469614953714,
+    10.3690476620161975
+  ],
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [17.91173669923782, 10.3438851951615003],
+        [17.95469614953714, 10.3438851951615003],
+        [17.95469614953714, 10.3690476620161975],
+        [17.91173669923782, 10.3690476620161975],
+        [17.91173669923782, 10.3438851951615003]
+      ]
+    ]
+  },
+  "properties": {
+    "title": "Nested Item",
+    "description": "A sample STAC nested Item that includes examples of all common metadata",
+    "datetime": "2020-12-12T00:00:00Z",
+    "eo:cloud_cover": 1.2,
+    "proj:epsg": 32659,
+    "view:sun_elevation": 54.9,
+    "view:off_nadir": 3.8,
+    "view:sun_azimuth": 135.7
+  },
+  "assets": {
+    "visual": {
+      "href": "https://e84-earth-search-sentinel-data.s3/example/visual.tif",
+      "title": "Visual asset",
+      "type": "image/tiff; application=geotiff",
+      "roles": ["visual"]
+    }
+  },
+  "links": [
+    {
+      "rel": "collection",
+      "href": "./nested-collection.json",
+      "type": "application/json",
+      "title": "Nested Example Collection"
+    }
+  ]
+}
+

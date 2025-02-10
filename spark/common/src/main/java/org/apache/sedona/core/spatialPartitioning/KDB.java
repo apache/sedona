@@ -33,7 +33,10 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 import scala.Tuple2;
 
-/** see https://en.wikipedia.org/wiki/K-D-B-tree */
+/**
+ * see <a
+ * href="https://en.wikipedia.org/wiki/K-D-B-tree">https://en.wikipedia.org/wiki/K-D-B-tree</a>
+ */
 public class KDB extends PartitioningUtils implements Serializable {
 
   private final int maxItemsPerNode;
