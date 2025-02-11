@@ -42,9 +42,6 @@ public class Rasterization {
       boolean allTouched)
       throws FactoryException {
 
-    //    System.out.println("Custom Rasterization");
-    //    System.out.println("allTouched = " + allTouched);
-
     // Validate the input geometry and raster metadata
     double[] metadata = RasterAccessors.metadata(raster);
     validateRasterMetadata(metadata);
@@ -93,10 +90,9 @@ public class Rasterization {
       case "GeometryCollection":
       case "MultiPolygon":
       case "MultiPoint":
-        rasterizeGeometryCollection(raster, metadata, geom, params, geomExtent, value, allTouched);
+        rasterizeGeometryCollection(raster, metadata, geom, params, value, allTouched);
         break;
       case "Point":
-        //        System.out.println("rasterizeGeometry for Point and MulitPoint...");
         rasterizePolygon(geom, params, geomExtent, value, true);
         break;
       case "LineString":
@@ -115,25 +111,14 @@ public class Rasterization {
       double[] metadata,
       Geometry geom,
       RasterizationParams params,
-      Envelope2D geomExtent,
       double value,
       boolean allTouched)
       throws FactoryException {
 
     for (int i = 0; i < geom.getNumGeometries(); i++) {
       Geometry subGeom = geom.getGeometryN(i);
-      //      System.out.println("\nWorking on " + Functions.asEWKT(subGeom));
       Envelope2D subGeomExtent = rasterizeGeomExtent(subGeom, raster, metadata, allTouched);
       rasterizeGeometry(raster, metadata, subGeom, params, subGeomExtent, value, allTouched);
-      //      System.out.println("upperLeftX, upperLeftY: " + params.upperLeftX + ", " +
-      // params.upperLeftY);
-      //      GridCoverageFactory cf = new GridCoverageFactory();
-      //      GridCoverage2D test = cf.create("raster", params.writableRaster, geomExtent);
-      //      System.out.println(
-      //          "Rasterized subGeom metadata: " +
-      // Arrays.toString(RasterAccessors.metadata(test)));
-      //      System.out.println(
-      //          "Rasterized subGeom band 1: " + Arrays.toString(MapAlgebra.bandAsArray(test, 1)));
     }
   }
 
@@ -143,127 +128,95 @@ public class Rasterization {
       Envelope2D geomExtent,
       double value,
       boolean allTouched) {
-    //    System.out.println("Calling rasterizePolygon...");
-    int rasterWidth = params.writableRaster.getWidth();
-    int rasterHeight = params.writableRaster.getHeight();
 
-    //    System.out.println("writableRaster width and height: " + rasterWidth + ", " +
-    // rasterHeight);
-    //    System.out.println("rasterWidth, rasterHeight: " + rasterWidth + ", " + rasterHeight);
-    double dx = Math.round(((geomExtent.getMinX() - params.upperLeftX) / params.scaleX));
-    double dy = Math.round(((geomExtent.getMinY() - params.upperLeftY) / params.scaleY));
-    int loopCount = 0;
+    //    double dx = Math.round(((geomExtent.getMinX() - params.upperLeftX) / params.scaleX));
+    //    double dy = Math.round(((geomExtent.getMinY() - params.upperLeftY) / params.scaleY));
 
-    //    System.out.println("Original raster Envelope: " + params.originalRaster.getEnvelope2D());
-    //    System.out.println("alignedRasterExtent Envelope: " + geomExtent);
-    //    System.out.println("worldX range: " + geomExtent.getMinX() + " - " +
-    // geomExtent.getMaxX());
-    //    System.out.println("worldY range: " + geomExtent.getMinY() + " - " +
-    // geomExtent.getMaxY());
-    //    System.out.println("upperLeftX, upperLeftY: " + params.upperLeftX + ", " +
-    // params.upperLeftY);
-    //    System.out.println("dx, dy: " + dx + ", " + dy);
+    int dx = (int) Math.round(((geomExtent.getMinX() - params.upperLeftX) / params.scaleX));
+    int dy = (int) Math.round(((geomExtent.getMinY() - params.upperLeftY) / params.scaleY));
+    int x = dx;
+    int y = dy;
+
+    // Compute initial centroid values outside the loop
+    //    double startCentroidX = geomExtent.getMinX() + (params.scaleX * 0.5);
+    //    double startCentroidY = geomExtent.getMinY() + (params.scaleY * 0.5);
+    //    double centroidX = startCentroidX;
+    //    double centroidY = startCentroidY;
+
+//    GeometryFactory factory = new GeometryFactory();
 
     for (double worldY = geomExtent.getMinY();
         worldY < geomExtent.getMaxY();
-        worldY += params.scaleY) {
+        worldY += params.scaleY, y++) {
+      x = dx;
+      //      centroidX = startCentroidX;
       for (double worldX = geomExtent.getMinX();
           worldX < geomExtent.getMaxX();
-          worldX += params.scaleX) {
-        loopCount += 1;
+          worldX += params.scaleX, x++) {
 
         // Compute corresponding raster indices
-        int x = (int) Math.round((worldX - geomExtent.getMinX()) / params.scaleX);
-        int y = (int) Math.round((worldY - geomExtent.getMinY()) / params.scaleY);
-        x += (int) dx;
-        y += (int) dy;
+        //        int x = (int) Math.round((worldX - geomExtent.getMinX()) / params.scaleX);
+        //        int y = (int) Math.round((worldY - geomExtent.getMinY()) / params.scaleY);
+        //        x += (int) dx;
+        //        y += (int) dy;
+
+        //        System.out.println("\nworldX, worldY: " + worldX + ", " + worldY);
+        //        System.out.println("x, y: " + x + ", " + y);
+        //        x += 1;
+        //        y += 1;
 
         // Flip y-axis (since raster Y starts from top-left)
         int yIndex = -y - 1;
 
-        //        System.out.println("\nworldX, worldY: " + worldX + ", " + worldY);
-        //        System.out.println("x, y: " + x + ", " + y);
-        //        System.out.println("x, yIndex: " + x + ", " + yIndex);
-
         // Create envelope for this pixel
-        double cellMinX = worldX;
-        double cellMaxX = cellMinX + params.scaleX;
-        double cellMinY = worldY;
-        double cellMaxY = cellMinY + params.scaleY;
+        double cellMaxX = worldX + params.scaleX;
+        double cellMaxY = worldY + params.scaleY;
 
-        Envelope cellEnvelope = new Envelope(cellMinX, cellMaxX, cellMinY, cellMaxY);
-        Polygon cellPolygon = JTS.toGeometry(cellEnvelope);
+//                Envelope cellEnvelope = new Envelope(worldX, cellMaxX, worldY, cellMaxY);
+//                Polygon cellPolygon = JTS.toGeometry(cellEnvelope);
+        // Compute centroid directly
+//        double centroidX = (worldX + cellMaxX) * 0.5;
+//        double centroidY = (worldY + cellMaxY) * 0.5;
 
-        boolean intersects =
-            allTouched
-                ? RectangleIntersects.intersects(cellPolygon, geom)
-                : geom.intersects(cellPolygon.getCentroid());
+                Polygon cellPolygon = JTS.toGeometry(new Envelope(worldX, cellMaxX, worldY,
+         cellMaxY));
+
+                boolean intersects =
+                    allTouched
+                        ? RectangleIntersects.intersects(cellPolygon, geom)
+                        : geom.intersects(cellPolygon);
+//        boolean intersects =
+//            allTouched
+//                ? geom.intersects(JTS.toGeometry(new Envelope(worldX, cellMaxX, worldY, cellMaxY)))
+//                : geom.intersects(factory.createPoint(new Coordinate(centroidX, centroidY)));
 
         if (intersects) {
           params.writableRaster.setSample(x, yIndex, 0, value);
         }
       }
-    }
-
-    //    System.out.println("\nwritableRaster after polyfill:");
-    //    printWritableRasterWithCoordinates(params.writableRaster);
-
-    //    System.out.println("loopCount: " + loopCount);
-  }
-
-  private static void printWritableRasterWithCoordinates(WritableRaster raster) {
-
-    int width = raster.getWidth();
-    int height = raster.getHeight();
-
-    for (int y = 0; y < height; y++) {
-      for (int x = 0; x < width; x++) {
-        // Get the value of the first band at this pixel
-        double value = raster.getSampleDouble(x, y, 0);
-
-        // Print the coordinates and value
-        System.out.printf("(%d,%d):%6.2f  ", x, y, value);
-      }
-      System.out.println(); // Newline after each row
+      //      centroidY += params.scaleY;
     }
   }
 
   private static void rasterizeLineString(Geometry geom, RasterizationParams params, double value) {
-    //    System.out.println("Calling rasterizeLineString...");
-    int loopCount = 0;
     for (int i = 0; i < geom.getNumGeometries(); i++) {
       LineString line = (LineString) geom.getGeometryN(i);
       Coordinate[] coords = line.getCoordinates();
 
       for (int j = 0; j < coords.length - 1; j++) {
-        loopCount++;
         // Extract start and end points for the segment
         Coordinate start = coords[j];
         Coordinate end = coords[j + 1];
-
-        //        double x0 = (start.x - geomExtent.getMinX()) / params.scaleX;
-        //        double y0 = (geomExtent.getMaxY() - start.y) / params.scaleY;
-        //        double x1 = (end.x - geomExtent.getMinX()) / params.scaleX;
-        //        double y1 = (geomExtent.getMaxY() - end.y) / params.scaleY;
 
         double x0 = (start.x - params.upperLeftX) / params.scaleX;
         double y0 = (params.upperLeftY - start.y) / params.scaleY;
         double x1 = (end.x - params.upperLeftX) / params.scaleX;
         double y1 = (params.upperLeftY - end.y) / params.scaleY;
 
-        // Debug information
-        //        System.out.printf(
-        //            "Rasterizing segment: Start (%6.2f, %6.2f), End (%6.2f, %6.2f)%n", x0, y0, x1,
-        // y1);
-
         // Apply Bresenham for this segment
         drawLineBresenham(params, x0, y0, x1, y1, value, 0.5);
       }
     }
-
-    //    System.out.println("\nWritable Raster after rasterizing LineString:");
-    //    printWritableRasterWithCoordinates(writableRaster);
-    //    System.out.println("loopCount: " + loopCount);
   }
 
   // Modified Bresenham with Fractional Steps
@@ -278,8 +231,7 @@ public class Rasterization {
 
     double dx = x1 - x0;
     double dy = y1 - y0;
-    //    System.out.println("Running drawLineBresenham");
-    //    System.out.println(x0 + ", " + y0 + ", " + x1 + ", " + y1);
+
     // Compute the number of steps based on the larger of dx or dy
     double distance = Math.sqrt(dx * dx + dy * dy);
     int steps = (int) Math.ceil(distance / stepSize);
@@ -314,44 +266,38 @@ public class Rasterization {
       Geometry geom, GridCoverage2D raster, double[] metadata, boolean allTouched) {
 
     if (Objects.equals(geom.getGeometryType(), "MultiLineString")) {
-      //      System.out.println("Detected MultiLinestring..");
       allTouched = true;
     }
     if (Objects.equals(geom.getGeometryType(), "MultiPoint")) {
-      //      System.out.println("Detected MultiPoint..");
       allTouched = true;
     }
 
     Envelope2D rasterExtent =
         JTS.getEnvelope2D(geom.getEnvelopeInternal(), raster.getCoordinateReferenceSystem2D());
 
-    // Extract scale values
-    double scaleX = Math.abs(metadata[4]);
-    double scaleY = Math.abs(metadata[5]);
-    double upperLeftX = metadata[0];
-    double upperLeftY = metadata[1];
-
     // Compute the aligned min/max values
     double alignedMinX =
-        (Math.floor((rasterExtent.getMinX() + upperLeftX) / scaleX) * scaleX) - upperLeftX;
+        (Math.floor((rasterExtent.getMinX() + metadata[0]) / metadata[4]) * metadata[4])
+            - metadata[0];
     double alignedMinY =
-        (Math.floor((rasterExtent.getMinY() + upperLeftY) / scaleY) * scaleY) - upperLeftY;
+        (Math.floor((rasterExtent.getMinY() + metadata[1]) / -metadata[5]) * -metadata[5])
+            - metadata[1];
     double alignedMaxX =
-        (Math.ceil((rasterExtent.getMaxX() + upperLeftX) / scaleX) * scaleX) - upperLeftX;
+        (Math.ceil((rasterExtent.getMaxX() + metadata[0]) / metadata[4]) * metadata[4])
+            - metadata[0];
     double alignedMaxY =
-        (Math.ceil((rasterExtent.getMaxY() + upperLeftY) / scaleY) * scaleY) - upperLeftY;
+        (Math.ceil((rasterExtent.getMaxY() + metadata[1]) / -metadata[5]) * -metadata[5])
+            - metadata[1];
 
     // For points and LineStrings at intersection of 2 or more pixels,
     // extend search grid by 1 pixel in each direction
     if (alignedMaxX == alignedMinX) {
-      //      System.out.println("\nFound alignedMaxX == alignedMinX ...");
-      alignedMinX -= scaleX;
-      alignedMaxX += scaleX;
+      alignedMinX -= metadata[4];
+      alignedMaxX += metadata[4];
     }
     if (alignedMaxY == alignedMinY) {
-      //      System.out.println("\nFound alignedMaxY == alignedMinY ...");
-      alignedMinY -= scaleY;
-      alignedMaxY += scaleY;
+      alignedMinY += metadata[5];
+      alignedMaxY -= metadata[5];
     }
 
     // Get the extent of the original raster
@@ -363,27 +309,16 @@ public class Rasterization {
     // Extend the aligned extent by 1 pixel if allTouched is true and if any geometry extent meets
     // the aligned extent
     if (allTouched) {
-      alignedMinX -= (rasterExtent.getMinX() == alignedMinX) ? scaleX : 0;
-      alignedMinY -= (rasterExtent.getMinY() == alignedMinY) ? scaleY : 0;
-      alignedMaxX += (rasterExtent.getMaxX() == alignedMaxX) ? scaleX : 0;
-      alignedMaxY += (rasterExtent.getMaxY() == alignedMaxY) ? scaleY : 0;
+      alignedMinX -= (rasterExtent.getMinX() == alignedMinX) ? metadata[4] : 0;
+      alignedMinY += (rasterExtent.getMinY() == alignedMinY) ? metadata[5] : 0;
+      alignedMaxX += (rasterExtent.getMaxX() == alignedMaxX) ? metadata[4] : 0;
+      alignedMaxY -= (rasterExtent.getMaxY() == alignedMaxY) ? metadata[5] : 0;
     }
 
     alignedMinX = Math.max(alignedMinX, originalMinX);
     alignedMinY = Math.max(alignedMinY, originalMinY);
     alignedMaxX = Math.min(alignedMaxX, originalMaxX);
     alignedMaxY = Math.min(alignedMaxY, originalMaxY);
-
-    int alignedRasterWidth, alignedRasterHeight;
-
-    alignedRasterWidth = (int) Math.ceil((alignedMaxX - alignedMinX) / scaleX);
-    alignedRasterHeight = (int) Math.ceil((alignedMaxY - alignedMinY) / scaleY);
-
-    //    System.out.println(
-    //        "\nalignedRasterWidth, alignedRasterHeight: "
-    //            + alignedRasterWidth
-    //            + ", "
-    //            + alignedRasterHeight);
 
     // Create the aligned raster extent
     Envelope2D alignedRasterExtent =
@@ -404,9 +339,6 @@ public class Rasterization {
       Envelope2D geomExtent,
       String pixelType) {
 
-    double scaleX = Math.abs(metadata[4]);
-    double scaleY = Math.abs(metadata[5]);
-
     double upperLeftX = 0;
     double upperLeftY = 0;
     if (useGeometryExtent) {
@@ -419,8 +351,8 @@ public class Rasterization {
 
     WritableRaster writableRaster;
     if (useGeometryExtent) {
-      int geomExtentWidth = (int) (Math.round(geomExtent.getWidth() / scaleX));
-      int geomExtentHeight = (int) (Math.round(geomExtent.getHeight() / scaleY));
+      int geomExtentWidth = (int) (Math.round(geomExtent.getWidth() / metadata[4]));
+      int geomExtentHeight = (int) (Math.round(geomExtent.getHeight() / -metadata[5]));
 
       writableRaster =
           RasterFactory.createBandedRaster(
@@ -434,7 +366,7 @@ public class Rasterization {
     }
 
     return new RasterizationParams(
-        writableRaster, pixelType, scaleX, scaleY, upperLeftX, upperLeftY);
+        writableRaster, pixelType, metadata[4], -metadata[5], upperLeftX, upperLeftY);
   }
 
   private static void validateRasterMetadata(double[] rasterMetadata) {
