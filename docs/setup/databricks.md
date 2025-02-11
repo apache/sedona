@@ -37,6 +37,7 @@ SedonaSQLRegistrator.registerAll(spark)
 
 ```python
 from sedona.register.geo_registrator import SedonaRegistrator
+
 SedonaRegistrator.registerAll(spark)
 ```
 
