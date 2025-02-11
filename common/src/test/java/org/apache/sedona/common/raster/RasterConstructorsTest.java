@@ -79,7 +79,7 @@ public class RasterConstructorsTest extends RasterTestBase {
   @Test
   public void profileRasterization() throws FactoryException, ParseException, IOException {
     for (int i = 0; i < 1000000; i++) {
-      testAsRasterWithRaster();
+      testAsRasterWithEmptyRaster();
     }
   }
 
@@ -106,6 +106,7 @@ public class RasterConstructorsTest extends RasterTestBase {
 
     rasterized = RasterConstructors.asRaster(geom, raster, "d");
     actual = MapAlgebra.bandAsArray(rasterized, 1);
+    //    System.out.println(Arrays.toString(actual));
     expected =
         new double[] {
           0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0,

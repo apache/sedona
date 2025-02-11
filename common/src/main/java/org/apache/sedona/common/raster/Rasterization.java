@@ -143,7 +143,7 @@ public class Rasterization {
     //    double centroidX = startCentroidX;
     //    double centroidY = startCentroidY;
 
-//    GeometryFactory factory = new GeometryFactory();
+    //    GeometryFactory factory = new GeometryFactory();
 
     for (double worldY = geomExtent.getMinY();
         worldY < geomExtent.getMaxY();
@@ -172,23 +172,24 @@ public class Rasterization {
         double cellMaxX = worldX + params.scaleX;
         double cellMaxY = worldY + params.scaleY;
 
-//                Envelope cellEnvelope = new Envelope(worldX, cellMaxX, worldY, cellMaxY);
-//                Polygon cellPolygon = JTS.toGeometry(cellEnvelope);
+        //                Envelope cellEnvelope = new Envelope(worldX, cellMaxX, worldY, cellMaxY);
+        //                Polygon cellPolygon = JTS.toGeometry(cellEnvelope);
         // Compute centroid directly
-//        double centroidX = (worldX + cellMaxX) * 0.5;
-//        double centroidY = (worldY + cellMaxY) * 0.5;
+        //        double centroidX = (worldX + cellMaxX) * 0.5;
+        //        double centroidY = (worldY + cellMaxY) * 0.5;
 
-                Polygon cellPolygon = JTS.toGeometry(new Envelope(worldX, cellMaxX, worldY,
-         cellMaxY));
+        Polygon cellPolygon = JTS.toGeometry(new Envelope(worldX, cellMaxX, worldY, cellMaxY));
 
-                boolean intersects =
-                    allTouched
-                        ? RectangleIntersects.intersects(cellPolygon, geom)
-                        : geom.intersects(cellPolygon);
-//        boolean intersects =
-//            allTouched
-//                ? geom.intersects(JTS.toGeometry(new Envelope(worldX, cellMaxX, worldY, cellMaxY)))
-//                : geom.intersects(factory.createPoint(new Coordinate(centroidX, centroidY)));
+        boolean intersects =
+            allTouched
+                ? RectangleIntersects.intersects(cellPolygon, geom)
+                : geom.intersects(cellPolygon.getCentroid());
+        //        boolean intersects =
+        //            allTouched
+        //                ? geom.intersects(JTS.toGeometry(new Envelope(worldX, cellMaxX, worldY,
+        // cellMaxY)))
+        //                : geom.intersects(factory.createPoint(new Coordinate(centroidX,
+        // centroidY)));
 
         if (intersects) {
           params.writableRaster.setSample(x, yIndex, 0, value);
