@@ -33,6 +33,15 @@ repos:
     rev: v1.5.5
     hooks:
       - id: insert-license
+        name: add license for all .c and .h files
+        files: \.(c|h)$
+        args:
+          - --comment-style
+          - "/*|*|*/"
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
+      - id: insert-license
         name: add license for all Markdown files
         files: \.md$
         args:
