@@ -93,25 +93,43 @@ This example loads NYC taxi trip records and taxi zone information stored as .CS
 #### Load NYC taxi trips and taxi zones data from CSV Files Stored on AWS S3
 
 ```python
-taxidf = sedona.read.format('csv').option("header","true").option("delimiter", ",").load("s3a://your-directory/data/nyc-taxi-data.csv")
-taxidf = taxidf.selectExpr('ST_Point(CAST(Start_Lon AS Decimal(24,20)), CAST(Start_Lat AS Decimal(24,20))) AS pickup', 'Trip_Pickup_DateTime', 'Payment_Type', 'Fare_Amt')
+taxidf = (
+    sedona.read.format("csv")
+    .option("header", "true")
+    .option("delimiter", ",")
+    .load("s3a://your-directory/data/nyc-taxi-data.csv")
+)
+taxidf = taxidf.selectExpr(
+    "ST_Point(CAST(Start_Lon AS Decimal(24,20)), CAST(Start_Lat AS Decimal(24,20))) AS pickup",
+    "Trip_Pickup_DateTime",
+    "Payment_Type",
+    "Fare_Amt",
+)
 ```
 
 ```python
-zoneDf = sedona.read.format('csv').option("delimiter", ",").load("s3a://your-directory/data/TIGER2018_ZCTA5.csv")
-zoneDf = zoneDf.selectExpr('ST_GeomFromWKT(_c0) as zone', '_c1 as zipcode')
+zoneDf = (
+    sedona.read.format("csv")
+    .option("delimiter", ",")
+    .load("s3a://your-directory/data/TIGER2018_ZCTA5.csv")
+)
+zoneDf = zoneDf.selectExpr("ST_GeomFromWKT(_c0) as zone", "_c1 as zipcode")
 ```
 
 #### Spatial SQL query to only return Taxi trips in Manhattan
 
 ```python
-taxidf_mhtn = taxidf.where('ST_Contains(ST_PolygonFromEnvelope(-74.01,40.73,-73.93,40.79), pickup)')
+taxidf_mhtn = taxidf.where(
+    "ST_Contains(ST_PolygonFromEnvelope(-74.01,40.73,-73.93,40.79), pickup)"
+)
 ```
 
 #### Spatial Join between Taxi Dataframe and Zone Dataframe to Find taxis in each zone
 
 ```python
-taxiVsZone = sedona.sql('SELECT zone, zipcode, pickup, Fare_Amt FROM zoneDf, taxiDf WHERE ST_Contains(zone, pickup)')
+taxiVsZone = sedona.sql(
+    "SELECT zone, zipcode, pickup, Fare_Amt FROM zoneDf, taxiDf WHERE ST_Contains(zone, pickup)"
+)
 ```
 
 #### Show a map of the loaded Spatial Dataframes using GeoPandas
@@ -120,14 +138,14 @@ taxiVsZone = sedona.sql('SELECT zone, zipcode, pickup, Fare_Amt FROM zoneDf, tax
 zoneGpd = gpd.GeoDataFrame(zoneDf.toPandas(), geometry="zone")
 taxiGpd = gpd.GeoDataFrame(taxidf.toPandas(), geometry="pickup")
 
-zone = zoneGpd.plot(color='yellow', edgecolor='black', zorder=1)
-zone.set_xlabel('Longitude (degrees)')
-zone.set_ylabel('Latitude (degrees)')
+zone = zoneGpd.plot(color="yellow", edgecolor="black", zorder=1)
+zone.set_xlabel("Longitude (degrees)")
+zone.set_ylabel("Latitude (degrees)")
 
 zone.set_xlim(-74.1, -73.8)
 zone.set_ylim(40.65, 40.9)
 
-taxi = taxiGpd.plot(ax=zone, alpha=0.01, color='red', zorder=3)
+taxi = taxiGpd.plot(ax=zone, alpha=0.01, color="red", zorder=3)
 ```
 
 ## Docker image

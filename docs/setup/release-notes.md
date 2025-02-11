@@ -392,8 +392,10 @@ Sedona 1.6.0 is compiled against Spark 3.3 / Spark 3.4 / Spark 3.5, Flink 1.19, 
 ```python
 from pyspark.sql.types import DoubleType
 
+
 def mean_udf(raster):
-	return float(raster.as_numpy().mean())
+    return float(raster.as_numpy().mean())
+
 
 sedona.udf.register("mean_udf", mean_udf, DoubleType())
 df_raster.withColumn("mean", expr("mean_udf(rast)")).show()
@@ -1064,11 +1066,15 @@ Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
         ```python
         from sedona.spark import *
 
-        config = SedonaContext.builder().\
-           config('spark.jars.packages',
-               'org.apache.sedona:sedona-spark-shaded-3.3_2.12:1.4.1,'
-               'org.datasyslab:geotools-wrapper:1.4.0-28.2'). \
-           getOrCreate()
+        config = (
+            SedonaContext.builder()
+            .config(
+                "spark.jars.packages",
+                "org.apache.sedona:sedona-spark-shaded-3.3_2.12:1.4.1,"
+                "org.datasyslab:geotools-wrapper:1.4.0-28.2",
+            )
+            .getOrCreate()
+        )
         sedona = SedonaContext.create(config)
         sedona.sql("SELECT ST_GeomFromWKT(XXX) FROM")
         ```

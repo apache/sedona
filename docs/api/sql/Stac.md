@@ -34,7 +34,9 @@ df.show()
 You can load a STAC collection from a s3 collection file object:
 
 ```python
-df = sedona.read.format("stac").load("s3a://example.com/stac_bucket/stac_collection.json")
+df = sedona.read.format("stac").load(
+    "s3a://example.com/stac_bucket/stac_collection.json"
+)
 df.printSchema()
 df.show()
 ```
@@ -42,7 +44,9 @@ df.show()
 You can also load a STAC collection from an HTTP/HTTPS endpoint:
 
 ```python
-df = sedona.read.format("stac").load("https://earth-search.aws.element84.com/v1/collections/sentinel-2-pre-c1-l2a")
+df = sedona.read.format("stac").load(
+    "https://earth-search.aws.element84.com/v1/collections/sentinel-2-pre-c1-l2a"
+)
 df.printSchema()
 df.show()
 ```
@@ -225,9 +229,7 @@ client = Client.open("https://planetarycomputer.microsoft.com/api/stac/v1")
 
 ```python
 items = client.search(
-    collection_id="aster-l1t",
-    datetime="2020",
-    return_dataframe=False
+    collection_id="aster-l1t", datetime="2020", return_dataframe=False
 )
 ```
 
@@ -235,10 +237,7 @@ items = client.search(
 
 ```python
 items = client.search(
-    collection_id="aster-l1t",
-    datetime="2020-05",
-    return_dataframe=False,
-    max_items=5
+    collection_id="aster-l1t", datetime="2020-05", return_dataframe=False, max_items=5
 )
 ```
 
@@ -250,22 +249,15 @@ items = client.search(
     ids=["AST_L1T_00312272006020322_20150518201805"],
     bbox=[-180.0, -90.0, 180.0, 90.0],
     datetime=["2006-01-01T00:00:00Z", "2007-01-01T00:00:00Z"],
-    return_dataframe=False
+    return_dataframe=False,
 )
 ```
 
 ### Search Multiple Items with Multiple Bounding Boxes
 
 ```python
-bbox_list = [
-    [-180.0, -90.0, 180.0, 90.0],
-    [-100.0, -50.0, 100.0, 50.0]
-]
-items = client.search(
-    collection_id="aster-l1t",
-    bbox=bbox_list,
-    return_dataframe=False
-)
+bbox_list = [[-180.0, -90.0, 180.0, 90.0], [-100.0, -50.0, 100.0, 50.0]]
+items = client.search(collection_id="aster-l1t", bbox=bbox_list, return_dataframe=False)
 ```
 
 ### Search Items and Get DataFrame as Return with Multiple Intervals
@@ -273,12 +265,10 @@ items = client.search(
 ```python
 interval_list = [
     ["2020-01-01T00:00:00Z", "2020-06-01T00:00:00Z"],
-    ["2020-07-01T00:00:00Z", "2021-01-01T00:00:00Z"]
+    ["2020-07-01T00:00:00Z", "2021-01-01T00:00:00Z"],
 ]
 df = client.search(
-    collection_id="aster-l1t",
-    datetime=interval_list,
-    return_dataframe=True
+    collection_id="aster-l1t", datetime=interval_list, return_dataframe=True
 )
 df.show()
 ```
@@ -288,9 +278,7 @@ df.show()
 ```python
 # Save items in DataFrame to GeoParquet with both bounding boxes and intervals
 client.get_collection("aster-l1t").save_to_geoparquet(
-    output_path="/path/to/output",
-    bbox=bbox_list,
-    datetime="2020-05"
+    output_path="/path/to/output", bbox=bbox_list, datetime="2020-05"
 )
 ```
 
