@@ -29,7 +29,6 @@ import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.geometry.jts.JTS;
 import org.locationtech.jts.geom.*;
-import org.locationtech.jts.operation.predicate.RectangleIntersects;
 import org.opengis.referencing.FactoryException;
 
 public class Rasterization {
@@ -143,8 +142,11 @@ public class Rasterization {
     //    double centroidX = startCentroidX;
     //    double centroidY = startCentroidY;
 
-    //    GeometryFactory factory = new GeometryFactory();
+    GeometryFactory factory = new GeometryFactory();
+    Coordinate centroidCoord = new Coordinate();
+    Point centroidPoint = factory.createPoint(centroidCoord);
 
+    //    int loopCount = 0;
     for (double worldY = geomExtent.getMinY();
         worldY < geomExtent.getMaxY();
         worldY += params.scaleY, y++) {
@@ -172,31 +174,33 @@ public class Rasterization {
         double cellMaxX = worldX + params.scaleX;
         double cellMaxY = worldY + params.scaleY;
 
-        //                Envelope cellEnvelope = new Envelope(worldX, cellMaxX, worldY, cellMaxY);
-        //                Polygon cellPolygon = JTS.toGeometry(cellEnvelope);
+        //        Envelope cellEnvelope = new Envelope(worldX, cellMaxX, worldY, cellMaxY);
+        //        Geometry cellPolygon = JTS.toGeometry(cellEnvelope);
         // Compute centroid directly
         //        double centroidX = (worldX + cellMaxX) * 0.5;
         //        double centroidY = (worldY + cellMaxY) * 0.5;
+        centroidCoord.setX(worldX + params.scaleX * 0.5);
+        centroidCoord.setY(worldY + params.scaleY * 0.5);
 
-        Polygon cellPolygon = JTS.toGeometry(new Envelope(worldX, cellMaxX, worldY, cellMaxY));
+        //        Polygon cellPolygon = JTS.toGeometry(new Envelope(worldX, cellMaxX, worldY,
+        // cellMaxY));
 
+        //        boolean intersects =
+        //            allTouched ? geom.intersects(cellPolygon) :
+        // geom.intersects(cellPolygon.getCentroid());
         boolean intersects =
             allTouched
-                ? RectangleIntersects.intersects(cellPolygon, geom)
-                : geom.intersects(cellPolygon.getCentroid());
-        //        boolean intersects =
-        //            allTouched
-        //                ? geom.intersects(JTS.toGeometry(new Envelope(worldX, cellMaxX, worldY,
-        // cellMaxY)))
-        //                : geom.intersects(factory.createPoint(new Coordinate(centroidX,
-        // centroidY)));
+                ? geom.intersects(JTS.toGeometry(new Envelope(worldX, cellMaxX, worldY, cellMaxY)))
+                : geom.covers(centroidPoint);
 
         if (intersects) {
           params.writableRaster.setSample(x, yIndex, 0, value);
         }
+        //        loopCount++;
       }
       //      centroidY += params.scaleY;
     }
+    //    System.out.println("loopCount: " + loopCount);
   }
 
   private static void rasterizeLineString(Geometry geom, RasterizationParams params, double value) {
