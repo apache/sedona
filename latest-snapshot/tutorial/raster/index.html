@@ -5169,7 +5169,12 @@ Please replace the <code>3.3</code> in the package name of sedona-spark-shaded w
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">rawDf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;binaryFile&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;recursiveFileLookup&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;pathGlobFilter&quot;</span><span class="p">,</span> <span class="s2">&quot;*.tif*&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path_to_raster_data_folder</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">rawDf</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;binaryFile&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;recursiveFileLookup&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;pathGlobFilter&quot;</span><span class="p">,</span> <span class="s2">&quot;*.tif*&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path_to_raster_data_folder</span><span class="p">)</span>
+<span class="p">)</span>
 <span class="n">rawDf</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;rawdf&quot;</span><span class="p">)</span>
 <span class="n">rawDf</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
@@ -5357,21 +5362,25 @@ Please replace the <code>3.3</code> in the package name of sedona-spark-shaded w
 <h2 id="collecting-raster-dataframes-and-working-with-them-locally-in-python">Collecting raster Dataframes and working with them locally in Python<a class="headerlink" href="#collecting-raster-dataframes-and-working-with-them-locally-in-python" title="Permanent link">&para;</a></h2>
 <p>Sedona allows collecting Dataframes with raster columns and working with them locally in Python since <code>v1.6.0</code>.
 The raster objects are represented as <code>SedonaRaster</code> objects in Python, which can be used to perform raster operations.</p>
-<div class="highlight"><pre><span></span><code><span class="n">df_raster</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;binaryFile&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/path/to/raster.tif&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;RS_FromGeoTiff(content) as rast&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df_raster</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;binaryFile&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/path/to/raster.tif&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;RS_FromGeoTiff(content) as rast&quot;</span><span class="p">)</span>
+<span class="p">)</span>
 <span class="n">rows</span> <span class="o">=</span> <span class="n">df_raster</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
 <span class="n">raster</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rast</span>
 <span class="n">raster</span>  <span class="c1"># &lt;sedona.raster.sedona_raster.InDbSedonaRaster at 0x1618fb1f0&gt;</span>
 </code></pre></div>
 <p>You can retrieve the metadata of the raster by accessing the properties of the <code>SedonaRaster</code> object.</p>
-<div class="highlight"><pre><span></span><code><span class="n">raster</span><span class="o">.</span><span class="n">width</span>        <span class="c1"># width of the raster</span>
-<span class="n">raster</span><span class="o">.</span><span class="n">height</span>       <span class="c1"># height of the raster</span>
-<span class="n">raster</span><span class="o">.</span><span class="n">affine_trans</span> <span class="c1"># affine transformation matrix</span>
-<span class="n">raster</span><span class="o">.</span><span class="n">crs_wkt</span>      <span class="c1"># coordinate reference system as WKT</span>
+<div class="highlight"><pre><span></span><code><span class="n">raster</span><span class="o">.</span><span class="n">width</span>  <span class="c1"># width of the raster</span>
+<span class="n">raster</span><span class="o">.</span><span class="n">height</span>  <span class="c1"># height of the raster</span>
+<span class="n">raster</span><span class="o">.</span><span class="n">affine_trans</span>  <span class="c1"># affine transformation matrix</span>
+<span class="n">raster</span><span class="o">.</span><span class="n">crs_wkt</span>  <span class="c1"># coordinate reference system as WKT</span>
 </code></pre></div>
 <p>You can get a numpy array containing the band data of the raster using the <code>as_numpy</code> or <code>as_numpy_masked</code> method. The
 band data is organized in CHW order.</p>
-<div class="highlight"><pre><span></span><code><span class="n">raster</span><span class="o">.</span><span class="n">as_numpy</span><span class="p">()</span>        <span class="c1"># numpy array of the raster</span>
-<span class="n">raster</span><span class="o">.</span><span class="n">as_numpy_masked</span><span class="p">()</span> <span class="c1"># numpy array with nodata values masked as nan</span>
+<div class="highlight"><pre><span></span><code><span class="n">raster</span><span class="o">.</span><span class="n">as_numpy</span><span class="p">()</span>  <span class="c1"># numpy array of the raster</span>
+<span class="n">raster</span><span class="o">.</span><span class="n">as_numpy_masked</span><span class="p">()</span>  <span class="c1"># numpy array with nodata values masked as nan</span>
 </code></pre></div>
 <p>If you want to work with the raster data using <code>rasterio</code>, you can retrieve a <code>rasterio.DatasetReader</code> object using the
 <code>as_rasterio</code> method.</p>
@@ -5381,15 +5390,17 @@ band data is organized in CHW order.</p>
 </div>
 <div class="highlight"><pre><span></span><code><span class="n">ds</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">as_rasterio</span><span class="p">()</span>  <span class="c1"># rasterio.DatasetReader object</span>
 <span class="c1"># Work with the raster using rasterio</span>
-<span class="n">band1</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>         <span class="c1"># read the first band</span>
+<span class="n">band1</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># read the first band</span>
 </code></pre></div>
 <h2 id="writing-python-udf-to-work-with-raster-data">Writing Python UDF to work with raster data<a class="headerlink" href="#writing-python-udf-to-work-with-raster-data" title="Permanent link">&para;</a></h2>
 <p>You can write Python UDFs to work with raster data in Python. The UDFs can take <code>SedonaRaster</code> objects as input and
 return any Spark data type as output. This is an example of a Python UDF that calculates the mean of the raster data.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DoubleType</span>
 
+
 <span class="k">def</span><span class="w"> </span><span class="nf">mean_udf</span><span class="p">(</span><span class="n">raster</span><span class="p">):</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">raster</span><span class="o">.</span><span class="n">as_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+
 
 <span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;mean_udf&quot;</span><span class="p">,</span> <span class="n">mean_udf</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
 <span class="n">df_raster</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;mean_udf(rast)&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -5406,13 +5417,17 @@ objects yet. However, you can write a UDF that returns the band data as an array
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayType</span><span class="p">,</span> <span class="n">DoubleType</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
+
 <span class="k">def</span><span class="w"> </span><span class="nf">mask_udf</span><span class="p">(</span><span class="n">raster</span><span class="p">):</span>
-    <span class="n">band1</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">as_numpy</span><span class="p">()[</span><span class="mi">0</span><span class="p">,:,:]</span>
+    <span class="n">band1</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">as_numpy</span><span class="p">()[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">band1</span> <span class="o">&lt;</span> <span class="mi">1400</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">mask</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
+
 <span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;mask_udf&quot;</span><span class="p">,</span> <span class="n">band_udf</span><span class="p">,</span> <span class="n">ArrayType</span><span class="p">(</span><span class="n">DoubleType</span><span class="p">()))</span>
-<span class="n">df_raster</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;mask&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;mask_udf(rast)&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;mask_rast&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;RS_MakeRaster(rast, &#39;I&#39;, mask)&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">df_raster</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;mask&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;mask_udf(rast)&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span>
+    <span class="s2">&quot;mask_rast&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;RS_MakeRaster(rast, &#39;I&#39;, mask)&quot;</span><span class="p">)</span>
+<span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>+--------------------+--------------------+--------------------+
 |                rast|                mask|           mask_rast|
@@ -5442,7 +5457,7 @@ objects yet. However, you can write a UDF that returns the band data as an array
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">December 4, 2024 07:01:47</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">February 11, 2025 03:07:44</span>
   </span>
 
     
