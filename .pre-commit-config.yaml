@@ -52,6 +52,15 @@ repos:
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
       - id: insert-license
+        name: add license for all R files
+        files: \.R$
+        args:
+          - --comment-style
+          - "|#|"
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
+      - id: insert-license
         name: add license for all TOML files
         files: \.toml$
         args:
