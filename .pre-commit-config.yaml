@@ -42,6 +42,15 @@ repos:
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
       - id: insert-license
+        name: add license for all Java files
+        files: \.java$
+        args:
+          - --comment-style
+          - "/*|*|*/"
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
+      - id: insert-license
         name: add license for all Markdown files
         files: \.md$
         args:
