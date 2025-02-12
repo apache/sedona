@@ -52,15 +52,6 @@ install:
 
 docsinstall:
 	@echo "Installing documentation dependencies..."
-	@if [ ! -f requirements-docs.txt ]; then \
-		echo "Creating requirements-docs.txt..."; \
-		echo "mkdocs" > requirements-docs.txt; \
-		echo "mkdocs-jupyter" >> requirements-docs.txt; \
-		echo "mkdocs-material" >> requirements-docs.txt; \
-		echo "mkdocs-macros-plugin" >> requirements-docs.txt; \
-		echo "mkdocs-git-revision-date-localized-plugin" >> requirements-docs.txt; \
-		echo "mike" >> requirements-docs.txt; \
-	fi
 	$(PIP) install -r requirements-docs.txt
 
 docsbuild: docsinstall
