@@ -66,12 +66,3 @@ clean:
 	rm -rf __pycache__
 	rm -rf .mypy_cache
 	rm -rf .pytest_cache
-
-test:
-	@echo "Running tests..."
-	@if [ -f test/run_tests.py ]; then \
-		$(PYTHON) test/run_tests.py; \
-	else \
-		echo "No test script found."; \
-		exit 1; \
-	fi
