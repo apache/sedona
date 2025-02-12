@@ -16,16 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.strategy.geostats
+package org.apache.spark.sql.sedona_sql.strategy.physical.function
 
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{Attribute, AttributeSet}
 import org.apache.spark.sql.execution.{SparkPlan, UnaryExecNode}
-import org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction
+import org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction
 
-case class EvalGeoStatsFunctionExec(
-    function: ST_GeoStatsFunction,
+case class EvalPhysicalFunctionExec(
+    function: PhysicalFunction,
     child: SparkPlan,
     resultAttrs: Seq[Attribute])
     extends UnaryExecNode {

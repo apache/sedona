@@ -16,24 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.plans.logical
+package org.apache.spark.sql.sedona_sql.strategy.physical.function
 
-import org.apache.spark.sql.catalyst.expressions.Attribute
-import org.apache.spark.sql.catalyst.expressions.AttributeSet
-import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.Strategy
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
-import org.apache.spark.sql.catalyst.plans.logical.UnaryNode
+import org.apache.spark.sql.execution.SparkPlan
+import org.apache.spark.sql.sedona_sql.plans.logical.EvalPhysicalFunction
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction
 
-case class EvalGeoStatsFunction(
-    function: Expression,
-    resultAttrs: Seq[Attribute],
-    child: LogicalPlan)
-    extends UnaryNode {
+class EvalPhysicalFunctionStrategy(spark: SparkSession) extends Strategy {
 
-  override def output: Seq[Attribute] = child.output ++ resultAttrs
-
-  override def producedAttributes: AttributeSet = AttributeSet(resultAttrs)
-
-  override protected def withNewChildInternal(newChild: LogicalPlan): LogicalPlan =
-    copy(child = newChild)
+  override def apply(plan: LogicalPlan): Seq[SparkPlan] = {
+    plan match {
+      case EvalPhysicalFunction(function: PhysicalFunction, resultAttrs, child) =>
+        EvalPhysicalFunctionExec(function, planLater(child), resultAttrs) :: Nil
+      case _ => Nil
+    }
+  }
 }
