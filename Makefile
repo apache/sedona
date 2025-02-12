@@ -61,8 +61,7 @@ docsbuild: docsinstall
 	$(MIKE) serve
 
 clean:
-	@echo "Cleaning up generated files..."
-	rm -rf site
+	@echo "Cleaning up generated files... (TODO)"
 	rm -rf __pycache__
 	rm -rf .mypy_cache
 	rm -rf .pytest_cache
