@@ -17,14 +17,17 @@
 
 notifications:
     commits:    commits@sedona.apache.org
-    issues_status:    dev@sedona.apache.org
+    issues_status:    issues@sedona.apache.org
     issues_comment:    issues@sedona.apache.org
-    pullrequests_status:    dev@sedona.apache.org
+    pullrequests_status:    issues@sedona.apache.org
     pullrequests_comment:    issues@sedona.apache.org
     jira_options: link label worklog
 github:
     description: "A cluster computing framework for processing large-scale geospatial data"
     homepage: https://sedona.apache.org/
+    collaborators:
+        - MrPowers
+        - jbampton
     autolink_jira:
         - SEDONA
     labels:
