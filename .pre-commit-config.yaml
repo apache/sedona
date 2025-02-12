@@ -70,13 +70,13 @@ repos:
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 24.10.0
+    rev: 25.1.0
     hooks:
       - id: black-jupyter
         name: run black-jupyter
         description: format Python files and Jupyter Notebooks with black
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v19.1.4
+    rev: v19.1.7
     hooks:
       - id: clang-format
         name: run clang-format
@@ -84,14 +84,15 @@ repos:
         args: [--style=Google]
         types_or: [c]
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.10
+    rev: 1.8.2
     hooks:
       - id: bandit
         name: run bandit
         description: check Python code for security issues
         args: ["-c=pyproject.toml", "-r"]
+        additional_dependencies: ["bandit[toml]"]
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.3.0
+    rev: v2.4.1
     hooks:
       - id: codespell
         name: run codespell
@@ -99,13 +100,13 @@ repos:
         args: [--ignore-words=.github/linters/codespell.txt]
         exclude: ^docs/image|^spark/common/src/test/resources|^docs/usecases|^tools/maven/scalafmt
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.21.2
+    rev: v8.23.3
     hooks:
       - id: gitleaks
         name: run gitleaks
         description: check for secrets with gitleaks
   - repo: https://github.com/shssoichiro/oxipng
-    rev: v9.1.2
+    rev: v9.1.3
     hooks:
       - id: oxipng
         name: run oxipng
@@ -160,7 +161,7 @@ repos:
         args: [--markdown-linebreak-ext=md]
         exclude: ^docs-overrides/main\.html$|\.Rd$
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.43.0
+    rev: v0.44.0
     hooks:
       - id: markdownlint
         name: run markdownlint
