@@ -243,6 +243,6 @@ Downloading click_plugins-1.1.1-py2.py3-none-any.whl (7.5 kB)
 - upload packages to workspace
 - add packages to your (clean!) Spark pool
 
-Pay careful attention to errors reported back from Synpase and troubleshoot to resolve conflicts.
+Pay careful attention to errors reported back from Synapse and troubleshoot to resolve conflicts.
 
 Note: We didn't have issues with Sedona 1.6.0 on Spark 3.4, but Sedona 1.6.1 and supporting packages had a conflict around `numpy` which requires us to download a specific version and add it to the packages list. `numpy` was not listed in the output of the grep.
