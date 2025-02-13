@@ -785,7 +785,7 @@ public class Functions {
     return GeomUtils.getEWKB(geometry);
   }
 
-  public static byte[] asEWKB(Geography geography) {
+  public static byte[] geogAsEWKB(Geography geography) {
     return asEWKB(geography.getGeometry());
   }
 

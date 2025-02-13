@@ -34,6 +34,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.reflect.runtime.universe.TypeTag
 import scala.reflect.runtime.universe.Type
 import scala.reflect.runtime.universe.typeOf
+import org.apache.sedona.common.geometryObjects.Geography
 
 /**
  * Custom exception to include the input row and the original exception message.
@@ -160,6 +161,10 @@ object InferrableType {
     new InferrableType[Geometry] {}
   implicit val geometryArrayInstance: InferrableType[Array[Geometry]] =
     new InferrableType[Array[Geometry]] {}
+  implicit val geographyInstance: InferrableType[Geography] =
+    new InferrableType[Geography] {}
+  implicit val geographyArrayInstance: InferrableType[Array[Geography]] =
+    new InferrableType[Array[Geography]] {}
   implicit val javaDoubleInstance: InferrableType[java.lang.Double] =
     new InferrableType[java.lang.Double] {}
   implicit val javaIntegerInstance: InferrableType[java.lang.Integer] =

@@ -506,7 +506,7 @@ case class ST_AsBinary(inputExpressions: Seq[Expression])
 }
 
 case class ST_AsEWKB(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.asEWKB _) {
+    extends InferredExpression(Functions.geogAsEWKB _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
