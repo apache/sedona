@@ -203,6 +203,10 @@
                         <a href="DataFrameAPI.html" title="">DataFrameAPI</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="trait" href="DataframePhysicalFunction.html" title="DataframePhysicalFunctions are Functions that will be replaced with a Physical Node for their evaluation."></a>
+                        <a href="DataframePhysicalFunction.html" title="DataframePhysicalFunctions are Functions that will be replaced with a Physical Node for their evaluation.">DataframePhysicalFunction</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="trait" href="FoldableExpression.html" title="Make expression foldable by constant folding optimizer."></a>
                         <a href="FoldableExpression.html" title="Make expression foldable by constant folding optimizer.">FoldableExpression</a>
                       </li><li class="current-entities indented6">
@@ -241,6 +245,10 @@
                         <span class="separator"></span>
                         <a class="object" href="InferredTypes$.html" title=""></a>
                         <a href="InferredTypes$.html" title="">InferredTypes</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="trait" href="PhysicalFunction.html" title="PhysicalFunctions are Functions that will be replaced with a Physical Node for their evaluation."></a>
+                        <a href="PhysicalFunction.html" title="PhysicalFunctions are Functions that will be replaced with a Physical Node for their evaluation.">PhysicalFunction</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="class" href="ST_3DDistance.html" title=""></a>
@@ -501,10 +509,6 @@
                         <span class="separator"></span>
                         <a class="class" href="ST_GeoHash.html" title=""></a>
                         <a href="ST_GeoHash.html" title="">ST_GeoHash</a>
-                      </li><li class="current-entities indented6">
-                        <span class="separator"></span>
-                        <a class="trait" href="ST_GeoStatsFunction.html" title=""></a>
-                        <a href="ST_GeoStatsFunction.html" title="">ST_GeoStatsFunction</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="class" href="ST_GeomCollFromText.html" title=""></a>
@@ -1156,7 +1160,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">ST_WeightedDistanceBandColumn</span><span class="params">(<span name="children">children: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <a href="ST_GeoStatsFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction">ST_GeoStatsFunction</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">ST_WeightedDistanceBandColumn</span><span class="params">(<span name="children">children: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <a href="DataframePhysicalFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.DataframePhysicalFunction">DataframePhysicalFunction</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
 
@@ -1165,7 +1169,7 @@
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="ST_GeoStatsFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction">ST_GeoStatsFunction</a>, <span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Unevaluable">Unevaluable</span>, <span class="extype" name="org.apache.spark.sql.catalyst.expressions.ImplicitCastInputTypes">ImplicitCastInputTypes</span>, <span class="extype" name="org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes">ExpectsInputTypes</span>, <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>, <span class="extype" name="org.apache.spark.sql.catalyst.trees.TreeNode">TreeNode</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>], <span class="extype" name="org.apache.spark.sql.catalyst.trees.TreePatternBits">TreePatternBits</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><a href="DataframePhysicalFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.DataframePhysicalFunction">DataframePhysicalFunction</a>, <a href="PhysicalFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction">PhysicalFunction</a>, <span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Unevaluable">Unevaluable</span>, <span class="extype" name="org.apache.spark.sql.catalyst.expressions.ImplicitCastInputTypes">ImplicitCastInputTypes</span>, <span class="extype" name="org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes">ExpectsInputTypes</span>, <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>, <span class="extype" name="org.apache.spark.sql.catalyst.trees.TreeNode">TreeNode</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>], <span class="extype" name="org.apache.spark.sql.catalyst.trees.TreePatternBits">TreePatternBits</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -1191,7 +1195,7 @@
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="org.apache.spark.sql.sedona_sql.expressions.ST_WeightedDistanceBandColumn"><span>ST_WeightedDistanceBandColumn</span></li><li class="in" name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction"><span>ST_GeoStatsFunction</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="org.apache.spark.sql.catalyst.expressions.Unevaluable"><span>Unevaluable</span></li><li class="in" name="org.apache.spark.sql.catalyst.expressions.ImplicitCastInputTypes"><span>ImplicitCastInputTypes</span></li><li class="in" name="org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes"><span>ExpectsInputTypes</span></li><li class="in" name="org.apache.spark.sql.catalyst.expressions.Expression"><span>Expression</span></li><li class="in" name="org.apache.spark.sql.catalyst.trees.TreeNode"><span>TreeNode</span></li><li class="in" name="org.apache.spark.sql.catalyst.trees.TreePatternBits"><span>TreePatternBits</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="org.apache.spark.sql.sedona_sql.expressions.ST_WeightedDistanceBandColumn"><span>ST_WeightedDistanceBandColumn</span></li><li class="in" name="org.apache.spark.sql.sedona_sql.expressions.DataframePhysicalFunction"><span>DataframePhysicalFunction</span></li><li class="in" name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction"><span>PhysicalFunction</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="org.apache.spark.sql.catalyst.expressions.Unevaluable"><span>Unevaluable</span></li><li class="in" name="org.apache.spark.sql.catalyst.expressions.ImplicitCastInputTypes"><span>ImplicitCastInputTypes</span></li><li class="in" name="org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes"><span>ExpectsInputTypes</span></li><li class="in" name="org.apache.spark.sql.catalyst.expressions.Expression"><span>Expression</span></li><li class="in" name="org.apache.spark.sql.catalyst.trees.TreeNode"><span>TreeNode</span></li><li class="in" name="org.apache.spark.sql.catalyst.trees.TreePatternBits"><span>TreePatternBits</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -1576,7 +1580,7 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_WeightedDistanceBandColumn">ST_WeightedDistanceBandColumn</a> → Expression</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction#deterministic" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction#deterministic" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="deterministic:Boolean"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_WeightedDistanceBandColumn.html#deterministic:Boolean" title="Permalink">
@@ -1591,23 +1595,7 @@
         <span class="name">deterministic</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ST_GeoStatsFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction">ST_GeoStatsFunction</a> → Expression</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_WeightedDistanceBandColumn#doExecute" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="doExecute(dataframe:org.apache.spark.sql.DataFrame,resultAttrs:Seq[org.apache.spark.sql.catalyst.expressions.Attribute]):org.apache.spark.sql.DataFrame"></a><a id="doExecute(DataFrame,Seq[Attribute]):DataFrame"></a>
-      <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_WeightedDistanceBandColumn.html#doExecute(dataframe:org.apache.spark.sql.DataFrame,resultAttrs:Seq[org.apache.spark.sql.catalyst.expressions.Attribute]):org.apache.spark.sql.DataFrame" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">doExecute</span><span class="params">(<span name="dataframe">dataframe: <a href="../../index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>, <span name="resultAttrs">resultAttrs: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Attribute">Attribute</span>]</span>)</span><span class="result">: <a href="../../index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_WeightedDistanceBandColumn">ST_WeightedDistanceBandColumn</a> → <a href="ST_GeoStatsFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction">ST_GeoStatsFunction</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="PhysicalFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction">PhysicalFunction</a> → Expression</dd></dl></div>
     </li><li name="org.apache.spark.sql.catalyst.expressions.Unevaluable#doGenCode" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="doGenCode(ctx:org.apache.spark.sql.catalyst.expressions.codegen.CodegenContext,ev:org.apache.spark.sql.catalyst.expressions.codegen.ExprCode):org.apache.spark.sql.catalyst.expressions.codegen.ExprCode"></a><a id="doGenCode(CodegenContext,ExprCode):ExprCode"></a>
       <span class="permalink">
@@ -1656,7 +1644,7 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Unevaluable → Expression</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction#execute" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.DataframePhysicalFunction#execute" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="execute(plan:org.apache.spark.sql.execution.SparkPlan,resultAttrs:Seq[org.apache.spark.sql.catalyst.expressions.Attribute]):org.apache.spark.rdd.RDD[org.apache.spark.sql.catalyst.InternalRow]"></a><a id="execute(SparkPlan,Seq[Attribute]):RDD[InternalRow]"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_WeightedDistanceBandColumn.html#execute(plan:org.apache.spark.sql.execution.SparkPlan,resultAttrs:Seq[org.apache.spark.sql.catalyst.expressions.Attribute]):org.apache.spark.rdd.RDD[org.apache.spark.sql.catalyst.InternalRow]" title="Permalink">
@@ -1671,7 +1659,7 @@
         <span class="name">execute</span><span class="params">(<span name="plan">plan: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="resultAttrs">resultAttrs: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Attribute">Attribute</span>]</span>)</span><span class="result">: <span class="extype" name="org.apache.spark.rdd.RDD">RDD</span>[<span class="extype" name="org.apache.spark.sql.catalyst.InternalRow">InternalRow</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ST_GeoStatsFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction">ST_GeoStatsFunction</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DataframePhysicalFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.DataframePhysicalFunction">DataframePhysicalFunction</a> → <a href="PhysicalFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction">PhysicalFunction</a></dd></dl></div>
     </li><li name="org.apache.spark.sql.catalyst.trees.TreeNode#exists" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="exists(f:BaseType=&gt;Boolean):Boolean"></a><a id="exists((Expression)⇒Boolean):Boolean"></a>
       <span class="permalink">
@@ -1854,7 +1842,7 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TreeNode</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction#geometryColumnName" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction#geometryColumnName" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="geometryColumnName:String"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_WeightedDistanceBandColumn.html#geometryColumnName:String" title="Permalink">
@@ -1869,7 +1857,7 @@
         <span class="name">geometryColumnName</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="ST_GeoStatsFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction">ST_GeoStatsFunction</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="PhysicalFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction">PhysicalFunction</a></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -1905,7 +1893,7 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>TreeNode</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction#getInputName" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction#getInputName" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getInputName(i:Int,fieldName:String):String"></a><a id="getInputName(Int,String):String"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_WeightedDistanceBandColumn.html#getInputName(i:Int,fieldName:String):String" title="Permalink">
@@ -1920,8 +1908,8 @@
         <span class="name">getInputName</span><span class="params">(<span name="i">i: <span class="extype" name="scala.Int">Int</span></span>, <span name="fieldName">fieldName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="ST_GeoStatsFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction">ST_GeoStatsFunction</a></dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction#getInputNames" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="PhysicalFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction">PhysicalFunction</a></dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction#getInputNames" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getInputNames(i:Int,fieldName:String):Seq[String]"></a><a id="getInputNames(Int,String):Seq[String]"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_WeightedDistanceBandColumn.html#getInputNames(i:Int,fieldName:String):Seq[String]" title="Permalink">
@@ -1936,8 +1924,8 @@
         <span class="name">getInputNames</span><span class="params">(<span name="i">i: <span class="extype" name="scala.Int">Int</span></span>, <span name="fieldName">fieldName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="ST_GeoStatsFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction">ST_GeoStatsFunction</a></dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction#getResultName" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="PhysicalFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction">PhysicalFunction</a></dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction#getResultName" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getResultName(resultAttrs:Seq[org.apache.spark.sql.catalyst.expressions.Attribute]):String"></a><a id="getResultName(Seq[Attribute]):String"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_WeightedDistanceBandColumn.html#getResultName(resultAttrs:Seq[org.apache.spark.sql.catalyst.expressions.Attribute]):String" title="Permalink">
@@ -1952,8 +1940,8 @@
         <span class="name">getResultName</span><span class="params">(<span name="resultAttrs">resultAttrs: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Attribute">Attribute</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="ST_GeoStatsFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction">ST_GeoStatsFunction</a></dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction#getScalarValue" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="PhysicalFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction">PhysicalFunction</a></dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction#getScalarValue" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getScalarValue[T](i:Int,name:String)(implicitct:scala.reflect.ClassTag[T]):T"></a><a id="getScalarValue[T](Int,String)(ClassTag[T]):T"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_WeightedDistanceBandColumn.html#getScalarValue[T](i:Int,name:String)(implicitct:scala.reflect.ClassTag[T]):T" title="Permalink">
@@ -1965,10 +1953,10 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getScalarValue</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="i">i: <span class="extype" name="scala.Int">Int</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ct">ct: <span class="extype" name="scala.reflect.ClassTag">ClassTag</span>[<span class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction.getScalarValue.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction.getScalarValue.T">T</span></span>
+        <span class="name">getScalarValue</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="i">i: <span class="extype" name="scala.Int">Int</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ct">ct: <span class="extype" name="scala.reflect.ClassTag">ClassTag</span>[<span class="extype" name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction.getScalarValue.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction.getScalarValue.T">T</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="ST_GeoStatsFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction">ST_GeoStatsFunction</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="PhysicalFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction">PhysicalFunction</a></dd></dl></div>
     </li><li name="org.apache.spark.sql.catalyst.trees.TreeNode#getTagValue" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getTagValue[T](tag:org.apache.spark.sql.catalyst.trees.TreeNodeTag[T]):Option[T]"></a><a id="getTagValue[T](TreeNodeTag[T]):Option[T]"></a>
       <span class="permalink">
@@ -2263,7 +2251,7 @@
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction#nullable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction#nullable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="nullable:Boolean"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_WeightedDistanceBandColumn.html#nullable:Boolean" title="Permalink">
@@ -2278,7 +2266,7 @@
         <span class="name">nullable</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ST_GeoStatsFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction">ST_GeoStatsFunction</a> → Expression</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="PhysicalFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction">PhysicalFunction</a> → Expression</dd></dl></div>
     </li><li name="org.apache.spark.sql.catalyst.trees.TreeNode#numberedTreeString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="numberedTreeString:String"></a>
       <span class="permalink">
@@ -2503,6 +2491,22 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Expression → TreeNode</dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction#sparkSession" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sparkSession:org.apache.spark.sql.SparkSession"></a><a id="sparkSession:SparkSession"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_WeightedDistanceBandColumn.html#sparkSession:org.apache.spark.sql.SparkSession" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sparkSession</span><span class="result">: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="PhysicalFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction">PhysicalFunction</a></dd></dl></div>
     </li><li name="org.apache.spark.sql.catalyst.expressions.Expression#sql" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="sql:String"></a>
       <span class="permalink">
@@ -2599,6 +2603,22 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TreeNode</dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_WeightedDistanceBandColumn#transformDataframe" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="transformDataframe(dataframe:org.apache.spark.sql.DataFrame,resultAttrs:Seq[org.apache.spark.sql.catalyst.expressions.Attribute]):org.apache.spark.sql.DataFrame"></a><a id="transformDataframe(DataFrame,Seq[Attribute]):DataFrame"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_WeightedDistanceBandColumn.html#transformDataframe(dataframe:org.apache.spark.sql.DataFrame,resultAttrs:Seq[org.apache.spark.sql.catalyst.expressions.Attribute]):org.apache.spark.sql.DataFrame" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">transformDataframe</span><span class="params">(<span name="dataframe">dataframe: <a href="../../index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>, <span name="resultAttrs">resultAttrs: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Attribute">Attribute</span>]</span>)</span><span class="result">: <a href="../../index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_WeightedDistanceBandColumn">ST_WeightedDistanceBandColumn</a> → <a href="DataframePhysicalFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.DataframePhysicalFunction">DataframePhysicalFunction</a></dd></dl></div>
     </li><li name="org.apache.spark.sql.catalyst.trees.TreeNode#transformDown" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="transformDown(rule:PartialFunction[BaseType,BaseType]):BaseType"></a><a id="transformDown(PartialFunction[Expression,Expression]):Expression"></a>
       <span class="permalink">
@@ -2933,8 +2953,10 @@
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction">
-              <h3>Inherited from <a href="ST_GeoStatsFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction">ST_GeoStatsFunction</a></h3>
+        <div class="parent" name="org.apache.spark.sql.sedona_sql.expressions.DataframePhysicalFunction">
+              <h3>Inherited from <a href="DataframePhysicalFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.DataframePhysicalFunction">DataframePhysicalFunction</a></h3>
+            </div><div class="parent" name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction">
+              <h3>Inherited from <a href="PhysicalFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction">PhysicalFunction</a></h3>
             </div><div class="parent" name="scala.Serializable">
               <h3>Inherited from <span class="extype" name="scala.Serializable">Serializable</span></h3>
             </div><div class="parent" name="java.io.Serializable">

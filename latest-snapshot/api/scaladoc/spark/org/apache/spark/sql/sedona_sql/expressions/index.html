@@ -251,6 +251,10 @@
                         <a href="DataFrameAPI.html" title="">DataFrameAPI</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="trait" href="DataframePhysicalFunction.html" title="DataframePhysicalFunctions are Functions that will be replaced with a Physical Node for their evaluation."></a>
+                        <a href="DataframePhysicalFunction.html" title="DataframePhysicalFunctions are Functions that will be replaced with a Physical Node for their evaluation.">DataframePhysicalFunction</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="trait" href="FoldableExpression.html" title="Make expression foldable by constant folding optimizer."></a>
                         <a href="FoldableExpression.html" title="Make expression foldable by constant folding optimizer.">FoldableExpression</a>
                       </li><li class="current-entities indented6">
@@ -289,6 +293,10 @@
                         <span class="separator"></span>
                         <a class="object" href="InferredTypes$.html" title=""></a>
                         <a href="InferredTypes$.html" title="">InferredTypes</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="trait" href="PhysicalFunction.html" title="PhysicalFunctions are Functions that will be replaced with a Physical Node for their evaluation."></a>
+                        <a href="PhysicalFunction.html" title="PhysicalFunctions are Functions that will be replaced with a Physical Node for their evaluation.">PhysicalFunction</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="class" href="ST_3DDistance.html" title=""></a>
@@ -549,10 +557,6 @@
                         <span class="separator"></span>
                         <a class="class" href="ST_GeoHash.html" title=""></a>
                         <a href="ST_GeoHash.html" title="">ST_GeoHash</a>
-                      </li><li class="current-entities indented6">
-                        <span class="separator"></span>
-                        <a class="trait" href="ST_GeoStatsFunction.html" title=""></a>
-                        <a href="ST_GeoStatsFunction.html" title="">ST_GeoStatsFunction</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="class" href="ST_GeomCollFromText.html" title=""></a>
@@ -1324,6 +1328,28 @@
       </span>
       
       
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.DataframePhysicalFunction" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="DataframePhysicalFunctionextendsExpressionwithPhysicalFunction"></a><a id="DataframePhysicalFunction:DataframePhysicalFunction"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/DataframePhysicalFunction.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="DataframePhysicalFunctions are Functions that will be replaced with a Physical Node for their evaluation." href="DataframePhysicalFunction.html"><span class="name">DataframePhysicalFunction</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <a href="PhysicalFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction">PhysicalFunction</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">DataframePhysicalFunctions are Functions that will be replaced with a Physical Node for their
+evaluation.</p><div class="fullcomment"><div class="comment cmt"><p>DataframePhysicalFunctions are Functions that will be replaced with a Physical Node for their
+evaluation.</p><p>The physical node will transform the input dataframe into the output dataframe. execute handles
+conversion of the RDD[InternalRow] to a DataFrame and back. Each DataframePhysicalFunction
+should implement transformDataframe. The output dataframe should have the same schema as the
+input dataframe, except for the resultAttrs which should be added to the output dataframe.
+</p></div></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.FoldableExpression" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="FoldableExpressionextendsExpression"></a><a id="FoldableExpression:FoldableExpression"></a>
       <span class="permalink">
@@ -1422,6 +1448,28 @@ foldable, then the expression itself is foldable.
       </span>
       
       <p class="shortcomment cmt">Custom exception to include the input row and the original exception message.</p>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="PhysicalFunctionextendsExpressionwithImplicitCastInputTypeswithUnevaluablewithSerializable"></a><a id="PhysicalFunction:PhysicalFunction"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/PhysicalFunction.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="PhysicalFunctions are Functions that will be replaced with a Physical Node for their evaluation." href="PhysicalFunction.html"><span class="name">PhysicalFunction</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <span class="extype" name="org.apache.spark.sql.catalyst.expressions.ImplicitCastInputTypes">ImplicitCastInputTypes</span> with <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Unevaluable">Unevaluable</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">PhysicalFunctions are Functions that will be replaced with a Physical Node for their
+evaluation.</p><div class="fullcomment"><div class="comment cmt"><p>PhysicalFunctions are Functions that will be replaced with a Physical Node for their
+evaluation.</p><p>execute is the method that will be called in order to evaluate the function. PhysicalFunction
+is marked non-deterministic to avoid the filter push-down optimization pass which duplicates
+the PhysicalFunction when pushing down aliased PhysicalFunction calls through a Project
+operator. Otherwise the PhysicalFunction would be evaluated twice.
+</p></div></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_3DDistance" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_3DDistanceextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_3DDistance:ST_3DDistance"></a>
       <span class="permalink">
@@ -1696,7 +1744,7 @@ foldable, then the expression itself is foldable.
       
       
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_BinaryDistanceBandColumn" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ST_BinaryDistanceBandColumnextendsExpressionwithST_GeoStatsFunctionwithProductwithSerializable"></a><a id="ST_BinaryDistanceBandColumn:ST_BinaryDistanceBandColumn"></a>
+      <a id="ST_BinaryDistanceBandColumnextendsExpressionwithDataframePhysicalFunctionwithProductwithSerializable"></a><a id="ST_BinaryDistanceBandColumn:ST_BinaryDistanceBandColumn"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_BinaryDistanceBandColumn.html" title="Permalink">
         <i class="material-icons"></i>
@@ -1707,7 +1755,7 @@ foldable, then the expression itself is foldable.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="" href="ST_BinaryDistanceBandColumn.html"><span class="name">ST_BinaryDistanceBandColumn</span></a><span class="params">(<span name="children">children: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <a href="ST_GeoStatsFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction">ST_GeoStatsFunction</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a title="" href="ST_BinaryDistanceBandColumn.html"><span class="name">ST_BinaryDistanceBandColumn</span></a><span class="params">(<span name="children">children: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <a href="DataframePhysicalFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.DataframePhysicalFunction">DataframePhysicalFunction</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
       
@@ -1959,7 +2007,7 @@ all inner geometries represent holes
       
       
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_DBSCAN" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ST_DBSCANextendsExpressionwithST_GeoStatsFunctionwithProductwithSerializable"></a><a id="ST_DBSCAN:ST_DBSCAN"></a>
+      <a id="ST_DBSCANextendsExpressionwithDataframePhysicalFunctionwithProductwithSerializable"></a><a id="ST_DBSCAN:ST_DBSCAN"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_DBSCAN.html" title="Permalink">
         <i class="material-icons"></i>
@@ -1970,7 +2018,7 @@ all inner geometries represent holes
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="" href="ST_DBSCAN.html"><span class="name">ST_DBSCAN</span></a><span class="params">(<span name="children">children: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <a href="ST_GeoStatsFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction">ST_GeoStatsFunction</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a title="" href="ST_DBSCAN.html"><span class="name">ST_DBSCAN</span></a><span class="params">(<span name="children">children: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <a href="DataframePhysicalFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.DataframePhysicalFunction">DataframePhysicalFunction</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
       
@@ -2432,7 +2480,7 @@ all inner geometries represent holes
       
       
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_GLocal" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ST_GLocalextendsExpressionwithST_GeoStatsFunctionwithProductwithSerializable"></a><a id="ST_GLocal:ST_GLocal"></a>
+      <a id="ST_GLocalextendsExpressionwithDataframePhysicalFunctionwithProductwithSerializable"></a><a id="ST_GLocal:ST_GLocal"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_GLocal.html" title="Permalink">
         <i class="material-icons"></i>
@@ -2443,7 +2491,7 @@ all inner geometries represent holes
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="" href="ST_GLocal.html"><span class="name">ST_GLocal</span></a><span class="params">(<span name="children">children: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <a href="ST_GeoStatsFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction">ST_GeoStatsFunction</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a title="" href="ST_GLocal.html"><span class="name">ST_GLocal</span></a><span class="params">(<span name="children">children: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <a href="DataframePhysicalFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.DataframePhysicalFunction">DataframePhysicalFunction</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
       
@@ -2476,22 +2524,6 @@ all inner geometries represent holes
       </span>
       <span class="symbol">
         <a title="" href="ST_GeoHash.html"><span class="name">ST_GeoHash</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
-      </span>
-      
-      
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="ST_GeoStatsFunctionextendsExpressionwithImplicitCastInputTypeswithUnevaluablewithSerializable"></a><a id="ST_GeoStatsFunction:ST_GeoStatsFunction"></a>
-      <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_GeoStatsFunction.html" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="ST_GeoStatsFunction.html"><span class="name">ST_GeoStatsFunction</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <span class="extype" name="org.apache.spark.sql.catalyst.expressions.ImplicitCastInputTypes">ImplicitCastInputTypes</span> with <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Unevaluable">Unevaluable</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
       
@@ -3380,7 +3412,7 @@ This only works with LINESTRINGs.
       
       
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_LocalOutlierFactor" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ST_LocalOutlierFactorextendsExpressionwithST_GeoStatsFunctionwithProductwithSerializable"></a><a id="ST_LocalOutlierFactor:ST_LocalOutlierFactor"></a>
+      <a id="ST_LocalOutlierFactorextendsExpressionwithDataframePhysicalFunctionwithProductwithSerializable"></a><a id="ST_LocalOutlierFactor:ST_LocalOutlierFactor"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_LocalOutlierFactor.html" title="Permalink">
         <i class="material-icons"></i>
@@ -3391,7 +3423,7 @@ This only works with LINESTRINGs.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="" href="ST_LocalOutlierFactor.html"><span class="name">ST_LocalOutlierFactor</span></a><span class="params">(<span name="children">children: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <a href="ST_GeoStatsFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction">ST_GeoStatsFunction</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a title="" href="ST_LocalOutlierFactor.html"><span class="name">ST_LocalOutlierFactor</span></a><span class="params">(<span name="children">children: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <a href="DataframePhysicalFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.DataframePhysicalFunction">DataframePhysicalFunction</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
       
@@ -4795,7 +4827,7 @@ System / Coordinate Reference System.</p>
       
       
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_WeightedDistanceBandColumn" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ST_WeightedDistanceBandColumnextendsExpressionwithST_GeoStatsFunctionwithProductwithSerializable"></a><a id="ST_WeightedDistanceBandColumn:ST_WeightedDistanceBandColumn"></a>
+      <a id="ST_WeightedDistanceBandColumnextendsExpressionwithDataframePhysicalFunctionwithProductwithSerializable"></a><a id="ST_WeightedDistanceBandColumn:ST_WeightedDistanceBandColumn"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_WeightedDistanceBandColumn.html" title="Permalink">
         <i class="material-icons"></i>
@@ -4806,7 +4838,7 @@ System / Coordinate Reference System.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="" href="ST_WeightedDistanceBandColumn.html"><span class="name">ST_WeightedDistanceBandColumn</span></a><span class="params">(<span name="children">children: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <a href="ST_GeoStatsFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction">ST_GeoStatsFunction</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a title="" href="ST_WeightedDistanceBandColumn.html"><span class="name">ST_WeightedDistanceBandColumn</span></a><span class="params">(<span name="children">children: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <a href="DataframePhysicalFunction.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.DataframePhysicalFunction">DataframePhysicalFunction</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
       
