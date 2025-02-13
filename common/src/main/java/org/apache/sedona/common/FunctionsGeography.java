@@ -16,22 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.common.geometryObjects;
+package org.apache.sedona.common;
 
-import org.locationtech.jts.geom.Geometry;
+import org.apache.sedona.common.geometryObjects.Geography;
 
-public class Geography {
-  private Geometry geometry;
-
-  public Geography(Geometry geometry) {
-    this.geometry = geometry;
-  }
-
-  public Geometry getGeometry() {
-    return this.geometry;
-  }
-
-  public String toString() {
-    return this.geometry.toText();
+public class FunctionsGeography {
+  public static byte[] asEWKB(Geography geography) {
+    return Functions.asEWKB(geography.getGeometry());
   }
 }
