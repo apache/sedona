@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.geometryObjects.Circle;
+import org.apache.sedona.common.geometryObjects.Geography;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.subDivide.GeometrySubDivider;
 import org.apache.sedona.common.utils.*;
@@ -782,6 +783,10 @@ public class Functions {
 
   public static byte[] asEWKB(Geometry geometry) {
     return GeomUtils.getEWKB(geometry);
+  }
+
+  public static byte[] asEWKB(Geography geography) {
+    return asEWKB(geography.getGeometry());
   }
 
   public static String asHexEWKB(Geometry geom, String endian) {
