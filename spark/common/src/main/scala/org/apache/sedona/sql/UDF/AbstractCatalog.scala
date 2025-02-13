@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql.UDF
 
+import org.apache.spark.sql.{SQLContext, SparkSession, functions}
 import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
 import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, ExpressionInfo, Literal}
@@ -73,5 +74,29 @@ abstract class AbstractCatalog {
     }
 
     (functionIdentifier, expressionInfo, functionBuilder)
+  }
+
+  def registerAll(sqlContext: SQLContext): Unit = {
+    registerAll(sqlContext.sparkSession)
+  }
+
+  def registerAll(sparkSession: SparkSession): Unit = {
+    Catalog.expressions.foreach { case (functionIdentifier, expressionInfo, functionBuilder) =>
+      sparkSession.sessionState.functionRegistry.registerFunction(
+        functionIdentifier,
+        expressionInfo,
+        functionBuilder)
+    }
+    Catalog.aggregateExpressions.foreach(f =>
+      sparkSession.udf.register(f.getClass.getSimpleName, functions.udaf(f)))
+  }
+
+  def dropAll(sparkSession: SparkSession): Unit = {
+    Catalog.expressions.foreach { case (functionIdentifier, _, _) =>
+      sparkSession.sessionState.functionRegistry.dropFunction(functionIdentifier)
+    }
+    Catalog.aggregateExpressions.foreach(f =>
+      sparkSession.sessionState.functionRegistry.dropFunction(
+        FunctionIdentifier(f.getClass.getSimpleName)))
   }
 }

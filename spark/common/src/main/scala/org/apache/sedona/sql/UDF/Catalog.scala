@@ -19,13 +19,11 @@
 package org.apache.sedona.sql.UDF
 
 import org.apache.spark.sql.expressions.Aggregator
-import org.apache.spark.sql.sedona_sql.expressions.{ST_InterpolatePoint, _}
 import org.apache.spark.sql.sedona_sql.expressions.collect.ST_Collect
 import org.apache.spark.sql.sedona_sql.expressions.raster._
+import org.apache.spark.sql.sedona_sql.expressions._
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.operation.buffer.BufferParameters
-
-import scala.collection.mutable.ListBuffer
 
 object Catalog extends AbstractCatalog {
 
@@ -344,9 +342,5 @@ object Catalog extends AbstractCatalog {
     function[ST_WeightedDistanceBandColumn]())
 
   val aggregateExpressions: Seq[Aggregator[Geometry, _, _]] =
-    Seq(new ST_Envelope_Aggr, new ST_Intersection_Aggr)
-
-  // Aggregate functions with List as buffer
-  val aggregateExpressions2: Seq[Aggregator[Geometry, ListBuffer[Geometry], Geometry]] =
-    Seq(new ST_Union_Aggr())
+    Seq(new ST_Envelope_Aggr, new ST_Intersection_Aggr, new ST_Union_Aggr())
 }

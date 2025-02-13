@@ -21,12 +21,12 @@ package org.apache.sedona.spark
 import org.apache.sedona.common.utils.TelemetryCollector
 import org.apache.sedona.core.serde.SedonaKryoRegistrator
 import org.apache.sedona.sql.RasterRegistrator
-import org.apache.sedona.sql.UDF.UdfRegistrator
+import org.apache.sedona.sql.UDF.Catalog
 import org.apache.sedona.sql.UDT.UdtRegistrator
 import org.apache.spark.serializer.KryoSerializer
-import org.apache.spark.sql.sedona_sql.optimization.{ExtractGeoStatsFunctions, SpatialFilterPushDownForGeoParquet, SpatialTemporalFilterPushDownForStacScan}
-import org.apache.spark.sql.sedona_sql.strategy.geostats.EvalGeoStatsFunctionStrategy
+import org.apache.spark.sql.sedona_sql.optimization._
 import org.apache.spark.sql.sedona_sql.strategy.join.JoinQueryDetector
+import org.apache.spark.sql.sedona_sql.strategy.physical.function.EvalPhysicalFunctionStrategy
 import org.apache.spark.sql.{SQLContext, SparkSession}
 
 import scala.annotation.StaticAnnotation
@@ -73,20 +73,21 @@ object SedonaContext {
       }
     }
 
-    // Support geostats functions
-    if (!sparkSession.experimental.extraOptimizations.contains(ExtractGeoStatsFunctions)) {
-      sparkSession.experimental.extraOptimizations ++= Seq(ExtractGeoStatsFunctions)
+    // Support physical functions
+    if (!sparkSession.experimental.extraOptimizations.contains(ExtractPhysicalFunctions)) {
+      sparkSession.experimental.extraOptimizations ++= Seq(ExtractPhysicalFunctions)
     }
+
     if (!sparkSession.experimental.extraStrategies.exists(
-        _.isInstanceOf[EvalGeoStatsFunctionStrategy])) {
+        _.isInstanceOf[EvalPhysicalFunctionStrategy])) {
       sparkSession.experimental.extraStrategies ++= Seq(
-        new EvalGeoStatsFunctionStrategy(sparkSession))
+        new EvalPhysicalFunctionStrategy(sparkSession))
     }
 
     addGeoParquetToSupportNestedFilterSources(sparkSession)
     RasterRegistrator.registerAll(sparkSession)
     UdtRegistrator.registerAll()
-    UdfRegistrator.registerAll(sparkSession)
+    Catalog.registerAll(sparkSession)
     sparkSession
   }
 
