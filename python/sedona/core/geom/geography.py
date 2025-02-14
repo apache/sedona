@@ -15,31 +15,29 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from typing import Union
+import pickle
 
-from shapely.geometry.base import BaseGeometry
-
-from sedona.core.geom.envelope import Envelope
-from sedona.core.geom.geography import Geography
-from sedona.core.jvm.translate import JvmGeometryAdapter
-from sedona.utils.spatial_rdd_parser import GeometryFactory
+from sedona.utils.decorators import require
 
 
-class GeometryAdapter:
+class Geography:
+
+    def __init__(self, geometry):
+        self._geom = geometry
+        self.userData = None
+
+
+    def getUserData(self):
+        return self.userData
 
     @classmethod
-    def create_jvm_geometry_from_base_geometry(
-        cls, jvm, geom: Union[BaseGeometry, Geography]
-    ):
-        """
-        :param jvm:
-        :param geom:
-        :return:
-        """
-        if isinstance(geom, (Envelope, Geography)):
-            jvm_geom = geom.create_jvm_instance(jvm)
-        else:
-            decoded_geom = GeometryFactory.to_bytes(geom)
-            jvm_geom = JvmGeometryAdapter(jvm).translate_to_java(decoded_geom)
+    def from_jvm_instance(cls, java_obj):
+        return Geography(java_obj.geometry)
 
-        return jvm_geom
+    @classmethod
+    def serialize_for_java(cls, geogs):
+        return pickle.dumps(geogs)
+
+    @require(["Geography"])
+    def create_jvm_instance(self, jvm):
+        return jvm.Geography(self._geom)
