@@ -42,7 +42,7 @@ From Maven
 
 - [geotools-wrapper-1.6.1-28.2.jar](https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper/1.6.1-28.2)
 
-From PyPi
+From PyPI
 
 - [rasterio-1.4.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl](https://files.pythonhosted.org/packages/cd/ad/2d3a14e5a97ca827a38d4963b86071267a6cd09d45065cd753d7325699b6/rasterio-1.4.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl)
 
@@ -225,7 +225,7 @@ pip install -r requirements.txt > pip-output.txt
 grep Downloading pip-output.txt
 ```
 
-**This will be the list of packages you need to locate and download from PyPi**
+**This will be the list of packages you need to locate and download from PyPI**
 
 Example output
 
