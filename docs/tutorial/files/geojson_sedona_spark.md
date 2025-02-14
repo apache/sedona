@@ -147,7 +147,6 @@ Now, let's see how to create GeoJSON files with Sedona by writing out DataFrames
 
 Let’s create a Sedona DataFrame and then write it out to GeoJSON files:
 
-
 ```
 df = sedona.createDataFrame([
     ("a", 'LINESTRING(2.0 5.0,6.0 1.0)'),
