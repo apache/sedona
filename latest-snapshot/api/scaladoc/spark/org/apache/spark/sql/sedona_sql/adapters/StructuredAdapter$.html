@@ -677,6 +677,23 @@ SpatialRDD after spatial partitioning.</p></div><dl class="paramcmts block"><dt 
 auto-detects geometry column if geometryFieldName is not provided. It uses the first geometry
 column in DataFrame.</p></div></div>
     </li><li name="org.apache.spark.sql.sedona_sql.adapters.StructuredAdapter#toSpatialRdd" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toSpatialRdd(rdd:org.apache.spark.rdd.RDD[org.apache.spark.sql.catalyst.InternalRow],schema:org.apache.spark.sql.types.StructType,geometryFieldName:String):org.apache.sedona.core.spatialRDD.SpatialRDD[org.locationtech.jts.geom.Geometry]"></a><a id="toSpatialRdd(RDD[InternalRow],StructType,String):SpatialRDD[Geometry]"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/adapters/StructuredAdapter$.html#toSpatialRdd(rdd:org.apache.spark.rdd.RDD[org.apache.spark.sql.catalyst.InternalRow],schema:org.apache.spark.sql.types.StructType,geometryFieldName:String):org.apache.sedona.core.spatialRDD.SpatialRDD[org.locationtech.jts.geom.Geometry]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toSpatialRdd</span><span class="params">(<span name="rdd">rdd: <span class="extype" name="org.apache.spark.rdd.RDD">RDD</span>[<span class="extype" name="org.apache.spark.sql.catalyst.InternalRow">InternalRow</span>]</span>, <span name="schema">schema: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>, <span name="geometryFieldName">geometryFieldName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="../../../../sedona/core/spatialRDD/SpatialRDD.html" class="extype" name="org.apache.sedona.core.spatialRDD.SpatialRDD">SpatialRDD</a>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Convert RDD[InternalRow] to SpatialRDD.</p><div class="fullcomment"><div class="comment cmt"><p>Convert RDD[InternalRow] to SpatialRDD. It puts InternalRow as user data of Geometry.
+</p></div></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.adapters.StructuredAdapter#toSpatialRdd" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toSpatialRdd(dataFrame:org.apache.spark.sql.DataFrame,geometryFieldName:String):org.apache.sedona.core.spatialRDD.SpatialRDD[org.locationtech.jts.geom.Geometry]"></a><a id="toSpatialRdd(DataFrame,String):SpatialRDD[Geometry]"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/spark/sql/sedona_sql/adapters/StructuredAdapter$.html#toSpatialRdd(dataFrame:org.apache.spark.sql.DataFrame,geometryFieldName:String):org.apache.sedona.core.spatialRDD.SpatialRDD[org.locationtech.jts.geom.Geometry]" title="Permalink">
@@ -691,8 +708,7 @@ column in DataFrame.</p></div></div>
         <span class="name">toSpatialRdd</span><span class="params">(<span name="dataFrame">dataFrame: <a href="../../index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>, <span name="geometryFieldName">geometryFieldName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="../../../../sedona/core/spatialRDD/SpatialRDD.html" class="extype" name="org.apache.sedona.core.spatialRDD.SpatialRDD">SpatialRDD</a>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">Convert DataFrame to SpatialRDD.</p><div class="fullcomment"><div class="comment cmt"><p>Convert DataFrame to SpatialRDD. It puts InternalRow as user data of Geometry. It allows only
-one geometry column.
+      <p class="shortcomment cmt">Convert DataFrame to SpatialRDD.</p><div class="fullcomment"><div class="comment cmt"><p>Convert DataFrame to SpatialRDD. It puts InternalRow as user data of Geometry.
 </p></div></div>
     </li><li name="org.apache.spark.sql.sedona_sql.adapters.StructuredAdapter#toSpatialRdd" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toSpatialRdd(rdd:org.apache.spark.rdd.RDD[org.apache.spark.sql.Row]):org.apache.sedona.core.spatialRDD.SpatialRDD[org.locationtech.jts.geom.Geometry]"></a><a id="toSpatialRdd(RDD[Row]):SpatialRDD[Geometry]"></a>
