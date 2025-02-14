@@ -136,6 +136,7 @@ public class FunctionEditorsTest extends RasterTestBase {
     Geometry geom = Constructors.geomFromWKT(polygon, 0);
 
     GridCoverage2D result = PixelFunctionEditors.setValues(raster, 1, geom, 10, true, false);
+
     Geometry point = Constructors.geomFromWKT("POINT (-77.9146 37.8916)", 0);
     double actual = PixelFunctions.value(result, point, 1);
     double expected = 10.0;
@@ -163,11 +164,11 @@ public class FunctionEditorsTest extends RasterTestBase {
     Geometry geom = Constructors.geomFromWKT(polygon, 3857);
 
     GridCoverage2D result = PixelFunctionEditors.setValues(raster, 1, geom, 10, true, false);
+
     Geometry point = Constructors.geomFromWKT("POINT (243700 4197797)", 26918);
     double actual = PixelFunctions.value(result, point, 1);
     double expected = 10.0;
     assertEquals(expected, actual, 0d);
-
     result = PixelFunctionEditors.setValues(raster, 1, geom, 10, false);
 
     point = Constructors.geomFromWKT("POINT (243700 4197797)", 26918);
@@ -249,8 +250,8 @@ public class FunctionEditorsTest extends RasterTestBase {
     actual = MapAlgebra.bandAsArray(raster, 1);
     expected =
         new double[] {
-          56.0, 56.0, 56.0, 0.0, 0.0, 56.0, 56.0, 0.0, 0.0, 0.0, 56.0, 0.0, 0.0, 0.0, 0.0, 56.0,
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+          56.0, 56.0, 56.0, 0.0, 0.0, 56.0, 56.0, 0.0, 0.0, 0.0, 56.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
         };
     assertArrayEquals(expected, actual, 0.1d);
   }

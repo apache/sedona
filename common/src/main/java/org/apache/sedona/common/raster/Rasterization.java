@@ -19,16 +19,16 @@
 package org.apache.sedona.common.raster;
 
 import java.awt.image.WritableRaster;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import javax.media.jai.RasterFactory;
+import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.geometry.Envelope2D;
 import org.geotools.geometry.jts.JTS;
 import org.locationtech.jts.geom.*;
+import org.opengis.geometry.BoundingBox;
 import org.opengis.referencing.FactoryException;
 
 public class Rasterization {
@@ -92,12 +92,12 @@ public class Rasterization {
         rasterizeGeometryCollection(raster, metadata, geom, params, value, allTouched);
         break;
       case "Point":
-        rasterizePolygon(geom, params, geomExtent, value, true);
+        rasterizePoint(geom, params, geomExtent, value);
         break;
       case "LineString":
       case "MultiLineString":
       case "LinearRing":
-        rasterizeLineString(geom, params, value);
+        rasterizeLineString(geom, params, value, geomExtent);
         break;
       default:
         rasterizePolygon(geom, params, geomExtent, value, allTouched);
@@ -121,51 +121,21 @@ public class Rasterization {
     }
   }
 
-  private static void rasterizePolygon(
-      Geometry geom,
-      RasterizationParams params,
-      Envelope2D geomExtent,
-      double value,
-      boolean allTouched) {
+  private static void rasterizePoint(
+      Geometry geom, RasterizationParams params, Envelope2D geomExtent, double value) {
 
-    //    double dx = Math.round(((geomExtent.getMinX() - params.upperLeftX) / params.scaleX));
-    //    double dy = Math.round(((geomExtent.getMinY() - params.upperLeftY) / params.scaleY));
+    int startX = (int) Math.round(((geomExtent.getMinX() - params.upperLeftX) / params.scaleX));
+    int startY = (int) Math.round(((geomExtent.getMinY() - params.upperLeftY) / params.scaleY));
+    int x = startX;
+    int y = startY;
 
-    int dx = (int) Math.round(((geomExtent.getMinX() - params.upperLeftX) / params.scaleX));
-    int dy = (int) Math.round(((geomExtent.getMinY() - params.upperLeftY) / params.scaleY));
-    int x = dx;
-    int y = dy;
-
-    // Compute initial centroid values outside the loop
-    //    double startCentroidX = geomExtent.getMinX() + (params.scaleX * 0.5);
-    //    double startCentroidY = geomExtent.getMinY() + (params.scaleY * 0.5);
-    //    double centroidX = startCentroidX;
-    //    double centroidY = startCentroidY;
-
-    GeometryFactory factory = new GeometryFactory();
-    Coordinate centroidCoord = new Coordinate();
-    Point centroidPoint = factory.createPoint(centroidCoord);
-
-    //    int loopCount = 0;
     for (double worldY = geomExtent.getMinY();
         worldY < geomExtent.getMaxY();
         worldY += params.scaleY, y++) {
-      x = dx;
-      //      centroidX = startCentroidX;
+      x = startX;
       for (double worldX = geomExtent.getMinX();
           worldX < geomExtent.getMaxX();
           worldX += params.scaleX, x++) {
-
-        // Compute corresponding raster indices
-        //        int x = (int) Math.round((worldX - geomExtent.getMinX()) / params.scaleX);
-        //        int y = (int) Math.round((worldY - geomExtent.getMinY()) / params.scaleY);
-        //        x += (int) dx;
-        //        y += (int) dy;
-
-        //        System.out.println("\nworldX, worldY: " + worldX + ", " + worldY);
-        //        System.out.println("x, y: " + x + ", " + y);
-        //        x += 1;
-        //        y += 1;
 
         // Flip y-axis (since raster Y starts from top-left)
         int yIndex = -y - 1;
@@ -174,44 +144,35 @@ public class Rasterization {
         double cellMaxX = worldX + params.scaleX;
         double cellMaxY = worldY + params.scaleY;
 
-        //        Envelope cellEnvelope = new Envelope(worldX, cellMaxX, worldY, cellMaxY);
-        //        Geometry cellPolygon = JTS.toGeometry(cellEnvelope);
-        // Compute centroid directly
-        //        double centroidX = (worldX + cellMaxX) * 0.5;
-        //        double centroidY = (worldY + cellMaxY) * 0.5;
-        centroidCoord.setX(worldX + params.scaleX * 0.5);
-        centroidCoord.setY(worldY + params.scaleY * 0.5);
-
-        //        Polygon cellPolygon = JTS.toGeometry(new Envelope(worldX, cellMaxX, worldY,
-        // cellMaxY));
-
-        //        boolean intersects =
-        //            allTouched ? geom.intersects(cellPolygon) :
-        // geom.intersects(cellPolygon.getCentroid());
         boolean intersects =
-            allTouched
-                ? geom.intersects(JTS.toGeometry(new Envelope(worldX, cellMaxX, worldY, cellMaxY)))
-                : geom.covers(centroidPoint);
+            geom.intersects(JTS.toGeometry(new Envelope(worldX, cellMaxX, worldY, cellMaxY)));
 
         if (intersects) {
           params.writableRaster.setSample(x, yIndex, 0, value);
         }
-        //        loopCount++;
       }
-      //      centroidY += params.scaleY;
     }
-    //    System.out.println("loopCount: " + loopCount);
   }
 
-  private static void rasterizeLineString(Geometry geom, RasterizationParams params, double value) {
+  private static void rasterizeLineString(
+      Geometry geom, RasterizationParams params, double value, Envelope2D geomExtent) {
     for (int i = 0; i < geom.getNumGeometries(); i++) {
       LineString line = (LineString) geom.getGeometryN(i);
       Coordinate[] coords = line.getCoordinates();
 
       for (int j = 0; j < coords.length - 1; j++) {
         // Extract start and end points for the segment
-        Coordinate start = coords[j];
-        Coordinate end = coords[j + 1];
+        LineSegment clippedSegment =
+            clipSegmentToRasterBounds(coords[j], coords[j + 1], geomExtent);
+
+        Coordinate start;
+        Coordinate end;
+        if (clippedSegment != null) {
+          start = new Coordinate(clippedSegment.p0.x, clippedSegment.p0.y);
+          end = new Coordinate(clippedSegment.p1.x, clippedSegment.p1.y);
+        } else {
+          continue; // Skip case where segment is completely outside geomExtent
+        }
 
         double x0 = (start.x - params.upperLeftX) / params.scaleX;
         double y0 = (params.upperLeftY - start.y) / params.scaleY;
@@ -219,7 +180,7 @@ public class Rasterization {
         double y1 = (params.upperLeftY - end.y) / params.scaleY;
 
         // Apply Bresenham for this segment
-        drawLineBresenham(params, x0, y0, x1, y1, value, 0.5);
+        drawLineBresenham(params, x0, y0, x1, y1, value, 0.2);
       }
     }
   }
@@ -265,6 +226,79 @@ public class Rasterization {
       x += stepX;
       y += stepY;
     }
+  }
+
+  private static LineSegment clipSegmentToRasterBounds(
+      Coordinate p1, Coordinate p2, Envelope2D geomExtent) {
+    double minX = geomExtent.getMinX();
+    double maxX = geomExtent.getMaxX();
+    double minY = geomExtent.getMinY();
+    double maxY = geomExtent.getMaxY();
+
+    double x1 = p1.x, y1 = p1.y;
+    double x2 = p2.x, y2 = p2.y;
+
+    boolean p1Inside = isInsideBounds(x1, y1, minX, maxX, minY, maxY);
+    boolean p2Inside = isInsideBounds(x2, y2, minX, maxX, minY, maxY);
+
+    if (p1Inside && p2Inside) {
+      // Both points inside: no clipping needed
+      return new LineSegment(p1, p2);
+    }
+
+    if (!p1Inside && !p2Inside) {
+      // Both points outside: no clipping needed
+      return null;
+    }
+
+    double dx = x2 - x1;
+    double dy = y2 - y1;
+
+    // Clip using parametric line equation
+    double[] tValues = {0, 1}; // Stores valid segment proportions
+
+    // Clip against minX and maxX
+    if (dx != 0) {
+      double tMin = (minX - x1) / dx;
+      double tMax = (maxX - x1) / dx;
+      if (dx < 0) {
+        double temp = tMin;
+        tMin = tMax;
+        tMax = temp;
+      }
+      tValues[0] = Math.max(tValues[0], tMin);
+      tValues[1] = Math.min(tValues[1], tMax);
+    }
+
+    // Clip against minY and maxY
+    if (dy != 0) {
+      double tMin = (minY - y1) / dy;
+      double tMax = (maxY - y1) / dy;
+      if (dy < 0) {
+        double temp = tMin;
+        tMin = tMax;
+        tMax = temp;
+      }
+      tValues[0] = Math.max(tValues[0], tMin);
+      tValues[1] = Math.min(tValues[1], tMax);
+    }
+
+    // If tValues are invalid (segment is outside), return null
+    if (tValues[0] > tValues[1]) {
+      return null; // No valid clipped segment
+    }
+
+    // Compute new clipped endpoints
+    Coordinate newP1 = new Coordinate(x1 + tValues[0] * dx, y1 + tValues[0] * dy);
+    Coordinate newP2 = new Coordinate(x1 + tValues[1] * dx, y1 + tValues[1] * dy);
+
+    return new LineSegment(newP1, newP2);
+  }
+
+  // Helper function to check if a point is inside the bounding box
+  private static boolean isInsideBounds(
+      double x, double y, double minX, double maxX, double minY, double maxY) {
+    return x >= minX && x <= maxX && y >= minY && y <= maxY;
   }
 
   private static Envelope2D rasterizeGeomExtent(
@@ -408,6 +442,157 @@ public class Rasterization {
       this.scaleY = scaleY;
       this.upperLeftX = upperLeftX;
       this.upperLeftY = upperLeftY;
+    }
+  }
+
+  public static void rasterizePolygon(
+      Geometry geom,
+      RasterizationParams params,
+      Envelope2D geomExtent,
+      double value,
+      boolean allTouched) {
+    if (!(geom instanceof Polygon)) {
+      throw new IllegalArgumentException("Only Polygon geometry is supported");
+    }
+
+    Geometry clippedGeom =
+        Functions.intersection(JTS.toGeometry((BoundingBox) geomExtent), Functions.buffer(geom, 0));
+
+    Polygon polygon = (Polygon) clippedGeom;
+
+    // Compute scanline X-intercepts
+    Map<Double, TreeSet<Double>> scanlineIntersections =
+        computeScanlineIntersections(polygon, params, value, geomExtent, allTouched);
+
+    // Process intersections to get startXs and endXs for each scanline
+    Map<Integer, List<int[]>> scanlineFillRanges = computeFillRanges(scanlineIntersections);
+
+    // Burn values between startX and endX pairs
+    fillPolygon(scanlineFillRanges, params, value);
+  }
+
+  /** Computes scanline intersections by iterating over polygon edges. */
+  private static Map<Double, TreeSet<Double>> computeScanlineIntersections(
+      Polygon polygon,
+      RasterizationParams params,
+      double value,
+      Envelope2D geomExtent,
+      boolean allTouched) {
+
+    Map<Double, TreeSet<Double>> scanlineIntersections = new HashMap<>();
+    List<LineString> allRings = new ArrayList<>();
+    allRings.add(polygon.getExteriorRing());
+    for (int i = 0; i < polygon.getNumInteriorRing(); i++) {
+      allRings.add(polygon.getInteriorRingN(i));
+    }
+
+    for (LineString ring : allRings) {
+      Coordinate[] coords = ring.getCoordinates();
+      int numPoints = coords.length;
+
+      if (allTouched) {
+        rasterizeLineString(ring, params, value, geomExtent);
+      }
+
+      for (int i = 0; i < numPoints - 1; i++) {
+        Coordinate worldP1 = coords[i];
+        Coordinate worldP2 = coords[i + 1];
+
+        // Ensure worldP1.y ≤ worldP2.y
+        if (worldP1.y > worldP2.y) {
+          Coordinate temp = worldP1;
+          worldP1 = worldP2;
+          worldP2 = temp;
+        }
+
+        if (worldP1.y == worldP2.y) {
+          continue; // Skip horizontal edges
+        }
+
+        double yStart = Math.floor((worldP1.y - params.upperLeftY) / params.scaleY);
+        double yEnd = Math.round((worldP2.y - params.upperLeftY) / params.scaleY);
+
+        // Contain y range within geomExtent; Use centroid y line as scan line
+        yStart = Math.max(0.5, Math.abs(yStart) - 0.5);
+        yEnd = Math.min((params.writableRaster.getHeight() - 0.5), Math.abs(yEnd) + 0.5);
+
+        double slope = (worldP2.y - worldP1.y) / (worldP2.x - worldP1.x);
+        double p1X = (worldP1.x - params.upperLeftX) / params.scaleX;
+        double p1Y = (params.upperLeftY - worldP1.y) / params.scaleY;
+
+        for (double y = yStart; y >= yEnd; y--) {
+          double xIntercept = p1X + ((p1Y - y) / slope);
+          if ((xIntercept < 0) || (xIntercept > params.writableRaster.getWidth())) {
+            continue; // skip xIntercepts outside geomExtent
+          }
+          if (!scanlineIntersections.containsKey(y)) {
+            scanlineIntersections.put(y, new TreeSet<>());
+          }
+          scanlineIntersections.get(y).add(xIntercept);
+        }
+      }
+    }
+    return scanlineIntersections;
+  }
+
+  /** Computes startX and endX pairs for each scanline by leveraging sorted X-intercepts. */
+  private static Map<Integer, List<int[]>> computeFillRanges(
+      Map<Double, TreeSet<Double>> scanlineIntersections) {
+
+    Map<Integer, List<int[]>> scanlineFillRanges = new HashMap<>();
+
+    for (Map.Entry<Double, TreeSet<Double>> entry : scanlineIntersections.entrySet()) {
+      double y = entry.getKey();
+      TreeSet<Double> xIntercepts = entry.getValue();
+      List<int[]> ranges = new ArrayList<>();
+
+      Iterator<Double> it = xIntercepts.iterator();
+      while (it.hasNext()) {
+        double x1 = it.next();
+        if (!it.hasNext()) {
+          ranges.add(new int[] {(int) Math.floor(x1)});
+          continue;
+        }
+        double x2 = it.next();
+
+        // Compute centroids
+        double firstCentroid = Math.ceil(x1 - 0.5) + 0.5;
+        double lastCentroid = Math.floor(x2 + 0.5) - 0.5;
+
+        if (lastCentroid < firstCentroid) {
+          continue; // No valid pixel to include
+        }
+        if (lastCentroid == firstCentroid) {
+          ranges.add(new int[] {(int) Math.floor(firstCentroid)});
+        } else {
+          ranges.add(new int[] {(int) Math.floor(firstCentroid), (int) Math.floor(lastCentroid)});
+        }
+      }
+
+      scanlineFillRanges.put((int) Math.floor(y), ranges);
+    }
+
+    return scanlineFillRanges;
+  }
+
+  /** Burns pixels between startX and endX for each scanline. */
+  private static void fillPolygon(
+      Map<Integer, List<int[]>> scanlineFillRanges, RasterizationParams params, double value) {
+
+    for (Map.Entry<Integer, List<int[]>> entry : scanlineFillRanges.entrySet()) {
+      int y = entry.getKey();
+      for (int[] range : entry.getValue()) {
+        if (range.length == 1) {
+          params.writableRaster.setSample(range[0], y, 0, value);
+          continue;
+        }
+        int xStart = range[0];
+        int xEnd = range[1];
+
+        for (int x = xStart; x <= xEnd; x++) {
+          params.writableRaster.setSample(x, y, 0, value);
+        }
+      }
     }
   }
 }

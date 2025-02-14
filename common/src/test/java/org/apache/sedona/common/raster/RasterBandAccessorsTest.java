@@ -85,8 +85,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
   }
 
   @Test
-  public void testZonalStats()
-      throws FactoryException, ParseException, IOException, TransformException {
+  public void testZonalStats() throws FactoryException, ParseException, IOException {
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
     String polygon =
@@ -94,19 +93,19 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     Geometry geom = Constructors.geomFromWKT(polygon, RasterAccessors.srid(raster));
 
     double actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "sum", false, false);
-    double expected = 1.0875064E7;
+    double expected = 1.0896994E7;
     assertEquals(expected, actual, 0d);
 
     actual = RasterBandAccessors.getZonalStats(raster, geom, 2, "mean", false, false);
-    expected = 220.81145343140577;
+    expected = 220.76055239764008;
     assertEquals(expected, actual, FP_TOLERANCE);
 
     actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "count");
-    expected = 185726.0;
+    expected = 185953.0;
     assertEquals(expected, actual, 0.1d);
 
     actual = RasterBandAccessors.getZonalStats(raster, geom, 3, "variance", false, false);
-    expected = 13555.74907572951;
+    expected = 13560.056183580346;
     assertEquals(expected, actual, FP_TOLERANCE);
 
     actual = RasterBandAccessors.getZonalStats(raster, geom, "max");
@@ -118,7 +117,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     assertEquals(expected, actual, 1E-1);
 
     actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "sd", false, false);
-    expected = 92.48405030729849;
+    expected = 92.53811912983977;
     assertEquals(expected, actual, FP_TOLERANCE);
 
     geom =
@@ -194,13 +193,13 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false, false, false);
     double[] expected =
         new double[] {
-          185726.0,
-          1.0875064E7,
-          58.554343495236125,
+          185953.0,
+          1.0896994E7,
+          58.600796975566816,
           0.0,
           0.0,
-          92.48405030729849,
-          8553.299561242919,
+          92.53811912983977,
+          8563.303492088418,
           0.0,
           255.0
         };

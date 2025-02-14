@@ -77,13 +77,6 @@ public class RasterConstructorsTest extends RasterTestBase {
   }
 
   @Test
-  public void profileRasterization() throws FactoryException, ParseException, IOException {
-    for (int i = 0; i < 1000000; i++) {
-      testAsRasterWithRaster();
-    }
-  }
-
-  @Test
   public void testAsRasterWithEmptyRaster() throws FactoryException, ParseException {
     // Polygon
     GridCoverage2D raster =
@@ -91,35 +84,22 @@ public class RasterConstructorsTest extends RasterTestBase {
 
     Geometry geom =
         Constructors.geomFromWKT("POLYGON((15 -15, 18 -20, 15 -24, 24 -25, 15 -15))", 0);
-    GridCoverage2D rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 3d);
+    GridCoverage2D rasterized = RasterConstructors.asRaster(geom, raster, "d", true, 3093151, 3d);
 
     double[] actual = MapAlgebra.bandAsArray(rasterized, 1);
-    //    System.out.println(
-    //        "\nOG raster metadata: " + Arrays.toString(RasterAccessors.metadata(raster)));
-    //    System.out.println(
-    //        "Rasterized metadata: " + Arrays.toString(RasterAccessors.metadata(rasterized)));
-    //    System.out.println("Rasterized raster: " + Arrays.toString(actual));
 
-    //    System.out.println(Arrays.toString(actual));
-    //    double[] expected =
-    //        new double[] {
-    //          3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0,
-    // 0.0,
-    //          3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0,
-    //          3093151.0, 3093151.0, 3093151.0, 3093151.0, 0.0, 3093151.0, 3093151.0, 3093151.0,
-    //          3093151.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0
-    //        };
     double[] expected =
         new double[] {
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0,
-          3093151.0, 3093151.0, 0.0, 0.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0, 0.0
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0,
+          3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 3093151.0,
+          3093151.0, 3093151.0, 3093151.0, 0.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0,
+          3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0
         };
 
     assertArrayEquals(expected, actual, 0.1d);
 
     rasterized = RasterConstructors.asRaster(geom, raster, "d");
     actual = MapAlgebra.bandAsArray(rasterized, 1);
-    //    System.out.println(Arrays.toString(actual));
     expected =
         new double[] {
           0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0,
@@ -128,156 +108,131 @@ public class RasterConstructorsTest extends RasterTestBase {
 
     assertArrayEquals(expected, actual, 0.1d);
 
-    //    // MultiPolygon
-    //    geom =
-    //        Constructors.geomFromWKT(
-    //            "MULTIPOLYGON ( ((2 -2, 4 -2, 4 -4, 2 -4, 2 -2)), ((4 -4, 6 -4, 6 -6, 5 -7, 4 -6,
-    // 4 -4)), ((6 -6, 8 -6, 8 -8, 6 -8, 6 -6)), ((8 -6, 10 -6, 10 -4, 9 -3, 8 -4, 8 -6)) )",
-    //            0);
-    //
-    //    rasterized = RasterConstructors.asRaster(geom, raster, "d", true, 3093151, 3d, true);
-    //    actual = MapAlgebra.bandAsArray(rasterized, 1);
-    //
-    //    expected =
-    //        new double[] {
-    //          3093151.0, 3093151.0, 0.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0,
-    //          3093151.0, 3093151.0, 0.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0, 0.0,
-    // 3093151.0,
-    //          3093151.0, 3093151.0, 0.0
-    //        };
-    //    assertArrayEquals(expected, actual, 0.1d);
-    //
-    //    rasterized = RasterConstructors.asRaster(geom, raster, "d");
-    //    actual = MapAlgebra.bandAsArray(rasterized, 1);
-    //
-    //    expected =
-    //        new double[] {
-    //          1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0,
-    // 1.0,
-    //          1.0, 0.0
-    //        };
-    //    assertArrayEquals(expected, actual, 0.1d);
-    //
-    //    // MultiLineString
-    //    geom =
-    //        Constructors.geomFromWKT("MULTILINESTRING ((5 -5, 10 -10), (10 -10, 15 -15, 20 -20))",
-    // 0);
-    //    rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 3d);
-    //
-    //    actual = MapAlgebra.bandAsArray(rasterized, 1);
-    //
-    //    expected =
-    //        new double[] {
-    //          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0,
-    // 0.0, 0.0,
-    //          0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0,
-    // 0.0,
-    //          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    // 0.0, 0.0,
-    //          0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0,
-    // 0.0,
-    //          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    // 0.0,
-    //          3093151.0
-    //        };
-    //    assertArrayEquals(expected, actual, 0.1d);
-    //
-    //    rasterized = RasterConstructors.asRaster(geom, raster, "d");
-    //
-    //    actual = MapAlgebra.bandAsArray(rasterized, 1);
-    //
-    //    expected =
-    //        new double[] {
-    //          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    // 0.0,
-    //          0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
-    // 0.0,
-    //          0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
-    // 0.0,
-    //          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0,
-    // 0.0,
-    //          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0
-    //        };
-    //    assertArrayEquals(expected, actual, 0.1d);
-    //
-    //    // LinearRing
-    //    geom = Constructors.geomFromWKT("LINEARRING (10 -10, 18 -20, 15 -24, 24 -25, 10 -10)", 0);
-    //    rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 3d);
-    //    actual = MapAlgebra.bandAsArray(rasterized, 1);
-    //
-    //    expected =
-    //        new double[] {
-    //          3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0,
-    // 0.0,
-    //          0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0,
-    // 3093151.0,
-    //          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    // 0.0,
-    //          0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 3093151.0,
-    // 3093151.0,
-    //          0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0
-    //        };
-    //    assertArrayEquals(expected, actual, 0.1d);
-    //
-    //    rasterized = RasterConstructors.asRaster(geom, raster, "d");
-    //    actual = MapAlgebra.bandAsArray(rasterized, 1);
-    //    expected =
-    //        new double[] {
-    //          1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    // 1.0,
-    //          1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    // 1.0,
-    //          1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
-    // 1.0,
-    //          1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0
-    //        };
-    //
-    //    assertArrayEquals(expected, actual, 0.1d);
-    //
-    //    // MultiPoints
-    //    geom = Constructors.geomFromWKT("MULTIPOINT ((5 -5), (10 -10), (15 -15))", 0);
-    //    rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 3d);
-    //    actual = MapAlgebra.bandAsArray(rasterized, 1);
-    //
-    //    expected =
-    //        new double[] {
-    //          3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0,
-    // 0.0,
-    //          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0,
-    // 0.0, 0.0,
-    //          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0,
-    // 0.0,
-    //          0.0, 0.0, 3093151.0, 3093151.0
-    //        };
-    //    assertArrayEquals(expected, actual, 0.1d);
-    //
-    //    rasterized = RasterConstructors.asRaster(geom, raster, "d");
-    //    actual = MapAlgebra.bandAsArray(rasterized, 1);
-    //
-    //    expected =
-    //        new double[] {
-    //          1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    // 0.0,
-    //          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    // 0.0,
-    //          0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0
-    //        };
-    //
-    //    assertArrayEquals(expected, actual, 0.1d);
-    //
-    //    // Point
-    //    geom = Constructors.geomFromWKT("POINT (5 -5)", 0);
-    //    rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 3d);
-    //
-    //    actual = MapAlgebra.bandAsArray(rasterized, 1);
-    //
-    //    expected = new double[] {3093151.0, 3093151.0, 3093151.0, 3093151.0};
-    //    assertArrayEquals(expected, actual, 0.1d);
-    //
-    //    rasterized = RasterConstructors.asRaster(geom, raster, "d");
-    //    actual = MapAlgebra.bandAsArray(rasterized, 1);
-    //    expected = new double[] {1.0, 1.0, 1.0, 1.0};
-    //    assertArrayEquals(expected, actual, 0.1d);
+    // MultiPolygon
+    geom =
+        Constructors.geomFromWKT(
+            "MULTIPOLYGON ( ((2 -2, 4 -2, 4 -4, 2 -4, 2 -2)), ((4 -4, 6 -4, 6 -6, 5 -7, 4 -6, 4 -4)), ((6 -6, 8 -6, 8 -8, 6 -8, 6 -6)), ((8 -6, 10 -6, 10 -4, 9 -3, 8 -4, 8 -6)) )",
+            0);
+
+    rasterized = RasterConstructors.asRaster(geom, raster, "d", true, 3093151, 3d, true);
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    expected =
+        new double[] {
+          3093151.0, 3093151.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0,
+          3093151.0, 0.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0, 0.0, 0.0, 3093151.0,
+          3093151.0, 0.0
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+
+    rasterized = RasterConstructors.asRaster(geom, raster, "d");
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+
+    expected =
+        new double[] {
+          1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0,
+          1.0, 0.0
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+
+    // MultiLineString
+    geom =
+        Constructors.geomFromWKT("MULTILINESTRING ((5 -5, 10 -10), (10 -10, 15 -15, 20 -20))", 0);
+    rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 3d);
+
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    expected =
+        new double[] {
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          3093151.0
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+
+    rasterized = RasterConstructors.asRaster(geom, raster, "d");
+
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+
+    expected =
+        new double[] {
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+
+    // LinearRing
+    geom = Constructors.geomFromWKT("LINEARRING (10 -10, 18 -20, 15 -24, 24 -25, 10 -10)", 0);
+    rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 3d);
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+
+    expected =
+        new double[] {
+          3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0,
+          3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0,
+          3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0,
+          3093151.0
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+
+    rasterized = RasterConstructors.asRaster(geom, raster, "d");
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+
+    expected =
+        new double[] {
+          1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+          1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+          1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0,
+          1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0
+        };
+
+    assertArrayEquals(expected, actual, 0.1d);
+
+    // MultiPoints
+    geom = Constructors.geomFromWKT("MULTIPOINT ((5 -5), (10 -10), (15 -15))", 0);
+    rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 3d);
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+
+    expected =
+        new double[] {
+          3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 3093151.0, 3093151.0
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+
+    rasterized = RasterConstructors.asRaster(geom, raster, "d");
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+
+    expected =
+        new double[] {
+          1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0
+        };
+
+    assertArrayEquals(expected, actual, 0.1d);
+
+    // Point
+    geom = Constructors.geomFromWKT("POINT (5 -5)", 0);
+    rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 3d);
+
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+
+    expected = new double[] {3093151.0, 3093151.0, 3093151.0, 3093151.0};
+    assertArrayEquals(expected, actual, 0.1d);
+
+    rasterized = RasterConstructors.asRaster(geom, raster, "d");
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    expected = new double[] {1.0, 1.0, 1.0, 1.0};
+    assertArrayEquals(expected, actual, 0.1d);
   }
 
   @Test
@@ -308,7 +263,6 @@ public class RasterConstructorsTest extends RasterTestBase {
         Constructors.geomFromWKT("POLYGON((1.5 1.5, 3.8 3.0, 4.5 4.4, 3.4 3.5, 1.5 1.5))", 0);
     GridCoverage2D rasterized = RasterConstructors.asRaster(geom, raster, "d", true, 612028, 5d);
     double[] actual = Arrays.stream(MapAlgebra.bandAsArray(rasterized, 1)).toArray();
-    //    System.out.println(Arrays.toString(actual));
     double[] expected = {
       0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 612028.0, 612028.0, 0.0, 0.0, 0.0,
       0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -318,31 +272,12 @@ public class RasterConstructorsTest extends RasterTestBase {
       612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
       612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
       612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-      612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-      612028.0, 612028.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 612028.0,
-      612028.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 612028.0, 612028.0,
-      612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 612028.0, 612028.0, 0.0, 0.0,
-      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+      612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      612028.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 612028.0,
+      612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 612028.0, 612028.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
     };
-    //    double[] expected = {
-    //      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    // 0.0, 0.0,
-    //      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 612028.0,
-    // 612028.0, 0.0,
-    //      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    // 0.0, 0.0,
-    //      0.0, 0.0, 612028.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    // 612028.0,
-    //      612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 612028.0, 612028.0,
-    // 612028.0, 0.0,
-    //      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 612028.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0,
-    // 0.0, 0.0,
-    //      0.0, 0.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 612028.0,
-    // 612028.0,
-    //      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    // 0.0, 0.0,
-    //      0.0, 0.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
-    //    };
     assertArrayEquals(expected, actual, 0.1d);
 
     rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 5484);
@@ -359,20 +294,16 @@ public class RasterConstructorsTest extends RasterTestBase {
           0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5484.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
           0.0, 0.0, 5484.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
         };
-
     assertArrayEquals(expected, actual, 0.1d);
   }
 
   @Test
-  public void testAsRasterWithRasterExtent()
-      throws IOException, ParseException, FactoryException, TransformException {
+  public void testAsRasterWithRasterExtent() throws IOException, ParseException, FactoryException {
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
-
     Geometry geom =
         Constructors.geomFromWKT(
             "POLYGON((1.5 1.5, 3.8 3.0, 4.5 4.4, 3.4 3.5, 1.5 1.5))", RasterAccessors.srid(raster));
-
     GridCoverage2D rasterized =
         RasterConstructors.asRasterWithRasterExtent(geom, raster, "d", false, 612028, 5d);
 

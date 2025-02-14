@@ -769,8 +769,8 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
           "RS_BandAsArray(RS_SetValues(raster, 1, ST_GeomFromWKT('POLYGON((1 -1, 3 -3, 6 -6, 4 -1, 1 -1))'), 150, true), 1)")
         .first()
         .getSeq(0)
-      expected = Seq(150.0, 150.0, 150.0, 150.0, 0.0, 150.0, 150.0, 150.0, 150.0, 0.0, 0.0, 150.0,
-        150.0, 150.0, 150.0, 0.0, 0.0, 150.0, 150.0, 150.0, 0.0, 0.0, 0.0, 150.0, 150.0)
+      expected = Seq(150.0, 150.0, 150.0, 150.0, 0.0, 0.0, 150.0, 150.0, 150.0, 0.0, 0.0, 0.0,
+        150.0, 150.0, 150.0, 0.0, 0.0, 0.0, 150.0, 150.0, 0.0, 0.0, 0.0, 0.0, 150.0)
       assert(expected.equals(actual))
     }
 
@@ -1632,20 +1632,20 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         "ST_GeomFromWKT('POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))', 26918) as geom")
       var actual =
         df.selectExpr("RS_ZonalStats(raster, geom, 1, 'sum', false, true)").first().get(0)
-      assertEquals(1.0875064e7, actual)
+      assertEquals(1.0896994e7, actual)
 
       actual =
         df.selectExpr("RS_ZonalStats(raster, geom, 1, 'count', false, false)").first().get(0)
-      assertEquals(185726.0, actual)
+      assertEquals(185953.0, actual)
 
       actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'mean', true, false)").first().get(0)
-      assertEquals(58.6241061211001, actual)
+      assertEquals(58.650240700685295, actual)
 
       actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'variance')").first().get(0)
-      assertEquals(8553.299561242919, actual)
+      assertEquals(8563.303492088418, actual)
 
       actual = df.selectExpr("RS_ZonalStats(raster, geom, 'sd')").first().get(0)
-      assertEquals(92.48405030729849, actual)
+      assertEquals(92.53811912983977, actual)
 
       // Test with a polygon in EPSG:4326
       actual = df
@@ -1676,7 +1676,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(3229013.0, actual)
 
       actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'count', true, true)").first().get(0)
-      assertEquals(14708.0, actual)
+      assertEquals(14648.0, actual)
 
       actual =
         df.selectExpr("RS_ZonalStats(raster, geom, 1, 'mean', false, false)").first().get(0)
@@ -1702,8 +1702,8 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .getStruct(0)
         .toSeq
         .slice(0, 9)
-      val expected = Seq(185726.0, 1.0875064e7, 58.554343495236125, 0.0, 0.0, 92.48405030729849,
-        8553.299561242919, 0.0, 255.0)
+      val expected = Seq(185953.0, 1.0896994e7, 58.600796975566816, 0.0, 0.0, 92.53811912983977,
+        8563.303492088418, 0.0, 255.0)
       assertTrue(expected.equals(actual))
 
       // Test with a polygon that does not intersect the raster in lenient mode
