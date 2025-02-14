@@ -23,7 +23,7 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{Expression, ImplicitCastInputTypes}
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.ArrayData
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, GeographyUDT}
 import org.apache.spark.sql.types.{AbstractDataType, BinaryType, BooleanType, DataType, DataTypes, DoubleType, IntegerType, LongType, StringType}
 import org.apache.spark.unsafe.types.UTF8String
 import org.locationtech.jts.geom.Geometry
@@ -235,6 +235,12 @@ object InferredTypes {
       } else {
         null
       }
+    } else if (t =:= typeOf[Geography]) { output =>
+      if (output != null) {
+        output.asInstanceOf[Geography].toGenericArrayData
+      } else {
+        null
+      }
     } else if (InferredRasterExpression.isRasterType(t)) {
       InferredRasterExpression.rasterSerializer
     } else if (t =:= typeOf[String]) { output =>
@@ -264,6 +270,14 @@ object InferredTypes {
         } else {
           null
         }
+    } else if (t =:= typeOf[Array[Geography]] || t =:= typeOf[java.util.List[Geography]]) {
+      output =>
+        if (output != null) {
+          ArrayData.toArrayData(output.asInstanceOf[Array[Geography]].map(_.toGenericArrayData))
+        } else {
+          null
+        }
+
     } else if (InferredRasterExpression.isRasterArrayType(t)) {
       InferredRasterExpression.rasterArraySerializer
     } else if (t =:= typeOf[Option[Boolean]]) { output =>
@@ -282,6 +296,10 @@ object InferredTypes {
       GeometryUDT
     } else if (t =:= typeOf[Array[Geometry]] || t =:= typeOf[java.util.List[Geometry]]) {
       DataTypes.createArrayType(GeometryUDT)
+    } else if (t =:= typeOf[Geography]) {
+      GeographyUDT
+    } else if (t =:= typeOf[Array[Geography]] || t =:= typeOf[java.util.List[Geography]]) {
+      DataTypes.createArrayType(GeographyUDT)
     } else if (InferredRasterExpression.isRasterType(t)) {
       InferredRasterExpression.rasterUDT
     } else if (InferredRasterExpression.isRasterArrayType(t)) {
