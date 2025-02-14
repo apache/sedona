@@ -26,7 +26,6 @@ class Geography:
         self._geom = geometry
         self.userData = None
 
-
     def getUserData(self):
         return self.userData
 
