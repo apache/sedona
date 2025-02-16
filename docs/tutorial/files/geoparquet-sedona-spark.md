@@ -76,7 +76,7 @@ df.show(truncate=False)
 Here are the results:
 
 ```
-+---+---------------------+                                                 
++---+---------------------+  
 |id |geometry             |
 +---+---------------------+
 |a  |LINESTRING (2 5, 6 1)|
