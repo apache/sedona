@@ -44,7 +44,7 @@ nav:
           - Install on AWS Glue: setup/glue.md
           - Install on Microsoft Fabric: setup/fabric.md
           - Set up Spark cluster manually: setup/cluster.md
-          - Install on Azure Synpase Analytics: setup/azure-synapse-analytics.md
+          - Install on Azure Synapse Analytics: setup/azure-synapse-analytics.md
       - Install with Apache Flink:
           - Install Sedona Scala/Java: setup/flink/install-scala.md
       - Install with Snowflake:

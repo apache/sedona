@@ -162,7 +162,7 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
     return true;
   }
 
-  public boolean spatialParitioningWithoutDuplicates(GridType gridType) throws Exception {
+  public boolean spatialPartitioningWithoutDuplicates(GridType gridType) throws Exception {
     int numPartitions = this.rawSpatialRDD.rdd().partitions().length;
     spatialPartitioningWithoutDuplicates(gridType, numPartitions);
     return true;
