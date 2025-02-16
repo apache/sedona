@@ -61,7 +61,7 @@ nav:
           - Sedona R: api/rdocs
           - Work with GeoPandas and Shapely: tutorial/geopandas-shapely.md
           - Files:
-              - GeoJSON: tutorial/files/geojson_sedona_spark.md
+              - GeoJSON: tutorial/files/geojson-sedona-spark.md
           - Map visualization SQL app:
               - Scala/Java: tutorial/viz.md
               - Use Apache Zeppelin: tutorial/zeppelin.md

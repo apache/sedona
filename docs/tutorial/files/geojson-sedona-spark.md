@@ -100,6 +100,26 @@ The multiline GeoJSON file contains a point, a linestring, and a polygon.  Let�
 
 Notice how the data is modeled as a `FeatureCollection`.  Each feature has a geometry type, geometry coordinates, and properties.
 
+You can also read many multiline GeoJSON files.  Suppose you have the following GeoJSON files:
+
+```
+many_geojsons/
+  file1.json
+  file2.json
+```
+
+Here's how you can read many GeoJSON files:
+
+```python
+df = (
+    sedona.read.format("geojson")
+    .option("multiLine", "true")
+    .load("data/many_geojsons")
+)
+```
+
+You just need to pass the directory that contains the JSON files.
+
 Multiline GeoJSON is nicely formatted for humans but inefficient for machines. It’s better to store all the JSON data in a single line.
 
 ## Read single-line GeoJSON files with Sedona and Spark
@@ -203,6 +223,7 @@ However, GeoJSON has many downsides, making it a suboptimal choice for storing g
 
 The GeoJSON format has many limitations that can make it a slow option for spatial data lakes:
 
+* A GeoJSON object may have a CRS, but it's optional, so this critical data can be lost.
 * It’s a row-oriented file format, so performance optimizations like column pruning aren’t available (column-oriented file formats, like GeoParquet, can take advantage of this optimization).
 * It does not store metadata information on row groups, so row-group filtering isn’t possible (row-group filtering is a Parquet performance optimization).
 * The schema is not specified in the footer, so it needs to be manually written or inferred.
