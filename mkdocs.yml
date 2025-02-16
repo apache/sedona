@@ -44,7 +44,7 @@ nav:
           - Install on AWS Glue: setup/glue.md
           - Install on Microsoft Fabric: setup/fabric.md
           - Set up Spark cluster manually: setup/cluster.md
-          - Install on Azure Synpase Analytics: setup/azure-synapse-analytics.md
+          - Install on Azure Synapse Analytics: setup/azure-synapse-analytics.md
       - Install with Apache Flink:
           - Install Sedona Scala/Java: setup/flink/install-scala.md
       - Install with Snowflake:
@@ -62,6 +62,7 @@ nav:
           - Work with GeoPandas and Shapely: tutorial/geopandas-shapely.md
           - Files:
               - GeoParquet: tutorial/files/geoparquet-sedona-spark.md
+              - GeoJSON: tutorial/files/geojson-sedona-spark.md
           - Map visualization SQL app:
               - Scala/Java: tutorial/viz.md
               - Use Apache Zeppelin: tutorial/zeppelin.md
