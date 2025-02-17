@@ -22,8 +22,8 @@ public final class Fileformat {
   private Fileformat() {}
 
   static {
-    com.google.protobuf.RuntimeVersion.validateProtobufGencodeVersion(
-        com.google.protobuf.RuntimeVersion.RuntimeDomain.PUBLIC,
+    proto4.RuntimeVersion.validateProtobufGencodeVersion(
+        proto4.RuntimeVersion.RuntimeDomain.PUBLIC,
         /* major= */ 4,
         /* minor= */ 27,
         /* patch= */ 0,
@@ -31,16 +31,16 @@ public final class Fileformat {
         Fileformat.class.getName());
   }
 
-  public static void registerAllExtensions(com.google.protobuf.ExtensionRegistryLite registry) {}
+  public static void registerAllExtensions(proto4.ExtensionRegistryLite registry) {}
 
-  public static void registerAllExtensions(com.google.protobuf.ExtensionRegistry registry) {
-    registerAllExtensions((com.google.protobuf.ExtensionRegistryLite) registry);
+  public static void registerAllExtensions(proto4.ExtensionRegistry registry) {
+    registerAllExtensions((proto4.ExtensionRegistryLite) registry);
   }
 
   public interface BlobOrBuilder
       extends
       // @@protoc_insertion_point(interface_extends:Blob)
-      com.google.protobuf.MessageOrBuilder {
+      proto4.MessageOrBuilder {
 
     /**
      *
@@ -65,7 +65,7 @@ public final class Fileformat {
      *
      * @return The raw.
      */
-    com.google.protobuf.ByteString getRaw();
+    proto4.ByteString getRaw();
 
     /**
      *
@@ -115,7 +115,7 @@ public final class Fileformat {
      *
      * @return The zlibData.
      */
-    com.google.protobuf.ByteString getZlibData();
+    proto4.ByteString getZlibData();
 
     /**
      *
@@ -140,7 +140,7 @@ public final class Fileformat {
      *
      * @return The lzmaData.
      */
-    com.google.protobuf.ByteString getLzmaData();
+    proto4.ByteString getLzmaData();
 
     /**
      *
@@ -171,18 +171,18 @@ public final class Fileformat {
      * @return The oBSOLETEBzip2Data.
      */
     @Deprecated
-    com.google.protobuf.ByteString getOBSOLETEBzip2Data();
+    proto4.ByteString getOBSOLETEBzip2Data();
   }
   /** Protobuf type {@code Blob} */
-  public static final class Blob extends com.google.protobuf.GeneratedMessage
+  public static final class Blob extends proto4.GeneratedMessage
       implements
       // @@protoc_insertion_point(message_implements:Blob)
       BlobOrBuilder {
     private static final long serialVersionUID = 0L;
 
     static {
-      com.google.protobuf.RuntimeVersion.validateProtobufGencodeVersion(
-          com.google.protobuf.RuntimeVersion.RuntimeDomain.PUBLIC,
+      proto4.RuntimeVersion.validateProtobufGencodeVersion(
+          proto4.RuntimeVersion.RuntimeDomain.PUBLIC,
           /* major= */ 4,
           /* minor= */ 27,
           /* patch= */ 0,
@@ -190,18 +190,18 @@ public final class Fileformat {
           Blob.class.getName());
     }
     // Use Blob.newBuilder() to construct.
-    private Blob(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private Blob(proto4.GeneratedMessage.Builder<?> builder) {
       super(builder);
     }
 
     private Blob() {
-      raw_ = com.google.protobuf.ByteString.EMPTY;
-      zlibData_ = com.google.protobuf.ByteString.EMPTY;
-      lzmaData_ = com.google.protobuf.ByteString.EMPTY;
-      oBSOLETEBzip2Data_ = com.google.protobuf.ByteString.EMPTY;
+      raw_ = proto4.ByteString.EMPTY;
+      zlibData_ = proto4.ByteString.EMPTY;
+      lzmaData_ = proto4.ByteString.EMPTY;
+      oBSOLETEBzip2Data_ = proto4.ByteString.EMPTY;
     }
 
-    public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+    public static final proto4.Descriptors.Descriptor getDescriptor() {
       return Fileformat.internal_static_org_apache_sedona_osm_build_Blob_descriptor;
     }
 
@@ -213,7 +213,7 @@ public final class Fileformat {
 
     private int bitField0_;
     public static final int RAW_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString raw_ = com.google.protobuf.ByteString.EMPTY;
+    private proto4.ByteString raw_ = proto4.ByteString.EMPTY;
     /**
      *
      *
@@ -241,7 +241,7 @@ public final class Fileformat {
      * @return The raw.
      */
     @Override
-    public com.google.protobuf.ByteString getRaw() {
+    public proto4.ByteString getRaw() {
       return raw_;
     }
 
@@ -279,7 +279,7 @@ public final class Fileformat {
     }
 
     public static final int ZLIB_DATA_FIELD_NUMBER = 3;
-    private com.google.protobuf.ByteString zlibData_ = com.google.protobuf.ByteString.EMPTY;
+    private proto4.ByteString zlibData_ = proto4.ByteString.EMPTY;
     /**
      *
      *
@@ -307,12 +307,12 @@ public final class Fileformat {
      * @return The zlibData.
      */
     @Override
-    public com.google.protobuf.ByteString getZlibData() {
+    public proto4.ByteString getZlibData() {
       return zlibData_;
     }
 
     public static final int LZMA_DATA_FIELD_NUMBER = 4;
-    private com.google.protobuf.ByteString lzmaData_ = com.google.protobuf.ByteString.EMPTY;
+    private proto4.ByteString lzmaData_ = proto4.ByteString.EMPTY;
     /**
      *
      *
@@ -340,13 +340,12 @@ public final class Fileformat {
      * @return The lzmaData.
      */
     @Override
-    public com.google.protobuf.ByteString getLzmaData() {
+    public proto4.ByteString getLzmaData() {
       return lzmaData_;
     }
 
     public static final int OBSOLETE_BZIP2_DATA_FIELD_NUMBER = 5;
-    private com.google.protobuf.ByteString oBSOLETEBzip2Data_ =
-        com.google.protobuf.ByteString.EMPTY;
+    private proto4.ByteString oBSOLETEBzip2Data_ = proto4.ByteString.EMPTY;
     /**
      *
      *
@@ -380,7 +379,7 @@ public final class Fileformat {
      */
     @Override
     @Deprecated
-    public com.google.protobuf.ByteString getOBSOLETEBzip2Data() {
+    public proto4.ByteString getOBSOLETEBzip2Data() {
       return oBSOLETEBzip2Data_;
     }
 
@@ -397,7 +396,7 @@ public final class Fileformat {
     }
 
     @Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException {
+    public void writeTo(proto4.CodedOutputStream output) throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeBytes(1, raw_);
       }
@@ -423,19 +422,19 @@ public final class Fileformat {
 
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += com.google.protobuf.CodedOutputStream.computeBytesSize(1, raw_);
+        size += proto4.CodedOutputStream.computeBytesSize(1, raw_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        size += com.google.protobuf.CodedOutputStream.computeInt32Size(2, rawSize_);
+        size += proto4.CodedOutputStream.computeInt32Size(2, rawSize_);
       }
       if (((bitField0_ & 0x00000004) != 0)) {
-        size += com.google.protobuf.CodedOutputStream.computeBytesSize(3, zlibData_);
+        size += proto4.CodedOutputStream.computeBytesSize(3, zlibData_);
       }
       if (((bitField0_ & 0x00000008) != 0)) {
-        size += com.google.protobuf.CodedOutputStream.computeBytesSize(4, lzmaData_);
+        size += proto4.CodedOutputStream.computeBytesSize(4, lzmaData_);
       }
       if (((bitField0_ & 0x00000010) != 0)) {
-        size += com.google.protobuf.CodedOutputStream.computeBytesSize(5, oBSOLETEBzip2Data_);
+        size += proto4.CodedOutputStream.computeBytesSize(5, oBSOLETEBzip2Data_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -509,73 +508,69 @@ public final class Fileformat {
     }
 
     public static Fileformat.Blob parseFrom(java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+        throws proto4.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
 
     public static Fileformat.Blob parseFrom(
-        java.nio.ByteBuffer data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+        java.nio.ByteBuffer data, proto4.ExtensionRegistryLite extensionRegistry)
+        throws proto4.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
 
-    public static Fileformat.Blob parseFrom(com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+    public static Fileformat.Blob parseFrom(proto4.ByteString data)
+        throws proto4.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
 
     public static Fileformat.Blob parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+        proto4.ByteString data, proto4.ExtensionRegistryLite extensionRegistry)
+        throws proto4.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
 
     public static Fileformat.Blob parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+        throws proto4.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
 
     public static Fileformat.Blob parseFrom(
-        byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+        byte[] data, proto4.ExtensionRegistryLite extensionRegistry)
+        throws proto4.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
 
     public static Fileformat.Blob parseFrom(java.io.InputStream input) throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessage.parseWithIOException(PARSER, input);
+      return proto4.GeneratedMessage.parseWithIOException(PARSER, input);
     }
 
     public static Fileformat.Blob parseFrom(
-        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.io.InputStream input, proto4.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessage.parseWithIOException(
-          PARSER, input, extensionRegistry);
+      return proto4.GeneratedMessage.parseWithIOException(PARSER, input, extensionRegistry);
     }
 
     public static Fileformat.Blob parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessage.parseDelimitedWithIOException(PARSER, input);
+      return proto4.GeneratedMessage.parseDelimitedWithIOException(PARSER, input);
     }
 
     public static Fileformat.Blob parseDelimitedFrom(
-        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.io.InputStream input, proto4.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessage.parseDelimitedWithIOException(
+      return proto4.GeneratedMessage.parseDelimitedWithIOException(
           PARSER, input, extensionRegistry);
     }
 
-    public static Fileformat.Blob parseFrom(com.google.protobuf.CodedInputStream input)
+    public static Fileformat.Blob parseFrom(proto4.CodedInputStream input)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessage.parseWithIOException(PARSER, input);
+      return proto4.GeneratedMessage.parseWithIOException(PARSER, input);
     }
 
     public static Fileformat.Blob parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        proto4.CodedInputStream input, proto4.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessage.parseWithIOException(
-          PARSER, input, extensionRegistry);
+      return proto4.GeneratedMessage.parseWithIOException(PARSER, input, extensionRegistry);
     }
 
     @Override
@@ -602,11 +597,11 @@ public final class Fileformat {
       return builder;
     }
     /** Protobuf type {@code Blob} */
-    public static final class Builder extends com.google.protobuf.GeneratedMessage.Builder<Builder>
+    public static final class Builder extends proto4.GeneratedMessage.Builder<Builder>
         implements
         // @@protoc_insertion_point(builder_implements:Blob)
         Fileformat.BlobOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+      public static final proto4.Descriptors.Descriptor getDescriptor() {
         return Fileformat.internal_static_org_apache_sedona_osm_build_Blob_descriptor;
       }
 
@@ -627,16 +622,16 @@ public final class Fileformat {
       public Builder clear() {
         super.clear();
         bitField0_ = 0;
-        raw_ = com.google.protobuf.ByteString.EMPTY;
+        raw_ = proto4.ByteString.EMPTY;
         rawSize_ = 0;
-        zlibData_ = com.google.protobuf.ByteString.EMPTY;
-        lzmaData_ = com.google.protobuf.ByteString.EMPTY;
-        oBSOLETEBzip2Data_ = com.google.protobuf.ByteString.EMPTY;
+        zlibData_ = proto4.ByteString.EMPTY;
+        lzmaData_ = proto4.ByteString.EMPTY;
+        oBSOLETEBzip2Data_ = proto4.ByteString.EMPTY;
         return this;
       }
 
       @Override
-      public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+      public proto4.Descriptors.Descriptor getDescriptorForType() {
         return Fileformat.internal_static_org_apache_sedona_osm_build_Blob_descriptor;
       }
 
@@ -691,7 +686,7 @@ public final class Fileformat {
       }
 
       @Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      public Builder mergeFrom(proto4.Message other) {
         if (other instanceof Fileformat.Blob) {
           return mergeFrom((Fileformat.Blob) other);
         } else {
@@ -729,8 +724,7 @@ public final class Fileformat {
 
       @Override
       public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          proto4.CodedInputStream input, proto4.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         if (extensionRegistry == null) {
           throw new NullPointerException();
@@ -782,7 +776,7 @@ public final class Fileformat {
                 } // default:
             } // switch (tag)
           } // while (!done)
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (proto4.InvalidProtocolBufferException e) {
           throw e.unwrapIOException();
         } finally {
           onChanged();
@@ -792,7 +786,7 @@ public final class Fileformat {
 
       private int bitField0_;
 
-      private com.google.protobuf.ByteString raw_ = com.google.protobuf.ByteString.EMPTY;
+      private proto4.ByteString raw_ = proto4.ByteString.EMPTY;
       /**
        *
        *
@@ -820,7 +814,7 @@ public final class Fileformat {
        * @return The raw.
        */
       @Override
-      public com.google.protobuf.ByteString getRaw() {
+      public proto4.ByteString getRaw() {
         return raw_;
       }
       /**
@@ -835,7 +829,7 @@ public final class Fileformat {
        * @param value The raw to set.
        * @return This builder for chaining.
        */
-      public Builder setRaw(com.google.protobuf.ByteString value) {
+      public Builder setRaw(proto4.ByteString value) {
         if (value == null) {
           throw new NullPointerException();
         }
@@ -930,7 +924,7 @@ public final class Fileformat {
         return this;
       }
 
-      private com.google.protobuf.ByteString zlibData_ = com.google.protobuf.ByteString.EMPTY;
+      private proto4.ByteString zlibData_ = proto4.ByteString.EMPTY;
       /**
        *
        *
@@ -958,7 +952,7 @@ public final class Fileformat {
        * @return The zlibData.
        */
       @Override
-      public com.google.protobuf.ByteString getZlibData() {
+      public proto4.ByteString getZlibData() {
         return zlibData_;
       }
       /**
@@ -973,7 +967,7 @@ public final class Fileformat {
        * @param value The zlibData to set.
        * @return This builder for chaining.
        */
-      public Builder setZlibData(com.google.protobuf.ByteString value) {
+      public Builder setZlibData(proto4.ByteString value) {
         if (value == null) {
           throw new NullPointerException();
         }
@@ -1000,7 +994,7 @@ public final class Fileformat {
         return this;
       }
 
-      private com.google.protobuf.ByteString lzmaData_ = com.google.protobuf.ByteString.EMPTY;
+      private proto4.ByteString lzmaData_ = proto4.ByteString.EMPTY;
       /**
        *
        *
@@ -1028,7 +1022,7 @@ public final class Fileformat {
        * @return The lzmaData.
        */
       @Override
-      public com.google.protobuf.ByteString getLzmaData() {
+      public proto4.ByteString getLzmaData() {
         return lzmaData_;
       }
       /**
@@ -1043,7 +1037,7 @@ public final class Fileformat {
        * @param value The lzmaData to set.
        * @return This builder for chaining.
        */
-      public Builder setLzmaData(com.google.protobuf.ByteString value) {
+      public Builder setLzmaData(proto4.ByteString value) {
         if (value == null) {
           throw new NullPointerException();
         }
@@ -1070,8 +1064,7 @@ public final class Fileformat {
         return this;
       }
 
-      private com.google.protobuf.ByteString oBSOLETEBzip2Data_ =
-          com.google.protobuf.ByteString.EMPTY;
+      private proto4.ByteString oBSOLETEBzip2Data_ = proto4.ByteString.EMPTY;
       /**
        *
        *
@@ -1105,7 +1098,7 @@ public final class Fileformat {
        */
       @Override
       @Deprecated
-      public com.google.protobuf.ByteString getOBSOLETEBzip2Data() {
+      public proto4.ByteString getOBSOLETEBzip2Data() {
         return oBSOLETEBzip2Data_;
       }
       /**
@@ -1121,7 +1114,7 @@ public final class Fileformat {
        * @return This builder for chaining.
        */
       @Deprecated
-      public Builder setOBSOLETEBzip2Data(com.google.protobuf.ByteString value) {
+      public Builder setOBSOLETEBzip2Data(proto4.ByteString value) {
         if (value == null) {
           throw new NullPointerException();
         }
@@ -1163,35 +1156,34 @@ public final class Fileformat {
       return DEFAULT_INSTANCE;
     }
 
-    private static final com.google.protobuf.Parser<Blob> PARSER =
-        new com.google.protobuf.AbstractParser<Blob>() {
+    private static final proto4.Parser<Blob> PARSER =
+        new proto4.AbstractParser<Blob>() {
           @Override
           public Blob parsePartialFrom(
-              com.google.protobuf.CodedInputStream input,
-              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-              throws com.google.protobuf.InvalidProtocolBufferException {
+              proto4.CodedInputStream input, proto4.ExtensionRegistryLite extensionRegistry)
+              throws proto4.InvalidProtocolBufferException {
             Builder builder = newBuilder();
             try {
               builder.mergeFrom(input, extensionRegistry);
-            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            } catch (proto4.InvalidProtocolBufferException e) {
               throw e.setUnfinishedMessage(builder.buildPartial());
-            } catch (com.google.protobuf.UninitializedMessageException e) {
+            } catch (proto4.UninitializedMessageException e) {
               throw e.asInvalidProtocolBufferException()
                   .setUnfinishedMessage(builder.buildPartial());
             } catch (java.io.IOException e) {
-              throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              throw new proto4.InvalidProtocolBufferException(e)
                   .setUnfinishedMessage(builder.buildPartial());
             }
             return builder.buildPartial();
           }
         };
 
-    public static com.google.protobuf.Parser<Blob> parser() {
+    public static proto4.Parser<Blob> parser() {
       return PARSER;
     }
 
     @Override
-    public com.google.protobuf.Parser<Blob> getParserForType() {
+    public proto4.Parser<Blob> getParserForType() {
       return PARSER;
     }
 
@@ -1204,7 +1196,7 @@ public final class Fileformat {
   public interface BlobHeaderOrBuilder
       extends
       // @@protoc_insertion_point(interface_extends:BlobHeader)
-      com.google.protobuf.MessageOrBuilder {
+      proto4.MessageOrBuilder {
 
     /**
      * <code>required string type = 1;</code>
@@ -1223,7 +1215,7 @@ public final class Fileformat {
      *
      * @return The bytes for type.
      */
-    com.google.protobuf.ByteString getTypeBytes();
+    proto4.ByteString getTypeBytes();
 
     /**
      * <code>optional bytes indexdata = 2;</code>
@@ -1236,7 +1228,7 @@ public final class Fileformat {
      *
      * @return The indexdata.
      */
-    com.google.protobuf.ByteString getIndexdata();
+    proto4.ByteString getIndexdata();
 
     /**
      * <code>required int32 datasize = 3;</code>
@@ -1252,15 +1244,15 @@ public final class Fileformat {
     int getDatasize();
   }
   /** Protobuf type {@code BlobHeader} */
-  public static final class BlobHeader extends com.google.protobuf.GeneratedMessage
+  public static final class BlobHeader extends proto4.GeneratedMessage
       implements
       // @@protoc_insertion_point(message_implements:BlobHeader)
       BlobHeaderOrBuilder {
     private static final long serialVersionUID = 0L;
 
     static {
-      com.google.protobuf.RuntimeVersion.validateProtobufGencodeVersion(
-          com.google.protobuf.RuntimeVersion.RuntimeDomain.PUBLIC,
+      proto4.RuntimeVersion.validateProtobufGencodeVersion(
+          proto4.RuntimeVersion.RuntimeDomain.PUBLIC,
           /* major= */ 4,
           /* minor= */ 27,
           /* patch= */ 0,
@@ -1268,16 +1260,16 @@ public final class Fileformat {
           BlobHeader.class.getName());
     }
     // Use BlobHeader.newBuilder() to construct.
-    private BlobHeader(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    private BlobHeader(proto4.GeneratedMessage.Builder<?> builder) {
       super(builder);
     }
 
     private BlobHeader() {
       type_ = "";
-      indexdata_ = com.google.protobuf.ByteString.EMPTY;
+      indexdata_ = proto4.ByteString.EMPTY;
     }
 
-    public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+    public static final proto4.Descriptors.Descriptor getDescriptor() {
       return Fileformat.internal_static_org_apache_sedona_osm_build_BlobHeader_descriptor;
     }
 
@@ -1313,7 +1305,7 @@ public final class Fileformat {
       if (ref instanceof String) {
         return (String) ref;
       } else {
-        com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+        proto4.ByteString bs = (proto4.ByteString) ref;
         String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
           type_ = s;
@@ -1327,20 +1319,19 @@ public final class Fileformat {
      * @return The bytes for type.
      */
     @Override
-    public com.google.protobuf.ByteString getTypeBytes() {
+    public proto4.ByteString getTypeBytes() {
       Object ref = type_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b =
-            com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+        proto4.ByteString b = proto4.ByteString.copyFromUtf8((String) ref);
         type_ = b;
         return b;
       } else {
-        return (com.google.protobuf.ByteString) ref;
+        return (proto4.ByteString) ref;
       }
     }
 
     public static final int INDEXDATA_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString indexdata_ = com.google.protobuf.ByteString.EMPTY;
+    private proto4.ByteString indexdata_ = proto4.ByteString.EMPTY;
     /**
      * <code>optional bytes indexdata = 2;</code>
      *
@@ -1356,7 +1347,7 @@ public final class Fileformat {
      * @return The indexdata.
      */
     @Override
-    public com.google.protobuf.ByteString getIndexdata() {
+    public proto4.ByteString getIndexdata() {
       return indexdata_;
     }
 
@@ -1402,9 +1393,9 @@ public final class Fileformat {
     }
 
     @Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException {
+    public void writeTo(proto4.CodedOutputStream output) throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
-        com.google.protobuf.GeneratedMessage.writeString(output, 1, type_);
+        proto4.GeneratedMessage.writeString(output, 1, type_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
         output.writeBytes(2, indexdata_);
@@ -1422,13 +1413,13 @@ public final class Fileformat {
 
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += com.google.protobuf.GeneratedMessage.computeStringSize(1, type_);
+        size += proto4.GeneratedMessage.computeStringSize(1, type_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        size += com.google.protobuf.CodedOutputStream.computeBytesSize(2, indexdata_);
+        size += proto4.CodedOutputStream.computeBytesSize(2, indexdata_);
       }
       if (((bitField0_ & 0x00000004) != 0)) {
-        size += com.google.protobuf.CodedOutputStream.computeInt32Size(3, datasize_);
+        size += proto4.CodedOutputStream.computeInt32Size(3, datasize_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -1486,74 +1477,70 @@ public final class Fileformat {
     }
 
     public static Fileformat.BlobHeader parseFrom(java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+        throws proto4.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
 
     public static Fileformat.BlobHeader parseFrom(
-        java.nio.ByteBuffer data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+        java.nio.ByteBuffer data, proto4.ExtensionRegistryLite extensionRegistry)
+        throws proto4.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
 
-    public static Fileformat.BlobHeader parseFrom(com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+    public static Fileformat.BlobHeader parseFrom(proto4.ByteString data)
+        throws proto4.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
 
     public static Fileformat.BlobHeader parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+        proto4.ByteString data, proto4.ExtensionRegistryLite extensionRegistry)
+        throws proto4.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
 
     public static Fileformat.BlobHeader parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+        throws proto4.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
 
     public static Fileformat.BlobHeader parseFrom(
-        byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+        byte[] data, proto4.ExtensionRegistryLite extensionRegistry)
+        throws proto4.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
 
     public static Fileformat.BlobHeader parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessage.parseWithIOException(PARSER, input);
+      return proto4.GeneratedMessage.parseWithIOException(PARSER, input);
     }
 
     public static Fileformat.BlobHeader parseFrom(
-        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.io.InputStream input, proto4.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessage.parseWithIOException(
-          PARSER, input, extensionRegistry);
+      return proto4.GeneratedMessage.parseWithIOException(PARSER, input, extensionRegistry);
     }
 
     public static Fileformat.BlobHeader parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessage.parseDelimitedWithIOException(PARSER, input);
+      return proto4.GeneratedMessage.parseDelimitedWithIOException(PARSER, input);
     }
 
     public static Fileformat.BlobHeader parseDelimitedFrom(
-        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.io.InputStream input, proto4.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessage.parseDelimitedWithIOException(
+      return proto4.GeneratedMessage.parseDelimitedWithIOException(
           PARSER, input, extensionRegistry);
     }
 
-    public static Fileformat.BlobHeader parseFrom(com.google.protobuf.CodedInputStream input)
+    public static Fileformat.BlobHeader parseFrom(proto4.CodedInputStream input)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessage.parseWithIOException(PARSER, input);
+      return proto4.GeneratedMessage.parseWithIOException(PARSER, input);
     }
 
     public static Fileformat.BlobHeader parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        proto4.CodedInputStream input, proto4.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessage.parseWithIOException(
-          PARSER, input, extensionRegistry);
+      return proto4.GeneratedMessage.parseWithIOException(PARSER, input, extensionRegistry);
     }
 
     @Override
@@ -1580,11 +1567,11 @@ public final class Fileformat {
       return builder;
     }
     /** Protobuf type {@code BlobHeader} */
-    public static final class Builder extends com.google.protobuf.GeneratedMessage.Builder<Builder>
+    public static final class Builder extends proto4.GeneratedMessage.Builder<Builder>
         implements
         // @@protoc_insertion_point(builder_implements:BlobHeader)
         Fileformat.BlobHeaderOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
+      public static final proto4.Descriptors.Descriptor getDescriptor() {
         return Fileformat.internal_static_org_apache_sedona_osm_build_BlobHeader_descriptor;
       }
 
@@ -1607,13 +1594,13 @@ public final class Fileformat {
         super.clear();
         bitField0_ = 0;
         type_ = "";
-        indexdata_ = com.google.protobuf.ByteString.EMPTY;
+        indexdata_ = proto4.ByteString.EMPTY;
         datasize_ = 0;
         return this;
       }
 
       @Override
-      public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
+      public proto4.Descriptors.Descriptor getDescriptorForType() {
         return Fileformat.internal_static_org_apache_sedona_osm_build_BlobHeader_descriptor;
       }
 
@@ -1660,7 +1647,7 @@ public final class Fileformat {
       }
 
       @Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      public Builder mergeFrom(proto4.Message other) {
         if (other instanceof Fileformat.BlobHeader) {
           return mergeFrom((Fileformat.BlobHeader) other);
         } else {
@@ -1700,8 +1687,7 @@ public final class Fileformat {
 
       @Override
       public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          proto4.CodedInputStream input, proto4.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         if (extensionRegistry == null) {
           throw new NullPointerException();
@@ -1741,7 +1727,7 @@ public final class Fileformat {
                 } // default:
             } // switch (tag)
           } // while (!done)
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        } catch (proto4.InvalidProtocolBufferException e) {
           throw e.unwrapIOException();
         } finally {
           onChanged();
@@ -1768,7 +1754,7 @@ public final class Fileformat {
       public String getType() {
         Object ref = type_;
         if (!(ref instanceof String)) {
-          com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
+          proto4.ByteString bs = (proto4.ByteString) ref;
           String s = bs.toStringUtf8();
           if (bs.isValidUtf8()) {
             type_ = s;
@@ -1783,15 +1769,14 @@ public final class Fileformat {
        *
        * @return The bytes for type.
        */
-      public com.google.protobuf.ByteString getTypeBytes() {
+      public proto4.ByteString getTypeBytes() {
         Object ref = type_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
-              com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+          proto4.ByteString b = proto4.ByteString.copyFromUtf8((String) ref);
           type_ = b;
           return b;
         } else {
-          return (com.google.protobuf.ByteString) ref;
+          return (proto4.ByteString) ref;
         }
       }
       /**
@@ -1826,7 +1811,7 @@ public final class Fileformat {
        * @param value The bytes for type to set.
        * @return This builder for chaining.
        */
-      public Builder setTypeBytes(com.google.protobuf.ByteString value) {
+      public Builder setTypeBytes(proto4.ByteString value) {
         if (value == null) {
           throw new NullPointerException();
         }
@@ -1836,7 +1821,7 @@ public final class Fileformat {
         return this;
       }
 
-      private com.google.protobuf.ByteString indexdata_ = com.google.protobuf.ByteString.EMPTY;
+      private proto4.ByteString indexdata_ = proto4.ByteString.EMPTY;
       /**
        * <code>optional bytes indexdata = 2;</code>
        *
@@ -1852,7 +1837,7 @@ public final class Fileformat {
        * @return The indexdata.
        */
       @Override
-      public com.google.protobuf.ByteString getIndexdata() {
+      public proto4.ByteString getIndexdata() {
         return indexdata_;
       }
       /**
@@ -1861,7 +1846,7 @@ public final class Fileformat {
        * @param value The indexdata to set.
        * @return This builder for chaining.
        */
-      public Builder setIndexdata(com.google.protobuf.ByteString value) {
+      public Builder setIndexdata(proto4.ByteString value) {
         if (value == null) {
           throw new NullPointerException();
         }
@@ -1940,35 +1925,34 @@ public final class Fileformat {
       return DEFAULT_INSTANCE;
     }
 
-    private static final com.google.protobuf.Parser<BlobHeader> PARSER =
-        new com.google.protobuf.AbstractParser<BlobHeader>() {
+    private static final proto4.Parser<BlobHeader> PARSER =
+        new proto4.AbstractParser<BlobHeader>() {
           @Override
           public BlobHeader parsePartialFrom(
-              com.google.protobuf.CodedInputStream input,
-              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-              throws com.google.protobuf.InvalidProtocolBufferException {
+              proto4.CodedInputStream input, proto4.ExtensionRegistryLite extensionRegistry)
+              throws proto4.InvalidProtocolBufferException {
             Builder builder = newBuilder();
             try {
               builder.mergeFrom(input, extensionRegistry);
-            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            } catch (proto4.InvalidProtocolBufferException e) {
               throw e.setUnfinishedMessage(builder.buildPartial());
-            } catch (com.google.protobuf.UninitializedMessageException e) {
+            } catch (proto4.UninitializedMessageException e) {
               throw e.asInvalidProtocolBufferException()
                   .setUnfinishedMessage(builder.buildPartial());
             } catch (java.io.IOException e) {
-              throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              throw new proto4.InvalidProtocolBufferException(e)
                   .setUnfinishedMessage(builder.buildPartial());
             }
             return builder.buildPartial();
           }
         };
 
-    public static com.google.protobuf.Parser<BlobHeader> parser() {
+    public static proto4.Parser<BlobHeader> parser() {
       return PARSER;
     }
 
     @Override
-    public com.google.protobuf.Parser<BlobHeader> getParserForType() {
+    public proto4.Parser<BlobHeader> getParserForType() {
       return PARSER;
     }
 
@@ -1978,20 +1962,20 @@ public final class Fileformat {
     }
   }
 
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static final proto4.Descriptors.Descriptor
       internal_static_org_apache_sedona_osm_build_Blob_descriptor;
-  private static final com.google.protobuf.GeneratedMessage.FieldAccessorTable
+  private static final proto4.GeneratedMessage.FieldAccessorTable
       internal_static_org_apache_sedona_osm_build_Blob_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static final proto4.Descriptors.Descriptor
       internal_static_org_apache_sedona_osm_build_BlobHeader_descriptor;
-  private static final com.google.protobuf.GeneratedMessage.FieldAccessorTable
+  private static final proto4.GeneratedMessage.FieldAccessorTable
       internal_static_org_apache_sedona_osm_build_BlobHeader_fieldAccessorTable;
 
-  public static com.google.protobuf.Descriptors.FileDescriptor getDescriptor() {
+  public static proto4.Descriptors.FileDescriptor getDescriptor() {
     return descriptor;
   }
 
-  private static com.google.protobuf.Descriptors.FileDescriptor descriptor;
+  private static proto4.Descriptors.FileDescriptor descriptor;
 
   static {
     String[] descriptorData = {
@@ -2004,12 +1988,12 @@ public final class Fileformat {
           + "\n\010datasize\030\003 \002(\005B\002H\003"
     };
     descriptor =
-        com.google.protobuf.Descriptors.FileDescriptor.internalBuildGeneratedFileFrom(
-            descriptorData, new com.google.protobuf.Descriptors.FileDescriptor[] {});
+        proto4.Descriptors.FileDescriptor.internalBuildGeneratedFileFrom(
+            descriptorData, new proto4.Descriptors.FileDescriptor[] {});
     internal_static_org_apache_sedona_osm_build_Blob_descriptor =
         getDescriptor().getMessageTypes().get(0);
     internal_static_org_apache_sedona_osm_build_Blob_fieldAccessorTable =
-        new com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        new proto4.GeneratedMessage.FieldAccessorTable(
             internal_static_org_apache_sedona_osm_build_Blob_descriptor,
             new String[] {
               "Raw", "RawSize", "ZlibData", "LzmaData", "OBSOLETEBzip2Data",
@@ -2017,7 +2001,7 @@ public final class Fileformat {
     internal_static_org_apache_sedona_osm_build_BlobHeader_descriptor =
         getDescriptor().getMessageTypes().get(1);
     internal_static_org_apache_sedona_osm_build_BlobHeader_fieldAccessorTable =
-        new com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        new proto4.GeneratedMessage.FieldAccessorTable(
             internal_static_org_apache_sedona_osm_build_BlobHeader_descriptor,
             new String[] {
               "Type", "Indexdata", "Datasize",

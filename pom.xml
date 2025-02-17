@@ -30,6 +30,9 @@
     <packaging>pom</packaging>
     <name>sedona-parent</name>
     <url>http://sedona.apache.org/</url>
+    <modules>
+        <module>shade-proto</module>
+    </modules>
     <description>Apache Sedona is a cluster computing system for processing large-scale spatial data.
     </description>
     <developers>
