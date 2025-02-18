@@ -18,10 +18,14 @@
  */
 package org.apache.sedona.sql
 
+import io.minio.{MinioClient, PutObjectArgs}
 import org.apache.log4j.{Level, Logger}
 import org.apache.sedona.spark.SedonaContext
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
+import org.testcontainers.containers.MinIOContainer
+
+import java.io.FileInputStream
 
 import java.util.concurrent.ThreadLocalRandom
 
@@ -86,5 +90,40 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
         }
       }
     }
+  }
+
+  def putFileIntoBucket(
+      bucketName: String,
+      key: String,
+      stream: FileInputStream,
+      client: MinioClient): Unit = {
+    val objectArguments = PutObjectArgs
+      .builder()
+      .bucket(bucketName)
+      .`object`(key)
+      .stream(stream, stream.available(), -1)
+      .build()
+
+    client.putObject(objectArguments)
+  }
+
+  def createMinioClient(container: MinIOContainer): MinioClient = {
+    MinioClient
+      .builder()
+      .endpoint(container.getS3URL)
+      .credentials(container.getUserName, container.getPassword)
+      .build()
+  }
+
+  def adjustSparkSession(sparkSession: SparkSession, container: MinIOContainer): Unit = {
+    sparkSession.sparkContext.hadoopConfiguration.set("fs.s3a.endpoint", container.getS3URL)
+    sparkSession.sparkContext.hadoopConfiguration.set("fs.s3a.access.key", container.getUserName)
+    sparkSession.sparkContext.hadoopConfiguration.set("fs.s3a.secret.key", container.getPassword)
+    sparkSession.sparkContext.hadoopConfiguration.set("fs.s3a.connection.timeout", "2000")
+
+    sparkSession.sparkContext.hadoopConfiguration.set("spark.sql.debug.maxToStringFields", "100")
+    sparkSession.sparkContext.hadoopConfiguration.set("fs.s3a.path.style.access", "true")
+    sparkSession.sparkContext.hadoopConfiguration
+      .set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
   }
 }

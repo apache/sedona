@@ -125,7 +125,7 @@ repos:
         name: run codespell
         description: check spelling with codespell
         args: [--ignore-words=.github/linters/codespell.txt]
-        exclude: ^docs/image|^spark/common/src/test/resources|^docs/usecases|^tools/maven/scalafmt
+        exclude: ^docs/image|^spark/common/src/test/resources|^docs/usecases|^tools/maven/scalafmt|osmpbf/build
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.23.3
     hooks:
