@@ -50,6 +50,7 @@ case class RS_Count(inputExpressions: Seq[Expression])
 
 case class RS_ZonalStats(inputExpressions: Seq[Expression])
     extends InferredExpression(
+      inferrableFunction7(RasterBandAccessors.getZonalStats),
       inferrableFunction6(RasterBandAccessors.getZonalStats),
       inferrableFunction5(RasterBandAccessors.getZonalStats),
       inferrableFunction4(RasterBandAccessors.getZonalStats),

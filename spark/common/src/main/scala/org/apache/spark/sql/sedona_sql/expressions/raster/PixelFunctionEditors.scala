@@ -28,6 +28,7 @@ case class RS_SetValues(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction8(PixelFunctionEditors.setValues),
       inferrableFunction7(PixelFunctionEditors.setValues),
+      inferrableFunction6(PixelFunctionEditors.setValues),
       inferrableFunction5(PixelFunctionEditors.setValues),
       inferrableFunction4(PixelFunctionEditors.setValues)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {

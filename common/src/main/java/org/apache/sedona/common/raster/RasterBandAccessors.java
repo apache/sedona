@@ -92,6 +92,7 @@ public class RasterBandAccessors {
    * @param raster Raster to use for computing stats
    * @param roi Geometry to define the region of interest
    * @param band Band to be used for computation
+   * @param allTouched Include pixels touched by roi geometry
    * @param excludeNoData Specifies whether to exclude no-data value or not
    * @param lenient Return null if the raster and roi do not intersect when set to true, otherwise
    *     will throw an exception
@@ -99,9 +100,14 @@ public class RasterBandAccessors {
    * @throws FactoryException
    */
   public static double[] getZonalStatsAll(
-      GridCoverage2D raster, Geometry roi, int band, boolean excludeNoData, boolean lenient)
+      GridCoverage2D raster,
+      Geometry roi,
+      int band,
+      boolean allTouched,
+      boolean excludeNoData,
+      boolean lenient)
       throws FactoryException {
-    List<Object> objects = getStatObjects(raster, roi, band, excludeNoData, lenient);
+    List<Object> objects = getStatObjects(raster, roi, band, allTouched, excludeNoData, lenient);
     if (objects == null) {
       return null;
     }
@@ -128,14 +134,28 @@ public class RasterBandAccessors {
    * @param raster Raster to use for computing stats
    * @param roi Geometry to define the region of interest
    * @param band Band to be used for computation
+   * @param allTouched Include pixels touched by roi geometry
    * @param excludeNoData Specifies whether to exclude no-data value or not
    * @return An array with all the stats for the region
    * @throws FactoryException
    */
   public static double[] getZonalStatsAll(
-      GridCoverage2D raster, Geometry roi, int band, boolean excludeNoData)
+      GridCoverage2D raster, Geometry roi, int band, boolean allTouched, boolean excludeNoData)
       throws FactoryException {
-    return getZonalStatsAll(raster, roi, band, excludeNoData, true);
+    return getZonalStatsAll(raster, roi, band, allTouched, excludeNoData, true);
+  }
+
+  /**
+   * @param raster Raster to use for computing stats
+   * @param roi Geometry to define the region of interest
+   * @param band Band to be used for computation
+   * @param allTouched Include pixels touched by roi geometry
+   * @return An array with all the stats for the region, excludeNoData is set to true
+   * @throws FactoryException
+   */
+  public static double[] getZonalStatsAll(
+      GridCoverage2D raster, Geometry roi, int band, boolean allTouched) throws FactoryException {
+    return getZonalStatsAll(raster, roi, band, allTouched, true);
   }
 
   /**
@@ -147,7 +167,7 @@ public class RasterBandAccessors {
    */
   public static double[] getZonalStatsAll(GridCoverage2D raster, Geometry roi, int band)
       throws FactoryException {
-    return getZonalStatsAll(raster, roi, band, true);
+    return getZonalStatsAll(raster, roi, band, false);
   }
 
   /**
@@ -159,7 +179,7 @@ public class RasterBandAccessors {
    */
   public static double[] getZonalStatsAll(GridCoverage2D raster, Geometry roi)
       throws FactoryException {
-    return getZonalStatsAll(raster, roi, 1, true);
+    return getZonalStatsAll(raster, roi, 1);
   }
 
   /**
@@ -167,6 +187,7 @@ public class RasterBandAccessors {
    * @param roi Geometry to define the region of interest
    * @param band Band to be used for computation
    * @param statType Define the statistic to be computed
+   * @param allTouched Include pixels touched by roi geometry
    * @param excludeNoData Specifies whether to exclude no-data value or not
    * @param lenient Return null if the raster and roi do not intersect when set to true, otherwise
    *     will throw an exception
@@ -179,10 +200,11 @@ public class RasterBandAccessors {
       Geometry roi,
       int band,
       String statType,
+      boolean allTouched,
       boolean excludeNoData,
       boolean lenient)
       throws FactoryException {
-    List<Object> objects = getStatObjects(raster, roi, band, excludeNoData, lenient);
+    List<Object> objects = getStatObjects(raster, roi, band, allTouched, excludeNoData, lenient);
     if (objects == null) {
       return null;
     }
@@ -217,10 +239,42 @@ public class RasterBandAccessors {
     }
   }
 
+  /**
+   * @param raster Raster to use for computing stats
+   * @param roi Geometry to define the region of interest
+   * @param band Band to be used for computation
+   * @param statType Define the statistic to be computed
+   * @param allTouched Include pixels touched by roi geometry
+   * @param excludeNoData Specifies whether to exclude no-data value or not
+   * @return A double precision floating point number representing the requested statistic
+   *     calculated over the specified region.
+   * @throws FactoryException
+   */
   public static Double getZonalStats(
-      GridCoverage2D raster, Geometry roi, int band, String statType, boolean excludeNoData)
+      GridCoverage2D raster,
+      Geometry roi,
+      int band,
+      String statType,
+      boolean allTouched,
+      boolean excludeNoData)
       throws FactoryException {
-    return getZonalStats(raster, roi, band, statType, excludeNoData, true);
+    return getZonalStats(raster, roi, band, statType, allTouched, excludeNoData, true);
+  }
+
+  /**
+   * @param raster Raster to use for computing stats
+   * @param roi Geometry to define the region of interest
+   * @param band Band to be used for computation
+   * @param statType Define the statistic to be computed
+   * @param allTouched Include pixels touched by roi geometry
+   * @return A double precision floating point number representing the requested statistic
+   *     calculated over the specified region. The excludeNoData is set to true.
+   * @throws FactoryException
+   */
+  public static Double getZonalStats(
+      GridCoverage2D raster, Geometry roi, int band, String statType, boolean allTouched)
+      throws FactoryException {
+    return getZonalStats(raster, roi, band, statType, allTouched, true);
   }
 
   /**
@@ -234,7 +288,7 @@ public class RasterBandAccessors {
    */
   public static Double getZonalStats(GridCoverage2D raster, Geometry roi, int band, String statType)
       throws FactoryException {
-    return getZonalStats(raster, roi, band, statType, true);
+    return getZonalStats(raster, roi, band, statType, false);
   }
 
   /**
@@ -248,7 +302,7 @@ public class RasterBandAccessors {
    */
   public static Double getZonalStats(GridCoverage2D raster, Geometry roi, String statType)
       throws FactoryException {
-    return getZonalStats(raster, roi, 1, statType, true);
+    return getZonalStats(raster, roi, 1, statType, false);
   }
 
   /**
@@ -267,6 +321,7 @@ public class RasterBandAccessors {
    * @param raster Raster to use for computing stats
    * @param roi Geometry to define the region of interest
    * @param band Band to be used for computation
+   * @param allTouched Include pixels touched by roi geometry
    * @param excludeNoData Specifies whether to exclude no-data value or not
    * @param lenient Return null if the raster and roi do not intersect when set to true, otherwise
    *     will throw an exception
@@ -274,7 +329,12 @@ public class RasterBandAccessors {
    * @throws FactoryException
    */
   private static List<Object> getStatObjects(
-      GridCoverage2D raster, Geometry roi, int band, boolean excludeNoData, boolean lenient)
+      GridCoverage2D raster,
+      Geometry roi,
+      int band,
+      boolean allTouched,
+      boolean excludeNoData,
+      boolean lenient)
       throws FactoryException {
     RasterUtils.ensureBand(raster, band);
 
@@ -301,7 +361,7 @@ public class RasterBandAccessors {
     Double noDataValue = RasterBandAccessors.getBandNoDataValue(raster, band);
     // Adding an arbitrary value '150' for the pixels that are under the geometry.
     GridCoverage2D rasterizedGeom =
-        RasterConstructors.asRasterWithRasterExtent(roi, raster, datatype, 150, null);
+        RasterConstructors.asRasterWithRasterExtent(roi, raster, datatype, allTouched, 150, null);
     Raster rasterziedData = RasterUtils.getRaster(rasterizedGeom.getRenderedImage());
     int width = RasterAccessors.getWidth(rasterizedGeom),
         height = RasterAccessors.getHeight(rasterizedGeom);

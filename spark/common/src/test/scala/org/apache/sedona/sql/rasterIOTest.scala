@@ -91,9 +91,10 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
     }
 
     it("Passed RS_AsRaster with empty raster") {
-      var df = sparkSession.sql(
-        "SELECT RS_MakeEmptyRaster(2, 255, 255, 3, -215, 2, -2, 0, 0, 4326) as raster, ST_GeomFromWKT('POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))') as geom")
-      var rasterized = df.selectExpr("RS_AsRaster(geom, raster, 'd', 255, 0d) as rasterized")
+      val df = sparkSession.sql(
+        "SELECT RS_MakeEmptyRaster(2, 255, 255, 3, 215, 2, -2, 0, 0, 4326) as raster, ST_GeomFromWKT('POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))') as geom")
+      var rasterized =
+        df.selectExpr("RS_AsRaster(geom, raster, 'd', false, 255, 0d) as rasterized")
       var actual = rasterized
         .selectExpr("RS_BandAsArray(rasterized, 1)")
         .first()
@@ -103,7 +104,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
         "Array(255.0, 255.0, 255.0, 255.0, 0.0, 0.0, 255.0, 255.0, 0.0, 0.0, 0.0, 255.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)"
       assertEquals(expected, actual)
 
-      rasterized = df.selectExpr("RS_AsRaster(geom, raster, 'd', 3093151) as rasterized")
+      rasterized = df.selectExpr("RS_AsRaster(geom, raster, 'd', false, 3093151) as rasterized")
       actual = rasterized
         .selectExpr("RS_BandAsArray(rasterized, 1)")
         .first()
@@ -125,19 +126,20 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
     }
 
     it("Passed RS_AsRaster LineString") {
-      var df = sparkSession.sql(
-        "SELECT RS_MakeEmptyRaster(2, 255, 255, 3, -215, 2, -2, 0, 0, 4326) as raster, ST_GeomFromWKT('LINESTRING(1 1, 2 1, 10 1)') as geom")
-      var rasterized = df.selectExpr("RS_AsRaster(geom, raster, 'd', 255, 0d) as rasterized")
+      val df = sparkSession.sql(
+        "SELECT RS_MakeEmptyRaster(2, 255, 255, 3, 215, 2, -2, 0, 0, 4326) as raster, ST_GeomFromWKT('LINESTRING(1 1, 2 1, 10 1)') as geom")
+      var rasterized =
+        df.selectExpr("RS_AsRaster(geom, raster, 'd', false, 255, 0d) as rasterized")
       var actual = rasterized
         .selectExpr("RS_BandAsArray(rasterized, 1)")
         .first()
         .getSeq(0)
         .mkString("Array(", ", ", ")")
-      var expected = "Array(255.0, 255.0, 255.0, 255.0, 255.0)"
+      var expected = "Array(0.0, 0.0, 0.0, 0.0, 255.0, 255.0, 255.0, 255.0)"
       assertEquals(expected, actual)
 
       rasterized = df.selectExpr(
-        "RS_AsRaster(ST_GeomFromWKT('LINESTRING(1 1, 1 2, 1 10)'), raster, 'd', 255, 0d) as rasterized")
+        "RS_AsRaster(ST_GeomFromWKT('LINESTRING(4 1, 4 2, 4 10)'), raster, 'd', false, 255, 0d) as rasterized")
       actual = rasterized
         .selectExpr("RS_BandAsArray(rasterized, 1)")
         .first()
@@ -149,9 +151,11 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
 
     it("Passed RS_AsRaster with raster") {
       var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
-      df =
-        df.selectExpr("ST_GeomFromWKT('POINT(5 5)') as geom", "RS_FromGeoTiff(content) as raster")
-      var rasterized = df.selectExpr("RS_AsRaster(geom, raster, 'd', 61784, 0d) as rasterized")
+      df = df.selectExpr(
+        "ST_GeomFromText('POINT (-13085817.809482181 3993868.8560156375)', 3857) as geom",
+        "RS_FromGeoTiff(content) as raster")
+      var rasterized =
+        df.selectExpr("RS_AsRaster(geom, raster, 'd', false, 61784, 0d) as rasterized")
       var actual = rasterized
         .selectExpr("RS_BandAsArray(rasterized, 1)")
         .first()
@@ -160,7 +164,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
       var expected = "Array(61784.0)"
       assertEquals(expected, actual)
 
-      rasterized = df.selectExpr("RS_AsRaster(geom, raster, 'd', 255) as rasterized")
+      rasterized = df.selectExpr("RS_AsRaster(geom, raster, 'd', false, 255) as rasterized")
       actual = rasterized
         .selectExpr("RS_BandAsArray(rasterized, 1)")
         .first()
@@ -183,13 +187,13 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
       var df = sparkSession.sql(
         "SELECT RS_MakeEmptyRaster(2, 255, 255, 3, 215, 2, -2, 0, 0, 0) as raster, ST_GeomFromWKT('POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))') as geom")
       var rasterized =
-        df.selectExpr("RS_AsRaster(geom, raster, 'd', 255, 0d, false) as rasterized")
+        df.selectExpr("RS_AsRaster(geom, raster, 'd', false, 255, 0d, false) as rasterized")
       var actualSeq =
         rasterized.selectExpr("RS_BandAsArray(rasterized, 1)").first().getSeq[Double](0)
       var actualMax = actualSeq.max
       var actualSum = actualSeq.sum
       var expectedMax = 255.0d
-      var expectedSum = 255.0 * 9
+      var expectedSum = 255.0 * 7
       assertEquals(expectedMax, actualMax, 1e-5)
       assertEquals(expectedSum, actualSum, 1e-5)
 

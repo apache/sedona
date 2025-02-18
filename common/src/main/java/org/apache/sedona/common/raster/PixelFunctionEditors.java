@@ -26,8 +26,6 @@ import javax.media.jai.RasterFactory;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.geometry.DirectPosition2D;
-import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
@@ -121,13 +119,19 @@ public class PixelFunctionEditors {
    * @param band Band of the raster to be edited
    * @param geom Geometry region to update
    * @param value Value to updated in the said region
+   * @param allTouched When set to true, sets value for all pixels touched by geom
    * @param keepNoData To keep no data value or not
    * @return An updated raster
    * @throws FactoryException
    * @throws TransformException
    */
   public static GridCoverage2D setValues(
-      GridCoverage2D raster, int band, Geometry geom, double value, boolean keepNoData)
+      GridCoverage2D raster,
+      int band,
+      Geometry geom,
+      double value,
+      boolean allTouched,
+      boolean keepNoData)
       throws FactoryException, TransformException {
     RasterUtils.ensureBand(raster, band);
 
@@ -148,9 +152,10 @@ public class PixelFunctionEditors {
 
     if (keepNoData) {
       noDataValue = RasterBandAccessors.getBandNoDataValue(raster, band);
-      rasterizedGeom = RasterConstructors.asRaster(geom, raster, bandDataType, value, noDataValue);
+      rasterizedGeom =
+          RasterConstructors.asRaster(geom, raster, bandDataType, allTouched, value, noDataValue);
     } else {
-      rasterizedGeom = RasterConstructors.asRaster(geom, raster, bandDataType, value);
+      rasterizedGeom = RasterConstructors.asRaster(geom, raster, bandDataType, allTouched, value);
     }
 
     Raster rasterizedGeomData = RasterUtils.getRaster(rasterizedGeom.getRenderedImage());
@@ -162,61 +167,61 @@ public class PixelFunctionEditors {
         widthOriginalRaster = RasterAccessors.getWidth(raster);
     WritableRaster rasterCopied = makeCopiedRaster(raster);
 
-    String geometryType = geom.getGeometryType();
-
-    // Taking a shortcut if the provided geometry is a Point or MultiPoint, then taking the lat lon
-    if (geometryType.equalsIgnoreCase(Geometry.TYPENAME_POINT)
-        || geometryType.equalsIgnoreCase(Geometry.TYPENAME_MULTIPOINT)) {
-      Coordinate[] coordinates = geom.getCoordinates();
-      for (Coordinate pointCoordinate : coordinates) {
-        int[] pointLocation =
-            raster
-                .getGridGeometry()
-                .worldToGrid(new DirectPosition2D(pointCoordinate.x, pointCoordinate.y))
-                .getCoordinateValues();
-        double[] pixel = rasterCopied.getPixel(pointLocation[0], pointLocation[1], (double[]) null);
-        pixel[band - 1] = rasterizedGeomData.getPixel(0, 0, (double[]) null)[0];
-        rasterCopied.setPixel(pointLocation[0], pointLocation[1], pixel);
-      }
-    }
     // Converting geometry to raster and then iterating through them
-    else {
-      int[] pixelLocation = RasterUtils.getGridCoordinatesFromWorld(raster, colX, rowY);
-      int x = pixelLocation[0], y = pixelLocation[1];
+    int[] pixelLocation = RasterUtils.getGridCoordinatesFromWorld(raster, colX, rowY);
+    int x = pixelLocation[0], y = pixelLocation[1];
 
-      // rasterX & rasterY are the starting pixels for the target raster
-      int rasterX = Math.max(x, 0);
-      int rasterY = Math.max(y, 0);
-      // geometryX & geometryY are the starting pixels for the geometry raster
-      int geometryX = rasterX - x;
-      int geometryY = rasterY - y;
-      // widthRegion & heightRegion are the size of the region to update
-      int widthRegion = Math.min(widthGeometryRaster - geometryX, widthOriginalRaster - rasterX);
-      int heightRegion = Math.min(heightGeometryRaster - geometryY, heightOriginalRaster - rasterY);
+    // rasterX & rasterY are the starting pixels for the target raster
+    int rasterX = Math.max(x, 0);
+    int rasterY = Math.max(y, 0);
+    // geometryX & geometryY are the starting pixels for the geometry raster
+    int geometryX = rasterX - x;
+    int geometryY = rasterY - y;
+    // widthRegion & heightRegion are the size of the region to update
+    int widthRegion = Math.min(widthGeometryRaster - geometryX, widthOriginalRaster - rasterX);
+    int heightRegion = Math.min(heightGeometryRaster - geometryY, heightOriginalRaster - rasterY);
 
-      for (int j = 0; j < heightRegion; j++) {
-        for (int i = 0; i < widthRegion; i++) {
-          double[] pixel = rasterCopied.getPixel(rasterX + i, rasterY + j, (double[]) null);
-          // [0] as only one band in the rasterized Geometry
-          double pixelNew =
-              rasterizedGeomData.getPixel(geometryX + i, geometryY + j, (double[]) null)[0];
-          // skipping 0 from the rasterized geometry as
-          if (pixelNew == 0
-              || keepNoData && noDataValue != null && noDataValue == pixel[band - 1]) {
-            continue;
-          } else {
-            pixel[band - 1] = pixelNew;
-          }
-          rasterCopied.setPixel(rasterX + i, rasterY + j, pixel);
+    for (int j = 0; j < heightRegion; j++) {
+      for (int i = 0; i < widthRegion; i++) {
+        double[] pixel = rasterCopied.getPixel(rasterX + i, rasterY + j, (double[]) null);
+        // [0] as only one band in the rasterized Geometry
+        double pixelNew =
+            rasterizedGeomData.getPixel(geometryX + i, geometryY + j, (double[]) null)[0];
+        // skipping 0 from the rasterized geometry as
+        if (pixelNew == 0 || keepNoData && noDataValue != null && noDataValue == pixel[band - 1]) {
+          continue;
+        } else {
+          pixel[band - 1] = pixelNew;
         }
+        rasterCopied.setPixel(rasterX + i, rasterY + j, pixel);
       }
     }
+
     return RasterUtils.clone(
         rasterCopied,
         raster.getSampleDimensions(),
         raster,
         null,
         true); // keep metadata since this is essentially the same raster
+  }
+
+  /**
+   * Returns a raster by replacing the values of pixels in a specified geometry region. It converts
+   * the Geometry to a raster using RS_AsRaster. A convenience function with keepNoData as false.
+   *
+   * @param raster Input raster to be updated
+   * @param band Band of the raster to be edited
+   * @param geom Geometry region to update
+   * @param value Value to updated in the said region
+   * @param allTouched When set to true, sets value for all pixels touched by geom
+   * @return An updated raster
+   * @throws FactoryException
+   * @throws TransformException
+   */
+  public static GridCoverage2D setValues(
+      GridCoverage2D raster, int band, Geometry geom, double value, boolean allTouched)
+      throws FactoryException, TransformException {
+    return setValues(raster, band, geom, value, allTouched, false);
   }
 
   /**
@@ -234,7 +239,7 @@ public class PixelFunctionEditors {
   public static GridCoverage2D setValues(
       GridCoverage2D raster, int band, Geometry geom, double value)
       throws FactoryException, TransformException {
-    return setValues(raster, band, geom, value, false);
+    return setValues(raster, band, geom, value, false, false);
   }
 
   /**
