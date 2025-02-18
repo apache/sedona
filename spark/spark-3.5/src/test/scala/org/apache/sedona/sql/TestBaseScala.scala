@@ -92,10 +92,10 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     }
   }
 
-  def putFileIntoBucket(key: String, stream: FileInputStream, client: MinioClient): Unit = {
+  def putFileIntoBucket(bucketName: String, key: String, stream: FileInputStream, client: MinioClient): Unit = {
     val objectArguments = PutObjectArgs
       .builder()
-      .bucket("sedona-osm")
+      .bucket(bucketName)
       .`object`(key)
       .stream(stream, stream.available(), -1)
       .build()

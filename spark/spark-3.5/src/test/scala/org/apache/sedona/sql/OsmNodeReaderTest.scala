@@ -159,7 +159,7 @@ class OsmNodeReaderTest extends TestBaseScala with Matchers {
 
   private def prepareFile(name: String, path: String, minioClient: MinioClient): String = {
     val fis = new FileInputStream(path);
-    putFileIntoBucket(name, fis, minioClient)
+    putFileIntoBucket("sedona-osm", name, fis, minioClient)
 
     s"s3a://sedona-osm/$name"
   }
