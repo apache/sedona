@@ -49,19 +49,19 @@ public class GenericUniquePartitioner extends SpatialPartitioner {
     // and return the partition with the minimum ID. This ensures that given the same
     // (parent) partitioner, the output partitions from this method will be consistent.
     Iterator<Tuple2<Integer, Geometry>> it = parent.placeObject(spatialObject);
-    int minParitionId = Integer.MAX_VALUE;
+    int minPartitionId = Integer.MAX_VALUE;
     Geometry minGeometry = null;
     while (it.hasNext()) {
       Tuple2<Integer, Geometry> value = it.next();
-      if (value._1() < minParitionId) {
-        minParitionId = value._1();
+      if (value._1() < minPartitionId) {
+        minPartitionId = value._1();
         minGeometry = value._2();
       }
     }
 
     HashSet<Tuple2<Integer, Geometry>> out = new HashSet<Tuple2<Integer, Geometry>>();
     if (minGeometry != null) {
-      out.add(new Tuple2<Integer, Geometry>(minParitionId, minGeometry));
+      out.add(new Tuple2<Integer, Geometry>(minPartitionId, minGeometry));
     }
 
     return out.iterator();

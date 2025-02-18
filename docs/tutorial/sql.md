@@ -1651,18 +1651,18 @@ You can use `StructuredAdapter` and the `spatialRDD.spatialPartitioningWithoutDu
 === "Scala"
 
 	```scala
-	spatialRDD.spatialParitioningWithoutDuplicates(GridType.KDBTREE)
+	spatialRDD.spatialPartitioningWithoutDuplicates(GridType.KDBTREE)
 	// Specify the desired number of partitions as 10, though the actual number may vary
-	// spatialRDD.spatialParitioningWithoutDuplicates(GridType.KDBTREE, 10)
+	// spatialRDD.spatialPartitioningWithoutDuplicates(GridType.KDBTREE, 10)
 	var spatialDf = StructuredAdapter.toSpatialPartitionedDf(spatialRDD, sedona)
 	```
 
 === "Java"
 
 	```java
-	spatialRDD.spatialParitioningWithoutDuplicates(GridType.KDBTREE)
+	spatialRDD.spatialPartitioningWithoutDuplicates(GridType.KDBTREE)
 	// Specify the desired number of partitions as 10, though the actual number may vary
-	// spatialRDD.spatialParitioningWithoutDuplicates(GridType.KDBTREE, 10)
+	// spatialRDD.spatialPartitioningWithoutDuplicates(GridType.KDBTREE, 10)
 	Dataset<Row> spatialDf = StructuredAdapter.toSpatialPartitionedDf(spatialRDD, sedona)
 	```
 
@@ -1673,7 +1673,7 @@ You can use `StructuredAdapter` and the `spatialRDD.spatialPartitioningWithoutDu
 
 	spatialRDD.spatialPartitioningWithoutDuplicates(GridType.KDBTREE)
 	# Specify the desired number of partitions as 10, though the actual number may vary
-	# spatialRDD.spatialParitioningWithoutDuplicates(GridType.KDBTREE, 10)
+	# spatialRDD.spatialPartitioningWithoutDuplicates(GridType.KDBTREE, 10)
 	spatialDf = StructuredAdapter.toSpatialPartitionedDf(spatialRDD, sedona)
 	```
 
