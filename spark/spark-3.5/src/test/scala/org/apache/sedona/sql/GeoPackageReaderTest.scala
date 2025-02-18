@@ -251,27 +251,27 @@ class GeoPackageReaderTest extends TestBaseScala with Matchers {
 
       val inputPath: String = prepareFile("example.geopackage", path, minioClient)
 
-//      sparkSessionMinio.read
-//        .format("geopackage")
-//        .option("showMetadata", "true")
-//        .load(inputPath)
-//        .count shouldEqual 34
-//
-//      val df = sparkSession.read
-//        .format("geopackage")
-//        .option("tableName", "point1")
-//        .load(inputPath)
-//
-//      df.count shouldEqual 4
-//
-//      val inputPathLarger: String = prepareFiles((1 to 300).map(_ => path).toArray, minioClient)
-//
-//      val dfLarger = sparkSessionMinio.read
-//        .format("geopackage")
-//        .option("tableName", "point1")
-//        .load(inputPathLarger)
-//
-//      dfLarger.count shouldEqual 300 * 4
+      sparkSessionMinio.read
+        .format("geopackage")
+        .option("showMetadata", "true")
+        .load(inputPath)
+        .count shouldEqual 34
+
+      val df = sparkSession.read
+        .format("geopackage")
+        .option("tableName", "point1")
+        .load(inputPath)
+
+      df.count shouldEqual 4
+
+      val inputPathLarger: String = prepareFiles((1 to 300).map(_ => path).toArray, minioClient)
+
+      val dfLarger = sparkSessionMinio.read
+        .format("geopackage")
+        .option("tableName", "point1")
+        .load(inputPathLarger)
+
+      dfLarger.count shouldEqual 300 * 4
 
       container.stop()
     }
