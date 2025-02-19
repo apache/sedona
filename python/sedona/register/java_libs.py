@@ -26,7 +26,7 @@ class SedonaJvmLib(Enum):
     KNNQuery = "org.apache.sedona.core.spatialOperator.KNNQuery"
     RangeQuery = "org.apache.sedona.core.spatialOperator.RangeQuery"
     Envelope = "org.locationtech.jts.geom.Envelope"
-    Geography = "import org.apache.sedona.common.geometryObjects.Geography"
+    Geography = "org.apache.sedona.common.geometryObjects.Geography"
     GeoSerializerData = (
         "org.apache.sedona.python.wrapper.adapters.GeoSparkPythonConverter"
     )
