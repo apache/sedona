@@ -24,6 +24,7 @@ import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.unsafe.types.UTF8String
 import org.locationtech.jts.geom.{Geometry, GeometryFactory, Point}
+import org.apache.sedona.common.geometryObjects.Geography
 
 object implicits {
 
@@ -140,5 +141,10 @@ object implicits {
       geom.getCoordinates.map(coordinate => geometryFactory.createPoint(coordinate))
 
     def isNonEmpty: Boolean = geom != null && !geom.isEmpty
+  }
+
+  implicit class GeographyEnhancer(geog: Geography) {
+
+    def toGenericArrayData: Array[Byte] = GeometrySerializer.serialize(geog.getGeometry())
   }
 }
