@@ -611,54 +611,7 @@ Please refer to [Reading Legacy Parquet Files](../api/sql/Reading-legacy-parquet
 	GeoParquet file reader does not work on Databricks runtime when Photon is enabled. Please disable Photon when using
 	GeoParquet file reader on Databricks runtime.
 
-### Inspect GeoParquet metadata
-
-Since v`1.5.1`, Sedona provides a Spark SQL data source `"geoparquet.metadata"` for inspecting GeoParquet metadata. The resulting dataframe contains
-the "geo" metadata for each input file.
-
-=== "Scala/Java"
-
-	```scala
-	val df = sedona.read.format("geoparquet.metadata").load(geoparquetdatalocation1)
-	df.printSchema()
-	```
-
-=== "Java"
-
-	```java
-	Dataset<Row> df = sedona.read.format("geoparquet.metadata").load(geoparquetdatalocation1)
-	df.printSchema()
-	```
-
-=== "Python"
-
-	```python
-	df = sedona.read.format("geoparquet.metadata").load(geoparquetdatalocation1)
-	df.printSchema()
-	```
-
-The output will be as follows:
-
-```
-root
- |-- path: string (nullable = true)
- |-- version: string (nullable = true)
- |-- primary_column: string (nullable = true)
- |-- columns: map (nullable = true)
- |    |-- key: string
- |    |-- value: struct (valueContainsNull = true)
- |    |    |-- encoding: string (nullable = true)
- |    |    |-- geometry_types: array (nullable = true)
- |    |    |    |-- element: string (containsNull = true)
- |    |    |-- bbox: array (nullable = true)
- |    |    |    |-- element: double (containsNull = true)
- |    |    |-- crs: string (nullable = true)
-```
-
-If the input Parquet file does not have GeoParquet metadata, the values of `version`, `primary_column` and `columns` fields of the resulting dataframe will be `null`.
-
-!!! note
-	`geoparquet.metadata` only supports reading GeoParquet specific metadata. Users can use [G-Research/spark-extension](https://github.com/G-Research/spark-extension/blob/13109b8e43dfba9272c85896ba5e30cfe280426f/PARQUET.md) to read comprehensive metadata of generic Parquet files.
+See [this page](../files/geoparquet-sedona-spark) for more information on loading GeoParquet.
 
 ## Load data from JDBC data sources
 
@@ -1489,77 +1442,7 @@ Since v`1.3.0`, Sedona natively supports writing GeoParquet file. GeoParquet can
 df.write.format("geoparquet").save(geoparquetoutputlocation + "/GeoParquet_File_Name.parquet")
 ```
 
-### CRS Metadata
-
-Since v`1.5.1`, Sedona supports writing GeoParquet files with custom GeoParquet spec version and crs.
-The default GeoParquet spec version is `1.0.0` and the default crs is `null`. You can specify the GeoParquet spec version and crs as follows:
-
-```scala
-val projjson = "{...}" // PROJJSON string for all geometry columns
-df.write.format("geoparquet")
-		.option("geoparquet.version", "1.0.0")
-		.option("geoparquet.crs", projjson)
-		.save(geoparquetoutputlocation + "/GeoParquet_File_Name.parquet")
-```
-
-If you have multiple geometry columns written to the GeoParquet file, you can specify the CRS for each column.
-For example, `g0` and `g1` are two geometry columns in the DataFrame `df`, and you want to specify the CRS for each column as follows:
-
-```scala
-val projjson_g0 = "{...}" // PROJJSON string for g0
-val projjson_g1 = "{...}" // PROJJSON string for g1
-df.write.format("geoparquet")
-		.option("geoparquet.version", "1.0.0")
-		.option("geoparquet.crs.g0", projjson_g0)
-		.option("geoparquet.crs.g1", projjson_g1)
-		.save(geoparquetoutputlocation + "/GeoParquet_File_Name.parquet")
-```
-
-The value of `geoparquet.crs` and `geoparquet.crs.<column_name>` can be one of the following:
-
-- `"null"`: Explicitly setting `crs` field to `null`. This is the default behavior.
-- `""` (empty string): Omit the `crs` field. This implies that the CRS is [OGC:CRS84](https://www.opengis.net/def/crs/OGC/1.3/CRS84) for CRS-aware implementations.
-- `"{...}"` (PROJJSON string): The `crs` field will be set as the PROJJSON object representing the Coordinate Reference System (CRS) of the geometry. You can find the PROJJSON string of a specific CRS from here: https://epsg.io/ (click the JSON option at the bottom of the page). You can also customize your PROJJSON string as needed.
-
-Please note that Sedona currently cannot set/get a projjson string to/from a CRS. Its geoparquet reader will ignore the projjson metadata and you will have to set your CRS via [`ST_SetSRID`](../api/sql/Function.md#st_setsrid) after reading the file.
-Its geoparquet writer will not leverage the SRID field of a geometry so you will have to always set the `geoparquet.crs` option manually when writing the file, if you want to write a meaningful CRS field.
-
-Due to the same reason, Sedona geoparquet reader and writer do NOT check the axis order (lon/lat or lat/lon) and assume they are handled by the users themselves when writing / reading the files. You can always use [`ST_FlipCoordinates`](../api/sql/Function.md#st_flipcoordinates) to swap the axis order of your geometries.
-
-### Covering Metadata
-
-Since `v1.6.1`, Sedona supports writing the [`covering` field](https://github.com/opengeospatial/geoparquet/blob/v1.1.0/format-specs/geoparquet.md#covering) to geometry column metadata. The `covering` field specifies a bounding box column to help accelerate spatial data retrieval. The bounding box column should be a top-level struct column containing `xmin`, `ymin`, `xmax`, `ymax` columns. If the DataFrame you are writing contains such columns, you can specify `.option("geoparquet.covering.<geometryColumnName>", "<coveringColumnName>")` option to write `covering` metadata to GeoParquet files:
-
-```scala
-df.write.format("geoparquet")
-		.option("geoparquet.covering.geometry", "bbox")
-		.save("/path/to/saved_geoparquet.parquet")
-```
-
-If the DataFrame has only one geometry column, you can simply specify the `geoparquet.covering` option and omit the geometry column name:
-
-```scala
-df.write.format("geoparquet")
-		.option("geoparquet.covering", "bbox")
-		.save("/path/to/saved_geoparquet.parquet")
-```
-
-If the DataFrame does not have a covering column, you can construct one using Sedona's SQL functions:
-
-```scala
-val df_bbox = df.withColumn("bbox", expr("struct(ST_XMin(geometry) AS xmin, ST_YMin(geometry) AS ymin, ST_XMax(geometry) AS xmax, ST_YMax(geometry) AS ymax)"))
-df_bbox.write.format("geoparquet").option("geoparquet.covering.geometry", "bbox").save("/path/to/saved_geoparquet.parquet")
-```
-
-## Sort then Save GeoParquet
-
-To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see [ST_GeoHash](../api/sql/Function.md#st_geohash)) and then save as a GeoParquet file. An example is as follows:
-
-```
-SELECT col1, col2, geom, ST_GeoHash(geom, 5) as geohash
-FROM spatialDf
-ORDER BY geohash
-```
+See [this page](../files/geoparquet-sedona-spark) for more information on writing to GeoParquet.
 
 ## Save to Postgis
 
