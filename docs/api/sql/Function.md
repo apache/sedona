@@ -2981,7 +2981,7 @@ POLYGON ((7 -1, 7 6, 9 6, 9 1, 7 -1), (6 2, 8 2, 8 1, 6 1, 6 2))
 
 Introduction: Given an invalid geometry, create a valid representation of the geometry.
 
-Collapsed geometries are either converted to empty (keepCollapsed=true) or a valid geometry of lower dimension (keepCollapsed=false).
+Collapsed geometries are either converted to empty (keepCollapsed=false) or a valid geometry of lower dimension (keepCollapsed=true).
 Default is keepCollapsed=false.
 
 Format:
