@@ -349,6 +349,10 @@
          <lastmod>2025-02-20</lastmod>
     </url>
     <url>
+         <loc>https://sedona.apache.org/latest/tutorial/files/geoparquet-sedona-spark/</loc>
+         <lastmod>2025-02-20</lastmod>
+    </url>
+    <url>
          <loc>https://sedona.apache.org/latest/tutorial/flink/sql/</loc>
          <lastmod>2025-02-20</lastmod>
     </url>
