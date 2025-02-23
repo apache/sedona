@@ -16,7 +16,7 @@
 #  under the License.
 import os
 from tempfile import mkdtemp
-from typing import Iterable
+from typing import Iterable, Union
 
 
 import pyspark
