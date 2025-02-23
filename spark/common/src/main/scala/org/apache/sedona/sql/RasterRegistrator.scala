@@ -22,6 +22,7 @@ import org.apache.sedona.sql.UDF.RasterUdafCatalog
 import org.apache.sedona.sql.utils.GeoToolsCoverageAvailability.{gridClassName, isGeoToolsAvailable}
 import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.sedona_sql.UDT.RasterUdtRegistratorWrapper
+import org.apache.spark.sql.sedona_sql.strategies.{ExtractSedonaUDF, SedonaArrowStrategy}
 import org.apache.spark.sql.{SparkSession, functions}
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -29,6 +30,12 @@ object RasterRegistrator {
   val logger: Logger = LoggerFactory.getLogger(getClass)
 
   def registerAll(sparkSession: SparkSession): Unit = {
+
+    sparkSession.experimental.extraStrategies =
+      sparkSession.experimental.extraStrategies :+ new SedonaArrowStrategy()
+    sparkSession.experimental.extraOptimizations =
+      sparkSession.experimental.extraOptimizations :+ ExtractSedonaUDF
+
     if (isGeoToolsAvailable) {
       RasterUdtRegistratorWrapper.registerAll(gridClassName)
       sparkSession.udf.register(
