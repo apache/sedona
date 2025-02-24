@@ -14,6 +14,8 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 #  under the License.
+import itertools
+from typing import List, Callable
 
 # We may be able to achieve streaming rather than complete materialization by using
 # with the ArrowStreamSerializer (instead of the ArrowCollectSerializer)
@@ -22,7 +24,7 @@
 from sedona.sql.st_functions import ST_AsEWKB
 from pyspark.sql import SparkSession
 from pyspark.sql import DataFrame
-from pyspark.sql.types import StructType, StructField
+from pyspark.sql.types import StructType, StructField, DataType, ArrayType, MapType
 import pyarrow as pa
 
 from sedona.sql.types import GeometryType
@@ -198,6 +200,53 @@ def unique_srid_from_ewkb(obj):
     return pyproj.CRS(f"EPSG:{epsg_code}")
 
 
+def _dedup_names(names: List[str]) -> List[str]:
+    if len(set(names)) == len(names):
+        return names
+    else:
+
+        def _gen_dedup(_name: str) -> Callable[[], str]:
+            _i = itertools.count()
+            return lambda: f"{_name}_{next(_i)}"
+
+        def _gen_identity(_name: str) -> Callable[[], str]:
+            return lambda: _name
+
+        gen_new_name = {
+            name: _gen_dedup(name) if len(list(group)) > 1 else _gen_identity(name)
+            for name, group in itertools.groupby(sorted(names))
+        }
+        return [gen_new_name[name]() for name in names]
+
+
+def _deduplicate_field_names(dt: DataType) -> DataType:
+    if isinstance(dt, StructType):
+        dedup_field_names = _dedup_names(dt.names)
+
+        return StructType(
+            [
+                StructField(
+                    dedup_field_names[i],
+                    _deduplicate_field_names(field.dataType),
+                    nullable=field.nullable,
+                )
+                for i, field in enumerate(dt.fields)
+            ]
+        )
+    elif isinstance(dt, ArrayType):
+        return ArrayType(
+            _deduplicate_field_names(dt.elementType), containsNull=dt.containsNull
+        )
+    elif isinstance(dt, MapType):
+        return MapType(
+            _deduplicate_field_names(dt.keyType),
+            _deduplicate_field_names(dt.valueType),
+            valueContainsNull=dt.valueContainsNull,
+        )
+    else:
+        return dt
+
+
 def infer_schema(gdf: gpd.GeoDataFrame) -> StructType:
     fields = gdf.dtypes.reset_index().values.tolist()
     geom_fields = []
@@ -215,6 +264,7 @@ def infer_schema(gdf: gpd.GeoDataFrame) -> StructType:
     pa_schema = pa.Schema.from_pandas(
         gdf.drop([name for _, name in geom_fields], axis=1)
     )
+
     spark_schema = []
 
     for field in pa_schema:
@@ -244,11 +294,12 @@ def create_spatial_dataframe(spark: SparkSession, gdf: gpd.GeoDataFrame) -> Data
     step = spark._jconf.arrowMaxRecordsPerBatch()
     step = step if step > 0 else len(gdf)
     pdf_slices = (gdf.iloc[start : start + step] for start in range(0, len(gdf), step))
+    spark_types = [_deduplicate_field_names(f.dataType) for f in schema.fields]
 
     arrow_data = [
         [
             (c, to_arrow_type(t) if t is not None else None, t)
-            for (_, c), t in zip(pdf_slice.items(), schema.fields)
+            for (_, c), t in zip(pdf_slice.items(), spark_types)
         ]
         for pdf_slice in pdf_slices
     ]
