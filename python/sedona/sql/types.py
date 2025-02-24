@@ -68,7 +68,7 @@ class GeographyType(UserDefinedType):
         return BinaryType()
 
     def serialize(self, obj):
-        return geometry_serde.serialize(obj._geom)
+        return geometry_serde.serialize(obj.geometry)
 
     def deserialize(self, datum):
         geom, offset = geometry_serde.deserialize(datum)

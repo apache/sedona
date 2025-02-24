@@ -26,6 +26,7 @@ from pyspark.sql import functions as f
 from shapely.geometry.base import BaseGeometry
 from tests.test_base import TestBase
 
+from sedona.core.geom.geography import Geography
 from sedona.sql import st_aggregates as sta
 from sedona.sql import st_constructors as stc
 from sedona.sql import st_functions as stf
@@ -85,6 +86,8 @@ test_configurations = [
     (stc.ST_GeomFromWKT, ("wkt",), "linestring_wkt", "", "LINESTRING (1 2, 3 4)"),
     (stc.ST_GeomFromWKT, ("wkt", 4326), "linestring_wkt", "", "LINESTRING (1 2, 3 4)"),
     (stc.ST_GeomFromEWKT, ("ewkt",), "linestring_ewkt", "", "LINESTRING (1 2, 3 4)"),
+    (stc.ST_GeogFromWKT, ("wkt",), "linestring_wkt", "", "LINESTRING (1 2, 3 4)"),
+    (stc.ST_GeogFromWKT, ("wkt", 4326), "linestring_wkt", "", "LINESTRING (1 2, 3 4)"),
     (stc.ST_LineFromText, ("wkt",), "linestring_wkt", "", "LINESTRING (1 2, 3 4)"),
     (
         stc.ST_LineFromWKB,
@@ -1230,6 +1233,7 @@ wrong_type_configurations = [
     (stc.ST_LinestringFromWKB, (None,)),
     (stc.ST_GeomFromEWKB, (None,)),
     (stc.ST_GeomFromWKT, (None,)),
+    (stc.ST_GeogFromWKT, (None,)),
     (stc.ST_GeometryFromText, (None,)),
     (stc.ST_LineFromText, (None,)),
     (stc.ST_LineStringFromText, (None, "")),
@@ -1710,6 +1714,9 @@ class TestDataFrameAPI(TestBase):
 
         if isinstance(actual_result, BaseGeometry):
             self.assert_geometry_almost_equal(expected_result, actual_result)
+            return
+        elif isinstance(actual_result, Geography):
+            self.assert_geometry_almost_equal(expected_result, actual_result.geometry)
             return
         elif isinstance(actual_result, bytearray):
             actual_result = actual_result.hex()

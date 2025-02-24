@@ -15,12 +15,9 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from typing import Union
-
 from shapely.geometry.base import BaseGeometry
 
 from sedona.core.geom.envelope import Envelope
-from sedona.core.geom.geography import Geography
 from sedona.core.jvm.translate import JvmGeometryAdapter
 from sedona.utils.spatial_rdd_parser import GeometryFactory
 
@@ -28,15 +25,13 @@ from sedona.utils.spatial_rdd_parser import GeometryFactory
 class GeometryAdapter:
 
     @classmethod
-    def create_jvm_geometry_from_base_geometry(
-        cls, jvm, geom: Union[BaseGeometry, Geography]
-    ):
+    def create_jvm_geometry_from_base_geometry(cls, jvm, geom: BaseGeometry):
         """
         :param jvm:
         :param geom:
         :return:
         """
-        if isinstance(geom, (Envelope, Geography)):
+        if isinstance(geom, Envelope):
             jvm_geom = geom.create_jvm_instance(jvm)
         else:
             decoded_geom = GeometryFactory.to_bytes(geom)

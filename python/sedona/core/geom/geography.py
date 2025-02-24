@@ -15,28 +15,11 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-import pickle
-
-from sedona.utils.decorators import require
+from shapely.geometry.base import BaseGeometry
 
 
 class Geography:
+    geometry: BaseGeometry
 
-    def __init__(self, geometry):
-        self._geom = geometry
-        self.userData = None
-
-    def getUserData(self):
-        return self.userData
-
-    @classmethod
-    def from_jvm_instance(cls, java_obj):
-        return Geography(java_obj.geometry)
-
-    @classmethod
-    def serialize_for_java(cls, geogs):
-        return pickle.dumps(geogs)
-
-    @require(["Geography"])
-    def create_jvm_instance(self, jvm):
-        return jvm.Geography(self._geom)
+    def __init__(self, geometry: BaseGeometry):
+        self.geometry = geometry
