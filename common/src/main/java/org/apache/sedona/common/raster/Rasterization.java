@@ -548,8 +548,20 @@ public class Rasterization {
           continue; // Skip horizontal edges
         }
 
-        double yStart = Math.floor((worldP1.y - params.upperLeftY) / params.scaleY);
-        double yEnd = Math.round((worldP2.y - params.upperLeftY) / params.scaleY);
+        // Using BigDecimal to avoid floating point errors
+        double yStart =
+            Math.ceil(
+                (valueOf(params.upperLeftY)
+                        .subtract(valueOf(worldP1.y))
+                        .divide(valueOf(params.scaleY), RoundingMode.CEILING))
+                    .doubleValue());
+
+        double yEnd =
+            Math.floor(
+                (valueOf(params.upperLeftY)
+                        .subtract(valueOf(worldP2.y))
+                        .divide(valueOf(params.scaleY), RoundingMode.FLOOR))
+                    .doubleValue());
 
         // Contain y range within geomExtent; Use centroid y line as scan line
         yEnd = Math.max(0.5, Math.abs(yEnd) + 0.5);
