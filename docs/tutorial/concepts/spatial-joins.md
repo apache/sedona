@@ -27,7 +27,7 @@ This page provides basic examples that clearly illustrate the key conceptual poi
 
 Look at the following graph containing three points and two polygons.  `point_b` is within `polygon_y`, `point_c` is within `polygon_x`, and `point_a` isn’t within any polygon.
 
-![](../../image/tutorial/concepts/spatial-join1.png)
+![spatial join within](../../image/tutorial/concepts/spatial-join1.png)
 
 The `points` table contains points and the `polygons` table includes polygons.
 
@@ -38,7 +38,7 @@ SELECT
     points.id as point_id,
     polygons.id as polygon_id
 FROM points
-JOIN polygons ON ST_Within(points.geometry, polygons.geometry);     
+JOIN polygons ON ST_Within(points.geometry, polygons.geometry);  
 ```
 
 Here’s the result:
@@ -87,7 +87,7 @@ SELECT
     points.id as point_id,
     polygons.id as polygon_id
 FROM points
-LEFT JOIN polygons ON ST_Contains(polygons.geometry, points.geometry);        
+LEFT JOIN polygons ON ST_Contains(polygons.geometry, points.geometry);  
 ```
 
 Here’s the same result:
@@ -106,7 +106,7 @@ Here’s the same result:
 
 Look at the following graph containing one polygon and two lines.  `line_a` and `line_b` cross `polygon_x`.  `line_c` does not cross `polygon_x`.
 
-![](../../image/tutorial/concepts/spatial-join2.png)
+![spatial join crosses](../../image/tutorial/concepts/spatial-join2.png)
 
 Here’s the SQL query to run this spatial join:
 
@@ -136,7 +136,7 @@ A spatial join with `ST_Crosses` lets us identify the lines that cross the polyg
 
 Suppose you have a polygon and two lines.  `line_a` does not touch the polygon, and `line_b` does touch the polygon.  See the following diagram:
 
-![](../../image/tutorial/concepts/spatial-join3.png)
+![spatial join touches](../../image/tutorial/concepts/spatial-join3.png)
 
 Let’s create `table_a` with the lines and `table_b` with the polygon and then join them.
 
@@ -169,7 +169,7 @@ SELECT
     lines.id as line_id,
     polygons.id as polygon_id
 FROM lines
-LEFT JOIN polygons ON ST_Touches(lines.geometry, polygons.geometry);        
+LEFT JOIN polygons ON ST_Touches(lines.geometry, polygons.geometry);  
 """).show()
 ```
 
@@ -190,7 +190,7 @@ Now, let’s look at running a join to see if points are within a polygon.
 
 The following diagram shows two polygons and a few shapes.  `polygon_a` overlaps `polygon_x`.  Neither `line_b`, `line_c`, or `point_d` overlap with `polygon_y` or `polygon_x`.
 
-![](../../image/tutorial/concepts/spatial-join4.png)
+![spatial join overlaps](../../image/tutorial/concepts/spatial-join4.png)
 
 Here is the SQL query to run this spatial join:
 
@@ -247,11 +247,11 @@ Here are the `coffee_shops` with `latitude` and `longitude`:
 Here’s how to compute the two nearest coffee shops to each address:
 
 ```sql
-SELECT 
-    addresses.id AS address_id, 
+SELECT
+    addresses.id AS address_id,
     coffee_shops.id AS coffee_shop_id
 FROM addresses
-JOIN coffee_shops 
+JOIN coffee_shops
 ON ST_KNN(addresses.geometry, coffee_shops.geometry, 2)
 ```
 
@@ -272,7 +272,7 @@ Here is the result:
 
 Here’s a visualization of the results:
 
-![](../../image/tutorial/concepts/spatial-join5.png)
+![spatial join knn](../../image/tutorial/concepts/spatial-join5.png)
 
 You can easily see the coffee shops that are closest to each address.
 
@@ -280,7 +280,7 @@ You can easily see the coffee shops that are closest to each address.
 
 Look at the following graph, which shows a point and different transit stations. Let’s perform a spatial join to find all the transit stations within 2.5 units of the point.
 
-![](../../image/tutorial/concepts/spatial-join6.png)
+![spatial distance join](../../image/tutorial/concepts/spatial-join6.png)
 
 We can see that `t2` and `t3` are within 2.5 units from the point.
 
@@ -310,11 +310,11 @@ And here is the transit table:
 Let’s perform a distance join to find all the transit stations that are within 2.5 units of the point:
 
 ```sql
-SELECT 
-    points.id AS point_id, 
+SELECT
+    points.id AS point_id,
     transit.id AS transit_id
 FROM points
-JOIN transit 
+JOIN transit
 ON ST_DWithin(points.geometry, transit.geometry, 2.5)
 ```
 
@@ -335,7 +335,7 @@ Sedona is an excellent tool for finding locations within a certain distance from
 
 Suppose you have a table with cities and another table with restaurants.  You want to identify all the restaurants in a given city.  See the following diagram for some sample data.
 
-![](../../image/tutorial/concepts/spatial-join7.png)
+![spatial range join](../../image/tutorial/concepts/spatial-join7.png)
 
 Three restaurants are within the city boundary, and one is outside the city.
 
@@ -365,11 +365,11 @@ And here is the `restaurants` table:
 Here’s how to execute the range join:
 
 ```
-SELECT 
-    cities.id AS city_id, 
+SELECT
+    cities.id AS city_id,
     restaurants.id AS restaurant_id
 FROM cities
-JOIN restaurants 
+JOIN restaurants
 ON ST_Intersects(restaurants.geometry, cities.geometry)
 ```
 
