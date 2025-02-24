@@ -28,6 +28,7 @@ import org.apache.spark.sql.types.{DataType, StructType}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.locationtech.jts.geom.Geometry
 import org.slf4j.{Logger, LoggerFactory}
+import org.apache.sedona.core.spatialPartitioning.GenericUniquePartitioner
 
 /**
  * Adapter for converting between DataFrame and SpatialRDD. It provides methods to convert
@@ -83,17 +84,30 @@ object StructuredAdapter {
   }
 
   /**
-   * Convert DataFrame to SpatialRDD. It puts InternalRow as user data of Geometry. It allows only
-   * one geometry column.
+   * Convert DataFrame to SpatialRDD. It puts InternalRow as user data of Geometry.
    *
    * @param dataFrame
    * @param geometryFieldName
    */
-  def toSpatialRdd(dataFrame: DataFrame, geometryFieldName: String): SpatialRDD[Geometry] = {
+  def toSpatialRdd(dataFrame: DataFrame, geometryFieldName: String): SpatialRDD[Geometry] =
+    toSpatialRdd(dataFrame.queryExecution.toRdd, dataFrame.schema, geometryFieldName)
+
+  /**
+   * Convert RDD[InternalRow] to SpatialRDD. It puts InternalRow as user data of Geometry.
+   *
+   * @param rdd
+   * @param schema
+   * @param geometryFieldName
+   * @return
+   */
+  def toSpatialRdd(
+      rdd: RDD[InternalRow],
+      schema: StructType,
+      geometryFieldName: String): SpatialRDD[Geometry] = {
     val spatialRDD = new SpatialRDD[Geometry]
-    spatialRDD.schema = dataFrame.schema
+    spatialRDD.schema = schema
     val ordinal = spatialRDD.schema.fieldIndex(geometryFieldName)
-    spatialRDD.rawSpatialRDD = dataFrame.queryExecution.toRdd
+    spatialRDD.rawSpatialRDD = rdd
       .map(row => {
         val geom = GeometrySerializer.deserialize(row.getBinary(ordinal))
         geom.setUserData(row.copy())
@@ -143,8 +157,11 @@ object StructuredAdapter {
     if (spatialRDD.spatialPartitionedRDD == null)
       throw new RuntimeException(
         "SpatialRDD is not spatially partitioned. Please call spatialPartitioning method before calling this method.")
-    logger.warn(
-      "SpatialPartitionedRDD might have duplicate geometries. Please make sure you are aware of it.")
+
+    if (!spatialRDD.getPartitioner().isInstanceOf[GenericUniquePartitioner]) {
+      logger.warn(
+        "SpatialPartitionedRDD might have duplicate geometries. Please make sure you are aware of it.")
+    }
     val rowRdd = spatialRDD.spatialPartitionedRDD.map(geometry => {
       val row = geometry.getUserData.asInstanceOf[InternalRow]
       row

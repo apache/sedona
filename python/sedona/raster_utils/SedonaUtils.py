@@ -15,10 +15,13 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
+from sedona.maps.SedonaMapUtils import SedonaMapUtils
+
 
 class SedonaUtils:
     @classmethod
     def display_image(cls, df):
         from IPython.display import HTML, display
 
-        display(HTML(df.toPandas().to_html(escape=False)))
+        pdf = SedonaMapUtils.__convert_to_gdf_or_pdf__(df, rename=False)
+        display(HTML(pdf.to_html(escape=False)))

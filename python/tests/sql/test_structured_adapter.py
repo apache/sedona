@@ -14,6 +14,9 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 #  under the License.
+import glob
+import tempfile
+
 from pyspark.sql import DataFrame
 
 from sedona.core.SpatialRDD import CircleRDD
@@ -58,3 +61,22 @@ class TestStructuredAdapter(TestBase):
             join_result_pair_rdd, schema, schema, self.spark
         )
         assert join_result_df.count() == 1
+
+    def test_spatial_partitioned_write(self):
+        xys = [(i, i // 100, i % 100) for i in range(1_000)]
+        df = self.spark.createDataFrame(xys, ["id", "x", "y"]).selectExpr(
+            "id", "ST_Point(x, y) AS geom"
+        )
+
+        rdd = StructuredAdapter.toSpatialRdd(df, "geom")
+        rdd.analyze()
+        rdd.spatialPartitioningWithoutDuplicates(GridType.KDBTREE, num_partitions=16)
+        n_spatial_partitions = rdd.spatialPartitionedRDD.getNumPartitions()
+        assert n_spatial_partitions >= 16
+
+        partitioned_df = StructuredAdapter.toSpatialPartitionedDf(rdd, self.spark)
+
+        with tempfile.TemporaryDirectory() as td:
+            out = td + "/out"
+            partitioned_df.write.format("geoparquet").save(out)
+            assert len(glob.glob(out + "/*.parquet")) == n_spatial_partitions

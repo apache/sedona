@@ -24,9 +24,18 @@ Sedona offers a spatial data generator called Spider. It is a data source that g
 Once you have your [`SedonaContext` object created](../Overview#quick-start), you can create a DataFrame with the `spider` data source.
 
 ```python
-df_random_points = sedona.read.format("spider").load(n=1000, distribution='uniform')
-df_random_boxes = sedona.read.format("spider").load(n=1000, distribution='gaussian', geometryType='box', maxWidth=0.05, maxHeight=0.05)
-df_random_polygons = sedona.read.format("spider").load(n=1000, distribution='bit', geometryType='polygon', minSegment=3, maxSegment=5, maxSize=0.1)
+df_random_points = sedona.read.format("spider").load(n=1000, distribution="uniform")
+df_random_boxes = sedona.read.format("spider").load(
+    n=1000, distribution="gaussian", geometryType="box", maxWidth=0.05, maxHeight=0.05
+)
+df_random_polygons = sedona.read.format("spider").load(
+    n=1000,
+    distribution="bit",
+    geometryType="polygon",
+    minSegment=3,
+    maxSegment=5,
+    maxSize=0.1,
+)
 ```
 
 Now we have three DataFrames with random spatial data. We can show the first three rows of the `df_random_points` DataFrame to verify the data is generated correctly.
@@ -57,22 +66,24 @@ import matplotlib.pyplot as plt
 import geopandas as gpd
 
 # Convert DataFrames to GeoDataFrames
-gdf_random_points = gpd.GeoDataFrame(df_random_points.toPandas(), geometry='geometry')
-gdf_random_boxes = gpd.GeoDataFrame(df_random_boxes.toPandas(), geometry='geometry')
-gdf_random_polygons = gpd.GeoDataFrame(df_random_polygons.toPandas(), geometry='geometry')
+gdf_random_points = gpd.GeoDataFrame(df_random_points.toPandas(), geometry="geometry")
+gdf_random_boxes = gpd.GeoDataFrame(df_random_boxes.toPandas(), geometry="geometry")
+gdf_random_polygons = gpd.GeoDataFrame(
+    df_random_polygons.toPandas(), geometry="geometry"
+)
 
 # Create a figure and a set of subplots
 fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
 # Plot each GeoDataFrame on a different subplot
-gdf_random_points.plot(ax=axes[0], color='blue', markersize=5)
-axes[0].set_title('Random Points')
+gdf_random_points.plot(ax=axes[0], color="blue", markersize=5)
+axes[0].set_title("Random Points")
 
-gdf_random_boxes.boundary.plot(ax=axes[1], color='red')
-axes[1].set_title('Random Boxes')
+gdf_random_boxes.boundary.plot(ax=axes[1], color="red")
+axes[1].set_title("Random Boxes")
 
-gdf_random_polygons.boundary.plot(ax=axes[2], color='green')
-axes[2].set_title('Random Polygons')
+gdf_random_polygons.boundary.plot(ax=axes[2], color="green")
+axes[2].set_title("Random Polygons")
 
 # Adjust the layout
 plt.tight_layout()
@@ -122,8 +133,11 @@ Example:
 
 ```python
 import geopandas as gpd
-df = sedona.read.format("spider").load(n=300, distribution='uniform', geometryType='box', maxWidth=0.05, maxHeight=0.05)
-gpd.GeoDataFrame(df.toPandas(), geometry='geometry').boundary.plot()
+
+df = sedona.read.format("spider").load(
+    n=300, distribution="uniform", geometryType="box", maxWidth=0.05, maxHeight=0.05
+)
+gpd.GeoDataFrame(df.toPandas(), geometry="geometry").boundary.plot()
 ```
 
 ![Uniform Distribution](../../image/spider/spider-uniform.png)
@@ -145,8 +159,11 @@ Example:
 
 ```python
 import geopandas as gpd
-df = sedona.read.format("spider").load(n=300, distribution='gaussian', geometryType='polygon', maxSize=0.05)
-gpd.GeoDataFrame(df.toPandas(), geometry='geometry').boundary.plot()
+
+df = sedona.read.format("spider").load(
+    n=300, distribution="gaussian", geometryType="polygon", maxSize=0.05
+)
+gpd.GeoDataFrame(df.toPandas(), geometry="geometry").boundary.plot()
 ```
 
 ![Gaussian Distribution](../../image/spider/spider-gaussian.png)
@@ -170,8 +187,11 @@ Example:
 
 ```python
 import geopandas as gpd
-df = sedona.read.format("spider").load(n=300, distribution='bit', geometryType='point', probability=0.2, digits=10)
-gpd.GeoDataFrame(df.toPandas(), geometry='geometry').plot(markersize=1)
+
+df = sedona.read.format("spider").load(
+    n=300, distribution="bit", geometryType="point", probability=0.2, digits=10
+)
+gpd.GeoDataFrame(df.toPandas(), geometry="geometry").plot(markersize=1)
 ```
 
 ![Bit Distribution](../../image/spider/spider-bit.png)
@@ -195,8 +215,11 @@ Example:
 
 ```python
 import geopandas as gpd
-df = sedona.read.format("spider").load(n=300, distribution='diagonal', geometryType='point', percentage=0.5, buffer=0.5)
-gpd.GeoDataFrame(df.toPandas(), geometry='geometry').plot(markersize=1)
+
+df = sedona.read.format("spider").load(
+    n=300, distribution="diagonal", geometryType="point", percentage=0.5, buffer=0.5
+)
+gpd.GeoDataFrame(df.toPandas(), geometry="geometry").plot(markersize=1)
 ```
 
 ![Diagonal Distribution](../../image/spider/spider-diagonal.png)
@@ -218,8 +241,11 @@ Example:
 
 ```python
 import geopandas as gpd
-df = sedona.read.format("spider").load(n=2000, distribution='sierpinski', geometryType='point')
-gpd.GeoDataFrame(df.toPandas(), geometry='geometry').plot(markersize=1)
+
+df = sedona.read.format("spider").load(
+    n=2000, distribution="sierpinski", geometryType="point"
+)
+gpd.GeoDataFrame(df.toPandas(), geometry="geometry").plot(markersize=1)
 ```
 
 ![Sierpinski Distribution](../../image/spider/spider-sierpinski.png)
@@ -237,8 +263,11 @@ Example:
 
 ```python
 import geopandas as gpd
-df = sedona.read.format("spider").load(n=300, distribution='parcel', dither=0.5, splitRange=0.5)
-gpd.GeoDataFrame(df.toPandas(), geometry='geometry').boundary.plot()
+
+df = sedona.read.format("spider").load(
+    n=300, distribution="parcel", dither=0.5, splitRange=0.5
+)
+gpd.GeoDataFrame(df.toPandas(), geometry="geometry").boundary.plot()
 ```
 
 ![Parcel Distribution](../../image/spider/spider-parcel.png)
@@ -274,8 +303,11 @@ Example:
 
 ```python
 import geopandas as gpd
-df_random_points = sedona.read.format("spider").load(n=1000, distribution='uniform', translateX=0.5, translateY=0.5, scaleX=2, scaleY=2)
-gpd.GeoDataFrame(df_random_points.toPandas(), geometry='geometry').plot(markersize=1)
+
+df_random_points = sedona.read.format("spider").load(
+    n=1000, distribution="uniform", translateX=0.5, translateY=0.5, scaleX=2, scaleY=2
+)
+gpd.GeoDataFrame(df_random_points.toPandas(), geometry="geometry").plot(markersize=1)
 ```
 
 The data is now in the region `[0.5, 2.5] x [0.5, 2.5]`.

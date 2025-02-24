@@ -34,7 +34,9 @@ df.show()
 You can load a STAC collection from a s3 collection file object:
 
 ```python
-df = sedona.read.format("stac").load("s3a://example.com/stac_bucket/stac_collection.json")
+df = sedona.read.format("stac").load(
+    "s3a://example.com/stac_bucket/stac_collection.json"
+)
 df.printSchema()
 df.show()
 ```
@@ -42,7 +44,9 @@ df.show()
 You can also load a STAC collection from an HTTP/HTTPS endpoint:
 
 ```python
-df = sedona.read.format("stac").load("https://earth-search.aws.element84.com/v1/collections/sentinel-2-pre-c1-l2a")
+df = sedona.read.format("stac").load(
+    "https://earth-search.aws.element84.com/v1/collections/sentinel-2-pre-c1-l2a"
+)
 df.printSchema()
 df.show()
 ```
@@ -145,6 +149,140 @@ In this example, the data source will push down the temporal filter to the under
 ```
 
 In this example, the data source will push down the spatial filter to the underlying data source.
+
+# Python API
+
+The Python API allows you to interact with a SpatioTemporal Asset Catalog (STAC) API using the Client class. This class provides methods to open a connection to a STAC API, retrieve collections, and search for items with various filters.
+
+## Client Class
+
+## Methods
+
+### `open(url: str) -> Client`
+
+Opens a connection to the specified STAC API URL.
+
+**Parameters:**
+
+- `url` (*str*): The URL of the STAC API to connect to.
+  **Example:** `"https://planetarycomputer.microsoft.com/api/stac/v1"`
+
+**Returns:**
+
+- `Client`: An instance of the `Client` class connected to the specified URL.
+
+---
+
+### `get_collection(collection_id: str) -> CollectionClient`
+
+Retrieves a collection client for the specified collection ID.
+
+**Parameters:**
+
+- `collection_id` (*str*): The ID of the collection to retrieve.
+  **Example:** `"aster-l1t"`
+
+**Returns:**
+
+- `CollectionClient`: An instance of the `CollectionClient` class for the specified collection.
+
+---
+
+### `search(*ids: Union[str, list], collection_id: str, bbox: Optional[list] = None, datetime: Optional[Union[str, datetime.datetime, list]] = None, max_items: Optional[int] = None, return_dataframe: bool = True) -> Union[Iterator[PyStacItem], DataFrame]`
+
+Searches for items in the specified collection with optional filters.
+
+**Parameters:**
+
+- `ids` (*Union[str, list]*): A variable number of item IDs to filter the items.
+  **Example:** `"item_id1"` or `["item_id1", "item_id2"]`
+- `collection_id` (*str*): The ID of the collection to search in.
+  **Example:** `"aster-l1t"`
+- `bbox` (*Optional[list]*): A list of bounding boxes for filtering the items. Each bounding box is represented as a list of four float values: `[min_lon, min_lat, max_lon, max_lat]`.
+  **Example:** `[[ -180.0, -90.0, 180.0, 90.0 ]]`
+- `datetime` (*Optional[Union[str, datetime.datetime, list]]*): A single datetime, RFC 3339-compliant timestamp, or a list of date-time ranges for filtering the items.
+  **Example:**
+    - `"2020-01-01T00:00:00Z"`
+    - `datetime.datetime(2020, 1, 1)`
+    - `[["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]`
+- `max_items` (*Optional[int]*): The maximum number of items to return from the search, even if there are more matching results.
+  **Example:** `100`
+- `return_dataframe` (*bool*): If `True` (default), return the result as a Spark DataFrame instead of an iterator of `PyStacItem` objects.
+  **Example:** `True`
+
+**Returns:**
+
+- *Union[Iterator[PyStacItem], DataFrame]*: An iterator of `PyStacItem` objects or a Spark DataFrame that matches the specified filters.
+
+## Sample Code
+
+### Initialize the Client
+
+```python
+from sedona.stac.client import Client
+
+# Initialize the client
+client = Client.open("https://planetarycomputer.microsoft.com/api/stac/v1")
+```
+
+### Search Items on a Collection Within a Year
+
+```python
+items = client.search(
+    collection_id="aster-l1t", datetime="2020", return_dataframe=False
+)
+```
+
+### Search Items on a Collection Within a Month and Max Items
+
+```python
+items = client.search(
+    collection_id="aster-l1t", datetime="2020-05", return_dataframe=False, max_items=5
+)
+```
+
+### Search Items with Bounding Box and Interval
+
+```python
+items = client.search(
+    collection_id="aster-l1t",
+    ids=["AST_L1T_00312272006020322_20150518201805"],
+    bbox=[-180.0, -90.0, 180.0, 90.0],
+    datetime=["2006-01-01T00:00:00Z", "2007-01-01T00:00:00Z"],
+    return_dataframe=False,
+)
+```
+
+### Search Multiple Items with Multiple Bounding Boxes
+
+```python
+bbox_list = [[-180.0, -90.0, 180.0, 90.0], [-100.0, -50.0, 100.0, 50.0]]
+items = client.search(collection_id="aster-l1t", bbox=bbox_list, return_dataframe=False)
+```
+
+### Search Items and Get DataFrame as Return with Multiple Intervals
+
+```python
+interval_list = [
+    ["2020-01-01T00:00:00Z", "2020-06-01T00:00:00Z"],
+    ["2020-07-01T00:00:00Z", "2021-01-01T00:00:00Z"],
+]
+df = client.search(
+    collection_id="aster-l1t", datetime=interval_list, return_dataframe=True
+)
+df.show()
+```
+
+### Save Items in DataFrame to GeoParquet with Both Bounding Boxes and Intervals
+
+```python
+# Save items in DataFrame to GeoParquet with both bounding boxes and intervals
+client.get_collection("aster-l1t").save_to_geoparquet(
+    output_path="/path/to/output", bbox=bbox_list, datetime="2020-05"
+)
+```
+
+These examples demonstrate how to use the Client class to search for items in a STAC collection with various filters and return the results as either an iterator of PyStacItem objects or a Spark DataFrame.
 
 # References
 

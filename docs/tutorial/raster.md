@@ -279,7 +279,12 @@ For multiple raster data files use the following code to load the data [from pat
 
 === "Python"
     ```python
-    rawDf = sedona.read.format("binaryFile").option("recursiveFileLookup", "true").option("pathGlobFilter", "*.tif*").load(path_to_raster_data_folder)
+    rawDf = (
+        sedona.read.format("binaryFile")
+        .option("recursiveFileLookup", "true")
+        .option("pathGlobFilter", "*.tif*")
+        .load(path_to_raster_data_folder)
+    )
     rawDf.createOrReplaceTempView("rawdf")
     rawDf.show()
     ```
@@ -608,7 +613,11 @@ Sedona allows collecting Dataframes with raster columns and working with them lo
 The raster objects are represented as `SedonaRaster` objects in Python, which can be used to perform raster operations.
 
 ```python
-df_raster = sedona.read.format("binaryFile").load("/path/to/raster.tif").selectExpr("RS_FromGeoTiff(content) as rast")
+df_raster = (
+    sedona.read.format("binaryFile")
+    .load("/path/to/raster.tif")
+    .selectExpr("RS_FromGeoTiff(content) as rast")
+)
 rows = df_raster.collect()
 raster = rows[0].rast
 raster  # <sedona.raster.sedona_raster.InDbSedonaRaster at 0x1618fb1f0>
@@ -617,18 +626,18 @@ raster  # <sedona.raster.sedona_raster.InDbSedonaRaster at 0x1618fb1f0>
 You can retrieve the metadata of the raster by accessing the properties of the `SedonaRaster` object.
 
 ```python
-raster.width        # width of the raster
-raster.height       # height of the raster
-raster.affine_trans # affine transformation matrix
-raster.crs_wkt      # coordinate reference system as WKT
+raster.width  # width of the raster
+raster.height  # height of the raster
+raster.affine_trans  # affine transformation matrix
+raster.crs_wkt  # coordinate reference system as WKT
 ```
 
 You can get a numpy array containing the band data of the raster using the `as_numpy` or `as_numpy_masked` method. The
 band data is organized in CHW order.
 
 ```python
-raster.as_numpy()        # numpy array of the raster
-raster.as_numpy_masked() # numpy array with nodata values masked as nan
+raster.as_numpy()  # numpy array of the raster
+raster.as_numpy_masked()  # numpy array with nodata values masked as nan
 ```
 
 If you want to work with the raster data using `rasterio`, you can retrieve a `rasterio.DatasetReader` object using the
@@ -640,7 +649,7 @@ If you want to work with the raster data using `rasterio`, you can retrieve a `r
 ```python
 ds = raster.as_rasterio()  # rasterio.DatasetReader object
 # Work with the raster using rasterio
-band1 = ds.read(1)         # read the first band
+band1 = ds.read(1)  # read the first band
 ```
 
 ## Writing Python UDF to work with raster data
@@ -651,8 +660,10 @@ return any Spark data type as output. This is an example of a Python UDF that ca
 ```python
 from pyspark.sql.types import DoubleType
 
+
 def mean_udf(raster):
     return float(raster.as_numpy().mean())
+
 
 sedona.udf.register("mean_udf", mean_udf, DoubleType())
 df_raster.withColumn("mean", expr("mean_udf(rast)")).show()
@@ -674,13 +685,17 @@ objects yet. However, you can write a UDF that returns the band data as an array
 from pyspark.sql.types import ArrayType, DoubleType
 import numpy as np
 
+
 def mask_udf(raster):
-    band1 = raster.as_numpy()[0,:,:]
+    band1 = raster.as_numpy()[0, :, :]
     mask = (band1 < 1400).astype(np.float64)
     return mask.flatten().tolist()
 
+
 sedona.udf.register("mask_udf", band_udf, ArrayType(DoubleType()))
-df_raster.withColumn("mask", expr("mask_udf(rast)")).withColumn("mask_rast", expr("RS_MakeRaster(rast, 'I', mask)")).show()
+df_raster.withColumn("mask", expr("mask_udf(rast)")).withColumn(
+    "mask_rast", expr("RS_MakeRaster(rast, 'I', mask)")
+).show()
 ```
 
 ```

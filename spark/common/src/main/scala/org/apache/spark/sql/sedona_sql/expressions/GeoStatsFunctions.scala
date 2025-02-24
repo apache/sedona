@@ -23,80 +23,13 @@ import org.apache.sedona.stats.Weighting.{addBinaryDistanceBandColumn, addWeight
 import org.apache.sedona.stats.clustering.DBSCAN.dbscan
 import org.apache.sedona.stats.hotspotDetection.GetisOrd.gLocal
 import org.apache.sedona.stats.outlierDetection.LocalOutlierFactor.localOutlierFactor
-import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{Attribute, AttributeReference, Expression, ImplicitCastInputTypes, Literal, ScalarSubquery, Unevaluable}
-import org.apache.spark.sql.execution.{LogicalRDD, SparkPlan}
+import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.catalyst.expressions.{Attribute, Expression}
 import org.apache.spark.sql.functions.{col, struct}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
-import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 
-import scala.reflect.ClassTag
-
-// We mark ST_GeoStatsFunction as non-deterministic to avoid the filter push-down optimization pass
-// duplicates the ST_GeoStatsFunction when pushing down aliased ST_GeoStatsFunction through a
-// Project operator. This will make ST_GeoStatsFunction being evaluated twice.
-trait ST_GeoStatsFunction
-    extends Expression
-    with ImplicitCastInputTypes
-    with Unevaluable
-    with Serializable {
-
-  final override lazy val deterministic: Boolean = false
-
-  override def nullable: Boolean = true
-
-  private final lazy val sparkSession = SparkSession.getActiveSession.get
-
-  protected final lazy val geometryColumnName = getInputName(0, "geometry")
-
-  protected def getInputName(i: Int, fieldName: String): String = children(i) match {
-    case ref: AttributeReference => ref.name
-    case _ =>
-      throw new IllegalArgumentException(
-        f"$fieldName argument must be a named reference to an existing column")
-  }
-
-  protected def getInputNames(i: Int, fieldName: String): Seq[String] = children(
-    i).dataType match {
-    case StructType(fields) => fields.map(_.name)
-    case _ => throw new IllegalArgumentException(f"$fieldName argument must be a struct")
-  }
-
-  protected def getResultName(resultAttrs: Seq[Attribute]): String = resultAttrs match {
-    case Seq(attr) => attr.name
-    case _ => throw new IllegalArgumentException("resultAttrs must have exactly one attribute")
-  }
-
-  protected def doExecute(dataframe: DataFrame, resultAttrs: Seq[Attribute]): DataFrame
-
-  protected def getScalarValue[T](i: Int, name: String)(implicit ct: ClassTag[T]): T = {
-    children(i) match {
-      case Literal(l: T, _) => l
-      case _: Literal =>
-        throw new IllegalArgumentException(f"$name must be an instance of  ${ct.runtimeClass}")
-      case s: ScalarSubquery =>
-        s.eval() match {
-          case t: T => t
-          case _ =>
-            throw new IllegalArgumentException(
-              f"$name must be an instance of  ${ct.runtimeClass}")
-        }
-      case _ => throw new IllegalArgumentException(f"$name must be a scalar value")
-    }
-  }
-
-  def execute(plan: SparkPlan, resultAttrs: Seq[Attribute]): RDD[InternalRow] = {
-    val df = doExecute(
-      Dataset.ofRows(sparkSession, LogicalRDD(plan.output, plan.execute())(sparkSession)),
-      resultAttrs)
-    df.queryExecution.toRdd
-  }
-
-}
-
-case class ST_DBSCAN(children: Seq[Expression]) extends ST_GeoStatsFunction {
+case class ST_DBSCAN(children: Seq[Expression]) extends DataframePhysicalFunction {
 
   override def dataType: DataType = StructType(
     Seq(StructField("isCore", BooleanType), StructField("cluster", LongType)))
@@ -107,7 +40,9 @@ case class ST_DBSCAN(children: Seq[Expression]) extends ST_GeoStatsFunction {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression =
     copy(children = newChildren)
 
-  override def doExecute(dataframe: DataFrame, resultAttrs: Seq[Attribute]): DataFrame = {
+  override def transformDataframe(
+      dataframe: DataFrame,
+      resultAttrs: Seq[Attribute]): DataFrame = {
     require(
       !dataframe.columns.contains("__isCore"),
       "__isCore is a  reserved name by the dbscan algorithm. Please rename the columns before calling the ST_DBSCAN function.")
@@ -129,7 +64,7 @@ case class ST_DBSCAN(children: Seq[Expression]) extends ST_GeoStatsFunction {
   }
 }
 
-case class ST_LocalOutlierFactor(children: Seq[Expression]) extends ST_GeoStatsFunction {
+case class ST_LocalOutlierFactor(children: Seq[Expression]) extends DataframePhysicalFunction {
 
   override def dataType: DataType = DoubleType
 
@@ -139,7 +74,9 @@ case class ST_LocalOutlierFactor(children: Seq[Expression]) extends ST_GeoStatsF
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression =
     copy(children = newChildren)
 
-  override def doExecute(dataframe: DataFrame, resultAttrs: Seq[Attribute]): DataFrame = {
+  override def transformDataframe(
+      dataframe: DataFrame,
+      resultAttrs: Seq[Attribute]): DataFrame = {
     localOutlierFactor(
       dataframe,
       getScalarValue[Int](1, "k"),
@@ -150,7 +87,7 @@ case class ST_LocalOutlierFactor(children: Seq[Expression]) extends ST_GeoStatsF
   }
 }
 
-case class ST_GLocal(children: Seq[Expression]) extends ST_GeoStatsFunction {
+case class ST_GLocal(children: Seq[Expression]) extends DataframePhysicalFunction {
 
   override def dataType: DataType = StructType(
     Seq(
@@ -172,7 +109,9 @@ case class ST_GLocal(children: Seq[Expression]) extends ST_GeoStatsFunction {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression =
     copy(children = newChildren)
 
-  override def doExecute(dataframe: DataFrame, resultAttrs: Seq[Attribute]): DataFrame = {
+  override def transformDataframe(
+      dataframe: DataFrame,
+      resultAttrs: Seq[Attribute]): DataFrame = {
     gLocal(
       dataframe,
       getInputName(0, "x"),
@@ -187,7 +126,8 @@ case class ST_GLocal(children: Seq[Expression]) extends ST_GeoStatsFunction {
   }
 }
 
-case class ST_BinaryDistanceBandColumn(children: Seq[Expression]) extends ST_GeoStatsFunction {
+case class ST_BinaryDistanceBandColumn(children: Seq[Expression])
+    extends DataframePhysicalFunction {
   override def dataType: DataType = ArrayType(
     StructType(
       Seq(StructField("neighbor", children(5).dataType), StructField("value", DoubleType))))
@@ -198,7 +138,9 @@ case class ST_BinaryDistanceBandColumn(children: Seq[Expression]) extends ST_Geo
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression =
     copy(children = newChildren)
 
-  override def doExecute(dataframe: DataFrame, resultAttrs: Seq[Attribute]): DataFrame = {
+  override def transformDataframe(
+      dataframe: DataFrame,
+      resultAttrs: Seq[Attribute]): DataFrame = {
     val attributeNames = getInputNames(5, "attributes")
     require(attributeNames.nonEmpty, "attributes must have at least one column")
     require(
@@ -217,7 +159,8 @@ case class ST_BinaryDistanceBandColumn(children: Seq[Expression]) extends ST_Geo
   }
 }
 
-case class ST_WeightedDistanceBandColumn(children: Seq[Expression]) extends ST_GeoStatsFunction {
+case class ST_WeightedDistanceBandColumn(children: Seq[Expression])
+    extends DataframePhysicalFunction {
 
   override def dataType: DataType = ArrayType(
     StructType(
@@ -237,7 +180,9 @@ case class ST_WeightedDistanceBandColumn(children: Seq[Expression]) extends ST_G
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression =
     copy(children = newChildren)
 
-  override def doExecute(dataframe: DataFrame, resultAttrs: Seq[Attribute]): DataFrame = {
+  override def transformDataframe(
+      dataframe: DataFrame,
+      resultAttrs: Seq[Attribute]): DataFrame = {
     val attributeNames = getInputNames(7, "attributes")
     require(attributeNames.nonEmpty, "attributes must have at least one column")
     require(
