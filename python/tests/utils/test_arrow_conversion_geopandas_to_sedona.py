@@ -4,10 +4,15 @@ from sedona.sql.types import GeometryType
 from sedona.utils.geoarrow import create_spatial_dataframe
 from tests.test_base import TestBase
 import geopandas as gpd
+import pyspark
 
 
 class TestGeopandasToSedonaWithArrow(TestBase):
 
+    @pytest.mark.skipif(
+        not pyspark.__version__.startswith("3.5"),
+        reason="It's only working with Spark 3.5",
+    )
     def test_conversion_dataframe(self):
         gdf = gpd.GeoDataFrame(
             {
@@ -22,6 +27,10 @@ class TestGeopandasToSedonaWithArrow(TestBase):
         assert df.columns == ["name", "geometry"]
         assert df.schema["geometry"].dataType == GeometryType()
 
+    @pytest.mark.skipif(
+        not pyspark.__version__.startswith("3.5"),
+        reason="It's only working with Spark 3.5",
+    )
     def test_different_geometry_positions(self):
         gdf = gpd.GeoDataFrame(
             {
@@ -50,6 +59,10 @@ class TestGeopandasToSedonaWithArrow(TestBase):
         assert df2.columns == ["name", "name1", "name2", "geometry"]
         assert df2.schema["geometry"].dataType == GeometryType()
 
+    @pytest.mark.skipif(
+        not pyspark.__version__.startswith("3.5"),
+        reason="It's only working with Spark 3.5",
+    )
     def test_multiple_geometry_columns(self):
         gdf = gpd.GeoDataFrame(
             {
@@ -66,6 +79,10 @@ class TestGeopandasToSedonaWithArrow(TestBase):
         assert df.schema["geometry"].dataType == GeometryType()
         assert df.schema["geometry2"].dataType == GeometryType()
 
+    @pytest.mark.skipif(
+        not pyspark.__version__.startswith("3.5"),
+        reason="It's only working with Spark 3.5",
+    )
     def test_missing_geometry_column(self):
         gdf = gpd.GeoDataFrame(
             {
