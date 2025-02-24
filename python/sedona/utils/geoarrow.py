@@ -25,7 +25,6 @@ from sedona.sql.st_functions import ST_AsEWKB
 from pyspark.sql import SparkSession
 from pyspark.sql import DataFrame
 from pyspark.sql.types import StructType, StructField, DataType, ArrayType, MapType
-import pyarrow as pa
 
 from sedona.sql.types import GeometryType
 import geopandas as gpd
@@ -219,6 +218,8 @@ def _dedup_names(names: List[str]) -> List[str]:
         return [gen_new_name[name]() for name in names]
 
 
+# Backport from Spark 4.0
+# https://github.com/apache/spark/blob/3515b207c41d78194d11933cd04bddc21f8418dd/python/pyspark/sql/pandas/types.py#L1385
 def _deduplicate_field_names(dt: DataType) -> DataType:
     if isinstance(dt, StructType):
         dedup_field_names = _dedup_names(dt.names)
@@ -248,6 +249,8 @@ def _deduplicate_field_names(dt: DataType) -> DataType:
 
 
 def infer_schema(gdf: gpd.GeoDataFrame) -> StructType:
+    import pyarrow as pa
+
     fields = gdf.dtypes.reset_index().values.tolist()
     geom_fields = []
     index = 0
