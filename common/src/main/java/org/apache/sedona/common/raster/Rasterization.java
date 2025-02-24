@@ -567,19 +567,33 @@ public class Rasterization {
         yEnd = Math.max(0.5, Math.abs(yEnd) + 0.5);
         yStart = Math.min((params.writableRaster.getHeight() - 0.5), Math.abs(yStart) - 0.5);
 
-        double slope = (worldP2.y - worldP1.y) / (worldP2.x - worldP1.x);
         double p1X = (worldP1.x - params.upperLeftX) / params.scaleX;
         double p1Y = (params.upperLeftY - worldP1.y) / params.scaleY;
 
-        for (double y = yStart; y >= yEnd; y--) {
-          double xIntercept = p1X + ((p1Y - y) / slope);
-          if ((xIntercept < 0) || (xIntercept > params.writableRaster.getWidth())) {
-            continue; // skip xIntercepts outside geomExtent
+        if (worldP1.x == worldP2.x) {
+          // Vertical line case: directly set xIntercept. Avoid divide by zero error when
+          // calculating slope
+          for (double y = yStart; y >= yEnd; y--) {
+            double xIntercept = p1X; // Vertical line, xIntercept is constant
+            if (xIntercept < 0 || xIntercept > params.writableRaster.getWidth()) {
+              continue; // Skip xIntercepts outside geomExtent
+            }
+            scanlineIntersections.computeIfAbsent(y, k -> new TreeSet<>()).add(xIntercept);
           }
-          if (!scanlineIntersections.containsKey(y)) {
-            scanlineIntersections.put(y, new TreeSet<>());
+        } else {
+          double slope = (worldP2.y - worldP1.y) / (worldP2.x - worldP1.x);
+          //        System.out.println("slope: " + slope);
+
+          for (double y = yStart; y >= yEnd; y--) {
+            double xIntercept = p1X + ((p1Y - y) / slope);
+            if ((xIntercept < 0) || (xIntercept > params.writableRaster.getWidth())) {
+              continue; // skip xIntercepts outside geomExtent
+            }
+            if (!scanlineIntersections.containsKey(y)) {
+              scanlineIntersections.put(y, new TreeSet<>());
+            }
+            scanlineIntersections.get(y).add(xIntercept);
           }
-          scanlineIntersections.get(y).add(xIntercept);
         }
       }
     }
