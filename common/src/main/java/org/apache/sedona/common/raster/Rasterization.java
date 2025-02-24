@@ -18,8 +18,6 @@
  */
 package org.apache.sedona.common.raster;
 
-import static java.math.BigDecimal.valueOf;
-
 import java.awt.image.WritableRaster;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -319,10 +317,10 @@ public class Rasterization {
         JTS.getEnvelope2D(geom.getEnvelopeInternal(), raster.getCoordinateReferenceSystem2D());
 
     // Using BigDecimal to avoid floating point errors
-    BigDecimal upperLeftX = valueOf(metadata[0]);
-    BigDecimal upperLeftY = valueOf(metadata[1]);
-    BigDecimal scaleX = valueOf(metadata[4]);
-    BigDecimal scaleY = valueOf(metadata[5]);
+    BigDecimal upperLeftX = BigDecimal.valueOf(metadata[0]);
+    BigDecimal upperLeftY = BigDecimal.valueOf(metadata[1]);
+    BigDecimal scaleX = BigDecimal.valueOf(metadata[4]);
+    BigDecimal scaleY = BigDecimal.valueOf(metadata[5]);
 
     // Compute the aligned min/max values
     double alignedMinX =
@@ -548,19 +546,20 @@ public class Rasterization {
           continue; // Skip horizontal edges
         }
 
+        // Calculate scan line limits to iterate between for each segment
         // Using BigDecimal to avoid floating point errors
         double yStart =
             Math.ceil(
-                (valueOf(params.upperLeftY)
-                        .subtract(valueOf(worldP1.y))
-                        .divide(valueOf(params.scaleY), RoundingMode.CEILING))
+                (BigDecimal.valueOf(params.upperLeftY)
+                        .subtract(BigDecimal.valueOf(worldP1.y))
+                        .divide(BigDecimal.valueOf(params.scaleY), RoundingMode.CEILING))
                     .doubleValue());
 
         double yEnd =
             Math.floor(
-                (valueOf(params.upperLeftY)
-                        .subtract(valueOf(worldP2.y))
-                        .divide(valueOf(params.scaleY), RoundingMode.FLOOR))
+                (BigDecimal.valueOf(params.upperLeftY)
+                        .subtract(BigDecimal.valueOf(worldP2.y))
+                        .divide(BigDecimal.valueOf(params.scaleY), RoundingMode.FLOOR))
                     .doubleValue());
 
         // Contain y range within geomExtent; Use centroid y line as scan line
