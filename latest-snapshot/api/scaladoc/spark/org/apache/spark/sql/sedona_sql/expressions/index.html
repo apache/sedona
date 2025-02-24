@@ -259,6 +259,10 @@
                         <a href="FoldableExpression.html" title="Make expression foldable by constant folding optimizer.">FoldableExpression</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="object" href="FunctionResolver$.html" title="A utility object for resolving functions based on input argument types."></a>
+                        <a href="FunctionResolver$.html" title="A utility object for resolving functions based on input argument types.">FunctionResolver</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="class" href="GeometryType.html" title=""></a>
                         <a href="GeometryType.html" title="">GeometryType</a>
                       </li><li class="current-entities indented6">
@@ -557,6 +561,10 @@
                         <span class="separator"></span>
                         <a class="class" href="ST_GeoHash.html" title=""></a>
                         <a href="ST_GeoHash.html" title="">ST_GeoHash</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="class" href="ST_GeogFromWKT.html" title="Return a Geography from a WKT string"></a>
+                        <a href="ST_GeogFromWKT.html" title="Return a Geography from a WKT string">ST_GeogFromWKT</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="class" href="ST_GeomCollFromText.html" title=""></a>
@@ -2527,6 +2535,25 @@ all inner geometries represent holes
       </span>
       
       
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_GeogFromWKT" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ST_GeogFromWKTextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_GeogFromWKT:ST_GeogFromWKT"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_GeogFromWKT.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Return a Geography from a WKT string" href="ST_GeogFromWKT.html"><span class="name">ST_GeogFromWKT</span></a><span class="params">(<span name="inputExpressions">inputExpressions: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result"> extends <a href="InferredExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.InferredExpression">InferredExpression</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Return a Geography from a WKT string
+</p><div class="fullcomment"><div class="comment cmt"><p>Return a Geography from a WKT string
+</p></div><dl class="paramcmts block"><dt class="param">inputExpressions</dt><dd class="cmt"><p>
+  This function takes a geometry string and a srid. The string format must be WKT.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_GeomCollFromText" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ST_GeomCollFromTextextendsInferredExpressionwithProductwithSerializable"></a><a id="ST_GeomCollFromText:ST_GeomCollFromText"></a>
       <span class="permalink">
@@ -5080,7 +5107,25 @@ System / Coordinate Reference System.</p>
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+                <li name="org.apache.spark.sql.sedona_sql.expressions.FunctionResolver" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="FunctionResolver"></a><a id="FunctionResolver:FunctionResolver"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/FunctionResolver$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="A utility object for resolving functions based on input argument types." href="FunctionResolver$.html"><span class="name">FunctionResolver</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">A utility object for resolving functions based on input argument types.</p><div class="fullcomment"><div class="comment cmt"><p>A utility object for resolving functions based on input argument types. See
+<a href="FunctionResolver$.html#resolveFunction(expressions:Seq[org.apache.spark.sql.catalyst.expressions.Expression],functionOverloads:Seq[org.apache.spark.sql.sedona_sql.expressions.InferrableFunction]):org.apache.spark.sql.sedona_sql.expressions.InferrableFunction" class="extmbr" name="org.apache.spark.sql.sedona_sql.expressions.FunctionResolver#resolveFunction">FunctionResolver.resolveFunction</a> for details.
+</p></div></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.InferrableFunction" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="InferrableFunction"></a><a id="InferrableFunction:InferrableFunction"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferrableFunction$.html" title="Permalink">
