@@ -18,7 +18,11 @@
  */
 package org.apache.sedona.common.raster;
 
+import static java.math.BigDecimal.valueOf;
+
 import java.awt.image.WritableRaster;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import javax.media.jai.RasterFactory;
 import org.apache.sedona.common.Functions;
@@ -314,19 +318,44 @@ public class Rasterization {
     Envelope2D rasterExtent =
         JTS.getEnvelope2D(geom.getEnvelopeInternal(), raster.getCoordinateReferenceSystem2D());
 
+    // Using BigDecimal to avoid floating point errors
+    BigDecimal upperLeftX = valueOf(metadata[0]);
+    BigDecimal upperLeftY = valueOf(metadata[1]);
+    BigDecimal scaleX = valueOf(metadata[4]);
+    BigDecimal scaleY = valueOf(metadata[5]);
+
     // Compute the aligned min/max values
     double alignedMinX =
-        (Math.floor((rasterExtent.getMinX() + metadata[0]) / metadata[4]) * metadata[4])
-            - metadata[0];
+        (scaleX
+                .multiply(
+                    BigDecimal.valueOf(
+                        Math.floor((rasterExtent.getMinX() + metadata[0]) / metadata[4])))
+                .subtract(upperLeftX))
+            .doubleValue();
+
     double alignedMinY =
-        (Math.floor((rasterExtent.getMinY() + metadata[1]) / -metadata[5]) * -metadata[5])
-            - metadata[1];
+        (scaleY
+                .multiply(
+                    BigDecimal.valueOf(
+                        Math.ceil((rasterExtent.getMinY() + metadata[1]) / metadata[5])))
+                .subtract(upperLeftY))
+            .doubleValue();
+
     double alignedMaxX =
-        (Math.ceil((rasterExtent.getMaxX() + metadata[0]) / metadata[4]) * metadata[4])
-            - metadata[0];
+        (scaleX
+                .multiply(
+                    BigDecimal.valueOf(
+                        Math.ceil((rasterExtent.getMaxX() + metadata[0]) / metadata[4])))
+                .subtract(upperLeftX))
+            .doubleValue();
+
     double alignedMaxY =
-        (Math.ceil((rasterExtent.getMaxY() + metadata[1]) / -metadata[5]) * -metadata[5])
-            - metadata[1];
+        (scaleY
+                .multiply(
+                    BigDecimal.valueOf(
+                        Math.floor((rasterExtent.getMaxY() + metadata[1]) / metadata[5])))
+                .subtract(upperLeftY))
+            .doubleValue();
 
     // For points and LineStrings at intersection of 2 or more pixels,
     // extend search grid by 1 pixel in each direction
@@ -420,7 +449,6 @@ public class Rasterization {
     }
   }
 
-  // New condensed Rasterization parameters
   private static class RasterizationParams {
     WritableRaster writableRaster;
     String pixelType;
@@ -455,8 +483,18 @@ public class Rasterization {
       throw new IllegalArgumentException("Only Polygon geometry is supported");
     }
 
+    // Clip polygon to rasterExtent
+    // Using buffer(0) to avoid TopologyException : found non-noded intersection.
     Geometry clippedGeom =
         Functions.intersection(JTS.toGeometry((BoundingBox) geomExtent), Functions.buffer(geom, 0));
+
+    if (Objects.equals(clippedGeom.getGeometryType(), "MultiPolygon")) {
+      for (int i = 0; i < clippedGeom.getNumGeometries(); i++) {
+        Geometry subGeom = clippedGeom.getGeometryN(i);
+        rasterizePolygon(subGeom, params, geomExtent, value, allTouched);
+      }
+      return;
+    }
 
     Polygon polygon = (Polygon) clippedGeom;
 
@@ -482,6 +520,7 @@ public class Rasterization {
     Map<Double, TreeSet<Double>> scanlineIntersections = new HashMap<>();
     List<LineString> allRings = new ArrayList<>();
     allRings.add(polygon.getExteriorRing());
+
     for (int i = 0; i < polygon.getNumInteriorRing(); i++) {
       allRings.add(polygon.getInteriorRingN(i));
     }
@@ -513,8 +552,8 @@ public class Rasterization {
         double yEnd = Math.round((worldP2.y - params.upperLeftY) / params.scaleY);
 
         // Contain y range within geomExtent; Use centroid y line as scan line
-        yStart = Math.max(0.5, Math.abs(yStart) - 0.5);
-        yEnd = Math.min((params.writableRaster.getHeight() - 0.5), Math.abs(yEnd) + 0.5);
+        yEnd = Math.max(0.5, Math.abs(yEnd) + 0.5);
+        yStart = Math.min((params.writableRaster.getHeight() - 0.5), Math.abs(yStart) - 0.5);
 
         double slope = (worldP2.y - worldP1.y) / (worldP2.x - worldP1.x);
         double p1X = (worldP1.x - params.upperLeftX) / params.scaleX;
