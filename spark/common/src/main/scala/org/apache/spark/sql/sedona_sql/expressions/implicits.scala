@@ -61,6 +61,18 @@ object implicits {
       }
     }
 
+    def toGeography(input: InternalRow): Geography = {
+      inputExpression match {
+        case serdeAware: SerdeAware =>
+          serdeAware.evalWithoutSerialization(input).asInstanceOf[Geography]
+        case _ =>
+          inputExpression.eval(input).asInstanceOf[Array[Byte]] match {
+            case binary: Array[Byte] => new Geography(GeometrySerializer.deserialize(binary))
+            case _ => null
+          }
+      }
+    }
+
     def toDoubleList(input: InternalRow): java.util.List[java.lang.Double] = {
       inputExpression match {
         case aware: SerdeAware =>
@@ -145,6 +157,6 @@ object implicits {
 
   implicit class GeographyEnhancer(geog: Geography) {
 
-    def toGenericArrayData: Array[Byte] = GeometrySerializer.serialize(geog.getGeometry())
+    def toGenericArrayData: Array[Byte] = GeometrySerializer.serialize(geog.getGeometry)
   }
 }

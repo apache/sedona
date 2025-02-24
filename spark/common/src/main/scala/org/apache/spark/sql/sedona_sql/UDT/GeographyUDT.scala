@@ -33,7 +33,7 @@ class GeographyUDT extends UserDefinedType[Geography] {
   override def userClass: Class[Geography] = classOf[Geography]
 
   override def serialize(obj: Geography): Array[Byte] =
-    GeometrySerializer.serialize(obj.getGeometry())
+    GeometrySerializer.serialize(obj.getGeometry)
 
   override def deserialize(datum: Any): Geography = {
     datum match {

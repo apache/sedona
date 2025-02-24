@@ -89,6 +89,12 @@ object st_constructors extends DataFrameAPI {
   def ST_GeomFromEWKT(wkt: Column): Column = wrapExpression[ST_GeomFromEWKT](wkt)
   def ST_GeomFromEWKT(wkt: String): Column = wrapExpression[ST_GeomFromEWKT](wkt)
 
+  def ST_GeogFromWKT(wkt: Column): Column = wrapExpression[ST_GeogFromWKT](wkt, 0)
+  def ST_GeogFromWKT(wkt: String): Column = wrapExpression[ST_GeogFromWKT](wkt, 0)
+  def ST_GeogFromWKT(wkt: Column, srid: Column): Column =
+    wrapExpression[ST_GeogFromWKT](wkt, srid)
+  def ST_GeogFromWKT(wkt: String, srid: Int): Column = wrapExpression[ST_GeogFromWKT](wkt, srid)
+
   def ST_LineFromText(wkt: Column): Column = wrapExpression[ST_LineFromText](wkt)
   def ST_LineFromText(wkt: String): Column = wrapExpression[ST_LineFromText](wkt)
 

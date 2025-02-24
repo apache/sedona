@@ -62,15 +62,16 @@ abstract class InferredExpression(fSeq: InferrableFunction*)
   lazy val f: InferrableFunction = fSeq match {
     // If there is only one function, simply use it and let org.apache.sedona.sql.UDF.Catalog handle default arguments.
     case Seq(f) => f
-    // If there are multiple overloaded functions, find the one with the same number of arguments as the input
-    // expressions. Please note that the Catalog won't be able to handle default arguments in this case. We'll
-    // move default argument handling from Catalog to this class in the future.
+    // If there are multiple overloaded functions, resolve the called function by comparing the types of input
+    // arguments with the types of function parameters.
     case _ =>
-      fSeq.find(f => f.sparkInputTypes.size == inputExpressions.size) match {
-        case Some(f) => f
-        case None =>
+      try {
+        FunctionResolver.resolveFunction(inputExpressions, fSeq)
+      } catch {
+        case e: IllegalArgumentException =>
           throw new IllegalArgumentException(
-            s"No overloaded function ${getClass.getName} has ${inputExpressions.size} arguments")
+            s"Cannot resolve function ${getClass.getName} with input arguments: " +
+              inputExpressions.map(_.dataType).mkString(", ") + s": ${e.getMessage}")
       }
   }
 
@@ -205,6 +206,8 @@ object InferredTypes {
   def buildArgumentExtractor(t: Type): Expression => InternalRow => Any = {
     if (t =:= typeOf[Geometry]) { expr => input =>
       expr.toGeometry(input)
+    } else if (t =:= typeOf[Geography]) { expr => input =>
+      expr.toGeography(input)
     } else if (t =:= typeOf[Array[Geometry]]) { expr => input =>
       expr.toGeometryArray(input)
     } else if (InferredRasterExpression.isRasterType(t)) {

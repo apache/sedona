@@ -18,6 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
+import org.apache.sedona.common.geometryObjects.Geography
 import org.apache.sedona.common.{Functions, FunctionsGeoTools}
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
 import org.apache.sedona.common.utils.{InscribedCircle, ValidDetail}
@@ -506,7 +507,9 @@ case class ST_AsBinary(inputExpressions: Seq[Expression])
 }
 
 case class ST_AsEWKB(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.geogAsEWKB _) {
+    extends InferredExpression(
+      (geom: Geometry) => Functions.asEWKB(geom),
+      (geog: Geography) => Functions.asEWKB(geog)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1244,7 +1247,9 @@ case class ST_Force_2D(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 case class ST_AsEWKT(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.asEWKT _) {
+    extends InferredExpression(
+      (geom: Geometry) => Functions.asEWKT(geom),
+      (geog: Geography) => Functions.asEWKT(geog)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

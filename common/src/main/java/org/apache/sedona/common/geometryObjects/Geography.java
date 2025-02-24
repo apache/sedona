@@ -21,7 +21,7 @@ package org.apache.sedona.common.geometryObjects;
 import org.locationtech.jts.geom.Geometry;
 
 public class Geography {
-  private Geometry geometry;
+  private final Geometry geometry;
 
   public Geography(Geometry geometry) {
     this.geometry = geometry;

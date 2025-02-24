@@ -777,6 +777,10 @@ public class Functions {
     return GeomUtils.getEWKT(geometry);
   }
 
+  public static String asEWKT(Geography geography) {
+    return asEWKT(geography.getGeometry());
+  }
+
   public static String asWKT(Geometry geometry) {
     return GeomUtils.getWKT(geometry);
   }
@@ -785,7 +789,7 @@ public class Functions {
     return GeomUtils.getEWKB(geometry);
   }
 
-  public static byte[] geogAsEWKB(Geography geography) {
+  public static byte[] asEWKB(Geography geography) {
     return asEWKB(geography.getGeometry());
   }
 
