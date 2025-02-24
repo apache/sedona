@@ -1161,6 +1161,7 @@ Output:
 Introduction: This returns a statistic value specified by `statType` over the region of interest defined by `zone`. It computes the statistic from the pixel values within the ROI geometry and returns the result. If the `excludeNoData` parameter is not specified, it will default to `true`. This excludes NoData values from the statistic calculation. Additionally, if the `band` parameter is not provided, band 1 will be used by default for the statistic computation. The valid options for `statType` are:
 
 The `allTouched` parameter (Since `v1.7.1`) determines how pixels are selected:
+
 - When true, any pixel touched by the geometry will be included.
 - When false (default), only pixels whose centroid intersects with the geometry will be included.
 
@@ -1237,6 +1238,7 @@ Output:
 Introduction: Returns a struct of statistic values, where each statistic is computed over a region defined by the `zone` geometry. The struct has the following schema:
 
 The `allTouched` parameter (Since `v1.7.1`) determines how pixels are selected:
+
 - When true, any pixel touched by the geometry will be included.
 - When false (default), only pixels whose centroid intersects with the geometry will be included.
 
@@ -1463,6 +1465,7 @@ Introduction: Returns a raster that is clipped by the given geometry.
 If `crop` is not specified then it will default to `true`, meaning it will make the resulting raster shrink to the geometry's extent and if `noDataValue` is not specified then the resulting raster will have the minimum possible value for the band pixel data type.
 
 The `allTouched` parameter (Since `v1.7.1`) determines how pixels are selected:
+
 - When true, any pixel touched by the geometry will be included.
 - When false (default), only pixels whose centroid intersects with the geometry will be included.
 
@@ -2081,6 +2084,7 @@ set to the corresponding value in `newValues`. The `newValues` should be provide
 The geometry variant of this function accepts all types of Geometries, and it sets the `newValue` in the specified region under the `geom`.
 
 The `allTouched` parameter (Since `v1.7.1`) determines how pixels are selected:
+
 - When true, any pixel touched by the geometry will be included.
 - When false (default), only pixels whose centroid intersects with the geometry will be included.
 
