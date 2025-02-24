@@ -16,18 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.UDT
+package org.apache.sedona.common.geometryObjects;
 
-import org.apache.spark.sql.types.UDTRegistration
-import org.locationtech.jts.geom.Geometry
-import org.apache.sedona.common.geometryObjects.Geography;
-import org.locationtech.jts.index.SpatialIndex
+import org.locationtech.jts.geom.Geometry;
 
-object UdtRegistratorWrapper {
+public class Geography {
+  private final Geometry geometry;
 
-  def registerAll(): Unit = {
-    UDTRegistration.register(classOf[Geometry].getName, classOf[GeometryUDT].getName)
-    UDTRegistration.register(classOf[Geography].getName, classOf[GeographyUDT].getName)
-    UDTRegistration.register(classOf[SpatialIndex].getName, classOf[IndexUDT].getName)
+  public Geography(Geometry geometry) {
+    this.geometry = geometry;
+  }
+
+  public Geometry getGeometry() {
+    return this.geometry;
+  }
+
+  public String toString() {
+    return this.geometry.toText();
   }
 }

@@ -25,6 +25,7 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import java.io.Serializable;
 import org.apache.sedona.common.geometryObjects.Circle;
+import org.apache.sedona.common.geometryObjects.Geography;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -36,7 +37,7 @@ import org.locationtech.jts.geom.Polygon;
  * Provides methods to efficiently serialize and deserialize geometry types.
  *
  * <p>Supports Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon,
- * GeometryCollection, Circle and Envelope types.
+ * GeometryCollection, Circle, Envelope, and Geography types.
  *
  * <p>First byte contains {@link Type#id}. Then go type-specific bytes, followed by user-data
  * attached to the geometry.
@@ -63,6 +64,9 @@ public class GeometrySerde extends Serializer implements Serializable {
       out.writeDouble(envelope.getMaxX());
       out.writeDouble(envelope.getMinY());
       out.writeDouble(envelope.getMaxY());
+    } else if (object instanceof Geography) {
+      writeType(out, Type.GEOGRAPHY);
+      writeGeometry(kryo, out, ((Geography) object).getGeometry());
     } else {
       throw new UnsupportedOperationException(
           "Cannot serialize object of type " + object.getClass().getName());
@@ -118,6 +122,10 @@ public class GeometrySerde extends Serializer implements Serializable {
             return new Envelope();
           }
         }
+      case GEOGRAPHY:
+        {
+          return new Geography(readGeometry(kryo, input));
+        }
       default:
         throw new UnsupportedOperationException(
             "Cannot deserialize object of type " + geometryType);
@@ -145,7 +153,8 @@ public class GeometrySerde extends Serializer implements Serializable {
   private enum Type {
     SHAPE(0),
     CIRCLE(1),
-    ENVELOPE(2);
+    ENVELOPE(2),
+    GEOGRAPHY(3);
 
     private final int id;
 
