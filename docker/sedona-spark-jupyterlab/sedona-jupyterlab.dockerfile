@@ -25,11 +25,13 @@ ARG spark_xml_version=0.16.0
 ARG sedona_version=1.5.1
 ARG geotools_wrapper_version=1.5.1-28.2
 ARG spark_extension_version=2.11.0
+ARG zeppelin_version=0.12.0
 
 # Set up envs
 ENV SHARED_WORKSPACE=${shared_workspace}
 ENV SPARK_HOME /usr/local/lib/python3.10/dist-packages/pyspark
 ENV SEDONA_HOME /opt/sedona
+ENV ZEPPELIN_HOME /opt/zeppelin
 RUN mkdir ${SEDONA_HOME}
 
 ENV SPARK_MASTER_HOST localhost
@@ -37,18 +39,28 @@ ENV SPARK_MASTER_PORT 7077
 ENV PYTHONPATH=$SPARK_HOME/python
 ENV PYSPARK_PYTHON python3
 ENV PYSPARK_DRIVER_PYTHON jupyter
-
 COPY ./ ${SEDONA_HOME}/
 
 RUN chmod +x ${SEDONA_HOME}/docker/spark.sh
 RUN chmod +x ${SEDONA_HOME}/docker/sedona.sh
+RUN chmod +x ${SEDONA_HOME}/docker/zeppelin/install-zeppelin.sh
 RUN ${SEDONA_HOME}/docker/spark.sh ${spark_version} ${hadoop_s3_version} ${aws_sdk_version} ${spark_xml_version}
 
 # Install Python dependencies
 COPY docker/sedona-spark-jupyterlab/requirements.txt /opt/requirements.txt
-RUN pip3 install -r /opt/requirements.txt
+RUN pip3 install --default-timeout=100 -r /opt/requirements.txt
 
 RUN ${SEDONA_HOME}/docker/sedona.sh ${sedona_version} ${geotools_wrapper_version} ${spark_version} ${spark_extension_version}
+RUN ${SEDONA_HOME}/docker/zeppelin/install-zeppelin.sh ${zeppelin_version} /opt
+# Set up Zeppelin configuration
+COPY docker/zeppelin/conf/zeppelin-site.xml ${ZEPPELIN_HOME}/conf/
+RUN mkdir ${ZEPPELIN_HOME}/helium
+RUN mkdir ${ZEPPELIN_HOME}/leaflet
+RUN mkdir ${ZEPPELIN_HOME}/notebook/sedona-tutorial
+COPY zeppelin/ ${ZEPPELIN_HOME}/leaflet
+COPY docker/zeppelin/conf/sedona-zeppelin.json ${ZEPPELIN_HOME}/helium/
+COPY docker/zeppelin/examples/*.zpln ${ZEPPELIN_HOME}/notebook/sedona-tutorial/
+COPY docker/zeppelin/examples/arealm.csv /opt/workspace/examples/data/
 
 COPY docs/usecases/*.ipynb /opt/workspace/examples/
 COPY docs/usecases/*.py /opt/workspace/examples/
@@ -69,6 +81,7 @@ EXPOSE 8888
 EXPOSE 8080
 EXPOSE 8081
 EXPOSE 4040
+EXPOSE 8085
 
 WORKDIR ${SHARED_WORKSPACE}
 

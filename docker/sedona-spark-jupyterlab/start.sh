@@ -77,5 +77,6 @@ echo "spark.executor.memory $EXECUTOR_MEM" >> "${SPARK_HOME}"/conf/spark-default
 service ssh start
 "${SPARK_HOME}"/sbin/start-all.sh
 
+"${ZEPPELIN_HOME}"/bin/zeppelin-daemon.sh start
 # Start jupyter lab
 exec jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token=

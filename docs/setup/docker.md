@@ -21,7 +21,7 @@
 
 Sedona Docker images are available on [Sedona official DockerHub repo](https://hub.docker.com/r/apache/sedona).
 
-We provide a Docker image for Apache Sedona with Python JupyterLab and 1 master node and 1 worker node.
+We provide a Docker image for Apache Sedona with Python JupyterLab, Apache Zeppelin and 1 master node and 1 worker node.
 
 ## How to use
 
@@ -50,7 +50,7 @@ docker pull apache/sedona:{{ sedona.current_version }}
 Format:
 
 ```bash
-docker run -e DRIVER_MEM=<driver_mem> -e EXECUTOR_MEM=<executor_mem> -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 apache/sedona:<sedona_version>
+docker run -e DRIVER_MEM=<driver_mem> -e EXECUTOR_MEM=<executor_mem> -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 -p 8085:8085 apache/sedona:<sedona_version>
 ```
 
 Driver memory and executor memory are optional. If their values are not given, the container will take 4GB RAM for the driver and 4GB RAM for the executor.
@@ -58,22 +58,22 @@ Driver memory and executor memory are optional. If their values are not given, t
 Example 1:
 
 ```bash
-docker run -e DRIVER_MEM=6g -e EXECUTOR_MEM=8g -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 apache/sedona:latest
+docker run -e DRIVER_MEM=6g -e EXECUTOR_MEM=8g -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 -p 8085:8085 apache/sedona:latest
 ```
 
 This command will start a container with 6GB RAM for the driver and 8GB RAM for the executor and use the latest Sedona image.
 
-This command will bind the container's ports 8888, 8080, 8081, 4040 to the host's ports 8888, 8080, 8081, 4040 respectively.
+This command will bind the container's ports 8888, 8080, 8081, 4040, 8085 to the host's ports 8888, 8080, 8081, 4040, 8085 respectively.
 
 Example 2:
 
 ```bash
-docker run -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 apache/sedona:{{ sedona.current_version }}
+docker run -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 -p 8085:8085 apache/sedona:{{ sedona.current_version }}
 ```
 
 This command will start a container with 4GB RAM for the driver and 4GB RAM for the executor and use Sedona {{ sedona.current_version }} image.
 
-This command will bind the container's ports 8888, 8080, 8081, 4040 to the host's ports 8888, 8080, 8081, 4040 respectively.
+This command will bind the container's ports 8888, 8080, 8081, 4040, 8085 to the host's ports 8888, 8080, 8081, 4040, 8085 respectively.
 
 ### Start coding
 
@@ -144,6 +144,23 @@ This docker image can only be built against Sedona 1.7.0+ and Spark 3.3+
 * Spark job UI: http://localhost:4040
 * Spark master web UI: http://localhost:8080/
 * Spark work web UI: http://localhost:8081/
+* Apache Zeppelin: http://localhost:8085/
+
+### Zeppelin Configuration
+
+1. Access Zeppelin at [http://localhost:8085/classic/#/helium](http://localhost:8085/classic/#/helium).
+2. Enable the `sedona-zeppelin` helium plugin.
+3. Navigate to [http://localhost:8085/classic/#/interpreter](http://localhost:8085/classic/#/interpreter), search for `spark`, and click `edit`.
+4. Add the dependency artifact:
+   ```plaintext
+   /usr/local/lib/python3.10/dist-packages/pyspark/jars/sedona-spark-shaded-3.4_2.12-1.7.0.jar
+   ```
+   This JAR file should be present at Spark home as mentioned above.
+5. Save the settings.
+
+For more information, refer to [Install Sedona-Zeppelin](./zeppelin.md).
+
+A Zeppelin tutorial notebook is bundled with Sedona tutorials. See [Sedona-Zeppelin tutorial](../tutorial/zeppelin.md) for details.
 
 ## How to push to DockerHub
 
