@@ -278,6 +278,8 @@ def infer_schema(gdf: gpd.GeoDataFrame) -> StructType:
     return StructType(spark_schema)
 
 
+# Modified backport from Spark 4.0
+# https://github.com/apache/spark/blob/3515b207c41d78194d11933cd04bddc21f8418dd/python/pyspark/sql/pandas/conversion.py#L632
 def create_spatial_dataframe(spark: SparkSession, gdf: gpd.GeoDataFrame) -> DataFrame:
     from pyspark.sql.pandas.types import (
         to_arrow_type,
