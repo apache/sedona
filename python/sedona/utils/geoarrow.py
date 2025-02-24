@@ -231,7 +231,6 @@ def infer_schema(gdf: gpd.GeoDataFrame) -> StructType:
 def create_spatial_dataframe(spark: SparkSession, gdf: gpd.GeoDataFrame) -> DataFrame:
     from pyspark.sql.pandas.types import (
         to_arrow_type,
-        _deduplicate_field_names,
     )
 
     def reader_func(temp_filename):
@@ -245,12 +244,11 @@ def create_spatial_dataframe(spark: SparkSession, gdf: gpd.GeoDataFrame) -> Data
     step = spark._jconf.arrowMaxRecordsPerBatch()
     step = step if step > 0 else len(gdf)
     pdf_slices = (gdf.iloc[start : start + step] for start in range(0, len(gdf), step))
-    spark_types = [_deduplicate_field_names(f.dataType) for f in schema.fields]
 
     arrow_data = [
         [
             (c, to_arrow_type(t) if t is not None else None, t)
-            for (_, c), t in zip(pdf_slice.items(), spark_types)
+            for (_, c), t in zip(pdf_slice.items(), schema.fields)
         ]
         for pdf_slice in pdf_slices
     ]
