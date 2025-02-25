@@ -275,14 +275,6 @@ class GeoPackageReaderTest extends TestBaseScala with Matchers {
 
       container.stop()
     }
-
-    def createMinioClient(container: MinIOContainer): MinioClient = {
-      MinioClient
-        .builder()
-        .endpoint(container.getS3URL)
-        .credentials(container.getUserName, container.getPassword)
-        .build()
-    }
   }
 
   private def readFeatureData(tableName: String): DataFrame = {
@@ -292,24 +284,13 @@ class GeoPackageReaderTest extends TestBaseScala with Matchers {
       .load(path)
   }
 
-  private def adjustSparkSession(sparkSession: SparkSession, container: MinIOContainer): Unit = {
-    sparkSession.sparkContext.hadoopConfiguration.set("fs.s3a.endpoint", container.getS3URL)
-    sparkSession.sparkContext.hadoopConfiguration.set("fs.s3a.access.key", container.getUserName)
-    sparkSession.sparkContext.hadoopConfiguration.set("fs.s3a.secret.key", container.getPassword)
-    sparkSession.sparkContext.hadoopConfiguration.set("fs.s3a.connection.timeout", "2000")
-
-    sparkSession.sparkContext.hadoopConfiguration.set("spark.sql.debug.maxToStringFields", "100")
-    sparkSession.sparkContext.hadoopConfiguration.set("fs.s3a.path.style.access", "true")
-    sparkSession.sparkContext.hadoopConfiguration
-      .set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
-  }
-
   private def prepareFiles(paths: Array[String], minioClient: MinioClient): String = {
     val key = "geopackage"
 
     paths.foreach(path => {
       val fis = new FileInputStream(path);
       putFileIntoBucket(
+        "sedona",
         s"${key}/${scala.util.Random.nextInt(1000000000)}.geopackage",
         fis,
         minioClient)
@@ -320,23 +301,9 @@ class GeoPackageReaderTest extends TestBaseScala with Matchers {
 
   private def prepareFile(name: String, path: String, minioClient: MinioClient): String = {
     val fis = new FileInputStream(path);
-    putFileIntoBucket(name, fis, minioClient)
+    putFileIntoBucket("sedona", name, fis, minioClient)
 
     s"s3a://sedona/$name"
-  }
-
-  private def putFileIntoBucket(
-      key: String,
-      stream: FileInputStream,
-      client: MinioClient): Unit = {
-    val objectArguments = PutObjectArgs
-      .builder()
-      .bucket("sedona")
-      .`object`(key)
-      .stream(stream, stream.available(), -1)
-      .build()
-
-    client.putObject(objectArguments)
   }
 
   private val POINT_1 = "POINT (-104.801918 39.720014)"
