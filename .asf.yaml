@@ -27,6 +27,10 @@ github:
     homepage: https://sedona.apache.org/
     collaborators:
         - MrPowers
+        - umartin
+        - zhangfengcdt
+        - james-willis
+        - gregleleu
     autolink_jira:
         - SEDONA
     labels:
