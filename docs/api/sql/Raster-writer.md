@@ -245,21 +245,32 @@ The newly created DataFrame can be written to disk again but must be under a dif
 
 #### RS_AsRaster
 
-Introduction: Converts a Geometry to a Raster dataset. Defaults to using `1.0` for cell `value` and `null` for `noDataValue` if not provided. Supports all geometry types.
-The `pixelType` argument defines data type of the output raster. This can be one of the following, D (double), F (float), I (integer), S (short), US (unsigned short) or B (byte).
-The `useGeometryExtent` argument defines the extent of the resultant raster. When set to `true`, it corresponds to the extent of `geom`, and when set to false, it corresponds to the extent of `raster`. Default value is `true` if not set.
+Introduction: `RS_AsRaster` converts a vector geometry into a raster dataset by assigning a specified value to all pixels covered by the geometry. Unlike `RS_Clip`, which extracts a subset of an existing raster while preserving its original values, `RS_AsRaster` generates a new raster where the geometry is rasterized onto a raster grid. The function supports all geometry types and takes the following parameters:
+
+* `geom`: The geometry to be rasterized.
+* `raster`: The reference raster to be used for overlaying the `geom` on.
+* `pixelType`: Defines data type of the output raster. This can be one of the following, D (double), F (float), I (integer), S (short), US (unsigned short) or B (byte).
+* `allTouched` (Since: `v1.7.1`): Decides the pixel selection criteria. If set to `true`, the function selects all pixels touched by the geometry, else, selects only pixels who's centroids intersect the geometry. Defaults to `false`.
+* `Value`: The value to be used for assigning pixels covered by the geometry. Defaults to using `1.0` for cell `value` if not provided.
+* `noDataValue`: Used for assigning the no data value of the resultant raster. Defaults to `null` if not provided.
+* `useGeometryExtent`: Defines the extent of the resultant raster. When set to `true`, it corresponds to the extent of `geom`, and when set to false, it corresponds to the extent of `raster`. Default value is `true` if not set.
+
 Format:
 
 ```
-RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, value: Double, noDataValue: Double, useGeometryExtent: Boolean)
+RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, allTouched: Boolean, value: Double, noDataValue: Double, useGeometryExtent: Boolean)
 ```
 
 ```
-RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, value: Double, noDataValue: Double)
+RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, allTouched: Boolean, value: Double, noDataValue: Double)
 ```
 
 ```
-RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, value: Double)
+RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, allTouched: Boolean, value: Double)
+```
+
+```
+RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, allTouched: Boolean)
 ```
 
 ```
@@ -286,7 +297,7 @@ SQL Example
 SELECT RS_AsRaster(
 		ST_GeomFromWKT('POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))'),
     	RS_MakeEmptyRaster(2, 255, 255, 3, -215, 2, -2, 0, 0, 4326),
-    	'D', 255.0, 0d
+    	'D', false, 255.0, 0d
 	)
 ```
 
@@ -316,7 +327,7 @@ GridCoverage2D["g...
 SELECT RS_AsRaster(
 		ST_GeomFromWKT('POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))'),
 		RS_MakeEmptyRaster(2, 255, 255, 3, 215, 2, -2, 0, 0, 0),
-       'D',255, 0d, false
+       'D', true, 255, 0d, false
 )
 ```
 
