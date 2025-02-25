@@ -6882,8 +6882,15 @@ Set excludeNoDataValue to <code>false</code> to get count of all pixels in raste
 </code></pre></div>
 <h3 id="rs_zonalstats">RS_ZonalStats<a class="headerlink" href="#rs_zonalstats" title="Permanent link">&para;</a></h3>
 <p>Introduction: This returns a statistic value specified by <code>statType</code> over the region of interest defined by <code>zone</code>. It computes the statistic from the pixel values within the ROI geometry and returns the result. If the <code>excludeNoData</code> parameter is not specified, it will default to <code>true</code>. This excludes NoData values from the statistic calculation. Additionally, if the <code>band</code> parameter is not provided, band 1 will be used by default for the statistic computation. The valid options for <code>statType</code> are:</p>
+<p>The <code>allTouched</code> parameter (Since <code>v1.7.1</code>) determines how pixels are selected:</p>
 <ul>
-<li><code>count</code>: Number of pixels in the region.</li>
+<li>When true, any pixel touched by the geometry will be included.</li>
+<li>
+<p>When false (default), only pixels whose centroid intersects with the geometry will be included.</p>
+</li>
+<li>
+<p><code>count</code>: Number of pixels in the region.</p>
+</li>
 <li><code>sum</code>: Sum of pixel values.</li>
 <li><code>mean|average|avg</code>: Arithmetic mean.</li>
 <li><code>median</code>: Middle value in the region.</li>
@@ -6904,31 +6911,40 @@ Set excludeNoDataValue to <code>false</code> to get count of all pixels in raste
 <p><code>lenient</code> parameter is set to <code>true</code> by default. The function will return <code>null</code> if the <code>raster</code> and <code>zone</code> geometry do not intersect.</p>
 </div>
 <p>Format:</p>
-<div class="highlight"><pre><span></span><code>RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String, excludeNoData: Boolean, lenient: Boolean)
+<div class="highlight"><pre><span></span><code>RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String, allTouched: Boolean, excludeNoData: Boolean, lenient: Boolean)
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String, excludeNoData: Boolean)
+<div class="highlight"><pre><span></span><code>RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String, allTouched: Boolean, excludeNoData: Boolean)
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String)
+<div class="highlight"><pre><span></span><code>RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String, allTouched: Boolean)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>RS_ZonalStats(raster: Raster, zone: Geometry, statType: String, allTouched: Boolean)
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>RS_ZonalStats(raster: Raster, zone: Geometry, statType: String)
 </code></pre></div>
 <p>Since: <code>v1.5.1</code></p>
 <p>SQL Example</p>
-<div class="highlight"><pre><span></span><code><span class="n">RS_ZonalStats</span><span class="p">(</span><span class="n">rast1</span><span class="p">,</span><span class="w"> </span><span class="n">geom1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;sum&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">false</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">RS_ZonalStats</span><span class="p">(</span><span class="n">rast1</span><span class="p">,</span><span class="w"> </span><span class="n">geom1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;sum&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">true</span><span class="p">,</span><span class="w"> </span><span class="k">false</span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>10690406
 </code></pre></div>
 <p>SQL Example</p>
-<div class="highlight"><pre><span></span><code><span class="n">RS_ZonalStats</span><span class="p">(</span><span class="n">rast2</span><span class="p">,</span><span class="w"> </span><span class="n">geom2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;mean&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">true</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">RS_ZonalStats</span><span class="p">(</span><span class="n">rast2</span><span class="p">,</span><span class="w"> </span><span class="n">geom2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;mean&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">false</span><span class="p">,</span><span class="w"> </span><span class="k">true</span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>226.55992667794473
 </code></pre></div>
 <h3 id="rs_zonalstatsall">RS_ZonalStatsAll<a class="headerlink" href="#rs_zonalstatsall" title="Permanent link">&para;</a></h3>
 <p>Introduction: Returns a struct of statistic values, where each statistic is computed over a region defined by the <code>zone</code> geometry. The struct has the following schema:</p>
+<p>The <code>allTouched</code> parameter (Since <code>v1.7.1</code>) determines how pixels are selected:</p>
 <ul>
-<li>count: Count of the pixels.</li>
+<li>When true, any pixel touched by the geometry will be included.</li>
+<li>
+<p>When false (default), only pixels whose centroid intersects with the geometry will be included.</p>
+</li>
+<li>
+<p>count: Count of the pixels.</p>
+</li>
 <li>sum: Sum of the pixel values.</li>
 <li>mean: Arithmetic mean.</li>
 <li>median: Median.</li>
@@ -6949,9 +6965,11 @@ Set excludeNoDataValue to <code>false</code> to get count of all pixels in raste
 <p><code>lenient</code> parameter is set to <code>true</code> by default. The function will return <code>null</code> if the <code>raster</code> and <code>zone</code> geometry do not intersect.</p>
 </div>
 <p>Format:</p>
-<div class="highlight"><pre><span></span><code>RS_ZonalStatsAll(raster: Raster, zone: Geometry, band: Integer, excludeNodata: Boolean, lenient: Boolean)
+<div class="highlight"><pre><span></span><code>RS_ZonalStatsAll(raster: Raster, zone: Geometry, band: Integer, allTouched: Boolean, excludeNodata: Boolean, lenient: Boolean)
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>RS_ZonalStatsAll(raster: Raster, zone: Geometry, band: Integer, excludeNodata: Boolean)
+<div class="highlight"><pre><span></span><code>RS_ZonalStatsAll(raster: Raster, zone: Geometry, band: Integer, allTouched: Boolean, excludeNodata: Boolean)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>RS_ZonalStatsAll(raster: Raster, zone: Geometry, band: Integer, allTouched: Boolean)
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>RS_ZonalStatsAll(raster: Raster, zone: Geometry, band: Integer)
 </code></pre></div>
@@ -6959,13 +6977,13 @@ Set excludeNoDataValue to <code>false</code> to get count of all pixels in raste
 </code></pre></div>
 <p>Since: <code>v1.5.1</code></p>
 <p>SQL Example</p>
-<div class="highlight"><pre><span></span><code><span class="n">RS_ZonalStatsAll</span><span class="p">(</span><span class="n">rast1</span><span class="p">,</span><span class="w"> </span><span class="n">geom1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="k">false</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">RS_ZonalStatsAll</span><span class="p">(</span><span class="n">rast1</span><span class="p">,</span><span class="w"> </span><span class="n">geom1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="k">true</span><span class="p">,</span><span class="w"> </span><span class="k">false</span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>{184792.0, 1.0690406E7, 57.851021689230684, 0.0, 0.0, 92.13277429243035, 8488.448098819916, 0.0, 255.0}
 </code></pre></div>
 <p>SQL Example</p>
-<div class="highlight"><pre><span></span><code><span class="n">RS_ZonalStatsAll</span><span class="p">(</span><span class="n">rast2</span><span class="p">,</span><span class="w"> </span><span class="n">geom2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="k">true</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">RS_ZonalStatsAll</span><span class="p">(</span><span class="n">rast2</span><span class="p">,</span><span class="w"> </span><span class="n">geom2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="k">false</span><span class="p">,</span><span class="w"> </span><span class="k">true</span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>{14184.0, 3213526.0, 226.55992667794473, 255.0, 255.0, 74.87605357255357, 5606.423398599913, 1.0, 255.0}
@@ -7065,6 +7083,11 @@ If no <code>toRasterIndex</code> is provided, the new band is appended to the en
 <h3 id="rs_clip">RS_Clip<a class="headerlink" href="#rs_clip" title="Permanent link">&para;</a></h3>
 <p>Introduction: Returns a raster that is clipped by the given geometry.</p>
 <p>If <code>crop</code> is not specified then it will default to <code>true</code>, meaning it will make the resulting raster shrink to the geometry's extent and if <code>noDataValue</code> is not specified then the resulting raster will have the minimum possible value for the band pixel data type.</p>
+<p>The <code>allTouched</code> parameter (Since <code>v1.7.1</code>) determines how pixels are selected:</p>
+<ul>
+<li>When true, any pixel touched by the geometry will be included.</li>
+<li>When false (default), only pixels whose centroid intersects with the geometry will be included.</li>
+</ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul>
@@ -7073,11 +7096,13 @@ If no <code>toRasterIndex</code> is provided, the new band is appended to the en
 </ul>
 </div>
 <p>Format:</p>
-<div class="highlight"><pre><span></span><code>RS_Clip(raster: Raster, band: Integer, geom: Geometry, noDataValue: Double, crop: Boolean, lenient: Boolean)
+<div class="highlight"><pre><span></span><code>RS_Clip(raster: Raster, band: Integer, geom: Geometry, allTouched: Boolean, noDataValue: Double, crop: Boolean, lenient: Boolean)
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>RS_Clip(raster: Raster, band: Integer, geom: Geometry, noDataValue: Double, crop: Boolean)
+<div class="highlight"><pre><span></span><code>RS_Clip(raster: Raster, band: Integer, geom: Geometry, allTouched: Boolean, noDataValue: Double, crop: Boolean)
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>RS_Clip(raster: Raster, band: Integer, geom: Geometry, noDataValue: Double)
+<div class="highlight"><pre><span></span><code>RS_Clip(raster: Raster, band: Integer, geom: Geometry, allTouched: Boolean, noDataValue: Double)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>RS_Clip(raster: Raster, band: Integer, geom: Geometry, allTouched: Boolean)
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>RS_Clip(raster: Raster, band: Integer, geom: Geometry)
 </code></pre></div>
@@ -7088,7 +7113,7 @@ If no <code>toRasterIndex</code> is provided, the new band is appended to the en
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_Clip</span><span class="p">(</span>
 <span class="w">        </span><span class="n">RS_FromGeoTiff</span><span class="p">(</span><span class="n">content</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
 <span class="w">        </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))&#39;</span><span class="p">),</span>
-<span class="w">        </span><span class="mi">200</span><span class="p">,</span><span class="w"> </span><span class="k">true</span>
+<span class="w">        </span><span class="k">false</span><span class="p">,</span><span class="w"> </span><span class="mi">200</span><span class="p">,</span><span class="w"> </span><span class="k">true</span>
 <span class="w">    </span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
@@ -7097,7 +7122,7 @@ If no <code>toRasterIndex</code> is provided, the new band is appended to the en
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_Clip</span><span class="p">(</span>
 <span class="w">        </span><span class="n">RS_FromGeoTiff</span><span class="p">(</span><span class="n">content</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
 <span class="w">        </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))&#39;</span><span class="p">),</span>
-<span class="w">        </span><span class="mi">200</span><span class="p">,</span><span class="w"> </span><span class="k">false</span>
+<span class="w">        </span><span class="k">false</span><span class="p">,</span><span class="w"> </span><span class="mi">200</span><span class="p">,</span><span class="w"> </span><span class="k">false</span>
 <span class="w">    </span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
@@ -7468,15 +7493,20 @@ to this function.</p>
 <p class="admonition-title">Note</p>
 <p>Since <code>v1.5.1</code>, if the coordinate reference system (CRS) of the input <code>geom</code> geometry differs from that of the <code>raster</code>, then <code>geom</code> will be transformed to match the CRS of the <code>raster</code>. If the <code>raster</code> or <code>geom</code> doesn't have a CRS then it will default to <code>4326/WGS84</code>.</p>
 </div>
-<p>Format:</p>
+<p>Format without ROI <code>geom</code>:</p>
 <div class="highlight"><pre><span></span><code>RS_SetValues(raster: Raster, bandIndex: Integer, colX: Integer, rowY: Integer, width: Integer, height: Integer, newValues: ARRAY[Double], keepNoData: Boolean = false)
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>RS_SetValues(raster: Raster, bandIndex: Integer, geom: Geometry, newValue: Double, keepNoData: Boolean = false)
+<div class="highlight"><pre><span></span><code>RS_SetValues(raster: Raster, bandIndex: Integer, colX: Integer, rowY: Integer, width: Integer, height: Integer, newValues: ARRAY[Double])
 </code></pre></div>
 <p>Since: <code>v1.5.0</code></p>
 <p>The <code>colX</code>, <code>rowY</code>, and <code>bandIndex</code> are 1-indexed. If <code>keepNoData</code> is <code>true</code>, the pixels with NoData value will not be
 set to the corresponding value in <code>newValues</code>. The <code>newValues</code> should be provided in rows.</p>
 <p>The geometry variant of this function accepts all types of Geometries, and it sets the <code>newValue</code> in the specified region under the <code>geom</code>.</p>
+<p>The <code>allTouched</code> parameter (Since <code>v1.7.1</code>) determines how pixels are selected:</p>
+<ul>
+<li>When true, any pixel touched by the geometry will be included.</li>
+<li>When false (default), only pixels whose centroid intersects with the geometry will be included.</li>
+</ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>If the shape of <code>newValues</code> doesn't match with provided <code>width</code> and <code>height</code>, <code>IllegalArgumentException</code> is thrown.</p>
@@ -7485,6 +7515,13 @@ set to the corresponding value in <code>newValues</code>. The <code>newValues</c
 <p class="admonition-title">Note</p>
 <p>If the mentioned <code>bandIndex</code> doesn't exist, this will throw an <code>IllegalArgumentException</code>.</p>
 </div>
+<p>Format with ROI <code>geom</code>:</p>
+<div class="highlight"><pre><span></span><code>RS_SetValues(raster: Raster, bandIndex: Integer, geom: Geometry, newValue: Double, allTouched: Boolean = false, keepNoData: Boolean = false)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>RS_SetValues(raster: Raster, bandIndex: Integer, geom: Geometry, newValue: Double, allTouched: Boolean = false)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>RS_SetValues(raster: Raster, bandIndex: Integer, geom: Geometry, newValue: Double)
+</code></pre></div>
 <p>SQL Example</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_BandAsArray</span><span class="p">(</span>
 <span class="w">        </span><span class="n">RS_SetValues</span><span class="p">(</span>
@@ -7506,7 +7543,7 @@ set to the corresponding value in <code>newValues</code>. The <code>newValues</c
 <span class="w">                </span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
 <span class="w">                </span><span class="nb">Array</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span>
 <span class="w">                </span><span class="p">),</span>
-<span class="w">            </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON((1 -1, 3 -3, 6 -6, 4 -1, 1 -1))&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="k">false</span>
+<span class="w">            </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON((1 -1, 3 -3, 6 -6, 4 -1, 1 -1))&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="k">false</span><span class="p">,</span><span class="w"> </span><span class="k">false</span>
 <span class="w">            </span><span class="p">)</span>
 <span class="w">           </span><span class="p">)</span>
 </code></pre></div>
@@ -7970,7 +8007,7 @@ To learn how to write map algebra script, please refer to <a href="https://githu
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">December 4, 2024 07:01:47</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">February 25, 2025 02:18:57</span>
   </span>
 
     

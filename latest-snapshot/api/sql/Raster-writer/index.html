@@ -4661,15 +4661,24 @@
 <p>The newly created DataFrame can be written to disk again but must be under a different name such as <code>my_raster_file_modified</code></p>
 <h3 id="write-geometry-to-raster-dataframe">Write Geometry to Raster dataframe<a class="headerlink" href="#write-geometry-to-raster-dataframe" title="Permanent link">&para;</a></h3>
 <h4 id="rs_asraster">RS_AsRaster<a class="headerlink" href="#rs_asraster" title="Permanent link">&para;</a></h4>
-<p>Introduction: Converts a Geometry to a Raster dataset. Defaults to using <code>1.0</code> for cell <code>value</code> and <code>null</code> for <code>noDataValue</code> if not provided. Supports all geometry types.
-The <code>pixelType</code> argument defines data type of the output raster. This can be one of the following, D (double), F (float), I (integer), S (short), US (unsigned short) or B (byte).
-The <code>useGeometryExtent</code> argument defines the extent of the resultant raster. When set to <code>true</code>, it corresponds to the extent of <code>geom</code>, and when set to false, it corresponds to the extent of <code>raster</code>. Default value is <code>true</code> if not set.
-Format:</p>
-<div class="highlight"><pre><span></span><code>RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, value: Double, noDataValue: Double, useGeometryExtent: Boolean)
+<p>Introduction: <code>RS_AsRaster</code> converts a vector geometry into a raster dataset by assigning a specified value to all pixels covered by the geometry. Unlike <code>RS_Clip</code>, which extracts a subset of an existing raster while preserving its original values, <code>RS_AsRaster</code> generates a new raster where the geometry is rasterized onto a raster grid. The function supports all geometry types and takes the following parameters:</p>
+<ul>
+<li><code>geom</code>: The geometry to be rasterized.</li>
+<li><code>raster</code>: The reference raster to be used for overlaying the <code>geom</code> on.</li>
+<li><code>pixelType</code>: Defines data type of the output raster. This can be one of the following, D (double), F (float), I (integer), S (short), US (unsigned short) or B (byte).</li>
+<li><code>allTouched</code> (Since: <code>v1.7.1</code>): Decides the pixel selection criteria. If set to <code>true</code>, the function selects all pixels touched by the geometry, else, selects only pixels who's centroids intersect the geometry. Defaults to <code>false</code>.</li>
+<li><code>Value</code>: The value to be used for assigning pixels covered by the geometry. Defaults to using <code>1.0</code> for cell <code>value</code> if not provided.</li>
+<li><code>noDataValue</code>: Used for assigning the no data value of the resultant raster. Defaults to <code>null</code> if not provided.</li>
+<li><code>useGeometryExtent</code>: Defines the extent of the resultant raster. When set to <code>true</code>, it corresponds to the extent of <code>geom</code>, and when set to false, it corresponds to the extent of <code>raster</code>. Default value is <code>true</code> if not set.</li>
+</ul>
+<p>Format:</p>
+<div class="highlight"><pre><span></span><code>RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, allTouched: Boolean, value: Double, noDataValue: Double, useGeometryExtent: Boolean)
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, value: Double, noDataValue: Double)
+<div class="highlight"><pre><span></span><code>RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, allTouched: Boolean, value: Double, noDataValue: Double)
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, value: Double)
+<div class="highlight"><pre><span></span><code>RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, allTouched: Boolean, value: Double)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, allTouched: Boolean)
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String)
 </code></pre></div>
@@ -4689,7 +4698,7 @@ If a raster is provided with anyone of these properties then IllegalArgumentExce
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_AsRaster</span><span class="p">(</span>
 <span class="w">        </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))&#39;</span><span class="p">),</span>
 <span class="w">        </span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">215</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">),</span>
-<span class="w">        </span><span class="s1">&#39;D&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="n">d</span>
+<span class="w">        </span><span class="s1">&#39;D&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">false</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="n">d</span>
 <span class="w">    </span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
@@ -4708,7 +4717,7 @@ If a raster is provided with anyone of these properties then IllegalArgumentExce
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_AsRaster</span><span class="p">(</span>
 <span class="w">        </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))&#39;</span><span class="p">),</span>
 <span class="w">        </span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">215</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
-<span class="w">       </span><span class="s1">&#39;D&#39;</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="n">d</span><span class="p">,</span><span class="w"> </span><span class="k">false</span>
+<span class="w">       </span><span class="s1">&#39;D&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">true</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="n">d</span><span class="p">,</span><span class="w"> </span><span class="k">false</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
@@ -4734,7 +4743,7 @@ If a raster is provided with anyone of these properties then IllegalArgumentExce
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">December 4, 2024 07:01:47</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">February 25, 2025 02:18:57</span>
   </span>
 
     
