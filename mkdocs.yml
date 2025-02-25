@@ -80,6 +80,7 @@ nav:
           - Scala/Java: tutorial/demo.md
           - Python: tutorial/jupyter-notebook.md
       - Concepts:
+          - Spatial Joins: tutorial/concepts/spatial-joins.md
           - Clustering Algorithms: tutorial/concepts/clustering-algorithms.md
   - API Docs:
       - Sedona with Apache Spark:
