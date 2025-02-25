@@ -409,7 +409,7 @@ If one of the tables is small, you can broadcast it, which copies it to all the 
 
 You should generally only broadcast DataFrames that are relatively small, see [here for more information](https://sedona.apache.org/latest/api/sql/Optimizer/?h=broadcast#broadcast-index-join).  
 
-Sedona will automatically broadcast tables smaller than the threshold; [see here for more details](https://sedona.apache.org/latest/api/sql/Optimizer/?h=broadcast#automatic-broadcast-index-join).
+Sedona will automatically broadcast tables smaller than the threshold; [see here for more details](https://sedona.apache.org/latest/api/sql/Optimizer/#automatic-broadcast-index-join).
 
 ## Conclusion
 
