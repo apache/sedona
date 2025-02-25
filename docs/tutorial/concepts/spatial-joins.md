@@ -331,7 +331,11 @@ Here are the results:
 
 Sedona is an excellent tool for finding locations within a certain distance from a point.
 
+Sedona uses the Euclidean distance between two objects so the distance unit has the same CRS of the original coordinates. To directly operate on WGS84 coordinates with meter distance, you should use `ST_DistanceSphere`, `ST_DistanceSpheroid`, or `ST_DWithnin(useSpheroid = true)`.
+
 ## Spatial range join
+
+All joins triggered by `ST_Intersects`, `ST_Contains`, `ST_Within`, `ST_DWithin`, `ST_Touches`, and `ST_Crosses` are considered a range join.  This section illustrates another range join, but we've already covered several range joins on this page.
 
 Suppose you have a table with cities and another table with restaurants.  You want to identify all the restaurants in a given city.  See the following diagram for some sample data.
 
