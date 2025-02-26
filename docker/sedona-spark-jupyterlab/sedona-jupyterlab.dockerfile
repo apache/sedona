@@ -29,16 +29,16 @@ ARG zeppelin_version=0.12.0
 
 # Set up envs
 ENV SHARED_WORKSPACE=${shared_workspace}
-ENV SPARK_HOME /usr/local/lib/python3.10/dist-packages/pyspark
-ENV SEDONA_HOME /opt/sedona
-ENV ZEPPELIN_HOME /opt/zeppelin
+ENV SPARK_HOME=/usr/local/lib/python3.10/dist-packages/pyspark
+ENV SEDONA_HOME=/opt/sedona
+ENV ZEPPELIN_HOME=/opt/zeppelin
 RUN mkdir ${SEDONA_HOME}
 
-ENV SPARK_MASTER_HOST localhost
-ENV SPARK_MASTER_PORT 7077
+ENV SPARK_MASTER_HOST=localhost
+ENV SPARK_MASTER_PORT=7077
 ENV PYTHONPATH=$SPARK_HOME/python
-ENV PYSPARK_PYTHON python3
-ENV PYSPARK_DRIVER_PYTHON jupyter
+ENV PYSPARK_PYTHON=python3
+ENV PYSPARK_DRIVER_PYTHON=jupyter
 COPY ./ ${SEDONA_HOME}/
 
 RUN chmod +x ${SEDONA_HOME}/docker/spark.sh
@@ -54,6 +54,8 @@ RUN ${SEDONA_HOME}/docker/sedona.sh ${sedona_version} ${geotools_wrapper_version
 RUN ${SEDONA_HOME}/docker/zeppelin/install-zeppelin.sh ${zeppelin_version} /opt
 # Set up Zeppelin configuration
 COPY docker/zeppelin/conf/zeppelin-site.xml ${ZEPPELIN_HOME}/conf/
+COPY docker/zeppelin/conf/helium.json ${ZEPPELIN_HOME}/conf/
+COPY docker/zeppelin/conf/interpreter.json ${ZEPPELIN_HOME}/conf/
 RUN mkdir ${ZEPPELIN_HOME}/helium
 RUN mkdir ${ZEPPELIN_HOME}/leaflet
 RUN mkdir ${ZEPPELIN_HOME}/notebook/sedona-tutorial
