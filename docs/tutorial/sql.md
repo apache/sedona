@@ -757,6 +757,102 @@ You can also load data from raster tables in the geopackage file. To load raster
 +---+----------+-----------+--------+--------------------+
 ```
 
+## Load from OSM PBF
+
+Since v1.7.1, Sedona supports loading OSM PBF file format as a DataFrame.
+
+=== "Scala/Java"
+
+	```scala
+	val df = sedona.read.format("osmpbf").load("/path/to/osmpbf")
+	```
+
+=== "Java"
+
+	```java
+	Dataset<Row> df = sedona.read().format("osmpbf").load("/path/to/osmpbf")
+	```
+
+=== "Python"
+
+	```python
+	df = sedona.read.format("osmpbf").load("/path/to/osmpbf")
+	```
+
+OSM PBF files can contain nodes, ways, and relations. Currently Sedona support
+DenseNodes, Ways and Relations. When you load the data you get a DataFrame with the following schema.
+
+```
+root
+ |-- id: long (nullable = true)
+ |-- kind: string (nullable = true)
+ |-- location: struct (nullable = true)
+ |    |-- longitude: double (nullable = true)
+ |    |-- latitude: double (nullable = true)
+ |-- tags: map (nullable = true)
+ |    |-- key: string
+ |    |-- value: string (valueContainsNull = true)
+ |-- refs: array (nullable = true)
+ |    |-- element: long (containsNull = true)
+ |-- ref_roles: array (nullable = true)
+ |    |-- element: string (containsNull = true)
+ |-- ref_types: array (nullable = true)
+ |    |-- element: string (containsNull = true)
+```
+
+Where:
+
+- `id` is the unique identifier of the object.
+- `kind` is the type of the object, it can be `node`, `way` or `relation`.
+- `location` is the location of the object, it contains the `longitude` and `latitude` of the object.
+- `tags` is a map of key-value pairs that represent the tags of the object.
+- `refs` is an array of the references of the object.
+- `ref_roles` is an array of the roles of the references.
+- `ref_types` is an array of the types of the references.
+
+The dataframe for ways might look like this for nodes:
+
+```
++---------+----+--------------------+--------------------+----+---------+---------+
+|       id|kind|            location|                tags|refs|ref_roles|ref_types|
++---------+----+--------------------+--------------------+----+---------+---------+
+|248675410|node|{21.0884952545166...|{tactile_paving -...|NULL|     NULL|     NULL|
+|260821820|node|{21.0191555023193...|{created_by -> JOSM}|NULL|     NULL|     NULL|
+|349189665|node|{22.1437530517578...|{source -> http:/...|NULL|     NULL|     NULL|
+|353366899|node|{22.9787712097167...|{source -> http:/...|NULL|     NULL|     NULL|
+|359460224|node|{22.4816703796386...|{source -> http:/...|NULL|     NULL|     NULL|
++---------+----+--------------------+--------------------+----+---------+---------+
+only showing top 5 rows
+```
+
+and for way
+
+```
++-------+----+--------+--------------------+--------------------+---------+---------+
+|     id|kind|location|                tags|                refs|ref_roles|ref_types|
++-------+----+--------+--------------------+--------------------+---------+---------+
+|4307329| way|    NULL|{junction -> roun...|[2448759046, 7093...|     NULL|     NULL|
+|4307330| way|    NULL|{surface -> aspha...|[26063923, 260639...|     NULL|     NULL|
+|4308966| way|    NULL|{sidewalk -> sepa...|[3387797238, 9252...|     NULL|     NULL|
+|4308968| way|    NULL|{surface -> pavin...|[26083890, 744724...|     NULL|     NULL|
+|4308969| way|    NULL|{cycleway:both ->...|[9526831176, 1218...|     NULL|     NULL|
++-------+----+--------+--------------------+--------------------+---------+---------+
+```
+
+and for relation
+
+```
++-----+--------+--------+--------------------+--------------------+--------------------+--------------------+
+|   id|    kind|location|                tags|                refs|           ref_roles|           ref_types|
++-----+--------+--------+--------------------+--------------------+--------------------+--------------------+
+|28124|relation|    NULL|{official_name ->...|[26382394, 26259985]|      [inner, outer]|          [WAY, WAY]|
+|28488|relation|    NULL|  {type -> junction}|[26409253, 303249...|[roundabout, roun...|[WAY, WAY, WAY, WAY]|
+|32939|relation|    NULL|{ref -> E 67, rou...|[140673970, 14067...|        [, , , , , ]|[WAY, WAY, RELATI...|
+|34387|relation|    NULL|{note -> rząd III...|[209161000, 52154...|[main_stream, mai...|[WAY, WAY, WAY, W...|
+|34392|relation|    NULL|{distance -> 1047...|[150033976, 25076...|[main_stream, mai...|[WAY, WAY, WAY, W...|
++-----+--------+--------+--------------------+--------------------+--------------------+--------------------+
+```
+
 Known limitations (v1.7.0):
 
 - webp rasters are not supported

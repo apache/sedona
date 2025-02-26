@@ -12,6 +12,7 @@ limite
 nd
 ois
 parm
+pavin
 pixelx
 refere
 ser
