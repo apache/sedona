@@ -67,6 +67,25 @@ This query will show the following outputs:
 
 ```
 
+To leverage Arrow optimization and speed up the conversion, you can use the `create_spatial_dataframe`
+that takes a SparkSession and GeoDataFrame as parameters and returns a Sedona DataFrame.
+
+```python
+def create_spatial_dataframe(spark: SparkSession, gdf: gpd.GeoDataFrame) -> DataFrame
+```
+
+- spark: SparkSession
+- gdf: gpd.GeoDataFrame
+- return: DataFrame
+
+Example:
+
+```python
+from sedona.utils.geoarrow import create_spatial_dataframe
+
+create_spatial_dataframe(spark, gdf)
+```
+
 ### From Sedona DataFrame to GeoPandas
 
 Reading data with Spark and converting to GeoPandas
