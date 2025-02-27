@@ -1597,7 +1597,7 @@
         <li class="md-nav__item">
   <a href="#load-from-geopackage" class="md-nav__link">
     <span class="md-ellipsis">
-      Load from geopackage
+      Load from GeoPackage
     </span>
   </a>
   
@@ -2049,6 +2049,28 @@
   
   <span class="md-ellipsis">
     CSV
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../files/geopackage-sedona-spark/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GeoPackage
     
   </span>
   
@@ -4909,7 +4931,7 @@
         <li class="md-nav__item">
   <a href="#load-from-geopackage" class="md-nav__link">
     <span class="md-ellipsis">
-      Load from geopackage
+      Load from GeoPackage
     </span>
   </a>
   
@@ -5800,7 +5822,7 @@ For Postgis there is no need to add a query to convert geometry types since it's
 </div>
 </div>
 </div>
-<h2 id="load-from-geopackage">Load from geopackage<a class="headerlink" href="#load-from-geopackage" title="Permanent link">&para;</a></h2>
+<h2 id="load-from-geopackage">Load from GeoPackage<a class="headerlink" href="#load-from-geopackage" title="Permanent link">&para;</a></h2>
 <p>Since v1.7.0, Sedona supports loading Geopackage file format as a DataFrame.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="16:3"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><input id="__tabbed_16_3" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Scala/Java</label><label for="__tabbed_16_2">Java</label><label for="__tabbed_16_3">Python</label></div>
 <div class="tabbed-content">
@@ -5818,61 +5840,10 @@ For Postgis there is no need to add a query to convert geometry types since it's
 </div>
 </div>
 </div>
-<p>Geopackage files can contain vector data and raster data. To show the possible options from a file you can
-look into the metadata table by adding parameter showMetadata and set its value as true.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:3"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><input id="__tabbed_17_3" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Scala/Java</label><label for="__tabbed_17_2">Java</label><label for="__tabbed_17_3">Python</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geopackage&quot;</span><span class="p">).</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;showMetadata&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;true&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/path/to/geopackage&quot;</span><span class="p">)</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">().</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;geopackage&quot;</span><span class="p">).</span><span class="na">option</span><span class="p">(</span><span class="s">&quot;showMetadata&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;true&quot;</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="s">&quot;/path/to/geopackage&quot;</span><span class="p">)</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<p>```python
-df = sedona.read.format("geopackage").option("showMetadata", "true").load("/path/to/geopackage")</p>
-</div>
-</div>
-</div>
-<p>Then you can see the metadata of the geopackage file like below.</p>
-<div class="highlight"><pre><span></span><code>+--------------------+---------+--------------------+-----------+--------------------+----------+-----------------+----------+----------+------+
-|          table_name|data_type|          identifier|description|         last_change|     min_x|            min_y|     max_x|     max_y|srs_id|
-+--------------------+---------+--------------------+-----------+--------------------+----------+-----------------+----------+----------+------+
-|gis_osm_water_a_f...| features|gis_osm_water_a_f...|           |2024-09-30 23:07:...|-9.0257084|57.96814069999999|33.4866675|80.4291867|  4326|
-+--------------------+---------+--------------------+-----------+--------------------+----------+-----------------+----------+----------+------+
-</code></pre></div>
-<p>You can also load data from raster tables in the geopackage file. To load raster data, you can use the following code.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:3"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><input id="__tabbed_18_3" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Scala/Java</label><label for="__tabbed_18_2">Java</label><label for="__tabbed_18_3">Python</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geopackage&quot;</span><span class="p">).</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;tableName&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;raster_table&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/path/to/geopackage&quot;</span><span class="p">)</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">().</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;geopackage&quot;</span><span class="p">).</span><span class="na">option</span><span class="p">(</span><span class="s">&quot;tableName&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;raster_table&quot;</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="s">&quot;/path/to/geopackage&quot;</span><span class="p">)</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geopackage&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;tableName&quot;</span><span class="p">,</span> <span class="s2">&quot;raster_table&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/path/to/geopackage&quot;</span><span class="p">)</span>
-</code></pre></div>
-</div>
-</div>
-</div>
-<div class="highlight"><pre><span></span><code>+---+----------+-----------+--------+--------------------+
-| id|zoom_level|tile_column|tile_row|           tile_data|
-+---+----------+-----------+--------+--------------------+
-|  1|        11|        428|     778|GridCoverage2D[&quot;c...|
-|  2|        11|        429|     778|GridCoverage2D[&quot;c...|
-|  3|        11|        428|     779|GridCoverage2D[&quot;c...|
-|  4|        11|        429|     779|GridCoverage2D[&quot;c...|
-|  5|        11|        427|     777|GridCoverage2D[&quot;c...|
-+---+----------+-----------+--------+--------------------+
-</code></pre></div>
+<p>See <a href="../files/geopackage-sedona-spark">this page</a> for more information on loading GeoPackage.</p>
 <h2 id="load-from-osm-pbf">Load from OSM PBF<a class="headerlink" href="#load-from-osm-pbf" title="Permanent link">&para;</a></h2>
 <p>Since v1.7.1, Sedona supports loading OSM PBF file format as a DataFrame.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:3"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Scala/Java</label><label for="__tabbed_19_2">Java</label><label for="__tabbed_19_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:3"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><input id="__tabbed_17_3" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Scala/Java</label><label for="__tabbed_17_2">Java</label><label for="__tabbed_17_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;osmpbf&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/path/to/osmpbf&quot;</span><span class="p">)</span>
@@ -5981,7 +5952,7 @@ only showing top 5 rows
 <p>Sedona provides an implementation of the <a href="https://en.wikipedia.org/wiki/Dbscan">DBSCAN</a> algorithm to cluster spatial data.</p>
 <p>The algorithm is available as a Scala and Python function called on a spatial dataframe. The returned dataframe has an additional column added containing the unique identifier of the cluster that record is a member of and a boolean column indicating if the record is a core point.</p>
 <p>The first parameter is the dataframe, the next two are the epsilon and min_points parameters of the DBSCAN algorithm.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="20:3"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><input id="__tabbed_20_3" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Scala</label><label for="__tabbed_20_2">Java</label><label for="__tabbed_20_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:3"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><input id="__tabbed_18_3" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Scala</label><label for="__tabbed_18_2">Java</label><label for="__tabbed_18_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">apache</span><span class="p">.</span><span class="nn">sedona</span><span class="p">.</span><span class="nn">stats</span><span class="p">.</span><span class="nn">clustering</span><span class="p">.</span><span class="nc">DBSCAN</span><span class="p">.</span><span class="n">dbscan</span>
@@ -6027,7 +5998,7 @@ only showing top 5 rows
 <p>Sedona provides an implementation of the <a href="https://en.wikipedia.org/wiki/Local_outlier_factor">Local Outlier Factor</a> algorithm to identify anomalous data.</p>
 <p>The algorithm is available as a Scala and Python function called on a spatial dataframe. The returned dataframe has an additional column added containing the local outlier factor.</p>
 <p>The first parameter is the dataframe, the next is the number of nearest neighbors to consider use in calculating the score.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="21:3"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><input id="__tabbed_21_3" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">Scala</label><label for="__tabbed_21_2">Java</label><label for="__tabbed_21_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:3"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Scala</label><label for="__tabbed_19_2">Java</label><label for="__tabbed_19_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">apache</span><span class="p">.</span><span class="nn">sedona</span><span class="p">.</span><span class="nn">stats</span><span class="p">.</span><span class="nn">outlierDetection</span><span class="p">.</span><span class="nc">LocalOutlierFactor</span><span class="p">.</span><span class="n">localOutlierFactor</span>
@@ -6079,7 +6050,7 @@ only showing top 5 rows
 <p>Sedona provides an implementation of the <a href="https://en.wikipedia.org/wiki/Getis%E2%80%93Ord_statistics">Gi and Gi*</a> algorithms to identify local hotspots in spatial data</p>
 <p>The algorithm is available as a Scala and Python function called on a spatial dataframe. The returned dataframe has additional columns added containing G statistic, E[G], V[G], the Z score, and the p-value.</p>
 <p>Using Gi involves first generating the neighbors list for each record, then calling the g_local function.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="22:3"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><input id="__tabbed_22_3" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">Scala</label><label for="__tabbed_22_2">Java</label><label for="__tabbed_22_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:3"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><input id="__tabbed_20_3" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Scala</label><label for="__tabbed_20_2">Java</label><label for="__tabbed_20_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">apache</span><span class="p">.</span><span class="nn">sedona</span><span class="p">.</span><span class="nn">stats</span><span class="p">.</span><span class="nc">Weighting</span><span class="p">.</span><span class="n">addBinaryDistanceBandColumn</span>
@@ -6237,7 +6208,7 @@ can also be found in the example notebook available <a href="https://github.com/
 <p>User-Defined Functions (UDFs) are user-created procedures that can perform operations on a single row of information. To cover almost all use cases, we will showcase 4 types of UDFs for a better understanding of how to use geometry with UDFs. Sedona's serializer deserializes the SQL geometry type to <a href="https://locationtech.github.io/jts/javadoc-1.18.0/org/locationtech/jts/geom/Geometry.html">JTS Geometry</a> (Scala/Java) or <a href="https://shapely.readthedocs.io/en/stable/geometry.html">Shapely Geometry</a> (Python). You can implement any custom logic using the rich ecosystem around these two libraries.</p>
 <h3 id="geometry-to-primitive">Geometry to primitive<a class="headerlink" href="#geometry-to-primitive" title="Permanent link">&para;</a></h3>
 <p>This UDF example takes a geometry type input and returns a primitive type output:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="23:3"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><input id="__tabbed_23_3" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">Scala</label><label for="__tabbed_23_2">Java</label><label for="__tabbed_23_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="21:3"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><input id="__tabbed_21_3" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">Scala</label><label for="__tabbed_21_2">Java</label><label for="__tabbed_21_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">locationtech</span><span class="p">.</span><span class="nn">jts</span><span class="p">.</span><span class="nn">geom</span><span class="p">.</span><span class="nc">Geometry</span>
@@ -6288,7 +6259,7 @@ can also be found in the example notebook available <a href="https://github.com/
 </code></pre></div>
 <h3 id="geometry-to-geometry">Geometry to Geometry<a class="headerlink" href="#geometry-to-geometry" title="Permanent link">&para;</a></h3>
 <p>This UDF example takes a geometry type input and returns a geometry type output:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="24:3"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><input id="__tabbed_24_3" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">Scala</label><label for="__tabbed_24_2">Java</label><label for="__tabbed_24_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="22:3"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><input id="__tabbed_22_3" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">Scala</label><label for="__tabbed_22_2">Java</label><label for="__tabbed_22_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">locationtech</span><span class="p">.</span><span class="nn">jts</span><span class="p">.</span><span class="nn">geom</span><span class="p">.</span><span class="nc">Geometry</span>
@@ -6340,7 +6311,7 @@ can also be found in the example notebook available <a href="https://github.com/
 </code></pre></div>
 <h3 id="geometry-primitive-to-geometry">Geometry, primitive to geometry<a class="headerlink" href="#geometry-primitive-to-geometry" title="Permanent link">&para;</a></h3>
 <p>This UDF example takes a geometry type input and a primitive type input and returns a geometry type output:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="25:3"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><input id="__tabbed_25_2" name="__tabbed_25" type="radio" /><input id="__tabbed_25_3" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">Scala</label><label for="__tabbed_25_2">Java</label><label for="__tabbed_25_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="23:3"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><input id="__tabbed_23_3" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">Scala</label><label for="__tabbed_23_2">Java</label><label for="__tabbed_23_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">locationtech</span><span class="p">.</span><span class="nn">jts</span><span class="p">.</span><span class="nn">geom</span><span class="p">.</span><span class="nc">Geometry</span>
@@ -6391,7 +6362,7 @@ can also be found in the example notebook available <a href="https://github.com/
 </code></pre></div>
 <h3 id="geometry-primitive-to-geometry-primitive">Geometry, primitive to Geometry, primitive<a class="headerlink" href="#geometry-primitive-to-geometry-primitive" title="Permanent link">&para;</a></h3>
 <p>This UDF example takes a geometry type input and a primitive type input and returns a geometry type and a primitive type output:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="26:3"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><input id="__tabbed_26_3" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">Scala</label><label for="__tabbed_26_2">Java</label><label for="__tabbed_26_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="24:3"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><input id="__tabbed_24_3" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">Scala</label><label for="__tabbed_24_2">Java</label><label for="__tabbed_24_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">locationtech</span><span class="p">.</span><span class="nn">jts</span><span class="p">.</span><span class="nn">geom</span><span class="p">.</span><span class="nc">Geometry</span>
@@ -6515,7 +6486,7 @@ my_postgis_db# alter table my_table alter column geom type geometry;
 <h2 id="convert-between-dataframe-and-spatialrdd">Convert between DataFrame and SpatialRDD<a class="headerlink" href="#convert-between-dataframe-and-spatialrdd" title="Permanent link">&para;</a></h2>
 <h3 id="dataframe-to-spatialrdd">DataFrame to SpatialRDD<a class="headerlink" href="#dataframe-to-spatialrdd" title="Permanent link">&para;</a></h3>
 <p>Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="27:3"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><input id="__tabbed_27_2" name="__tabbed_27" type="radio" /><input id="__tabbed_27_3" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">Scala</label><label for="__tabbed_27_2">Java</label><label for="__tabbed_27_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="25:3"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><input id="__tabbed_25_2" name="__tabbed_25" type="radio" /><input id="__tabbed_25_3" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">Scala</label><label for="__tabbed_25_2">Java</label><label for="__tabbed_25_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">spatialRDD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">StructuredAdapter</span><span class="p">.</span><span class="n">toSpatialRdd</span><span class="p">(</span><span class="n">spatialDf</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;usacounty&quot;</span><span class="p">)</span>
@@ -6536,7 +6507,7 @@ my_postgis_db# alter table my_table alter column geom type geometry;
 <p>"usacounty" is the name of the geometry column. It is an optional parameter. If you don't provide it, the first geometry column will be used.</p>
 <h3 id="spatialrdd-to-dataframe">SpatialRDD to DataFrame<a class="headerlink" href="#spatialrdd-to-dataframe" title="Permanent link">&para;</a></h3>
 <p>Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read <a href="../api/javadoc/sql/org/apache/sedona/sql/utils/index.html">Adapter Scaladoc</a></p>
-<div class="tabbed-set tabbed-alternate" data-tabs="28:3"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><input id="__tabbed_28_3" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">Scala</label><label for="__tabbed_28_2">Java</label><label for="__tabbed_28_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="26:3"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><input id="__tabbed_26_3" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">Scala</label><label for="__tabbed_26_2">Java</label><label for="__tabbed_26_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">spatialDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">StructuredAdapter</span><span class="p">.</span><span class="n">toDf</span><span class="p">(</span><span class="n">spatialRDD</span><span class="p">,</span><span class="w"> </span><span class="n">sedona</span><span class="p">)</span>
@@ -6561,7 +6532,7 @@ are introduced on purpose to ensure correctness when performing a spatial join;
 however, when using Sedona to prepare a dataset for distribution this is not typically
 desired.</p>
 <p>You can use <code>StructuredAdapter</code> and the <code>spatialRDD.spatialPartitioningWithoutDuplicates</code> function to obtain a Sedona DataFrame that is spatially partitioned without duplicates. This is especially useful for generating balanced GeoParquet files while preserving spatial proximity within files, which is crucial for optimizing filter pushdown performance in GeoParquet files.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="29:3"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><input id="__tabbed_29_2" name="__tabbed_29" type="radio" /><input id="__tabbed_29_3" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1">Scala</label><label for="__tabbed_29_2">Java</label><label for="__tabbed_29_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="27:3"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><input id="__tabbed_27_2" name="__tabbed_27" type="radio" /><input id="__tabbed_27_3" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">Scala</label><label for="__tabbed_27_2">Java</label><label for="__tabbed_27_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="n">spatialRDD</span><span class="p">.</span><span class="n">spatialPartitioningWithoutDuplicates</span><span class="p">(</span><span class="nc">GridType</span><span class="p">.</span><span class="nc">KDBTREE</span><span class="p">)</span>
@@ -6590,7 +6561,7 @@ desired.</p>
 </div>
 <h3 id="spatialpairrdd-to-dataframe">SpatialPairRDD to DataFrame<a class="headerlink" href="#spatialpairrdd-to-dataframe" title="Permanent link">&para;</a></h3>
 <p>PairRDD is the result of a spatial join query or distance join query. SedonaSQL DataFrame-RDD Adapter can convert the result to a DataFrame. But you need to provide the schema of the left and right RDDs.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="30:3"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><input id="__tabbed_30_3" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">Scala</label><label for="__tabbed_30_2">Java</label><label for="__tabbed_30_3">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="28:3"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><input id="__tabbed_28_3" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">Scala</label><label for="__tabbed_28_2">Java</label><label for="__tabbed_28_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">joinResultDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">StructuredAdapter</span><span class="p">.</span><span class="n">toDf</span><span class="p">(</span><span class="n">joinResultPairRDD</span><span class="p">,</span><span class="w"> </span><span class="n">leftDf</span><span class="p">.</span><span class="n">schema</span><span class="p">,</span><span class="w"> </span><span class="n">rightDf</span><span class="p">.</span><span class="n">schema</span><span class="p">,</span><span class="w"> </span><span class="n">sedona</span><span class="p">)</span>
@@ -6628,7 +6599,7 @@ desired.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">February 26, 2025 23:57:40</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">February 27, 2025 21:44:37</span>
   </span>
 
     
