@@ -673,7 +673,7 @@ For Postgis there is no need to add a query to convert geometry types since it's
 		.withColumn("geom", f.expr("ST_GeomFromWKB(geom)")))
 	```
 
-## Load from geopackage
+## Load from GeoPackage
 
 Since v1.7.0, Sedona supports loading Geopackage file format as a DataFrame.
 
@@ -695,67 +695,7 @@ Since v1.7.0, Sedona supports loading Geopackage file format as a DataFrame.
 	df = sedona.read.format("geopackage").option("tableName", "tab").load("/path/to/geopackage")
 	```
 
-Geopackage files can contain vector data and raster data. To show the possible options from a file you can
-look into the metadata table by adding parameter showMetadata and set its value as true.
-
-=== "Scala/Java"
-
-	```scala
-	val df = sedona.read.format("geopackage").option("showMetadata", "true").load("/path/to/geopackage")
-	```
-
-=== "Java"
-
-	```java
-	Dataset<Row> df = sedona.read().format("geopackage").option("showMetadata", "true").load("/path/to/geopackage")
-	```
-
-=== "Python"
-
-	```python
-	df = sedona.read.format("geopackage").option("showMetadata", "true").load("/path/to/geopackage")
-
-Then you can see the metadata of the geopackage file like below.
-
-```
-+--------------------+---------+--------------------+-----------+--------------------+----------+-----------------+----------+----------+------+
-|          table_name|data_type|          identifier|description|         last_change|     min_x|            min_y|     max_x|     max_y|srs_id|
-+--------------------+---------+--------------------+-----------+--------------------+----------+-----------------+----------+----------+------+
-|gis_osm_water_a_f...| features|gis_osm_water_a_f...|           |2024-09-30 23:07:...|-9.0257084|57.96814069999999|33.4866675|80.4291867|  4326|
-+--------------------+---------+--------------------+-----------+--------------------+----------+-----------------+----------+----------+------+
-```
-
-You can also load data from raster tables in the geopackage file. To load raster data, you can use the following code.
-
-=== "Scala/Java"
-
-	```scala
-	val df = sedona.read.format("geopackage").option("tableName", "raster_table").load("/path/to/geopackage")
-	```
-
-=== "Java"
-
-	```java
-	Dataset<Row> df = sedona.read().format("geopackage").option("tableName", "raster_table").load("/path/to/geopackage")
-	```
-
-=== "Python"
-
-	```python
-	df = sedona.read.format("geopackage").option("tableName", "raster_table").load("/path/to/geopackage")
-	```
-
-```
-+---+----------+-----------+--------+--------------------+
-| id|zoom_level|tile_column|tile_row|           tile_data|
-+---+----------+-----------+--------+--------------------+
-|  1|        11|        428|     778|GridCoverage2D["c...|
-|  2|        11|        429|     778|GridCoverage2D["c...|
-|  3|        11|        428|     779|GridCoverage2D["c...|
-|  4|        11|        429|     779|GridCoverage2D["c...|
-|  5|        11|        427|     777|GridCoverage2D["c...|
-+---+----------+-----------+--------+--------------------+
-```
+See [this page](../files/geopackage-sedona-spark) for more information on loading GeoPackage.
 
 ## Load from OSM PBF
 
