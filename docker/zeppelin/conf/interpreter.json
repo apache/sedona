@@ -134,7 +134,7 @@
           "name": "default.completer.ttlInSeconds",
           "value": "120",
           "type": "number",
-          "description": "Time to live sql completer in seconds (-1 to update everytime, 0 to disable update)"
+          "description": "Time to live sql completer in seconds (-1 to update every time, 0 to disable update)"
         },
         "default.completer.schemaFilters": {
           "name": "default.completer.schemaFilters",
@@ -1156,7 +1156,7 @@
           "name": "neo4j.database",
           "value": "",
           "type": "string",
-          "description": "The Neo4j target database, if empty use the dafault db."
+          "description": "The Neo4j target database, if empty use the default db."
         },
         "neo4j.multi.statement": {
           "name": "neo4j.multi.statement",

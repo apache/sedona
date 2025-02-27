@@ -61,7 +61,7 @@ Example 1:
 docker run -d -e DRIVER_MEM=6g -e EXECUTOR_MEM=8g -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 -p 8085:8085 apache/sedona:latest
 ```
 
-This command will start a container with 6GB RAM for the driver and 8GB RAM for the executor and use the latest Sedona image. The container will run in detached mode. 
+This command will start a container with 6GB RAM for the driver and 8GB RAM for the executor and use the latest Sedona image. The container will run in detached mode.
 
 This command will bind the container's ports 8888, 8080, 8081, 4040, 8085 to the host's ports 8888, 8080, 8081, 4040, 8085 respectively.
 
@@ -95,8 +95,8 @@ Open your browser and go to [http://localhost:8888/](http://localhost:8888/) to 
 
 ### Notes
 
-* This container assumes you have at least 8GB RAM and takes all your CPU cores and 8GM RAM. The 1 worker will take 4GB and the Jupyter program will take the remaining 4GB.
-* Sedona in this container runs in the cluster mode. Only 1 notebook can be run at a time. If you want to run another notebook, please shut down the kernel of the current notebook first ([How?](https://jupyterlab.readthedocs.io/en/stable/user/running.html)).
+- This container assumes you have at least 8GB RAM and takes all your CPU cores and 8GM RAM. The 1 worker will take 4GB and the Jupyter program will take the remaining 4GB.
+- Sedona in this container runs in the cluster mode. Only 1 notebook can be run at a time. If you want to run another notebook, please shut down the kernel of the current notebook first ([How?](https://jupyterlab.readthedocs.io/en/stable/user/running.html)).
 
 ## How to build
 
@@ -146,19 +146,19 @@ This docker image can only be built against Sedona 1.7.0+ and Spark 3.3+
 
 ### Software
 
-* OS: Ubuntu 22.02
-* JDK: openjdk-19
-* Python: 3.10
-* Spark 3.4.1
+- OS: Ubuntu 22.02
+- JDK: openjdk-19
+- Python: 3.10
+- Spark 3.4.1
 
 ### Web UI
 
-* JupyterLab: http://localhost:8888/
-* Spark master URL: spark://localhost:7077
-* Spark job UI: http://localhost:4040
-* Spark master web UI: http://localhost:8080/
-* Spark work web UI: http://localhost:8081/
-* Apache Zeppelin: http://localhost:8085/
+- JupyterLab: http://localhost:8888/
+- Spark master URL: spark://localhost:7077
+- Spark job UI: http://localhost:4040
+- Spark master web UI: http://localhost:8080/
+- Spark work web UI: http://localhost:8081/
+- Apache Zeppelin: http://localhost:8085/
 
 A Zeppelin tutorial notebook is bundled with Sedona tutorials. See [Sedona-Zeppelin tutorial](../tutorial/zeppelin.md) for details.
 
