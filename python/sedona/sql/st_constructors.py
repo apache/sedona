@@ -177,6 +177,22 @@ def ST_GeomFromWKT(
 
 
 @validate_argument_types
+def ST_GeogFromWKT(
+    wkt: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = None
+) -> Column:
+    """Generate a geography column from a Well-Known Text (WKT) string column.
+
+    :param wkt: WKT string column to generate from.
+    :type wkt: ColumnOrName
+    :return: Geography column representing the WKT string.
+    :rtype: Column
+    """
+    args = (wkt) if srid is None else (wkt, srid)
+
+    return _call_constructor_function("ST_GeogFromWKT", args)
+
+
+@validate_argument_types
 def ST_GeomFromEWKT(ewkt: ColumnOrName) -> Column:
     """Generate a geometry column from a OGC Extended Well-Known Text (WKT) string column.
 

@@ -16,22 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.strategy.geostats
+package org.apache.sedona.sql.datasources.osmpbf.iterators;
 
-import org.apache.spark.sql.Strategy
-import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
-import org.apache.spark.sql.execution.SparkPlan
-import org.apache.spark.sql.sedona_sql.plans.logical.EvalGeoStatsFunction
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction
+import org.apache.sedona.sql.datasources.osmpbf.build.Fileformat;
 
-class EvalGeoStatsFunctionStrategy(spark: SparkSession) extends Strategy {
+public class BlobData {
+  Fileformat.BlobHeader header;
+  Fileformat.Blob blob;
 
-  override def apply(plan: LogicalPlan): Seq[SparkPlan] = {
-    plan match {
-      case EvalGeoStatsFunction(function: ST_GeoStatsFunction, resultAttrs, child) =>
-        EvalGeoStatsFunctionExec(function, planLater(child), resultAttrs) :: Nil
-      case _ => Nil
-    }
+  public BlobData(Fileformat.BlobHeader header, Fileformat.Blob blob) {
+    this.header = header;
+    this.blob = blob;
+  }
+
+  public Fileformat.BlobHeader getHeader() {
+    return header;
+  }
+
+  public Fileformat.Blob getBlob() {
+    return blob;
   }
 }

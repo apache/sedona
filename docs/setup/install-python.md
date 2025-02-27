@@ -64,12 +64,20 @@ You can get it using one of the following methods:
 
 ```python
 from sedona.spark import *
-config = SedonaContext.builder(). \
-    config('spark.jars.packages',
-           'org.apache.sedona:sedona-spark-3.3_2.12:{{ sedona.current_version }},'
-           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
-    config('spark.jars.repositories', 'https://artifacts.unidata.ucar.edu/repository/unidata-all'). \
-    getOrCreate()
+
+config = (
+    SedonaContext.builder()
+    .config(
+        "spark.jars.packages",
+        "org.apache.sedona:sedona-spark-3.3_2.12:{{ sedona.current_version }},"
+        "org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}",
+    )
+    .config(
+        "spark.jars.repositories",
+        "https://artifacts.unidata.ucar.edu/repository/unidata-all",
+    )
+    .getOrCreate()
+)
 sedona = SedonaContext.create(config)
 ```
 
@@ -81,15 +89,18 @@ SedonaRegistrator is deprecated in Sedona 1.4.1 and later versions. Please use t
 from pyspark.sql import SparkSession
 from sedona.register import SedonaRegistrator
 from sedona.utils import SedonaKryoRegistrator, KryoSerializer
-spark = SparkSession. \
-    builder. \
-    appName('appName'). \
-    config("spark.serializer", KryoSerializer.getName). \
-    config("spark.kryo.registrator", SedonaKryoRegistrator.getName). \
-    config('spark.jars.packages',
-           'org.apache.sedona:sedona-spark-shaded-3.3_2.12:{{ sedona.current_version }},'
-           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
-    getOrCreate()
+
+spark = (
+    SparkSession.builder.appName("appName")
+    .config("spark.serializer", KryoSerializer.getName)
+    .config("spark.kryo.registrator", SedonaKryoRegistrator.getName)
+    .config(
+        "spark.jars.packages",
+        "org.apache.sedona:sedona-spark-shaded-3.3_2.12:{{ sedona.current_version }},"
+        "org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}",
+    )
+    .getOrCreate()
+)
 SedonaRegistrator.registerAll(spark)
 ```
 

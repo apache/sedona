@@ -19,6 +19,7 @@
 package org.apache.sedona.sql
 
 import com.google.common.math.DoubleMath
+import io.minio.{MinioClient, PutObjectArgs}
 import org.apache.hadoop.fs.FileUtil
 import org.apache.hadoop.hdfs.{HdfsConfiguration, MiniDFSCluster}
 import org.apache.log4j.{Level, Logger}
@@ -31,8 +32,9 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.locationtech.jts.geom._
 import org.locationtech.jts.io.WKTReader
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
+import org.testcontainers.containers.MinIOContainer
 
-import java.io.File
+import java.io.{File, FileInputStream}
 import java.nio.file.Files
 
 trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
@@ -60,6 +62,18 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     sparkConfig.foreach { case (key, value) => builder.config(key, value) }
     builder.getOrCreate()
   }
+
+  lazy val sparkSessionMinio = SedonaContext
+    .builder()
+    .master("local[*]")
+    .appName("sedonasqlScalaTest")
+    .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.3.0")
+    .config(
+      "spark.hadoop.fs.s3a.aws.credentials.provider",
+      "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider")
+    .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
+    .config("sedona.join.autoBroadcastJoinThreshold", "-1")
+    .getOrCreate()
 
   // Lazy initialization of Spark context from the Spark session
   lazy val sc: SparkContext = sparkSession.sparkContext
@@ -363,5 +377,40 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
 
   def assertGeometryEquals(expectedWkt: String, actualGeom: Geometry): Unit = {
     assertGeometryEquals(expectedWkt, actualGeom, 1e-6)
+  }
+
+  def putFileIntoBucket(
+      bucketName: String,
+      key: String,
+      stream: FileInputStream,
+      client: MinioClient): Unit = {
+    val objectArguments = PutObjectArgs
+      .builder()
+      .bucket(bucketName)
+      .`object`(key)
+      .stream(stream, stream.available(), -1)
+      .build()
+
+    client.putObject(objectArguments)
+  }
+
+  def createMinioClient(container: MinIOContainer): MinioClient = {
+    MinioClient
+      .builder()
+      .endpoint(container.getS3URL)
+      .credentials(container.getUserName, container.getPassword)
+      .build()
+  }
+
+  def adjustSparkSession(sparkSession: SparkSession, container: MinIOContainer): Unit = {
+    sparkSession.sparkContext.hadoopConfiguration.set("fs.s3a.endpoint", container.getS3URL)
+    sparkSession.sparkContext.hadoopConfiguration.set("fs.s3a.access.key", container.getUserName)
+    sparkSession.sparkContext.hadoopConfiguration.set("fs.s3a.secret.key", container.getPassword)
+    sparkSession.sparkContext.hadoopConfiguration.set("fs.s3a.connection.timeout", "2000")
+
+    sparkSession.sparkContext.hadoopConfiguration.set("spark.sql.debug.maxToStringFields", "100")
+    sparkSession.sparkContext.hadoopConfiguration.set("fs.s3a.path.style.access", "true")
+    sparkSession.sparkContext.hadoopConfiguration
+      .set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
   }
 }

@@ -44,7 +44,7 @@ nav:
           - Install on AWS Glue: setup/glue.md
           - Install on Microsoft Fabric: setup/fabric.md
           - Set up Spark cluster manually: setup/cluster.md
-          - Install on Azure Synpase Analytics: setup/azure-synapse-analytics.md
+          - Install on Azure Synapse Analytics: setup/azure-synapse-analytics.md
       - Install with Apache Flink:
           - Install Sedona Scala/Java: setup/flink/install-scala.md
       - Install with Snowflake:
@@ -60,6 +60,10 @@ nav:
           - Spatial RDD app: tutorial/rdd.md
           - Sedona R: api/rdocs
           - Work with GeoPandas and Shapely: tutorial/geopandas-shapely.md
+          - Files:
+              - CSV: tutorial/files/csv-geometry-sedona-spark.md
+              - GeoParquet: tutorial/files/geoparquet-sedona-spark.md
+              - GeoJSON: tutorial/files/geojson-sedona-spark.md
           - Map visualization SQL app:
               - Scala/Java: tutorial/viz.md
               - Use Apache Zeppelin: tutorial/zeppelin.md
@@ -76,6 +80,7 @@ nav:
           - Scala/Java: tutorial/demo.md
           - Python: tutorial/jupyter-notebook.md
       - Concepts:
+          - Spatial Joins: tutorial/concepts/spatial-joins.md
           - Clustering Algorithms: tutorial/concepts/clustering-algorithms.md
   - API Docs:
       - Sedona with Apache Spark:
@@ -199,7 +204,7 @@ extra:
     current_rc: 1.7.0-rc1
     current_snapshot: 1.7.1-SNAPSHOT
     next_version: 1.7.1
-copyright: Copyright © 2024 The Apache Software Foundation. Apache Sedona, Sedona, Apache, the Apache feather logo, and the Apache Sedona project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries. All other marks mentioned may be trademarks or registered trademarks of their respective owners. Please visit <a href="https://www.apache.org/">Apache Software Foundation</a> for more details.<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=f3e121f6-c909-4592-8be6-5bd345768cba" />
+copyright: Copyright © 2024 The Apache Software Foundation. Apache Sedona, Sedona, Apache, the Apache feather logo, and the Apache Sedona project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries. All other marks mentioned may be trademarks or registered trademarks of their respective owners. Please visit <a href="https://www.apache.org/">Apache Software Foundation</a> for more details.<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=f3e121f6-c909-4592-8be6-5bd345768cba" /><img src="https://analytics.apache.org/matomo.php?idsite=74&rec=1" />
 
 markdown_extensions:
   - admonition

@@ -16,24 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.plans.logical
+package org.apache.sedona.sql.datasources.osmpbf.model;
 
-import org.apache.spark.sql.catalyst.expressions.Attribute
-import org.apache.spark.sql.catalyst.expressions.AttributeSet
-import org.apache.spark.sql.catalyst.expressions.Expression
-import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
-import org.apache.spark.sql.catalyst.plans.logical.UnaryNode
+public enum RelationType {
+  NODE,
+  WAY,
+  RELATION;
 
-case class EvalGeoStatsFunction(
-    function: Expression,
-    resultAttrs: Seq[Attribute],
-    child: LogicalPlan)
-    extends UnaryNode {
-
-  override def output: Seq[Attribute] = child.output ++ resultAttrs
-
-  override def producedAttributes: AttributeSet = AttributeSet(resultAttrs)
-
-  override protected def withNewChildInternal(newChild: LogicalPlan): LogicalPlan =
-    copy(child = newChild)
+  public static String fromValue(int number) {
+    switch (number) {
+      case 0:
+        return NODE.toString();
+      case 1:
+        return WAY.toString();
+      case 2:
+        return RELATION.toString();
+      default:
+        throw new IllegalArgumentException("Unknown relation type: " + number);
+    }
+  }
 }

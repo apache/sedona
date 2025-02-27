@@ -16,26 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.strategy.geostats
+package org.apache.spark.sql.sedona_sql.plans.logical
 
-import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{Attribute, AttributeSet}
-import org.apache.spark.sql.execution.{SparkPlan, UnaryExecNode}
-import org.apache.spark.sql.sedona_sql.expressions.ST_GeoStatsFunction
+import org.apache.spark.sql.catalyst.expressions.Attribute
+import org.apache.spark.sql.catalyst.expressions.AttributeSet
+import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
+import org.apache.spark.sql.catalyst.plans.logical.UnaryNode
 
-case class EvalGeoStatsFunctionExec(
-    function: ST_GeoStatsFunction,
-    child: SparkPlan,
-    resultAttrs: Seq[Attribute])
-    extends UnaryExecNode {
-
-  override protected def doExecute(): RDD[InternalRow] = function.execute(child, resultAttrs)
+case class EvalPhysicalFunction(
+    function: Expression,
+    resultAttrs: Seq[Attribute],
+    child: LogicalPlan)
+    extends UnaryNode {
 
   override def output: Seq[Attribute] = child.output ++ resultAttrs
 
   override def producedAttributes: AttributeSet = AttributeSet(resultAttrs)
 
-  override protected def withNewChildInternal(newChild: SparkPlan): SparkPlan =
+  override protected def withNewChildInternal(newChild: LogicalPlan): LogicalPlan =
     copy(child = newChild)
 }

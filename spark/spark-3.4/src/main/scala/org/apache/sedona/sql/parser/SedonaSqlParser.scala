@@ -28,17 +28,22 @@ class SedonaSqlParser(delegate: ParserInterface) extends SparkSqlParser {
   val parserBuilder = new SedonaSqlAstBuilder
 
   /**
-   * Parse the SQL text and return the logical plan.
+   * Parse the SQL text and return the logical plan. This method first attempts to use the
+   * delegate parser to parse the SQL text. If the delegate parser fails (throws an exception), it
+   * falls back to using the Sedona SQL parser.
+   *
    * @param sqlText
+   *   The SQL text to be parsed.
    * @return
+   *   The parsed logical plan.
    */
   override def parsePlan(sqlText: String): LogicalPlan =
     try {
-      parse(sqlText) { parser =>
-        parserBuilder.visit(parser.singleStatement())
-      }.asInstanceOf[LogicalPlan]
+      delegate.parsePlan(sqlText)
     } catch {
       case _: Exception =>
-        delegate.parsePlan(sqlText)
+        parse(sqlText) { parser =>
+          parserBuilder.visit(parser.singleStatement())
+        }.asInstanceOf[LogicalPlan]
     }
 }

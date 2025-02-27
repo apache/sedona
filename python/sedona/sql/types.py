@@ -33,6 +33,7 @@ else:
     SedonaRaster = None
 
 from ..utils import geometry_serde
+from ..core.geom.geography import Geography
 
 
 class GeometryType(UserDefinedType):
@@ -58,6 +59,31 @@ class GeometryType(UserDefinedType):
     @classmethod
     def scalaUDT(cls):
         return "org.apache.spark.sql.sedona_sql.UDT.GeometryUDT"
+
+
+class GeographyType(UserDefinedType):
+
+    @classmethod
+    def sqlType(cls):
+        return BinaryType()
+
+    def serialize(self, obj):
+        return geometry_serde.serialize(obj.geometry)
+
+    def deserialize(self, datum):
+        geom, offset = geometry_serde.deserialize(datum)
+        return Geography(geom)
+
+    @classmethod
+    def module(cls):
+        return "sedona.sql.types"
+
+    def needConversion(self):
+        return True
+
+    @classmethod
+    def scalaUDT(cls):
+        return "org.apache.spark.sql.sedona_sql.UDT.GeographyUDT"
 
 
 class RasterType(UserDefinedType):
