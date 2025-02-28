@@ -4736,7 +4736,7 @@
 
 <h1 id="sedona-jupyterlab-docker-image">Sedona JupyterLab Docker Image<a class="headerlink" href="#sedona-jupyterlab-docker-image" title="Permanent link">&para;</a></h1>
 <p>Sedona Docker images are available on <a href="https://hub.docker.com/r/apache/sedona">Sedona official DockerHub repo</a>.</p>
-<p>We provide a Docker image for Apache Sedona with Python JupyterLab and 1 master node and 1 worker node.</p>
+<p>We provide a Docker image for Apache Sedona with Python JupyterLab, Apache Zeppelin and 1 master node and 1 worker node.</p>
 <h2 id="how-to-use">How to use<a class="headerlink" href="#how-to-use" title="Permanent link">&para;</a></h2>
 <h3 id="pull-the-image-from-dockerhub">Pull the image from DockerHub<a class="headerlink" href="#pull-the-image-from-dockerhub" title="Permanent link">&para;</a></h3>
 <p>Format:</p>
@@ -4750,21 +4750,32 @@
 </code></pre></div>
 <h3 id="start-the-container">Start the container<a class="headerlink" href="#start-the-container" title="Permanent link">&para;</a></h3>
 <p>Format:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span><span class="nv">DRIVER_MEM</span><span class="o">=</span>&lt;driver_mem&gt;<span class="w"> </span>-e<span class="w"> </span><span class="nv">EXECUTOR_MEM</span><span class="o">=</span>&lt;executor_mem&gt;<span class="w"> </span>-p<span class="w"> </span><span class="m">8888</span>:8888<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span>-p<span class="w"> </span><span class="m">8081</span>:8081<span class="w"> </span>-p<span class="w"> </span><span class="m">4040</span>:4040<span class="w"> </span>apache/sedona:&lt;sedona_version&gt;
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-e<span class="w"> </span><span class="nv">DRIVER_MEM</span><span class="o">=</span>&lt;driver_mem&gt;<span class="w"> </span>-e<span class="w"> </span><span class="nv">EXECUTOR_MEM</span><span class="o">=</span>&lt;executor_mem&gt;<span class="w"> </span>-p<span class="w"> </span><span class="m">8888</span>:8888<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span>-p<span class="w"> </span><span class="m">8081</span>:8081<span class="w"> </span>-p<span class="w"> </span><span class="m">4040</span>:4040<span class="w"> </span>-p<span class="w"> </span><span class="m">8085</span>:8085<span class="w"> </span>apache/sedona:&lt;sedona_version&gt;
 </code></pre></div>
-<p>Driver memory and executor memory are optional. If their values are not given, the container will take 4GB RAM for the driver and 4GB RAM for the executor.</p>
+<p>Driver memory and executor memory are optional. If their values are not given, the container will take 4GB RAM for the driver and 4GB RAM for the executor. The -d (or --detach) flag ensures the container runs in detached mode, allowing it to run in the background.</p>
 <p>Example 1:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span><span class="nv">DRIVER_MEM</span><span class="o">=</span>6g<span class="w"> </span>-e<span class="w"> </span><span class="nv">EXECUTOR_MEM</span><span class="o">=</span>8g<span class="w"> </span>-p<span class="w"> </span><span class="m">8888</span>:8888<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span>-p<span class="w"> </span><span class="m">8081</span>:8081<span class="w"> </span>-p<span class="w"> </span><span class="m">4040</span>:4040<span class="w"> </span>apache/sedona:latest
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-e<span class="w"> </span><span class="nv">DRIVER_MEM</span><span class="o">=</span>6g<span class="w"> </span>-e<span class="w"> </span><span class="nv">EXECUTOR_MEM</span><span class="o">=</span>8g<span class="w"> </span>-p<span class="w"> </span><span class="m">8888</span>:8888<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span>-p<span class="w"> </span><span class="m">8081</span>:8081<span class="w"> </span>-p<span class="w"> </span><span class="m">4040</span>:4040<span class="w"> </span>-p<span class="w"> </span><span class="m">8085</span>:8085<span class="w"> </span>apache/sedona:latest
 </code></pre></div>
-<p>This command will start a container with 6GB RAM for the driver and 8GB RAM for the executor and use the latest Sedona image.</p>
-<p>This command will bind the container's ports 8888, 8080, 8081, 4040 to the host's ports 8888, 8080, 8081, 4040 respectively.</p>
+<p>This command will start a container with 6GB RAM for the driver and 8GB RAM for the executor and use the latest Sedona image. The container will run in detached mode.</p>
+<p>This command will bind the container's ports 8888, 8080, 8081, 4040, 8085 to the host's ports 8888, 8080, 8081, 4040, 8085 respectively.</p>
 <p>Example 2:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span><span class="m">8888</span>:8888<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span>-p<span class="w"> </span><span class="m">8081</span>:8081<span class="w"> </span>-p<span class="w"> </span><span class="m">4040</span>:4040<span class="w"> </span>apache/sedona:1.7.0
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span><span class="m">8888</span>:8888<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span>-p<span class="w"> </span><span class="m">8081</span>:8081<span class="w"> </span>-p<span class="w"> </span><span class="m">4040</span>:4040<span class="w"> </span>-p<span class="w"> </span><span class="m">8085</span>:8085<span class="w"> </span>apache/sedona:1.7.0
 </code></pre></div>
 <p>This command will start a container with 4GB RAM for the driver and 4GB RAM for the executor and use Sedona 1.7.0 image.</p>
-<p>This command will bind the container's ports 8888, 8080, 8081, 4040 to the host's ports 8888, 8080, 8081, 4040 respectively.</p>
+<p>This command will bind the container's ports 8888, 8080, 8081, 4040, 8085 to the host's ports 8888, 8080, 8081, 4040, 8085 respectively.</p>
+<p>Example 3: Persisting <code>/opt</code> (Jupyter &amp; Zeppelin Data) with Docker Volume</p>
+<p>To ensure that <strong>Jupyter workspace, Zeppelin notebooks, and configurations persist</strong>, mount <code>/opt</code> as a <strong>Docker volume</strong>:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-e<span class="w"> </span><span class="nv">DRIVER_MEM</span><span class="o">=</span>6g<span class="w"> </span>-e<span class="w"> </span><span class="nv">EXECUTOR_MEM</span><span class="o">=</span>8g<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">8888</span>:8888<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span>-p<span class="w"> </span><span class="m">8081</span>:8081<span class="w"> </span>-p<span class="w"> </span><span class="m">4040</span>:4040<span class="w"> </span>-p<span class="w"> </span><span class="m">8085</span>:8085<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-v<span class="w"> </span>sedona_opt:/opt<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>apache/sedona:latest
+</code></pre></div>
+<ul>
+<li>The <code>-v sedona_opt:/opt</code> flag <strong>creates (if not existing) and mounts a Docker volume named <code>sedona_opt</code></strong> to the <code>/opt</code> directory inside the container.</li>
+<li>This ensures that <strong>Jupyter and Zeppelin notebooks, configurations, and workspaces persist</strong> even if the container is stopped or removed.</li>
+</ul>
 <h3 id="start-coding">Start coding<a class="headerlink" href="#start-coding" title="Permanent link">&para;</a></h3>
-<p>Open your browser and go to <a href="http://localhost:8888/">http://localhost:8888/</a> to start coding with Sedona.</p>
+<p>Open your browser and go to <a href="http://localhost:8888/">http://localhost:8888/</a> to start coding with Sedona. You can also access Apache Zeppelin at <a href="http://localhost:8085/classic/">http://localhost:8085/classic/</a> using your browser.</p>
 <h3 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h3>
 <ul>
 <li>This container assumes you have at least 8GB RAM and takes all your CPU cores and 8GM RAM. The 1 worker will take 4GB and the Jupyter program will take the remaining 4GB.</li>
@@ -4807,7 +4818,9 @@
 <li>Spark job UI: <a href="http://localhost:4040">http://localhost:4040</a></li>
 <li>Spark master web UI: <a href="http://localhost:8080/">http://localhost:8080/</a></li>
 <li>Spark work web UI: <a href="http://localhost:8081/">http://localhost:8081/</a></li>
+<li>Apache Zeppelin: <a href="http://localhost:8085/">http://localhost:8085/</a></li>
 </ul>
+<p>A Zeppelin tutorial notebook is bundled with Sedona tutorials. See <a href="../../tutorial/zeppelin/">Sedona-Zeppelin tutorial</a> for details.</p>
 <h2 id="how-to-push-to-dockerhub">How to push to DockerHub<a class="headerlink" href="#how-to-push-to-dockerhub" title="Permanent link">&para;</a></h2>
 <p>Format:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>login
@@ -4837,7 +4850,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">December 4, 2024 07:01:47</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime">February 28, 2025 19:27:56</span>
   </span>
 
     
