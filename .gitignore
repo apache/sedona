@@ -19,3 +19,4 @@ dependency-reduced-pom.xml
 __pycache__
 /.bsp
 /.scala-build
+.DS_Store
