@@ -753,8 +753,15 @@
                     <value>4.0</value>
                 </property>
             </activation>
+            <repositories>
+                <repository>
+                    <id>spark-4.0.0-rc1</id>
+                    <name>Spark 4.0.0 RC1 Staging</name>
+                    <url>https://repository.apache.org/content/repositories/orgapachespark-1475/</url>
+                </repository>
+            </repositories>
             <properties>
-                <spark.version>4.0.0-preview2</spark.version>
+                <spark.version>4.0.0</spark.version>
                 <spark.compat.version>3.5</spark.compat.version>
                 <log4j.version>2.22.1</log4j.version>
                 <graphframe.version>0.8.3-spark3.5</graphframe.version>
