@@ -20,7 +20,7 @@ name: Scala and Java build
 on:
   push:
     branches:
-      - master
+      - '*'
     paths:
       - 'common/**'
       - 'spark/**'
@@ -57,6 +57,9 @@ jobs:
       fail-fast: true
       matrix:
         include:
+          - spark: 4.0.0
+            scala: 2.13.8
+            jdk: '17'
           - spark: 3.5.0
             scala: 2.13.8
             jdk: '8'
