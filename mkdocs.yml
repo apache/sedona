@@ -65,6 +65,7 @@ nav:
               - GeoPackage: tutorial/files/geopackage-sedona-spark.md
               - GeoParquet: tutorial/files/geoparquet-sedona-spark.md
               - GeoJSON: tutorial/files/geojson-sedona-spark.md
+              - Shapefiles: tutorial/files/shapefiles-sedona-spark.md
           - Map visualization SQL app:
               - Scala/Java: tutorial/viz.md
               - Use Apache Zeppelin: tutorial/zeppelin.md
