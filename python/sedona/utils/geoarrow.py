@@ -181,7 +181,7 @@ def try_register_extension_types():
 
     try:
         register_extension_types()
-    except:
+    except RuntimeError:
         pass
 
 
