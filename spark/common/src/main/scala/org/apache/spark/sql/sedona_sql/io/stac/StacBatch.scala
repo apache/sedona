@@ -28,7 +28,7 @@ import org.apache.spark.sql.types.StructType
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
-import scala.jdk.CollectionConverters.asScalaIteratorConverter
+import scala.jdk.CollectionConverters._
 import scala.util.control.Breaks.breakable
 
 /**

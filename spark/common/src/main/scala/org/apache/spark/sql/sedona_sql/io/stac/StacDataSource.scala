@@ -30,7 +30,7 @@ import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
 import java.util
 import java.util.concurrent.ConcurrentHashMap
-import scala.jdk.CollectionConverters.mapAsScalaMapConverter
+import scala.jdk.CollectionConverters._
 
 /**
  * The `StacDataSource` class is responsible for enabling the reading of SpatioTemporal Asset
