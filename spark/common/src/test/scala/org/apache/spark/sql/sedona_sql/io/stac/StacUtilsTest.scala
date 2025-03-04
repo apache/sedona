@@ -27,7 +27,7 @@ import org.scalatest.funsuite.AnyFunSuite
 
 import java.io.{File, PrintWriter}
 import scala.io.Source
-import scala.jdk.CollectionConverters.asScalaIteratorConverter
+import scala.jdk.CollectionConverters._
 
 class StacUtilsTest extends AnyFunSuite {
 
