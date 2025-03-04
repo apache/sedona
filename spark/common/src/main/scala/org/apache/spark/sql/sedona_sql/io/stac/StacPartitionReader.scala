@@ -151,43 +151,30 @@ class StacPartitionReader(
   }
 
   /**
-   * Create a PartitionedFile instance using reflection. The constructor parameters differ between
-   * these versions, so we need to handle both cases. For Spark 3.4 and below, the constructor has
-   * 7 parameters, while for Spark 3.5 and above, it has 8 parameters. Additionally, the type of
-   * the second parameter may be `SparkPath` in some cases, which requires special handling.
+   * Create a PartitionedFile instance using reflection. This is needed to support both Spark 3.3
+   * and below and Spark 3.4 and above.
    *
    * @param currentFile
    *   The file to create the PartitionedFile for.
    * @return
    *   The created PartitionedFile instance.
-   * @throws NoSuchMethodException
-   *   If no suitable constructor is found.
    */
   def createPartitionedFile(currentFile: File): PartitionedFile = {
     val partitionedFileClass =
       Class.forName("org.apache.spark.sql.execution.datasources.PartitionedFile")
     val constructors = partitionedFileClass.getConstructors
+    // Spark 3.3 and below have 7 parameters for the constructor
     val constructor = constructors
       .find(_.getParameterCount == 7)
       .getOrElse(
+        // Spark 3.4 and above have 8 parameters for the constructor
         constructors
           .find(_.getParameterCount == 8)
-          .getOrElse(
-            throw new NoSuchMethodException("No constructor with 7 or 8 parameters found")))
-
-    val params = if (constructor.getParameterCount == 7) {
-      val secondParamType = constructor.getParameterTypes()(1)
-      if (secondParamType.getName == "org.apache.spark.paths.SparkPath") {
-        Array(
-          null,
-          createSparkPath(currentFile.getPath),
-          java.lang.Long.valueOf(0L),
-          java.lang.Long.valueOf(currentFile.length()),
-          Array.empty[String],
-          java.lang.Long.valueOf(0L),
-          java.lang.Long.valueOf(0L))
-      } else {
-        Array(
+          .getOrElse(throw new NoSuchMethodException("No constructor with 7 parameters found")))
+    if (constructor.getParameterCount == 7) {
+      // for spark 3.3 and below
+      constructor
+        .newInstance(
           null,
           currentFile.getPath,
           java.lang.Long.valueOf(0L),
@@ -195,20 +182,24 @@ class StacPartitionReader(
           Array.empty[String],
           java.lang.Long.valueOf(0L),
           java.lang.Long.valueOf(0L))
-      }
+        .asInstanceOf[PartitionedFile]
+    } else if (constructor.getParameterCount == 8) {
+      // for spark 3.4 and above
+      constructor
+        .newInstance(
+          null,
+          createSparkPath(currentFile.getPath),
+          java.lang.Long.valueOf(0L),
+          java.lang.Long.valueOf(currentFile.length()),
+          Array.empty[String],
+          java.lang.Long.valueOf(0L),
+          java.lang.Long.valueOf(0L),
+          null)
+        .asInstanceOf[PartitionedFile]
     } else {
-      Array(
-        null,
-        createSparkPath(currentFile.getPath),
-        java.lang.Long.valueOf(0L),
-        java.lang.Long.valueOf(currentFile.length()),
-        Array.empty[String],
-        java.lang.Long.valueOf(0L),
-        java.lang.Long.valueOf(0L),
-        null)
+      throw new IllegalArgumentException(
+        "Invalid number of parameters for PartitionedFile constructor")
     }
-
-    constructor.newInstance(params: _*).asInstanceOf[PartitionedFile]
   }
 
   /**

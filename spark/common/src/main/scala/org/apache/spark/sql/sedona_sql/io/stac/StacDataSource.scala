@@ -30,7 +30,7 @@ import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
 import java.util
 import java.util.concurrent.ConcurrentHashMap
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.mapAsScalaMapConverter
 
 /**
  * The `StacDataSource` class is responsible for enabling the reading of SpatioTemporal Asset
@@ -106,9 +106,16 @@ class StacDataSource() extends TableProvider with DataSourceRegister {
       "columnNameOfCorruptRecord" -> SparkSession.active.sessionState.conf.columnNameOfCorruptRecord,
       "defaultParallelism" -> SparkSession.active.sparkContext.defaultParallelism.toString,
       "maxPartitionItemFiles" -> SparkSession.active.conf
-        .get("spark.wherobots.stac.load.maxPartitionItemFiles", "0"),
+        .get("spark.sedona.stac.load.maxPartitionItemFiles", "0"),
       "numPartitions" -> SparkSession.active.conf
-        .get("spark.wherobots.stac.load.numPartitions", "-1"))
+        .get("spark.sedona.stac.load.numPartitions", "-1"),
+      "itemsLimitMax" -> opts
+        .asCaseSensitiveMap()
+        .asScala
+        .toMap
+        .get("itemsLimitMax")
+        .filter(_.toInt > 0)
+        .getOrElse(SparkSession.active.conf.get("spark.sedona.stac.load.itemsLimitMax", "-1")))
     val stacCollectionJsonString = StacUtils.loadStacCollectionToJson(optsMap)
 
     new StacTable(stacCollectionJson = stacCollectionJsonString, opts = optsMap)

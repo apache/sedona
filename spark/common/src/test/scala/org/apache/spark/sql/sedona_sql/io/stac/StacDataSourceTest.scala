@@ -19,11 +19,8 @@
 package org.apache.spark.sql.sedona_sql.io.stac
 
 import org.apache.sedona.sql.TestBaseScala
-import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, RasterUDT}
+import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types.{ArrayType, DoubleType, MapType, StringType, StructField, StructType, TimestampType}
-import org.scalatest.BeforeAndAfterAll
-
-import java.util.TimeZone
 
 class StacDataSourceTest extends TestBaseScala {
 
@@ -35,7 +32,8 @@ class StacDataSourceTest extends TestBaseScala {
     "https://storage.googleapis.com/cfo-public/vegetation/collection.json",
     "https://storage.googleapis.com/cfo-public/wildfire/collection.json",
     "https://earthdatahub.destine.eu/api/stac/v1/collections/copernicus-dem",
-    "https://planetarycomputer.microsoft.com/api/stac/v1/collections/naip")
+    "https://planetarycomputer.microsoft.com/api/stac/v1/collections/naip",
+    "https://satellogic-earthview.s3.us-west-2.amazonaws.com/stac/catalog.json")
 
   it("basic df load from local file should work") {
     val dfStac = sparkSession.read.format("stac").load(STAC_COLLECTION_LOCAL)

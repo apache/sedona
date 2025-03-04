@@ -21,7 +21,7 @@ package org.apache.spark.sql.sedona_sql.io.stac
 import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.sql.catalyst.InternalRow
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.mapAsJavaMapConverter
 
 class StacPartitionReaderTest extends TestBaseScala {
 

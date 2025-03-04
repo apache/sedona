@@ -42,7 +42,7 @@ class TestBase:
             if "SPARK_HOME" in os.environ and not os.environ["SPARK_HOME"]:
                 del os.environ["SPARK_HOME"]
 
-            builder = SedonaContext.builder()
+            builder = SedonaContext.builder().appName("SedonaSparkTest")
             if SPARK_REMOTE:
                 builder = (
                     builder.remote(SPARK_REMOTE)
@@ -54,9 +54,16 @@ class TestBase:
                         "spark.sql.extensions",
                         "org.apache.sedona.sql.SedonaSqlExtensions",
                     )
+                    .config(
+                        "spark.sedona.stac.load.itemsLimitMax",
+                        "20",
+                    )
                 )
             else:
-                builder = builder.master("local[*]")
+                builder = builder.master("local[*]").config(
+                    "spark.sedona.stac.load.itemsLimitMax",
+                    "20",
+                )
 
             # Allows the Sedona .jar to be explicitly set by the caller (e.g, to run
             # pytest against a freshly-built development version of Sedona)
