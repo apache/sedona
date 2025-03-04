@@ -175,7 +175,7 @@ def try_register_extension_types():
 
     Do this defensively, because it can fail if the extension type was
     registered in some other way (notably: old versions of geoarrow-pyarrow,
-    which is apparently a recursive dependency of Kepler).
+    which is a dependency of Kepler).
     """
     from geoarrow.types.type_pyarrow import register_extension_types
 
