@@ -58,6 +58,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         self._col_label: Label
 
         from sedona.geopandas import GeoSeries
+
         if isinstance(
             data, (GeoDataFrame, GeoSeries, PandasOnSparkSeries, PandasOnSparkDataFrame)
         ):
@@ -353,7 +354,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
-    def sjoin(self, other, how='inner', op='intersects', lsuffix='left', rsuffix='right'):
+    def sjoin(
+        self, other, how="inner", op="intersects", lsuffix="left", rsuffix="right"
+    ):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
