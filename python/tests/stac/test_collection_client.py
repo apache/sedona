@@ -38,7 +38,7 @@ class TestStacReader(TestBase):
         collection = client.get_collection("aster-l1t")
         df = collection.get_dataframe()
         assert df is not None
-        assert df.count() == 10
+        assert df.count() == 20
 
     def test_get_dataframe_with_spatial_extent(self) -> None:
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
@@ -79,7 +79,7 @@ class TestStacReader(TestBase):
         datetime = [["2006-12-01T00:00:00Z", "2006-12-27T02:00:00Z"]]
         items = list(collection.get_items(datetime=datetime))
         assert items is not None
-        assert len(items) == 6
+        assert len(items) == 16
 
     def test_get_items_with_both_extents(self) -> None:
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
@@ -140,7 +140,7 @@ class TestStacReader(TestBase):
         ]
         items = list(collection.get_items(bbox=bbox, datetime=datetime))
         assert items is not None
-        assert len(items) == 10
+        assert len(items) == 20
 
     def test_get_items_with_bbox_and_interval(self) -> None:
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
@@ -186,4 +186,4 @@ class TestStacReader(TestBase):
 
             # Optionally, you can load the file back and check its contents
             df_loaded = collection.spark.read.format("geoparquet").load(output_path)
-            assert df_loaded.count() == 10, "Loaded GeoParquet file is empty"
+            assert df_loaded.count() == 20, "Loaded GeoParquet file is empty"

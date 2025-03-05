@@ -29,6 +29,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
 import scala.jdk.CollectionConverters._
+import scala.util.control.Breaks.breakable
 
 /**
  * The `StacBatch` class represents a batch of partitions for reading data in the SpatioTemporal
@@ -47,7 +48,23 @@ case class StacBatch(
     temporalFilter: Option[TemporalFilter])
     extends Batch {
 
+  private val defaultItemsLimitPerRequest = opts.getOrElse("itemsLimitPerRequest", "10").toInt
+  private val itemsLoadProcessReportThreshold =
+    opts.getOrElse("itemsLoadProcessReportThreshold", "1000000").toInt
+  private var itemMaxLeft: Int = -1
+  private var lastReportCount: Int = 0
+
   val mapper = new ObjectMapper()
+
+  /**
+   * Sets the maximum number of items left to process.
+   *
+   * @param value
+   *   The maximum number of items left.
+   */
+  def setItemMaxLeft(value: Int): Unit = {
+    itemMaxLeft = value
+  }
 
   /**
    * Plans the input partitions for reading data from the STAC data source.
@@ -62,7 +79,10 @@ case class StacBatch(
     val itemLinks = scala.collection.mutable.ArrayBuffer[String]()
 
     // Start the recursive collection of item links
-    collectItemLinks(stacCollectionBasePath, stacCollectionJson, itemLinks)
+    val itemsLimitMax = opts.getOrElse("itemsLimitMax", "-1").toInt
+    val checkItemsLimitMax = itemsLimitMax > 0
+    setItemMaxLeft(itemsLimitMax)
+    collectItemLinks(stacCollectionBasePath, stacCollectionJson, itemLinks, checkItemsLimitMax)
 
     // Handle when the number of items is less than 1
     if (itemLinks.isEmpty) {
@@ -106,16 +126,78 @@ case class StacBatch(
    * @param itemLinks
    *   The list of item links to populate.
    */
-  private def collectItemLinks(
+  def collectItemLinks(
       collectionBasePath: String,
       collectionJson: String,
-      itemLinks: scala.collection.mutable.ArrayBuffer[String]): Unit = {
+      itemLinks: scala.collection.mutable.ArrayBuffer[String],
+      needCountNextItems: Boolean): Unit = {
+
+    // end early if there are no more items to process
+    if (needCountNextItems && itemMaxLeft <= 0) return
+
+    if (itemLinks.size - lastReportCount >= itemsLoadProcessReportThreshold) {
+      Console.out.println(s"Searched or partitioned ${itemLinks.size} items so far.")
+      lastReportCount = itemLinks.size
+    }
+
     // Parse the JSON string into a JsonNode (tree representation of JSON)
     val rootNode: JsonNode = mapper.readTree(collectionJson)
 
     // Extract item links from the "links" array
     val linksNode = rootNode.get("links")
     val iterator = linksNode.elements()
+
+    def iterateItemsWithLimit(itemUrl: String, needCountNextItems: Boolean): Boolean = {
+      // Load the item URL and process the response
+      var nextUrl: Option[String] = Some(itemUrl)
+      breakable {
+        while (nextUrl.isDefined) {
+          val itemJson = StacUtils.loadStacCollectionToJson(nextUrl.get)
+          val itemRootNode = mapper.readTree(itemJson)
+          // Check if there exists a "next" link
+          val itemLinksNode = itemRootNode.get("links")
+          if (itemLinksNode == null) {
+            return true
+          }
+          val itemIterator = itemLinksNode.elements()
+          nextUrl = None
+          while (itemIterator.hasNext) {
+            val itemLinkNode = itemIterator.next()
+            val itemRel = itemLinkNode.get("rel").asText()
+            val itemHref = itemLinkNode.get("href").asText()
+            if (itemRel == "next") {
+              // Only check the number of items returned if there are more items to process
+              val numberReturnedNode = itemRootNode.get("numberReturned")
+              val numberReturned = if (numberReturnedNode == null) {
+                // From STAC API Spec:
+                // The optional limit parameter limits the number of
+                // items that are presented in the response document.
+                // The default value is 10.
+                defaultItemsLimitPerRequest
+              } else {
+                numberReturnedNode.asInt()
+              }
+              // count the number of items returned and left to be processed
+              itemMaxLeft = itemMaxLeft - numberReturned
+              // early exit if there are no more items to process
+              if (needCountNextItems && itemMaxLeft <= 0) {
+                return true
+              }
+              nextUrl = Some(if (itemHref.startsWith("http") || itemHref.startsWith("file")) {
+                itemHref
+              } else {
+                collectionBasePath + itemHref
+              })
+            }
+          }
+          if (nextUrl.isDefined) {
+            itemLinks += nextUrl.get
+          }
+        }
+      }
+      false
+    }
+
     while (iterator.hasNext) {
       val linkNode = iterator.next()
       val rel = linkNode.get("rel").asText()
@@ -129,7 +211,24 @@ case class StacBatch(
         } else {
           collectionBasePath + href
         }
-        itemLinks += itemUrl // Add the item URL to the list
+        if (rel == "items" && href.startsWith("http")) {
+          itemLinks += (itemUrl + "?limit=" + defaultItemsLimitPerRequest)
+        } else {
+          itemLinks += itemUrl
+        }
+        if (needCountNextItems && itemMaxLeft <= 0) {
+          return
+        } else {
+          if (rel == "item" && needCountNextItems) {
+            // count the number of items returned and left to be processed
+            itemMaxLeft = itemMaxLeft - 1
+          } else if (rel == "items" && href.startsWith("http")) {
+            // iterate through the items and check if the limit is reached (if needed)
+            if (iterateItemsWithLimit(
+                itemUrl + "?limit=" + defaultItemsLimitPerRequest,
+                needCountNextItems)) return
+          }
+        }
       } else if (rel == "child") {
         val childUrl = if (href.startsWith("http") || href.startsWith("file")) {
           href
@@ -143,7 +242,11 @@ case class StacBatch(
           filterCollection(linkedCollectionJson, spatialFilter, temporalFilter)
 
         if (!collectionFiltered) {
-          collectItemLinks(nestedCollectionBasePath, linkedCollectionJson, itemLinks)
+          collectItemLinks(
+            nestedCollectionBasePath,
+            linkedCollectionJson,
+            itemLinks,
+            needCountNextItems)
         }
       }
     }

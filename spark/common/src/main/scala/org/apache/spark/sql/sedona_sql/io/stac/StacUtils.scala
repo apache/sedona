@@ -47,12 +47,31 @@ object StacUtils {
   }
 
   // Function to load JSON from URL or service
-  def loadStacCollectionToJson(url: String): String = {
-    if (url.startsWith("s3://") || url.startsWith("s3a://")) {
-      SparkSession.active.read.textFile(url).collect().mkString("\n")
-    } else {
-      Source.fromURL(url).mkString
+  def loadStacCollectionToJson(url: String, maxRetries: Int = 3): String = {
+    var retries = 0
+    var success = false
+    var result: String = ""
+
+    while (retries < maxRetries && !success) {
+      try {
+        result = if (url.startsWith("s3://") || url.startsWith("s3a://")) {
+          SparkSession.active.read.textFile(url).collect().mkString("\n")
+        } else {
+          Source.fromURL(url).mkString
+        }
+        success = true
+      } catch {
+        case e: Exception =>
+          retries += 1
+          if (retries >= maxRetries) {
+            throw new RuntimeException(
+              s"Failed to load STAC collection from $url after $maxRetries attempts",
+              e)
+          }
+      }
     }
+
+    result
   }
 
   // Function to get the base URL from the collection URL or service
