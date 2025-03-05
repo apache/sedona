@@ -409,6 +409,26 @@ which are necessary for batch data processing.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacBatch#collectItemLinks" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="collectItemLinks(collectionBasePath:String,collectionJson:String,itemLinks:scala.collection.mutable.ArrayBuffer[String],needCountNextItems:Boolean):Unit"></a><a id="collectItemLinks(String,String,ArrayBuffer[String],Boolean):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacBatch.html#collectItemLinks(collectionBasePath:String,collectionJson:String,itemLinks:scala.collection.mutable.ArrayBuffer[String],needCountNextItems:Boolean):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">collectItemLinks</span><span class="params">(<span name="collectionBasePath">collectionBasePath: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="collectionJson">collectionJson: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="itemLinks">itemLinks: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="needCountNextItems">needCountNextItems: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Recursively processes collections and collects item links.</p><div class="fullcomment"><div class="comment cmt"><p>Recursively processes collections and collects item links.
+</p></div><dl class="paramcmts block"><dt class="param">collectionBasePath</dt><dd class="cmt"><p>
+  The base path of the STAC collection.</p></dd><dt class="param">collectionJson</dt><dd class="cmt"><p>
+  The JSON string representation of the STAC collection.</p></dd><dt class="param">itemLinks</dt><dd class="cmt"><p>
+  The list of item links to populate.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacBatch#createReaderFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="createReaderFactory():org.apache.spark.sql.connector.read.PartitionReaderFactory"></a><a id="createReaderFactory():PartitionReaderFactory"></a>
       <span class="permalink">
@@ -641,6 +661,24 @@ which are necessary for batch data processing.
       </span>
       
       
+    </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacBatch#setItemMaxLeft" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setItemMaxLeft(value:Int):Unit"></a><a id="setItemMaxLeft(Int):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacBatch.html#setItemMaxLeft(value:Int):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setItemMaxLeft</span><span class="params">(<span name="value">value: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Sets the maximum number of items left to process.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the maximum number of items left to process.
+</p></div><dl class="paramcmts block"><dt class="param">value</dt><dd class="cmt"><p>
+  The maximum number of items left.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacBatch#spatialFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="spatialFilter:Option[org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter]"></a><a id="spatialFilter:Option[GeoParquetSpatialFilter]"></a>
       <span class="permalink">
