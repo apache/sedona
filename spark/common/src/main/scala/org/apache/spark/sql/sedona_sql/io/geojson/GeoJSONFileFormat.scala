@@ -88,17 +88,25 @@ class GeoJSONFileFormat extends TextBasedFileFormat with DataSourceRegister {
     parsedOptions.compressionCodec.foreach { codec =>
       CompressionCodecs.setCodecConfiguration(conf, codec)
     }
-    val geometryColumnName = options.getOrElse("geometry.column", "geometry")
-    SparkCompatUtil.findNestedField(
-      dataSchema,
-      geometryColumnName.split('.'),
-      resolver = SQLConf.get.resolver) match {
-      case Some(StructField(_, dataType, _, _)) =>
-        if (!dataType.acceptsType(GeometryUDT)) {
-          throw new IllegalArgumentException(s"$geometryColumnName is not a geometry column")
-        }
+
+    val geometryColumnName = options.get("geometry.column") match {
+      case Some(columnName) =>
+        validateGeometryColumnName(dataSchema, columnName)
+        columnName
       case None =>
-        throw new IllegalArgumentException(s"Column $geometryColumnName not found in the schema")
+        // Pick up a geometry column to be written as the geometry field of GeoJSON.
+        // 1. If there's a column named "geometry" with geometry type, Sedona will use this column
+        // 2. Otherwise, Sedona will use the first geometry column found in the root schema
+        dataSchema.fields.filter(_.dataType == GeometryUDT) match {
+          case Array() =>
+            throw new IllegalArgumentException("No geometry column found in the schema")
+          case geometryFields =>
+            // Look for a field named "geometry" first
+            geometryFields
+              .find(_.name.equalsIgnoreCase("geometry"))
+              .getOrElse(geometryFields.head) // Otherwise take the first geometry field
+              .name
+        }
     }
 
     new OutputWriterFactory {
@@ -112,6 +120,22 @@ class GeoJSONFileFormat extends TextBasedFileFormat with DataSourceRegister {
       override def getFileExtension(context: TaskAttemptContext): String = {
         ".json" + CodecStreams.getCompressionExtension(context)
       }
+    }
+  }
+
+  private def validateGeometryColumnName(
+      dataSchema: StructType,
+      geometryColumnName: String): Unit = {
+    SparkCompatUtil.findNestedField(
+      dataSchema,
+      geometryColumnName.split('.'),
+      resolver = SQLConf.get.resolver) match {
+      case Some(StructField(_, dataType, _, _)) =>
+        if (!dataType.acceptsType(GeometryUDT)) {
+          throw new IllegalArgumentException(s"$geometryColumnName is not a geometry column")
+        }
+      case None =>
+        throw new IllegalArgumentException(s"Column $geometryColumnName not found in the schema")
     }
   }
 
