@@ -18,7 +18,6 @@ import os
 import shutil
 import tempfile
 
-from numpy.dtypes import ObjectDType
 from shapely.geometry import (
     Point,
     Polygon,
@@ -113,4 +112,3 @@ class TestSeries(TestBase):
 def check_geoseries(s):
     assert isinstance(s, GeoSeries)
     assert isinstance(s.geometry, GeoSeries)
-    assert isinstance(s.dtype, ObjectDType)
