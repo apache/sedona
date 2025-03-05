@@ -24,7 +24,6 @@ import pandas as pd
 import geopandas as gpd
 import pyspark.pandas as pspd
 
-from sedona.geopandas import GeoSeries
 from sedona.geopandas.base import GeoFrame
 from sedona.geopandas._typing import GeoFrameLike, Label
 from pyspark.pandas._typing import Axis, Dtype, Scalar
@@ -58,6 +57,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         self._anchor: GeoDataFrame
         self._col_label: Label
 
+        from sedona.geopandas import GeoSeries
         if isinstance(
             data, (GeoDataFrame, GeoSeries, PandasOnSparkSeries, PandasOnSparkDataFrame)
         ):
@@ -92,7 +92,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 data=pdf,
                 index=index,
                 dtype=dtype,
-                name=name,
                 copy=copy,
             )
 
@@ -347,5 +346,17 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         raise NotImplementedError("This method is not implemented yet.")
 
     def contains_properly(self, other, align=None):
+        # Implementation of the abstract method
+        raise NotImplementedError("This method is not implemented yet.")
+
+    def buffer(self, distance, resolution=16):
+        # Implementation of the abstract method
+        raise NotImplementedError("This method is not implemented yet.")
+
+    def sjoin(self, other, how='inner', op='intersects', lsuffix='left', rsuffix='right'):
+        # Implementation of the abstract method
+        raise NotImplementedError("This method is not implemented yet.")
+
+    def to_parquet(self, path, **kwargs):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")

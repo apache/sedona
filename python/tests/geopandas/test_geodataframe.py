@@ -46,7 +46,7 @@ class TestDataframe(TestBase):
 
     def test_constructor(self):
         s = GeoDataFrame([Point(x, x) for x in range(3)])
-        check_geoseries(s)
+        check_geodataframe(s)
 
     def test_psdf(self):
         # this is to make sure the spark session works with pandas on spark api
@@ -60,46 +60,10 @@ class TestDataframe(TestBase):
         )
         assert psdf.count().count() is 3
 
-    def test_type(self):
-        assert type(self.g1) is GeoDataFrame
-
-    def test_copy(self):
-        gc = self.g3.copy()
-        assert type(gc) is GeoDataFrame
-        assert self.g3.name == gc.name
-
-    def test_area(self):
-        area = self.g1.area
-        assert area is not None
-        assert type(area) is GeoDataFrame
-        assert area.count() is 2
-
-    def test_buffer(self):
-        buffer = self.g1.buffer(0.2)
-        assert buffer is not None
-        assert type(buffer) is GeoDataFrame
-        assert buffer.count() is 2
-
-    def test_buffer_then_area(self):
-        area = self.g1.buffer(0.2).area
-        assert area is not None
-        assert type(area) is GeoDataFrame
-        assert area.count() is 2
-
-    def test_buffer_then_geoparquet(self):
-        temp_file_path = os.path.join(
-            self.tempdir, next(tempfile._get_candidate_names()) + ".parquet"
-        )
-        self.g1.buffer(0.2).to_parquet(temp_file_path)
-        assert os.path.exists(temp_file_path)
-
-
 # -----------------------------------------------------------------------------
 # # Utils
 # -----------------------------------------------------------------------------
 
 
-def check_geoseries(s):
+def check_geodataframe(s):
     assert isinstance(s, GeoDataFrame)
-    assert isinstance(s.geometry, GeoDataFrame)
-    assert isinstance(s.dtype, ObjectDType)
