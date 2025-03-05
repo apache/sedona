@@ -18,9 +18,10 @@
  */
 package org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp;
 
-import java.io.IOException;
 import java.io.Serializable;
-import org.locationtech.jts.geom.CoordinateSequence;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateXYM;
+import org.locationtech.jts.geom.CoordinateXYZM;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 
@@ -43,26 +44,143 @@ public abstract class ShapeParser implements Serializable {
    *
    * @param reader the reader
    * @return the geometry
-   * @throws IOException Signals that an I/O exception has occurred.
    */
   public abstract Geometry parseShape(ShapeReader reader);
+
+  /**
+   * According to the shapefile specification, any floating point number smaller than -10^38 is
+   * considered a "no data" value. In practice, we also observe that ogrinfo considers 0 as a "no
+   * data" value.
+   *
+   * @param value The coordinate value to check
+   * @return true if the value is a "no data" value
+   */
+  protected static boolean isNoData(double value) {
+    return value < -1e38 || value == 0;
+  }
 
   /**
    * read numPoints of coordinates from input source.
    *
    * @param reader the reader
    * @param numPoints the num points
-   * @return the coordinate sequence
-   * @throws IOException Signals that an I/O exception has occurred.
+   * @return the coordinate array
    */
-  protected CoordinateSequence readCoordinates(ShapeReader reader, int numPoints) {
-    CoordinateSequence coordinateSequence =
-        geometryFactory.getCoordinateSequenceFactory().create(numPoints, 2);
+  protected Coordinate[] readCoordinates(ShapeReader reader, int numPoints) {
+    Coordinate[] coordinates = new Coordinate[numPoints];
+
     for (int i = 0; i < numPoints; ++i) {
-      coordinateSequence.setOrdinate(i, 0, reader.readDouble());
-      coordinateSequence.setOrdinate(i, 1, reader.readDouble());
+      double x = reader.readDouble();
+      double y = reader.readDouble();
+      coordinates[i] = new Coordinate(x, y);
     }
-    return coordinateSequence;
+
+    return coordinates;
+  }
+
+  /**
+   * Read coordinates with Z and M values from input source.
+   *
+   * @param reader the reader
+   * @param numPoints the number of points
+   * @return the coordinate array with Z and M values
+   */
+  protected Coordinate[] readCoordinatesWithZM(ShapeReader reader, int numPoints) {
+    double[] x = new double[numPoints];
+    double[] y = new double[numPoints];
+    double[] z = new double[numPoints];
+    double[] m = new double[numPoints];
+
+    // Read all X and Y values
+    for (int i = 0; i < numPoints; ++i) {
+      x[i] = reader.readDouble();
+      y[i] = reader.readDouble();
+    }
+
+    // Skip Z range (min/max)
+    reader.skip(2 * ShapeFileConst.DOUBLE_LENGTH);
+
+    // Read all Z values
+    for (int i = 0; i < numPoints; ++i) {
+      z[i] = reader.readDouble();
+    }
+
+    // Skip M range (min/max)
+    reader.skip(2 * ShapeFileConst.DOUBLE_LENGTH);
+
+    // Read all M values and check if any are valid data
+    boolean allMNoData = true;
+    for (int i = 0; i < numPoints; ++i) {
+      m[i] = reader.readDouble();
+      // Check if this is a valid M value (not "no data")
+      if (!isNoData(m[i])) {
+        allMNoData = false;
+      }
+    }
+
+    // Create appropriate coordinate objects based on M values
+    Coordinate[] coordinates = new Coordinate[numPoints];
+    if (allMNoData) {
+      // If all M values are nodata, use XYZ coordinates
+      for (int i = 0; i < numPoints; ++i) {
+        coordinates[i] = new Coordinate(x[i], y[i], z[i]);
+      }
+    } else {
+      // If we have valid M values, use XYZM coordinates
+      for (int i = 0; i < numPoints; ++i) {
+        coordinates[i] = new CoordinateXYZM(x[i], y[i], z[i], m[i]);
+      }
+    }
+
+    return coordinates;
+  }
+
+  /**
+   * Read coordinates with M values from input source.
+   *
+   * @param reader the reader
+   * @param numPoints the number of points
+   * @return the coordinate array with M values
+   */
+  protected Coordinate[] readCoordinatesWithM(ShapeReader reader, int numPoints) {
+    double[] x = new double[numPoints];
+    double[] y = new double[numPoints];
+    double[] m = new double[numPoints];
+
+    // Read all X and Y values
+    for (int i = 0; i < numPoints; ++i) {
+      x[i] = reader.readDouble();
+      y[i] = reader.readDouble();
+    }
+
+    // Skip M range (min/max)
+    reader.skip(2 * ShapeFileConst.DOUBLE_LENGTH);
+
+    // Read all M values
+    boolean allMNoData = true;
+    for (int i = 0; i < numPoints; ++i) {
+      m[i] = reader.readDouble();
+      // Check if this is a valid M value (not "no data")
+      if (!isNoData(m[i])) {
+        allMNoData = false;
+      }
+    }
+
+    // Create appropriate coordinate objects based on M values
+    Coordinate[] coordinates = new Coordinate[numPoints];
+    if (allMNoData) {
+      // If all M values are nodata, use XY coordinates
+      for (int i = 0; i < numPoints; ++i) {
+        coordinates[i] = new Coordinate(x[i], y[i]);
+      }
+    } else {
+      // If we have valid M values, use XYM coordinates
+      for (int i = 0; i < numPoints; ++i) {
+        coordinates[i] = new CoordinateXYM(x[i], y[i], m[i]);
+      }
+    }
+
+    return coordinates;
   }
 
   protected int[] readOffsets(ShapeReader reader, int numParts, int maxOffset) {

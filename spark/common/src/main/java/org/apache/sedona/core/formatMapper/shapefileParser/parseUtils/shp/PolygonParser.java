@@ -21,7 +21,7 @@ package org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp;
 import java.util.ArrayList;
 import java.util.List;
 import org.locationtech.jts.algorithm.Orientation;
-import org.locationtech.jts.geom.CoordinateSequence;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LinearRing;
@@ -29,13 +29,16 @@ import org.locationtech.jts.geom.Polygon;
 
 public class PolygonParser extends ShapeParser {
 
+  private final ShapeType shapeType;
+
   /**
    * create a parser that can abstract a Polygon from input source with given GeometryFactory.
    *
    * @param geometryFactory the geometry factory
    */
-  public PolygonParser(GeometryFactory geometryFactory) {
+  public PolygonParser(GeometryFactory geometryFactory, ShapeType shapeType) {
     super(geometryFactory);
+    this.shapeType = shapeType;
   }
 
   /**
@@ -53,6 +56,17 @@ public class PolygonParser extends ShapeParser {
 
     int[] offsets = readOffsets(reader, numRings, numPoints);
 
+    // Read the coordinates for all rings
+    Coordinate[] allCoordinates;
+
+    if (shapeType == ShapeType.POLYGONZ) {
+      allCoordinates = readCoordinatesWithZM(reader, numPoints);
+    } else if (shapeType == ShapeType.POLYGONM) {
+      allCoordinates = readCoordinatesWithM(reader, numPoints);
+    } else {
+      allCoordinates = readCoordinates(reader, numPoints);
+    }
+
     boolean shellsCCW = false;
 
     LinearRing shell = null;
@@ -60,18 +74,24 @@ public class PolygonParser extends ShapeParser {
     List<Polygon> polygons = new ArrayList<>();
 
     for (int i = 0; i < numRings; ++i) {
-      int readScale = offsets[i + 1] - offsets[i];
-      CoordinateSequence csRing = readCoordinates(reader, readScale);
+      int startIndex = offsets[i];
+      int endIndex = offsets[i + 1];
+      int pointCount = endIndex - startIndex;
 
-      if (csRing.size() <= 3) {
+      if (pointCount <= 3) {
         continue; // if points less than 3, it's not a ring, we just abandon it
       }
 
-      LinearRing ring = geometryFactory.createLinearRing(csRing);
+      // Extract coordinates for this ring
+      Coordinate[] ringCoordinates = new Coordinate[pointCount];
+      System.arraycopy(allCoordinates, startIndex, ringCoordinates, 0, pointCount);
+
+      LinearRing ring = geometryFactory.createLinearRing(ringCoordinates);
+
       if (shell == null) {
         shell = ring;
-        shellsCCW = Orientation.isCCW(csRing);
-      } else if (Orientation.isCCW(csRing) != shellsCCW) {
+        shellsCCW = Orientation.isCCW(ringCoordinates);
+      } else if (Orientation.isCCW(ringCoordinates) != shellsCCW) {
         holes.add(ring);
       } else {
         Polygon polygon =
