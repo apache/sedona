@@ -324,9 +324,9 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.MultiPointParser#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(geometryFactory:org.locationtech.jts.geom.GeometryFactory):org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.MultiPointParser"></a><a id="&lt;init&gt;:MultiPointParser"></a>
+      <a id="&lt;init&gt;(geometryFactory:org.locationtech.jts.geom.GeometryFactory,shapeType:org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeType):org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.MultiPointParser"></a><a id="&lt;init&gt;:MultiPointParser"></a>
       <span class="permalink">
-      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/shp/MultiPointParser.html#&lt;init&gt;(geometryFactory:org.locationtech.jts.geom.GeometryFactory):org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.MultiPointParser" title="Permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/shp/MultiPointParser.html#&lt;init&gt;(geometryFactory:org.locationtech.jts.geom.GeometryFactory,shapeType:org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeType):org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.MultiPointParser" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -335,7 +335,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">MultiPointParser</span><span class="params">(<span name="geometryFactory">geometryFactory: <span class="extype" name="org.locationtech.jts.geom.GeometryFactory">GeometryFactory</span></span>)</span>
+        <span class="name">MultiPointParser</span><span class="params">(<span name="geometryFactory">geometryFactory: <span class="extype" name="org.locationtech.jts.geom.GeometryFactory">GeometryFactory</span></span>, <span name="shapeType">shapeType: <a href="ShapeType.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeType">ShapeType</a></span>)</span>
       </span>
       
       <p class="shortcomment cmt">create a parser that can abstract a MultiPoint from input source with given GeometryFactory.</p><div class="fullcomment"><div class="comment cmt"><p>create a parser that can abstract a MultiPoint from input source with given GeometryFactory.
@@ -621,9 +621,9 @@
               
         </dd><dt>Exceptions thrown</dt><dd><span class="cmt"><p><span class="extype" name="IOException"><code>IOException</code></span> Signals that an I/O exception has occurred.</p></span></dd></dl></div>
     </li><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeParser#readCoordinates" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="readCoordinates(reader:org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeReader,numPoints:Int):org.locationtech.jts.geom.CoordinateSequence"></a><a id="readCoordinates(ShapeReader,Int):CoordinateSequence"></a>
+      <a id="readCoordinates(reader:org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeReader,numPoints:Int):Array[org.locationtech.jts.geom.Coordinate]"></a><a id="readCoordinates(ShapeReader,Int):Array[Coordinate]"></a>
       <span class="permalink">
-      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/shp/MultiPointParser.html#readCoordinates(reader:org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeReader,numPoints:Int):org.locationtech.jts.geom.CoordinateSequence" title="Permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/shp/MultiPointParser.html#readCoordinates(reader:org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeReader,numPoints:Int):Array[org.locationtech.jts.geom.Coordinate]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -632,11 +632,45 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">readCoordinates</span><span class="params">(<span name="reader">reader: <a href="ShapeReader.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeReader">ShapeReader</a></span>, <span name="numPoints">numPoints: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="org.locationtech.jts.geom.CoordinateSequence">CoordinateSequence</span></span>
+        <span class="name">readCoordinates</span><span class="params">(<span name="reader">reader: <a href="ShapeReader.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeReader">ShapeReader</a></span>, <span name="numPoints">numPoints: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="org.locationtech.jts.geom.Coordinate">Coordinate</span>]</span>
       </span>
       
       <p class="shortcomment cmt">read numPoints of coordinates from input source.</p><div class="fullcomment"><div class="comment cmt"><p>read numPoints of coordinates from input source.
-</p></div><dl class="paramcmts block"><dt class="param">reader</dt><dd class="cmt"><p>the reader</p></dd><dt class="param">numPoints</dt><dd class="cmt"><p>the num points</p></dd><dt>returns</dt><dd class="cmt"><p>the coordinate sequence</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="index.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp">shp</a>] </dd><dt>Definition Classes</dt><dd><a href="ShapeParser.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeParser">ShapeParser</a></dd><dt>Exceptions thrown</dt><dd><span class="cmt"><p><span class="extype" name="IOException"><code>IOException</code></span> Signals that an I/O exception has occurred.</p></span></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">reader</dt><dd class="cmt"><p>the reader</p></dd><dt class="param">numPoints</dt><dd class="cmt"><p>the num points</p></dd><dt>returns</dt><dd class="cmt"><p>the coordinate array</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="index.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp">shp</a>] </dd><dt>Definition Classes</dt><dd><a href="ShapeParser.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeParser">ShapeParser</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeParser#readCoordinatesWithM" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="readCoordinatesWithM(reader:org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeReader,numPoints:Int):Array[org.locationtech.jts.geom.Coordinate]"></a><a id="readCoordinatesWithM(ShapeReader,Int):Array[Coordinate]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/shp/MultiPointParser.html#readCoordinatesWithM(reader:org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeReader,numPoints:Int):Array[org.locationtech.jts.geom.Coordinate]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">readCoordinatesWithM</span><span class="params">(<span name="reader">reader: <a href="ShapeReader.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeReader">ShapeReader</a></span>, <span name="numPoints">numPoints: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="org.locationtech.jts.geom.Coordinate">Coordinate</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Read coordinates with M values from input source.</p><div class="fullcomment"><div class="comment cmt"><p>Read coordinates with M values from input source.
+</p></div><dl class="paramcmts block"><dt class="param">reader</dt><dd class="cmt"><p>the reader</p></dd><dt class="param">numPoints</dt><dd class="cmt"><p>the number of points</p></dd><dt>returns</dt><dd class="cmt"><p>the coordinate array with M values</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="index.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp">shp</a>] </dd><dt>Definition Classes</dt><dd><a href="ShapeParser.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeParser">ShapeParser</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeParser#readCoordinatesWithZM" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="readCoordinatesWithZM(reader:org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeReader,numPoints:Int):Array[org.locationtech.jts.geom.Coordinate]"></a><a id="readCoordinatesWithZM(ShapeReader,Int):Array[Coordinate]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/shp/MultiPointParser.html#readCoordinatesWithZM(reader:org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeReader,numPoints:Int):Array[org.locationtech.jts.geom.Coordinate]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">readCoordinatesWithZM</span><span class="params">(<span name="reader">reader: <a href="ShapeReader.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeReader">ShapeReader</a></span>, <span name="numPoints">numPoints: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="org.locationtech.jts.geom.Coordinate">Coordinate</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Read coordinates with Z and M values from input source.</p><div class="fullcomment"><div class="comment cmt"><p>Read coordinates with Z and M values from input source.
+</p></div><dl class="paramcmts block"><dt class="param">reader</dt><dd class="cmt"><p>the reader</p></dd><dt class="param">numPoints</dt><dd class="cmt"><p>the number of points</p></dd><dt>returns</dt><dd class="cmt"><p>the coordinate array with Z and M values</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="index.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp">shp</a>] </dd><dt>Definition Classes</dt><dd><a href="ShapeParser.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeParser">ShapeParser</a></dd></dl></div>
     </li><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeParser#readOffsets" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readOffsets(reader:org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeReader,numParts:Int,maxOffset:Int):Array[Int]"></a><a id="readOffsets(ShapeReader,Int,Int):Array[Int]"></a>
       <span class="permalink">
