@@ -294,4 +294,23 @@
             </plugin>
         </plugins>
 	</build>
+    <profiles>
+        <profile>
+            <id>sedona-spark-4.0</id>
+            <activation>
+                <property>
+                    <name>spark</name>
+                    <value>4.0</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.spark</groupId>
+                    <artifactId>spark-sql-api_${scala.compat.version}</artifactId>
+                    <version>${spark.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>

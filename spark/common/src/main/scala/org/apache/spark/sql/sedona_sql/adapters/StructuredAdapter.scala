@@ -127,6 +127,16 @@ object StructuredAdapter {
     toSpatialRdd(dataFrame, DfUtils.getGeometryColumnName(dataFrame.schema))
   }
 
+  private[sedona_sql] def createDataFrame(
+      sparkSession: SparkSession,
+      rdd: RDD[InternalRow],
+      schema: StructType): DataFrame = {
+    val internalCreateDataFrame = sparkSession
+      .getClass()
+      .getDeclaredMethod("internalCreateDataFrame", classOf[RDD[_]], classOf[StructType])
+    internalCreateDataFrame.invoke(sparkSession, rdd, schema).asInstanceOf[DataFrame]
+  }
+
   /**
    * Convert SpatialRDD.rawSpatialRdd to DataFrame
    * @param spatialRDD
@@ -139,7 +149,7 @@ object StructuredAdapter {
       val row = geometry.getUserData.asInstanceOf[InternalRow]
       row
     })
-    sparkSession.internalCreateDataFrame(rowRdd, spatialRDD.schema)
+    createDataFrame(sparkSession, rowRdd, spatialRDD.schema)
   }
 
   /**
@@ -166,7 +176,7 @@ object StructuredAdapter {
       val row = geometry.getUserData.asInstanceOf[InternalRow]
       row
     })
-    sparkSession.internalCreateDataFrame(rowRdd, spatialRDD.schema)
+    createDataFrame(sparkSession, rowRdd, spatialRDD.schema)
   }
 
   /**
@@ -213,9 +223,7 @@ object StructuredAdapter {
       val rightRow = pair._2.getUserData.asInstanceOf[InternalRow].toSeq(rightSchema)
       InternalRow.fromSeq(leftRow ++ rightRow)
     })
-    sparkSession.internalCreateDataFrame(
-      rowRdd,
-      StructType(leftSchema.fields ++ rightSchema.fields))
+    createDataFrame(sparkSession, rowRdd, StructType(leftSchema.fields ++ rightSchema.fields))
   }
 
   /**

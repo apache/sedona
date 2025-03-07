@@ -42,9 +42,22 @@ trait DataFrameAPI {
   // Spark 4 method using Column.fn
   val fnMethod =
     try {
-      Some(Column.getClass().getDeclaredMethod("fn", classOf[String], classOf[Array[Column]]))
+      // Get the companion object class
+      val clazz = Class.forName("org.apache.spark.sql.Column$")
+
+      // Object methods aren't actual static methods, so we need create
+      // an instance of the companion object
+      val constructor = clazz.getDeclaredConstructor()
+      constructor.setAccessible(true)
+      val instance = constructor.newInstance()
+
+      // Create a simple function for invoking the method
+      val method = clazz.getDeclaredMethod("fn", classOf[String], classOf[Seq[Column]])
+      Some((funcName: String, args: Seq[Column]) =>
+        method.invoke(instance, funcName, args).asInstanceOf[Column])
     } catch {
-      case _: NoSuchMethodException => None
+      case _: NoSuchMethodException =>
+        None
     }
 
   protected def wrapExpression[E <: Expression: ClassTag](args: Any*): Column = {
@@ -61,7 +74,7 @@ trait DataFrameAPI {
           case x: Any => lit(x)
           case null => lit(null)
         })
-        fn.invoke(runtimeClass.getSimpleName(), colArgs: _*).asInstanceOf[Column]
+        fn(runtimeClass.getSimpleName(), colArgs)
       }
       .getOrElse {
         val (expr, constructor) = exprMethods.get
@@ -88,7 +101,7 @@ trait DataFrameAPI {
           case x: Any => lit(x)
           case null => lit(null)
         })
-        fn.invoke(runtimeClass.getSimpleName(), colArgs: _*).asInstanceOf[Column]
+        fn(runtimeClass.getSimpleName(), colArgs)
       }
       .getOrElse {
         val (expr, constructor) = exprMethods.get
