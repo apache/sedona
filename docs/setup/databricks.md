@@ -17,60 +17,10 @@
  under the License.
  -->
 
-Please pay attention to the Spark version postfix and Scala version postfix on our [Maven Coordinate page](maven-coordinates.md). Databricks Spark and Apache Spark's compatibility can be found [here](https://docs.databricks.com/en/release-notes/runtime/index.html).
-
-## Community edition (free-tier)
-
-You just need to install the Sedona jars and Sedona Python on Databricks using Databricks default web UI. Then everything will work.
-
-### Install libraries
-
-1) From the Libraries tab install from Maven Coordinates
-
-```
-org.apache.sedona:sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}
-org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}
-```
-
-2) For enabling python support, from the Libraries tab install from PyPI
-
-```
-apache-sedona=={{ sedona.current_version }}
-geopandas==1.0.1
-keplergl==0.3.7
-pydeck==0.9.1
-```
-
-### Initialize
-
-After you have installed the libraries and started the cluster, you can initialize the Sedona `ST_*` functions and types by running from your code:
-
-(scala)
-
-```scala
-import org.apache.sedona.sql.utils.SedonaSQLRegistrator
-SedonaSQLRegistrator.registerAll(spark)
-```
-
-(or python)
-
-```python
-from sedona.register.geo_registrator import SedonaRegistrator
-
-SedonaRegistrator.registerAll(spark)
-```
-
-## Advanced editions
-
-In Databricks advanced editions, you need to install Sedona via [cluster init-scripts](https://docs.databricks.com/clusters/init-scripts.html) as described below. We recommend Databricks 10.x+. Sedona is not guaranteed to be 100% compatible with `Databricks photon acceleration`. Sedona requires Spark internal APIs to inject many optimization strategies, which sometimes is not accessible in `Photon`.
-
-In Spark 3.2, `org.apache.spark.sql.catalyst.expressions.Generator` class added a field `nodePatterns`. Any SQL functions that rely on Generator class may have issues if compiled for a runtime with a differing spark version. For Sedona, those functions are:
-
-* ST_MakeValid
-* ST_SubDivideExplode
+In Databricks advanced editions, you need to install Sedona via [cluster init-scripts](https://docs.databricks.com/clusters/init-scripts.html) as described below. Sedona is not guaranteed to be 100% compatible with `Databricks photon acceleration`. Sedona requires Spark internal APIs to inject many optimization strategies, which sometimes is not accessible in `Photon`.
 
 !!!note
-    The following steps use DBR including Apache Spark 3.4.x as an example. Please change the Spark version according to your DBR version.
+    The following steps use DBR including Apache Spark 3.4.x as an example. Please change the Spark version according to your DBR version. Please pay attention to the Spark version postfix and Scala version postfix on our [Maven Coordinate page](maven-coordinates.md). Databricks Spark and Apache Spark's compatibility can be found [here](https://docs.databricks.com/en/release-notes/runtime/index.html).
 
 ### Download Sedona jars
 
@@ -90,9 +40,6 @@ curl -o /Workspace/Shared/sedona/{{ sedona.current_version }}/sedona-spark-shade
 Of course, you can also do the steps above manually.
 
 ### Create an init script
-
-!!!warning
-    Starting from December 2023, Databricks has disabled all DBFS based init script (/dbfs/XXX/<script-name>.sh). So you will have to store the init script from a workspace level (`/Workspace/Users/<user-name>/<script-name>.sh`) or Unity Catalog volume (`/Volumes/<catalog>/<schema>/<volume>/<path-to-script>/<script-name>.sh`). Please see [Databricks init scripts](https://docs.databricks.com/en/init-scripts/cluster-scoped.html#configure-a-cluster-scoped-init-script-using-the-ui) for more information.
 
 !!!note
     If you are creating a Shared cluster, you won't be able to use init scripts and jars stored under `Workspace`. Please instead store them in `Volumes`. The overall process should be the same.
