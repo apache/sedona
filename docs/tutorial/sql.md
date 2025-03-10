@@ -299,7 +299,7 @@ Since v`1.7.0`, Sedona supports loading Shapefile as a DataFrame.
 
 The input path can be a directory containing one or multiple shapefiles, or path to a `.shp` file.
 
-See [this page](files/shapefile-sedona-spark.md) for more information on loading Shapefiles.
+See [this page](files/shapefiles-sedona-spark.md) for more information on loading Shapefiles.
 
 ## Load GeoParquet
 
@@ -641,7 +641,7 @@ The output will look like this:
 +----------------+---+------+-------+
 ```
 
-See [this page](../concepts/clustering-algorithms) for more information on the DBSCAN algorithm.
+See [this page](concepts/clustering-algorithms.md) for more information on the DBSCAN algorithm.
 
 ## Calculate the Local Outlier Factor (LOF)
 

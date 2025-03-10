@@ -76,7 +76,7 @@ df.show(truncate=False)
 Here are the results:
 
 ```
-+---+---------------------+  
++---+---------------------+
 |id |geometry             |
 +---+---------------------+
 |a  |LINESTRING (2 5, 6 1)|
@@ -199,10 +199,10 @@ The value of `geoparquet.crs` and `geoparquet.crs.<column_name>` can be one of t
 * `""` (empty string): Omit the `crs` field. This implies that the CRS is [OGC:CRS84](https://www.opengis.net/def/crs/OGC/1.3/CRS84) for CRS-aware implementations.
 * `"{...}"` (PROJJSON string): The `crs` field will be set as the PROJJSON object representing the Coordinate Reference System (CRS) of the geometry. You can find the PROJJSON string of a specific CRS from here: https://epsg.io/ (click the JSON option at the bottom of the page). You can also customize your PROJJSON string as needed.
 
-Please note that Sedona currently cannot set/get a projjson string to/from a CRS. Its geoparquet reader will ignore the projjson metadata and you will have to set your CRS via [`ST_SetSRID`](../api/sql/Function.md#st_setsrid) after reading the file.
+Please note that Sedona currently cannot set/get a projjson string to/from a CRS. Its geoparquet reader will ignore the projjson metadata and you will have to set your CRS via [`ST_SetSRID`](../../api/sql/Function.md#st_setsrid) after reading the file.
 Its geoparquet writer will not leverage the SRID field of a geometry so you will have to always set the `geoparquet.crs` option manually when writing the file, if you want to write a meaningful CRS field.
 
-Due to the same reason, Sedona geoparquet reader and writer do NOT check the axis order (lon/lat or lat/lon) and assume they are handled by the users themselves when writing / reading the files. You can always use [`ST_FlipCoordinates`](../api/sql/Function.md#st_flipcoordinates) to swap the axis order of your geometries.
+Due to the same reason, Sedona geoparquet reader and writer do NOT check the axis order (lon/lat or lat/lon) and assume they are handled by the users themselves when writing / reading the files. You can always use [`ST_FlipCoordinates`](../../api/sql/Function.md#st_flipcoordinates) to swap the axis order of your geometries.
 
 ## Save GeoParquet with Covering Metadata
 
@@ -231,7 +231,7 @@ df_bbox.write.format("geoparquet").option("geoparquet.covering.geometry", "bbox"
 
 ## Sort then Save GeoParquet
 
-To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see [ST_GeoHash](../api/sql/Function.md#st_geohash)) and then save as a GeoParquet file. An example is as follows:
+To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see [ST_GeoHash](../../api/sql/Function.md#st_geohash)) and then save as a GeoParquet file. An example is as follows:
 
 ```
 SELECT col1, col2, geom, ST_GeoHash(geom, 5) as geohash
@@ -253,7 +253,7 @@ Let’s look at an example of a dataset with points and three bounding boxes.
 
 Now, let’s apply a spatial filter to read points within a particular area:
 
-![GeoParquet bbox filter](../../image/tutorial/files/geoparquet_bbox1.png)
+![GeoParquet bbox filter](../../image/tutorial/files/geoparquet_bbox2.png)
 
 Here is the query:
 
