@@ -17,6 +17,8 @@
  under the License.
  -->
 
+# STAC catalog with Apache Sedona and Spark
+
 The STAC data source allows you to read data from a SpatioTemporal Asset Catalog (STAC) API. The data source supports reading STAC items and collections.
 
 ## Usage
@@ -108,29 +110,29 @@ root
 +------------+--------------------+-------+--------------------+--------------------+--------------------+-----+-----------+--------------------+--------------+------------+--------------------+--------------------+-----------+-----------+-------------+-------+----+--------------------+--------------------+--------------------+
 ```
 
-# Filter Pushdown
+## Filter Pushdown
 
 The STAC data source supports predicate pushdown for spatial and temporal filters. The data source can push down spatial and temporal filters to the underlying data source to reduce the amount of data that needs to be read.
 
-## Spatial Filter Pushdown
+### Spatial Filter Pushdown
 
 Spatial filter pushdown allows the data source to apply spatial predicates (e.g., st_contains, st_intersects) directly at the data source level, reducing the amount of data transferred and processed.
 
-## Temporal Filter Pushdown
+### Temporal Filter Pushdown
 
 Temporal filter pushdown allows the data source to apply temporal predicates (e.g., BETWEEN, >=, <=) directly at the data source level, similarly reducing the amount of data transferred and processed.
 
-# Examples
+## Examples
 
 Here are some examples demonstrating how to query a STAC data source that is loaded into a table named `STAC_TABLE`.
 
-## SQL Select Without Filters
+### SQL Select Without Filters
 
 ```sql
 SELECT id, datetime as dt, geometry, bbox FROM STAC_TABLE
 ```
 
-## SQL Select With Temporal Filter
+### SQL Select With Temporal Filter
 
 ```sql
   SELECT id, datetime as dt, geometry, bbox
@@ -140,7 +142,7 @@ SELECT id, datetime as dt, geometry, bbox FROM STAC_TABLE
 
 In this example, the data source will push down the temporal filter to the underlying data source.
 
-## SQL Select With Spatial Filter
+### SQL Select With Spatial Filter
 
 ```sql
   SELECT id, geometry
@@ -150,7 +152,7 @@ In this example, the data source will push down the temporal filter to the under
 
 In this example, the data source will push down the spatial filter to the underlying data source.
 
-## Sedona Configuration for STAC Reader
+### Sedona Configuration for STAC Reader
 
 When using the STAC reader in Sedona, several configuration options can be set to control the behavior of the reader. These configurations are typically set in a `Map[String, String]` and passed to the reader. Below are the key sedona configuration options:
 
@@ -192,73 +194,13 @@ These configurations can be combined into a single `Map[String, String]` and pas
 
 These options above provide fine-grained control over how the STAC data is read and processed in Sedona.
 
-# Python API
+## Python API
 
 The Python API allows you to interact with a SpatioTemporal Asset Catalog (STAC) API using the Client class. This class provides methods to open a connection to a STAC API, retrieve collections, and search for items with various filters.
 
-## Client Class
+### Sample Code
 
-## Methods
-
-### `open(url: str) -> Client`
-
-Opens a connection to the specified STAC API URL.
-
-**Parameters:**
-
-- `url` (*str*): The URL of the STAC API to connect to.
-  **Example:** `"https://planetarycomputer.microsoft.com/api/stac/v1"`
-
-**Returns:**
-
-- `Client`: An instance of the `Client` class connected to the specified URL.
-
----
-
-### `get_collection(collection_id: str) -> CollectionClient`
-
-Retrieves a collection client for the specified collection ID.
-
-**Parameters:**
-
-- `collection_id` (*str*): The ID of the collection to retrieve.
-  **Example:** `"aster-l1t"`
-
-**Returns:**
-
-- `CollectionClient`: An instance of the `CollectionClient` class for the specified collection.
-
----
-
-### `search(*ids: Union[str, list], collection_id: str, bbox: Optional[list] = None, datetime: Optional[Union[str, datetime.datetime, list]] = None, max_items: Optional[int] = None, return_dataframe: bool = True) -> Union[Iterator[PyStacItem], DataFrame]`
-
-Searches for items in the specified collection with optional filters.
-
-**Parameters:**
-
-- `ids` (*Union[str, list]*): A variable number of item IDs to filter the items.
-  **Example:** `"item_id1"` or `["item_id1", "item_id2"]`
-- `collection_id` (*str*): The ID of the collection to search in.
-  **Example:** `"aster-l1t"`
-- `bbox` (*Optional[list]*): A list of bounding boxes for filtering the items. Each bounding box is represented as a list of four float values: `[min_lon, min_lat, max_lon, max_lat]`.
-  **Example:** `[[ -180.0, -90.0, 180.0, 90.0 ]]`
-- `datetime` (*Optional[Union[str, datetime.datetime, list]]*): A single datetime, RFC 3339-compliant timestamp, or a list of date-time ranges for filtering the items.
-  **Example:**
-    - `"2020-01-01T00:00:00Z"`
-    - `datetime.datetime(2020, 1, 1)`
-    - `[["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]`
-- `max_items` (*Optional[int]*): The maximum number of items to return from the search, even if there are more matching results.
-  **Example:** `100`
-- `return_dataframe` (*bool*): If `True` (default), return the result as a Spark DataFrame instead of an iterator of `PyStacItem` objects.
-  **Example:** `True`
-
-**Returns:**
-
-- *Union[Iterator[PyStacItem], DataFrame]*: An iterator of `PyStacItem` objects or a Spark DataFrame that matches the specified filters.
-
-## Sample Code
-
-### Initialize the Client
+#### Initialize the Client
 
 ```python
 from sedona.stac.client import Client
@@ -267,7 +209,7 @@ from sedona.stac.client import Client
 client = Client.open("https://planetarycomputer.microsoft.com/api/stac/v1")
 ```
 
-### Search Items on a Collection Within a Year
+#### Search Items on a Collection Within a Year
 
 ```python
 items = client.search(
@@ -275,7 +217,7 @@ items = client.search(
 )
 ```
 
-### Search Items on a Collection Within a Month and Max Items
+#### Search Items on a Collection Within a Month and Max Items
 
 ```python
 items = client.search(
@@ -283,7 +225,7 @@ items = client.search(
 )
 ```
 
-### Search Items with Bounding Box and Interval
+#### Search Items with Bounding Box and Interval
 
 ```python
 items = client.search(
@@ -295,14 +237,14 @@ items = client.search(
 )
 ```
 
-### Search Multiple Items with Multiple Bounding Boxes
+#### Search Multiple Items with Multiple Bounding Boxes
 
 ```python
 bbox_list = [[-180.0, -90.0, 180.0, 90.0], [-100.0, -50.0, 100.0, 50.0]]
 items = client.search(collection_id="aster-l1t", bbox=bbox_list, return_dataframe=False)
 ```
 
-### Search Items and Get DataFrame as Return with Multiple Intervals
+#### Search Items and Get DataFrame as Return with Multiple Intervals
 
 ```python
 interval_list = [
@@ -315,7 +257,7 @@ df = client.search(
 df.show()
 ```
 
-### Save Items in DataFrame to GeoParquet with Both Bounding Boxes and Intervals
+#### Save Items in DataFrame to GeoParquet with Both Bounding Boxes and Intervals
 
 ```python
 # Save items in DataFrame to GeoParquet with both bounding boxes and intervals
@@ -326,7 +268,57 @@ client.get_collection("aster-l1t").save_to_geoparquet(
 
 These examples demonstrate how to use the Client class to search for items in a STAC collection with various filters and return the results as either an iterator of PyStacItem objects or a Spark DataFrame.
 
-# References
+### Methods
+
+**`open(url: str) -> Client`**
+Opens a connection to the specified STAC API URL.
+
+Parameters:
+* `url` (*str*): The URL of the STAC API to connect to.
+  * Example: `"https://planetarycomputer.microsoft.com/api/stac/v1"`
+
+Returns:
+* `Client`: An instance of the `Client` class connected to the specified URL.
+
+---
+
+**`get_collection(collection_id: str) -> CollectionClient`**
+Retrieves a collection client for the specified collection ID.
+
+Parameters:
+* `collection_id` (*str*): The ID of the collection to retrieve.
+  * Example: `"aster-l1t"`
+
+Returns:
+* `CollectionClient`: An instance of the `CollectionClient` class for the specified collection.
+
+---
+
+**`search(*ids: Union[str, list], collection_id: str, bbox: Optional[list] = None, datetime: Optional[Union[str, datetime.datetime, list]] = None, max_items: Optional[int] = None, return_dataframe: bool = True) -> Union[Iterator[PyStacItem], DataFrame]`**
+Searches for items in the specified collection with optional filters.
+
+Parameters:
+
+* `ids` (*Union[str, list]*): A variable number of item IDs to filter the items.
+  * Example: `"item_id1"` or `["item_id1", "item_id2"]`
+* `collection_id` (*str*): The ID of the collection to search in.
+  * Example: `"aster-l1t"`
+* `bbox` (*Optional[list]*): A list of bounding boxes for filtering the items. Each bounding box is represented as a list of four float values: `[min_lon, min_lat, max_lon, max_lat]`.
+  * Example: `[[ -180.0, -90.0, 180.0, 90.0 ]]`
+* `datetime` (*Optional[Union[str, datetime.datetime, list]]*): A single datetime, RFC 3339-compliant timestamp, or a list of date-time ranges for filtering the items.
+  * Examples:
+    * `"2020-01-01T00:00:00Z"`
+    * `datetime.datetime(2020, 1, 1)`
+    * `[["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]`
+* `max_items` (*Optional[int]*): The maximum number of items to return from the search, even if there are more matching results.
+  * Example: `100`
+* `return_dataframe` (*bool*): If `True` (default), return the result as a Spark DataFrame instead of an iterator of `PyStacItem` objects.
+  * Example: `True`
+
+Returns:
+* *Union[Iterator[PyStacItem], DataFrame]*: An iterator of `PyStacItem` objects or a Spark DataFrame that matches the specified filters.
+
+## References
 
 - STAC Specification: https://stacspec.org/
 

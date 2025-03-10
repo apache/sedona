@@ -66,6 +66,7 @@ nav:
               - GeoParquet: tutorial/files/geoparquet-sedona-spark.md
               - GeoJSON: tutorial/files/geojson-sedona-spark.md
               - Shapefiles: tutorial/files/shapefiles-sedona-spark.md
+              - STAC catalog: tutorial/files/stac-sedona-spark.md
           - Concepts:
               - Spatial Joins: tutorial/concepts/spatial-joins.md
               - Clustering Algorithms: tutorial/concepts/clustering-algorithms.md
@@ -97,7 +98,6 @@ nav:
                   - Query optimization: api/sql/Optimizer.md
                   - Nearest-Neighbour searching: api/sql/NearestNeighbourSearching.md
                   - "Spider:Spatial Data Generator": api/sql/Spider.md
-                  - Reading STAC Data Source: api/sql/Stac.md
                   - Reading Legacy Parquet Files: api/sql/Reading-legacy-parquet.md
                   - Visualization:
                       - SedonaPyDeck: api/sql/Visualization_SedonaPyDeck.md

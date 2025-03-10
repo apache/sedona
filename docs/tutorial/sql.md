@@ -20,7 +20,7 @@
 The page outlines the steps to manage spatial data using SedonaSQL.
 
 !!!note
-    Since v`1.5.0`, Sedona assumes geographic coordinates to be in longitude/latitude order. If your data is lat/lon order, please use `ST_FlipCoordinates` to swap X and Y.
+    Sedona assumes geographic coordinates to be in longitude/latitude order. If your data is lat/lon order, please use `ST_FlipCoordinates` to swap X and Y.
 
 SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of SQL operators as follows. All these operators can be directly called through:
 
@@ -63,8 +63,6 @@ Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.
 ## Create Sedona config
 
 Use the following code to create your Sedona config at the beginning. If you already have a SparkSession (usually named `spark`) created by AWS EMR/Databricks/Microsoft Fabric, please ==skip this step==.
-
-==Sedona >= 1.4.1==
 
 You can add additional Spark runtime config to the config builder. For example, `SedonaContext.builder().config("spark.sql.autoBroadcastJoinThreshold", "10485760")`
 
@@ -111,64 +109,9 @@ You can add additional Spark runtime config to the config builder. For example, 
 	```
     If you are using a different Spark version, please replace the `3.3` in package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
 
-==Sedona < 1.4.1==
-
-The following method has been deprecated since Sedona 1.4.1. Please use the method above to create your Sedona config.
-
-=== "Scala"
-
-	```scala
-	var sparkSession = SparkSession.builder()
-	.master("local[*]") // Delete this if run in cluster mode
-	.appName("readTestScala") // Change this to a proper name
-	// Enable Sedona custom Kryo serializer
-	.config("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
-	.config("spark.kryo.registrator", classOf[SedonaKryoRegistrator].getName)
-	.getOrCreate() // org.apache.sedona.core.serde.SedonaKryoRegistrator
-	```
-	If you use SedonaViz together with SedonaSQL, please use the following two lines to enable Sedona Kryo serializer instead:
-	```scala
-	.config("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
-	.config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
-	```
-
-=== "Java"
-
-	```java
-	SparkSession sparkSession = SparkSession.builder()
-	.master("local[*]") // Delete this if run in cluster mode
-	.appName("readTestJava") // Change this to a proper name
-	// Enable Sedona custom Kryo serializer
-	.config("spark.serializer", KryoSerializer.class.getName()) // org.apache.spark.serializer.KryoSerializer
-	.config("spark.kryo.registrator", SedonaKryoRegistrator.class.getName())
-	.getOrCreate() // org.apache.sedona.core.serde.SedonaKryoRegistrator
-	```
-	If you use SedonaViz together with SedonaSQL, please use the following two lines to enable Sedona Kryo serializer instead:
-	```java
-	.config("spark.serializer", KryoSerializer.class.getName()) // org.apache.spark.serializer.KryoSerializer
-	.config("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName()) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
-	```
-
-=== "Python"
-
-	```python
-	sparkSession = SparkSession. \
-	    builder. \
-	    appName('readTestPython'). \
-	    config("spark.serializer", KryoSerializer.getName()). \
-	    config("spark.kryo.registrator", SedonaKryoRegistrator.getName()). \
-	    config('spark.jars.packages',
-	           'org.apache.sedona:sedona-spark-shaded-3.3_2.12:{{ sedona.current_version }},'
-	           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
-	    getOrCreate()
-	```
-    If you are using Spark versions >= 3.4, please replace the `3.0` in package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
-
 ## Initiate SedonaContext
 
 Add the following line after creating Sedona config. If you already have a SparkSession (usually named `spark`) created by AWS EMR/Databricks/Microsoft Fabric, please call `sedona = SedonaContext.create(spark)` instead. For ==Databricks==, the situation is more complicated, please refer to [Databricks setup guide](../setup/databricks.md), but generally you don't need to create SedonaContext.
-
-==Sedona >= 1.4.1==
 
 === "Scala"
 
@@ -192,30 +135,6 @@ Add the following line after creating Sedona config. If you already have a Spark
 	from sedona.spark import *
 
 	sedona = SedonaContext.create(config)
-	```
-
-==Sedona < 1.4.1==
-
-The following method has been deprecated since Sedona 1.4.1. Please use the method above to create your SedonaContext.
-
-=== "Scala"
-
-	```scala
-	SedonaSQLRegistrator.registerAll(sparkSession)
-	```
-
-=== "Java"
-
-	```java
-	SedonaSQLRegistrator.registerAll(sparkSession)
-	```
-
-=== "Python"
-
-	```python
-	from sedona.register import SedonaRegistrator
-
-	SedonaRegistrator.registerAll(spark)
 	```
 
 You can also register everything by passing `--conf spark.sql.extensions=org.apache.sedona.sql.SedonaSqlExtensions` to `spark-submit` or `spark-shell`.
@@ -315,56 +234,6 @@ root
 
 Since `v1.6.1`, Sedona supports reading GeoJSON files using the `geojson` data source. It is designed to handle JSON files that use [GeoJSON format](https://datatracker.ietf.org/doc/html/rfc7946) for their geometries.
 
-This includes SpatioTemporal Asset Catalog (STAC) files, GeoJSON features, GeoJSON feature collections and other variations.
-The key functionality lies in the way 'geometry' fields are processed: these are specifically read as Sedona's `GeometryUDT` type, ensuring integration with Sedona's suite of spatial functions.
-
-### Key features
-
-- Broad Support: The reader and writer are versatile, supporting all GeoJSON-formatted files, including STAC files, feature collections, and more.
-- Geometry Transformation: When reading, fields named 'geometry' are automatically converted from GeoJSON format to Sedona's `GeometryUDT` type and vice versa when writing.
-
-### Load MultiLine GeoJSON FeatureCollection
-
-Suppose we have a GeoJSON FeatureCollection file as follows.
-This entire file is considered as a single GeoJSON FeatureCollection object.
-Multiline format is preferable for scenarios where files need to be human-readable or manually edited.
-
-```json
-{ "type": "FeatureCollection",
-    "features": [
-      { "type": "Feature",
-        "geometry": {"type": "Point", "coordinates": [102.0, 0.5]},
-        "properties": {"prop0": "value0"}
-        },
-      { "type": "Feature",
-        "geometry": {
-          "type": "LineString",
-          "coordinates": [
-            [102.0, 0.0], [103.0, 1.0], [104.0, 0.0], [105.0, 1.0]
-            ]
-          },
-        "properties": {
-          "prop0": "value1",
-          "prop1": 0.0
-          }
-        },
-      { "type": "Feature",
-         "geometry": {
-           "type": "Polygon",
-           "coordinates": [
-             [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0],
-               [100.0, 1.0], [100.0, 0.0] ]
-             ]
-         },
-         "properties": {
-           "prop0": "value2",
-           "prop1": {"this": "that"}
-           }
-         }
-       ]
-}
-```
-
 Set the `multiLine` option to `True` to read multiline GeoJSON files.
 
 === "Python"
@@ -402,81 +271,7 @@ Set the `multiLine` option to `True` to read multiline GeoJSON files.
     df.printSchema();
     ```
 
-The output is as follows:
-
-```
-+--------------------+------+
-|            geometry| prop0|
-+--------------------+------+
-|     POINT (102 0.5)|value0|
-|LINESTRING (102 0...|value1|
-|POLYGON ((100 0, ...|value2|
-+--------------------+------+
-
-root
- |-- geometry: geometry (nullable = false)
- |-- prop0: string (nullable = true)
-
-```
-
-### Load Single Line GeoJSON Features
-
-Suppose we have a single-line GeoJSON Features dataset as follows. Each line is a single GeoJSON Feature.
-This format is efficient for processing large datasets where each line is a separate, self-contained GeoJSON object.
-
-```json
-{"type":"Feature","geometry":{"type":"Point","coordinates":[102.0,0.5]},"properties":{"prop0":"value0"}}
-{"type":"Feature","geometry":{"type":"LineString","coordinates":[[102.0,0.0],[103.0,1.0],[104.0,0.0],[105.0,1.0]]},"properties":{"prop0":"value1"}}
-{"type":"Feature","geometry":{"type":"Polygon","coordinates":[[[100.0,0.0],[101.0,0.0],[101.0,1.0],[100.0,1.0],[100.0,0.0]]]},"properties":{"prop0":"value2"}}
-```
-
-By default, when `option` is not specified, Sedona reads a GeoJSON file as a single line GeoJSON.
-
-=== "Python"
-
-	```python
-	df = sedona.read.format("geojson").load("PATH/TO/MYFILE.json")
-	   .withColumn("prop0", f.expr("properties['prop0']")).drop("properties").drop("type")
-
-	df.show()
-	df.printSchema()
-	```
-
-=== "Scala"
-
-	```scala
-	val df = sedona.read.format("geojson").load("PATH/TO/MYFILE.json")
-	   .withColumn("prop0", expr("properties['prop0']")).drop("properties").drop("type")
-
-	df.show()
-	df.printSchema()
-	```
-
-=== "Java"
-
-	```java
-	Dataset<Row> df = sedona.read.format("geojson").load("PATH/TO/MYFILE.json")
-	   .withColumn("prop0", expr("properties['prop0']")).drop("properties").drop("type")
-
-	df.show()
-	df.printSchema()
-	```
-
-The output is as follows:
-
-```
-+--------------------+------+
-|            geometry| prop0|
-+--------------------+------+
-|     POINT (102 0.5)|value0|
-|LINESTRING (102 0...|value1|
-|POLYGON ((100 0, ...|value2|
-+--------------------+------+
-
-root
- |-- geometry: geometry (nullable = false)
- |-- prop0: string (nullable = true)
-```
+See [this page](files/geojson-sedona-spark.md) for more information on loading GeoJSON files.
 
 ## Load Shapefile
 
@@ -502,7 +297,7 @@ Since v`1.7.0`, Sedona supports loading Shapefile as a DataFrame.
 
 The input path can be a directory containing one or multiple shapefiles, or path to a `.shp` file.
 
-See [this page](../files/shapefile-sedona-spark) for more information on loading Shapefiles.
+See [this page](files/shapefile-sedona-spark.md) for more information on loading Shapefiles.
 
 ## Load GeoParquet
 
@@ -550,7 +345,7 @@ Please refer to [Reading Legacy Parquet Files](../api/sql/Reading-legacy-parquet
 	GeoParquet file reader does not work on Databricks runtime when Photon is enabled. Please disable Photon when using
 	GeoParquet file reader on Databricks runtime.
 
-See [this page](../files/geoparquet-sedona-spark) for more information on loading GeoParquet.
+See [this page](files/geoparquet-sedona-spark.md) for more information on loading GeoParquet.
 
 ## Load data from JDBC data sources
 
@@ -634,7 +429,7 @@ Since v1.7.0, Sedona supports loading Geopackage file format as a DataFrame.
 	df = sedona.read.format("geopackage").option("tableName", "tab").load("/path/to/geopackage")
 	```
 
-See [this page](../files/geopackage-sedona-spark) for more information on loading GeoPackage.
+See [this page](files/geopackage-sedona-spark.md) for more information on loading GeoPackage.
 
 ## Load from OSM PBF
 
@@ -1401,13 +1196,7 @@ Since `v1.6.1`, the GeoJSON data source in Sedona can be used to save a Spatial 
 df.write.format("geojson").save("YOUR/PATH.json")
 ```
 
-The structure of the generated file will be like this:
-
-```json
-{"type":"Feature","geometry":{"type":"Point","coordinates":[102.0,0.5]},"properties":{"prop0":"value0"}}
-{"type":"Feature","geometry":{"type":"LineString","coordinates":[[102.0,0.0],[103.0,1.0],[104.0,0.0],[105.0,1.0]]},"properties":{"prop0":"value1"}}
-{"type":"Feature","geometry":{"type":"Polygon","coordinates":[[[100.0,0.0],[101.0,0.0],[101.0,1.0],[100.0,1.0],[100.0,0.0]]]},"properties":{"prop0":"value2"}}
-```
+See [this page](files/geojson-sedona-spark.md) for more information on writing to GeoJSON.
 
 ## Save GeoParquet
 
@@ -1417,7 +1206,7 @@ Since v`1.3.0`, Sedona natively supports writing GeoParquet file. GeoParquet can
 df.write.format("geoparquet").save(geoparquetoutputlocation + "/GeoParquet_File_Name.parquet")
 ```
 
-See [this page](../files/geoparquet-sedona-spark) for more information on writing to GeoParquet.
+See [this page](files/geoparquet-sedona-spark.md) for more information on writing to GeoParquet.
 
 ## Save to Postgis
 
