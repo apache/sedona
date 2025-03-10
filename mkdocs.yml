@@ -145,11 +145,6 @@ nav:
           - Make a release: community/publish.md
           - Vote a release: community/vote.md
       - Publications: community/publication.md
-  - Use cases:
-      - Spatially aggregate airports per country: usecases/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb
-      - Match foot traffic to Seattle coffee shops: usecases/contrib/foot-traffic.ipynb
-      - Raster image manipulation: usecases/ApacheSedonaRaster.ipynb
-      - Read Overture Maps data: usecases/Sedona_OvertureMaps_GeoParquet.ipynb
   - Apache Software Foundation:
       - Foundation: asf/asf.md
       - License: https://www.apache.org/licenses/" target="_blank
@@ -239,7 +234,5 @@ plugins:
   - macros
   - git-revision-date-localized:
       type: datetime
-  - mkdocs-jupyter:
-      include_source: True
   - mike:
       canonical_version: "latest"
