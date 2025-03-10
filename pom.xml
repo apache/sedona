@@ -765,6 +765,7 @@
                 <spark.version>4.0.0</spark.version>
                 <spark.compat.version>3.5</spark.compat.version>
                 <spark.major.version>4</spark.major.version>
+                <hadoop.version>3.4.1</hadoop.version>
                 <log4j.version>2.24.3</log4j.version>
                 <slf4j.version>2.0.16</slf4j.version>
                 <graphframe.version>0.8.3-spark3.5</graphframe.version>
