@@ -196,11 +196,11 @@ Due to these limitations, other options are worth investigating.
 There are a variety of other file formats that are good for geometric data:
 
 * Iceberg
-* [GeoParquet](../geoparquet-sedona-spark)
+* [GeoParquet](geoparquet-sedona-spark.md)
 * FlatGeoBuf
-* [GeoPackage](../geopackage-sedona-spark)
-* [GeoJSON](../geojson-sedona-spark)
-* [CSV](../csv-geometry-sedona-spark)
+* [GeoPackage](geopackage-sedona-spark.md)
+* [GeoJSON](geojson-sedona-spark.md)
+* [CSV](csv-geometry-sedona-spark.md)
 * GeoTIFF
 
 ## Why Sedona does not support Shapefile writes

@@ -460,7 +460,7 @@ POINT ZM(1 1 1 1)
 ## ST_AsGeoJSON
 
 !!!note
-	This method is not recommended. Please use [Sedona GeoJSON data source](../../tutorial/sql.md#save-as-geojson) to write GeoJSON files.
+	This method is not recommended. Please use [Sedona GeoJSON data source](../../tutorial/sql.md#save-geojson) to write GeoJSON files.
 
 Introduction: Return the [GeoJSON](https://geojson.org/) string representation of a geometry
 

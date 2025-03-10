@@ -66,6 +66,10 @@ nav:
               - GeoParquet: tutorial/files/geoparquet-sedona-spark.md
               - GeoJSON: tutorial/files/geojson-sedona-spark.md
               - Shapefiles: tutorial/files/shapefiles-sedona-spark.md
+              - STAC catalog: tutorial/files/stac-sedona-spark.md
+          - Concepts:
+              - Spatial Joins: tutorial/concepts/spatial-joins.md
+              - Clustering Algorithms: tutorial/concepts/clustering-algorithms.md
           - Map visualization SQL app:
               - Scala/Java: tutorial/viz.md
               - Use Apache Zeppelin: tutorial/zeppelin.md
@@ -81,9 +85,6 @@ nav:
       - Examples:
           - Scala/Java: tutorial/demo.md
           - Python: tutorial/jupyter-notebook.md
-      - Concepts:
-          - Spatial Joins: tutorial/concepts/spatial-joins.md
-          - Clustering Algorithms: tutorial/concepts/clustering-algorithms.md
   - API Docs:
       - Sedona with Apache Spark:
           - SQL:
@@ -97,7 +98,6 @@ nav:
                   - Query optimization: api/sql/Optimizer.md
                   - Nearest-Neighbour searching: api/sql/NearestNeighbourSearching.md
                   - "Spider:Spatial Data Generator": api/sql/Spider.md
-                  - Reading STAC Data Source: api/sql/Stac.md
                   - Reading Legacy Parquet Files: api/sql/Reading-legacy-parquet.md
                   - Visualization:
                       - SedonaPyDeck: api/sql/Visualization_SedonaPyDeck.md
@@ -145,11 +145,6 @@ nav:
           - Make a release: community/publish.md
           - Vote a release: community/vote.md
       - Publications: community/publication.md
-  - Use cases:
-      - Spatially aggregate airports per country: usecases/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb
-      - Match foot traffic to Seattle coffee shops: usecases/contrib/foot-traffic.ipynb
-      - Raster image manipulation: usecases/ApacheSedonaRaster.ipynb
-      - Read Overture Maps data: usecases/Sedona_OvertureMaps_GeoParquet.ipynb
   - Apache Software Foundation:
       - Foundation: asf/asf.md
       - License: https://www.apache.org/licenses/" target="_blank
@@ -239,7 +234,5 @@ plugins:
   - macros
   - git-revision-date-localized:
       type: datetime
-  - mkdocs-jupyter:
-      include_source: True
   - mike:
       canonical_version: "latest"
