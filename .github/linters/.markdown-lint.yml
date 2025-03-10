@@ -17,6 +17,9 @@
 
 # https://github.com/DavidAnson/markdownlint#rules--aliases
 
+# ul-style Unordered list style
+MD004: false
+
 # ul-indent - Unordered list indentation
 MD007: false
 
