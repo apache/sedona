@@ -68,7 +68,7 @@ This command will bind the container's ports 8888, 8080, 8081, 4040, 8085 to the
 Example 2:
 
 ```bash
-docker run -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 -p 8085:8085 apache/sedona:{{ sedona.current_version }}
+docker run -d -e -p 8888:8888 -p 8080:8080 -p 8081:8081 -p 4040:4040 -p 8085:8085 apache/sedona:{{ sedona.current_version }}
 ```
 
 This command will start a container with 4GB RAM for the driver and 4GB RAM for the executor and use Sedona {{ sedona.current_version }} image.
@@ -91,7 +91,7 @@ docker run -d -e DRIVER_MEM=6g -e EXECUTOR_MEM=8g \
 
 ### Start coding
 
-Open your browser and go to [http://localhost:8888/](http://localhost:8888/) to start coding with Sedona. You can also access Apache Zeppelin at [http://localhost:8085/classic/](http://localhost:8085/classic/  ) using your browser.
+Open your browser and go to [http://localhost:8888/](http://localhost:8888/) to start coding with Sedona in Jupyter Notebook. You can also access Apache Zeppelin at [http://localhost:8085/classic/](http://localhost:8085/classic/  ) using your browser.
 
 ### Notes
 
