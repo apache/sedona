@@ -139,7 +139,7 @@ Add the following line after creating Sedona config. If you already have a Spark
 
 You can also register everything by passing `--conf spark.sql.extensions=org.apache.sedona.sql.SedonaSqlExtensions` to `spark-submit` or `spark-shell`.
 
-## Load data from files
+## Load data from text files
 
 Assume we have a WKT file, namely `usa-county.tsv`, at Path `/Download/usa-county.tsv` as follows:
 
@@ -151,6 +151,8 @@ POLYGON (..., ...)	Lancaster County
 ```
 
 The file may have many other columns.
+
+### Load the raw DataFrame
 
 Use the following code to load the data and create a raw DataFrame:
 
@@ -186,7 +188,7 @@ The output will be like this:
 |POLYGON ((-96.910...| 31|109|00835876|31109|  Lancaster|    Lancaster County| 06| H1|G4020| 339|30700|null|   A|2169240202|22877180|+40.7835474|-096.6886584|
 ```
 
-## Create a Geometry type column
+### Create a Geometry type column
 
 All geometrical operations in SedonaSQL are on Geometry type objects. Therefore, before any kind of queries, you need to create a Geometry type column on a DataFrame.
 
@@ -347,6 +349,30 @@ Please refer to [Reading Legacy Parquet Files](../api/sql/Reading-legacy-parquet
 
 See [this page](files/geoparquet-sedona-spark.md) for more information on loading GeoParquet.
 
+## Load data from STAC catalog
+
+Sedona STAC data source allows you to read data from a SpatioTemporal Asset Catalog (STAC) API. The data source supports reading STAC items and collections.
+
+You can load a STAC collection from a s3 collection file object:
+
+```python
+df = sedona.read.format("stac").load(
+    "s3a://example.com/stac_bucket/stac_collection.json"
+)
+```
+
+You can also load a STAC collection from an HTTP/HTTPS endpoint:
+
+```python
+df = sedona.read.format("stac").load(
+    "https://earth-search.aws.element84.com/v1/collections/sentinel-2-pre-c1-l2a"
+)
+```
+
+The STAC data source supports predicate pushdown for spatial and temporal filters. The data source can push down spatial and temporal filters to the underlying data source to reduce the amount of data that needs to be read.
+
+See [this page](files/stac-sedona-spark.md) for more information on loading data from STAC.
+
 ## Load data from JDBC data sources
 
 The 'query' option in Spark SQL's JDBC data source can be used to convert geometry columns to a format that Sedona can interpret.
@@ -407,7 +433,7 @@ For Postgis there is no need to add a query to convert geometry types since it's
 		.withColumn("geom", f.expr("ST_GeomFromWKB(geom)")))
 	```
 
-## Load from GeoPackage
+## Load GeoPackage
 
 Since v1.7.0, Sedona supports loading Geopackage file format as a DataFrame.
 
@@ -431,7 +457,7 @@ Since v1.7.0, Sedona supports loading Geopackage file format as a DataFrame.
 
 See [this page](files/geopackage-sedona-spark.md) for more information on loading GeoPackage.
 
-## Load from OSM PBF
+## Load OSM PBF
 
 Since v1.7.1, Sedona supports loading OSM PBF file format as a DataFrame.
 
@@ -526,14 +552,6 @@ and for relation
 |34392|relation|    NULL|{distance -> 1047...|[150033976, 25076...|[main_stream, mai...|[WAY, WAY, WAY, W...|
 +-----+--------+--------+--------------------+--------------------+--------------------+--------------------+
 ```
-
-Known limitations (v1.7.0):
-
-- webp rasters are not supported
-- ewkb geometries are not supported
-- filtering based on geometries envelopes are not supported
-
-All points above should be resolved soon, stay tuned !
 
 ## Transform the Coordinate Reference System
 
@@ -1188,7 +1206,7 @@ SELECT ST_AsText(countyshape)
 FROM polygondf
 ```
 
-## Save as GeoJSON
+## Save GeoJSON
 
 Since `v1.6.1`, the GeoJSON data source in Sedona can be used to save a Spatial DataFrame to a single-line JSON file, with geometries written in GeoJSON format.
 

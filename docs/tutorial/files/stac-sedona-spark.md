@@ -274,10 +274,11 @@ These examples demonstrate how to use the Client class to search for items in a 
 Opens a connection to the specified STAC API URL.
 
 Parameters:
-* `url` (*str*): The URL of the STAC API to connect to.
-  * Example: `"https://planetarycomputer.microsoft.com/api/stac/v1"`
+
+* `url` (*str*): The URL of the STAC API to connect to. Example: `"https://planetarycomputer.microsoft.com/api/stac/v1"`
 
 Returns:
+
 * `Client`: An instance of the `Client` class connected to the specified URL.
 
 ---
@@ -286,10 +287,11 @@ Returns:
 Retrieves a collection client for the specified collection ID.
 
 Parameters:
-* `collection_id` (*str*): The ID of the collection to retrieve.
-  * Example: `"aster-l1t"`
+
+* `collection_id` (*str*): The ID of the collection to retrieve. Example: `"aster-l1t"`
 
 Returns:
+
 * `CollectionClient`: An instance of the `CollectionClient` class for the specified collection.
 
 ---
@@ -299,23 +301,15 @@ Searches for items in the specified collection with optional filters.
 
 Parameters:
 
-* `ids` (*Union[str, list]*): A variable number of item IDs to filter the items.
-  * Example: `"item_id1"` or `["item_id1", "item_id2"]`
-* `collection_id` (*str*): The ID of the collection to search in.
-  * Example: `"aster-l1t"`
-* `bbox` (*Optional[list]*): A list of bounding boxes for filtering the items. Each bounding box is represented as a list of four float values: `[min_lon, min_lat, max_lon, max_lat]`.
-  * Example: `[[ -180.0, -90.0, 180.0, 90.0 ]]`
-* `datetime` (*Optional[Union[str, datetime.datetime, list]]*): A single datetime, RFC 3339-compliant timestamp, or a list of date-time ranges for filtering the items.
-  * Examples:
-    * `"2020-01-01T00:00:00Z"`
-    * `datetime.datetime(2020, 1, 1)`
-    * `[["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]`
-* `max_items` (*Optional[int]*): The maximum number of items to return from the search, even if there are more matching results.
-  * Example: `100`
-* `return_dataframe` (*bool*): If `True` (default), return the result as a Spark DataFrame instead of an iterator of `PyStacItem` objects.
-  * Example: `True`
+* `ids` (*Union[str, list]*): A variable number of item IDs to filter the items. Example: `"item_id1"` or `["item_id1", "item_id2"]`
+* `collection_id` (*str*): The ID of the collection to search in. Example: `"aster-l1t"`
+* `bbox` (*Optional[list]*): A list of bounding boxes for filtering the items, represented as `[min_lon, min_lat, max_lon, max_lat]`. Example: `[[ -180.0, -90.0, 180.0, 90.0 ]]`
+* `datetime` (*Optional[Union[str, datetime.datetime, list]]*): A single datetime, RFC 3339-compliant timestamp, or a list of date-time ranges. Example: `"2020-01-01T00:00:00Z"`, `datetime.datetime(2020, 1, 1)`, `[["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]`
+* `max_items` (*Optional[int]*): The maximum number of items to return. Example: `100`
+* `return_dataframe` (*bool*): If `True` (default), return the result as a Spark DataFrame instead of an iterator of `PyStacItem` objects. Example: `True`
 
 Returns:
+
 * *Union[Iterator[PyStacItem], DataFrame]*: An iterator of `PyStacItem` objects or a Spark DataFrame that matches the specified filters.
 
 ## References
