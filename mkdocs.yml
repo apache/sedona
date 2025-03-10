@@ -66,6 +66,9 @@ nav:
               - GeoParquet: tutorial/files/geoparquet-sedona-spark.md
               - GeoJSON: tutorial/files/geojson-sedona-spark.md
               - Shapefiles: tutorial/files/shapefiles-sedona-spark.md
+          - Concepts:
+              - Spatial Joins: tutorial/concepts/spatial-joins.md
+              - Clustering Algorithms: tutorial/concepts/clustering-algorithms.md
           - Map visualization SQL app:
               - Scala/Java: tutorial/viz.md
               - Use Apache Zeppelin: tutorial/zeppelin.md
@@ -81,9 +84,6 @@ nav:
       - Examples:
           - Scala/Java: tutorial/demo.md
           - Python: tutorial/jupyter-notebook.md
-      - Concepts:
-          - Spatial Joins: tutorial/concepts/spatial-joins.md
-          - Clustering Algorithms: tutorial/concepts/clustering-algorithms.md
   - API Docs:
       - Sedona with Apache Spark:
           - SQL:
