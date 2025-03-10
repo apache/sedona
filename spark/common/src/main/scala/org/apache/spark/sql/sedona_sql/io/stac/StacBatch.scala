@@ -48,7 +48,11 @@ case class StacBatch(
     temporalFilter: Option[TemporalFilter])
     extends Batch {
 
-  private val defaultItemsLimitPerRequest = opts.getOrElse("itemsLimitPerRequest", "10").toInt
+  private val defaultItemsLimitPerRequest: Int = {
+    val itemsLimitMax = opts.getOrElse("itemsLimitMax", "-1").toInt
+    val limitPerRequest = opts.getOrElse("itemsLimitPerRequest", "10").toInt
+    if (itemsLimitMax > 0 && limitPerRequest > itemsLimitMax) itemsLimitMax else limitPerRequest
+  }
   private val itemsLoadProcessReportThreshold =
     opts.getOrElse("itemsLoadProcessReportThreshold", "1000000").toInt
   private var itemMaxLeft: Int = -1
