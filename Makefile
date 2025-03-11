@@ -65,3 +65,7 @@ clean:
 	rm -rf __pycache__
 	rm -rf .mypy_cache
 	rm -rf .pytest_cache
+
+run-docs:
+	docker build -f docker/docs/Dockerfile -t mkdocs-sedona .
+	docker run --rm -it -p 8000:8000 -v ${PWD}:/docs mkdocs-sedona

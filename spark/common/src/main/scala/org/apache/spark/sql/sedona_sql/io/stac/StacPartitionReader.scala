@@ -62,7 +62,7 @@ class StacPartitionReader(
         val tempFile = File.createTempFile("stac_item_", ".json")
         val writer = new PrintWriter(tempFile)
         try {
-          val fileContent = Source.fromURL(url).mkString
+          val fileContent = fetchContentWithRetry(url)
           val rootNode = mapper.readTree(fileContent)
           val nodeType = rootNode.get("type").asText()
 
@@ -148,6 +148,29 @@ class StacPartitionReader(
         System.getProperty("java.io.tmpdir"))) {
       file.delete()
     }
+  }
+
+  def fetchContentWithRetry(url: java.net.URL, maxRetries: Int = 3): String = {
+    var attempt = 0
+    var success = false
+    var fileContent: String = ""
+
+    while (attempt < maxRetries && !success) {
+      try {
+        fileContent = Source.fromURL(url).mkString
+        success = true
+      } catch {
+        case e: Exception =>
+          attempt += 1
+          if (attempt >= maxRetries) {
+            throw new RuntimeException(
+              s"Failed to fetch content from URL after $maxRetries attempts",
+              e)
+          }
+      }
+    }
+
+    fileContent
   }
 
   /**

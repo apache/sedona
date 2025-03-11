@@ -21,7 +21,7 @@ Sedona offers a spatial data generator called Spider. It is a data source that g
 
 ## Quick Start
 
-Once you have your [`SedonaContext` object created](../Overview#quick-start), you can create a DataFrame with the `spider` data source.
+Once you have your [`SedonaContext` object created](Overview.md#quick-start), you can create a DataFrame with the `spider` data source.
 
 ```python
 df_random_points = sedona.read.format("spider").load(n=1000, distribution="uniform")

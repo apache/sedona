@@ -302,7 +302,7 @@ Please use the following steps:
 
 ### 1. Generate S2 ids for both tables
 
-Use [ST_S2CellIds](../../api/snowflake/vector-data/Function.md#ST_S2CellIDs) to generate cell IDs. Each geometry may produce one or more IDs.
+Use [ST_S2CellIds](../../api/snowflake/vector-data/Function.md#st_s2cellids) to generate cell IDs. Each geometry may produce one or more IDs.
 
 ```sql
 SELECT * FROM lefts, TABLE(FLATTEN(ST_S2CellIDs(lefts.geom, 15))) s1

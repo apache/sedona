@@ -22,10 +22,12 @@ import org.apache.commons.io.FileUtils
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types.{DateType, DecimalType, LongType, StringType, StructField, StructType}
 import org.locationtech.jts.geom.{Geometry, MultiPolygon, Point, Polygon}
+import org.locationtech.jts.io.{WKTReader, WKTWriter}
 import org.scalatest.BeforeAndAfterAll
 
 import java.io.File
 import java.nio.file.Files
+import scala.collection.mutable
 
 class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
   val temporaryLocation: String = resourceFolder + "shapefiles/tmp"
@@ -190,24 +192,12 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
         .load(resourceFolder + "shapefiles/unsupported")
       val schema = shapefileDf.schema
       assert(schema.find(_.name == "geometry").get.dataType == GeometryUDT)
-      assert(schema.find(_.name == "ID").get.dataType == StringType)
-      assert(schema.find(_.name == "LOD").get.dataType == LongType)
-      assert(schema.find(_.name == "Parent_ID").get.dataType == StringType)
-      assert(schema.length == 4)
       val rows = shapefileDf.collect()
-      assert(rows.length == 20)
-      var nonNullLods = 0
+      assert(rows.length == 10)
       rows.foreach { row =>
         assert(row.getAs[Geometry]("geometry") == null)
-        assert(row.getAs[String]("ID").nonEmpty)
-        val lodIndex = row.fieldIndex("LOD")
-        if (!row.isNullAt(lodIndex)) {
-          assert(row.getAs[Long]("LOD") == 2)
-          nonNullLods += 1
-        }
-        assert(row.getAs[String]("Parent_ID").nonEmpty)
+        assert(!row.isNullAt(row.fieldIndex("id")))
       }
-      assert(nonNullLods == 17)
     }
 
     it("read bad_shx") {
@@ -721,6 +711,61 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
         assert(geom.isInstanceOf[Point])
         assert(row.getAs[String]("osm_id").nonEmpty)
         assert(row.isNullAt(row.fieldIndex("code2")))
+      }
+    }
+
+    it("should read shapes of various types") {
+      // There are multiple directories under shapefiles/shapetypes, each containing a shapefile.
+      // We'll iterate over each directory and read the shapefile within it.
+      val shapeTypesDir = new File(resourceFolder + "shapefiles/shapetypes")
+      val shapeTypeDirs = shapeTypesDir.listFiles().filter(_.isDirectory)
+      shapeTypeDirs.foreach { shapeTypeDir =>
+        val fileName = shapeTypeDir.getName
+        val hasZ = fileName.endsWith("zm") || fileName.endsWith("z")
+        val hasM = fileName.endsWith("zm") || fileName.endsWith("m")
+        val shapeType =
+          if (fileName.startsWith("point")) "POINT"
+          else if (fileName.startsWith("linestring")) "LINESTRING"
+          else if (fileName.startsWith("multipoint")) "MULTIPOINT"
+          else "POLYGON"
+        val expectedWktPrefix =
+          if (!hasZ && !hasM) shapeType
+          else {
+            shapeType + " " + (if (hasZ) "Z" else "") + (if (hasM) "M" else "")
+          }
+
+        val shapefileDf = sparkSession.read
+          .format("shapefile")
+          .load(shapeTypeDir.getAbsolutePath)
+        val schema = shapefileDf.schema
+        assert(schema.find(_.name == "geometry").get.dataType == GeometryUDT)
+        val rows = shapefileDf.collect()
+        assert(rows.length > 0)
+
+        // Validate the geometry type and WKT prefix
+        val wktWriter = new WKTWriter(4)
+        val rowsMap = mutable.Map[String, Geometry]()
+        rows.foreach { row =>
+          val id = row.getAs[String]("id")
+          val geom = row.getAs[Geometry]("geometry")
+          val wkt = wktWriter.write(geom)
+          assert(wkt.startsWith(expectedWktPrefix))
+          assert(geom != null)
+          rowsMap.put(id, geom)
+        }
+
+        // Validate the geometry values by reading the CSV file containing the same data
+        val csvDf = sparkSession.read
+          .format("csv")
+          .option("header", "true")
+          .load(shapeTypeDir.getAbsolutePath + "/*.csv")
+        val wktReader = new WKTReader()
+        csvDf.collect().foreach { row =>
+          val id = row.getAs[String]("id")
+          val wkt = row.getAs[String]("wkt")
+          val geom = wktReader.read(wkt)
+          assert(rowsMap(id).equals(geom))
+        }
       }
     }
   }

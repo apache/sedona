@@ -190,7 +190,16 @@ a_thing/
 
 Sedona writes multiple GeoJSON files in parallel, which is faster than writing a single file.
 
-Note that the DataFrame must contain a column named geometry for the write operation to work.
+Note that the DataFrame must contain at least one column with geometry type for the write operation to work. Sedona will use the following rules to determine which column to use as the geometry:
+
+1. If there's a column named "geometry" with geometry type, Sedona will use this column
+2. Otherwise, Sedona will use the first geometry column found in the root schema
+
+You can also manually specify which geometry column to use with the "geometry.column" option:
+
+```python
+df.write.format("geojson").option("geometry.column", "geometry").save("/tmp/a_thing")
+```
 
 Now let’s read these GeoJSON files into a DataFrame:
 

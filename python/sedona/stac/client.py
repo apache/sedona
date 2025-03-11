@@ -60,10 +60,22 @@ class Client:
         """
         return CollectionClient(self.url, collection_id)
 
+    def get_collection_from_catalog(self):
+        """
+        Retrieves the catalog from the STAC API.
+
+        This method fetches the root catalog from the STAC API, providing access to all collections and items.
+
+        Returns:
+        - dict: The root catalog of the STAC API.
+        """
+        # Implement logic to fetch and return the root catalog
+        return CollectionClient(self.url, None)
+
     def search(
         self,
         *ids: Union[str, list],
-        collection_id: str,
+        collection_id: Optional[str] = None,
         bbox: Optional[list] = None,
         datetime: Optional[Union[str, python_datetime.datetime, list]] = None,
         max_items: Optional[int] = None,
@@ -76,7 +88,7 @@ class Client:
         - ids (Union[str, list]): A variable number of item IDs to filter the items.
           Example: "item_id1" or ["item_id1", "item_id2"]
 
-        - collection_id (str): The ID of the collection to search in.
+        - collection_id (Optional[str]): The ID of the collection to search in.
           Example: "aster-l1t"
 
         - bbox (Optional[list]): A list of bounding boxes for filtering the items.
@@ -101,7 +113,10 @@ class Client:
         Returns:
         - Union[Iterator[PyStacItem], DataFrame]: An iterator of PyStacItem objects or a Spark DataFrame that match the specified filters.
         """
-        client = self.get_collection(collection_id)
+        if collection_id:
+            client = self.get_collection(collection_id)
+        else:
+            client = self.get_collection_from_catalog()
         if return_dataframe:
             return client.get_dataframe(
                 *ids, bbox=bbox, datetime=datetime, max_items=max_items

@@ -14,13 +14,24 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 #  under the License.
+import itertools
+from typing import List, Callable
 
 # We may be able to achieve streaming rather than complete materialization by using
 # with the ArrowStreamSerializer (instead of the ArrowCollectSerializer)
 
 
-from sedona.sql.types import GeometryType
 from sedona.sql.st_functions import ST_AsEWKB
+from pyspark.sql import SparkSession
+from pyspark.sql import DataFrame
+from pyspark.sql.types import StructType, StructField, DataType, ArrayType, MapType
+
+from sedona.sql.types import GeometryType
+import geopandas as gpd
+from pyspark.sql.pandas.types import (
+    from_arrow_type,
+)
+from pyspark.sql.pandas.serializers import ArrowStreamPandasSerializer
 
 
 def dataframe_to_arrow(df, crs=None):
@@ -60,9 +71,9 @@ def dataframe_to_arrow(df, crs=None):
         # Using the extension type ensures that the type and its metadata will
         # propagate through all pyarrow transformations.
         import geoarrow.types as gat
-        from geoarrow.types.type_pyarrow import register_extension_types
 
-        register_extension_types()
+        try_register_extension_types()
+
         spec = gat.wkb()
 
         new_cols = [
@@ -106,7 +117,16 @@ def dataframe_to_arrow_raw(df):
 
     self_destruct = jconf.arrowPySparkSelfDestructEnabled()
     batches = df._collect_as_arrow(split_batches=self_destruct)
+
+    # The zero row case can use from_batches() with schema (nothing to cast)
+    if not batches:
+        return pa.Table.from_batches([], schema)
+
+    # When batches were returned, use cast(schema). This was backported from
+    # Spark, where presumably there is a good reason that the schemas of batches
+    # may not necessarily align with that of schema (thus a cast is required)
     table = pa.Table.from_batches(batches).cast(schema)
+
     # Ensure only the table has a reference to the batches, so that
     # self_destruct (if enabled) is effective
     del batches
@@ -150,6 +170,21 @@ def crs_to_json(crs):
         return pyproj.CRS(crs).to_json()
 
 
+def try_register_extension_types():
+    """Try to register extension types using geoarrow-types
+
+    Do this defensively, because it can fail if the extension type was
+    registered in some other way (notably: old versions of geoarrow-pyarrow,
+    which is a dependency of Kepler).
+    """
+    from geoarrow.types.type_pyarrow import register_extension_types
+
+    try:
+        register_extension_types()
+    except RuntimeError:
+        pass
+
+
 def unique_srid_from_ewkb(obj):
     import pyarrow as pa
     import pyarrow.compute as pc
@@ -186,3 +221,129 @@ def unique_srid_from_ewkb(obj):
     import pyproj
 
     return pyproj.CRS(f"EPSG:{epsg_code}")
+
+
+def _dedup_names(names: List[str]) -> List[str]:
+    if len(set(names)) == len(names):
+        return names
+    else:
+
+        def _gen_dedup(_name: str) -> Callable[[], str]:
+            _i = itertools.count()
+            return lambda: f"{_name}_{next(_i)}"
+
+        def _gen_identity(_name: str) -> Callable[[], str]:
+            return lambda: _name
+
+        gen_new_name = {
+            name: _gen_dedup(name) if len(list(group)) > 1 else _gen_identity(name)
+            for name, group in itertools.groupby(sorted(names))
+        }
+        return [gen_new_name[name]() for name in names]
+
+
+# Backport from Spark 4.0
+# https://github.com/apache/spark/blob/3515b207c41d78194d11933cd04bddc21f8418dd/python/pyspark/sql/pandas/types.py#L1385
+def _deduplicate_field_names(dt: DataType) -> DataType:
+    if isinstance(dt, StructType):
+        dedup_field_names = _dedup_names(dt.names)
+
+        return StructType(
+            [
+                StructField(
+                    dedup_field_names[i],
+                    _deduplicate_field_names(field.dataType),
+                    nullable=field.nullable,
+                )
+                for i, field in enumerate(dt.fields)
+            ]
+        )
+    elif isinstance(dt, ArrayType):
+        return ArrayType(
+            _deduplicate_field_names(dt.elementType), containsNull=dt.containsNull
+        )
+    elif isinstance(dt, MapType):
+        return MapType(
+            _deduplicate_field_names(dt.keyType),
+            _deduplicate_field_names(dt.valueType),
+            valueContainsNull=dt.valueContainsNull,
+        )
+    else:
+        return dt
+
+
+def infer_schema(gdf: gpd.GeoDataFrame) -> StructType:
+    import pyarrow as pa
+
+    fields = gdf.dtypes.reset_index().values.tolist()
+    geom_fields = []
+    index = 0
+    for name, dtype in fields:
+        if dtype == "geometry":
+            geom_fields.append((index, name))
+            continue
+
+        index += 1
+
+    if not geom_fields:
+        raise ValueError("No geometry field found in the GeoDataFrame")
+
+    pa_schema = pa.Schema.from_pandas(
+        gdf.drop([name for _, name in geom_fields], axis=1)
+    )
+
+    spark_schema = []
+
+    for field in pa_schema:
+        field_type = field.type
+        spark_type = from_arrow_type(field_type)
+        spark_schema.append(StructField(field.name, spark_type, True))
+
+    for index, geom_field in geom_fields:
+        spark_schema.insert(index, StructField(geom_field, GeometryType(), True))
+
+    return StructType(spark_schema)
+
+
+# Modified backport from Spark 4.0
+# https://github.com/apache/spark/blob/3515b207c41d78194d11933cd04bddc21f8418dd/python/pyspark/sql/pandas/conversion.py#L632
+def create_spatial_dataframe(spark: SparkSession, gdf: gpd.GeoDataFrame) -> DataFrame:
+    from pyspark.sql.pandas.types import (
+        to_arrow_type,
+    )
+
+    def reader_func(temp_filename):
+        return spark._jvm.PythonSQLUtils.readArrowStreamFromFile(temp_filename)
+
+    def create_iter_server():
+        return spark._jvm.ArrowIteratorServer()
+
+    schema = infer_schema(gdf)
+    timezone = spark._jconf.sessionLocalTimeZone()
+    step = spark._jconf.arrowMaxRecordsPerBatch()
+    step = step if step > 0 else len(gdf)
+    pdf_slices = (gdf.iloc[start : start + step] for start in range(0, len(gdf), step))
+    spark_types = [_deduplicate_field_names(f.dataType) for f in schema.fields]
+
+    arrow_data = [
+        [
+            (c, to_arrow_type(t) if t is not None else None, t)
+            for (_, c), t in zip(pdf_slice.items(), spark_types)
+        ]
+        for pdf_slice in pdf_slices
+    ]
+
+    safecheck = spark._jconf.arrowSafeTypeConversion()
+    ser = ArrowStreamPandasSerializer(timezone, safecheck)
+    jiter = spark._sc._serialize_to_jvm(
+        arrow_data, ser, reader_func, create_iter_server
+    )
+
+    jsparkSession = spark._jsparkSession
+    jdf = spark._jvm.PythonSQLUtils.toDataFrame(jiter, schema.json(), jsparkSession)
+
+    df = DataFrame(jdf, spark)
+
+    df._schema = schema
+
+    return df
