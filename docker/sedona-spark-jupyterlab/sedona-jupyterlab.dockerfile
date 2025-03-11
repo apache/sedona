@@ -48,7 +48,8 @@ RUN ${SEDONA_HOME}/docker/spark.sh ${spark_version} ${hadoop_s3_version} ${aws_s
 
 # Install Python dependencies
 COPY docker/sedona-spark-jupyterlab/requirements.txt /opt/requirements.txt
-RUN pip3 install --default-timeout=100 -r /opt/requirements.txt
+RUN pip3 install -r /opt/requirements.txt
+
 
 RUN ${SEDONA_HOME}/docker/sedona.sh ${sedona_version} ${geotools_wrapper_version} ${spark_version} ${spark_extension_version}
 RUN ${SEDONA_HOME}/docker/zeppelin/install-zeppelin.sh ${zeppelin_version} /opt
@@ -56,6 +57,9 @@ RUN ${SEDONA_HOME}/docker/zeppelin/install-zeppelin.sh ${zeppelin_version} /opt
 COPY docker/zeppelin/conf/zeppelin-site.xml ${ZEPPELIN_HOME}/conf/
 COPY docker/zeppelin/conf/helium.json ${ZEPPELIN_HOME}/conf/
 COPY docker/zeppelin/conf/interpreter.json ${ZEPPELIN_HOME}/conf/
+# Extract version from the actual JAR file and update interpreter.json
+RUN jar_name=$(find "${SPARK_HOME}/jars/" -name "sedona-spark-shaded-*.jar" | head -n 1) && \
+    sed -i "s|\(\"groupArtifactVersion\": \).*|\1\"${jar_name}\",|" "${ZEPPELIN_HOME}/conf/interpreter.json"
 RUN mkdir ${ZEPPELIN_HOME}/helium
 RUN mkdir ${ZEPPELIN_HOME}/leaflet
 RUN mkdir ${ZEPPELIN_HOME}/notebook/sedona-tutorial
