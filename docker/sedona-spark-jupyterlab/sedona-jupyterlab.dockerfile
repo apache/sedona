@@ -50,7 +50,6 @@ RUN ${SEDONA_HOME}/docker/spark.sh ${spark_version} ${hadoop_s3_version} ${aws_s
 COPY docker/sedona-spark-jupyterlab/requirements.txt /opt/requirements.txt
 RUN pip3 install -r /opt/requirements.txt
 
-
 RUN ${SEDONA_HOME}/docker/sedona.sh ${sedona_version} ${geotools_wrapper_version} ${spark_version} ${spark_extension_version}
 RUN ${SEDONA_HOME}/docker/zeppelin/install-zeppelin.sh ${zeppelin_version} /opt
 # Set up Zeppelin configuration
