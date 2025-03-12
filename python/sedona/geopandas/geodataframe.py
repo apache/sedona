@@ -46,7 +46,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         index=None,
         columns=None,
         dtype=None,
-        name=None,
         copy=False,
         geometry: Any | None = None,
         crs: Any | None = None,
@@ -63,7 +62,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             data, (GeoDataFrame, GeoSeries, PandasOnSparkSeries, PandasOnSparkDataFrame)
         ):
             assert dtype is None
-            assert name is None
             assert not copy
 
             self._anchor = data
@@ -72,7 +70,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             if isinstance(data, pd.DataFrame):
                 assert index is None
                 assert dtype is None
-                assert name is None
                 assert not copy
                 df = data
             else:
@@ -126,9 +123,34 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
-    def copy(self: GeoFrameLike) -> GeoFrameLike:
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def copy(self, deep=False):
+        """
+        Make a copy of this GeoDataFrame object.
+
+        Parameters:
+        - deep: bool, default False
+            If True, a deep copy of the data is made. Otherwise, a shallow copy is made.
+
+        Returns:
+        - GeoDataFrame: A copy of this GeoDataFrame object.
+
+        Examples:
+        >>> from shapely.geometry import Point
+        >>> import geopandas as gpd
+        >>> from sedona.geopandas import GeoDataFrame
+
+        >>> gdf = GeoDataFrame([{"geometry": Point(1, 1), "value1": 2, "value2": 3}])
+        >>> gdf_copy = gdf.copy()
+        >>> print(gdf_copy)
+           geometry  value1  value2
+        0  POINT (1 1)       2       3
+        """
+        if deep:
+            return GeoDataFrame(
+                self._anchor.copy(), dtype=self.dtypes, index=self._col_label
+            )
+        else:
+            return self
 
     @property
     def area(self):
