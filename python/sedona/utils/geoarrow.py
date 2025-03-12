@@ -58,8 +58,6 @@ def dataframe_to_arrow(df, crs=None):
       the output if exactly one CRS is present in the output.
     :return:
     """
-    import pyarrow as pa
-
     col_is_geometry = [isinstance(f.dataType, GeometryType) for f in df.schema.fields]
 
     if not any(col_is_geometry):
@@ -67,30 +65,7 @@ def dataframe_to_arrow(df, crs=None):
 
     df_projected = project_dataframe_geoarrow(df, col_is_geometry)
     table = dataframe_to_arrow_raw(df_projected)
-
-    try:
-        # Using geoarrow-types is the preferred mechanism for Arrow output.
-        # Using the extension type ensures that the type and its metadata will
-        # propagate through all pyarrow transformations.
-        import geoarrow.types as gat
-        from geoarrow.types.type_pyarrow import register_extension_types
-
-        register_extension_types()
-        spec = gat.wkb()
-
-        new_cols = [
-            wrap_geoarrow_extension(col, spec, crs) if is_geom else col
-            for is_geom, col in zip(col_is_geometry, table.columns)
-        ]
-
-        return pa.table(new_cols, table.column_names)
-    except ImportError:
-        # In the event that we don't have access to GeoArrow extension types,
-        # we can still add field metadata that will propagate through some types
-        # of operations (e.g., writing this table to a file or passing it to
-        # DuckDB as long as no intermediate transformations were applied).
-        schema = raw_schema_to_geoarrow_schema(table.schema, col_is_geometry, crs)
-        return table.from_arrays(table.columns, schema=schema)
+    return wrap_table_or_batch(table, col_is_geometry, crs)
 
 
 class GeoArrowDataFrameReader:
@@ -147,7 +122,9 @@ class GeoArrowDataFrameReader:
         try:
             for batch_or_indices in self._batch_stream:
                 if isinstance(batch_or_indices, pa.RecordBatch):
-                    yield batch_or_indices
+                    yield wrap_table_or_batch(
+                        batch_or_indices, self._col_is_geometry, self._crs
+                    )
                 else:
                     self._batch_order = batch_or_indices
         finally:
@@ -168,8 +145,9 @@ class GeoArrowDataFrameReader:
 
         with unwrap_spark_exception():
             # Join serving thread and raise any exceptions from collectAsArrowToPython
-            self._jsocket_auth_server.getResult()
+            auth_server = self._jsocket_auth_server
             self._jsocket_auth_server = None
+            auth_server.getResult()
 
 
 def project_dataframe_geoarrow(df, col_is_geometry):
@@ -202,6 +180,34 @@ def raw_schema_to_geoarrow_schema(raw_schema, col_is_geometry, crs):
     ]
 
     return pa.schema(new_fields)
+
+
+def wrap_table_or_batch(table_or_batch, col_is_geometry, crs):
+    try:
+        # Using geoarrow-types is the preferred mechanism for Arrow output.
+        # Using the extension type ensures that the type and its metadata will
+        # propagate through all pyarrow transformations.
+        import geoarrow.types as gat
+        from geoarrow.types.type_pyarrow import register_extension_types
+
+        register_extension_types()
+        spec = gat.wkb()
+
+        new_cols = [
+            wrap_geoarrow_extension(col, spec, crs) if is_geom else col
+            for is_geom, col in zip(col_is_geometry, table_or_batch.columns)
+        ]
+
+        return table_or_batch.from_arrays(new_cols, table_or_batch.column_names)
+    except ImportError:
+        # In the event that we don't have access to GeoArrow extension types,
+        # we can still add field metadata that will propagate through some types
+        # of operations (e.g., writing this table to a file or passing it to
+        # DuckDB as long as no intermediate transformations were applied).
+        schema = raw_schema_to_geoarrow_schema(
+            table_or_batch.schema, col_is_geometry, crs
+        )
+        return table_or_batch.from_arrays(table_or_batch.columns, schema=schema)
 
 
 def dataframe_to_arrow_raw(df):
