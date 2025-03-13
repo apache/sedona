@@ -161,7 +161,7 @@ def project_dataframe_geoarrow(df, col_is_geometry):
     return df.select(*df_columns)
 
 
-def raw_schema_to_geoarrow_schema(raw_schema, col_is_geometry, crs):
+def raw_schema_to_geoarrow_schema(raw_schema, col_is_geometry, crs, columns=None):
     import pyarrow as pa
 
     try:
@@ -171,9 +171,12 @@ def raw_schema_to_geoarrow_schema(raw_schema, col_is_geometry, crs):
     except ImportError:
         spec = None
 
+    if columns is None:
+        columns = [None] * len(col_is_geometry)
+
     new_fields = [
         (
-            wrap_geoarrow_field(raw_schema.field(i), None, crs, spec)
+            wrap_geoarrow_field(raw_schema.field(i), columns[i], crs, spec)
             if is_geom
             else raw_schema.field(i)
         )
@@ -206,7 +209,7 @@ def wrap_table_or_batch(table_or_batch, col_is_geometry, crs):
         # of operations (e.g., writing this table to a file or passing it to
         # DuckDB as long as no intermediate transformations were applied).
         schema = raw_schema_to_geoarrow_schema(
-            table_or_batch.schema, col_is_geometry, crs
+            table_or_batch.schema, col_is_geometry, crs, table_or_batch.columns
         )
         return table_or_batch.from_arrays(table_or_batch.columns, schema=schema)
 
