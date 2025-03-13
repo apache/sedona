@@ -24,9 +24,6 @@ from typing import List, Callable
 from sedona.sql.st_functions import ST_AsEWKB
 from pyspark.sql import SparkSession
 from pyspark.sql import DataFrame
-from pyspark.traceback_utils import SCCallSiteSync
-from pyspark.errors.exceptions.captured import unwrap_spark_exception
-from pyspark.sql.pandas.serializers import ArrowCollectSerializer
 from pyspark.sql.types import StructType, StructField, DataType, ArrayType, MapType
 
 try:
@@ -71,6 +68,8 @@ def dataframe_to_arrow(df, crs=None):
 class GeoArrowDataFrameReader:
     def __init__(self, df, crs=None):
         from pyspark.sql.pandas.types import to_arrow_schema
+        from pyspark.traceback_utils import SCCallSiteSync
+        from pyspark.sql.pandas.serializers import ArrowCollectSerializer
 
         self._crs = crs
         self._batch_order = None
@@ -140,6 +139,8 @@ class GeoArrowDataFrameReader:
         self._finish_stream()
 
     def _finish_stream(self):
+        from pyspark.errors.exceptions.captured import unwrap_spark_exception
+
         if self._jsocket_auth_server is None:
             return
 
