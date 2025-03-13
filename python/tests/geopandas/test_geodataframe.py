@@ -168,11 +168,6 @@ class TestDataframe(TestBase):
         assert "id" in buffer_df.columns
         assert "value" in buffer_df.columns
 
-        # Check that the buffer operation was applied (data integrity)
-        buffer_df._internal.spark_frame.printSchema()
-        buffer_df._internal.spark_frame.show()
-        buffered_geoms = buffer_df["geometry1"]
-
         # Convert to pandas to extract individual geometries
         pandas_df = buffer_df._internal.spark_frame.select("geometry1").toPandas()
 
