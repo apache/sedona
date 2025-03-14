@@ -16,7 +16,7 @@
 #  under the License.
 
 """
-.. versionadded:: 1.7.1
+.. versionadded:: 1.8.0
     geopandas API on Sedona
 """
 
