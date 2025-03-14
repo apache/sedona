@@ -92,8 +92,6 @@ class TestDataframe(TestBase):
         data = {"geometry1": points1, "geometry2": points2, "attribute": [1, 2, 3]}
 
         df = GeoDataFrame(data)
-        df._internal.spark_frame.printSchema()
-        df._internal.spark_frame.show()
         assert type(df) is GeoDataFrame
 
         schema = df._internal.spark_frame.schema
