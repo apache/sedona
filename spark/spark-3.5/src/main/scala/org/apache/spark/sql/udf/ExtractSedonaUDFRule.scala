@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.strategies
+package org.apache.spark.sql.udf
 
+import org.apache.sedona.sql.UDF.PythonEvalType
 import org.apache.spark.sql.catalyst.expressions.{AttributeReference, Expression, ExpressionSet, PythonUDF}
 import org.apache.spark.sql.catalyst.plans.logical.{LogicalPlan, Project, Subquery}
 import org.apache.spark.sql.catalyst.rules.Rule
@@ -25,7 +26,7 @@ import org.apache.spark.sql.catalyst.trees.TreePattern.PYTHON_UDF
 
 import scala.collection.mutable
 
-object ExtractSedonaUDF extends Rule[LogicalPlan] {
+class ExtractSedonaUDFRule extends Rule[LogicalPlan] {
 
   private def hasScalarPythonUDF(e: Expression): Boolean = {
     e.exists(PythonUDF.isScalarPythonUDF)

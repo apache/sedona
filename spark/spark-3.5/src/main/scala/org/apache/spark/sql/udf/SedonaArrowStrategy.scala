@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.strategies
+package org.apache.spark.sql.udf
 
+import org.apache.sedona.sql.UDF.PythonEvalType
 import org.apache.spark.api.python.ChainedPythonFunctions
 import org.apache.spark.{JobArtifactSet, TaskContext}
 import org.apache.spark.sql.Strategy

@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.strategies
+package org.apache.spark.sql.udf
 
+import org.apache.sedona.sql.UDF
 import org.apache.spark.TestUtils
 import org.apache.spark.api.python._
 import org.apache.spark.broadcast.Broadcast
@@ -116,6 +117,6 @@ object ScalarUDF {
       broadcastVars = List.empty[Broadcast[PythonBroadcast]].asJava,
       accumulator = null),
     dataType = GeometryUDT,
-    pythonEvalType = PythonEvalType.SQL_SCALAR_SEDONA_UDF,
+    pythonEvalType = UDF.PythonEvalType.SQL_SCALAR_SEDONA_UDF,
     udfDeterministic = true)
 }

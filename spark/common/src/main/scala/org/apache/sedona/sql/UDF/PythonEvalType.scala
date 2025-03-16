@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.strategies
+package org.apache.sedona.sql.UDF
 
 object PythonEvalType {
   val SQL_SCALAR_SEDONA_UDF = 5200
