@@ -111,6 +111,13 @@ jobs:
         run: |
           SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
           pip freeze
+          if [ "${SPARK_VERSION}" == "3.5.0" ]; then
+              pip install pyspark==3.5.0 pandas
+          fi
+
+          pip show pyspark
+          export SPARK_HOME=/opt/spark
+
           mvn -q clean install -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} ${SKIP_TESTS}
       - run: mkdir staging
       - run: cp spark-shaded/target/sedona-*.jar staging
