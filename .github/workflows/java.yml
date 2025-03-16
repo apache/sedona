@@ -97,7 +97,7 @@ jobs:
           java-version: ${{ matrix.jdk }}
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.7'
+          python-version: '3.10'
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
