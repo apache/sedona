@@ -115,7 +115,7 @@ jobs:
               pip install pyspark==3.5.0 pandas
               pip show pyspark
               pip freeze
-              export SPARK_HOME=/opt/spark
+              export SPARK_HOME=/opt/hostedtoolcache/Python/3.10.16/x64/lib/python3.10/site-packages/pyspark
           fi
 
           mvn -q clean install -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} ${SKIP_TESTS}
