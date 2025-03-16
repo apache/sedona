@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../image/sedona_logo_symbol.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.8">
     
     
       
@@ -4722,10 +4722,6 @@ mvn<span class="w"> </span>-q<span class="w"> </span>-B<span class="w"> </span>r
 
 <span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;*****Step 2: Upload the Release Candidate to https://repository.apache.org.&quot;</span>
 
-<span class="c1"># For Spark 3.3 and Scala 2.12</span>
-mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.7.1-rc1<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.3 -Dscala=2.12&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.3<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.12
-
-<span class="c1"># For Spark 3.3 and Scala 2.13</span>
 <span class="c1">## Note that we use maven-release-plugin 2.3.2 instead of more recent version (e.g., 3.0.1) to get rid of a bug of maven-release-plugin,</span>
 <span class="c1">## which prevent us from cloning git repo with user specified -Dtag=&lt;tag&gt;.</span>
 <span class="c1">## Please refer to https://issues.apache.org/jira/browse/MRELEASE-933 and https://issues.apache.org/jira/browse/SCM-729 for details.</span>
@@ -4733,19 +4729,36 @@ mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:ma
 <span class="c1">## Please also note that system properties `-Dspark` and `-Dscala` has to be specified both for release:perform and the actual build parameters</span>
 <span class="c1">## in `-Darguments`, because the build profiles activated for release:perform task will also affect the actual build task. It is safer to specify</span>
 <span class="c1">## these system properties for both tasks.</span>
-mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.7.1-rc1<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.3 -Dscala=2.13&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.3<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13
 
-<span class="c1"># For Spark 3.4 and Scala 2.12</span>
-mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.7.1-rc1<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.4 -Dscala=2.12&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.4<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.12
+<span class="c1"># Define repository details</span>
+<span class="nv">REPO_URL</span><span class="o">=</span><span class="s2">&quot;https://github.com/apache/sedona.git&quot;</span>
+<span class="nv">TAG</span><span class="o">=</span><span class="s2">&quot;1.7.1-rc1&quot;</span>
+<span class="nv">LOCAL_DIR</span><span class="o">=</span><span class="s2">&quot;sedona-release&quot;</span>
 
-<span class="c1"># For Spark 3.4 and Scala 2.13</span>
-mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.7.1-rc1<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.4 -Dscala=2.13&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.4<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13
+<span class="c1"># Remove existing directory if it exists and clone the repository</span>
+rm<span class="w"> </span>-rf<span class="w"> </span><span class="nv">$LOCAL_DIR</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>--depth<span class="w"> </span><span class="m">1</span><span class="w"> </span>--branch<span class="w"> </span><span class="nv">$TAG</span><span class="w"> </span><span class="nv">$REPO_URL</span><span class="w"> </span><span class="nv">$LOCAL_DIR</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span><span class="nv">$LOCAL_DIR</span>
 
-<span class="c1"># For Spark 3.5 and Scala 2.12</span>
-mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.7.1-rc1<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.5 -Dscala=2.12&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.4<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.12
+<span class="c1"># Define the Maven release plugin version</span>
+<span class="nv">MAVEN_PLUGIN_VERSION</span><span class="o">=</span><span class="s2">&quot;2.3.2&quot;</span>
 
-<span class="c1"># For Spark 3.5 and Scala 2.13</span>
-mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.7.1-rc1<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.5 -Dscala=2.13&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.4<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13
+<span class="c1"># Define Spark and Scala versions</span>
+<span class="nb">declare</span><span class="w"> </span>-a<span class="w"> </span><span class="nv">SPARK_VERSIONS</span><span class="o">=(</span><span class="s2">&quot;3.3&quot;</span><span class="w"> </span><span class="s2">&quot;3.4&quot;</span><span class="w"> </span><span class="s2">&quot;3.5&quot;</span><span class="o">)</span>
+<span class="nb">declare</span><span class="w"> </span>-a<span class="w"> </span><span class="nv">SCALA_VERSIONS</span><span class="o">=(</span><span class="s2">&quot;2.12&quot;</span><span class="w"> </span><span class="s2">&quot;2.13&quot;</span><span class="o">)</span>
+
+<span class="c1"># Iterate through Spark and Scala versions</span>
+<span class="k">for</span><span class="w"> </span>SPARK<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">SPARK_VERSIONS</span><span class="p">[@]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span>SCALA<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">SCALA_VERSIONS</span><span class="p">[@]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Running release:perform for Spark </span><span class="nv">$SPARK</span><span class="s2"> and Scala </span><span class="nv">$SCALA</span><span class="s2">...&quot;</span>
+
+<span class="w">    </span>mvn<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:<span class="nv">$MAVEN_PLUGIN_VERSION</span>:perform<span class="w"> </span><span class="se">\</span>
+<span class="w">      </span>-DconnectionUrl<span class="o">=</span>scm:git:file://<span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="w"> </span><span class="se">\</span>
+<span class="w">      </span>-Dtag<span class="o">=</span><span class="nv">$TAG</span><span class="w"> </span><span class="se">\</span>
+<span class="w">      </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span><span class="se">\</span>
+<span class="w">      </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=</span><span class="nv">$SPARK</span><span class="s2"> -Dscala=</span><span class="nv">$SCALA</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">      </span>-Dspark<span class="o">=</span><span class="nv">$SPARK</span><span class="w"> </span><span class="se">\</span>
+<span class="w">      </span>-Dscala<span class="o">=</span><span class="nv">$SCALA</span>
+<span class="w">  </span><span class="k">done</span>
+<span class="k">done</span>
 
 <span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;*****Step 3: Upload Release Candidate on ASF SVN: https://dist.apache.org/repos/dist/dev/sedona&quot;</span>
 
@@ -5033,7 +5046,7 @@ R<span class="w"> </span>CMD<span class="w"> </span>check<span class="w"> </span
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="December 4, 2024 07:01:47">December 4, 2024 07:01:47</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="March 16, 2025 06:33:20">March 16, 2025 06:33:20</span>
   </span>
 
     
