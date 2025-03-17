@@ -6,6 +6,8 @@ import pyspark.sql.functions as f
 import shapely.geometry.base as b
 from time import time
 import geopandas as gpd
+import pytest
+import pyspark
 
 
 def non_vectorized_buffer_udf(geom: b.BaseGeometry) -> b.BaseGeometry:
@@ -36,6 +38,9 @@ class TestSedonaArrowUDF(TestBase):
             .collect()[0][0]
         )
 
+    @pytest.mark.skipif(
+        pyspark.__version__ < "3.5", reason="requires Spark 3.5 or higher"
+    )
     def test_pandas_arrow_udf(self):
         df = (
             self.spark.read.option("header", "true")
@@ -64,6 +69,9 @@ class TestSedonaArrowUDF(TestBase):
         for v, nv in zip(vectorized_times, non_vectorized_times):
             assert v < nv, "Vectorized UDF is slower than non-vectorized UDF"
 
+    @pytest.mark.skipif(
+        pyspark.__version__ < "3.5", reason="requires Spark 3.5 or higher"
+    )
     def test_geo_series_udf(self):
         df = (
             self.spark.read.option("header", "true")
