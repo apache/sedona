@@ -44,6 +44,7 @@ COPY ./ ${SEDONA_HOME}/
 RUN chmod +x ${SEDONA_HOME}/docker/spark.sh
 RUN chmod +x ${SEDONA_HOME}/docker/sedona.sh
 RUN chmod +x ${SEDONA_HOME}/docker/zeppelin/install-zeppelin.sh
+RUN chmod +x ${SEDONA_HOME}/docker/update-zeppelin-interpreter.sh
 RUN ${SEDONA_HOME}/docker/spark.sh ${spark_version} ${hadoop_s3_version} ${aws_sdk_version} ${spark_xml_version}
 
 # Install Python dependencies
@@ -57,26 +58,8 @@ COPY docker/zeppelin/conf/zeppelin-site.xml ${ZEPPELIN_HOME}/conf/
 COPY docker/zeppelin/conf/helium.json ${ZEPPELIN_HOME}/conf/
 COPY docker/zeppelin/conf/interpreter.json ${ZEPPELIN_HOME}/conf/
 # Extract version from the actual JAR file and update interpreter.json
-RUN /bin/sh -c ' \
-    sedona_jar=$(find "$SPARK_HOME/jars/" -name "sedona-spark-shaded-*.jar" | head -n 1); \
-    geotools_jar=$(find "$SPARK_HOME/jars/" -name "geotools-wrapper-*.jar" | head -n 1); \
-    if [ -z "$sedona_jar" ] || [ -z "$geotools_jar" ]; then \
-        echo "Error: One or both JARs not found in $SPARK_HOME/jars/"; \
-        exit 1; \
-    fi; \
-    jq --arg sedona "$sedona_jar" --arg geotools "$geotools_jar" \
-    '\''.interpreterSettings.spark.dependencies |= map( \
-        if .groupArtifactVersion | test("sedona-spark-shaded-.*\\.jar$") then \
-            .groupArtifactVersion = $sedona \
-        elif .groupArtifactVersion | test("geotools-wrapper-.*\\.jar$") then \
-            .groupArtifactVersion = $geotools \
-        else . end \
-    )'\'' "$ZEPPELIN_HOME/conf/interpreter.json" > "$ZEPPELIN_HOME/conf/interpreter.json.tmp"; \
-    mv "$ZEPPELIN_HOME/conf/interpreter.json.tmp" "$ZEPPELIN_HOME/conf/interpreter.json"; \
-    echo "Updated interpreter.json with:"; \
-    echo "  - Sedona JAR: $sedona_jar"; \
-    echo "  - GeoTools JAR: $geotools_jar" \
-'
+RUN ${SEDONA_HOME}/docker/update-zeppelin-interpreter.sh
+
 RUN mkdir ${ZEPPELIN_HOME}/helium
 RUN mkdir ${ZEPPELIN_HOME}/leaflet
 RUN mkdir ${ZEPPELIN_HOME}/notebook/sedona-tutorial
