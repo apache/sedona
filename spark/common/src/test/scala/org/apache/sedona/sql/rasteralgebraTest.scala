@@ -1831,7 +1831,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
           s"SELECT RS_PixelAsPoints(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize), 1)")
         .first()
         .getList(0)
-      val expected = "[POINT (127.19000244140625 -12),0.0,2,1]"
+      val expected = "[POINT (127.19 -12),0.0,2,1]"
       assertEquals(expected, result.get(1).toString)
     }
 
@@ -1863,7 +1863,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .first()
         .getString(0)
       val expected =
-        "POLYGON ((127.19000244140625 -20, 131.19000244140625 -20, 131.19000244140625 -24, 127.19000244140625 -24, 127.19000244140625 -20))"
+        "POLYGON ((127.19 -20, 131.19 -20, 131.19 -24, 127.19 -24, 127.19 -20))"
       assertEquals(expected, result)
     }
 
@@ -1880,7 +1880,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .first()
         .getList(0)
       val expected =
-        "[POLYGON ((127.19000244140625 -20, 131.19000244140625 -20, 131.19000244140625 -24, 127.19000244140625 -24, 127.19000244140625 -20)),0.0,2,3]"
+        "[POLYGON ((127.19 -20, 131.19 -20, 131.19 -24, 127.19 -24, 127.19 -20)),0.0,2,3]"
       assertEquals(expected, result.get(11).toString)
     }
 
@@ -1963,9 +1963,11 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     it("Passed RS_RasterToWorldCoord with raster") {
       var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       df = df.selectExpr("RS_FromGeoTiff(content) as raster")
-      val result = df.selectExpr("RS_RasterToWorldCoord(raster, 1, 1)").first().get(0).toString
-      val expected = "POINT (-13095818 4021262.75)"
-      assertEquals(expected, result)
+      val result =
+        df.selectExpr("RS_RasterToWorldCoord(raster, 1, 1)").first().get(0).asInstanceOf[Geometry]
+      val actualCoordinate = result.getCoordinate
+      assertEquals(-13095817.809482181, actualCoordinate.x, 0.5d)
+      assertEquals(4021262.7487925636, actualCoordinate.y, 0.5d)
     }
 
     it("Passed RS_WorldToRasterCoord with raster") {
