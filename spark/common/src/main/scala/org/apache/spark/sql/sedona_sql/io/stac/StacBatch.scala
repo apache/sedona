@@ -19,16 +19,19 @@
 package org.apache.spark.sql.sedona_sql.io.stac
 
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.connector.read.{Batch, InputPartition, PartitionReaderFactory}
 import org.apache.spark.sql.execution.datasource.stac.TemporalFilter
 import org.apache.spark.sql.execution.datasources.parquet.{GeoParquetSpatialFilter, GeometryFieldMetaData}
 import org.apache.spark.sql.sedona_sql.io.stac.StacUtils.getNumPartitions
 import org.apache.spark.sql.types.StructType
+import org.apache.spark.util.SerializableConfiguration
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
 import scala.jdk.CollectionConverters._
+import scala.util.Random
 import scala.util.control.Breaks.breakable
 
 /**
@@ -40,12 +43,14 @@ import scala.util.control.Breaks.breakable
  * which are necessary for batch data processing.
  */
 case class StacBatch(
+    broadcastConf: Broadcast[SerializableConfiguration],
     stacCollectionUrl: String,
     stacCollectionJson: String,
     schema: StructType,
     opts: Map[String, String],
     spatialFilter: Option[GeoParquetSpatialFilter],
-    temporalFilter: Option[TemporalFilter])
+    temporalFilter: Option[TemporalFilter],
+    limitFilter: Option[Int])
     extends Batch {
 
   private val defaultItemsLimitPerRequest: Int = {
@@ -82,10 +87,16 @@ case class StacBatch(
     // Initialize the itemLinks array
     val itemLinks = scala.collection.mutable.ArrayBuffer[String]()
 
-    // Start the recursive collection of item links
-    val itemsLimitMax = opts.getOrElse("itemsLimitMax", "-1").toInt
+    // Get the maximum number of items to process
+    val itemsLimitMax = limitFilter match {
+      case Some(limit) if limit >= 0 => limit
+      case _ => opts.getOrElse("itemsLimitMax", "-1").toInt
+    }
     val checkItemsLimitMax = itemsLimitMax > 0
+
+    // Start the recursive collection of item links
     setItemMaxLeft(itemsLimitMax)
+
     collectItemLinks(stacCollectionBasePath, stacCollectionJson, itemLinks, checkItemsLimitMax)
 
     // Handle when the number of items is less than 1
@@ -109,8 +120,9 @@ case class StacBatch(
     // Determine how many items to put in each partition
     val partitionSize = Math.ceil(itemLinks.length.toDouble / numPartitions).toInt
 
-    // Group the item links into partitions
-    itemLinks
+    // Group the item links into partitions, but randomize first for better load balancing
+    Random
+      .shuffle(itemLinks)
       .grouped(partitionSize)
       .zipWithIndex
       .map { case (items, index) =>
@@ -229,7 +241,7 @@ case class StacBatch(
           } else if (rel == "items" && href.startsWith("http")) {
             // iterate through the items and check if the limit is reached (if needed)
             if (iterateItemsWithLimit(
-                itemUrl + "?limit=" + defaultItemsLimitPerRequest,
+                getItemLink(itemUrl, defaultItemsLimitPerRequest, spatialFilter, temporalFilter),
                 needCountNextItems)) return
           }
         }
@@ -254,6 +266,17 @@ case class StacBatch(
         }
       }
     }
+  }
+
+  /** Adds an item link to the list of item links. */
+  def getItemLink(
+      itemUrl: String,
+      defaultItemsLimitPerRequest: Int,
+      spatialFilter: Option[GeoParquetSpatialFilter],
+      temporalFilter: Option[TemporalFilter]): String = {
+    val baseUrl = itemUrl + "?limit=" + defaultItemsLimitPerRequest
+    val urlWithFilters = StacUtils.addFiltersToUrl(baseUrl, spatialFilter, temporalFilter)
+    urlWithFilters
   }
 
   /**
@@ -361,6 +384,7 @@ case class StacBatch(
   override def createReaderFactory(): PartitionReaderFactory = { (partition: InputPartition) =>
     {
       new StacPartitionReader(
+        broadcastConf,
         partition.asInstanceOf[StacPartition],
         schema,
         opts,
