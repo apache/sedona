@@ -32,6 +32,6 @@ class ArrowWriteBuilder implements WriteBuilder {
 
   @Override
   public BatchWrite buildForBatch() {
-    throw new UnsupportedOperationException("Unimplemented method 'buildForBatch'");
+    return new ArrowBatchWrite(writeInfo);
   }
 }
