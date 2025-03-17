@@ -18,10 +18,12 @@
  */
 package org.apache.spark.sql.sedona_sql.io.stac
 
+import org.apache.hadoop.conf.Configuration
 import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.util.SerializableConfiguration
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.mapAsJavaMapConverter
 
 class StacPartitionReaderTest extends TestBaseScala {
 
@@ -40,6 +42,7 @@ class StacPartitionReaderTest extends TestBaseScala {
     val partition = StacPartition(0, jsonFiles, Map.empty[String, String].asJava)
     val reader =
       new StacPartitionReader(
+        sparkSession.sparkContext.broadcast(new SerializableConfiguration(new Configuration())),
         partition,
         StacTable.SCHEMA_V1_1_0,
         Map.empty[String, String],
@@ -61,6 +64,7 @@ class StacPartitionReaderTest extends TestBaseScala {
     val partition = StacPartition(0, jsonFiles, Map.empty[String, String].asJava)
     val reader =
       new StacPartitionReader(
+        sparkSession.sparkContext.broadcast(new SerializableConfiguration(new Configuration())),
         partition,
         StacTable.SCHEMA_V1_1_0,
         Map.empty[String, String],
@@ -82,6 +86,7 @@ class StacPartitionReaderTest extends TestBaseScala {
     val partition = StacPartition(0, jsonFiles, Map.empty[String, String].asJava)
     val reader =
       new StacPartitionReader(
+        sparkSession.sparkContext.broadcast(new SerializableConfiguration(new Configuration())),
         partition,
         StacTable.SCHEMA_V1_1_0,
         Map.empty[String, String],

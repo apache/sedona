@@ -19,12 +19,14 @@
 package org.apache.spark.sql.sedona_sql.io.stac
 
 import org.apache.sedona.sql.TestBaseScala
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.sql.types.{ArrayType, DoubleType, MapType, StringType, StructField, StructType, TimestampType}
+import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, RasterUDT}
+import org.apache.spark.sql.types._
 
 class StacDataSourceTest extends TestBaseScala {
 
   val STAC_COLLECTION_LOCAL: String = resourceFolder + "datasource_stac/collection.json"
+  val STAC_COLLECTION_SERVICE: String =
+    "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l1c"
   val STAC_ITEM_LOCAL: String = resourceFolder + "geojson/core-item.json"
 
   val STAC_COLLECTION_REMOTE: List[String] = List(
@@ -34,6 +36,25 @@ class StacDataSourceTest extends TestBaseScala {
     "https://earthdatahub.destine.eu/api/stac/v1/collections/copernicus-dem",
     "https://planetarycomputer.microsoft.com/api/stac/v1/collections/naip",
     "https://satellogic-earthview.s3.us-west-2.amazonaws.com/stac/catalog.json")
+
+  ignore("performance benchmark using remote service endpoint") {
+    val startTime = System.currentTimeMillis()
+    val dfStac = sparkSession.read
+      .format("stac")
+      .option("itemsLimitMax", "-1")
+      .option("itemsLimitPerRequest", "200")
+      .option("generateOutDBRaster", "true")
+      .load("https://earth-search.aws.element84.com/v1/collections/sentinel-2-c1-l2a")
+
+    dfStac.createOrReplaceTempView("STACTBL")
+    val dfSelect = sparkSession.sql("SELECT * FROM STACTBL")
+    val rowCount = dfSelect.count()
+
+    val endTime = System.currentTimeMillis()
+    val elapsedTimeSeconds = (endTime - startTime) / 1000.0
+
+    assert(rowCount > 0)
+  }
 
   it("basic df load from local file should work") {
     val dfStac = sparkSession.read.format("stac").load(STAC_COLLECTION_LOCAL)
@@ -64,6 +85,39 @@ class StacDataSourceTest extends TestBaseScala {
     assert(rowCount == 6)
   }
 
+  it("normal select SQL without any filter with limit and with remote service endpoint") {
+    val dfStac = sparkSession.read.format("stac").load(STAC_COLLECTION_SERVICE)
+    dfStac.createOrReplaceTempView("STACTBL")
+
+    val dfSelect =
+      sparkSession.sql("SELECT id, datetime as dt, geometry, bbox FROM STACTBL LIMIT 10")
+
+    assert(dfSelect.schema.fieldNames.contains("id"))
+    assert(dfSelect.schema.fieldNames.contains("dt"))
+    assert(dfSelect.schema.fieldNames.contains("geometry"))
+    assert(dfSelect.schema.fieldNames.contains("bbox"))
+
+    val rowCount = dfSelect.count()
+    assert(rowCount == 10)
+  }
+
+  it("select SQL with filter on datetime with remote service endpoint") {
+    val dfStac = sparkSession.read.format("stac").load(STAC_COLLECTION_SERVICE)
+    dfStac.createOrReplaceTempView("STACTBL")
+
+    val dfSelect = sparkSession.sql(
+      "SELECT id, datetime as dt, geometry, bbox " +
+        "FROM STACTBL " +
+        "WHERE datetime BETWEEN '2022-12-05T00:00:00Z' AND '2022-12-06T00:00:00Z'")
+
+    val physicalPlan = dfSelect.queryExecution.executedPlan.toString()
+    assert(physicalPlan.contains(
+      "PushedTemporalFilters -> AndFilter(GreaterThanFilter(datetime,2022-12-05T00:00),LessThanFilter(datetime,2022-12-06T00:00))"))
+
+    val rowCount = dfSelect.count()
+    assert(rowCount == 20)
+  }
+
   it("select SQL with filter on datetime") {
     val dfStac = sparkSession.read.format("stac").load(STAC_COLLECTION_LOCAL)
     dfStac.createOrReplaceTempView("STACTBL")
@@ -88,7 +142,7 @@ class StacDataSourceTest extends TestBaseScala {
     val dfSelect = sparkSession.sql(
       "SELECT id, geometry " +
         "FROM STACTBL " +
-        "WHERE st_contains(ST_GeomFromText('POLYGON((17 10, 18 10, 18 11, 17 11, 17 10))'), geometry)")
+        "WHERE st_intersects(ST_GeomFromText('POLYGON((17 10, 18 10, 18 11, 17 11, 17 10))'), geometry)")
 
     val physicalPlan = dfSelect.queryExecution.executedPlan.toString()
     assert(physicalPlan.contains(
@@ -102,10 +156,11 @@ class StacDataSourceTest extends TestBaseScala {
     val dfStac = sparkSession.read.format("stac").load(STAC_COLLECTION_LOCAL)
     dfStac.createOrReplaceTempView("STACTBL")
 
-    val dfSelect = sparkSession.sql("SELECT id, datetime as dt, geometry, bbox " +
-      "FROM STACTBL " +
-      "WHERE datetime BETWEEN '2020-01-01T00:00:00Z' AND '2020-12-13T00:00:00Z' " +
-      "AND st_contains(ST_GeomFromText('POLYGON((17 10, 18 10, 18 11, 17 11, 17 10))'), geometry)")
+    val dfSelect = sparkSession.sql(
+      "SELECT id, datetime as dt, geometry, bbox " +
+        "FROM STACTBL " +
+        "WHERE datetime BETWEEN '2020-01-01T00:00:00Z' AND '2020-12-13T00:00:00Z' " +
+        "AND st_intersects(ST_GeomFromText('POLYGON((17 10, 18 10, 18 11, 17 11, 17 10))'), geometry)")
 
     val physicalPlan = dfSelect.queryExecution.executedPlan.toString()
     assert(physicalPlan.contains(
@@ -137,11 +192,12 @@ class StacDataSourceTest extends TestBaseScala {
     val dfStac = sparkSession.read.format("stac").load(STAC_COLLECTION_LOCAL)
     dfStac.createOrReplaceTempView("STACTBL")
 
-    val dfSelect = sparkSession.sql("SELECT id, datetime as dt, geometry, bbox " +
-      "FROM STACTBL " +
-      "WHERE id = 'some-id' " +
-      "AND datetime BETWEEN '2020-01-01T00:00:00Z' AND '2020-12-13T00:00:00Z' " +
-      "AND st_contains(ST_GeomFromText('POLYGON((17 10, 18 10, 18 11, 17 11, 17 10))'), geometry)")
+    val dfSelect = sparkSession.sql(
+      "SELECT id, datetime as dt, geometry, bbox " +
+        "FROM STACTBL " +
+        "WHERE id = 'some-id' " +
+        "AND datetime BETWEEN '2020-01-01T00:00:00Z' AND '2020-12-13T00:00:00Z' " +
+        "AND st_intersects(ST_GeomFromText('POLYGON((17 10, 18 10, 18 11, 17 11, 17 10))'), geometry)")
 
     val physicalPlan = dfSelect.queryExecution.executedPlan.toString()
     assert(physicalPlan.contains(

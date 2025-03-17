@@ -18,14 +18,19 @@
  */
 package org.apache.spark.sql.sedona_sql.io.stac
 
+import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.connector.read.{Batch, Scan}
 import org.apache.spark.sql.execution.datasource.stac.TemporalFilter
 import org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter
 import org.apache.spark.sql.internal.connector.SupportsMetadata
 import org.apache.spark.sql.sedona_sql.io.stac.StacUtils.{getFullCollectionUrl, inferStacSchema}
 import org.apache.spark.sql.types.StructType
+import org.apache.spark.util.SerializableConfiguration
 
-class StacScan(stacCollectionJson: String, opts: Map[String, String])
+class StacScan(
+    stacCollectionJson: String,
+    opts: Map[String, String],
+    broadcastConf: Broadcast[SerializableConfiguration])
     extends Scan
     with SupportsMetadata {
 
@@ -34,6 +39,8 @@ class StacScan(stacCollectionJson: String, opts: Map[String, String])
 
   // The temporal filter to be pushed down to the data source
   var temporalFilter: Option[TemporalFilter] = None
+
+  var limit: Option[Int] = None
 
   /**
    * Returns the schema of the data to be read.
@@ -62,12 +69,14 @@ class StacScan(stacCollectionJson: String, opts: Map[String, String])
   override def toBatch: Batch = {
     val stacCollectionUrl = getFullCollectionUrl(opts)
     StacBatch(
+      broadcastConf,
       stacCollectionUrl,
       stacCollectionJson,
       readSchema(),
       opts,
       spatialFilter,
-      temporalFilter)
+      temporalFilter,
+      limit)
   }
 
   /**
@@ -91,6 +100,16 @@ class StacScan(stacCollectionJson: String, opts: Map[String, String])
   }
 
   /**
+   * Sets the limit on the number of items to be read.
+   *
+   * @param n
+   *   The limit on the number of items to be read.
+   */
+  def setLimit(n: Int) = {
+    limit = Some(n)
+  }
+
+  /**
    * Returns metadata about the data to be read.
    *
    * The metadata includes information about the pushed filters.
@@ -101,7 +120,8 @@ class StacScan(stacCollectionJson: String, opts: Map[String, String])
   override def getMetaData(): Map[String, String] = {
     Map(
       "PushedSpatialFilters" -> spatialFilter.map(_.toString).getOrElse("None"),
-      "PushedTemporalFilters" -> temporalFilter.map(_.toString).getOrElse("None"))
+      "PushedTemporalFilters" -> temporalFilter.map(_.toString).getOrElse("None"),
+      "Pushedimit" -> limit.map(_.toString).getOrElse("None"))
   }
 
   /**

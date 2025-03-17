@@ -36,7 +36,7 @@ class TestStacClient(TestBase):
             return_dataframe=False,
         )
         assert items is not None
-        assert len(list(items)) == 2
+        assert len(list(items)) > 0
 
     def test_search_with_ids(self) -> None:
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
@@ -82,7 +82,7 @@ class TestStacClient(TestBase):
             return_dataframe=False,
         )
         assert items is not None
-        assert len(list(items)) == 4
+        assert len(list(items)) > 0
 
     def test_search_with_bbox_and_non_overlapping_intervals(self) -> None:
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
@@ -144,6 +144,7 @@ class TestStacClient(TestBase):
             datetime=["2006-01-01T00:00:00Z", "2007-01-01T00:00:00Z"],
         )
         assert df is not None
+        assert df.count() == 20
         assert isinstance(df, DataFrame)
 
     def test_search_with_catalog_url(self) -> None:

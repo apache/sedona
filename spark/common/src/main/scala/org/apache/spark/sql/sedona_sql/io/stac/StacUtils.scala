@@ -22,9 +22,13 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.util.ArrayBasedMapData
-import org.apache.spark.sql.types.{MapType, StringType, StructField, StructType}
+import org.apache.spark.sql.execution.datasource.stac.TemporalFilter
+import org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter
+import org.apache.spark.sql.types.{StructField, StructType}
+import org.locationtech.jts.geom.Envelope
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import scala.io.Source
 
 object StacUtils {
@@ -141,71 +145,35 @@ object StacUtils {
     val propertiesStruct = schema("properties").dataType.asInstanceOf[StructType]
     val propertiesRow = row.getStruct(propertiesIndex, propertiesStruct.fields.length)
 
-    val newValues = schema.fields.zipWithIndex.foldLeft(Seq.empty[Any]) {
-      case (acc, (field, index)) if field.name == "properties" =>
-        acc ++ propertiesStruct.fields.zipWithIndex.map { case (propField, propIndex) =>
+    val newValues = schema.fields.zipWithIndex.flatMap {
+      case (field, index) if field.name == "properties" =>
+        propertiesStruct.fields.zipWithIndex.map { case (propField, propIndex) =>
           propertiesRow.get(propIndex, propField.dataType)
         }
-      case (acc, (_, index)) =>
-        acc :+ row.get(index, schema(index).dataType)
+      case (_, index) => Seq(row.get(index, schema(index).dataType))
     }
 
     InternalRow.fromSeq(newValues)
   }
 
+  /**
+   * Update the schema to include the promoted properties.
+   *
+   * @param schema
+   *   The schema to update.
+   * @return
+   *   The updated schema.
+   */
   def updatePropertiesPromotedSchema(schema: StructType): StructType = {
     val propertiesIndex = schema.fieldIndex("properties")
     val propertiesStruct = schema("properties").dataType.asInstanceOf[StructType]
 
-    val newFields = schema.fields.foldLeft(Seq.empty[StructField]) {
-      case (acc, StructField("properties", _, _, _)) =>
-        acc ++ propertiesStruct.fields
-      case (acc, other) =>
-        acc :+ other
+    val newFields = schema.fields.flatMap {
+      case StructField("properties", _, _, _) => propertiesStruct.fields
+      case other => Seq(other)
     }
 
     StructType(newFields)
-  }
-
-  /**
-   * Builds the output row with the raster field in the assets map.
-   *
-   * @param row
-   *   The input row.
-   * @param schema
-   *   The schema of the input row.
-   * @return
-   *   The output row with the raster field in the assets map.
-   */
-  def buildOutDbRasterFields(row: InternalRow, schema: StructType): InternalRow = {
-    val newValues = new Array[Any](schema.fields.length)
-
-    schema.fields.zipWithIndex.foreach {
-      case (StructField("assets", MapType(StringType, valueType: StructType, _), _, _), index) =>
-        val assetsMap = row.getMap(index)
-        if (assetsMap != null) {
-          val updatedAssets = assetsMap
-            .keyArray()
-            .array
-            .zip(assetsMap.valueArray().array)
-            .map { case (key, value) =>
-              val assetRow = value.asInstanceOf[InternalRow]
-              if (assetRow != null) {
-                key -> assetRow
-              } else {
-                key -> null
-              }
-            }
-            .toMap
-          newValues(index) = ArrayBasedMapData(updatedAssets)
-        } else {
-          newValues(index) = null
-        }
-      case (_, index) =>
-        newValues(index) = row.get(index, schema.fields(index).dataType)
-    }
-
-    InternalRow.fromSeq(newValues)
   }
 
   /**
@@ -240,5 +208,87 @@ object StacUtils {
       }
       Math.max(1, Math.ceil(itemCount.toDouble / maxSplitFiles).toInt)
     }
+  }
+
+  /** Returns the temporal filter string based on the temporal filter. */
+  def getFilterBBox(filter: GeoParquetSpatialFilter): String = {
+    def calculateUnionBBox(filter: GeoParquetSpatialFilter): Envelope = {
+      filter match {
+        case GeoParquetSpatialFilter.AndFilter(left, right) =>
+          val leftEnvelope = calculateUnionBBox(left)
+          val rightEnvelope = calculateUnionBBox(right)
+          leftEnvelope.expandToInclude(rightEnvelope)
+          leftEnvelope
+        case GeoParquetSpatialFilter.OrFilter(left, right) =>
+          val leftEnvelope = calculateUnionBBox(left)
+          val rightEnvelope = calculateUnionBBox(right)
+          leftEnvelope.expandToInclude(rightEnvelope)
+          leftEnvelope
+        case leaf: GeoParquetSpatialFilter.LeafFilter =>
+          leaf.queryWindow.getEnvelopeInternal
+      }
+    }
+
+    val unionEnvelope = calculateUnionBBox(filter)
+    s"bbox=${unionEnvelope.getMinX}%2C${unionEnvelope.getMinY}%2C${unionEnvelope.getMaxX}%2C${unionEnvelope.getMaxY}"
+  }
+
+  /** Returns the temporal filter string based on the temporal filter. */
+  def getFilterTemporal(filter: TemporalFilter): String = {
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+
+    def formatDateTime(dateTime: LocalDateTime): String = {
+      if (dateTime == null) ".." else dateTime.format(formatter)
+    }
+
+    def calculateUnionTemporal(filter: TemporalFilter): (LocalDateTime, LocalDateTime) = {
+      filter match {
+        case TemporalFilter.AndFilter(left, right) =>
+          val (leftStart, leftEnd) = calculateUnionTemporal(left)
+          val (rightStart, rightEnd) = calculateUnionTemporal(right)
+          val start =
+            if (leftStart == null || (rightStart != null && rightStart.isBefore(leftStart)))
+              rightStart
+            else leftStart
+          val end =
+            if (leftEnd == null || (rightEnd != null && rightEnd.isAfter(leftEnd))) rightEnd
+            else leftEnd
+          (start, end)
+        case TemporalFilter.OrFilter(left, right) =>
+          val (leftStart, leftEnd) = calculateUnionTemporal(left)
+          val (rightStart, rightEnd) = calculateUnionTemporal(right)
+          val start =
+            if (leftStart == null || (rightStart != null && rightStart.isBefore(leftStart)))
+              rightStart
+            else leftStart
+          val end =
+            if (leftEnd == null || (rightEnd != null && rightEnd.isAfter(leftEnd))) rightEnd
+            else leftEnd
+          (start, end)
+        case TemporalFilter.LessThanFilter(_, value) =>
+          (null, value)
+        case TemporalFilter.GreaterThanFilter(_, value) =>
+          (value, null)
+        case TemporalFilter.EqualFilter(_, value) =>
+          (value, value)
+      }
+    }
+
+    val (start, end) = calculateUnionTemporal(filter)
+    if (end == null) s"datetime=${formatDateTime(start)}/.."
+    else s"datetime=${formatDateTime(start)}/${formatDateTime(end)}"
+  }
+
+  /** Adds the spatial and temporal filters to the base URL. */
+  def addFiltersToUrl(
+      baseUrl: String,
+      spatialFilter: Option[GeoParquetSpatialFilter],
+      temporalFilter: Option[TemporalFilter]): String = {
+    val spatialFilterStr = spatialFilter.map(StacUtils.getFilterBBox).getOrElse("")
+    val temporalFilterStr = temporalFilter.map(StacUtils.getFilterTemporal).getOrElse("")
+
+    val filters = Seq(spatialFilterStr, temporalFilterStr).filter(_.nonEmpty).mkString("&")
+    val urlWithFilters = if (filters.nonEmpty) s"&$filters" else ""
+    s"$baseUrl$urlWithFilters"
   }
 }

@@ -21,15 +21,24 @@ package org.apache.spark.sql.sedona_sql.io.stac
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.sedona.core.spatialOperator.SpatialPredicate
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.sedona_sql.io.stac.StacUtils.getNumPartitions
+import org.apache.spark.sql.execution.datasource.stac.TemporalFilter
+import org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter
+import org.apache.spark.sql.sedona_sql.io.stac.StacUtils.{getFilterBBox, getFilterTemporal, getNumPartitions}
+import org.locationtech.jts.geom.{Envelope, GeometryFactory, Polygon}
+import org.locationtech.jts.io.WKTReader
 import org.scalatest.funsuite.AnyFunSuite
 
 import java.io.{File, PrintWriter}
+import java.time.LocalDateTime
 import scala.io.Source
 import scala.jdk.CollectionConverters._
 
 class StacUtilsTest extends AnyFunSuite {
+
+  val geometryFactory = new GeometryFactory()
+  val wktReader = new WKTReader(geometryFactory)
 
   test("getStacCollectionBasePath should return base URL for HTTP URL") {
     val opts = Map("path" -> "https://service_url/collections/collection.json")
@@ -590,5 +599,122 @@ class StacUtilsTest extends AnyFunSuite {
       // Close the writer
       writer.close()
     }
+  }
+
+  test("getFilterBBox with LeafFilter") {
+    val queryWindow: Polygon =
+      wktReader.read("POLYGON((10 10, 20 10, 20 20, 10 20, 10 10))").asInstanceOf[Polygon]
+    val leafFilter =
+      GeoParquetSpatialFilter.LeafFilter("geometry", SpatialPredicate.INTERSECTS, queryWindow)
+    val bbox = getFilterBBox(leafFilter)
+    assert(bbox == "bbox=10.0%2C10.0%2C20.0%2C20.0")
+  }
+
+  test("getFilterBBox with AndFilter") {
+    val queryWindow1: Polygon =
+      wktReader.read("POLYGON((10 10, 20 10, 20 20, 10 20, 10 10))").asInstanceOf[Polygon]
+    val queryWindow2: Polygon =
+      wktReader.read("POLYGON((30 30, 40 30, 40 40, 30 40, 30 30))").asInstanceOf[Polygon]
+    val leafFilter1 =
+      GeoParquetSpatialFilter.LeafFilter("geometry", SpatialPredicate.INTERSECTS, queryWindow1)
+    val leafFilter2 =
+      GeoParquetSpatialFilter.LeafFilter("geometry", SpatialPredicate.INTERSECTS, queryWindow2)
+    val andFilter = GeoParquetSpatialFilter.AndFilter(leafFilter1, leafFilter2)
+    val bbox = getFilterBBox(andFilter)
+    assert(bbox == "bbox=10.0%2C10.0%2C40.0%2C40.0")
+  }
+
+  test("getFilterBBox with OrFilter") {
+    val queryWindow1: Polygon =
+      wktReader.read("POLYGON((10 10, 20 10, 20 20, 10 20, 10 10))").asInstanceOf[Polygon]
+    val queryWindow2: Polygon =
+      wktReader.read("POLYGON((30 30, 40 30, 40 40, 30 40, 30 30))").asInstanceOf[Polygon]
+    val leafFilter1 =
+      GeoParquetSpatialFilter.LeafFilter("geometry", SpatialPredicate.INTERSECTS, queryWindow1)
+    val leafFilter2 =
+      GeoParquetSpatialFilter.LeafFilter("geometry", SpatialPredicate.INTERSECTS, queryWindow2)
+    val orFilter = GeoParquetSpatialFilter.OrFilter(leafFilter1, leafFilter2)
+    val bbox = getFilterBBox(orFilter)
+    assert(bbox == "bbox=10.0%2C10.0%2C40.0%2C40.0")
+  }
+
+  test("getFilterTemporal with LessThanFilter") {
+    val dateTime = LocalDateTime.parse("2025-03-07T00:00:00")
+    val filter = TemporalFilter.LessThanFilter("timestamp", dateTime)
+    val result = getFilterTemporal(filter)
+    assert(result == "datetime=../2025-03-07T00:00:00.000Z")
+  }
+
+  test("getFilterTemporal with GreaterThanFilter") {
+    val dateTime = LocalDateTime.parse("2025-03-06T00:00:00")
+    val filter = TemporalFilter.GreaterThanFilter("timestamp", dateTime)
+    val result = getFilterTemporal(filter)
+    assert(result == "datetime=2025-03-06T00:00:00.000Z/..")
+  }
+
+  test("getFilterTemporal with EqualFilter") {
+    val dateTime = LocalDateTime.parse("2025-03-06T00:00:00")
+    val filter = TemporalFilter.EqualFilter("timestamp", dateTime)
+    val result = getFilterTemporal(filter)
+    assert(result == "datetime=2025-03-06T00:00:00.000Z/2025-03-06T00:00:00.000Z")
+  }
+
+  test("getFilterTemporal with AndFilter") {
+    val dateTime1 = LocalDateTime.parse("2025-03-06T00:00:00")
+    val dateTime2 = LocalDateTime.parse("2025-03-07T00:00:00")
+    val filter1 = TemporalFilter.GreaterThanFilter("timestamp", dateTime1)
+    val filter2 = TemporalFilter.LessThanFilter("timestamp", dateTime2)
+    val andFilter = TemporalFilter.AndFilter(filter1, filter2)
+    val result = getFilterTemporal(andFilter)
+    assert(result == "datetime=2025-03-06T00:00:00.000Z/2025-03-07T00:00:00.000Z")
+  }
+
+  test("getFilterTemporal with OrFilter") {
+    val dateTime1 = LocalDateTime.parse("2025-03-06T00:00:00")
+    val dateTime2 = LocalDateTime.parse("2025-03-07T00:00:00")
+    val filter1 = TemporalFilter.GreaterThanFilter("timestamp", dateTime1)
+    val filter2 = TemporalFilter.LessThanFilter("timestamp", dateTime2)
+    val orFilter = TemporalFilter.OrFilter(filter1, filter2)
+    val result = getFilterTemporal(orFilter)
+    assert(result == "datetime=2025-03-06T00:00:00.000Z/2025-03-07T00:00:00.000Z")
+  }
+
+  test("addFiltersToUrl with no filters") {
+    val baseUrl = "http://example.com/stac"
+    val result = StacUtils.addFiltersToUrl(baseUrl, None, None)
+    assert(result == "http://example.com/stac")
+  }
+
+  test("addFiltersToUrl with spatial filter") {
+    val baseUrl = "http://example.com/stac"
+    val envelope = new Envelope(1.0, 2.0, 3.0, 4.0)
+    val queryWindow = geometryFactory.toGeometry(envelope)
+    val spatialFilter = Some(
+      GeoParquetSpatialFilter.LeafFilter("geometry", SpatialPredicate.INTERSECTS, queryWindow))
+    val result = StacUtils.addFiltersToUrl(baseUrl, spatialFilter, None)
+    val expectedUrl = s"$baseUrl&bbox=1.0%2C3.0%2C2.0%2C4.0"
+    assert(result == expectedUrl)
+  }
+
+  test("addFiltersToUrl with temporal filter") {
+    val baseUrl = "http://example.com/stac"
+    val temporalFilter = Some(
+      TemporalFilter.GreaterThanFilter("timestamp", LocalDateTime.parse("2025-03-06T00:00:00")))
+    val result = StacUtils.addFiltersToUrl(baseUrl, None, temporalFilter)
+    val expectedUrl = s"$baseUrl&datetime=2025-03-06T00:00:00.000Z/.."
+    assert(result == expectedUrl)
+  }
+
+  test("addFiltersToUrl with both spatial and temporal filters") {
+    val baseUrl = "http://example.com/stac"
+    val envelope = new Envelope(1.0, 2.0, 3.0, 4.0)
+    val queryWindow = geometryFactory.toGeometry(envelope)
+    val spatialFilter = Some(
+      GeoParquetSpatialFilter.LeafFilter("geometry", SpatialPredicate.INTERSECTS, queryWindow))
+    val temporalFilter = Some(
+      TemporalFilter.GreaterThanFilter("timestamp", LocalDateTime.parse("2025-03-06T00:00:00")))
+    val result = StacUtils.addFiltersToUrl(baseUrl, spatialFilter, temporalFilter)
+    val expectedUrl = s"$baseUrl&bbox=1.0%2C3.0%2C2.0%2C4.0&datetime=2025-03-06T00:00:00.000Z/.."
+    assert(result == expectedUrl)
   }
 }
