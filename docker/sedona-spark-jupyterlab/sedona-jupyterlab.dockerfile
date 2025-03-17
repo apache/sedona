@@ -18,12 +18,12 @@
 FROM ubuntu:22.04
 
 ARG shared_workspace=/opt/workspace
-ARG spark_version=3.4.1
+ARG spark_version=3.5.5
 ARG hadoop_s3_version=3.3.4
 ARG aws_sdk_version=1.12.402
 ARG spark_xml_version=0.16.0
-ARG sedona_version=1.5.1
-ARG geotools_wrapper_version=1.5.1-28.2
+ARG sedona_version=1.7.1
+ARG geotools_wrapper_version=1.7.1-28.5
 ARG spark_extension_version=2.11.0
 ARG zeppelin_version=0.12.0
 
@@ -57,8 +57,26 @@ COPY docker/zeppelin/conf/zeppelin-site.xml ${ZEPPELIN_HOME}/conf/
 COPY docker/zeppelin/conf/helium.json ${ZEPPELIN_HOME}/conf/
 COPY docker/zeppelin/conf/interpreter.json ${ZEPPELIN_HOME}/conf/
 # Extract version from the actual JAR file and update interpreter.json
-RUN jar_name=$(find "${SPARK_HOME}/jars/" -name "sedona-spark-shaded-*.jar" | head -n 1) && \
-    sed -i "s|\(\"groupArtifactVersion\": \).*|\1\"${jar_name}\",|" "${ZEPPELIN_HOME}/conf/interpreter.json"
+RUN /bin/sh -c ' \
+    sedona_jar=$(find "$SPARK_HOME/jars/" -name "sedona-spark-shaded-*.jar" | head -n 1); \
+    geotools_jar=$(find "$SPARK_HOME/jars/" -name "geotools-wrapper-*.jar" | head -n 1); \
+    if [ -z "$sedona_jar" ] || [ -z "$geotools_jar" ]; then \
+        echo "Error: One or both JARs not found in $SPARK_HOME/jars/"; \
+        exit 1; \
+    fi; \
+    jq --arg sedona "$sedona_jar" --arg geotools "$geotools_jar" \
+    '\''.interpreterSettings.spark.dependencies |= map( \
+        if .groupArtifactVersion | test("sedona-spark-shaded-.*\\.jar$") then \
+            .groupArtifactVersion = $sedona \
+        elif .groupArtifactVersion | test("geotools-wrapper-.*\\.jar$") then \
+            .groupArtifactVersion = $geotools \
+        else . end \
+    )'\'' "$ZEPPELIN_HOME/conf/interpreter.json" > "$ZEPPELIN_HOME/conf/interpreter.json.tmp"; \
+    mv "$ZEPPELIN_HOME/conf/interpreter.json.tmp" "$ZEPPELIN_HOME/conf/interpreter.json"; \
+    echo "Updated interpreter.json with:"; \
+    echo "  - Sedona JAR: $sedona_jar"; \
+    echo "  - GeoTools JAR: $geotools_jar" \
+'
 RUN mkdir ${ZEPPELIN_HOME}/helium
 RUN mkdir ${ZEPPELIN_HOME}/leaflet
 RUN mkdir ${ZEPPELIN_HOME}/notebook/sedona-tutorial

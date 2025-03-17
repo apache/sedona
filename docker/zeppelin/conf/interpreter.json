@@ -1668,7 +1668,11 @@
       ],
       "dependencies": [
         {
-          "groupArtifactVersion": "/usr/local/lib/python3.10/dist-packages/pyspark/jars/sedona-spark-shaded-3.4_2.12-1.7.0.jar",
+          "groupArtifactVersion": "/usr/local/lib/python3.10/dist-packages/pyspark/jars/sedona-spark-shaded-3.5_2.12-1.7.1.jar",
+          "local": false
+        },
+        {
+          "groupArtifactVersion": "/usr/local/lib/python3.10/dist-packages/pyspark/jars/geotools-wrapper-1.7.1-28.5.jar",
           "local": false
         }
       ],
