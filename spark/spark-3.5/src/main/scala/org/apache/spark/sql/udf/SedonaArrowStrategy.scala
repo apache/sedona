@@ -29,7 +29,9 @@ import org.apache.spark.sql.execution.SparkPlan
 import org.apache.spark.sql.execution.python.{ArrowPythonRunner, BatchIterator, EvalPythonExec, PythonSQLMetrics}
 import org.apache.spark.sql.types.StructType
 
-import scala.jdk.CollectionConverters.asScalaIteratorConverter
+import scala.collection.JavaConverters.asScalaIteratorConverter
+
+//import scala.jdk.CollectionConverters.asScalaIteratorConverter
 
 class SedonaArrowStrategy extends Strategy {
   override def apply(plan: LogicalPlan): Seq[SparkPlan] = plan match {

@@ -28,8 +28,8 @@ import org.apache.spark.util.Utils
 
 import java.io.File
 import java.nio.file.{Files, Paths}
-import scala.jdk.CollectionConverters.seqAsJavaListConverter
 import scala.sys.process.Process
+import scala.jdk.CollectionConverters._
 
 object ScalarUDF {
 
