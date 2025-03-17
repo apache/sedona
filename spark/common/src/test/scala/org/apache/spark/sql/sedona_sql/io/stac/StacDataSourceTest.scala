@@ -19,8 +19,8 @@
 package org.apache.spark.sql.sedona_sql.io.stac
 
 import org.apache.sedona.sql.TestBaseScala
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.sql.types.{ArrayType, DoubleType, MapType, StringType, StructField, StructType, TimestampType}
+import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, RasterUDT}
+import org.apache.spark.sql.types._
 
 class StacDataSourceTest extends TestBaseScala {
 
@@ -88,7 +88,7 @@ class StacDataSourceTest extends TestBaseScala {
     val dfSelect = sparkSession.sql(
       "SELECT id, geometry " +
         "FROM STACTBL " +
-        "WHERE st_contains(ST_GeomFromText('POLYGON((17 10, 18 10, 18 11, 17 11, 17 10))'), geometry)")
+        "WHERE st_intersects(ST_GeomFromText('POLYGON((17 10, 18 10, 18 11, 17 11, 17 10))'), geometry)")
 
     val physicalPlan = dfSelect.queryExecution.executedPlan.toString()
     assert(physicalPlan.contains(
@@ -102,10 +102,11 @@ class StacDataSourceTest extends TestBaseScala {
     val dfStac = sparkSession.read.format("stac").load(STAC_COLLECTION_LOCAL)
     dfStac.createOrReplaceTempView("STACTBL")
 
-    val dfSelect = sparkSession.sql("SELECT id, datetime as dt, geometry, bbox " +
-      "FROM STACTBL " +
-      "WHERE datetime BETWEEN '2020-01-01T00:00:00Z' AND '2020-12-13T00:00:00Z' " +
-      "AND st_contains(ST_GeomFromText('POLYGON((17 10, 18 10, 18 11, 17 11, 17 10))'), geometry)")
+    val dfSelect = sparkSession.sql(
+      "SELECT id, datetime as dt, geometry, bbox " +
+        "FROM STACTBL " +
+        "WHERE datetime BETWEEN '2020-01-01T00:00:00Z' AND '2020-12-13T00:00:00Z' " +
+        "AND st_intersects(ST_GeomFromText('POLYGON((17 10, 18 10, 18 11, 17 11, 17 10))'), geometry)")
 
     val physicalPlan = dfSelect.queryExecution.executedPlan.toString()
     assert(physicalPlan.contains(
@@ -137,11 +138,12 @@ class StacDataSourceTest extends TestBaseScala {
     val dfStac = sparkSession.read.format("stac").load(STAC_COLLECTION_LOCAL)
     dfStac.createOrReplaceTempView("STACTBL")
 
-    val dfSelect = sparkSession.sql("SELECT id, datetime as dt, geometry, bbox " +
-      "FROM STACTBL " +
-      "WHERE id = 'some-id' " +
-      "AND datetime BETWEEN '2020-01-01T00:00:00Z' AND '2020-12-13T00:00:00Z' " +
-      "AND st_contains(ST_GeomFromText('POLYGON((17 10, 18 10, 18 11, 17 11, 17 10))'), geometry)")
+    val dfSelect = sparkSession.sql(
+      "SELECT id, datetime as dt, geometry, bbox " +
+        "FROM STACTBL " +
+        "WHERE id = 'some-id' " +
+        "AND datetime BETWEEN '2020-01-01T00:00:00Z' AND '2020-12-13T00:00:00Z' " +
+        "AND st_intersects(ST_GeomFromText('POLYGON((17 10, 18 10, 18 11, 17 11, 17 10))'), geometry)")
 
     val physicalPlan = dfSelect.queryExecution.executedPlan.toString()
     assert(physicalPlan.contains(

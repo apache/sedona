@@ -18,6 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.io.stac
 
+import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.connector.catalog.{SupportsRead, Table, TableCapability}
 import org.apache.spark.sql.connector.read.ScanBuilder
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
@@ -25,6 +26,7 @@ import org.apache.spark.sql.sedona_sql.io.geojson.GeoJSONUtils
 import org.apache.spark.sql.sedona_sql.io.stac.StacUtils.{inferStacSchema, updatePropertiesPromotedSchema}
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
+import org.apache.spark.util.SerializableConfiguration
 
 import java.util.concurrent.ConcurrentHashMap
 
@@ -38,7 +40,10 @@ import java.util.concurrent.ConcurrentHashMap
  * @constructor
  *   Creates a new instance of the `StacTable` class.
  */
-class StacTable(stacCollectionJson: String, opts: Map[String, String])
+class StacTable(
+    stacCollectionJson: String,
+    opts: Map[String, String],
+    broadcastConf: Broadcast[SerializableConfiguration])
     extends Table
     with SupportsRead {
 
@@ -84,7 +89,7 @@ class StacTable(stacCollectionJson: String, opts: Map[String, String])
    *   A new instance of ScanBuilder.
    */
   override def newScanBuilder(options: CaseInsensitiveStringMap): ScanBuilder =
-    new StacScanBuilder(stacCollectionJson, opts)
+    new StacScanBuilder(stacCollectionJson, opts, broadcastConf)
 }
 
 object StacTable {
