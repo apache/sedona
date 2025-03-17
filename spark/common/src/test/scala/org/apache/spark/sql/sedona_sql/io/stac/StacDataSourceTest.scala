@@ -25,8 +25,6 @@ import org.apache.spark.sql.types._
 class StacDataSourceTest extends TestBaseScala {
 
   val STAC_COLLECTION_LOCAL: String = resourceFolder + "datasource_stac/collection.json"
-  val STAC_COLLECTION_SERVICE: String =
-    "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l1c"
   val STAC_ITEM_LOCAL: String = resourceFolder + "geojson/core-item.json"
 
   val STAC_COLLECTION_REMOTE: List[String] = List(
@@ -36,25 +34,6 @@ class StacDataSourceTest extends TestBaseScala {
     "https://earthdatahub.destine.eu/api/stac/v1/collections/copernicus-dem",
     "https://planetarycomputer.microsoft.com/api/stac/v1/collections/naip",
     "https://satellogic-earthview.s3.us-west-2.amazonaws.com/stac/catalog.json")
-
-  ignore("performance benchmark using remote service endpoint") {
-    val startTime = System.currentTimeMillis()
-    val dfStac = sparkSession.read
-      .format("stac")
-      .option("itemsLimitMax", "-1")
-      .option("itemsLimitPerRequest", "200")
-      .option("generateOutDBRaster", "true")
-      .load("https://earth-search.aws.element84.com/v1/collections/sentinel-2-c1-l2a")
-
-    dfStac.createOrReplaceTempView("STACTBL")
-    val dfSelect = sparkSession.sql("SELECT * FROM STACTBL")
-    val rowCount = dfSelect.count()
-
-    val endTime = System.currentTimeMillis()
-    val elapsedTimeSeconds = (endTime - startTime) / 1000.0
-
-    assert(rowCount > 0)
-  }
 
   it("basic df load from local file should work") {
     val dfStac = sparkSession.read.format("stac").load(STAC_COLLECTION_LOCAL)
@@ -83,39 +62,6 @@ class StacDataSourceTest extends TestBaseScala {
 
     val rowCount = dfSelect.count()
     assert(rowCount == 6)
-  }
-
-  it("normal select SQL without any filter with limit and with remote service endpoint") {
-    val dfStac = sparkSession.read.format("stac").load(STAC_COLLECTION_SERVICE)
-    dfStac.createOrReplaceTempView("STACTBL")
-
-    val dfSelect =
-      sparkSession.sql("SELECT id, datetime as dt, geometry, bbox FROM STACTBL LIMIT 10")
-
-    assert(dfSelect.schema.fieldNames.contains("id"))
-    assert(dfSelect.schema.fieldNames.contains("dt"))
-    assert(dfSelect.schema.fieldNames.contains("geometry"))
-    assert(dfSelect.schema.fieldNames.contains("bbox"))
-
-    val rowCount = dfSelect.count()
-    assert(rowCount == 10)
-  }
-
-  it("select SQL with filter on datetime with remote service endpoint") {
-    val dfStac = sparkSession.read.format("stac").load(STAC_COLLECTION_SERVICE)
-    dfStac.createOrReplaceTempView("STACTBL")
-
-    val dfSelect = sparkSession.sql(
-      "SELECT id, datetime as dt, geometry, bbox " +
-        "FROM STACTBL " +
-        "WHERE datetime BETWEEN '2022-12-05T00:00:00Z' AND '2022-12-06T00:00:00Z'")
-
-    val physicalPlan = dfSelect.queryExecution.executedPlan.toString()
-    assert(physicalPlan.contains(
-      "PushedTemporalFilters -> AndFilter(GreaterThanFilter(datetime,2022-12-05T00:00),LessThanFilter(datetime,2022-12-06T00:00))"))
-
-    val rowCount = dfSelect.count()
-    assert(rowCount == 20)
   }
 
   it("select SQL with filter on datetime") {
