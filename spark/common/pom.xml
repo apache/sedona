@@ -37,6 +37,13 @@
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-connect-common_2.12</artifactId>
+            <version>3.5.5</version>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.sedona</groupId>
             <artifactId>sedona-common</artifactId>
