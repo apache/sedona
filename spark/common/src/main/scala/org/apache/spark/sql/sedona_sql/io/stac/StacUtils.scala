@@ -137,40 +137,32 @@ object StacUtils {
     }
   }
 
-  /**
-   * Promote the properties field to the top level of the row.
-   */
   def promotePropertiesToTop(row: InternalRow, schema: StructType): InternalRow = {
     val propertiesIndex = schema.fieldIndex("properties")
     val propertiesStruct = schema("properties").dataType.asInstanceOf[StructType]
     val propertiesRow = row.getStruct(propertiesIndex, propertiesStruct.fields.length)
 
-    val newValues = schema.fields.zipWithIndex.flatMap {
-      case (field, index) if field.name == "properties" =>
-        propertiesStruct.fields.zipWithIndex.map { case (propField, propIndex) =>
+    val newValues = schema.fields.zipWithIndex.foldLeft(Seq.empty[Any]) {
+      case (acc, (field, index)) if field.name == "properties" =>
+        acc ++ propertiesStruct.fields.zipWithIndex.map { case (propField, propIndex) =>
           propertiesRow.get(propIndex, propField.dataType)
         }
-      case (_, index) => Seq(row.get(index, schema(index).dataType))
+      case (acc, (_, index)) =>
+        acc :+ row.get(index, schema(index).dataType)
     }
 
     InternalRow.fromSeq(newValues)
   }
 
-  /**
-   * Update the schema to include the promoted properties.
-   *
-   * @param schema
-   *   The schema to update.
-   * @return
-   *   The updated schema.
-   */
   def updatePropertiesPromotedSchema(schema: StructType): StructType = {
     val propertiesIndex = schema.fieldIndex("properties")
     val propertiesStruct = schema("properties").dataType.asInstanceOf[StructType]
 
-    val newFields = schema.fields.flatMap {
-      case StructField("properties", _, _, _) => propertiesStruct.fields
-      case other => Seq(other)
+    val newFields = schema.fields.foldLeft(Seq.empty[StructField]) {
+      case (acc, StructField("properties", _, _, _)) =>
+        acc ++ propertiesStruct.fields
+      case (acc, other) =>
+        acc :+ other
     }
 
     StructType(newFields)

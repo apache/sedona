@@ -30,7 +30,7 @@ import org.apache.spark.util.SerializableConfiguration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
-import scala.jdk.CollectionConverters.asScalaIteratorConverter
+import scala.jdk.CollectionConverters._
 import scala.util.Random
 import scala.util.control.Breaks.breakable
 
