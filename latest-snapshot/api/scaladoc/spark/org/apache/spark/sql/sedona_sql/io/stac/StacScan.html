@@ -292,9 +292,9 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="org.apache.spark.sql.sedona_sql.io.stac.StacScan#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(stacCollectionJson:String,opts:Map[String,String]):org.apache.spark.sql.sedona_sql.io.stac.StacScan"></a><a id="&lt;init&gt;:StacScan"></a>
+      <a id="&lt;init&gt;(stacCollectionJson:String,opts:Map[String,String],broadcastConf:org.apache.spark.broadcast.Broadcast[org.apache.spark.util.SerializableConfiguration]):org.apache.spark.sql.sedona_sql.io.stac.StacScan"></a><a id="&lt;init&gt;:StacScan"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacScan.html#&lt;init&gt;(stacCollectionJson:String,opts:Map[String,String]):org.apache.spark.sql.sedona_sql.io.stac.StacScan" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacScan.html#&lt;init&gt;(stacCollectionJson:String,opts:Map[String,String],broadcastConf:org.apache.spark.broadcast.Broadcast[org.apache.spark.util.SerializableConfiguration]):org.apache.spark.sql.sedona_sql.io.stac.StacScan" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -303,7 +303,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">StacScan</span><span class="params">(<span name="stacCollectionJson">stacCollectionJson: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="opts">opts: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>)</span>
+        <span class="name">StacScan</span><span class="params">(<span name="stacCollectionJson">stacCollectionJson: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="opts">opts: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="broadcastConf">broadcastConf: <span class="extype" name="org.apache.spark.broadcast.Broadcast">Broadcast</span>[<span class="extype" name="org.apache.spark.util.SerializableConfiguration">SerializableConfiguration</span>]</span>)</span>
       </span>
       
       
@@ -549,6 +549,22 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacScan#limit" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="limit:Option[Int]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacScan.html#limit:Option[Int]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">limit</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>]</span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -620,6 +636,24 @@
       
       <p class="shortcomment cmt">Returns the schema of the data to be read.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the schema of the data to be read.</p><p>The schema is statically defined in the <code>StacTable</code> object.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.io.stac.StacScan">StacScan</a> → Scan</dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacScan#setLimit" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setLimit(n:Int):Unit"></a><a id="setLimit(Int):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacScan.html#setLimit(n:Int):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setLimit</span><span class="params">(<span name="n">n: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Sets the limit on the number of items to be read.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the limit on the number of items to be read.
+</p></div><dl class="paramcmts block"><dt class="param">n</dt><dd class="cmt"><p>
+  The limit on the number of items to be read.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacScan#setSpatialPredicates" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setSpatialPredicates(combinedSpatialFilter:org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter):Unit"></a><a id="setSpatialPredicates(GeoParquetSpatialFilter):Unit"></a>
       <span class="permalink">

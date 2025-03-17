@@ -236,7 +236,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">StacBatch</span><span class="params">(<span name="stacCollectionUrl">stacCollectionUrl: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="stacCollectionJson">stacCollectionJson: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="schema">schema: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>, <span name="opts">opts: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="spatialFilter">spatialFilter: <span class="extype" name="scala.Option">Option</span>[<a href="../../../execution/datasources/parquet/GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a>]</span>, <span name="temporalFilter">temporalFilter: <span class="extype" name="scala.Option">Option</span>[<a href="../../../execution/datasource/stac/TemporalFilter.html" class="extype" name="org.apache.spark.sql.execution.datasource.stac.TemporalFilter">TemporalFilter</a>]</span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.connector.read.Batch">Batch</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">StacBatch</span><span class="params">(<span name="broadcastConf">broadcastConf: <span class="extype" name="org.apache.spark.broadcast.Broadcast">Broadcast</span>[<span class="extype" name="org.apache.spark.util.SerializableConfiguration">SerializableConfiguration</span>]</span>, <span name="stacCollectionUrl">stacCollectionUrl: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="stacCollectionJson">stacCollectionJson: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="schema">schema: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>, <span name="opts">opts: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="spatialFilter">spatialFilter: <span class="extype" name="scala.Option">Option</span>[<a href="../../../execution/datasources/parquet/GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a>]</span>, <span name="temporalFilter">temporalFilter: <span class="extype" name="scala.Option">Option</span>[<a href="../../../execution/datasource/stac/TemporalFilter.html" class="extype" name="org.apache.spark.sql.execution.datasource.stac.TemporalFilter">TemporalFilter</a>]</span>, <span name="limitFilter">limitFilter: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>]</span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.connector.read.Batch">Batch</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
 
@@ -296,9 +296,9 @@ which are necessary for batch data processing.
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="org.apache.spark.sql.sedona_sql.io.stac.StacBatch#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(stacCollectionUrl:String,stacCollectionJson:String,schema:org.apache.spark.sql.types.StructType,opts:Map[String,String],spatialFilter:Option[org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter],temporalFilter:Option[org.apache.spark.sql.execution.datasource.stac.TemporalFilter]):org.apache.spark.sql.sedona_sql.io.stac.StacBatch"></a><a id="&lt;init&gt;:StacBatch"></a>
+      <a id="&lt;init&gt;(broadcastConf:org.apache.spark.broadcast.Broadcast[org.apache.spark.util.SerializableConfiguration],stacCollectionUrl:String,stacCollectionJson:String,schema:org.apache.spark.sql.types.StructType,opts:Map[String,String],spatialFilter:Option[org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter],temporalFilter:Option[org.apache.spark.sql.execution.datasource.stac.TemporalFilter],limitFilter:Option[Int]):org.apache.spark.sql.sedona_sql.io.stac.StacBatch"></a><a id="&lt;init&gt;:StacBatch"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacBatch.html#&lt;init&gt;(stacCollectionUrl:String,stacCollectionJson:String,schema:org.apache.spark.sql.types.StructType,opts:Map[String,String],spatialFilter:Option[org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter],temporalFilter:Option[org.apache.spark.sql.execution.datasource.stac.TemporalFilter]):org.apache.spark.sql.sedona_sql.io.stac.StacBatch" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacBatch.html#&lt;init&gt;(broadcastConf:org.apache.spark.broadcast.Broadcast[org.apache.spark.util.SerializableConfiguration],stacCollectionUrl:String,stacCollectionJson:String,schema:org.apache.spark.sql.types.StructType,opts:Map[String,String],spatialFilter:Option[org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter],temporalFilter:Option[org.apache.spark.sql.execution.datasource.stac.TemporalFilter],limitFilter:Option[Int]):org.apache.spark.sql.sedona_sql.io.stac.StacBatch" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -307,7 +307,7 @@ which are necessary for batch data processing.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">StacBatch</span><span class="params">(<span name="stacCollectionUrl">stacCollectionUrl: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="stacCollectionJson">stacCollectionJson: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="schema">schema: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>, <span name="opts">opts: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="spatialFilter">spatialFilter: <span class="extype" name="scala.Option">Option</span>[<a href="../../../execution/datasources/parquet/GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a>]</span>, <span name="temporalFilter">temporalFilter: <span class="extype" name="scala.Option">Option</span>[<a href="../../../execution/datasource/stac/TemporalFilter.html" class="extype" name="org.apache.spark.sql.execution.datasource.stac.TemporalFilter">TemporalFilter</a>]</span>)</span>
+        <span class="name">StacBatch</span><span class="params">(<span name="broadcastConf">broadcastConf: <span class="extype" name="org.apache.spark.broadcast.Broadcast">Broadcast</span>[<span class="extype" name="org.apache.spark.util.SerializableConfiguration">SerializableConfiguration</span>]</span>, <span name="stacCollectionUrl">stacCollectionUrl: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="stacCollectionJson">stacCollectionJson: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="schema">schema: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>, <span name="opts">opts: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="spatialFilter">spatialFilter: <span class="extype" name="scala.Option">Option</span>[<a href="../../../execution/datasources/parquet/GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a>]</span>, <span name="temporalFilter">temporalFilter: <span class="extype" name="scala.Option">Option</span>[<a href="../../../execution/datasource/stac/TemporalFilter.html" class="extype" name="org.apache.spark.sql.execution.datasource.stac.TemporalFilter">TemporalFilter</a>]</span>, <span name="limitFilter">limitFilter: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>]</span>)</span>
       </span>
       
       
@@ -385,6 +385,22 @@ which are necessary for batch data processing.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacBatch#broadcastConf" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="broadcastConf:org.apache.spark.broadcast.Broadcast[org.apache.spark.util.SerializableConfiguration]"></a><a id="broadcastConf:Broadcast[SerializableConfiguration]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacBatch.html#broadcastConf:org.apache.spark.broadcast.Broadcast[org.apache.spark.util.SerializableConfiguration]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">broadcastConf</span><span class="result">: <span class="extype" name="org.apache.spark.broadcast.Broadcast">Broadcast</span>[<span class="extype" name="org.apache.spark.util.SerializableConfiguration">SerializableConfiguration</span>]</span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
@@ -525,6 +541,22 @@ which are necessary for batch data processing.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacBatch#getItemLink" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="getItemLink(itemUrl:String,defaultItemsLimitPerRequest:Int,spatialFilter:Option[org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter],temporalFilter:Option[org.apache.spark.sql.execution.datasource.stac.TemporalFilter]):String"></a><a id="getItemLink(String,Int,Option[GeoParquetSpatialFilter],Option[TemporalFilter]):String"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacBatch.html#getItemLink(itemUrl:String,defaultItemsLimitPerRequest:Int,spatialFilter:Option[org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter],temporalFilter:Option[org.apache.spark.sql.execution.datasource.stac.TemporalFilter]):String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getItemLink</span><span class="params">(<span name="itemUrl">itemUrl: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="defaultItemsLimitPerRequest">defaultItemsLimitPerRequest: <span class="extype" name="scala.Int">Int</span></span>, <span name="spatialFilter">spatialFilter: <span class="extype" name="scala.Option">Option</span>[<a href="../../../execution/datasources/parquet/GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a>]</span>, <span name="temporalFilter">temporalFilter: <span class="extype" name="scala.Option">Option</span>[<a href="../../../execution/datasource/stac/TemporalFilter.html" class="extype" name="org.apache.spark.sql.execution.datasource.stac.TemporalFilter">TemporalFilter</a>]</span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Adds an item link to the list of item links.</p>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -541,6 +573,22 @@ which are necessary for batch data processing.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacBatch#limitFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="limitFilter:Option[Int]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacBatch.html#limitFilter:Option[Int]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">limitFilter</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>]</span>
+      </span>
+      
+      
     </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacBatch#mapper" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="mapper:com.fasterxml.jackson.databind.ObjectMapper"></a><a id="mapper:ObjectMapper"></a>
       <span class="permalink">

@@ -346,6 +346,22 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacUtils#addFiltersToUrl" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="addFiltersToUrl(baseUrl:String,spatialFilter:Option[org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter],temporalFilter:Option[org.apache.spark.sql.execution.datasource.stac.TemporalFilter]):String"></a><a id="addFiltersToUrl(String,Option[GeoParquetSpatialFilter],Option[TemporalFilter]):String"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacUtils$.html#addFiltersToUrl(baseUrl:String,spatialFilter:Option[org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter],temporalFilter:Option[org.apache.spark.sql.execution.datasource.stac.TemporalFilter]):String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addFiltersToUrl</span><span class="params">(<span name="baseUrl">baseUrl: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="spatialFilter">spatialFilter: <span class="extype" name="scala.Option">Option</span>[<a href="../../../execution/datasources/parquet/GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a>]</span>, <span name="temporalFilter">temporalFilter: <span class="extype" name="scala.Option">Option</span>[<a href="../../../execution/datasource/stac/TemporalFilter.html" class="extype" name="org.apache.spark.sql.execution.datasource.stac.TemporalFilter">TemporalFilter</a>]</span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Adds the spatial and temporal filters to the base URL.</p>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -362,26 +378,6 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacUtils#buildOutDbRasterFields" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="buildOutDbRasterFields(row:org.apache.spark.sql.catalyst.InternalRow,schema:org.apache.spark.sql.types.StructType):org.apache.spark.sql.catalyst.InternalRow"></a><a id="buildOutDbRasterFields(InternalRow,StructType):InternalRow"></a>
-      <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacUtils$.html#buildOutDbRasterFields(row:org.apache.spark.sql.catalyst.InternalRow,schema:org.apache.spark.sql.types.StructType):org.apache.spark.sql.catalyst.InternalRow" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">buildOutDbRasterFields</span><span class="params">(<span name="row">row: <span class="extype" name="org.apache.spark.sql.catalyst.InternalRow">InternalRow</span></span>, <span name="schema">schema: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.catalyst.InternalRow">InternalRow</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Builds the output row with the raster field in the assets map.</p><div class="fullcomment"><div class="comment cmt"><p>Builds the output row with the raster field in the assets map.
-</p></div><dl class="paramcmts block"><dt class="param">row</dt><dd class="cmt"><p>
-  The input row.</p></dd><dt class="param">schema</dt><dd class="cmt"><p>
-  The schema of the input row.</p></dd><dt>returns</dt><dd class="cmt"><p>
-  The output row with the raster field in the assets map.</p></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
@@ -479,6 +475,38 @@
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacUtils#getFilterBBox" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="getFilterBBox(filter:org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter):String"></a><a id="getFilterBBox(GeoParquetSpatialFilter):String"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacUtils$.html#getFilterBBox(filter:org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter):String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getFilterBBox</span><span class="params">(<span name="filter">filter: <a href="../../../execution/datasources/parquet/GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns the temporal filter string based on the temporal filter.</p>
+    </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacUtils#getFilterTemporal" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="getFilterTemporal(filter:org.apache.spark.sql.execution.datasource.stac.TemporalFilter):String"></a><a id="getFilterTemporal(TemporalFilter):String"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacUtils$.html#getFilterTemporal(filter:org.apache.spark.sql.execution.datasource.stac.TemporalFilter):String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getFilterTemporal</span><span class="params">(<span name="filter">filter: <a href="../../../execution/datasource/stac/TemporalFilter.html" class="extype" name="org.apache.spark.sql.execution.datasource.stac.TemporalFilter">TemporalFilter</a></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns the temporal filter string based on the temporal filter.</p>
     </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacUtils#getFullCollectionUrl" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="getFullCollectionUrl(opts:Map[String,String]):String"></a><a id="getFullCollectionUrl(Map[String,String]):String"></a>
       <span class="permalink">
@@ -708,7 +736,7 @@ from this GeoJson file.
         <span class="name">promotePropertiesToTop</span><span class="params">(<span name="row">row: <span class="extype" name="org.apache.spark.sql.catalyst.InternalRow">InternalRow</span></span>, <span name="schema">schema: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.catalyst.InternalRow">InternalRow</span></span>
       </span>
       
-      <p class="shortcomment cmt">Promote the properties field to the top level of the row.</p>
+      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
