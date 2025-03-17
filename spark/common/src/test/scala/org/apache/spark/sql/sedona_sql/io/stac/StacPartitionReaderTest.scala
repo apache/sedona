@@ -23,7 +23,7 @@ import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.util.SerializableConfiguration
 
-import scala.jdk.CollectionConverters.mapAsJavaMapConverter
+import scala.jdk.CollectionConverters._
 
 class StacPartitionReaderTest extends TestBaseScala {
 
