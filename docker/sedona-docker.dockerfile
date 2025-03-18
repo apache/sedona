@@ -39,26 +39,45 @@ ENV SPARK_MASTER_PORT=7077
 ENV PYTHONPATH=$SPARK_HOME/python
 ENV PYSPARK_PYTHON=python3
 ENV PYSPARK_DRIVER_PYTHON=jupyter
-COPY ./ ${SEDONA_HOME}/
 
-RUN chmod +x ${SEDONA_HOME}/docker/spark.sh
-RUN chmod +x ${SEDONA_HOME}/docker/sedona.sh
-RUN chmod +x ${SEDONA_HOME}/docker/zeppelin/install-zeppelin.sh
-RUN chmod +x ${SEDONA_HOME}/docker/update-zeppelin-interpreter.sh
-RUN ${SEDONA_HOME}/docker/spark.sh ${spark_version} ${hadoop_s3_version} ${aws_sdk_version} ${spark_xml_version}
+# Set up OS libraries and PySpark
+RUN apt-get update
+RUN apt-get install -y openjdk-19-jdk-headless curl python3-pip maven
+RUN pip3 install --upgrade pip && pip3 install pipenv
+RUN pip3 install pyspark==${spark_version}
+COPY ./docker/install-spark.sh ${SEDONA_HOME}/docker/
+RUN chmod +x ${SEDONA_HOME}/docker/install-spark.sh
+RUN ${SEDONA_HOME}/docker/install-spark.sh ${hadoop_s3_version} ${aws_sdk_version} ${spark_xml_version}
 
 # Install Python dependencies
-COPY docker/sedona-spark-jupyterlab/requirements.txt /opt/requirements.txt
+COPY docker/requirements.txt /opt/requirements.txt
 RUN pip3 install -r /opt/requirements.txt
 
-RUN ${SEDONA_HOME}/docker/sedona.sh ${sedona_version} ${geotools_wrapper_version} ${spark_version} ${spark_extension_version}
-RUN ${SEDONA_HOME}/docker/zeppelin/install-zeppelin.sh ${zeppelin_version} /opt
+
+# Copy local compiled jars and python code to the docker environment
+COPY ./spark-shaded/ ${SEDONA_HOME}/spark-shaded/
+COPY ./python/ ${SEDONA_HOME}/python/
+# Install Sedona
+COPY ./docker/install-sedona.sh ${SEDONA_HOME}/docker/
+RUN chmod +x ${SEDONA_HOME}/docker/install-sedona.sh
+RUN ${SEDONA_HOME}/docker/install-sedona.sh ${sedona_version} ${geotools_wrapper_version} ${spark_version} ${spark_extension_version}
+
+
+# Install Zeppelin
+COPY ./docker/install-zeppelin.sh ${SEDONA_HOME}/docker/
+RUN chmod +x ${SEDONA_HOME}/docker/install-zeppelin.sh
+RUN ${SEDONA_HOME}/docker/install-zeppelin.sh ${zeppelin_version} /opt
+COPY ./docker/zeppelin/ ${SEDONA_HOME}/docker/zeppelin/
+
 # Set up Zeppelin configuration
 COPY docker/zeppelin/conf/zeppelin-site.xml ${ZEPPELIN_HOME}/conf/
 COPY docker/zeppelin/conf/helium.json ${ZEPPELIN_HOME}/conf/
 COPY docker/zeppelin/conf/interpreter.json ${ZEPPELIN_HOME}/conf/
+
 # Extract version from the actual JAR file and update interpreter.json
-RUN ${SEDONA_HOME}/docker/update-zeppelin-interpreter.sh
+COPY ./docker/zeppelin/update-zeppelin-interpreter.sh ${SEDONA_HOME}/docker/zeppelin/
+RUN chmod +x ${SEDONA_HOME}/docker/zeppelin/update-zeppelin-interpreter.sh
+RUN ${SEDONA_HOME}/docker/zeppelin/update-zeppelin-interpreter.sh
 
 RUN mkdir ${ZEPPELIN_HOME}/helium
 RUN mkdir ${ZEPPELIN_HOME}/leaflet
@@ -91,5 +110,5 @@ EXPOSE 8085
 
 WORKDIR ${SHARED_WORKSPACE}
 
-COPY docker/sedona-spark-jupyterlab/start.sh /opt/
+COPY ./docker/start.sh /opt/
 CMD ["/bin/bash", "/opt/start.sh"]

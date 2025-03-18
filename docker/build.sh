@@ -80,18 +80,18 @@ if [ "$SEDONA_VERSION" = "latest" ]; then
     echo "Using latest geotools-wrapper version: $GEOTOOLS_WRAPPER_VERSION"
 
     # The compilation must take place outside Docker to avoid unnecessary maven packages
-    mvn clean install -DskipTests -Dspark="${SEDONA_SPARK_VERSION}" -Dscala=2.12
+    # mvn clean install -DskipTests -Dspark="${SEDONA_SPARK_VERSION}" -Dscala=2.12
 fi
 
 # -- Building the image
 
 if [ -z "$BUILD_MODE" ] || [ "$BUILD_MODE" = "local" ]; then
     # If local, build the image for the local environment
-    docker buildx build \
+    docker buildx build --load \
     --build-arg spark_version="${SPARK_VERSION}" \
     --build-arg sedona_version="${SEDONA_VERSION}" \
     --build-arg geotools_wrapper_version="${GEOTOOLS_WRAPPER_VERSION}" \
-    -f docker/sedona-spark-jupyterlab/sedona-jupyterlab.dockerfile \
+    -f docker/sedona-docker.dockerfile \
     -t apache/sedona:"${SEDONA_VERSION}" .
 else
     # If release, build the image for cross-platform

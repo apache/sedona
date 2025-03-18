@@ -18,18 +18,9 @@
 set -e
 
 # Define variables
-spark_version=$1
-hadoop_s3_version=$2
-aws_sdk_version=$3
-spark_xml_version=$4
-
-# Set up OS libraries
-apt-get update
-apt-get install -y openjdk-19-jdk-headless curl python3-pip maven
-pip3 install --upgrade pip && pip3 install pipenv
-
-# Download Spark jar and set up PySpark
-pip3 install pyspark=="${spark_version}"
+hadoop_s3_version=$1
+aws_sdk_version=$2
+spark_xml_version=$3
 
 # Add S3 jars
 curl https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/"${hadoop_s3_version}"/hadoop-aws-"${hadoop_s3_version}".jar -o "${SPARK_HOME}"/jars/hadoop-aws-"${hadoop_s3_version}".jar
