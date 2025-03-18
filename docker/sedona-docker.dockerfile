@@ -32,6 +32,7 @@ ENV SHARED_WORKSPACE=${shared_workspace}
 ENV SPARK_HOME=/opt/spark
 ENV SEDONA_HOME=/opt/sedona
 ENV ZEPPELIN_HOME=/opt/zeppelin
+RUN mkdir ${SPARK_HOME}
 RUN mkdir ${SEDONA_HOME}
 
 ENV SPARK_MASTER_HOST=localhost

@@ -24,9 +24,9 @@ aws_sdk_version=$3
 spark_xml_version=$4
 
 # Download Spark jar and set up PySpark
-curl --retry 5 --retry-delay 10 --retry-connrefused https://archive.apache.org/dist/spark/spark-"${spark_version}"/spark-"${spark_version}"-bin-hadoop"${hadoop_version}".tgz -o spark.tgz
-tar -xf spark.tgz && mv spark-"${spark_version}"-bin-hadoop"${hadoop_version}"/* "${SPARK_HOME}"/
-rm spark.tgz && rm -rf spark-"${spark_version}"-bin-hadoop"${hadoop_version}"
+curl --retry 5 --retry-delay 10 --retry-connrefused https://archive.apache.org/dist/spark/spark-"${spark_version}"/spark-"${spark_version}"-bin-hadoop3.tgz -o spark.tgz
+tar -xf spark.tgz && mv spark-"${spark_version}"-bin-hadoop3/* "${SPARK_HOME}"/
+rm spark.tgz && rm -rf spark-"${spark_version}"-bin-hadoop3
 
 # Add S3 jars
 curl --retry 5 --retry-delay 10 --retry-connrefused https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/"${hadoop_s3_version}"/hadoop-aws-"${hadoop_s3_version}".jar -o "${SPARK_HOME}"/jars/hadoop-aws-"${hadoop_s3_version}".jar
