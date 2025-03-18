@@ -977,7 +977,7 @@
       "properties": {
         "SPARK_HOME": {
           "name": "SPARK_HOME",
-          "value": "/usr/local/lib/python3.10/dist-packages/pyspark",
+          "value": "/opt/spark",
           "type": "string",
           "description": "Location of spark distribution"
         }

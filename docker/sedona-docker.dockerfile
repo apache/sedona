@@ -29,7 +29,7 @@ ARG zeppelin_version=0.12.0
 
 # Set up envs
 ENV SHARED_WORKSPACE=${shared_workspace}
-ENV SPARK_HOME=/usr/local/lib/python3.10/dist-packages/pyspark
+ENV SPARK_HOME=/opt/spark
 ENV SEDONA_HOME=/opt/sedona
 ENV ZEPPELIN_HOME=/opt/zeppelin
 RUN mkdir ${SEDONA_HOME}
@@ -44,10 +44,9 @@ ENV PYSPARK_DRIVER_PYTHON=jupyter
 RUN apt-get update
 RUN apt-get install -y openjdk-19-jdk-headless curl python3-pip maven
 RUN pip3 install --upgrade pip && pip3 install pipenv
-RUN pip3 install pyspark==${spark_version}
 COPY ./docker/install-spark.sh ${SEDONA_HOME}/docker/
 RUN chmod +x ${SEDONA_HOME}/docker/install-spark.sh
-RUN ${SEDONA_HOME}/docker/install-spark.sh ${hadoop_s3_version} ${aws_sdk_version} ${spark_xml_version}
+RUN ${SEDONA_HOME}/docker/install-spark.sh ${spark_version} ${hadoop_s3_version} ${aws_sdk_version} ${spark_xml_version}
 
 # Install Python dependencies
 COPY docker/requirements.txt /opt/requirements.txt
