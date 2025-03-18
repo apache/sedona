@@ -21,8 +21,8 @@ ZEPPELIN_VERSION=${1:-0.9.0}
 TARGET_DIR=${2:-/opt}
 
 # Download and extract Zeppelin using curl
-curl -L https://archive.apache.org/dist/zeppelin/zeppelin-"${ZEPPELIN_VERSION}"/zeppelin-"${ZEPPELIN_VERSION}"-bin-all.tgz \
-    -o zeppelin-"${ZEPPELIN_VERSION}"-bin-all.tgz
-tar -xzf zeppelin-"${ZEPPELIN_VERSION}"-bin-all.tgz -C "${TARGET_DIR}"
-mv "${TARGET_DIR}"/zeppelin-"${ZEPPELIN_VERSION}"-bin-all "${ZEPPELIN_HOME}"
-rm zeppelin-"${ZEPPELIN_VERSION}"-bin-all.tgz
+curl -L --retry 5 --retry-delay 10 --retry-connrefused https://archive.apache.org/dist/zeppelin/zeppelin-"${ZEPPELIN_VERSION}"/zeppelin-"${ZEPPELIN_VERSION}"-bin-netinst.tgz \
+    -o zeppelin-"${ZEPPELIN_VERSION}"-bin-netinst.tgz
+tar -xzf zeppelin-"${ZEPPELIN_VERSION}"-bin-netinst.tgz -C "${TARGET_DIR}"
+mv "${TARGET_DIR}"/zeppelin-"${ZEPPELIN_VERSION}"-bin-netinst "${ZEPPELIN_HOME}"
+rm zeppelin-"${ZEPPELIN_VERSION}"-bin-netinst.tgz

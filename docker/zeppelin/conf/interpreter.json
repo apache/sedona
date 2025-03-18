@@ -1383,13 +1383,13 @@
       "properties": {
         "SPARK_HOME": {
           "name": "SPARK_HOME",
-          "value": "/usr/local/lib/python3.10/dist-packages/pyspark",
+          "value": "/opt/spark",
           "type": "string",
           "description": "Location of spark distribution"
         },
         "spark.master": {
           "name": "spark.master",
-          "value": "local[*]",
+          "value": "spark://localhost:7077",
           "type": "string",
           "description": "Spark master uri. local | yarn-client | yarn-cluster | spark master address of standalone mode, ex) spark://master_host:7077"
         },
@@ -1668,11 +1668,11 @@
       ],
       "dependencies": [
         {
-          "groupArtifactVersion": "/usr/local/lib/python3.10/dist-packages/pyspark/jars/sedona-spark-shaded-3.5_2.12-1.7.1.jar",
+          "groupArtifactVersion": "/opt/spark/jars/sedona-spark-shaded-3.5_2.12-1.7.1.jar",
           "local": false
         },
         {
-          "groupArtifactVersion": "/usr/local/lib/python3.10/dist-packages/pyspark/jars/geotools-wrapper-1.7.1-28.5.jar",
+          "groupArtifactVersion": "/opt/spark/jars/geotools-wrapper-1.7.1-28.5.jar",
           "local": false
         }
       ],

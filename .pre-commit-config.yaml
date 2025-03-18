@@ -132,13 +132,6 @@ repos:
       - id: gitleaks
         name: run gitleaks
         description: check for secrets with gitleaks
-  - repo: https://github.com/shssoichiro/oxipng
-    rev: v9.1.3
-    hooks:
-      - id: oxipng
-        name: run oxipng
-        description: check PNG files with oxipng
-        args: ["-o", "4", "--strip", "safe", "--alpha"]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
@@ -212,3 +205,10 @@ repos:
         args: [--strict, -c=.github/linters/.yaml-lint.yml]
         types: [yaml]
         files: \.ya?ml$
+  - repo: https://github.com/shssoichiro/oxipng
+    rev: v9.1.3
+    hooks:
+      - id: oxipng
+        name: run oxipng
+        description: check PNG files with oxipng
+        args: ["-o", "4", "--strip", "safe", "--alpha"]
