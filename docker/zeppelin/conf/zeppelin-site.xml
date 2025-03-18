@@ -57,7 +57,7 @@
 
 <property>
   <name>zeppelin.default.ui</name>
-  <value>new</value>
+  <value>classic</value>
   <description>Default UI for Zeppelin. Options: classic or new</description>
 </property>
 
