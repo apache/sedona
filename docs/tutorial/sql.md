@@ -58,7 +58,7 @@ Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.
 === "Python"
 
 	1. Please read [Quick start](../setup/install-python.md) to install Sedona Python.
-	2. This tutorial is based on [Sedona SQL Jupyter Notebook example](jupyter-notebook.md). You can interact with Sedona Python Jupyter notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=docs/usecases) to interact with Sedona Python Jupyter notebook immediately on Binder.
+	2. This tutorial is based on [Sedona SQL Jupyter Notebook example](jupyter-notebook.md).
 
 ## Create Sedona config
 
@@ -841,7 +841,7 @@ Each API exposed by SedonaPyDeck offers customization via optional arguments, de
 
 SedonaPyDeck exposes a `create_choropleth_map` API which can be used to visualize a choropleth map out of the passed SedonaDataFrame containing polygons with an observation:
 
-Example (referenced from example notebook available via binder):
+Example:
 
 ```python
 SedonaPyDeck.create_choropleth_map(df=groupedresult, plot_col='AirportCount')
@@ -859,7 +859,7 @@ can also be found in the example notebook available [here](https://github.com/ap
 
 SedonaPyDeck exposes a create_geometry_map API which can be used to visualize a passed SedonaDataFrame containing any type of geometries:
 
-Example (referenced from overture notebook available via binder):
+Example:
 
 ```python
 SedonaPyDeck.create_geometry_map(df_building, elevation_col='height')
