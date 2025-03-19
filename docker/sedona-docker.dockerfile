@@ -85,20 +85,10 @@ RUN mkdir ${ZEPPELIN_HOME}/notebook/sedona-tutorial
 COPY zeppelin/ ${ZEPPELIN_HOME}/leaflet
 COPY docker/zeppelin/conf/sedona-zeppelin.json ${ZEPPELIN_HOME}/helium/
 COPY docker/zeppelin/examples/*.zpln ${ZEPPELIN_HOME}/notebook/sedona-tutorial/
-COPY docker/zeppelin/examples/arealm.csv /opt/workspace/examples/data/
 
 COPY docs/usecases/*.ipynb /opt/workspace/examples/
 COPY docs/usecases/*.py /opt/workspace/examples/
 COPY docs/usecases/data /opt/workspace/examples/data
-
-# Add the master IP address to all notebooks
-RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i 's/config = SedonaContext.builder()/config = SedonaContext.builder().master(\\"spark:\/\/localhost:7077\\")/' {} +
-# Delete packages configured by the notebooks
-RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/spark\.jars\.packages/d' {} +
-RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/org\.apache\.sedona:sedona-spark-shaded-/d' {} +
-RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/org\.apache\.sedona:sedona-spark-/d' {} +
-RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/org\.datasyslab:geotools-wrapper:/d' {} +
-RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/uk\.co\.gresearch\.spark:spark-extension_2\.12:/d' {} +
 
 RUN rm -rf ${SEDONA_HOME}
 

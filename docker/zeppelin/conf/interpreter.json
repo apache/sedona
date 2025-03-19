@@ -1405,36 +1405,6 @@
           "type": "string",
           "description": "The name of spark application."
         },
-        "spark.driver.cores": {
-          "name": "spark.driver.cores",
-          "value": "1",
-          "type": "number",
-          "description": "Number of cores to use for the driver process, only in cluster mode."
-        },
-        "spark.driver.memory": {
-          "name": "spark.driver.memory",
-          "value": "1g",
-          "type": "string",
-          "description": "Amount of memory to use for the driver process, i.e. where SparkContext is initialized, in the same format as JVM memory strings with a size unit suffix (\"k\", \"m\", \"g\" or \"t\") (e.g. 512m, 2g)."
-        },
-        "spark.executor.cores": {
-          "name": "spark.executor.cores",
-          "value": "1",
-          "type": "number",
-          "description": "The number of cores to use on each executor"
-        },
-        "spark.executor.memory": {
-          "name": "spark.executor.memory",
-          "value": "1g",
-          "type": "string",
-          "description": "Executor memory per worker instance. ex) 512m, 32g"
-        },
-        "spark.executor.instances": {
-          "name": "spark.executor.instances",
-          "value": "2",
-          "type": "number",
-          "description": "The number of executors for static allocation."
-        },
         "spark.files": {
           "name": "spark.files",
           "value": "",
