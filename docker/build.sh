@@ -102,6 +102,6 @@ else
     --build-arg spark_version="${SPARK_VERSION}" \
     --build-arg sedona_version="${SEDONA_VERSION}" \
     --build-arg geotools_wrapper_version="${GEOTOOLS_WRAPPER_VERSION}" \
-    -f docker/sedona-spark-jupyterlab/sedona-jupyterlab.dockerfile \
+    -f docker/sedona-docker.dockerfile \
     -t apache/sedona:"${SEDONA_VERSION}" .
 fi
