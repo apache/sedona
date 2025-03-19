@@ -1140,15 +1140,16 @@ Returns a struct containing the cluster ID and a boolean indicating if the recor
 
 - `epsilon` is the maximum distance between two points for them to be considered as part of the same cluster.
 - `minPoints` is the minimum number of neighbors a single record must have to form a cluster.
+- `useSpheroid` is whether to use ST_DistanceSpheroid or ST_Distance as the distance metric.
 
-Format: `ST_DBSCAN(geom: Geometry, epsilon: Double, minPoints: Integer)`
+Format: `ST_DBSCAN(geom: Geometry, epsilon: Double, minPoints: Integer, useSpheroid: Boolean)`
 
 Since: `v1.7.1`
 
 SQL Example
 
 ```sql
-SELECT ST_DBSCAN(geom, 1.0, 2)
+SELECT ST_DBSCAN(geom, 1.0, 2, False)
 ```
 
 Output:
