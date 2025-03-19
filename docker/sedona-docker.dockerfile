@@ -18,20 +18,21 @@
 FROM ubuntu:22.04
 
 ARG shared_workspace=/opt/workspace
-ARG spark_version=3.4.1
+ARG spark_version=3.5.5
 ARG hadoop_s3_version=3.3.4
 ARG aws_sdk_version=1.12.402
 ARG spark_xml_version=0.16.0
-ARG sedona_version=1.5.1
-ARG geotools_wrapper_version=1.5.1-28.2
+ARG sedona_version=1.7.1
+ARG geotools_wrapper_version=1.7.1-28.5
 ARG spark_extension_version=2.11.0
 ARG zeppelin_version=0.12.0
 
 # Set up envs
 ENV SHARED_WORKSPACE=${shared_workspace}
-ENV SPARK_HOME=/usr/local/lib/python3.10/dist-packages/pyspark
+ENV SPARK_HOME=/opt/spark
 ENV SEDONA_HOME=/opt/sedona
 ENV ZEPPELIN_HOME=/opt/zeppelin
+RUN mkdir ${SPARK_HOME}
 RUN mkdir ${SEDONA_HOME}
 
 ENV SPARK_MASTER_HOST=localhost
@@ -39,43 +40,55 @@ ENV SPARK_MASTER_PORT=7077
 ENV PYTHONPATH=$SPARK_HOME/python
 ENV PYSPARK_PYTHON=python3
 ENV PYSPARK_DRIVER_PYTHON=jupyter
-COPY ./ ${SEDONA_HOME}/
 
-RUN chmod +x ${SEDONA_HOME}/docker/spark.sh
-RUN chmod +x ${SEDONA_HOME}/docker/sedona.sh
-RUN chmod +x ${SEDONA_HOME}/docker/zeppelin/install-zeppelin.sh
-RUN ${SEDONA_HOME}/docker/spark.sh ${spark_version} ${hadoop_s3_version} ${aws_sdk_version} ${spark_xml_version}
+# Set up OS libraries and PySpark
+RUN apt-get update
+RUN apt-get install -y openjdk-19-jdk-headless curl python3-pip maven
+RUN pip3 install --upgrade pip && pip3 install pipenv
+COPY ./docker/install-spark.sh ${SEDONA_HOME}/docker/
+RUN chmod +x ${SEDONA_HOME}/docker/install-spark.sh
+RUN ${SEDONA_HOME}/docker/install-spark.sh ${spark_version} ${hadoop_s3_version} ${aws_sdk_version} ${spark_xml_version}
 
 # Install Python dependencies
-COPY docker/sedona-spark-jupyterlab/requirements.txt /opt/requirements.txt
-RUN pip3 install --default-timeout=100 -r /opt/requirements.txt
+COPY docker/requirements.txt /opt/requirements.txt
+RUN pip3 install -r /opt/requirements.txt
 
-RUN ${SEDONA_HOME}/docker/sedona.sh ${sedona_version} ${geotools_wrapper_version} ${spark_version} ${spark_extension_version}
-RUN ${SEDONA_HOME}/docker/zeppelin/install-zeppelin.sh ${zeppelin_version} /opt
+
+# Copy local compiled jars and python code to the docker environment
+COPY ./spark-shaded/ ${SEDONA_HOME}/spark-shaded/
+COPY ./python/ ${SEDONA_HOME}/python/
+# Install Sedona
+COPY ./docker/install-sedona.sh ${SEDONA_HOME}/docker/
+RUN chmod +x ${SEDONA_HOME}/docker/install-sedona.sh
+RUN ${SEDONA_HOME}/docker/install-sedona.sh ${sedona_version} ${geotools_wrapper_version} ${spark_version} ${spark_extension_version}
+
+
+# Install Zeppelin
+COPY ./docker/install-zeppelin.sh ${SEDONA_HOME}/docker/
+RUN chmod +x ${SEDONA_HOME}/docker/install-zeppelin.sh
+RUN ${SEDONA_HOME}/docker/install-zeppelin.sh ${zeppelin_version} /opt
+COPY ./docker/zeppelin/ ${SEDONA_HOME}/docker/zeppelin/
+
 # Set up Zeppelin configuration
 COPY docker/zeppelin/conf/zeppelin-site.xml ${ZEPPELIN_HOME}/conf/
 COPY docker/zeppelin/conf/helium.json ${ZEPPELIN_HOME}/conf/
 COPY docker/zeppelin/conf/interpreter.json ${ZEPPELIN_HOME}/conf/
+
+# Extract version from the actual JAR file and update interpreter.json
+COPY ./docker/zeppelin/update-zeppelin-interpreter.sh ${SEDONA_HOME}/docker/zeppelin/
+RUN chmod +x ${SEDONA_HOME}/docker/zeppelin/update-zeppelin-interpreter.sh
+RUN ${SEDONA_HOME}/docker/zeppelin/update-zeppelin-interpreter.sh
+
 RUN mkdir ${ZEPPELIN_HOME}/helium
 RUN mkdir ${ZEPPELIN_HOME}/leaflet
 RUN mkdir ${ZEPPELIN_HOME}/notebook/sedona-tutorial
 COPY zeppelin/ ${ZEPPELIN_HOME}/leaflet
 COPY docker/zeppelin/conf/sedona-zeppelin.json ${ZEPPELIN_HOME}/helium/
 COPY docker/zeppelin/examples/*.zpln ${ZEPPELIN_HOME}/notebook/sedona-tutorial/
-COPY docker/zeppelin/examples/arealm.csv /opt/workspace/examples/data/
 
 COPY docs/usecases/*.ipynb /opt/workspace/examples/
 COPY docs/usecases/*.py /opt/workspace/examples/
 COPY docs/usecases/data /opt/workspace/examples/data
-
-# Add the master IP address to all notebooks
-RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i 's/config = SedonaContext.builder()/config = SedonaContext.builder().master(\\"spark:\/\/localhost:7077\\")/' {} +
-# Delete packages configured by the notebooks
-RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/spark\.jars\.packages/d' {} +
-RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/org\.apache\.sedona:sedona-spark-shaded-/d' {} +
-RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/org\.apache\.sedona:sedona-spark-/d' {} +
-RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/org\.datasyslab:geotools-wrapper:/d' {} +
-RUN find /opt/workspace/examples/ -type f -name "*.ipynb" -exec sed -i '/uk\.co\.gresearch\.spark:spark-extension_2\.12:/d' {} +
 
 RUN rm -rf ${SEDONA_HOME}
 
@@ -87,5 +100,5 @@ EXPOSE 8085
 
 WORKDIR ${SHARED_WORKSPACE}
 
-COPY docker/sedona-spark-jupyterlab/start.sh /opt/
+COPY ./docker/start.sh /opt/
 CMD ["/bin/bash", "/opt/start.sh"]

@@ -22,12 +22,6 @@ root:
           - any-glob-to-any-file:
               - '*'
 
-binder:
-  - any:
-      - changed-files:
-          - any-glob-to-any-file:
-              - binder/**/*
-
 docs:
   - any:
       - changed-files:
