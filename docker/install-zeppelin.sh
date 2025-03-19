@@ -14,10 +14,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+set -e
 
-export SPARK_HOME=$HOME/spark-3.4.2-bin-hadoop3
-export PATH=$SPARK_HOME/bin:$PATH
-export PYTHONPATH=$SPARK_HOME/python:$PYTHONPATH
-export PYSPARK_SUBMIT_ARGS="--master local[*] pyspark-shell"
+# Define Zeppelin version and target directory
+ZEPPELIN_VERSION=${1:-0.9.0}
+TARGET_DIR=${2:-/opt}
 
-exec "$@"
+# Download and extract Zeppelin using curl
+curl -L --retry 5 --retry-delay 10 --retry-connrefused https://archive.apache.org/dist/zeppelin/zeppelin-"${ZEPPELIN_VERSION}"/zeppelin-"${ZEPPELIN_VERSION}"-bin-netinst.tgz \
+    -o zeppelin-"${ZEPPELIN_VERSION}"-bin-netinst.tgz
+tar -xzf zeppelin-"${ZEPPELIN_VERSION}"-bin-netinst.tgz -C "${TARGET_DIR}"
+mv "${TARGET_DIR}"/zeppelin-"${ZEPPELIN_VERSION}"-bin-netinst "${ZEPPELIN_HOME}"
+rm zeppelin-"${ZEPPELIN_VERSION}"-bin-netinst.tgz

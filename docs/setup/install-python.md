@@ -17,8 +17,6 @@
  under the License.
  -->
 
-Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=docs/usecases) and play the interactive Sedona Python Jupyter Notebook immediately!
-
 Apache Sedona extends pyspark functions which depends on libraries:
 
 * pyspark

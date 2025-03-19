@@ -57,7 +57,7 @@
 
 <property>
   <name>zeppelin.default.ui</name>
-  <value>new</value>
+  <value>classic</value>
   <description>Default UI for Zeppelin. Options: classic or new</description>
 </property>
 
@@ -435,7 +435,7 @@
 
 <property>
   <name>zeppelin.interpreter.output.limit</name>
-  <value>102400</value>
+  <value>10240000</value>
   <description>Output message from interpreter exceeding the limit will be truncated</description>
 </property>
 

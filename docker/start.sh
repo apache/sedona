@@ -67,11 +67,21 @@ if [ $TOTAL_REQUIRED_MEM_MB -gt "$TOTAL_PHYSICAL_MEM_MB" ]; then
     exit 1
 fi
 
-# Configure spark
-cp "${SPARK_HOME}"/conf/spark-env.sh.template "${SPARK_HOME}"/conf/spark-env.sh
-echo "SPARK_WORKER_MEMORY=${EXECUTOR_MEM}" >> "${SPARK_HOME}"/conf/spark-env.sh
-echo "spark.driver.memory $DRIVER_MEM" >> "${SPARK_HOME}"/conf/spark-defaults.conf
-echo "spark.executor.memory $EXECUTOR_MEM" >> "${SPARK_HOME}"/conf/spark-defaults.conf
+# Configure Spark
+cp "${SPARK_HOME}/conf/spark-env.sh.template" "${SPARK_HOME}/conf/spark-env.sh"
+
+# Append Spark environment variables
+{
+  echo "SPARK_WORKER_MEMORY=${EXECUTOR_MEM}"
+} >> "${SPARK_HOME}/conf/spark-env.sh"
+
+# Append Spark default configurations
+{
+  echo "spark.driver.memory $DRIVER_MEM"
+  echo "spark.executor.memory $EXECUTOR_MEM"
+  echo "spark.sql.extensions org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions"
+  echo "spark.hadoop.fs.s3a.aws.credentials.provider org.apache.hadoop.fs.s3a.AnonymousAWSCredentialsProvider"
+} >> "${SPARK_HOME}/conf/spark-defaults.conf"
 
 # Start spark standalone cluster
 service ssh start

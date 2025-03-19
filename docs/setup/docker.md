@@ -109,13 +109,13 @@ Requirements: docker ([How?](https://docs.docker.com/engine/install/))
 Format:
 
 ```bash
-./docker/sedona-spark-jupyterlab/build.sh <spark_version> <sedona_version> <build_mode>
+./docker/build.sh <spark_version> <sedona_version> <build_mode>
 ```
 
 Example:
 
 ```bash
-./docker/sedona-spark-jupyterlab/build.sh 3.4.1 {{ sedona.current_version }}
+./docker/build.sh 3.4.1 {{ sedona.current_version }}
 ```
 
 `build_mode` is optional. If its value is not given or is `local`, the script will build the image locally. Otherwise, it will start a cross-platform compilation and push images directly to DockerHub.
@@ -127,13 +127,13 @@ Requirements: docker ([How?](https://docs.docker.com/engine/install/)), JDK <= 1
 Format:
 
 ```bash
-./docker/sedona-spark-jupyterlab/build.sh <spark_version> latest <build_mode>
+./docker/build.sh <spark_version> latest <build_mode>
 ```
 
 Example:
 
 ```bash
-./docker/sedona-spark-jupyterlab/build.sh 3.4.1 latest
+./docker/build.sh 3.4.1 latest
 ```
 
 `build_mode` is optional. If its value is not given or is `local`, the script will build the image locally. Otherwise, it will start a cross-platform compilation and push images directly to DockerHub.
@@ -149,7 +149,7 @@ This docker image can only be built against Sedona 1.7.0+ and Spark 3.3+
 - OS: Ubuntu 22.02
 - JDK: openjdk-19
 - Python: 3.10
-- Spark 3.4.1
+- Spark 3.5.5
 
 ### Web UI
 
@@ -168,12 +168,12 @@ Format:
 
 ```bash
 docker login
-./docker/sedona-spark-jupyterlab/build.sh <spark_version> <sedona_version> release
+./docker/build.sh <spark_version> <sedona_version> release
 ```
 
 Example:
 
 ```bash
 docker login
-./docker/sedona-spark-jupyterlab/build.sh 3.4.1 {{ sedona.current_version }} release
+./docker/build.sh 3.4.1 {{ sedona.current_version }} release
 ```
