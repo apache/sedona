@@ -114,6 +114,13 @@ public class RasterBandAccessors {
     DescriptiveStatistics stats = (DescriptiveStatistics) objects.get(0);
     double[] pixelData = (double[]) objects.get(1);
 
+    // Shortcut for an edge case where ROI barely intersects with raster's extent, but it doesn't intersect with the
+    // centroid of the pixel.
+    // This happens when allTouched parameter is false.
+    if (pixelData.length == 0) {
+      return new double[] {0, 0, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
+    }
+
     // order of stats
     // count, sum, mean, median, mode, stddev, variance, min, max
     double[] result = new double[9];
@@ -312,6 +319,11 @@ public class RasterBandAccessors {
    */
   private static double zonalMode(double[] pixelData) {
     double[] modes = StatUtils.mode(pixelData);
+    // Return NaN when ROI and raster's extent overlap, but there's no pixel data.
+    // This behavior only happens when allTouched parameter is false.
+    if (modes.length == 0) {
+      return Double.NaN;
+    }
     return modes[modes.length - 1];
   }
 
