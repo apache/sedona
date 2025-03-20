@@ -22,8 +22,11 @@ import org.apache.sedona.spark.SedonaContext
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SparkSessionExtensions
 import org.apache.spark.sql.parser.ParserFactory
+import org.slf4j.{Logger, LoggerFactory}
 
 class SedonaSqlExtensions extends (SparkSessionExtensions => Unit) {
+  val logger: Logger = LoggerFactory.getLogger(getClass)
+
   private lazy val enableParser =
     SparkContext.getOrCreate().getConf.get("spark.sedona.enableParserExtension", "true").toBoolean
 
@@ -33,9 +36,20 @@ class SedonaSqlExtensions extends (SparkSessionExtensions => Unit) {
       _ => ()
     })
 
+    // Inject Sedona SQL parser
     if (enableParser) {
-      e.injectParser { case (_, parser) =>
-        ParserFactory.getParser("org.apache.sedona.sql.parser.SedonaSqlParser", parser)
+      // Try to inject the Sedona SQL parser but gracefully handle initialization failures.
+      // This prevents extension loading errors from causing the SparkSession initialization to fail,
+      // allowing the application to continue running without the Sedona parser extension.
+      // Common failures include version incompatibilities between Spark and Sedona.
+      try {
+        e.injectParser { case (_, parser) =>
+          ParserFactory.getParser("org.apache.sedona.sql.parser.SedonaSqlParser", parser)
+        }
+      } catch {
+        case ex: Exception =>
+          logger.warn(s"Failed to inject Sedona SQL parser: ${ex.getMessage}", ex)
+        // Skip parser injection
       }
     }
   }
