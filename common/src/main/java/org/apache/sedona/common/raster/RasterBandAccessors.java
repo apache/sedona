@@ -99,7 +99,7 @@ public class RasterBandAccessors {
    * @return An array with all the stats for the region
    * @throws FactoryException
    */
-  public static double[] getZonalStatsAll(
+  public static Double[] getZonalStatsAll(
       GridCoverage2D raster,
       Geometry roi,
       int band,
@@ -114,18 +114,35 @@ public class RasterBandAccessors {
     DescriptiveStatistics stats = (DescriptiveStatistics) objects.get(0);
     double[] pixelData = (double[]) objects.get(1);
 
+    // Shortcut for an edge case where ROI barely intersects with raster's extent, but it doesn't
+    // intersect with the centroid of the pixel.
+    // This happens when allTouched parameter is false.
+    if (pixelData.length == 0) {
+      return new Double[] {0.0, null, null, null, null, null, null, null, null};
+    }
+
     // order of stats
     // count, sum, mean, median, mode, stddev, variance, min, max
-    double[] result = new double[9];
-    result[0] = stats.getN();
-    result[1] = stats.getSum();
-    result[2] = stats.getMean();
-    result[3] = stats.getPercentile(50);
+    Double[] result = new Double[9];
+    result[0] = (double) stats.getN();
+    if (stats.getN() == 0) {
+      result[1] = null;
+    } else {
+      result[1] = stats.getSum();
+    }
+    double mean = stats.getMean();
+    result[2] = Double.isNaN(mean) ? null : mean;
+    double median = stats.getPercentile(50);
+    result[3] = Double.isNaN(median) ? null : median;
     result[4] = zonalMode(pixelData);
-    result[5] = stats.getStandardDeviation();
-    result[6] = stats.getVariance();
-    result[7] = stats.getMin();
-    result[8] = stats.getMax();
+    double stdDev = stats.getStandardDeviation();
+    result[5] = Double.isNaN(stdDev) ? null : stats.getStandardDeviation();
+    double variance = stats.getVariance();
+    result[6] = Double.isNaN(variance) ? null : variance;
+    double min = stats.getMin();
+    result[7] = Double.isNaN(min) ? null : min;
+    double max = stats.getMax();
+    result[8] = Double.isNaN(max) ? null : max;
 
     return result;
   }
@@ -139,7 +156,7 @@ public class RasterBandAccessors {
    * @return An array with all the stats for the region
    * @throws FactoryException
    */
-  public static double[] getZonalStatsAll(
+  public static Double[] getZonalStatsAll(
       GridCoverage2D raster, Geometry roi, int band, boolean allTouched, boolean excludeNoData)
       throws FactoryException {
     return getZonalStatsAll(raster, roi, band, allTouched, excludeNoData, true);
@@ -153,7 +170,7 @@ public class RasterBandAccessors {
    * @return An array with all the stats for the region, excludeNoData is set to true
    * @throws FactoryException
    */
-  public static double[] getZonalStatsAll(
+  public static Double[] getZonalStatsAll(
       GridCoverage2D raster, Geometry roi, int band, boolean allTouched) throws FactoryException {
     return getZonalStatsAll(raster, roi, band, allTouched, true);
   }
@@ -165,7 +182,7 @@ public class RasterBandAccessors {
    * @return An array with all the stats for the region, excludeNoData is set to true
    * @throws FactoryException
    */
-  public static double[] getZonalStatsAll(GridCoverage2D raster, Geometry roi, int band)
+  public static Double[] getZonalStatsAll(GridCoverage2D raster, Geometry roi, int band)
       throws FactoryException {
     return getZonalStatsAll(raster, roi, band, false);
   }
@@ -177,7 +194,7 @@ public class RasterBandAccessors {
    *     set to 1
    * @throws FactoryException
    */
-  public static double[] getZonalStatsAll(GridCoverage2D raster, Geometry roi)
+  public static Double[] getZonalStatsAll(GridCoverage2D raster, Geometry roi)
       throws FactoryException {
     return getZonalStatsAll(raster, roi, 1);
   }
@@ -213,26 +230,36 @@ public class RasterBandAccessors {
 
     switch (statType.toLowerCase()) {
       case "sum":
-        return stats.getSum();
+        if (pixelData.length == 0) {
+          return null;
+        } else {
+          return stats.getSum();
+        }
       case "average":
       case "avg":
       case "mean":
-        return stats.getMean();
+        double mean = stats.getMean();
+        return Double.isNaN(mean) ? null : mean;
       case "count":
         return (double) stats.getN();
       case "max":
-        return stats.getMax();
+        double max = stats.getMax();
+        return Double.isNaN(max) ? null : max;
       case "min":
-        return stats.getMin();
+        double min = stats.getMin();
+        return Double.isNaN(min) ? null : min;
       case "stddev":
       case "sd":
-        return stats.getStandardDeviation();
+        double stdDev = stats.getStandardDeviation();
+        return Double.isNaN(stdDev) ? null : stdDev;
       case "median":
-        return stats.getPercentile(50);
+        double median = stats.getPercentile(50);
+        return Double.isNaN(median) ? null : median;
       case "mode":
         return zonalMode(pixelData);
       case "variance":
-        return stats.getVariance();
+        double variance = stats.getVariance();
+        return Double.isNaN(variance) ? null : variance;
       default:
         throw new IllegalArgumentException(
             "Please select from the accepted options. Some of the valid options are sum, mean, stddev, etc.");
@@ -310,8 +337,13 @@ public class RasterBandAccessors {
    * @return Mode of the pixel values. If there is multiple with same occurrence, then the largest
    *     value will be returned.
    */
-  private static double zonalMode(double[] pixelData) {
+  private static Double zonalMode(double[] pixelData) {
     double[] modes = StatUtils.mode(pixelData);
+    // Return NaN when ROI and raster's extent overlap, but there's no pixel data.
+    // This behavior only happens when allTouched parameter is false.
+    if (modes.length == 0) {
+      return null;
+    }
     return modes[modes.length - 1];
   }
 

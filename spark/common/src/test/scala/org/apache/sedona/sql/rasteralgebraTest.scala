@@ -1623,6 +1623,24 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertTrue(expectedSummary4.equals(actualSummary4))
     }
 
+    it("Passed RS_ZonalStats edge case") {
+      val df = sparkSession.sql("""
+          |with data as (
+          | SELECT array(3, 7, 5, 40, 61, 70, 60, 80, 27, 55, 35, 44, 21, 36, 53, 54, 86, 28, 45, 24, 99, 22, 18, 98, 10) as pixels,
+          |   ST_GeomFromWKT('POLYGON ((5.822754 -6.620957, 6.965332 -6.620957, 6.965332 -5.834616, 5.822754 -5.834616, 5.822754 -6.620957))', 4326) as geom
+          |)
+          |
+          |SELECT RS_SetSRID(RS_AddBandFromArray(RS_MakeEmptyRaster(1, "D", 5, 5, 1, -1, 1), pixels, 1), 4326) as raster, geom FROM data
+          |""".stripMargin)
+
+      val actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'mode')").first().get(0)
+      assertNull(actual)
+
+      val statsDf = df.selectExpr("RS_ZonalStatsAll(raster, geom) as stats")
+      val actualBoolean = statsDf.selectExpr("isNull(stats.mode)").first().getAs[Boolean](0)
+      assertTrue(actualBoolean)
+    }
+
     it("Passed RS_ZonalStats") {
       var df = sparkSession.read
         .format("binaryFile")
