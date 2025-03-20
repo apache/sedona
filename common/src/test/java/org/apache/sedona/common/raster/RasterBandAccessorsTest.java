@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
 
 public class RasterBandAccessorsTest extends RasterTestBase {
 
@@ -103,7 +102,8 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     Double actualZonalStats = RasterBandAccessors.getZonalStats(raster, extent, "mode");
     assertNull(actualZonalStats);
 
-    String actualZonalStatsAll = Arrays.toString(RasterBandAccessors.getZonalStatsAll(raster, extent));
+    String actualZonalStatsAll =
+        Arrays.toString(RasterBandAccessors.getZonalStatsAll(raster, extent));
     String expectedZonalStatsAll = "[0.0, 0.0, NaN, NaN, null, NaN, NaN, NaN, NaN]";
     assertEquals(expectedZonalStatsAll, actualZonalStatsAll);
   }
@@ -205,94 +205,105 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     assertEquals(expected, actual, FP_TOLERANCE);
   }
 
-//  @Test
-//  public void testZonalStatsAll()
-//      throws IOException, FactoryException, ParseException, TransformException {
-//    GridCoverage2D raster =
-//        rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
-//    String polygon =
-//        "POLYGON ((-8673439.6642 4572993.5327, -8673155.5737 4563873.2099, -8701890.3259 4562931.7093, -8682522.8735 4572703.8908, -8673439.6642 4572993.5327))";
-//    Geometry geom = Constructors.geomFromWKT(polygon, 3857);
-//
-//    double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false, false, false);
-//    double[] expected =
-//        new double[] {
-//          185953.0,
-//          1.0896994E7,
-//          58.600796975566816,
-//          0.0,
-//          0.0,
-//          92.53811912983977,
-//          8563.303492088418,
-//          0.0,
-//          255.0
-//        };
-//    assertArrayEquals(expected, actual, FP_TOLERANCE);
-//
-//    geom =
-//        Constructors.geomFromWKT(
-//            "POLYGON ((-77.96672569800863073 37.91971182746296876, -77.9688630154902711 37.89620133516485367, -77.93936803424354309 37.90517806858776595, -77.96672569800863073 37.91971182746296876))",
-//            0);
-//    actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false, false, false);
-//    assertNotNull(actual);
-//
-//    Geometry nonIntersectingGeom =
-//        Constructors.geomFromWKT(
-//            "POLYGON ((-78.22106647832458748 37.76411511479908967, -78.20183062098976734 37.72863564460374874, -78.18088490966962922 37.76753482276972562, -78.22106647832458748 37.76411511479908967))",
-//            0);
-//    actual =
-//        RasterBandAccessors.getZonalStatsAll(raster, nonIntersectingGeom, 1, false, false, true);
-//    assertNull(actual);
-//    assertThrows(
-//        IllegalArgumentException.class,
-//        () ->
-//            RasterBandAccessors.getZonalStatsAll(
-//                raster, nonIntersectingGeom, 1, false, false, false));
-//  }
-//
-//  @Test
-//  public void testZonalStatsAllWithNoData()
-//      throws IOException, FactoryException, ParseException, TransformException {
-//    GridCoverage2D raster =
-//        rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
-//    String polygon =
-//        "POLYGON((-167.750000 87.750000, -155.250000 87.750000, -155.250000 40.250000, -180.250000 40.250000, -167.750000 87.750000))";
-//    Geometry geom = Constructors.geomFromWKT(polygon, RasterAccessors.srid(raster));
-//
-//    double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false, true);
-//    double[] expected =
-//        new double[] {
-//          14249.0,
-//          3229013.0,
-//          226.61330619692416,
-//          255.0,
-//          255.0,
-//          74.81287592054916,
-//          5596.966403503485,
-//          1.0,
-//          255.0
-//        };
-//
-//    assertArrayEquals(expected, actual, FP_TOLERANCE);
-//  }
-//
-//  @Test
-//  public void testZonalStatsAllWithEmptyRaster() throws FactoryException, ParseException {
-//    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 6, 6, 1, -1, 1, -1, 0, 0, 4326);
-//    double[] bandValue =
-//        new double[] {
-//          0, 0, 0, 0, 0, 0, 0, 1, 0, 3, 9, 0, 0, 5, 6, 0, 8, 0, 0, 4, 11, 11, 12, 0, 0, 13, 0, 15,
-//          16, 0, 0, 0, 0, 0, 0, 0
-//        };
-//    raster = MapAlgebra.addBandFromArray(raster, bandValue, 1);
-//    raster = RasterBandEditors.setBandNoDataValue(raster, 1, 0d);
-//    // Testing implicit CRS transformation
-//    Geometry geom = Constructors.geomFromWKT("POLYGON((2 -2, 2 -6, 6 -6, 6 -2, 2 -2))", 0);
-//
-//    double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false, true);
-//    double[] expected = new double[] {13.0, 114.0, 8.7692, 9.0, 11.0, 4.7285, 22.3589, 1.0, 16.0};
-//    assertArrayEquals(expected, actual, FP_TOLERANCE);
-//  }
+  //  @Test
+  //  public void testZonalStatsAll()
+  //      throws IOException, FactoryException, ParseException, TransformException {
+  //    GridCoverage2D raster =
+  //        rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+  //    String polygon =
+  //        "POLYGON ((-8673439.6642 4572993.5327, -8673155.5737 4563873.2099, -8701890.3259
+  // 4562931.7093, -8682522.8735 4572703.8908, -8673439.6642 4572993.5327))";
+  //    Geometry geom = Constructors.geomFromWKT(polygon, 3857);
+  //
+  //    double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false, false,
+  // false);
+  //    double[] expected =
+  //        new double[] {
+  //          185953.0,
+  //          1.0896994E7,
+  //          58.600796975566816,
+  //          0.0,
+  //          0.0,
+  //          92.53811912983977,
+  //          8563.303492088418,
+  //          0.0,
+  //          255.0
+  //        };
+  //    assertArrayEquals(expected, actual, FP_TOLERANCE);
+  //
+  //    geom =
+  //        Constructors.geomFromWKT(
+  //            "POLYGON ((-77.96672569800863073 37.91971182746296876, -77.9688630154902711
+  // 37.89620133516485367, -77.93936803424354309 37.90517806858776595, -77.96672569800863073
+  // 37.91971182746296876))",
+  //            0);
+  //    actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false, false, false);
+  //    assertNotNull(actual);
+  //
+  //    Geometry nonIntersectingGeom =
+  //        Constructors.geomFromWKT(
+  //            "POLYGON ((-78.22106647832458748 37.76411511479908967, -78.20183062098976734
+  // 37.72863564460374874, -78.18088490966962922 37.76753482276972562, -78.22106647832458748
+  // 37.76411511479908967))",
+  //            0);
+  //    actual =
+  //        RasterBandAccessors.getZonalStatsAll(raster, nonIntersectingGeom, 1, false, false,
+  // true);
+  //    assertNull(actual);
+  //    assertThrows(
+  //        IllegalArgumentException.class,
+  //        () ->
+  //            RasterBandAccessors.getZonalStatsAll(
+  //                raster, nonIntersectingGeom, 1, false, false, false));
+  //  }
+  //
+  //  @Test
+  //  public void testZonalStatsAllWithNoData()
+  //      throws IOException, FactoryException, ParseException, TransformException {
+  //    GridCoverage2D raster =
+  //        rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
+  //    String polygon =
+  //        "POLYGON((-167.750000 87.750000, -155.250000 87.750000, -155.250000 40.250000,
+  // -180.250000 40.250000, -167.750000 87.750000))";
+  //    Geometry geom = Constructors.geomFromWKT(polygon, RasterAccessors.srid(raster));
+  //
+  //    double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false, true);
+  //    double[] expected =
+  //        new double[] {
+  //          14249.0,
+  //          3229013.0,
+  //          226.61330619692416,
+  //          255.0,
+  //          255.0,
+  //          74.81287592054916,
+  //          5596.966403503485,
+  //          1.0,
+  //          255.0
+  //        };
+  //
+  //    assertArrayEquals(expected, actual, FP_TOLERANCE);
+  //  }
+  //
+  //  @Test
+  //  public void testZonalStatsAllWithEmptyRaster() throws FactoryException, ParseException {
+  //    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 6, 6, 1, -1, 1, -1, 0, 0,
+  // 4326);
+  //    double[] bandValue =
+  //        new double[] {
+  //          0, 0, 0, 0, 0, 0, 0, 1, 0, 3, 9, 0, 0, 5, 6, 0, 8, 0, 0, 4, 11, 11, 12, 0, 0, 13, 0,
+  // 15,
+  //          16, 0, 0, 0, 0, 0, 0, 0
+  //        };
+  //    raster = MapAlgebra.addBandFromArray(raster, bandValue, 1);
+  //    raster = RasterBandEditors.setBandNoDataValue(raster, 1, 0d);
+  //    // Testing implicit CRS transformation
+  //    Geometry geom = Constructors.geomFromWKT("POLYGON((2 -2, 2 -6, 6 -6, 6 -2, 2 -2))", 0);
+  //
+  //    double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false, true);
+  //    double[] expected = new double[] {13.0, 114.0, 8.7692, 9.0, 11.0, 4.7285, 22.3589, 1.0,
+  // 16.0};
+  //    assertArrayEquals(expected, actual, FP_TOLERANCE);
+  //  }
 
   @Test
   public void testSummaryStatsAllWithAllNoData() throws FactoryException {

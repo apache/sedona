@@ -1624,8 +1624,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     }
 
     it("Passed RS_ZonalStats edge case") {
-      var df = sparkSession.sql(
-        """
+      val df = sparkSession.sql("""
           |with data as (
           | SELECT array(3, 7, 5, 40, 61, 70, 60, 80, 27, 55, 35, 44, 21, 36, 53, 54, 86, 28, 45, 24, 99, 22, 18, 98, 10) as pixels,
           |   ST_GeomFromWKT('POLYGON ((5.822754 -6.620957, 6.965332 -6.620957, 6.965332 -5.834616, 5.822754 -5.834616, 5.822754 -6.620957))', 4326) as geom
