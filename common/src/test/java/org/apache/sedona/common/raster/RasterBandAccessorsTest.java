@@ -86,18 +86,36 @@ public class RasterBandAccessorsTest extends RasterTestBase {
 
   @Test
   public void testZonalStatsIntersectingNoPixelData() throws FactoryException, ParseException {
-    double[][] pixelsValues = new double[][] {
-            new double[] {3, 7, 5, 40, 61, 70, 60, 80, 27, 55, 35, 44, 21, 36, 53, 54, 86, 28, 45, 24, 99, 22, 18, 98, 10}
-    };
-    GridCoverage2D raster = RasterConstructors.makeNonEmptyRaster(1, "", 5, 5, 1, -1, 1, -1, 0, 0, 0, pixelsValues);
-    Geometry extent = Constructors.geomFromWKT("POLYGON ((5.822754 -6.620957, 6.965332 -6.620957, 6.965332 -5.834616, 5.822754 -5.834616, 5.822754 -6.620957))", 0);
+    double[][] pixelsValues =
+        new double[][] {
+          new double[] {
+            3, 7, 5, 40, 61, 70, 60, 80, 27, 55, 35, 44, 21, 36, 53, 54, 86, 28, 45, 24, 99, 22, 18,
+            98, 10
+          }
+        };
+    GridCoverage2D raster =
+        RasterConstructors.makeNonEmptyRaster(1, "", 5, 5, 1, -1, 1, -1, 0, 0, 0, pixelsValues);
+    Geometry extent =
+        Constructors.geomFromWKT(
+            "POLYGON ((5.822754 -6.620957, 6.965332 -6.620957, 6.965332 -5.834616, 5.822754 -5.834616, 5.822754 -6.620957))",
+            0);
 
     double actualZonalStats = RasterBandAccessors.getZonalStats(raster, extent, "mode");
     assertTrue(Double.isNaN(actualZonalStats));
 
-
-    double [] actualZonalStatsAll = RasterBandAccessors.getZonalStatsAll(raster, extent);
-    double[] expectedZonalStatsAll = new double[] {0.0, 0.0, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
+    double[] actualZonalStatsAll = RasterBandAccessors.getZonalStatsAll(raster, extent);
+    double[] expectedZonalStatsAll =
+        new double[] {
+          0.0,
+          0.0,
+          Double.NaN,
+          Double.NaN,
+          Double.NaN,
+          Double.NaN,
+          Double.NaN,
+          Double.NaN,
+          Double.NaN
+        };
     assertArrayEquals(expectedZonalStatsAll, actualZonalStatsAll, FP_TOLERANCE);
   }
 

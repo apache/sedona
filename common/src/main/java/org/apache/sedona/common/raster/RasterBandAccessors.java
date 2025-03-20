@@ -114,11 +114,14 @@ public class RasterBandAccessors {
     DescriptiveStatistics stats = (DescriptiveStatistics) objects.get(0);
     double[] pixelData = (double[]) objects.get(1);
 
-    // Shortcut for an edge case where ROI barely intersects with raster's extent, but it doesn't intersect with the
+    // Shortcut for an edge case where ROI barely intersects with raster's extent, but it doesn't
+    // intersect with the
     // centroid of the pixel.
     // This happens when allTouched parameter is false.
     if (pixelData.length == 0) {
-      return new double[] {0, 0, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
+      return new double[] {
+        0, 0, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN
+      };
     }
 
     // order of stats
