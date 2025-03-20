@@ -99,7 +99,7 @@ public class RasterBandAccessors {
    * @return An array with all the stats for the region
    * @throws FactoryException
    */
-  public static double[] getZonalStatsAll(
+  public static Double[] getZonalStatsAll(
       GridCoverage2D raster,
       Geometry roi,
       int band,
@@ -115,19 +115,18 @@ public class RasterBandAccessors {
     double[] pixelData = (double[]) objects.get(1);
 
     // Shortcut for an edge case where ROI barely intersects with raster's extent, but it doesn't
-    // intersect with the
-    // centroid of the pixel.
+    // intersect with the centroid of the pixel.
     // This happens when allTouched parameter is false.
     if (pixelData.length == 0) {
-      return new double[] {
-        0, 0, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN
+      return new Double[] {
+        0.0, 0.0, Double.NaN, Double.NaN, null, Double.NaN, Double.NaN, Double.NaN, Double.NaN
       };
     }
 
     // order of stats
     // count, sum, mean, median, mode, stddev, variance, min, max
-    double[] result = new double[9];
-    result[0] = stats.getN();
+    Double[] result = new Double[9];
+    result[0] = (double) stats.getN();
     result[1] = stats.getSum();
     result[2] = stats.getMean();
     result[3] = stats.getPercentile(50);
@@ -149,7 +148,7 @@ public class RasterBandAccessors {
    * @return An array with all the stats for the region
    * @throws FactoryException
    */
-  public static double[] getZonalStatsAll(
+  public static Double[] getZonalStatsAll(
       GridCoverage2D raster, Geometry roi, int band, boolean allTouched, boolean excludeNoData)
       throws FactoryException {
     return getZonalStatsAll(raster, roi, band, allTouched, excludeNoData, true);
@@ -163,7 +162,7 @@ public class RasterBandAccessors {
    * @return An array with all the stats for the region, excludeNoData is set to true
    * @throws FactoryException
    */
-  public static double[] getZonalStatsAll(
+  public static Double[] getZonalStatsAll(
       GridCoverage2D raster, Geometry roi, int band, boolean allTouched) throws FactoryException {
     return getZonalStatsAll(raster, roi, band, allTouched, true);
   }
@@ -175,7 +174,7 @@ public class RasterBandAccessors {
    * @return An array with all the stats for the region, excludeNoData is set to true
    * @throws FactoryException
    */
-  public static double[] getZonalStatsAll(GridCoverage2D raster, Geometry roi, int band)
+  public static Double[] getZonalStatsAll(GridCoverage2D raster, Geometry roi, int band)
       throws FactoryException {
     return getZonalStatsAll(raster, roi, band, false);
   }
@@ -187,7 +186,7 @@ public class RasterBandAccessors {
    *     set to 1
    * @throws FactoryException
    */
-  public static double[] getZonalStatsAll(GridCoverage2D raster, Geometry roi)
+  public static Double[] getZonalStatsAll(GridCoverage2D raster, Geometry roi)
       throws FactoryException {
     return getZonalStatsAll(raster, roi, 1);
   }
@@ -320,12 +319,12 @@ public class RasterBandAccessors {
    * @return Mode of the pixel values. If there is multiple with same occurrence, then the largest
    *     value will be returned.
    */
-  private static double zonalMode(double[] pixelData) {
+  private static Double zonalMode(double[] pixelData) {
     double[] modes = StatUtils.mode(pixelData);
     // Return NaN when ROI and raster's extent overlap, but there's no pixel data.
     // This behavior only happens when allTouched parameter is false.
     if (modes.length == 0) {
-      return Double.NaN;
+      return null;
     }
     return modes[modes.length - 1];
   }
