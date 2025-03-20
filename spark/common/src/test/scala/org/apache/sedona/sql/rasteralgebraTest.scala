@@ -1635,6 +1635,10 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
 
       val actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'mode')").first().get(0)
       assertNull(actual)
+
+      val statsDf = df.selectExpr("RS_ZonalStatsAll(raster, geom) as stats")
+      val actualBoolean = statsDf.selectExpr("isNull(stats.mode)").first().getAs[Boolean](0)
+      assertTrue(actualBoolean)
     }
 
     it("Passed RS_ZonalStats") {

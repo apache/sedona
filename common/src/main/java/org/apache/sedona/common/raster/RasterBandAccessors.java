@@ -118,23 +118,31 @@ public class RasterBandAccessors {
     // intersect with the centroid of the pixel.
     // This happens when allTouched parameter is false.
     if (pixelData.length == 0) {
-      return new Double[] {
-        0.0, 0.0, Double.NaN, Double.NaN, null, Double.NaN, Double.NaN, Double.NaN, Double.NaN
-      };
+      return new Double[] {0.0, null, null, null, null, null, null, null, null};
     }
 
     // order of stats
     // count, sum, mean, median, mode, stddev, variance, min, max
     Double[] result = new Double[9];
     result[0] = (double) stats.getN();
-    result[1] = stats.getSum();
-    result[2] = stats.getMean();
-    result[3] = stats.getPercentile(50);
+    if (stats.getN() == 0) {
+      result[1] = null;
+    } else {
+      result[1] = stats.getSum();
+    }
+    double mean = stats.getMean();
+    result[2] = Double.isNaN(mean) ? null : mean;
+    double median = stats.getPercentile(50);
+    result[3] = Double.isNaN(median) ? null : median;
     result[4] = zonalMode(pixelData);
-    result[5] = stats.getStandardDeviation();
-    result[6] = stats.getVariance();
-    result[7] = stats.getMin();
-    result[8] = stats.getMax();
+    double stdDev = stats.getStandardDeviation();
+    result[5] = Double.isNaN(stdDev) ? null : stats.getStandardDeviation();
+    double variance = stats.getVariance();
+    result[6] = Double.isNaN(variance) ? null : variance;
+    double min = stats.getMin();
+    result[7] = Double.isNaN(min) ? null : min;
+    double max = stats.getMax();
+    result[8] = Double.isNaN(max) ? null : max;
 
     return result;
   }
@@ -222,26 +230,36 @@ public class RasterBandAccessors {
 
     switch (statType.toLowerCase()) {
       case "sum":
-        return stats.getSum();
+        if (pixelData.length == 0) {
+          return null;
+        } else {
+          return stats.getSum();
+        }
       case "average":
       case "avg":
       case "mean":
-        return stats.getMean();
+        double mean = stats.getMean();
+        return Double.isNaN(mean) ? null : mean;
       case "count":
         return (double) stats.getN();
       case "max":
-        return stats.getMax();
+        double max = stats.getMax();
+        return Double.isNaN(max) ? null : max;
       case "min":
-        return stats.getMin();
+        double min = stats.getMin();
+        return Double.isNaN(min) ? null : min;
       case "stddev":
       case "sd":
-        return stats.getStandardDeviation();
+        double stdDev = stats.getStandardDeviation();
+        return Double.isNaN(stdDev) ? null : stdDev;
       case "median":
-        return stats.getPercentile(50);
+        double median = stats.getPercentile(50);
+        return Double.isNaN(median) ? null : median;
       case "mode":
         return zonalMode(pixelData);
       case "variance":
-        return stats.getVariance();
+        double variance = stats.getVariance();
+        return Double.isNaN(variance) ? null : variance;
       default:
         throw new IllegalArgumentException(
             "Please select from the accepted options. Some of the valid options are sum, mean, stddev, etc.");
