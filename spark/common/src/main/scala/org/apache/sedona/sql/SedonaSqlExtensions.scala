@@ -42,14 +42,17 @@ class SedonaSqlExtensions extends (SparkSessionExtensions => Unit) {
       // This prevents extension loading errors from causing the SparkSession initialization to fail,
       // allowing the application to continue running without the Sedona parser extension.
       // Common failures include version incompatibilities between Spark and Sedona.
-      try {
-        e.injectParser { case (_, parser) =>
+      e.injectParser { case (_, parser) =>
+        try {
           ParserFactory.getParser("org.apache.sedona.sql.parser.SedonaSqlParser", parser)
+        } catch {
+          case parserInjectionException: Throwable =>
+            logger.warn(
+              s"Failed to inject Sedona SQL parser: ${parserInjectionException.getMessage}",
+              parserInjectionException)
+            // Return the original parser instead of failing
+            parser
         }
-      } catch {
-        case ex: Exception =>
-          logger.warn(s"Failed to inject Sedona SQL parser: ${ex.getMessage}", ex)
-        // Skip parser injection
       }
     }
   }
