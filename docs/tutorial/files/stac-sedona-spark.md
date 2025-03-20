@@ -116,7 +116,7 @@ The STAC data source supports predicate pushdown for spatial and temporal filter
 
 ### Spatial Filter Pushdown
 
-Spatial filter pushdown allows the data source to apply spatial predicates (e.g., st_contains, st_intersects) directly at the data source level, reducing the amount of data transferred and processed.
+Spatial filter pushdown allows the data source to apply spatial predicates (e.g., st_intersects) directly at the data source level, reducing the amount of data transferred and processed.
 
 ### Temporal Filter Pushdown
 
@@ -147,7 +147,7 @@ In this example, the data source will push down the temporal filter to the under
 ```sql
   SELECT id, geometry
   FROM STAC_TABLE
-  WHERE st_contains(ST_GeomFromText('POLYGON((17 10, 18 10, 18 11, 17 11, 17 10))'), geometry)
+  WHERE st_intersects(ST_GeomFromText('POLYGON((17 10, 18 10, 18 11, 17 11, 17 10))'), geometry)
 ```
 
 In this example, the data source will push down the spatial filter to the underlying data source.

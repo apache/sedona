@@ -83,4 +83,4 @@ jobs:
           SPARK_VERSION: ${{ matrix.spark }}
           SEDONA_VERSION: ${{ matrix.sedona }}
           GEOTOOLS_VERSION: ${{ matrix.geotools }}
-        run: ./docker/sedona-spark-jupyterlab/build.sh ${SPARK_VERSION} ${SEDONA_VERSION} local ${GEOTOOLS_VERSION}
+        run: ./docker/build.sh ${SPARK_VERSION} ${SEDONA_VERSION} local ${GEOTOOLS_VERSION}

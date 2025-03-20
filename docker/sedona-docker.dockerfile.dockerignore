@@ -6,4 +6,4 @@
 !zeppelin/**
 !docs/usecases/**
 !python/**
-!spark-shaded/target/**
+!spark-shaded/**
