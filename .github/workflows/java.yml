@@ -113,8 +113,6 @@ jobs:
 
           if [ "${SPARK_VERSION}" == "3.5.0" ]; then
               pip install pyspark==3.5.0 pandas shapely apache-sedona pyarrow
-              pip show pyspark
-              pip freeze
               export SPARK_HOME=/opt/hostedtoolcache/Python/3.10.16/x64/lib/python3.10/site-packages/pyspark
           fi
 
