@@ -1196,6 +1196,7 @@ Output:
 ```
 
 ## Spatial vectorized udfs (Python only)
+
 By default when you create the user defined functions in Python, the UDFs are not vectorized.
 This means that the UDFs are called row by row which can be slow.
 To speed up the UDFs, you can use the `vectorized` UDF which will be called in a batch mode
