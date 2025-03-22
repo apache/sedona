@@ -8,6 +8,9 @@ from time import time
 import geopandas as gpd
 import pytest
 import pyspark
+import pandas as pd
+from pyspark.sql.functions import pandas_udf
+from pyspark.sql.types import IntegerType
 
 
 def non_vectorized_buffer_udf(geom: b.BaseGeometry) -> b.BaseGeometry:
@@ -24,6 +27,11 @@ def vectorized_geo_series_buffer(series: gpd.GeoSeries) -> gpd.GeoSeries:
     buffered = series.buffer(0.1)
 
     return buffered
+
+
+@pandas_udf(IntegerType())
+def squared_udf(s: pd.Series) -> pd.Series:
+    return s**2  # Perform vectorized operation
 
 
 buffer_distanced_udf = f.udf(non_vectorized_buffer_udf, GeometryType())
@@ -83,3 +91,14 @@ class TestSedonaArrowUDF(TestBase):
         area = self.get_area(df, vectorized_buffer)
 
         assert area > 478
+
+    def test_pandas_arrow_udf_compatibility(self):
+        df = (
+            self.spark.read.option("header", "true")
+            .format("csv")
+            .load(chicago_crimes_input_location)
+            .selectExpr("CAST(x AS INT) AS x")
+        )
+
+        sum_value = df.select(f.sum(squared_udf(f.col("x")))).collect()[0][0]
+        assert sum_value == 115578630
