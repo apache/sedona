@@ -45,6 +45,7 @@ jobs:
       - run: sudo pip3 install -U virtualenvwrapper
       - run: python3 -m pip install uv
       - run: cd python
+      - run: rm pyproject.toml
       - run: uv init --no-workspace
       - run: uv add apache-flink==1.20.1
       - run: uv add pytest --dev
