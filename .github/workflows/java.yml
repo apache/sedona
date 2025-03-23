@@ -52,6 +52,8 @@ permissions:
 
 jobs:
   build:
+    concurrency:
+      group: java-build-${{ github.ref }}
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: true

@@ -51,6 +51,9 @@ permissions:
 
 jobs:
   build:
+    concurrency:
+      group: python-build-${{ github.ref }}
+      cancel-in-progress: true
     runs-on: ubuntu-22.04
     strategy:
       matrix:
