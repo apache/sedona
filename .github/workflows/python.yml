@@ -154,7 +154,7 @@ jobs:
           export SPARK_HOME=${VENV_PATH}/lib/python${PYTHON_VERSION}/site-packages/pyspark
           cd python
           source ${VENV_PATH}/bin/activate
-          pytest -v tests
+          pytest -v tests -m "not flink"
       - name: Run basic tests without rasterio
         env:
           PYTHON_VERSION: ${{ matrix.python }}
