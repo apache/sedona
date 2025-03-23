@@ -1,17 +1,9 @@
-from pyflink.table import StreamTableEnvironment
-from pyflink.table.udf import ScalarFunction, udf
 from shapely.wkb import loads
 import pytest
 
 
-class Buffer(ScalarFunction):
-    def eval(self, s):
-        geom = loads(s)
-        return geom.buffer(1).wkb
-
-
 @pytest.mark.flink
-def test_register(table_env: StreamTableEnvironment):
+def test_register(table_env):
     result = (
         table_env.sql_query("SELECT ST_ASBinary(ST_Point(1.0, 2.0))")
         .execute()
@@ -22,7 +14,14 @@ def test_register(table_env: StreamTableEnvironment):
 
 
 @pytest.mark.flink
-def test_register_udf(table_env: StreamTableEnvironment):
+def test_register_udf(table_env):
+    from pyflink.table.udf import ScalarFunction, udf
+
+    class Buffer(ScalarFunction):
+        def eval(self, s):
+            geom = loads(s)
+            return geom.buffer(1).wkb
+
     table_env.create_temporary_function(
         "ST_BufferPython", udf(Buffer(), result_type="Binary")
     )
