@@ -51,4 +51,6 @@ jobs:
       - run: uv add pytest --dev
       - run: |
           SEDONA_PYFLINK_EXTRA_JARS=${PWD}/$(find flink-shaded/target -name sedona-flink*.jar)
-          uv run pytest -v -m flink ./tests
+          pwd
+          ls -l
+          (cd python; uv run pytest -v -m flink ./tests)
