@@ -1,0 +1,76 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+name: Sedona Pyflink Test
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'common/**'
+      - 'flink/**'
+      - 'flink-shaded/**'
+      - 'pom.xml'
+      - 'python/**'
+      - '.github/workflows/pyflink.yml'
+  pull_request:
+    branches:
+      - '*'
+    paths:
+      - 'common/**'
+      - 'flink/**'
+      - 'flink-shaded/**'
+      - 'pom.xml'
+      - 'python/**'
+      - '.github/workflows/pyflink.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        include:
+          - python: '3.10'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '8'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: sudo apt-get -y install python3-pip python-dev-is-python3
+      - run: mvn package -pl "org.apache.sedona:sedona-flink-shaded_2.12" -am -DskipTests
+      - run: sudo pip3 install -U setuptools
+      - run: sudo pip3 install -U wheel
+      - run: sudo pip3 install -U virtualenvwrapper
+      - run: python3 -m pip install uv
+      - run: cd python
+      - run: rm pyproject.toml
+      - run: uv init --no-workspace
+      - run: uv add apache-flink==1.20.1 shapely attr setuptools
+      - run: uv add pytest --dev
+      - run: |
+          wget https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.7.1-28.5/geotools-wrapper-1.7.1-28.5.jar
+          export SEDONA_PYFLINK_EXTRA_JARS=${PWD}/$(find flink-shaded/target -name sedona-flink*.jar),${PWD}/geotools-wrapper-1.7.1-28.5.jar
+          (cd python; PYTHONPATH=$(pwd) uv run pytest -v -s ./tests/flink)
