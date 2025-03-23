@@ -17,7 +17,6 @@ def test_register(table_env: StreamTableEnvironment):
         .execute()
         .collect()
     )
-
     assert 1 == len(([el for el in result]))
 
 
