@@ -2,7 +2,11 @@ import os
 
 import pytest
 
-from sedona.flink import SedonaContext
+try:
+    from sedona.flink import SedonaContext
+except ImportError:
+    pass
+
 from pyflink.datastream import StreamExecutionEnvironment
 from pyflink.table import EnvironmentSettings, StreamTableEnvironment
 
