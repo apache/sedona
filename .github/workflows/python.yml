@@ -49,12 +49,11 @@ env:
 permissions:
   contents: read
 
-concurrency:
-  group: {{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   build:
+    concurrency:
+      group: { { github.workflow } }-${{ github.ref }}
+      cancel-in-progress: true
     runs-on: ubuntu-22.04
     strategy:
       matrix:
