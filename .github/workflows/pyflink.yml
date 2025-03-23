@@ -57,4 +57,4 @@ jobs:
           SEDONA_PYFLINK_EXTRA_JARS=${PWD}/$(find flink-shaded/target -name sedona-flink*.jar)
           pwd
           ls -l
-          (cd python; uv run pytest -v -m flink ./tests/flink)
+          (cd python; PYTHONPATH=$(pwd) uv run pytest -v -m flink -s ./tests/flink)
