@@ -17,8 +17,8 @@
 
 import os
 
+from tests import tests_resource
 from tests.spatial_operator.test_join_base import TestJoinBase
-from tests.tools import tests_resource
 
 from sedona.core.enums import FileDataSplitter, GridType, IndexType
 from sedona.core.enums.join_build_side import JoinBuildSide

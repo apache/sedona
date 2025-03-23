@@ -18,8 +18,9 @@ import os
 
 from pyspark.sql.types import StructField, StructType
 from shapely.wkt import loads
+
+from tests import tests_resource
 from tests.test_base import TestBase
-from tests.tools import tests_resource
 
 from sedona.core.enums import GridType, IndexType
 from sedona.core.formatMapper import WktReader

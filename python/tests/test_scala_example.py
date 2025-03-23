@@ -19,8 +19,9 @@ import os
 
 from pyspark import StorageLevel
 from shapely.geometry import Point
+
+from tests import tests_resource
 from tests.test_base import TestBase
-from tests.tools import tests_resource
 
 from sedona.core.enums import FileDataSplitter, GridType, IndexType
 from sedona.core.geom.envelope import Envelope
