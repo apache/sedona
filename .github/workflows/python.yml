@@ -49,11 +49,12 @@ env:
 permissions:
   contents: read
 
+concurrency:
+  group: {{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
-    concurrency:
-      group: python-build-${{ github.ref }}
-      cancel-in-progress: true
     runs-on: ubuntu-22.04
     strategy:
       matrix:
