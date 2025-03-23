@@ -31,7 +31,6 @@ on:
       - 'pom.xml'
       - '.github/workflows/java.yml'
   pull_request:
-    types: [opened, synchronize, reopened]
     branches:
       - '*'
     paths:
@@ -50,10 +49,6 @@ env:
 
 permissions:
   contents: read
-
-concurrency:
-  group: pr-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
 
 jobs:
   build:

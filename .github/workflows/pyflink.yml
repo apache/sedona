@@ -12,7 +12,6 @@ on:
       - 'python/**'
       - '.github/workflows/pyflink.yml'
   pull_request:
-    types: [opened, synchronize, reopened]
     branches:
       - '*'
     paths:
@@ -22,10 +21,6 @@ on:
       - 'pom.xml'
       - 'python/**'
       - '.github/workflows/pyflink.yml'
-
-concurrency:
-  group: pr-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
 
 jobs:
   build:
