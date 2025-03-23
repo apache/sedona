@@ -42,11 +42,12 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
-    concurrency:
-      group: { { github.workflow } }-${{ github.ref }}
-      cancel-in-progress: true
     strategy:
       matrix:
         os: ['ubuntu-latest', 'windows-latest', 'macos-13']

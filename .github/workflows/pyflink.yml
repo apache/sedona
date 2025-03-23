@@ -22,11 +22,12 @@ on:
       - 'python/**'
       - '.github/workflows/pyflink.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
-    concurrency:
-      group: {{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
     runs-on: ubuntu-22.04
     strategy:
       matrix:
