@@ -15,12 +15,11 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-import pytest
 from pyspark.sql.functions import expr
 from pyspark.sql.types import StructType
 from shapely.wkt import loads as wkt_loads
-from sedona.core.geom.geography import Geography
-from sedona.sql.types import GeographyType
+from sedona.spark.core.geom.geography import Geography
+from sedona.spark.sql.types import GeographyType
 from tests.test_base import TestBase
 
 

@@ -17,10 +17,11 @@
 
 from shapely.geometry import LineString, Point, Polygon
 from shapely.wkt import loads
+
+from sedona.spark.utils.spatial_rdd_parser import GeoData
 from tests.test_base import TestBase
 
-from sedona.core.SpatialRDD import LineStringRDD, PointRDD, PolygonRDD
-from sedona.utils.spatial_rdd_parser import GeoData
+from sedona.spark.core.SpatialRDD import LineStringRDD, PointRDD, PolygonRDD
 
 
 class TestWithScParallelize(TestBase):

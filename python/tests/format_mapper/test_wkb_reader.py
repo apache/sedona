@@ -17,10 +17,10 @@
 
 import os
 
+from tests import tests_resource
 from tests.test_base import TestBase
-from tests.tools import tests_resource
 
-from sedona.core.formatMapper.wkb_reader import WkbReader
+from sedona.spark.core.formatMapper.wkb_reader import WkbReader
 
 
 class TestWkbReader(TestBase):

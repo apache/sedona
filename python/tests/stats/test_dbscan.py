@@ -20,9 +20,9 @@ import pytest
 from sklearn.cluster import DBSCAN as sklearnDBSCAN
 from tests.test_base import TestBase
 
-from sedona.sql.st_constructors import ST_MakePoint
-from sedona.sql.st_functions import ST_Buffer
-from sedona.stats.clustering.dbscan import dbscan
+from sedona.spark.sql.st_constructors import ST_MakePoint
+from sedona.spark.sql.st_functions import ST_Buffer
+from sedona.spark.stats import dbscan
 
 
 class TestDBScan(TestBase):

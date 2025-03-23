@@ -614,7 +614,7 @@ The first parameter is the dataframe, the next two are the epsilon and min_point
 === "Python"
 
 	```python
-	from sedona.stats.clustering.dbscan import dbscan
+	from sedona.spark.stats import dbscan
 
 	dbscan(df, 0.1, 5).show()
 	```
@@ -670,7 +670,7 @@ The first parameter is the dataframe, the next is the number of nearest neighbor
 === "Python"
 
 	```python
-	from sedona.stats.outlier_detection.local_outlier_factor import local_outlier_factor
+	from sedona.spark.stats import local_outlier_factor
 
 	local_outlier_factor(df, 20).show()
 	```
@@ -737,8 +737,8 @@ Using Gi involves first generating the neighbors list for each record, then call
 === "Python"
 
 	```python
-	from sedona.stats.weighting import add_binary_distance_band_column
-	from sedona.stats.hotspot_detection.getis_ord import g_local
+	from sedona.spark.stats import add_binary_distance_band_column
+	from sedona.spark.stats import g_local
 
 	distance_radius = 1.0
 	weighted_df = addBinaryDistanceBandColumn(df, distance_radius)
@@ -966,7 +966,7 @@ This UDF example takes a geometry type input and returns a primitive type output
 === "Python"
 
 	```python
-	from sedona.sql.types import GeometryType
+	from sedona.spark.sql.types import GeometryType
 	from pyspark.sql.types import DoubleType
 
 	def lengthPoly(geom: GeometryType()):
@@ -1025,7 +1025,7 @@ This UDF example takes a geometry type input and returns a geometry type output:
 === "Python"
 
 	```python
-	from sedona.sql.types import GeometryType
+	from sedona.spark import GeometryType
 	from pyspark.sql.types import DoubleType
 
 	def bufferFixed(geom: GeometryType()):
@@ -1083,7 +1083,7 @@ This UDF example takes a geometry type input and a primitive type input and retu
 === "Python"
 
 	```python
-	from sedona.sql.types import GeometryType
+	from sedona.spark import GeometryType
 	from pyspark.sql.types import DoubleType
 
 	def bufferIt(geom: GeometryType(), distance: DoubleType()):
@@ -1165,7 +1165,7 @@ This UDF example takes a geometry type input and a primitive type input and retu
 === "Python"
 
 	```python
-	from sedona.sql.types import GeometryType
+	from sedona.spark import GeometryType
 	from pyspark.sql.types import *
 
 	schemaUDF = StructType([
@@ -1230,7 +1230,7 @@ a given geometry.
 
 ```python
 import shapely.geometry.base as b
-from sedona.sql.functions import sedona_vectorized_udf
+from sedona.spark import sedona_vectorized_udf
 
 @sedona_vectorized_udf(return_type=GeometryType())
 def vectorized_buffer(geom: b.BaseGeometry) -> b.BaseGeometry:
@@ -1241,8 +1241,8 @@ def vectorized_buffer(geom: b.BaseGeometry) -> b.BaseGeometry:
 
 ```python
 import geopandas as gpd
-from sedona.sql.functions import sedona_vectorized_udf, SedonaUDFType
-from sedona.sql.types import GeometryType
+from sedona.spark import sedona_vectorized_udf, SedonaUDFType
+from sedona.spark import GeometryType
 
 
 @sedona_vectorized_udf(udf_type=SedonaUDFType.GEO_SERIES, return_type=GeometryType())
@@ -1339,7 +1339,7 @@ Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD.
 === "Python"
 
 	```python
-	from sedona.utils.structured_adapter import StructuredAdapter
+	from sedona.spark import StructuredAdapter
 
 	spatialRDD = StructuredAdapter.toSpatialRdd(spatialDf, "usacounty")
 	```
@@ -1365,7 +1365,7 @@ Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Ple
 === "Python"
 
 	```python
-	from sedona.utils.adapter import StructuredAdapter
+	from sedona.spark import StructuredAdapter
 
 	spatialDf = StructuredAdapter.toDf(spatialRDD, sedona)
 	```
@@ -1401,7 +1401,7 @@ You can use `StructuredAdapter` and the `spatialRDD.spatialPartitioningWithoutDu
 === "Python"
 
 	```python
-	from sedona.utils.structured_adapter import StructuredAdapter
+	from sedona.spark import StructuredAdapter
 
 	spatialRDD.spatialPartitioningWithoutDuplicates(GridType.KDBTREE)
 	# Specify the desired number of partitions as 10, though the actual number may vary
@@ -1427,7 +1427,7 @@ PairRDD is the result of a spatial join query or distance join query. SedonaSQL 
 === "Python"
 
 	```python
-	from sedona.utils.adapter import StructuredAdapter
+	from sedona.spark import StructuredAdapter
 
 	joinResultDf = StructuredAdapter.pairRddToDf(result_pair_rdd, leftDf.schema, rightDf.schema, spark)
 	```

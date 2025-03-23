@@ -28,7 +28,7 @@ from sedona.spark import *
 Alternatively it can also be imported using:
 
 ```python
-from sedona.maps.SedonaKepler import SedonaKepler
+from sedona.spark import SedonaKepler
 ```
 
 Following are details on all the APIs exposed via SedonaKepler:

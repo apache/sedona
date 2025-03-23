@@ -19,6 +19,8 @@ import logging
 import os
 
 from shapely.geometry import Point
+
+from tests import tests_resource
 from tests.properties.polygon_properties import (
     polygon_rdd_end_offset,
     polygon_rdd_index_type,
@@ -27,14 +29,13 @@ from tests.properties.polygon_properties import (
     polygon_rdd_start_offset,
 )
 from tests.test_base import TestBase
-from tests.tools import tests_resource
 
-from sedona.core.enums import FileDataSplitter, GridType, IndexType
-from sedona.core.enums.join_build_side import JoinBuildSide
-from sedona.core.geom.envelope import Envelope
-from sedona.core.spatialOperator import JoinQuery, KNNQuery, RangeQuery
-from sedona.core.spatialOperator.join_params import JoinParams
-from sedona.core.SpatialRDD import CircleRDD, PointRDD, PolygonRDD
+from sedona.spark.core.enums import FileDataSplitter, GridType, IndexType
+from sedona.spark.core.enums.join_build_side import JoinBuildSide
+from sedona.spark.core.geom.envelope import Envelope
+from sedona.spark.core.spatialOperator import JoinQuery, KNNQuery, RangeQuery
+from sedona.spark.core.spatialOperator.join_params import JoinParams
+from sedona.spark.core.SpatialRDD import CircleRDD, PointRDD, PolygonRDD
 
 point_rdd_input_location = os.path.join(tests_resource, "arealm-small.csv")
 

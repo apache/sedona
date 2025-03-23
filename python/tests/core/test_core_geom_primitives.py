@@ -17,7 +17,7 @@
 
 from tests.test_base import TestBase
 
-from sedona.core.geom.envelope import Envelope
+from sedona.spark.core.geom.envelope import Envelope
 
 
 class TestGeomPrimitives(TestBase):

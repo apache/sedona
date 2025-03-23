@@ -15,12 +15,16 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-import pytest
 from tests.test_base import TestBase
 
-from sedona.core.enums import GridType
-from sedona.core.SpatialRDD import LineStringRDD, PointRDD, PolygonRDD, RectangleRDD
-from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
+from sedona.spark.core.enums import GridType
+from sedona.spark.core.SpatialRDD import (
+    LineStringRDD,
+    PointRDD,
+    PolygonRDD,
+    RectangleRDD,
+)
+from sedona.spark.core.SpatialRDD.spatial_rdd import SpatialRDD
 
 
 class TestJoinBase(TestBase):

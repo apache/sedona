@@ -28,7 +28,7 @@ import org.locationtech.jts.geom.Geometry
 class GeometryUDT extends UserDefinedType[Geometry] {
   override def sqlType: DataType = BinaryType
 
-  override def pyUDT: String = "sedona.sql.types.GeometryType"
+  override def pyUDT: String = "sedona.spark.sql.types.GeometryType"
 
   override def userClass: Class[Geometry] = classOf[Geometry]
 

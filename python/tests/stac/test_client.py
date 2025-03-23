@@ -15,7 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from sedona.stac.client import Client
+from sedona.spark.stac.client import Client
 from pyspark.sql import DataFrame
 
 from tests.test_base import TestBase
@@ -124,8 +124,6 @@ class TestStacClient(TestBase):
         assert len(list(items)) == 0
 
     def test_search_with_YYYY(self) -> None:
-        from datetime import datetime
-
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         items = client.search(
             collection_id="aster-l1t",

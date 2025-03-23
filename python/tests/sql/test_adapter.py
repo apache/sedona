@@ -17,7 +17,6 @@
 
 import logging
 
-import pyspark
 import pytest
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col, expr
@@ -32,13 +31,15 @@ from tests import (
 from tests.test_base import TestBase
 
 from sedona import version
-from sedona.core.enums import FileDataSplitter, GridType, IndexType
-from sedona.core.formatMapper.shapefileParser.shape_file_reader import ShapefileReader
-from sedona.core.geom.envelope import Envelope
-from sedona.core.jvm.config import is_greater_or_equal_version
-from sedona.core.spatialOperator import JoinQuery
-from sedona.core.SpatialRDD import CircleRDD, PolygonRDD
-from sedona.utils.adapter import Adapter
+from sedona.spark.core.enums import FileDataSplitter, GridType, IndexType
+from sedona.spark.core.formatMapper.shapefileParser.shape_file_reader import (
+    ShapefileReader,
+)
+from sedona.spark.core.geom.envelope import Envelope
+from sedona.spark.core.jvm.config import is_greater_or_equal_version
+from sedona.spark.core.spatialOperator import JoinQuery
+from sedona.spark.core.SpatialRDD import CircleRDD, PolygonRDD
+from sedona.spark import Adapter
 
 
 class TestAdapter(TestBase):

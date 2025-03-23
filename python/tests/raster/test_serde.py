@@ -22,7 +22,7 @@ from pyspark.sql.functions import expr
 from tests import world_map_raster_input_location
 from tests.test_base import TestBase
 
-from sedona.sql.types import RasterType
+from sedona.spark.sql.types import RasterType
 
 
 class TestRasterSerde(TestBase):

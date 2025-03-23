@@ -17,13 +17,14 @@
 
 from shapely.geometry import LineString, Point, Polygon
 from shapely.geometry.base import BaseGeometry
+
+from sedona.spark.utils.spatial_rdd_parser import GeoData
 from tests.test_base import TestBase
 
-from sedona.core.enums import GridType, IndexType
-from sedona.core.spatialOperator import JoinQuery
-from sedona.core.SpatialRDD import CircleRDD, LineStringRDD, PointRDD, PolygonRDD
-from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
-from sedona.utils.spatial_rdd_parser import GeoData
+from sedona.spark.core.enums import GridType, IndexType
+from sedona.spark.core.spatialOperator import JoinQuery
+from sedona.spark.core.SpatialRDD import CircleRDD, LineStringRDD, PointRDD, PolygonRDD
+from sedona.spark.core.SpatialRDD.spatial_rdd import SpatialRDD
 
 
 class TestJoinQueryCorrectness(TestBase):

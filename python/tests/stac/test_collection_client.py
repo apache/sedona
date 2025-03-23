@@ -15,8 +15,8 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from sedona.stac.client import Client
-from sedona.stac.collection_client import CollectionClient
+from sedona.spark.stac.client import Client
+from sedona.spark.stac.collection_client import CollectionClient
 
 from tests.test_base import TestBase
 

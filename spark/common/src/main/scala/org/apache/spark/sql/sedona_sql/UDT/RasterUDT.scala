@@ -25,7 +25,7 @@ import org.geotools.coverage.grid.GridCoverage2D
 class RasterUDT extends UserDefinedType[GridCoverage2D] {
   override def sqlType: DataType = BinaryType
 
-  override def pyUDT: String = "sedona.sql.types.RasterType"
+  override def pyUDT: String = "sedona.spark.sql.types.RasterType"
 
   // A reasonable size for small in-db rasters. This is used by the optimizer to decide whether to
   // broadcast the dataframe or not.

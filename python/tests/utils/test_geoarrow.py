@@ -22,7 +22,7 @@ import pyproj
 import pytest
 from tests.test_base import TestBase
 from pyspark.sql.types import StringType, StructType
-from sedona.utils.geoarrow import (
+from sedona.spark.geoarrow.geoarrow import (
     dataframe_to_arrow,
     unique_srid_from_ewkb,
     wrap_geoarrow_field,

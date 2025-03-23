@@ -23,7 +23,7 @@ import pyspark
 from pyspark.sql import DataFrame
 
 from sedona.spark import *
-from sedona.utils.decorators import classproperty
+from sedona.spark.utils.decorators import classproperty
 
 SPARK_REMOTE = os.getenv("SPARK_REMOTE")
 EXTRA_JARS = os.getenv("SEDONA_PYTHON_EXTRA_JARS")

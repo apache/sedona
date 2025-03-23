@@ -18,13 +18,13 @@
 import os
 
 import pytest
-from tests.test_base import TestBase
-from tests.tools import tests_resource
 
-from sedona.core.formatMapper.shapefileParser import ShapefileReader
-from sedona.core.geom.envelope import Envelope
-from sedona.core.jvm.config import SedonaMeta, is_greater_or_equal_version
-from sedona.core.spatialOperator import RangeQuery
+from tests import tests_resource
+from tests.test_base import TestBase
+
+from sedona.spark.core.formatMapper.shapefileParser import ShapefileReader
+from sedona.spark.core.geom.envelope import Envelope
+from sedona.spark.core.spatialOperator import RangeQuery
 
 undefined_type_shape_location = os.path.join(tests_resource, "shapefiles/undefined")
 polygon_shape_location = os.path.join(tests_resource, "shapefiles/polygon")

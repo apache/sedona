@@ -34,7 +34,7 @@ if os.getenv("ENABLE_ASAN"):
 
 ext_modules = [
     Extension(
-        "sedona.utils.geomserde_speedup",
+        "sedona.spark.utils.geomserde_speedup",
         sources=[
             "src/geomserde_speedup_module.c",
             "src/geomserde.c",
@@ -63,6 +63,7 @@ setup(
         "spark": ["pyspark>=2.3.0"],
         "pydeck-map": ["geopandas", "pydeck==0.8.0"],
         "kepler-map": ["geopandas", "keplergl==0.3.2"],
+        "flink": ["apache-flink>=1.19.0"],
         "all": [
             "pyspark>=2.3.0",
             "geopandas",
