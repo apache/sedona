@@ -113,7 +113,7 @@ jobs:
 
           if [ "${SPARK_VERSION}" == "3.5.0" ]; then
               pip install pyspark==3.5.0 pandas shapely apache-sedona pyarrow
-              export SPARK_HOME=/opt/hostedtoolcache/Python/3.10.16/x64/lib/python3.10/site-packages/pyspark
+              export SPARK_HOME=$(python -c "import pyspark; print(pyspark.__path__[0])")
           fi
 
           mvn -q clean install -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} ${SKIP_TESTS}
