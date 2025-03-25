@@ -125,6 +125,36 @@ class ArrowSerializer[T](
   }
 
   /**
+   * Write the schema in Arrow IPC stream format to the [[OutputStream]].
+   */
+  def writeSchema(output: OutputStream): Unit = {
+    val channel = newChannel(output)
+    channel.write(schemaBytes)
+  }
+
+  /**
+   * Write current batch in Arrow IPC stream format to the [[OutputStream]].
+   */
+  def writeBatch(output: OutputStream): Unit = {
+    val channel = newChannel(output)
+    root.setRowCount(rowCount)
+    val batch = unloader.getRecordBatch
+    try {
+      MessageSerializer.serialize(channel, batch)
+    } finally {
+      batch.close()
+    }
+  }
+
+  /**
+   * Write the end-of-stream bytes to [[OutputStream]].
+   */
+  def writeEndOfStream(output: OutputStream): Unit = {
+    val channel = newChannel(output)
+    ArrowStreamWriter.writeEndOfStream(channel, IpcOption.DEFAULT)
+  }
+
+  /**
    * Reset the serializer.
    */
   def reset(): Unit = {

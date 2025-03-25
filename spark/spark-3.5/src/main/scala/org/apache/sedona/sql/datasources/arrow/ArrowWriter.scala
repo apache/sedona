@@ -21,15 +21,32 @@ package org.apache.sedona.sql.datasources.arrow
 import org.apache.spark.sql.connector.write.LogicalWriteInfo
 import org.apache.spark.sql.connector.write.PhysicalWriteInfo
 import org.apache.spark.sql.connector.write.DataWriter
+import org.apache.arrow.memory.RootAllocator;
 import org.apache.spark.sql.connector.write.WriterCommitMessage
 import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.sql.Row;
+import java.io.ByteArrayOutputStream
+import org.apache.spark.sql.catalyst.encoders.RowEncoder
+import org.apache.spark.sql.Encoder
+import org.apache.spark.sql.catalyst.encoders.AgnosticEncoder
 
-case class ArrowWriter(
-    logicalInfo: LogicalWriteInfo,
-    physicalInfo: PhysicalWriteInfo,
-    partitionId: Int,
-    taskId: Long)
-    extends DataWriter[InternalRow] {
+case class ArrowWriter() extends DataWriter[InternalRow] {
+
+  private var encoder: AgnosticEncoder[Row] = _
+  private var serializer: ArrowSerializer[Row] = _
+  private var dummyOutput: ByteArrayOutputStream = _
+
+  def this(
+      logicalInfo: LogicalWriteInfo,
+      physicalInfo: PhysicalWriteInfo,
+      partitionId: Int,
+      taskId: Long) {
+    this()
+    dummyOutput = new ByteArrayOutputStream()
+    encoder = RowEncoder.encoderFor(logicalInfo.schema())
+    serializer = new ArrowSerializer[Row](encoder, new RootAllocator(), "UTC");
+  }
+
   def write(record: InternalRow): Unit = {}
 
   def commit(): WriterCommitMessage = {
