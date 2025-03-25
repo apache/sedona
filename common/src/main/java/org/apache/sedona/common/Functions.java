@@ -885,7 +885,7 @@ public class Functions {
   }
 
   public static Geometry force2D(Geometry geometry) {
-    return GeomUtils.get2dGeom(geometry);
+    return GeometryForce2DTransformer.transform2D(geometry);
   }
 
   public static boolean isEmpty(Geometry geometry) {

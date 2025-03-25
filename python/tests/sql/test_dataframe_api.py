@@ -543,6 +543,7 @@ test_configurations = [
     ),
     (stf.ST_FlipCoordinates, ("point",), "point_geom", "", "POINT (1 0)"),
     (stf.ST_Force_2D, ("point",), "point_geom", "", "POINT (0 1)"),
+    (stf.ST_Force2D, ("point",), "point_geom", "", "POINT (0 1)"),
     (stf.ST_Force3D, ("point", 1.0), "point_geom", "", "POINT Z (0 1 1)"),
     (
         stf.ST_Force3DM,
@@ -1304,6 +1305,7 @@ wrong_type_configurations = [
     (stf.ST_ExteriorRing, (None,)),
     (stf.ST_FlipCoordinates, (None,)),
     (stf.ST_Force_2D, (None,)),
+    (stf.ST_Force2D, (None,)),
     (stf.ST_Force3DM, (None,)),
     (stf.ST_Force3DZ, (None,)),
     (stf.ST_Force4D, (None,)),

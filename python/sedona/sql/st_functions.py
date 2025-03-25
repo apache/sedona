@@ -655,6 +655,18 @@ def ST_Force_2D(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
+def ST_Force2D(geometry: ColumnOrName) -> Column:
+    """Force the geometry column to only output two dimensional representations.
+
+    :param geometry: Geometry column to force to be 2D.
+    :type geometry: ColumnOrName
+    :return: Geometry column identical to geometry except with only X and Y coordinates.
+    :rtype: Column
+    """
+    return _call_st_function("ST_Force2D", geometry)
+
+
+@validate_argument_types
 def ST_GeneratePoints(
     geometry: ColumnOrName,
     numPoints: Union[ColumnOrName, int],
