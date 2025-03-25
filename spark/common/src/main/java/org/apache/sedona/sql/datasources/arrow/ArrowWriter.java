@@ -20,12 +20,12 @@ package org.apache.sedona.sql.datasources.arrow;
 
 import java.io.IOException;
 import org.apache.arrow.memory.RootAllocator;
+import org.apache.sedona.arrow.ArrowSerializer;
 import org.apache.spark.sql.Encoder;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.catalyst.InternalRow;
 import org.apache.spark.sql.catalyst.encoders.AgnosticEncoder;
 import org.apache.spark.sql.catalyst.encoders.RowEncoder;
-import org.apache.spark.sql.connect.client.arrow.ArrowSerializer;
 import org.apache.spark.sql.connector.write.DataWriter;
 import org.apache.spark.sql.connector.write.WriterCommitMessage;
 import org.apache.spark.sql.types.StructType;

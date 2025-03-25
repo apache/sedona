@@ -37,21 +37,6 @@
     </properties>
 
     <dependencies>
-
-        <dependency>
-            <groupId>org.apache.arrow</groupId>
-            <artifactId>arrow-java-root</artifactId>
-            <version>18.2.0</version>
-            <type>pom</type>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-connect-common_${scala.compat.version}</artifactId>
-            <version>${spark.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>org.apache.sedona</groupId>
             <artifactId>sedona-common</artifactId>
