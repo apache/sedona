@@ -29,9 +29,7 @@ case class ArrowBatchWrite(logicalInfo: LogicalWriteInfo) extends BatchWrite {
     return new ArrowDataWriterFactory(logicalInfo, info)
   }
 
-  def commit(messages: Array[WriterCommitMessage]): Unit = {
-
-  }
+  def commit(messages: Array[WriterCommitMessage]): Unit = {}
 
   def abort(messages: Array[WriterCommitMessage]): Unit = {}
 
