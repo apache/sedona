@@ -29,12 +29,16 @@ import java.io.ByteArrayOutputStream
 import org.apache.spark.sql.catalyst.encoders.RowEncoder
 import org.apache.spark.sql.Encoder
 import org.apache.spark.sql.catalyst.encoders.AgnosticEncoder
+import org.apache.spark.sql.Encoders
+import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 
 case class ArrowWriter() extends DataWriter[InternalRow] {
 
   private var encoder: AgnosticEncoder[Row] = _
+  private var rowDeserializer: ExpressionEncoder.Deserializer[Row] = _
   private var serializer: ArrowSerializer[Row] = _
   private var dummyOutput: ByteArrayOutputStream = _
+  private var rowCount: Long = 0
 
   def this(
       logicalInfo: LogicalWriteInfo,
@@ -44,10 +48,35 @@ case class ArrowWriter() extends DataWriter[InternalRow] {
     this()
     dummyOutput = new ByteArrayOutputStream()
     encoder = RowEncoder.encoderFor(logicalInfo.schema())
+    rowDeserializer = Encoders
+      .row(logicalInfo.schema())
+      .asInstanceOf[ExpressionEncoder[Row]]
+      .resolveAndBind()
+      .createDeserializer()
     serializer = new ArrowSerializer[Row](encoder, new RootAllocator(), "UTC");
+
+    serializer.writeSchema(dummyOutput)
   }
 
-  def write(record: InternalRow): Unit = {}
+  def write(record: InternalRow): Unit = {
+    serializer.append(rowDeserializer.apply(record))
+    rowCount = rowCount + 1
+    if (shouldFlush()) {
+      flush()
+    }
+  }
+
+  private def shouldFlush(): Boolean = {
+    // Can use serializer.sizeInBytes() to parameterize batch size in terms of bytes
+    // or just use rowCount (batches of ~1024 rows are common and 16 MB is also a common
+    // threshold (maybe also applying a minimum row count in case we're dealing with big
+    // geometries). Checking sizeInBytes() should be done sparingly (expensive)).
+    rowCount >= 1024
+  }
+
+  private def flush(): Unit = {
+    serializer.writeBatch(dummyOutput)
+  }
 
   def commit(): WriterCommitMessage = {
     null
@@ -55,6 +84,11 @@ case class ArrowWriter() extends DataWriter[InternalRow] {
 
   def abort(): Unit = {}
 
-  def close(): Unit = {}
+  def close(): Unit = {
+    flush()
+    serializer.writeEndOfStream(dummyOutput)
+    serializer.close()
+    dummyOutput.close()
+  }
 
 }
