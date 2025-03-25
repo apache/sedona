@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.sql.datasources.arrow
+package org.apache.sedona.arrow
 
 import scala.collection.JavaConverters._
 import scala.reflect.ClassTag

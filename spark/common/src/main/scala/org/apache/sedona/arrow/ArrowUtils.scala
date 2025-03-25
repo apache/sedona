@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.sql.datasources.arrow
+package org.apache.sedona.arrow
 
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -30,7 +30,7 @@ import org.apache.arrow.vector.types.pojo.{ArrowType, Field, FieldType, Schema}
 import org.apache.spark.sql.errors.ExecutionErrors
 import org.apache.spark.sql.types._
 
-private[sql] object ArrowUtils {
+private[arrow] object ArrowUtils {
 
   val rootAllocator = new RootAllocator(Long.MaxValue)
 

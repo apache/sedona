@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.sql.datasources.arrow
+package org.apache.sedona.arrow
 
 import java.io.{ByteArrayOutputStream, OutputStream}
 import java.lang.invoke.{MethodHandles, MethodType}
@@ -43,7 +43,7 @@ import org.apache.spark.sql.catalyst.util.{SparkDateTimeUtils, SparkIntervalUtil
 import org.apache.spark.sql.errors.ExecutionErrors
 import org.apache.spark.sql.types.Decimal
 
-private[sql] trait CloseableIterator[E] extends Iterator[E] with AutoCloseable { self =>
+private[arrow] trait CloseableIterator[E] extends Iterator[E] with AutoCloseable { self =>
   def asJava: java.util.Iterator[E] = new java.util.Iterator[E] with AutoCloseable {
     override def next() = self.next()
 
