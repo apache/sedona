@@ -42,7 +42,6 @@ import org.apache.spark.sql.catalyst.encoders.AgnosticEncoders._
 import org.apache.spark.sql.catalyst.util.{SparkDateTimeUtils, SparkIntervalUtils}
 import org.apache.spark.sql.errors.ExecutionErrors
 import org.apache.spark.sql.types.Decimal
-import org.apache.spark.sql.util.ArrowUtils
 
 private[sql] trait CloseableIterator[E] extends Iterator[E] with AutoCloseable { self =>
   def asJava: java.util.Iterator[E] = new java.util.Iterator[E] with AutoCloseable {
