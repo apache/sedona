@@ -128,6 +128,7 @@ public class Catalog {
       new Functions.ST_AsGML(),
       new Functions.ST_AsKML(),
       new Functions.ST_Force_2D(),
+      new Functions.ST_Force2D(),
       new Functions.ST_IsEmpty(),
       new Functions.ST_X(),
       new Functions.ST_Y(),
