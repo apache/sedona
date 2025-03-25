@@ -1439,7 +1439,7 @@ POINT (2 1)
 
 ## ST_Force_2D
 
-Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates
+Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates. This function is an alias of [ST_Force2D](#st_force2d).
 
 Format: `ST_Force_2D (A: Geometry)`
 
@@ -1449,6 +1449,26 @@ Example:
 
 ```sql
 SELECT ST_Force_2D(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'))
+```
+
+Output:
+
+```
+POLYGON((0 0,0 5,5 0,0 0),(1 1,3 1,1 3,1 1))
+```
+
+## ST_Force2D
+
+Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates. This function is an alias of [ST_Force_2D](#st_force_2d).
+
+Format: `ST_Force2D (A: Geometry)`
+
+Since: `v1.8.0`
+
+Example:
+
+```sql
+SELECT ST_Force2D(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'))
 ```
 
 Output:
