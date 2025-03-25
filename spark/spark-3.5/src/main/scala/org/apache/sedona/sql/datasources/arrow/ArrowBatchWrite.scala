@@ -16,22 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.sql.datasources.arrow;
+package org.apache.sedona.sql.datasources.arrow
 
-import org.apache.spark.sql.catalyst.InternalRow;
-import org.apache.spark.sql.connector.write.DataWriter;
-import org.apache.spark.sql.connector.write.DataWriterFactory;
-import org.apache.spark.sql.types.StructType;
+import org.apache.spark.sql.connector.write.BatchWrite
+import org.apache.spark.sql.connector.write.{DataWriterFactory, PhysicalWriteInfo}
+import org.apache.spark.sql.connector.write.WriterCommitMessage
+import org.apache.spark.sql.connector.write.LogicalWriteInfo
+import org.apache.spark.sql.catalyst.InternalRow
 
-class ArrowDataWriterFactory implements DataWriterFactory {
-  private final StructType schema;
-
-  public ArrowDataWriterFactory(StructType schema) {
-    this.schema = schema;
+case class ArrowBatchWrite(logicalInfo: LogicalWriteInfo) extends BatchWrite {
+  def createBatchWriterFactory(info: PhysicalWriteInfo): DataWriterFactory = {
+    return new ArrowDataWriterFactory(logicalInfo, info)
   }
 
-  @Override
-  public DataWriter<InternalRow> createWriter(int partitionId, long taskId) {
-    return new ArrowWriter(partitionId, taskId, schema);
+  def commit(messages: Array[WriterCommitMessage]): Unit = {
+
   }
+
+  def abort(messages: Array[WriterCommitMessage]): Unit = {}
+
 }

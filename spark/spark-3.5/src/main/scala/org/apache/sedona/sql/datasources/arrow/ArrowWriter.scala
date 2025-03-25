@@ -16,22 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.sql.datasources.arrow;
+package org.apache.sedona.sql.datasources.arrow
 
-import org.apache.spark.sql.connector.write.BatchWrite;
-import org.apache.spark.sql.connector.write.LogicalWriteInfo;
-import org.apache.spark.sql.connector.write.WriteBuilder;
+import org.apache.spark.sql.connector.write.LogicalWriteInfo
+import org.apache.spark.sql.connector.write.PhysicalWriteInfo
+import org.apache.spark.sql.connector.write.DataWriter
+import org.apache.spark.sql.connector.write.WriterCommitMessage
+import org.apache.spark.sql.catalyst.InternalRow
 
-class ArrowWriteBuilder implements WriteBuilder {
+case class ArrowWriter(
+    logicalInfo: LogicalWriteInfo,
+    physicalInfo: PhysicalWriteInfo,
+    partitionId: Int,
+    taskId: Long)
+    extends DataWriter[InternalRow] {
+  def write(record: InternalRow): Unit = {}
 
-  private final LogicalWriteInfo writeInfo;
-
-  public ArrowWriteBuilder(LogicalWriteInfo writeInfo) {
-    this.writeInfo = writeInfo;
+  def commit(): WriterCommitMessage = {
+    null
   }
 
-  @Override
-  public BatchWrite buildForBatch() {
-    return new ArrowBatchWrite(writeInfo);
-  }
+  def abort(): Unit = {}
+
+  def close(): Unit = {}
+
 }

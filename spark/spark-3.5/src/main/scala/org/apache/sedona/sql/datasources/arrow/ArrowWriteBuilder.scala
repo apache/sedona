@@ -16,26 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.sql.datasources.arrow;
+package org.apache.sedona.sql.datasources.arrow
 
-import java.util.Map;
-import org.apache.spark.sql.connector.catalog.Table;
-import org.apache.spark.sql.connector.catalog.TableProvider;
-import org.apache.spark.sql.connector.expressions.Transform;
-import org.apache.spark.sql.types.StructType;
-import org.apache.spark.sql.util.CaseInsensitiveStringMap;
+import org.apache.spark.sql.connector.write.WriteBuilder
+import org.apache.spark.sql.connector.write.Write
+import org.apache.spark.sql.connector.write.BatchWrite
+import org.apache.spark.sql.connector.write.LogicalWriteInfo
 
-class ArrowTableProvider implements TableProvider {
+case class ArrowWriteBuilder(info: LogicalWriteInfo) extends WriteBuilder {
 
-  @Override
-  public StructType inferSchema(CaseInsensitiveStringMap options) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'inferSchema'");
+  override def buildForBatch(): BatchWrite = {
+    new ArrowBatchWrite(info)
   }
 
-  @Override
-  public Table getTable(
-      StructType schema, Transform[] partitioning, Map<String, String> properties) {
-    return new ArrowTable(schema);
-  }
 }
