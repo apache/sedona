@@ -49,4 +49,6 @@ github:
         issues: true
         # Enable projects for project management boards
         projects: false
+        # Enable github discussion
+        discussions: true
     ghp_branch:
