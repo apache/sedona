@@ -22,8 +22,6 @@ import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
 
-import scala.collection.Seq
-
 class StacDataSourceTest extends TestBaseScala {
 
   val STAC_COLLECTION_LOCAL: String = resourceFolder + "datasource_stac/collection.json"
