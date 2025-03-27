@@ -21,6 +21,7 @@ extends: default
 
 rules:
   colons: disable
+  comments: disable
   document-start: disable
   line-length: disable
   truthy: false
