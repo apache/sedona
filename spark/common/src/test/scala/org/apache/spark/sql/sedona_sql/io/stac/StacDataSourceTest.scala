@@ -19,8 +19,10 @@
 package org.apache.spark.sql.sedona_sql.io.stac
 
 import org.apache.sedona.sql.TestBaseScala
-import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, RasterUDT}
+import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
+
+import scala.collection.Seq
 
 class StacDataSourceTest extends TestBaseScala {
 
@@ -38,6 +40,15 @@ class StacDataSourceTest extends TestBaseScala {
   it("basic df load from local file should work") {
     val dfStac = sparkSession.read.format("stac").load(STAC_COLLECTION_LOCAL)
     val rowCount = dfStac.count()
+    assert(rowCount > 0)
+  }
+
+  it("basic df load from local file with extensions should work") {
+    val dfStac = sparkSession.read.format("stac").load(STAC_COLLECTION_LOCAL)
+    dfStac.printSchema()
+    // Filter rows where grid:code equals "MSIN-2506"
+    val filteredDf = dfStac.filter(dfStac.col("grid:code") === "MSIN-2506")
+    val rowCount = filteredDf.count()
     assert(rowCount > 0)
   }
 
@@ -156,54 +167,84 @@ class StacDataSourceTest extends TestBaseScala {
   }
 
   def assertSchema(actualSchema: StructType): Unit = {
-    val expectedSchema = StructType(
-      Seq(
-        StructField("stac_version", StringType, nullable = false),
-        StructField(
-          "stac_extensions",
-          ArrayType(StringType, containsNull = true),
-          nullable = true),
-        StructField("type", StringType, nullable = false),
-        StructField("id", StringType, nullable = false),
-        StructField("bbox", ArrayType(DoubleType, containsNull = true), nullable = true),
-        StructField("geometry", new GeometryUDT(), nullable = true),
-        StructField("title", StringType, nullable = true),
-        StructField("description", StringType, nullable = true),
-        StructField("datetime", TimestampType, nullable = true),
-        StructField("start_datetime", TimestampType, nullable = true),
-        StructField("end_datetime", TimestampType, nullable = true),
-        StructField("created", TimestampType, nullable = true),
-        StructField("updated", TimestampType, nullable = true),
-        StructField("platform", StringType, nullable = true),
-        StructField("instruments", ArrayType(StringType, containsNull = true), nullable = true),
-        StructField("constellation", StringType, nullable = true),
-        StructField("mission", StringType, nullable = true),
-        StructField("gsd", DoubleType, nullable = true),
-        StructField("collection", StringType, nullable = true),
-        StructField(
-          "links",
-          ArrayType(
-            StructType(Seq(
+    // Base STAC fields that should always be present
+    val baseFields = Seq(
+      StructField("stac_version", StringType, nullable = false),
+      StructField("stac_extensions", ArrayType(StringType, containsNull = true), nullable = true),
+      StructField("type", StringType, nullable = false),
+      StructField("id", StringType, nullable = false),
+      StructField("bbox", ArrayType(DoubleType, containsNull = true), nullable = true),
+      StructField("geometry", new GeometryUDT(), nullable = true),
+      StructField("title", StringType, nullable = true),
+      StructField("description", StringType, nullable = true),
+      StructField("datetime", TimestampType, nullable = true),
+      StructField("start_datetime", TimestampType, nullable = true),
+      StructField("end_datetime", TimestampType, nullable = true),
+      StructField("created", TimestampType, nullable = true),
+      StructField("updated", TimestampType, nullable = true),
+      StructField("platform", StringType, nullable = true),
+      StructField("instruments", ArrayType(StringType, containsNull = true), nullable = true),
+      StructField("constellation", StringType, nullable = true),
+      StructField("mission", StringType, nullable = true),
+      StructField("gsd", DoubleType, nullable = true),
+      StructField("collection", StringType, nullable = true),
+      StructField(
+        "links",
+        ArrayType(
+          StructType(
+            Seq(
               StructField("rel", StringType, nullable = true),
               StructField("href", StringType, nullable = true),
               StructField("type", StringType, nullable = true),
               StructField("title", StringType, nullable = true))),
-            containsNull = true),
-          nullable = true),
-        StructField(
-          "assets",
-          MapType(
-            StringType,
-            StructType(Seq(
+          containsNull = true),
+        nullable = true),
+      StructField(
+        "assets",
+        MapType(
+          StringType,
+          StructType(
+            Seq(
               StructField("href", StringType, nullable = true),
               StructField("type", StringType, nullable = true),
               StructField("title", StringType, nullable = true),
               StructField("roles", ArrayType(StringType, containsNull = true), nullable = true))),
-            valueContainsNull = true),
-          nullable = true)))
+          valueContainsNull = true),
+        nullable = true))
 
-    assert(
-      actualSchema == expectedSchema,
-      s"Schema does not match. Expected: $expectedSchema, Actual: $actualSchema")
+    // Extension fields that may be present
+    val extensionFields = Seq(
+      // Grid extension fields
+      StructField("grid:code", StringType, nullable = true)
+      // Add other extension fields as needed
+    )
+
+    // Check that all base fields are present with correct types
+    baseFields.foreach { expectedField =>
+      val actualField = actualSchema.fields.find(_.name == expectedField.name)
+      assert(actualField.isDefined, s"Required field ${expectedField.name} not found in schema")
+      assert(
+        actualField.get.dataType == expectedField.dataType,
+        s"Field ${expectedField.name} has wrong type. Expected: ${expectedField.dataType}, Actual: ${actualField.get.dataType}")
+      assert(
+        actualField.get.nullable == expectedField.nullable,
+        s"Field ${expectedField.name} has wrong nullability. Expected: ${expectedField.nullable}, Actual: ${actualField.get.nullable}")
+    }
+
+    // Check extension fields if they are present
+    val actualFieldNames = actualSchema.fields.map(_.name).toSet
+    extensionFields.foreach { extensionField =>
+      if (actualFieldNames.contains(extensionField.name)) {
+        val actualField = actualSchema.fields.find(_.name == extensionField.name).get
+        assert(
+          actualField.dataType == extensionField.dataType,
+          s"Extension field ${extensionField.name} has wrong type. Expected: ${extensionField.dataType}, Actual: ${actualField.dataType}")
+      }
+    }
+
+    // Check that there are no unexpected fields
+    val expectedFieldNames = (baseFields ++ extensionFields).map(_.name).toSet
+    val unexpectedFields = actualFieldNames.diff(expectedFieldNames)
+    assert(unexpectedFields.isEmpty, s"Schema contains unexpected fields: $unexpectedFields")
   }
 }
