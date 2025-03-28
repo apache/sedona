@@ -39,7 +39,7 @@ repos:
         entry: prettier --write '**/*.yaml' '**/*.yml'
         files: \.ya?ml$
         language: node
-        additional_dependencies: ['prettier@3.3.3']
+        additional_dependencies: ['prettier@3.5.3']
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
