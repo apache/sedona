@@ -43,7 +43,6 @@ class StacDataSourceTest extends TestBaseScala {
 
   it("basic df load from local file with extensions should work") {
     val dfStac = sparkSession.read.format("stac").load(STAC_COLLECTION_LOCAL)
-    dfStac.printSchema()
     // Filter rows where grid:code equals "MSIN-2506"
     val filteredDf = dfStac.filter(dfStac.col("grid:code") === "MSIN-2506")
     val rowCount = filteredDf.count()
