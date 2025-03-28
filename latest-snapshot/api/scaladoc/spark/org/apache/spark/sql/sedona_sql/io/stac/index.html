@@ -222,6 +222,10 @@
                         <a class="class" href="StacDataSource.html" title="The StacDataSource class is responsible for enabling the reading of SpatioTemporal Asset Catalogs (STAC) as tables in Apache Spark."></a>
                         <a href="StacDataSource.html" title="The StacDataSource class is responsible for enabling the reading of SpatioTemporal Asset Catalogs (STAC) as tables in Apache Spark.">StacDataSource</a>
                       </li><li class="current-entities indented7">
+                        <a class="object" href="StacExtension$.html" title=""></a>
+                        <a class="class" href="StacExtension.html" title="Defines a STAC extension with its schema and property mappings"></a>
+                        <a href="StacExtension.html" title="Defines a STAC extension with its schema and property mappings">StacExtension</a>
+                      </li><li class="current-entities indented7">
                         <span class="separator"></span>
                         <a class="class" href="StacPartition.html" title=""></a>
                         <a href="StacPartition.html" title="">StacPartition</a>
@@ -351,6 +355,26 @@ or remote STAC catalog sources into Spark for processing.</p><p>This class imple
 are converted into Spark tables, and the <code>DataSourceRegister</code> interface to provide a custom
 short name for easier data source loading.
 </p></div></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacExtension" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="StacExtensionextendsProductwithSerializable"></a><a id="StacExtension:StacExtension"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacExtension.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Defines a STAC extension with its schema and property mappings" href="StacExtension.html"><span class="name">StacExtension</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="schema">schema: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Defines a STAC extension with its schema and property mappings
+</p><div class="fullcomment"><div class="comment cmt"><p>Defines a STAC extension with its schema and property mappings
+</p></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>
+  The name of the STAC extension (e.g., &quot;eo&quot;, &quot;proj&quot;)</p></dd><dt class="param">schema</dt><dd class="cmt"><p>
+  The schema for the extension properties</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacPartition" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="StacPartitionextendsInputPartitionwithProductwithSerializable"></a><a id="StacPartition:StacPartition"></a>
       <span class="permalink">
@@ -448,7 +472,23 @@ Spark's data source API, providing support for reading data from STAC.
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="org.apache.spark.sql.sedona_sql.io.stac.StacTable" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+                <li name="org.apache.spark.sql.sedona_sql.io.stac.StacExtension" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StacExtension"></a><a id="StacExtension:StacExtension"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacExtension$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="StacExtension$.html"><span class="name">StacExtension</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacTable" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="StacTable"></a><a id="StacTable:StacTable"></a>
       <span class="permalink">
       <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacTable$.html" title="Permalink">

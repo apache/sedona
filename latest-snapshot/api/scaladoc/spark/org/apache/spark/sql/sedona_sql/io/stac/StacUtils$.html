@@ -190,6 +190,10 @@
                         <a class="class" href="StacDataSource.html" title="The StacDataSource class is responsible for enabling the reading of SpatioTemporal Asset Catalogs (STAC) as tables in Apache Spark."></a>
                         <a href="StacDataSource.html" title="The StacDataSource class is responsible for enabling the reading of SpatioTemporal Asset Catalogs (STAC) as tables in Apache Spark.">StacDataSource</a>
                       </li><li class="current-entities indented7">
+                        <a class="object" href="StacExtension$.html" title=""></a>
+                        <a class="class" href="StacExtension.html" title="Defines a STAC extension with its schema and property mappings"></a>
+                        <a href="StacExtension.html" title="Defines a STAC extension with its schema and property mappings">StacExtension</a>
+                      </li><li class="current-entities indented7">
                         <span class="separator"></span>
                         <a class="class" href="StacPartition.html" title=""></a>
                         <a href="StacPartition.html" title="">StacPartition</a>
@@ -346,6 +350,27 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacUtils#addExtensionFieldsToSchema" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addExtensionFieldsToSchema(schema:org.apache.spark.sql.types.StructType,extensions:Array[org.apache.spark.sql.sedona_sql.io.stac.StacExtension]):org.apache.spark.sql.types.StructType"></a><a id="addExtensionFieldsToSchema(StructType,Array[StacExtension]):StructType"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacUtils$.html#addExtensionFieldsToSchema(schema:org.apache.spark.sql.types.StructType,extensions:Array[org.apache.spark.sql.sedona_sql.io.stac.StacExtension]):org.apache.spark.sql.types.StructType" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addExtensionFieldsToSchema</span><span class="params">(<span name="schema">schema: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>, <span name="extensions">extensions: <span class="extype" name="scala.Array">Array</span>[<a href="StacExtension.html" class="extype" name="org.apache.spark.sql.sedona_sql.io.stac.StacExtension">StacExtension</a>]</span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Adds STAC extension fields to the properties field in the schema
+</p><div class="fullcomment"><div class="comment cmt"><p>Adds STAC extension fields to the properties field in the schema
+</p></div><dl class="paramcmts block"><dt class="param">schema</dt><dd class="cmt"><p>
+  The base STAC schema to enhance</p></dd><dt class="param">extensions</dt><dd class="cmt"><p>
+  Array of STAC extension definitions</p></dd><dt>returns</dt><dd class="cmt"><p>
+  Enhanced schema with extension fields added to the properties struct</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacUtils#addFiltersToUrl" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="addFiltersToUrl(baseUrl:String,spatialFilter:Option[org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter],temporalFilter:Option[org.apache.spark.sql.execution.datasource.stac.TemporalFilter]):String"></a><a id="addFiltersToUrl(String,Option[GeoParquetSpatialFilter],Option[TemporalFilter]):String"></a>
       <span class="permalink">
@@ -736,7 +761,7 @@ from this GeoJson file.
         <span class="name">promotePropertiesToTop</span><span class="params">(<span name="row">row: <span class="extype" name="org.apache.spark.sql.catalyst.InternalRow">InternalRow</span></span>, <span name="schema">schema: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.catalyst.InternalRow">InternalRow</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Promote the properties field to the top level of the row.</p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
