@@ -57,7 +57,7 @@ repos:
         files: \.h$
         args:
           - --comment-style
-          - "/*| *| */"
+          - '/*| *| */'
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
@@ -103,7 +103,7 @@ repos:
         files: \.scala$
         args:
           - --comment-style
-          - "/*| *| */"
+          - '/*| *| */'
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
