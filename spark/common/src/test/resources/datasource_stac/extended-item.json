@@ -58,6 +58,7 @@
       "cool_sensor_v2"
     ],
     "gsd": 0.66,
+    "grid:code": "MSIN-2506",
     "eo:cloud_cover": 1.2,
     "eo:snow_cover": 0,
     "statistics": {
