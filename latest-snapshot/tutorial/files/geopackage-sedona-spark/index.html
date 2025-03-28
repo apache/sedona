@@ -4509,11 +4509,7 @@
   my_file2.gpkg
 </code></pre></div>
 <p>Here’s how you can read all the files:</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geopackage&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;tableName&quot;</span><span class="p">,</span> <span class="s2">&quot;my_layer&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/tmp/gpkgs&quot;</span><span class="p">)</span>
-<span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geopackage&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;tableName&quot;</span><span class="p">,</span> <span class="s2">&quot;my_layer&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/tmp/gpkgs&quot;</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>Here are the results:</p>
@@ -4530,7 +4526,11 @@
 <p>Sedona is an excellent option for analyzing many GeoPackage files because it can read and process them in parallel.</p>
 <h2 id="load-raster-data-stored-in-geopackage-files">Load raster data stored in GeoPackage files<a class="headerlink" href="#load-raster-data-stored-in-geopackage-files" title="Permanent link">&para;</a></h2>
 <p>You can also load data from raster tables in the GeoPackage file. To load raster data, you can use the following code.</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geopackage&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;tableName&quot;</span><span class="p">,</span> <span class="s2">&quot;raster_table&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/path/to/geopackage&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geopackage&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;tableName&quot;</span><span class="p">,</span> <span class="s2">&quot;raster_table&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/path/to/geopackage&quot;</span><span class="p">)</span>
+<span class="p">)</span>
 </code></pre></div>
 <p>Here are the contents of the DataFrame:</p>
 <div class="highlight"><pre><span></span><code>+---+----------+-----------+--------+--------------------+
@@ -4592,7 +4592,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 27, 2025 21:44:37">February 27, 2025 21:44:37</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="March 28, 2025 04:58:42">March 28, 2025 04:58:42</span>
   </span>
 
     
