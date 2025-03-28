@@ -21,7 +21,8 @@ default_stages: [pre-commit, pre-push]
 default_language_version:
   # force all unspecified Python hooks to run python3
   python: python3
-  node: 22.2.0
+  # force all unspecified Node hooks to run Node.js v22.14.0 LTS
+  node: 22.14.0
 minimum_pre_commit_version: '3.2.0'
 repos:
   - repo: meta
@@ -43,11 +44,20 @@ repos:
     rev: v1.5.5
     hooks:
       - id: insert-license
-        name: add license for all .c and .h files
-        files: \.(c|h)$
+        name: add license for all .c files
+        files: \.c$
         args:
           - --comment-style
           - '/*|*|*/'
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
+      - id: insert-license
+        name: add license for all .h files
+        files: \.h$
+        args:
+          - --comment-style
+          - "/*| *| */"
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
@@ -85,6 +95,15 @@ repos:
         args:
           - --comment-style
           - '|#|'
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
+      - id: insert-license
+        name: add license for all Scala files
+        files: \.scala$
+        args:
+          - --comment-style
+          - "/*| *| */"
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
