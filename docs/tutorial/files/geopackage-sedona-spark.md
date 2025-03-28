@@ -113,11 +113,7 @@ gpkgs/
 Here’s how you can read all the files:
 
 ```python
-df = (
-    sedona.read.format("geopackage")
-    .option("tableName", "my_layer")
-    .load("/tmp/gpkgs")
-)
+df = sedona.read.format("geopackage").option("tableName", "my_layer").load("/tmp/gpkgs")
 df.show()
 ```
 
@@ -143,7 +139,11 @@ Sedona is an excellent option for analyzing many GeoPackage files because it can
 You can also load data from raster tables in the GeoPackage file. To load raster data, you can use the following code.
 
 ```python
-df = sedona.read.format("geopackage").option("tableName", "raster_table").load("/path/to/geopackage")
+df = (
+    sedona.read.format("geopackage")
+    .option("tableName", "raster_table")
+    .load("/path/to/geopackage")
+)
 ```
 
 Here are the contents of the DataFrame:

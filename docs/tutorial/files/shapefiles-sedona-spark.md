@@ -38,13 +38,9 @@ from shapely.geometry import Point
 point1 = Point(0, 0)
 point2 = Point(1, 1)
 
-data = {
-    'name': ['Point A', 'Point B'],
-    'value': [10, 20],
-    'geometry': [point1, point2]
-}
+data = {"name": ["Point A", "Point B"], "value": [10, 20], "geometry": [point1, point2]}
 
-gdf = gpd.GeoDataFrame(data, geometry='geometry')
+gdf = gpd.GeoDataFrame(data, geometry="geometry")
 gdf.to_file("/tmp/my_geodata.shp")
 ```
 
@@ -98,7 +94,11 @@ df = (
 The name of the geometry column is geometry by default. You can change the name of the geometry column using the `geometry.name` option. Suppose one of the non-spatial attributes is named "geometry", `geometry.name` must be configured to avoid conflict.
 
 ```python
-df = sedona.read.format("shapefile").option("geometry.name", "geom").load("/path/to/shapefile")
+df = (
+    sedona.read.format("shapefile")
+    .option("geometry.name", "geom")
+    .load("/path/to/shapefile")
+)
 ```
 
 The character encoding of string attributes are inferred from the `.cpg` file. If you see garbled values in string fields, you can manually specify the correct charset using the `charset` option. For example:
@@ -118,7 +118,11 @@ The character encoding of string attributes are inferred from the `.cpg` file. I
 === "Python"
 
     ```python
-    df = sedona.read.format("shapefile").option("charset", "UTF-8").load("/path/to/shapefile")
+    df = (
+        sedona.read.format("shapefile")
+        .option("charset", "UTF-8")
+        .load("/path/to/shapefile")
+    )
     ```
 
 Let’s see how to load many Shapefiles into a Sedona DataFrame.
