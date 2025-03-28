@@ -77,6 +77,7 @@ root
  |    |-- element: string (containsNull = true)
  |-- constellation: string (nullable = true)
  |-- mission: string (nullable = true)
+ |-- grid:code: string (nullable = true)
  |-- gsd: double (nullable = true)
  |-- collection: string (nullable = true)
  |-- links: array (nullable = true)
