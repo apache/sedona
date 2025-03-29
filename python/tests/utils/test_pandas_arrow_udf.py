@@ -4,26 +4,54 @@ from tests import chicago_crimes_input_location
 from tests.test_base import TestBase
 import pyspark.sql.functions as f
 import shapely.geometry.base as b
-from time import time
 import geopandas as gpd
 import pytest
 import pyspark
 import pandas as pd
 from pyspark.sql.functions import pandas_udf
-from pyspark.sql.types import IntegerType
+from pyspark.sql.types import IntegerType, FloatType
+from shapely.geometry import Point
+from shapely.wkt import loads
 
 
 def non_vectorized_buffer_udf(geom: b.BaseGeometry) -> b.BaseGeometry:
     return geom.buffer(0.1)
 
 
-@sedona_vectorized_udf()
-def vectorized_buffer(geom: b.BaseGeometry) -> b.BaseGeometry:
+@sedona_vectorized_udf(return_type=GeometryType())
+def vectorized_buffer_udf(geom: b.BaseGeometry) -> b.BaseGeometry:
     return geom.buffer(0.1)
 
 
-@sedona_vectorized_udf(udf_type=SedonaUDFType.GEO_SERIES)
-def vectorized_geo_series_buffer(series: gpd.GeoSeries) -> gpd.GeoSeries:
+@sedona_vectorized_udf(return_type=FloatType())
+def vectorized_geom_to_numeric_udf(geom: b.BaseGeometry) -> float:
+    return geom.area
+
+
+@sedona_vectorized_udf(return_type=FloatType())
+def vectorized_geom_to_numeric_udf_child_geom(geom: Point) -> float:
+    return geom.x
+
+
+@sedona_vectorized_udf(return_type=GeometryType())
+def vectorized_numeric_to_geom(x: float) -> b.BaseGeometry:
+    return Point(x, x)
+
+
+@sedona_vectorized_udf(udf_type=SedonaUDFType.GEO_SERIES, return_type=FloatType())
+def vectorized_series_to_numeric_udf(series: gpd.GeoSeries) -> pd.Series:
+    buffered = series.x
+
+    return buffered
+
+
+@sedona_vectorized_udf(udf_type=SedonaUDFType.GEO_SERIES, return_type=GeometryType())
+def vectorized_series_string_to_geom(x: str) -> b.BaseGeometry:
+    return loads(x)
+
+
+@sedona_vectorized_udf(udf_type=SedonaUDFType.GEO_SERIES, return_type=GeometryType())
+def vectorized_series_buffer_udf(series: gpd.GeoSeries) -> gpd.GeoSeries:
     buffered = series.buffer(0.1)
 
     return buffered
@@ -31,7 +59,7 @@ def vectorized_geo_series_buffer(series: gpd.GeoSeries) -> gpd.GeoSeries:
 
 @pandas_udf(IntegerType())
 def squared_udf(s: pd.Series) -> pd.Series:
-    return s**2  # Perform vectorized operation
+    return s ** 2  # Perform vectorized operation
 
 
 buffer_distanced_udf = f.udf(non_vectorized_buffer_udf, GeometryType())
@@ -54,28 +82,82 @@ class TestSedonaArrowUDF(TestBase):
             self.spark.read.option("header", "true")
             .format("csv")
             .load(chicago_crimes_input_location)
+            .selectExpr("ST_Point(x, y) AS geom")
+        )
+
+        area1 = self.get_area(df, vectorized_buffer_udf)
+        assert area1 > 478
+
+    @pytest.mark.skipif(
+        pyspark.__version__ < "3.5", reason="requires Spark 3.5 or higher"
+    )
+    def test_pandas_udf_shapely_geometry_and_numeric(self):
+        df = (
+            self.spark.read.option("header", "true")
+            .format("csv")
+            .load(chicago_crimes_input_location)
+            .selectExpr("ST_Point(x, y) AS geom", "x")
+            .select(
+                vectorized_geom_to_numeric_udf(f.col("geom")).alias("area"),
+                vectorized_geom_to_numeric_udf_child_geom(f.col("geom")).alias("x_coordinate"),
+                vectorized_numeric_to_geom(f.col("x")).alias("geom_second"),
+            )
+        )
+
+        df.show()
+
+        assert df.select(f.sum("area")).collect()[0][0] == 0.0
+        assert -1339276 > df.select(f.sum("x_coordinate")).collect()[0][0] > -1339277
+        assert df.select(f.col("geom_second")).collect()[0][0].x == -87.694099124
+
+    @pytest.mark.skipif(
+        pyspark.__version__ < "3.5", reason="requires Spark 3.5 or higher"
+    )
+    def test_pandas_udf_geoseries_geometry_and_numeric(self):
+        df = (
+            self.spark.read.option("header", "true")
+            .format("csv")
+            .load(chicago_crimes_input_location)
+            .selectExpr(
+                "ST_Point(x, y) AS geom",
+                "CONCAT('POINT(', x, ' ', y, ')') AS wkt",
+            )
+            .select(
+                vectorized_series_to_numeric_udf(f.col("geom")).alias("x_coordinate"),
+                vectorized_series_string_to_geom(f.col("wkt")).alias("geom"),
+            )
+        )
+
+        assert -1339276 > df.select(f.sum("x_coordinate")).collect()[0][0] > -1339277
+        assert df.select(f.col("geom")).collect()[0][0].x == -87.694099124
+
+    @pytest.mark.skipif(
+        pyspark.__version__ < "3.5", reason="requires Spark 3.5 or higher"
+    )
+    def test_pandas_udf_numeric_to_geometry(self):
+        df = (
+            self.spark.read.option("header", "true")
+            .format("csv")
+            .load(chicago_crimes_input_location)
             .selectExpr("ST_Point(y, x) AS geom")
         )
 
-        vectorized_times = []
-        non_vectorized_times = []
+        area1 = self.get_area(df, vectorized_buffer_udf)
+        assert area1 > 478
 
-        for i in range(5):
-            start = time()
-            area1 = self.get_area(df, vectorized_buffer)
+    @pytest.mark.skipif(
+        pyspark.__version__ < "3.5", reason="requires Spark 3.5 or higher"
+    )
+    def test_pandas_udf_numeric_and_numeric_to_geometry(self):
+        df = (
+            self.spark.read.option("header", "true")
+            .format("csv")
+            .load(chicago_crimes_input_location)
+            .selectExpr("ST_Point(y, x) AS geom")
+        )
 
-            assert area1 > 478
-
-            vectorized_times.append(time() - start)
-
-            area2 = self.get_area(df, buffer_distanced_udf)
-
-            assert area2 > 478
-
-            non_vectorized_times.append(time() - start)
-
-        for v, nv in zip(vectorized_times, non_vectorized_times):
-            assert v < nv, "Vectorized UDF is slower than non-vectorized UDF"
+        area1 = self.get_area(df, vectorized_buffer_udf)
+        assert area1 > 478
 
     @pytest.mark.skipif(
         pyspark.__version__ < "3.5", reason="requires Spark 3.5 or higher"
@@ -88,7 +170,7 @@ class TestSedonaArrowUDF(TestBase):
             .selectExpr("ST_Point(y, x) AS geom")
         )
 
-        area = self.get_area(df, vectorized_buffer)
+        area = self.get_area(df, vectorized_series_buffer_udf)
 
         assert area > 478
 

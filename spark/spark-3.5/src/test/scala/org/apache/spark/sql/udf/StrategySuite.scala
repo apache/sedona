@@ -43,7 +43,7 @@ class StrategySuite extends AnyFunSuite with Matchers {
 
   import spark.implicits._
 
-  test("Chained Scalar Pandas UDFs should be combined to a single physical node") {
+  test("sedona geospatial UDF") {
     val df = Seq(
       (1, "value", wktReader.read("POINT(21 52)")),
       (2, "value1", wktReader.read("POINT(20 50)")),

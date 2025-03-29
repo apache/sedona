@@ -31,8 +31,9 @@ import org.apache.spark.sql.types.StructType
 
 import scala.collection.JavaConverters.asScalaIteratorConverter
 
-//import scala.jdk.CollectionConverters.asScalaIteratorConverter
-
+// We use custom Strategy to avoid Apache Spark assert on types, we
+// can consider extending this to support other engines working with
+// arrow data
 class SedonaArrowStrategy extends Strategy {
   override def apply(plan: LogicalPlan): Seq[SparkPlan] = plan match {
     case SedonaArrowEvalPython(udfs, output, child, evalType) =>
@@ -41,6 +42,9 @@ class SedonaArrowStrategy extends Strategy {
   }
 }
 
+// It's modification og Apache Spark's ArrowEvalPythonExec, we remove the check on the types to allow geometry types
+// here, it's initial version to allow the vectorized udf for Sedona geometry types. We can consider extending this
+// to support other engines working with arrow data
 case class SedonaArrowEvalPythonExec(
     udfs: Seq[PythonUDF],
     resultAttrs: Seq[Attribute],

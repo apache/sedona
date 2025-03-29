@@ -26,6 +26,8 @@ import org.apache.spark.sql.catalyst.trees.TreePattern.PYTHON_UDF
 
 import scala.collection.mutable
 
+// That rule extracts scalar Python UDFs, currently Apache Spark has
+// assert on types which blocks using the vectorized udfs with geometry type
 class ExtractSedonaUDFRule extends Rule[LogicalPlan] {
 
   private def hasScalarPythonUDF(e: Expression): Boolean = {

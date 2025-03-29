@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql.UDF
 
+// We use constant 5000 for Sedona UDFs, 200 is Apache Spark scalar UDF
 object PythonEvalType {
   val SQL_SCALAR_SEDONA_UDF = 5200
   val SEDONA_UDF_TYPE_CONSTANT = 5000
