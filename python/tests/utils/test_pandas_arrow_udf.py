@@ -107,7 +107,9 @@ class TestSedonaArrowUDF(TestBase):
                 vectorized_geom_to_numeric_udf_child_geom(f.col("geom")).alias(
                     "x_coordinate"
                 ),
-                vectorized_numeric_to_geom(f.col("x").cast("float")).alias("geom_second"),
+                vectorized_numeric_to_geom(f.col("x").cast("float")).alias(
+                    "geom_second"
+                ),
             )
         )
 
