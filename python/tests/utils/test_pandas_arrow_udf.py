@@ -113,7 +113,13 @@ class TestSedonaArrowUDF(TestBase):
 
         assert df.select(f.sum("area")).collect()[0][0] == 0.0
         assert -1339276 > df.select(f.sum("x_coordinate")).collect()[0][0] > -1339277
-        assert df.select(f.col("geom_second")).collect()[0][0].x == -87.694099124
+        assert (
+            -1339276
+            > df.selectExpr("ST_X(geom_second) AS x_coordinate")
+            .select(f.sum("x_coordinate"))
+            .collect()[0][0]
+            > -1339277
+        )
 
     @pytest.mark.skipif(
         pyspark.__version__ < "3.5", reason="requires Spark 3.5 or higher"
@@ -135,8 +141,20 @@ class TestSedonaArrowUDF(TestBase):
         )
 
         assert -1339276 > df.select(f.sum("x_coordinate")).collect()[0][0] > -1339277
-        assert df.select(f.col("geom")).collect()[0][0].x == -87.694099124
-        assert df.select(f.col("geom_2")).collect()[0][0].x == -87.694099124
+        assert (
+            -1339276
+            > df.selectExpr("ST_X(geom) AS x_coordinate")
+            .select(f.sum("x_coordinate"))
+            .collect()[0][0]
+            > -1339277
+        )
+        assert (
+            -1339276
+            > df.selectExpr("ST_X(geom_2) AS x_coordinate")
+            .select(f.sum("x_coordinate"))
+            .collect()[0][0]
+            > -1339277
+        )
 
     @pytest.mark.skipif(
         pyspark.__version__ < "3.5", reason="requires Spark 3.5 or higher"
