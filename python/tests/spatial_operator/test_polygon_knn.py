@@ -18,8 +18,10 @@
 import os
 
 from shapely.geometry import Point
+
+from tests import tests_resource
 from tests.test_base import TestBase
-from tests.tools import distance_sorting_functions, tests_resource
+from tests.tools import distance_sorting_functions
 
 from sedona.core.enums import FileDataSplitter, IndexType
 from sedona.core.spatialOperator import KNNQuery
