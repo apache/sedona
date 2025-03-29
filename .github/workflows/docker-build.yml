@@ -45,8 +45,8 @@ jobs:
         spark: ['3.5.1', '3.4.3', '3.3.4']
         include:
           - spark: 3.5.1
-            sedona: "latest"
-            geotools: "auto"
+            sedona: 'latest'
+            geotools: 'auto'
           - spark: 3.4.3
             sedona: 1.6.0
             geotools: 28.2
