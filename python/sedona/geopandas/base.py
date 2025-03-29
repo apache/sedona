@@ -40,7 +40,7 @@ from sedona.geopandas._typing import GeoFrameLike
 bool_type = bool
 
 
-class GeoFrame(object, metaclass=ABCMeta):
+class GeoFrame(metaclass=ABCMeta):
     """
     A base class for both GeoDataFrame and GeoSeries.
     """

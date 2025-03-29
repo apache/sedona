@@ -56,7 +56,7 @@ class TestDataframe(TestBase):
             },
             index=[10, 20, 30, 40, 50, 60],
         )
-        assert psdf.count().count() is 3
+        assert psdf.count().count() == 3
 
     def test_type_single_geometry_column(self):
         # Create a GeoDataFrame with a single geometry column and additional attributes

@@ -42,7 +42,7 @@ class TestSpatialJoin(TestBase):
         joined = sjoin(left, right)
         assert joined is not None
         assert type(joined) is GeoSeries
-        assert joined.count() is 4
+        assert joined.count() == 4
 
     def test_sjoin_method2(self):
         left = self.g1
@@ -50,4 +50,4 @@ class TestSpatialJoin(TestBase):
         joined = left.sjoin(right)
         assert joined is not None
         assert type(joined) is GeoSeries
-        assert joined.count() is 4
+        assert joined.count() == 4
