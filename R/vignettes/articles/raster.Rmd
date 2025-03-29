@@ -107,7 +107,7 @@ dir(dest_file, recursive = TRUE)
 Available options see [Raster writer](../../../api/sql/Raster-writer/):
 
 * rasterField: the binary column to be saved (if there is only one takes that column by default, otherwise specify)
-* fileExtension: `.tiff` bvy default, also accepts `.png`, `.jpeg`, `.asc`
+* fileExtension: `.tiff` by default, also accepts `.png`, `.jpeg`, `.asc`
 * pathField: if used any column name that indicates the paths of each raster file, otherwise random UUIDs are generated.
 
 ```{r}

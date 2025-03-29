@@ -1,7 +1,252 @@
-!!! note
-	Sedona before 1.6.0 only works with Shapely 1.x. If you want to work with Shapely 2.x, please use Sedona 1.6.0+
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
 
-    If you use Sedona < 1.6.0, please use GeoPandas <= `0.11.1` since GeoPandas > 0.11.1 will automatically install Shapely 2.0. If you use Shapely, please use <= `1.8.5`.
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ -->
+
+## Sedona 1.7.1
+
+Sedona 1.7.1 is compiled against Spark 3.3 / Spark 3.4 / Spark 3.5, Flink 1.19, Snowflake 7+, Java 8.
+
+This release is a minor release that includes new features, improvements, bug fixes. No API breaking changes and behavior changes are expected.
+
+### New Contributors
+
+* @MrPowers made their first contribution in https://github.com/apache/sedona/pull/1735
+* @paleolimbot made their first contribution in https://github.com/apache/sedona/pull/1748
+* @kadolor made their first contribution in https://github.com/apache/sedona/pull/1762
+* @BaseMax made their first contribution in https://github.com/apache/sedona/pull/1808
+* @ruanqizhen made their first contribution in https://github.com/apache/sedona/pull/1822
+* @sshiv012 made their first contribution in https://github.com/apache/sedona/pull/1826
+
+### Highlights
+
+* [X] [<a href='https://issues.apache.org/jira/browse/SEDONA-689'>SEDONA-689</a>] SQL interface for GeoStats including ST_DBSCAN, ST_GLocal, and ST_LocalOutlierFactor
+* [X] [<a href='https://issues.apache.org/jira/browse/SEDONA-690'>SEDONA-690</a>] Broadcast join support for distributed KNN Join
+* [X] GeoArrow-enhanced GeoPandas input and output of Sedona DataFrame
+* [X] [<a href='https://issues.apache.org/jira/browse/SEDONA-695'>SEDONA-695</a>] Expose spatial partitioning structure from SpatialRDD to enable better partitioning for GeoParquet
+* [X] [<a href='https://issues.apache.org/jira/browse/SEDONA-704'>SEDONA-704</a>] STAC catalog reader
+* [X] [<a href='https://issues.apache.org/jira/browse/SEDONA-713'>SEDONA-713</a>] OpenStreetMap (OSM) PBF reader
+* [X] [<a href='https://issues.apache.org/jira/browse/SEDONA-707'>SEDONA-707</a>] Significant performance improvement on geometry rasterization such as RS_AsRaster
+* [X] Several cool ST functions such as ST_RemoveRepeatedPoints
+
+### Bug
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-688'>SEDONA-688</a>] -         running ST_KNN() error : java.lang.ArithmeticException: / by zero
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-690'>SEDONA-690</a>] -         Optimize query side broadcast KNN join
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-694'>SEDONA-694</a>] -         Error message for optional includes refers to old pypi package name
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-696'>SEDONA-696</a>] -         Fix issue with geopackage datasource on databricks.
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-698'>SEDONA-698</a>] -         Fix ST_RemoveRepeatedPoints
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-699'>SEDONA-699</a>] -         When loading metadata for relatively huge geoparquet files Sedona application stops responding.
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-700'>SEDONA-700</a>] -         ST_KNN fails on null and empty geometries
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-706'>SEDONA-706</a>] -         Python DataFrame API have problem working in multi-threaded environment
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-716'>SEDONA-716</a>] -         MERGE INTO TABLE Does&#39;t Work with Sedona 1.7.0
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-718'>SEDONA-718</a>] -         Auto Detect geometry column in GeoJSON writer
+</li>
+</ul>
+
+### New Feature
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-693'>SEDONA-693</a>] -         Add ST_Perimeter2D
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-704'>SEDONA-704</a>] -         Add the STAC datasource reader
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-707'>SEDONA-707</a>] -         Add allTouched parameter for RS_functions that perform rasterization (Geometry to Raster)
+</li>
+</ul>
+
+### Improvement
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-685'>SEDONA-685</a>] -         R – Switch shapefile and geojson readers to DataFrame API sources
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-689'>SEDONA-689</a>] -         Geostats in SQL
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-695'>SEDONA-695</a>] -         Expose spatial partitioning structure from SpatialRDD
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-705'>SEDONA-705</a>] -         Add spatial partitioners that don&#39;t introduce duplicates
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-708'>SEDONA-708</a>] -         SedonaPython should use PyArrow to get GeoPandas DataFrame
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-711'>SEDONA-711</a>] -         Add Geography user-defined type
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-715'>SEDONA-715</a>] -         Add Zeppelin Notebook support along with visualization plugin for the docker image
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-717'>SEDONA-717</a>] -         Fix dataframe_to_arrow() for zero-row case
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-719'>SEDONA-719</a>] -         Support reading Shapefile with Z/M ordinates
+</li>
+</ul>
+
+### Task
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-25'>SEDONA-25</a>] -         Change Scala Seq type in Adapter
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-46'>SEDONA-46</a>] -         Add Postgis equivalent ST_ClusterDBSCAN to Apache Sedona.
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-713'>SEDONA-713</a>] -         Create OSM reader to Apache Sedona
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-714'>SEDONA-714</a>] -         Add conversion from geopandas to Sedona using arrow.
+</li>
+</ul>
+
+## Sedona 1.7.0
+
+Sedona 1.7.0 is compiled against Spark 3.3 / Spark 3.4 / Spark 3.5, Flink 1.19, Snowflake 7+, Java 8.
+
+This release is a major release that includes new features, improvements, bug fixes, API breaking changes, and behavior changes.
+
+### New Contributors
+
+* @mvaaltola made their first contribution in https://github.com/apache/sedona/pull/1574
+* @emmanuel-ferdman made their first contribution in https://github.com/apache/sedona/pull/1658
+* @MohammadLotfiA made their first contribution in https://github.com/apache/sedona/pull/1659
+* @golfalot made their first contribution in https://github.com/apache/sedona/pull/1673
+* @AmirTallap made their first contribution in https://github.com/apache/sedona/pull/1675
+* @freamdx made their first contribution in https://github.com/apache/sedona/pull/1704
+
+### Highlights
+
+* [X] Add a new join algorithm for distributed K Nearest Neighbor Join and a corresponding ST_KNN function
+* [X] Add new spatial statistics algorithms DBSCAN, Local Outlier Factor, and Getis Ord Hot Spot Analysis
+* [X] Add new DataFrame based readers for Shapefile, and GeoPackage
+* [X] Add 10 new ST functions
+
+### API breaking changes
+
+* [X] The support of Spark 3.0, 3.1, 3.2 is dropped. Sedona is now only compatible with Spark 3.3, 3.4, and 3.5.
+* [X] Rasterio is no longer a mandatory dependency. You can still use Sedona Raster without rasterio. If you need to write rasterio UDF in Sedona, you can install it separately.
+
+### Behavior changes
+
+* [X] JTS version is upgraded to 1.20.0. This may cause some behavior changes in ST functions that rely on JTS.
+* [X] ST_Length, ST_Length2D and ST_LengthSpheroid now only return the length for line objects. It now returns 0 for polygon objects.
+* [X] ST_Perimeter now only returns the perimeter for polygon objects. It now returns 0 for line objects.
+
+### Bug
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-650'>SEDONA-650</a>] -         Fiona-Geopandas Compatibility Issue in Python 3.8
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-665'>SEDONA-665</a>] -         Docker build failed at ubuntu 22 with rasterio 1.4.0+
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-669'>SEDONA-669</a>] -         GeoParquet format should handle timestamp_ntz columns properly
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-670'>SEDONA-670</a>] -         GeoJSON reader does not work properly on DBR
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-672'>SEDONA-672</a>] -         Bug fix for ST_LengthSpheroid
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-673'>SEDONA-673</a>] -         Cannot load GeoParquet without bbox metadata when spatial filter is applied
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-677'>SEDONA-677</a>] -         Kryo deserialization for null envelopes results in unit envelopes
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-682'>SEDONA-682</a>] -         Sedona Spark 3.3 does not compile on Scala 2.13
+</li>
+</ul>
+
+### New Feature
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-646'>SEDONA-646</a>] -         Shapefile data source for DataFrame API
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-647'>SEDONA-647</a>] -         Add ST_RemoveRepeatedPoints
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-648'>SEDONA-648</a>] -         Implement Distributed K Nearest Neighbor Join
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-652'>SEDONA-652</a>] -         Add ST_MakeEnvelope
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-654'>SEDONA-654</a>] -         Add ST_RotateY
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-655'>SEDONA-655</a>] -         DBSCAN
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-656'>SEDONA-656</a>] -         Add ST_Project
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-658'>SEDONA-658</a>] -         Add ST_Simplify
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-659'>SEDONA-659</a>] -         Upgrade jts version to 1.20.0
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-661'>SEDONA-661</a>] -         Local Outlier Factor
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-664'>SEDONA-664</a>] -         Add native GeoPackage reader
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-666'>SEDONA-666</a>] -         Add ST_Scale and ST_ScaleGeom
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-667'>SEDONA-667</a>] -         Getis Ord G Local
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-671'>SEDONA-671</a>] -         Spider random spatial data generator
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-675'>SEDONA-675</a>] -         Add ST_InterpolatePoint
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-676'>SEDONA-676</a>] -         Add ST_Perimeter
+</li>
+</ul>
+
+### Improvement
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-636'>SEDONA-636</a>] -         datatype geometry is not supported when &#39;create table xxx (geom geometry)
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-640'>SEDONA-640</a>] -         Refactor support for multiple spark versions in the build
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-642'>SEDONA-642</a>] -         R – Adapt R package for split version of jars
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-644'>SEDONA-644</a>] -         R – Update for SedonaContext
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-649'>SEDONA-649</a>] -         Fix spelling in Java files
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-653'>SEDONA-653</a>] -         Add lenient mode for RS_Clip
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-663'>SEDONA-663</a>] -         Support spark connect in dataframe api
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-678'>SEDONA-678</a>] -         Fix ST_Length and ST_Length2D behavior
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-679'>SEDONA-679</a>] -         Fix ST_LengthSpheroid behavior
+</li>
+</ul>
+
+### Task
+
+<ul>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-651'>SEDONA-651</a>] -         Add spark prefix to all sedona spark config
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-662'>SEDONA-662</a>] -         Clean Up Dead Code from DBSCAN
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-668'>SEDONA-668</a>] -         Drop the support of Spark 3.0, 3.1, 3.2
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-674'>SEDONA-674</a>] -         Make the rasterio binding for sedona-python work with GDAL 3.10
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-680'>SEDONA-680</a>] -         Remove rasterio from mandatory dependency
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-681'>SEDONA-681</a>] -         Bump GeoTools version from 28.2 to 28.5
+</li>
+<li>[<a href='https://issues.apache.org/jira/browse/SEDONA-683'>SEDONA-683</a>] -         Exclude some repetitive dependencies
+</li>
+</ul>
 
 ## Sedona 1.6.1
 
@@ -245,8 +490,10 @@ Sedona 1.6.0 is compiled against Spark 3.3 / Spark 3.4 / Spark 3.5, Flink 1.19, 
 ```python
 from pyspark.sql.types import DoubleType
 
+
 def mean_udf(raster):
-	return float(raster.as_numpy().mean())
+    return float(raster.as_numpy().mean())
+
 
 sedona.udf.register("mean_udf", mean_udf, DoubleType())
 df_raster.withColumn("mean", expr("mean_udf(rast)")).show()
@@ -917,11 +1164,15 @@ Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
         ```python
         from sedona.spark import *
 
-        config = SedonaContext.builder().\
-           config('spark.jars.packages',
-               'org.apache.sedona:sedona-spark-shaded-3.0_2.12:1.4.1,'
-               'org.datasyslab:geotools-wrapper:1.4.0-28.2'). \
-           getOrCreate()
+        config = (
+            SedonaContext.builder()
+            .config(
+                "spark.jars.packages",
+                "org.apache.sedona:sedona-spark-shaded-3.3_2.12:1.4.1,"
+                "org.datasyslab:geotools-wrapper:1.4.0-28.2",
+            )
+            .getOrCreate()
+        )
         sedona = SedonaContext.create(config)
         sedona.sql("SELECT ST_GeomFromWKT(XXX) FROM")
         ```
@@ -1011,7 +1262,7 @@ Sedona 1.4.0 is compiled against, Spark 3.3 / Flink 1.12, Java 8.
 
 * [X] **Sedona Spark & Flink** Serialize and deserialize geometries 3 - 7X faster
 * [X] **Sedona Spark & Flink** Google S2 based spatial join for fast approximate point-in-polygon join. See [Join query in Spark](../api/sql/Optimizer.md#google-s2-based-approximate-equi-join) and [Join query in Flink](../tutorial/flink/sql.md#join-query)
-* [X] **Sedona Spark** Pushdown spatial predicate on GeoParquet to reduce memory consumption by 10X: see [explanation](../api/sql/Optimizer.md#Push-spatial-predicates-to-GeoParquet)
+* [X] **Sedona Spark** Pushdown spatial predicate on GeoParquet to reduce memory consumption by 10X: see [explanation](../api/sql/Optimizer.md#push-spatial-predicates-to-geoparquet)
 * [X] **Sedona Spark** Automatically use broadcast index spatial join for small datasets
 * [X] **Sedona Spark** New RasterUDT added to Sedona GeoTiff reader.
 * [X] **Sedona Spark** A number of bug fixes and improvement to the Sedona R module.

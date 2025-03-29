@@ -1,19 +1,19 @@
-#  Licensed to the Apache Software Foundation (ASF) under one
-#  or more contributor license agreements.  See the NOTICE file
-#  distributed with this work for additional information
-#  regarding copyright ownership.  The ASF licenses this file
-#  to you under the Apache License, Version 2.0 (the
-#  "License"); you may not use this file except in compliance
-#  with the License.  You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
-#  Unless required by applicable law or agreed to in writing,
-#  software distributed under the License is distributed on an
-#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-#  KIND, either express or implied.  See the License for the
-#  specific language governing permissions and limitations
-#  under the License.
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 
 
 # ------- Read RDD ------------
@@ -389,7 +389,14 @@ sedona_read_shapefile <- function(sc,
 # ------- Read SDF ------------
 #' Read geospatial data into a Spark DataFrame.
 #'
-#' @description Functions to read geospatial data from a variety of formats into Spark DataFrames.
+#' @description `r lifecycle::badge("deprecated")`
+#'
+#' These functions are deprecated and will be removed in a future release. Sedona has
+#' been implementing readers as spark DataFrame sources, so you can use `spark_read_source`
+#' with the right sources ("shapefile", "geojson", "geoparquet") to read geospatial data.
+#'
+#' Functions to read geospatial data from a variety of formats into Spark DataFrames.
+#'
 #'
 #' * `spark_read_shapefile`: from a shapefile
 #' * `spark_read_geojson`: from a geojson file
@@ -420,9 +427,15 @@ spark_read_shapefile <- function(sc,
                                  options = list(),
                                  ...) {
 
+  lifecycle::deprecate_soft(
+    "1.7.1",
+    "spark_read_shapefile()",
+    with = "spark_read_source()"
+  )
+
   lapply(names(options), function(name) {
     if (!name %in% c("")) {
-      warning(paste0("Ignoring unknown option '", name,"'"))
+      warning(paste0("Ignoring unknown option '", name, "'"))
     }
   })
 
@@ -446,12 +459,18 @@ spark_read_geojson <- function(sc,
                                memory = TRUE,
                                overwrite = TRUE) {
 
+  lifecycle::deprecate_soft(
+    "1.7.1",
+    "spark_read_geojson()",
+    with = "spark_read_source()"
+  )
+
   # check options
   if ("allow_invalid_geometries" %in% names(options)) final_allow_invalid <- options[["allow_invalid_geometries"]] else final_allow_invalid <- TRUE
   if ("skip_syntactically_invalid_geometries" %in% names(options)) final_skip <- options[["skip_syntactically_invalid_geometries"]] else final_skip <- TRUE
   lapply(names(options), function(name) {
     if (!name %in% c("allow_invalid_geometries", "skip_syntactically_invalid_geometries")) {
-      warning(paste0("Ignoring unknown option '", name,"'"))
+      warning(paste0("Ignoring unknown option '", name, "'"))
     }
   })
 
@@ -479,6 +498,12 @@ spark_read_geoparquet <- function(sc,
                                   repartition = 0,
                                   memory = TRUE,
                                   overwrite = TRUE) {
+
+  lifecycle::deprecate_soft(
+    "1.7.1",
+    "spark_read_geoparquet()",
+    with = "spark_read_source()"
+  )
 
   spark_read_source(sc,
                     name = name,
@@ -602,7 +627,14 @@ sedona_save_spatial_rdd <- function(x,
 
 #' Write geospatial data from a Spark DataFrame.
 #'
-#' @description Functions to write geospatial data into a variety of formats from Spark DataFrames.
+#' @description `r lifecycle::badge("deprecated")`
+#'
+#' These functions are deprecated and will be removed in a future release. Sedona has
+#' been implementing writers as spark DataFrame sources, so you can use `spark_write_source`
+#' with the right sources ("shapefile", "geojson", "geoparquet") to write geospatial data.
+
+#'
+#' Functions to write geospatial data into a variety of formats from Spark DataFrames.
 #'
 #' * `spark_write_geojson`: to GeoJSON
 #' * `spark_write_geoparquet`: to GeoParquet
@@ -644,6 +676,12 @@ spark_write_geojson <- function(x,
                                 partition_by = NULL,
                                 ...) {
 
+  lifecycle::deprecate_soft(
+    "1.7.1",
+    "spark_write_geojson()",
+    with = "spark_read_source()"
+  )
+
   ## find geometry column if not specified
   if (!"spatial_col" %in% names(options)) {
     schema <- x %>% sdf_schema()
@@ -678,6 +716,11 @@ spark_write_geoparquet <- function(x,
                                    options = list(),
                                    partition_by = NULL,
                                    ...) {
+  lifecycle::deprecate_soft(
+    "1.7.1",
+    "spark_write_geoparquet()",
+    with = "spark_read_source()"
+  )
 
   spark_write_source(
     x = x,
@@ -701,6 +744,12 @@ spark_write_raster <- function(x,
                                    options = list(),
                                    partition_by = NULL,
                                    ...) {
+
+  lifecycle::deprecate_soft(
+    "1.7.1",
+    "spark_write_raster()",
+    with = "spark_read_source()"
+  )
 
   spark_write_source(
     x = x,

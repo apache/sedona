@@ -146,8 +146,11 @@ public class ExtendedQuadTree<T> extends PartitioningUtils implements Serializab
 
       final Set<Tuple2<Integer, Geometry>> result = new HashSet<>();
       for (QuadRectangle rectangle : matchedPartitions) {
+        // Ignore null or empty point
+        if (point == null || point.isEmpty()) break;
+
         // For points, make sure to return only one partition
-        if (point != null && !(new HalfOpenRectangle(rectangle.getEnvelope())).contains(point)) {
+        if (!(new HalfOpenRectangle(rectangle.getEnvelope())).contains(point)) {
           continue;
         }
 

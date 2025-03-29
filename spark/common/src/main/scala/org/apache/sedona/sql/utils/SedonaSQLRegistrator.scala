@@ -20,7 +20,7 @@ package org.apache.sedona.sql.utils
 
 import org.apache.sedona.spark.SedonaContext
 import org.apache.sedona.sql.RasterRegistrator
-import org.apache.sedona.sql.UDF.UdfRegistrator
+import org.apache.sedona.sql.UDF.Catalog
 import org.apache.spark.sql.{SQLContext, SparkSession}
 
 @deprecated("Use SedonaContext instead", "1.4.1")
@@ -44,7 +44,7 @@ object SedonaSQLRegistrator {
     SedonaContext.create(sparkSession, language)
 
   def dropAll(sparkSession: SparkSession): Unit = {
-    UdfRegistrator.dropAll(sparkSession)
+    Catalog.dropAll(sparkSession)
     RasterRegistrator.dropAll(sparkSession)
   }
 }

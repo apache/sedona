@@ -1,19 +1,19 @@
-#  Licensed to the Apache Software Foundation (ASF) under one
-#  or more contributor license agreements.  See the NOTICE file
-#  distributed with this work for additional information
-#  regarding copyright ownership.  The ASF licenses this file
-#  to you under the Apache License, Version 2.0 (the
-#  "License"); you may not use this file except in compliance
-#  with the License.  You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
-#  Unless required by applicable law or agreed to in writing,
-#  software distributed under the License is distributed on an
-#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-#  KIND, either express or implied.  See the License for the
-#  specific language governing permissions and limitations
-#  under the License.
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 
 context("data interface: raster")
 
@@ -33,7 +33,7 @@ test_that("Passed RS_FromGeoTiff from binary", {
     mutate(raster = RS_FromGeoTiff(content))
 
   expect_equal(
-    raster_sdf %>% sdf_schema() ,
+    raster_sdf %>% sdf_schema(),
     list(
       path             = list(name = "path", type = "StringType"),
       modificationTime = list(name = "modificationTime", type = "TimestampType"),
@@ -65,7 +65,7 @@ test_that("Passed RS_FromArcInfoAsciiGrid from binary", {
     mutate(raster = RS_FromArcInfoAsciiGrid(content))
 
   expect_equal(
-    raster_sdf %>% sdf_schema() ,
+    raster_sdf %>% sdf_schema(),
     list(
       path             = list(name = "path", type = "StringType"),
       modificationTime = list(name = "modificationTime", type = "TimestampType"),
@@ -101,7 +101,7 @@ test_that("Passed RS_Envelope with raster", {
     )
 
   expect_equal(
-    raster_sdf %>% sdf_schema() ,
+    raster_sdf %>% sdf_schema(),
     list(
       path             = list(name = "path", type = "StringType"),
       modificationTime = list(name = "modificationTime", type = "TimestampType"),
@@ -212,9 +212,10 @@ test_that("Should read geotiff using binary source and write geotiff back to dis
   binary_sdf <- spark_read_binary(sc, dir = test_data("raster"), name = sdf_name)
 
   tmp_dest <- tempfile()
-
+  lifecycle::expect_deprecated({
   binary_sdf %>%
     spark_write_raster(path = tmp_dest)
+  })
 
   sdf_name_2 <- random_string("spatial_sdf_2")
   binary_2_sdf <- spark_read_binary(sc, dir = tmp_dest, name = sdf_name_2, recursive_file_lookup = TRUE)

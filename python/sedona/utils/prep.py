@@ -28,6 +28,8 @@ from shapely.geometry import (
 )
 from shapely.geometry.base import BaseGeometry
 
+from ..core.geom.geography import Geography
+
 
 def assign_all() -> bool:
     geoms = [
@@ -41,6 +43,7 @@ def assign_all() -> bool:
     ]
     assign_udt_shapely_objects(geoms=geoms)
     assign_user_data_to_shapely_objects(geoms=geoms)
+    assign_udt_geography()
     return True
 
 
@@ -55,3 +58,9 @@ def assign_udt_shapely_objects(geoms: List[type(BaseGeometry)]) -> bool:
 def assign_user_data_to_shapely_objects(geoms: List[type(BaseGeometry)]) -> bool:
     for geom in geoms:
         geom.getUserData = lambda geom_instance: geom_instance.userData
+
+
+def assign_udt_geography():
+    from sedona.sql.types import GeographyType
+
+    Geography.__UDT__ = GeographyType()

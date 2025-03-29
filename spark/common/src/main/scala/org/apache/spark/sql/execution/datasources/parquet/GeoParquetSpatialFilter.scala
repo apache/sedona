@@ -69,6 +69,10 @@ object GeoParquetSpatialFilter {
     def evaluate(columns: Map[String, GeometryFieldMetaData]): Boolean = {
       columns.get(columnName).forall { column =>
         val bbox = column.bbox
+        if (bbox.isEmpty) {
+          return true
+        }
+
         val columnEnvelope =
           queryWindow.getFactory.toGeometry(new Envelope(bbox(0), bbox(2), bbox(1), bbox(3)))
         predicateType match {

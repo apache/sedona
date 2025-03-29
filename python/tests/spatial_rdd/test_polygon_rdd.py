@@ -188,7 +188,4 @@ class TestPolygonRDD(TestBase):
 
         result = rectangle_rdd.rawSpatialRDD.collect()
 
-        for el in result:
-            print(el.geom.wkt)
-        print(result)
         assert result.__len__() > -1

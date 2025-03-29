@@ -27,6 +27,7 @@ import net.sf.geographiclib.PolygonResult;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Polygon;
 
 public class Spheroid {
   // Standard EPSG Codes
@@ -71,15 +72,43 @@ public class Spheroid {
   }
 
   /**
-   * Calculate the length of a geometry using the Spheroid formula. Equivalent to PostGIS
+   * Calculates length just for linear geometries or geometry collection containing linear
+   * geometries.
+   *
+   * @param geometry
+   * @return
+   */
+  public static double length(Geometry geometry) {
+    String geomType = geometry.getGeometryType();
+    if (geomType.equalsIgnoreCase(Geometry.TYPENAME_LINESTRING)
+        || geomType.equalsIgnoreCase(Geometry.TYPENAME_POINT)
+        || geomType.equalsIgnoreCase(Geometry.TYPENAME_MULTIPOINT)
+        || geomType.equalsIgnoreCase(Geometry.TYPENAME_MULTILINESTRING)) {
+      return baseLength(geometry);
+    } else if (geomType.equalsIgnoreCase(Geometry.TYPENAME_GEOMETRYCOLLECTION)) {
+      double length = 0;
+      for (int i = 0; i < geometry.getNumGeometries(); i++) {
+        length += length(geometry.getGeometryN(i));
+      }
+      return length;
+    } else {
+      return 0;
+    }
+  }
+
+  /**
+   * Base function to calculate the spheroid length/perimeter
+   *
+   * <p>Calculate the length of a geometry using the Spheroid formula. Equivalent to PostGIS
    * ST_LengthSpheroid and PostGIS ST_Length(useSpheroid=true) WGS84 ellipsoid is used.
    *
    * @param geom
    * @return
    */
-  public static double length(Geometry geom) {
+  public static double baseLength(Geometry geom) {
     String geomType = geom.getGeometryType();
-    if (geomType.equals("Polygon") || geomType.equals("LineString")) {
+    if (geomType.equals(Geometry.TYPENAME_LINEARRING)
+        || geomType.equals(Geometry.TYPENAME_LINESTRING)) {
       PolygonArea p = new PolygonArea(Geodesic.WGS84, true);
       Coordinate[] coordinates = geom.getCoordinates();
       for (int i = 0; i < coordinates.length; i++) {
@@ -89,12 +118,23 @@ public class Spheroid {
       }
       PolygonResult compute = p.Compute();
       return compute.perimeter;
-    } else if (geomType.equals("MultiPolygon")
-        || geomType.equals("MultiLineString")
-        || geomType.equals("GeometryCollection")) {
+    } else if (geomType.equals(Geometry.TYPENAME_POLYGON)) {
+      Polygon poly = (Polygon) geom;
+      double length = baseLength(poly.getExteriorRing());
+
+      if (poly.getNumInteriorRing() > 0) {
+        for (int i = 0; i < poly.getNumInteriorRing(); i++) {
+          length += baseLength(poly.getInteriorRingN(i));
+        }
+      }
+
+      return length;
+    } else if (geomType.equals(Geometry.TYPENAME_MULTIPOLYGON)
+        || geomType.equals(Geometry.TYPENAME_MULTILINESTRING)
+        || geomType.equals(Geometry.TYPENAME_GEOMETRYCOLLECTION)) {
       double length = 0.0;
       for (int i = 0; i < geom.getNumGeometries(); i++) {
-        length += length(geom.getGeometryN(i));
+        length += baseLength(geom.getGeometryN(i));
       }
       return length;
     } else {

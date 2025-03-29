@@ -71,6 +71,96 @@ class geojsonIOTests extends TestBaseScala with BeforeAndAfterAll {
       }
     }
 
+    it("GeoJSON Test - Automatically select the top-level geometry column named geometry") {
+      // We have a dataframe containing two geometry columns, named "g" and "geometry".
+      // We want to write this dataframe to a GeoJSON file, and automatically select the "geometry"
+      // column as the geometry column.
+      val df = sparkSession
+        .range(0, 10)
+        .toDF("id")
+        .withColumn("g", expr("ST_MakeLine(ST_Point(id, id), ST_Point(id, id + 1))"))
+        .withColumn("geometry", expr("ST_Point(id, id)"))
+        .withColumn("text", expr("concat('test', id)"))
+      df.write
+        .format("geojson")
+        .mode(SaveMode.Overwrite)
+        .save(geojsonoutputlocation + "/geojson_write.json")
+
+      // Read the GeoJSON back using JSON reader
+      val schema =
+        "type string, geometry string, properties struct<id:int, g: string, text:string>"
+      val dfJson = sparkSession.read
+        .schema(schema)
+        .format("json")
+        .load(geojsonoutputlocation + "/geojson_write.json")
+      dfJson.collect().foreach { row =>
+        assert(row.getAs("geometry").toString.startsWith("{\"type\":\"Point\""))
+        val properties = row.getAs[GenericRowWithSchema]("properties")
+        assert(properties.getAs("text").toString.startsWith("test"))
+        assert(properties.getAs("g").toString.startsWith("LINESTRING"))
+      }
+    }
+
+    it("GeoJSON Test - Automatically select the first top-level geometry column") {
+      // We have a dataframe containing two geometry columns, named "g0" and "g1".
+      // We want to write this dataframe to a GeoJSON file, and automatically select the "g0"
+      // column as the geometry column.
+      val df = sparkSession
+        .range(0, 10)
+        .toDF("id")
+        .withColumn("g0", expr("ST_MakeLine(ST_Point(id, id), ST_Point(id, id + 1))"))
+        .withColumn("g1", expr("ST_Point(id, id)"))
+        .withColumn("text", expr("concat('test', id)"))
+      df.write
+        .format("geojson")
+        .mode(SaveMode.Overwrite)
+        .save(geojsonoutputlocation + "/geojson_write.json")
+
+      // Read the GeoJSON back using JSON reader
+      val schema =
+        "type string, geometry string, properties struct<id:int, g1: string, text:string>"
+      val dfJson = sparkSession.read
+        .schema(schema)
+        .format("json")
+        .load(geojsonoutputlocation + "/geojson_write.json")
+      dfJson.collect().foreach { row =>
+        assert(row.getAs("geometry").toString.startsWith("{\"type\":\"LineString\""))
+        val properties = row.getAs[GenericRowWithSchema]("properties")
+        assert(properties.getAs("text").toString.startsWith("test"))
+        assert(properties.getAs("g1").toString.startsWith("POINT"))
+      }
+    }
+
+    it("GeoJSON Test - Automatically select the top-level geometry column other than geometry") {
+      // We have a dataframe containing two geometry columns, named "g" and "geometry".
+      // We want to write this dataframe to a GeoJSON file, and automatically select the "geometry"
+      // column as the geometry column.
+      val df = sparkSession
+        .range(0, 10)
+        .toDF("id")
+        .withColumn("g", expr("ST_MakeLine(ST_Point(id, id), ST_Point(id, id + 1))"))
+        .withColumn("geometry", expr("concat('g_', id)"))
+        .withColumn("text", expr("concat('test', id)"))
+      df.write
+        .format("geojson")
+        .mode(SaveMode.Overwrite)
+        .save(geojsonoutputlocation + "/geojson_write.json")
+
+      // Read the GeoJSON back using JSON reader
+      val schema =
+        "type string, geometry string, properties struct<id:int, geometry: string, text:string>"
+      val dfJson = sparkSession.read
+        .schema(schema)
+        .format("json")
+        .load(geojsonoutputlocation + "/geojson_write.json")
+      dfJson.collect().foreach { row =>
+        assert(row.getAs("geometry").toString.startsWith("{\"type\":\"LineString\""))
+        val properties = row.getAs[GenericRowWithSchema]("properties")
+        assert(properties.getAs("text").toString.startsWith("test"))
+        assert(properties.getAs("geometry").toString.startsWith("g_"))
+      }
+    }
+
     it("GeoJSON Test - Specifying geometry column other than geometry") {
       val df = sparkSession
         .range(0, 10)
@@ -107,6 +197,33 @@ class geojsonIOTests extends TestBaseScala with BeforeAndAfterAll {
         val properties = row.getAs[GenericRowWithSchema]("properties")
         properties.getAs("text").toString.startsWith("test")
         properties.getAs("geom").toString.startsWith("LINESTRING")
+      }
+    }
+
+    it("GeoJSON Test - Write a dataframe without geometry columns should throw an exception") {
+      // Even though we have a column named "geometry", but it is not a geometry column.
+      val df = sparkSession
+        .range(0, 10)
+        .toDF("id")
+        .withColumn("geometry", expr("concat('g_', id)"))
+        .withColumn("text", expr("concat('test', id)"))
+      assertThrows[IllegalArgumentException] {
+        df.write
+          .format("geojson")
+          .mode(SaveMode.Overwrite)
+          .save(geojsonoutputlocation + "/geojson_write.json")
+      }
+
+      // We have no geometry column, not even a column named "geometry".
+      val df2 = sparkSession
+        .range(0, 10)
+        .toDF("id")
+        .withColumn("text", expr("concat('test', id)"))
+      assertThrows[IllegalArgumentException] {
+        df2.write
+          .format("geojson")
+          .mode(SaveMode.Overwrite)
+          .save(geojsonoutputlocation + "/geojson_write.json")
       }
     }
 

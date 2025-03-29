@@ -1,3 +1,22 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ -->
+
 After the installation done, you can start using Sedona functions. Please log in to Snowflake again using the user that has the privilege to access the database.
 
 !!!note
@@ -283,7 +302,7 @@ Please use the following steps:
 
 ### 1. Generate S2 ids for both tables
 
-Use [ST_S2CellIds](../../api/snowflake/vector-data/Function.md#ST_S2CellIDs) to generate cell IDs. Each geometry may produce one or more IDs.
+Use [ST_S2CellIds](../../api/snowflake/vector-data/Function.md#st_s2cellids) to generate cell IDs. Each geometry may produce one or more IDs.
 
 ```sql
 SELECT * FROM lefts, TABLE(FLATTEN(ST_S2CellIDs(lefts.geom, 15))) s1

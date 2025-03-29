@@ -45,6 +45,22 @@ object st_functions extends DataFrameAPI {
   def ST_AddPoint(lineString: String, point: String, index: Int): Column =
     wrapExpression[ST_AddPoint](lineString, point, index)
 
+  def ST_LabelPoint(geometry: Column): Column =
+    wrapExpression[ST_LabelPoint](geometry)
+  def ST_LabelPoint(geometry: String): Column =
+    wrapExpression[ST_LabelPoint](geometry)
+  def ST_LabelPoint(geometry: Column, gridResolution: Column): Column =
+    wrapExpression[ST_LabelPoint](geometry, gridResolution)
+  def ST_LabelPoint(geometry: String, gridResolution: Integer): Column =
+    wrapExpression[ST_LabelPoint](geometry, gridResolution)
+  def ST_LabelPoint(geometry: Column, gridResolution: Column, goodnessThreshold: Column): Column =
+    wrapExpression[ST_LabelPoint](geometry, gridResolution, goodnessThreshold)
+  def ST_LabelPoint(
+      geometry: String,
+      gridResolution: Integer,
+      goodnessThreshold: Double): Column =
+    wrapExpression[ST_LabelPoint](geometry, gridResolution, goodnessThreshold)
+
   def ST_Area(geometry: Column): Column = wrapExpression[ST_Area](geometry)
   def ST_Area(geometry: String): Column = wrapExpression[ST_Area](geometry)
 
@@ -202,6 +218,9 @@ object st_functions extends DataFrameAPI {
   def ST_Force_2D(geometry: Column): Column = wrapExpression[ST_Force_2D](geometry)
   def ST_Force_2D(geometry: String): Column = wrapExpression[ST_Force_2D](geometry)
 
+  def ST_Force2D(geometry: Column): Column = wrapExpression[ST_Force2D](geometry)
+  def ST_Force2D(geometry: String): Column = wrapExpression[ST_Force2D](geometry)
+
   def ST_GeoHash(geometry: Column, precision: Column): Column =
     wrapExpression[ST_GeoHash](geometry, precision)
   def ST_GeoHash(geometry: String, precision: Int): Column =
@@ -317,6 +336,13 @@ object st_functions extends DataFrameAPI {
   def ST_LineMerge(multiLineString: String): Column =
     wrapExpression[ST_LineMerge](multiLineString)
 
+  def ST_LineSegments(geom: Column): Column = wrapExpression[ST_LineSegments](geom)
+  def ST_LineSegments(geom: String): Column = wrapExpression[ST_LineSegments](geom)
+  def ST_LineSegments(geom: Column, lenient: Column): Column =
+    wrapExpression[ST_LineSegments](geom, lenient)
+  def ST_LineSegments(geom: String, lenient: Boolean): Column =
+    wrapExpression[ST_LineSegments](geom, lenient)
+
   def ST_LineSubstring(lineString: Column, startFraction: Column, endFraction: Column): Column =
     wrapExpression[ST_LineSubstring](lineString, startFraction, endFraction)
   def ST_LineSubstring(lineString: String, startFraction: Double, endFraction: Double): Column =
@@ -357,6 +383,28 @@ object st_functions extends DataFrameAPI {
     wrapExpression[ST_MakeLine](geom1, geom2)
   def ST_MakeLine(geom1: String, geom2: String): Column =
     wrapExpression[ST_MakeLine](geom1, geom2)
+
+  def ST_Perimeter(geom: Column): Column = wrapExpression[ST_Perimeter](geom)
+  def ST_Perimeter(geom: String): Column = wrapExpression[ST_Perimeter](geom)
+  def ST_Perimeter(geom: Column, use_spheroid: Column): Column =
+    wrapExpression[ST_Perimeter](geom, use_spheroid)
+  def ST_Perimeter(geom: String, use_spheroid: Boolean): Column =
+    wrapExpression[ST_Perimeter](geom, use_spheroid)
+  def ST_Perimeter(geom: Column, use_spheroid: Column, lenient: Column): Column =
+    wrapExpression[ST_Perimeter](geom, use_spheroid, lenient)
+  def ST_Perimeter(geom: String, use_spheroid: Boolean, lenient: Boolean): Column =
+    wrapExpression[ST_Perimeter](geom, use_spheroid, lenient)
+
+  def ST_Perimeter2D(geom: Column): Column = wrapExpression[ST_Perimeter2D](geom)
+  def ST_Perimeter2D(geom: String): Column = wrapExpression[ST_Perimeter2D](geom)
+  def ST_Perimeter2D(geom: Column, use_spheroid: Column): Column =
+    wrapExpression[ST_Perimeter2D](geom, use_spheroid)
+  def ST_Perimeter2D(geom: String, use_spheroid: Boolean): Column =
+    wrapExpression[ST_Perimeter2D](geom, use_spheroid)
+  def ST_Perimeter2D(geom: Column, use_spheroid: Column, lenient: Column): Column =
+    wrapExpression[ST_Perimeter2D](geom, use_spheroid, lenient)
+  def ST_Perimeter2D(geom: String, use_spheroid: Boolean, lenient: Boolean): Column =
+    wrapExpression[ST_Perimeter2D](geom, use_spheroid, lenient)
 
   def ST_Points(geom: Column): Column = wrapExpression[ST_Points](geom)
   def ST_Points(geom: String): Column = wrapExpression[ST_Points](geom)
@@ -495,6 +543,23 @@ object st_functions extends DataFrameAPI {
 
   def ST_Reverse(geometry: Column): Column = wrapExpression[ST_Reverse](geometry)
   def ST_Reverse(geometry: String): Column = wrapExpression[ST_Reverse](geometry)
+
+  def ST_Scale(geometry: Column, scaleX: Column, scaleY: Column): Column =
+    wrapExpression[ST_Scale](geometry, scaleX, scaleY)
+  def ST_Scale(geometry: String, scaleX: Double, scaleY: Double): Column =
+    wrapExpression[ST_Scale](geometry, scaleX, scaleY)
+  def ST_Scale(geometry: String, scaleX: String, scaleY: String): Column =
+    wrapExpression[ST_Scale](geometry, scaleX, scaleY)
+
+  def ST_ScaleGeom(geometry: Column, factor: Column): Column =
+    wrapExpression[ST_ScaleGeom](geometry, factor)
+  def ST_ScaleGeom(geometry: String, factor: String): Column =
+    wrapExpression[ST_ScaleGeom](geometry, factor)
+
+  def ST_ScaleGeom(geometry: Column, factor: Column, origin: Column): Column =
+    wrapExpression[ST_ScaleGeom](geometry, factor, origin)
+  def ST_ScaleGeom(geometry: String, factor: String, origin: String): Column =
+    wrapExpression[ST_ScaleGeom](geometry, factor, origin)
 
   def ST_RotateX(geometry: Column, angle: Column): Column =
     wrapExpression[ST_RotateX](geometry, angle)
@@ -909,4 +974,52 @@ object st_functions extends DataFrameAPI {
 
   def ST_IsCollection(geometry: String): Column = wrapExpression[ST_IsCollection](geometry)
 
+  def ST_InterpolatePoint(geom1: Column, geom2: Column): Column =
+    wrapExpression[ST_InterpolatePoint](geom1, geom2)
+
+  def ST_InterpolatePoint(geom1: String, geom2: String): Column =
+    wrapExpression[ST_InterpolatePoint](geom1, geom2)
+
+  def ST_DBSCAN(geom: Column, epsilon: Column, minPoints: Column, useSpheroid: Column): Column =
+    wrapExpression[ST_DBSCAN](geom, epsilon, minPoints, useSpheroid)
+
+  def ST_LocalOutlierFactor(geom: Column, k: Column, useSpheroid: Column): Column =
+    wrapExpression[ST_LocalOutlierFactor](geom, k, useSpheroid)
+
+  def ST_GLocal(x: Column, weights: Column, star: Column): Column =
+    wrapExpression[ST_GLocal](x, weights, star)
+
+  def ST_BinaryDistanceBandColumn(
+      geometry: Column,
+      threshold: Column,
+      includeZeroDistanceNeighbors: Column,
+      includeSelf: Column,
+      useSpheroid: Column,
+      attributes: Column): Column =
+    wrapExpression[ST_BinaryDistanceBandColumn](
+      geometry,
+      threshold,
+      includeZeroDistanceNeighbors,
+      includeSelf,
+      useSpheroid,
+      attributes)
+
+  def ST_WeightedDistanceBandColumn(
+      geometry: Column,
+      threshold: Column,
+      alpha: Column,
+      includeZeroDistanceNeighbors: Column,
+      includeSelf: Column,
+      selfWeight: Column,
+      useSpheroid: Column,
+      attributes: Column): Column =
+    wrapExpression[ST_BinaryDistanceBandColumn](
+      geometry,
+      threshold,
+      alpha,
+      includeZeroDistanceNeighbors,
+      includeSelf,
+      selfWeight,
+      useSpheroid,
+      attributes)
 }

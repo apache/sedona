@@ -1,7 +1,26 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ -->
+
 The page outlines the steps to manage spatial data using SedonaSQL.
 
 !!!note
-    Since v`1.5.0`, Sedona assumes geographic coordinates to be in longitude/latitude order. If your data is lat/lon order, please use `ST_FlipCoordinates` to swap X and Y.
+    Sedona assumes geographic coordinates to be in longitude/latitude order. If your data is lat/lon order, please use `ST_FlipCoordinates` to swap X and Y.
 
 SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of SQL operators as follows. All these operators can be directly called through:
 
@@ -39,13 +58,11 @@ Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.
 === "Python"
 
 	1. Please read [Quick start](../setup/install-python.md) to install Sedona Python.
-	2. This tutorial is based on [Sedona SQL Jupyter Notebook example](jupyter-notebook.md). You can interact with Sedona Python Jupyter notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=docs/usecases) to interact with Sedona Python Jupyter notebook immediately on Binder.
+	2. This tutorial is based on [Sedona SQL Jupyter Notebook example](jupyter-notebook.md).
 
 ## Create Sedona config
 
 Use the following code to create your Sedona config at the beginning. If you already have a SparkSession (usually named `spark`) created by AWS EMR/Databricks/Microsoft Fabric, please ==skip this step==.
-
-==Sedona >= 1.4.1==
 
 You can add additional Spark runtime config to the config builder. For example, `SedonaContext.builder().config("spark.sql.autoBroadcastJoinThreshold", "10485760")`
 
@@ -86,70 +103,15 @@ You can add additional Spark runtime config to the config builder. For example, 
 
 	config = SedonaContext.builder() .\
 	    config('spark.jars.packages',
-	           'org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},'
+	           'org.apache.sedona:sedona-spark-shaded-3.3_2.12:{{ sedona.current_version }},'
 	           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
 	    getOrCreate()
 	```
-    If you are using Spark versions >= 3.4, please replace the `3.0` in package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
-
-==Sedona < 1.4.1==
-
-The following method has been deprecated since Sedona 1.4.1. Please use the method above to create your Sedona config.
-
-=== "Scala"
-
-	```scala
-	var sparkSession = SparkSession.builder()
-	.master("local[*]") // Delete this if run in cluster mode
-	.appName("readTestScala") // Change this to a proper name
-	// Enable Sedona custom Kryo serializer
-	.config("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
-	.config("spark.kryo.registrator", classOf[SedonaKryoRegistrator].getName)
-	.getOrCreate() // org.apache.sedona.core.serde.SedonaKryoRegistrator
-	```
-	If you use SedonaViz together with SedonaSQL, please use the following two lines to enable Sedona Kryo serializer instead:
-	```scala
-	.config("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
-	.config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
-	```
-
-=== "Java"
-
-	```java
-	SparkSession sparkSession = SparkSession.builder()
-	.master("local[*]") // Delete this if run in cluster mode
-	.appName("readTestJava") // Change this to a proper name
-	// Enable Sedona custom Kryo serializer
-	.config("spark.serializer", KryoSerializer.class.getName()) // org.apache.spark.serializer.KryoSerializer
-	.config("spark.kryo.registrator", SedonaKryoRegistrator.class.getName())
-	.getOrCreate() // org.apache.sedona.core.serde.SedonaKryoRegistrator
-	```
-	If you use SedonaViz together with SedonaSQL, please use the following two lines to enable Sedona Kryo serializer instead:
-	```java
-	.config("spark.serializer", KryoSerializer.class.getName()) // org.apache.spark.serializer.KryoSerializer
-	.config("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName()) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
-	```
-
-=== "Python"
-
-	```python
-	sparkSession = SparkSession. \
-	    builder. \
-	    appName('readTestPython'). \
-	    config("spark.serializer", KryoSerializer.getName()). \
-	    config("spark.kryo.registrator", SedonaKryoRegistrator.getName()). \
-	    config('spark.jars.packages',
-	           'org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},'
-	           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
-	    getOrCreate()
-	```
-    If you are using Spark versions >= 3.4, please replace the `3.0` in package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
+    If you are using a different Spark version, please replace the `3.3` in package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
 
 ## Initiate SedonaContext
 
 Add the following line after creating Sedona config. If you already have a SparkSession (usually named `spark`) created by AWS EMR/Databricks/Microsoft Fabric, please call `sedona = SedonaContext.create(spark)` instead. For ==Databricks==, the situation is more complicated, please refer to [Databricks setup guide](../setup/databricks.md), but generally you don't need to create SedonaContext.
-
-==Sedona >= 1.4.1==
 
 === "Scala"
 
@@ -175,33 +137,9 @@ Add the following line after creating Sedona config. If you already have a Spark
 	sedona = SedonaContext.create(config)
 	```
 
-==Sedona < 1.4.1==
-
-The following method has been deprecated since Sedona 1.4.1. Please use the method above to create your SedonaContext.
-
-=== "Scala"
-
-	```scala
-	SedonaSQLRegistrator.registerAll(sparkSession)
-	```
-
-=== "Java"
-
-	```java
-	SedonaSQLRegistrator.registerAll(sparkSession)
-	```
-
-=== "Python"
-
-	```python
-	from sedona.register import SedonaRegistrator
-
-	SedonaRegistrator.registerAll(spark)
-	```
-
 You can also register everything by passing `--conf spark.sql.extensions=org.apache.sedona.sql.SedonaSqlExtensions` to `spark-submit` or `spark-shell`.
 
-## Load data from files
+## Load data from text files
 
 Assume we have a WKT file, namely `usa-county.tsv`, at Path `/Download/usa-county.tsv` as follows:
 
@@ -213,6 +151,8 @@ POLYGON (..., ...)	Lancaster County
 ```
 
 The file may have many other columns.
+
+### Load the raw DataFrame
 
 Use the following code to load the data and create a raw DataFrame:
 
@@ -248,7 +188,7 @@ The output will be like this:
 |POLYGON ((-96.910...| 31|109|00835876|31109|  Lancaster|    Lancaster County| 06| H1|G4020| 339|30700|null|   A|2169240202|22877180|+40.7835474|-096.6886584|
 ```
 
-## Create a Geometry type column
+### Create a Geometry type column
 
 All geometrical operations in SedonaSQL are on Geometry type objects. Therefore, before any kind of queries, you need to create a Geometry type column on a DataFrame.
 
@@ -296,56 +236,6 @@ root
 
 Since `v1.6.1`, Sedona supports reading GeoJSON files using the `geojson` data source. It is designed to handle JSON files that use [GeoJSON format](https://datatracker.ietf.org/doc/html/rfc7946) for their geometries.
 
-This includes SpatioTemporal Asset Catalog (STAC) files, GeoJSON features, GeoJSON feature collections and other variations.
-The key functionality lies in the way 'geometry' fields are processed: these are specifically read as Sedona's `GeometryUDT` type, ensuring integration with Sedona's suite of spatial functions.
-
-### Key features
-
-- Broad Support: The reader and writer are versatile, supporting all GeoJSON-formatted files, including STAC files, feature collections, and more.
-- Geometry Transformation: When reading, fields named 'geometry' are automatically converted from GeoJSON format to Sedona's `GeometryUDT` type and vice versa when writing.
-
-### Load MultiLine GeoJSON FeatureCollection
-
-Suppose we have a GeoJSON FeatureCollection file as follows.
-This entire file is considered as a single GeoJSON FeatureCollection object.
-Multiline format is preferable for scenarios where files need to be human-readable or manually edited.
-
-```json
-{ "type": "FeatureCollection",
-    "features": [
-      { "type": "Feature",
-        "geometry": {"type": "Point", "coordinates": [102.0, 0.5]},
-        "properties": {"prop0": "value0"}
-        },
-      { "type": "Feature",
-        "geometry": {
-          "type": "LineString",
-          "coordinates": [
-            [102.0, 0.0], [103.0, 1.0], [104.0, 0.0], [105.0, 1.0]
-            ]
-          },
-        "properties": {
-          "prop0": "value1",
-          "prop1": 0.0
-          }
-        },
-      { "type": "Feature",
-         "geometry": {
-           "type": "Polygon",
-           "coordinates": [
-             [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0],
-               [100.0, 1.0], [100.0, 0.0] ]
-             ]
-         },
-         "properties": {
-           "prop0": "value2",
-           "prop1": {"this": "that"}
-           }
-         }
-       ]
-}
-```
-
 Set the `multiLine` option to `True` to read multiline GeoJSON files.
 
 === "Python"
@@ -383,81 +273,7 @@ Set the `multiLine` option to `True` to read multiline GeoJSON files.
     df.printSchema();
     ```
 
-The output is as follows:
-
-```
-+--------------------+------+
-|            geometry| prop0|
-+--------------------+------+
-|     POINT (102 0.5)|value0|
-|LINESTRING (102 0...|value1|
-|POLYGON ((100 0, ...|value2|
-+--------------------+------+
-
-root
- |-- geometry: geometry (nullable = false)
- |-- prop0: string (nullable = true)
-
-```
-
-### Load Single Line GeoJSON Features
-
-Suppose we have a single-line GeoJSON Features dataset as follows. Each line is a single GeoJSON Feature.
-This format is efficient for processing large datasets where each line is a separate, self-contained GeoJSON object.
-
-```json
-{"type":"Feature","geometry":{"type":"Point","coordinates":[102.0,0.5]},"properties":{"prop0":"value0"}}
-{"type":"Feature","geometry":{"type":"LineString","coordinates":[[102.0,0.0],[103.0,1.0],[104.0,0.0],[105.0,1.0]]},"properties":{"prop0":"value1"}}
-{"type":"Feature","geometry":{"type":"Polygon","coordinates":[[[100.0,0.0],[101.0,0.0],[101.0,1.0],[100.0,1.0],[100.0,0.0]]]},"properties":{"prop0":"value2"}}
-```
-
-By default, when `option` is not specified, Sedona reads a GeoJSON file as a single line GeoJSON.
-
-=== "Python"
-
-	```python
-	df = sedona.read.format("geojson").load("PATH/TO/MYFILE.json")
-	   .withColumn("prop0", f.expr("properties['prop0']")).drop("properties").drop("type")
-
-	df.show()
-	df.printSchema()
-	```
-
-=== "Scala"
-
-	```scala
-	val df = sedona.read.format("geojson").load("PATH/TO/MYFILE.json")
-	   .withColumn("prop0", expr("properties['prop0']")).drop("properties").drop("type")
-
-	df.show()
-	df.printSchema()
-	```
-
-=== "Java"
-
-	```java
-	Dataset<Row> df = sedona.read.format("geojson").load("PATH/TO/MYFILE.json")
-	   .withColumn("prop0", expr("properties['prop0']")).drop("properties").drop("type")
-
-	df.show()
-	df.printSchema()
-	```
-
-The output is as follows:
-
-```
-+--------------------+------+
-|            geometry| prop0|
-+--------------------+------+
-|     POINT (102 0.5)|value0|
-|LINESTRING (102 0...|value1|
-|POLYGON ((100 0, ...|value2|
-+--------------------+------+
-
-root
- |-- geometry: geometry (nullable = false)
- |-- prop0: string (nullable = true)
-```
+See [this page](files/geojson-sedona-spark.md) for more information on loading GeoJSON files.
 
 ## Load Shapefile
 
@@ -483,72 +299,7 @@ Since v`1.7.0`, Sedona supports loading Shapefile as a DataFrame.
 
 The input path can be a directory containing one or multiple shapefiles, or path to a `.shp` file.
 
-- When the input path is a directory, all shapefiles directly under the directory will be loaded. If you want to load all shapefiles in subdirectories, please specify `.option("recursiveFileLookup", "true")`.
-- When the input path is a `.shp` file, that shapefile will be loaded. Sedona will look for sibling files (`.dbf`, `.shx`, etc.) with the same main file name and load them automatically.
-
-The name of the geometry column is `geometry` by default. You can change the name of the geometry column using the `geometry.name` option. If one of the non-spatial attributes is named "geometry", `geometry.name` must be configured to avoid conflict.
-
-=== "Scala/Java"
-
-    ```scala
-    val df = sedona.read.format("shapefile").option("geometry.name", "geom").load("/path/to/shapefile")
-    ```
-
-=== "Java"
-
-    ```java
-    Dataset<Row> df = sedona.read().format("shapefile").option("geometry.name", "geom").load("/path/to/shapefile")
-    ```
-
-=== "Python"
-
-    ```python
-    df = sedona.read.format("shapefile").option("geometry.name", "geom").load("/path/to/shapefile")
-    ```
-
-Each record in shapefile has a unique record number, that record number is not loaded by default. If you want to include record number in the loaded DataFrame, you can set the `key.name` option to the name of the record number column:
-
-=== "Scala/Java"
-
-    ```scala
-    val df = sedona.read.format("shapefile").option("key.name", "FID").load("/path/to/shapefile")
-    ```
-
-=== "Java"
-
-    ```java
-    Dataset<Row> df = sedona.read().format("shapefile").option("key.name", "FID").load("/path/to/shapefile")
-    ```
-
-=== "Python"
-
-    ```python
-    df = sedona.read.format("shapefile").option("key.name", "FID").load("/path/to/shapefile")
-    ```
-
-The character encoding of string attributes are inferred from the `.cpg` file. If you see garbled values in string fields, you can manually specify the correct charset using the `charset` option. For example:
-
-=== "Scala/Java"
-
-    ```scala
-    val df = sedona.read.format("shapefile").option("charset", "UTF-8").load("/path/to/shapefile")
-    ```
-
-=== "Java"
-
-    ```java
-    Dataset<Row> df = sedona.read().format("shapefile").option("charset", "UTF-8").load("/path/to/shapefile")
-    ```
-
-=== "Python"
-
-    ```python
-    df = sedona.read.format("shapefile").option("charset", "UTF-8").load("/path/to/shapefile")
-    ```
-
-### (Deprecated) Loading Shapefile using SpatialRDD
-
-If you are using Sedona earlier than v`1.7.0`, you can load shapefiles as SpatialRDD and converted to DataFrame using Adapter. Please read [Load SpatialRDD](rdd.md#create-a-generic-spatialrdd) and [DataFrame <-> RDD](#convert-between-dataframe-and-spatialrdd).
+See [this page](files/shapefiles-sedona-spark.md) for more information on loading Shapefiles.
 
 ## Load GeoParquet
 
@@ -596,54 +347,31 @@ Please refer to [Reading Legacy Parquet Files](../api/sql/Reading-legacy-parquet
 	GeoParquet file reader does not work on Databricks runtime when Photon is enabled. Please disable Photon when using
 	GeoParquet file reader on Databricks runtime.
 
-### Inspect GeoParquet metadata
+See [this page](files/geoparquet-sedona-spark.md) for more information on loading GeoParquet.
 
-Since v`1.5.1`, Sedona provides a Spark SQL data source `"geoparquet.metadata"` for inspecting GeoParquet metadata. The resulting dataframe contains
-the "geo" metadata for each input file.
+## Load data from STAC catalog
 
-=== "Scala/Java"
+Sedona STAC data source allows you to read data from a SpatioTemporal Asset Catalog (STAC) API. The data source supports reading STAC items and collections.
 
-	```scala
-	val df = sedona.read.format("geoparquet.metadata").load(geoparquetdatalocation1)
-	df.printSchema()
-	```
+You can load a STAC collection from a s3 collection file object:
 
-=== "Java"
-
-	```java
-	Dataset<Row> df = sedona.read.format("geoparquet.metadata").load(geoparquetdatalocation1)
-	df.printSchema()
-	```
-
-=== "Python"
-
-	```python
-	df = sedona.read.format("geoparquet.metadata").load(geoparquetdatalocation1)
-	df.printSchema()
-	```
-
-The output will be as follows:
-
-```
-root
- |-- path: string (nullable = true)
- |-- version: string (nullable = true)
- |-- primary_column: string (nullable = true)
- |-- columns: map (nullable = true)
- |    |-- key: string
- |    |-- value: struct (valueContainsNull = true)
- |    |    |-- encoding: string (nullable = true)
- |    |    |-- geometry_types: array (nullable = true)
- |    |    |    |-- element: string (containsNull = true)
- |    |    |-- bbox: array (nullable = true)
- |    |    |    |-- element: double (containsNull = true)
- |    |    |-- crs: string (nullable = true)
+```python
+df = sedona.read.format("stac").load(
+    "s3a://example.com/stac_bucket/stac_collection.json"
+)
 ```
 
-If the input Parquet file does not have GeoParquet metadata, the values of `version`, `primary_column` and `columns` fields of the resulting dataframe will be `null`.
+You can also load a STAC collection from an HTTP/HTTPS endpoint:
 
-!!! note
-	`geoparquet.metadata` only supports reading GeoParquet specific metadata. Users can use [G-Research/spark-extension](https://github.com/G-Research/spark-extension/blob/13109b8e43dfba9272c85896ba5e30cfe280426f/PARQUET.md) to read comprehensive metadata of generic Parquet files.
+```python
+df = sedona.read.format("stac").load(
+    "https://earth-search.aws.element84.com/v1/collections/sentinel-2-pre-c1-l2a"
+)
+```
+
+The STAC data source supports predicate pushdown for spatial and temporal filters. The data source can push down spatial and temporal filters to the underlying data source to reduce the amount of data that needs to be read.
+
+See [this page](files/stac-sedona-spark.md) for more information on loading data from STAC.
 
 ## Load data from JDBC data sources
 
@@ -705,6 +433,126 @@ For Postgis there is no need to add a query to convert geometry types since it's
 		.withColumn("geom", f.expr("ST_GeomFromWKB(geom)")))
 	```
 
+## Load GeoPackage
+
+Since v1.7.0, Sedona supports loading Geopackage file format as a DataFrame.
+
+=== "Scala/Java"
+
+	```scala
+	val df = sedona.read.format("geopackage").option("tableName", "tab").load("/path/to/geopackage")
+	```
+
+=== "Java"
+
+	```java
+	Dataset<Row> df = sedona.read().format("geopackage").option("tableName", "tab").load("/path/to/geopackage")
+	```
+
+=== "Python"
+
+	```python
+	df = sedona.read.format("geopackage").option("tableName", "tab").load("/path/to/geopackage")
+	```
+
+See [this page](files/geopackage-sedona-spark.md) for more information on loading GeoPackage.
+
+## Load OSM PBF
+
+Since v1.7.1, Sedona supports loading OSM PBF file format as a DataFrame.
+
+=== "Scala/Java"
+
+	```scala
+	val df = sedona.read.format("osmpbf").load("/path/to/osmpbf")
+	```
+
+=== "Java"
+
+	```java
+	Dataset<Row> df = sedona.read().format("osmpbf").load("/path/to/osmpbf")
+	```
+
+=== "Python"
+
+	```python
+	df = sedona.read.format("osmpbf").load("/path/to/osmpbf")
+	```
+
+OSM PBF files can contain nodes, ways, and relations. Currently Sedona support
+DenseNodes, Ways and Relations. When you load the data you get a DataFrame with the following schema.
+
+```
+root
+ |-- id: long (nullable = true)
+ |-- kind: string (nullable = true)
+ |-- location: struct (nullable = true)
+ |    |-- longitude: double (nullable = true)
+ |    |-- latitude: double (nullable = true)
+ |-- tags: map (nullable = true)
+ |    |-- key: string
+ |    |-- value: string (valueContainsNull = true)
+ |-- refs: array (nullable = true)
+ |    |-- element: long (containsNull = true)
+ |-- ref_roles: array (nullable = true)
+ |    |-- element: string (containsNull = true)
+ |-- ref_types: array (nullable = true)
+ |    |-- element: string (containsNull = true)
+```
+
+Where:
+
+- `id` is the unique identifier of the object.
+- `kind` is the type of the object, it can be `node`, `way` or `relation`.
+- `location` is the location of the object, it contains the `longitude` and `latitude` of the object.
+- `tags` is a map of key-value pairs that represent the tags of the object.
+- `refs` is an array of the references of the object.
+- `ref_roles` is an array of the roles of the references.
+- `ref_types` is an array of the types of the references.
+
+The dataframe for ways might look like this for nodes:
+
+```
++---------+----+--------------------+--------------------+----+---------+---------+
+|       id|kind|            location|                tags|refs|ref_roles|ref_types|
++---------+----+--------------------+--------------------+----+---------+---------+
+|248675410|node|{21.0884952545166...|{tactile_paving -...|NULL|     NULL|     NULL|
+|260821820|node|{21.0191555023193...|{created_by -> JOSM}|NULL|     NULL|     NULL|
+|349189665|node|{22.1437530517578...|{source -> http:/...|NULL|     NULL|     NULL|
+|353366899|node|{22.9787712097167...|{source -> http:/...|NULL|     NULL|     NULL|
+|359460224|node|{22.4816703796386...|{source -> http:/...|NULL|     NULL|     NULL|
++---------+----+--------------------+--------------------+----+---------+---------+
+only showing top 5 rows
+```
+
+and for way
+
+```
++-------+----+--------+--------------------+--------------------+---------+---------+
+|     id|kind|location|                tags|                refs|ref_roles|ref_types|
++-------+----+--------+--------------------+--------------------+---------+---------+
+|4307329| way|    NULL|{junction -> roun...|[2448759046, 7093...|     NULL|     NULL|
+|4307330| way|    NULL|{surface -> aspha...|[26063923, 260639...|     NULL|     NULL|
+|4308966| way|    NULL|{sidewalk -> sepa...|[3387797238, 9252...|     NULL|     NULL|
+|4308968| way|    NULL|{surface -> pavin...|[26083890, 744724...|     NULL|     NULL|
+|4308969| way|    NULL|{cycleway:both ->...|[9526831176, 1218...|     NULL|     NULL|
++-------+----+--------+--------------------+--------------------+---------+---------+
+```
+
+and for relation
+
+```
++-----+--------+--------+--------------------+--------------------+--------------------+--------------------+
+|   id|    kind|location|                tags|                refs|           ref_roles|           ref_types|
++-----+--------+--------+--------------------+--------------------+--------------------+--------------------+
+|28124|relation|    NULL|{official_name ->...|[26382394, 26259985]|      [inner, outer]|          [WAY, WAY]|
+|28488|relation|    NULL|  {type -> junction}|[26409253, 303249...|[roundabout, roun...|[WAY, WAY, WAY, WAY]|
+|32939|relation|    NULL|{ref -> E 67, rou...|[140673970, 14067...|        [, , , , , ]|[WAY, WAY, RELATI...|
+|34387|relation|    NULL|{note -> rząd III...|[209161000, 52154...|[main_stream, mai...|[WAY, WAY, WAY, W...|
+|34392|relation|    NULL|{distance -> 1047...|[150033976, 25076...|[main_stream, mai...|[WAY, WAY, WAY, W...|
++-----+--------+--------+--------------------+--------------------+--------------------+--------------------+
+```
+
 ## Transform the Coordinate Reference System
 
 Sedona doesn't control the coordinate unit (degree-based or meter-based) of all geometries in a Geometry column. The unit of all related distances in SedonaSQL is same as the unit of all geometries in a Geometry column.
@@ -750,7 +598,7 @@ The first parameter is the dataframe, the next two are the epsilon and min_point
 === "Scala"
 
 	```scala
-	import org.apache.sedona.stats.DBSCAN.dbscan
+	import org.apache.sedona.stats.clustering.DBSCAN.dbscan
 
 	dbscan(df, 0.1, 5).show()
 	```
@@ -758,7 +606,7 @@ The first parameter is the dataframe, the next two are the epsilon and min_point
 === "Java"
 
 	```java
-	import org.apache.sedona.stats.DBSCAN;
+	import org.apache.sedona.stats.clustering.DBSCAN;
 
 	DBSCAN.dbscan(df, 0.1, 5).show();
 	```
@@ -766,7 +614,7 @@ The first parameter is the dataframe, the next two are the epsilon and min_point
 === "Python"
 
 	```python
-	from sedona.stats.dbscan import dbscan
+	from sedona.stats.clustering.dbscan import dbscan
 
 	dbscan(df, 0.1, 5).show()
 	```
@@ -792,6 +640,132 @@ The output will look like this:
 |     POINT (4 3)| 13| false|     -1|
 +----------------+---+------+-------+
 ```
+
+See [this page](concepts/clustering-algorithms.md) for more information on the DBSCAN algorithm.
+
+## Calculate the Local Outlier Factor (LOF)
+
+Sedona provides an implementation of the [Local Outlier Factor](https://en.wikipedia.org/wiki/Local_outlier_factor) algorithm to identify anomalous data.
+
+The algorithm is available as a Scala and Python function called on a spatial dataframe. The returned dataframe has an additional column added containing the local outlier factor.
+
+The first parameter is the dataframe, the next is the number of nearest neighbors to consider use in calculating the score.
+
+=== "Scala"
+
+	```scala
+	import org.apache.sedona.stats.outlierDetection.LocalOutlierFactor.localOutlierFactor
+
+    localOutlierFactor(df, 20).show()
+	```
+
+=== "Java"
+
+	```java
+	import org.apache.sedona.stats.outlierDetection.LocalOutlierFactor;
+
+	LocalOutlierFactor.localOutlierFactor(df, 20).show();
+	```
+
+=== "Python"
+
+	```python
+	from sedona.stats.outlier_detection.local_outlier_factor import local_outlier_factor
+
+	local_outlier_factor(df, 20).show()
+	```
+
+The output will look like this:
+
+```
++--------------------+------------------+
+|            geometry|               lof|
++--------------------+------------------+
+|POINT (-2.0231305...| 0.952098153363662|
+|POINT (-2.0346944...|0.9975325496668104|
+|POINT (-2.2040074...|1.0825843906411081|
+|POINT (1.61573501...|1.7367129352162634|
+|POINT (-2.1176324...|1.5714144683150393|
+|POINT (-2.2349759...|0.9167275845938276|
+|POINT (1.65470192...| 1.046231536764447|
+|POINT (0.62624112...|1.1988700676990034|
+|POINT (2.01746261...|1.1060219481067417|
+|POINT (-2.0483857...|1.0775553430145446|
+|POINT (2.43969463...|1.1129132178576646|
+|POINT (-2.2425480...| 1.104108012697006|
+|POINT (-2.7859235...|  2.86371824574529|
+|POINT (-1.9738858...|1.0398822680356794|
+|POINT (2.00153403...| 0.927409656346015|
+|POINT (2.06422812...|0.9222203762264445|
+|POINT (-1.7533819...|1.0273650471626696|
+|POINT (-2.2030766...| 0.964744555830738|
+|POINT (-1.8509857...|1.0375927869698574|
+|POINT (2.10849080...|1.0753419197322656|
++--------------------+------------------+
+```
+
+## Perform Getis-Ord Gi(*) Hot Spot Analysis
+
+Sedona provides an implementation of the [Gi and Gi*](https://en.wikipedia.org/wiki/Getis%E2%80%93Ord_statistics) algorithms to identify local hotspots in spatial data
+
+The algorithm is available as a Scala and Python function called on a spatial dataframe. The returned dataframe has additional columns added containing G statistic, E[G], V[G], the Z score, and the p-value.
+
+Using Gi involves first generating the neighbors list for each record, then calling the g_local function.
+=== "Scala"
+
+	```scala
+	import org.apache.sedona.stats.Weighting.addBinaryDistanceBandColumn
+	import org.apache.sedona.stats.hotspotDetection.GetisOrd.gLocal
+
+	val distanceRadius = 1.0
+	val weightedDf = addBinaryDistanceBandColumn(df, distanceRadius)
+    gLocal(weightedDf, "val").show()
+	```
+
+=== "Java"
+
+	```java
+	import org.apache.sedona.stats.Weighting;
+	import org.apache.sedona.stats.hotspotDetection.GetisOrd;
+	import org.apache.spark.sql.DataFrame;
+
+	double distanceRadius = 1.0;
+	DataFrame weightedDf = Weighting.addBinaryDistanceBandColumn(df, distanceRadius);
+	GetisOrd.gLocal(weightedDf, "val").show();
+	```
+
+=== "Python"
+
+	```python
+	from sedona.stats.weighting import add_binary_distance_band_column
+	from sedona.stats.hotspot_detection.getis_ord import g_local
+
+	distance_radius = 1.0
+	weighted_df = addBinaryDistanceBandColumn(df, distance_radius)
+    g_local(weightedDf, "val").show()
+	```
+
+The output will look like this:
+
+<pre>
+<code>
++-----------+---+--------------------+-------------------+-------------------+--------------------+--------------------+--------------------+
+|   geometry|val|             weights|                  G|                 EG|                  VG|                   Z|                   P|
++-----------+---+--------------------+-------------------+-------------------+--------------------+--------------------+--------------------+
+|POINT (2 2)|0.9|[&#123;&#123;POINT (2 3), 1...| 0.4488188976377953|0.45454545454545453| 0.00356321373799772|-0.09593402008347063|  0.4617864875295957|
+|POINT (2 3)|1.2|[&#123;&#123;POINT (2 2), 0...|0.35433070866141736|0.36363636363636365|0.003325666155464539|-0.16136436037034918|  0.4359032175415549|
+|POINT (3 3)|1.2|[&#123;&#123;POINT (2 3), 1...|0.28346456692913385| 0.2727272727272727|0.002850570990398176| 0.20110780337013057| 0.42030714022155924|
+|POINT (3 2)|1.2|[&#123;&#123;POINT (2 2), 0...| 0.4488188976377953|0.45454545454545453| 0.00356321373799772|-0.09593402008347063|  0.4617864875295957|
+|POINT (3 1)|1.2|[&#123;&#123;POINT (3 2), 3...| 0.3622047244094489| 0.2727272727272727|0.002850570990398176|  1.6758983614177538| 0.04687905137429871|
+|POINT (2 1)|2.2|[&#123;&#123;POINT (2 2), 0...| 0.4330708661417323|0.36363636363636365|0.003325666155464539|  1.2040263812249166| 0.11428969105925013|
+|POINT (1 1)|1.2|[&#123;&#123;POINT (2 1), 5...| 0.2834645669291339| 0.2727272727272727|0.002850570990398176|  0.2011078033701316|  0.4203071402215588|
+|POINT (1 2)|0.2|[&#123;&#123;POINT (2 2), 0...|0.35433070866141736|0.45454545454545453| 0.00356321373799772|   -1.67884535146075|0.046591093685710794|
+|POINT (1 3)|1.2|[&#123;&#123;POINT (2 3), 1...| 0.2047244094488189| 0.2727272727272727|0.002850570990398176| -1.2736827546774914| 0.10138793530151635|
+|POINT (0 2)|1.0|[&#123;&#123;POINT (1 2), 7...|0.09448818897637795|0.18181818181818182|0.002137928242798632| -1.8887168824332323|0.029464887612748458|
+|POINT (4 2)|1.2|[&#123;&#123;POINT (3 2), 3...| 0.1889763779527559|0.18181818181818182|0.002137928242798632| 0.15481285921583854| 0.43848442662481324|
++-----------+---+--------------------+-------------------+-------------------+--------------------+--------------------+--------------------+
+</code>
+</pre>
 
 ## Run spatial queries
 
@@ -856,7 +830,7 @@ SedonaPyDeck exposes APIs to create interactive map visualizations using [pydeck
 !!!Note
 	To use SedonaPyDeck, install sedona with the `pydeck-map` extra:
 	```
-	pip install sedona[pydeck-map]
+	pip install apache-sedona[pydeck-map]
 	```
 
 The following tutorial showcases the various maps that can be created using SedonaPyDeck, the datasets used to create these maps are publicly available.
@@ -867,7 +841,7 @@ Each API exposed by SedonaPyDeck offers customization via optional arguments, de
 
 SedonaPyDeck exposes a `create_choropleth_map` API which can be used to visualize a choropleth map out of the passed SedonaDataFrame containing polygons with an observation:
 
-Example (referenced from example notebook available via binder):
+Example:
 
 ```python
 SedonaPyDeck.create_choropleth_map(df=groupedresult, plot_col='AirportCount')
@@ -878,14 +852,14 @@ SedonaPyDeck.create_choropleth_map(df=groupedresult, plot_col='AirportCount')
 
 ![Creating a Choropleth map using SedonaPyDeck](../image/choropleth.gif)
 
-The dataset used is available [here](https://github.com/apache/sedona/tree/4c5fa8333b2c61850d5664b878df9493c7915066/binder/data/ne_50m_airports) and
-can also be found in the example notebook available [here](https://github.com/apache/sedona/blob/4c5fa8333b2c61850d5664b878df9493c7915066/binder/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb)
+The dataset used is available [here](https://github.com/apache/sedona/tree/b66e768155866a38ba2e3404f1151cac14fad5ea/docs/usecases/data/ne_50m_airports) and
+can also be found in the example notebook available [here](https://github.com/apache/sedona/blob/master/docs/usecases/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb)
 
 #### Creating a Geometry map using SedonaPyDeck
 
 SedonaPyDeck exposes a create_geometry_map API which can be used to visualize a passed SedonaDataFrame containing any type of geometries:
 
-Example (referenced from overture notebook available via binder):
+Example:
 
 ```python
 SedonaPyDeck.create_geometry_map(df_building, elevation_col='height')
@@ -933,7 +907,7 @@ SedonaKepler exposes APIs to create interactive and customizable map visualizati
 !!!Note
 	To use SedonaKepler, install sedona with the `kepler-map` extra:
 	```
-	pip install sedona[kepler-map]
+	pip install apache-sedona[kepler-map]
 	```
 
 This tutorial showcases how simple it is to instantly visualize geospatial data using SedonaKepler.
@@ -946,8 +920,8 @@ SedonaKepler.create_map(df=groupedresult, name="AirportCount")
 
 ![Visualize geospatial data using SedonaKepler](../image/sedona_customization.gif)
 
-The dataset used is available [here](https://github.com/apache/sedona/tree/4c5fa8333b2c61850d5664b878df9493c7915066/binder/data/ne_50m_airports) and
-can also be found in the example notebook available [here](https://github.com/apache/sedona/blob/4c5fa8333b2c61850d5664b878df9493c7915066/binder/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb)
+The dataset used is available [here](https://github.com/apache/sedona/tree/b66e768155866a38ba2e3404f1151cac14fad5ea/docs/usecases/data/ne_50m_airports) and
+can also be found in the example notebook available [here](https://github.com/apache/sedona/blob/master/docs/usecases/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb)
 
 Details on all the APIs available by SedonaKepler are listed in the [SedonaKepler API docs](../api/sql/Visualization_SedonaKepler.md)
 
@@ -1232,7 +1206,7 @@ SELECT ST_AsText(countyshape)
 FROM polygondf
 ```
 
-## Save as GeoJSON
+## Save GeoJSON
 
 Since `v1.6.1`, the GeoJSON data source in Sedona can be used to save a Spatial DataFrame to a single-line JSON file, with geometries written in GeoJSON format.
 
@@ -1240,13 +1214,7 @@ Since `v1.6.1`, the GeoJSON data source in Sedona can be used to save a Spatial 
 df.write.format("geojson").save("YOUR/PATH.json")
 ```
 
-The structure of the generated file will be like this:
-
-```json
-{"type":"Feature","geometry":{"type":"Point","coordinates":[102.0,0.5]},"properties":{"prop0":"value0"}}
-{"type":"Feature","geometry":{"type":"LineString","coordinates":[[102.0,0.0],[103.0,1.0],[104.0,0.0],[105.0,1.0]]},"properties":{"prop0":"value1"}}
-{"type":"Feature","geometry":{"type":"Polygon","coordinates":[[[100.0,0.0],[101.0,0.0],[101.0,1.0],[100.0,1.0],[100.0,0.0]]]},"properties":{"prop0":"value2"}}
-```
+See [this page](files/geojson-sedona-spark.md) for more information on writing to GeoJSON.
 
 ## Save GeoParquet
 
@@ -1256,77 +1224,7 @@ Since v`1.3.0`, Sedona natively supports writing GeoParquet file. GeoParquet can
 df.write.format("geoparquet").save(geoparquetoutputlocation + "/GeoParquet_File_Name.parquet")
 ```
 
-### CRS Metadata
-
-Since v`1.5.1`, Sedona supports writing GeoParquet files with custom GeoParquet spec version and crs.
-The default GeoParquet spec version is `1.0.0` and the default crs is `null`. You can specify the GeoParquet spec version and crs as follows:
-
-```scala
-val projjson = "{...}" // PROJJSON string for all geometry columns
-df.write.format("geoparquet")
-		.option("geoparquet.version", "1.0.0")
-		.option("geoparquet.crs", projjson)
-		.save(geoparquetoutputlocation + "/GeoParquet_File_Name.parquet")
-```
-
-If you have multiple geometry columns written to the GeoParquet file, you can specify the CRS for each column.
-For example, `g0` and `g1` are two geometry columns in the DataFrame `df`, and you want to specify the CRS for each column as follows:
-
-```scala
-val projjson_g0 = "{...}" // PROJJSON string for g0
-val projjson_g1 = "{...}" // PROJJSON string for g1
-df.write.format("geoparquet")
-		.option("geoparquet.version", "1.0.0")
-		.option("geoparquet.crs.g0", projjson_g0)
-		.option("geoparquet.crs.g1", projjson_g1)
-		.save(geoparquetoutputlocation + "/GeoParquet_File_Name.parquet")
-```
-
-The value of `geoparquet.crs` and `geoparquet.crs.<column_name>` can be one of the following:
-
-- `"null"`: Explicitly setting `crs` field to `null`. This is the default behavior.
-- `""` (empty string): Omit the `crs` field. This implies that the CRS is [OGC:CRS84](https://www.opengis.net/def/crs/OGC/1.3/CRS84) for CRS-aware implementations.
-- `"{...}"` (PROJJSON string): The `crs` field will be set as the PROJJSON object representing the Coordinate Reference System (CRS) of the geometry. You can find the PROJJSON string of a specific CRS from here: https://epsg.io/ (click the JSON option at the bottom of the page). You can also customize your PROJJSON string as needed.
-
-Please note that Sedona currently cannot set/get a projjson string to/from a CRS. Its geoparquet reader will ignore the projjson metadata and you will have to set your CRS via [`ST_SetSRID`](../api/sql/Function.md#st_setsrid) after reading the file.
-Its geoparquet writer will not leverage the SRID field of a geometry so you will have to always set the `geoparquet.crs` option manually when writing the file, if you want to write a meaningful CRS field.
-
-Due to the same reason, Sedona geoparquet reader and writer do NOT check the axis order (lon/lat or lat/lon) and assume they are handled by the users themselves when writing / reading the files. You can always use [`ST_FlipCoordinates`](../api/sql/Function.md#st_flipcoordinates) to swap the axis order of your geometries.
-
-### Covering Metadata
-
-Since `v1.6.1`, Sedona supports writing the [`covering` field](https://github.com/opengeospatial/geoparquet/blob/v1.1.0/format-specs/geoparquet.md#covering) to geometry column metadata. The `covering` field specifies a bounding box column to help accelerate spatial data retrieval. The bounding box column should be a top-level struct column containing `xmin`, `ymin`, `xmax`, `ymax` columns. If the DataFrame you are writing contains such columns, you can specify `.option("geoparquet.covering.<geometryColumnName>", "<coveringColumnName>")` option to write `covering` metadata to GeoParquet files:
-
-```scala
-df.write.format("geoparquet")
-		.option("geoparquet.covering.geometry", "bbox")
-		.save("/path/to/saved_geoparquet.parquet")
-```
-
-If the DataFrame has only one geometry column, you can simply specify the `geoparquet.covering` option and omit the geometry column name:
-
-```scala
-df.write.format("geoparquet")
-		.option("geoparquet.covering", "bbox")
-		.save("/path/to/saved_geoparquet.parquet")
-```
-
-If the DataFrame does not have a covering column, you can construct one using Sedona's SQL functions:
-
-```scala
-val df_bbox = df.withColumn("bbox", expr("struct(ST_XMin(geometry) AS xmin, ST_YMin(geometry) AS ymin, ST_XMax(geometry) AS xmax, ST_YMax(geometry) AS ymax)"))
-df_bbox.write.format("geoparquet").option("geoparquet.covering.geometry", "bbox").save("/path/to/saved_geoparquet.parquet")
-```
-
-## Sort then Save GeoParquet
-
-To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see [ST_GeoHash](../api/sql/Function.md#st_geohash)) and then save as a GeoParquet file. An example is as follows:
-
-```
-SELECT col1, col2, geom, ST_GeoHash(geom, 5) as geohash
-FROM spatialDf
-ORDER BY geohash
-```
+See [this page](files/geoparquet-sedona-spark.md) for more information on writing to GeoParquet.
 
 ## Save to Postgis
 
@@ -1357,32 +1255,29 @@ my_postgis_db# alter table my_table alter column geom type geometry;
 
 ### DataFrame to SpatialRDD
 
-Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Please read [Adapter Scaladoc](../api/scaladoc/spark/org/apache/sedona/sql/utils/index.html)
+Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD.
 
 === "Scala"
 
 	```scala
-	var spatialRDD = Adapter.toSpatialRdd(spatialDf, "usacounty")
+	var spatialRDD = StructuredAdapter.toSpatialRdd(spatialDf, "usacounty")
 	```
 
 === "Java"
 
 	```java
-	SpatialRDD spatialRDD = Adapter.toSpatialRdd(spatialDf, "usacounty")
+	SpatialRDD spatialRDD = StructuredAdapter.toSpatialRdd(spatialDf, "usacounty")
 	```
 
 === "Python"
 
 	```python
-	from sedona.utils.adapter import Adapter
+	from sedona.utils.structured_adapter import StructuredAdapter
 
-	spatialRDD = Adapter.toSpatialRdd(spatialDf, "usacounty")
+	spatialRDD = StructuredAdapter.toSpatialRdd(spatialDf, "usacounty")
 	```
 
-"usacounty" is the name of the geometry column
-
-!!!warning
-	Only one Geometry type column is allowed per DataFrame.
+"usacounty" is the name of the geometry column. It is an optional parameter. If you don't provide it, the first geometry column will be used.
 
 ### SpatialRDD to DataFrame
 
@@ -1391,109 +1286,81 @@ Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Ple
 === "Scala"
 
 	```scala
-	var spatialDf = Adapter.toDf(spatialRDD, sedona)
+	var spatialDf = StructuredAdapter.toDf(spatialRDD, sedona)
 	```
 
 === "Java"
 
 	```java
-	Dataset<Row> spatialDf = Adapter.toDf(spatialRDD, sedona)
+	Dataset<Row> spatialDf = StructuredAdapter.toDf(spatialRDD, sedona)
 	```
 
 === "Python"
 
 	```python
-	from sedona.utils.adapter import Adapter
+	from sedona.utils.adapter import StructuredAdapter
 
-	spatialDf = Adapter.toDf(spatialRDD, sedona)
+	spatialDf = StructuredAdapter.toDf(spatialRDD, sedona)
 	```
 
-All other attributes such as price and age will be also brought to the DataFrame as long as you specify ==carryOtherAttributes== (see [Read other attributes in an SpatialRDD](rdd.md#read-other-attributes-in-an-spatialrdd)).
+### SpatialRDD to DataFrame with spatial partitioning
 
-You may also manually specify a schema for the resulting DataFrame in case you require different column names or data
-types. Note that string schemas and not all data types are supported&mdash;please check the
-[Adapter Scaladoc](../api/javadoc/sql/org/apache/sedona/sql/utils/index.html) to confirm what is supported for your use
-case. At least one column for the user data must be provided.
+By default, `StructuredAdapter.toDf()` does not preserve spatial partitions because doing so
+may introduce duplicate features for most types of spatial data. These duplicates
+are introduced on purpose to ensure correctness when performing a spatial join;
+however, when using Sedona to prepare a dataset for distribution this is not typically
+desired.
+
+You can use `StructuredAdapter` and the `spatialRDD.spatialPartitioningWithoutDuplicates` function to obtain a Sedona DataFrame that is spatially partitioned without duplicates. This is especially useful for generating balanced GeoParquet files while preserving spatial proximity within files, which is crucial for optimizing filter pushdown performance in GeoParquet files.
 
 === "Scala"
 
 	```scala
-	val schema = StructType(Array(
-	  StructField("county", GeometryUDT, nullable = true),
-	  StructField("name", StringType, nullable = true),
-	  StructField("price", DoubleType, nullable = true),
-	  StructField("age", IntegerType, nullable = true)
-	))
-	val spatialDf = Adapter.toDf(spatialRDD, schema, sedona)
+	spatialRDD.spatialPartitioningWithoutDuplicates(GridType.KDBTREE)
+	// Specify the desired number of partitions as 10, though the actual number may vary
+	// spatialRDD.spatialPartitioningWithoutDuplicates(GridType.KDBTREE, 10)
+	var spatialDf = StructuredAdapter.toSpatialPartitionedDf(spatialRDD, sedona)
+	```
+
+=== "Java"
+
+	```java
+	spatialRDD.spatialPartitioningWithoutDuplicates(GridType.KDBTREE)
+	// Specify the desired number of partitions as 10, though the actual number may vary
+	// spatialRDD.spatialPartitioningWithoutDuplicates(GridType.KDBTREE, 10)
+	Dataset<Row> spatialDf = StructuredAdapter.toSpatialPartitionedDf(spatialRDD, sedona)
+	```
+
+=== "Python"
+
+	```python
+	from sedona.utils.structured_adapter import StructuredAdapter
+
+	spatialRDD.spatialPartitioningWithoutDuplicates(GridType.KDBTREE)
+	# Specify the desired number of partitions as 10, though the actual number may vary
+	# spatialRDD.spatialPartitioningWithoutDuplicates(GridType.KDBTREE, 10)
+	spatialDf = StructuredAdapter.toSpatialPartitionedDf(spatialRDD, sedona)
 	```
 
 ### SpatialPairRDD to DataFrame
 
-PairRDD is the result of a spatial join query or distance join query. SedonaSQL DataFrame-RDD Adapter can convert the result to a DataFrame. But you need to provide the name of other attributes.
+PairRDD is the result of a spatial join query or distance join query. SedonaSQL DataFrame-RDD Adapter can convert the result to a DataFrame. But you need to provide the schema of the left and right RDDs.
 
 === "Scala"
 
 	```scala
-	var joinResultDf = Adapter.toDf(joinResultPairRDD, Seq("left_attribute1", "left_attribute2"), Seq("right_attribute1", "right_attribute2"), sedona)
+	var joinResultDf = StructuredAdapter.toDf(joinResultPairRDD, leftDf.schema, rightDf.schema, sedona)
 	```
 
 === "Java"
 
 	```java
-	import scala.collection.JavaConverters;
-
-	List leftFields = new ArrayList<>(Arrays.asList("c1", "c2", "c3"));
-	List rightFields = new ArrayList<>(Arrays.asList("c4", "c5", "c6"));
-	Dataset joinResultDf = Adapter.toDf(joinResultPairRDD, JavaConverters.asScalaBuffer(leftFields).toSeq(), JavaConverters.asScalaBuffer(rightFields).toSeq(), sedona);
-	```
-
-=== "Python"
-
-	```python
-	from sedona.utils.adapter import Adapter
-
-	joinResultDf = Adapter.toDf(jvm_sedona_rdd, ["poi_from_id", "poi_from_name"], ["poi_to_id", "poi_to_name"], spark))
-	```
-or you can use the attribute names directly from the input RDD
-
-=== "Scala"
-
-	```scala
-	import scala.collection.JavaConversions._
-	var joinResultDf = Adapter.toDf(joinResultPairRDD, leftRdd.fieldNames, rightRdd.fieldNames, sedona)
-	```
-
-=== "Java"
-
-	```java
-	import scala.collection.JavaConverters;
-	Dataset joinResultDf = Adapter.toDf(joinResultPairRDD, JavaConverters.asScalaBuffer(leftRdd.fieldNames).toSeq(), JavaConverters.asScalaBuffer(rightRdd.fieldNames).toSeq(), sedona);
+	Dataset joinResultDf = StructuredAdapter.toDf(joinResultPairRDD, leftDf.schema, rightDf.schema, sedona);
 	```
 === "Python"
 
 	```python
-	from sedona.utils.adapter import Adapter
+	from sedona.utils.adapter import StructuredAdapter
 
-	joinResultDf = Adapter.toDf(result_pair_rdd, leftRdd.fieldNames, rightRdd.fieldNames, spark)
-	```
-
-All other attributes such as price and age will be also brought to the DataFrame as long as you specify ==carryOtherAttributes== (see [Read other attributes in an SpatialRDD](rdd.md#read-other-attributes-in-an-spatialrdd)).
-
-You may also manually specify a schema for the resulting DataFrame in case you require different column names or data
-types. Note that string schemas and not all data types are supported&mdash;please check the
-[Adapter Scaladoc](../api/javadoc/sql/org/apache/sedona/sql/utils/index.html) to confirm what is supported for your use
-case. Columns for the left and right user data must be provided.
-
-=== "Scala"
-
-	```scala
-	val schema = StructType(Array(
-	  StructField("leftGeometry", GeometryUDT, nullable = true),
-	  StructField("name", StringType, nullable = true),
-	  StructField("price", DoubleType, nullable = true),
-	  StructField("age", IntegerType, nullable = true),
-	  StructField("rightGeometry", GeometryUDT, nullable = true),
-	  StructField("category", StringType, nullable = true)
-	))
-	val joinResultDf = Adapter.toDf(joinResultPairRDD, schema, sedona)
+	joinResultDf = StructuredAdapter.pairRddToDf(result_pair_rdd, leftDf.schema, rightDf.schema, spark)
 	```

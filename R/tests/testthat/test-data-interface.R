@@ -1,19 +1,19 @@
-#  Licensed to the Apache Software Foundation (ASF) under one
-#  or more contributor license agreements.  See the NOTICE file
-#  distributed with this work for additional information
-#  regarding copyright ownership.  The ASF licenses this file
-#  to you under the Apache License, Version 2.0 (the
-#  "License"); you may not use this file except in compliance
-#  with the License.  You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
-#  Unless required by applicable law or agreed to in writing,
-#  software distributed under the License is distributed on an
-#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-#  KIND, either express or implied.  See the License for the
-#  specific language governing permissions and limitations
-#  under the License.
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 
 context("data interface")
 
@@ -297,8 +297,9 @@ test_that("sedona_read_shapefile() works as expected", {
 
 test_that("spark_read_geoparquet() works as expected", {
   sdf_name <- random_string("spatial_sdf")
-  geoparquet_sdf <- spark_read_geoparquet(sc, geoparquet("example1.parquet"), name = sdf_name)
-
+  lifecycle::expect_deprecated({
+    geoparquet_sdf <- spark_read_geoparquet(sc, geoparquet("example1.parquet"), name = sdf_name)
+  })
   ## Right number of rows
   geoparquet_df <-
     geoparquet_sdf %>%
@@ -350,7 +351,9 @@ test_that("spark_read_geoparquet() works as expected", {
 
 test_that("spark_read_geoparquet() works as expected, ex 2", {
   sdf_name <- random_string("spatial_sdf")
-  geoparquet_sdf <- spark_read_geoparquet(sc, geoparquet("example2.parquet"), name = sdf_name)
+  lifecycle::expect_deprecated({
+    geoparquet_sdf <- spark_read_geoparquet(sc, geoparquet("example2.parquet"), name = sdf_name)
+  })
 
   ## Right data (first row)
   expect_equivalent(
@@ -366,8 +369,9 @@ test_that("spark_read_geoparquet() works as expected, ex 2", {
 
 test_that("spark_read_geoparquet() works as expected, ex 3", {
   sdf_name <- random_string("spatial_sdf")
-  geoparquet_sdf <- spark_read_geoparquet(sc, geoparquet("example3.parquet"), name = sdf_name)
-
+  lifecycle::expect_deprecated({
+    geoparquet_sdf <- spark_read_geoparquet(sc, geoparquet("example3.parquet"), name = sdf_name)
+  })
   ## Right data (first row)
   expect_equivalent(
     geoparquet_sdf %>% head(1) %>% mutate(geometry = geometry %>% st_astext() %>% substring(1, 26)) %>% collect() %>% as.list(),
@@ -385,8 +389,9 @@ test_that("spark_read_geoparquet() works as expected, ex 3", {
 
 test_that("spark_read_geoparquet() works as expected, ex 1.0.0-beta.1", {
   sdf_name <- random_string("spatial_sdf")
-  geoparquet_sdf <- spark_read_geoparquet(sc, geoparquet("example-1.0.0-beta.1.parquet"), name = sdf_name)
-
+  lifecycle::expect_deprecated({
+    geoparquet_sdf <- spark_read_geoparquet(sc, geoparquet("example-1.0.0-beta.1.parquet"), name = sdf_name)
+  })
   ## Right number of rows
   geoparquet_df <-
     geoparquet_sdf %>%
@@ -417,14 +422,16 @@ test_that("spark_read_geoparquet() works as expected, multiple geom", {
 
   ## Write
   tmp_dest <- tempfile()
-  spark_write_geoparquet(geoparquet_sdf, path = tmp_dest, mode = "overwrite")
-
+  lifecycle::expect_deprecated({
+    spark_write_geoparquet(geoparquet_sdf, path = tmp_dest, mode = "overwrite")
+  })
   ## Check
   ### Can't check on geoparquet metadata with available packages
 
   file <- dir(tmp_dest, full.names = TRUE, pattern = "parquet$")
-
-  geoparquet_2_sdf <- spark_read_geoparquet(sc, path = file)
+  lifecycle::expect_deprecated({
+    geoparquet_2_sdf <- spark_read_geoparquet(sc, path = file)
+  })
   out <- geoparquet_2_sdf %>% sdf_schema()
 
   expect_match(out$g0$type, "GeometryUDT")
@@ -450,7 +457,9 @@ test_that("spark_read_geoparquet() throws an error with plain parquet files", {
 
 test_that("spark_read_geojson() works as expected", {
   sdf_name <- random_string("spatial_sdf")
+  lifecycle::expect_deprecated({
   geojson_sdf <- spark_read_geojson(sc, path = test_data("testPolygon.json"), name = sdf_name)
+  })
   tmp_dest <- tempfile(fileext = ".json")
 
   ## Right number of rows
@@ -470,8 +479,9 @@ test_that("spark_read_geojson() works as expected", {
 
 test_that("spark_read_geojson() works as expected, no feat", {
   sdf_name <- random_string("spatial_sdf")
+  lifecycle::expect_deprecated({
   geojson_sdf <- spark_read_geojson(sc, path = test_data("testpolygon-no-property.json"), name = sdf_name)
-
+  })
   ## Right number of rows
   expect_equal(
     invoke(geojson_sdf %>% spark_dataframe(), 'count'), 10
@@ -486,8 +496,9 @@ test_that("spark_read_geojson() works as expected, no feat", {
 
 test_that("spark_read_geojson() works as expected, null values", {
   sdf_name <- random_string("spatial_sdf")
+  lifecycle::expect_deprecated({
   geojson_sdf <- spark_read_geojson(sc, path = test_data("testpolygon-with-null-property-value.json"), name = sdf_name)
-
+  })
   ## Right number of rows
   expect_equal(
     invoke(geojson_sdf %>% spark_dataframe(), 'count'), 3
@@ -503,8 +514,9 @@ test_that("spark_read_geojson() works as expected, null values", {
 
 test_that("spark_read_geojson() works as expected, with id", {
   sdf_name <- random_string("spatial_sdf")
+  lifecycle::expect_deprecated({
   geojson_sdf <- spark_read_geojson(sc, path = test_data("testContainsId.json"), name = sdf_name)
-
+  })
   ## Right number of rows
   expect_equal(
     invoke(geojson_sdf %>% spark_dataframe(), 'count'), 1
@@ -533,8 +545,9 @@ test_that("spark_read_geojson() works as expected, invalid geom", {
   sdf_name <- random_string("spatial_sdf")
 
   # Keep invalid
+  lifecycle::expect_deprecated({
   geojson_sdf <- spark_read_geojson(sc, path = test_data("testInvalidPolygon.json"), name = sdf_name)
-
+  })
   ## Right number of rows
   expect_equal(
     invoke(geojson_sdf %>% spark_dataframe(), 'count'), 3
@@ -545,8 +558,9 @@ test_that("spark_read_geojson() works as expected, invalid geom", {
 
 
   # Remove invalid
+  lifecycle::expect_deprecated({
   geojson_sdf <- spark_read_geojson(sc, path = test_data("testInvalidPolygon.json"), name = sdf_name, options = list(allow_invalid_geometries = FALSE))
-
+  })
   ## Right number of rows
   expect_equal(
     invoke(geojson_sdf %>% spark_dataframe(), 'count'), 2
@@ -645,15 +659,19 @@ test_that("sedona_save_spatial_rdd() works as expected", {
 # ------- Write SDF ------------
 
 test_that("spark_write_geoparquet() works as expected", {
+  lifecycle::expect_deprecated({
   geoparquet_sdf <- spark_read_geoparquet(sc, geoparquet("example2.parquet"))
+  })
   tmp_dest <- tempfile(fileext = ".parquet")
 
   ## Save
+  lifecycle::expect_deprecated({
   geoparquet_sdf %>% spark_write_geoparquet(tmp_dest)
-
+  })
   ### Reload
+  lifecycle::expect_deprecated({
   geoparquet_2_sdf <- spark_read_geoparquet(sc, tmp_dest)
-
+  })
   expect_equivalent(
     geoparquet_sdf %>% mutate(geometry = geometry %>% st_astext()) %>% collect(),
     geoparquet_2_sdf %>% mutate(geometry = geometry %>% st_astext()) %>% collect()
@@ -665,15 +683,19 @@ test_that("spark_write_geoparquet() works as expected", {
 
 test_that("spark_write_geojson() works as expected", {
   sdf_name <- random_string("spatial_sdf")
+  lifecycle::expect_deprecated({
   geojson_sdf <- spark_read_geojson(sc, path = test_data("testPolygon.json"), name = sdf_name)
+  })
   tmp_dest <- tempfile(fileext = ".json")
 
   ## Save
+  lifecycle::expect_deprecated({
   geojson_sdf %>% spark_write_geojson(tmp_dest)
-
+  })
   ### Reload
+  lifecycle::expect_deprecated({
   geojson_2_sdf <- spark_read_geojson(sc, path = tmp_dest)
-
+  })
   ## order of columns changes !
   expect_equal(
     colnames(geojson_sdf) %>% sort(),

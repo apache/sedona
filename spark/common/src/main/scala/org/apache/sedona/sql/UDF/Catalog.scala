@@ -18,26 +18,19 @@
  */
 package org.apache.sedona.sql.UDF
 
-import org.apache.spark.sql.catalyst.FunctionIdentifier
-import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
-import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, ExpressionInfo, Literal}
 import org.apache.spark.sql.expressions.Aggregator
-import org.apache.spark.sql.sedona_sql.expressions._
 import org.apache.spark.sql.sedona_sql.expressions.collect.ST_Collect
 import org.apache.spark.sql.sedona_sql.expressions.raster._
+import org.apache.spark.sql.sedona_sql.expressions._
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.operation.buffer.BufferParameters
 
-import scala.collection.mutable.ListBuffer
-import scala.reflect.ClassTag
+object Catalog extends AbstractCatalog {
 
-object Catalog {
-
-  type FunctionDescription = (FunctionIdentifier, ExpressionInfo, FunctionBuilder)
-
-  val expressions: Seq[FunctionDescription] = Seq(
+  override val expressions: Seq[FunctionDescription] = Seq(
     // Expression for vectors
     function[GeometryType](),
+    function[ST_LabelPoint](),
     function[ST_PointFromText](),
     function[ST_PointFromWKB](),
     function[ST_LineFromWKB](),
@@ -47,6 +40,7 @@ object Catalog {
     function[ST_GeomFromText](0),
     function[ST_GeometryFromText](0),
     function[ST_LineFromText](),
+    function[ST_GeogFromWKT](0),
     function[ST_GeomFromWKT](0),
     function[ST_GeomFromEWKT](),
     function[ST_GeomFromWKB](),
@@ -55,6 +49,8 @@ object Catalog {
     function[ST_GeomFromGML](),
     function[ST_GeomFromKML](),
     function[ST_CoordDim](),
+    function[ST_Perimeter](),
+    function[ST_Perimeter2D](),
     function[ST_Point](),
     function[ST_Points](),
     function[ST_MakeEnvelope](),
@@ -150,6 +146,7 @@ object Catalog {
     function[ST_H3ToGeom](),
     function[ST_H3KRing](),
     function[ST_InteriorRingN](),
+    function[ST_InterpolatePoint](),
     function[ST_Dump](),
     function[ST_DumpPoints](),
     function[ST_IsClosed](),
@@ -166,6 +163,7 @@ object Catalog {
     function[ST_IsPolygonCCW](),
     function[ST_ForcePolygonCCW](),
     function[ST_FlipCoordinates](),
+    function[ST_LineSegments](),
     function[ST_LineSubstring](),
     function[ST_LineInterpolatePoint](),
     function[ST_LineLocatePoint](),
@@ -189,6 +187,7 @@ object Catalog {
     function[ST_PointN](),
     function[ST_AsEWKT](),
     function[ST_Force_2D](),
+    function[ST_Force2D](),
     function[ST_ForcePolygonCW](),
     function[ST_ForceRHR](),
     function[ST_ZMax](),
@@ -234,6 +233,8 @@ object Catalog {
     function[ST_HausdorffDistance](-1),
     function[ST_DWithin](),
     function[ST_IsValidReason](),
+    function[ST_Scale](),
+    function[ST_ScaleGeom](),
     function[ST_Rotate](),
     function[ST_RotateX](),
     function[ST_RotateY](),
@@ -334,54 +335,14 @@ object Catalog {
     function[RS_Resample](),
     function[RS_ReprojectMatch]("nearestneighbor"),
     function[RS_FromNetCDF](),
-    function[RS_NetCDFInfo]())
+    function[RS_NetCDFInfo](),
+    // geostats functions
+    function[ST_DBSCAN](),
+    function[ST_LocalOutlierFactor](),
+    function[ST_GLocal](),
+    function[ST_BinaryDistanceBandColumn](),
+    function[ST_WeightedDistanceBandColumn]())
 
-  // Aggregate functions with Geometry as buffer
-  val aggregateExpressions: Seq[Aggregator[Geometry, Geometry, Geometry]] =
-    Seq(new ST_Envelope_Aggr, new ST_Intersection_Aggr)
-
-  // Aggregate functions with List as buffer
-  val aggregateExpressions2: Seq[Aggregator[Geometry, ListBuffer[Geometry], Geometry]] =
-    Seq(new ST_Union_Aggr())
-
-  private def function[T <: Expression: ClassTag](defaultArgs: Any*): FunctionDescription = {
-    val classTag = implicitly[ClassTag[T]]
-    val constructor = classTag.runtimeClass.getConstructor(classOf[Seq[Expression]])
-    val functionName = classTag.runtimeClass.getSimpleName
-    val functionIdentifier = FunctionIdentifier(functionName)
-    val expressionInfo = new ExpressionInfo(
-      classTag.runtimeClass.getCanonicalName,
-      functionIdentifier.database.orNull,
-      functionName)
-
-    def functionBuilder(expressions: Seq[Expression]): T = {
-      val expr = constructor.newInstance(expressions).asInstanceOf[T]
-      expr match {
-        case e: ExpectsInputTypes =>
-          val numParameters = e.inputTypes.size
-          val numArguments = expressions.size
-          if (numParameters == numArguments) expr
-          else {
-            val numUnspecifiedArgs = numParameters - numArguments
-            if (numUnspecifiedArgs > 0) {
-              if (numUnspecifiedArgs <= defaultArgs.size) {
-                val args =
-                  expressions ++ defaultArgs.takeRight(numUnspecifiedArgs).map(Literal(_))
-                constructor.newInstance(args).asInstanceOf[T]
-              } else {
-                throw new IllegalArgumentException(s"function $functionName takes at least " +
-                  s"${numParameters - defaultArgs.size} argument(s), $numArguments argument(s) specified")
-              }
-            } else {
-              throw new IllegalArgumentException(
-                s"function $functionName takes at most " +
-                  s"$numParameters argument(s), $numArguments argument(s) specified")
-            }
-          }
-        case _ => expr
-      }
-    }
-
-    (functionIdentifier, expressionInfo, functionBuilder)
-  }
+  val aggregateExpressions: Seq[Aggregator[Geometry, _, _]] =
+    Seq(new ST_Envelope_Aggr, new ST_Intersection_Aggr, new ST_Union_Aggr())
 }

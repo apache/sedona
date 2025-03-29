@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.geometryObjects.Circle;
+import org.apache.sedona.common.geometryObjects.Geography;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.subDivide.GeometrySubDivider;
 import org.apache.sedona.common.utils.*;
@@ -78,6 +79,123 @@ public class Functions {
 
   public static double area(Geometry geometry) {
     return geometry.getArea();
+  }
+
+  public static Geometry labelPoint(Geometry geometry) {
+    return labelPoint(geometry, 16, 0.2);
+  }
+
+  public static Geometry labelPoint(Geometry geometry, int gridResolution) {
+    return labelPoint(geometry, gridResolution, 0.2);
+  }
+
+  public static Geometry labelPoint(
+      Geometry geometry, int gridResolution, double goodnessThreshold) {
+    if (geometry.getArea() <= 0) {
+      throw new IllegalArgumentException("Geometry must have a positive area");
+    }
+
+    GeometryFactory geometryFactory = new GeometryFactory();
+
+    // Find the largest polygon
+    Polygon largestPolygon = findLargestPolygon(geometry);
+
+    if (largestPolygon == null) {
+      throw new IllegalArgumentException("Geometry must contain at least one Polygon");
+    }
+
+    return polygonToLabel(largestPolygon, gridResolution, goodnessThreshold, geometryFactory);
+  }
+
+  private static Polygon findLargestPolygon(Geometry geometry) {
+    if (geometry instanceof Polygon) {
+      return (Polygon) geometry;
+    }
+
+    if (geometry instanceof GeometryCollection) {
+      GeometryCollection gc = (GeometryCollection) geometry;
+      Polygon largestPolygon = null;
+      double maxArea = Double.MIN_VALUE;
+
+      for (int i = 0; i < gc.getNumGeometries(); i++) {
+        Geometry subGeometry = gc.getGeometryN(i);
+        Polygon candidate = findLargestPolygon(subGeometry);
+
+        if (candidate != null && candidate.getArea() > maxArea) {
+          largestPolygon = candidate;
+          maxArea = candidate.getArea();
+        }
+      }
+      return largestPolygon;
+    }
+
+    return null;
+  }
+
+  private static Point polygonToLabel(
+      Polygon polygon,
+      int gridResolution,
+      double goodnessThreshold,
+      GeometryFactory geometryFactory) {
+    if (polygon.getArea() <= 0) {
+      throw new IllegalArgumentException("Polygon must have a positive area");
+    }
+
+    Envelope env = polygon.getEnvelopeInternal();
+    double xmin = env.getMinX();
+    double ymin = env.getMinY();
+    double xmax = env.getMaxX();
+    double ymax = env.getMaxY();
+
+    // Calculate step size based on grid resolution
+    double stepSizeX = (xmax - xmin) / gridResolution;
+    double stepSizeY = (ymax - ymin) / gridResolution;
+
+    Point centroid = polygon.getCentroid();
+    double radius = Math.sqrt(polygon.getArea() / Math.PI);
+    goodnessThreshold = radius * goodnessThreshold;
+
+    double bestGoodness = labelGoodness(polygon, centroid);
+
+    if (bestGoodness < goodnessThreshold) {
+      for (int x = 0; x < gridResolution; x++) {
+        for (int y = 0; y < gridResolution; y++) {
+          double candidateX = xmin + x * stepSizeX;
+          double candidateY = ymin + y * stepSizeY;
+          Point candidate = geometryFactory.createPoint(new Coordinate(candidateX, candidateY));
+
+          double candidateGoodness = labelGoodness(polygon, candidate);
+
+          if (candidateGoodness > bestGoodness) {
+            centroid = candidate;
+            bestGoodness = candidateGoodness;
+          }
+        }
+      }
+    }
+
+    return centroid;
+  }
+
+  private static double labelGoodness(Geometry geometry, Point point) {
+    if (!geometry.intersects(point)) {
+      return 0.0;
+    }
+
+    double closest = Double.POSITIVE_INFINITY;
+    Coordinate[] coordinates = geometry.getCoordinates();
+
+    for (Coordinate coord : coordinates) {
+      double dx = coord.x - point.getX();
+      double dy = coord.y - point.getY();
+      double distanceSquared = dx * dx + dy * dy;
+
+      if (distanceSquared < closest) {
+        closest = distanceSquared;
+      }
+    }
+
+    return Math.sqrt(closest);
   }
 
   public static double azimuth(Geometry left, Geometry right) {
@@ -457,8 +575,26 @@ public class Functions {
     return new Distance3DOp(left, right).distance();
   }
 
-  public static double length(Geometry geometry) {
+  public static double baseLength(Geometry geometry) {
     return geometry.getLength();
+  }
+
+  public static double length(Geometry geometry) {
+    String geomType = geometry.getGeometryType();
+    if (geomType.equalsIgnoreCase(Geometry.TYPENAME_LINESTRING)
+        || geomType.equalsIgnoreCase(Geometry.TYPENAME_POINT)
+        || geomType.equalsIgnoreCase(Geometry.TYPENAME_MULTIPOINT)
+        || geomType.equalsIgnoreCase(Geometry.TYPENAME_MULTILINESTRING)) {
+      return baseLength(geometry);
+    } else if (geomType.equalsIgnoreCase(Geometry.TYPENAME_GEOMETRYCOLLECTION)) {
+      double length = 0;
+      for (int i = 0; i < geometry.getNumGeometries(); i++) {
+        length += length(geometry.getGeometryN(i));
+      }
+      return length;
+    } else {
+      return 0;
+    }
   }
 
   public static Geometry normalize(Geometry geometry) {
@@ -641,12 +777,20 @@ public class Functions {
     return GeomUtils.getEWKT(geometry);
   }
 
+  public static String asEWKT(Geography geography) {
+    return asEWKT(geography.getGeometry());
+  }
+
   public static String asWKT(Geometry geometry) {
     return GeomUtils.getWKT(geometry);
   }
 
   public static byte[] asEWKB(Geometry geometry) {
     return GeomUtils.getEWKB(geometry);
+  }
+
+  public static byte[] asEWKB(Geography geography) {
+    return asEWKB(geography.getGeometry());
   }
 
   public static String asHexEWKB(Geometry geom, String endian) {
@@ -741,7 +885,7 @@ public class Functions {
   }
 
   public static Geometry force2D(Geometry geometry) {
-    return GeomUtils.get2dGeom(geometry);
+    return GeometryForce2DTransformer.transform2D(geometry);
   }
 
   public static boolean isEmpty(Geometry geometry) {
@@ -1021,6 +1165,36 @@ public class Functions {
     return geometry.getFactory().createGeometryCollection();
   }
 
+  public static Geometry[] lineSegments(Geometry geometry, boolean lenient) {
+    if (!(geometry instanceof LineString)) {
+      if (lenient) {
+        return new Geometry[] {};
+      } else {
+        throw new IllegalArgumentException(
+            "Geometry is not a LineString. This function expects input geometry to be a LineString.");
+      }
+    }
+
+    LineString line = (LineString) geometry;
+    Coordinate[] coords = line.getCoordinates();
+    if (coords.length == 2 || coords.length == 0) {
+      return new Geometry[] {line};
+    }
+
+    GeometryFactory geometryFactory = geometry.getFactory();
+    Geometry[] resultArray = new Geometry[coords.length - 1];
+    for (int i = 1; i < coords.length; i++) {
+      resultArray[i - 1] =
+          geometryFactory.createLineString(new Coordinate[] {coords[i - 1], coords[i]});
+    }
+
+    return resultArray;
+  }
+
+  public static Geometry[] lineSegments(Geometry geometry) {
+    return lineSegments(geometry, true);
+  }
+
   public static Geometry minimumBoundingCircle(Geometry geometry, int quadrantSegments) {
     MinimumBoundingCircle minimumBoundingCircle = new MinimumBoundingCircle(geometry);
     Coordinate centre = minimumBoundingCircle.getCentre();
@@ -1050,7 +1224,7 @@ public class Functions {
     // All non-polygonal geometries use LargestEmptyCircle
     if (!geometry.getClass().getSimpleName().equals("Polygon")
         && !geometry.getClass().getSimpleName().equals("MultiPolygon")) {
-      LargestEmptyCircle largestEmptyCircle = new LargestEmptyCircle(geometry, tolerance);
+      LargestEmptyCircle largestEmptyCircle = new LargestEmptyCircle(geometry, null, tolerance);
       center = largestEmptyCircle.getCenter();
       nearest = largestEmptyCircle.getRadiusPoint();
       radius = largestEmptyCircle.getRadiusLine().getLength();
@@ -1092,6 +1266,46 @@ public class Functions {
     LengthIndexedLine indexedLine = new LengthIndexedLine(geom);
     Coordinate interPoint = indexedLine.extractPoint(length * fraction);
     return geom.getFactory().createPoint(interPoint);
+  }
+
+  public static double perimeter(Geometry geometry, boolean use_spheroid, boolean lenient) {
+    if (use_spheroid && geometry.getSRID() != 4326) {
+      if (!lenient) {
+        throw new IllegalArgumentException(
+            "For spheroidal perimeter calculations, the input geometry must be in the WGS84 CRS (SRID 4326).");
+      }
+    }
+
+    String geomType = geometry.getGeometryType();
+    if (geomType.equalsIgnoreCase(Geometry.TYPENAME_POLYGON)) {
+      return calculateLength(geometry, use_spheroid);
+    } else if (geomType.equalsIgnoreCase(Geometry.TYPENAME_MULTIPOLYGON)) {
+      return calculateLength(geometry, use_spheroid);
+    } else if (geomType.equalsIgnoreCase(Geometry.TYPENAME_GEOMETRYCOLLECTION)) {
+      double perimeter = 0;
+      for (int i = 0; i < geometry.getNumGeometries(); i++) {
+        perimeter += perimeter(geometry.getGeometryN(i), use_spheroid, lenient);
+      }
+      return perimeter;
+    } else {
+      return 0;
+    }
+  }
+
+  private static double calculateLength(Geometry geometry, boolean use_spheroid) {
+    if (use_spheroid) {
+      return Spheroid.baseLength(geometry);
+    } else {
+      return baseLength(geometry);
+    }
+  }
+
+  public static double perimeter(Geometry geometry, boolean use_spheroid) {
+    return perimeter(geometry, use_spheroid, true);
+  }
+
+  public static double perimeter(Geometry geometry) {
+    return perimeter(geometry, false);
   }
 
   /**
@@ -2266,6 +2480,45 @@ public class Functions {
     return geometry.getFactory().createMultiPointFromCoords(coordinates);
   }
 
+  public static Geometry scale(Geometry geometry, double scaleX, double scaleY) {
+    return scaleGeom(geometry, Constructors.point(scaleX, scaleY));
+  }
+
+  public static Geometry scaleGeom(Geometry geometry, Geometry factor) {
+    return scaleGeom(geometry, factor, null);
+  }
+
+  public static Geometry scaleGeom(Geometry geometry, Geometry factor, Geometry origin) {
+    if (geometry == null || factor == null || geometry.isEmpty() || factor.isEmpty()) {
+      return geometry;
+    }
+
+    if (!factor.getGeometryType().equalsIgnoreCase(Geometry.TYPENAME_POINT)) {
+      throw new IllegalArgumentException("Scale factor geometry should be a Point type.");
+    }
+
+    Geometry resultGeom = null;
+    AffineTransformation scaleInstance = null;
+    Coordinate factorCoordinate = factor.getCoordinate();
+
+    if (origin == null || origin.isEmpty()) {
+      scaleInstance =
+          AffineTransformation.scaleInstance(factorCoordinate.getX(), factorCoordinate.getY());
+      resultGeom = scaleInstance.transform(geometry);
+    } else {
+      Coordinate falseOrigin = origin.getCoordinate();
+      scaleInstance =
+          AffineTransformation.scaleInstance(
+              factorCoordinate.getX(),
+              factorCoordinate.getY(),
+              falseOrigin.getX(),
+              falseOrigin.getY());
+      resultGeom = scaleInstance.transform(geometry);
+    }
+
+    return resultGeom;
+  }
+
   public static Geometry rotateX(Geometry geometry, double angle) {
     if (GeomUtils.isAnyGeomEmpty(geometry)) {
       return geometry;
@@ -2337,5 +2590,58 @@ public class Functions {
     double originY = origin.getY();
     AffineTransformation rotation = AffineTransformation.rotationInstance(angle, originX, originY);
     return rotation.transform(geometry);
+  }
+
+  /**
+   * This function returns the m coordinate of the closest point in a LineString to the specified
+   * Point.
+   *
+   * @param geom1 The LineString (with or without M values) to be evaluated.
+   * @param geom2 The Point object to find the closest point to.
+   * @return The interpolated M value of the closest point on the LineString.
+   */
+  public static double interpolatePoint(Geometry geom1, Geometry geom2) {
+    if (!(Geometry.TYPENAME_LINESTRING.equalsIgnoreCase(geom1.getGeometryType()))) {
+      throw new IllegalArgumentException(
+          String.format(
+              "First argument is of type %s, should be a LineString.", geom1.getGeometryType()));
+    }
+    if (!(Geometry.TYPENAME_POINT.equalsIgnoreCase(geom2.getGeometryType()))) {
+      throw new IllegalArgumentException(
+          String.format(
+              "Second argument is of type %s, should be a Point.", geom2.getGeometryType()));
+    }
+    if (Float.isNaN((float) geom1.getCoordinate().getM())) {
+      throw new IllegalArgumentException("The given linestring does not have a measure value.");
+    }
+
+    if (geom1.getSRID() != geom2.getSRID()) {
+      throw new IllegalArgumentException(
+          String.format(
+              "The Line has SRID %d and Point has SRID %d. The Line and Point should be in the same SRID.",
+              geom1.getSRID(), geom2.getSRID()));
+    }
+
+    LineString line = (LineString) geom1;
+    Point point = (Point) geom2;
+
+    // Find the closest point on the line to the input point
+    Coordinate closestPoint = DistanceOp.nearestPoints(line, point)[0];
+
+    // Use LengthIndexedLine to extract the index at the closest point
+    LengthIndexedLine indexedLine = new LengthIndexedLine(line);
+    double index = indexedLine.indexOf(closestPoint);
+
+    // Extract the point at that index and compute its length fraction
+    double totalLength = indexedLine.getEndIndex();
+    double fractionAlongLine = index / totalLength;
+
+    // Get the start and end coordinates of the line
+    Geometry start = line.getStartPoint();
+    Geometry end = line.getEndPoint();
+
+    // Interpolate the M value
+    return fractionAlongLine * (end.getCoordinate().getM() - start.getCoordinate().getM())
+        + start.getCoordinate().getM();
   }
 }

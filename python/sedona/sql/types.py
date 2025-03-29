@@ -17,9 +17,23 @@
 
 from pyspark.sql.types import BinaryType, UserDefinedType
 
-from ..raster import raster_serde
-from ..raster.sedona_raster import SedonaRaster
+# Only support RasterType when rasterio is installed
+try:
+    import rasterio
+except ImportError:
+    rasterio = None
+
+if rasterio is not None:
+    from ..raster import raster_serde
+    from ..raster.sedona_raster import SedonaRaster
+else:
+    # We'll skip RasterType UDT registration and raise error when deserializing
+    # RasterUDT objects if rasterio is not installed
+    raster_serde = None
+    SedonaRaster = None
+
 from ..utils import geometry_serde
+from ..core.geom.geography import Geography
 
 
 class GeometryType(UserDefinedType):
@@ -47,6 +61,31 @@ class GeometryType(UserDefinedType):
         return "org.apache.spark.sql.sedona_sql.UDT.GeometryUDT"
 
 
+class GeographyType(UserDefinedType):
+
+    @classmethod
+    def sqlType(cls):
+        return BinaryType()
+
+    def serialize(self, obj):
+        return geometry_serde.serialize(obj.geometry)
+
+    def deserialize(self, datum):
+        geom, offset = geometry_serde.deserialize(datum)
+        return Geography(geom)
+
+    @classmethod
+    def module(cls):
+        return "sedona.sql.types"
+
+    def needConversion(self):
+        return True
+
+    @classmethod
+    def scalaUDT(cls):
+        return "org.apache.spark.sql.sedona_sql.UDT.GeographyUDT"
+
+
 class RasterType(UserDefinedType):
 
     @classmethod
@@ -57,7 +96,12 @@ class RasterType(UserDefinedType):
         raise NotImplementedError("RasterType.serialize is not implemented yet")
 
     def deserialize(self, datum):
-        return raster_serde.deserialize(datum)
+        if raster_serde is not None:
+            return raster_serde.deserialize(datum)
+        else:
+            raise NotImplementedError(
+                "rasterio is not installed. Please install it to support RasterType deserialization"
+            )
 
     @classmethod
     def module(cls):
@@ -71,4 +115,5 @@ class RasterType(UserDefinedType):
         return "org.apache.spark.sql.sedona_sql.UDT.RasterUDT"
 
 
-SedonaRaster.__UDT__ = RasterType()
+if SedonaRaster is not None:
+    SedonaRaster.__UDT__ = RasterType()

@@ -15,6 +15,9 @@
 #  specific language governing permissions and limitations
 #  under the License.
 from math import radians
+import os
+import threading
+import concurrent.futures
 from typing import Callable, Tuple
 
 import pytest
@@ -23,6 +26,7 @@ from pyspark.sql import functions as f
 from shapely.geometry.base import BaseGeometry
 from tests.test_base import TestBase
 
+from sedona.core.geom.geography import Geography
 from sedona.sql import st_aggregates as sta
 from sedona.sql import st_constructors as stc
 from sedona.sql import st_functions as stf
@@ -82,6 +86,8 @@ test_configurations = [
     (stc.ST_GeomFromWKT, ("wkt",), "linestring_wkt", "", "LINESTRING (1 2, 3 4)"),
     (stc.ST_GeomFromWKT, ("wkt", 4326), "linestring_wkt", "", "LINESTRING (1 2, 3 4)"),
     (stc.ST_GeomFromEWKT, ("ewkt",), "linestring_ewkt", "", "LINESTRING (1 2, 3 4)"),
+    (stc.ST_GeogFromWKT, ("wkt",), "linestring_wkt", "", "LINESTRING (1 2, 3 4)"),
+    (stc.ST_GeogFromWKT, ("wkt", 4326), "linestring_wkt", "", "LINESTRING (1 2, 3 4)"),
     (stc.ST_LineFromText, ("wkt",), "linestring_wkt", "", "LINESTRING (1 2, 3 4)"),
     (
         stc.ST_LineFromWKB,
@@ -266,6 +272,27 @@ test_configurations = [
         "linestring_geom",
         "",
         "LINESTRING (0 0, 1 1, 1 0, 2 0, 3 0, 4 0, 5 0)",
+    ),
+    (
+        stf.ST_LabelPoint,
+        ("geom",),
+        "triangle_geom",
+        "",
+        "POINT (0.6666666666666666 0.3333333333333333)",
+    ),
+    (
+        stf.ST_LabelPoint,
+        ("geom", 1),
+        "triangle_geom",
+        "",
+        "POINT (0.6666666666666666 0.3333333333333333)",
+    ),
+    (
+        stf.ST_LabelPoint,
+        ("geom", 1, 0.5),
+        "triangle_geom",
+        "",
+        "POINT (0.6666666666666666 0.3333333333333333)",
     ),
     (
         stf.ST_Angle,
@@ -516,6 +543,7 @@ test_configurations = [
     ),
     (stf.ST_FlipCoordinates, ("point",), "point_geom", "", "POINT (1 0)"),
     (stf.ST_Force_2D, ("point",), "point_geom", "", "POINT (0 1)"),
+    (stf.ST_Force2D, ("point",), "point_geom", "", "POINT (0 1)"),
     (stf.ST_Force3D, ("point", 1.0), "point_geom", "", "POINT Z (0 1 1)"),
     (
         stf.ST_Force3DM,
@@ -611,6 +639,7 @@ test_configurations = [
         "",
         "POLYGON ((2 0, 1 0, 1 1, 2 1, 2 0))",
     ),
+    (stf.ST_InterpolatePoint, ("linem", "point"), "linestringm_and_point", "", 1.0),
     (stf.ST_IsCollection, ("geom",), "geom_collection", "", True),
     (stf.ST_IsClosed, ("geom",), "closed_linestring_geom", "", True),
     (stf.ST_IsEmpty, ("geom",), "empty_geom", "", True),
@@ -660,6 +689,14 @@ test_configurations = [
         "multiline_geom",
         "",
         "LINESTRING (0 0, 1 0, 1 1, 0 0)",
+    ),
+    (stf.ST_LineSegments, ("line",), "linestring_geom", "array_size(geom)", 5),
+    (
+        stf.ST_LineSegments,
+        ("geom", True),
+        "polygon_unsimplified",
+        "array_size(geom)",
+        0,
     ),
     (
         stf.ST_LineSubstring,
@@ -730,6 +767,24 @@ test_configurations = [
         0.2927864015850548,
     ),
     (stf.ST_MaxDistance, ("a", "b"), "overlapping_polys", "", 3.1622776601683795),
+    (stf.ST_Perimeter, ("geom",), "triangle_geom", "", 3.414213562373095),
+    (stf.ST_Perimeter, ("geom", True), "triangle_geom", "ceil(geom)", 378794),
+    (
+        stf.ST_Perimeter,
+        (lambda: stf.ST_SetSRID("geom", 4326), True),
+        "triangle_geom",
+        "ceil(geom)",
+        378794,
+    ),
+    (stf.ST_Perimeter2D, ("geom",), "triangle_geom", "", 3.414213562373095),
+    (stf.ST_Perimeter2D, ("geom", True), "triangle_geom", "ceil(geom)", 378794),
+    (
+        stf.ST_Perimeter2D,
+        (lambda: stf.ST_SetSRID("geom", 4326), True),
+        "triangle_geom",
+        "ceil(geom)",
+        378794,
+    ),
     (
         stf.ST_Points,
         ("line",),
@@ -844,6 +899,20 @@ test_configurations = [
         "linestring_geom",
         "",
         "LINESTRING (5 0, 4 0, 3 0, 2 0, 1 0, 0 0)",
+    ),
+    (
+        stf.ST_Scale,
+        ("poly", 3, 2),
+        "poly_and_point",
+        "",
+        "POLYGON ((0 0, 0 2, 3 2, 3 0, 0 0))",
+    ),
+    (
+        stf.ST_ScaleGeom,
+        ("poly", "point"),
+        "poly_and_point",
+        "",
+        "POLYGON ((0 0, 0 2, 3 2, 3 0, 0 0))",
     ),
     (
         stf.ST_RotateX,
@@ -1165,6 +1234,7 @@ wrong_type_configurations = [
     (stc.ST_LinestringFromWKB, (None,)),
     (stc.ST_GeomFromEWKB, (None,)),
     (stc.ST_GeomFromWKT, (None,)),
+    (stc.ST_GeogFromWKT, (None,)),
     (stc.ST_GeometryFromText, (None,)),
     (stc.ST_LineFromText, (None,)),
     (stc.ST_LineStringFromText, (None, "")),
@@ -1235,6 +1305,7 @@ wrong_type_configurations = [
     (stf.ST_ExteriorRing, (None,)),
     (stf.ST_FlipCoordinates, (None,)),
     (stf.ST_Force_2D, (None,)),
+    (stf.ST_Force2D, (None,)),
     (stf.ST_Force3DM, (None,)),
     (stf.ST_Force3DZ, (None,)),
     (stf.ST_Force4D, (None,)),
@@ -1263,6 +1334,7 @@ wrong_type_configurations = [
     (stf.ST_IsValidDetail, (None,)),
     (stf.ST_IsValid, (None,)),
     (stf.ST_IsValidReason, (None,)),
+    (stf.ST_LabelPoint, (None,)),
     (stf.ST_Length, (None,)),
     (stf.ST_Length2D, (None,)),
     (stf.ST_LineFromMultiPoint, (None,)),
@@ -1316,6 +1388,8 @@ wrong_type_configurations = [
     (stf.ST_RemovePoint, ("", 1.0)),
     (stf.ST_RemoveRepeatedPoints, (None, None)),
     (stf.ST_Reverse, (None,)),
+    (stf.ST_Scale, (None, None, None)),
+    (stf.ST_ScaleGeom, (None, None, None)),
     (
         stf.ST_Rotate,
         (
@@ -1592,6 +1666,10 @@ class TestDataFrameAPI(TestBase):
             return TestDataFrameAPI.spark.sql(
                 "SELECT array(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'), ST_GeomFromWKT('POLYGON ((-2 1, 2 1, 2 4, -2 4, -2 1))')) as polys"
             )
+        elif request.param == "poly_and_point":
+            return TestDataFrameAPI.spark.sql(
+                "SELECT ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))') AS poly, ST_GeomFromWKT('POINT (3 2)') AS point"
+            )
         elif request.param == "poly_and_line":
             return TestDataFrameAPI.spark.sql(
                 "SELECT ST_GeomFromWKT('POLYGON((2.6 12.5, 2.6 20.0, 12.6 20.0, 12.6 12.5, 2.6 12.5 ))') as poly, ST_GeomFromWKT('LINESTRING (0.5 10.7, 5.4 8.4, 10.1 10.0)') as line"
@@ -1599,6 +1677,10 @@ class TestDataFrameAPI(TestBase):
         elif request.param == "noded_linework":
             return TestDataFrameAPI.spark.sql(
                 "SELECT ST_GeomFromWKT('GEOMETRYCOLLECTION (LINESTRING (2 0, 2 1, 2 2), LINESTRING (2 2, 2 3, 2 4), LINESTRING (0 2, 1 2, 2 2), LINESTRING (2 2, 3 2, 4 2), LINESTRING (0 2, 1 3, 2 4), LINESTRING (2 4, 3 3, 4 2))') as geom"
+            )
+        elif request.param == "linestringm_and_point":
+            return TestDataFrameAPI.spark.sql(
+                "SELECT ST_GeomFromWKT('LINESTRING M (0 0 0, 2 0 2, 4 0 4)') as linem, ST_GeomFromWKT('POINT (1 1)') as point"
             )
         raise ValueError(f"Invalid base_df name passed: {request.param}")
 
@@ -1633,7 +1715,11 @@ class TestDataFrameAPI(TestBase):
         actual_result = df.collect()[0][0]
 
         if isinstance(actual_result, BaseGeometry):
-            actual_result = actual_result.wkt
+            self.assert_geometry_almost_equal(expected_result, actual_result)
+            return
+        elif isinstance(actual_result, Geography):
+            self.assert_geometry_almost_equal(expected_result, actual_result.geometry)
+            return
         elif isinstance(actual_result, bytearray):
             actual_result = actual_result.hex()
         elif isinstance(actual_result, Row):
@@ -1657,3 +1743,43 @@ class TestDataFrameAPI(TestBase):
             match=f"Incorrect argument type: [A-Za-z_0-9]+ for {func.__name__} should be [A-Za-z0-9\\[\\]_, ]+ but received [A-Za-z0-9_]+.",
         ):
             func(*args)
+
+    def test_multi_thread(self):
+        df = self.spark.range(0, 100)
+
+        def run_spatial_query():
+            result = df.select(
+                stf.ST_Buffer(stc.ST_Point("id", f.col("id") + 1), 1.0).alias("geom")
+            ).collect()
+            assert len(result) == 100
+
+        # Create and run 4 threads
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+            futures = [executor.submit(run_spatial_query) for _ in range(4)]
+            concurrent.futures.wait(futures)
+        for future in futures:
+            future.result()
+
+    @pytest.mark.skipif(
+        os.getenv("SPARK_REMOTE") is not None,
+        reason="Checkpoint dir is not available in Spark Connect",
+    )
+    def test_dbscan(self):
+        df = self.spark.createDataFrame([{"id": 1, "x": 2, "y": 3}]).withColumn(
+            "geometry", f.expr("ST_Point(x, y)")
+        )
+
+        df.withColumn("dbscan", ST_DBSCAN("geometry", 1.0, 2, False)).collect()
+
+    @pytest.mark.skipif(
+        os.getenv("SPARK_REMOTE") is not None,
+        reason="Checkpoint dir is not available in Spark Connect",
+    )
+    def test_lof(self):
+        df = self.spark.createDataFrame([{"id": 1, "x": 2, "y": 3}]).withColumn(
+            "geometry", f.expr("ST_Point(x, y)")
+        )
+
+        df.withColumn(
+            "localOutlierFactor", ST_LocalOutlierFactor("geometry", 2, False)
+        ).collect()
