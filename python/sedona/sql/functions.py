@@ -29,13 +29,18 @@ sedona_udf_to_eval_type = {
 }
 
 
-def sedona_vectorized_udf(return_type: DataType, udf_type: SedonaUDFType = SedonaUDFType.SHAPELY_SCALAR):
+def sedona_vectorized_udf(
+    return_type: DataType, udf_type: SedonaUDFType = SedonaUDFType.SHAPELY_SCALAR
+):
     import geopandas as gpd
 
     def apply_fn(fn):
         function_signature = inspect.signature(fn)
         serialize_geom = False
         deserialize_geom = False
+
+        if isinstance(return_type, GeometryType):
+            serialize_geom = True
 
         if issubclass(function_signature.return_annotation, BaseGeometry):
             serialize_geom = True
@@ -51,23 +56,33 @@ def sedona_vectorized_udf(return_type: DataType, udf_type: SedonaUDFType = Sedon
                 deserialize_geom = True
 
         if udf_type == SedonaUDFType.SHAPELY_SCALAR:
-            return _apply_shapely_series_udf(fn, return_type, serialize_geom, deserialize_geom)
+            return _apply_shapely_series_udf(
+                fn, return_type, serialize_geom, deserialize_geom
+            )
 
         if udf_type == SedonaUDFType.GEO_SERIES:
-            return _apply_geo_series_udf(fn, return_type, serialize_geom, deserialize_geom)
+            return _apply_geo_series_udf(
+                fn, return_type, serialize_geom, deserialize_geom
+            )
 
         raise InvalidSedonaUDFType(f"Invalid UDF type: {udf_type}")
 
     return apply_fn
 
 
-def _apply_shapely_series_udf(fn, return_type: DataType, serialize_geom: bool, deserialize_geom: bool):
-    print(deserialize_geom)
-
+def _apply_shapely_series_udf(
+    fn, return_type: DataType, serialize_geom: bool, deserialize_geom: bool
+):
     def apply(series: pd.Series) -> pd.Series:
-        applied = series.apply(lambda x: fn(geometry_serde.deserialize(x)[0]) if deserialize_geom else fn(x))
+        applied = series.apply(
+            lambda x: (
+                fn(geometry_serde.deserialize(x)[0]) if deserialize_geom else fn(x)
+            )
+        )
 
-        return applied.apply(lambda x: geometry_serde.serialize(x) if serialize_geom else x)
+        return applied.apply(
+            lambda x: geometry_serde.serialize(x) if serialize_geom else x
+        )
 
     udf = UserDefinedFunction(
         apply, return_type, "SedonaPandasArrowUDF", evalType=SEDONA_SCALAR_EVAL_TYPE
@@ -76,7 +91,9 @@ def _apply_shapely_series_udf(fn, return_type: DataType, serialize_geom: bool, d
     return udf
 
 
-def _apply_geo_series_udf(fn, return_type: DataType, serialize_geom: bool, deserialize_geom: bool):
+def _apply_geo_series_udf(
+    fn, return_type: DataType, serialize_geom: bool, deserialize_geom: bool
+):
     import geopandas as gpd
 
     def apply(series: pd.Series) -> pd.Series:
@@ -86,7 +103,9 @@ def _apply_geo_series_udf(fn, return_type: DataType, serialize_geom: bool, deser
                 series.apply(lambda x: geometry_serde.deserialize(x)[0])
             )
 
-        return fn(series_data).apply(lambda x: geometry_serde.serialize(x) if serialize_geom else x)
+        return fn(series_data).apply(
+            lambda x: geometry_serde.serialize(x) if serialize_geom else x
+        )
 
     return UserDefinedFunction(
         apply, return_type, "SedonaPandasArrowUDF", evalType=SEDONA_SCALAR_EVAL_TYPE
@@ -105,4 +124,3 @@ def serialize_to_geometry_if_geom(data, return_type: DataType):
         return geometry_serde.serialize(data)
 
     return data
-

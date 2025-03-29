@@ -51,6 +51,11 @@ def vectorized_series_string_to_geom(x: str) -> b.BaseGeometry:
 
 
 @sedona_vectorized_udf(udf_type=SedonaUDFType.GEO_SERIES, return_type=GeometryType())
+def vectorized_series_string_to_geom_2(x: str):
+    return loads(x)
+
+
+@sedona_vectorized_udf(udf_type=SedonaUDFType.GEO_SERIES, return_type=GeometryType())
 def vectorized_series_buffer_udf(series: gpd.GeoSeries) -> gpd.GeoSeries:
     buffered = series.buffer(0.1)
 
@@ -59,7 +64,7 @@ def vectorized_series_buffer_udf(series: gpd.GeoSeries) -> gpd.GeoSeries:
 
 @pandas_udf(IntegerType())
 def squared_udf(s: pd.Series) -> pd.Series:
-    return s ** 2  # Perform vectorized operation
+    return s**2  # Perform vectorized operation
 
 
 buffer_distanced_udf = f.udf(non_vectorized_buffer_udf, GeometryType())
@@ -99,12 +104,12 @@ class TestSedonaArrowUDF(TestBase):
             .selectExpr("ST_Point(x, y) AS geom", "x")
             .select(
                 vectorized_geom_to_numeric_udf(f.col("geom")).alias("area"),
-                vectorized_geom_to_numeric_udf_child_geom(f.col("geom")).alias("x_coordinate"),
+                vectorized_geom_to_numeric_udf_child_geom(f.col("geom")).alias(
+                    "x_coordinate"
+                ),
                 vectorized_numeric_to_geom(f.col("x")).alias("geom_second"),
             )
         )
-
-        df.show()
 
         assert df.select(f.sum("area")).collect()[0][0] == 0.0
         assert -1339276 > df.select(f.sum("x_coordinate")).collect()[0][0] > -1339277
@@ -125,11 +130,13 @@ class TestSedonaArrowUDF(TestBase):
             .select(
                 vectorized_series_to_numeric_udf(f.col("geom")).alias("x_coordinate"),
                 vectorized_series_string_to_geom(f.col("wkt")).alias("geom"),
+                vectorized_series_string_to_geom_2(f.col("wkt")).alias("geom_2"),
             )
         )
 
         assert -1339276 > df.select(f.sum("x_coordinate")).collect()[0][0] > -1339277
         assert df.select(f.col("geom")).collect()[0][0].x == -87.694099124
+        assert df.select(f.col("geom_2")).collect()[0][0].x == -87.694099124
 
     @pytest.mark.skipif(
         pyspark.__version__ < "3.5", reason="requires Spark 3.5 or higher"

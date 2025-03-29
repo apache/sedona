@@ -1206,10 +1206,15 @@ To create a vectorized UDF please use the decorator sedona_vectorized_udf.
 Currently supports only the scalar UDFs. Vectorized UDFs are way faster than
 the normal UDFs. It might be even 2x faster than the normal UDFs.
 
+!!!note
+	When you use geometry as an input type, please include the BaseGeometry type,
+	like Point from shapely or geopandas GeoSeries, when you use GEO_SERIES vectorized udf.
+	That's how Sedona infers the type and knows if the data should be cast.
+
 Decorator signature looks as follows:
 
 ```python
-def sedona_vectorized_udf(udf_type: SedonaUDFType = SedonaUDFType.SHAPELY_SCALAR)
+def sedona_vectorized_udf(udf_type: SedonaUDFType = SedonaUDFType.SHAPELY_SCALAR, return_type: DataType)
 ```
 
 where udf_type is the type of the UDF function, currently supported are:
@@ -1221,13 +1226,15 @@ The main difference is what input data you get in the function
 Let's analyze the two examples below, that creates buffers from
 a given geometry.
 
+Make sure
+
 ### Shapely scalar UDF
 
 ```python
 import shapely.geometry.base as b
-from sedona.sql.functions import sedona_vectorized_udf, SedonaUDFType
+from sedona.sql.functions import sedona_vectorized_udf
 
-@sedona_vectorized_udf()
+@sedona_vectorized_udf(return_type=GeometryType())
 def vectorized_buffer(geom: b.BaseGeometry) -> b.BaseGeometry:
     return geom.buffer(0.1)
 ```
@@ -1237,8 +1244,10 @@ def vectorized_buffer(geom: b.BaseGeometry) -> b.BaseGeometry:
 ```python
 import geopandas as gpd
 from sedona.sql.functions import sedona_vectorized_udf, SedonaUDFType
+from sedona.sql.types import GeometryType
 
-@sedona_vectorized_udf(udf_type=SedonaUDFType.GEO_SERIES)
+
+@sedona_vectorized_udf(udf_type=SedonaUDFType.GEO_SERIES, return_type=GeometryType())
 def vectorized_geo_series_buffer(series: gpd.GeoSeries) -> gpd.GeoSeries:
     buffered = series.buffer(0.1)
 
