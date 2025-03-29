@@ -46,13 +46,13 @@ def vectorized_series_to_numeric_udf(series: gpd.GeoSeries) -> pd.Series:
 
 
 @sedona_vectorized_udf(udf_type=SedonaUDFType.GEO_SERIES, return_type=GeometryType())
-def vectorized_series_string_to_geom(x: str) -> b.BaseGeometry:
-    return loads(x)
+def vectorized_series_string_to_geom(x: pd.Series) -> b.BaseGeometry:
+    return x.apply(lambda x: loads(str(x)))
 
 
 @sedona_vectorized_udf(udf_type=SedonaUDFType.GEO_SERIES, return_type=GeometryType())
-def vectorized_series_string_to_geom_2(x: str):
-    return loads(x)
+def vectorized_series_string_to_geom_2(x: pd.Series):
+    return x.apply(lambda x: loads(str(x)))
 
 
 @sedona_vectorized_udf(udf_type=SedonaUDFType.GEO_SERIES, return_type=GeometryType())
