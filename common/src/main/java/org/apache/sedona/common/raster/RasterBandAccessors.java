@@ -394,11 +394,11 @@ public class RasterBandAccessors {
     // Adding an arbitrary value '150' for the pixels that are under the geometry.
     GridCoverage2D rasterizedGeom =
         RasterConstructors.asRasterWithRasterExtent(roi, raster, datatype, allTouched, 150, null);
-    Raster rasterziedData = RasterUtils.getRaster(rasterizedGeom.getRenderedImage());
+    Raster rasterizedData = RasterUtils.getRaster(rasterizedGeom.getRenderedImage());
     int width = RasterAccessors.getWidth(rasterizedGeom),
         height = RasterAccessors.getHeight(rasterizedGeom);
     double[] rasterizedPixelData =
-        rasterziedData.getSamples(0, 0, width, height, 0, (double[]) null);
+        rasterizedData.getSamples(0, 0, width, height, 0, (double[]) null);
     double[] rasterPixelData =
         rasterData.getSamples(0, 0, width, height, band - 1, (double[]) null);
 
