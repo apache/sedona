@@ -1,13 +1,26 @@
-import subprocess
+import shutil
 import re
 from datetime import datetime
 from collections import defaultdict
+import subprocess
+
+
+def get_git_command():
+    git_path = shutil.which("git")
+    if not git_path:
+        raise EnvironmentError("Git executable not found in system PATH.")
+    return git_path
 
 
 def get_contributors():
-    output = subprocess.check_output(
-        ["git", "shortlog", "-sne", "--all"], encoding="utf-8"
-    )
+    git = get_git_command()
+    try:
+        output = subprocess.check_output(
+            [git, "shortlog", "-sne", "--all"], encoding="utf-8"
+        )
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError("Failed to get git shortlog output.") from e
+
     lines = output.strip().split("\n")
     contributors = defaultdict(int)
 
@@ -46,9 +59,13 @@ def get_contributors():
 
 def write_authors_file(contributors, filename="AUTHORS"):
     today = datetime.now().strftime("%Y-%m-%d")
-    hash_output = subprocess.check_output(
-        ["git", "rev-parse", "--short", "HEAD"], encoding="utf-8"
-    ).strip()
+    git = get_git_command()
+    try:
+        hash_output = subprocess.check_output(
+            [git, "rev-parse", "--short", "HEAD"], encoding="utf-8"
+        ).strip()
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError("Failed to get git commit hash.") from e
 
     with open(filename, "w", encoding="utf-8") as f:
         f.write("# Authors of apache/sedona\n\n")
