@@ -149,7 +149,7 @@ public class FunctionsTest extends RasterTestBase {
     List<PixelRecord> points = PixelFunctions.getPixelAsPolygons(emptyRaster, 1);
 
     PixelRecord point = points.get(11);
-    Geometry geom = (Geometry) point.geom;
+    Geometry geom = point.geom;
     String expected = "POLYGON ((131 -246, 139 -246, 139 -254, 131 -254, 131 -246))";
     assertEquals(expected, geom.toString());
 
@@ -157,7 +157,7 @@ public class FunctionsTest extends RasterTestBase {
     emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 10, 234, -43, 3, 4, 2, 3, 0);
     points = PixelFunctions.getPixelAsPolygons(emptyRaster, 1);
     point = points.get(11);
-    geom = (Geometry) point.geom;
+    geom = point.geom;
     expected = "POLYGON ((241 -32, 244 -29, 246 -25, 243 -28, 241 -32))";
     assertEquals(expected, geom.toString());
   }
@@ -284,13 +284,13 @@ public class FunctionsTest extends RasterTestBase {
     List<PixelRecord> points = PixelFunctions.getPixelAsPoints(emptyRaster, 1);
 
     PixelRecord point1 = points.get(0);
-    Geometry geom1 = (Geometry) point1.geom;
+    Geometry geom1 = point1.geom;
     assertEquals(123, geom1.getCoordinate().x, FP_TOLERANCE);
     assertEquals(-230, geom1.getCoordinate().y, FP_TOLERANCE);
     assertEquals(0.0, point1.value, FP_TOLERANCE);
 
     PixelRecord point2 = points.get(22);
-    Geometry geom2 = (Geometry) point2.geom;
+    Geometry geom2 = point2.geom;
     assertEquals(139, geom2.getCoordinate().x, FP_TOLERANCE);
     assertEquals(-262, geom2.getCoordinate().y, FP_TOLERANCE);
     assertEquals(0.0, point2.value, FP_TOLERANCE);
@@ -303,7 +303,7 @@ public class FunctionsTest extends RasterTestBase {
         RasterConstructors.makeEmptyRaster(1, 5, 5, -123, 54, 5, 5, 0, 0, srid);
     List<PixelRecord> points = PixelFunctions.getPixelAsPoints(emptyRaster, 1);
     PixelRecord point1 = points.get(0);
-    Geometry geom1 = (Geometry) point1.geom;
+    Geometry geom1 = point1.geom;
     assertEquals(-123, geom1.getCoordinate().x, FP_TOLERANCE);
     assertEquals(54, geom1.getCoordinate().y, FP_TOLERANCE);
     assertEquals(srid, geom1.getSRID());
@@ -317,7 +317,7 @@ public class FunctionsTest extends RasterTestBase {
     List<PixelRecord> points = PixelFunctions.getPixelAsPoints(emptyRaster, 1);
 
     PixelRecord point1 = points.get(11);
-    Geometry geom1 = (Geometry) point1.geom;
+    Geometry geom1 = point1.geom;
     assertEquals(-118, geom1.getCoordinate().x, FP_TOLERANCE);
     assertEquals(34, geom1.getCoordinate().y, FP_TOLERANCE);
     assertEquals(srid, geom1.getSRID());
@@ -329,10 +329,10 @@ public class FunctionsTest extends RasterTestBase {
     GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
     List<PixelRecord> points = PixelFunctions.getPixelAsPoints(raster, 1);
     PixelRecord firstPoint = points.get(0);
-    Geometry firstGeom = (Geometry) firstPoint.geom;
+    Geometry firstGeom = firstPoint.geom;
 
-    double expectedX = -1.3095818E7;
-    double expectedY = 4021262.75;
+    double expectedX = -1.3095817809482181E7;
+    double expectedY = 4021262.7487925636;
     double val = 0.0;
 
     assertEquals(expectedX, firstGeom.getCoordinate().x, FP_TOLERANCE);
@@ -348,7 +348,7 @@ public class FunctionsTest extends RasterTestBase {
     List<PixelRecord> points = PixelFunctions.getPixelAsPoints(emptyRaster, 1);
 
     PixelRecord point1 = points.get(26);
-    Geometry geom1 = (Geometry) point1.geom;
+    Geometry geom1 = point1.geom;
     String expected = "POINT (250 -186)";
     assertEquals(expected, geom1.toString());
   }

@@ -2125,7 +2125,7 @@ class TestPredicateJoin(TestBase):
             )
             assert point.take(1)[0][0] == test[2]
 
-    def test_st_force2d(self):
+    def test_st_force_2d(self):
         tests1 = {
             "'POINT(0 5)'": "POINT (0 5)",
             "'POLYGON((0 0 2, 0 5 2, 5 0 2, 0 0 2), (1 1 2, 3 1 2, 1 3 2, 1 1 2))'": "POLYGON ((0 0, 0 5, 5 0, 0 0), (1 1, 3 1, 1 3, 1 1))",
@@ -2135,6 +2135,19 @@ class TestPredicateJoin(TestBase):
         for input_geom, expected_geom in tests1.items():
             geom_2d = self.spark.sql(
                 "select ST_AsText(ST_Force_2D(ST_GeomFromText({})))".format(input_geom)
+            )
+            assert geom_2d.take(1)[0][0] == expected_geom
+
+    def test_st_force2d(self):
+        tests1 = {
+            "'POINT(0 5)'": "POINT (0 5)",
+            "'POLYGON((0 0 2, 0 5 2, 5 0 2, 0 0 2), (1 1 2, 3 1 2, 1 3 2, 1 1 2))'": "POLYGON ((0 0, 0 5, 5 0, 0 0), (1 1, 3 1, 1 3, 1 1))",
+            "'LINESTRING(0 5 1, 0 0 1, 0 10 2)'": "LINESTRING (0 5, 0 0, 0 10)",
+        }
+
+        for input_geom, expected_geom in tests1.items():
+            geom_2d = self.spark.sql(
+                "select ST_AsText(ST_Force2D(ST_GeomFromText({})))".format(input_geom)
             )
             assert geom_2d.take(1)[0][0] == expected_geom
 

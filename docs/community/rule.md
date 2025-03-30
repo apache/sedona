@@ -23,9 +23,9 @@ The project welcomes contributions. You can contribute to Sedona code or documen
 
 The following sections brief the workflow of how to complete a contribution.
 
-## Pick / Announce a task using JIRA
+## Pick / Announce a task
 
-It is important to confirm that your contribution is acceptable. You should create a JIRA ticket or pick an existing ticket. A new JIRA ticket will be automatically sent to `dev@sedona.apache.org`
+It is important to confirm that your contribution is acceptable. Before starting a contribution, you should announce your intention to the community via tickets. Sedona allows tickets from both [GitHub issues](https://github.com/apache/sedona/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen) and [JIRA](https://issues.apache.org/jira/projects/SEDONA). A new JIRA ticket will be automatically sent to `dev@sedona.apache.org`
 
 ## Develop a code contribution
 
@@ -54,7 +54,7 @@ Documentation contributions should satisfy the following requirements:
 
 After developing a contribution, the easiest and most visible way to submit a Pull Request (PR) to the [GitHub repo](https://github.com/apache/sedona).
 
-**Please use the JIRA ticket ID in the PR name, such as "[SEDONA-1] my subject".**
+**Please use the JIRA ticket ID or GitHub Issue ID in the PR name, such as "[SEDONA-1] my subject" or ""[GH-1] my subject".**
 
 When creating a PR, please answer the questions in the PR template.
 

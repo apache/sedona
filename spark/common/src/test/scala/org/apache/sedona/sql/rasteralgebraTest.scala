@@ -1623,6 +1623,24 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertTrue(expectedSummary4.equals(actualSummary4))
     }
 
+    it("Passed RS_ZonalStats edge case") {
+      val df = sparkSession.sql("""
+          |with data as (
+          | SELECT array(3, 7, 5, 40, 61, 70, 60, 80, 27, 55, 35, 44, 21, 36, 53, 54, 86, 28, 45, 24, 99, 22, 18, 98, 10) as pixels,
+          |   ST_GeomFromWKT('POLYGON ((5.822754 -6.620957, 6.965332 -6.620957, 6.965332 -5.834616, 5.822754 -5.834616, 5.822754 -6.620957))', 4326) as geom
+          |)
+          |
+          |SELECT RS_SetSRID(RS_AddBandFromArray(RS_MakeEmptyRaster(1, "D", 5, 5, 1, -1, 1), pixels, 1), 4326) as raster, geom FROM data
+          |""".stripMargin)
+
+      val actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'mode')").first().get(0)
+      assertNull(actual)
+
+      val statsDf = df.selectExpr("RS_ZonalStatsAll(raster, geom) as stats")
+      val actualBoolean = statsDf.selectExpr("isNull(stats.mode)").first().getAs[Boolean](0)
+      assertTrue(actualBoolean)
+    }
+
     it("Passed RS_ZonalStats") {
       var df = sparkSession.read
         .format("binaryFile")
@@ -1831,7 +1849,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
           s"SELECT RS_PixelAsPoints(RS_MakeEmptyRaster($numBands, $widthInPixel, $heightInPixel, $upperLeftX, $upperLeftY, $cellSize), 1)")
         .first()
         .getList(0)
-      val expected = "[POINT (127.19000244140625 -12),0.0,2,1]"
+      val expected = "[POINT (127.19 -12),0.0,2,1]"
       assertEquals(expected, result.get(1).toString)
     }
 
@@ -1863,7 +1881,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .first()
         .getString(0)
       val expected =
-        "POLYGON ((127.19000244140625 -20, 131.19000244140625 -20, 131.19000244140625 -24, 127.19000244140625 -24, 127.19000244140625 -20))"
+        "POLYGON ((127.19 -20, 131.19 -20, 131.19 -24, 127.19 -24, 127.19 -20))"
       assertEquals(expected, result)
     }
 
@@ -1880,7 +1898,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .first()
         .getList(0)
       val expected =
-        "[POLYGON ((127.19000244140625 -20, 131.19000244140625 -20, 131.19000244140625 -24, 127.19000244140625 -24, 127.19000244140625 -20)),0.0,2,3]"
+        "[POLYGON ((127.19 -20, 131.19 -20, 131.19 -24, 127.19 -24, 127.19 -20)),0.0,2,3]"
       assertEquals(expected, result.get(11).toString)
     }
 
@@ -1963,9 +1981,11 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
     it("Passed RS_RasterToWorldCoord with raster") {
       var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       df = df.selectExpr("RS_FromGeoTiff(content) as raster")
-      val result = df.selectExpr("RS_RasterToWorldCoord(raster, 1, 1)").first().get(0).toString
-      val expected = "POINT (-13095818 4021262.75)"
-      assertEquals(expected, result)
+      val result =
+        df.selectExpr("RS_RasterToWorldCoord(raster, 1, 1)").first().get(0).asInstanceOf[Geometry]
+      val actualCoordinate = result.getCoordinate
+      assertEquals(-13095817.809482181, actualCoordinate.x, 0.5d)
+      assertEquals(4021262.7487925636, actualCoordinate.y, 0.5d)
     }
 
     it("Passed RS_WorldToRasterCoord with raster") {

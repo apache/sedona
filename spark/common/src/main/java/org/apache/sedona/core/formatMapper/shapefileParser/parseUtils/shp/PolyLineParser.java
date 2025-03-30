@@ -18,21 +18,23 @@
  */
 package org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp;
 
-import java.io.IOException;
-import org.locationtech.jts.geom.CoordinateSequence;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 
 public class PolyLineParser extends ShapeParser {
 
+  private final ShapeType shapeType;
+
   /**
    * create a parser that can abstract a MultiPolyline from input source with given GeometryFactory.
    *
    * @param geometryFactory the geometry factory
    */
-  public PolyLineParser(GeometryFactory geometryFactory) {
+  public PolyLineParser(GeometryFactory geometryFactory, ShapeType shapeType) {
     super(geometryFactory);
+    this.shapeType = shapeType;
   }
 
   /**
@@ -40,7 +42,6 @@ public class PolyLineParser extends ShapeParser {
    *
    * @param reader the reader
    * @return the geometry
-   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
   public Geometry parseShape(ShapeReader reader) {
@@ -50,11 +51,29 @@ public class PolyLineParser extends ShapeParser {
 
     int[] offsets = readOffsets(reader, numParts, numPoints);
 
+    // Read all coordinates
+    Coordinate[] allCoordinates;
+
+    if (shapeType == ShapeType.POLYLINEZ) {
+      allCoordinates = readCoordinatesWithZM(reader, numPoints);
+    } else if (shapeType == ShapeType.POLYLINEM) {
+      allCoordinates = readCoordinatesWithM(reader, numPoints);
+    } else {
+      allCoordinates = readCoordinates(reader, numPoints);
+    }
+
+    // Create line strings for each part
     LineString[] lines = new LineString[numParts];
     for (int i = 0; i < numParts; ++i) {
-      int readScale = offsets[i + 1] - offsets[i];
-      CoordinateSequence csString = readCoordinates(reader, readScale);
-      lines[i] = geometryFactory.createLineString(csString);
+      int startIndex = offsets[i];
+      int endIndex = offsets[i + 1];
+      int pointCount = endIndex - startIndex;
+
+      // Extract coordinates for this part
+      Coordinate[] partCoordinates = new Coordinate[pointCount];
+      System.arraycopy(allCoordinates, startIndex, partCoordinates, 0, pointCount);
+
+      lines[i] = geometryFactory.createLineString(partCoordinates);
     }
 
     if (numParts == 1) {

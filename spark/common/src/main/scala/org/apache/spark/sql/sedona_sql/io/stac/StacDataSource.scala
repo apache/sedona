@@ -18,15 +18,16 @@
  */
 package org.apache.spark.sql.sedona_sql.io.stac
 
-import StacUtils.{inferStacSchema, updatePropertiesPromotedSchema}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.connector.catalog.{Table, TableProvider}
 import org.apache.spark.sql.connector.expressions.Transform
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.io.geojson.GeoJSONUtils
+import org.apache.spark.sql.sedona_sql.io.stac.StacUtils.{inferStacSchema, updatePropertiesPromotedSchema}
 import org.apache.spark.sql.sources.DataSourceRegister
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
+import org.apache.spark.util.SerializableConfiguration
 
 import java.util
 import java.util.concurrent.ConcurrentHashMap
@@ -100,17 +101,28 @@ class StacDataSource() extends TableProvider with DataSourceRegister {
       partitioning: Array[Transform],
       properties: util.Map[String, String]): Table = {
     val opts = new CaseInsensitiveStringMap(properties)
+    val sparkSession = SparkSession.active
 
     val optsMap: Map[String, String] = opts.asCaseSensitiveMap().asScala.toMap ++ Map(
       "sessionLocalTimeZone" -> SparkSession.active.sessionState.conf.sessionLocalTimeZone,
       "columnNameOfCorruptRecord" -> SparkSession.active.sessionState.conf.columnNameOfCorruptRecord,
       "defaultParallelism" -> SparkSession.active.sparkContext.defaultParallelism.toString,
       "maxPartitionItemFiles" -> SparkSession.active.conf
-        .get("spark.wherobots.stac.load.maxPartitionItemFiles", "0"),
-      "numPartitions" -> SparkSession.active.conf
-        .get("spark.wherobots.stac.load.numPartitions", "-1"))
+        .get("spark.sedona.stac.load.maxPartitionItemFiles", "0"),
+      "numPartitions" -> sparkSession.conf
+        .get("spark.sedona.stac.load.numPartitions", "-1"),
+      "itemsLimitMax" -> opts
+        .asCaseSensitiveMap()
+        .asScala
+        .toMap
+        .getOrElse(
+          "itemsLimitMax",
+          sparkSession.conf.get("spark.sedona.stac.load.itemsLimitMax", "-1")))
     val stacCollectionJsonString = StacUtils.loadStacCollectionToJson(optsMap)
+    val hadoopConf = sparkSession.sessionState.newHadoopConfWithOptions(opts.asScala.toMap)
+    val broadcastedConf =
+      sparkSession.sparkContext.broadcast(new SerializableConfiguration(hadoopConf))
 
-    new StacTable(stacCollectionJson = stacCollectionJsonString, opts = optsMap)
+    new StacTable(stacCollectionJson = stacCollectionJsonString, opts = optsMap, broadcastedConf)
   }
 }

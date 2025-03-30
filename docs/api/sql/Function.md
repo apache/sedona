@@ -460,7 +460,7 @@ POINT ZM(1 1 1 1)
 ## ST_AsGeoJSON
 
 !!!note
-	This method is not recommended. Please use [Sedona GeoJSON data source](../../tutorial/sql.md#save-as-geojson) to write GeoJSON files.
+	This method is not recommended. Please use [Sedona GeoJSON data source](../../tutorial/sql.md#save-geojson) to write GeoJSON files.
 
 Introduction: Return the [GeoJSON](https://geojson.org/) string representation of a geometry
 
@@ -1140,15 +1140,16 @@ Returns a struct containing the cluster ID and a boolean indicating if the recor
 
 - `epsilon` is the maximum distance between two points for them to be considered as part of the same cluster.
 - `minPoints` is the minimum number of neighbors a single record must have to form a cluster.
+- `useSpheroid` is whether to use ST_DistanceSpheroid or ST_Distance as the distance metric.
 
-Format: `ST_DBSCAN(geom: Geometry, epsilon: Double, minPoints: Integer)`
+Format: `ST_DBSCAN(geom: Geometry, epsilon: Double, minPoints: Integer, useSpheroid: Boolean)`
 
 Since: `v1.7.1`
 
 SQL Example
 
 ```sql
-SELECT ST_DBSCAN(geom, 1.0, 2)
+SELECT ST_DBSCAN(geom, 1.0, 2, False)
 ```
 
 Output:
@@ -1494,7 +1495,7 @@ POINT (2 1)
 
 ## ST_Force_2D
 
-Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates
+Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates. This function is an alias of [ST_Force2D](#st_force2d).
 
 Format: `ST_Force_2D (A: Geometry)`
 
@@ -1504,6 +1505,26 @@ SQL Example
 
 ```sql
 SELECT ST_Force_2D(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'))
+```
+
+Output:
+
+```
+POLYGON((0 0,0 5,5 0,0 0),(1 1,3 1,1 3,1 1))
+```
+
+## ST_Force2D
+
+Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates. This function is an alias of [ST_Force_2D](#st_force_2d).
+
+Format: `ST_Force2D (A: Geometry)`
+
+Since: `v1.8.0`
+
+SQL Example
+
+```sql
+SELECT ST_Force2D(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'))
 ```
 
 Output:

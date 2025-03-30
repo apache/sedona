@@ -1,17 +1,17 @@
 ## Did you read the Contributor Guide?
 
-- Yes, I have read the [Contributor Rules](https://sedona.apache.org/latest-snapshot/community/rule/) and [Contributor Development Guide](https://sedona.apache.org/latest-snapshot/community/develop/)
+- Yes, I have read the [Contributor Rules](https://sedona.apache.org/latest/community/rule/) and [Contributor Development Guide](https://sedona.apache.org/latest/community/develop/)
 
 - No, I haven't read it.
 
-## Is this PR related to a JIRA ticket?
+## Is this PR related to a ticket?
 
-- Yes, the URL of the associated JIRA ticket is https://issues.apache.org/jira/browse/SEDONA-XXX. The PR name follows the format `[SEDONA-XXX] my subject`.
+- Yes, and the PR name follows the format `[SEDONA-XXX] my subject`.
+- Yes, and the PR name follows the format `[GH-XXX] my subject`.
 
 - No:
   - this is a documentation update. The PR name follows the format `[DOCS] my subject`
   - this is a CI update. The PR name follows the format `[CI] my subject`
-
 
 ## What changes were proposed in this PR?
 
