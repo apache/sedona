@@ -2,7 +2,7 @@ import shutil
 import re
 from datetime import datetime
 from collections import defaultdict
-import subprocess
+import subprocess  # nosec B404
 
 
 def get_git_command():
@@ -17,7 +17,7 @@ def get_contributors():
     try:
         output = subprocess.check_output(
             [git, "shortlog", "-sne", "--all"], encoding="utf-8"
-        )
+        )  # nosec B603
     except subprocess.CalledProcessError as e:
         raise RuntimeError("Failed to get git shortlog output.") from e
 
@@ -63,7 +63,7 @@ def write_authors_file(contributors, filename="AUTHORS"):
     try:
         hash_output = subprocess.check_output(
             [git, "rev-parse", "--short", "HEAD"], encoding="utf-8"
-        ).strip()
+        ).strip()  # nosec
     except subprocess.CalledProcessError as e:
         raise RuntimeError("Failed to get git commit hash.") from e
 
