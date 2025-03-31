@@ -23,10 +23,10 @@ import org.apache.flink.table.functions.ScalarFunction;
 import org.apache.sedona.flink.confluent.GeometrySerde;
 import org.locationtech.jts.geom.Geometry;
 
-public class ST_Area extends ScalarFunction {
+public class ST_AreaSpheroid extends ScalarFunction {
   @DataTypeHint("Double")
   public Double eval(byte[] ewkb) {
     Geometry geom = GeometrySerde.deserialize(ewkb);
-    return org.apache.sedona.common.Functions.area(geom);
+    return org.apache.sedona.common.sphere.Spheroid.area(geom);
   }
 }

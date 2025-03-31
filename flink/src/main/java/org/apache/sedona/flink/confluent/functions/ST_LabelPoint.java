@@ -23,10 +23,25 @@ import org.apache.flink.table.functions.ScalarFunction;
 import org.apache.sedona.flink.confluent.GeometrySerde;
 import org.locationtech.jts.geom.Geometry;
 
-public class ST_Area extends ScalarFunction {
-  @DataTypeHint("Double")
-  public Double eval(byte[] ewkb) {
+public class ST_LabelPoint extends ScalarFunction {
+
+  public byte[] eval(byte[] ewkb) {
     Geometry geom = GeometrySerde.deserialize(ewkb);
-    return org.apache.sedona.common.Functions.area(geom);
+    return GeometrySerde.serialize(org.apache.sedona.common.Functions.labelPoint(geom));
+  }
+
+  public byte[] eval(byte[] ewkb, @DataTypeHint("Integer") Integer gridResolution) {
+    Geometry geom = GeometrySerde.deserialize(ewkb);
+    return GeometrySerde.serialize(
+        org.apache.sedona.common.Functions.labelPoint(geom, gridResolution));
+  }
+
+  public byte[] eval(
+      byte[] ewkb,
+      @DataTypeHint("Integer") Integer gridResolution,
+      @DataTypeHint("Double") Double goodnessThreshold) {
+    Geometry geom = GeometrySerde.deserialize(ewkb);
+    return GeometrySerde.serialize(
+        org.apache.sedona.common.Functions.labelPoint(geom, gridResolution, goodnessThreshold));
   }
 }

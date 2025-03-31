@@ -23,10 +23,11 @@ import org.apache.flink.table.functions.ScalarFunction;
 import org.apache.sedona.flink.confluent.GeometrySerde;
 import org.locationtech.jts.geom.Geometry;
 
-public class ST_Area extends ScalarFunction {
+public class ST_Azimuth extends ScalarFunction {
   @DataTypeHint("Double")
-  public Double eval(byte[] ewkb) {
-    Geometry geom = GeometrySerde.deserialize(ewkb);
-    return org.apache.sedona.common.Functions.area(geom);
+  public Double eval(byte[] ewkb1, byte[] ewkb2) {
+    Geometry geom1 = GeometrySerde.deserialize(ewkb1);
+    Geometry geom2 = GeometrySerde.deserialize(ewkb2);
+    return org.apache.sedona.common.Functions.azimuth(geom1, geom2);
   }
 }

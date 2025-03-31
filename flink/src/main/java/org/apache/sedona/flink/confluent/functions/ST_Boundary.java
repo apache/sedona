@@ -18,15 +18,14 @@
  */
 package org.apache.sedona.flink.confluent.functions;
 
-import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.functions.ScalarFunction;
 import org.apache.sedona.flink.confluent.GeometrySerde;
 import org.locationtech.jts.geom.Geometry;
 
-public class ST_Area extends ScalarFunction {
-  @DataTypeHint("Double")
-  public Double eval(byte[] ewkb) {
+public class ST_Boundary extends ScalarFunction {
+
+  public byte[] eval(byte[] ewkb) {
     Geometry geom = GeometrySerde.deserialize(ewkb);
-    return org.apache.sedona.common.Functions.area(geom);
+    return GeometrySerde.serialize(org.apache.sedona.common.Functions.boundary(geom));
   }
 }

@@ -15,6 +15,8 @@ import subprocess
 class FlinkSQLStatement:
     name: str
     status: str
+    full_metadata: str
+    status_detail: str | None = None
 
 
 def describe_flink_sql_statement(name: str, environment: str):
@@ -32,10 +34,13 @@ def describe_flink_sql_statement(name: str, environment: str):
     if result.returncode == 0:
         result = result.stdout
         metadata = json.loads(result)
+        status_detail = metadata.get("statusDetail", None)
 
         return FlinkSQLStatement(
             name=metadata["name"],
             status=metadata["status"],
+            full_metadata=result,
+            status_detail=status_detail
         )
 
     else:
@@ -66,11 +71,14 @@ def run_flink_sql_statement(sql: str, compute_pool: str, database: str, environm
             metadata_update = describe_flink_sql_statement(name, environment)
 
         if metadata_update.status == "FAILED":
-            typer.secho(f"Command failed for {function_name}", fg=typer.colors.RED)
+            status_detail = metadata_update.status_detail if metadata_update.status_detail else ""
+            full_metadata = metadata_update.full_metadata
+            typer.secho(f"Command failed for {function_name} {status_detail} {full_metadata}", fg=typer.colors.RED)
             return
 
         if metadata_update.status == "COMPLETED":
-            typer.secho(f"Command succeeded for {function_name}", fg=typer.colors.GREEN)
+            status_detail = metadata_update.status_detail if metadata_update.status_detail else ""
+            typer.secho(f"Command succeeded for {function_name} {status_detail}", fg=typer.colors.GREEN)
             return
 
     else:
@@ -103,7 +111,9 @@ def apply(
     for f in files:
         class_name = f.split("/")[-1].replace(".class", "")
 
-        sql = function_template.format(class_name, class_name, artifact_id)
+        location = "constructors" if "constructors" in f else "functions"
+
+        sql = function_template.format(class_name, location, class_name, artifact_id)
 
         tasks.append([sql, class_name])
 
