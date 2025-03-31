@@ -1226,8 +1226,6 @@ The main difference is what input data you get in the function
 Let's analyze the two examples below, that creates buffers from
 a given geometry.
 
-Make sure
-
 ### Shapely scalar UDF
 
 ```python
