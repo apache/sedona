@@ -100,12 +100,27 @@ public class RasterBandAccessorsTest extends RasterTestBase {
             0);
 
     Double actualZonalStats = RasterBandAccessors.getZonalStats(raster, extent, "mode");
-    assertNull(actualZonalStats);
+    assertEquals(10.0, actualZonalStats, FP_TOLERANCE);
 
     String actualZonalStatsAll =
         Arrays.toString(RasterBandAccessors.getZonalStatsAll(raster, extent));
-    String expectedZonalStatsAll = "[0.0, null, null, null, null, null, null, null, null]";
+    String expectedZonalStatsAll = "[1.0, 10.0, 10.0, 10.0, 10.0, 0.0, 0.0, 10.0, 10.0]";
     assertEquals(expectedZonalStatsAll, actualZonalStatsAll);
+  }
+
+  @Test
+  public void testZonalStatsForVerticalLineBug() throws Exception {
+    String wkt =
+        "POLYGON ((989675.3 221207.04013636176, 989675.3 221109.675, 989435.2175433404 221109.675, 989433.6550697018 221110.53743814293, 989419.3 221118.46099022447, 989419.3 221137.08165200218, 989449.9606422258 221192.9473339209, 989465.7613533186 221221.73707975633, 989508.9887178271 221300.49928501665, 989630.3976442496 221232.27312269452, 989639.3630089872 221227.23492283348, 989675.3 221207.04013636176))";
+
+    Geometry geom = Constructors.geomFromWKT(wkt, 2263);
+
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, 256, 256, 989419.3, 221365.675, 1, -1, 0, 0, 2263);
+
+    Double actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "mean", true);
+    Double expected = 0.0;
+    assertEquals(expected, actual, FP_TOLERANCE);
   }
 
   @Test
