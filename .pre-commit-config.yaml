@@ -205,7 +205,7 @@ repos:
               python/tests/tools\.py
           )$
       - id: requirements-txt-fixer
-        files: ^docker/requirements\.txt$
+        files: ^docker/requirements\.txt$|^requirements-docs\.txt$
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
         exclude: ^docs-overrides/main\.html$|\.Rd$
