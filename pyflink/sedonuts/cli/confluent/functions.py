@@ -12,7 +12,7 @@ def list_classes_in_jar(jar_file_path):
 
         class_files = [
             file for file in jar_contents
-            if file.endswith('.class') and "org/apache/sedona/flink/confluent/constructors" in file and "ST_" in file
+            if file.endswith('.class') and "org/apache/sedona/flink/confluent" in file and "ST_" in file
         ]
 
         return class_files

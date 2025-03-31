@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 import typer
 
-from sedonuts.cli.confluent.functions import list_functions
+from sedonuts.cli.confluent.functions import list_functions, download_jar
 from sedonuts.cli.confluent.template import function_template
 import concurrent.futures
 
@@ -39,12 +39,12 @@ def describe_flink_sql_statement(name: str, environment: str):
         )
 
     else:
-        print("Command failed:")
-        print(result.stderr)
+        typer.secho("command failed", fg=typer.colors.RED)
+        typer.secho(result.stderr, fg=typer.colors.RED)
 
 
 def run_flink_sql_statement(sql: str, compute_pool: str, database: str, environment: str, function_name: str):
-    print(f"Creating function for {function_name}")
+    typer.secho(f"Creating function for {function_name}", fg=typer.colors.GREEN)
     command = [
         'confluent', 'flink', 'statement', 'create', '--sql',
         sql, '--compute-pool', compute_pool, '--database', database,
@@ -66,17 +66,17 @@ def run_flink_sql_statement(sql: str, compute_pool: str, database: str, environm
             metadata_update = describe_flink_sql_statement(name, environment)
 
         if metadata_update.status == "FAILED":
-            print(f"Command failed for {function_name}")
+            typer.secho(f"Command failed for {function_name}", fg=typer.colors.RED)
             return
 
         if metadata_update.status == "COMPLETED":
-            print(f"Command succeeded for {function_name}")
+            typer.secho(f"Command succeeded for {function_name}", fg=typer.colors.GREEN)
             return
 
     else:
-        print("Command failed:")
-        print(result.stderr.strip()) # The standard error output
-        print("")
+        typer.secho("Command failed:", fg=typer.colors.RED)
+        typer.secho(result.stderr.strip(), fg=typer.colors.RED)
+        typer.secho("", fg=typer.colors.RED)
 
 
 def apply(
@@ -85,11 +85,18 @@ def apply(
         database: str = typer.Option(..., "--database", "-d", help="Database name"),
         compute_pool: str = typer.Option(..., "--compute-pool", "-c", help="Compute pool name"),
         environment: str = typer.Option(..., "--environment", "-e", help="Environment name"),
+        sedona_version: str = typer.Option(None, "--sedona-version", "-s", help="Sedona version"),
+        scala_version: str = typer.Option(None, "--scala-version", "-v", help="Scala version")
 ):
+    path = file
+
+    if not path:
+        path = download_jar(sedona_version=sedona_version, scala_version=scala_version)
+
     files = list_functions(
-        "1.8.0",
-        "2.12",
-        "/Users/pawelkocinski/Desktop/projects/sed/sedona/flink-shaded/target"
+        sedona_version,
+        scala_version,
+        path
     )
 
     tasks = []
