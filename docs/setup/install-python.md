@@ -1,4 +1,21 @@
-Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=docs/usecases) and play the interactive Sedona Python Jupyter Notebook immediately!
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ -->
 
 Apache Sedona extends pyspark functions which depends on libraries:
 
@@ -35,8 +52,7 @@ python3 setup.py install
 
 Sedona Python needs one additional jar file called `sedona-spark-shaded` or `sedona-spark` to work properly. Please make sure you use the correct version for Spark and Scala.
 
-* For Spark 3.0 to 3.3 and Scala 2.12, it is called `sedona-spark-shaded-3.0_2.12-{{ sedona.current_version }}.jar` or `sedona-spark-3.0_2.12-{{ sedona.current_version }}.jar`
-* For Spark 3.4+ and Scala 2.12, it is called `sedona-spark-shaded-3.4_2.12-{{ sedona.current_version }}.jar` or `sedona-spark-3.4_2.12-{{ sedona.current_version }}.jar`. If you are using Spark versions higher than 3.4, please replace the `3.4` in artifact names with the corresponding major.minor version numbers.
+Please use Spark major.minor version number in artifact names.
 
 You can get it using one of the following methods:
 
@@ -46,12 +62,20 @@ You can get it using one of the following methods:
 
 ```python
 from sedona.spark import *
-config = SedonaContext.builder(). \
-    config('spark.jars.packages',
-           'org.apache.sedona:sedona-spark-3.0_2.12:{{ sedona.current_version }},'
-           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
-    config('spark.jars.repositories', 'https://artifacts.unidata.ucar.edu/repository/unidata-all'). \
-    getOrCreate()
+
+config = (
+    SedonaContext.builder()
+    .config(
+        "spark.jars.packages",
+        "org.apache.sedona:sedona-spark-3.3_2.12:{{ sedona.current_version }},"
+        "org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}",
+    )
+    .config(
+        "spark.jars.repositories",
+        "https://artifacts.unidata.ucar.edu/repository/unidata-all",
+    )
+    .getOrCreate()
+)
 sedona = SedonaContext.create(config)
 ```
 
@@ -63,15 +87,18 @@ SedonaRegistrator is deprecated in Sedona 1.4.1 and later versions. Please use t
 from pyspark.sql import SparkSession
 from sedona.register import SedonaRegistrator
 from sedona.utils import SedonaKryoRegistrator, KryoSerializer
-spark = SparkSession. \
-    builder. \
-    appName('appName'). \
-    config("spark.serializer", KryoSerializer.getName). \
-    config("spark.kryo.registrator", SedonaKryoRegistrator.getName). \
-    config('spark.jars.packages',
-           'org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},'
-           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
-    getOrCreate()
+
+spark = (
+    SparkSession.builder.appName("appName")
+    .config("spark.serializer", KryoSerializer.getName)
+    .config("spark.kryo.registrator", SedonaKryoRegistrator.getName)
+    .config(
+        "spark.jars.packages",
+        "org.apache.sedona:sedona-spark-shaded-3.3_2.12:{{ sedona.current_version }},"
+        "org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}",
+    )
+    .getOrCreate()
+)
 SedonaRegistrator.registerAll(spark)
 ```
 

@@ -1,12 +1,31 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ -->
+
 # Contributing to Apache Sedona
 
 The project welcomes contributions. You can contribute to Sedona code or documentation by making Pull Requests on [Sedona GitHub Repo](https://github.com/apache/sedona).
 
 The following sections brief the workflow of how to complete a contribution.
 
-## Pick / Announce a task using JIRA
+## Pick / Announce a task
 
-It is important to confirm that your contribution is acceptable. You should create a JIRA ticket or pick an existing ticket. A new JIRA ticket will be automatically sent to `dev@sedona.apache.org`
+It is important to confirm that your contribution is acceptable. Before starting a contribution, you should announce your intention to the community via tickets. Sedona allows tickets from both [GitHub issues](https://github.com/apache/sedona/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen) and [JIRA](https://issues.apache.org/jira/projects/SEDONA). A new JIRA ticket will be automatically sent to `dev@sedona.apache.org`
 
 ## Develop a code contribution
 
@@ -35,7 +54,7 @@ Documentation contributions should satisfy the following requirements:
 
 After developing a contribution, the easiest and most visible way to submit a Pull Request (PR) to the [GitHub repo](https://github.com/apache/sedona).
 
-**Please use the JIRA ticket ID in the PR name, such as "[SEDONA-1] my subject".**
+**Please use the JIRA ticket ID or GitHub Issue ID in the PR name, such as "[SEDONA-1] my subject" or ""[GH-1] my subject".**
 
 When creating a PR, please answer the questions in the PR template.
 

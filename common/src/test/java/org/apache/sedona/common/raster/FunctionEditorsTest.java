@@ -32,7 +32,8 @@ import org.opengis.referencing.operation.TransformException;
 public class FunctionEditorsTest extends RasterTestBase {
 
   @Test
-  public void testSetValuesWithEmptyRaster() throws FactoryException {
+  public void testSetValuesWithEmptyRaster()
+      throws FactoryException, ParseException, TransformException {
     GridCoverage2D emptyRaster = RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 0);
     double[] values =
         new double[] {1, 1, 1, 0, 0, 0, 1, 2, 3, 3, 5, 6, 7, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 0, 0};
@@ -56,6 +57,41 @@ public class FunctionEditorsTest extends RasterTestBase {
           17.0, 18.0, 19.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
         };
     assertArrayEquals(actual, expected, 0.0);
+
+    // Test Rasterization with GeometryCollection
+    emptyRaster = RasterConstructors.makeEmptyRaster(1, 10, 10, 0, 0, 1, -1, 0, 0, 0);
+    String polygon =
+        "GEOMETRYCOLLECTION(POINT(1.5 -4.5), POINT(2 -2), MULTIPOINT((4 -4), (6 -6)), LINESTRING(1 -1, 8 -1), MULTILINESTRING((2 -8, 7 -8), (3 -6, 5 -6)), POLYGON((3 -3, 5 -3, 5 -5, 3 -5, 3 -3)), MULTIPOLYGON(((6 -2, 8 -2, 8 -4, 6 -4, 6 -2)),((1 -7, 2 -7, 2 -9, 1 -9, 1 -7))))";
+    Geometry geom = Constructors.geomFromWKT(polygon, 0);
+    GridCoverage2D result = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 10, false, false);
+    actual = MapAlgebra.bandAsArray(result, 1);
+    expected =
+        new double[] {
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0,
+          10.0, 0.0, 0.0, 0.0, 10.0, 10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10.0,
+          10.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.0, 10.0, 0.0, 10.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 10.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 10.0, 0.0,
+          0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 10.0,
+          10.0, 10.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        };
+    assertArrayEquals(actual, expected, 0.0);
+
+    // Test Rasterization on Polygons with holes
+    polygon =
+        "POLYGON ((2.5 -2.5, 7.5 -2.5, 7.5 -7.5, 2.5 -7.5, 2.5 -2.5), (4 -4, 6 -4, 6 -6, 4 -6, 4 -4))";
+    geom = Constructors.geomFromWKT(polygon, 0);
+    result = PixelFunctionEditors.setValues(emptyRaster, 1, geom, 10, false, false);
+    actual = MapAlgebra.bandAsArray(result, 1);
+    expected =
+        new double[] {
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 0.0, 0.0, 0.0, 0.0, 10.0, 10.0,
+          10.0, 10.0, 10.0, 10.0, 0.0, 0.0, 0.0, 0.0, 10.0, 10.0, 0.0, 0.0, 10.0, 10.0, 0.0, 0.0,
+          0.0, 0.0, 10.0, 10.0, 0.0, 0.0, 10.0, 10.0, 0.0, 0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 10.0,
+          10.0, 10.0, 0.0, 0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        };
+    assertArrayEquals(actual, expected, 0.0);
   }
 
   @Test
@@ -67,11 +103,18 @@ public class FunctionEditorsTest extends RasterTestBase {
         "POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 236722 4197590, 236722 4204770))";
     Geometry geom = Constructors.geomFromWKT(polygon, 26918);
 
-    GridCoverage2D result = PixelFunctionEditors.setValues(raster, 1, geom, 10, false);
+    GridCoverage2D result = PixelFunctionEditors.setValues(raster, 1, geom, 10, true, false);
 
-    Geometry point = Constructors.geomFromWKT("POINT (243700 4197797)", 26918);
+    Geometry point = Constructors.geomFromWKT("POINT (236698.272 4204794.5)", 26918);
     double actual = PixelFunctions.value(result, point, 1);
     double expected = 10.0;
+    assertEquals(expected, actual, 0d);
+
+    result = PixelFunctionEditors.setValues(raster, 1, geom, 10, false);
+
+    point = Constructors.geomFromWKT("POINT (243700 4197797)", 26918);
+    actual = PixelFunctions.value(result, point, 1);
+    expected = 10.0;
     assertEquals(expected, actual, 0d);
 
     point = Constructors.geomFromWKT("POINT (240311 4202806)", 26918);
@@ -92,11 +135,18 @@ public class FunctionEditorsTest extends RasterTestBase {
         "POLYGON ((-77.9148 37.9545, -77.9123 37.8898, -77.9938 37.8878, -77.9964 37.9524, -77.9148 37.9545))";
     Geometry geom = Constructors.geomFromWKT(polygon, 0);
 
-    GridCoverage2D result = PixelFunctionEditors.setValues(raster, 1, geom, 10, false);
+    GridCoverage2D result = PixelFunctionEditors.setValues(raster, 1, geom, 10, true, false);
 
     Geometry point = Constructors.geomFromWKT("POINT (-77.9146 37.8916)", 0);
     double actual = PixelFunctions.value(result, point, 1);
     double expected = 10.0;
+    assertEquals(expected, actual, 0d);
+
+    result = PixelFunctionEditors.setValues(raster, 1, geom, 10, false);
+
+    point = Constructors.geomFromWKT("POINT (-77.9146 37.8916)", 0);
+    actual = PixelFunctions.value(result, point, 1);
+    expected = 10.0;
     assertEquals(expected, actual, 0d);
 
     point = Constructors.geomFromWKT("POINT (-77.9549 37.9357)", 0);
@@ -113,11 +163,17 @@ public class FunctionEditorsTest extends RasterTestBase {
         "POLYGON ((-8682522.873537656 4572703.890837922, -8673439.664183248 4572993.532747675, -8673155.57366801 4563873.2099182755, -8701890.325907696 4562931.7093397, -8682522.873537656 4572703.890837922))";
     Geometry geom = Constructors.geomFromWKT(polygon, 3857);
 
-    GridCoverage2D result = PixelFunctionEditors.setValues(raster, 1, geom, 10, false);
+    GridCoverage2D result = PixelFunctionEditors.setValues(raster, 1, geom, 10, true, false);
 
     Geometry point = Constructors.geomFromWKT("POINT (243700 4197797)", 26918);
     double actual = PixelFunctions.value(result, point, 1);
     double expected = 10.0;
+    assertEquals(expected, actual, 0d);
+    result = PixelFunctionEditors.setValues(raster, 1, geom, 10, false);
+
+    point = Constructors.geomFromWKT("POINT (243700 4197797)", 26918);
+    actual = PixelFunctions.value(result, point, 1);
+    expected = 10.0;
     assertEquals(expected, actual, 0d);
 
     point = Constructors.geomFromWKT("POINT (235749.0869 4200557.7397)", 26918);
@@ -150,7 +206,7 @@ public class FunctionEditorsTest extends RasterTestBase {
     double[] actual = MapAlgebra.bandAsArray(raster, 1);
     double[] expected =
         new double[] {
-          4235.0, 0.0, 0.0, 0.0, 4235.0, 4235.0, 0.0, 0.0, 4235.0, 4235.0, 4235.0, 0.0, 4235.0, 0.0,
+          4235.0, 0.0, 0.0, 0.0, 4235.0, 4235.0, 0.0, 0.0, 4235.0, 0.0, 4235.0, 0.0, 4235.0, 0.0,
           0.0, 4235.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
         };
     assertArrayEquals(expected, actual, 0.1d);
@@ -161,7 +217,7 @@ public class FunctionEditorsTest extends RasterTestBase {
     actual = MapAlgebra.bandAsArray(raster, 1);
     expected =
         new double[] {
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 35.0, 0.0, 0.0,
           0.0, 35.0, 0.0, 0.0, 0.0, 0.0
         };
     assertArrayEquals(expected, actual, 0.1d);
@@ -172,8 +228,8 @@ public class FunctionEditorsTest extends RasterTestBase {
     actual = MapAlgebra.bandAsArray(raster, 1);
     expected =
         new double[] {
-          0.0, 400.0, 0.0, 0.0, 0.0, 400.0, 0.0, 0.0, 0.0, 0.0, 400.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 400.0
+          400.0, 400.0, 0.0, 0.0, 400.0, 400.0, 400.0, 0.0, 0.0, 400.0, 400.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 400.0, 400.0
         };
     assertArrayEquals(expected, actual, 0.1d);
 
@@ -183,7 +239,7 @@ public class FunctionEditorsTest extends RasterTestBase {
     actual = MapAlgebra.bandAsArray(raster, 1);
     expected =
         new double[] {
-          255.0, 255.0, 255.0, 0.0, 0.0, 255.0, 255.0, 255.0, 0.0, 0.0, 255.0, 255.0, 0.0, 0.0, 0.0,
+          255.0, 255.0, 255.0, 0.0, 0.0, 255.0, 255.0, 255.0, 0.0, 0.0, 255.0, 0.0, 0.0, 0.0, 0.0,
           255.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
         };
     assertArrayEquals(expected, actual, 0.1d);

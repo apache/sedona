@@ -1,10 +1,29 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ -->
+
 # Develop Sedona
 
 ## Scala/Java developers
 
 ### IDE
 
-We recommend [Intellij IDEA](https://www.jetbrains.com/idea/) with Scala plugin installed. Please make sure that the IDE has JDK 1.8 set as project default.
+We recommend [Intellij IDEA](https://www.jetbrains.com/idea/) with Scala plugin installed. Please make sure that the Project has the SDK set to a JDK 1.8.
 
 ### Import the project
 
@@ -51,7 +70,7 @@ Make sure you reload the `pom.xml` or reload the maven project. The IDE will ask
 
 In a terminal, go to the Sedona root folder. Run `mvn clean install`. All tests will take more than 15 minutes. To only build the project jars, run `mvn clean install -DskipTests`.
 !!!Note
-    `mvn clean install` will compile Sedona with Spark 3.0 and Scala 2.12. If you have a different version of Spark in $SPARK_HOME, make sure to specify that using -Dspark command line arg.
+    `mvn clean install` will compile Sedona with Spark 3.3 and Scala 2.12. If you have a different version of Spark in $SPARK_HOME, make sure to specify that using -Dspark command line arg.
     For example, to compile sedona with Spark 3.4 and Scala 2.12, use: `mvn clean install -Dspark=3.4 -Dscala=2.12`
 
 More details can be found on [Compile Sedona](../setup/compile.md)
@@ -100,6 +119,18 @@ sun.misc.Unsafe
 You can fix this issue by disabling `Use '--release' option for cross-compilation` in the IDE settings.
 
 ![Disable "Use '--release' option for cross-compilation" when using Java 11](../image/ide-java-13.png)
+
+### Run Tests with Different Spark/Scala Versions
+
+If you want to test changes with different Spark/Scala versions, you can select the Spark and Scala profile in the Maven panel. Once you have selected the desired versions, reload the sedona-parent project. See picture below
+
+!!!Note
+    The profile change won't update the module names in the IDE. Don't be misled if a module still has a `-3.3-2.12` suffix in the name.
+
+!!!Note
+    Not all combinations of spark and scala versions are supported and so they will fail to compile.
+
+![Select Spark and Scala Profiles](../image/ide-java-14.png)
 
 ## Python developers
 

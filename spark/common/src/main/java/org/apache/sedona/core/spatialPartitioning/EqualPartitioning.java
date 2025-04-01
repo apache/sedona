@@ -37,8 +37,19 @@ public class EqualPartitioning implements Serializable {
   /** The grids. */
   List<Envelope> grids = new ArrayList<Envelope>();
 
-  public EqualPartitioning(List<Envelope> grids) {
+  /**
+   * Whether to discard geometries that do not intersect any grid. If true, geometries that are not
+   * contained in a grid are placed into the overflow container.
+   */
+  Boolean preserveUncontainedGeometries;
+
+  public EqualPartitioning(List<Envelope> grids, boolean preserveUncontainedGeometries) {
     this.grids = grids;
+    this.preserveUncontainedGeometries = preserveUncontainedGeometries;
+  }
+
+  public EqualPartitioning(List<Envelope> grids) {
+    this(grids, true);
   }
   /**
    * Instantiates a new equal partitioning.
@@ -100,12 +111,12 @@ public class EqualPartitioning implements Serializable {
       if (grid.covers(envelope)) {
         result.add(new Tuple2(i, geometry));
         containFlag = true;
-      } else if (grid.intersects(envelope) || envelope.covers(grid)) {
+      } else if (grid.intersects(envelope)) {
         result.add(new Tuple2<>(i, geometry));
       }
     }
 
-    if (!containFlag) {
+    if (!containFlag && preserveUncontainedGeometries) {
       result.add(new Tuple2<>(overflowContainerID, geometry));
     }
 
@@ -133,7 +144,7 @@ public class EqualPartitioning implements Serializable {
       }
     }
 
-    if (!containFlag) {
+    if (!containFlag && preserveUncontainedGeometries) {
       result.add(overflowContainerID);
     }
     return result;

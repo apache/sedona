@@ -104,8 +104,8 @@ class AffineTransform:
 
     def __repr__(self):
         return (
-            "[ {} {} {}\n".format(self.scale_x, self.skew_x, self.ip_x)
-            + "  {} {} {}\n".format(self.skew_y, self.scale_y, self.ip_y)
+            f"[ {self.scale_x} {self.skew_x} {self.ip_x}\n"
+            + f"  {self.skew_y} {self.scale_y} {self.ip_y}\n"
             + "   0  0  1 ]"
         )
 

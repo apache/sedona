@@ -1,3 +1,22 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ -->
+
 # Publish a SNAPSHOT version
 
 This step is to publish Maven SNAPSHOTs to https://repository.apache.org
@@ -40,11 +59,11 @@ rm -f pom.xml.*
 mvn -q -B clean release:prepare -Dtag={{ sedona_create_release.current_git_tag }} -DreleaseVersion={{ sedona_create_release.current_version }} -DdevelopmentVersion={{ sedona_create_release.current_snapshot }} -Dresume=false -DdryRun=true -Penable-all-submodules -Darguments="-DskipTests"
 mvn -q -B release:clean -Penable-all-submodules
 
-# Spark 3.0 and Scala 2.12
-mvn -q deploy -DskipTests -Dspark=3.0 -Dscala=2.12
+# Spark 3.3 and Scala 2.12
+mvn -q deploy -DskipTests -Dspark=3.3 -Dscala=2.12
 
-# Spark 3.0 and Scala 2.13
-mvn -q deploy -DskipTests -Dspark=3.0 -Dscala=2.13
+# Spark 3.3 and Scala 2.13
+mvn -q deploy -DskipTests -Dspark=3.3 -Dscala=2.13
 
 # Spark 3.4 and Scala 2.12
 mvn -q deploy -DskipTests -Dspark=3.4 -Dscala=2.12

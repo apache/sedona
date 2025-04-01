@@ -315,7 +315,7 @@ class SedonaPyDeck:
         :return: fill_color string for pydeck map
         """
         plot_max = gdf[plot_col].max()
-        return "[85, 183, 177, ({0} / {1}) * 255 + 15]".format(plot_col, plot_max)
+        return f"[85, 183, 177, ({plot_col} / {plot_max}) * 255 + 15]"
 
     @classmethod
     def _create_coord_column_(cls, gdf, geometry_col):
@@ -385,7 +385,7 @@ def _try_import_pydeck() -> ModuleType:
         import pydeck as pdk
 
     except ImportError:
-        msg = "Install sedona[pydeck-map] to convert sedona dataframes to pydeck maps."
+        msg = "Install apache-sedona[pydeck-map] to convert sedona dataframes to pydeck maps."
         raise ImportError(msg) from None
 
     return pdk

@@ -1,3 +1,22 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ -->
+
 Starting from ==Sedona v1.0.1==, you can use Sedona in a pure Spark SQL environment. The example code is written in SQL.
 
 SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.md)
@@ -8,24 +27,16 @@ Start `spark-sql` as following (replace `<VERSION>` with actual version like `{{
 
 !!! abstract "Run spark-sql with Apache Sedona"
 
-	=== "Spark 3.0 to 3.3 and Scala 2.12"
+	=== "Spark 3.3+ and Scala 2.12"
 
         ```sh
-        spark-sql --packages org.apache.sedona:sedona-spark-shaded-3.0_2.12:<VERSION>,org.datasyslab:geotools-wrapper:<VERSION>-28.2 \
+        spark-sql --packages org.apache.sedona:sedona-spark-shaded-3.3_2.12:<VERSION>,org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }} \
           --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
           --conf spark.kryo.registrator=org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator \
           --conf spark.sql.extensions=org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions
         ```
 
-	=== "Spark 3.4+ and Scala 2.12"
-
-        ```sh
-        spark-sql --packages org.apache.sedona:sedona-spark-shaded-3.4_2.12:<VERSION>,org.datasyslab:geotools-wrapper:<VERSION>-28.2 \
-          --conf spark.serializer=org.apache.spark.serializer.KryoSerializer \
-          --conf spark.kryo.registrator=org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator \
-          --conf spark.sql.extensions=org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions
-        ```
-        If you are using Spark versions higher than 3.4, please replace the `3.4` in artifact names with the corresponding major.minor version of Spark.
+        Please replace the `3.3` in artifact names with the corresponding major.minor version of Spark.
 
 This will register all Sedona types, functions and optimizations in SedonaSQL and SedonaViz.
 

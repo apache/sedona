@@ -1,4 +1,23 @@
 
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ -->
+
 Sedona supports nearest-neighbour searching on geospatial data by providing a geospatial k-Nearest Neighbors (kNN) join method. This method involves identifying the k-nearest neighbors for a given spatial point or region based on geographic proximity, typically using spatial coordinates and a suitable distance metric like Euclidean or great-circle distance.
 
 ## ST_KNN
@@ -14,6 +33,12 @@ Queries side table contains geometries that are used to find the k-nearest neigh
 When either queries or objects data contain non-point data (geometries), we take the centroid of each geometry.
 
 In case there are ties in the distance, the result will include all the tied geometries only when the following sedona config is set to true:
+
+**Note for Inner Join:**
+
+- The `ST_KNN` join only supports left inner join.
+- It returns only pairs where there is at least one matching neighbor within the k nearest neighbors.
+- If a query point has no valid neighbor (e.g., because k is too large), it is excluded from the result.
 
 ```
 spark.sedona.join.knn.includeTieBreakers=true

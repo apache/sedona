@@ -1,0 +1,6 @@
+mike
+mkdocs
+mkdocs-git-revision-date-localized-plugin
+mkdocs-jupyter
+mkdocs-macros-plugin
+mkdocs-material

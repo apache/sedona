@@ -54,10 +54,12 @@ class PreserveSRIDSuite extends TestBaseScala with TableDrivenPropertyChecks {
       ("ST_SimplifyVW(geom1, 0.1)", 1000),
       ("ST_SimplifyPolygonHull(geom1, 0.5)", 1000),
       ("ST_SetSRID(geom1, 2000)", 2000),
+      ("ST_LabelPoint(geom1)", 1000),
       ("ST_LineMerge(geom2)", 1000),
       ("ST_StartPoint(geom3)", 1000),
       ("ST_Snap(geom3, geom3, 0.1)", 1000),
       ("ST_Boundary(geom1)", 1000),
+      ("ST_LineSegments(geom3)[0]", 1000),
       ("ST_LineSubstring(geom3, 0.1, 0.9)", 1000),
       ("ST_LineInterpolatePoint(geom3, 0.1)", 1000),
       ("ST_EndPoint(geom3)", 1000),
@@ -112,6 +114,8 @@ class PreserveSRIDSuite extends TestBaseScala with TableDrivenPropertyChecks {
       ("ST_Affine(geom1, 1, 2, 1, 2, 1, 2)", 1000),
       ("ST_BoundingDiagonal(geom1)", 1000),
       ("ST_DelaunayTriangles(geom4)", 1000),
+      ("ST_Scale(geom1, 1, 2)", 1000),
+      ("ST_ScaleGeom(geom1, geom6)", 1000),
       ("ST_Rotate(geom1, 10)", 1000),
       ("ST_RotateX(geom1, 10)", 1000),
       ("ST_Collect(geom1, geom2, geom3)", 1000),
@@ -141,7 +145,8 @@ class PreserveSRIDSuite extends TestBaseScala with TableDrivenPropertyChecks {
         StructField("geom2", GeometryUDT),
         StructField("geom3", GeometryUDT),
         StructField("geom4", GeometryUDT),
-        StructField("geom5", GeometryUDT)))
+        StructField("geom5", GeometryUDT),
+        StructField("geom6", GeometryUDT)))
     val geom1 = Constructors.geomFromWKT("POLYGON ((0 0, 1 0, 0.5 0.5, 1 1, 0 1, 0 0))", 1000)
     val geom2 =
       Constructors.geomFromWKT("MULTILINESTRING ((0 0, 0 1), (0 1, 1 1), (1 1, 1 0))", 1000)
@@ -155,7 +160,8 @@ class PreserveSRIDSuite extends TestBaseScala with TableDrivenPropertyChecks {
         |LINESTRING (2 2, 3 2, 4 2), LINESTRING (0 2, 1 3, 2 4),
         |LINESTRING (2 4, 3 3, 4 2))""".stripMargin,
       1000)
-    val rows = Seq(Row(geom1, geom2, geom3, geom4, geom5))
+    val geom6 = Constructors.geomFromWKT("POINT (1 2)", 1000)
+    val rows = Seq(Row(geom1, geom2, geom3, geom4, geom5, geom6))
     sparkSession.createDataFrame(rows.asJava, schema)
   }
 }

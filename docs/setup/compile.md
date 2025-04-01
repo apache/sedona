@@ -1,6 +1,25 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ -->
+
 # Compile Sedona source code
 
-[![Scala and Java build](https://github.com/apache/sedona/actions/workflows/java.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/java.yml) [![Python build](https://github.com/apache/sedona/actions/workflows/python.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/python.yml) [![R build](https://github.com/apache/sedona/actions/workflows/r.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/r.yml) [![Example project build](https://github.com/apache/sedona/actions/workflows/example.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/example.yml) [![Docs build](https://github.com/apache/sedona/actions/workflows/docs.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/docs.yml) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=docs/usecases)
+[![Scala and Java build](https://github.com/apache/sedona/actions/workflows/java.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/java.yml) [![Python build](https://github.com/apache/sedona/actions/workflows/python.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/python.yml) [![R build](https://github.com/apache/sedona/actions/workflows/r.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/r.yml) [![Example project build](https://github.com/apache/sedona/actions/workflows/example.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/example.yml) [![Docs build](https://github.com/apache/sedona/actions/workflows/docs.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/docs.yml)
 
 ## Compile Scala / Java source code
 
@@ -29,33 +48,25 @@ To compile all modules, please make sure you are in the root folder of all modul
 	Geotools jars will be packaged into the produced fat jars.
 
 !!!note
-	By default, this command will compile Sedona with Spark 3.0 and Scala 2.12
+	By default, this command will compile Sedona with Spark 3.3 and Scala 2.12
 
 ### Compile with different targets
 
 User can specify `-Dspark` and `-Dscala` command line options to compile with different targets. Available targets are:
 
-* `-Dspark`: `3.0` for Spark 3.0 to 3.3; `{major}.{minor}` for Spark 3.4 or later. For example, specify `-Dspark=3.4` to build for Spark 3.4.
+* `-Dspark`: `{major}.{minor}`: For example, specify `-Dspark=3.4` to build for Spark 3.4.
 * `-Dscala`: `2.12` or `2.13`
 
-=== "Spark 3.0 to 3.3 Scala 2.12"
+=== "Spark 3.3+ Scala 2.12"
 	```
-	mvn clean install -DskipTests -Dspark=3.0 -Dscala=2.12
+	mvn clean install -DskipTests -Dspark=3.3 -Dscala=2.12
 	```
-=== "Spark 3.4+ Scala 2.12"
-	```
-	mvn clean install -DskipTests -Dspark=3.4 -Dscala=2.12
-	```
-    Please replace `3.4` with Spark major.minor version when building for higher Spark versions.
-=== "Spark 3.0 to 3.3 Scala 2.13"
-	```
-	mvn clean install -DskipTests -Dspark=3.0 -Dscala=2.13
-	```
-=== "Spark 3.4+ Scala 2.13"
+    Please replace `3.3` with Spark major.minor version when building for higher Spark versions.
+=== "Spark 3.3+ Scala 2.13"
 	```
 	mvn clean install -DskipTests -Dspark=3.4 -Dscala=2.13
 	```
-    Please replace `3.4` with Spark major.minor version when building for higher Spark versions.
+    Please replace `3.3` with Spark major.minor version when building for higher Spark versions.
 
 !!!tip
 	To get the Sedona Spark Shaded jar with all GeoTools jars included, simply append `-Dgeotools` option. The command is like this:`mvn clean install -DskipTests -Dscala=2.12 -Dspark=3.0 -Dgeotools`

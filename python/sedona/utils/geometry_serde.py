@@ -42,9 +42,7 @@ try:
                     ".dll"
                 ):
                     return os.path.join(lib_dirpath, filename)
-        raise RuntimeError(
-            "geos_c DLL not found in {}\\[S|s]hapely.libs".format(packages_dir)
-        )
+        raise RuntimeError(f"geos_c DLL not found in {packages_dir}\\[S|s]hapely.libs")
 
     if shapely.__version__.startswith("2."):
         if sys.platform != "win32":

@@ -1,4 +1,24 @@
-Sedona has received numerous help from the community. This page lists the contributors and committers of Apache Sedona. People on this page are ordered by their last name.
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ -->
+
+Sedona has received numerous help from the community. This page lists the committers and project management committee of Apache Sedona.
+People on this page are ordered by their last name.
 
 ## Committers
 
@@ -10,25 +30,26 @@ A committer will be promoted to a PMC member when the community thinks he/she is
 
 Current Sedona PMC members are as follows:
 
-|        Name       |  GitHub ID  |        Apache ID       |
-|:-----------------:|:-----------:|:----------------------:|
-|    Adam Binford   | Kimahriman  |  kimahriman@apache.org |
-| Kanchan Chowdhury | kanchanchy  | kanchanchy@apache.org  |
-| Paweł Kociński    |  Imbruced   |   imbruced@apache.org  |
-|      Yitao Li     |  yitao-li   |   yitaoli@apache.org   |
-|   Netanel Malka   | netanel246  |    malka@apache.org    |
-| Kristin Cowalcijk | Kontinuation| kontinuation@apache.org|
-|   Mohamed Sarwat  |   Sarwat    |   mosarwat@apache.org  |
-| Kengo Seki        |   sekikn    | sekikn@apache.org      |
-|    Sachio Wakai   |  SW186000   |    swakai@apache.org   |
-|     Jinxuan Wu    | jinxuan     |   jinxuanw@apache.org  |
-|       Jia Yu      |  jiayuasu   |    jiayu@apache.org    |
-|    Zongsi Zhang   | zongsizhang | zongsizhang@apache.org |
-|     Felix Cheung     ||	felixcheung@apache.org |
-|     Von Gosling      || vongosling@apache.org |
-| Jean-Baptiste Onofré || jbonofre@apache.org |
-|   George Percivall   || percivall@apache.org |
-|     Sunil Govindan   ||sunilg@apache.org|
+|         Name         |  GitHub ID   |        Apache ID        |
+|:--------------------:|:------------:|:-----------------------:|
+|     Adam Binford     |  Kimahriman  |  kimahriman@apache.org  |
+|  Kanchan Chowdhury   |  kanchanchy  |  kanchanchy@apache.org  |
+|  Kristin Cowalcijk   | Kontinuation | kontinuation@apache.org |
+|     Furqaan Khan     | furqaankhan  |   furqaan@apache.org    |
+|    Paweł Kociński    |   Imbruced   |   imbruced@apache.org   |
+|       Yitao Li       |   yitao-li   |   yitaoli@apache.org    |
+|    Netanel Malka     |  netanel246  |    malka@apache.org     |
+|    Mohamed Sarwat    |    Sarwat    |   mosarwat@apache.org   |
+|      Kengo Seki      |    sekikn    |    sekikn@apache.org    |
+|     Sachio Wakai     |   SW186000   |    swakai@apache.org    |
+|      Jinxuan Wu      |   jinxuan    |   jinxuanw@apache.org   |
+|        Jia Yu        |   jiayuasu   |    jiayu@apache.org     |
+|     Zongsi Zhang     | zongsizhang  | zongsizhang@apache.org  |
+|     Felix Cheung     |              | felixcheung@apache.org  |
+|     Von Gosling      |              |  vongosling@apache.org  |
+|    Sunil Govindan    |              |    sunilg@apache.org    |
+| Jean-Baptiste Onofré |              |   jbonofre@apache.org   |
+|   George Percivall   |              |  percivall@apache.org   |
 
 ## Become a committer
 
@@ -38,16 +59,17 @@ The PMC regularly adds new committers from the active contributors, based on the
 
 * Sustained contributions to Sedona: Committers should have a history of major contributions to Sedona.
 * Quality of contributions: Committers more than any other community member should submit simple, well-tested, and well-designed patches. In addition, they should show sufficient expertise to be able to review patches.
-* Community involvement: Committers should have a constructive and friendly attitude in all community interactions. They should also be active on the dev mailing list & Gitter, and help mentor newer contributors and users.
+* Community involvement: Committers should have a constructive and friendly attitude in all community interactions. They should also be active on the dev mailing list & Discord, and help mentor newer contributors and users.
 
 The PMC also adds new PMC members. PMC members are expected to carry out PMC responsibilities as described in Apache Guidance, including helping vote on releases, enforce Apache project trademarks, take responsibility for legal and license issues, and ensure the project follows Apache project mechanics. The PMC periodically adds committers to the PMC who have shown they understand and can help with these activities.
 
 Current Sedona Committers are as follows:
 
-|        Name       |  GitHub ID  |        Apache ID       |
-|:-----------------:|:-----------:|:----------------------:|
-|  Nilesh Gajwani   | 	iGN5117  	 |  nilesh@apache.org     |
-|  Furqaan Khan   | 	furqaankhan  	 |  furqaan@apache.org     |
+|      Name      | GitHub ID |      Apache ID      |
+|:--------------:|:---------:|:-------------------:|
+|  John Bampton  | jbampton  | johnbam@apache.org  |
+| Nilesh Gajwani |  iGN5117  |  nilesh@apache.org  |
+|  Pranav Toggi  | prantogg  | prantogg@apache.org |
 
 ## Nominate a committer or PMC member
 
@@ -105,7 +127,7 @@ CC: private at sedona.apache.org
 Subject: [NOTICE] New PMC NAME for Apache Sedona PMC
 Body:
 
-New PMC NAME has been voted as a new member of the Apache Sedona PMC. the vote thread is at: *link to the vote result thread*
+New PMC NAME has been voted as a new member of the Apache Sedona PMC. The vote thread is at: *link to the vote result thread*
 ```
 
 ### Send the invitation
@@ -163,7 +185,7 @@ establishing you as a committer.
 
 ```
 
-### PMC Accept and ICLA instruction
+### PMC Accept and ICLA instructions
 
 ```
 To: New PMC Email address
@@ -241,11 +263,11 @@ A PMC member helps manage and guide the direction of the project.
 After the committer account is established.
 
 ```
-To: New PMC Email
+To: New Committer Email
 CC: private@sedona.apache.org
-Subject: account request: New PMC NAME
+Subject: account request: New Committer NAME
 
-New PMC NAME, as you know, the ASF Infrastructure has set up your
+New Committer NAME, as you know, the ASF Infrastructure has set up your
 committer account with the username '####'.
 
 You have commit access to specific sections of the

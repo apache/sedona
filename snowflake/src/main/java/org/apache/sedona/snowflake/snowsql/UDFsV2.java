@@ -102,6 +102,32 @@ public class UDFsV2 {
   }
 
   @UDFAnnotations.ParamMeta(
+      argNames = {"geom"},
+      argTypes = {"Geometry"},
+      returnTypes = "Geometry")
+  public static String ST_LabelPoint(String geom) {
+    return GeometrySerde.serGeoJson(Functions.labelPoint(GeometrySerde.deserGeoJson(geom)));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geom", "gridResolution"},
+      argTypes = {"Geometry", "int"},
+      returnTypes = "Geometry")
+  public static String ST_LabelPoint(String geom, int gridResolution) {
+    return GeometrySerde.serGeoJson(
+        Functions.labelPoint(GeometrySerde.deserGeoJson(geom), gridResolution));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geom", "gridResolution", "goodnessThreshold"},
+      argTypes = {"Geometry", "int", "double"},
+      returnTypes = "Geometry")
+  public static String ST_LabelPoint(String geom, int gridResolution, double goodnessThreshold) {
+    return GeometrySerde.serGeoJson(
+        Functions.labelPoint(GeometrySerde.deserGeoJson(geom), gridResolution, goodnessThreshold));
+  }
+
+  @UDFAnnotations.ParamMeta(
       argNames = {"geom1", "geom2"},
       argTypes = {"Geometry", "Geometry"})
   public static double ST_Angle(String geom1, String geom2) {
@@ -942,6 +968,54 @@ public class UDFsV2 {
   @UDFAnnotations.ParamMeta(
       argNames = {"geometry"},
       argTypes = {"Geometry"},
+      returnTypes = "double")
+  public static double ST_Perimeter(String geometry) {
+    return Functions.perimeter(GeometrySerde.deserGeoJson(geometry));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "use_spheroid"},
+      argTypes = {"Geometry", "boolean"},
+      returnTypes = "double")
+  public static double ST_Perimeter(String geometry, boolean use_spheroid) {
+    return Functions.perimeter(GeometrySerde.deserGeoJson(geometry), use_spheroid);
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "use_spheroid", "lenient"},
+      argTypes = {"Geometry", "boolean", "boolean"},
+      returnTypes = "double")
+  public static double ST_Perimeter(String geometry, boolean use_spheroid, boolean lenient) {
+    return Functions.perimeter(GeometrySerde.deserGeoJson(geometry), use_spheroid, lenient);
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry"},
+      argTypes = {"Geometry"},
+      returnTypes = "double")
+  public static double ST_Perimeter2D(String geometry) {
+    return Functions.perimeter(GeometrySerde.deserGeoJson(geometry));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "use_spheroid"},
+      argTypes = {"Geometry", "boolean"},
+      returnTypes = "double")
+  public static double ST_Perimeter2D(String geometry, boolean use_spheroid) {
+    return Functions.perimeter(GeometrySerde.deserGeoJson(geometry), use_spheroid);
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "use_spheroid", "lenient"},
+      argTypes = {"Geometry", "boolean", "boolean"},
+      returnTypes = "double")
+  public static double ST_Perimeter2D(String geometry, boolean use_spheroid, boolean lenient) {
+    return Functions.perimeter(GeometrySerde.deserGeoJson(geometry), use_spheroid, lenient);
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry"},
+      argTypes = {"Geometry"},
       returnTypes = "Geometry")
   public static String ST_PointOnSurface(String geometry) {
     return GeometrySerde.serGeoJson(Functions.pointOnSurface(GeometrySerde.deserGeoJson(geometry)));
@@ -1533,6 +1607,37 @@ public class UDFsV2 {
   public static String ST_Translate(String geom, double deltaX, double deltaY, double deltaZ) {
     return GeometrySerde.serGeoJson(
         Functions.translate(GeometrySerde.deserGeoJson(geom), deltaX, deltaY, deltaZ));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "scaleX", "scaleY"},
+      argTypes = {"Geometry", "double", "double"},
+      returnTypes = "Geometry")
+  public static String ST_Scale(String geometry, double scaleX, double scaleY) {
+    return GeometrySerde.serGeoJson(
+        Functions.scale(GeometrySerde.deserGeoJson(geometry), scaleX, scaleY));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "factor", "origin"},
+      argTypes = {"Geometry", "Geometry", "Geometry"},
+      returnTypes = "Geometry")
+  public static String ST_ScaleGeom(String geometry, String factor, String origin) {
+    return GeometrySerde.serGeoJson(
+        Functions.scaleGeom(
+            GeometrySerde.deserGeoJson(geometry),
+            GeometrySerde.deserGeoJson(factor),
+            GeometrySerde.deserGeoJson(origin)));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "factor"},
+      argTypes = {"Geometry", "Geometry"},
+      returnTypes = "Geometry")
+  public static String ST_ScaleGeom(String geometry, String factor) {
+    return GeometrySerde.serGeoJson(
+        Functions.scaleGeom(
+            GeometrySerde.deserGeoJson(geometry), GeometrySerde.deserGeoJson(factor)));
   }
 
   @UDFAnnotations.ParamMeta(

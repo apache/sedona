@@ -42,6 +42,7 @@ import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
+import org.apache.spark.sql.types.StructType;
 import org.apache.spark.storage.StorageLevel;
 import org.apache.spark.util.random.SamplingUtils;
 import org.locationtech.jts.geom.Coordinate;
@@ -85,6 +86,8 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
   public JavaRDD<T> rawSpatialRDD;
 
   public List<String> fieldNames;
+
+  public StructType schema;
   /** The CR stransformation. */
   protected boolean CRStransformation = false;
   /** The source epsg code. */
@@ -159,11 +162,71 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
     return true;
   }
 
+  public boolean spatialPartitioningWithoutDuplicates(GridType gridType) throws Exception {
+    int numPartitions = this.rawSpatialRDD.rdd().partitions().length;
+    spatialPartitioningWithoutDuplicates(gridType, numPartitions);
+    return true;
+  }
+
+  /**
+   * Calculate non-duplicate inducing partitioning
+   *
+   * <p>Note that non-duplicating partitioners are intended for use by distributed partitioned
+   * writers and not able to be used for spatial joins.
+   *
+   * @param gridType The target GridType
+   * @param numPartitions The target number of partitions
+   * @throws Exception
+   */
+  public void spatialPartitioningWithoutDuplicates(GridType gridType, int numPartitions)
+      throws Exception {
+    calc_partitioner(gridType, numPartitions);
+    partitioner = new GenericUniquePartitioner(partitioner);
+    this.spatialPartitionedRDD = partition(partitioner);
+  }
+
+  /**
+   * Calculate non-duplicate inducing partitioning from an existing SpatialPartitioner
+   *
+   * <p>Note that non-duplicating partitioners are intended for use by distributed partitioned
+   * writers and not able to be used for spatial joins.
+   *
+   * @param partitioner An existing partitioner obtained from the partitioning of another
+   *     SpatialRDD.
+   * @throws Exception
+   */
+  public void spatialPartitioningWithoutDuplicates(SpatialPartitioner partitioner) {
+    partitioner = new GenericUniquePartitioner(partitioner);
+    this.spatialPartitionedRDD = partition(partitioner);
+  }
+
+  /**
+   * Calculate non-duplicate inducing partitioning based on a list of existing envelopes
+   *
+   * <p>This is shorthand for spatialPartitioningWithoutDuplicates(new IndexedGridPartitioner()).
+   * Using spatialPartitioningWithoutDuplicates(gridType, numPartitions) is typically more
+   * appropriate because it is able to adapt to the content of the partition and is able to produce
+   * more consistently balanced partitions.
+   *
+   * <p>Note that non-duplicating partitioners are intended for use by distributed partitioned
+   * writers and not able to be used for spatial joins.
+   *
+   * @param otherGrids A list of existing envelopes
+   * @return true on success
+   * @throws Exception
+   */
+  public boolean spatialPartitioningWithoutDuplicates(final List<Envelope> otherGrids)
+      throws Exception {
+    this.partitioner = new GenericUniquePartitioner(new IndexedGridPartitioner(otherGrids));
+    this.spatialPartitionedRDD = partition(partitioner);
+    return true;
+  }
+
   /**
    * Spatial partitioning.
    *
    * @param gridType the grid type
-   * @return true, if successful
+   * @param numPartitions the target number of partitions
    * @throws Exception the exception
    */
   public void calc_partitioner(GridType gridType, int numPartitions) throws Exception {
@@ -278,7 +341,7 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
 
   /** @deprecated Use spatialPartitioning(SpatialPartitioner partitioner) */
   public boolean spatialPartitioning(final List<Envelope> otherGrids) throws Exception {
-    this.partitioner = new FlatGridPartitioner(otherGrids);
+    this.partitioner = new IndexedGridPartitioner(otherGrids);
     this.spatialPartitionedRDD = partition(partitioner);
     return true;
   }

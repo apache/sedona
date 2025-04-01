@@ -1,8 +1,27 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ -->
+
 !!!note
     Sedona uses 1-based indexing for all raster functions except [map algebra function](../api/sql/Raster-map-algebra.md), which uses 0-based indexing.
 
 !!!note
-    Since v`1.5.0`, Sedona assumes geographic coordinates to be in longitude/latitude order. If your data is lat/lon order, please use `ST_FlipCoordinates` to swap X and Y.
+    Sedona assumes geographic coordinates to be in longitude/latitude order. If your data is lat/lon order, please use `ST_FlipCoordinates` to swap X and Y.
 
 Starting from `v1.1.0`, Sedona SQL supports raster data sources and raster operators in DataFrame and SQL. Raster support is available in all Sedona language bindings including ==Scala, Java, Python, and R==.
 
@@ -42,13 +61,11 @@ Detailed SedonaSQL APIs are available here: [SedonaSQL API](../api/sql/Overview.
 === "Python"
 
 	1. Please read [Quick start](../setup/install-python.md) to install Sedona Python.
-	2. This tutorial is based on [Sedona SQL Jupyter Notebook example](jupyter-notebook.md). You can interact with Sedona Python Jupyter Notebook immediately on Binder. Click [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/apache/sedona/HEAD?filepath=docs/usecases) to interact with Sedona Python Jupyter notebook immediately on Binder.
+	2. This tutorial is based on [Sedona SQL Jupyter Notebook example](jupyter-notebook.md).
 
 ## Create Sedona config
 
 Use the following code to create your Sedona config at the beginning. If you already have a SparkSession (usually named `spark`) created by Wherobots/AWS EMR/Databricks, please skip this step and use `spark` directly.
-
-==Sedona >= 1.4.1==
 
 You can add additional Spark runtime config to the config builder. For example, `SedonaContext.builder().config("spark.sql.autoBroadcastJoinThreshold", "10485760")`
 
@@ -89,70 +106,15 @@ You can add additional Spark runtime config to the config builder. For example, 
 
 	config = SedonaContext.builder() .\
 	    config('spark.jars.packages',
-	           'org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},'
+	           'org.apache.sedona:sedona-spark-shaded-3.3_2.12:{{ sedona.current_version }},'
 	           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
 	    getOrCreate()
 	```
-    If you are using Spark versions >= 3.4, please replace the `3.0` in the package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
-
-==Sedona < 1.4.1==
-
-The following method has been deprecated since Sedona 1.4.1. Please use the method above to create your Sedona config.
-
-=== "Scala"
-
-	```scala
-	var sparkSession = SparkSession.builder()
-	.master("local[*]") // Delete this if run in cluster mode
-	.appName("readTestScala") // Change this to a proper name
-	// Enable Sedona custom Kryo serializer
-	.config("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
-	.config("spark.kryo.registrator", classOf[SedonaKryoRegistrator].getName)
-	.getOrCreate() // org.apache.sedona.core.serde.SedonaKryoRegistrator
-	```
-	If you use SedonaViz together with SedonaSQL, please use the following two lines to enable Sedona Kryo serializer instead:
-	```scala
-	.config("spark.serializer", classOf[KryoSerializer].getName) // org.apache.spark.serializer.KryoSerializer
-	.config("spark.kryo.registrator", classOf[SedonaVizKryoRegistrator].getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
-	```
-
-=== "Java"
-
-	```java
-	SparkSession sparkSession = SparkSession.builder()
-	.master("local[*]") // Delete this if run in cluster mode
-	.appName("readTestScala") // Change this to a proper name
-	// Enable Sedona custom Kryo serializer
-	.config("spark.serializer", KryoSerializer.class.getName) // org.apache.spark.serializer.KryoSerializer
-	.config("spark.kryo.registrator", SedonaKryoRegistrator.class.getName)
-	.getOrCreate() // org.apache.sedona.core.serde.SedonaKryoRegistrator
-	```
-	If you use SedonaViz together with SedonaSQL, please use the following two lines to enable Sedona Kryo serializer instead:
-	```scala
-	.config("spark.serializer", KryoSerializer.class.getName) // org.apache.spark.serializer.KryoSerializer
-	.config("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName) // org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
-	```
-
-=== "Python"
-
-	```python
-	sparkSession = SparkSession. \
-	    builder. \
-	    appName('appName'). \
-	    config("spark.serializer", KryoSerializer.getName). \
-	    config("spark.kryo.registrator", SedonaKryoRegistrator.getName). \
-	    config('spark.jars.packages',
-	           'org.apache.sedona:sedona-spark-shaded-3.0_2.12:{{ sedona.current_version }},'
-	           'org.datasyslab:geotools-wrapper:{{ sedona.current_geotools }}'). \
-	    getOrCreate()
-	```
-    If you are using Spark versions >= 3.4, please replace the `3.0` in the package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
+    Please replace the `3.3` in the package name of sedona-spark-shaded with the corresponding major.minor version of Spark, such as `sedona-spark-shaded-3.4_2.12:{{ sedona.current_version }}`.
 
 ## Initiate SedonaContext
 
 Add the following line after creating the Sedona config. If you already have a SparkSession (usually named `spark`) created by Wherobots/AWS EMR/Databricks, please call `SedonaContext.create(spark)` instead.
-
-==Sedona >= 1.4.1==
 
 === "Scala"
 
@@ -176,30 +138,6 @@ Add the following line after creating the Sedona config. If you already have a S
 	from sedona.spark import *
 
 	sedona = SedonaContext.create(config)
-	```
-
-==Sedona < 1.4.1==
-
-The following method has been deprecated since Sedona 1.4.1. Please use the method above to create your SedonaContext.
-
-=== "Scala"
-
-	```scala
-	SedonaSQLRegistrator.registerAll(sparkSession)
-	```
-
-=== "Java"
-
-	```java
-	SedonaSQLRegistrator.registerAll(sparkSession)
-	```
-
-=== "Python"
-
-	```python
-	from sedona.register import SedonaRegistrator
-
-	SedonaRegistrator.registerAll(spark)
 	```
 
 You can also register everything by passing `--conf spark.sql.extensions=org.apache.sedona.sql.SedonaSqlExtensions` to `spark-submit` or `spark-shell`.
@@ -260,7 +198,12 @@ For multiple raster data files use the following code to load the data [from pat
 
 === "Python"
     ```python
-    rawDf = sedona.read.format("binaryFile").option("recursiveFileLookup", "true").option("pathGlobFilter", "*.tif*").load(path_to_raster_data_folder)
+    rawDf = (
+        sedona.read.format("binaryFile")
+        .option("recursiveFileLookup", "true")
+        .option("pathGlobFilter", "*.tif*")
+        .load(path_to_raster_data_folder)
+    )
     rawDf.createOrReplaceTempView("rawdf")
     rawDf.show()
     ```
@@ -589,7 +532,11 @@ Sedona allows collecting Dataframes with raster columns and working with them lo
 The raster objects are represented as `SedonaRaster` objects in Python, which can be used to perform raster operations.
 
 ```python
-df_raster = sedona.read.format("binaryFile").load("/path/to/raster.tif").selectExpr("RS_FromGeoTiff(content) as rast")
+df_raster = (
+    sedona.read.format("binaryFile")
+    .load("/path/to/raster.tif")
+    .selectExpr("RS_FromGeoTiff(content) as rast")
+)
 rows = df_raster.collect()
 raster = rows[0].rast
 raster  # <sedona.raster.sedona_raster.InDbSedonaRaster at 0x1618fb1f0>
@@ -598,27 +545,30 @@ raster  # <sedona.raster.sedona_raster.InDbSedonaRaster at 0x1618fb1f0>
 You can retrieve the metadata of the raster by accessing the properties of the `SedonaRaster` object.
 
 ```python
-raster.width        # width of the raster
-raster.height       # height of the raster
-raster.affine_trans # affine transformation matrix
-raster.crs_wkt      # coordinate reference system as WKT
+raster.width  # width of the raster
+raster.height  # height of the raster
+raster.affine_trans  # affine transformation matrix
+raster.crs_wkt  # coordinate reference system as WKT
 ```
 
 You can get a numpy array containing the band data of the raster using the `as_numpy` or `as_numpy_masked` method. The
 band data is organized in CHW order.
 
 ```python
-raster.as_numpy()        # numpy array of the raster
-raster.as_numpy_masked() # numpy array with nodata values masked as nan
+raster.as_numpy()  # numpy array of the raster
+raster.as_numpy_masked()  # numpy array with nodata values masked as nan
 ```
 
 If you want to work with the raster data using `rasterio`, you can retrieve a `rasterio.DatasetReader` object using the
 `as_rasterio` method.
 
+!!!note
+    You need to have the `rasterio` package installed (version >= 1.2.10) to use this method. You can install it using `pip install rasterio`.
+
 ```python
 ds = raster.as_rasterio()  # rasterio.DatasetReader object
 # Work with the raster using rasterio
-band1 = ds.read(1)         # read the first band
+band1 = ds.read(1)  # read the first band
 ```
 
 ## Writing Python UDF to work with raster data
@@ -629,8 +579,10 @@ return any Spark data type as output. This is an example of a Python UDF that ca
 ```python
 from pyspark.sql.types import DoubleType
 
+
 def mean_udf(raster):
     return float(raster.as_numpy().mean())
+
 
 sedona.udf.register("mean_udf", mean_udf, DoubleType())
 df_raster.withColumn("mean", expr("mean_udf(rast)")).show()
@@ -652,13 +604,17 @@ objects yet. However, you can write a UDF that returns the band data as an array
 from pyspark.sql.types import ArrayType, DoubleType
 import numpy as np
 
+
 def mask_udf(raster):
-    band1 = raster.as_numpy()[0,:,:]
+    band1 = raster.as_numpy()[0, :, :]
     mask = (band1 < 1400).astype(np.float64)
     return mask.flatten().tolist()
 
+
 sedona.udf.register("mask_udf", band_udf, ArrayType(DoubleType()))
-df_raster.withColumn("mask", expr("mask_udf(rast)")).withColumn("mask_rast", expr("RS_MakeRaster(rast, 'I', mask)")).show()
+df_raster.withColumn("mask", expr("mask_udf(rast)")).withColumn(
+    "mask_rast", expr("RS_MakeRaster(rast, 'I', mask)")
+).show()
 ```
 
 ```

@@ -1,3 +1,22 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ -->
+
 # Work with GeoPandas and Shapely
 
 !!! note
@@ -48,6 +67,25 @@ This query will show the following outputs:
 
 ```
 
+To leverage Arrow optimization and speed up the conversion, you can use the `create_spatial_dataframe`
+that takes a SparkSession and GeoDataFrame as parameters and returns a Sedona DataFrame.
+
+```python
+def create_spatial_dataframe(spark: SparkSession, gdf: gpd.GeoDataFrame) -> DataFrame
+```
+
+- spark: SparkSession
+- gdf: gpd.GeoDataFrame
+- return: DataFrame
+
+Example:
+
+```python
+from sedona.utils.geoarrow import create_spatial_dataframe
+
+create_spatial_dataframe(spark, gdf)
+```
+
 ### From Sedona DataFrame to GeoPandas
 
 Reading data with Spark and converting to GeoPandas
@@ -95,6 +133,26 @@ gdf.plot(
 
 <br>
 <br>
+
+You may also wish to try converting to GeoPandas via GeoArrow, which can be
+significantly faster for large results (requires geopandas >= 1.0).
+
+```python
+import geopandas as gpd
+from sedona.spark import dataframe_to_arrow
+
+config = SedonaContext.builder().
+	getOrCreate()
+
+sedona = SedonaContext.create(config)
+
+test_wkt = ["POINT (0 1)", "LINESTRING (0 1, 2 3)"]
+df = sedona.createDataFrame(zip(test_wkt), ["wkt"]).selectExpr(
+    "ST_GeomFromText(wkt) as geom"
+)
+
+gpd.GeoDataFrame.from_arrow(dataframe_to_arrow(df))
+```
 
 ## Interoperate with shapely objects
 

@@ -45,4 +45,15 @@ public class InscribedCircle {
         && this.nearest.equals(other.nearest)
         && Math.abs(this.radius - other.radius) < epsilon;
   }
+
+  public boolean equals(Object obj) {
+    if (obj == this) {
+      return true;
+    }
+    if (obj == null || obj.getClass() != this.getClass()) {
+      return false;
+    }
+    InscribedCircle other = (InscribedCircle) obj;
+    return this.equals(other);
+  }
 }

@@ -18,6 +18,7 @@
 import math
 from typing import List
 
+import pytest
 from pyspark.sql import DataFrame, Row
 from pyspark.sql.functions import col, explode, expr
 from pyspark.sql.types import IntegerType, StructField, StructType
@@ -52,6 +53,25 @@ class TestPredicateJoin(TestBase):
             StructField("geomB", GeometryType(), False),
         ]
     )
+
+    def test_ST_LabelPoint(self):
+        geom_expr = "ST_GeomFromWKT('POLYGON ((-112.637484 33.440546, -112.546852 33.477209, -112.489177 33.550488, -112.41777 33.751684, -111.956371 33.719707, -111.766868 33.616843, -111.775107 33.527595, -111.640533 33.504695, -111.440044 33.463462, -111.415326 33.374055, -111.514197 33.309809, -111.643279 33.222542, -111.893203 33.174278, -111.96461 33.250109, -112.123903 33.261593, -112.252985 33.35341, -112.406784 33.346527, -112.667694 33.316695, -112.637484 33.440546))')"
+        function_df = self.spark.sql(f"select ST_LabelPoint({geom_expr})")
+        actual = function_df.take(1)[0][0]
+        expected = "POINT (-112.04278737349767 33.46420809489905)"
+        self.assert_geometry_almost_equal(expected, actual, 0.1)
+
+        geom_expr = "ST_GeomFromWKT('GEOMETRYCOLLECTION(POLYGON ((-112.840785 33.435962, -112.840785 33.708284, -112.409597 33.708284, -112.409597 33.435962, -112.840785 33.435962)), POLYGON ((-112.309264 33.398167, -112.309264 33.746007, -111.787444 33.746007, -111.787444 33.398167, -112.309264 33.398167)))')"
+        function_df = self.spark.sql(f"select ST_LabelPoint({geom_expr}, 1)")
+        actual = function_df.take(1)[0][0]
+        expected = "POINT (-112.04835399999999 33.57208699999999)"
+        self.assert_geometry_almost_equal(expected, actual, 0.1)
+
+        geom_expr = "ST_GeomFromWKT('POLYGON ((-112.654072 33.114485, -112.313516 33.653431, -111.63515 33.314399, -111.497829 33.874913, -111.692825 33.431378, -112.376684 33.788215, -112.654072 33.114485))')"
+        function_df = self.spark.sql(f"select ST_LabelPoint({geom_expr}, 1, 0.1)")
+        actual = function_df.take(1)[0][0]
+        expected = "POINT (-112.0722602222832 33.53914975012836)"
+        self.assert_geometry_almost_equal(expected, actual, 0.1)
 
     def test_st_concave_hull(self):
         polygon_wkt_df = (
@@ -98,57 +118,30 @@ class TestPredicateJoin(TestBase):
         function_df.show()
 
     def test_st_buffer(self):
-        polygon_from_wkt = (
-            self.spark.read.format("csv")
-            .option("delimiter", "\t")
-            .option("header", "false")
-            .load(mixed_wkt_geometry_input_location)
-        )
+        geom_expr = "ST_GeomFromWKT('LINESTRING(0 0, 10 10)')"
+        function_df = self.spark.sql(f"select ST_Buffer({geom_expr}, 1)")
+        actual = function_df.take(1)[0][0]
+        expected = "POLYGON ((9.292893218813452 10.707106781186548, 9.444429766980399 10.831469612302545, 9.61731656763491 10.923879532511286, 9.804909677983872 10.98078528040323, 10 11, 10.195090322016128 10.98078528040323, 10.38268343236509 10.923879532511286, 10.555570233019603 10.831469612302545, 10.707106781186548 10.707106781186548, 10.831469612302545 10.555570233019601, 10.923879532511286 10.38268343236509, 10.98078528040323 10.195090322016128, 11 10, 10.98078528040323 9.804909677983872, 10.923879532511286 9.61731656763491, 10.831469612302545 9.444429766980399, 10.707106781186548 9.292893218813452, 0.7071067811865475 -0.7071067811865475, 0.5555702330196023 -0.8314696123025452, 0.3826834323650898 -0.9238795325112867, 0.1950903220161283 -0.9807852804032304, 0 -1, -0.1950903220161282 -0.9807852804032304, -0.3826834323650897 -0.9238795325112867, -0.555570233019602 -0.8314696123025453, -0.7071067811865475 -0.7071067811865476, -0.8314696123025453 -0.5555702330196022, -0.9238795325112867 -0.3826834323650899, -0.9807852804032304 -0.1950903220161286, -1 0, -0.9807852804032304 0.1950903220161284, -0.9238795325112867 0.3826834323650896, -0.8314696123025455 0.555570233019602, -0.7071067811865475 0.7071067811865475, 9.292893218813452 10.707106781186548))"
+        self.assert_geometry_almost_equal(expected, actual, 0.1)
 
-        polygon_from_wkt.createOrReplaceTempView("polygontable")
-        polygon_from_wkt.show()
-
-        polygon_df = self.spark.sql(
-            "select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable"
-        )
-        polygon_df.createOrReplaceTempView("polygondf")
-        polygon_df.show()
+        function_df = self.spark.sql(f"select ST_Buffer({geom_expr}, 1, true)")
+        actual = function_df.take(1)[0][0]
+        expected = "POLYGON ((9.999993652864127 10.0000063012992, 9.999995015003332 10.000007407644903, 9.999996568713167 10.00000822931893, 9.999998254285428 10.00000873474483, 10.000000006944521 10.000008904499353, 10.000001759336742 10.000008732058928, 10.000003444118638 10.000008224050353, 10.000004996544984 10.000007399996127, 10.000006356956911 10.000006291564157, 10.000007473074547 10.000004941350873, 10.00000830200612 10.000003401244212, 10.000008811896254 10.000001730429604, 10.000008983150158 9.999999993115512, 10.000008809186637 9.999998256065968, 10.000008296691016 9.999996586034781, 10.000007465358209 9.999995047200317, 10.000006347135875 9.99999369869915, 0.0000063471358746 -0.0000063997976682, 0.0000049849966679 -0.0000075234370537, 0.0000034312868348 -0.0000083579549476, 0.000001745714573 -0.0000088712813465, -0.0000000069445209 -0.000009043689356, -0.0000017593367407 -0.000008868553461, -0.0000034441186362 -0.0000083526040333, -0.000004996544984 -0.0000075156687142, -0.0000063569569102 -0.0000063899104433, -0.0000074730745473 -0.0000050185915196, -0.0000083020061205 -0.0000034544109354, -0.0000088118962544 -0.0000017574792784, -0.0000089831501569 0.0000000069910119, -0.0000088091866368 0.0000017711932577, -0.0000082966910144 0.0000034673292289, -0.0000074653582092 0.000005030217681, -0.0000063471358746 0.000006399797681, 9.999993652864127 10.0000063012992))"
+        self.assert_geometry_almost_equal(expected, actual, 0.1)
 
         function_df = self.spark.sql(
-            "select ST_ReducePrecision(ST_Buffer(polygondf.countyshape, 1), 2) from polygondf"
+            f"select ST_Buffer({geom_expr}, 10, false, 'endcap=square')"
         )
-        actual = function_df.take(1)[0][0].wkt
-        assert (
-            actual
-            == "POLYGON ((-98.02 41.77, -98.02 41.78, -98.02 41.8, -98.02 41.81, -98.02 41.82, -98.02 41.83, -98.02 41.84, -98.02 41.85, -98.02 41.86, -98.02 41.87, -98.02 41.89, -98.02 41.9, -98.02 41.91, -98.02 41.92, -98.02 41.93, -98.02 41.95, -98.02 41.98, -98.02 42, -98.02 42.01, -98.02 42.02, -98.02 42.04, -98.02 42.05, -98.02 42.07, -98.02 42.09, -98.02 42.11, -98.02 42.12, -97.99 42.31, -97.93 42.5, -97.84 42.66, -97.72 42.81, -97.57 42.93, -97.4 43.02, -97.21 43.07, -97.02 43.09, -97 43.09, -96.98 43.09, -96.97 43.09, -96.96 43.09, -96.95 43.09, -96.94 43.09, -96.92 43.09, -96.91 43.09, -96.89 43.09, -96.88 43.09, -96.86 43.09, -96.84 43.09, -96.83 43.09, -96.82 43.09, -96.81 43.09, -96.8 43.09, -96.79 43.09, -96.78 43.09, -96.76 43.09, -96.74 43.09, -96.73 43.09, -96.71 43.09, -96.7 43.09, -96.69 43.09, -96.68 43.09, -96.66 43.09, -96.65 43.09, -96.64 43.09, -96.63 43.09, -96.62 43.09, -96.61 43.09, -96.6 43.09, -96.59 43.09, -96.58 43.09, -96.57 43.09, -96.56 43.09, -96.55 43.09, -96.36 43.07, -96.17 43.01, -96 42.92, -95.86 42.8, -95.73 42.66, -95.64 42.49, -95.58 42.31, -95.56 42.12, -95.56 42.1, -95.56 42.09, -95.56 42.08, -95.56 42.07, -95.56 42.06, -95.56 42.04, -95.56 42, -95.56 41.99, -95.56 41.98, -95.56 41.97, -95.56 41.96, -95.56 41.95, -95.56 41.94, -95.56 41.93, -95.56 41.92, -95.56 41.91, -95.56 41.9, -95.56 41.89, -95.56 41.88, -95.56 41.87, -95.56 41.86, -95.56 41.85, -95.56 41.83, -95.56 41.82, -95.56 41.81, -95.56 41.8, -95.56 41.79, -95.56 41.78, -95.56 41.77, -95.56 41.76, -95.56 41.75, -95.56 41.74, -95.58 41.54, -95.63 41.36, -95.72 41.19, -95.85 41.03, -96 40.91, -96.17 40.82, -96.36 40.76, -96.55 40.74, -96.56 40.74, -96.57 40.74, -96.58 40.74, -96.59 40.74, -96.6 40.74, -96.62 40.74, -96.63 40.74, -96.64 40.74, -96.65 40.74, -96.67 40.74, -96.68 40.74, -96.69 40.74, -96.7 40.74, -96.71 40.74, -96.72 40.74, -96.73 40.74, -96.74 40.74, -96.75 40.74, -96.76 40.74, -96.77 40.74, -96.78 40.74, -96.79 40.74, -96.8 40.74, -96.81 40.74, -96.82 40.74, -96.83 40.74, -96.85 40.74, -96.86 40.74, -96.88 40.74, -96.9 40.74, -96.91 40.74, -96.92 40.74, -96.93 40.74, -96.94 40.74, -96.95 40.74, -96.97 40.74, -96.98 40.74, -96.99 40.74, -97.01 40.74, -97.02 40.74, -97.22 40.76, -97.4 40.82, -97.57 40.91, -97.72 41.03, -97.85 41.18, -97.94 41.35, -98 41.54, -98.02 41.73, -98.02 41.75, -98.02 41.76, -98.02 41.77))"
-        )
+        actual = function_df.take(1)[0][0]
+        expected = "POLYGON ((2.9289321881345254 17.071067811865476, 10 24.14213562373095, 24.14213562373095 10, 7.071067811865475 -7.071067811865475, 0 -14.142135623730951, -14.14213562373095 -0.0000000000000009, 2.9289321881345254 17.071067811865476))"
+        self.assert_geometry_almost_equal(expected, actual, 0.1)
 
         function_df = self.spark.sql(
-            "select ST_ReducePrecision(ST_Buffer(polygondf.countyshape, 1, true), 2) from polygondf"
+            f"select ST_Buffer({geom_expr}, 10, true, 'endcap=square')"
         )
-        actual = function_df.take(1)[0][0].wkt
-        assert (
-            actual
-            == "POLYGON ((-97.02 42.01, -97.02 42.02, -97.02 42.03, -97.02 42.04, -97.02 42.05, -97.02 42.06, -97.02 42.07, -97.02 42.08, -97.02 42.09, -97.01 42.09, -97 42.09, -96.99 42.09, -96.98 42.09, -96.97 42.09, -96.96 42.09, -96.95 42.09, -96.94 42.09, -96.93 42.09, -96.92 42.09, -96.91 42.09, -96.9 42.09, -96.89 42.09, -96.88 42.09, -96.87 42.09, -96.86 42.09, -96.85 42.09, -96.84 42.09, -96.83 42.09, -96.82 42.09, -96.81 42.09, -96.8 42.09, -96.79 42.09, -96.78 42.09, -96.77 42.09, -96.76 42.09, -96.75 42.09, -96.74 42.09, -96.73 42.09, -96.72 42.09, -96.71 42.09, -96.7 42.09, -96.69 42.09, -96.68 42.09, -96.67 42.09, -96.66 42.09, -96.65 42.09, -96.64 42.09, -96.63 42.09, -96.62 42.09, -96.61 42.09, -96.6 42.09, -96.59 42.09, -96.58 42.09, -96.57 42.09, -96.56 42.09, -96.56 42.08, -96.56 42.07, -96.56 42.06, -96.56 42.05, -96.56 42.04, -96.56 42.03, -96.56 42.02, -96.55 42.02, -96.56 42, -96.56 41.99, -96.56 41.98, -96.56 41.97, -96.56 41.96, -96.56 41.95, -96.56 41.94, -96.56 41.93, -96.56 41.92, -96.56 41.91, -96.56 41.9, -96.56 41.89, -96.56 41.88, -96.56 41.87, -96.56 41.86, -96.56 41.85, -96.56 41.84, -96.56 41.83, -96.56 41.82, -96.56 41.81, -96.56 41.8, -96.56 41.79, -96.56 41.78, -96.56 41.77, -96.56 41.76, -96.56 41.75, -96.56 41.74, -96.57 41.74, -96.58 41.74, -96.59 41.74, -96.6 41.74, -96.61 41.74, -96.62 41.74, -96.63 41.74, -96.64 41.74, -96.65 41.74, -96.66 41.74, -96.67 41.74, -96.68 41.74, -96.69 41.74, -96.7 41.74, -96.71 41.74, -96.72 41.74, -96.73 41.74, -96.74 41.74, -96.75 41.74, -96.76 41.74, -96.77 41.74, -96.78 41.74, -96.79 41.74, -96.8 41.74, -96.81 41.74, -96.82 41.74, -96.83 41.74, -96.84 41.74, -96.85 41.74, -96.86 41.74, -96.87 41.74, -96.88 41.74, -96.89 41.74, -96.9 41.74, -96.91 41.74, -96.92 41.74, -96.93 41.74, -96.94 41.74, -96.95 41.74, -96.96 41.74, -96.97 41.74, -96.98 41.74, -96.99 41.74, -97 41.74, -97.01 41.74, -97.02 41.74, -97.02 41.75, -97.02 41.76, -97.02 41.77, -97.02 41.78, -97.02 41.79, -97.02 41.8, -97.02 41.81, -97.02 41.82, -97.02 41.83, -97.02 41.84, -97.02 41.85, -97.02 41.86, -97.02 41.87, -97.02 41.88, -97.02 41.89, -97.02 41.9, -97.02 41.91, -97.02 41.92, -97.02 41.93, -97.02 41.94, -97.02 41.95, -97.02 41.96, -97.02 41.97, -97.02 41.98, -97.02 41.99, -97.02 42, -97.02 42.01))"
-        )
-
-        function_df = self.spark.sql(
-            "select ST_ReducePrecision(ST_Buffer(polygondf.countyshape, 10, false, 'endcap=square'), 2) from polygondf"
-        )
-        actual = function_df.take(1)[0][0].wkt
-        assert (
-            actual
-            == "POLYGON ((-107.02 42.06, -107.02 42.07, -107.02 42.09, -107.02 42.11, -107.02 42.32, -107.02 42.33, -107.01 42.42, -107.01 42.43, -106.77 44.33, -106.16 46.15, -105.22 47.82, -103.98 49.27, -102.48 50.47, -100.78 51.36, -98.94 51.9, -97.04 52.09, -97.03 52.09, -97.01 52.09, -96.95 52.09, -96.9 52.09, -96.81 52.09, -96.7 52.09, -96.68 52.09, -96.65 52.09, -96.55 52.09, -96.54 52.09, -96.49 52.09, -96.48 52.09, -94.58 51.89, -92.74 51.33, -91.04 50.43, -89.55 49.23, -88.32 47.76, -87.39 46.08, -86.79 44.25, -86.56 42.35, -86.56 42.18, -86.56 42.17, -86.56 42.1, -86.55 41.99, -86.56 41.9, -86.56 41.78, -86.56 41.77, -86.56 41.75, -86.56 41.73, -86.56 41.7, -86.75 39.76, -87.33 37.89, -88.25 36.17, -89.49 34.66, -91 33.43, -92.72 32.51, -94.59 31.94, -96.53 31.74, -96.55 31.74, -96.56 31.74, -96.57 31.74, -96.58 31.74, -96.6 31.74, -96.69 31.74, -96.72 31.74, -96.75 31.74, -96.94 31.74, -97.02 31.74, -97.04 31.74, -97.06 31.74, -98.99 31.94, -100.85 32.5, -102.56 33.42, -104.07 34.65, -105.31 36.14, -106.23 37.85, -106.81 39.71, -107.02 41.64, -107.02 41.75, -107.02 41.94, -107.02 41.96, -107.02 41.99, -107.02 42.01, -107.02 42.02, -107.02 42.03, -107.02 42.06))"
-        )
-
-        function_df = self.spark.sql(
-            "select ST_ReducePrecision(ST_Buffer(polygondf.countyshape, 10, true, 'endcap=square'), 2) from polygondf"
-        )
-        actual = function_df.take(1)[0][0].wkt
-        assert (
-            actual
-            == "POLYGON ((-97.02 42.01, -97.02 42.02, -97.02 42.03, -97.02 42.04, -97.02 42.05, -97.02 42.06, -97.02 42.07, -97.02 42.08, -97.02 42.09, -97.01 42.09, -97 42.09, -96.99 42.09, -96.98 42.09, -96.97 42.09, -96.96 42.09, -96.95 42.09, -96.94 42.09, -96.93 42.09, -96.92 42.09, -96.91 42.09, -96.9 42.09, -96.89 42.09, -96.88 42.09, -96.87 42.09, -96.86 42.09, -96.85 42.09, -96.84 42.09, -96.83 42.09, -96.82 42.09, -96.81 42.09, -96.8 42.09, -96.79 42.09, -96.78 42.09, -96.77 42.09, -96.76 42.09, -96.75 42.09, -96.74 42.09, -96.73 42.09, -96.72 42.09, -96.71 42.09, -96.7 42.09, -96.69 42.09, -96.68 42.09, -96.67 42.09, -96.66 42.09, -96.65 42.09, -96.64 42.09, -96.63 42.09, -96.62 42.09, -96.61 42.09, -96.6 42.09, -96.59 42.09, -96.58 42.09, -96.57 42.09, -96.56 42.09, -96.56 42.08, -96.56 42.07, -96.56 42.06, -96.56 42.05, -96.56 42.04, -96.56 42.03, -96.55 42.03, -96.55 42.02, -96.56 42, -96.56 41.99, -96.56 41.98, -96.56 41.97, -96.56 41.96, -96.56 41.95, -96.56 41.94, -96.56 41.93, -96.56 41.92, -96.56 41.91, -96.56 41.9, -96.56 41.89, -96.56 41.88, -96.56 41.87, -96.56 41.86, -96.56 41.85, -96.56 41.84, -96.56 41.83, -96.56 41.82, -96.56 41.81, -96.56 41.8, -96.56 41.79, -96.56 41.78, -96.56 41.77, -96.56 41.76, -96.56 41.75, -96.56 41.74, -96.57 41.74, -96.58 41.74, -96.59 41.74, -96.6 41.74, -96.61 41.74, -96.62 41.74, -96.63 41.74, -96.64 41.74, -96.65 41.74, -96.66 41.74, -96.67 41.74, -96.68 41.74, -96.69 41.74, -96.7 41.74, -96.71 41.74, -96.72 41.74, -96.73 41.74, -96.74 41.74, -96.75 41.74, -96.76 41.74, -96.77 41.74, -96.78 41.74, -96.79 41.74, -96.8 41.74, -96.81 41.74, -96.82 41.74, -96.83 41.74, -96.84 41.74, -96.85 41.74, -96.86 41.74, -96.87 41.74, -96.88 41.74, -96.89 41.74, -96.9 41.74, -96.91 41.74, -96.92 41.74, -96.93 41.74, -96.94 41.74, -96.95 41.74, -96.96 41.74, -96.97 41.74, -96.98 41.74, -96.99 41.74, -97 41.74, -97.01 41.74, -97.02 41.74, -97.02 41.75, -97.02 41.76, -97.02 41.77, -97.02 41.78, -97.02 41.79, -97.02 41.8, -97.02 41.81, -97.02 41.82, -97.02 41.83, -97.02 41.84, -97.02 41.85, -97.02 41.86, -97.02 41.87, -97.02 41.88, -97.02 41.89, -97.02 41.9, -97.02 41.91, -97.02 41.92, -97.02 41.93, -97.02 41.94, -97.02 41.95, -97.02 41.96, -97.02 41.97, -97.02 41.98, -97.02 41.99, -97.02 42, -97.02 42.01))"
-        )
+        actual = function_df.take(1)[0][0]
+        expected = "POLYGON ((9.999936528641255 10.000063012993312, 10.000000098210357 10.00012592862454, 10.000127040927849 9.999999902648744, 0.0000634713587459 -0.0000639979767969, -0.0000000982103557 -0.0001278970813952, -0.0001270409278476 0.0000000988678222, 9.999936528641255 10.000063012993312))"
+        self.assert_geometry_almost_equal(expected, actual, 0.1)
 
     def test_st_bestsrid(self):
         polygon_from_wkt = (
@@ -300,18 +293,16 @@ class TestPredicateJoin(TestBase):
         )
 
         polygon_wkt_df.createOrReplaceTempView("polygontable")
-        polygon_wkt_df.show()
 
         polygon_df = self.spark.sql(
             "select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable"
         )
         polygon_df.createOrReplaceTempView("polygondf")
-        polygon_df.show()
 
         function_df = self.spark.sql(
             "select ST_Length(polygondf.countyshape) from polygondf"
         )
-        function_df.show()
+        assert function_df.take(1)[0][0] == 0.0
 
     def test_st_length2d(self):
         polygon_wkt_df = (
@@ -331,7 +322,7 @@ class TestPredicateJoin(TestBase):
         function_df = self.spark.sql(
             "select ST_Length2D(polygondf.countyshape) from polygondf"
         )
-        assert function_df.take(1)[0][0] == 1.6244272911181594
+        assert function_df.take(1)[0][0] == 0.0
 
     def test_st_area(self):
         polygon_wkt_df = (
@@ -450,12 +441,13 @@ class TestPredicateJoin(TestBase):
             "SELECT ST_GeomFromWKT('POLYGON ((40 180, 110 160, 180 180, 180 120, 140 90, 160 40, 80 10, 70 40, 20 50, 40 180),(60 140, 50 90, 90 140, 60 140))') AS geom"
         )
         actual = baseDf.selectExpr("ST_MaximumInscribedCircle(geom)").take(1)[0][0]
-        center = actual.center.wkt
-        assert center == "POINT (96.953125 76.328125)"
-        nearest = actual.nearest.wkt
-        assert nearest == "POINT (140 90)"
-        radius = actual.radius
-        assert radius == 45.165845650018
+        self.assert_geometry_almost_equal(
+            "POINT (96.9287109375 76.3232421875)", actual.center
+        )
+        self.assert_geometry_almost_equal(
+            "POINT (61.64205411585366 104.55256764481707)", actual.nearest
+        )
+        assert actual.radius == pytest.approx(45.18896951053177, 1e-6)
 
     def test_st_is_valid_detail(self):
         baseDf = self.spark.sql(
@@ -471,7 +463,7 @@ class TestPredicateJoin(TestBase):
         actual = baseDf.selectExpr("ST_IsValidDetail(geom)").first()[0]
         expected = Row(
             valid=False,
-            reason="Ring Self-intersection at or near point (1.0, 1.0, NaN)",
+            reason="Ring Self-intersection at or near point (1.0, 1.0)",
             location=self.spark.sql("SELECT ST_GeomFromText('POINT (1 1)')").first()[0],
         )
         assert expected == actual
@@ -1345,6 +1337,32 @@ class TestPredicateJoin(TestBase):
         ]
         assert collected_geometries[0] == "LINESTRING (0 0, 1 1, 1 0, 21 52)"
 
+    def test_st_scale(self):
+        baseDf = self.spark.sql(
+            "SELECT ST_GeomFromWKT('LINESTRING (50 160, 50 50, 100 50)') AS geom"
+        )
+        actual = baseDf.selectExpr("ST_AsText(ST_Scale(geom, -10, 5))").first()[0]
+        expected = "LINESTRING (-500 800, -500 250, -1000 250)"
+        assert expected == actual
+
+    def test_st_scalegeom(self):
+        baseDf = self.spark.sql(
+            "SELECT ST_GeomFromWKT('POLYGON ((0 0, 0 1.5, 1.5 1.5, 1.5 0, 0 0))') AS geometry, ST_GeomFromWKT('POINT (1.8 2.1)') AS factor, ST_GeomFromWKT('POINT (0.32959 0.796483)') AS origin"
+        )
+        actual = baseDf.selectExpr("ST_AsText(ST_ScaleGeom(geometry, factor))").first()[
+            0
+        ]
+        expected = (
+            "POLYGON ((0 0, 0 3.1500000000000004, 2.7 3.1500000000000004, 2.7 0, 0 0))"
+        )
+        assert expected == actual
+
+        actual = baseDf.selectExpr(
+            "ST_AsText(ST_ScaleGeom(geometry, factor, origin))"
+        ).first()[0]
+        expected = "POLYGON ((-0.263672 -0.8761313000000002, -0.263672 2.2738687000000004, 2.436328 2.2738687000000004, 2.436328 -0.8761313000000002, -0.263672 -0.8761313000000002))"
+        assert expected == actual
+
     def test_st_rotate_x(self):
         baseDf = self.spark.sql(
             "SELECT ST_GeomFromWKT('LINESTRING (50 160, 50 50, 100 50)') as geom1, ST_GeomFromWKT('LINESTRING(1 2 3, 1 1 1)') AS geom2"
@@ -1648,6 +1666,44 @@ class TestPredicateJoin(TestBase):
         for actual, expected in result:
             assert actual == expected
 
+    def test_st_perimeter(self):
+        baseDf = self.spark.sql(
+            "SELECT ST_GeomFromWKT('POLYGON((743238 2967416,743238 2967450,743265 2967450,743265.625 2967416,743238 2967416))') AS geom"
+        )
+        actual = baseDf.selectExpr("ST_Perimeter(geom)").take(1)[0][0]
+        expected = 122.63074400009504
+        assert actual == expected
+
+        baseDf = self.spark.sql(
+            "SELECT ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))', 4326) AS geom"
+        )
+        actual = baseDf.selectExpr("ST_Perimeter(geom, true)").first()[0]
+        expected = 443770.91724830196
+        assert expected == actual
+
+        actual = baseDf.selectExpr("ST_Perimeter(geom, true, false)").first()[0]
+        expected = 443770.91724830196
+        assert expected == actual
+
+    def test_st_perimeter2D(self):
+        baseDf = self.spark.sql(
+            "SELECT ST_GeomFromWKT('POLYGON((743238 2967416,743238 2967450,743265 2967450,743265.625 2967416,743238 2967416))') AS geom"
+        )
+        actual = baseDf.selectExpr("ST_Perimeter2D(geom)").take(1)[0][0]
+        expected = 122.63074400009504
+        assert actual == expected
+
+        baseDf = self.spark.sql(
+            "SELECT ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))', 4326) AS geom"
+        )
+        actual = baseDf.selectExpr("ST_Perimeter2D(geom, true)").first()[0]
+        expected = 443770.91724830196
+        assert expected == actual
+
+        actual = baseDf.selectExpr("ST_Perimeter2D(geom, true, false)").first()[0]
+        expected = 443770.91724830196
+        assert expected == actual
+
     def test_st_points(self):
         # Given
         geometry_df = self.spark.createDataFrame(
@@ -1911,14 +1967,10 @@ class TestPredicateJoin(TestBase):
         )
 
         # then result should be as expected
-        assert set(
-            [
-                el[0]
-                for el in geometry_df_collected.selectExpr(
-                    "ST_AsText(collected)"
-                ).collect()
-            ]
-        ) == {
+        assert {
+            el[0]
+            for el in geometry_df_collected.selectExpr("ST_AsText(collected)").collect()
+        } == {
             "MULTILINESTRING ((1 2, 3 4), (3 4, 4 5))",
             "MULTIPOINT ((1 2), (-2 3))",
             "MULTIPOLYGON (((1 2, 1 4, 3 4, 3 2, 1 2)), ((0.5 0.5, 5 0, 5 5, 0 5, 0.5 0.5)))",
@@ -1944,14 +1996,10 @@ class TestPredicateJoin(TestBase):
         )
 
         # then result should be calculated
-        assert set(
-            [
-                el[0]
-                for el in geometry_df_collected.selectExpr(
-                    "ST_AsText(collected)"
-                ).collect()
-            ]
-        ) == {
+        assert {
+            el[0]
+            for el in geometry_df_collected.selectExpr("ST_AsText(collected)").collect()
+        } == {
             "MULTILINESTRING ((1 2, 3 4), (3 4, 4 5))",
             "MULTIPOINT ((1 2), (-2 3))",
             "MULTIPOLYGON (((1 2, 1 4, 3 4, 3 2, 1 2)), ((0.5 0.5, 5 0, 5 5, 0 5, 0.5 0.5)))",
@@ -1980,7 +2028,7 @@ class TestPredicateJoin(TestBase):
         }
         for input_geom, expected_geom in test_cases.items():
             reversed_geometry = self.spark.sql(
-                "select ST_AsText(ST_Reverse(ST_GeomFromText({})))".format(input_geom)
+                f"select ST_AsText(ST_Reverse(ST_GeomFromText({input_geom})))"
             )
             assert reversed_geometry.take(1)[0][0] == expected_geom
 
@@ -2069,6 +2117,19 @@ class TestPredicateJoin(TestBase):
             )
             assert point.take(1)[0][0] == test[2]
 
+    def test_st_force_2d(self):
+        tests1 = {
+            "'POINT(0 5)'": "POINT (0 5)",
+            "'POLYGON((0 0 2, 0 5 2, 5 0 2, 0 0 2), (1 1 2, 3 1 2, 1 3 2, 1 1 2))'": "POLYGON ((0 0, 0 5, 5 0, 0 0), (1 1, 3 1, 1 3, 1 1))",
+            "'LINESTRING(0 5 1, 0 0 1, 0 10 2)'": "LINESTRING (0 5, 0 0, 0 10)",
+        }
+
+        for input_geom, expected_geom in tests1.items():
+            geom_2d = self.spark.sql(
+                f"select ST_AsText(ST_Force_2D(ST_GeomFromText({input_geom})))"
+            )
+            assert geom_2d.take(1)[0][0] == expected_geom
+
     def test_st_force2d(self):
         tests1 = {
             "'POINT(0 5)'": "POINT (0 5)",
@@ -2078,7 +2139,7 @@ class TestPredicateJoin(TestBase):
 
         for input_geom, expected_geom in tests1.items():
             geom_2d = self.spark.sql(
-                "select ST_AsText(ST_Force_2D(ST_GeomFromText({})))".format(input_geom)
+                f"select ST_AsText(ST_Force2D(ST_GeomFromText({input_geom})))"
             )
             assert geom_2d.take(1)[0][0] == expected_geom
 
@@ -2102,9 +2163,22 @@ class TestPredicateJoin(TestBase):
 
         for input_geom, expected_geom in tests.items():
             areal_geom = self.spark.sql(
-                "select ST_AsText(ST_BuildArea(ST_GeomFromText({})))".format(input_geom)
+                f"select ST_AsText(ST_BuildArea(ST_GeomFromText({input_geom})))"
             )
             assert areal_geom.take(1)[0][0] == expected_geom
+
+    def test_st_line_segments(self):
+        baseDf = self.spark.sql(
+            "SELECT ST_GeomFromWKT('LINESTRING(120 140, 60 120, 30 20)') AS line, ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 0, 0 0))') AS poly"
+        )
+        resultSize = baseDf.selectExpr(
+            "array_size(ST_LineSegments(line, false))"
+        ).first()[0]
+        expected = 2
+        assert expected == resultSize
+
+        resultSize = baseDf.selectExpr("array_size(ST_LineSegments(poly))").first()[0]
+        assert 0 == resultSize
 
     def test_st_line_from_multi_point(self):
         test_cases = {
@@ -2162,7 +2236,7 @@ class TestPredicateJoin(TestBase):
         ]
         for input_geom in test_cases:
             cell_ids = self.spark.sql(
-                "select ST_S2CellIDs(ST_GeomFromText({}), 6)".format(input_geom)
+                f"select ST_S2CellIDs(ST_GeomFromText({input_geom}), 6)"
             ).take(1)[0][0]
             assert isinstance(cell_ids, list)
             assert isinstance(cell_ids[0], int)
@@ -2190,7 +2264,7 @@ class TestPredicateJoin(TestBase):
         ]
         for input_geom in test_cases:
             cell_ids = self.spark.sql(
-                "select ST_H3CellIDs(ST_GeomFromText({}), 6, true)".format(input_geom)
+                f"select ST_H3CellIDs(ST_GeomFromText({input_geom}), 6, true)"
             ).take(1)[0][0]
             assert isinstance(cell_ids, list)
             assert isinstance(cell_ids[0], int)
@@ -2358,8 +2432,8 @@ class TestPredicateJoin(TestBase):
         actual_df = self.spark.sql(
             "SELECT ST_VoronoiPolygons(ST_GeomFromText('MULTIPOINT (0 0, 2 2)')) AS geom"
         )
-        actual = actual_df.selectExpr("ST_AsText(geom)").take(1)[0][0]
-        assert expected == actual
+        actual = actual_df.take(1)[0][0]
+        self.assert_geometry_almost_equal(expected, actual)
 
     def test_frechetDistance(self):
         expected = 5.0990195135927845

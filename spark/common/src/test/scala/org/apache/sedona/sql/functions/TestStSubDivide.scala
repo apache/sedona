@@ -20,6 +20,7 @@ package org.apache.sedona.sql.functions
 
 import org.apache.sedona.common.subDivide.GeometrySubDivider
 import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.geom.GeometryFactory
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.{TableDrivenPropertyChecks, TableFor3, TableFor4}
@@ -33,15 +34,20 @@ class TestStSubDivide
     with TableDrivenPropertyChecks
     with FunctionsHelper {
 
+  val factory = new GeometryFactory()
+
   for ((
       statement: String,
       inputGeometry: String,
       maxVertices: Int,
       outPutGeometry: Seq[String]) <- Fixtures.testPolygons) {
     test("it should return subdivide geometry when input geometry is " + statement) {
-      Fixtures
-        .subDivideGeometry(inputGeometry, maxVertices)
-        .map(geom => geometryToWkt(geom)) should contain theSameElementsAs outPutGeometry
+      val subdivided = Fixtures.subDivideGeometry(inputGeometry, maxVertices)
+      subdivided should have size outPutGeometry.size
+      val actual = factory.createGeometryCollection(subdivided.toArray)
+      val expected = factory.createGeometryCollection(outPutGeometry.map(readGeometry).toArray)
+      assert(actual.buffer(1e-6).contains(expected))
+      assert(expected.buffer(1e-6).contains(actual))
     }
   }
 

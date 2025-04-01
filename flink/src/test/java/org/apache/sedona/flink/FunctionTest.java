@@ -49,6 +49,36 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testAnchor() {
+    String actual =
+        (String)
+            first(
+                    tableEnv.sqlQuery(
+                        "SELECT ST_AsText(ST_ReducePrecision(ST_LabelPoint(ST_GeomFromWKT('POLYGON ((-112.637484 33.440546, -112.546852 33.477209, -112.489177 33.550488, -112.41777 33.751684, -111.956371 33.719707, -111.766868 33.616843, -111.775107 33.527595, -111.640533 33.504695, -111.440044 33.463462, -111.415326 33.374055, -111.514197 33.309809, -111.643279 33.222542, -111.893203 33.174278, -111.96461 33.250109, -112.123903 33.261593, -112.252985 33.35341, -112.406784 33.346527, -112.667694 33.316695, -112.637484 33.440546))'), 2, 0.2), 4))"))
+                .getField(0);
+    String expected = "POINT (-112.0428 33.4642)";
+    assertEquals(expected, actual);
+
+    actual =
+        (String)
+            first(
+                    tableEnv.sqlQuery(
+                        "SELECT ST_AsText(ST_ReducePrecision(ST_LabelPoint(ST_GeomFromWKT('GEOMETRYCOLLECTION(POLYGON ((-112.840785 33.435962, -112.840785 33.708284, -112.409597 33.708284, -112.409597 33.435962, -112.840785 33.435962)), POLYGON ((-112.309264 33.398167, -112.309264 33.746007, -111.787444 33.746007, -111.787444 33.398167, -112.309264 33.398167)))'), 4), 4))"))
+                .getField(0);
+    expected = "POINT (-112.0484 33.5721)";
+    assertEquals(expected, actual);
+
+    actual =
+        (String)
+            first(
+                    tableEnv.sqlQuery(
+                        "SELECT ST_AsText(ST_ReducePrecision(ST_LabelPoint(ST_GeomFromWKT('POLYGON ((-112.654072 33.114485, -112.313516 33.653431, -111.63515 33.314399, -111.497829 33.874913, -111.692825 33.431378, -112.376684 33.788215, -112.654072 33.114485))')), 4))"))
+                .getField(0);
+    expected = "POINT (-112.0723 33.5391)";
+    assertEquals(expected, actual);
+  }
+
+  @Test
   public void testArea() {
     Table polygonTable = createPolygonTable(1);
     Table ResultTable =
@@ -277,14 +307,14 @@ public class FunctionTest extends TestBase {
         polygonTable.select(
             call(Functions.ST_ConcaveHull.class.getSimpleName(), $("geom"), 1.0, true));
     Geometry result = (Geometry) first(concaveHullPolygonTable).getField(0);
-    assertEquals("POLYGON ((1 2, 2 2, 3 2, 5 0, 4 0, 1 0, 0 0, 1 2))", result.toString());
+    assertGeometryEquals("POLYGON ((1 2, 2 2, 3 2, 5 0, 4 0, 1 0, 0 0, 1 2))", result.toString());
 
     Table polygonTable2 =
         tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 0))') as geom");
     Table concaveHullPolygonTable2 =
         polygonTable2.select(call(Functions.ST_ConcaveHull.class.getSimpleName(), $("geom"), 1.0));
     Geometry result2 = (Geometry) first(concaveHullPolygonTable2).getField(0);
-    assertEquals("POLYGON ((0 0, 1 1, 1 0, 0 0))", result2.toString());
+    assertGeometryEquals("POLYGON ((0 0, 1 1, 1 0, 0 0))", result2.toString());
   }
 
   @Test
@@ -632,30 +662,31 @@ public class FunctionTest extends TestBase {
 
   @Test
   public void testLength() {
-    Table polygonTable = createPolygonTable(1);
+    Table polygonTable = createLineStringTable(1);
     Table resultTable =
-        polygonTable.select(call(Functions.ST_Length.class.getSimpleName(), $(polygonColNames[0])));
+        polygonTable.select(
+            call(Functions.ST_Length.class.getSimpleName(), $(linestringColNames[0])));
     assertNotNull(first(resultTable).getField(0));
     double result = (double) first(resultTable).getField(0);
-    assertEquals(4, result, 0);
+    assertEquals(1.4142135623730951, result, FP_TOLERANCE);
   }
 
   @Test
   public void testLength2D() {
-    Table polygonTable = createPolygonTable(1);
+    Table polygonTable = createLineStringTable(1);
     Table resultTable =
         polygonTable.select(
-            call(Functions.ST_Length2D.class.getSimpleName(), $(polygonColNames[0])));
+            call(Functions.ST_Length2D.class.getSimpleName(), $(linestringColNames[0])));
     assertNotNull(first(resultTable).getField(0));
     double result = (double) first(resultTable).getField(0);
-    assertEquals(4, result, 0);
+    assertEquals(1.4142135623730951, result, FP_TOLERANCE);
   }
 
   @Test
   public void testLengthSpheroid() {
     Table tbl =
-        tableEnv.sqlQuery("SELECT ST_LengthSpheroid(ST_GeomFromWKT('Polygon ((0 0, 90 0, 0 0))'))");
-    Double expected = 20037508.342789244;
+        tableEnv.sqlQuery("SELECT ST_LengthSpheroid(ST_GeomFromWKT('LINESTRING (0 0, 2 0)'))");
+    Double expected = 222638.98158654713;
     Double actual = (Double) first(tbl).getField(0);
     assertEquals(expected, actual, 0.1);
   }
@@ -762,6 +793,58 @@ public class FunctionTest extends TestBase {
 
     pointTable = tableEnv.sqlQuery("SELECT GeometryType(ST_GeomFromText('POINTM(2.0 3.5 10.2)'))");
     assertEquals("POINTM", first(pointTable).getField(0));
+  }
+
+  @Test
+  public void testPerimeter() {
+    Table polygonTable = createPolygonTable(testDataSize);
+    Table perimeterTable =
+        polygonTable.select(
+            call(Functions.ST_Perimeter.class.getSimpleName(), $(polygonColNames[0])));
+    Double perimeter = (Double) first(perimeterTable).getField(0);
+    assertEquals(4.0, perimeter, FP_TOLERANCE);
+
+    polygonTable =
+        tableEnv.sqlQuery(
+            "SELECT ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))', 4326) AS geom");
+    perimeterTable =
+        polygonTable.select(
+            call(Functions.ST_Perimeter.class.getSimpleName(), $("geom"), true, false));
+    perimeter = (Double) first(perimeterTable).getField(0);
+    assertEquals(443770.91724830196, perimeter, FP_TOLERANCE);
+
+    polygonTable =
+        tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))') AS geom");
+    perimeterTable =
+        polygonTable.select(call(Functions.ST_Perimeter.class.getSimpleName(), $("geom"), true));
+    perimeter = (Double) first(perimeterTable).getField(0);
+    assertEquals(443770.91724830196, perimeter, FP_TOLERANCE);
+  }
+
+  @Test
+  public void testPerimeter2D() {
+    Table polygonTable = createPolygonTable(testDataSize);
+    Table perimeterTable =
+        polygonTable.select(
+            call(Functions.ST_Perimeter2D.class.getSimpleName(), $(polygonColNames[0])));
+    Double perimeter = (Double) first(perimeterTable).getField(0);
+    assertEquals(4.0, perimeter, FP_TOLERANCE);
+
+    polygonTable =
+        tableEnv.sqlQuery(
+            "SELECT ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))', 4326) AS geom");
+    perimeterTable =
+        polygonTable.select(
+            call(Functions.ST_Perimeter2D.class.getSimpleName(), $("geom"), true, false));
+    perimeter = (Double) first(perimeterTable).getField(0);
+    assertEquals(443770.91724830196, perimeter, FP_TOLERANCE);
+
+    polygonTable =
+        tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))') AS geom");
+    perimeterTable =
+        polygonTable.select(call(Functions.ST_Perimeter2D.class.getSimpleName(), $("geom"), true));
+    perimeter = (Double) first(perimeterTable).getField(0);
+    assertEquals(443770.91724830196, perimeter, FP_TOLERANCE);
   }
 
   @Test
@@ -1043,11 +1126,22 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
-  public void testForce2D() {
+  public void testForce_2D() {
     Table polygonTable = createPolygonTable(1);
     Table Forced2DTable =
         polygonTable.select(
             call(Functions.ST_Force_2D.class.getSimpleName(), $(polygonColNames[0])));
+    Geometry result = (Geometry) first(Forced2DTable).getField(0);
+    assertEquals(
+        "POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))", result.toString());
+  }
+
+  @Test
+  public void testForce2D() {
+    Table polygonTable = createPolygonTable(1);
+    Table Forced2DTable =
+        polygonTable.select(
+            call(Functions.ST_Force2D.class.getSimpleName(), $(polygonColNames[0])));
     Geometry result = (Geometry) first(Forced2DTable).getField(0);
     assertEquals(
         "POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))", result.toString());
@@ -1525,6 +1619,30 @@ public class FunctionTest extends TestBase {
     table = table.select(call(Functions.ST_LineMerge.class.getSimpleName(), $("multiline")));
     Geometry result = (Geometry) first(table).getField(0);
     assertEquals("LINESTRING (10 160, 60 120, 120 140, 180 120)", result.toString());
+  }
+
+  @Test
+  public void testLineSegments() {
+    Table baseTable =
+        tableEnv.sqlQuery(
+            "SELECT ST_GeomFromWKT('LINESTRING(120 140, 60 120, 30 20)') AS line, ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 0, 0 0))') AS poly");
+    Geometry[] result =
+        (Geometry[])
+            first(
+                    baseTable.select(
+                        call(Functions.ST_LineSegments.class.getSimpleName(), $("line"))))
+                .getField(0);
+    int actualSize = result.length;
+    int expectedSize = 2;
+    assertEquals(expectedSize, actualSize);
+
+    result =
+        (Geometry[])
+            first(
+                    baseTable.select(
+                        call(Functions.ST_LineSegments.class.getSimpleName(), $("poly"), true)))
+                .getField(0);
+    assertEquals(0, result.length);
   }
 
   @Test
@@ -2358,7 +2476,7 @@ public class FunctionTest extends TestBase {
     Table polyTable1 =
         tableEnv.sqlQuery("SELECT ST_VoronoiPolygons(ST_GeomFromWKT('MULTIPOINT ((0 0), (2 2))'))");
     Geometry result = (Geometry) first(polyTable1).getField(0);
-    assertEquals(
+    assertGeometryEquals(
         "GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 -2, -2 -2)), POLYGON ((-2 4, 4 4, 4 -2, -2 4)))",
         result.toString());
 
@@ -2366,7 +2484,7 @@ public class FunctionTest extends TestBase {
         tableEnv.sqlQuery(
             "SELECT ST_VoronoiPolygons(ST_GeomFromWKT('MULTIPOINT ((0 0), (2 2))'), 0, ST_Buffer(ST_GeomFromWKT('POINT(1 1)'), 10.0) )");
     result = (Geometry) first(polyTable2).getField(0);
-    assertEquals(
+    assertGeometryEquals(
         "GEOMETRYCOLLECTION (POLYGON ((-9 -9, -9 11, 11 -9, -9 -9)), POLYGON ((-9 11, 11 11, 11 -9, -9 11)))",
         result.toString());
 
@@ -2374,14 +2492,14 @@ public class FunctionTest extends TestBase {
         tableEnv.sqlQuery(
             "SELECT ST_VoronoiPolygons(ST_GeomFromWKT('MULTIPOINT ((0 0), (2 2))'), 30)");
     result = (Geometry) first(polyTable3).getField(0);
-    assertEquals(
+    assertGeometryEquals(
         "GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 4, 4 -2, -2 -2)))", result.toString());
 
     Table polyTable4 =
         tableEnv.sqlQuery(
             "SELECT ST_VoronoiPolygons(ST_GeomFromWKT('MULTIPOINT ((0 0), (2 2))'), 30, ST_Buffer(ST_GeomFromWKT('POINT(1 1)'), 10) )");
     result = (Geometry) first(polyTable4).getField(0);
-    assertEquals(
+    assertGeometryEquals(
         "GEOMETRYCOLLECTION (POLYGON ((-9 -9, -9 11, 11 11, 11 -9, -9 -9)))", result.toString());
 
     Table polyTable5 =
@@ -2655,6 +2773,52 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testScale() {
+    Table tbl =
+        tableEnv.sqlQuery(
+            "SELECT ST_GeomFromWKT('POLYGON ((0 0, 2 0, 1 1, 2 2, 0 2, 1 1, 0 0))', 1010) AS geom");
+    Geometry actual =
+        (Geometry)
+            first(tbl.select(call(Functions.ST_Scale.class.getSimpleName(), $("geom"), 2, 3)))
+                .getField(0);
+    String expected = "POLYGON ((0 0, 4 0, 2 3, 4 6, 0 6, 2 3, 0 0))";
+    assertEquals(expected, actual.toString());
+    assertEquals(1010, actual.getSRID());
+  }
+
+  @Test
+  public void testScaleGeom() {
+    Table tbl =
+        tableEnv.sqlQuery(
+            "SELECT ST_GeomFromWKT('POLYGON ((0 0, 2 0, 1 1, 2 2, 0 2, 1 1, 0 0))', 1010) AS geom, ST_GeomFromWKT('POINT (2 3)') AS factor");
+    Geometry actual =
+        (Geometry)
+            first(
+                    tbl.select(
+                        call(Functions.ST_ScaleGeom.class.getSimpleName(), $("geom"), $("factor"))))
+                .getField(0);
+    String expected = "POLYGON ((0 0, 4 0, 2 3, 4 6, 0 6, 2 3, 0 0))";
+    assertEquals(expected, actual.toString());
+    assertEquals(1010, actual.getSRID());
+
+    tbl =
+        tableEnv.sqlQuery(
+            "SELECT ST_GeomFromWKT('POLYGON ((0 0, 2 0, 1 1, 2 2, 0 2, 1 1, 0 0))', 1010) AS geom, ST_GeomFromWKT('POINT (2 3)') AS factor, ST_GeomFromWKT('POINT (-1 0)') AS origin");
+    actual =
+        (Geometry)
+            first(
+                    tbl.select(
+                        call(
+                            Functions.ST_ScaleGeom.class.getSimpleName(),
+                            $("geom"),
+                            $("factor"),
+                            $("origin"))))
+                .getField(0);
+    expected = "POLYGON ((1 0, 5 0, 3 3, 5 6, 1 6, 3 3, 1 0))";
+    assertEquals(expected, actual.toString());
+  }
+
+  @Test
   public void testRotateX() {
     Table tbl =
         tableEnv.sqlQuery(
@@ -2729,5 +2893,72 @@ public class FunctionTest extends TestBase {
     expected =
         "POLYGON ((0.0700679430157733 0.5247497074078575, 2 0, 1.2974088252118154 1.227340882196042, 2.5247497074078575 1.9299320569842267, 0.5948176504236309 2.454681764392084, 1.2974088252118154 1.227340882196042, 0.0700679430157733 0.5247497074078575))";
     assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testInterpolatePoint() {
+    // Create a table with the test geometries
+    Table tbl =
+        tableEnv.sqlQuery(
+            "SELECT "
+                + "ST_GeomFromEWKT('LINESTRING M (0 0 0, 2 0 2, 4 0 4)') AS line1, "
+                + "ST_GeomFromEWKT('POINT(1 1)') AS point1, "
+                + "ST_GeomFromEWKT('LINESTRING M (0 0 0, -2 2 2, -4 4 4)') AS line2, "
+                + "ST_GeomFromEWKT('POINT(-1 1)') AS point2, "
+                + "ST_GeomFromEWKT('LINESTRING M (0 0 0, 2 2 2, 4 0 4)') AS line3, "
+                + "ST_GeomFromEWKT('POINT(2 0)') AS point3, "
+                + "ST_GeomFromEWKT('POINT(2.5 1)') AS point4");
+
+    double actual =
+        (double)
+            first(
+                    tbl.select(
+                            call(
+                                Functions.ST_InterpolatePoint.class.getSimpleName(),
+                                $("line1"),
+                                $("point1")))
+                        .as("result"))
+                .getField(0);
+    double expected = 1.0; // Closest point on line is (1, 0) and interpolated M is 1
+    assertEquals(expected, actual, 1e-6);
+
+    actual =
+        (double)
+            first(
+                    tbl.select(
+                            call(
+                                Functions.ST_InterpolatePoint.class.getSimpleName(),
+                                $("line2"),
+                                $("point2")))
+                        .as("result"))
+                .getField(0);
+    expected = 1.0; // Interpolated M value
+    assertEquals(expected, actual, 1e-6);
+
+    actual =
+        (double)
+            first(
+                    tbl.select(
+                            call(
+                                Functions.ST_InterpolatePoint.class.getSimpleName(),
+                                $("line3"),
+                                $("point3")))
+                        .as("result"))
+                .getField(0);
+    expected = 1.0; // Interpolated M value
+    assertEquals(expected, actual, 1e-6);
+
+    actual =
+        (double)
+            first(
+                    tbl.select(
+                            call(
+                                Functions.ST_InterpolatePoint.class.getSimpleName(),
+                                $("line3"),
+                                $("point4")))
+                        .as("result"))
+                .getField(0);
+    expected = 2.75;
+    assertEquals(expected, actual, 1e-6);
   }
 }

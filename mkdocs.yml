@@ -1,4 +1,22 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
 site_name: Apache Sedona&trade;
+site_url: https://sedona.apache.org
 site_description: Apache Sedona&trade; is a cluster computing system for processing large-scale spatial data. Sedona extends existing cluster computing systems, such as Apache Spark, Apache Flink, and Snowflake, with a set of out-of-the-box distributed Spatial Datasets and Spatial SQL that efficiently load, process, and analyze large-scale spatial data across machines.
 nav:
   - Home: index.md
@@ -26,6 +44,7 @@ nav:
           - Install on AWS Glue: setup/glue.md
           - Install on Microsoft Fabric: setup/fabric.md
           - Set up Spark cluster manually: setup/cluster.md
+          - Install on Azure Synapse Analytics: setup/azure-synapse-analytics.md
       - Install with Apache Flink:
           - Install Sedona Scala/Java: setup/flink/install-scala.md
       - Install with Snowflake:
@@ -41,6 +60,16 @@ nav:
           - Spatial RDD app: tutorial/rdd.md
           - Sedona R: api/rdocs
           - Work with GeoPandas and Shapely: tutorial/geopandas-shapely.md
+          - Files:
+              - CSV: tutorial/files/csv-geometry-sedona-spark.md
+              - GeoPackage: tutorial/files/geopackage-sedona-spark.md
+              - GeoParquet: tutorial/files/geoparquet-sedona-spark.md
+              - GeoJSON: tutorial/files/geojson-sedona-spark.md
+              - Shapefiles: tutorial/files/shapefiles-sedona-spark.md
+              - STAC catalog: tutorial/files/stac-sedona-spark.md
+          - Concepts:
+              - Spatial Joins: tutorial/concepts/spatial-joins.md
+              - Clustering Algorithms: tutorial/concepts/clustering-algorithms.md
           - Map visualization SQL app:
               - Scala/Java: tutorial/viz.md
               - Use Apache Zeppelin: tutorial/zeppelin.md
@@ -68,6 +97,7 @@ nav:
                   - DataFrame Style functions: api/sql/DataFrameAPI.md
                   - Query optimization: api/sql/Optimizer.md
                   - Nearest-Neighbour searching: api/sql/NearestNeighbourSearching.md
+                  - 'Spider:Spatial Data Generator': api/sql/Spider.md
                   - Reading Legacy Parquet Files: api/sql/Reading-legacy-parquet.md
                   - Visualization:
                       - SedonaPyDeck: api/sql/Visualization_SedonaPyDeck.md
@@ -115,11 +145,6 @@ nav:
           - Make a release: community/publish.md
           - Vote a release: community/vote.md
       - Publications: community/publication.md
-  - Use cases:
-      - Spatially aggregate airports per country: usecases/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb
-      - Match foot traffic to Seattle coffee shops: usecases/contrib/foot-traffic.ipynb
-      - Raster image manipulation: usecases/ApacheSedonaRaster.ipynb
-      - Read Overture Maps data: usecases/Sedona_OvertureMaps_GeoParquet.ipynb
   - Apache Software Foundation:
       - Foundation: asf/asf.md
       - License: https://www.apache.org/licenses/" target="_blank
@@ -131,6 +156,7 @@ nav:
       - Telemetry: asf/telemetry.md
 repo_url: https://github.com/apache/sedona
 repo_name: apache/sedona
+edit_uri: edit/master/docs/
 theme:
   font: false
   name: 'material'
@@ -144,17 +170,21 @@ theme:
     logo: fontawesome/solid/earth-americas
     repo: fontawesome/brands/github
   features:
-    - navigation.instant
-    - navigation.tabs
-    - navigation.top
-    - search.suggest
+    - content.code.copy
+    - content.action.edit
     - search.highlight
     - search.share
+    - search.suggest
     - navigation.footer
-    - content.code.copy
+    - navigation.instant
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
 extra:
   version:
     provider: mike
+    default:
+      - latest
   social:
     - icon: fontawesome/brands/github-alt
       link: 'https://github.com/apache/sedona'
@@ -163,15 +193,15 @@ extra:
     - icon: fontawesome/brands/discord
       link: 'https://share.hsforms.com/1Ndql_ZigTdmLlVQc_d1o4gqga4q'
   sedona:
-    current_version: 1.6.1
-    current_geotools: 1.6.1-28.2
+    current_version: 1.7.1
+    current_geotools: 1.7.1-28.5
   sedona_create_release:
-    current_version: 1.6.1
-    current_git_tag: sedona-1.6.1-rc2
-    current_rc: 1.6.1-rc2
-    current_snapshot: 1.6.1-SNAPSHOT
-    next_version: 1.7.0
-copyright: Copyright © 2024 The Apache Software Foundation. Apache Sedona, Sedona, Apache, the Apache feather logo, and the Apache Sedona project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries. All other marks mentioned may be trademarks or registered trademarks of their respective owners. Please visit <a href="https://www.apache.org/">Apache Software Foundation</a> for more details.<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=f3e121f6-c909-4592-8be6-5bd345768cba" />
+    current_version: 1.7.1
+    current_git_tag: sedona-1.7.1-rc1
+    current_rc: 1.7.1-rc1
+    current_snapshot: 1.8.0-SNAPSHOT
+    next_version: 1.8.0
+copyright: Copyright © 2025 The Apache Software Foundation. Apache Sedona, Sedona, Apache, the Apache feather logo, and the Apache Sedona project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries. All other marks mentioned may be trademarks or registered trademarks of their respective owners. Please visit <a href="https://www.apache.org/">Apache Software Foundation</a> for more details.<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=f3e121f6-c909-4592-8be6-5bd345768cba" /><img src="https://analytics.apache.org/matomo.php?idsite=74&rec=1" />
 
 markdown_extensions:
   - admonition
@@ -204,5 +234,5 @@ plugins:
   - macros
   - git-revision-date-localized:
       type: datetime
-  - mkdocs-jupyter:
-      include_source: True
+  - mike:
+      canonical_version: 'latest'

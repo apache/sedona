@@ -1,7 +1,7 @@
 Type: Package
 Package: apache.sedona
 Title: R Interface for Apache Sedona
-Version: 1.6.1
+Version: 1.7.1
 Authors@R:
     c(person(family = "Apache Sedona",
              role = c("aut", "cre"),
@@ -38,6 +38,6 @@ Suggests:
     knitr,
     rmarkdown
 Encoding: UTF-8
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 SystemRequirements: 'Apache Spark' 3.x
 Roxygen: list(markdown = TRUE)

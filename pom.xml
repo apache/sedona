@@ -26,7 +26,7 @@
     </parent>
     <groupId>org.apache.sedona</groupId>
     <artifactId>sedona-parent</artifactId>
-    <version>1.6.1-SNAPSHOT</version>
+    <version>1.8.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>sedona-parent</name>
     <url>http://sedona.apache.org/</url>
@@ -68,10 +68,10 @@
         <maven.compiler.plugin.version>3.10.1</maven.compiler.plugin.version>
 
         <cdm.version>5.4.2</cdm.version>
-        <geotools.version>28.2</geotools.version>
+        <geotools.version>28.5</geotools.version>
         <hadoop.version>3.2.4</hadoop.version>
         <jackson.version>2.13.4</jackson.version>
-        <jts.version>1.19.0</jts.version>
+        <jts.version>1.20.0</jts.version>
         <jts2geojson.version>0.16.1</jts2geojson.version>
         <spatial4j.version>0.8</spatial4j.version>
 
@@ -165,6 +165,20 @@
                 <artifactId>cdm-core</artifactId>
                 <version>${cdm.version}</version>
                 <scope>${cdm.scope}</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.httpcomponents</groupId>
+                        <artifactId>httpclient</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.protobuf</groupId>
+                        <artifactId>protobuf-java</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <!--The following GeoTools dependencies use GNU Lesser General Public License and thus are excluded from the binary distribution-->
             <!-- Users have to include them by themselves manually -->
@@ -681,60 +695,6 @@
             </repositories>
         </profile>
         <profile>
-            <!-- This profile works for Spark 3.0 -->
-            <id>sedona-spark-3.0</id>
-            <activation>
-                <property>
-                    <name>spark</name>
-                    <value>3.0</value>
-                </property>
-            </activation>
-            <properties>
-                <spark.version>3.0.3</spark.version>
-                <spark.compat.version>3.0</spark.compat.version>
-                <log4j.version>2.17.2</log4j.version>
-                <graphframe.version>0.8.1-spark3.0</graphframe.version>
-                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
-                <skip.deploy.common.modules>true</skip.deploy.common.modules>
-            </properties>
-        </profile>
-        <profile>
-            <!-- This profile works for Spark 3.1 -->
-            <id>sedona-spark-3.1</id>
-            <activation>
-                <property>
-                    <name>spark</name>
-                    <value>3.1</value>
-                </property>
-            </activation>
-            <properties>
-                <spark.version>3.1.2</spark.version>
-                <spark.compat.version>3.1</spark.compat.version>
-                <log4j.version>2.17.2</log4j.version>
-                <graphframe.version>0.8.2-spark3.1</graphframe.version>
-                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
-                <skip.deploy.common.modules>true</skip.deploy.common.modules>
-            </properties>
-        </profile>
-        <profile>
-            <!-- This profile works for Spark 3.2 -->
-            <id>sedona-spark-3.2</id>
-            <activation>
-                <property>
-                    <name>spark</name>
-                    <value>3.2</value>
-                </property>
-            </activation>
-            <properties>
-                <spark.version>3.2.0</spark.version>
-                <spark.compat.version>3.2</spark.compat.version>
-                <log4j.version>2.17.2</log4j.version>
-                <graphframe.version>0.8.2-spark3.2</graphframe.version>
-                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
-                <skip.deploy.common.modules>true</skip.deploy.common.modules>
-            </properties>
-        </profile>
-        <profile>
             <!-- This profile works for Spark 3.3 -->
             <id>sedona-spark-3.3</id>
             <activation>
@@ -805,6 +765,7 @@
                 <module>common</module>
                 <module>spark</module>
                 <module>spark-shaded</module>
+                <module>shade-proto</module>
             </modules>
         </profile>
         <profile>
@@ -828,6 +789,7 @@
                 <module>flink</module>
                 <module>flink-shaded</module>
                 <module>snowflake</module>
+                <module>shade-proto</module>
             </modules>
         </profile>
         <profile>

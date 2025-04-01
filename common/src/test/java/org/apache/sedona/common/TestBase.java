@@ -18,7 +18,11 @@
  */
 package org.apache.sedona.common;
 
+import static org.junit.Assert.fail;
+
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.WKTReader;
 
 public class TestBase {
   public Coordinate[] coordArray(double... coordValues) {
@@ -36,5 +40,25 @@ public class TestBase {
           new Coordinate(coordValues[i], coordValues[i + 1], coordValues[i + 2]);
     }
     return coords;
+  }
+
+  public void assertGeometryEquals(String expectedWkt, String actualWkt, double tolerance) {
+    WKTReader reader = new WKTReader();
+    try {
+      Geometry expectedGeom = reader.read(expectedWkt);
+      Geometry actualGeom = reader.read(actualWkt);
+      if (!expectedGeom.equals(actualGeom)) {
+        if (!expectedGeom.buffer(tolerance).contains(actualGeom)
+            || !actualGeom.buffer(tolerance).contains(expectedGeom)) {
+          fail(String.format("Geometry %s should equal to %s", actualWkt, expectedWkt));
+        }
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void assertGeometryEquals(String expectedWkt, String actualWkt) {
+    assertGeometryEquals(expectedWkt, actualWkt, 1e-6);
   }
 }
