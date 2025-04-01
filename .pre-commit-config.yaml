@@ -36,8 +36,8 @@ repos:
       - id: prettier
         name: run prettier
         description: format files with prettier
-        entry: prettier --write '**/*.yaml' '**/*.yml'
-        files: \.ya?ml$
+        entry: prettier --write '**/*.js' '**/*.yaml' '**/*.yml'
+        files: \.(js|ya?ml)$
         language: node
         additional_dependencies: ['prettier@3.5.3']
   - repo: https://github.com/Lucas-C/pre-commit-hooks
