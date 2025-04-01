@@ -92,7 +92,7 @@ class TestDBScan(TestBase):
 
         clusters = {
             frozenset([y[0] for y in clusters_members if y[1] == x])
-            for x in set([y[1] for y in clusters_members])
+            for x in {y[1] for y in clusters_members}
         }
 
         return clusters

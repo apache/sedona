@@ -1633,12 +1633,13 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
           |SELECT RS_SetSRID(RS_AddBandFromArray(RS_MakeEmptyRaster(1, "D", 5, 5, 1, -1, 1), pixels, 1), 4326) as raster, geom FROM data
           |""".stripMargin)
 
-      val actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'mode')").first().get(0)
-      assertNull(actual)
+      var actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'mode')").first().get(0)
+      assertEquals(10.0, actual)
 
       val statsDf = df.selectExpr("RS_ZonalStatsAll(raster, geom) as stats")
-      val actualBoolean = statsDf.selectExpr("isNull(stats.mode)").first().getAs[Boolean](0)
-      assertTrue(actualBoolean)
+      actual = statsDf.first().getStruct(0).toSeq.slice(0, 9)
+      val expected = Seq(1.0, 10.0, 10.0, 10.0, 10.0, 0.0, 0.0, 10.0, 10.0)
+      assertTrue(expected.equals(actual))
     }
 
     it("Passed RS_ZonalStats") {

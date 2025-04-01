@@ -82,7 +82,7 @@ class CoordinateType:
         elif geom._ndim == 3:
             return CoordinateType.XYZ
         else:
-            raise ValueError("Invalid coordinate dimension: {}".format(geom._ndim))
+            raise ValueError(f"Invalid coordinate dimension: {geom._ndim}")
 
     @staticmethod
     def bytes_per_coord(coord_type: int) -> int:
@@ -233,7 +233,7 @@ def deserialize(buffer: bytes) -> Optional[BaseGeometry]:
     elif geom_type == GeometryTypeID.GEOMETRYCOLLECTION:
         geom = deserialize_geometry_collection(geom_buffer)
     else:
-        raise ValueError("Unsupported geometry type ID: {}".format(geom_type))
+        raise ValueError(f"Unsupported geometry type ID: {geom_type}")
     return geom, geom_buffer.ints_offset
 
 
@@ -546,7 +546,7 @@ def serialize_shapely_1_empty_geom(geom: BaseGeometry) -> bytearray:
         geom_type = GeometryTypeID.MULTIPOLYGON
         total_size = 12
     else:
-        raise ValueError("Invalid empty geometry collection object: {}".format(geom))
+        raise ValueError(f"Invalid empty geometry collection object: {geom}")
     return create_buffer_for_geom(geom_type, CoordinateType.XY, total_size, 0)
 
 

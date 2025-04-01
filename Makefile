@@ -46,10 +46,10 @@ checkupdate: checkinstall
 
 install:
 	@echo "Installing dependencies..."
-	@if [ -f requirements.txt ]; then \
-		$(PIP) install -r requirements.txt; \
+	@if [ -f requirements-dev.txt ]; then \
+		$(PIP) install -r requirements-dev.txt; \
 	else \
-		echo "Error: requirements.txt not found."; \
+		echo "Error: requirements-dev.txt not found."; \
 		exit 1; \
 	fi
 

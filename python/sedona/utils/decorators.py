@@ -20,7 +20,7 @@ from typing import Callable, Iterable, List, TypeVar
 T = TypeVar("T")
 
 
-class classproperty(object):
+class classproperty:
 
     def __init__(self, f):
         self.f = f
