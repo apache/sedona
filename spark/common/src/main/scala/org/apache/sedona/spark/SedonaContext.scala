@@ -24,10 +24,12 @@ import org.apache.sedona.sql.RasterRegistrator
 import org.apache.sedona.sql.UDF.Catalog
 import org.apache.sedona.sql.UDT.UdtRegistrator
 import org.apache.spark.serializer.KryoSerializer
+import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
+import org.apache.spark.sql.catalyst.rules.Rule
 import org.apache.spark.sql.sedona_sql.optimization._
 import org.apache.spark.sql.sedona_sql.strategy.join.JoinQueryDetector
 import org.apache.spark.sql.sedona_sql.strategy.physical.function.EvalPhysicalFunctionStrategy
-import org.apache.spark.sql.{SQLContext, SparkSession}
+import org.apache.spark.sql.{SQLContext, SparkSession, Strategy}
 
 import scala.annotation.StaticAnnotation
 import scala.util.Try
@@ -50,6 +52,7 @@ object SedonaContext {
 
   /**
    * This is the entry point of the entire Sedona system
+   *
    * @param sparkSession
    * @return
    */
@@ -62,6 +65,28 @@ object SedonaContext {
     TelemetryCollector.send("spark", language)
     if (!sparkSession.experimental.extraStrategies.exists(_.isInstanceOf[JoinQueryDetector])) {
       sparkSession.experimental.extraStrategies ++= Seq(new JoinQueryDetector(sparkSession))
+    }
+
+    val sedonaArrowStrategy = Try(
+      Class
+        .forName("org.apache.spark.sql.udf.SedonaArrowStrategy")
+        .getDeclaredConstructor()
+        .newInstance()
+        .asInstanceOf[Strategy])
+
+    val extractSedonaUDFRule =
+      Try(
+        Class
+          .forName("org.apache.spark.sql.udf.ExtractSedonaUDFRule")
+          .getDeclaredConstructor()
+          .newInstance()
+          .asInstanceOf[Rule[LogicalPlan]])
+
+    if (sedonaArrowStrategy.isSuccess && extractSedonaUDFRule.isSuccess) {
+      sparkSession.experimental.extraStrategies =
+        sparkSession.experimental.extraStrategies :+ sedonaArrowStrategy.get
+      sparkSession.experimental.extraOptimizations =
+        sparkSession.experimental.extraOptimizations :+ extractSedonaUDFRule.get
     }
 
     customOptimizationsWithSession(sparkSession).foreach { opt =>
@@ -95,6 +120,7 @@ object SedonaContext {
    * This method adds the basic Sedona configurations to the SparkSession Usually the user does
    * not need to call this method directly This is only needed when the user needs to manually
    * configure Sedona
+   *
    * @return
    */
   def builder(): SparkSession.Builder = {
