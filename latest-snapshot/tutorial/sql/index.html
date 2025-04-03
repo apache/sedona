@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../image/sedona_logo_symbol.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.10">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.11">
     
     
       
@@ -134,11 +134,13 @@
     
     
     
-      <label class="md-header__button md-icon" for="__search">
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
-      </label>
-      <div class="md-search" data-md-component="search" role="dialog">
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
@@ -177,6 +179,7 @@
     </div>
   </div>
 </div>
+      
     
     
       <div class="md-header__source">
@@ -1819,6 +1822,39 @@
   <a href="#geometry-primitive-to-geometry-primitive" class="md-nav__link">
     <span class="md-ellipsis">
       Geometry, primitive to Geometry, primitive
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spatial-vectorized-udfs-python-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      Spatial vectorized udfs (Python only)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Spatial vectorized udfs (Python only)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#shapely-scalar-udf" class="md-nav__link">
+    <span class="md-ellipsis">
+      Shapely scalar UDF
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geoseries-udf" class="md-nav__link">
+    <span class="md-ellipsis">
+      GeoSeries UDF
     </span>
   </a>
   
@@ -5166,6 +5202,39 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#spatial-vectorized-udfs-python-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      Spatial vectorized udfs (Python only)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Spatial vectorized udfs (Python only)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#shapely-scalar-udf" class="md-nav__link">
+    <span class="md-ellipsis">
+      Shapely scalar UDF
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geoseries-udf" class="md-nav__link">
+    <span class="md-ellipsis">
+      GeoSeries UDF
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#save-to-permanent-storage" class="md-nav__link">
     <span class="md-ellipsis">
       Save to permanent storage
@@ -6262,6 +6331,58 @@ can also be found in the example notebook available <a href="https://github.com/
 |POLYGON ((1 1, 1 2, 2 1, 1 1))|    10.0|POLYGON ((1 -9, -0.9509032201612866 -8.80785280...|66.14518337329191|
 +------------------------------+--------+--------------------------------------------------+-----------------+
 </code></pre></div>
+<h2 id="spatial-vectorized-udfs-python-only">Spatial vectorized udfs (Python only)<a class="headerlink" href="#spatial-vectorized-udfs-python-only" title="Permanent link">&para;</a></h2>
+<p>By default when you create the user defined functions in Python, the UDFs are not vectorized.
+This means that the UDFs are called row by row which can be slow.
+To speed up the UDFs, you can use the <code>vectorized</code> UDF which will be called in a batch mode
+using Apache Arrow.</p>
+<p>To create a vectorized UDF please use the decorator sedona_vectorized_udf.
+Currently supports only the scalar UDFs. Vectorized UDFs are way faster than
+the normal UDFs. It might be even 2x faster than the normal UDFs.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When you use geometry as an input type, please include the BaseGeometry type,
+like Point from shapely or geopandas GeoSeries, when you use GEO_SERIES vectorized udf.
+That's how Sedona infers the type and knows if the data should be cast.</p>
+</div>
+<p>Decorator signature looks as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">sedona_vectorized_udf</span><span class="p">(</span><span class="n">udf_type</span><span class="p">:</span> <span class="n">SedonaUDFType</span> <span class="o">=</span> <span class="n">SedonaUDFType</span><span class="o">.</span><span class="n">SHAPELY_SCALAR</span><span class="p">,</span> <span class="n">return_type</span><span class="p">:</span> <span class="n">DataType</span><span class="p">)</span>
+</code></pre></div>
+<p>where udf_type is the type of the UDF function, currently supported are:</p>
+<ul>
+<li>SHAPELY_SCALAR</li>
+<li>GEO_SERIES</li>
+</ul>
+<p>The main difference is what input data you get in the function
+Let's analyze the two examples below, that creates buffers from
+a given geometry.</p>
+<h3 id="shapely-scalar-udf">Shapely scalar UDF<a class="headerlink" href="#shapely-scalar-udf" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">shapely.geometry.base</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">b</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">sedona_vectorized_udf</span>
+
+<span class="nd">@sedona_vectorized_udf</span><span class="p">(</span><span class="n">return_type</span><span class="o">=</span><span class="n">GeometryType</span><span class="p">())</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">vectorized_buffer</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">BaseGeometry</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">b</span><span class="o">.</span><span class="n">BaseGeometry</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">geom</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="geoseries-udf">GeoSeries UDF<a class="headerlink" href="#geoseries-udf" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">sedona_vectorized_udf</span><span class="p">,</span> <span class="n">SedonaUDFType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
+
+
+<span class="nd">@sedona_vectorized_udf</span><span class="p">(</span><span class="n">udf_type</span><span class="o">=</span><span class="n">SedonaUDFType</span><span class="o">.</span><span class="n">GEO_SERIES</span><span class="p">,</span> <span class="n">return_type</span><span class="o">=</span><span class="n">GeometryType</span><span class="p">())</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">vectorized_geo_series_buffer</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">:</span>
+    <span class="n">buffered</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">buffered</span>
+</code></pre></div>
+<p>To call the UDFs you can use the following code:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Shapely scalar UDF</span>
+<span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;buffered&quot;</span><span class="p">,</span> <span class="n">vectorized_buffer</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">geom</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># GeoSeries UDF</span>
+<span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;buffered&quot;</span><span class="p">,</span> <span class="n">vectorized_geo_series_buffer</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">geom</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
 <h2 id="save-to-permanent-storage">Save to permanent storage<a class="headerlink" href="#save-to-permanent-storage" title="Permanent link">&para;</a></h2>
 <p>To save a Spatial DataFrame to some permanent storage such as Hive tables and HDFS, you can simply convert each geometry in the Geometry type column back to a plain String and save the plain DataFrame to wherever you want.</p>
 <p>Use the following code to convert the Geometry column in a DataFrame back to a WKT string column:</p>
@@ -6413,7 +6534,7 @@ desired.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="March 19, 2025 08:09:09">March 19, 2025 08:09:09</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="April 2, 2025 01:35:19">April 2, 2025 01:35:19</span>
   </span>
 
     
@@ -6491,7 +6612,7 @@ desired.</p>
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      Copyright © 2025 The Apache Software Foundation. Apache Sedona, Sedona, Apache, the Apache feather logo, and the Apache Sedona project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries. All other marks mentioned may be trademarks or registered trademarks of their respective owners. Please visit <a href="https://www.apache.org/">Apache Software Foundation</a> for more details.<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=f3e121f6-c909-4592-8be6-5bd345768cba" /><img src="https://analytics.apache.org/matomo.php?idsite=74&rec=1" />
+      Copyright © 2025 The Apache Software Foundation. Apache Sedona, Sedona, Apache, the Apache feather logo, and the Apache Sedona project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries. All other marks mentioned may be trademarks or registered trademarks of their respective owners. Please visit <a href="https://www.apache.org/">Apache Software Foundation</a> for more details.<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=f3e121f6-c909-4592-8be6-5bd345768cba" /><img referrerpolicy="no-referrer-when-downgrade" src="https://analytics.apache.org/matomo.php?idsite=74&rec=1" />
     </div>
   
   
