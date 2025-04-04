@@ -48,7 +48,7 @@ Please join our Discord community!
 * [Apache Sedona@LinkedIn](https://www.linkedin.com/company/apache-sedona)
 * [Apache Sedona@X](https://X.com/ApacheSedona)
 * [Sedona JIRA](https://issues.apache.org/jira/projects/SEDONA): bug reports and feature requests
-* [Sedona Github Issues](https://github.com/apache/sedona/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen): bug reports and feature requests
+* [Sedona GitHub Issues](https://github.com/apache/sedona/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen): bug reports and feature requests
 * [Sedona GitHub Discussion](https://github.com/apache/sedona/discussions): project development and general questions
 * [Sedona Mailing Lists](https://lists.apache.org/list.html?sedona.apache.org): [dev@sedona.apache.org](https://lists.apache.org/list.html?dev@sedona.apache.org): project development and general questions
 
