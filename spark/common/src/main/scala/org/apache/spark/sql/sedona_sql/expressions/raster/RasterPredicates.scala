@@ -24,12 +24,16 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression}
 import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, RasterUDT}
-import org.apache.spark.sql.sedona_sql.expressions.FoldableExpression
+import org.apache.spark.sql.sedona_sql.expressions.{FoldableExpression, NullIntolerantShim}
 import org.apache.spark.sql.types.{AbstractDataType, BooleanType, DataType}
 import org.geotools.coverage.grid.GridCoverage2D
 import org.locationtech.jts.geom.Geometry
 
-abstract class RS_Predicate extends Expression with FoldableExpression with ExpectsInputTypes {
+abstract class RS_Predicate
+    extends Expression
+    with FoldableExpression
+    with ExpectsInputTypes
+    with NullIntolerantShim {
   def inputExpressions: Seq[Expression]
 
   override def toString: String = s" **${this.getClass.getName}**  "

@@ -28,7 +28,11 @@ import org.apache.spark.sql.types.{AbstractDataType, BooleanType, DataType}
 import org.locationtech.jts.geom.Geometry
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 
-abstract class ST_Predicate extends Expression with FoldableExpression with ExpectsInputTypes {
+abstract class ST_Predicate
+    extends Expression
+    with FoldableExpression
+    with ExpectsInputTypes
+    with NullIntolerantShim {
 
   def inputExpressions: Seq[Expression]
 

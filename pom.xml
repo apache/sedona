@@ -763,7 +763,7 @@
             </repositories>
             <properties>
                 <spark.version>4.0.0</spark.version>
-                <spark.compat.version>3.5</spark.compat.version>
+                <spark.compat.version>4.0</spark.compat.version>
                 <spark.major.version>4</spark.major.version>
                 <hadoop.version>3.4.1</hadoop.version>
                 <log4j.version>2.24.3</log4j.version>
