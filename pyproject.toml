@@ -21,3 +21,8 @@ skips = ["B101", "B403", "B405", "B608"]
 [tool.codespell]
 ignore-words = '.github/linters/codespell.txt'
 skip = './docs/image,./docs/usecases,./site,./spark/common/src/test/resources,./tools/maven/scalafmt.conf'
+
+[tool.vulture]
+min_confidence = 100
+paths = ["docs/usecases/utilities.py", "python/", "spark-version-converter.py"]
+sort_by_size = true
