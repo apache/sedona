@@ -37,13 +37,11 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.util.LongAccumulator;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.index.SpatialIndex;
 import org.locationtech.jts.index.strtree.STRtree;
 import scala.Tuple2;
 
@@ -785,7 +783,7 @@ public class JoinQuery {
     LongAccumulator candidateCount = Metrics.createMetric(sparkContext, "candidateCount");
 
     final Broadcast<STRtree> broadcastObjectsTreeIndex;
-    final Broadcast<List> broadcastQueryObjects;
+    final Broadcast<List<UniqueGeometry<U>>> broadcastQueryObjects;
     if (broadcastJoin && objectRDD.indexedRawRDD != null && objectRDD.indexedRDD == null) {
       // If broadcastJoin is true and rawIndex is created on object side
       // we will broadcast queryRDD to objectRDD
@@ -816,8 +814,8 @@ public class JoinQuery {
     final JavaRDD<Pair<U, T>> joinResult;
     if (broadcastObjectsTreeIndex == null && broadcastQueryObjects == null) {
       // no broadcast join
-      final KnnJoinIndexJudgement judgement =
-          new KnnJoinIndexJudgement(
+      final KnnJoinIndexJudgement<U, T> judgement =
+          new KnnJoinIndexJudgement<>(
               joinParams.k,
               joinParams.searchRadius,
               joinParams.distanceMetric,
@@ -828,11 +826,12 @@ public class JoinQuery {
               streamCount,
               resultCount,
               candidateCount);
-      joinResult = queryRDD.spatialPartitionedRDD.zipPartitions(objectRDD.indexedRDD, judgement);
+      joinResult =
+          queryRDD.spatialPartitionedRDD.zipPartitions(objectRDD.spatialPartitionedRDD, judgement);
     } else if (broadcastObjectsTreeIndex != null) {
       // broadcast join with objectRDD as broadcast side
-      final KnnJoinIndexJudgement judgement =
-          new KnnJoinIndexJudgement(
+      final KnnJoinIndexJudgement<U, T> judgement =
+          new KnnJoinIndexJudgement<>(
               joinParams.k,
               joinParams.searchRadius,
               joinParams.distanceMetric,
@@ -844,11 +843,11 @@ public class JoinQuery {
               resultCount,
               candidateCount);
       // won't need inputs from the shapes in the objectRDD
-      joinResult = queryRDD.rawSpatialRDD.zipPartitions(queryRDD.rawSpatialRDD, judgement);
-    } else if (broadcastQueryObjects != null) {
+      joinResult = queryRDD.rawSpatialRDD.mapPartitions(judgement::callUsingBroadcastObjectIndex);
+    } else {
       // broadcast join with queryRDD as broadcast side
-      final KnnJoinIndexJudgement judgement =
-          new KnnJoinIndexJudgement(
+      final KnnJoinIndexJudgement<UniqueGeometry<U>, T> judgement =
+          new KnnJoinIndexJudgement<>(
               joinParams.k,
               joinParams.searchRadius,
               joinParams.distanceMetric,
@@ -860,8 +859,6 @@ public class JoinQuery {
               resultCount,
               candidateCount);
       joinResult = querySideBroadcastKNNJoin(objectRDD, joinParams, judgement, includeTies);
-    } else {
-      throw new IllegalArgumentException("No index found on the input RDDs.");
     }
 
     return joinResult.mapToPair(
@@ -891,22 +888,11 @@ public class JoinQuery {
       JavaRDD<Pair<U, T>> querySideBroadcastKNNJoin(
           SpatialRDD<T> objectRDD,
           JoinParams joinParams,
-          KnnJoinIndexJudgement judgement,
+          KnnJoinIndexJudgement<UniqueGeometry<U>, T> judgement,
           boolean includeTies) {
     final JavaRDD<Pair<U, T>> joinResult;
-    JavaRDD<Pair<U, T>> joinResultMapped =
-        objectRDD.indexedRawRDD.mapPartitions(
-            iterator -> {
-              List<Pair<U, T>> results = new ArrayList<>();
-              if (iterator.hasNext()) {
-                SpatialIndex spatialIndex = iterator.next();
-                // the broadcast join won't need inputs from the query's shape stream
-                Iterator<Pair<U, T>> callResult =
-                    judgement.call(null, Collections.singletonList(spatialIndex).iterator());
-                callResult.forEachRemaining(results::add);
-              }
-              return results.iterator();
-            });
+    JavaRDD<Pair<UniqueGeometry<U>, T>> joinResultMapped =
+        objectRDD.rawSpatialRDD.mapPartitions(judgement::callUsingBroadcastQueryList);
     // this is to avoid serializable issues with the broadcast variable
     int k = joinParams.k;
     DistanceMetric distanceMetric = joinParams.distanceMetric;
@@ -915,72 +901,67 @@ public class JoinQuery {
     // (based on a grouping key and distance)
     joinResult =
         joinResultMapped
-            .groupBy(pair -> pair.getKey()) // Group by the first geometry
+            .groupBy(pair -> pair.getKey().getUniqueId())
             .flatMap(
-                (FlatMapFunction<Tuple2<U, Iterable<Pair<U, T>>>, Pair<U, T>>)
-                    pair -> {
-                      Iterable<Pair<U, T>> values = pair._2;
+                pair -> {
+                  Iterable<Pair<UniqueGeometry<U>, T>> values = pair._2;
 
-                      // Extract and sort values by distance
-                      List<Pair<U, T>> sortedPairs = new ArrayList<>();
-                      for (Pair<U, T> p : values) {
-                        Pair<U, T> newPair =
-                            Pair.of(
-                                (U) ((UniqueGeometry<?>) p.getKey()).getOriginalGeometry(),
-                                p.getValue());
-                        sortedPairs.add(newPair);
-                      }
+                  // Extract and sort values by distance
+                  List<Pair<U, T>> sortedPairs = new ArrayList<>();
+                  for (Pair<UniqueGeometry<U>, T> p : values) {
+                    Pair<U, T> newPair = Pair.of(p.getKey().getOriginalGeometry(), p.getValue());
+                    sortedPairs.add(newPair);
+                  }
 
-                      // Sort pairs based on the distance function between the two geometries
-                      sortedPairs.sort(
-                          (p1, p2) -> {
-                            double distance1 =
-                                KnnJoinIndexJudgement.distance(
-                                    p1.getKey(), p1.getValue(), distanceMetric);
-                            double distance2 =
-                                KnnJoinIndexJudgement.distance(
-                                    p2.getKey(), p2.getValue(), distanceMetric);
-                            return Double.compare(
-                                distance1, distance2); // Sort ascending by distance
-                          });
+                  // Sort pairs based on the distance function between the two geometries
+                  sortedPairs.sort(
+                      (p1, p2) -> {
+                        double distance1 =
+                            KnnJoinIndexJudgement.distance(
+                                p1.getKey(), p1.getValue(), distanceMetric);
+                        double distance2 =
+                            KnnJoinIndexJudgement.distance(
+                                p2.getKey(), p2.getValue(), distanceMetric);
+                        return Double.compare(distance1, distance2); // Sort ascending by distance
+                      });
 
-                      if (includeTies) {
-                        // Keep the top k pairs, including ties
-                        List<Pair<U, T>> topPairs = new ArrayList<>();
-                        double kthDistance = -1;
-                        for (int i = 0; i < sortedPairs.size(); i++) {
-                          if (i < k) {
-                            topPairs.add(sortedPairs.get(i));
-                            if (i == k - 1) {
-                              kthDistance =
-                                  KnnJoinIndexJudgement.distance(
-                                      sortedPairs.get(i).getKey(),
-                                      sortedPairs.get(i).getValue(),
-                                      distanceMetric);
-                            }
-                          } else {
-                            double currentDistance =
-                                KnnJoinIndexJudgement.distance(
-                                    sortedPairs.get(i).getKey(),
-                                    sortedPairs.get(i).getValue(),
-                                    distanceMetric);
-                            if (currentDistance == kthDistance) {
-                              topPairs.add(sortedPairs.get(i));
-                            } else {
-                              break;
-                            }
-                          }
+                  if (includeTies) {
+                    // Keep the top k pairs, including ties
+                    List<Pair<U, T>> topPairs = new ArrayList<>();
+                    double kthDistance = -1;
+                    for (int i = 0; i < sortedPairs.size(); i++) {
+                      if (i < k) {
+                        topPairs.add(sortedPairs.get(i));
+                        if (i == k - 1) {
+                          kthDistance =
+                              KnnJoinIndexJudgement.distance(
+                                  sortedPairs.get(i).getKey(),
+                                  sortedPairs.get(i).getValue(),
+                                  distanceMetric);
                         }
-                        return topPairs.iterator();
                       } else {
-                        // Keep the top k pairs without ties
-                        List<Pair<U, T>> topPairs = new ArrayList<>();
-                        for (int i = 0; i < Math.min(k, sortedPairs.size()); i++) {
+                        double currentDistance =
+                            KnnJoinIndexJudgement.distance(
+                                sortedPairs.get(i).getKey(),
+                                sortedPairs.get(i).getValue(),
+                                distanceMetric);
+                        if (currentDistance == kthDistance) {
                           topPairs.add(sortedPairs.get(i));
+                        } else {
+                          break;
                         }
-                        return topPairs.iterator();
                       }
-                    });
+                    }
+                    return topPairs.iterator();
+                  } else {
+                    // Keep the top k pairs without ties
+                    List<Pair<U, T>> topPairs = new ArrayList<>();
+                    for (int i = 0; i < Math.min(k, sortedPairs.size()); i++) {
+                      topPairs.add(sortedPairs.get(i));
+                    }
+                    return topPairs.iterator();
+                  }
+                });
 
     return joinResult;
   }
