@@ -19,7 +19,7 @@
 
 In Databricks advanced editions, you need to install Sedona via [cluster init-scripts](https://docs.databricks.com/clusters/init-scripts.html) as described below. Sedona is not guaranteed to be 100% compatible with `Databricks photon acceleration`. Sedona requires Spark internal APIs to inject many optimization strategies, which sometimes is not accessible in `Photon`.
 
-The following steps use DBR including Apache Spark 3.4.x as an example. Please change the Spark version according to your DBR version. Please pay attention to the Spark version postfix and Scala version postfix on our [Maven Coordinate page](maven-coordinates.md). Databricks Spark and Apache Spark's compatibility can be found [here](https://docs.databricks.com/en/release-notes/runtime/index.html).
+The following steps use DBR including Apache Spark 3.5.x as an example. Please change the Spark version according to your DBR version. Please pay attention to the Spark version postfix and Scala version postfix on our [Maven Coordinate page](maven-coordinates.md). Databricks Spark and Apache Spark's compatibility can be found [here](https://docs.databricks.com/en/release-notes/runtime/index.html).
 
 !!! bug
     Databricks Runtime 16.2 (non-LTS) introduces a change in the json4s dependency, which may lead to compatibility issues with Apache Sedona. We recommend using a currently supported LTS version, such as Databricks Runtime 15.4 LTS or 14.3 LTS, to ensure stability. A patch will be provided once an official Databricks Runtime 16 LTS version is released.
@@ -36,7 +36,7 @@ mkdir -p /Workspace/Shared/sedona/{{ sedona.current_version }}
 # Download the dependencies from Maven into DBFS
 curl -o /Workspace/Shared/sedona/{{ sedona.current_version }}/geotools-wrapper-{{ sedona.current_geotools }}.jar "https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/{{ sedona.current_geotools }}/geotools-wrapper-{{ sedona.current_geotools }}.jar"
 
-curl -o /Workspace/Shared/sedona/{{ sedona.current_version }}/sedona-spark-shaded-3.4_2.12-{{ sedona.current_version }}.jar "https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.4_2.12/{{ sedona.current_version }}/sedona-spark-shaded-3.4_2.12-{{ sedona.current_version }}.jar"
+curl -o /Workspace/Shared/sedona/{{ sedona.current_version }}/sedona-spark-shaded-3.5_2.12-{{ sedona.current_version }}.jar "https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/{{ sedona.current_version }}/sedona-spark-shaded-3.5_2.12-{{ sedona.current_version }}.jar"
 ```
 
 Of course, you can also do the steps above manually.
