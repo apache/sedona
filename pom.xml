@@ -76,7 +76,6 @@
         <spatial4j.version>0.8</spatial4j.version>
 
         <jt-jiffle.version>1.1.24</jt-jiffle.version>
-        <antlr-runtime.version>4.9.3</antlr-runtime.version>
         <janino-version>3.1.9</janino-version>
 
         <!-- Actual scala, spark and log4j version will be set by activated profiles.
@@ -273,13 +272,6 @@
                 <groupId>it.geosolutions.jaiext.jiffle</groupId>
                 <artifactId>jt-jiffle-language</artifactId>
                 <version>${jt-jiffle.version}</version>
-                <scope>${geotools.scope}</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>*</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
            <dependency>
                 <groupId>org.apache.hadoop</groupId>
