@@ -19,37 +19,29 @@
   {% if page.is_homepage %}
   <!-- {{ super() }} -->
   <style>
-    .md-header{position:initial}.md-main__inner{margin-left:15%}.md-content{display:display}@media screen and (min-width:60em){.md-sidebar--secondary{display:display}}@media screen and (min-width:76.25em){.md-sidebar--primary{display:none}}
+    .md-header{position:initial}.md-main__inner{margin-left:5%}.md-content{display:display}@media screen and (min-width:60em){.md-sidebar--secondary{display:display}}@media screen and (min-width:76.25em){.md-sidebar--primary{display:none}}
     .br {
             display: block;
             margin-bottom: 14em;
         }
     .responsive-container {
       display: grid;
-      grid-template-areas: 'ab';
+      grid-template-columns: 44% 56%;
+      grid-gap: 20px;
     }
     .responsive-text {
-      grid-area: a;
-      width: 44%; height: 100%; float: left;
+      grid-column: 1;
     }
     .responsive-img {
-      grid-area: b;
-      margin-left: 46%; height: 100%;
+     grid-column: 2;
     }
 
     @media (max-width: 490px) {
       .responsive-container {
-        grid-template-areas:
-                'b'
-                'a';
+        grid-template-columns: 100%;
       }
-      .responsive-text {
-        width: 100%;
-        height: 100%;
-      }
-      .responsive-img {
-        margin-left: 0;
-        height: 100%;
+      .responsive-text , .responsive-img {
+        grid-column: 1;
       }
     }
 </style>
