@@ -17,8 +17,8 @@
 
 import os
 
+from tests import tests_resource
 from tests.test_base import TestBase
-from tests.tools import tests_resource
 
 from sedona.core.enums import FileDataSplitter
 from sedona.core.SpatialRDD import PointRDD, PolygonRDD
