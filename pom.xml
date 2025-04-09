@@ -272,6 +272,20 @@
                 <groupId>it.geosolutions.jaiext.jiffle</groupId>
                 <artifactId>jt-jiffle-language</artifactId>
                 <version>${jt-jiffle.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.codehaus.janino</groupId>
+                        <artifactId>janino</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>it.geosolutions.jaiext.utilities</groupId>
+                        <artifactId>jt-utilities</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
            <dependency>
                 <groupId>org.apache.hadoop</groupId>
