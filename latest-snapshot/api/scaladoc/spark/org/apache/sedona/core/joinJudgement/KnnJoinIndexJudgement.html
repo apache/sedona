@@ -163,6 +163,10 @@
                         <a href="DynamicIndexLookupJudgement.html" title="">DynamicIndexLookupJudgement</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
+                        <a class="class" href="InMemoryKNNJoinIterator.html" title=""></a>
+                        <a href="InMemoryKNNJoinIterator.html" title="">InMemoryKNNJoinIterator</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
                         <a class="class" href="" title="This class is responsible for performing a K-nearest neighbors (KNN) join operation using a spatial index."></a>
                         <a href="" title="This class is responsible for performing a K-nearest neighbors (KNN) join operation using a spatial index.">KnnJoinIndexJudgement</a>
                       </li><li class="current-entities indented5">
@@ -200,7 +204,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">KnnJoinIndexJudgement</span><span class="tparams">[<span name="T">T &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>, <span name="U">U &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>]</span><span class="result"> extends <span class="extype" name="org.apache.sedona.core.joinJudgement.JudgementBase">JudgementBase</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>] with <span class="extype" name="org.apache.spark.api.java.function.FlatMapFunction2">FlatMapFunction2</span>[<span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>], <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.locationtech.jts.index.SpatialIndex">SpatialIndex</span>], <span class="extype" name="org.apache.commons.lang3.tuple.Pair">Pair</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>]] with <span class="extype" name="java.io.Serializable">Serializable</span></span>
+        <span class="name">KnnJoinIndexJudgement</span><span class="tparams">[<span name="T">T &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>, <span name="U">U &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>]</span><span class="result"> extends <span class="extype" name="org.apache.sedona.core.joinJudgement.JudgementBase">JudgementBase</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>] with <span class="extype" name="org.apache.spark.api.java.function.FlatMapFunction2">FlatMapFunction2</span>[<span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>], <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>], <span class="extype" name="org.apache.commons.lang3.tuple.Pair">Pair</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>]] with <span class="extype" name="java.io.Serializable">Serializable</span></span>
       </span>
       </h4>
 
@@ -211,7 +215,7 @@ spatial index. It extends the JudgementBase class and implements the FlatMapFunc
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><span class="extype" name="org.apache.spark.api.java.function.FlatMapFunction2">FlatMapFunction2</span>[<span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>], <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.locationtech.jts.index.SpatialIndex">SpatialIndex</span>], <span class="extype" name="org.apache.commons.lang3.tuple.Pair">Pair</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>]], <span class="extype" name="org.apache.sedona.core.joinJudgement.JudgementBase">JudgementBase</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>], <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="org.apache.spark.api.java.function.FlatMapFunction2">FlatMapFunction2</span>[<span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>], <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>], <span class="extype" name="org.apache.commons.lang3.tuple.Pair">Pair</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>]], <span class="extype" name="org.apache.sedona.core.joinJudgement.JudgementBase">JudgementBase</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>], <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -258,9 +262,9 @@ spatial index. It extends the JudgementBase class and implements the FlatMapFunc
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(k:Int,searchRadius:Double,distanceMetric:org.apache.sedona.core.enums.DistanceMetric,includeTies:Boolean,broadcastQueryObjects:org.apache.spark.broadcast.Broadcast[java.util.List],broadcastObjectsTreeIndex:org.apache.spark.broadcast.Broadcast[org.locationtech.jts.index.strtree.STRtree],buildCount:org.apache.spark.util.LongAccumulator,streamCount:org.apache.spark.util.LongAccumulator,resultCount:org.apache.spark.util.LongAccumulator,candidateCount:org.apache.spark.util.LongAccumulator):org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement[T,U]"></a><a id="&lt;init&gt;:KnnJoinIndexJudgement[T,U]"></a>
+      <a id="&lt;init&gt;(k:Int,distanceMetric:org.apache.sedona.core.enums.DistanceMetric,includeTies:Boolean,broadcastQueryObjects:org.apache.spark.broadcast.Broadcast[java.util.List[T]],broadcastObjectsTreeIndex:org.apache.spark.broadcast.Broadcast[org.locationtech.jts.index.strtree.STRtree],buildCount:org.apache.spark.util.LongAccumulator,streamCount:org.apache.spark.util.LongAccumulator,resultCount:org.apache.spark.util.LongAccumulator,candidateCount:org.apache.spark.util.LongAccumulator):org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement[T,U]"></a><a id="&lt;init&gt;:KnnJoinIndexJudgement[T,U]"></a>
       <span class="permalink">
-      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#&lt;init&gt;(k:Int,searchRadius:Double,distanceMetric:org.apache.sedona.core.enums.DistanceMetric,includeTies:Boolean,broadcastQueryObjects:org.apache.spark.broadcast.Broadcast[java.util.List],broadcastObjectsTreeIndex:org.apache.spark.broadcast.Broadcast[org.locationtech.jts.index.strtree.STRtree],buildCount:org.apache.spark.util.LongAccumulator,streamCount:org.apache.spark.util.LongAccumulator,resultCount:org.apache.spark.util.LongAccumulator,candidateCount:org.apache.spark.util.LongAccumulator):org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement[T,U]" title="Permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#&lt;init&gt;(k:Int,distanceMetric:org.apache.sedona.core.enums.DistanceMetric,includeTies:Boolean,broadcastQueryObjects:org.apache.spark.broadcast.Broadcast[java.util.List[T]],broadcastObjectsTreeIndex:org.apache.spark.broadcast.Broadcast[org.locationtech.jts.index.strtree.STRtree],buildCount:org.apache.spark.util.LongAccumulator,streamCount:org.apache.spark.util.LongAccumulator,resultCount:org.apache.spark.util.LongAccumulator,candidateCount:org.apache.spark.util.LongAccumulator):org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement[T,U]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -269,7 +273,7 @@ spatial index. It extends the JudgementBase class and implements the FlatMapFunc
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">KnnJoinIndexJudgement</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="searchRadius">searchRadius: <span class="extype" name="java.lang.Double">Double</span></span>, <span name="distanceMetric">distanceMetric: <a href="../enums/DistanceMetric.html" class="extype" name="org.apache.sedona.core.enums.DistanceMetric">DistanceMetric</a></span>, <span name="includeTies">includeTies: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="broadcastQueryObjects">broadcastQueryObjects: <span class="extype" name="org.apache.spark.broadcast.Broadcast">Broadcast</span>[<span class="extype" name="java.util.List">List</span>]</span>, <span name="broadcastObjectsTreeIndex">broadcastObjectsTreeIndex: <span class="extype" name="org.apache.spark.broadcast.Broadcast">Broadcast</span>[<span class="extype" name="org.locationtech.jts.index.strtree.STRtree">STRtree</span>]</span>, <span name="buildCount">buildCount: <span class="extype" name="org.apache.spark.util.LongAccumulator">LongAccumulator</span></span>, <span name="streamCount">streamCount: <span class="extype" name="org.apache.spark.util.LongAccumulator">LongAccumulator</span></span>, <span name="resultCount">resultCount: <span class="extype" name="org.apache.spark.util.LongAccumulator">LongAccumulator</span></span>, <span name="candidateCount">candidateCount: <span class="extype" name="org.apache.spark.util.LongAccumulator">LongAccumulator</span></span>)</span>
+        <span class="name">KnnJoinIndexJudgement</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="distanceMetric">distanceMetric: <a href="../enums/DistanceMetric.html" class="extype" name="org.apache.sedona.core.enums.DistanceMetric">DistanceMetric</a></span>, <span name="includeTies">includeTies: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="broadcastQueryObjects">broadcastQueryObjects: <span class="extype" name="org.apache.spark.broadcast.Broadcast">Broadcast</span>[<span class="extype" name="java.util.List">List</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>]]</span>, <span name="broadcastObjectsTreeIndex">broadcastObjectsTreeIndex: <span class="extype" name="org.apache.spark.broadcast.Broadcast">Broadcast</span>[<span class="extype" name="org.locationtech.jts.index.strtree.STRtree">STRtree</span>]</span>, <span name="buildCount">buildCount: <span class="extype" name="org.apache.spark.util.LongAccumulator">LongAccumulator</span></span>, <span name="streamCount">streamCount: <span class="extype" name="org.apache.spark.util.LongAccumulator">LongAccumulator</span></span>, <span name="resultCount">resultCount: <span class="extype" name="org.apache.spark.util.LongAccumulator">LongAccumulator</span></span>, <span name="candidateCount">candidateCount: <span class="extype" name="org.apache.spark.util.LongAccumulator">LongAccumulator</span></span>)</span>
       </span>
       
       <p class="shortcomment cmt"></p>
@@ -348,9 +352,9 @@ spatial index. It extends the JudgementBase class and implements the FlatMapFunc
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement#call" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="call(streamShapes:java.util.Iterator[T],treeIndexes:java.util.Iterator[org.locationtech.jts.index.SpatialIndex]):java.util.Iterator[org.apache.commons.lang3.tuple.Pair[U,T]]"></a><a id="call(Iterator[T],Iterator[SpatialIndex]):Iterator[Pair[U,T]]"></a>
+      <a id="call(queryShapes:java.util.Iterator[T],objectShapes:java.util.Iterator[U]):java.util.Iterator[org.apache.commons.lang3.tuple.Pair[T,U]]"></a><a id="call(Iterator[T],Iterator[U]):Iterator[Pair[T,U]]"></a>
       <span class="permalink">
-      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#call(streamShapes:java.util.Iterator[T],treeIndexes:java.util.Iterator[org.locationtech.jts.index.SpatialIndex]):java.util.Iterator[org.apache.commons.lang3.tuple.Pair[U,T]]" title="Permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#call(queryShapes:java.util.Iterator[T],objectShapes:java.util.Iterator[U]):java.util.Iterator[org.apache.commons.lang3.tuple.Pair[T,U]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -359,16 +363,52 @@ spatial index. It extends the JudgementBase class and implements the FlatMapFunc
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">call</span><span class="params">(<span name="streamShapes">streamShapes: <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>]</span>, <span name="treeIndexes">treeIndexes: <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.locationtech.jts.index.SpatialIndex">SpatialIndex</span>]</span>)</span><span class="result">: <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.commons.lang3.tuple.Pair">Pair</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>]]</span>
+        <span class="name">call</span><span class="params">(<span name="queryShapes">queryShapes: <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>]</span>, <span name="objectShapes">objectShapes: <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>]</span>)</span><span class="result">: <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.commons.lang3.tuple.Pair">Pair</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>]]</span>
       </span>
       
       <p class="shortcomment cmt">This method performs the KNN join operation.</p><div class="fullcomment"><div class="comment cmt"><p>This method performs the KNN join operation. It iterates over the geometries in the stream side
 and uses the spatial index to find the k nearest neighbors for each geometry. The method
 returns an iterator over the join results.
-</p></div><dl class="paramcmts block"><dt class="param">streamShapes</dt><dd class="cmt"><p>iterator over the geometries in the stream side</p></dd><dt class="param">treeIndexes</dt><dd class="cmt"><p>iterator over the spatial indexes</p></dd><dt>returns</dt><dd class="cmt"><p>an iterator over the join results</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement">KnnJoinIndexJudgement</a> → FlatMapFunction2</dd><dt>Annotations</dt><dd>
+</p></div><dl class="paramcmts block"><dt class="param">queryShapes</dt><dd class="cmt"><p>iterator over the geometries in the query side</p></dd><dt class="param">objectShapes</dt><dd class="cmt"><p>iterator over the geometries in the object side</p></dd><dt>returns</dt><dd class="cmt"><p>an iterator over the join results</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement">KnnJoinIndexJudgement</a> → FlatMapFunction2</dd><dt>Annotations</dt><dd>
                 <span class="name">@Override</span><span class="args">()</span>
               
         </dd><dt>Exceptions thrown</dt><dd><span class="cmt"><p><span class="extype" name="Exception"><code>Exception</code></span> if the spatial index is not of type STRtree</p></span></dd></dl></div>
+    </li><li name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement#callUsingBroadcastObjectIndex" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="callUsingBroadcastObjectIndex(queryShapes:java.util.Iterator[T]):java.util.Iterator[org.apache.commons.lang3.tuple.Pair[T,U]]"></a><a id="callUsingBroadcastObjectIndex(Iterator[T]):Iterator[Pair[T,U]]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#callUsingBroadcastObjectIndex(queryShapes:java.util.Iterator[T]):java.util.Iterator[org.apache.commons.lang3.tuple.Pair[T,U]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">callUsingBroadcastObjectIndex</span><span class="params">(<span name="queryShapes">queryShapes: <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.commons.lang3.tuple.Pair">Pair</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">This method performs the KNN join operation using the broadcast spatial index built using all
+geometries in the object side.</p><div class="fullcomment"><div class="comment cmt"><p>This method performs the KNN join operation using the broadcast spatial index built using all
+geometries in the object side.
+</p></div><dl class="paramcmts block"><dt class="param">queryShapes</dt><dd class="cmt"><p>iterator over the geometries in the query side</p></dd><dt>returns</dt><dd class="cmt"><p>an iterator over the join results</p></dd></dl></div>
+    </li><li name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement#callUsingBroadcastQueryList" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="callUsingBroadcastQueryList(objectShapes:java.util.Iterator[U]):java.util.Iterator[org.apache.commons.lang3.tuple.Pair[T,U]]"></a><a id="callUsingBroadcastQueryList(Iterator[U]):Iterator[Pair[T,U]]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#callUsingBroadcastQueryList(objectShapes:java.util.Iterator[U]):java.util.Iterator[org.apache.commons.lang3.tuple.Pair[T,U]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">callUsingBroadcastQueryList</span><span class="params">(<span name="objectShapes">objectShapes: <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>]</span>)</span><span class="result">: <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.commons.lang3.tuple.Pair">Pair</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">This method performs the KNN join operation using the broadcast query geometries.</p><div class="fullcomment"><div class="comment cmt"><p>This method performs the KNN join operation using the broadcast query geometries.
+</p></div><dl class="paramcmts block"><dt class="param">objectShapes</dt><dd class="cmt"><p>iterator over the geometries in the object side</p></dd><dt>returns</dt><dd class="cmt"><p>an iterator over the join results</p></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
@@ -775,7 +815,7 @@ the result of the current stream shape against all the build shapes.
 
         <div id="inheritedMembers">
         <div class="parent" name="org.apache.spark.api.java.function.FlatMapFunction2">
-              <h3>Inherited from <span class="extype" name="org.apache.spark.api.java.function.FlatMapFunction2">FlatMapFunction2</span>[<span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>], <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.locationtech.jts.index.SpatialIndex">SpatialIndex</span>], <span class="extype" name="org.apache.commons.lang3.tuple.Pair">Pair</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>]]</h3>
+              <h3>Inherited from <span class="extype" name="org.apache.spark.api.java.function.FlatMapFunction2">FlatMapFunction2</span>[<span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>], <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>], <span class="extype" name="org.apache.commons.lang3.tuple.Pair">Pair</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>]]</h3>
             </div><div class="parent" name="org.apache.sedona.core.joinJudgement.JudgementBase">
               <h3>Inherited from <span class="extype" name="org.apache.sedona.core.joinJudgement.JudgementBase">JudgementBase</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>]</h3>
             </div><div class="parent" name="java.io.Serializable">

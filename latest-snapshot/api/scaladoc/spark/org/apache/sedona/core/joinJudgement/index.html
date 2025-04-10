@@ -195,6 +195,10 @@
                         <a href="DynamicIndexLookupJudgement.html" title="">DynamicIndexLookupJudgement</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
+                        <a class="class" href="InMemoryKNNJoinIterator.html" title=""></a>
+                        <a href="InMemoryKNNJoinIterator.html" title="">InMemoryKNNJoinIterator</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
                         <a class="class" href="KnnJoinIndexJudgement.html" title="This class is responsible for performing a K-nearest neighbors (KNN) join operation using a spatial index."></a>
                         <a href="KnnJoinIndexJudgement.html" title="This class is responsible for performing a K-nearest neighbors (KNN) join operation using a spatial index.">KnnJoinIndexJudgement</a>
                       </li><li class="current-entities indented5">
@@ -478,8 +482,24 @@ intersection of the geometries.
       </span>
       
       
+    </li><li name="org.apache.sedona.core.joinJudgement.InMemoryKNNJoinIterator" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="InMemoryKNNJoinIterator[T&lt;:org.locationtech.jts.geom.Geometry,U&lt;:org.locationtech.jts.geom.Geometry]extendsIterator[org.apache.commons.lang3.tuple.Pair[T,U]]"></a><a id="InMemoryKNNJoinIterator[T&lt;:Geometry,U&lt;:Geometry]:InMemoryKNNJoinIterator[T,U]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/InMemoryKNNJoinIterator.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="InMemoryKNNJoinIterator.html"><span class="name">InMemoryKNNJoinIterator</span></a><span class="tparams">[<span name="T">T &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>, <span name="U">U &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>]</span><span class="result"> extends <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.commons.lang3.tuple.Pair">Pair</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.InMemoryKNNJoinIterator.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.InMemoryKNNJoinIterator.U">U</span>]]</span>
+      </span>
+      
+      
     </li><li name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="KnnJoinIndexJudgement[T&lt;:org.locationtech.jts.geom.Geometry,U&lt;:org.locationtech.jts.geom.Geometry]extendsJudgementBase[T,U]withFlatMapFunction2[java.util.Iterator[T],java.util.Iterator[org.locationtech.jts.index.SpatialIndex],org.apache.commons.lang3.tuple.Pair[U,T]]withSerializable"></a><a id="KnnJoinIndexJudgement[T&lt;:Geometry,U&lt;:Geometry]:KnnJoinIndexJudgement[T,U]"></a>
+      <a id="KnnJoinIndexJudgement[T&lt;:org.locationtech.jts.geom.Geometry,U&lt;:org.locationtech.jts.geom.Geometry]extendsJudgementBase[T,U]withFlatMapFunction2[java.util.Iterator[T],java.util.Iterator[U],org.apache.commons.lang3.tuple.Pair[T,U]]withSerializable"></a><a id="KnnJoinIndexJudgement[T&lt;:Geometry,U&lt;:Geometry]:KnnJoinIndexJudgement[T,U]"></a>
       <span class="permalink">
       <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html" title="Permalink">
         <i class="material-icons"></i>
@@ -490,7 +510,7 @@ intersection of the geometries.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="This class is responsible for performing a K-nearest neighbors (KNN) join operation using a spatial index." href="KnnJoinIndexJudgement.html"><span class="name">KnnJoinIndexJudgement</span></a><span class="tparams">[<span name="T">T &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>, <span name="U">U &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>]</span><span class="result"> extends <span class="extype" name="org.apache.sedona.core.joinJudgement.JudgementBase">JudgementBase</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>] with <span class="extype" name="org.apache.spark.api.java.function.FlatMapFunction2">FlatMapFunction2</span>[<span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>], <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.locationtech.jts.index.SpatialIndex">SpatialIndex</span>], <span class="extype" name="org.apache.commons.lang3.tuple.Pair">Pair</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>]] with <span class="extype" name="java.io.Serializable">Serializable</span></span>
+        <a title="This class is responsible for performing a K-nearest neighbors (KNN) join operation using a spatial index." href="KnnJoinIndexJudgement.html"><span class="name">KnnJoinIndexJudgement</span></a><span class="tparams">[<span name="T">T &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>, <span name="U">U &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>]</span><span class="result"> extends <span class="extype" name="org.apache.sedona.core.joinJudgement.JudgementBase">JudgementBase</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>] with <span class="extype" name="org.apache.spark.api.java.function.FlatMapFunction2">FlatMapFunction2</span>[<span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>], <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>], <span class="extype" name="org.apache.commons.lang3.tuple.Pair">Pair</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>]] with <span class="extype" name="java.io.Serializable">Serializable</span></span>
       </span>
       
       <p class="shortcomment cmt">This class is responsible for performing a K-nearest neighbors (KNN) join operation using a
