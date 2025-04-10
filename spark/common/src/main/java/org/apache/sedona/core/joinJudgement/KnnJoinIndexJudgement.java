@@ -19,7 +19,6 @@
 package org.apache.sedona.core.joinJudgement;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -47,7 +46,6 @@ public class KnnJoinIndexJudgement<T extends Geometry, U extends Geometry>
     extends JudgementBase<T, U>
     implements FlatMapFunction2<Iterator<T>, Iterator<U>, Pair<T, U>>, Serializable {
   private final int k;
-  private final Double searchRadius;
   private final DistanceMetric distanceMetric;
   private final boolean includeTies;
   private final Broadcast<List<T>> broadcastQueryObjects;
@@ -57,7 +55,6 @@ public class KnnJoinIndexJudgement<T extends Geometry, U extends Geometry>
    * Constructor for the KnnJoinIndexJudgement class.
    *
    * @param k the number of nearest neighbors to find
-   * @param searchRadius only search for nearest neighbors within this radius
    * @param distanceMetric the distance metric to use
    * @param broadcastQueryObjects the broadcast geometries on queries
    * @param broadcastObjectsTreeIndex the broadcast spatial index on objects
@@ -68,7 +65,6 @@ public class KnnJoinIndexJudgement<T extends Geometry, U extends Geometry>
    */
   public KnnJoinIndexJudgement(
       int k,
-      Double searchRadius,
       DistanceMetric distanceMetric,
       boolean includeTies,
       Broadcast<List<T>> broadcastQueryObjects,
@@ -79,7 +75,6 @@ public class KnnJoinIndexJudgement<T extends Geometry, U extends Geometry>
       LongAccumulator candidateCount) {
     super(null, buildCount, streamCount, resultCount, candidateCount);
     this.k = k;
-    this.searchRadius = searchRadius;
     this.distanceMetric = distanceMetric;
     this.includeTies = includeTies;
     this.broadcastQueryObjects = broadcastQueryObjects;
@@ -109,14 +104,7 @@ public class KnnJoinIndexJudgement<T extends Geometry, U extends Geometry>
 
     STRtree strTree = buildSTRtree(objectShapes);
     return new InMemoryKNNJoinIterator<>(
-        queryShapes,
-        strTree,
-        k,
-        searchRadius,
-        distanceMetric,
-        includeTies,
-        streamCount,
-        resultCount);
+        queryShapes, strTree, k, distanceMetric, includeTies, streamCount, resultCount);
   }
 
   /**
@@ -139,14 +127,7 @@ public class KnnJoinIndexJudgement<T extends Geometry, U extends Geometry>
     // broadcasted, the STRtree built from the broadcasted object should be able to fit into memory.
     STRtree strTree = broadcastObjectsTreeIndex.getValue();
     return new InMemoryKNNJoinIterator<>(
-        queryShapes,
-        strTree,
-        k,
-        searchRadius,
-        distanceMetric,
-        includeTies,
-        streamCount,
-        resultCount);
+        queryShapes, strTree, k, distanceMetric, includeTies, streamCount, resultCount);
   }
 
   /**
@@ -167,14 +148,7 @@ public class KnnJoinIndexJudgement<T extends Geometry, U extends Geometry>
     List<T> queryItems = broadcastQueryObjects.getValue();
     STRtree strTree = buildSTRtree(objectShapes);
     return new InMemoryKNNJoinIterator<>(
-        queryItems.iterator(),
-        strTree,
-        k,
-        searchRadius,
-        distanceMetric,
-        includeTies,
-        streamCount,
-        resultCount);
+        queryItems.iterator(), strTree, k, distanceMetric, includeTies, streamCount, resultCount);
   }
 
   private STRtree buildSTRtree(Iterator<U> objectShapes) {
@@ -250,19 +224,6 @@ public class KnnJoinIndexJudgement<T extends Geometry, U extends Geometry>
       default:
         return new EuclideanItemDistance().distance(key, value);
     }
-  }
-
-  public static Object[] getInSearchRadius(
-      Object[] localK, Geometry queryGeom, DistanceMetric distanceMetric, double searchRadius) {
-    localK =
-        Arrays.stream(localK)
-            .filter(
-                candidate -> {
-                  Geometry candidateGeom = (Geometry) candidate;
-                  return distanceByMetric(queryGeom, candidateGeom, distanceMetric) <= searchRadius;
-                })
-            .toArray();
-    return localK;
   }
 
   public static ItemDistance getItemDistance(DistanceMetric distanceMetric) {

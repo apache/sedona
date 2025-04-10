@@ -140,7 +140,7 @@ case class BroadcastObjectSideKNNJoinExec(
     // Metric to use in the join to calculate the distance, only Euclidean and Spheroid are supported
     val distanceMetric = if (isGeography) DistanceMetric.HAVERSINE else DistanceMetric.EUCLIDEAN
     val joinParams =
-      new JoinParams(true, null, IndexType.RTREE, null, kValue, distanceMetric, null)
+      new JoinParams(true, null, IndexType.RTREE, null, kValue, distanceMetric)
     joinParams
   }
 

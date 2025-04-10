@@ -399,7 +399,7 @@ public class JoinQuery {
       DistanceMetric distanceMetric)
       throws Exception {
     final JoinParams joinParams =
-        new JoinParams(true, null, IndexType.RTREE, null, k, distanceMetric, null);
+        new JoinParams(true, null, IndexType.RTREE, null, k, distanceMetric);
 
     final JavaPairRDD<U, T> joinResults = knnJoin(queryRDD, objectRDD, joinParams, false, false);
     return collectGeometriesByKey(joinResults);
@@ -817,7 +817,6 @@ public class JoinQuery {
       final KnnJoinIndexJudgement<U, T> judgement =
           new KnnJoinIndexJudgement<>(
               joinParams.k,
-              joinParams.searchRadius,
               joinParams.distanceMetric,
               includeTies,
               null,
@@ -833,7 +832,6 @@ public class JoinQuery {
       final KnnJoinIndexJudgement<U, T> judgement =
           new KnnJoinIndexJudgement<>(
               joinParams.k,
-              joinParams.searchRadius,
               joinParams.distanceMetric,
               includeTies,
               null,
@@ -849,7 +847,6 @@ public class JoinQuery {
       final KnnJoinIndexJudgement<UniqueGeometry<U>, T> judgement =
           new KnnJoinIndexJudgement<>(
               joinParams.k,
-              joinParams.searchRadius,
               joinParams.distanceMetric,
               includeTies,
               broadcastQueryObjects,
@@ -975,14 +972,13 @@ public class JoinQuery {
     // KNN specific parameters
     public final int k;
     public final DistanceMetric distanceMetric;
-    public final Double searchRadius;
 
     public JoinParams(
         boolean useIndex,
         SpatialPredicate spatialPredicate,
         IndexType polygonIndexType,
         JoinBuildSide joinBuildSide) {
-      this(useIndex, spatialPredicate, polygonIndexType, joinBuildSide, -1, null, null);
+      this(useIndex, spatialPredicate, polygonIndexType, joinBuildSide, -1, null);
     }
 
     public JoinParams(
@@ -991,15 +987,13 @@ public class JoinQuery {
         IndexType polygonIndexType,
         JoinBuildSide joinBuildSide,
         int k,
-        DistanceMetric distanceMetric,
-        Double searchRadius) {
+        DistanceMetric distanceMetric) {
       this.useIndex = useIndex;
       this.spatialPredicate = spatialPredicate;
       this.indexType = polygonIndexType;
       this.joinBuildSide = joinBuildSide;
       this.k = k;
       this.distanceMetric = distanceMetric;
-      this.searchRadius = searchRadius;
     }
 
     public JoinParams(boolean useIndex, SpatialPredicate spatialPredicate) {

@@ -39,7 +39,6 @@ public class InMemoryKNNJoinIterator<T extends Geometry, U extends Geometry>
   private final STRtree strTree;
 
   private final int k;
-  private final Double searchRadius;
   private final DistanceMetric distanceMetric;
   private final boolean includeTies;
   private final ItemDistance itemDistance;
@@ -54,7 +53,6 @@ public class InMemoryKNNJoinIterator<T extends Geometry, U extends Geometry>
       Iterator<T> querySideIterator,
       STRtree strTree,
       int k,
-      Double searchRadius,
       DistanceMetric distanceMetric,
       boolean includeTies,
       LongAccumulator streamCount,
@@ -63,7 +61,6 @@ public class InMemoryKNNJoinIterator<T extends Geometry, U extends Geometry>
     this.strTree = strTree;
 
     this.k = k;
-    this.searchRadius = searchRadius;
     this.distanceMetric = distanceMetric;
     this.includeTies = includeTies;
     this.itemDistance = KnnJoinIndexJudgement.getItemDistance(distanceMetric);
@@ -113,10 +110,6 @@ public class InMemoryKNNJoinIterator<T extends Geometry, U extends Geometry>
         strTree.nearestNeighbour(queryGeom.getEnvelopeInternal(), queryGeom, itemDistance, k);
     if (includeTies) {
       localK = getUpdatedLocalKWithTies(queryGeom, localK, strTree);
-    }
-    if (searchRadius != null) {
-      localK =
-          KnnJoinIndexJudgement.getInSearchRadius(localK, queryGeom, distanceMetric, searchRadius);
     }
 
     for (Object obj : localK) {
