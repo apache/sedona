@@ -175,8 +175,6 @@ class TestDataframe(TestBase):
         assert len(wkt_values1) == 2
         assert len(wkt_values2) == 2
 
-        logging.debug("debuging wkt_values1[0]: ", wkt_values1[0])
-
         assert wkt_values1[0] == "POLYGON ((0.091 0.091, 1.091 0.091, 1.091 1.091, 0.091 1.091, 0.091 0.091))"
         assert wkt_values1[1] == "POLYGON ((0.019 0.019, 2.019 0.019, 2.019 2.019, 0.019 2.019, 0.019 0.019))"
         assert wkt_values2[0] == "POLYGON ((0.09 1.09, 1.09 1.09, 1.09 0.09, 0.09 0.09, 0.09 1.09))"
