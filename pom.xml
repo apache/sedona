@@ -762,9 +762,9 @@
             </activation>
             <repositories>
                 <repository>
-                    <id>spark-4.0.0-rc2</id>
-                    <name>Spark 4.0.0 RC2 Staging</name>
-                    <url>https://repository.apache.org/content/repositories/orgapachespark-1478/</url>
+                    <id>spark-4.0.0-rc4</id>
+                    <name>Spark 4.0.0 RC4 Staging</name>
+                    <url>https://repository.apache.org/content/repositories/orgapachespark-1480/</url>
                 </repository>
             </repositories>
             <properties>
