@@ -27,7 +27,6 @@ from sedona.geopandas import GeoSeries
 from tests.test_base import TestBase
 import pyspark.pandas as ps
 
-
 class TestSeries(TestBase):
     def setup_method(self):
         self.tempdir = tempfile.mkdtemp()
@@ -103,11 +102,24 @@ class TestSeries(TestBase):
         self.g1.buffer(0.2).to_parquet(temp_file_path)
         assert os.path.exists(temp_file_path)
 
+    def test_to_wkt(self):
+        wkt = self.g1.to_wkt()
+        assert wkt is not None
+        assert type(wkt) is GeoSeries
+        assert wkt.count() is 2
+        assert wkt.dtype == object
+        assert wkt.values[0] == "POLYGON ((0 0, 1 0, 1 1, 0 0))"
+
+        wkt = self.g1.to_wkt(reduce_precision=2)
+        assert wkt is not None
+        assert type(wkt) is GeoSeries
+        assert wkt.count() is 2
+        assert wkt.dtype == object
+        assert wkt.values[0] == "POLYGON ((0 0, 1 0, 1 1, 0 0))"
 
 # -----------------------------------------------------------------------------
 # # Utils
 # -----------------------------------------------------------------------------
-
 
 def check_geoseries(s):
     assert isinstance(s, GeoSeries)
