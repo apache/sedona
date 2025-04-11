@@ -143,6 +143,44 @@ class TestDataframe(TestBase):
         assert len(area_values) == 2
         self.assert_almost_equal(area_values[0], 1.0)
         self.assert_almost_equal(area_values[1], 4.0)
+    
+    def test_to_wkt(self):
+        # Create a GeoDataFrame with polygons to test wkt conversion
+        from shapely.geometry import Polygon
+
+        # Create geometries
+        poly1 = Polygon([(0.091, 0.091), (1.091, 0.091), (1.091, 1.091), (0.091, 1.091)])
+        poly2 = Polygon([(0.019, 0.019), (2.019, 0.019), (2.019, 2.019), (0.019, 2.019)])
+
+        data = {"geometry1": [poly1, poly2], "id": [1, 2], "value": ["a", "b"]}
+
+        df = GeoDataFrame(data)
+
+        # Calculate wkt
+        wkt_df1 = df.to_wkt()
+        wkt_df2 = df.to_wkt(rounding_precision = 2)
+
+        # Verify result is a GeoDataFrame
+        assert type(wkt_df1) is GeoDataFrame
+        assert type(wkt_df2) is GeoDataFrame
+
+        # Verify non-geometry columns were preserved
+        assert "id" in wkt_df1.columns
+        assert "value" in wkt_df1.columns
+        assert "id" in wkt_df2.columns
+        assert "value" in wkt_df2.columns
+
+        wkt_values1 = wkt_df1["geometry1"].to_list()
+        wkt_values2 = wkt_df2["geometry1"].to_list()
+        assert len(wkt_values1) == 2
+        assert len(wkt_values2) == 2
+
+        logging.debug("debuging wkt_values1[0]: ", wkt_values1[0])
+
+        assert wkt_values1[0] == "POLYGON ((0.091 0.091, 1.091 0.091, 1.091 1.091, 0.091 1.091, 0.091 0.091))"
+        assert wkt_values1[1] == "POLYGON ((0.019 0.019, 2.019 0.019, 2.019 2.019, 0.019 2.019, 0.019 0.019))"
+        assert wkt_values2[0] == "POLYGON ((0.09 1.09, 1.09 1.09, 1.09 0.09, 0.09 0.09, 0.09 1.09))"
+        assert wkt_values2[1] == "POLYGON ((0.02 2.02, 2.02 2.02, 2.02 0.02, 0.02 0.02, 0.02 2.02))"
 
     def test_buffer(self):
         # Create a GeoDataFrame with geometries to test buffer operation

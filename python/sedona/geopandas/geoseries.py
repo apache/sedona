@@ -579,6 +579,73 @@ class GeoSeries(GeoFrame, pspd.Series):
             on_attribute,
             **kwargs,
         )
+    
+    def to_wkt(self, **kwargs) -> "GeoSeries":
+        """
+        Convert GeoSeries geometries to WKT
+
+        Parameters
+        ----------
+        kwargs
+            rounding_precision
+
+        Returns
+        -------
+        Series
+            WKT representations of the geometries
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point
+        >>> import geopandas as gpd
+        >>> from sedona.geopandas import GeoSeries
+        
+        >>> s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        >>> s
+        0    POINT (1 1)
+        1    POINT (2 2)
+        2    POINT (3 3)
+        dtype: geometry
+
+        >>> s.to_wkt()
+        0    POINT (1 1)
+        1    POINT (2 2)
+        2    POINT (3 3)
+        dtype: object
+
+        """
+
+        # Find the first column with BinaryType or GeometryType
+        first_col = self.get_first_geometry_column()
+
+        # Read the keyword arguments
+        rounding_precision = kwargs.get("rounding_precision", None)
+
+        if self.get_first_geometry_column():
+            data_type = self._internal.spark_frame.schema[first_col].dataType
+
+            # Start with the base expression.
+            if isinstance(data_type, BinaryType):
+                base_expr = f"ST_GeomFromWKB(`{first_col}`)"
+            else:
+                base_expr = f"`{first_col}`"
+
+            # Chain transformations if the keyword argument is provided.
+            if rounding_precision is not None:
+                base_expr = f"ST_ReducePrecision({base_expr}, {rounding_precision})"
+
+            wkt_expr = f"ST_AsEWKT({base_expr}) as wkt"
+
+        sdf = self._internal.spark_frame.selectExpr(wkt_expr)
+        internal = InternalFrame(
+            spark_frame=sdf,
+            index_spark_columns=None,
+            column_labels=[self._column_label],
+            data_spark_columns=[scol_for(sdf, "wkt")],
+            data_fields=[self._internal.data_fields[0]],
+            column_label_names=self._internal.column_label_names,
+        )
+        return _to_geo_series(first_series(PandasOnSparkDataFrame(internal)))
 
     # -----------------------------------------------------------------------------
     # # Utils

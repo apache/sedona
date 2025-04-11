@@ -670,3 +670,59 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         """
         # Use the Spark DataFrame's write method to write to GeoParquet format
         self._internal.spark_frame.write.format("geoparquet").save(path, **kwargs)
+
+    def to_wkt(self, **kwargs):
+        """
+        Encode all geometry columns in the GeoDataFrame to WKT.
+
+        Parameters
+        ----------
+        kwargs
+            rounding_precision
+
+        Returns
+        -------
+        DataFrame
+            geometry columns are encoded to WKT
+        """
+
+
+        # Create a list of all column expressions for the new dataframe
+        select_expressions = []
+
+        # Read the keyword arguments
+        rounding_precision = kwargs.get("rounding_precision", None)
+
+        # Process geometry columns to get wkts
+        for field in self._internal.spark_frame.schema.fields:
+            col_name = field.name
+            # Skip index column to avoid duplication
+            if col_name == "__index_level_0__" or col_name == "__natural_order__":
+                continue
+
+            if field.dataType.typeName() in {"geometrytype", "binary"}:
+                # Start with the base expression.
+                if field.dataType.typeName() == "binary":
+                    base_expr = f"ST_GeomFromWKB(`{col_name}`)"
+                else:
+                    base_expr = f"`{col_name}`"
+
+                # Chain transformations if the keyword argument is provided.
+                if rounding_precision is not None:
+                    base_expr = f"ST_ReducePrecision({base_expr}, {rounding_precision})"
+
+                wkt_expr = f"ST_AsEWKT({base_expr}) as {col_name}"
+                select_expressions.append(wkt_expr)
+            else:
+                # Keep non-geometry columns as they are
+                select_expressions.append(f"`{col_name}`")
+
+        # Execute the query to get all data in one go
+        result_df = self._internal.spark_frame.selectExpr(*select_expressions)
+
+        # Convert to pandas DataFrame
+        pandas_df = result_df.toPandas()
+
+        # Create a new GeoDataFrame with the result
+        # Note: This avoids the need to manipulate the index columns separately
+        return GeoDataFrame(pandas_df)
