@@ -686,7 +686,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             geometry columns are encoded to WKT
         """
 
-
         # Create a list of all column expressions for the new dataframe
         select_expressions = []
 

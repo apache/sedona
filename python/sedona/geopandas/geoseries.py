@@ -579,7 +579,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             on_attribute,
             **kwargs,
         )
-    
+
     def to_wkt(self, **kwargs) -> "GeoSeries":
         """
         Convert GeoSeries geometries to WKT
@@ -599,7 +599,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         >>> from shapely.geometry import Point
         >>> import geopandas as gpd
         >>> from sedona.geopandas import GeoSeries
-        
+
         >>> s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
         >>> s
         0    POINT (1 1)
