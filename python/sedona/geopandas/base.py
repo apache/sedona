@@ -49,7 +49,6 @@ class GeoFrame(metaclass=ABCMeta):
     def __getitem__(self, key: Any) -> Any:
         raise NotImplementedError("This method is not implemented yet.")
 
-    @abstractmethod
     def _reduce_for_geostat_function(
         self,
         sfun: Callable[["GeoSeries"], Column],
