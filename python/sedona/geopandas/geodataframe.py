@@ -201,7 +201,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
     def _process_geometry_columns(
         self, operation: str, rename_suffix: str = "", *args, **kwargs
-    ) -> "GeoDataFrame":
+    ) -> GeoDataFrame:
         """
         Helper method to process geometry columns with a specified operation.
 
