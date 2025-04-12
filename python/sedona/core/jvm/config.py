@@ -28,7 +28,7 @@ from pyspark.sql import SparkSession
 
 from sedona.utils.decorators import classproperty
 
-string_types = (type(b""), type(""))
+string_types = (bytes, str)
 
 
 def is_greater_or_equal_version(version_a: str, version_b: str) -> bool:
@@ -190,7 +190,7 @@ class SparkJars:
         try:
             used_jar_files = java_spark_conf.get(value)
         except Py4JJavaError:
-            error_message = "Didn't find the value of {} from SparkConf".format(value)
+            error_message = f"Didn't find the value of {value} from SparkConf"
             logging.info(error_message)
 
         return used_jar_files, error_message

@@ -1195,6 +1195,73 @@ Output:
 +------------------------------+--------+--------------------------------------------------+-----------------+
 ```
 
+## Spatial vectorized udfs (Python only)
+
+By default when you create the user defined functions in Python, the UDFs are not vectorized.
+This means that the UDFs are called row by row which can be slow.
+To speed up the UDFs, you can use the `vectorized` UDF which will be called in a batch mode
+using Apache Arrow.
+
+To create a vectorized UDF please use the decorator sedona_vectorized_udf.
+Currently supports only the scalar UDFs. Vectorized UDFs are way faster than
+the normal UDFs. It might be even 2x faster than the normal UDFs.
+
+!!!note
+	When you use geometry as an input type, please include the BaseGeometry type,
+	like Point from shapely or geopandas GeoSeries, when you use GEO_SERIES vectorized udf.
+	That's how Sedona infers the type and knows if the data should be cast.
+
+Decorator signature looks as follows:
+
+```python
+def sedona_vectorized_udf(udf_type: SedonaUDFType = SedonaUDFType.SHAPELY_SCALAR, return_type: DataType)
+```
+
+where udf_type is the type of the UDF function, currently supported are:
+
+- SHAPELY_SCALAR
+- GEO_SERIES
+
+The main difference is what input data you get in the function
+Let's analyze the two examples below, that creates buffers from
+a given geometry.
+
+### Shapely scalar UDF
+
+```python
+import shapely.geometry.base as b
+from sedona.sql.functions import sedona_vectorized_udf
+
+@sedona_vectorized_udf(return_type=GeometryType())
+def vectorized_buffer(geom: b.BaseGeometry) -> b.BaseGeometry:
+    return geom.buffer(0.1)
+```
+
+### GeoSeries UDF
+
+```python
+import geopandas as gpd
+from sedona.sql.functions import sedona_vectorized_udf, SedonaUDFType
+from sedona.sql.types import GeometryType
+
+
+@sedona_vectorized_udf(udf_type=SedonaUDFType.GEO_SERIES, return_type=GeometryType())
+def vectorized_geo_series_buffer(series: gpd.GeoSeries) -> gpd.GeoSeries:
+    buffered = series.buffer(0.1)
+
+    return buffered
+```
+
+To call the UDFs you can use the following code:
+
+```python
+# Shapely scalar UDF
+df.withColumn("buffered", vectorized_buffer(df.geom)).show()
+
+# GeoSeries UDF
+df.withColumn("buffered", vectorized_geo_series_buffer(df.geom)).show()
+```
+
 ## Save to permanent storage
 
 To save a Spatial DataFrame to some permanent storage such as Hive tables and HDFS, you can simply convert each geometry in the Geometry type column back to a plain String and save the plain DataFrame to wherever you want.

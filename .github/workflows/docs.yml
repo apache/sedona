@@ -48,23 +48,19 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: 3.x
-      - run: pip install mkdocs-jupyter
-      - run: pip install mkdocs-material
-      - run: pip install mkdocs-macros-plugin
-      - run: pip install mkdocs-git-revision-date-localized-plugin
-      - run: pip install mike
+      - run: pip install -r requirements-docs.txt
       - run: sudo apt update
-      - uses: r-lib/actions/setup-r@v2.11.2
+      - uses: r-lib/actions/setup-r@v2.11.3
         with:
           r-version: release
           use-public-rspm: true
       - name: Query R dependencies
-        uses: r-lib/actions/setup-r-dependencies@v2.11.2
+        uses: r-lib/actions/setup-r-dependencies@v2.11.3
         with:
           cache: true
           extra-packages: |
             any::pkgdown
-          working-directory : './R'
+          working-directory: './R'
       - run: Rscript -e 'pkgdown::build_site(pkg = "./R", preview = FALSE, override = list(destination = "../docs/api/rdocs"))'
       - run: git config --global user.name = "GitHub Action"
       - run: git config --global user.email = "test@abc.com"
@@ -87,14 +83,14 @@ jobs:
           name: generated-docs
           path: staging
       - name: Cache Python packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
       - name: Cache Maven packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}

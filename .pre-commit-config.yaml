@@ -21,6 +21,8 @@ default_stages: [pre-commit, pre-push]
 default_language_version:
   # force all unspecified Python hooks to run python3
   python: python3
+  # force all unspecified Node hooks to run Node.js v22.14.0 LTS
+  node: 22.14.0
 minimum_pre_commit_version: '3.2.0'
 repos:
   - repo: meta
@@ -29,15 +31,33 @@ repos:
         name: run identity check
       - id: check-hooks-apply
         name: run check hooks apply
+  - repo: local
+    hooks:
+      - id: prettier
+        name: run prettier
+        description: format files with prettier
+        entry: prettier --write '**/*.js' '**/*.yaml' '**/*.yml'
+        files: \.(js|ya?ml)$
+        language: node
+        additional_dependencies: ['prettier@3.5.3']
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
       - id: insert-license
-        name: add license for all .c and .h files
-        files: \.(c|h)$
+        name: add license for all .c files
+        files: \.c$
         args:
           - --comment-style
-          - "/*|*|*/"
+          - '/*|*|*/'
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
+      - id: insert-license
+        name: add license for all .h files
+        files: \.h$
+        args:
+          - --comment-style
+          - '/*| *| */'
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
@@ -46,7 +66,7 @@ repos:
         files: \.java$
         args:
           - --comment-style
-          - "/*|*|*/"
+          - '/*|*|*/'
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
@@ -55,7 +75,7 @@ repos:
         files: \.md$
         args:
           - --comment-style
-          - "<!--|| -->"
+          - '<!--|| -->'
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
@@ -65,7 +85,7 @@ repos:
         files: ^Makefile$
         args:
           - --comment-style
-          - "|#|"
+          - '|#|'
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
@@ -74,7 +94,16 @@ repos:
         files: \.R$
         args:
           - --comment-style
-          - "|#|"
+          - '|#|'
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
+      - id: insert-license
+        name: add license for all Scala files
+        files: \.scala$
+        args:
+          - --comment-style
+          - '/*| *| */'
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
@@ -83,7 +112,7 @@ repos:
         files: \.toml$
         args:
           - --comment-style
-          - "|#|"
+          - '|#|'
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
@@ -92,10 +121,15 @@ repos:
         files: \.ya?ml$
         args:
           - --comment-style
-          - "|#|"
+          - '|#|'
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.19.1
+    hooks:
+      - id: pyupgrade
+        args: [--py37-plus]
   - repo: https://github.com/psf/black-pre-commit-mirror
     rev: 25.1.0
     hooks:
@@ -116,8 +150,8 @@ repos:
       - id: bandit
         name: run bandit
         description: check Python code for security issues
-        args: ["-c=pyproject.toml", "-r"]
-        additional_dependencies: ["bandit[toml]"]
+        args: ['-c=pyproject.toml', '-r']
+        additional_dependencies: ['bandit[toml]']
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.1
     hooks:
@@ -176,7 +210,7 @@ repos:
               python/tests/tools\.py
           )$
       - id: requirements-txt-fixer
-        files: ^docker/requirements\.txt$
+        files: ^docker/requirements\.txt$|^requirements-docs\.txt$
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
         exclude: ^docs-overrides/main\.html$|\.Rd$
@@ -211,4 +245,4 @@ repos:
       - id: oxipng
         name: run oxipng
         description: check PNG files with oxipng
-        args: ["-o", "4", "--strip", "safe", "--alpha"]
+        args: ['-o', '4', '--strip', 'safe', '--alpha']

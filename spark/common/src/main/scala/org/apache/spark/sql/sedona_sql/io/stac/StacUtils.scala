@@ -24,7 +24,7 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.execution.datasource.stac.TemporalFilter
 import org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter
-import org.apache.spark.sql.types.{StructField, StructType}
+import org.apache.spark.sql.types.{MetadataBuilder, StructField, StructType}
 import org.locationtech.jts.geom.Envelope
 
 import java.time.LocalDateTime
@@ -129,14 +129,79 @@ object StacUtils {
     val stacVersion = collection.get("stac_version").asText()
 
     // Return the corresponding schema based on the stac_version
-    stacVersion match {
+    val coreSchema = stacVersion match {
       case "1.0.0" => StacTable.SCHEMA_V1_0_0
       case version if version.matches("1\\.[1-9]\\d*\\.\\d*") => StacTable.SCHEMA_V1_1_0
       // Add more cases here for other versions if needed
       case _ => throw new IllegalArgumentException(s"Unsupported STAC version: $stacVersion")
     }
+    val extensions = StacExtension.getStacExtensionDefinitions()
+    val schemaWithExtensions = addExtensionFieldsToSchema(coreSchema, extensions)
+    schemaWithExtensions
   }
 
+  /**
+   * Adds STAC extension fields to the properties field in the schema
+   *
+   * @param schema
+   *   The base STAC schema to enhance
+   * @param extensions
+   *   Array of STAC extension definitions
+   * @return
+   *   Enhanced schema with extension fields added to the properties struct
+   */
+  def addExtensionFieldsToSchema(
+      schema: StructType,
+      extensions: Array[StacExtension]): StructType = {
+    // Find the properties field in the schema
+    val propertiesFieldOpt = schema.fields.find(_.name == "properties")
+
+    if (propertiesFieldOpt.isEmpty) {
+      // If there's no properties field, return the original schema
+      return schema
+    }
+
+    // Get the properties field and its struct type
+    val propertiesField = propertiesFieldOpt.get
+    val propertiesStruct = propertiesField.dataType.asInstanceOf[StructType]
+
+    // Create extension fields with metadata indicating their source
+    val extensionFields = extensions.flatMap { extension =>
+      extension.schema.fields.map { field =>
+        StructField(
+          field.name,
+          field.dataType,
+          field.nullable,
+          new MetadataBuilder()
+            .withMetadata(field.metadata)
+            .putString("stac_extension", extension.name)
+            .build())
+      }
+    }
+
+    // Create a new properties struct that includes the extension fields
+    val updatedPropertiesStruct = StructType(propertiesStruct.fields ++ extensionFields)
+
+    // Create a new properties field with the updated struct
+    val updatedPropertiesField = StructField(
+      propertiesField.name,
+      updatedPropertiesStruct,
+      propertiesField.nullable,
+      propertiesField.metadata)
+
+    // Replace the properties field in the schema
+    val updatedFields = schema.fields.map {
+      case field if field.name == "properties" => updatedPropertiesField
+      case field => field
+    }
+
+    // Return the schema with the updated properties field
+    StructType(updatedFields)
+  }
+
+  /**
+   * Promote the properties field to the top level of the row.
+   */
   def promotePropertiesToTop(row: InternalRow, schema: StructType): InternalRow = {
     val propertiesIndex = schema.fieldIndex("properties")
     val propertiesStruct = schema("properties").dataType.asInstanceOf[StructType]

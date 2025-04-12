@@ -1,0 +1,8 @@
+*.json
+.idea
+.mypy_cache
+.venv
+site/
+target/
+binder/Pipfile.lock
+docs-overrides/main.html
