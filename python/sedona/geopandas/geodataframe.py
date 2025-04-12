@@ -32,6 +32,7 @@ from pyspark.pandas import Series as PandasOnSparkSeries
 
 from pyspark.pandas.internal import InternalFrame
 
+
 class GeoDataFrame(GeoFrame, pspd.DataFrame):
     """
     A class representing a GeoDataFrame, inheriting from GeoFrame and pyspark.pandas.DataFrame.
@@ -139,9 +140,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         from sedona.geopandas import GeoSeries
         from pyspark.sql import DataFrame as SparkDataFrame
 
-        if isinstance(
-            data, (GeoDataFrame, GeoSeries)
-        ):
+        if isinstance(data, (GeoDataFrame, GeoSeries)):
             assert dtype is None
             assert not copy
             self._anchor = data
@@ -201,7 +200,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         raise NotImplementedError("This method is not implemented yet.")
 
     def _process_geometry_columns(
-            self, operation: str, rename_suffix: str = "", *args, **kwargs
+        self, operation: str, rename_suffix: str = "", *args, **kwargs
     ) -> "GeoDataFrame":
         """
         Helper method to process geometry columns with a specified operation.
@@ -583,7 +582,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         >>> gdf = GeoDataFrame(data)
         >>> buffered = gdf.buffer(0.5)
         """
-        return self._process_geometry_columns("ST_Buffer", rename_suffix="_buffered", distance=distance)
+        return self._process_geometry_columns(
+            "ST_Buffer", rename_suffix="_buffered", distance=distance
+        )
 
     def sjoin(
         self,

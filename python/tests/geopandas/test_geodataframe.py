@@ -167,7 +167,9 @@ class TestDataframe(TestBase):
         assert "value" in buffer_df.columns
 
         # Convert to pandas to extract individual geometries
-        pandas_df = buffer_df._internal.spark_frame.select("geometry1_buffered").toPandas()
+        pandas_df = buffer_df._internal.spark_frame.select(
+            "geometry1_buffered"
+        ).toPandas()
 
         # Calculate areas to verify buffer was applied correctly
         # Point buffer with radius 0.5 should have area approximately π * 0.5² ≈ 0.785
