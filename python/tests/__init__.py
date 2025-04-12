@@ -17,7 +17,12 @@
 
 import os
 
-from tests.tools import tests_resource
+from os import path
+
+tests_path = os.path.abspath(os.path.join(__file__, "../../../spark/common/src/test/"))
+tests_resource = os.path.abspath(
+    path.join(__file__, "../../../spark/common/src/test/resources/")
+)
 
 mixed_wkb_geometry_input_location = os.path.join(tests_resource, "county_small_wkb.tsv")
 mixed_wkt_geometry_input_location = os.path.join(tests_resource, "county_small.tsv")
