@@ -71,9 +71,9 @@ def dataframe_to_arrow(df, crs=None):
         # Using the extension type ensures that the type and its metadata will
         # propagate through all pyarrow transformations.
         import geoarrow.types as gat
-        from geoarrow.types.type_pyarrow import register_extension_types
 
-        register_extension_types()
+        try_register_extension_types()
+
         spec = gat.wkb()
 
         new_cols = [
@@ -117,7 +117,16 @@ def dataframe_to_arrow_raw(df):
 
     self_destruct = jconf.arrowPySparkSelfDestructEnabled()
     batches = df._collect_as_arrow(split_batches=self_destruct)
+
+    # The zero row case can use from_batches() with schema (nothing to cast)
+    if not batches:
+        return pa.Table.from_batches([], schema)
+
+    # When batches were returned, use cast(schema). This was backported from
+    # Spark, where presumably there is a good reason that the schemas of batches
+    # may not necessarily align with that of schema (thus a cast is required)
     table = pa.Table.from_batches(batches).cast(schema)
+
     # Ensure only the table has a reference to the batches, so that
     # self_destruct (if enabled) is effective
     del batches
@@ -159,6 +168,21 @@ def crs_to_json(crs):
         import pyproj
 
         return pyproj.CRS(crs).to_json()
+
+
+def try_register_extension_types():
+    """Try to register extension types using geoarrow-types
+
+    Do this defensively, because it can fail if the extension type was
+    registered in some other way (notably: old versions of geoarrow-pyarrow,
+    which is a dependency of Kepler).
+    """
+    from geoarrow.types.type_pyarrow import register_extension_types
+
+    try:
+        register_extension_types()
+    except RuntimeError:
+        pass
 
 
 def unique_srid_from_ewkb(obj):

@@ -1967,14 +1967,10 @@ class TestPredicateJoin(TestBase):
         )
 
         # then result should be as expected
-        assert set(
-            [
-                el[0]
-                for el in geometry_df_collected.selectExpr(
-                    "ST_AsText(collected)"
-                ).collect()
-            ]
-        ) == {
+        assert {
+            el[0]
+            for el in geometry_df_collected.selectExpr("ST_AsText(collected)").collect()
+        } == {
             "MULTILINESTRING ((1 2, 3 4), (3 4, 4 5))",
             "MULTIPOINT ((1 2), (-2 3))",
             "MULTIPOLYGON (((1 2, 1 4, 3 4, 3 2, 1 2)), ((0.5 0.5, 5 0, 5 5, 0 5, 0.5 0.5)))",
@@ -2000,14 +1996,10 @@ class TestPredicateJoin(TestBase):
         )
 
         # then result should be calculated
-        assert set(
-            [
-                el[0]
-                for el in geometry_df_collected.selectExpr(
-                    "ST_AsText(collected)"
-                ).collect()
-            ]
-        ) == {
+        assert {
+            el[0]
+            for el in geometry_df_collected.selectExpr("ST_AsText(collected)").collect()
+        } == {
             "MULTILINESTRING ((1 2, 3 4), (3 4, 4 5))",
             "MULTIPOINT ((1 2), (-2 3))",
             "MULTIPOLYGON (((1 2, 1 4, 3 4, 3 2, 1 2)), ((0.5 0.5, 5 0, 5 5, 0 5, 0.5 0.5)))",
@@ -2036,7 +2028,7 @@ class TestPredicateJoin(TestBase):
         }
         for input_geom, expected_geom in test_cases.items():
             reversed_geometry = self.spark.sql(
-                "select ST_AsText(ST_Reverse(ST_GeomFromText({})))".format(input_geom)
+                f"select ST_AsText(ST_Reverse(ST_GeomFromText({input_geom})))"
             )
             assert reversed_geometry.take(1)[0][0] == expected_geom
 
@@ -2125,6 +2117,19 @@ class TestPredicateJoin(TestBase):
             )
             assert point.take(1)[0][0] == test[2]
 
+    def test_st_force_2d(self):
+        tests1 = {
+            "'POINT(0 5)'": "POINT (0 5)",
+            "'POLYGON((0 0 2, 0 5 2, 5 0 2, 0 0 2), (1 1 2, 3 1 2, 1 3 2, 1 1 2))'": "POLYGON ((0 0, 0 5, 5 0, 0 0), (1 1, 3 1, 1 3, 1 1))",
+            "'LINESTRING(0 5 1, 0 0 1, 0 10 2)'": "LINESTRING (0 5, 0 0, 0 10)",
+        }
+
+        for input_geom, expected_geom in tests1.items():
+            geom_2d = self.spark.sql(
+                f"select ST_AsText(ST_Force_2D(ST_GeomFromText({input_geom})))"
+            )
+            assert geom_2d.take(1)[0][0] == expected_geom
+
     def test_st_force2d(self):
         tests1 = {
             "'POINT(0 5)'": "POINT (0 5)",
@@ -2134,7 +2139,7 @@ class TestPredicateJoin(TestBase):
 
         for input_geom, expected_geom in tests1.items():
             geom_2d = self.spark.sql(
-                "select ST_AsText(ST_Force_2D(ST_GeomFromText({})))".format(input_geom)
+                f"select ST_AsText(ST_Force2D(ST_GeomFromText({input_geom})))"
             )
             assert geom_2d.take(1)[0][0] == expected_geom
 
@@ -2158,7 +2163,7 @@ class TestPredicateJoin(TestBase):
 
         for input_geom, expected_geom in tests.items():
             areal_geom = self.spark.sql(
-                "select ST_AsText(ST_BuildArea(ST_GeomFromText({})))".format(input_geom)
+                f"select ST_AsText(ST_BuildArea(ST_GeomFromText({input_geom})))"
             )
             assert areal_geom.take(1)[0][0] == expected_geom
 
@@ -2231,7 +2236,7 @@ class TestPredicateJoin(TestBase):
         ]
         for input_geom in test_cases:
             cell_ids = self.spark.sql(
-                "select ST_S2CellIDs(ST_GeomFromText({}), 6)".format(input_geom)
+                f"select ST_S2CellIDs(ST_GeomFromText({input_geom}), 6)"
             ).take(1)[0][0]
             assert isinstance(cell_ids, list)
             assert isinstance(cell_ids[0], int)
@@ -2259,7 +2264,7 @@ class TestPredicateJoin(TestBase):
         ]
         for input_geom in test_cases:
             cell_ids = self.spark.sql(
-                "select ST_H3CellIDs(ST_GeomFromText({}), 6, true)".format(input_geom)
+                f"select ST_H3CellIDs(ST_GeomFromText({input_geom}), 6, true)"
             ).take(1)[0][0]
             assert isinstance(cell_ids, list)
             assert isinstance(cell_ids[0], int)

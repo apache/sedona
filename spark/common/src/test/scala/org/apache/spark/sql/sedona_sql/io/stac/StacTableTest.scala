@@ -19,7 +19,7 @@
 package org.apache.spark.sql.sedona_sql.io.stac
 
 import org.apache.spark.sql.sedona_sql.io.stac.StacTable.{SCHEMA_GEOPARQUET, addAssetStruct, addAssetsStruct}
-import org.apache.spark.sql.types.{ArrayType, MapType, StringType, StructField, StructType}
+import org.apache.spark.sql.types.{ArrayType, StringType, StructField, StructType}
 import org.scalatest.funsuite.AnyFunSuite
 
 class StacTableTest extends AnyFunSuite {

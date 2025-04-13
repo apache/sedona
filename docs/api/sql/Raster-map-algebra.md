@@ -34,7 +34,7 @@ RS_MapAlgebra(rast: Raster, pixelType: String, script: String, [noDataValue: Dou
 
 * `rast`: The raster to apply the map algebra expression to.
 * `pixelType`: The data type of the output raster. This can be one of `D` (double), `F` (float), `I` (integer), `S` (short), `US` (unsigned short) or `B` (byte). If specified `NULL`, the output raster will have the same data type as the input raster.
-* `script`: The map algebra script. [Refer here for more details on the format.](#:~:text=The Jiffle script is,current output pixel value)
+* `script`: The map algebra script. [Refer here for more details on the format.](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle)
 * `noDataValue`: (Optional) The nodata value of the output raster.
 
 As of version `v1.5.1`, the `RS_MapAlgebra` function allows two raster column inputs, with multi-band rasters supported. The function accepts 5 parameters:
@@ -46,7 +46,7 @@ RS_MapAlgebra(rast0: Raster, rast1: Raster, pixelType: String, script: String, n
 * `rast0`: The first raster to apply the map algebra expression to.
 * `rast1`: The second raster to apply the map algebra expression to.
 * `pixelType`: The data type of the output raster. This can be one of `D` (double), `F` (float), `I` (integer), `S` (short), `US` (unsigned short) or `B` (byte). If specified `NULL`, the output raster will have the same data type as the input raster.
-* `script`: The map algebra script. [Refer here for more details on the format.](#:~:text=The Jiffle script is,current output pixel value)
+* `script`: The map algebra script. [Refer here for more details on the format.](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle)
 * `noDataValue`: (Not optional) The nodata value of the output raster, `null` is allowed.
 
 Spark SQL Example for two raster input `RS_MapAlgebra`:

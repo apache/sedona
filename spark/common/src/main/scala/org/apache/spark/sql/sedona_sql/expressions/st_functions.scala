@@ -220,6 +220,9 @@ object st_functions {
   def ST_Force_2D(geometry: Column): Column = wrapExpression[ST_Force_2D](geometry)
   def ST_Force_2D(geometry: String): Column = wrapExpression[ST_Force_2D](geometry)
 
+  def ST_Force2D(geometry: Column): Column = wrapExpression[ST_Force2D](geometry)
+  def ST_Force2D(geometry: String): Column = wrapExpression[ST_Force2D](geometry)
+
   def ST_GeoHash(geometry: Column, precision: Column): Column =
     wrapExpression[ST_GeoHash](geometry, precision)
   def ST_GeoHash(geometry: String, precision: Int): Column =

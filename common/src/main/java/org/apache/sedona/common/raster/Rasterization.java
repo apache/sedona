@@ -574,7 +574,7 @@ public class Rasterization {
           // calculating slope
           for (double y = yStart; y >= yEnd; y--) {
             double xIntercept = p1X; // Vertical line, xIntercept is constant
-            if (xIntercept < 0 || xIntercept > params.writableRaster.getWidth()) {
+            if (xIntercept < 0 || xIntercept >= params.writableRaster.getWidth()) {
               continue; // Skip xIntercepts outside geomExtent
             }
             scanlineIntersections.computeIfAbsent(y, k -> new TreeSet<>()).add(xIntercept);
@@ -585,7 +585,7 @@ public class Rasterization {
 
           for (double y = yStart; y >= yEnd; y--) {
             double xIntercept = p1X + ((p1Y - y) / slope);
-            if ((xIntercept < 0) || (xIntercept > params.writableRaster.getWidth())) {
+            if ((xIntercept < 0) || (xIntercept >= params.writableRaster.getWidth())) {
               continue; // skip xIntercepts outside geomExtent
             }
             if (!scanlineIntersections.containsKey(y)) {

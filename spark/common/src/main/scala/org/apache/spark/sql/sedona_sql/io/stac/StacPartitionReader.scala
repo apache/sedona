@@ -20,6 +20,7 @@ package org.apache.spark.sql.sedona_sql.io.stac
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.hadoop.conf.Configuration
+import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.json.JSONOptionsInRead
 import org.apache.spark.sql.connector.read.PartitionReader
@@ -28,14 +29,16 @@ import org.apache.spark.sql.execution.datasources.PartitionedFile
 import org.apache.spark.sql.execution.datasources.json.JsonDataSource
 import org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter
 import org.apache.spark.sql.sedona_sql.io.geojson.{GeoJSONUtils, SparkCompatUtil}
-import org.apache.spark.sql.sedona_sql.io.stac.StacUtils.{buildOutDbRasterFields, promotePropertiesToTop}
+import org.apache.spark.sql.sedona_sql.io.stac.StacUtils.promotePropertiesToTop
 import org.apache.spark.sql.types.{StringType, StructType}
+import org.apache.spark.util.SerializableConfiguration
 
 import java.io.{File, PrintWriter}
 import java.lang.reflect.Constructor
 import scala.io.Source
 
 class StacPartitionReader(
+    broadcast: Broadcast[SerializableConfiguration],
     partition: StacPartition,
     schema: StructType,
     opts: Map[String, String],
@@ -62,7 +65,7 @@ class StacPartitionReader(
         val tempFile = File.createTempFile("stac_item_", ".json")
         val writer = new PrintWriter(tempFile)
         try {
-          val fileContent = Source.fromURL(url).mkString
+          val fileContent = fetchContentWithRetry(url)
           val rootNode = mapper.readTree(fileContent)
           val nodeType = rootNode.get("type").asText()
 
@@ -120,8 +123,7 @@ class StacPartitionReader(
 
         rows.map(row => {
           val geometryConvertedRow = GeoJSONUtils.convertGeoJsonToGeometry(row, alteredSchema)
-          val rasterAddedRow = buildOutDbRasterFields(geometryConvertedRow, alteredSchema)
-          val propertiesPromotedRow = promotePropertiesToTop(rasterAddedRow, alteredSchema)
+          val propertiesPromotedRow = promotePropertiesToTop(geometryConvertedRow, alteredSchema)
           propertiesPromotedRow
         })
       } else {
@@ -148,6 +150,29 @@ class StacPartitionReader(
         System.getProperty("java.io.tmpdir"))) {
       file.delete()
     }
+  }
+
+  def fetchContentWithRetry(url: java.net.URL, maxRetries: Int = 3): String = {
+    var attempt = 0
+    var success = false
+    var fileContent: String = ""
+
+    while (attempt < maxRetries && !success) {
+      try {
+        fileContent = Source.fromURL(url).mkString
+        success = true
+      } catch {
+        case e: Exception =>
+          attempt += 1
+          if (attempt >= maxRetries) {
+            throw new RuntimeException(
+              s"Failed to fetch content from URL after $maxRetries attempts",
+              e)
+          }
+      }
+    }
+
+    fileContent
   }
 
   /**

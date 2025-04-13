@@ -146,78 +146,6 @@ Input: `POLYGON ((1 0 1, 1 1 1, 2 2 2, 1 0 1))`
 
 Output: `POLYGON Z((2 3 1, 4 5 1, 7 8 2, 2 3 1))`
 
-## ST_LabelPoint
-
-Introduction: `ST_LabelPoint` computes and returns a label point for a given polygon or geometry collection. The label point is chosen to be sufficiently far from boundaries of the geometry. For a regular Polygon this will be the
-centroid.
-
-The algorithm is derived from Tippecanoe’s `polygon_to_anchor`, an approximate solution for label point generation, designed to be faster than optimal algorithms like `polylabel`. It searches for a “good enough” label point within a limited number of iterations. For geometry collections, only the largest Polygon by area is considered. While `ST_Centroid` is a fast algorithm to calculate the center of mass of a (Multi)Polygon, it may place the point outside of the Polygon or near a boundary for concave shapes, polygons with holes, or MultiPolygons.
-
-`ST_LabelPoint` takes up to 3 arguments,
-
-- `geometry`: input geometry (e.g., a Polygon or GeometryCollection) for which the anchor point is to be calculated.
-- `gridResolution` (Optional, default is 16): Controls the resolution of the search grid for refining the label point. A higher resolution increases the grid density, providing a higher chance of finding a good enough result at the cost of runtime. For example, a gridResolution of 16 divides the bounding box of the polygon into a 16x16 grid.
-- `goodnessThreshold` (Optional, default is 0.2): Determines the minimum acceptable “goodness” value for the anchor point. Higher thresholds prioritize points farther from boundaries but may require more computation.
-
-!!!note
-    - `ST_LabelPoint` throws an `IllegalArgumentException` if the input geometry has an area of zero or less.
-    - Holes within polygons are respected. Points within a hole are given a goodness of 0.
-    - For GeometryCollections, only the largest polygon by area is considered.
-
-!!!tip
-    - Use `ST_LabelPoint` for tasks such as label placement, identifying representative points for polygons, or other spatial analyses where an internal reference point is preferred but not required. If intersection of the point and the original geometry is required, use of an algorithm like `polylabel` should be considered.
-    - `ST_LabelPoint` offers a faster, approximate solution for label point generation, making it ideal for large datasets or real-time applications.
-
-Format:
-
-```sql
-ST_LabelPoint(geometry: Geometry)
-```
-
-```sql
-ST_LabelPoint(geometry: Geometry, gridResolution: Integer)
-```
-
-```sql
-ST_LabelPoint(geometry: Geometry, gridResolution: Integer, goodnessThreshold: Double)
-```
-
-SQL Example:
-
-```
-SELECT ST_LabelPoint(ST_GeomFromWKT('POLYGON((0 0, 4 0, 4 4, 0 4, 0 0))'))
-```
-
-Output:
-
-```
-POINT (2 2)
-```
-
-SQL Example:
-
-```
-SELECT ST_LabelPoint(ST_GeomFromWKT('GEOMETRYCOLLECTION(POLYGON ((-112.840785 33.435962, -112.840785 33.708284, -112.409597 33.708284, -112.409597 33.435962, -112.840785 33.435962)), POLYGON ((-112.309264 33.398167, -112.309264 33.746007, -111.787444 33.746007, -111.787444 33.398167, -112.309264 33.398167)))'))
-```
-
-Output:
-
-```
-POINT (-112.04835399999999 33.57208699999999)
-```
-
-SQL Example:
-
-```
-SELECT ST_LabelPoint(ST_GeomFromWKT('POLYGON ((-112.654072 33.114485, -112.313516 33.653431, -111.63515 33.314399, -111.497829 33.874913, -111.692825 33.431378, -112.376684 33.788215, -112.654072 33.114485))', 4326))
-```
-
-Output:
-
-```
-SRID=4326;POINT (-112.0722602222832 33.53914975012836)
-```
-
 ## ST_Angle
 
 Introduction: Computes and returns the angle between two vectors represented by the provided points or linestrings.
@@ -1162,7 +1090,7 @@ Output: `POINT (2 1)`
 
 ## ST_Force_2D
 
-Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates
+Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates. This function is an alias of [ST_Force2D](#st_force2d).
 
 Format: `ST_Force_2D (A:geometry)`
 
@@ -1171,6 +1099,30 @@ Example:
 ```sql
 SELECT ST_AsText(
     ST_Force_2D(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'))
+) AS geom
+```
+
+Result:
+
+```
++---------------------------------------------------------------+
+|geom                                                           |
++---------------------------------------------------------------+
+|POLYGON((0 0,0 5,5 0,0 0),(1 1,3 1,1 3,1 1))                   |
++---------------------------------------------------------------+
+```
+
+## ST_Force2D
+
+Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates. This function is an alias of [ST_Force_2D](#st_force_2d).
+
+Format: `ST_Force2D (A:geometry)`
+
+Example:
+
+```sql
+SELECT ST_AsText(
+    ST_Force2D(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'))
 ) AS geom
 ```
 
@@ -1791,6 +1743,78 @@ gid  |                  validity_info
 5340 | Self-intersection at or near point (42.0, 5.0, NaN)
 5350 | Self-intersection at or near point (52.0, 5.0, NaN)
 
+```
+
+## ST_LabelPoint
+
+Introduction: `ST_LabelPoint` computes and returns a label point for a given polygon or geometry collection. The label point is chosen to be sufficiently far from boundaries of the geometry. For a regular Polygon this will be the
+centroid.
+
+The algorithm is derived from Tippecanoe’s `polygon_to_anchor`, an approximate solution for label point generation, designed to be faster than optimal algorithms like `polylabel`. It searches for a “good enough” label point within a limited number of iterations. For geometry collections, only the largest Polygon by area is considered. While `ST_Centroid` is a fast algorithm to calculate the center of mass of a (Multi)Polygon, it may place the point outside of the Polygon or near a boundary for concave shapes, polygons with holes, or MultiPolygons.
+
+`ST_LabelPoint` takes up to 3 arguments,
+
+- `geometry`: input geometry (e.g., a Polygon or GeometryCollection) for which the anchor point is to be calculated.
+- `gridResolution` (Optional, default is 16): Controls the resolution of the search grid for refining the label point. A higher resolution increases the grid density, providing a higher chance of finding a good enough result at the cost of runtime. For example, a gridResolution of 16 divides the bounding box of the polygon into a 16x16 grid.
+- `goodnessThreshold` (Optional, default is 0.2): Determines the minimum acceptable “goodness” value for the anchor point. Higher thresholds prioritize points farther from boundaries but may require more computation.
+
+!!!note
+    - `ST_LabelPoint` throws an `IllegalArgumentException` if the input geometry has an area of zero or less.
+    - Holes within polygons are respected. Points within a hole are given a goodness of 0.
+    - For GeometryCollections, only the largest polygon by area is considered.
+
+!!!tip
+    - Use `ST_LabelPoint` for tasks such as label placement, identifying representative points for polygons, or other spatial analyses where an internal reference point is preferred but not required. If intersection of the point and the original geometry is required, use of an algorithm like `polylabel` should be considered.
+    - `ST_LabelPoint` offers a faster, approximate solution for label point generation, making it ideal for large datasets or real-time applications.
+
+Format:
+
+```sql
+ST_LabelPoint(geometry: Geometry)
+```
+
+```sql
+ST_LabelPoint(geometry: Geometry, gridResolution: Integer)
+```
+
+```sql
+ST_LabelPoint(geometry: Geometry, gridResolution: Integer, goodnessThreshold: Double)
+```
+
+SQL Example:
+
+```
+SELECT ST_LabelPoint(ST_GeomFromWKT('POLYGON((0 0, 4 0, 4 4, 0 4, 0 0))'))
+```
+
+Output:
+
+```
+POINT (2 2)
+```
+
+SQL Example:
+
+```
+SELECT ST_LabelPoint(ST_GeomFromWKT('GEOMETRYCOLLECTION(POLYGON ((-112.840785 33.435962, -112.840785 33.708284, -112.409597 33.708284, -112.409597 33.435962, -112.840785 33.435962)), POLYGON ((-112.309264 33.398167, -112.309264 33.746007, -111.787444 33.746007, -111.787444 33.398167, -112.309264 33.398167)))'))
+```
+
+Output:
+
+```
+POINT (-112.04835399999999 33.57208699999999)
+```
+
+SQL Example:
+
+```
+SELECT ST_LabelPoint(ST_GeomFromWKT('POLYGON ((-112.654072 33.114485, -112.313516 33.653431, -111.63515 33.314399, -111.497829 33.874913, -111.692825 33.431378, -112.376684 33.788215, -112.654072 33.114485))', 4326))
+```
+
+Output:
+
+```
+SRID=4326;POINT (-112.0722602222832 33.53914975012836)
 ```
 
 ## ST_Length

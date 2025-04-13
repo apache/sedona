@@ -99,10 +99,6 @@ echo "Now the releases are staged. A tag and two commits have been created on Se
 
 echo "*****Step 2: Upload the Release Candidate to https://repository.apache.org."
 
-# For Spark 3.3 and Scala 2.12
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.3 -Dscala=2.12" -Dspark=3.3 -Dscala=2.12
-
-# For Spark 3.3 and Scala 2.13
 ## Note that we use maven-release-plugin 2.3.2 instead of more recent version (e.g., 3.0.1) to get rid of a bug of maven-release-plugin,
 ## which prevent us from cloning git repo with user specified -Dtag=<tag>.
 ## Please refer to https://issues.apache.org/jira/browse/MRELEASE-933 and https://issues.apache.org/jira/browse/SCM-729 for details.
@@ -110,19 +106,36 @@ mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionU
 ## Please also note that system properties `-Dspark` and `-Dscala` has to be specified both for release:perform and the actual build parameters
 ## in `-Darguments`, because the build profiles activated for release:perform task will also affect the actual build task. It is safer to specify
 ## these system properties for both tasks.
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.3 -Dscala=2.13" -Dspark=3.3 -Dscala=2.13
 
-# For Spark 3.4 and Scala 2.12
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.4 -Dscala=2.12" -Dspark=3.4 -Dscala=2.12
+# Define repository details
+REPO_URL="https://github.com/apache/sedona.git"
+TAG="{{ sedona_create_release.current_rc }}"
+LOCAL_DIR="sedona-release"
 
-# For Spark 3.4 and Scala 2.13
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.4 -Dscala=2.13" -Dspark=3.4 -Dscala=2.13
+# Remove existing directory if it exists and clone the repository
+rm -rf $LOCAL_DIR && git clone --depth 1 --branch $TAG $REPO_URL $LOCAL_DIR && cd $LOCAL_DIR
 
-# For Spark 3.5 and Scala 2.12
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.5 -Dscala=2.12" -Dspark=3.4 -Dscala=2.12
+# Define the Maven release plugin version
+MAVEN_PLUGIN_VERSION="2.3.2"
 
-# For Spark 3.5 and Scala 2.13
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.5 -Dscala=2.13" -Dspark=3.4 -Dscala=2.13
+# Define Spark and Scala versions
+declare -a SPARK_VERSIONS=("3.3" "3.4" "3.5")
+declare -a SCALA_VERSIONS=("2.12" "2.13")
+
+# Iterate through Spark and Scala versions
+for SPARK in "${SPARK_VERSIONS[@]}"; do
+  for SCALA in "${SCALA_VERSIONS[@]}"; do
+    echo "Running release:perform for Spark $SPARK and Scala $SCALA..."
+
+    mvn org.apache.maven.plugins:maven-release-plugin:$MAVEN_PLUGIN_VERSION:perform \
+      -DconnectionUrl=scm:git:file://$(pwd) \
+      -Dtag=$TAG \
+      -Dresume=false \
+      -Darguments="-DskipTests -Dspark=$SPARK -Dscala=$SCALA" \
+      -Dspark=$SPARK \
+      -Dscala=$SCALA
+  done
+done
 
 echo "*****Step 3: Upload Release Candidate on ASF SVN: https://dist.apache.org/repos/dist/dev/sedona"
 

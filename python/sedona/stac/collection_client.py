@@ -119,7 +119,7 @@ class CollectionClient:
         - DataFrame: The filtered Spark DataFrame.
 
         The function constructs SQL conditions for spatial and temporal filters and applies them to the DataFrame.
-        If bbox is provided, it constructs spatial conditions using st_contains and ST_GeomFromText.
+        If bbox is provided, it constructs spatial conditions using st_intersects and ST_GeomFromText.
         If datetime is provided, it constructs temporal conditions using the datetime column.
         The conditions are combined using OR logic.
         """
@@ -131,7 +131,7 @@ class CollectionClient:
                     f"{bbox[2]} {bbox[3]}, {bbox[0]} {bbox[3]}, {bbox[0]} {bbox[1]}))"
                 )
                 bbox_conditions.append(
-                    f"st_contains(ST_GeomFromText('{polygon_wkt}'), geometry)"
+                    f"st_intersects(ST_GeomFromText('{polygon_wkt}'), geometry)"
                 )
             bbox_sql_condition = " OR ".join(bbox_conditions)
             df = df.filter(bbox_sql_condition)
@@ -217,34 +217,7 @@ class CollectionClient:
           is raised with a message indicating the failure.
         """
         try:
-            # Load the collection data from the specified collection URL
-            df = self.spark.read.format("stac").load(self.collection_url)
-
-            # Apply ID filters if provided
-            if ids:
-                if isinstance(ids, tuple):
-                    ids = list(ids)
-                if isinstance(ids, str):
-                    ids = [ids]
-                df = df.filter(df.id.isin(ids))
-
-            # Ensure bbox is a list of lists
-            if bbox and isinstance(bbox[0], float):
-                bbox = [bbox]
-
-            # Handle datetime parameter
-            if datetime:
-                if isinstance(datetime, (str, python_datetime.datetime)):
-                    datetime = [self._expand_date(str(datetime))]
-                elif isinstance(datetime, list) and isinstance(datetime[0], str):
-                    datetime = [datetime]
-
-            # Apply spatial and temporal filters
-            df = self._apply_spatial_temporal_filters(df, bbox, datetime)
-
-            # Limit the number of items if max_items is specified
-            if max_items is not None:
-                df = df.limit(max_items)
+            df = self.load_items_df(bbox, datetime, ids, max_items)
 
             # Collect the filtered rows and convert them to PyStacItem objects
             items = []
@@ -291,32 +264,7 @@ class CollectionClient:
           is raised with a message indicating the failure.
         """
         try:
-            df = self.spark.read.format("stac").load(self.collection_url)
-
-            # Apply ID filters if provided
-            if ids:
-                if isinstance(ids, tuple):
-                    ids = list(ids)
-                if isinstance(ids, str):
-                    ids = [ids]
-                df = df.filter(df.id.isin(ids))
-
-            # Ensure bbox is a list of lists
-            if bbox and isinstance(bbox[0], float):
-                bbox = [bbox]
-
-            # Handle datetime parameter
-            if datetime:
-                if isinstance(datetime, (str, python_datetime.datetime)):
-                    datetime = [[str(datetime), str(datetime)]]
-                elif isinstance(datetime, list) and isinstance(datetime[0], str):
-                    datetime = [datetime]
-
-            df = self._apply_spatial_temporal_filters(df, bbox, datetime)
-
-            # Limit the number of items if max_items is specified
-            if max_items is not None:
-                df = df.limit(max_items)
+            df = self.load_items_df(bbox, datetime, ids, max_items)
 
             return df
         except Exception as e:
@@ -392,6 +340,39 @@ class CollectionClient:
         # Apply the new schema to the assets column
         df = df.withColumn("assets", new_schema)
 
+        return df
+
+    def load_items_df(self, bbox, datetime, ids, max_items):
+        # Load the collection data from the specified collection URL
+        if not ids and not bbox and not datetime and max_items is not None:
+            df = (
+                self.spark.read.format("stac")
+                .option("itemsLimitMax", max_items)
+                .load(self.collection_url)
+            )
+        else:
+            df = self.spark.read.format("stac").load(self.collection_url)
+            # Apply ID filters if provided
+            if ids:
+                if isinstance(ids, tuple):
+                    ids = list(ids)
+                if isinstance(ids, str):
+                    ids = [ids]
+                df = df.filter(df.id.isin(ids))
+            # Ensure bbox is a list of lists
+            if bbox and isinstance(bbox[0], float):
+                bbox = [bbox]
+            # Handle datetime parameter
+            if datetime:
+                if isinstance(datetime, (str, python_datetime.datetime)):
+                    datetime = [self._expand_date(str(datetime))]
+                elif isinstance(datetime, list) and isinstance(datetime[0], str):
+                    datetime = [datetime]
+            # Apply spatial and temporal filters
+            df = self._apply_spatial_temporal_filters(df, bbox, datetime)
+        # Limit the number of items if max_items is specified
+        if max_items is not None:
+            df = df.limit(max_items)
         return df
 
     def __str__(self):

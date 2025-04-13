@@ -18,7 +18,9 @@
  */
 package org.apache.spark.sql.sedona_sql.io.stac
 
+import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.connector.read.{Scan, ScanBuilder}
+import org.apache.spark.util.SerializableConfiguration
 
 /**
  * The `StacScanBuilder` class represents the builder for creating a `Scan` instance in the
@@ -28,7 +30,11 @@ import org.apache.spark.sql.connector.read.{Scan, ScanBuilder}
  * bridge between Spark's data source API and the specific implementation of the STAC data read
  * operation.
  */
-class StacScanBuilder(stacCollectionJson: String, opts: Map[String, String]) extends ScanBuilder {
+class StacScanBuilder(
+    stacCollectionJson: String,
+    opts: Map[String, String],
+    broadcastConf: Broadcast[SerializableConfiguration])
+    extends ScanBuilder {
 
   /**
    * Builds and returns a `Scan` instance. The `Scan` defines the schema and batch reading methods
@@ -37,5 +43,5 @@ class StacScanBuilder(stacCollectionJson: String, opts: Map[String, String]) ext
    * @return
    *   A `Scan` instance that defines how to read STAC data.
    */
-  override def build(): Scan = new StacScan(stacCollectionJson, opts)
+  override def build(): Scan = new StacScan(stacCollectionJson, opts, broadcastConf)
 }

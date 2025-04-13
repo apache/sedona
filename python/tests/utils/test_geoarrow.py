@@ -37,6 +37,12 @@ class TestGeoArrow(TestBase):
         wkt_table = dataframe_to_arrow(wkt_df)
         assert wkt_table == pa.table({"wkt": TEST_WKT})
 
+    def test_to_geoarrow_zero_rows(self):
+        schema = StructType().add("wkt", StringType())
+        wkt_df = TestGeoArrow.spark.createDataFrame(zip(TEST_WKT), schema).limit(0)
+        wkt_table = dataframe_to_arrow(wkt_df)
+        assert wkt_table == pa.table({"wkt": pa.array([], pa.utf8())})
+
     def test_to_geoarrow_with_geometry(self):
         schema = StructType().add("wkt", StringType())
         wkt_df = TestGeoArrow.spark.createDataFrame(zip(TEST_WKT), schema)

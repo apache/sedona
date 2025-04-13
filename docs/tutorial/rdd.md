@@ -765,9 +765,9 @@ Distance join can only accept `COVERED_BY` and `INTERSECTS` as spatial predicate
 
 The details of spatial partitioning in join query is [here](#use-spatial-partitioning).
 
-The details of using spatial indexes in join query is [here](#use-spatial-indexes-2).
+The details of using spatial indexes in join query is [here](#use-spatial-indexes_2).
 
-The output format of the distance join query is [here](#output-format-2).
+The output format of the distance join query is [here](#output-format_2).
 
 !!!note
 	Distance join query is equal to the following query in Spatial SQL:
