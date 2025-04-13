@@ -28,7 +28,7 @@
 	<artifactId>sedona-spark-4.0_${scala.compat.version}</artifactId>
 
 	<name>${project.groupId}:${project.artifactId}</name>
-	<description>A cluster computing system for processing large-scale spatial data: SQL API for Spark 3.5.</description>
+	<description>A cluster computing system for processing large-scale spatial data: SQL API for Spark 4.0.</description>
     <url>http://sedona.apache.org/</url>
 	<packaging>jar</packaging>
 
