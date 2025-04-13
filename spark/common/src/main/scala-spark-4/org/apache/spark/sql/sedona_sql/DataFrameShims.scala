@@ -38,7 +38,7 @@ object DataFrameShims {
 
   private[sedona_sql] def wrapVarArgExpression[E <: Expression: ClassTag](arg: Seq[Any]): Column = {
     val runtimeClass = implicitly[ClassTag[E]].runtimeClass
-    
+
     val colArgs = arg.map(_ match {
       case c: Column => c
       case s: String => Column(s)
