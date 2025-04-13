@@ -144,6 +144,8 @@
                 </executions>
             </plugin>
             <plugin>
+                <!-- We need to shade jiffle and it's antlr dependency because Spark 4 uses an
+                     incompatible version of antlr at runtime. -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <executions>

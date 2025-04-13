@@ -20,7 +20,7 @@ name: Scala and Java build
 on:
   push:
     branches:
-      - '*'
+      - master
     paths:
       - 'common/**'
       - 'spark/**'
