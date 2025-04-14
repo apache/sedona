@@ -16,19 +16,19 @@
 #  under the License.
 from __future__ import annotations
 
-from typing import Any, Callable, Optional, Union
+from typing import Any
 
-from pyspark.sql import Column
-
-import pandas as pd
 import geopandas as gpd
+import pandas as pd
 import pyspark.pandas as pspd
-
-from sedona.geopandas.base import GeoFrame
-from sedona.geopandas._typing import GeoFrameLike, Label
-from pyspark.pandas._typing import Axis, Dtype, Scalar
-from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas import Series as PandasOnSparkSeries
+from pyspark.pandas._typing import Dtype
+from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
+from pyspark.pandas.internal import InternalFrame
+
+from sedona.geopandas._typing import Label
+from sedona.geopandas.base import GeoFrame
+from sedona.geopandas.geoindex import GeoIndex
 
 
 class GeoDataFrame(GeoFrame, pspd.DataFrame):
@@ -136,16 +136,29 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         self._col_label: Label
 
         from sedona.geopandas import GeoSeries
+        from pyspark.sql import DataFrame as SparkDataFrame
 
-        if isinstance(
-            data, (GeoDataFrame, GeoSeries, PandasOnSparkSeries, PandasOnSparkDataFrame)
-        ):
+        if isinstance(data, (GeoDataFrame, GeoSeries)):
             assert dtype is None
             assert not copy
-
             self._anchor = data
             self._col_label = index
+        elif isinstance(data, (PandasOnSparkSeries, PandasOnSparkDataFrame)):
+            assert columns is None
+            assert dtype is None
+            assert not copy
+            if index is None:
+                internal = InternalFrame(spark_frame=data._internal.spark_frame)
+                object.__setattr__(self, "_internal_frame", internal)
+        elif isinstance(data, SparkDataFrame):
+            assert columns is None
+            assert dtype is None
+            assert not copy
+            if index is None:
+                internal = InternalFrame(spark_frame=data, index_spark_columns=None)
+                object.__setattr__(self, "_internal_frame", internal)
         else:
+            # below are not distributed dataframe types
             if isinstance(data, pd.DataFrame):
                 assert index is None
                 assert dtype is None
@@ -172,33 +185,70 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 copy=copy,
             )
 
-    def _reduce_for_geostat_function(
-        self,
-        sfun: Callable[["GeoSeries"], Column],
-        name: str,
-        axis: Optional[Axis] = None,
-        numeric_only: bool = True,
-        skipna: bool = True,
-        **kwargs: Any,
-    ) -> Union["GeoSeries", Scalar]:
+    def _process_geometry_columns(
+        self, operation: str, rename_suffix: str = "", *args, **kwargs
+    ) -> GeoDataFrame:
+        """
+        Helper method to process geometry columns with a specified operation.
+
+        Parameters
+        ----------
+        operation : str
+            The spatial operation to apply (e.g., 'ST_Area', 'ST_Buffer').
+        rename_suffix : str, default ""
+            Suffix to append to the resulting column name.
+        args : tuple
+            Positional arguments for the operation.
+        kwargs : dict
+            Keyword arguments for the operation.
+
+        Returns
+        -------
+        GeoDataFrame
+            A new GeoDataFrame with the operation applied to geometry columns.
+        """
+        select_expressions = []
+
+        for field in self._internal.spark_frame.schema.fields:
+            col_name = field.name
+
+            # Skip index and order columns
+            if col_name in ("__index_level_0__", "__natural_order__"):
+                continue
+
+            if field.dataType.typeName() in ("geometrytype", "binary"):
+                # Prepare arguments for the operation
+                positional_params = ", ".join([repr(v) for v in args])
+                keyword_params = ", ".join([repr(v) for v in kwargs.values()])
+                params = ", ".join(filter(None, [positional_params, keyword_params]))
+
+                if field.dataType.typeName() == "binary":
+                    expr = f"{operation}(ST_GeomFromWKB(`{col_name}`){', ' + params if params else ''}) as {col_name}{rename_suffix}"
+                else:
+                    expr = f"{operation}(`{col_name}`{', ' + params if params else ''}) as {col_name}{rename_suffix}"
+                select_expressions.append(expr)
+            else:
+                # Keep non-geometry columns as they are
+                select_expressions.append(f"`{col_name}`")
+
+        sdf = self._internal.spark_frame.selectExpr(*select_expressions)
+        return GeoDataFrame(sdf)
+
+    @property
+    def dtypes(self) -> gpd.GeoSeries | pd.Series | Dtype:
+        # Implementation of the abstract method
+        raise NotImplementedError("This method is not implemented yet.")
+
+    def to_geopandas(self) -> gpd.GeoDataFrame | pd.Series:
+        # Implementation of the abstract method
+        raise NotImplementedError("This method is not implemented yet.")
+
+    def _to_geopandas(self) -> gpd.GeoDataFrame | pd.Series:
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    def dtypes(self) -> Union[gpd.GeoSeries, pd.Series, Dtype]:
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def to_geopandas(self) -> Union[gpd.GeoDataFrame, pd.Series]:
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def _to_geopandas(self) -> Union[gpd.GeoDataFrame, pd.Series]:
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def geoindex(self) -> "GeoIndex":
+    def geoindex(self) -> GeoIndex:
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
@@ -232,7 +282,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             return self
 
     @property
-    def area(self) -> "GeoDataFrame":
+    def area(self) -> GeoDataFrame:
         """
         Returns a GeoDataFrame containing the area of each geometry expressed in the units of the CRS.
 
@@ -256,42 +306,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         0           1.0      1
         1           4.0      2
         """
-        # Create a list of all column expressions for the new dataframe
-        select_expressions = []
-
-        # Process geometry columns to calculate areas
-        for field in self._internal.spark_frame.schema.fields:
-            col_name = field.name
-
-            # Skip index column to avoid duplication
-            if col_name == "__index_level_0__" or col_name == "__natural_order__":
-                continue
-
-            if (
-                field.dataType.typeName() == "geometrytype"
-                or field.dataType.typeName() == "binary"
-            ):
-                # Calculate the area for each geometry column
-                if field.dataType.typeName() == "binary":
-                    area_expr = (
-                        f"ST_Area(ST_GeomFromWKB(`{col_name}`)) as {col_name}_area"
-                    )
-                else:
-                    area_expr = f"ST_Area(`{col_name}`) as {col_name}_area"
-                select_expressions.append(area_expr)
-            else:
-                # Keep non-geometry columns as they are
-                select_expressions.append(f"`{col_name}`")
-
-        # Execute the query to get all data in one go
-        result_df = self._internal.spark_frame.selectExpr(*select_expressions)
-
-        # Convert to pandas DataFrame
-        pandas_df = result_df.toPandas()
-
-        # Create a new GeoDataFrame with the result
-        # Note: This avoids the need to manipulate the index columns separately
-        return GeoDataFrame(pandas_df)
+        return self._process_geometry_columns("ST_Area", rename_suffix="_area")
 
     @property
     def crs(self):
@@ -517,7 +532,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         mitre_limit=5.0,
         single_sided=False,
         **kwargs,
-    ) -> "GeoDataFrame":
+    ) -> GeoDataFrame:
         """
         Returns a GeoDataFrame with all geometries buffered by the specified distance.
 
@@ -553,40 +568,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         >>> gdf = GeoDataFrame(data)
         >>> buffered = gdf.buffer(0.5)
         """
-        # Create a list of all column expressions for the new dataframe
-        select_expressions = []
-
-        # Process each field in the schema
-        for field in self._internal.spark_frame.schema.fields:
-            col_name = field.name
-
-            # Skip index and order columns
-            if col_name == "__index_level_0__" or col_name == "__natural_order__":
-                continue
-
-            # Apply buffer to geometry columns
-            if (
-                field.dataType.typeName() == "geometrytype"
-                or field.dataType.typeName() == "binary"
-            ):
-
-                if field.dataType.typeName() == "binary":
-                    # For binary geometry columns (WKB)
-                    buffer_expr = f"ST_Buffer(ST_GeomFromWKB(`{col_name}`), {distance}) as {col_name}"
-                else:
-                    # For native geometry columns
-                    buffer_expr = f"ST_Buffer(`{col_name}`, {distance}) as {col_name}"
-                select_expressions.append(buffer_expr)
-            else:
-                # Keep non-geometry columns as they are
-                select_expressions.append(f"`{col_name}`")
-
-        # Execute the query to get all data in one go
-        result_df = self._internal.spark_frame.selectExpr(*select_expressions)
-
-        # Convert to pandas DataFrame and create a new GeoDataFrame
-        pandas_df = result_df.toPandas()
-        return GeoDataFrame(pandas_df)
+        return self._process_geometry_columns(
+            "ST_Buffer", rename_suffix="_buffered", distance=distance
+        )
 
     def sjoin(
         self,

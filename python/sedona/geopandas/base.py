@@ -40,7 +40,7 @@ from sedona.geopandas._typing import GeoFrameLike
 bool_type = bool
 
 
-class GeoFrame(object, metaclass=ABCMeta):
+class GeoFrame(metaclass=ABCMeta):
     """
     A base class for both GeoDataFrame and GeoSeries.
     """
@@ -49,7 +49,6 @@ class GeoFrame(object, metaclass=ABCMeta):
     def __getitem__(self, key: Any) -> Any:
         raise NotImplementedError("This method is not implemented yet.")
 
-    @abstractmethod
     def _reduce_for_geostat_function(
         self,
         sfun: Callable[["GeoSeries"], Column],

@@ -458,6 +458,34 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
       df2.cache()
       df1.join(df2, expr("ST_KNN(geom1, geom2, 1)")).count() should be(0)
     }
+
+    it("KNN Join using spider data source") {
+      val dfRandomSquares = sparkSession.read
+        .format("spider")
+        .option("n", "10000")
+        .option("distribution", "parcel")
+        .option("dither", "0.5")
+        .option("splitRange", "0.5")
+        .load()
+
+      dfRandomSquares.createOrReplaceTempView("df_random_squares")
+
+      val dfRandomPoints = sparkSession.read
+        .format("spider")
+        .option("n", "1000")
+        .option("distribution", "uniform")
+        .load()
+
+      dfRandomPoints.createOrReplaceTempView("df_random_points")
+
+      // Execute a KNN join query: attribute points to the nearest square
+      val knnJoined = sparkSession.sql("""SELECT sq.id, pt.id
+          |FROM df_random_squares sq
+          |JOIN df_random_points pt
+          |ON ST_KNN(sq.geometry, pt.geometry, 1, TRUE)""".stripMargin)
+
+      assert(knnJoined.count() > 0)
+    }
   }
 
   private def withOptimizationMode(mode: String)(body: => Unit): Unit = {

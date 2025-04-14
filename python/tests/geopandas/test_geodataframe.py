@@ -56,7 +56,7 @@ class TestDataframe(TestBase):
             },
             index=[10, 20, 30, 40, 50, 60],
         )
-        assert psdf.count().count() is 3
+        assert psdf.count().count() == 3
 
     def test_type_single_geometry_column(self):
         # Create a GeoDataFrame with a single geometry column and additional attributes
@@ -162,17 +162,19 @@ class TestDataframe(TestBase):
         assert type(buffer_df) is GeoDataFrame
 
         # Verify the original columns are preserved
-        assert "geometry1" in buffer_df.columns
+        assert "geometry1_buffered" in buffer_df.columns
         assert "id" in buffer_df.columns
         assert "value" in buffer_df.columns
 
         # Convert to pandas to extract individual geometries
-        pandas_df = buffer_df._internal.spark_frame.select("geometry1").toPandas()
+        pandas_df = buffer_df._internal.spark_frame.select(
+            "geometry1_buffered"
+        ).toPandas()
 
         # Calculate areas to verify buffer was applied correctly
         # Point buffer with radius 0.5 should have area approximately π * 0.5² ≈ 0.785
         # Square buffer with radius 0.5 should expand the 1x1 square to 2x2 square with rounded corners
-        areas = [geom.area for geom in pandas_df["geometry1"]]
+        areas = [geom.area for geom in pandas_df["geometry1_buffered"]]
 
         # Check that square buffer area is greater than original (1.0)
         assert areas[1] > 1.0

@@ -36,8 +36,8 @@ repos:
       - id: prettier
         name: run prettier
         description: format files with prettier
-        entry: prettier --write '**/*.yaml' '**/*.yml'
-        files: \.ya?ml$
+        entry: prettier --write '**/*.js' '**/*.yaml' '**/*.yml'
+        files: \.(js|ya?ml)$
         language: node
         additional_dependencies: ['prettier@3.5.3']
   - repo: https://github.com/Lucas-C/pre-commit-hooks
@@ -125,6 +125,11 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.19.1
+    hooks:
+      - id: pyupgrade
+        args: [--py37-plus]
   - repo: https://github.com/psf/black-pre-commit-mirror
     rev: 25.1.0
     hooks:
@@ -205,7 +210,7 @@ repos:
               python/tests/tools\.py
           )$
       - id: requirements-txt-fixer
-        files: ^docker/requirements\.txt$
+        files: ^docker/requirements\.txt$|^requirements-docs\.txt$
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
         exclude: ^docs-overrides/main\.html$|\.Rd$
