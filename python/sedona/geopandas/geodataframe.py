@@ -16,21 +16,19 @@
 #  under the License.
 from __future__ import annotations
 
-from typing import Any, Callable, Optional, Union
+from typing import Any
 
-from pyspark.sql import Column
-
-import pandas as pd
 import geopandas as gpd
+import pandas as pd
 import pyspark.pandas as pspd
-
-from sedona.geopandas.base import GeoFrame
-from sedona.geopandas._typing import GeoFrameLike, Label
-from pyspark.pandas._typing import Axis, Dtype, Scalar
-from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas import Series as PandasOnSparkSeries
-
+from pyspark.pandas._typing import Dtype
+from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas.internal import InternalFrame
+
+from sedona.geopandas._typing import Label
+from sedona.geopandas.base import GeoFrame
+from sedona.geopandas.geoindex import GeoIndex
 
 
 class GeoDataFrame(GeoFrame, pspd.DataFrame):
@@ -186,18 +184,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 dtype=dtype,
                 copy=copy,
             )
-
-    def _reduce_for_geostat_function(
-        self,
-        sfun: Callable[[GeoSeries], Column],
-        name: str,
-        axis: Axis | None = None,
-        numeric_only: bool = True,
-        skipna: bool = True,
-        **kwargs: Any,
-    ) -> GeoSeries | Scalar:
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
 
     def _process_geometry_columns(
         self, operation: str, rename_suffix: str = "", *args, **kwargs

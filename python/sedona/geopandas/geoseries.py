@@ -15,24 +15,22 @@
 #  specific language governing permissions and limitations
 #  under the License.
 
-from typing import Any, Callable, Optional, Union
+from typing import Any, Union
 
-from pyspark.pandas._typing import Axis, Dtype, Scalar
+import geopandas as gpd
+import pandas as pd
+import pyspark.pandas as pspd
+from pyspark.pandas import Series as PandasOnSparkSeries
+from pyspark.pandas._typing import Dtype
+from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas.internal import InternalFrame
 from pyspark.pandas.series import first_series
 from pyspark.pandas.utils import scol_for
-from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
-from pyspark.pandas import Series as PandasOnSparkSeries
-from pyspark.sql import Column
-
-import pandas as pd
-import geopandas as gpd
-import pyspark.pandas as pspd
 from pyspark.sql.types import BinaryType
 
-from sedona.geopandas.geodataframe import GeoDataFrame
-from sedona.geopandas.base import GeoFrame
 from sedona.geopandas._typing import Label
+from sedona.geopandas.base import GeoFrame
+from sedona.geopandas.geodataframe import GeoDataFrame
 from sedona.geopandas.geoindex import GeoIndex
 
 
@@ -141,17 +139,67 @@ class GeoSeries(GeoFrame, pspd.Series):
                 fastpath=fastpath,
             )
 
-    def _reduce_for_geostat_function(
-        self,
-        sfun: Callable[["GeoSeries"], Column],
-        name: str,
-        axis: Optional[Axis] = None,
-        numeric_only: bool = True,
-        skipna: bool = True,
-        **kwargs: Any,
-    ) -> Union["GeoSeries", Scalar]:
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def _process_geometry_column(
+        self, operation: str, rename: str, *args, **kwargs
+    ) -> "GeoSeries":
+        """
+        Helper method to process a single geometry column with a specified operation.
+
+        Parameters
+        ----------
+        operation : str
+            The spatial operation to apply (e.g., 'ST_Area', 'ST_Buffer').
+        rename : str
+            The name of the resulting column.
+        args : tuple
+            Positional arguments for the operation.
+        kwargs : dict
+            Keyword arguments for the operation.
+
+        Returns
+        -------
+        GeoSeries
+            A GeoSeries with the operation applied to the geometry column.
+        """
+        # Find the first column with BinaryType or GeometryType
+        first_col = self.get_first_geometry_column()
+
+        if first_col:
+            data_type = self._internal.spark_frame.schema[first_col].dataType
+
+            # Handle both positional and keyword arguments
+            all_args = list(args)
+            for k, v in kwargs.items():
+                all_args.append(v)
+
+            # Join all arguments as comma-separated values
+            params = ""
+            if all_args:
+                params_list = [
+                    str(arg) if isinstance(arg, (int, float)) else repr(arg)
+                    for arg in all_args
+                ]
+                params = f", {', '.join(params_list)}"
+
+            if isinstance(data_type, BinaryType):
+                sql_expr = (
+                    f"{operation}(ST_GeomFromWKB(`{first_col}`){params}) as {rename}"
+                )
+            else:
+                sql_expr = f"{operation}(`{first_col}`{params}) as {rename}"
+
+            sdf = self._internal.spark_frame.selectExpr(sql_expr)
+            internal = InternalFrame(
+                spark_frame=sdf,
+                index_spark_columns=None,
+                column_labels=[self._column_label],
+                data_spark_columns=[scol_for(sdf, rename)],
+                data_fields=[self._internal.data_fields[0]],
+                column_label_names=self._internal.column_label_names,
+            )
+            return _to_geo_series(first_series(PandasOnSparkDataFrame(internal)))
+        else:
+            raise ValueError("No valid geometry column found.")
 
     @property
     def dtypes(self) -> Union[gpd.GeoSeries, pd.Series, Dtype]:
@@ -227,27 +275,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         1    4.0
         dtype: float64
         """
-
-        # Find the first column with BinaryType or GeometryType
-        first_col = self.get_first_geometry_column()
-
-        if self.get_first_geometry_column():
-            data_type = self._internal.spark_frame.schema[first_col].dataType
-            if isinstance(data_type, BinaryType):
-                sql_expr = f"ST_Area(ST_GeomFromWKB(`{first_col}`)) as area"
-            else:
-                sql_expr = f"ST_Area(`{first_col}`) as area"
-
-        sdf = self._internal.spark_frame.selectExpr(sql_expr)
-        internal = InternalFrame(
-            spark_frame=sdf,
-            index_spark_columns=None,
-            column_labels=[self._column_label],
-            data_spark_columns=[scol_for(sdf, "area")],
-            data_fields=[self._internal.data_fields[0]],
-            column_label_names=self._internal.column_label_names,
-        )
-        return _to_geo_series(first_series(PandasOnSparkDataFrame(internal)))
+        return self._process_geometry_column("ST_Area", rename="area")
 
     @property
     def crs(self):
@@ -497,28 +525,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries
             A GeoSeries of buffered geometries.
         """
-        # Find the first column with BinaryType or GeometryType
-        first_col = self.get_first_geometry_column()
-
-        if self.get_first_geometry_column():
-            data_type = self._internal.spark_frame.schema[first_col].dataType
-            if isinstance(data_type, BinaryType):
-                sql_expr = (
-                    f"ST_Buffer(ST_GeomFromWKB(`{first_col}`), {distance}) as buffer"
-                )
-            else:
-                sql_expr = f"ST_Buffer(`{first_col}`, {distance}) as buffer"
-
-        sdf = self._internal.spark_frame.selectExpr(sql_expr)
-        internal = InternalFrame(
-            spark_frame=sdf,
-            index_spark_columns=None,
-            column_labels=[self._column_label],
-            data_spark_columns=[scol_for(sdf, "buffer")],
-            data_fields=[self._internal.data_fields[0]],
-            column_label_names=self._internal.column_label_names,
+        return self._process_geometry_column(
+            "ST_Buffer", rename="buffer", distance=distance
         )
-        return _to_geo_series(first_series(PandasOnSparkDataFrame(internal)))
 
     def to_parquet(self, path, **kwargs):
         """
