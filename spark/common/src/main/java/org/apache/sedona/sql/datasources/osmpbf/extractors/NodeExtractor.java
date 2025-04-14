@@ -20,29 +20,18 @@ package org.apache.sedona.sql.datasources.osmpbf.extractors;
 
 import java.util.HashMap;
 import org.apache.sedona.sql.datasources.osmpbf.build.Osmformat;
+import org.apache.sedona.sql.datasources.osmpbf.features.TagsResolver;
 import org.apache.sedona.sql.datasources.osmpbf.model.OsmNode;
 
-public class DenseNodeExtractor {
-  long latOffset;
-  long lonOffset;
-  long granularity;
-  long firstId;
-  long firstLat;
-  long firstLon;
-  Integer keyIndex;
+public class NodeExtractor {
 
-  Osmformat.DenseNodes nodes;
+  Osmformat.PrimitiveGroup primitiveGroup;
+  Osmformat.PrimitiveBlock primitiveBlock;
 
-  public DenseNodeExtractor(
-      Osmformat.DenseNodes nodes, long latOffset, long lonOffset, long granularity) {
-    this.firstId = 0;
-    this.firstLat = 0;
-    this.firstLon = 0;
-    this.latOffset = latOffset;
-    this.lonOffset = lonOffset;
-    this.granularity = granularity;
-    this.nodes = nodes;
-    this.keyIndex = 0;
+  public NodeExtractor(
+      Osmformat.PrimitiveGroup primitiveGroup, Osmformat.PrimitiveBlock primitiveBlock) {
+    this.primitiveGroup = primitiveGroup;
+    this.primitiveBlock = primitiveBlock;
   }
 
   public OsmNode extract(int idx, Osmformat.StringTable stringTable) {
@@ -50,39 +39,22 @@ public class DenseNodeExtractor {
   }
 
   private OsmNode parse(int idx, Osmformat.StringTable stringTable) {
-    long id = nodes.getId(idx) + firstId;
-    long latitude = nodes.getLat(idx) + firstLat;
-    long longitude = nodes.getLon(idx) + firstLon;
+    Osmformat.Node node = primitiveGroup.getNodes(idx);
+
+    long id = node.getId();
+    long latitude = node.getLat();
+    long longitude = node.getLon();
+
+    long latOffset = primitiveBlock.getLatOffset();
+    long lonOffset = primitiveBlock.getLonOffset();
+    long granularity = primitiveBlock.getGranularity();
 
     float lat = (float) (.000000001 * (latOffset + (latitude * granularity)));
     float lon = (float) (.000000001 * (lonOffset + (longitude * granularity)));
 
-    firstId = id;
-    firstLat = latitude;
-    firstLon = longitude;
-
-    HashMap<String, String> tags = parseTags(stringTable);
+    HashMap<String, String> tags =
+        TagsResolver.resolveTags(node.getKeysCount(), node::getKeys, node::getVals, stringTable);
 
     return new OsmNode(id, lat, lon, tags);
-  }
-
-  HashMap<String, String> parseTags(Osmformat.StringTable stringTable) {
-    HashMap<String, String> tags = new HashMap<>();
-
-    while (nodes.getKeysVals(keyIndex) != 0) {
-      int key = nodes.getKeysVals(keyIndex);
-      int value = nodes.getKeysVals(keyIndex + 1);
-
-      String keyString = stringTable.getS(key).toStringUtf8();
-      String valueString = stringTable.getS(value).toStringUtf8();
-
-      tags.put(keyString, valueString);
-
-      keyIndex = keyIndex + 2;
-    }
-
-    keyIndex = keyIndex + 1;
-
-    return tags;
   }
 }
