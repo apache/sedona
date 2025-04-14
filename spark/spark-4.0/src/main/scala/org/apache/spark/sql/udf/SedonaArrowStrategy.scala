@@ -26,7 +26,7 @@ import org.apache.spark.sql.catalyst.expressions.{Attribute, PythonUDF}
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.execution.{SparkPlan, SparkStrategy}
 import org.apache.spark.sql.execution.metric.SQLMetric
-import org.apache.spark.sql.execution.python.{ArrowPythonRunner, ArrowPythonWithNamedArgumentRunner, BatchIterator, EvalPythonEvaluatorFactory, EvalPythonExec, PythonSQLMetrics}
+import org.apache.spark.sql.execution.python.SedonaArrowEvalPythonExec
 import org.apache.spark.sql.types.StructType
 
 import scala.collection.JavaConverters.asScalaIteratorConverter
@@ -39,82 +39,5 @@ class SedonaArrowStrategy extends SparkStrategy {
     case SedonaArrowEvalPython(udfs, output, child, evalType) =>
       SedonaArrowEvalPythonExec(udfs, output, planLater(child), evalType) :: Nil
     case _ => Nil
-  }
-}
-
-// It's modification og Apache Spark's ArrowEvalPythonExec, we remove the check on the types to allow geometry types
-// here, it's initial version to allow the vectorized udf for Sedona geometry types. We can consider extending this
-// to support other engines working with arrow data
-case class SedonaArrowEvalPythonExec(
-    udfs: Seq[PythonUDF],
-    resultAttrs: Seq[Attribute],
-    child: SparkPlan,
-    evalType: Int)
-    extends EvalPythonExec
-    with PythonSQLMetrics {
-
-  private val batchSize = conf.arrowMaxRecordsPerBatch
-  private val sessionLocalTimeZone = conf.sessionLocalTimeZone
-  private val largeVarTypes = conf.arrowUseLargeVarTypes
-  private val pythonRunnerConf = ArrowPythonRunner.getPythonRunnerConfMap(conf)
-  private[this] val jobArtifactUUID = JobArtifactSet.getCurrentJobArtifactState.map(_.uuid)
-  private val profiler = conf.pythonUDFProfiler
-
-  override protected def evaluatorFactory: EvalPythonEvaluatorFactory = {
-    new SedonaArrowEvaluatorFactory(
-      child.output,
-      udfs,
-      output,
-      batchSize,
-      evalType,
-      sessionLocalTimeZone,
-      largeVarTypes,
-      pythonRunnerConf,
-      pythonMetrics,
-      jobArtifactUUID,
-      profiler)
-  }
-
-  override protected def withNewChildInternal(newChild: SparkPlan): SparkPlan =
-    copy(child = newChild)
-}
-
-class SedonaArrowEvaluatorFactory(
-    childOutput: Seq[Attribute],
-    udfs: Seq[PythonUDF],
-    output: Seq[Attribute],
-    batchSize: Int,
-    evalType: Int,
-    sessionLocalTimeZone: String,
-    largeVarTypes: Boolean,
-    pythonRunnerConf: Map[String, String],
-    pythonMetrics: Map[String, SQLMetric],
-    jobArtifactUUID: Option[String],
-    profiler: Option[String])
-    extends EvalPythonEvaluatorFactory(childOutput, udfs, output) {
-
-  override def evaluate(
-      funcs: Seq[(ChainedPythonFunctions, Long)],
-      argMetas: Array[Array[EvalPythonExec.ArgumentMetadata]],
-      iter: Iterator[InternalRow],
-      schema: StructType,
-      context: TaskContext): Iterator[InternalRow] = {
-    val batchIter = if (batchSize > 0) new BatchIterator(iter, batchSize) else Iterator(iter)
-
-    val columnarBatchIter = new ArrowPythonWithNamedArgumentRunner(
-      funcs,
-      evalType - PythonEvalType.SEDONA_UDF_TYPE_CONSTANT,
-      argMetas,
-      schema,
-      sessionLocalTimeZone,
-      largeVarTypes,
-      pythonRunnerConf,
-      pythonMetrics,
-      jobArtifactUUID,
-      profiler).compute(batchIter, context.partitionId(), context)
-
-    columnarBatchIter.flatMap { batch =>
-      batch.rowIterator.asScala
-    }
   }
 }
