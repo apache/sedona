@@ -119,6 +119,11 @@ jobs:
               export SPARK_HOME=$(python -c "import pyspark; print(pyspark.__path__[0])")
           fi
 
+          if [ "${SPARK_VERSION}" == "4.0.0" ]; then
+              pip install https://dist.apache.org/repos/dist/dev/spark/v4.0.0-rc4-bin/pyspark-4.0.0.tar.gz pandas shapely apache-sedona pyarrow
+              export SPARK_HOME=$(python -c "import pyspark; print(pyspark.__path__[0])")
+          fi
+
           mvn -q clean install -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} ${SKIP_TESTS}
       - run: mkdir staging
       - run: cp spark-shaded/target/sedona-*.jar staging
