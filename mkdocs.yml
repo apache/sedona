@@ -191,7 +191,7 @@ extra:
     - icon: fontawesome/brands/twitter
       link: 'https://twitter.com/ApacheSedona'
     - icon: fontawesome/brands/discord
-      link: 'https://share.hsforms.com/1Ndql_ZigTdmLlVQc_d1o4gqga4q'
+      link: 'https://discord.gg/7ZtfVE3X'
   sedona:
     current_version: 1.7.1
     current_geotools: 1.7.1-28.5
