@@ -39,6 +39,6 @@ It's always better to get aligned with the core devs before writing any code.
 
 ## Do you have questions about the source code?
 
-Feel free to create an issue or join the [Discord](https://share.hsforms.com/1Ndql_ZigTdmLlVQc_d1o4gqga4q) with questions!
+Feel free to create an issue or join the [Discord](https://discord.gg/7ZtfVE3X) with questions!
 
 Thanks for reading and looking forward to collaborating with you!
