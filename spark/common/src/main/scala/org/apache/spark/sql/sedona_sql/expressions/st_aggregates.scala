@@ -22,7 +22,7 @@ import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.Column
 import org.apache.spark.sql.functions.{col, udaf}
 
-object st_aggregates extends DataFrameAPI {
+object st_aggregates {
   def ST_Envelope_Aggr(geometry: Column): Column = {
     val aggrFunc = udaf(new ST_Envelope_Aggr)
     aggrFunc(geometry)

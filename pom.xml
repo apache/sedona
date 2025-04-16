@@ -76,7 +76,6 @@
         <spatial4j.version>0.8</spatial4j.version>
 
         <jt-jiffle.version>1.1.24</jt-jiffle.version>
-        <antlr-runtime.version>4.9.3</antlr-runtime.version>
         <janino-version>3.1.9</janino-version>
 
         <!-- Actual scala, spark and log4j version will be set by activated profiles.
@@ -84,6 +83,7 @@
         <scala.compat.version>2.12</scala.compat.version>
         <spark.version>3.3.0</spark.version>
         <spark.compat.version>3.3</spark.compat.version>
+        <spark.major.version>3</spark.major.version>
         <log4j.version>2.17.2</log4j.version>
         <graphframe.version>0.8.3-spark3.4</graphframe.version>
 
@@ -272,11 +272,18 @@
                 <groupId>it.geosolutions.jaiext.jiffle</groupId>
                 <artifactId>jt-jiffle-language</artifactId>
                 <version>${jt-jiffle.version}</version>
-                <scope>${geotools.scope}</scope>
                 <exclusions>
                     <exclusion>
-                        <groupId>*</groupId>
+                        <groupId>javax.media</groupId>
                         <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.codehaus.janino</groupId>
+                        <artifactId>janino</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>it.geosolutions.jaiext.utilities</groupId>
+                        <artifactId>jt-utilities</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -741,6 +748,35 @@
                 <spark.compat.version>3.5</spark.compat.version>
                 <log4j.version>2.20.0</log4j.version>
                 <graphframe.version>0.8.3-spark3.5</graphframe.version>
+                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
+                <skip.deploy.common.modules>true</skip.deploy.common.modules>
+            </properties>
+        </profile>
+        <profile>
+            <id>sedona-spark-4.0</id>
+            <activation>
+                <property>
+                    <name>spark</name>
+                    <value>4.0</value>
+                </property>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>spark-4.0.0-rc4</id>
+                    <name>Spark 4.0.0 RC4 Staging</name>
+                    <url>https://repository.apache.org/content/repositories/orgapachespark-1480/</url>
+                </repository>
+            </repositories>
+            <properties>
+                <spark.version>4.0.0</spark.version>
+                <spark.compat.version>4.0</spark.compat.version>
+                <spark.major.version>4</spark.major.version>
+                <hadoop.version>3.4.1</hadoop.version>
+                <log4j.version>2.24.3</log4j.version>
+                <slf4j.version>2.0.16</slf4j.version>
+                <graphframe.version>0.8.3-spark3.5</graphframe.version>
+                <scala.version>2.13.12</scala.version>
+                <scala.compat.version>2.13</scala.compat.version>
                 <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
                 <skip.deploy.common.modules>true</skip.deploy.common.modules>
             </properties>

@@ -21,7 +21,9 @@ package org.apache.spark.sql.sedona_sql.expressions
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.Column
 
-object st_constructors extends DataFrameAPI {
+import org.apache.spark.sql.sedona_sql.DataFrameShims._
+
+object st_constructors {
   def ST_GeomFromGeoHash(geohash: Column, precision: Column): Column =
     wrapExpression[ST_GeomFromGeoHash](geohash, precision)
   def ST_GeomFromGeoHash(geohash: String, precision: Int): Column =
