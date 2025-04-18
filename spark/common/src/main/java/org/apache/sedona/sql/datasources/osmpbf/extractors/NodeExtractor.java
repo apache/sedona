@@ -49,6 +49,9 @@ public class NodeExtractor {
     long lonOffset = primitiveBlock.getLonOffset();
     long granularity = primitiveBlock.getGranularity();
 
+    // https://wiki.openstreetmap.org/wiki/PBF_Format
+    // latitude = .000000001 * (lat_offset + (granularity * lat))
+    // longitude = .000000001 * (lon_offset + (granularity * lon))
     float lat = (float) (.000000001 * (latOffset + (latitude * granularity)));
     float lon = (float) (.000000001 * (lonOffset + (longitude * granularity)));
 
