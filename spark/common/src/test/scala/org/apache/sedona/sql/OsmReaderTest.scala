@@ -25,8 +25,12 @@ import org.testcontainers.containers.MinIOContainer
 
 import java.io.FileInputStream
 
+case class Node(id: Long, latitude: Double, longitude: Double, tags: Map[String, String])
+
 class OsmReaderTest extends TestBaseScala with Matchers {
   val monacoPath: String = resourceFolder + "osmpbf/monaco-latest.osm.pbf"
+  val densePath: String = resourceFolder + "osmpbf/dense.pbf"
+  val nodesPath: String = resourceFolder + "osmpbf/nodes.pbf"
 
   import sparkSession.implicits._
 
@@ -42,6 +46,40 @@ class OsmReaderTest extends TestBaseScala with Matchers {
         .count()
 
       assert(cnt > 0)
+    }
+
+    it("should parse normal nodes") {
+      sparkSession.read
+        .format("osmpbf")
+        .load(nodesPath)
+        .select("id", "location.*", "tags")
+        .selectExpr(
+          "id",
+          "ROUND(latitude, 2) AS latitude",
+          "ROUND(longitude, 2) AS longitude",
+          "tags")
+        .as[Node]
+        .collect() should contain theSameElementsAs Array(
+        Node(1002, 48.86, 2.35, Map("amenity" -> "cafe", "name" -> "Cafe de Paris")),
+        Node(1003, 30.12, 22.23, Map("amenity" -> "bakery", "name" -> "Delicious Pastries")),
+        Node(1001, 52.52, 13.40, Map("amenity" -> "restaurant", "name" -> "Curry 36")))
+    }
+
+    it("should parse dense nodes") {
+      sparkSession.read
+        .format("osmpbf")
+        .load(densePath)
+        .select("id", "location.*", "tags")
+        .selectExpr(
+          "id",
+          "ROUND(latitude, 2) AS latitude",
+          "ROUND(longitude, 2) AS longitude",
+          "tags")
+        .as[Node]
+        .collect() should contain theSameElementsAs Array(
+        Node(1002, 48.86, 2.35, Map("amenity" -> "cafe", "name" -> "Cafe de Paris")),
+        Node(1003, 30.12, 22.23, Map("amenity" -> "bakery", "name" -> "Delicious Pastries")),
+        Node(1001, 52.52, 13.40, Map("amenity" -> "restaurant", "name" -> "Curry 36")))
     }
 
     it("should be able to read from osm file on s3") {
