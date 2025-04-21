@@ -49,6 +49,10 @@ env:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
 jobs:
   build:
     runs-on: ubuntu-22.04
@@ -95,6 +99,7 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '8'
+      - run: echo ${{ github.ref }}
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
