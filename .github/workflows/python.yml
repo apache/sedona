@@ -91,6 +91,7 @@ jobs:
           - spark: '3.3.0'
             scala: '2.12.8'
             python: '3.8'
+
     env:
       VENV_PATH: /home/runner/.local/share/virtualenvs/python-${{ matrix.python }}
     steps:
