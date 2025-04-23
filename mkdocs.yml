@@ -133,6 +133,7 @@ nav:
               - Function (Snowflake): api/snowflake/vector-data/Function.md
               - Aggregate Function (Snowflake): api/snowflake/vector-data/AggregateFunction.md
               - Predicate (Snowflake): api/snowflake/vector-data/Predicate.md
+  - Inside Apache Sedona:
   - Community:
       - Community: community/contact.md
       - Contributor Guide:
@@ -232,6 +233,7 @@ plugins:
   - search:
   # prebuild_index: true
   - macros
+  - blog
   - git-revision-date-localized:
       type: datetime
   - mike:
