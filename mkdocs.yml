@@ -133,7 +133,7 @@ nav:
               - Function (Snowflake): api/snowflake/vector-data/Function.md
               - Aggregate Function (Snowflake): api/snowflake/vector-data/AggregateFunction.md
               - Predicate (Snowflake): api/snowflake/vector-data/Predicate.md
-  - Inside Apache Sedona: blog/index.md
+  - Blog: blog/index.md
   - Community:
       - Community: community/contact.md
       - Contributor Guide:
