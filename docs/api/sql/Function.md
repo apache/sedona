@@ -4253,6 +4253,8 @@ POINT(100 150)
 
 Introduction: Returns list of geometries divided based of given maximum number of vertices.
 
+A minimum of 5 vertices is required for maxVertices parameter to form a closed box.
+
 Format: `ST_SubDivide(geom: Geometry, maxVertices: Integer)`
 
 Since: `v1.1.0`
@@ -4308,6 +4310,8 @@ Output:
 ## ST_SubDivideExplode
 
 Introduction: It works the same as ST_SubDivide but returns new rows with geometries instead of list.
+
+A minimum of 5 vertices is required for maxVertices parameter to form a closed box.
 
 Format: `ST_SubDivideExplode(geom: Geometry, maxVertices: Integer)`
 
