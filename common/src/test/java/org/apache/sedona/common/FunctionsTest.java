@@ -4420,4 +4420,12 @@ public class FunctionsTest extends TestBase {
     assertFalse(Functions.hasM(emptyPoint));
     assertFalse(Functions.hasZ(emptyPoint));
   }
+
+  @Test
+  public void subdivideInvalidMaxVertices() {
+    LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 99, 99));
+    IllegalArgumentException e =
+        assertThrows(IllegalArgumentException.class, () -> Functions.subDivide(lineString, 4));
+    assertEquals("ST_Subdivide needs 5 or more max vertices", e.getMessage());
+  }
 }
