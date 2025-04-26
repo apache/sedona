@@ -3169,6 +3169,8 @@ Output: `POINT(100 150)`
 
 Introduction: Returns a multi-geometry divided based of given maximum number of vertices.
 
+A minimum of 5 vertices is required for maxVertices parameter to form a closed box.
+
 Format: `ST_SubDivide(geom: geometry, maxVertices: int)`
 
 SQL example:
@@ -3187,6 +3189,8 @@ MULTILINESTRING ((0 0, 5 5), (5 5, 10 10), (10 10, 21 21), (21 21, 60 60), (60 6
 ## ST_SubDivideExplode
 
 Introduction: It works the same as ST_SubDivide but returns new rows with geometries instead of a multi-geometry.
+
+A minimum of 5 vertices is required for maxVertices parameter to form a closed box.
 
 Format: `
 SELECT SEDONA.ST_AsText(GEOM)
