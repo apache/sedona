@@ -23,7 +23,7 @@ Every volunteer project obtains its strength from the people involved in it. We 
 
 You can participate in the community as follows:
 
-* Use our project and provide a feedback.
+* Use our project and provide feedback.
 * Provide us with the use-cases.
 * Report bugs and submit patches.
 * Contribute code and documentation.
@@ -42,7 +42,7 @@ Everyone is welcome to join our community events. We have a community office hou
 
 ## Discord Server
 
-[![Apache Sedona Community Discord Server](https://dcbadge.limes.pink/api/server/https://discord.gg/9A3k5dEBsY)](https://discord.gg/9A3k5dEBsY)
+[Apache Sedona Community Discord Server](https://discord.gg/9A3k5dEBsY)
 
 ## Get help
 
