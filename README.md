@@ -39,17 +39,20 @@
 
 ## Join the community
 
-Follow Sedona on Twitter for fresh news: [Sedona@Twitter](https://twitter.com/ApacheSedona)
+Everyone is welcome to join our community events. We have a community office hour every 4 weeks. Please register to the event you want to attend: https://bit.ly/3UBmxFY
 
-Join the Sedona Discord community: [![Apache Sedona Community Discord Server](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://share.hsforms.com/1Ndql_ZigTdmLlVQc_d1o4gqga4q)
+Please join our Discord community!
 
-Join the Sedona monthly community office hour: [Google Calendar](https://calendar.google.com/calendar/event?action=TEMPLATE&tmeid=NjI0cWgwcTZndnI1anAzYnFrNHY5Y2wyaTRfMjAyNDA0MDlUMTUwMDAwWiBjX2VmN2Q1NGY1MzA4YTRiN2YyNWFjMzNkMGY3ZWViNTRhM2E3ZjExNWI2ODlmYWY0ZDgyNDI1ZjNjYjVlZGU5MzVAZw&tmsrc=c_ef7d54f5308a4b7f25ac33d0f7eeb54a3a7f115b689faf4d82425f3cb5ede935%40group.calendar.google.com&scp=ALL), Tuesdays from 8 AM to 9 AM Pacific Time, every 4 weeks
+[![Apache Sedona Community Discord Server](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://discord.gg/9A3k5dEBsY)
 
-[Sedona JIRA](https://issues.apache.org/jira/projects/SEDONA): Bugs, Pull Requests, and other similar issues
+* [Apache Sedona@LinkedIn](https://www.linkedin.com/company/apache-sedona)
+* [Apache Sedona@X](https://X.com/ApacheSedona)
+* [Sedona JIRA](https://issues.apache.org/jira/projects/SEDONA): bug reports and feature requests
+* [Sedona GitHub Issues](https://github.com/apache/sedona/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen): bug reports and feature requests
+* [Sedona GitHub Discussion](https://github.com/apache/sedona/discussions): project development and general questions
+* [Sedona Mailing Lists](https://lists.apache.org/list.html?sedona.apache.org): [dev@sedona.apache.org](https://lists.apache.org/list.html?dev@sedona.apache.org): project development and general questions
 
-[Sedona Mailing Lists](https://lists.apache.org/list.html?sedona.apache.org): [dev@sedona.apache.org](https://lists.apache.org/list.html?dev@sedona.apache.org): project development, general questions or tutorials.
-
-* Please first subscribe and then post emails. To subscribe, please send an email (leave the subject and content blank) to dev-subscribe@sedona.apache.org
+For the mailing list, Please first subscribe and then post emails. To subscribe, please send an email (leave the subject and content blank) to [dev-subscribe@sedona.apache.org](mailto:dev-subscribe@sedona.apache.org?subject=Subscribe&body=Subscribe)
 
 ## What is Apache Sedona?
 
