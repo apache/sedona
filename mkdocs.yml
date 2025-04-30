@@ -134,6 +134,7 @@ nav:
               - Aggregate Function (Snowflake): api/snowflake/vector-data/AggregateFunction.md
               - Predicate (Snowflake): api/snowflake/vector-data/Predicate.md
   - Blog: blog/index.md
+
   - Community:
       - Community: community/contact.md
       - Contributor Guide:
@@ -233,7 +234,12 @@ plugins:
   - search:
   # prebuild_index: true
   - macros
-  - blog
+  - blog:
+        post_date_format: full
+        blog_toc: true
+        archive_date_format: MMMM yyyy
+        post_excerpt_max_authors: 5
+
   - git-revision-date-localized:
       type: datetime
   - mike:
