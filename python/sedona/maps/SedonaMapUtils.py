@@ -19,7 +19,6 @@ import json
 
 from sedona.sql.types import GeometryType
 from sedona.utils.geoarrow import dataframe_to_arrow
-from packaging.version import parse
 
 
 class SedonaMapUtils:
@@ -46,6 +45,9 @@ class SedonaMapUtils:
             return data_pyarrow.to_pandas()
         try:
             import geopandas as gpd
+
+            # packaging is a dependency of geopandas
+            from packaging.version import parse
         except ImportError:
             msg = "GeoPandas is missing. You can install it manually or via apache-sedona[kepler-map] or apache-sedona[pydeck-map]."
             raise ImportError(msg) from None
