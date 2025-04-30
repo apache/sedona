@@ -46,7 +46,7 @@ You can query tables in the Lakehouse Architecture for business intelligence (BI
 The Lakehouse Architecture offers several advantages:
 
 * Data is stored in open formats, letting any engine can query it, avoiding vendor lock-in.
-* Lakehouses support all the features familiar to data warehouses, like reliable transactions, Data Manipulation Language (DML) operations, and RBAC .
+* Lakehouses support all the features familiar to data warehouses, like reliable transactions, Data Manipulation Language (DML) operations, and RBAC.
 * Lakehouses are performant enough for low-latency applications like BI dashboards.
 * Lakehouses are interoperable with proprietary tools like BigQuery, Redshift, or Esri.
 * You can store Lakehouses in cloud-based storage systems without any additional charges.
@@ -66,7 +66,8 @@ The `stores` table is indirectly linked to `sales_performance` via the `sales_te
 
 **Impact:** With Single-table transactions, the updates to the `stores`, `sales_territories`, and `sales_performance` tables are bundled together. This ensures that all of these related changes (store status, territory boundaries/assignments, sales targets) are completed successfully and become visible at the same time, maintaining accurate and consistent operational data for sales management and analysis.
 
-Without MTT, if the territory updates fail after the store is marked closed, the company might have inconsistent data showing a closed store still linked to its old territory, or incorrect sales targets.
+Without the atomicity of reliable transactions, if the territory updates fail after the store is marked closed, the
+company might have inconsistent data showing a closed store still linked to its old territory, or incorrect sales targets.
 
 Let's see how Lakehouses differ from data lakes.
 
@@ -88,7 +89,7 @@ The Lakehouse metadata layer is relatively small, so the storage costs for a Lak
 
 ## Lakehouses vs. Data Warehouses
 
-A Data Warehouse is an analytics system typically powered by a proprietary engine with similarly proprietary  file formats. However, due to many modern customers wanting to avoid vendor-lock-in via a proprietary file format, data warehouses also began supporting Lakehouse Storage Systems in addition to proprietary file formats.
+A Data Warehouse is an analytics system typically powered by a proprietary engine with similarly proprietary file formats. However, due to many modern customers wanting to avoid vendor-lock-in via a proprietary file format, data warehouses also began supporting Lakehouse Storage Systems in addition to proprietary file formats.
 
 Still, data warehouses generally exhibit the following limitations:
 
@@ -102,7 +103,7 @@ In the next section, we'll discuss how to create tables with Iceberg.
 
 ## Creating tables with Iceberg
 
-The following code sample demonstrates how to create and populate an Iceberg table within a Lakehouse. In this example, we'll create a customers table with id and first_name columns:
+The following code sample demonstrates how to create and populate an Iceberg table within a Lakehouse. In this example, we'll create a `customers` table with `id` and `first_name columns:
 
 ```py
 CREATE TABLE local.db.customers (id string, first_name string)
@@ -124,9 +125,9 @@ df.write.format("iceberg").mode("append").saveAsTable("local.db.customers")
 
 Finally, run a query on the `customers` table:
 
+```py
 sedona.table("local.db.customers").show()
 
-```py
 +---+----------+
 | id|first_name|
 +---+----------+
@@ -136,7 +137,7 @@ sedona.table("local.db.customers").show()
 +---+----------+
 ```
 
-Creating a table with tabular data is straightforward.  Now let's see how to make a table with spatial data in Iceberg.
+Creating a table with tabular data is straightforward. Now let's see how to make a table with spatial data in Iceberg.
 
 ## Creating spatial tables with Iceberg v3
 
@@ -194,14 +195,14 @@ joined.show()
 
 Now, we can see the customer information and the location of their purchases all in one table.
 
-It's easy to join any tables with Sedona, regardless of the underlying file format, because Sedona has so many built-in file readers (e.g., you can easily join one table stored in Shapefiles and another stored in GeoParquet files). But it's even easier when Iceberg stores the tabular and spatial tables in the same catalog.
+It's easy to join any tables with Sedona, regardless of the underlying file format, because Sedona has so
+many built-in file readers (e.g., you can easily join one table stored in Shapefiles and another stored
+in GeoParquet files). But it's even easier when Iceberg stores the tabular and spatial tables in the same catalog.
 
-## Optimizing spatial tables in Lakehouses
-
-!!!tip "Speed up your lakehouse queries"
+!!!tip "Best Practice: Co-location can optimize spatial tables in Lakehouses"
     To speed up your Lakehouse queries, you can co-locate similar data in the same files and eliminate excessively small files.
 
-Let's look at the following spatial table stored in GeoParquet.  This table is the Overture Maps Foundation buildings dataset.
+Let's look at the following spatial table stored in GeoParquet. This table is the Overture Maps Foundation buildings dataset.
 
 ```py
 (
@@ -536,7 +537,7 @@ Lakehouse architecture offers many advantages for the data community, and
 with the native support native for `geometry` and `geography` (GEO) data types
 in Iceberg, the spatial community can now take advantage of these benefits.
 This marks a fundamental shift from simply storing spatial data *within*
-eneric types (like binary WKB or string WKT).
+generic types (like binary WKB or string WKT).
 
 This native support is expected to improve interoperability and performance
 across various query engines, including Sedona.
