@@ -2,8 +2,10 @@
 date:
   created: 2025-04-30
 authors:
+
   - matt_powers
   - kelly
+
 ---
 
 # Geospatial Data on Iceberg: The Lakehouse Advantage
@@ -35,7 +37,7 @@ Tables in Lakehouses are governed by a catalog. These catalogs don't store files
 
 Example Lakehouse catalogs include Databricks' Unity catalog and the open source Apache Polaris.
 
- The catalogs allow for role-based access control (RBAC) at the tabular level and features like multi-table transactions, which ensure that relevant changes to dependent tables are applied atomically and without manual intervention.
+ The catalogs allow for role-based access control (RBAC) at the tabular level and features like single-table transactions, which ensure that relevant changes to dependent tables are applied atomically and without manual intervention.
 
 You can query tables in the Lakehouse Architecture for business intelligence (BI) reporting, data science, machine learning, and other complex analyses.
 
@@ -43,7 +45,7 @@ You can query tables in the Lakehouse Architecture for business intelligence (BI
 
 The Lakehouse Architecture offers several advantages:
 
-* Data is stored in open formats so any engine can query it, and there is no vendor lock-in.
+* Data is stored in open formats, letting any engine can query it, avoiding vendor lock-in.
 * Lakehouses support all the features familiar to data warehouses, like reliable transactions, Data Manipulation Language (DML) operations, and RBAC .
 * Lakehouses are performant enough for low-latency applications like BI dashboards.
 * Lakehouses are interoperable with proprietary tools like BigQuery, Redshift, or Esri.
@@ -52,9 +54,9 @@ The Lakehouse Architecture offers several advantages:
 
 ## Lakehouses & spatial data
 
-Earlier, we mentioned 2 important features of lakehouses: Multi-table transactions and RBAC. Let's delve into how these 2 features can be beneficial for working with spatial data.
+Earlier, we mentioned 2 important features of lakehouses: Single-table transactions and RBAC. Let's delve into how these 2 features can be beneficial for working with spatial data.
 
-### Multi-table transactions
+### Single-table transactions
 
 **Scenario:** Imagine a retail company is closing a store in New Jersey. Let's assume that this company maintains 3 different tables: `stores` (containing point geometry), `sales_territories` (containing polygon geometry), and `sales_performance` (containing no geometry).
 
@@ -62,7 +64,7 @@ These tables are interdependent: The `store_id` field is in `stores` and `sales_
 
 The `stores` table is indirectly linked to `sales_performance` via the `sales_territories` table.
 
-**Impact:** With Multi-table transactions, the updates to the `stores`, `sales_territories`, and `sales_performance` tables are bundled together. This ensures that all of these related changes (store status, territory boundaries/assignments, sales targets) are completed successfully and become visible at the same time, maintaining accurate and consistent operational data for sales management and analysis.
+**Impact:** With Single-table transactions, the updates to the `stores`, `sales_territories`, and `sales_performance` tables are bundled together. This ensures that all of these related changes (store status, territory boundaries/assignments, sales targets) are completed successfully and become visible at the same time, maintaining accurate and consistent operational data for sales management and analysis.
 
 Without MTT, if the territory updates fail after the store is marked closed, the company might have inconsistent data showing a closed store still linked to its old territory, or incorrect sales targets.
 
@@ -78,7 +80,7 @@ The following are a few examples of data lakes:
 * GeoJSON files stored in Azure Blob Storage
 * CSV files with WKT geometry data stored in GCP
 
-Generally, data lakes lack built-in mechanisms to coordinate atomic changes across multiple files or objects. As a result of this and other architectural limitations, data lakes do not support reliable multi-table transactions.
+Generally, data lakes lack built-in mechanisms to coordinate atomic changes across multiple files or objects. As a result of this and other architectural limitations, data lakes do not support reliable single-table transactions.
 
 Consequently, traditional data lakes present challenges for common data tasks: they struggle to efficiently execute developer-centric operations like `DELETE` and `MERGE`; modifying datasets often requires downtime to maintain consistency during file rewrites; and they typically lack the sophisticated performance optimizations (like advanced indexing) found in more performant database systems.
 
