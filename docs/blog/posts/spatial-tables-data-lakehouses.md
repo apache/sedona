@@ -41,7 +41,7 @@ Example Lakehouse catalogs include Databricks' Unity catalog and the open source
 
 You can query tables in the Lakehouse Architecture for business intelligence (BI) reporting, data science, machine learning, and other complex analyses.
 
-![][image1]
+![Lakehouse Architecture](../../image/lakehouse-architecture.png)
 
 The Lakehouse Architecture offers several advantages:
 
