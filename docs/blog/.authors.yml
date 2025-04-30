@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,10 +16,13 @@
 # specific language governing permissions and limitations
 # under the License.
 
+=======
+>>>>>>> 97cd25dc74 ([DOCS] adding blog post, fixing blog post formatting, adding blog options)
 authors:
   kelly:
     name: Kelly-Ann Dolor
     description: Staff Technical Writer, Apache Sedona
+<<<<<<< HEAD
     avatar: https://media.licdn.com/dms/image/v2/C4D03AQHKr_fPpGdNGw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1516866211726?e=2147483647&v=beta&t=p4PcyFNjZhvAIX8e1qZt4i3HbH5yOIXuEs8MTNoYZ3Y
   matt_powers:
     name: Matthew Powers
@@ -28,3 +32,10 @@ authors:
     name: Matthew Forrest
     description: Director of Customer Engineering & Product Led Growth, Wherobots
     avatar: https://media.licdn.com/dms/image/v2/D4E03AQHxYTrEgc53_g/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1722352936567?e=2147483647&v=beta&t=X10Z02O2UX8IRmbypcw-m-jbIDeNsPWWL-YOPX_v1XQ
+=======
+    avatar: https://static.licdn.com/aero-v1/sc/h/9c8pery4andzj6ohjkjp54ma2
+  matt_powers:
+    name: Matthew Powers
+    description: Staff Developer Relations Engineer, Apache Sedona
+    avatar: https://media.licdn.com/dms/image/v2/C4E03AQHL3oztZlTr2w/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1517751981945?e=2147483647&v=beta&t=66hsE-PF25_Uc1EbjnljUOmqjl3NwJ0lHAcZkusxnO0
+>>>>>>> 97cd25dc74 ([DOCS] adding blog post, fixing blog post formatting, adding blog options)

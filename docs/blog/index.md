@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ---
 hide:
 
@@ -26,3 +27,6 @@ title: Blog
 -->
 
 The official source for Apache Sedona news, technical insights, release updates, and best practices in large-scale spatial data management.
+=======
+# Apache Sedona Blog
+>>>>>>> 97cd25dc74 ([DOCS] adding blog post, fixing blog post formatting, adding blog options)

@@ -137,6 +137,7 @@ nav:
               - Aggregate Function (Snowflake): api/snowflake/vector-data/AggregateFunction.md
               - Predicate (Snowflake): api/snowflake/vector-data/Predicate.md
   - Blog: blog/index.md
+
   - Community:
       - Community: community/contact.md
       - Contributor Guide:
@@ -242,6 +243,7 @@ plugins:
   # prebuild_index: true
   - macros
   - blog:
+<<<<<<< HEAD
       # Format for displaying the date of blog posts (e.g., "full" for full date format)
       post_date_format: full
       # Whether to include a table of contents (TOC) for blog posts
@@ -250,6 +252,13 @@ plugins:
       archive_date_format: MMMM yyyy
       # Maximum number of authors to display in the post excerpt
       post_excerpt_max_authors: 5
+=======
+        post_date_format: full
+        blog_toc: true
+        archive_date_format: MMMM yyyy
+        post_excerpt_max_authors: 5
+
+>>>>>>> 97cd25dc74 ([DOCS] adding blog post, fixing blog post formatting, adding blog options)
   - git-revision-date-localized:
       type: datetime
   - mike:
