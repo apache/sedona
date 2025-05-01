@@ -1,3 +1,13 @@
+---
+date:
+  created: 2025-04-30
+authors:
+
+  - matt_powers
+  - kelly
+
+---
+
 <!--
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -16,16 +26,6 @@
  specific language governing permissions and limitations
  under the License.
  -->
-
----
-date:
-  created: 2025-04-30
-authors:
-
-  - matt_powers
-  - kelly
-
----
 
 # Geospatial Data on Iceberg: The Lakehouse Advantage
 
