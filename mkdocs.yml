@@ -243,8 +243,6 @@ plugins:
   # prebuild_index: true
   - macros
   - blog:
-<<<<<<< HEAD
-<<<<<<< HEAD
       # Format for displaying the date of blog posts (e.g., "full" for full date format)
       post_date_format: full
       # Whether to include a table of contents (TOC) for blog posts
@@ -253,10 +251,7 @@ plugins:
       archive_date_format: MMMM yyyy
       # Maximum number of authors to display in the post excerpt
       post_excerpt_max_authors: 5
-=======
-=======
         # Format for displaying the date of blog posts (e.g., "full" for full date format)
->>>>>>> 8dbe11ae96 (Apply suggestions from code review)
         post_date_format: full
         # Whether to include a table of contents (TOC) for blog posts
         blog_toc: true
@@ -264,8 +259,6 @@ plugins:
         archive_date_format: MMMM yyyy
         # Maximum number of authors to display in the post excerpt
         post_excerpt_max_authors: 5
-
->>>>>>> 97cd25dc74 ([DOCS] adding blog post, fixing blog post formatting, adding blog options)
   - git-revision-date-localized:
       type: datetime
   - mike:
