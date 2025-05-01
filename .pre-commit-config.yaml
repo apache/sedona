@@ -125,6 +125,15 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
+      - id: insert-license
+        name: add license for all Python files
+        files: \.py$
+        args:
+          - --comment-style
+          - '|# |'
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.19.1
     hooks:
