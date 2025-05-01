@@ -20,6 +20,7 @@ import json
 from sedona.spark.sql.types import GeometryType
 from sedona.spark.geoarrow.geoarrow import dataframe_to_arrow
 
+
 class SedonaMapUtils:
 
     @classmethod
