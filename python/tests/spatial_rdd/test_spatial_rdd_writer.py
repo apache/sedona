@@ -74,7 +74,7 @@ def remove_wkb_directory():
 
 class TestSpatialRDDWriter(TestBase):
 
-    def test_save_as_geo_json_with_data(self, remove_wkb_directory):
+    def test_save_as_geo_json_with_data(self):
         spatial_rdd = PointRDD(
             sparkContext=self.sc,
             InputLocation=inputLocation,

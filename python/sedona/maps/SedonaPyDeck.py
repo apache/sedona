@@ -318,7 +318,7 @@ class SedonaPyDeck:
         return f"[85, 183, 177, ({plot_col} / {plot_max}) * 255 + 15]"
 
     @classmethod
-    def _create_coord_column_(cls, gdf, geometry_col, add_points=False):
+    def _create_coord_column_(cls, gdf, geometry_col):
         """
         Create a coordinate column in a given GeoPandas Dataframe, this coordinate column contains coordinates of a ST_Point in a list format of [longitude, latitude]
         :param gdf: GeoPandas Dataframe
