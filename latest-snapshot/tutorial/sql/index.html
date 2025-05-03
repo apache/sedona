@@ -5854,7 +5854,7 @@ only showing top 5 rows
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.stats.clustering.dbscan</span><span class="w"> </span><span class="kn">import</span> <span class="n">dbscan</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">dbscan</span>
 
 <span class="n">dbscan</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
@@ -5900,7 +5900,7 @@ only showing top 5 rows
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.stats.outlier_detection.local_outlier_factor</span><span class="w"> </span><span class="kn">import</span> <span class="n">local_outlier_factor</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">local_outlier_factor</span>
 
 <span class="n">local_outlier_factor</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
@@ -5959,8 +5959,8 @@ only showing top 5 rows
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.stats.weighting</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_binary_distance_band_column</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.stats.hotspot_detection.getis_ord</span><span class="w"> </span><span class="kn">import</span> <span class="n">g_local</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_binary_distance_band_column</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">g_local</span>
 
 <span class="n">distance_radius</span> <span class="o">=</span> <span class="mf">1.0</span>
 <span class="n">weighted_df</span> <span class="o">=</span> <span class="n">addBinaryDistanceBandColumn</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">distance_radius</span><span class="p">)</span>
@@ -6124,7 +6124,7 @@ can also be found in the example notebook available <a href="https://github.com/
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DoubleType</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">lengthPoly</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">GeometryType</span><span class="p">()):</span>
@@ -6176,7 +6176,7 @@ can also be found in the example notebook available <a href="https://github.com/
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DoubleType</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">bufferFixed</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">GeometryType</span><span class="p">()):</span>
@@ -6227,7 +6227,7 @@ can also be found in the example notebook available <a href="https://github.com/
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DoubleType</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">bufferIt</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">GeometryType</span><span class="p">(),</span> <span class="n">distance</span><span class="p">:</span> <span class="n">DoubleType</span><span class="p">()):</span>
@@ -6302,7 +6302,7 @@ can also be found in the example notebook available <a href="https://github.com/
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="n">schemaUDF</span> <span class="o">=</span> <span class="n">StructType</span><span class="p">([</span>
@@ -6358,7 +6358,7 @@ Let's analyze the two examples below, that creates buffers from
 a given geometry.</p>
 <h3 id="shapely-scalar-udf">Shapely scalar UDF<a class="headerlink" href="#shapely-scalar-udf" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">shapely.geometry.base</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">b</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">sedona_vectorized_udf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">sedona_vectorized_udf</span>
 
 <span class="nd">@sedona_vectorized_udf</span><span class="p">(</span><span class="n">return_type</span><span class="o">=</span><span class="n">GeometryType</span><span class="p">())</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">vectorized_buffer</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">BaseGeometry</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">b</span><span class="o">.</span><span class="n">BaseGeometry</span><span class="p">:</span>
@@ -6366,8 +6366,8 @@ a given geometry.</p>
 </code></pre></div>
 <h3 id="geoseries-udf">GeoSeries UDF<a class="headerlink" href="#geoseries-udf" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">sedona_vectorized_udf</span><span class="p">,</span> <span class="n">SedonaUDFType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">sedona_vectorized_udf</span><span class="p">,</span> <span class="n">SedonaUDFType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
 
 
 <span class="nd">@sedona_vectorized_udf</span><span class="p">(</span><span class="n">udf_type</span><span class="o">=</span><span class="n">SedonaUDFType</span><span class="o">.</span><span class="n">GEO_SERIES</span><span class="p">,</span> <span class="n">return_type</span><span class="o">=</span><span class="n">GeometryType</span><span class="p">())</span>
@@ -6432,7 +6432,7 @@ my_postgis_db# alter table my_table alter column geom type geometry;
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.utils.structured_adapter</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructuredAdapter</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructuredAdapter</span>
 
 <span class="n">spatialRDD</span> <span class="o">=</span> <span class="n">StructuredAdapter</span><span class="o">.</span><span class="n">toSpatialRdd</span><span class="p">(</span><span class="n">spatialDf</span><span class="p">,</span> <span class="s2">&quot;usacounty&quot;</span><span class="p">)</span>
 </code></pre></div>
@@ -6453,7 +6453,7 @@ my_postgis_db# alter table my_table alter column geom type geometry;
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.utils.adapter</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructuredAdapter</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructuredAdapter</span>
 
 <span class="n">spatialDf</span> <span class="o">=</span> <span class="n">StructuredAdapter</span><span class="o">.</span><span class="n">toDf</span><span class="p">(</span><span class="n">spatialRDD</span><span class="p">,</span> <span class="n">sedona</span><span class="p">)</span>
 </code></pre></div>
@@ -6484,7 +6484,7 @@ desired.</p>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.utils.structured_adapter</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructuredAdapter</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructuredAdapter</span>
 
 <span class="n">spatialRDD</span><span class="o">.</span><span class="n">spatialPartitioningWithoutDuplicates</span><span class="p">(</span><span class="n">GridType</span><span class="o">.</span><span class="n">KDBTREE</span><span class="p">)</span>
 <span class="c1"># Specify the desired number of partitions as 10, though the actual number may vary</span>
@@ -6507,7 +6507,7 @@ desired.</p>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.utils.adapter</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructuredAdapter</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructuredAdapter</span>
 
 <span class="n">joinResultDf</span> <span class="o">=</span> <span class="n">StructuredAdapter</span><span class="o">.</span><span class="n">pairRddToDf</span><span class="p">(</span><span class="n">result_pair_rdd</span><span class="p">,</span> <span class="n">leftDf</span><span class="o">.</span><span class="n">schema</span><span class="p">,</span> <span class="n">rightDf</span><span class="o">.</span><span class="n">schema</span><span class="p">,</span> <span class="n">spark</span><span class="p">)</span>
 </code></pre></div>
@@ -6534,7 +6534,7 @@ desired.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="April 21, 2025 16:29:37">April 21, 2025 16:29:37</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="May 3, 2025 19:30:21">May 3, 2025 19:30:21</span>
   </span>
 
     
