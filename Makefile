@@ -20,7 +20,7 @@ PIP := $(PYTHON) -m pip
 MKDOCS := mkdocs
 MIKE := mike
 
-.PHONY: check checkinstall checkupdate install docsinstall docsbuild clean test
+.PHONY: check checkinstall checklinks checkupdate install docsinstall docsbuild clean test
 
 check:
 	@echo "Running pre-commit checks..."
@@ -28,7 +28,7 @@ check:
 		echo "Error: pre-commit is not installed. Run 'make checkinstall' first."; \
 		exit 1; \
 	fi
-	pre-commit run --all-files
+	SKIP=lychee pre-commit run --all-files
 
 checkinstall:
 	@echo "Installing pre-commit..."
@@ -36,6 +36,9 @@ checkinstall:
 		$(PIP) install pre-commit; \
 	fi
 	pre-commit install
+
+checklinks:
+	pre-commit run lychee --all-files
 
 checkupdate: checkinstall
 	@echo "Updating pre-commit hooks..."
