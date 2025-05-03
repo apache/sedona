@@ -19,10 +19,10 @@ import tempfile
 
 from pyspark.sql import DataFrame
 
-from sedona.core.SpatialRDD import CircleRDD
-from sedona.core.enums import GridType
-from sedona.core.spatialOperator import JoinQueryRaw
-from sedona.utils.structured_adapter import StructuredAdapter
+from sedona.spark.core.SpatialRDD import CircleRDD
+from sedona.spark.core.enums import GridType
+from sedona.spark.core.spatialOperator import JoinQueryRaw
+from sedona.spark.utils.structured_adapter import StructuredAdapter
 from tests.test_base import TestBase
 
 

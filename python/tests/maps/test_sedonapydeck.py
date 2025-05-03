@@ -22,7 +22,7 @@ import pydeck as pdk
 from tests import chicago_crimes_input_location, google_buildings_input_location
 from tests.test_base import TestBase
 
-from sedona.maps.SedonaPyDeck import SedonaPyDeck
+from sedona.spark import SedonaPyDeck
 
 
 class TestVisualization(TestBase):

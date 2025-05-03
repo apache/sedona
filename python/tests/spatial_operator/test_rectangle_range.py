@@ -17,13 +17,13 @@
 
 import os
 
+from tests import tests_resource
 from tests.test_base import TestBase
-from tests.tools import tests_resource
 
-from sedona.core.enums import FileDataSplitter, IndexType
-from sedona.core.geom.envelope import Envelope
-from sedona.core.spatialOperator import RangeQuery
-from sedona.core.SpatialRDD import RectangleRDD
+from sedona.spark.core.enums import FileDataSplitter, IndexType
+from sedona.spark.core.geom.envelope import Envelope
+from sedona.spark.core.spatialOperator import RangeQuery
+from sedona.spark.core.SpatialRDD import RectangleRDD
 
 inputLocation = os.path.join(tests_resource, "zcta510-small.csv")
 queryWindowSet = os.path.join(tests_resource, "zcta510-small.csv")

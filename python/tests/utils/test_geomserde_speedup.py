@@ -27,7 +27,7 @@ from shapely.geometry import (
 from shapely.geometry.base import BaseGeometry
 from shapely.wkt import loads as wkt_loads
 
-from sedona.utils import geometry_serde
+from sedona.spark.utils import geometry_serde
 
 
 class TestGeomSerdeSpeedup:

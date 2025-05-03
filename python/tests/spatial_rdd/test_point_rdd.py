@@ -17,7 +17,6 @@
 
 from tests.properties.point_properties import (
     crs_envelope,
-    crs_envelope_transformed,
     crs_point_test,
     input_boundary,
     input_count,
@@ -25,14 +24,13 @@ from tests.properties.point_properties import (
     num_partitions,
     offset,
     splitter,
-    transformed_envelope,
 )
 from tests.test_base import TestBase
 
-from sedona.core.enums import GridType, IndexType
-from sedona.core.geom.envelope import Envelope
-from sedona.core.SpatialRDD import PointRDD
-from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
+from sedona.spark.core.enums import GridType, IndexType
+from sedona.spark.core.geom.envelope import Envelope
+from sedona.spark.core.SpatialRDD import PointRDD
+from sedona.spark.core.SpatialRDD.spatial_rdd import SpatialRDD
 
 
 class TestPointRDD(TestBase):

@@ -16,7 +16,6 @@
 #  under the License.
 from math import radians
 import os
-import threading
 import concurrent.futures
 from typing import Callable, Tuple
 
@@ -26,15 +25,12 @@ from pyspark.sql import functions as f
 from shapely.geometry.base import BaseGeometry
 from tests.test_base import TestBase
 
-from sedona.core.geom.geography import Geography
-from sedona.sql import st_aggregates as sta
-from sedona.sql import st_constructors as stc
-from sedona.sql import st_functions as stf
-from sedona.sql import st_predicates as stp
-from sedona.sql.st_aggregates import *
-from sedona.sql.st_constructors import *
-from sedona.sql.st_functions import *
-from sedona.sql.st_predicates import *
+from sedona.spark.core.geom.geography import Geography
+from sedona.spark.sql import st_aggregates as sta
+from sedona.spark.sql import st_constructors as stc
+from sedona.spark.sql import st_functions as stf
+from sedona.spark.sql import st_predicates as stp
+from sedona.spark.sql.st_functions import *
 
 test_configurations = [
     # constructors

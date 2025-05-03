@@ -28,15 +28,14 @@ from tests.properties.polygon_properties import (
     polygon_rdd_input_location,
     polygon_rdd_splitter,
     polygon_rdd_start_offset,
-    query_envelope,
     splitter,
 )
 from tests.test_base import TestBase
 
-from sedona.core.enums import FileDataSplitter, GridType, IndexType
-from sedona.core.geom.envelope import Envelope
-from sedona.core.SpatialRDD import PolygonRDD
-from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
+from sedona.spark.core.enums import FileDataSplitter, IndexType
+from sedona.spark.core.geom.envelope import Envelope
+from sedona.spark.core.SpatialRDD import PolygonRDD
+from sedona.spark.core.SpatialRDD.spatial_rdd import SpatialRDD
 
 
 class TestPolygonRDD(TestBase):

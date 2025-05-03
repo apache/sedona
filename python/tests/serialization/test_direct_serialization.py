@@ -19,7 +19,7 @@ from shapely.geometry import Polygon
 from shapely.wkt import loads
 from tests.test_base import TestBase
 
-from sedona.utils.geometry_adapter import GeometryAdapter
+from sedona.spark.utils.geometry_adapter import GeometryAdapter
 
 
 class TestDirectSerialization(TestBase):

@@ -25,7 +25,7 @@ from tests import (
 )
 from tests.test_base import TestBase
 
-from sedona.maps.SedonaKepler import SedonaKepler
+from sedona.spark import SedonaKepler
 
 
 class TestVisualization(TestBase):

@@ -23,14 +23,12 @@ from tests.properties.linestring_properties import (
     input_location,
     num_partitions,
     splitter,
-    transformed_envelope,
-    transformed_envelope_2,
 )
 from tests.test_base import TestBase
 
-from sedona.core.enums import GridType, IndexType
-from sedona.core.geom.envelope import Envelope
-from sedona.core.SpatialRDD import LineStringRDD
+from sedona.spark.core.enums import IndexType
+from sedona.spark.core.geom.envelope import Envelope
+from sedona.spark.core.SpatialRDD import LineStringRDD
 
 
 class TestLineStringRDD(TestBase):

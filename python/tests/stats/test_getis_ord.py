@@ -18,11 +18,12 @@
 from esda.getisord import G_Local
 from libpysal.weights import DistanceBand
 from pyspark.sql import functions as f
+
+from sedona.spark.stats import g_local
+from sedona.spark.stats import add_distance_band_column
 from tests.test_base import TestBase
 
-from sedona.sql.st_constructors import ST_MakePoint
-from sedona.stats.hotspot_detection.getis_ord import g_local
-from sedona.stats.weighting import add_distance_band_column
+from sedona.spark.sql.st_constructors import ST_MakePoint
 
 
 class TestGetisOrd(TestBase):

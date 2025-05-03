@@ -14,8 +14,3 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 #  under the License.
-
-"""The clustering module contains spark based implementations of popular geospatial clustering algorithms.
-
-These implementations are designed to scale to larger datasets and support various geometric feature types.
-"""

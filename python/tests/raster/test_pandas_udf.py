@@ -22,7 +22,6 @@ import pytest
 import rasterio
 from pyspark.sql.functions import expr, pandas_udf
 from pyspark.sql.types import IntegerType
-from tests import world_map_raster_input_location
 from tests.test_base import TestBase
 
 
@@ -42,7 +41,7 @@ class TestRasterPandasUDF(TestBase):
         # A Python Pandas UDF that takes a raster as input
         @pandas_udf(IntegerType())
         def pandas_udf_raster_as_param(s: pd.Series) -> pd.Series:
-            from sedona.raster import raster_serde
+            from sedona.spark.raster import raster_serde
 
             def func(x):
                 with raster_serde.deserialize(x) as raster:
@@ -54,7 +53,7 @@ class TestRasterPandasUDF(TestBase):
         # A Python Pandas UDF that takes a raster as input
         @pandas_udf(IntegerType())
         def pandas_udf_raster_as_param_2(s: pd.Series) -> pd.Series:
-            from sedona.raster import raster_serde
+            from sedona.spark.raster import raster_serde
 
             def func(x):
                 with raster_serde.deserialize(x) as raster:

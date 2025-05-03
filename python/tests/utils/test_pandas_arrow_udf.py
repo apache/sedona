@@ -16,8 +16,8 @@
 #  under the License.
 
 
-from sedona.sql.types import GeometryType
-from sedona.sql.functions import sedona_vectorized_udf, SedonaUDFType
+from sedona.spark.sql.types import GeometryType
+from sedona.spark.sql.functions import sedona_vectorized_udf, SedonaUDFType
 from tests import chicago_crimes_input_location
 from tests.test_base import TestBase
 import pyspark.sql.functions as f

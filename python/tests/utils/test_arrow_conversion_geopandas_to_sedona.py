@@ -17,8 +17,8 @@
 
 import pytest
 
-from sedona.sql.types import GeometryType
-from sedona.utils.geoarrow import create_spatial_dataframe
+from sedona.spark.sql.types import GeometryType
+from sedona.spark.geoarrow.geoarrow import create_spatial_dataframe
 from tests.test_base import TestBase
 import geopandas as gpd
 import pyspark

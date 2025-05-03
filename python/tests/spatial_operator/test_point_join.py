@@ -17,14 +17,13 @@
 
 import os
 
-import pytest
+from tests import tests_resource
 from tests.spatial_operator.test_join_base import TestJoinBase
-from tests.tools import tests_resource
 
-from sedona.core.enums import FileDataSplitter, GridType, IndexType
-from sedona.core.enums.join_build_side import JoinBuildSide
-from sedona.core.spatialOperator import JoinQuery
-from sedona.core.spatialOperator.join_params import JoinParams
+from sedona.spark.core.enums import FileDataSplitter, GridType, IndexType
+from sedona.spark.core.enums.join_build_side import JoinBuildSide
+from sedona.spark.core.spatialOperator import JoinQuery
+from sedona.spark.core.spatialOperator.join_params import JoinParams
 
 input_location = os.path.join(tests_resource, "arealm-small.csv")
 input_location_query_window = os.path.join(tests_resource, "zcta510-small.csv")

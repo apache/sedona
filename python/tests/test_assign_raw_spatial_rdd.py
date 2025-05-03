@@ -23,7 +23,7 @@ from tests.properties.point_properties import (
 )
 from tests.test_base import TestBase
 
-from sedona.core.SpatialRDD import CircleRDD, PointRDD
+from sedona.spark.core.SpatialRDD import CircleRDD, PointRDD
 
 
 class TestSpatialRddAssignment(TestBase):

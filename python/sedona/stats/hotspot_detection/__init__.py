@@ -14,5 +14,3 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 #  under the License.
-
-"""Detecting across a region where a variable's value is significantly different from other values nearby."""

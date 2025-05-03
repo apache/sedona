@@ -18,8 +18,8 @@
 import attr
 from pyspark.sql import SparkSession
 
-from sedona.register.geo_registrator import PackageImporter
-from sedona.utils import KryoSerializer, SedonaKryoRegistrator
+from sedona.spark.register.geo_registrator import PackageImporter
+from sedona.spark.utils import KryoSerializer, SedonaKryoRegistrator
 
 try:
     from pyspark.sql.utils import is_remote

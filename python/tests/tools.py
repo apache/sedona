@@ -14,17 +14,9 @@
 #  KIND, either express or implied.  See the License for the
 #  specific language governing permissions and limitations
 #  under the License.
-
-from os import path
-
 from shapely.geometry import Point
 
-from sedona.utils.spatial_rdd_parser import GeoData
-
-tests_path = path.abspath(path.join(__file__, "../../../spark/common/src/test/"))
-tests_resource = path.abspath(
-    path.join(__file__, "../../../spark/common/src/test/resources/")
-)
+from sedona.spark.utils.spatial_rdd_parser import GeoData
 
 
 def distance_sorting_functions(geo_data: GeoData, query_point: Point):

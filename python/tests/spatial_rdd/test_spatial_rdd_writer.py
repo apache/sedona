@@ -19,12 +19,13 @@ import os
 import shutil
 
 import pytest
-from tests.test_base import TestBase
-from tests.tools import tests_resource
 
-from sedona.core.enums import FileDataSplitter
-from sedona.core.geom.envelope import Envelope
-from sedona.core.SpatialRDD import PointRDD
+from tests import tests_resource
+from tests.test_base import TestBase
+
+from sedona.spark.core.enums import FileDataSplitter
+from sedona.spark.core.geom.envelope import Envelope
+from sedona.spark.core.SpatialRDD import PointRDD
 
 wkb_folder = "wkb"
 wkt_folder = "wkt"

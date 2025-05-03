@@ -34,7 +34,7 @@ from tests.sql.resource.sample_data import (
 )
 from tests.test_base import TestBase
 
-from sedona.sql.types import GeometryType
+from sedona.spark.sql.types import GeometryType
 
 
 class TestPredicateJoin(TestBase):

@@ -28,7 +28,7 @@ from sedona.spark import *
 Alternatively it can also be imported using:
 
 ```python
-from sedona.maps.SedonaPyDeck import SedonaPyDeck
+from sedona.spark import SedonaPyDeck
 ```
 
 !!!Note
