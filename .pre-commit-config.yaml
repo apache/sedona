@@ -130,7 +130,7 @@ repos:
         files: \.py$
         args:
           - --comment-style
-          - '|# |'
+          - '|#|'
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
