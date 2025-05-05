@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://sedona.apache.org/latest/api/sql/Visualization_SedonaPyDeck/">
+        <link rel="canonical" href="https://sedona.apache.org/latest/api/sql/Visualization-SedonaKepler/">
       
       
-        <link rel="prev" href="../Reading-legacy-parquet/">
+        <link rel="prev" href="../Visualization-SedonaPyDeck/">
       
       
-        <link rel="next" href="../Visualization_SedonaKepler/">
+        <link rel="next" href="../Raster-loader/">
       
       
       <link rel="icon" href="../../../image/sedona_logo_symbol.png">
@@ -24,7 +24,7 @@
     
     
       
-        <title>SedonaPyDeck - Apache Sedona&trade;</title>
+        <title>SedonaKepler - Apache Sedona&trade;</title>
       
     
     
@@ -71,7 +71,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#geometry-map" class="md-skip">
+        <a href="#creating-a-map-object-using-sedonakeplercreate_map" class="md-skip">
           Skip to content
         </a>
       
@@ -122,7 +122,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              SedonaPyDeck
+              SedonaKepler
             
           </span>
         </div>
@@ -2834,6 +2834,29 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../Visualization-SedonaPyDeck/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SedonaPyDeck
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -2849,7 +2872,7 @@
   
   
   <span class="md-ellipsis">
-    SedonaPyDeck
+    SedonaKepler
     
   </span>
   
@@ -2862,7 +2885,7 @@
   
   
   <span class="md-ellipsis">
-    SedonaPyDeck
+    SedonaKepler
     
   </span>
   
@@ -2883,36 +2906,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#geometry-map" class="md-nav__link">
+  <a href="#creating-a-map-object-using-sedonakeplercreate_map" class="md-nav__link">
     <span class="md-ellipsis">
-      Geometry Map
+      Creating a map object using SedonaKepler.create_map
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#choropleth-map" class="md-nav__link">
+  <a href="#adding-sedonadataframe-to-a-map-object-using-sedonakepleradd_df" class="md-nav__link">
     <span class="md-ellipsis">
-      Choropleth Map
+      Adding SedonaDataFrame to a map object using SedonaKepler.add_df
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#scatterplot" class="md-nav__link">
+  <a href="#setting-a-config-via-the-map" class="md-nav__link">
     <span class="md-ellipsis">
-      Scatterplot
+      Setting a config via the map
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#heatmap" class="md-nav__link">
+  <a href="#saving-and-setting-config" class="md-nav__link">
     <span class="md-ellipsis">
-      Heatmap
+      Saving and setting config
     </span>
   </a>
   
@@ -2922,29 +2945,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Visualization_SedonaKepler/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    SedonaKepler
-    
-  </span>
-  
-
-      </a>
     </li>
   
 
@@ -4520,36 +4520,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#geometry-map" class="md-nav__link">
+  <a href="#creating-a-map-object-using-sedonakeplercreate_map" class="md-nav__link">
     <span class="md-ellipsis">
-      Geometry Map
+      Creating a map object using SedonaKepler.create_map
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#choropleth-map" class="md-nav__link">
+  <a href="#adding-sedonadataframe-to-a-map-object-using-sedonakepleradd_df" class="md-nav__link">
     <span class="md-ellipsis">
-      Choropleth Map
+      Adding SedonaDataFrame to a map object using SedonaKepler.add_df
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#scatterplot" class="md-nav__link">
+  <a href="#setting-a-config-via-the-map" class="md-nav__link">
     <span class="md-ellipsis">
-      Scatterplot
+      Setting a config via the map
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#heatmap" class="md-nav__link">
+  <a href="#saving-and-setting-config" class="md-nav__link">
     <span class="md-ellipsis">
-      Heatmap
+      Saving and setting config
     </span>
   </a>
   
@@ -4573,7 +4573,7 @@
 
 
   
-    <a href="https://github.com/apache/sedona/edit/master/docs/api/sql/Visualization_SedonaPyDeck.md" title="Edit this page" class="md-content__button md-icon">
+    <a href="https://github.com/apache/sedona/edit/master/docs/api/sql/Visualization-SedonaKepler.md" title="Edit this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -4581,7 +4581,7 @@
   
 
 
-  <h1>SedonaPyDeck</h1>
+  <h1>SedonaKepler</h1>
 
 <!--
  Licensed to the Apache Software Foundation (ASF) under one
@@ -4602,69 +4602,68 @@
  under the License.
  -->
 
-<p>SedonaPyDeck offers a number of APIs which aid in quick and interactive visualization of a geospatial data in a Jupyter notebook/lab environment.</p>
-<p>Inorder to start using SedonaPyDeck, simply import Sedona using:</p>
+<p>SedonaKepler offers a number of APIs which aid in quick and interactive visualization of a geospatial data in a Jupyter notebook/lab environment.</p>
+<p>Inorder to start using SedonaKepler, simply import Sedona using:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 </code></pre></div>
 <p>Alternatively it can also be imported using:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaPyDeck</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaKepler</span>
 </code></pre></div>
+<p>Following are details on all the APIs exposed via SedonaKepler:</p>
+<h3 id="creating-a-map-object-using-sedonakeplercreate_map"><strong>Creating a map object using SedonaKepler.create_map</strong><a class="headerlink" href="#creating-a-map-object-using-sedonakeplercreate_map" title="Permanent link">&para;</a></h3>
+<p>SedonaKepler exposes a create_map API with the following signature:</p>
+<div class="highlight"><pre><span></span><code><span class="n">create_map</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">SedonaDataFrame</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;unnamed&#39;</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">map</span>
+</code></pre></div>
+<p>The parameter 'name' is used to associate the passed SedonaDataFrame in the map object and any config applied to the map is linked to this name. It is recommended you pass a unique identifier to the dataframe here.</p>
+<p>If no SedonaDataFrame object is passed, an empty map (with config applied if passed) is returned. A SedonaDataFrame can be added later using the method <code>add_df</code></p>
+<p>A map config can be passed optionally to apply pre-apply customizations to the map.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>For more information on the optional parameters please visit <a href="https://deckgl.readthedocs.io/en/latest/deck.html">PyDeck docs</a>.</p>
-<p>SedonaPyDeck assumes the map provider to be Mapbox when user selects 'salellite' option for <code>map_style</code>.</p>
+<p>The map config references every customization with the name assigned to the SedonaDataFrame being displayed, if there is a mismatch in the name, the config will not be applied to the map object.</p>
 </div>
-<p>Following are details on all the APIs exposed via SedonaPyDeck:</p>
-<h3 id="geometry-map"><strong>Geometry Map</strong><a class="headerlink" href="#geometry-map" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_geometry_map</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">fill_color</span><span class="o">=</span><span class="s2">&quot;[85, 183, 177, 255]&quot;</span><span class="p">,</span> <span class="n">line_color</span><span class="o">=</span><span class="s2">&quot;[85, 183, 177, 255]&quot;</span><span class="p">,</span>
-                   <span class="n">elevation_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                   <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">api_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stroked</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="admonition abstract">
+<p class="admonition-title">Example usage (Referenced from Sedona Jupyter examples)</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:1"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="nb">map</span> <span class="o">=</span> <span class="n">SedonaKepler</span><span class="o">.</span><span class="n">create_map</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">groupedresult</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;AirportCount&quot;</span><span class="p">)</span>
+<span class="nb">map</span>
 </code></pre></div>
-<p>The parameter <code>fill_color</code> can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column, and is used to color polygons or point geometries in the map</p>
-<p>The parameter <code>line_color</code> can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column, and is used to color the line geometries in the map.</p>
-<p>The parameter <code>elevation_col</code> can be given a static elevation or elevation based on column values like <code>fill_color</code>, this only works for the polygon geometries in the map.</p>
-<p>The parameter <code>stroked</code> determines whether to draw an outline around polygons and points, accepts a boolean value. For more information, please refer to this <a href="https://deck.gl/docs/api-reference/layers/geojson-layer#:~:text=%27circle%27.-,stroked,-(boolean%2C%20optional)">documentation of deck.gl</a>.</p>
-<p>Optionally, parameters <code>initial_view_state</code>, <code>map_style</code>, <code>map_provider</code>, <code>api_keys</code> can be passed to configure the map as per user's liking.
-More details on the parameters and their default values can be found on the PyDeck website as well by deck.gl <a href="https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/layers/geojson-layer.md">here</a></p>
-<h3 id="choropleth-map"><strong>Choropleth Map</strong><a class="headerlink" href="#choropleth-map" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_choropleth_map</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">fill_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                          <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">api_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">elevation_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stroked</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</div>
+</div>
+</div>
+</div>
+<h3 id="adding-sedonadataframe-to-a-map-object-using-sedonakepleradd_df"><strong>Adding SedonaDataFrame to a map object using SedonaKepler.add_df</strong><a class="headerlink" href="#adding-sedonadataframe-to-a-map-object-using-sedonakepleradd_df" title="Permanent link">&para;</a></h3>
+<p>SedonaKepler exposes an add_df API with the following signature:</p>
+<div class="highlight"><pre><span></span><code><span class="n">add_df</span><span class="p">(</span><span class="nb">map</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">SedonaDataFrame</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;unnamed&#39;</span><span class="p">)</span>
 </code></pre></div>
-<p>The parameter <code>fill_color</code> can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column.</p>
-<p>The parameter <code>stroked</code> determines whether to draw an outline around polygons and points, accepts a boolean value. For more information please refer to this <a href="https://deck.gl/docs/api-reference/layers/geojson-layer#:~:text=%27circle%27.-,stroked,-(boolean%2C%20optional)">documentation of deck.gl</a>.</p>
-<p>For example, all these are valid values of fill_color:</p>
-<div class="highlight"><pre><span></span><code><span class="n">fill_color</span><span class="o">=</span><span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">250</span><span class="p">]</span>
-<span class="n">fill_color</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">255</span><span class="p">]</span>
-<span class="n">fill_color</span><span class="o">=</span><span class="s1">&#39;[0, 12, 240, AirportCount * 10]&#39;</span> <span class="c1">## AirportCount is a column in the passed df</span>
+<p>This API can be used to add a SedonaDataFrame to an already created map object. The map object passed is directly mutated and nothing is returned.</p>
+<p>The parameters name has the same conditions as 'create_map'</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>This method can be used to add multiple dataframes to a map object to be able to visualize them together.</p>
+</div>
+<div class="admonition abstract">
+<p class="admonition-title">Example usage (Referenced from Sedona Jupyter examples)</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:1"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block"></div>
+</div>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nb">map</span> <span class="o">=</span> <span class="n">SedonaKepler</span><span class="o">.</span><span class="n">create_map</span><span class="p">()</span>
+<span class="n">SedonaKepler</span><span class="o">.</span><span class="n">add_df</span><span class="p">(</span><span class="nb">map</span><span class="p">,</span> <span class="n">groupedresult</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;AirportCount&quot;</span><span class="p">)</span>
+<span class="nb">map</span>
 </code></pre></div>
-<p>Instead of giving a <code>fill_color</code> parameter, a 'plot_col' can be passed which specifies the column to decide the choropleth.
-SedonaPyDeck then creates a default color scheme based on the values of the column passed.</p>
-<p>The parameter <code>elevation_col</code> can be given a numeric or a string value (containing the column with/without operations on it) to set a 3D elevation to the plotted polygons if any.</p>
-<p>Optionally, parameters <code>initial_view_state</code>, <code>map_style</code>, <code>map_provider</code>, <code>api_keys</code> can be passed to configure the map as per user's liking.
-More details on the parameters and their default values can be found on the PyDeck website.</p>
-<h3 id="scatterplot"><strong>Scatterplot</strong><a class="headerlink" href="#scatterplot" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_scatterplot_map</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">fill_color</span><span class="o">=</span><span class="s2">&quot;[255, 140, 0]&quot;</span><span class="p">,</span> <span class="n">radius_col</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">radius_min_pixels</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">radius_max_pixels</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">radius_scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                           <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">api_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-</code></pre></div>
-<p>The parameter <code>fill_color</code> can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column.</p>
-<p>The parameter <code>radius_col</code> can be given a numeric value or a string value consisting of any operations on the column, in order to specify the radius of the plotted point.</p>
-<p>The parameter <code>radius_min_pixels</code> can be given a numeric value that would set the minimum radius in pixels. This can be used to prevent the plotted circle from getting too small when zoomed out.</p>
-<p>The parameter <code>radius_max_pixels</code> can be given a numeric value that would set the maximum radius in pixels. This can be used to prevent the circle from getting too big when zoomed in.</p>
-<p>The parameter <code>radius_scale</code> can be given a numeric value that sets a global radius multiplier for all points.</p>
-<p>Optionally, parameters <code>initial_view_state</code>, <code>map_style</code>, <code>map_provider</code>, <code>api_keys</code> can be passed to configure the map as per user's liking.
-More details on the parameters and their default values can be found on the PyDeck website as well by deck.gl <a href="https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/layers/scatterplot-layer.md">here</a></p>
-<h3 id="heatmap"><strong>Heatmap</strong><a class="headerlink" href="#heatmap" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_heatmap</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">color_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">aggregation</span><span class="o">=</span><span class="s2">&quot;SUM&quot;</span><span class="p">,</span> <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">api_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-</code></pre></div>
-<p>The parameter <code>color_range</code> can be optionally given a list of RGB values, SedonaPyDeck by default uses <code>6-class YlOrRd</code> as color_range.
-More examples can be found on <a href="https://colorbrewer2.org/#type=sequential&amp;scheme=YlOrRd&amp;n=6">colorbrewer</a></p>
-<p>The parameter <code>weight</code> can be given a numeric value or a string with column and operations on it to determine weight of each point while plotting a heatmap.
-By default, SedonaPyDeck assigns a weight of 1 to each point</p>
-<p>The parameter <code>aggregation</code> can be used to define aggregation strategy to use when aggregating heatmap to a lower resolution (zooming out).
-One of "MEAN" or "SUM" can be provided. By default, SedonaPyDeck uses "MEAN" as the aggregation strategy.</p>
-<p>Optionally, parameters <code>initial_view_state</code>, <code>map_style</code>, <code>map_provider</code>, <code>api_keys</code> can be passed to configure the map as per user's liking.
-More details on the parameters and their default values can be found on the PyDeck website as well by deck.gl <a href="https://github.com/visgl/deck.gl/blob/8.9-release/docs/api-reference/aggregation-layers/heatmap-layer.md">here</a></p>
+</div>
+<h3 id="setting-a-config-via-the-map"><strong>Setting a config via the map</strong><a class="headerlink" href="#setting-a-config-via-the-map" title="Permanent link">&para;</a></h3>
+<p>A map rendered by accessing the map object created by SedonaKepler includes a config panel which can be used to customize the map</p>
+<h3 id="saving-and-setting-config"><strong>Saving and setting config</strong><a class="headerlink" href="#saving-and-setting-config" title="Permanent link">&para;</a></h3>
+<p>A map object's current config can be accessed by accessing its 'config' attribute like <code>map.config</code>. This config can be saved for future use or use across notebooks if the exact same map is to be rendered every time.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The map config references each applied customization with the name given to the dataframe and hence will work only on maps with the same name of dataframe supplied.
+For more details refer to keplerGl documentation <a href="https://docs.kepler.gl/docs/keplergl-jupyter#6.-match-config-with-data">here</a></p>
+</div>
 
 
 
@@ -4685,7 +4684,7 @@ More details on the parameters and their default values can be found on the PyDe
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="May 3, 2025 19:30:21">May 3, 2025 19:30:21</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="May 5, 2025 16:14:15">May 5, 2025 16:14:15</span>
   </span>
 
     
@@ -4723,7 +4722,7 @@ More details on the parameters and their default values can be found on the PyDe
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../Reading-legacy-parquet/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Reading Legacy Parquet Files">
+          <a href="../Visualization-SedonaPyDeck/" class="md-footer__link md-footer__link--prev" aria-label="Previous: SedonaPyDeck">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -4733,20 +4732,20 @@ More details on the parameters and their default values can be found on the PyDe
                 Previous
               </span>
               <div class="md-ellipsis">
-                Reading Legacy Parquet Files
+                SedonaPyDeck
               </div>
             </div>
           </a>
         
         
           
-          <a href="../Visualization_SedonaKepler/" class="md-footer__link md-footer__link--next" aria-label="Next: SedonaKepler">
+          <a href="../Raster-loader/" class="md-footer__link md-footer__link--next" aria-label="Next: Raster loader">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                SedonaKepler
+                Raster loader
               </div>
             </div>
             <div class="md-footer__button md-icon">

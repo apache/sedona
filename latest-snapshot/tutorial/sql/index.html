@@ -3290,7 +3290,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/sql/Visualization_SedonaPyDeck/" class="md-nav__link">
+      <a href="../../api/sql/Visualization-SedonaPyDeck/" class="md-nav__link">
         
   
   
@@ -3313,7 +3313,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/sql/Visualization_SedonaKepler/" class="md-nav__link">
+      <a href="../../api/sql/Visualization-SedonaKepler/" class="md-nav__link">
         
   
   
@@ -6037,7 +6037,7 @@ only showing top 5 rows
 </code></pre></div></p>
 </div>
 <p>The following tutorial showcases the various maps that can be created using SedonaPyDeck, the datasets used to create these maps are publicly available.</p>
-<p>Each API exposed by SedonaPyDeck offers customization via optional arguments, details on all possible arguments can be found in the <a href="../../api/sql/Visualization_SedonaPyDeck/">API docs of SedonaPyDeck</a>.</p>
+<p>Each API exposed by SedonaPyDeck offers customization via optional arguments, details on all possible arguments can be found in the <a href="../api/sql/Visualization_SedonaPyDeck.md">API docs of SedonaPyDeck</a>.</p>
 <h4 id="creating-a-choropleth-map-using-sedonapydeck">Creating a Choropleth map using SedonaPyDeck<a class="headerlink" href="#creating-a-choropleth-map-using-sedonapydeck" title="Permanent link">&para;</a></h4>
 <p>SedonaPyDeck exposes a <code>create_choropleth_map</code> API which can be used to visualize a choropleth map out of the passed SedonaDataFrame containing polygons with an observation:</p>
 <p>Example:</p>
@@ -6090,7 +6090,7 @@ can also be found in the example notebook available <a href="https://github.com/
 <p><img alt="Visualize geospatial data using SedonaKepler" src="../../image/sedona_customization.gif" /></p>
 <p>The dataset used is available <a href="https://github.com/apache/sedona/tree/b66e768155866a38ba2e3404f1151cac14fad5ea/docs/usecases/data/ne_50m_airports">here</a> and
 can also be found in the example notebook available <a href="https://github.com/apache/sedona/blob/master/docs/usecases/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb">here</a></p>
-<p>Details on all the APIs available by SedonaKepler are listed in the <a href="../../api/sql/Visualization_SedonaKepler/">SedonaKepler API docs</a></p>
+<p>Details on all the APIs available by SedonaKepler are listed in the <a href="../api/sql/Visualization_SedonaKepler.md">SedonaKepler API docs</a></p>
 <h2 id="create-a-user-defined-function-udf">Create a User-Defined Function (UDF)<a class="headerlink" href="#create-a-user-defined-function-udf" title="Permanent link">&para;</a></h2>
 <p>User-Defined Functions (UDFs) are user-created procedures that can perform operations on a single row of information. To cover almost all use cases, we will showcase 4 types of UDFs for a better understanding of how to use geometry with UDFs. Sedona's serializer deserializes the SQL geometry type to <a href="https://locationtech.github.io/jts/javadoc-1.18.0/org/locationtech/jts/geom/Geometry.html">JTS Geometry</a> (Scala/Java) or <a href="https://shapely.readthedocs.io/en/stable/geometry.html">Shapely Geometry</a> (Python). You can implement any custom logic using the rich ecosystem around these two libraries.</p>
 <h3 id="geometry-to-primitive">Geometry to primitive<a class="headerlink" href="#geometry-to-primitive" title="Permanent link">&para;</a></h3>
