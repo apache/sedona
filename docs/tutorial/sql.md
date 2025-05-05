@@ -825,7 +825,7 @@ Sedona provides `SedonaPyDeck` and `SedonaKepler` wrappers, both of which expose
 
 Spatial query results can be visualized in a Jupyter lab/notebook environment using SedonaPyDeck.
 
-SedonaPyDeck exposes APIs to create interactive map visualizations using [pydeck](https://pydeck.gl/index.html#) based on [deck.gl](https://deck.gl/)
+SedonaPyDeck exposes APIs to create interactive map visualizations using [pydeck](https://deckgl.readthedocs.io) based on [deck.gl](https://deck.gl/)
 
 !!!Note
 	To use SedonaPyDeck, install sedona with the `pydeck-map` extra:
@@ -835,7 +835,7 @@ SedonaPyDeck exposes APIs to create interactive map visualizations using [pydeck
 
 The following tutorial showcases the various maps that can be created using SedonaPyDeck, the datasets used to create these maps are publicly available.
 
-Each API exposed by SedonaPyDeck offers customization via optional arguments, details on all possible arguments can be found in the [API docs of SedonaPyDeck](../api/sql/Visualization_SedonaPyDeck.md).
+Each API exposed by SedonaPyDeck offers customization via optional arguments, details on all possible arguments can be found in the [API docs of SedonaPyDeck](../api/sql/Visualization-SedonaPyDeck.md).
 
 #### Creating a Choropleth map using SedonaPyDeck
 
@@ -923,7 +923,7 @@ SedonaKepler.create_map(df=groupedresult, name="AirportCount")
 The dataset used is available [here](https://github.com/apache/sedona/tree/b66e768155866a38ba2e3404f1151cac14fad5ea/docs/usecases/data/ne_50m_airports) and
 can also be found in the example notebook available [here](https://github.com/apache/sedona/blob/master/docs/usecases/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb)
 
-Details on all the APIs available by SedonaKepler are listed in the [SedonaKepler API docs](../api/sql/Visualization_SedonaKepler.md)
+Details on all the APIs available by SedonaKepler are listed in the [SedonaKepler API docs](../api/sql/Visualization-SedonaKepler.md)
 
 ## Create a User-Defined Function (UDF)
 
