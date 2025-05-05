@@ -100,8 +100,8 @@ nav:
                   - 'Spider:Spatial Data Generator': api/sql/Spider.md
                   - Reading Legacy Parquet Files: api/sql/Reading-legacy-parquet.md
                   - Visualization:
-                      - SedonaPyDeck: api/sql/Visualization_SedonaPyDeck.md
-                      - SedonaKepler: api/sql/Visualization_SedonaKepler.md
+                      - SedonaPyDeck: api/sql/Visualization-SedonaPyDeck.md
+                      - SedonaKepler: api/sql/Visualization-SedonaKepler.md
               - Raster data:
                   - Raster loader: api/sql/Raster-loader.md
                   - Raster aggregates: api/sql/Raster-aggregate-function.md
