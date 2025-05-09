@@ -58,7 +58,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '8'
+          java-version: '11'
       - run: sudo apt-get remove scala-library scala
       - run: sudo wget www.scala-lang.org/files/archive/scala-2.12.11.deb
       - run: sudo dpkg -i scala-2.12.11.deb
