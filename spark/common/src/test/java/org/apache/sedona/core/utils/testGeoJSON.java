@@ -33,7 +33,9 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.wololo.geojson.Feature;
 import org.wololo.jts2geojson.GeoJSONWriter;
 
-/** @author Arizona State University DataSystems Lab */
+/**
+ * @author Arizona State University DataSystems Lab
+ */
 
 // TODO: Auto-generated Javadoc
 
