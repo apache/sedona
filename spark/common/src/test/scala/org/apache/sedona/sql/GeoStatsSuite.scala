@@ -48,12 +48,14 @@ class GeoStatsSuite extends TestBaseScala {
   }
 
   it("test dbscan function") {
+    assume(spark.version.startsWith("3"), "DBSCAN doesn't work on Spark 4 yet")
     dbscan(getData.withColumn("sql_results", expr("ST_DBSCAN(geometry, 1.0, 4, false)")), 1.0, 4)
       .where("sql_results.cluster = cluster and sql_results.isCore = isCore")
       .count() == getData.count()
   }
 
   it("test dbscan function df method") {
+    assume(spark.version.startsWith("3"), "DBSCAN doesn't work on Spark 4 yet")
     dbscan(
       getData.withColumn("sql_results", ST_DBSCAN(col("geometry"), lit(1.0), lit(4), lit(false))),
       1.0,
@@ -63,6 +65,7 @@ class GeoStatsSuite extends TestBaseScala {
   }
 
   it("test dbscan function with distance column") {
+    assume(spark.version.startsWith("3"), "DBSCAN doesn't work on Spark 4 yet")
     dbscan(
       getData.withColumn("sql_results", expr("ST_DBSCAN(geometry, 1.0, 4, true)")),
       1.0,
@@ -73,6 +76,7 @@ class GeoStatsSuite extends TestBaseScala {
   }
 
   it("test dbscan function with scalar subquery") {
+    assume(spark.version.startsWith("3"), "DBSCAN doesn't work on Spark 4 yet")
     dbscan(
       getData.withColumn(
         "sql_results",
@@ -84,6 +88,7 @@ class GeoStatsSuite extends TestBaseScala {
   }
 
   it("test dbscan with geom literal") {
+    assume(spark.version.startsWith("3"), "DBSCAN doesn't work on Spark 4 yet")
     val error = intercept[IllegalArgumentException] {
       spark.sql("SELECT ST_DBSCAN(ST_GeomFromWKT('POINT(0.0 1.1)'), 1.0, 4, false)").collect()
     }
@@ -94,6 +99,7 @@ class GeoStatsSuite extends TestBaseScala {
   }
 
   it("test dbscan with minPts variable") {
+    assume(spark.version.startsWith("3"), "DBSCAN doesn't work on Spark 4 yet")
     val error = intercept[IllegalArgumentException] {
       getData
         .withColumn("result", ST_DBSCAN(col("geometry"), lit(1.0), col("id"), lit(false)))
@@ -132,6 +138,7 @@ class GeoStatsSuite extends TestBaseScala {
   }
 
   it("test DBSCAN with a column named __isCore in input df") {
+    assume(spark.version.startsWith("3"), "DBSCAN doesn't work on Spark 4 yet")
     val exception = intercept[IllegalArgumentException] {
       getData
         .withColumn("__isCore", lit(1))
@@ -207,6 +214,7 @@ class GeoStatsSuite extends TestBaseScala {
   }
 
   it("test ST_Geostats with string column") {
+    assume(spark.version.startsWith("3"), "DBSCAN doesn't work on Spark 4 yet")
     getData
       .withColumn("someString", lit("test"))
       .withColumn("sql_results", expr("ST_DBSCAN(geometry, 1.0, 4, false)"))

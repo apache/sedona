@@ -21,7 +21,9 @@ package org.apache.spark.sql.sedona_sql.expressions
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.Column
 
-object st_predicates extends DataFrameAPI {
+import org.apache.spark.sql.sedona_sql.DataFrameShims._
+
+object st_predicates {
   def ST_Contains(a: Column, b: Column): Column = wrapExpression[ST_Contains](a, b)
   def ST_Contains(a: String, b: String): Column = wrapExpression[ST_Contains](a, b)
 
