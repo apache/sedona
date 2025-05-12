@@ -38,6 +38,7 @@ public class TestBase {
     conf.set("spark.serializer", KryoSerializer.class.getName());
     conf.set("spark.kryo.registrator", SedonaKryoRegistrator.class.getName());
     conf.set("spark.driver.bindAddress", "127.0.0.1");
+    conf.set("spark.driver.port", "4092");
 
     sc = new JavaSparkContext(conf);
     Logger.getLogger("org").setLevel(Level.WARN);
