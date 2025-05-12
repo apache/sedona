@@ -41,6 +41,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     .builder()
     .master("local[*]")
     .appName("sedonasqlScalaTest")
+    .config("spark.driver.bindAddress", "127.0.0.1")
     .config("spark.sql.warehouse.dir", warehouseLocation)
     // We need to be explicit about broadcasting in tests.
     .config("sedona.join.autoBroadcastJoinThreshold", "-1")
