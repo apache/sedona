@@ -31,7 +31,9 @@ import org.locationtech.jts.geom.Geometry;
 
 public class NestedLoopJudgement<T extends Geometry, U extends Geometry> extends JudgementBase<T, U>
     implements FlatMapFunction2<Iterator<T>, Iterator<U>, Pair<U, T>>, Serializable {
-  /** @see JudgementBase */
+  /**
+   * @see JudgementBase
+   */
   public NestedLoopJudgement(
       SpatialPredicate spatialPredicate,
       LongAccumulator buildCount,

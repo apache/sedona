@@ -306,7 +306,9 @@ public class KDB extends PartitioningUtils implements Serializable {
   }
 
   private interface Splitter {
-    /** @return true if the specified envelope belongs to the lower split */
+    /**
+     * @return true if the specified envelope belongs to the lower split
+     */
     boolean split(Envelope envelope);
   }
 
