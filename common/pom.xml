@@ -122,6 +122,11 @@
             <groupId>edu.ucar</groupId>
             <artifactId>cdm-core</artifactId>
         </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-library</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
     </dependencies>
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
