@@ -175,7 +175,7 @@ class OsmReaderTest extends TestBaseScala with Matchers {
         .join(nodes, col("r.ref") === nodes("id"))
         .groupBy("r.id")
         .count()
-        .count() shouldEqual (113)
+        .count() shouldEqual (162)
 
       relations
         .selectExpr("explode(refs) AS ref", "id")
@@ -183,7 +183,7 @@ class OsmReaderTest extends TestBaseScala with Matchers {
         .join(ways, col("r.ref") === ways("id"))
         .groupBy("r.id")
         .count()
-        .count() shouldEqual (162)
+        .count() shouldEqual (261)
 
       relations
         .selectExpr("explode(refs) AS ref", "id")
@@ -191,7 +191,21 @@ class OsmReaderTest extends TestBaseScala with Matchers {
         .join(relations.as("r2"), col("r1.ref") === col("r2.id"))
         .groupBy("r1.id")
         .count()
-        .count() shouldEqual (31)
+        .count() shouldEqual (54)
+
+      val relationsList = relations
+        .where("id == 7360676")
+        .selectExpr("refs")
+        .as[Seq[String]]
+        .collect()
+        .head
+
+      val expectedRelationsList = Seq(
+        "252356770", "503642591", "4939150452", "1373711177", "4939150459", "503642592"
+      )
+
+      relationsList.length shouldEqual (expectedRelationsList.length)
+      relationsList should contain theSameElementsAs expectedRelationsList
     }
   }
 
