@@ -59,7 +59,7 @@ Tables in Lakehouses are governed by a catalog. These catalogs don't store files
 
 Example Lakehouse catalogs include Databricks' Unity catalog and the open source Apache Polaris.
 
- The catalogs allow for role-based access control (RBAC) at the tabular level and features like single-table transactions, which ensure that relevant changes to dependent tables are applied atomically and without manual intervention.
+The catalogs allow for role-based access control (RBAC) at the tabular level and features like single-table transactions, which ensure that relevant changes to dependent tables are applied atomically and without manual intervention.
 
 You can query tables in the Lakehouse Architecture for business intelligence (BI) reporting, data science, machine learning, and other complex analyses.
 
@@ -86,12 +86,29 @@ These tables are interdependent: The `store_id` field is in `stores` and `sales_
 
 The `stores` table is indirectly linked to `sales_performance` via the `sales_territories` table.
 
-**Impact:** With Single-table transactions, the updates to the `stores`, `sales_territories`, and `sales_performance` tables are bundled together. This ensures that all of these related changes (store status, territory boundaries/assignments, sales targets) are completed successfully and become visible at the same time, maintaining accurate and consistent operational data for sales management and analysis.
+**Impact:** With **single-table transactions**, as featured in many lakehouses, each update to an individual table is atomic (all-or-nothing). In the aforementioned scenario, when a store is closed:
 
-Without the atomicity of reliable transactions, if the territory updates fail after the store is marked closed, the
-company might have inconsistent data showing a closed store still linked to its old territory, or incorrect sales targets.
+The operation to update the store's status in the `stores` table is completed as one atomic transaction on that table.
 
-Let's see how Lakehouses differ from data lakes.
+Any corresponding changes to the `sales_territories` table (e.g., altering polygon boundaries or updating `store_id` associations) would be a separate atomic transaction on the `sales_territories` table.
+Similarly, updates to the `sales_performance` table (e.g., adjusting sales targets linked to the `territory_id`) would be performed as an atomic transaction on that specific table.
+
+This individual atomicity ensures that each table remains consistent after its specific update. For example, the `stores` table won't be left in a partially updated state.
+
+To ensure data consistency across all three tables (`stores`, `sales_territories`, and `sales_performance`) for the entire
+business operation of closing a store, these individual atomic operations on each table would typically be executed in sequence.
+
+While single-table transactions don't automatically "package" these three distinct table updates into a single overarching transaction that
+makes them all visible simultaneously (that would require multi-table transaction capabilities), they are foundational.
+
+By ensuring each step is completed successfully and atomically, the overall process is far more reliable.
+
+If an update to `sales_territories` were to fail, the `stores` table (from its preceding successful transaction) would remain consistent, and the `sales_territories` table would roll back its own failed changes, preventing corruption within that table.
+
+Developers could implement application logic or an orchestration layer (like Apache Airflow) separately in order to manage
+the overall consistency across tables, potentially by handling compensating transactions if a later step fails.
+
+Now, let's see how Lakehouses differ from Data Lakes.
 
 ## Lakehouses vs. Data Lakes
 
