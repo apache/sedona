@@ -200,9 +200,8 @@ class OsmReaderTest extends TestBaseScala with Matchers {
         .collect()
         .head
 
-      val expectedRelationsList = Seq(
-        "252356770", "503642591", "4939150452", "1373711177", "4939150459", "503642592"
-      )
+      val expectedRelationsList =
+        Seq("252356770", "503642591", "4939150452", "1373711177", "4939150459", "503642592")
 
       relationsList.length shouldEqual (expectedRelationsList.length)
       relationsList should contain theSameElementsAs expectedRelationsList
