@@ -96,8 +96,6 @@ public class VizTestBase {
   /** The US main land boundary. */
   protected static void initialize(final String testSuiteName) throws Exception {
     conf = new SparkConf().setAppName(testSuiteName).setMaster("local[*]");
-    conf.set("spark.driver.bindAddress", "127.0.0.1");
-    conf.set("spark.driver.host", "127.0.0.1");
     conf.set("spark.serializer", KryoSerializer.class.getName());
     conf.set("spark.kryo.registrator", SedonaVizKryoRegistrator.class.getName());
 

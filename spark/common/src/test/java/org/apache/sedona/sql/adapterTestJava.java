@@ -55,12 +55,7 @@ public class adapterTestJava implements Serializable {
   public static void onceExecutedBeforeAll() {
     sparkSession =
         SedonaContext.create(
-            SedonaContext.builder()
-                .master("local[*]")
-                .appName("adapterTestJava")
-                .config("spark.driver.bindAddress", "127.0.0.1")
-                .config("spark.driver.host", "127.0.0.1")
-                .getOrCreate());
+            SedonaContext.builder().master("local[*]").appName("adapterTestJava").getOrCreate());
     Logger.getLogger("org").setLevel(Level.WARN);
     Logger.getLogger("akka").setLevel(Level.WARN);
   }

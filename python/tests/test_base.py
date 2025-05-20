@@ -60,14 +60,9 @@ class TestBase:
                     )
                 )
             else:
-                builder = (
-                    builder.master("local[*]")
-                    .config(
-                        "spark.sedona.stac.load.itemsLimitMax",
-                        "20",
-                    )
-                    .config("spark.driver.bindAddress", "127.0.0.1")
-                    .config("spark.driver.host", "127.0.0.1")
+                builder = builder.master("local[*]").config(
+                    "spark.sedona.stac.load.itemsLimitMax",
+                    "20",
                 )
 
             # Allows the Sedona .jar to be explicitly set by the caller (e.g, to run

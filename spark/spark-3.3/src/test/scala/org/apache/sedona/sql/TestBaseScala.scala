@@ -41,8 +41,6 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     .builder()
     .master("local[*]")
     .appName("sedonasqlScalaTest")
-    .config("spark.driver.bindAddress", "127.0.0.1")
-    .config("spark.driver.host", "127.0.0.1")
     .config("spark.sql.warehouse.dir", warehouseLocation)
     .config("sedona.join.autoBroadcastJoinThreshold", "-1")
     .config("spark.sql.session.timeZone", "UTC")
@@ -54,8 +52,6 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     .builder()
     .master("local[*]")
     .appName("sedonasqlScalaTest")
-    .config("spark.driver.bindAddress", "127.0.0.1")
-    .config("spark.driver.host", "127.0.0.1")
     .config("spark.sql.warehouse.dir", warehouseLocation)
     .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.3.0")
     .config(

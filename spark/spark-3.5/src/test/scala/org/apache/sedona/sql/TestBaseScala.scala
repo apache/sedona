@@ -41,8 +41,6 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   val sparkSession = SedonaContext
     .builder()
     .master("local[*]")
-    .config("spark.driver.bindAddress", "127.0.0.1")
-    .config("spark.driver.host", "127.0.0.1")
     .appName("sedonasqlScalaTest")
     .config("spark.sql.warehouse.dir", warehouseLocation)
     // We need to be explicit about broadcasting in tests.
@@ -55,8 +53,6 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     .builder()
     .master("local[*]")
     .appName("sedonasqlScalaTest")
-    .config("spark.driver.bindAddress", "127.0.0.1")
-    .config("spark.driver.host", "127.0.0.1")
     .config("spark.sql.warehouse.dir", warehouseLocation)
     .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.3.0")
     .config(

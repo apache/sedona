@@ -46,6 +46,7 @@ on:
 env:
   MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
   DO_NOT_TRACK: true
+  SPARK_LOCAL_IP: 127.0.0.1
 
 permissions:
   contents: read

@@ -59,8 +59,6 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
       .builder()
       .master("local[*]")
       .appName("sedonasqlScalaTest")
-      .config("spark.driver.bindAddress", "127.0.0.1")
-      .config("spark.driver.host", "127.0.0.1")
     sparkConfig.foreach { case (key, value) => builder.config(key, value) }
     builder.getOrCreate()
   }
@@ -69,8 +67,6 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     .builder()
     .master("local[*]")
     .appName("sedonasqlScalaTest")
-    .config("spark.driver.bindAddress", "127.0.0.1")
-    .config("spark.driver.host", "127.0.0.1")
     .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.3.0")
     .config(
       "spark.hadoop.fs.s3a.aws.credentials.provider",

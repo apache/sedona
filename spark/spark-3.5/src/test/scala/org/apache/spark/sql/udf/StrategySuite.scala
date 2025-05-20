@@ -34,8 +34,6 @@ class StrategySuite extends AnyFunSuite with Matchers {
       .builder()
       .master("local[*]")
       .appName("sedonasqlScalaTest")
-      .config("spark.driver.bindAddress", "127.0.0.1")
-      .config("spark.driver.host", "127.0.0.1")
 
     val spark = SedonaContext.create(builder.getOrCreate())
 
