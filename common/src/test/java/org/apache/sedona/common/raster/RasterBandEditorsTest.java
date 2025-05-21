@@ -202,11 +202,13 @@ public class RasterBandEditorsTest extends RasterTestBase {
   }
 
   @Test
-  public void testClip_smallAOI()
-      throws IOException, FactoryException, TransformException, ParseException {
+  public void testClip_smallAOI() throws FactoryException, TransformException, ParseException {
     // Test for AOI geometries smaller than a pixel
     GridCoverage2D raster =
-        rasterFromGeoTiff(resourceFolder + "raster/2023_30m_cdls_clipped_19_031.tif");
+        RasterConstructors.makeEmptyRaster(1, "F", 4, 4, 401805.039562261, 2095852.150947876, 30);
+    raster = RasterEditors.setSrid(raster, 5070);
+    double[] bandValues = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+    raster = MapAlgebra.addBandFromArray(raster, bandValues, 1);
     String polygon =
         "POLYGON ((401866.1071465613 2095803.8989834636, 401850.9983055725 2095803.1375789386, 401850.039562261 2095822.150947876, 401865.14840359957 2095822.9124532426, 401880.2572475523 2095823.6738547424, 401881.2159852499 2095804.6604855175, 401866.1071465613 2095803.8989834636))";
     Geometry geom = Constructors.geomFromWKT(polygon, 5070);
@@ -215,7 +217,7 @@ public class RasterBandEditorsTest extends RasterTestBase {
     double bandNoDataValue = RasterBandAccessors.getBandNoDataValue(clippedRaster);
     double expectedBandNoDataValue = 0.0;
     double[] actualValues = MapAlgebra.bandAsArray(clippedRaster, 1);
-    double[] expectedValues = {123.0, 122.0, 122.0, 122.0};
+    double[] expectedValues = {2.0, 3.0, 6.0, 7.0};
 
     assertEquals(expectedBandNoDataValue, bandNoDataValue, FP_TOLERANCE);
     assertTrue(Arrays.equals(expectedValues, actualValues));

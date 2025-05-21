@@ -18,8 +18,6 @@
  */
 package org.apache.sedona.common.raster;
 
-import static org.apache.sedona.common.raster.Rasterization.rasterizeGeomExtent;
-
 import java.awt.geom.Point2D;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
@@ -305,7 +303,7 @@ public class RasterBandEditors {
 
     // Use rasterizeGeomExtent for AOI geometries smaller than a pixel
     double[] metadata = RasterAccessors.metadata(singleBandRaster);
-    Envelope2D geomEnvelope = rasterizeGeomExtent(geometry, singleBandRaster, metadata, allTouched);
+    Envelope2D geomEnvelope = Rasterization.rasterizeGeomExtent(geometry, singleBandRaster, metadata, allTouched);
     Geometry geomExtent = JTS.toGeometry((BoundingBox) geomEnvelope);
 
     // Crop the raster
