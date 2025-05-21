@@ -42,7 +42,7 @@ Everyone is welcome to join our community events. We have a community office hou
 
 ## Discord Server
 
-[![Apache Sedona Community Discord Server](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://share.hsforms.com/1Ndql_ZigTdmLlVQc_d1o4gqga4q)
+[![Apache Sedona Community Discord Server](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://discord.gg/9A3k5dEBsY)
 
 ## Get help
 
@@ -55,7 +55,7 @@ You can ask for help or contribute to the project. Before submitting an issue, p
 Enhancement requests for new features are also welcome. The more concrete and rationale the request is, the greater the chance it will be incorporated into future releases.
 
 * [Sedona JIRA](https://issues.apache.org/jira/projects/SEDONA): bug reports and feature requests
-* [Sedona Github Issues](https://github.com/apache/sedona/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen): bug reports and feature requests
+* [Sedona GitHub Issues](https://github.com/apache/sedona/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen): bug reports and feature requests
 * [Sedona GitHub Discussion](https://github.com/apache/sedona/discussions): project development and general questions
 * [Sedona Mailing Lists](https://lists.apache.org/list.html?sedona.apache.org): [dev@sedona.apache.org](https://lists.apache.org/list.html?dev@sedona.apache.org): project development and general questions.
 

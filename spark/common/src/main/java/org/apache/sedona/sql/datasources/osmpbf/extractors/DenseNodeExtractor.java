@@ -81,6 +81,8 @@ public class DenseNodeExtractor {
       keyIndex = keyIndex + 2;
     }
 
+    keyIndex = keyIndex + 1;
+
     return tags;
   }
 }

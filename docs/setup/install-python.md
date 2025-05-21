@@ -85,8 +85,8 @@ SedonaRegistrator is deprecated in Sedona 1.4.1 and later versions. Please use t
 
 ```python
 from pyspark.sql import SparkSession
-from sedona.register import SedonaRegistrator
-from sedona.utils import SedonaKryoRegistrator, KryoSerializer
+from sedona.spark import SedonaRegistrator
+from sedona.spark import SedonaKryoRegistrator, KryoSerializer
 
 spark = (
     SparkSession.builder.appName("appName")

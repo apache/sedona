@@ -81,7 +81,7 @@ def create_spatial_dataframe(spark: SparkSession, gdf: gpd.GeoDataFrame) -> Data
 Example:
 
 ```python
-from sedona.utils.geoarrow import create_spatial_dataframe
+from sedona.spark.geoarrow import create_spatial_dataframe
 
 create_spatial_dataframe(spark, gdf)
 ```

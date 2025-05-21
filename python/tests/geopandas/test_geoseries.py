@@ -1,19 +1,19 @@
-#  Licensed to the Apache Software Foundation (ASF) under one
-#  or more contributor license agreements.  See the NOTICE file
-#  distributed with this work for additional information
-#  regarding copyright ownership.  The ASF licenses this file
-#  to you under the Apache License, Version 2.0 (the
-#  "License"); you may not use this file except in compliance
-#  with the License.  You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
-#  Unless required by applicable law or agreed to in writing,
-#  software distributed under the License is distributed on an
-#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-#  KIND, either express or implied.  See the License for the
-#  specific language governing permissions and limitations
-#  under the License.
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 import os
 import shutil
 import tempfile
@@ -56,7 +56,7 @@ class TestSeries(TestBase):
             },
             index=[10, 20, 30, 40, 50, 60],
         )
-        assert psdf.count().count() is 3
+        assert psdf.count().count() == 3
 
     def test_internal_st_function(self):
         # this is to make sure the spark session works with internal sedona udfs
@@ -82,19 +82,19 @@ class TestSeries(TestBase):
         area = self.g1.area
         assert area is not None
         assert type(area) is GeoSeries
-        assert area.count() is 2
+        assert area.count() == 2
 
     def test_buffer(self):
         buffer = self.g1.buffer(0.2)
         assert buffer is not None
         assert type(buffer) is GeoSeries
-        assert buffer.count() is 2
+        assert buffer.count() == 2
 
     def test_buffer_then_area(self):
         area = self.g1.buffer(0.2).area
         assert area is not None
         assert type(area) is GeoSeries
-        assert area.count() is 2
+        assert area.count() == 2
 
     def test_buffer_then_geoparquet(self):
         temp_file_path = os.path.join(

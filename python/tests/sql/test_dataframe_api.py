@@ -1,22 +1,21 @@
-#  Licensed to the Apache Software Foundation (ASF) under one
-#  or more contributor license agreements.  See the NOTICE file
-#  distributed with this work for additional information
-#  regarding copyright ownership.  The ASF licenses this file
-#  to you under the Apache License, Version 2.0 (the
-#  "License"); you may not use this file except in compliance
-#  with the License.  You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
-#  Unless required by applicable law or agreed to in writing,
-#  software distributed under the License is distributed on an
-#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-#  KIND, either express or implied.  See the License for the
-#  specific language governing permissions and limitations
-#  under the License.
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 from math import radians
 import os
-import threading
 import concurrent.futures
 from typing import Callable, Tuple
 
@@ -26,15 +25,12 @@ from pyspark.sql import functions as f
 from shapely.geometry.base import BaseGeometry
 from tests.test_base import TestBase
 
-from sedona.core.geom.geography import Geography
-from sedona.sql import st_aggregates as sta
-from sedona.sql import st_constructors as stc
-from sedona.sql import st_functions as stf
-from sedona.sql import st_predicates as stp
-from sedona.sql.st_aggregates import *
-from sedona.sql.st_constructors import *
-from sedona.sql.st_functions import *
-from sedona.sql.st_predicates import *
+from sedona.spark.core.geom.geography import Geography
+from sedona.spark.sql import st_aggregates as sta
+from sedona.spark.sql import st_constructors as stc
+from sedona.spark.sql import st_functions as stf
+from sedona.spark.sql import st_predicates as stp
+from sedona.spark.sql.st_functions import *
 
 test_configurations = [
     # constructors
@@ -543,6 +539,7 @@ test_configurations = [
     ),
     (stf.ST_FlipCoordinates, ("point",), "point_geom", "", "POINT (1 0)"),
     (stf.ST_Force_2D, ("point",), "point_geom", "", "POINT (0 1)"),
+    (stf.ST_Force2D, ("point",), "point_geom", "", "POINT (0 1)"),
     (stf.ST_Force3D, ("point", 1.0), "point_geom", "", "POINT Z (0 1 1)"),
     (
         stf.ST_Force3DM,
@@ -1304,6 +1301,7 @@ wrong_type_configurations = [
     (stf.ST_ExteriorRing, (None,)),
     (stf.ST_FlipCoordinates, (None,)),
     (stf.ST_Force_2D, (None,)),
+    (stf.ST_Force2D, (None,)),
     (stf.ST_Force3DM, (None,)),
     (stf.ST_Force3DZ, (None,)),
     (stf.ST_Force4D, (None,)),

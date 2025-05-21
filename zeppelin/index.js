@@ -25,192 +25,185 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-import Visualization from 'zeppelin-vis'
-import ColumnselectorTransformation from 'zeppelin-tabledata/columnselector'
+import Visualization from 'zeppelin-vis';
+import ColumnselectorTransformation from 'zeppelin-tabledata/columnselector';
 
-
-import L from 'leaflet/dist/leaflet'
-import 'leaflet/dist/leaflet.css'
+import L from 'leaflet/dist/leaflet';
+import 'leaflet/dist/leaflet.css';
 // workaround https://github.com/Leaflet/Leaflet/issues/4968
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
 let DefaultIcon = L.icon({
-	iconUrl: icon,
-	iconSize: [25, 41],
-	iconAnchor: [12, 41],
-	popupAnchor: [0, -41],
-	tooltipAnchor: [12, -28],
-	shadowUrl: iconShadow
+  iconUrl: icon,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [0, -41],
+  tooltipAnchor: [12, -28],
+  shadowUrl: iconShadow,
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
 export default class LeafletMap extends Visualization {
+  constructor(targetEl, config) {
+    super(targetEl, config);
 
-	constructor(targetEl, config) {
-		super(targetEl, config);
+    const columnSpec = [{name: 'mapimage'}, {name: 'geometry'}, {name: 'info'}];
 
-		const columnSpec = [
-			{name: 'mapimage'},
-			{name: 'geometry'},
-			{name: 'info'}
-		];
+    this.transformation = new ColumnselectorTransformation(config, columnSpec);
+    this.chartInstance = this.createMap();
+  }
 
-		this.transformation = new ColumnselectorTransformation(config, columnSpec);
-		this.chartInstance = this.createMap();
-	}
+  getTransformation() {
+    return this.transformation;
+  }
 
-	getTransformation() {
-		return this.transformation;
-	}
+  showChart() {
+    super.setConfig(config);
+    this.transformation.setConfig(config);
+    if (!this.chartInstance) {
+      this.chartInstance = this.createMap();
+    }
+    return this.chartInstance;
+  }
 
-	showChart() {
-		super.setConfig(config);
-		this.transformation.setConfig(config);
-		if (!this.chartInstance) {
-			this.chartInstance = this.createMap();
-		}
-		return this.chartInstance;
-	};
+  createMap() {
+    // using canvas renderer to support drawing geometry like LineString, Polygon etc.
+    return L.map(this.getChartElementId(), {renderer: L.canvas()});
+  }
 
-	createMap() {
-	    // using canvas renderer to support drawing geometry like LineString, Polygon etc.
-	    return L.map(this.getChartElementId(), {renderer: L.canvas()});
-	}
+  getChartElementId() {
+    return this.targetEl[0].id;
+  }
 
-	getChartElementId() {
-		return this.targetEl[0].id
-	};
+  getChartElement() {
+    return document.getElementById(this.getChartElementId());
+  }
 
-	getChartElement() {
-		return document.getElementById(this.getChartElementId());
-	};
+  clearChart() {
+    if (this.chartInstance) {
+      this.chartInstance.off();
+      this.chartInstance.remove();
+      this.chartInstance = null;
+    }
+  }
 
-	clearChart() {
-		if (this.chartInstance) {
-			this.chartInstance.off();
-			this.chartInstance.remove();
-			this.chartInstance = null;
-		}
-	};
-
-	showError(error) {
-		this.clearChart();
-		this.getChartElement().innerHTML = `
+  showError(error) {
+    this.clearChart();
+    this.getChartElement().innerHTML = `
         <div style="margin-top: 60px; text-align: center; font-weight: 100">
             <span style="font-size:30px;">
                 ${error.message}
             </span>
-        </div>`
-	}
+        </div>`;
+  }
 
-	drawMapChart(chartDataModel) {
-		const map = this.showChart();
-		L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-			attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-		}).addTo(map);
+  drawMapChart(chartDataModel) {
+    const map = this.showChart();
+    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+      attribution:
+        '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(map);
 
-		this.getChartElement().style.height = this.targetEl.height();
-		map.invalidateSize(true)
+    this.getChartElement().style.height = this.targetEl.height();
+    map.invalidateSize(true);
 
-		var imageBounds = null
-		const markers = chartDataModel.rows.flatMap(
-				row => {
-					const {image, boundary, info} = row;
-					var markers = [];
+    var imageBounds = null;
+    const markers = chartDataModel.rows.flatMap((row) => {
+      const {image, boundary, info} = row;
+      var markers = [];
 
-					// throw new Error(image);
-					var jsts = require("jsts");
-					// Read WKT string from Sedona
-					var reader = new jsts.io.WKTReader();
-					var obj = reader.read(boundary);
-					// Collect the centroid point of the input geometry
-					var centroid = obj.getCentroid()
-					var marker = L.marker([centroid.getY(), centroid.getX()]);
-					const mapMarker = marker.addTo(map);
-					markers.push(marker);
+      // throw new Error(image);
+      var jsts = require('jsts');
+      // Read WKT string from Sedona
+      var reader = new jsts.io.WKTReader();
+      var obj = reader.read(boundary);
+      // Collect the centroid point of the input geometry
+      var centroid = obj.getCentroid();
+      var marker = L.marker([centroid.getY(), centroid.getX()]);
+      const mapMarker = marker.addTo(map);
+      markers.push(marker);
 
-					if (obj.getGeometryType() !== 'Point') {
-					    var writer = new jsts.io.GeoJSONWriter();
-					    var geojson = writer.write(obj);
-					    marker = L.geoJSON(geojson);
-					    marker.addTo(map);
-					    markers.push(marker);
-					}
+      if (obj.getGeometryType() !== 'Point') {
+        var writer = new jsts.io.GeoJSONWriter();
+        var geojson = writer.write(obj);
+        marker = L.geoJSON(geojson);
+        marker.addTo(map);
+        markers.push(marker);
+      }
 
-					// Attach the marker information if exists
-					if(info){
-						mapMarker.bindTooltip(info);
-					}
-					// Overlay the generated image over the tile layer
-					if (image) {
-						var envelope = obj.getEnvelopeInternal()
-						// Read the boundary of the map viewport
-						imageBounds = [[envelope.getMinY(), envelope.getMinX()], [envelope.getMaxY(), envelope.getMaxX()]]
-						var imageUrl = 'data:image/png;base64,' + image;
-						L.imageOverlay(imageUrl, imageBounds).addTo(map);
-					}
-					return markers;
-			}
-		);
-		// Adjust the location of the viewport
-		// If imageBounds was initialized, use imageBounds instead
-		var bounds = null
-		if (imageBounds) {
-			bounds = imageBounds;
-		}
-		else {
-			let featureGroup = L.featureGroup(markers);
-			bounds = featureGroup.getBounds().pad(0.5);
-		}
-		// throw new Error(featureGroup.getBounds().pad(0.5).toString())
-		map.fitBounds(bounds);
+      // Attach the marker information if exists
+      if (info) {
+        mapMarker.bindTooltip(info);
+      }
+      // Overlay the generated image over the tile layer
+      if (image) {
+        var envelope = obj.getEnvelopeInternal();
+        // Read the boundary of the map viewport
+        imageBounds = [
+          [envelope.getMinY(), envelope.getMinX()],
+          [envelope.getMaxY(), envelope.getMaxX()],
+        ];
+        var imageUrl = 'data:image/png;base64,' + image;
+        L.imageOverlay(imageUrl, imageBounds).addTo(map);
+      }
+      return markers;
+    });
+    // Adjust the location of the viewport
+    // If imageBounds was initialized, use imageBounds instead
+    var bounds = null;
+    if (imageBounds) {
+      bounds = imageBounds;
+    } else {
+      let featureGroup = L.featureGroup(markers);
+      bounds = featureGroup.getBounds().pad(0.5);
+    }
+    // throw new Error(featureGroup.getBounds().pad(0.5).toString())
+    map.fitBounds(bounds);
+  }
 
-	};
+  createMapDataModel(data) {
+    const getColumnIndex = (config, fieldName, isOptional) => {
+      const fieldConf = config[fieldName];
+      if (fieldConf instanceof Object) {
+        return fieldConf.index;
+      } else if (isOptional) {
+        return -1;
+      } else {
+        throw {
+          message: 'Please set ' + fieldName + ' in Settings',
+        };
+      }
+    };
 
-	createMapDataModel(data) {
-			const getColumnIndex = (config, fieldName, isOptional) => {
-				const fieldConf = config[fieldName];
-				if (fieldConf instanceof Object) {
-					return fieldConf.index
-				}
-				else if (isOptional) {
-					return -1
-				}
-				else {
-					throw {
-						message: "Please set " + fieldName + " in Settings"
-					}
-				}
-			};
+    const config = this.getTransformation().config;
+    const imageIdx = getColumnIndex(config, 'mapimage', true);
+    const boundaryIdx = getColumnIndex(config, 'geometry');
+    const infoIdx = getColumnIndex(config, 'info', true);
+    const rows = data.rows.map((tableRow) => {
+      const image = imageIdx < 0 ? null : tableRow[imageIdx];
+      const boundary = tableRow[boundaryIdx];
+      const info = infoIdx < 0 ? null : tableRow[infoIdx];
+      return {
+        image,
+        boundary,
+        info,
+      };
+    });
 
-			const config = this.getTransformation().config;
-			const imageIdx = getColumnIndex(config, 'mapimage', true);
-			const boundaryIdx = getColumnIndex(config, 'geometry');
-			const infoIdx = getColumnIndex(config, 'info', true);
-			const rows = data.rows.map(tableRow => {
-			const image = imageIdx < 0 ? null : tableRow[imageIdx];
-			const boundary = tableRow[boundaryIdx];
-			const info = infoIdx < 0 ? null : tableRow[infoIdx];
-			return {
-				image, boundary, info
-			};
-		});
+    return {
+      rows,
+    };
+  }
 
-		return {
-			rows
-		};
-	}
-
-	render(data) {
-		try {
-			const mapDataModel = this.createMapDataModel(data);
-			this.clearChart();
-			this.drawMapChart(mapDataModel)
-		}
-		catch (error) {
-			console.error(error);
-			this.showError(error)
-		}
-	}
+  render(data) {
+    try {
+      const mapDataModel = this.createMapDataModel(data);
+      this.clearChart();
+      this.drawMapChart(mapDataModel);
+    } catch (error) {
+      console.error(error);
+      this.showError(error);
+    }
+  }
 }

@@ -32,7 +32,9 @@ public class LeftIndexLookupJudgement<T extends Geometry, U extends Geometry>
     extends JudgementBase<T, U>
     implements FlatMapFunction2<Iterator<SpatialIndex>, Iterator<U>, Pair<U, T>>, Serializable {
 
-  /** @see JudgementBase */
+  /**
+   * @see JudgementBase
+   */
   public LeftIndexLookupJudgement(
       SpatialPredicate spatialPredicate,
       LongAccumulator buildCount,
