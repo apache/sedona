@@ -303,7 +303,7 @@ public class Rasterization {
     return x >= minX && x <= maxX && y >= minY && y <= maxY;
   }
 
-  private static Envelope2D rasterizeGeomExtent(
+  protected static Envelope2D rasterizeGeomExtent(
       Geometry geom, GridCoverage2D raster, double[] metadata, boolean allTouched) {
 
     if (Objects.equals(geom.getGeometryType(), "MultiLineString")) {
