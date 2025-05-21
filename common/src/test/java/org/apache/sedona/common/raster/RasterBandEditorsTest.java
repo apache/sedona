@@ -202,6 +202,26 @@ public class RasterBandEditorsTest extends RasterTestBase {
   }
 
   @Test
+  public void testClip_smallAOI()
+      throws IOException, FactoryException, TransformException, ParseException {
+    // Test for AOI geometries smaller than a pixel
+    GridCoverage2D raster =
+        rasterFromGeoTiff(resourceFolder + "raster/2023_30m_cdls_clipped_19_031.tif");
+    String polygon =
+        "POLYGON ((401866.1071465613 2095803.8989834636, 401850.9983055725 2095803.1375789386, 401850.039562261 2095822.150947876, 401865.14840359957 2095822.9124532426, 401880.2572475523 2095823.6738547424, 401881.2159852499 2095804.6604855175, 401866.1071465613 2095803.8989834636))";
+    Geometry geom = Constructors.geomFromWKT(polygon, 5070);
+
+    GridCoverage2D clippedRaster = RasterBandEditors.clip(raster, 1, geom, false, 0, true);
+    double bandNoDataValue = RasterBandAccessors.getBandNoDataValue(clippedRaster);
+    double expectedBandNoDataValue = 0.0;
+    double[] actualValues = MapAlgebra.bandAsArray(clippedRaster, 1);
+    double[] expectedValues = {123.0, 122.0, 122.0, 122.0};
+
+    assertEquals(expectedBandNoDataValue, bandNoDataValue, FP_TOLERANCE);
+    assertTrue(Arrays.equals(expectedValues, actualValues));
+  }
+
+  @Test
   public void testClip()
       throws IOException, FactoryException, TransformException, ParseException,
           ClassNotFoundException {
@@ -244,7 +264,7 @@ public class RasterBandEditorsTest extends RasterTestBase {
     points.add(Constructors.geomFromWKT("POINT(237919 4.20357e+06)", 26918));
     points.add(Constructors.geomFromWKT("POINT(223802 4.20465e+06)", 26918));
     actualValues = PixelFunctions.values(croppedRaster, points, 1).toArray(new Double[0]);
-    expectedValues = new Double[] {0.0, 0.0, 0.0, 0.0, null};
+    expectedValues = new Double[] {0.0, 0.0, 0.0, 0.0, 255.0};
     assertTrue(Arrays.equals(expectedValues, actualValues));
   }
 
