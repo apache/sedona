@@ -32,4 +32,3 @@ Download the required JAR files from Maven Central:
 
 Follow the official Flink documentation to install the JAR files in your Flink cluster or PyFlink application.
 https://nightlies.apache.org/flink/flink-docs-master/docs/dev/python/dependency_management/
-
