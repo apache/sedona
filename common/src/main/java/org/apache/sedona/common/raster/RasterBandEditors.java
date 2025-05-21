@@ -29,10 +29,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.coverage.processing.CannotCropException;
-import org.geotools.coverage.processing.operation.Crop;
 import org.locationtech.jts.geom.Geometry;
-import org.opengis.parameter.ParameterValueGroup;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
@@ -291,31 +288,32 @@ public class RasterBandEditors {
 
     // Selecting the band from original raster
     RasterUtils.ensureBand(raster, band);
-    GridCoverage2D singleBandRaster = RasterBandAccessors.getBand(raster, new int[] {band});
+    GridCoverage2D newRaster = RasterBandAccessors.getBand(raster, new int[] {band});
 
     Pair<GridCoverage2D, Geometry> pair =
-        RasterUtils.setDefaultCRSAndTransform(singleBandRaster, geometry);
-    singleBandRaster = pair.getLeft();
+        RasterUtils.setDefaultCRSAndTransform(newRaster, geometry);
+    newRaster = pair.getLeft();
     geometry = pair.getRight();
 
     // Crop the raster
     // this will shrink the extent of the raster to the geometry
-    Crop cropObject = new Crop();
-    ParameterValueGroup parameters = cropObject.getParameters();
-    parameters.parameter("Source").setValue(singleBandRaster);
-    parameters.parameter(Crop.PARAMNAME_DEST_NODATA).setValue(new double[] {noDataValue});
-    parameters.parameter(Crop.PARAMNAME_ROI).setValue(geometry);
-
-    GridCoverage2D newRaster;
-    try {
-      newRaster = (GridCoverage2D) cropObject.doOperation(parameters, null);
-    } catch (CannotCropException e) {
-      if (lenient) {
-        return null;
-      } else {
-        throw e;
-      }
-    }
+    //    Crop cropObject = new Crop();
+    //    ParameterValueGroup parameters = cropObject.getParameters();
+    //    parameters.parameter("Source").setValue(newRaster);
+    //    parameters.parameter(Crop.PARAMNAME_DEST_NODATA).setValue(new double[] {noDataValue});
+    //    parameters.parameter(Crop.PARAMNAME_ROI).setValue(geometry);
+    //
+    //    GridCoverage2D newRaster;
+    //    try {
+    //      newRaster = (GridCoverage2D) cropObject.doOperation(parameters, null);
+    //    } catch (CannotCropException e) {
+    //      if (lenient) {
+    //        return null;
+    //      } else {
+    //        throw e;
+    //      }
+    //    }
+    newRaster = setBandNoDataValue(newRaster, noDataValue);
 
     if (!crop) {
       double[] metadataOriginal = RasterAccessors.metadata(raster);
