@@ -295,24 +295,12 @@ public class RasterBandEditors {
     newRaster = pair.getLeft();
     geometry = pair.getRight();
 
-    // Crop the raster
-    // this will shrink the extent of the raster to the geometry
-    //    Crop cropObject = new Crop();
-    //    ParameterValueGroup parameters = cropObject.getParameters();
-    //    parameters.parameter("Source").setValue(newRaster);
-    //    parameters.parameter(Crop.PARAMNAME_DEST_NODATA).setValue(new double[] {noDataValue});
-    //    parameters.parameter(Crop.PARAMNAME_ROI).setValue(geometry);
-    //
-    //    GridCoverage2D newRaster;
-    //    try {
-    //      newRaster = (GridCoverage2D) cropObject.doOperation(parameters, null);
-    //    } catch (CannotCropException e) {
-    //      if (lenient) {
-    //        return null;
-    //      } else {
-    //        throw e;
-    //      }
-    //    }
+    if (!RasterPredicates.rsIntersects(newRaster, geometry)) {
+      if (lenient) {
+        return null;
+      }
+    }
+
     newRaster = setBandNoDataValue(newRaster, noDataValue);
 
     if (!crop) {
