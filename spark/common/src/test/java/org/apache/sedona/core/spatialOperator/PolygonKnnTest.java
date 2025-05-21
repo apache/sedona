@@ -40,7 +40,9 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 
-/** @author Arizona State University DataSystems Lab */
+/**
+ * @author Arizona State University DataSystems Lab
+ */
 
 // TODO: Auto-generated Javadoc
 
