@@ -23,9 +23,9 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLConnection;
+import org.geotools.api.referencing.FactoryException;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
-import org.opengis.referencing.FactoryException;
 
 public class RasterOutputTest extends RasterTestBase {
 

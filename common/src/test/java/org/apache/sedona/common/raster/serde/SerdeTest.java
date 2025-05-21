@@ -24,10 +24,10 @@ import java.io.File;
 import java.io.IOException;
 import org.apache.sedona.common.raster.RasterConstructors;
 import org.apache.sedona.common.raster.RasterTestBase;
+import org.geotools.api.referencing.FactoryException;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.gce.geotiff.GeoTiffReader;
 import org.junit.Test;
-import org.opengis.referencing.FactoryException;
 
 public class SerdeTest extends RasterTestBase {
 

@@ -22,12 +22,12 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import org.apache.sedona.common.Constructors;
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
 
 public class FunctionEditorsTest extends RasterTestBase {
 

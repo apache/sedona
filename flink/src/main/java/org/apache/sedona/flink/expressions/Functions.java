@@ -24,10 +24,10 @@ import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.annotation.InputGroup;
 import org.apache.flink.table.functions.ScalarFunction;
 import org.apache.sedona.common.FunctionsGeoTools;
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.operation.TransformException;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.operation.buffer.BufferParameters;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
 
 public class Functions {
   public static class GeometryType extends ScalarFunction {

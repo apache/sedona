@@ -31,13 +31,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.raster.serde.Serde;
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.processing.CannotCropException;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
 
 public class RasterBandEditorsTest extends RasterTestBase {
 

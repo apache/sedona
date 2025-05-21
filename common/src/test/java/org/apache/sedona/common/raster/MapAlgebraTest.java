@@ -23,10 +23,10 @@ import static org.junit.Assert.*;
 import java.awt.image.DataBuffer;
 import java.util.Random;
 import org.apache.sedona.common.utils.RasterUtils;
+import org.geotools.api.referencing.FactoryException;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Assert;
 import org.junit.Test;
-import org.opengis.referencing.FactoryException;
 
 public class MapAlgebraTest extends RasterTestBase {
   @Test
