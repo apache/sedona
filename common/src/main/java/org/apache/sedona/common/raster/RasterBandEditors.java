@@ -18,6 +18,8 @@
  */
 package org.apache.sedona.common.raster;
 
+import static org.apache.sedona.common.raster.Rasterization.rasterizeGeomExtent;
+
 import java.awt.geom.Point2D;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
@@ -29,7 +31,13 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.processing.CannotCropException;
+import org.geotools.coverage.processing.operation.Crop;
+import org.geotools.geometry.Envelope2D;
+import org.geotools.geometry.jts.JTS;
 import org.locationtech.jts.geom.Geometry;
+import org.opengis.geometry.BoundingBox;
+import org.opengis.parameter.ParameterValueGroup;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
@@ -288,20 +296,35 @@ public class RasterBandEditors {
 
     // Selecting the band from original raster
     RasterUtils.ensureBand(raster, band);
-    GridCoverage2D newRaster = RasterBandAccessors.getBand(raster, new int[] {band});
+    GridCoverage2D singleBandRaster = RasterBandAccessors.getBand(raster, new int[] {band});
 
     Pair<GridCoverage2D, Geometry> pair =
-        RasterUtils.setDefaultCRSAndTransform(newRaster, geometry);
-    newRaster = pair.getLeft();
+        RasterUtils.setDefaultCRSAndTransform(singleBandRaster, geometry);
+    singleBandRaster = pair.getLeft();
     geometry = pair.getRight();
 
-    if (!RasterPredicates.rsIntersects(newRaster, geometry)) {
+    double[] metadata = RasterAccessors.metadata(singleBandRaster);
+    Envelope2D geomEnvelope = rasterizeGeomExtent(geometry, singleBandRaster, metadata, allTouched);
+    Geometry geomExtent = JTS.toGeometry((BoundingBox) geomEnvelope);
+
+    // Crop the raster
+    // this will shrink the extent of the raster to the geometry
+    Crop cropObject = new Crop();
+    ParameterValueGroup parameters = cropObject.getParameters();
+    parameters.parameter("Source").setValue(singleBandRaster);
+    parameters.parameter(Crop.PARAMNAME_DEST_NODATA).setValue(new double[] {noDataValue});
+    parameters.parameter(Crop.PARAMNAME_ROI).setValue(geomExtent);
+
+    GridCoverage2D newRaster;
+    try {
+      newRaster = (GridCoverage2D) cropObject.doOperation(parameters, null);
+    } catch (CannotCropException e) {
       if (lenient) {
         return null;
+      } else {
+        throw e;
       }
     }
-
-    newRaster = setBandNoDataValue(newRaster, noDataValue);
 
     if (!crop) {
       double[] metadataOriginal = RasterAccessors.metadata(raster);
