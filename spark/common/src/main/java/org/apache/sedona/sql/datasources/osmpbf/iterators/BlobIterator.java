@@ -27,6 +27,7 @@ import org.apache.sedona.sql.datasources.osmpbf.DenseNodeIterator;
 import org.apache.sedona.sql.datasources.osmpbf.build.Fileformat.Blob;
 import org.apache.sedona.sql.datasources.osmpbf.build.Osmformat;
 import org.apache.sedona.sql.datasources.osmpbf.extractors.DenseNodeExtractor;
+import org.apache.sedona.sql.datasources.osmpbf.extractors.NodeExtractor;
 import org.apache.sedona.sql.datasources.osmpbf.extractors.RelationExtractor;
 import org.apache.sedona.sql.datasources.osmpbf.extractors.WaysExtractor;
 import org.apache.sedona.sql.datasources.osmpbf.model.OSMEntity;
@@ -68,7 +69,7 @@ public class BlobIterator implements Iterator<OSMEntity> {
     }
 
     if (!currentPrimitiveGroup.getNodesList().isEmpty()) {
-      return null;
+      return extractNodePrimitiveGroup();
     }
 
     if (!currentPrimitiveGroup.getWaysList().isEmpty()) {
@@ -84,6 +85,18 @@ public class BlobIterator implements Iterator<OSMEntity> {
     }
 
     return null;
+  }
+
+  private OSMEntity extractNodePrimitiveGroup() {
+    osmEntityIdx += 1;
+    if (currentPrimitiveGroup.getNodesList().size() == osmEntityIdx) {
+      nextEntity();
+    }
+
+    Osmformat.StringTable stringTable = primitiveBlock.getStringtable();
+
+    return new NodeExtractor(currentPrimitiveGroup, primitiveBlock)
+        .extract(osmEntityIdx, stringTable);
   }
 
   public OSMEntity extractDenseNodePrimitiveGroup() {

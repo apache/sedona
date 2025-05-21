@@ -6,4 +6,3 @@ site/
 target/
 binder/Pipfile.lock
 docs-overrides/main.html
-zeppelin/index.js

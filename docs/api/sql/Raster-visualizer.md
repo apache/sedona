@@ -77,7 +77,7 @@ Output:
 Example:
 
 ```python
-from sedona.raster_utils.SedonaUtils import SedonaUtils
+from sedona.spark import SedonaUtils
 
 # Or from sedona.spark import *
 

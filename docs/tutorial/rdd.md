@@ -51,7 +51,7 @@ Please refer to [Create a Geometry type column](sql.md#create-a-geometry-type-co
 === "Python"
 
 	```python
-	from sedona.utils.structured_adapter import StructuredAdapter
+	from sedona.spark import StructuredAdapter
 
 	spatialRDD = StructuredAdapter.toSpatialRdd(spatialDf, "usacounty")
 	```
@@ -165,8 +165,8 @@ Assume you now have a SpatialRDD (typed or generic). You can use the following c
 === "Python"
 
 	```python
-	from sedona.core.geom.envelope import Envelope
-	from sedona.core.spatialOperator import RangeQuery
+	from sedona.spark import Envelope
+	from sedona.spark import RangeQuery
 
 	range_query_window = Envelope(-90.01, -80.01, 30.01, 40.01)
 	consider_boundary_intersection = False  ## Only return gemeotries fully covered by the window
@@ -179,9 +179,9 @@ Assume you now have a SpatialRDD (typed or generic). You can use the following c
 
     Example:
     ```python
-    from sedona.core.geom.envelope import Envelope
-    from sedona.core.spatialOperator import RangeQueryRaw
-    from sedona.utils.adapter import Adapter
+    from sedona.spark import Envelope
+    from sedona.spark import RangeQueryRaw
+    from sedona.spark import Adapter
 
     range_query_window = Envelope(-90.01, -80.01, 30.01, 40.01)
     consider_boundary_intersection = False  ## Only return gemeotries fully covered by the window
@@ -283,9 +283,9 @@ To utilize a spatial index in a spatial range query, use the following code:
 === "Python"
 
 	```python
-	from sedona.core.geom.envelope import Envelope
-	from sedona.core.enums import IndexType
-	from sedona.core.spatialOperator import RangeQuery
+	from sedona.spark import Envelope
+	from sedona.spark import IndexType
+	from sedona.spark import RangeQuery
 
 	range_query_window = Envelope(-90.01, -80.01, 30.01, 40.01)
 	consider_boundary_intersection = False ## Only return gemeotries fully covered by the window
@@ -379,7 +379,7 @@ Assume you now have a SpatialRDD (typed or generic). You can use the following c
 === "Python"
 
 	```python
-	from sedona.core.spatialOperator import KNNQuery
+	from sedona.spark import KNNQuery
 	from shapely.geometry import Point
 
 	point = Point(-84.01, 34.01)
@@ -446,8 +446,8 @@ To utilize a spatial index in a spatial KNN query, use the following code:
 === "Python"
 
 	```python
-	from sedona.core.spatialOperator import KNNQuery
-	from sedona.core.enums import IndexType
+	from sedona.spark import KNNQuery
+	from sedona.spark import IndexType
 	from shapely.geometry import Point
 
 	point = Point(-84.01, 34.01)
@@ -518,8 +518,8 @@ Assume you now have two SpatialRDDs (typed or generic). You can use the followin
 === "Python"
 
 	```python
-	from sedona.core.enums import GridType
-	from sedona.core.spatialOperator import JoinQuery
+	from sedona.spark import GridType
+	from sedona.spark import JoinQuery
 
 	consider_boundary_intersection = False ## Only return geometries fully covered by each query window in queryWindowRDD
 	using_index = False
@@ -610,9 +610,9 @@ To utilize a spatial index in a spatial join query, use the following code:
 === "Python"
 
 	```python
-	from sedona.core.enums import GridType
-	from sedona.core.enums import IndexType
-	from sedona.core.spatialOperator import JoinQuery
+	from sedona.spark import GridType
+	from sedona.spark import IndexType
+	from sedona.spark import JoinQuery
 
 	object_rdd.spatialPartitioning(GridType.KDBTREE)
 	query_window_rdd.spatialPartitioning(object_rdd.getPartitioner())
@@ -676,10 +676,10 @@ The index should be built on either one of two SpatialRDDs. In general, you shou
 
     Example:
     ```python
-    from sedona.core.SpatialRDD import CircleRDD
-    from sedona.core.enums import GridType
-    from sedona.core.spatialOperator import JoinQueryRaw
-	from sedona.utils.structured_adapter import StructuredAdapter
+    from sedona.spark import CircleRDD
+    from sedona.spark import GridType
+    from sedona.spark import JoinQueryRaw
+	from sedona.spark import StructuredAdapter
 
     object_rdd.analyze()
 
@@ -743,9 +743,9 @@ Assume you now have two SpatialRDDs (typed or generic). You can use the followin
 === "Python"
 
 	```python
-	from sedona.core.SpatialRDD import CircleRDD
-	from sedona.core.enums import GridType
-	from sedona.core.spatialOperator import JoinQuery
+	from sedona.spark import CircleRDD
+	from sedona.spark import GridType
+	from sedona.spark import JoinQuery
 
 	object_rdd.analyze()
 

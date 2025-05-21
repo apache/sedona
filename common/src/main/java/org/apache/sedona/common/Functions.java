@@ -603,28 +603,28 @@ public class Functions {
   }
 
   public static Double x(Geometry geometry) {
-    if (geometry instanceof Point) {
+    if (geometry instanceof Point && geometry.getCoordinate() != null) {
       return geometry.getCoordinate().x;
     }
     return null;
   }
 
   public static Double y(Geometry geometry) {
-    if (geometry instanceof Point) {
+    if (geometry instanceof Point && geometry.getCoordinate() != null) {
       return geometry.getCoordinate().y;
     }
     return null;
   }
 
   public static Double z(Geometry geometry) {
-    if (geometry instanceof Point) {
+    if (geometry instanceof Point && geometry.getCoordinate() != null) {
       return geometry.getCoordinate().z;
     }
     return null;
   }
 
   public static Double m(Geometry geom) {
-    if (geom instanceof Point) {
+    if (geom instanceof Point && geom.getCoordinate() != null) {
       return geom.getCoordinate().getM();
     }
     return null;
@@ -708,12 +708,12 @@ public class Functions {
 
   public static boolean hasM(Geometry geom) {
     Coordinate coord = geom.getCoordinate();
-    return !Double.isNaN(coord.getM());
+    return coord != null && !Double.isNaN(coord.getM());
   }
 
   public static boolean hasZ(Geometry geom) {
     Coordinate coord = geom.getCoordinate();
-    return !Double.isNaN(coord.getZ());
+    return coord != null && !Double.isNaN(coord.getZ());
   }
 
   public static Geometry flipCoordinates(Geometry geometry) {
@@ -1866,6 +1866,9 @@ public class Functions {
   }
 
   public static Geometry[] subDivide(Geometry geometry, int maxVertices) {
+    if (maxVertices < 5) {
+      throw new IllegalArgumentException("ST_Subdivide needs 5 or more max vertices");
+    }
     return GeometrySubDivider.subDivide(geometry, maxVertices);
   }
 

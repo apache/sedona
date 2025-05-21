@@ -1,34 +1,35 @@
-#  Licensed to the Apache Software Foundation (ASF) under one
-#  or more contributor license agreements.  See the NOTICE file
-#  distributed with this work for additional information
-#  regarding copyright ownership.  The ASF licenses this file
-#  to you under the Apache License, Version 2.0 (the
-#  "License"); you may not use this file except in compliance
-#  with the License.  You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
-#  Unless required by applicable law or agreed to in writing,
-#  software distributed under the License is distributed on an
-#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-#  KIND, either express or implied.  See the License for the
-#  specific language governing permissions and limitations
-#  under the License.
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 import os
 
 from pyspark.sql.types import StructField, StructType
 from shapely.wkt import loads
-from tests.test_base import TestBase
-from tests.tools import tests_resource
 
-from sedona.core.enums import GridType, IndexType
-from sedona.core.formatMapper import WktReader
-from sedona.core.spatialOperator.join_params import JoinParams
-from sedona.core.spatialOperator.join_query_raw import JoinQueryRaw
-from sedona.core.spatialOperator.range_query_raw import RangeQueryRaw
-from sedona.core.SpatialRDD import CircleRDD
-from sedona.sql.types import GeometryType
-from sedona.utils.adapter import Adapter
+from tests import tests_resource
+from tests.test_base import TestBase
+
+from sedona.spark.core.enums import GridType, IndexType
+from sedona.spark.core.formatMapper import WktReader
+from sedona.spark.core.spatialOperator.join_params import JoinParams
+from sedona.spark.core.spatialOperator.join_query_raw import JoinQueryRaw
+from sedona.spark.core.spatialOperator.range_query_raw import RangeQueryRaw
+from sedona.spark.core.SpatialRDD import CircleRDD
+from sedona.spark.sql.types import GeometryType
+from sedona.spark.utils.adapter import Adapter
 
 bank_csv_path = os.path.join(tests_resource, "small/points.csv")
 areas_csv_path = os.path.join(tests_resource, "small/areas.csv")
@@ -165,24 +166,20 @@ class TestOmitPythonJvmSerdeToDf(TestBase):
         right_geometries = self.__row_to_list(right_geometries_raw)
 
         # Ignore the ordering of these
-        assert set(geom[0] for geom in left_geometries) == set(
-            [
-                "POLYGON ((0 4, -3 3, -8 6, -6 8, -2 9, 0 4))",
-                "POLYGON ((10 3, 10 6, 14 6, 14 3, 10 3))",
-                "POLYGON ((2 2, 2 4, 3 5, 7 5, 9 3, 8 1, 4 1, 2 2))",
-                "POLYGON ((-1 -1, -1 -3, -2 -5, -6 -8, -5 -2, -3 -2, -1 -1))",
-                "POLYGON ((-1 -1, -1 -3, -2 -5, -6 -8, -5 -2, -3 -2, -1 -1))",
-            ]
-        )
-        assert set(geom[0] for geom in right_geometries) == set(
-            [
-                "POINT (-3 5)",
-                "POINT (11 5)",
-                "POINT (4 3)",
-                "POINT (-1 -1)",
-                "POINT (-4 -5)",
-            ]
-        )
+        assert {geom[0] for geom in left_geometries} == {
+            "POLYGON ((0 4, -3 3, -8 6, -6 8, -2 9, 0 4))",
+            "POLYGON ((10 3, 10 6, 14 6, 14 3, 10 3))",
+            "POLYGON ((2 2, 2 4, 3 5, 7 5, 9 3, 8 1, 4 1, 2 2))",
+            "POLYGON ((-1 -1, -1 -3, -2 -5, -6 -8, -5 -2, -3 -2, -1 -1))",
+            "POLYGON ((-1 -1, -1 -3, -2 -5, -6 -8, -5 -2, -3 -2, -1 -1))",
+        }
+        assert {geom[0] for geom in right_geometries} == {
+            "POINT (-3 5)",
+            "POINT (11 5)",
+            "POINT (4 3)",
+            "POINT (-1 -1)",
+            "POINT (-4 -5)",
+        }
 
     def test_range_query_flat_to_df(self):
         poi_point_rdd = WktReader.readToGeometryRDD(

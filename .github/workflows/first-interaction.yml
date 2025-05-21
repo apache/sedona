@@ -23,6 +23,10 @@ on:
   pull_request:
     types: [opened]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
 jobs:
   first-interaction:
     runs-on: ubuntu-latest

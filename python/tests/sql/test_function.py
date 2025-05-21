@@ -1,19 +1,19 @@
-#  Licensed to the Apache Software Foundation (ASF) under one
-#  or more contributor license agreements.  See the NOTICE file
-#  distributed with this work for additional information
-#  regarding copyright ownership.  The ASF licenses this file
-#  to you under the Apache License, Version 2.0 (the
-#  "License"); you may not use this file except in compliance
-#  with the License.  You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
-#  Unless required by applicable law or agreed to in writing,
-#  software distributed under the License is distributed on an
-#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-#  KIND, either express or implied.  See the License for the
-#  specific language governing permissions and limitations
-#  under the License.
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 
 import math
 from typing import List
@@ -34,7 +34,7 @@ from tests.sql.resource.sample_data import (
 )
 from tests.test_base import TestBase
 
-from sedona.sql.types import GeometryType
+from sedona.spark.sql.types import GeometryType
 
 
 class TestPredicateJoin(TestBase):
@@ -1967,14 +1967,10 @@ class TestPredicateJoin(TestBase):
         )
 
         # then result should be as expected
-        assert set(
-            [
-                el[0]
-                for el in geometry_df_collected.selectExpr(
-                    "ST_AsText(collected)"
-                ).collect()
-            ]
-        ) == {
+        assert {
+            el[0]
+            for el in geometry_df_collected.selectExpr("ST_AsText(collected)").collect()
+        } == {
             "MULTILINESTRING ((1 2, 3 4), (3 4, 4 5))",
             "MULTIPOINT ((1 2), (-2 3))",
             "MULTIPOLYGON (((1 2, 1 4, 3 4, 3 2, 1 2)), ((0.5 0.5, 5 0, 5 5, 0 5, 0.5 0.5)))",
@@ -2000,14 +1996,10 @@ class TestPredicateJoin(TestBase):
         )
 
         # then result should be calculated
-        assert set(
-            [
-                el[0]
-                for el in geometry_df_collected.selectExpr(
-                    "ST_AsText(collected)"
-                ).collect()
-            ]
-        ) == {
+        assert {
+            el[0]
+            for el in geometry_df_collected.selectExpr("ST_AsText(collected)").collect()
+        } == {
             "MULTILINESTRING ((1 2, 3 4), (3 4, 4 5))",
             "MULTIPOINT ((1 2), (-2 3))",
             "MULTIPOLYGON (((1 2, 1 4, 3 4, 3 2, 1 2)), ((0.5 0.5, 5 0, 5 5, 0 5, 0.5 0.5)))",
@@ -2036,7 +2028,7 @@ class TestPredicateJoin(TestBase):
         }
         for input_geom, expected_geom in test_cases.items():
             reversed_geometry = self.spark.sql(
-                "select ST_AsText(ST_Reverse(ST_GeomFromText({})))".format(input_geom)
+                f"select ST_AsText(ST_Reverse(ST_GeomFromText({input_geom})))"
             )
             assert reversed_geometry.take(1)[0][0] == expected_geom
 
@@ -2134,7 +2126,7 @@ class TestPredicateJoin(TestBase):
 
         for input_geom, expected_geom in tests1.items():
             geom_2d = self.spark.sql(
-                "select ST_AsText(ST_Force_2D(ST_GeomFromText({})))".format(input_geom)
+                f"select ST_AsText(ST_Force_2D(ST_GeomFromText({input_geom})))"
             )
             assert geom_2d.take(1)[0][0] == expected_geom
 
@@ -2147,7 +2139,7 @@ class TestPredicateJoin(TestBase):
 
         for input_geom, expected_geom in tests1.items():
             geom_2d = self.spark.sql(
-                "select ST_AsText(ST_Force2D(ST_GeomFromText({})))".format(input_geom)
+                f"select ST_AsText(ST_Force2D(ST_GeomFromText({input_geom})))"
             )
             assert geom_2d.take(1)[0][0] == expected_geom
 
@@ -2171,7 +2163,7 @@ class TestPredicateJoin(TestBase):
 
         for input_geom, expected_geom in tests.items():
             areal_geom = self.spark.sql(
-                "select ST_AsText(ST_BuildArea(ST_GeomFromText({})))".format(input_geom)
+                f"select ST_AsText(ST_BuildArea(ST_GeomFromText({input_geom})))"
             )
             assert areal_geom.take(1)[0][0] == expected_geom
 
@@ -2244,7 +2236,7 @@ class TestPredicateJoin(TestBase):
         ]
         for input_geom in test_cases:
             cell_ids = self.spark.sql(
-                "select ST_S2CellIDs(ST_GeomFromText({}), 6)".format(input_geom)
+                f"select ST_S2CellIDs(ST_GeomFromText({input_geom}), 6)"
             ).take(1)[0][0]
             assert isinstance(cell_ids, list)
             assert isinstance(cell_ids[0], int)
@@ -2272,7 +2264,7 @@ class TestPredicateJoin(TestBase):
         ]
         for input_geom in test_cases:
             cell_ids = self.spark.sql(
-                "select ST_H3CellIDs(ST_GeomFromText({}), 6, true)".format(input_geom)
+                f"select ST_H3CellIDs(ST_GeomFromText({input_geom}), 6, true)"
             ).take(1)[0][0]
             assert isinstance(cell_ids, list)
             assert isinstance(cell_ids[0], int)

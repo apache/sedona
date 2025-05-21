@@ -46,9 +46,14 @@ on:
 env:
   MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
   DO_NOT_TRACK: true
+  SPARK_LOCAL_IP: 127.0.0.1
 
 permissions:
   contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 jobs:
   build:
@@ -59,11 +64,7 @@ jobs:
         include:
           - spark: 3.5.0
             scala: 2.13.8
-            jdk: '8'
-            skipTests: ''
-          - spark: 3.5.0
-            scala: 2.12.15
-            jdk: '8'
+            jdk: '11'
             skipTests: ''
           - spark: 3.5.0
             scala: 2.12.15
@@ -71,11 +72,7 @@ jobs:
             skipTests: ''
           - spark: 3.4.0
             scala: 2.13.8
-            jdk: '8'
-            skipTests: ''
-          - spark: 3.4.0
-            scala: 2.12.15
-            jdk: '8'
+            jdk: '11'
             skipTests: ''
           - spark: 3.4.0
             scala: 2.12.15
@@ -83,11 +80,11 @@ jobs:
             skipTests: ''
           - spark: 3.3.0
             scala: 2.13.8
-            jdk: '8'
+            jdk: '11'
             skipTests: ''
           - spark: 3.3.0
             scala: 2.12.15
-            jdk: '8'
+            jdk: '11'
             skipTests: ''
     steps:
       - uses: actions/checkout@v4
@@ -97,9 +94,9 @@ jobs:
           java-version: ${{ matrix.jdk }}
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.7'
+          python-version: '3.10'
       - name: Cache Maven packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
@@ -110,6 +107,12 @@ jobs:
           SKIP_TESTS: ${{ matrix.skipTests }}
         run: |
           SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
+
+          if [ "${SPARK_VERSION}" == "3.5.0" ]; then
+              pip install pyspark==3.5.0 pandas shapely apache-sedona pyarrow
+              export SPARK_HOME=$(python -c "import pyspark; print(pyspark.__path__[0])")
+          fi
+
           mvn -q clean install -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} ${SKIP_TESTS}
       - run: mkdir staging
       - run: cp spark-shaded/target/sedona-*.jar staging

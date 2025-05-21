@@ -1,23 +1,22 @@
-#  Licensed to the Apache Software Foundation (ASF) under one
-#  or more contributor license agreements.  See the NOTICE file
-#  distributed with this work for additional information
-#  regarding copyright ownership.  The ASF licenses this file
-#  to you under the Apache License, Version 2.0 (the
-#  "License"); you may not use this file except in compliance
-#  with the License.  You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
-#  Unless required by applicable law or agreed to in writing,
-#  software distributed under the License is distributed on an
-#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-#  KIND, either express or implied.  See the License for the
-#  specific language governing permissions and limitations
-#  under the License.
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 
 import logging
 
-import pyspark
 import pytest
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col, expr
@@ -32,13 +31,15 @@ from tests import (
 from tests.test_base import TestBase
 
 from sedona import version
-from sedona.core.enums import FileDataSplitter, GridType, IndexType
-from sedona.core.formatMapper.shapefileParser.shape_file_reader import ShapefileReader
-from sedona.core.geom.envelope import Envelope
-from sedona.core.jvm.config import is_greater_or_equal_version
-from sedona.core.spatialOperator import JoinQuery
-from sedona.core.SpatialRDD import CircleRDD, PolygonRDD
-from sedona.utils.adapter import Adapter
+from sedona.spark.core.enums import FileDataSplitter, GridType, IndexType
+from sedona.spark.core.formatMapper.shapefileParser.shape_file_reader import (
+    ShapefileReader,
+)
+from sedona.spark.core.geom.envelope import Envelope
+from sedona.spark.core.jvm.config import is_greater_or_equal_version
+from sedona.spark.core.spatialOperator import JoinQuery
+from sedona.spark.core.SpatialRDD import CircleRDD, PolygonRDD
+from sedona.spark import Adapter
 
 
 class TestAdapter(TestBase):

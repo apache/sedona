@@ -1,19 +1,19 @@
-#  Licensed to the Apache Software Foundation (ASF) under one
-#  or more contributor license agreements.  See the NOTICE file
-#  distributed with this work for additional information
-#  regarding copyright ownership.  The ASF licenses this file
-#  to you under the Apache License, Version 2.0 (the
-#  "License"); you may not use this file except in compliance
-#  with the License.  You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
-#  Unless required by applicable law or agreed to in writing,
-#  software distributed under the License is distributed on an
-#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-#  KIND, either express or implied.  See the License for the
-#  specific language governing permissions and limitations
-#  under the License.
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 
 import numpy as np
 import pandas as pd
@@ -22,7 +22,6 @@ import pytest
 import rasterio
 from pyspark.sql.functions import expr, pandas_udf
 from pyspark.sql.types import IntegerType
-from tests import world_map_raster_input_location
 from tests.test_base import TestBase
 
 
@@ -42,7 +41,7 @@ class TestRasterPandasUDF(TestBase):
         # A Python Pandas UDF that takes a raster as input
         @pandas_udf(IntegerType())
         def pandas_udf_raster_as_param(s: pd.Series) -> pd.Series:
-            from sedona.raster import raster_serde
+            from sedona.spark.raster import raster_serde
 
             def func(x):
                 with raster_serde.deserialize(x) as raster:
@@ -54,7 +53,7 @@ class TestRasterPandasUDF(TestBase):
         # A Python Pandas UDF that takes a raster as input
         @pandas_udf(IntegerType())
         def pandas_udf_raster_as_param_2(s: pd.Series) -> pd.Series:
-            from sedona.raster import raster_serde
+            from sedona.spark.raster import raster_serde
 
             def func(x):
                 with raster_serde.deserialize(x) as raster:

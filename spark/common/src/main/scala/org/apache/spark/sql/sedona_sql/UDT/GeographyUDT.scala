@@ -28,7 +28,7 @@ import org.apache.sedona.common.geometryObjects.Geography;
 class GeographyUDT extends UserDefinedType[Geography] {
   override def sqlType: DataType = BinaryType
 
-  override def pyUDT: String = "sedona.sql.types.GeographyType"
+  override def pyUDT: String = "sedona.spark.sql.types.GeographyType"
 
   override def userClass: Class[Geography] = classOf[Geography]
 

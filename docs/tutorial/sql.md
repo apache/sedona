@@ -480,7 +480,7 @@ Since v1.7.1, Sedona supports loading OSM PBF file format as a DataFrame.
 	```
 
 OSM PBF files can contain nodes, ways, and relations. Currently Sedona support
-DenseNodes, Ways and Relations. When you load the data you get a DataFrame with the following schema.
+Nodes, DenseNodes, Ways and Relations. When you load the data you get a DataFrame with the following schema.
 
 ```
 root
@@ -614,7 +614,7 @@ The first parameter is the dataframe, the next two are the epsilon and min_point
 === "Python"
 
 	```python
-	from sedona.stats.clustering.dbscan import dbscan
+	from sedona.spark.stats import dbscan
 
 	dbscan(df, 0.1, 5).show()
 	```
@@ -670,7 +670,7 @@ The first parameter is the dataframe, the next is the number of nearest neighbor
 === "Python"
 
 	```python
-	from sedona.stats.outlier_detection.local_outlier_factor import local_outlier_factor
+	from sedona.spark.stats import local_outlier_factor
 
 	local_outlier_factor(df, 20).show()
 	```
@@ -737,8 +737,8 @@ Using Gi involves first generating the neighbors list for each record, then call
 === "Python"
 
 	```python
-	from sedona.stats.weighting import add_binary_distance_band_column
-	from sedona.stats.hotspot_detection.getis_ord import g_local
+	from sedona.spark.stats import add_binary_distance_band_column
+	from sedona.spark.stats import g_local
 
 	distance_radius = 1.0
 	weighted_df = addBinaryDistanceBandColumn(df, distance_radius)
@@ -825,7 +825,7 @@ Sedona provides `SedonaPyDeck` and `SedonaKepler` wrappers, both of which expose
 
 Spatial query results can be visualized in a Jupyter lab/notebook environment using SedonaPyDeck.
 
-SedonaPyDeck exposes APIs to create interactive map visualizations using [pydeck](https://pydeck.gl/index.html#) based on [deck.gl](https://deck.gl/)
+SedonaPyDeck exposes APIs to create interactive map visualizations using [pydeck](https://deckgl.readthedocs.io) based on [deck.gl](https://deck.gl/)
 
 !!!Note
 	To use SedonaPyDeck, install sedona with the `pydeck-map` extra:
@@ -835,7 +835,7 @@ SedonaPyDeck exposes APIs to create interactive map visualizations using [pydeck
 
 The following tutorial showcases the various maps that can be created using SedonaPyDeck, the datasets used to create these maps are publicly available.
 
-Each API exposed by SedonaPyDeck offers customization via optional arguments, details on all possible arguments can be found in the [API docs of SedonaPyDeck](../api/sql/Visualization_SedonaPyDeck.md).
+Each API exposed by SedonaPyDeck offers customization via optional arguments, details on all possible arguments can be found in the [API docs of SedonaPyDeck](../api/sql/Visualization-SedonaPyDeck.md).
 
 #### Creating a Choropleth map using SedonaPyDeck
 
@@ -923,7 +923,7 @@ SedonaKepler.create_map(df=groupedresult, name="AirportCount")
 The dataset used is available [here](https://github.com/apache/sedona/tree/b66e768155866a38ba2e3404f1151cac14fad5ea/docs/usecases/data/ne_50m_airports) and
 can also be found in the example notebook available [here](https://github.com/apache/sedona/blob/master/docs/usecases/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb)
 
-Details on all the APIs available by SedonaKepler are listed in the [SedonaKepler API docs](../api/sql/Visualization_SedonaKepler.md)
+Details on all the APIs available by SedonaKepler are listed in the [SedonaKepler API docs](../api/sql/Visualization-SedonaKepler.md)
 
 ## Create a User-Defined Function (UDF)
 
@@ -966,7 +966,7 @@ This UDF example takes a geometry type input and returns a primitive type output
 === "Python"
 
 	```python
-	from sedona.sql.types import GeometryType
+	from sedona.spark.sql.types import GeometryType
 	from pyspark.sql.types import DoubleType
 
 	def lengthPoly(geom: GeometryType()):
@@ -1025,7 +1025,7 @@ This UDF example takes a geometry type input and returns a geometry type output:
 === "Python"
 
 	```python
-	from sedona.sql.types import GeometryType
+	from sedona.spark import GeometryType
 	from pyspark.sql.types import DoubleType
 
 	def bufferFixed(geom: GeometryType()):
@@ -1083,7 +1083,7 @@ This UDF example takes a geometry type input and a primitive type input and retu
 === "Python"
 
 	```python
-	from sedona.sql.types import GeometryType
+	from sedona.spark import GeometryType
 	from pyspark.sql.types import DoubleType
 
 	def bufferIt(geom: GeometryType(), distance: DoubleType()):
@@ -1165,7 +1165,7 @@ This UDF example takes a geometry type input and a primitive type input and retu
 === "Python"
 
 	```python
-	from sedona.sql.types import GeometryType
+	from sedona.spark import GeometryType
 	from pyspark.sql.types import *
 
 	schemaUDF = StructType([
@@ -1193,6 +1193,73 @@ Output:
 +------------------------------+--------+--------------------------------------------------+-----------------+
 |POLYGON ((1 1, 1 2, 2 1, 1 1))|    10.0|POLYGON ((1 -9, -0.9509032201612866 -8.80785280...|66.14518337329191|
 +------------------------------+--------+--------------------------------------------------+-----------------+
+```
+
+## Spatial vectorized udfs (Python only)
+
+By default when you create the user defined functions in Python, the UDFs are not vectorized.
+This means that the UDFs are called row by row which can be slow.
+To speed up the UDFs, you can use the `vectorized` UDF which will be called in a batch mode
+using Apache Arrow.
+
+To create a vectorized UDF please use the decorator sedona_vectorized_udf.
+Currently supports only the scalar UDFs. Vectorized UDFs are way faster than
+the normal UDFs. It might be even 2x faster than the normal UDFs.
+
+!!!note
+	When you use geometry as an input type, please include the BaseGeometry type,
+	like Point from shapely or geopandas GeoSeries, when you use GEO_SERIES vectorized udf.
+	That's how Sedona infers the type and knows if the data should be cast.
+
+Decorator signature looks as follows:
+
+```python
+def sedona_vectorized_udf(udf_type: SedonaUDFType = SedonaUDFType.SHAPELY_SCALAR, return_type: DataType)
+```
+
+where udf_type is the type of the UDF function, currently supported are:
+
+- SHAPELY_SCALAR
+- GEO_SERIES
+
+The main difference is what input data you get in the function
+Let's analyze the two examples below, that creates buffers from
+a given geometry.
+
+### Shapely scalar UDF
+
+```python
+import shapely.geometry.base as b
+from sedona.spark import sedona_vectorized_udf
+
+@sedona_vectorized_udf(return_type=GeometryType())
+def vectorized_buffer(geom: b.BaseGeometry) -> b.BaseGeometry:
+    return geom.buffer(0.1)
+```
+
+### GeoSeries UDF
+
+```python
+import geopandas as gpd
+from sedona.spark import sedona_vectorized_udf, SedonaUDFType
+from sedona.spark import GeometryType
+
+
+@sedona_vectorized_udf(udf_type=SedonaUDFType.GEO_SERIES, return_type=GeometryType())
+def vectorized_geo_series_buffer(series: gpd.GeoSeries) -> gpd.GeoSeries:
+    buffered = series.buffer(0.1)
+
+    return buffered
+```
+
+To call the UDFs you can use the following code:
+
+```python
+# Shapely scalar UDF
+df.withColumn("buffered", vectorized_buffer(df.geom)).show()
+
+# GeoSeries UDF
+df.withColumn("buffered", vectorized_geo_series_buffer(df.geom)).show()
 ```
 
 ## Save to permanent storage
@@ -1272,7 +1339,7 @@ Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD.
 === "Python"
 
 	```python
-	from sedona.utils.structured_adapter import StructuredAdapter
+	from sedona.spark import StructuredAdapter
 
 	spatialRDD = StructuredAdapter.toSpatialRdd(spatialDf, "usacounty")
 	```
@@ -1298,7 +1365,7 @@ Use SedonaSQL DataFrame-RDD Adapter to convert a DataFrame to an SpatialRDD. Ple
 === "Python"
 
 	```python
-	from sedona.utils.adapter import StructuredAdapter
+	from sedona.spark import StructuredAdapter
 
 	spatialDf = StructuredAdapter.toDf(spatialRDD, sedona)
 	```
@@ -1334,7 +1401,7 @@ You can use `StructuredAdapter` and the `spatialRDD.spatialPartitioningWithoutDu
 === "Python"
 
 	```python
-	from sedona.utils.structured_adapter import StructuredAdapter
+	from sedona.spark import StructuredAdapter
 
 	spatialRDD.spatialPartitioningWithoutDuplicates(GridType.KDBTREE)
 	# Specify the desired number of partitions as 10, though the actual number may vary
@@ -1360,7 +1427,7 @@ PairRDD is the result of a spatial join query or distance join query. SedonaSQL 
 === "Python"
 
 	```python
-	from sedona.utils.adapter import StructuredAdapter
+	from sedona.spark import StructuredAdapter
 
 	joinResultDf = StructuredAdapter.pairRddToDf(result_pair_rdd, leftDf.schema, rightDf.schema, spark)
 	```
