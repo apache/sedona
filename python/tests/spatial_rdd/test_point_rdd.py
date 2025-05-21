@@ -1,23 +1,22 @@
-#  Licensed to the Apache Software Foundation (ASF) under one
-#  or more contributor license agreements.  See the NOTICE file
-#  distributed with this work for additional information
-#  regarding copyright ownership.  The ASF licenses this file
-#  to you under the Apache License, Version 2.0 (the
-#  "License"); you may not use this file except in compliance
-#  with the License.  You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
-#  Unless required by applicable law or agreed to in writing,
-#  software distributed under the License is distributed on an
-#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-#  KIND, either express or implied.  See the License for the
-#  specific language governing permissions and limitations
-#  under the License.
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 
 from tests.properties.point_properties import (
     crs_envelope,
-    crs_envelope_transformed,
     crs_point_test,
     input_boundary,
     input_count,
@@ -25,14 +24,13 @@ from tests.properties.point_properties import (
     num_partitions,
     offset,
     splitter,
-    transformed_envelope,
 )
 from tests.test_base import TestBase
 
-from sedona.core.enums import GridType, IndexType
-from sedona.core.geom.envelope import Envelope
-from sedona.core.SpatialRDD import PointRDD
-from sedona.core.SpatialRDD.spatial_rdd import SpatialRDD
+from sedona.spark.core.enums import GridType, IndexType
+from sedona.spark.core.geom.envelope import Envelope
+from sedona.spark.core.SpatialRDD import PointRDD
+from sedona.spark.core.SpatialRDD.spatial_rdd import SpatialRDD
 
 
 class TestPointRDD(TestBase):

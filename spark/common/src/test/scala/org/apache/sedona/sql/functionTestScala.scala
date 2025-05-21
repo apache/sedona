@@ -3770,4 +3770,14 @@ class functionTestScala
       "The Line has SRID 4326 and Point has SRID 3857. The Line and Point should be in the same SRID.")
   }
 
+  it("should raise an error when using ST_SubDivide with not enough vertices") {
+    val invalidDf = sparkSession.sql("""
+        |SELECT ST_Subdivide(ST_GeomFromWKT('LINESTRING(0 0, 99 99)'), 4) as result
+    """.stripMargin)
+
+    val exception = intercept[Exception] {
+      invalidDf.collect()
+    }
+    exception.getMessage should include("ST_Subdivide needs 5 or more max vertices")
+  }
 }

@@ -40,7 +40,9 @@ public class DynamicIndexLookupJudgement<T extends Geometry, U extends Geometry>
   private final IndexType indexType;
   private final JoinBuildSide joinBuildSide;
 
-  /** @see JudgementBase */
+  /**
+   * @see JudgementBase
+   */
   public DynamicIndexLookupJudgement(
       SpatialPredicate spatialPredicate,
       IndexType indexType,

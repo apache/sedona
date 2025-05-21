@@ -154,13 +154,7 @@ To compile the source code and test the website on your local machine, please re
 In short, you need to run:
 
 ```
-pip install mkdocs
-pip install mkdocs-jupyter
-pip install mkdocs-material
-pip install mkdocs-macros-plugin
-pip install mkdocs-git-revision-date-localized-plugin
-pip install mike
-pip install pymdown-extensions
+pip install -r requirements-docs.txt
 ```
 
 After installing MkDocs and MkDocs-Material, run these commands in the Sedona root folder:
@@ -179,16 +173,31 @@ your local machine is currently optional.
 The pre-commit [configuration file](https://github.com/apache/sedona/blob/master/.pre-commit-config.yaml)
 is in the repository root. Before you can run the hooks, you need to have pre-commit installed.
 
-The hooks run when running `git commit`. Some of the hooks will auto fix the code after the hook fails
-whilst most will print error messages from the linters.
-
-If you want to test all hooks against all files and when you are adding a new hook
-you should always run:
+The hooks run when running `git commit` and also from the command line with `pre-commit`. Some of the hooks will auto
+fix the code after the hooks fail whilst most will print error messages from the linters. If a hook fails the overall
+commit will fail, and you will need to fix the issues or problems and `git add` and git commit again. On git commit
+the hooks will run mostly only against modified files so if you want to test all hooks against all files and when you
+are adding a new hook you should always run:
 
 `pre-commit run --all-files`
 
-Sometimes you might need to skip a hook to commit for example:
+Sometimes you might need to skip a hook to commit because the hook is stopping you from committing or your computer
+might not have all the installation requirements for all the hooks. The `SKIP` variable is comma separated for two or
+more hooks:
 
-`SKIP=markdownlint git commit -m "foo"`
+`SKIP=codespell git commit -m "foo"`
+
+The same applies when running pre-commit:
+
+`SKIP=codespell pre-commit run --all-files`
+
+Occasionally you can have more serious problems when using `pre-commit` with `git commit`. You can use `--no-verify` to
+commit and stop `pre-commit` from checking the hooks. For example:
+
+`git commit --no-verify -m "foo"`
+
+If you just want to run one hook for example just run the `markdownlint` hook:
+
+`pre-commit run markdownlint --all-files`
 
 We have a [Makefile](https://github.com/apache/sedona/blob/master/Makefile) in the repository root which has three pre-commit convenience commands.

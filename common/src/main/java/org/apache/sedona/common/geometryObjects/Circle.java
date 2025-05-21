@@ -246,7 +246,9 @@ public class Circle extends Geometry {
     return false;
   }
 
-  /** @return true if a line from `start` to `end` intersects this circle */
+  /**
+   * @return true if a line from `start` to `end` intersects this circle
+   */
   private boolean intersects(Point start, Point end) {
     double deltaX = end.getX() - start.getX();
     double deltaY = end.getY() - start.getY();

@@ -100,8 +100,8 @@ nav:
                   - 'Spider:Spatial Data Generator': api/sql/Spider.md
                   - Reading Legacy Parquet Files: api/sql/Reading-legacy-parquet.md
                   - Visualization:
-                      - SedonaPyDeck: api/sql/Visualization_SedonaPyDeck.md
-                      - SedonaKepler: api/sql/Visualization_SedonaKepler.md
+                      - SedonaPyDeck: api/sql/Visualization-SedonaPyDeck.md
+                      - SedonaKepler: api/sql/Visualization-SedonaKepler.md
               - Raster data:
                   - Raster loader: api/sql/Raster-loader.md
                   - Raster aggregates: api/sql/Raster-aggregate-function.md
@@ -191,7 +191,7 @@ extra:
     - icon: fontawesome/brands/twitter
       link: 'https://twitter.com/ApacheSedona'
     - icon: fontawesome/brands/discord
-      link: 'https://share.hsforms.com/1Ndql_ZigTdmLlVQc_d1o4gqga4q'
+      link: 'https://discord.gg/9A3k5dEBsY'
   sedona:
     current_version: 1.7.1
     current_geotools: 1.7.1-28.5

@@ -4402,4 +4402,30 @@ public class FunctionsTest extends TestBase {
     expected = 2.75;
     assertEquals(expected, actual, 1e-6);
   }
+
+  @Test
+  public void emptyPoint() throws ParseException {
+    Geometry point = Constructors.geomFromEWKT("POINT(1 1)");
+    Geometry emptyPoint = Constructors.geomFromEWKT("POINT EMPTY");
+
+    double actualX = Functions.x(point);
+    double expectedX = 1.0;
+    assertEquals(expectedX, actualX, 1e-6);
+
+    assertNull(Functions.x(emptyPoint));
+    assertNull(Functions.y(emptyPoint));
+    assertNull(Functions.z(emptyPoint));
+    assertNull(Functions.m(emptyPoint));
+
+    assertFalse(Functions.hasM(emptyPoint));
+    assertFalse(Functions.hasZ(emptyPoint));
+  }
+
+  @Test
+  public void subdivideInvalidMaxVertices() {
+    LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 99, 99));
+    IllegalArgumentException e =
+        assertThrows(IllegalArgumentException.class, () -> Functions.subDivide(lineString, 4));
+    assertEquals("ST_Subdivide needs 5 or more max vertices", e.getMessage());
+  }
 }
