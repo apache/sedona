@@ -26,7 +26,7 @@ sc <- testthat_spark_connection()
 test_that("Passed RS_FromGeoTiff from binary", {
   ## Load
   sdf_name <- random_string("spatial_sdf")
-  binary_sdf <- spark_read_binary(sc, dir = test_data("raster/test1.tiff"), name = sdf_name)
+  binary_sdf <- spark_read_binary(sc, dir = test_data("raster"), name = sdf_name)
 
   raster_sdf <-
     binary_sdf %>%
@@ -91,7 +91,7 @@ test_that("Passed RS_FromArcInfoAsciiGrid from binary", {
 test_that("Passed RS_Envelope with raster", {
   ## Load
   sdf_name <- random_string("spatial_sdf")
-  binary_sdf <- spark_read_binary(sc, dir = test_data("raster/test1.tiff"), name = sdf_name)
+  binary_sdf <- spark_read_binary(sc, dir = test_data("raster"), name = sdf_name)
 
   raster_sdf <-
     binary_sdf %>%
@@ -182,7 +182,7 @@ test_that("Passed RS_Value with raster", {
 test_that("Passed RS_Values with raster", {
   ## Load
   sdf_name <- random_string("spatial_sdf")
-  binary_sdf <- spark_read_binary(sc, dir = test_data("raster/test1.tiff"), name = sdf_name)
+  binary_sdf <- spark_read_binary(sc, dir = test_data("raster"), name = sdf_name)
 
   a <-
     binary_sdf %>%

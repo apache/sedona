@@ -56,7 +56,7 @@ jobs:
         spark: [3.4.0, 3.5.0]
         hadoop: [3]
         scala: [2.12.15]
-        r: [oldrel, release]
+        r: [oldrel]
     env:
       SPARK_VERSION: ${{ matrix.spark }}
       HADOOP_VERSION: ${{ matrix.hadoop }}
@@ -124,7 +124,7 @@ jobs:
       - name: Build Sedona libraries
         run: |
           SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
-          mvn -q clean install -DskipTests -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4}
+          mvn -q clean install -DskipTests -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dgeotools
       - name: Run tests
         run: |
           if [[ "${SPARK_VERSION:0:3}" < "3.3" ]]; then

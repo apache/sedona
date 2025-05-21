@@ -27,17 +27,17 @@ import javax.media.jai.RasterFactory;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.utils.RasterUtils;
+import org.geotools.api.geometry.BoundingBox;
+import org.geotools.api.parameter.ParameterValueGroup;
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.processing.CannotCropException;
 import org.geotools.coverage.processing.operation.Crop;
-import org.geotools.geometry.Envelope2D;
 import org.geotools.geometry.jts.JTS;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.geom.Geometry;
-import org.opengis.geometry.BoundingBox;
-import org.opengis.parameter.ParameterValueGroup;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
 
 public class RasterBandEditors {
   /**
@@ -303,7 +303,7 @@ public class RasterBandEditors {
 
     // Use rasterizeGeomExtent for AOI geometries smaller than a pixel
     double[] metadata = RasterAccessors.metadata(singleBandRaster);
-    Envelope2D geomEnvelope =
+    ReferencedEnvelope geomEnvelope =
         Rasterization.rasterizeGeomExtent(geometry, singleBandRaster, metadata, allTouched);
     Geometry geomExtent = JTS.toGeometry((BoundingBox) geomEnvelope);
 

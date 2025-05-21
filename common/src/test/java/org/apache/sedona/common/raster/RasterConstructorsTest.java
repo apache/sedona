@@ -32,16 +32,16 @@ import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.utils.RasterUtils;
+import org.geotools.api.coverage.SampleDimensionType;
+import org.geotools.api.geometry.Position;
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Assert;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
-import org.opengis.coverage.SampleDimensionType;
-import org.opengis.geometry.DirectPosition;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
 
 public class RasterConstructorsTest extends RasterTestBase {
 
@@ -324,10 +324,10 @@ public class RasterConstructorsTest extends RasterTestBase {
         Constructors.geomFromWKT("POLYGON((0.1 0.1, 0.1 0.4, 0.4 0.4, 0.4 0.1, 0.1 0.1))", 0);
     GridCoverage2D rasterized =
         RasterConstructors.asRasterWithRasterExtent(geom, raster, "d", false, 100d, 0d);
-    assertEquals(0, rasterized.getEnvelope2D().x, 1e-6);
-    assertEquals(0, rasterized.getEnvelope2D().y, 1e-6);
-    assertEquals(0.5, rasterized.getEnvelope2D().width, 1e-6);
-    assertEquals(0.5, rasterized.getEnvelope2D().height, 1e-6);
+    assertEquals(0, rasterized.getEnvelope2D().getMinX(), 1e-6);
+    assertEquals(0, rasterized.getEnvelope2D().getMinY(), 1e-6);
+    assertEquals(0.5, rasterized.getEnvelope2D().getWidth(), 1e-6);
+    assertEquals(0.5, rasterized.getEnvelope2D().getHeight(), 1e-6);
     assertEquals(5, RasterAccessors.getWidth(rasterized));
     assertEquals(5, RasterAccessors.getHeight(rasterized));
     double sum = Arrays.stream(MapAlgebra.bandAsArray(rasterized, 1)).sum();
@@ -624,10 +624,8 @@ public class RasterConstructorsTest extends RasterTestBase {
           // corresponding
           // pixel in the grid coverage
           try {
-            DirectPosition actualWorldCoord =
-                tileRaster.getGridGeometry().gridToWorld(tileGridCoord);
-            DirectPosition expectedWorldCoord =
-                gridCoverage2D.getGridGeometry().gridToWorld(gridCoord);
+            Position actualWorldCoord = tileRaster.getGridGeometry().gridToWorld(tileGridCoord);
+            Position expectedWorldCoord = gridCoverage2D.getGridGeometry().gridToWorld(gridCoord);
             Assert.assertEquals(expectedWorldCoord, actualWorldCoord);
           } catch (TransformException e) {
             throw new RuntimeException(e);

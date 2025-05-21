@@ -31,6 +31,7 @@ import java.io.Serializable;
 import java.net.URI;
 import javax.media.jai.RenderedImageAdapter;
 import org.apache.sedona.common.raster.DeepCopiedRenderedImage;
+import org.geotools.api.referencing.operation.MathTransform;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
@@ -38,7 +39,6 @@ import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.objenesis.strategy.StdInstantiatorStrategy;
-import org.opengis.referencing.operation.MathTransform;
 
 public class Serde {
   private Serde() {}

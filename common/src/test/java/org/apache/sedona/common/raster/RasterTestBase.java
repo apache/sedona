@@ -27,24 +27,23 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import javax.media.jai.RasterFactory;
+import org.geotools.api.geometry.Bounds;
+import org.geotools.api.geometry.Position;
+import org.geotools.api.parameter.GeneralParameterValue;
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
+import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.gce.geotiff.GeoTiffWriter;
-import org.geotools.geometry.DirectPosition2D;
-import org.geotools.geometry.Envelope2D;
+import org.geotools.geometry.Position2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Assert;
 import org.junit.Before;
-import org.opengis.geometry.DirectPosition;
-import org.opengis.geometry.Envelope;
-import org.opengis.parameter.GeneralParameterValue;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.TransformException;
 
 public class RasterTestBase {
   String arc =
@@ -128,7 +127,8 @@ public class RasterTestBase {
         image.setRGB(i, j, new Color(color, color, color).getRGB());
       }
     }
-    return factory.create("test", image, new Envelope2D(DefaultGeographicCRS.WGS84, 0, 0, 10, 10));
+    return factory.create(
+        "test", image, ReferencedEnvelope.rect(0, 0, 10, 10, DefaultGeographicCRS.WGS84));
   }
 
   protected void assertSameCoverage(GridCoverage2D expected, GridCoverage2D actual) {
@@ -137,16 +137,16 @@ public class RasterTestBase {
 
   protected void assertSameCoverage(GridCoverage2D expected, GridCoverage2D actual, int density) {
     Assert.assertEquals(expected.getNumSampleDimensions(), actual.getNumSampleDimensions());
-    Envelope expectedEnvelope = expected.getEnvelope();
-    Envelope actualEnvelope = actual.getEnvelope();
-    assertSameEnvelope(expectedEnvelope, actualEnvelope, 1e-6);
+    Bounds expectedEnvelope = expected.getEnvelope();
+    Bounds actualEnvelope = actual.getEnvelope();
+    assertSameBounds(expectedEnvelope, actualEnvelope, 1e-6);
     CoordinateReferenceSystem expectedCrs = expected.getCoordinateReferenceSystem();
     CoordinateReferenceSystem actualCrs = actual.getCoordinateReferenceSystem();
     Assert.assertTrue(CRS.equalsIgnoreMetadata(expectedCrs, actualCrs));
     assertSameValues(expected, actual, density);
   }
 
-  protected void assertSameEnvelope(Envelope expected, Envelope actual, double epsilon) {
+  protected void assertSameBounds(Bounds expected, Bounds actual, double epsilon) {
     Assert.assertEquals(expected.getMinimum(0), actual.getMinimum(0), epsilon);
     Assert.assertEquals(expected.getMinimum(1), actual.getMinimum(1), epsilon);
     Assert.assertEquals(expected.getMaximum(0), actual.getMaximum(0), epsilon);
@@ -154,7 +154,7 @@ public class RasterTestBase {
   }
 
   protected void assertSameValues(GridCoverage2D expected, GridCoverage2D actual, int density) {
-    Envelope expectedEnvelope = expected.getEnvelope();
+    Bounds expectedEnvelope = expected.getEnvelope();
     double x0 = expectedEnvelope.getMinimum(0);
     double y0 = expectedEnvelope.getMinimum(1);
     double xStep = (expectedEnvelope.getMaximum(0) - x0) / density;
@@ -166,7 +166,7 @@ public class RasterTestBase {
       for (int j = 0; j < density; j++) {
         double x = x0 + j * xStep;
         double y = y0 + i * yStep;
-        DirectPosition position = new DirectPosition2D(x, y);
+        Position position = new Position2D(x, y);
         try {
           GridCoordinates2D gridPosition = expected.getGridGeometry().worldToGrid(position);
           if (Double.isNaN(gridPosition.getX()) || Double.isNaN(gridPosition.getY())) {

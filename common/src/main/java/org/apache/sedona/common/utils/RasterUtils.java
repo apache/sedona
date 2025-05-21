@@ -41,6 +41,13 @@ import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.raster.RasterAccessors;
 import org.apache.sedona.common.raster.RasterEditors;
+import org.geotools.api.coverage.grid.GridEnvelope;
+import org.geotools.api.metadata.spatial.PixelOrientation;
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
+import org.geotools.api.referencing.operation.MathTransform;
+import org.geotools.api.referencing.operation.TransformException;
+import org.geotools.api.util.InternationalString;
 import org.geotools.coverage.Category;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.GridSampleDimension;
@@ -49,20 +56,12 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
-import org.geotools.geometry.DirectPosition2D;
+import org.geotools.geometry.Position2D;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.geotools.util.ClassChanger;
 import org.geotools.util.NumberRange;
 import org.locationtech.jts.geom.Geometry;
-import org.opengis.coverage.grid.GridEnvelope;
-import org.opengis.geometry.DirectPosition;
-import org.opengis.metadata.spatial.PixelOrientation;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
-import org.opengis.referencing.operation.TransformException;
-import org.opengis.util.InternationalString;
 
 /** Utility functions for working with GridCoverage2D objects. */
 public class RasterUtils {
@@ -466,7 +465,7 @@ public class RasterUtils {
 
   public static Point2D getWorldCornerCoordinates(GridCoverage2D raster, int colX, int rowY)
       throws TransformException {
-    Point2D.Double gridCoord = new DirectPosition2D(colX - 1, rowY - 1);
+    Point2D.Double gridCoord = new Position2D(colX - 1, rowY - 1);
     return raster
         .getGridGeometry()
         .getGridToCRS2D(PixelOrientation.UPPER_LEFT)
@@ -488,7 +487,7 @@ public class RasterUtils {
   public static Point2D getWorldCornerCoordinatesWithRangeCheck(
       GridCoverage2D raster, int colX, int rowY)
       throws IndexOutOfBoundsException, TransformException {
-    Point2D.Double gridCoordinates2D = new DirectPosition2D(colX - 1, rowY - 1);
+    Point2D.Double gridCoordinates2D = new Position2D(colX - 1, rowY - 1);
     if (!(raster.getGridGeometry().getGridRange2D().contains(gridCoordinates2D)))
       throw new IndexOutOfBoundsException(
           String.format(
@@ -501,14 +500,14 @@ public class RasterUtils {
 
   public static int[] getGridCoordinatesFromWorld(
       GridCoverage2D raster, double longitude, double latitude) throws TransformException {
-    DirectPosition2D directPosition2D =
-        new DirectPosition2D(raster.getCoordinateReferenceSystem2D(), longitude, latitude);
-    DirectPosition worldCoord =
+    Point2D directPosition2D =
+        new Position2D(raster.getCoordinateReferenceSystem2D(), longitude, latitude);
+    Point2D worldCoord =
         raster
             .getGridGeometry()
             .getCRSToGrid2D(PixelOrientation.UPPER_LEFT)
-            .transform((DirectPosition) directPosition2D, null);
-    double[] coords = worldCoord.getCoordinate();
+            .transform(directPosition2D, null);
+    double[] coords = new double[] {worldCoord.getX(), worldCoord.getY()};
     int[] gridCoords = new int[] {(int) Math.floor(coords[0]), (int) Math.floor(coords[1])};
     return gridCoords;
   }
