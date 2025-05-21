@@ -303,7 +303,8 @@ public class RasterBandEditors {
 
     // Use rasterizeGeomExtent for AOI geometries smaller than a pixel
     double[] metadata = RasterAccessors.metadata(singleBandRaster);
-    Envelope2D geomEnvelope = Rasterization.rasterizeGeomExtent(geometry, singleBandRaster, metadata, allTouched);
+    Envelope2D geomEnvelope =
+        Rasterization.rasterizeGeomExtent(geometry, singleBandRaster, metadata, allTouched);
     Geometry geomExtent = JTS.toGeometry((BoundingBox) geomEnvelope);
 
     // Crop the raster
