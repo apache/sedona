@@ -27,7 +27,7 @@ pip install apache-sedona[flink] shapely attr
 
 Download the required JAR files from Maven Central:
 
-* sedona-flink-shaded_2.12:jar:1.7.1
+* sedona-flink-shaded_2.12:jar:{{ sedona.current_version }}
 * geotools-wrapper-{{ sedona.current_geotools }}.jar
 
 Follow the official Flink documentation to install the JAR files in your Flink cluster or PyFlink application.
