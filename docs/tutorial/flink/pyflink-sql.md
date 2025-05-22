@@ -19,6 +19,7 @@
 
 To set up the PyFlink with Apache Sedona, please follow the guide. [PyFlink](../../setup/flink/install-python.md)
 When you finish it, you can run the following code to test if everything works.
+
 ```python
 from sedona.flink import SedonaContext
 from pyflink.datastream import StreamExecutionEnvironment
@@ -47,6 +48,7 @@ table_env.\
 
 [loads(bytes(el[0])) for el in result]
 ```
+
 ```
 [<POINT (1 2)>]
 ```
