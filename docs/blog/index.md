@@ -1,5 +1,6 @@
 ---
 hide:
+<<<<<<< HEAD
 
   - navigation
 
@@ -24,5 +25,11 @@ title: Blog
 # specific language governing permissions and limitations
 # under the License.
 -->
+=======
+  - navigation
+---
+
+# Blog
+>>>>>>> 3128e022f4 (blog refinements)
 
 The official source for Apache Sedona news, technical insights, release updates, and best practices in large-scale spatial data management.

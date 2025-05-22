@@ -5,7 +5,7 @@ authors:
 
   - matt_powers
   - kelly
-
+title: Geospatial Data on Iceberg - The Lakehouse Advantage
 ---
 
 <<<<<<< HEAD
@@ -29,39 +29,51 @@ authors:
  under the License.
  -->
 
+<<<<<<< HEAD
 >>>>>>> 14074d417b ([DOCS] putting metadata at top)
 # Geospatial Data on Iceberg: The Lakehouse Advantage
 
 This post delves into the benefits of Lakehouse architecture for spatial tables
 and differentiate its approach from standard data warehouses and data lakes.
+=======
+This post discusses the benefits of Lakehouse architecture for spatial
+tables, comparing the Lakehouse approach to standard data warehouses and data lakes.
+>>>>>>> 3128e022f4 (blog refinements)
 
 While spatial data requires different types of metadata and optimizations,
 it doesn't require entirely different file formats.
 
 Recent advancements, specifically the addition of native geometry/geography types to
 Apache Parquet and the Apache Iceberg V3 specification, now enable the spatial data community
-to fully integrate with and take advantage of Lakehouse architectures, overcoming previous
-ecosystem fragmentation.
+to fully integrate with Lakehouse architectures.
 <!-- more -->
 
 Many of the benefits that Lakehouses provide for tabular data also apply to spatial data, including:
 
 * **Versioned data:** Lakehouses automatically track changes to spatial features over time, creating distinct versions ideal for historical analysis and auditing how geometries or attributes evolved.
-* **Time travel:** This capability allows querying spatial data (like features, boundaries, or locations) exactly as that data existed at a specific prior time or version, crucial for reproducibility and auditing historical spatial relationships.
+* **Time travel:** Versioning lets you query spatial data (like features, boundaries, or locations) exactly as that data existed at a specific prior time, crucial for understanding historical spatial analysis.
 * **Schema enforcement:** Lakehouses enforce schemas to ensure spatial data consistency by guaranteeing correct geometry types and attribute formats, which improve data quality and query reliability.
-* **Database Optimizations:** Techniques like geographic partitioning, data skipping using bounding boxes, and columnar storage accelerate spatial queries and improve storage efficiency within the Lakehouse.
+* **Database Optimizations:** Techniques like geographic partitioning, data skipping using bounding boxes, and columnar storage accelerate spatial queries and improve storage efficiency within Lakehouse.
 
-## Data Lakehouse Architecture Overview
+## Data Lakehouse architecture overview
 
-Lakehouse architectures use open table formats like Apache Iceberg, Delta Lake, or Hudi to manage data stored on underlying platforms like cloud object storage (e.g. Amazon S3, or Google Cloud Storage).
+Lakehouse architectures use open table formats like Apache Iceberg, Delta Lake, or Hudi to manage data
+stored on underlying platforms like cloud object storage (for example Amazon S3 or Google Cloud Storage).
 
-Tables in Lakehouses are governed by a catalog. These catalogs don't store files–files are stored in cloud object storage. Rather, catalogs maintain records of related metadata information, like names of available databases/tables, table schemas, historical information needed for features like time travel. The catalog enables tools like Apache Spark, Trino, and Apache Flink, to know the location of your table or its latest state–enabling accurate database queries and analysis.
+Lakehouse Tables are governed by a catalog. These catalogs don't store files since files are kept in cloud object storage.
+Rather, catalogs maintain records of related metadata information, like names of available
+databases/tables, table schemas, versioning information needed for features like time travel.
 
-Example Lakehouse catalogs include Databricks' Unity catalog and the open source Apache Polaris.
+Example Lakehouse catalogs include Databricks' Unity Catalog and the open source Apache Polaris.
 
-The catalogs allow for role-based access control (RBAC) at the tabular level and features like single-table transactions, which ensure that relevant changes to dependent tables are applied atomically and without manual intervention.
+The Lakehouse Catalog enables tools like Apache Spark, Trino, and Apache Flink to know your table's location or its latest
+state, enabling accurate database queries and analysis.
 
-You can query tables in the Lakehouse Architecture for business intelligence (BI) reporting, data science, machine learning, and other complex analyses.
+The catalogs allow for role-based access control (RBAC) at the table level and single-table
+transactions.
+
+You can query tables in the Lakehouse Architecture for business intelligence (BI) reporting,
+data science, machine learning, and other complex analyses.
 
 ![Lakehouse Architecture](../../image/lakehouse-architecture.png)
 
@@ -76,9 +88,39 @@ The Lakehouse Architecture offers several advantages:
 
 ## Lakehouses & spatial data
 
-Earlier, we mentioned 2 important features of lakehouses: Single-table transactions and RBAC. Let's delve into how these 2 features can be beneficial for working with spatial data.
+Earlier, we mentioned 2 important features of Lakehouses: Single-table transactions and RBAC. Let's delve into how these 2 features can be beneficial for working with spatial data.
 
 ### Single-table transactions
+
+```mermaid
+    erDiagram
+        SALES_TERRITORIES ||--|{ STORES : "contains"
+        STORES ||--o{ SALES_PERFORMANCE : "generates"
+
+        SALES_TERRITORIES {
+            int territory_id PK "Primary Key"
+            varchar territory_name "Name of the sales territory"
+            polygon geometry "Polygon geometry defining the territory boundary"
+        }
+
+        STORES {
+            int store_id PK "Primary Key"
+            varchar store_name "Name of the store"
+            varchar address "Store's address"
+            varchar city "City"
+            varchar state "State (e.g., NJ for New Jersey)"
+            point geometry "Point geometry for store location"
+            int territory_id FK "Foreign Key referencing sales_territories.territory_id"
+        }
+
+        SALES_PERFORMANCE {
+            int performance_id PK "Primary Key"
+            int store_id FK "Foreign Key referencing stores.store_id"
+            date sale_date "Date of sales data"
+            decimal sales_amount "Sales figures"
+            varchar other_details "Other non-geometric performance data"
+        }
+```
 
 **Scenario:** Imagine a retail company is closing a store in New Jersey. Let's assume that this company maintains 3 different tables: `stores` (containing point geometry), `sales_territories` (containing polygon geometry), and `sales_performance` (containing no geometry).
 
@@ -86,7 +128,7 @@ These tables are interdependent: The `store_id` field is in `stores` and `sales_
 
 The `stores` table is indirectly linked to `sales_performance` via the `sales_territories` table.
 
-**Impact:** With **single-table transactions**, as featured in many lakehouses, each update to an individual table is atomic (all-or-nothing). In the aforementioned scenario, when a store is closed:
+**Impact:** With **single-table transactions**, as featured in many Lakehouses, each update to an individual table is atomic (all-or-nothing). In the aforementioned scenario, when a store is closed:
 
 The operation to update the store's status in the `stores` table is completed as one atomic transaction on that table.
 
