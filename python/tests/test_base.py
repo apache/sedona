@@ -54,16 +54,19 @@ class TestBase:
                         "spark.sql.extensions",
                         "org.apache.sedona.sql.SedonaSqlExtensions",
                     )
-                    .config(
-                        "spark.sedona.stac.load.itemsLimitMax",
-                        "20",
-                    )
                 )
             else:
-                builder = builder.master("local[*]").config(
+                builder = builder.master("local[*]")
+
+            builder = (
+                builder.config(
                     "spark.sedona.stac.load.itemsLimitMax",
                     "20",
                 )
+                # Pandas on PySpark doesn't work with ANSI mode, which is enabled by default
+                # in Spark 4
+                .config("spark.sql.ansi.enabled", "false")
+            )
 
             # Allows the Sedona .jar to be explicitly set by the caller (e.g, to run
             # pytest against a freshly-built development version of Sedona)
