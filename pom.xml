@@ -760,13 +760,6 @@
                     <value>4.0</value>
                 </property>
             </activation>
-            <repositories>
-                <repository>
-                    <id>spark-4.0.0-rc4</id>
-                    <name>Spark 4.0.0 RC4 Staging</name>
-                    <url>https://repository.apache.org/content/repositories/orgapachespark-1480/</url>
-                </repository>
-            </repositories>
             <properties>
                 <spark.version>4.0.0</spark.version>
                 <spark.compat.version>4.0</spark.compat.version>
