@@ -117,7 +117,7 @@ jobs:
           fi
 
           if [ "${SPARK_VERSION}" == "4.0.0" ]; then
-              pip install https://dist.apache.org/repos/dist/dev/spark/v4.0.0-rc4-bin/pyspark-4.0.0.tar.gz pandas shapely apache-sedona pyarrow
+              pip install pyspark==4.0.0 pandas shapely apache-sedona pyarrow
               export SPARK_HOME=$(python -c "import pyspark; print(pyspark.__path__[0])")
           fi
 
