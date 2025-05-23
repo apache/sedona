@@ -53,7 +53,7 @@ Many of the benefits that Lakehouses provide for tabular data also apply to spat
 * **Versioned data:** Lakehouses automatically track changes to spatial features over time, creating distinct versions ideal for historical analysis and auditing how geometries or attributes evolved.
 * **Time travel:** Versioning lets you query spatial data (like features, boundaries, or locations) exactly as that data existed at a specific prior time, crucial for understanding historical spatial analysis.
 * **Schema enforcement:** Lakehouses enforce schemas to ensure spatial data consistency by guaranteeing correct geometry types and attribute formats, which improve data quality and query reliability.
-* **Database Optimizations:** Techniques like geographic partitioning, data skipping using bounding boxes, and columnar storage accelerate spatial queries and improve storage efficiency within Lakehouse.
+* **Database optimizations:** Techniques like geographic partitioning, data skipping using bounding boxes, and columnar storage accelerate spatial queries and improve storage efficiency within Lakehouse.
 
 ## Data Lakehouse architecture overview
 
@@ -92,48 +92,48 @@ Earlier, we mentioned 2 important features of Lakehouses: Single-table transacti
 
 ### Single-table transactions
 
-```mermaid
-    erDiagram
-        SALES_TERRITORIES ||--|{ STORES : "contains"
-        STORES ||--o{ SALES_PERFORMANCE : "generates"
-
-        SALES_TERRITORIES {
-            int territory_id PK "Primary Key"
-            varchar territory_name "Name of the sales territory"
-            polygon geometry "Polygon geometry defining the territory boundary"
-        }
-
-        STORES {
-            int store_id PK "Primary Key"
-            varchar store_name "Name of the store"
-            varchar address "Store's address"
-            varchar city "City"
-            varchar state "State (e.g., NJ for New Jersey)"
-            point geometry "Point geometry for store location"
-            int territory_id FK "Foreign Key referencing sales_territories.territory_id"
-        }
-
-        SALES_PERFORMANCE {
-            int performance_id PK "Primary Key"
-            int store_id FK "Foreign Key referencing stores.store_id"
-            date sale_date "Date of sales data"
-            decimal sales_amount "Sales figures"
-            varchar other_details "Other non-geometric performance data"
-        }
-```
-
-**Scenario:** Imagine a retail company is closing a store in New Jersey. Let's assume that this company maintains 3 different tables: `stores` (containing point geometry), `sales_territories` (containing polygon geometry), and `sales_performance` (containing no geometry).
+Imagine a retail company is closing a store in New Jersey. Let's assume that this company maintains 3 different tables: `stores` (containing point geometry), `sales_territories` (containing polygon geometry), and `sales_performance` (containing no geometry).
 
 These tables are interdependent: The `store_id` field is in `stores` and `sales_territories` and `territory_id` is in `sales_territories` and `sales_performance`.
 
 The `stores` table is indirectly linked to `sales_performance` via the `sales_territories` table.
 
-**Impact:** With **single-table transactions**, as featured in many Lakehouses, each update to an individual table is atomic (all-or-nothing). In the aforementioned scenario, when a store is closed:
+With **single-table transactions**, as featured in many Lakehouses, each update to an individual table is atomic (all-or-nothing). In this scenario, when a store is closed:
 
 The operation to update the store's status in the `stores` table is completed as one atomic transaction on that table.
 
 Any corresponding changes to the `sales_territories` table (e.g., altering polygon boundaries or updating `store_id` associations) would be a separate atomic transaction on the `sales_territories` table.
 Similarly, updates to the `sales_performance` table (e.g., adjusting sales targets linked to the `territory_id`) would be performed as an atomic transaction on that specific table.
+
+```mermaid
+erDiagram
+    SALES_TERRITORIES ||--|{ STORES : "contains"
+    STORES ||--o{ SALES_PERFORMANCE : "generates"
+
+    SALES_TERRITORIES {
+        int territory_id PK "Primary Key"
+        varchar territory_name "Name of the sales territory"
+        polygon geometry "Polygon geometry defining the territory boundary"
+    }
+
+    STORES {
+        int store_id PK "Primary Key"
+        varchar store_name "Name of the store"
+        varchar address "Store's address"
+        varchar city "City"
+        varchar state "State (e.g., NJ for New Jersey)"
+        point geometry "Point geometry for store location"
+        int territory_id FK "Foreign Key referencing sales_territories.territory_id"
+    }
+
+    SALES_PERFORMANCE {
+        int performance_id PK "Primary Key"
+        int store_id FK "Foreign Key referencing stores.store_id"
+        date sale_date "Date of sales data"
+        decimal sales_amount "Sales figures"
+        varchar other_details "Other non-geometric performance data"
+    }
+```
 
 This individual atomicity ensures that each table remains consistent after its specific update. For example, the `stores` table won't be left in a partially updated state.
 
@@ -145,7 +145,8 @@ makes them all visible simultaneously (that would require multi-table transactio
 
 By ensuring each step is completed successfully and atomically, the overall process is far more reliable.
 
-If an update to `sales_territories` were to fail, the `stores` table (from its preceding successful transaction) would remain consistent, and the `sales_territories` table would roll back its own failed changes, preventing corruption within that table.
+If an update to `sales_territories` were to fail, the `stores` table (from its preceding successful transaction) would
+remain consistent, and the `sales_territories` table would roll back its own failed changes, preventing corruption within that table.
 
 Developers could implement application logic or an orchestration layer (like Apache Airflow) separately in order to manage
 the overall consistency across tables, potentially by handling compensating transactions if a later step fails.
@@ -162,7 +163,8 @@ The following are a few examples of data lakes:
 * GeoJSON files stored in Azure Blob Storage
 * CSV files with WKT geometry data stored in GCP
 
-Generally, data lakes lack built-in mechanisms to coordinate atomic changes across multiple files or objects. As a result of this and other architectural limitations, data lakes do not support reliable single-table transactions.
+Generally, data lakes lack built-in mechanisms to coordinate atomic changes across multiple files or objects.
+As a result of this and other architectural limitations, data lakes do not support reliable single-table transactions.
 
 Consequently, traditional data lakes present challenges for common data tasks: they struggle to efficiently execute developer-centric operations like `DELETE` and `MERGE`; modifying datasets often requires downtime to maintain consistency during file rewrites; and they typically lack the sophisticated performance optimizations (like advanced indexing) found in more performant database systems.
 
@@ -184,7 +186,7 @@ In the next section, we'll discuss how to create tables with Iceberg.
 
 ## Creating tables with Iceberg
 
-The following code sample demonstrates how to create and populate an Iceberg table within a Lakehouse. In this example, we'll create a `customers` table with `id` and `first_name columns:
+The following code sample demonstrates how to create and populate an Iceberg table within a Lakehouse. In this example, we'll create a `customers` table with `id` and `first_name` columns:
 
 ```py
 CREATE TABLE local.db.customers (id string, first_name string)
