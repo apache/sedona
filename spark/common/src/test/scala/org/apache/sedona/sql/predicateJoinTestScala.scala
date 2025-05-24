@@ -381,7 +381,7 @@ class predicateJoinTestScala extends TestBaseScala {
         .load(csvPointInputLocation)
       pointCsvDF.createOrReplaceTempView("pointtable")
       var pointDf = sparkSession
-        .sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape from pointtable where pointtable._c0 > 10000")
+        .sql("select ST_Point(cast(pointtable._c0 as Decimal(24,20)),cast(pointtable._c1 as Decimal(24,20))) as pointshape from pointtable where cast(pointtable._c0 as Decimal(24,20)) > 10000")
         .repartition(1)
       pointDf.createOrReplaceTempView("pointdf")
 
