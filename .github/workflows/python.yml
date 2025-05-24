@@ -84,14 +84,11 @@ jobs:
             python: '3.8'
           - spark: '3.4.0'
             scala: '2.12.8'
-            python: '3.7'
+            python: '3.8'
           - spark: '3.4.0'
             scala: '2.12.8'
-            python: '3.7'
-            shapely: '1'
-          - spark: '3.3.0'
-            scala: '2.12.8'
             python: '3.8'
+            shapely: '1'
 
     env:
       VENV_PATH: /home/runner/.local/share/virtualenvs/python-${{ matrix.python }}
