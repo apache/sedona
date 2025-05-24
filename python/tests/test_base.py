@@ -44,17 +44,17 @@ class TestBase:
 
             builder = SedonaContext.builder().appName("SedonaSparkTest")
             if SPARK_REMOTE:
-                builder = (
-                    builder.remote(SPARK_REMOTE)
-                    .config(
+                builder = builder.remote(SPARK_REMOTE).config(
+                    "spark.sql.extensions",
+                    "org.apache.sedona.sql.SedonaSqlExtensions",
+                )
+
+                # Connect is packaged with Spark 4+
+                if pyspark.__version__ < "4":
+                    builder = builder.config(
                         "spark.jars.packages",
                         f"org.apache.spark:spark-connect_2.12:{pyspark.__version__}",
                     )
-                    .config(
-                        "spark.sql.extensions",
-                        "org.apache.sedona.sql.SedonaSqlExtensions",
-                    )
-                )
             else:
                 builder = builder.master("local[*]")
 
