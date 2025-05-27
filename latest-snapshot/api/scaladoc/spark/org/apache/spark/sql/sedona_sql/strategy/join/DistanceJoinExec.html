@@ -3,9 +3,9 @@
         <head>
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-          <title>org.apache.sedona:sedona-spark-common-3.3_2.12 1.8.0-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.strategy.join.DistanceJoinExec</title>
-          <meta name="description" content="org.apache.sedona sedona - spark - common - 3.3 2.12 1.8.0 - SNAPSHOT API - org.apache.spark.sql.sedona sql.strategy.join.DistanceJoinExec" />
-          <meta name="keywords" content="org.apache.sedona sedona spark common 3.3 2.12 1.8.0 SNAPSHOT API org.apache.spark.sql.sedona sql.strategy.join.DistanceJoinExec" />
+          <title>org.apache.sedona:sedona-spark-common-3.4_2.12 1.8.0-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.strategy.join.DistanceJoinExec</title>
+          <meta name="description" content="org.apache.sedona sedona - spark - common - 3.4 2.12 1.8.0 - SNAPSHOT API - org.apache.spark.sql.sedona sql.strategy.join.DistanceJoinExec" />
+          <meta name="keywords" content="org.apache.sedona sedona spark common 3.4 2.12 1.8.0 SNAPSHOT API org.apache.spark.sql.sedona sql.strategy.join.DistanceJoinExec" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       
@@ -28,7 +28,7 @@
         </head>
         <body>
       <div id="search">
-        <span id="doc-title">org.apache.sedona:sedona-spark-common-3.3_2.12 1.8.0-SNAPSHOT API<span id="doc-version"></span></span>
+        <span id="doc-title">org.apache.sedona:sedona-spark-common-3.4_2.12 1.8.0-SNAPSHOT API<span id="doc-version"></span></span>
         <span class="close-results"><span class="left">&lt;</span> Back</span>
         <div id="textfilter">
           <span class="input">
@@ -850,6 +850,22 @@ ST_Distance(a.geom, b.geom) &lt;= 1
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>SparkPlan</dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.SparkPlan#doExecuteWrite" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="doExecuteWrite(writeFilesSpec:org.apache.spark.sql.execution.datasources.WriteFilesSpec):org.apache.spark.rdd.RDD[org.apache.spark.sql.connector.write.WriterCommitMessage]"></a><a id="doExecuteWrite(WriteFilesSpec):RDD[WriterCommitMessage]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/DistanceJoinExec.html#doExecuteWrite(writeFilesSpec:org.apache.spark.sql.execution.datasources.WriteFilesSpec):org.apache.spark.rdd.RDD[org.apache.spark.sql.connector.write.WriterCommitMessage]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">doExecuteWrite</span><span class="params">(<span name="writeFilesSpec">writeFilesSpec: <span class="extype" name="org.apache.spark.sql.execution.datasources.WriteFilesSpec">WriteFilesSpec</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.rdd.RDD">RDD</span>[<span class="extype" name="org.apache.spark.sql.connector.write.WriterCommitMessage">WriterCommitMessage</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>SparkPlan</dd></dl></div>
     </li><li name="org.apache.spark.sql.execution.SparkPlan#doPrepare" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="doPrepare():Unit"></a>
       <span class="permalink">
@@ -1039,6 +1055,22 @@ ST_Distance(a.geom, b.geom) &lt;= 1
       </span>
       <span class="symbol">
         <span class="name">executeToIterator</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Iterator">Iterator</span>[<span class="extype" name="org.apache.spark.sql.catalyst.InternalRow">InternalRow</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>SparkPlan</dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.SparkPlan#executeWrite" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="executeWrite(writeFilesSpec:org.apache.spark.sql.execution.datasources.WriteFilesSpec):org.apache.spark.rdd.RDD[org.apache.spark.sql.connector.write.WriterCommitMessage]"></a><a id="executeWrite(WriteFilesSpec):RDD[WriterCommitMessage]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/DistanceJoinExec.html#executeWrite(writeFilesSpec:org.apache.spark.sql.execution.datasources.WriteFilesSpec):org.apache.spark.rdd.RDD[org.apache.spark.sql.connector.write.WriterCommitMessage]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">executeWrite</span><span class="params">(<span name="writeFilesSpec">writeFilesSpec: <span class="extype" name="org.apache.spark.sql.execution.datasources.WriteFilesSpec">WriteFilesSpec</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.rdd.RDD">RDD</span>[<span class="extype" name="org.apache.spark.sql.connector.write.WriterCommitMessage">WriterCommitMessage</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>SparkPlan</dd></dl></div>
@@ -1863,6 +1895,38 @@ ST_Distance(a.geom, b.geom) &lt;= 1
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>QueryPlan</dd></dl></div>
+    </li><li name="org.apache.spark.sql.catalyst.trees.TreeNode#multiTransformDown" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="multiTransformDown(rule:PartialFunction[BaseType,Seq[BaseType]]):Stream[BaseType]"></a><a id="multiTransformDown(PartialFunction[SparkPlan,Seq[SparkPlan]]):Stream[SparkPlan]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/DistanceJoinExec.html#multiTransformDown(rule:PartialFunction[BaseType,Seq[BaseType]]):Stream[BaseType]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">multiTransformDown</span><span class="params">(<span name="rule">rule: <span class="extype" name="scala.PartialFunction">PartialFunction</span>[<span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span>, <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span>]]</span>)</span><span class="result">: <span class="extype" name="scala.Stream">Stream</span>[<span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TreeNode</dd></dl></div>
+    </li><li name="org.apache.spark.sql.catalyst.trees.TreeNode#multiTransformDownWithPruning" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="multiTransformDownWithPruning(cond:org.apache.spark.sql.catalyst.trees.TreePatternBits=&gt;Boolean,ruleId:org.apache.spark.sql.catalyst.rules.RuleId)(rule:PartialFunction[BaseType,Seq[BaseType]]):Stream[BaseType]"></a><a id="multiTransformDownWithPruning((TreePatternBits)⇒Boolean,RuleId)(PartialFunction[SparkPlan,Seq[SparkPlan]]):Stream[SparkPlan]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/DistanceJoinExec.html#multiTransformDownWithPruning(cond:org.apache.spark.sql.catalyst.trees.TreePatternBits=&gt;Boolean,ruleId:org.apache.spark.sql.catalyst.rules.RuleId)(rule:PartialFunction[BaseType,Seq[BaseType]]):Stream[BaseType]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">multiTransformDownWithPruning</span><span class="params">(<span name="cond">cond: (<span class="extype" name="org.apache.spark.sql.catalyst.trees.TreePatternBits">TreePatternBits</span>) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="ruleId">ruleId: <span class="extype" name="org.apache.spark.sql.catalyst.rules.RuleId">RuleId</span></span>)</span><span class="params">(<span name="rule">rule: <span class="extype" name="scala.PartialFunction">PartialFunction</span>[<span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span>, <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span>]]</span>)</span><span class="result">: <span class="extype" name="scala.Stream">Stream</span>[<span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TreeNode</dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -2017,7 +2081,7 @@ ST_Distance(a.geom, b.geom) &lt;= 1
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TraitJoinQueryExec.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryExec">TraitJoinQueryExec</a></dd></dl></div>
-    </li><li name="org.apache.spark.sql.execution.SparkPlan#outputOrdering" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="org.apache.spark.sql.catalyst.plans.QueryPlan#outputOrdering" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="outputOrdering:Seq[org.apache.spark.sql.catalyst.expressions.SortOrder]"></a><a id="outputOrdering:Seq[SortOrder]"></a>
       <span class="permalink">
       <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/DistanceJoinExec.html#outputOrdering:Seq[org.apache.spark.sql.catalyst.expressions.SortOrder]" title="Permalink">
@@ -2032,7 +2096,7 @@ ST_Distance(a.geom, b.geom) &lt;= 1
         <span class="name">outputOrdering</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.SortOrder">SortOrder</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>SparkPlan</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>QueryPlan</dd></dl></div>
     </li><li name="org.apache.spark.sql.execution.SparkPlan#outputPartitioning" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="outputPartitioning:org.apache.spark.sql.catalyst.plans.physical.Partitioning"></a><a id="outputPartitioning:Partitioning"></a>
       <span class="permalink">
