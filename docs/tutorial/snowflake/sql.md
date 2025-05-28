@@ -34,7 +34,6 @@ Alternatively, use another database and specify the fully qualified name e.g. `S
 
 ## Create a sample table
 
-
 Let's create a `city_tbl` that contains the locations and names of cities. Each location is a WKT string.
 
 ```sql
@@ -252,6 +251,7 @@ Introduction: Find geometries from A and geometries from B such that each geomet
 Example:
 
 Create the illustrative tables:
+
 ```sql
 CREATE OR REPLACE TABLE polygondf AS
 SELECT SEDONA.ST_GeomFromText('POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))') polygonshape;
@@ -297,8 +297,6 @@ WHERE ST_Contains(polygondf.polygonshape,pointdf.pointshape)
 ```
 
 This also work natively with other predicates like `ST_Intersects` and `ST_Within`.
- 
-
 
 ## Distance join
 
@@ -306,8 +304,6 @@ This also work natively with other predicates like `ST_Intersects` and `ST_Withi
 	Sedona distance join in Snowflake does not trigger Sedona's optimized spatial join algorithm while Sedona Spark does. It uses Snowflake's default Cartesian join which is very slow. Therefore, it is recommended to use Sedona's S2-based join or Snowflake's native ST functions + native `Geography` type to do range join, which will trigger Snowflake's `GeoJoin` algorithm.
 
 Introduction: Find geometries from A and geometries from B such that the distance of each geometry pair is less or equal than a certain distance. It supports the planar Euclidean distance calculators `SEDONA.ST_Distance`, `SEDONA.ST_HausdorffDistance`, `SEDONA.ST_FrechetDistance` and the meter-based geodesic distance calculators `SEDONA.ST_DistanceSpheroid` and `SEDONA.ST_DistanceSphere`. Snowflake only natively supports `ST_Distance`.
-
-
 
 First create two new illustrative tables with a single geometry.
 
@@ -353,12 +349,12 @@ FROM polygondf, polygondf2
 WHERE SEDONA.ST_FrechetDistance(polygondf.polygonshape, polygondf2.polygonshape)  <= 0
 ```
 
-Note that only the Hausdorff distance takes in a third `densityFraction` parameter in $(0,1]$ with smaller values giving more accurate results. 
+Note that only the Hausdorff distance takes in a third `densityFraction` parameter in $(0,1]$ with smaller values giving more accurate results.
 
 !!!warning
 	If you use planar Euclidean distance functions like `SEDONA.ST_Distance`, `SEDONA.ST_HausdorffDistance` or `SEDONA.ST_FrechetDistance` as the predicate, Sedona doesn't control the distance's unit (degree or meter). It is same with the geometry. If your coordinates are in the longitude and latitude system, the unit of `distance` should be degree instead of meter or mile. To change the geometry's unit, please either transform the coordinate reference system to a meter-based system. See [SEDONA.ST_Transform](../../api/snowflake/vector-data/Function.md#st_transform). If you don't want to transform your data, please consider using `SEDONA.ST_DistanceSpheroid` or `SEDONA.ST_DistanceSphere`.
 
-For instance, the following returns roughly 78.45 kilometers, since the geometries are assumed to be in degrees of longitude and latitude, even if no crs was explicitely set.
+For instance, the following returns roughly 78.45 kilometers, since the geometries are assumed to be in degrees of longitude and latitude, even if no CRS was explicitly set.
 
 ```sql
 SELECT SEDONA.ST_DistanceSpheroid(pointdf.pointshape,pointdf2.pointshape)
@@ -367,22 +363,20 @@ FROM pointdf, pointdf2
 
 As the following query illustrates, running Snowflake's native `ST_DISTANCE` on `GEOGRAPHY` objects will return a result similar to `SEDONA.ST_DistanceSphere` and `SEDONA.ST_DistanceSpheroid`:
 
-
-
 ```sql
-SELECT 
+SELECT
     SEDONA.ST_DistanceSphere(
-        pointdf.pointshape, 
+        pointdf.pointshape,
         pointdf2.pointshape
-    ) SEDONA_ST_DistanceSphere, 
+    ) SEDONA_ST_DistanceSphere,
     --
     SEDONA.ST_DistanceSpheroid(
-        pointdf.pointshape, 
+        pointdf.pointshape,
         pointdf2.pointshape
-    ) SEDONA_ST_DistanceSpheroid, 
+    ) SEDONA_ST_DistanceSpheroid,
     --
     ST_DISTANCE(
-        TO_GEOGRAPHY(SEDONA.st_astext(pointdf.pointshape)), 
+        TO_GEOGRAPHY(SEDONA.st_astext(pointdf.pointshape)),
         TO_GEOGRAPHY(SEDONA.st_astext(pointdf2.pointshape) )
     ) SFKL_ST_DISTANCE
 FROM pointdf, pointdf2
@@ -390,14 +384,13 @@ FROM pointdf, pointdf2
 
 Output:
 
-
 | SEDONA_ST_DISTANCESPHERE | SEDONA_ST_DISTANCESPHEROID | SFKL_ST_DISTANCE |
 | ------------------------ | -------------------------- | ---------------- |
 | 78626.28640698           | 78451.248031239            | 78626.311089506  |
 
 ## Google S2 based approximate equi-join
 
-You can use Sedona's built-in Google S2 functions to perform an approximate equi-join. This algorithm leverages Snowflake's internal equi-join algorithm and might be performant given that you can opt to skip the refinement step  by sacrificing query accuracy. Sedona's S2 functions are a nice complement to Snowflake's native H3 and Geohash functions. 
+You can use Sedona's built-in Google S2 functions to perform an approximate equi-join. This algorithm leverages Snowflake's internal equi-join algorithm and might be performant given that you can opt to skip the refinement step  by sacrificing query accuracy. Sedona's S2 functions are a nice complement to Snowflake's native H3 and Geohash functions.
 
 Please use the following steps:
 
@@ -436,8 +429,6 @@ WHERE lcs.cellId = rcs.cellId AND ST_Contains(lcs.geom, rcs.geom)
 
 As you see, compared to the query in Step 2, we added one more filter, which is `ST_Contains`, to remove false positives. You can also use `ST_Intersects` and so on.
 
-
-
 !!!tip
 	You can skip this step if you don't need 100% accuracy and want faster query speed.
 
@@ -466,7 +457,7 @@ GROUP BY (lcs_geom, rcs_geom)
 
 ### 5. Putting it all together
 
-The following queries creates 2 regions of interests and 5 different spatial queries in the form of bounding boxes in longitude, latitude. It then computes S2 coverings of both tables and merges on the S2 cell ID. A spatial filter can be applied to the original geometries to guarantee the exactness of the join. 
+The following queries creates 2 regions of interests and 5 different spatial queries in the form of bounding boxes in longitude, latitude. It then computes S2 coverings of both tables and merges on the S2 cell ID. A spatial filter can be applied to the original geometries to guarantee the exactness of the join.
 
 The following example uses Snowflake's native `ST_GeogFromText` (treated as geographies), but also works with `ST_GeomFromText`. In both cases, note `SEDONA.ST_S2CellIDs` takes in a Snowflake `GEOGRAPHY` or `GEOMETRY` object along with an integer S2 precision.
 
@@ -474,12 +465,12 @@ The following example uses Snowflake's native `ST_GeogFromText` (treated as geog
 -- lng/lat format: no need to flip
 -- lefts are area of interest (AOI)
 with lefts AS (
-  SELECT index AS poly_id_left, value AS wkt FROM TABLE( 
+  SELECT index AS poly_id_left, value AS wkt FROM TABLE(
       SPLIT_TO_TABLE (
           'POLYGON ((-74.64966372842101805 44.92318068906040196, -73.05513946490677313 44.92318068906040196, -73.05513946490677313 45.9127817308399031, -74.64966372842101805 45.9127817308399031, -74.64966372842101805 44.92318068906040196))|POLYGON ((-71.72125014775386376 46.58534825561803672, -70.72763860520016976 46.58534825561803672, -70.72763860520016976 47.26007441306773416, -71.72125014775386376 47.26007441306773416, -71.72125014775386376 46.58534825561803672))', '|'
           )
-      ) 
- 
+      )
+
 ),
 -- rights are queries
 -- 1st polygon intersects both AOI
@@ -488,24 +479,24 @@ with lefts AS (
 -- 4th polygon touches AOI 1
 -- 5th polygon is disjoint from both
 rights AS (
-  SELECT index AS poly_id_right, value AS wkt FROM TABLE( 
+  SELECT index AS poly_id_right, value AS wkt FROM TABLE(
       SPLIT_TO_TABLE (
           'POLYGON ((-73.51160030163114811 45.54300066590783302, -71.31736631503980561 45.54300066590783302, -71.31736631503980561 46.82515071005796869, -73.51160030163114811 46.82515071005796869, -73.51160030163114811 45.54300066590783302))|POLYGON ((-75.26522832 44.23585380, -69.77500453509208 44.23585380, -69.77500453509208 47.59180373699041411, -75.26522832 47.59180373699041411, -75.26522832 44.23585380))|POLYGON ((-73.82001807503861812 45.0759163125215423, -73.34011383205873358 45.0759163125215423, -73.34011383205873358 45.35768613572972185, -73.82001807503861812 45.35768613572972185, -73.82001807503861812 45.0759163125215423))|POLYGON ((-74.64966372842101805 44.92318068906040196, -75.26522832 44.92318068906040196, -75.26522832 44.23585380, -74.64966372842101805 44.23585380, -74.64966372842101805 44.92318068906040196))|POLYGON ((-71.65791191749059408 44.19369241163229844, -70.2497216546401404 44.19369241163229844, -70.2497216546401404 44.96946189775351144, -71.65791191749059408 44.96946189775351144, -71.65791191749059408 44.19369241163229844))', '|'
           )
-      ) 
+      )
 ),
 -- compute s2 cells covering the polyons for both tables
 -- S2 discretizes the polygons, hence higher resolution yields more accurate queries, at the cost of increased computation
 -- both tables need to be discretized at the same level - in this case 10
 lefts_s2 AS (
-    SELECT * FROM lefts, TABLE(FLATTEN(SEDONA.ST_S2CellIDs(ST_GeogFromText(lefts.wkt), 10))) 
+    SELECT * FROM lefts, TABLE(FLATTEN(SEDONA.ST_S2CellIDs(ST_GeogFromText(lefts.wkt), 10)))
 ),
 rights_s2 AS (
-    SELECT * FROM rights, TABLE(FLATTEN(SEDONA.ST_S2CellIDs(ST_GeogFromText(rights.wkt), 10))) 
+    SELECT * FROM rights, TABLE(FLATTEN(SEDONA.ST_S2CellIDs(ST_GeogFromText(rights.wkt), 10)))
 )
 -- merge on s2 index (int) and group by to retrieve the original polygons rather the the s2 cells
 -- add the spatial predicate to be exact and omit if speed is more important
--- expect all queries except the 5th to match 
+-- expect all queries except the 5th to match
 -- expected result: 1 (touches) + 1 (contained) + 2 (intersect both) + 2 (contains both) = 6 rows total
 -- AOI 1 (poly_id_left 1) should be present 4 times and AOI 2 (poly_id_left 2) should be present 2 times
 SELECT rights_s2.wkt ,  lefts_s2.wkt, LISTAGG(DISTINCT poly_id_right::TEXT) poly_id_right, LISTAGG(DISTINCT poly_id_left::TEXT) poly_id_left
