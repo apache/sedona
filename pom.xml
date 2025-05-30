@@ -272,11 +272,14 @@
                 <groupId>it.geosolutions.jaiext.jiffle</groupId>
                 <artifactId>jt-jiffle-language</artifactId>
                 <version>${jt-jiffle.version}</version>
-                <scope>${geotools.scope}</scope>
                 <exclusions>
                     <exclusion>
-                        <groupId>*</groupId>
+                        <groupId>javax.media</groupId>
                         <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>it.geosolutions.jaiext.utilities</groupId>
+                        <artifactId>jt-utilities</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -340,6 +343,11 @@
                 <artifactId>kryo</artifactId>
                 <version>4.0.2</version>
                 <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.janino</groupId>
+                <artifactId>janino</artifactId>
+                <version>${janino-version}</version>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
