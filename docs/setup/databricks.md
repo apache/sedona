@@ -81,12 +81,12 @@ Download the required Sedona packages by executing the following commands:
 ```sh
 %sh
 # Create JAR directory for Sedona
-mkdir -p /Workspace/Shared/sedona/1.7.1
+mkdir -p /Workspace/Shared/sedona/{{ sedona.current_version }}
 
 # Download the dependencies from Maven into DBFS
-curl -o /Workspace/Shared/sedona/1.7.1/geotools-wrapper-1.7.1-28.5.jar "https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.7.1-28.5/geotools-wrapper-1.7.1-28.5.jar"
+curl -o /Workspace/Shared/sedona/{{ sedona.current_version }}/geotools-wrapper-{{ sedona.current_geotools }}.jar "https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/{{ sedona.current_geotools }}/geotools-wrapper-{{ sedona.current_geotools }}.jar"
 
-curl -o /Workspace/Shared/sedona/1.7.1/sedona-spark-shaded-3.5_2.12-1.7.1.jar "https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/1.7.1/sedona-spark-shaded-3.5_2.12-1.7.1.jar"
+curl -o /Workspace/Shared/sedona/{{ sedona.current_version }}/sedona-spark-shaded-3.5_2.12-{{ sedona.current_version }}.jar "https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/{{ sedona.current_version }}/sedona-spark-shaded-3.5_2.12-{{ sedona.current_version }}.jar"
 ```
 
 Here are the software versions used to compile `sedona-spark-shaded-3.5_2.12-1.7.1.jar`:
@@ -158,7 +158,7 @@ Add the required dependencies in the Library tab:
 Here’s the full list of libraries:
 
 ```
-apache-sedona==1.7.1
+apache-sedona=={{ sedona.current_version }}
 geopandas==1.0.1
 keplergl==0.3.7
 pydeck==0.9.1
