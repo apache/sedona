@@ -139,10 +139,10 @@
             <plugin>
                 <!--
                   We need to shade jiffle and its antlr and janino dependencies for the following reasons:
-                  
+
                   1. Databricks runtime uses an older version of janino (3.0.16) that does not work
                      with jiffle in Spark repl. See https://github.com/apache/sedona/discussions/1945
-                  
+
                   2. Spark 4 uses an incompatible version of antlr at runtime.
                 -->
                 <groupId>org.apache.maven.plugins</groupId>
