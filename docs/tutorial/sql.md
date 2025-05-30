@@ -480,7 +480,7 @@ Since v1.7.1, Sedona supports loading OSM PBF file format as a DataFrame.
 	```
 
 OSM PBF files can contain nodes, ways, and relations. Currently Sedona support
-DenseNodes, Ways and Relations. When you load the data you get a DataFrame with the following schema.
+Nodes, DenseNodes, Ways and Relations. When you load the data you get a DataFrame with the following schema.
 
 ```
 root

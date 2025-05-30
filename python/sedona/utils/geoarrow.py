@@ -15,7 +15,7 @@
 #  specific language governing permissions and limitations
 #  under the License.
 import itertools
-from typing import List, Callable
+from typing import TYPE_CHECKING, Callable, List
 
 # We may be able to achieve streaming rather than complete materialization by using
 # with the ArrowStreamSerializer (instead of the ArrowCollectSerializer)
@@ -27,11 +27,13 @@ from pyspark.sql import DataFrame
 from pyspark.sql.types import StructType, StructField, DataType, ArrayType, MapType
 
 from sedona.sql.types import GeometryType
-import geopandas as gpd
 from pyspark.sql.pandas.types import (
     from_arrow_type,
 )
 from pyspark.sql.pandas.serializers import ArrowStreamPandasSerializer
+
+if TYPE_CHECKING:
+    import geopandas as gpd
 
 
 def dataframe_to_arrow(df, crs=None):
@@ -272,7 +274,7 @@ def _deduplicate_field_names(dt: DataType) -> DataType:
         return dt
 
 
-def infer_schema(gdf: gpd.GeoDataFrame) -> StructType:
+def infer_schema(gdf: "gpd.GeoDataFrame") -> StructType:
     import pyarrow as pa
 
     fields = gdf.dtypes.reset_index().values.tolist()
@@ -307,7 +309,7 @@ def infer_schema(gdf: gpd.GeoDataFrame) -> StructType:
 
 # Modified backport from Spark 4.0
 # https://github.com/apache/spark/blob/3515b207c41d78194d11933cd04bddc21f8418dd/python/pyspark/sql/pandas/conversion.py#L632
-def create_spatial_dataframe(spark: SparkSession, gdf: gpd.GeoDataFrame) -> DataFrame:
+def create_spatial_dataframe(spark: SparkSession, gdf: "gpd.GeoDataFrame") -> DataFrame:
     from pyspark.sql.pandas.types import (
         to_arrow_type,
     )

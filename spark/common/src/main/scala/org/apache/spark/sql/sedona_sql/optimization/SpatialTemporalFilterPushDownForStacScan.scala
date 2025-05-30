@@ -20,7 +20,7 @@ package org.apache.spark.sql.sedona_sql.optimization
 
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.expressions.{And, EqualTo, Expression, GreaterThan, GreaterThanOrEqual, LessThan, LessThanOrEqual, Literal, Or, SubqueryExpression}
-import org.apache.spark.sql.catalyst.plans.logical.{Filter, LogicalPlan}
+import org.apache.spark.sql.catalyst.plans.logical.{Filter, GlobalLimit, LocalLimit, LogicalPlan}
 import org.apache.spark.sql.connector.catalog.CatalogV2Implicits.parseColumnPath
 import org.apache.spark.sql.execution.datasource.stac.TemporalFilter
 import org.apache.spark.sql.execution.datasource.stac.TemporalFilter.{AndFilter => TemporalAndFilter}
@@ -79,7 +79,22 @@ class SpatialTemporalFilterPushDownForStacScan(sparkSession: SparkSession)
             filter.copy()
           }
           filter.copy()
+        case lr: DataSourceV2ScanRelation if isStacScanRelation(lr) =>
+          val scan = lr.scan.asInstanceOf[StacScan]
+          val limit = extractLimit(plan)
+          limit match {
+            case Some(n) => scan.setLimit(n)
+            case None =>
+          }
+          lr
       }
+    }
+  }
+
+  def extractLimit(plan: LogicalPlan): Option[Int] = {
+    plan.collectFirst {
+      case GlobalLimit(Literal(limit: Int, _), _) => limit
+      case LocalLimit(Literal(limit: Int, _), _) => limit
     }
   }
 

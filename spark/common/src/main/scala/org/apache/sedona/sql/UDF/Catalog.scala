@@ -187,6 +187,7 @@ object Catalog extends AbstractCatalog {
     function[ST_PointN](),
     function[ST_AsEWKT](),
     function[ST_Force_2D](),
+    function[ST_Force2D](),
     function[ST_ForcePolygonCW](),
     function[ST_ForceRHR](),
     function[ST_ZMax](),

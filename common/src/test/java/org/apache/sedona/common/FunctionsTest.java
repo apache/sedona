@@ -2134,6 +2134,81 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void force2D() throws ParseException {
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (3 5, 5 7, 5 3, 3 5), (5 7, 11 5, 5 3, 5 7))",
+            0);
+    byte[] polyBinary = Functions.asEWKB(geom);
+    Geometry polyFromBinary = Constructors.geomFromWKB(polyBinary);
+    Geometry forcedPoly = Functions.force2D(Functions.makeValid(polyFromBinary, false));
+    String actual = Functions.asWKT(forcedPoly);
+    String expected =
+        "POLYGON ((0 10, 10 10, 10 5.333333333333333, 5 7, 3 5, 5 3, 10 4.666666666666667, 10 0, 0 0, 0 10))";
+    assertEquals(expected, actual);
+
+    geom = Constructors.geomFromWKT("POINT ZM(1 2 2 5)", 0);
+    actual = Functions.asWKT(Functions.force2D(geom));
+    expected = "POINT (1 2)";
+    assertEquals(expected, actual);
+
+    geom = Constructors.geomFromWKT("MULTIPOINT ZM((1 2 2 5), (2 3 2 5))", 0);
+    actual = Functions.asWKT(Functions.force2D(geom));
+    expected = "MULTIPOINT ((1 2), (2 3))";
+    assertEquals(expected, actual);
+
+    geom = Constructors.geomFromWKT("LINESTRING (1 2 5, 2 3 5, 3 4 5)", 0);
+    actual = Functions.asWKT(Functions.force2D(geom));
+    expected = "LINESTRING (1 2, 2 3, 3 4)";
+    assertEquals(expected, actual);
+
+    // return 2D as is
+    geom =
+        Constructors.geomFromWKT(
+            "MULTILINESTRING ((10 10, 20 20, 30 30), (15 15, 25 25, 35 35))", 0);
+    Geometry actualGeom = Functions.force2D(geom);
+    assertTrue(Predicates.equals(actualGeom, geom));
+
+    geom = Constructors.geomFromWKT("LINEARRING M(30 10 5, 40 40 5, 20 40 5, 10 20 5, 30 10 5)", 0);
+    actual = Functions.asWKT(Functions.force2D(geom));
+    expected = "LINEARRING (30 10, 40 40, 20 40, 10 20, 30 10)";
+    assertEquals(expected, actual);
+
+    geom =
+        Constructors.geomFromWKT(
+            "POLYGON ZM((0 0 0 0, 10 0 0 0, 10 10 0 0, 0 10 0 0, 0 0 0 0), (4 4 0 0, 4 6 0 0, 6 6 0 0, 6 4 0 0, 4 4 0 0))",
+            0);
+    actual = Functions.asWKT(Functions.force2D(geom));
+    expected = "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (4 4, 4 6, 6 6, 6 4, 4 4))";
+    assertEquals(expected, actual);
+
+    geom =
+        Constructors.geomFromWKT(
+            "POLYGON ZM((0 0 0 0, 10 0 0 0, 10 10 0 0, 0 0 0 0), (4 4 0 0, 4 6 0 0, 6 6 0 0, 4 4 0 0))",
+            0);
+    actual = Functions.asWKT(Functions.force2D(geom));
+    expected = "POLYGON ((0 0, 10 0, 10 10, 0 0), (4 4, 4 6, 6 6, 4 4))";
+    assertEquals(expected, actual);
+
+    geom =
+        Constructors.geomFromWKT(
+            "MULTIPOLYGON M(((30 10 5, 40 40 5, 20 40 5, 10 20 5, 30 10 5)), ((15 5 5, 10 20 5, 20 30 5, 15 5 5)))",
+            0);
+    actual = Functions.asWKT(Functions.force2D(geom));
+    expected = "MULTIPOLYGON (((30 10, 40 40, 20 40, 10 20, 30 10)), ((15 5, 10 20, 20 30, 15 5)))";
+    assertEquals(expected, actual);
+
+    geom =
+        Constructors.geomFromWKT(
+            "GEOMETRYCOLLECTION ZM(POINT ZM(10 10 2 5), LINESTRING ZM(15 15 2 5, 25 25 2 5, 35 35 2 5), POLYGON ZM((30 10 2 5, 40 40 2 5, 20 40 2 5, 10 20 2 5, 30 10 2 5)))",
+            0);
+    actual = Functions.asWKT(Functions.force2D(geom));
+    expected =
+        "GEOMETRYCOLLECTION (POINT (10 10), LINESTRING (15 15, 25 25, 35 35), POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10)))";
+    assertEquals(expected, actual);
+  }
+
+  @Test
   public void testForce3DM() throws ParseException {
     Geometry geom = Constructors.geomFromWKT("POINT (1 2)", 0);
     String actual = Functions.asWKT(Functions.force3DM(geom, 5));
@@ -4326,5 +4401,31 @@ public class FunctionsTest extends TestBase {
     actual = Functions.interpolatePoint(line, point);
     expected = 2.75;
     assertEquals(expected, actual, 1e-6);
+  }
+
+  @Test
+  public void emptyPoint() throws ParseException {
+    Geometry point = Constructors.geomFromEWKT("POINT(1 1)");
+    Geometry emptyPoint = Constructors.geomFromEWKT("POINT EMPTY");
+
+    double actualX = Functions.x(point);
+    double expectedX = 1.0;
+    assertEquals(expectedX, actualX, 1e-6);
+
+    assertNull(Functions.x(emptyPoint));
+    assertNull(Functions.y(emptyPoint));
+    assertNull(Functions.z(emptyPoint));
+    assertNull(Functions.m(emptyPoint));
+
+    assertFalse(Functions.hasM(emptyPoint));
+    assertFalse(Functions.hasZ(emptyPoint));
+  }
+
+  @Test
+  public void subdivideInvalidMaxVertices() {
+    LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 99, 99));
+    IllegalArgumentException e =
+        assertThrows(IllegalArgumentException.class, () -> Functions.subDivide(lineString, 4));
+    assertEquals("ST_Subdivide needs 5 or more max vertices", e.getMessage());
   }
 }

@@ -22,6 +22,8 @@ import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.sql.connector.read.InputPartition
 import org.apache.spark.sql.types.StructType
 
+import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, ZoneOffset}
 import scala.io.Source
 import scala.collection.mutable
 
@@ -40,6 +42,41 @@ class StacBatchTest extends TestBaseScala {
     }
   }
 
+  it("collectItemLinks should collect correct item links") {
+    val collectionUrl =
+      "https://earth-search.aws.element84.com/v1/collections/sentinel-2-pre-c1-l2a"
+    val stacCollectionJson = StacUtils.loadStacCollectionToJson(collectionUrl)
+    val opts = mutable
+      .Map(
+        "itemsLimitMax" -> "1000",
+        "itemsLimitPerRequest" -> "200",
+        "itemsLoadProcessReportThreshold" -> "1000000")
+      .toMap
+
+    val stacBatch =
+      StacBatch(
+        null,
+        collectionUrl,
+        stacCollectionJson,
+        StructType(Seq()),
+        opts,
+        None,
+        None,
+        None)
+    stacBatch.setItemMaxLeft(1000)
+    val itemLinks = mutable.ArrayBuffer[String]()
+    val needCountNextItems = true
+
+    val startTime = System.nanoTime()
+    stacBatch.collectItemLinks(collectionUrl, stacCollectionJson, itemLinks, needCountNextItems)
+    val endTime = System.nanoTime()
+    val duration = (endTime - startTime) / 1e6 // Convert to milliseconds
+
+    assert(itemLinks.nonEmpty)
+    assert(itemLinks.length == 5)
+    assert(duration > 0)
+  }
+
   it("planInputPartitions should create correct number of partitions") {
     val stacCollectionJson =
       """
@@ -48,18 +85,26 @@ class StacBatchTest extends TestBaseScala {
         |  "id": "sample-collection",
         |  "description": "A sample STAC collection",
         |  "links": [
-        |    {"rel": "item", "href": "https://path/to/item1.json"},
-        |    {"rel": "item", "href": "https://path/to/item2.json"},
-        |    {"rel": "item", "href": "https://path/to/item3.json"}
+        |    {"rel": "item", "href": "https://storage.googleapis.com/cfo-public/vegetation/California-Vegetation-CanopyBaseHeight-2016-Summer-00010m.json"},
+        |    {"rel": "item", "href": "https://storage.googleapis.com/cfo-public/vegetation/California-Vegetation-CanopyBaseHeight-2016-Summer-00010m.json"},
+        |    {"rel": "item", "href": "https://storage.googleapis.com/cfo-public/vegetation/California-Vegetation-CanopyBaseHeight-2016-Summer-00010m.json"}
         |  ]
         |}
       """.stripMargin
 
-    val opts = mutable.Map("numPartitions" -> "2").toMap
-    val collectionUrl = "https://path/to/collection.json"
+    val opts = mutable.Map("numPartitions" -> "2", "itemsLimitMax" -> "20").toMap
+    val collectionUrl = "https://storage.googleapis.com/cfo-public/vegetation/collection.json"
 
     val stacBatch =
-      StacBatch(collectionUrl, stacCollectionJson, StructType(Seq()), opts, None, None)
+      StacBatch(
+        null,
+        collectionUrl,
+        stacCollectionJson,
+        StructType(Seq()),
+        opts,
+        None,
+        None,
+        None)
     val partitions: Array[InputPartition] = stacBatch.planInputPartitions()
 
     assert(partitions.length == 2)
@@ -75,11 +120,19 @@ class StacBatchTest extends TestBaseScala {
         |}
       """.stripMargin
 
-    val opts = mutable.Map("numPartitions" -> "2").toMap
+    val opts = mutable.Map("numPartitions" -> "2", "itemsLimitMax" -> "20").toMap
     val collectionUrl = "https://path/to/collection.json"
 
     val stacBatch =
-      StacBatch(collectionUrl, stacCollectionJson, StructType(Seq()), opts, None, None)
+      StacBatch(
+        null,
+        collectionUrl,
+        stacCollectionJson,
+        StructType(Seq()),
+        opts,
+        None,
+        None,
+        None)
     val partitions: Array[InputPartition] = stacBatch.planInputPartitions()
 
     assert(partitions.isEmpty)
@@ -88,11 +141,19 @@ class StacBatchTest extends TestBaseScala {
   it("planInputPartitions should create correct number of partitions with real collection.json") {
     val rootJsonFile = "datasource_stac/collection.json"
     val stacCollectionJson = loadJsonFromResource(rootJsonFile)
-    val opts = mutable.Map("numPartitions" -> "3").toMap
+    val opts = mutable.Map("numPartitions" -> "3", "itemsLimitMax" -> "20").toMap
     val collectionUrl = getAbsolutePathOfResource(rootJsonFile)
 
     val stacBatch =
-      StacBatch(collectionUrl, stacCollectionJson, StructType(Seq()), opts, None, None)
+      StacBatch(
+        null,
+        collectionUrl,
+        stacCollectionJson,
+        StructType(Seq()),
+        opts,
+        None,
+        None,
+        None)
     val partitions: Array[InputPartition] = stacBatch.planInputPartitions()
 
     assert(partitions.length == 3)
