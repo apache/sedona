@@ -84,7 +84,7 @@
         <scala.compat.version>2.12</scala.compat.version>
         <spark.version>3.3.0</spark.version>
         <spark.compat.version>3.3</spark.compat.version>
-        <log4j.version>2.17.2</log4j.version>
+        <log4j.version>2.19.0</log4j.version>
         <graphframe.version>0.8.3-spark3.4</graphframe.version>
 
         <flink.version>1.19.0</flink.version>
