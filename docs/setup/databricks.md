@@ -23,8 +23,6 @@ You can run Sedona in Databricks to leverage the functionality that Sedona provi
 
 Sedona isn’t available in all Databricks environments because of the platform's limitations. This post explains how and where you can run Sedona in Databricks.
 
-This post also demonstrates how to read Databricks Delta tables in environments outside Databricks.
-
 ## Databricks and Sedona version requirements
 
 Databricks and Sedona depend on Spark, Scala, and other libraries.
