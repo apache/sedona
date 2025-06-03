@@ -4414,9 +4414,8 @@ public class FunctionsTest extends TestBase {
   }
 
   /**
-   * Computes the intersection over union (IoU) between two geometries. - Algorithm:
-   * area(intersection(a,b)) / area(b) - 1.0 indicates a perfect match, while 0.0 indicates no
-   * overlap.
+   * Computes the intersection over union (IoU) between two geometries. 1.0 indicates a perfect match,
+   * while 0.0 indicates no overlap.
    */
   private double intersectionOverUnion(Geometry expected, Geometry actual) {
     double intersectionArea = expected.intersection(actual).getArea();

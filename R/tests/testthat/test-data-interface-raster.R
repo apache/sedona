@@ -192,6 +192,7 @@ test_that("Passed RS_Values with raster", {
     ) %>%
     select(val) %>%
     collect()
+  print(a) ## FIXME: delete after debugging
   expect_equal(
     a %>% as.list(),
     list(val = list(c(255, NA_real_)))
