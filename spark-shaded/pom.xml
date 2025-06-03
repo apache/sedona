@@ -52,6 +52,10 @@
                     <groupId>it.geosolutions.jaiext.jiffle</groupId>
                     <artifactId>jt-jiffle-language</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.janino</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>

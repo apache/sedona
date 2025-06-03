@@ -47,6 +47,15 @@
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
+                <!-- Even those these are shaded, the shaded POM isn't used when building projects in a single Maven run -->
+                <exclusion>
+                    <groupId>it.geosolutions.jaiext.jiffle</groupId>
+                    <artifactId>jt-jiffle-language</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.janino</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
