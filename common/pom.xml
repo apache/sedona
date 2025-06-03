@@ -118,6 +118,12 @@
             <groupId>edu.ucar</groupId>
             <artifactId>cdm-core</artifactId>
         </dependency>
+        <!-- For shading a janino package that works with Spark for jiffle -->
+        <dependency>
+            <groupId>org.codehaus.janino</groupId>
+            <artifactId>janino</artifactId>
+            <version>${janino-version}</version>
+        </dependency>
     </dependencies>
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
@@ -145,15 +151,8 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- Shade some dependencies into sedona-common to resolve various package conflict issues -->
             <plugin>
-                <!--
-                  We need to shade jiffle and its antlr and janino dependencies for the following reasons:
-
-                  1. Databricks runtime uses an older version of janino (3.0.16) that does not work
-                     with jiffle in Spark repl. See https://github.com/apache/sedona/discussions/1945
-
-                  2. Spark 4 uses an incompatible version of antlr at runtime.
-                -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <executions>
@@ -165,9 +164,25 @@
                         <configuration>
                             <artifactSet>
                                 <includes>
+                                    <!--
+                                      We need to shade jiffle and its antlr and janino dependencies for the following reasons:
+
+                                      1. Databricks runtime uses an older version of janino (3.0.16) that does not work
+                                         with jiffle in Spark repl. See https://github.com/apache/sedona/discussions/1945
+
+                                      2. Spark 4 uses an incompatible version of antlr at runtime.
+                                    -->
                                     <include>it.geosolutions.jaiext.jiffle:*</include>
                                     <include>org.antlr:*</include>
                                     <include>org.codehaus.janino:*</include>
+
+                                    <!--
+                                      We shade our own released version of s2-geometry-library to avoid conflicts with
+                                      any other official com.google.geometry:s2-geometry in the runtime environment.
+
+                                      Our new s2-geometry-library requires a version of guava higher than what Spark
+                                      ships with, so we shade it as well to make s2-geometry-library work.
+                                    -->
                                     <include>org.datasyslab:s2-geometry-library</include>
                                     <include>com.google.guava:guava</include>
                                 </includes>

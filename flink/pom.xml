@@ -44,6 +44,14 @@
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
+                    <groupId>it.geosolutions.jaiext.jiffle</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.janino</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
                     <groupId>org.datasyslab</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>

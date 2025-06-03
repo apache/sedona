@@ -53,6 +53,10 @@
                     <artifactId>jt-jiffle-language</artifactId>
                 </exclusion>
                 <exclusion>
+                    <groupId>org.codehaus.janino</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
                     <groupId>org.datasyslab</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
