@@ -57,12 +57,13 @@ setup(
     ext_modules=ext_modules,
     long_description=long_description,
     long_description_content_type="text/markdown",
-    python_requires=">=3.6",
+    python_requires=">=3.8",
     install_requires=["attrs", "shapely>=1.7.0"],
     extras_require={
         "spark": ["pyspark>=2.3.0"],
         "pydeck-map": ["geopandas", "pydeck==0.8.0"],
         "kepler-map": ["geopandas", "keplergl==0.3.2"],
+        "flink": ["apache-flink>=1.19.0"],
         "all": [
             "pyspark>=2.3.0",
             "geopandas",

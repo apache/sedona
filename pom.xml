@@ -81,10 +81,10 @@
         <!-- Actual scala, spark and log4j version will be set by activated profiles.
              Setting a default value helps IDE:s that can't make sense of profiles. -->
         <scala.compat.version>2.12</scala.compat.version>
-        <spark.version>3.3.0</spark.version>
-        <spark.compat.version>3.3</spark.compat.version>
+        <spark.version>3.4.0</spark.version>
+        <spark.compat.version>3.4</spark.compat.version>
         <spark.major.version>3</spark.major.version>
-        <log4j.version>2.17.2</log4j.version>
+        <log4j.version>2.19.0</log4j.version>
         <graphframe.version>0.8.3-spark3.4</graphframe.version>
 
         <flink.version>1.19.0</flink.version>
@@ -278,10 +278,6 @@
                         <artifactId>*</artifactId>
                     </exclusion>
                     <exclusion>
-                        <groupId>org.codehaus.janino</groupId>
-                        <artifactId>janino</artifactId>
-                    </exclusion>
-                    <exclusion>
                         <groupId>it.geosolutions.jaiext.utilities</groupId>
                         <artifactId>jt-utilities</artifactId>
                     </exclusion>
@@ -347,6 +343,11 @@
                 <artifactId>kryo</artifactId>
                 <version>4.0.2</version>
                 <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.janino</groupId>
+                <artifactId>janino</artifactId>
+                <version>${janino-version}</version>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
@@ -700,23 +701,6 @@
                     </snapshots>
                 </repository>
             </repositories>
-        </profile>
-        <profile>
-            <!-- This profile works for Spark 3.3 -->
-            <id>sedona-spark-3.3</id>
-            <activation>
-                <property>
-                    <name>spark</name>
-                    <value>3.3</value>
-                </property>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <spark.version>3.3.0</spark.version>
-                <spark.compat.version>3.3</spark.compat.version>
-                <log4j.version>2.17.2</log4j.version>
-                <graphframe.version>0.8.3-spark3.4</graphframe.version>
-            </properties>
         </profile>
         <profile>
             <id>sedona-spark-3.4</id>

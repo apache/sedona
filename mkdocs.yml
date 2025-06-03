@@ -47,6 +47,7 @@ nav:
           - Install on Azure Synapse Analytics: setup/azure-synapse-analytics.md
       - Install with Apache Flink:
           - Install Sedona Scala/Java: setup/flink/install-scala.md
+          - Install Sedona Python: setup/flink/install-python.md
       - Install with Snowflake:
           - Install Sedona SQL: setup/snowflake/install.md
       - Release notes: setup/release-notes.md
@@ -80,6 +81,7 @@ nav:
               - Storing large raster geometries in Parquet files: tutorial/storing-blobs-in-parquet.md
       - Sedona with Apache Flink:
           - Spatial SQL app (Flink): tutorial/flink/sql.md
+          - Spatial SQL app (PyFlink): tutorial/flink/pyflink-sql.md
       - Sedona with Snowflake:
           - Spatial SQL app (Snowflake): tutorial/snowflake/sql.md
       - Examples:
