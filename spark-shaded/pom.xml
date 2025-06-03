@@ -22,7 +22,7 @@
     <parent>
         <artifactId>sedona-parent</artifactId>
         <groupId>org.apache.sedona</groupId>
-        <version>1.7.1</version>
+        <version>1.8.0-SNAPSHOT</version>
     </parent>
     <artifactId>sedona-spark-shaded-${spark.compat.version}_${scala.compat.version}</artifactId>
 
@@ -45,6 +45,15 @@
             <exclusions>
                 <exclusion>
                     <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <!-- Even those these are shaded, the shaded POM isn't used when building projects in a single Maven run -->
+                <exclusion>
+                    <groupId>it.geosolutions.jaiext.jiffle</groupId>
+                    <artifactId>jt-jiffle-language</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.janino</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>

@@ -1090,7 +1090,7 @@ Output: `POINT (2 1)`
 
 ## ST_Force_2D
 
-Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates
+Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates. This function is an alias of [ST_Force2D](#st_force2d).
 
 Format: `ST_Force_2D (A:geometry)`
 
@@ -1099,6 +1099,30 @@ Example:
 ```sql
 SELECT ST_AsText(
     ST_Force_2D(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'))
+) AS geom
+```
+
+Result:
+
+```
++---------------------------------------------------------------+
+|geom                                                           |
++---------------------------------------------------------------+
+|POLYGON((0 0,0 5,5 0,0 0),(1 1,3 1,1 3,1 1))                   |
++---------------------------------------------------------------+
+```
+
+## ST_Force2D
+
+Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates. This function is an alias of [ST_Force_2D](#st_force_2d).
+
+Format: `ST_Force2D (A:geometry)`
+
+Example:
+
+```sql
+SELECT ST_AsText(
+    ST_Force2D(ST_GeomFromText('POLYGON((0 0 2,0 5 2,5 0 2,0 0 2),(1 1 2,3 1 2,1 3 2,1 1 2))'))
 ) AS geom
 ```
 
@@ -3145,6 +3169,8 @@ Output: `POINT(100 150)`
 
 Introduction: Returns a multi-geometry divided based of given maximum number of vertices.
 
+A minimum of 5 vertices is required for maxVertices parameter to form a closed box.
+
 Format: `ST_SubDivide(geom: geometry, maxVertices: int)`
 
 SQL example:
@@ -3163,6 +3189,8 @@ MULTILINESTRING ((0 0, 5 5), (5 5, 10 10), (10 10, 21 21), (21 21, 60 60), (60 6
 ## ST_SubDivideExplode
 
 Introduction: It works the same as ST_SubDivide but returns new rows with geometries instead of a multi-geometry.
+
+A minimum of 5 vertices is required for maxVertices parameter to form a closed box.
 
 Format: `
 SELECT SEDONA.ST_AsText(GEOM)

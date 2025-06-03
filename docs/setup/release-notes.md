@@ -17,6 +17,39 @@
  under the License.
  -->
 
+## Sedona 1.7.2
+
+Sedona 1.7.2 is compiled against Spark 3.3 / Spark 3.4 / Spark 3.5, Flink 1.19, Snowflake 7+, Java 8.
+
+This release is a minor release that only includes bug fixes. No API breaking changes and behavior changes are expected.
+
+### New Contributors
+
+* @MadhuriRathod30 made their first contribution in https://github.com/apache/sedona/pull/1906
+* @jgoday made their first contribution in https://github.com/apache/sedona/pull/1923
+* @oliverbeagley made their first contribution in https://github.com/apache/sedona/pull/1929
+* @cgauvi made their first contribution in https://github.com/apache/sedona/pull/1962
+
+### Bug
+
+* [SEDONA-722](https://issues.apache.org/jira/browse/SEDONA-722): Fix precision loss problems caused by casting world coordinates from double to float
+* [SEDONA-704](https://issues.apache.org/jira/browse/SEDONA-704): Optimize STAC reader and fix few issues
+* [SEDONA-715](https://issues.apache.org/jira/browse/SEDONA-715): Unify Zeppelin and Jupyter setting in Docker
+* [GH-1868](https://github.com/apache/sedona/issues/1868): Fix spark sql extension load failure when parser failed to load
+* [SEDONA-726](https://issues.apache.org/jira/browse/SEDONA-726): Fix ST_Force_2D and add ST_Force2D
+* [SEDONA-704](https://issues.apache.org/jira/browse/SEDONA-704): Add the grid extension to the stac reader
+* [SEDONA-724](https://issues.apache.org/jira/browse/SEDONA-724): Fix RS_ZonalStats and RS_ZonalStatsAll edge case bug
+* [SEDONA-728](https://issues.apache.org/jira/browse/SEDONA-728): Fix Rasterization clamping bug
+* [SEDONA-690](https://issues.apache.org/jira/browse/SEDONA-690): Set default metric to use Haversine for KNN join and code refactoring
+* [SEDONA-731](https://issues.apache.org/jira/browse/SEDONA-731): Add osm nodes parser
+* [GH-1922](https://github.com/apache/sedona/issues/1922): ST_X/Y/Z ON null geometries
+* [GH-1761](https://github.com/apache/sedona/issues/1761): Error when invalid ST_Subdivide maxVertices argument
+* [GH-1910](https://github.com/apache/sedona/issues/1910): Import geopandas only when type checking
+* [GH-1931](https://github.com/apache/sedona/issues/1931): Move packaging module import to geopandas try-except block
+* [SEDONA-734](https://issues.apache.org/jira/browse/SEDONA-734) Fix relation parsing in OSM reader
+* [SEDONA-735](https://issues.apache.org/jira/browse/SEDONA-735) Fix RS_Clip bug caused by AOI geometries smaller than pixel size
+* [GH-1945](https://github.com/apache/sedona/issues/1945) Shade Jiffle and its dependencies
+
 ## Sedona 1.7.1
 
 Sedona 1.7.1 is compiled against Spark 3.3 / Spark 3.4 / Spark 3.5, Flink 1.19, Snowflake 7+, Java 8.

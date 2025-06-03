@@ -141,14 +141,15 @@ public class FormatUtils<T extends Geometry> implements Serializable {
     geoJSONReader = new GeoJSONReader();
   }
 
-  private void handleNonSpatialDataToGeometry(Geometry geometry, List<String> splitedGeometryData) {
-    LinkedList<String> splitedGeometryDataList = new LinkedList<String>(splitedGeometryData);
+  private void handleNonSpatialDataToGeometry(
+      Geometry geometry, List<String> splittedGeometryData) {
+    LinkedList<String> splittedGeometryDataList = new LinkedList<String>(splittedGeometryData);
     if (carryInputData) {
       if (this.splitter != FileDataSplitter.GEOJSON) {
         // remove spatial data position
-        splitedGeometryDataList.remove(this.startOffset);
+        splittedGeometryDataList.remove(this.startOffset);
       }
-      geometry.setUserData(String.join("\t", splitedGeometryDataList));
+      geometry.setUserData(String.join("\t", splittedGeometryDataList));
     }
   }
 

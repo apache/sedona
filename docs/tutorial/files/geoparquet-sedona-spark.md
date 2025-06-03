@@ -37,11 +37,14 @@ Let's see how to write a Sedona DataFrame to GeoParquet files.
 Start by creating a Sedona DataFrame:
 
 ```python
-df = sedona.createDataFrame([
-    ("a", 'LINESTRING(2.0 5.0,6.0 1.0)'),
-    ("b", 'LINESTRING(7.0 4.0,9.0 2.0)'),
-    ("c", 'LINESTRING(1.0 3.0,3.0 1.0)'),
-], ["id", "geometry"])
+df = sedona.createDataFrame(
+    [
+        ("a", "LINESTRING(2.0 5.0,6.0 1.0)"),
+        ("b", "LINESTRING(7.0 4.0,9.0 2.0)"),
+        ("c", "LINESTRING(1.0 3.0,3.0 1.0)"),
+    ],
+    ["id", "geometry"],
+)
 df = df.withColumn("geometry", ST_GeomFromText(col("geometry")))
 ```
 
@@ -258,13 +261,15 @@ Now, let’s apply a spatial filter to read points within a particular area:
 Here is the query:
 
 ```python
-my_shape = 'POLYGON((4.0 3.5, 4.0 6.0, 8.0 6.0, 8.0 4.5, 4.0 3.5))'
+my_shape = "POLYGON((4.0 3.5, 4.0 6.0, 8.0 6.0, 8.0 4.5, 4.0 3.5))"
 
-res = sedona.sql(f'''
+res = sedona.sql(
+    f"""
 select *
 from points
 where st_intersects(geometry, ST_GeomFromWKT('{my_shape}'))
-''')
+"""
+)
 res.show(truncate=False)
 ```
 

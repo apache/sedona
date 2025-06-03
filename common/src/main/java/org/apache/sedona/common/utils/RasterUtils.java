@@ -45,7 +45,6 @@ import org.geotools.coverage.Category;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.TypeMap;
-import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.grid.GridEnvelope2D;
@@ -467,10 +466,11 @@ public class RasterUtils {
 
   public static Point2D getWorldCornerCoordinates(GridCoverage2D raster, int colX, int rowY)
       throws TransformException {
+    Point2D.Double gridCoord = new DirectPosition2D(colX - 1, rowY - 1);
     return raster
         .getGridGeometry()
         .getGridToCRS2D(PixelOrientation.UPPER_LEFT)
-        .transform(new GridCoordinates2D(colX - 1, rowY - 1), null);
+        .transform(gridCoord, null);
   }
 
   /**
@@ -488,7 +488,7 @@ public class RasterUtils {
   public static Point2D getWorldCornerCoordinatesWithRangeCheck(
       GridCoverage2D raster, int colX, int rowY)
       throws IndexOutOfBoundsException, TransformException {
-    GridCoordinates2D gridCoordinates2D = new GridCoordinates2D(colX - 1, rowY - 1);
+    Point2D.Double gridCoordinates2D = new DirectPosition2D(colX - 1, rowY - 1);
     if (!(raster.getGridGeometry().getGridRange2D().contains(gridCoordinates2D)))
       throw new IndexOutOfBoundsException(
           String.format(

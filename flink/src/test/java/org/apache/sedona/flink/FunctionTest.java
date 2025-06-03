@@ -1126,11 +1126,22 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
-  public void testForce2D() {
+  public void testForce_2D() {
     Table polygonTable = createPolygonTable(1);
     Table Forced2DTable =
         polygonTable.select(
             call(Functions.ST_Force_2D.class.getSimpleName(), $(polygonColNames[0])));
+    Geometry result = (Geometry) first(Forced2DTable).getField(0);
+    assertEquals(
+        "POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))", result.toString());
+  }
+
+  @Test
+  public void testForce2D() {
+    Table polygonTable = createPolygonTable(1);
+    Table Forced2DTable =
+        polygonTable.select(
+            call(Functions.ST_Force2D.class.getSimpleName(), $(polygonColNames[0])));
     Geometry result = (Geometry) first(Forced2DTable).getField(0);
     assertEquals(
         "POLYGON ((-0.5 -0.5, -0.5 0.5, 0.5 0.5, 0.5 -0.5, -0.5 -0.5))", result.toString());

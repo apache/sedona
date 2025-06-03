@@ -62,8 +62,13 @@ jobs:
       - name: Install dependencies
         run: |
           cd python
-          pipenv --python ${{ matrix.python }}
-          pipenv install --dev
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+              PYTHON_EXE_PATH="$pythonLocation/python.exe"
+          else
+              PYTHON_EXE_PATH="$pythonLocation/python"
+          fi
+          echo "Using Python executable at: $PYTHON_EXE_PATH"
+          pipenv install --dev --python "$PYTHON_EXE_PATH"
       - name: Build extension
         run: |
           cd python

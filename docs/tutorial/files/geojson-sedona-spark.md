@@ -40,10 +40,14 @@ Here’s how to read a multiline GeoJSON file with Sedona:
 
 ```python
 df = (
-    sedona.read.format("geojson").option("multiLine", "true").load("data/multiline_geojson.json")
+    sedona.read.format("geojson")
+    .option("multiLine", "true")
+    .load("data/multiline_geojson.json")
     .selectExpr("explode(features) as features")
     .select("features.*")
-    .withColumn("prop0", expr("properties['prop0']")).drop("properties").drop("type")
+    .withColumn("prop0", expr("properties['prop0']"))
+    .drop("properties")
+    .drop("type")
 )
 df.show(truncate=False)
 ```
@@ -112,9 +116,7 @@ Here's how you can read many GeoJSON files:
 
 ```python
 df = (
-    sedona.read.format("geojson")
-    .option("multiLine", "true")
-    .load("data/many_geojsons")
+    sedona.read.format("geojson").option("multiLine", "true").load("data/many_geojsons")
 )
 ```
 
@@ -132,7 +134,7 @@ df = (
     .load("data/singleline_geojson.json")
     .withColumn("prop0", expr("properties['prop0']"))
     .drop("properties")
-    .drop("type")  
+    .drop("type")
 )
 df.show(truncate=False)
 ```

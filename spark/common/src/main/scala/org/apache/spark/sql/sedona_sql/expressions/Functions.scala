@@ -1241,6 +1241,19 @@ case class ST_Force_2D(inputExpressions: Seq[Expression])
   }
 }
 
+/*
+ * Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates.
+ *
+ * @param inputExpressions
+ */
+case class ST_Force2D(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.force2D _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 /**
  * Returns the geometry in EWKT format
  *

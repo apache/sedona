@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
 
 public class RasterBandAccessorsTest extends RasterTestBase {
 
@@ -82,6 +81,46 @@ public class RasterBandAccessorsTest extends RasterTestBase {
             IllegalArgumentException.class,
             () -> RasterBandAccessors.getBandNoDataValue(raster, 2));
     assertEquals("Provided band index 2 is not present in the raster", exception.getMessage());
+  }
+
+  @Test
+  public void testZonalStatsIntersectingNoPixelData() throws FactoryException, ParseException {
+    double[][] pixelsValues =
+        new double[][] {
+          new double[] {
+            3, 7, 5, 40, 61, 70, 60, 80, 27, 55, 35, 44, 21, 36, 53, 54, 86, 28, 45, 24, 99, 22, 18,
+            98, 10
+          }
+        };
+    GridCoverage2D raster =
+        RasterConstructors.makeNonEmptyRaster(1, "", 5, 5, 1, -1, 1, -1, 0, 0, 0, pixelsValues);
+    Geometry extent =
+        Constructors.geomFromWKT(
+            "POLYGON ((5.822754 -6.620957, 6.965332 -6.620957, 6.965332 -5.834616, 5.822754 -5.834616, 5.822754 -6.620957))",
+            0);
+
+    Double actualZonalStats = RasterBandAccessors.getZonalStats(raster, extent, "mode");
+    assertEquals(10.0, actualZonalStats, FP_TOLERANCE);
+
+    String actualZonalStatsAll =
+        Arrays.toString(RasterBandAccessors.getZonalStatsAll(raster, extent));
+    String expectedZonalStatsAll = "[1.0, 10.0, 10.0, 10.0, 10.0, 0.0, 0.0, 10.0, 10.0]";
+    assertEquals(expectedZonalStatsAll, actualZonalStatsAll);
+  }
+
+  @Test
+  public void testZonalStatsForVerticalLineBug() throws Exception {
+    String wkt =
+        "POLYGON ((989675.3 221207.04013636176, 989675.3 221109.675, 989435.2175433404 221109.675, 989433.6550697018 221110.53743814293, 989419.3 221118.46099022447, 989419.3 221137.08165200218, 989449.9606422258 221192.9473339209, 989465.7613533186 221221.73707975633, 989508.9887178271 221300.49928501665, 989630.3976442496 221232.27312269452, 989639.3630089872 221227.23492283348, 989675.3 221207.04013636176))";
+
+    Geometry geom = Constructors.geomFromWKT(wkt, 2263);
+
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, 256, 256, 989419.3, 221365.675, 1, -1, 0, 0, 2263);
+
+    Double actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "mean", true);
+    Double expected = 0.0;
+    assertEquals(expected, actual, FP_TOLERANCE);
   }
 
   @Test
@@ -182,15 +221,17 @@ public class RasterBandAccessorsTest extends RasterTestBase {
   }
 
   @Test
-  public void testZonalStatsAll()
-      throws IOException, FactoryException, ParseException, TransformException {
+  public void testZonalStatsAll() throws IOException, FactoryException, ParseException {
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
     String polygon =
         "POLYGON ((-8673439.6642 4572993.5327, -8673155.5737 4563873.2099, -8701890.3259 4562931.7093, -8682522.8735 4572703.8908, -8673439.6642 4572993.5327))";
     Geometry geom = Constructors.geomFromWKT(polygon, 3857);
 
-    double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false, false, false);
+    double[] actual =
+        Arrays.stream(RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false, false, false))
+            .mapToDouble(Double::doubleValue)
+            .toArray();
     double[] expected =
         new double[] {
           185953.0,
@@ -209,16 +250,19 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         Constructors.geomFromWKT(
             "POLYGON ((-77.96672569800863073 37.91971182746296876, -77.9688630154902711 37.89620133516485367, -77.93936803424354309 37.90517806858776595, -77.96672569800863073 37.91971182746296876))",
             0);
-    actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false, false, false);
+    actual =
+        Arrays.stream(RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false, false, false))
+            .mapToDouble(Double::doubleValue)
+            .toArray();
     assertNotNull(actual);
 
     Geometry nonIntersectingGeom =
         Constructors.geomFromWKT(
             "POLYGON ((-78.22106647832458748 37.76411511479908967, -78.20183062098976734 37.72863564460374874, -78.18088490966962922 37.76753482276972562, -78.22106647832458748 37.76411511479908967))",
             0);
-    actual =
+    Double[] actualNull =
         RasterBandAccessors.getZonalStatsAll(raster, nonIntersectingGeom, 1, false, false, true);
-    assertNull(actual);
+    assertNull(actualNull);
     assertThrows(
         IllegalArgumentException.class,
         () ->
@@ -227,15 +271,17 @@ public class RasterBandAccessorsTest extends RasterTestBase {
   }
 
   @Test
-  public void testZonalStatsAllWithNoData()
-      throws IOException, FactoryException, ParseException, TransformException {
+  public void testZonalStatsAllWithNoData() throws IOException, FactoryException, ParseException {
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
     String polygon =
         "POLYGON((-167.750000 87.750000, -155.250000 87.750000, -155.250000 40.250000, -180.250000 40.250000, -167.750000 87.750000))";
     Geometry geom = Constructors.geomFromWKT(polygon, RasterAccessors.srid(raster));
 
-    double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false, true);
+    double[] actual =
+        Arrays.stream(RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false, true))
+            .mapToDouble(Double::doubleValue)
+            .toArray();
     double[] expected =
         new double[] {
           14249.0,
@@ -265,7 +311,10 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     // Testing implicit CRS transformation
     Geometry geom = Constructors.geomFromWKT("POLYGON((2 -2, 2 -6, 6 -6, 6 -2, 2 -2))", 0);
 
-    double[] actual = RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false, true);
+    double[] actual =
+        Arrays.stream(RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false, true))
+            .mapToDouble(Double::doubleValue)
+            .toArray();
     double[] expected = new double[] {13.0, 114.0, 8.7692, 9.0, 11.0, 4.7285, 22.3589, 1.0, 16.0};
     assertArrayEquals(expected, actual, FP_TOLERANCE);
   }

@@ -72,12 +72,13 @@ public class RelationExtractor {
     long[] memberIds = new long[relation.getMemidsCount()];
 
     if (relation.getMemidsCount() != 0) {
-      long firstId = relation.getMemids(0);
+      long idValue = relation.getMemids(0);
 
-      memberIds[0] = firstId;
+      memberIds[0] = idValue;
 
       for (int i = 1; i < relation.getMemidsCount(); i++) {
-        memberIds[i] = relation.getMemids(i) + firstId;
+        idValue += relation.getMemids(i);
+        memberIds[i] = idValue;
       }
     }
 
