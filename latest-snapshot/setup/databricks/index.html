@@ -71,7 +71,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#download-sedona-jars" class="md-skip">
+        <a href="#databricks-and-sedona-version-requirements" class="md-skip">
           Skip to content
         </a>
       
@@ -1081,36 +1081,54 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#download-sedona-jars" class="md-nav__link">
+  <a href="#databricks-and-sedona-version-requirements" class="md-nav__link">
     <span class="md-ellipsis">
-      Download Sedona jars
+      Databricks and Sedona version requirements
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#create-an-init-script" class="md-nav__link">
+  <a href="#install-the-sedona-library-in-databricks" class="md-nav__link">
     <span class="md-ellipsis">
-      Create an init script
+      Install the Sedona library in Databricks
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#set-up-cluster-config" class="md-nav__link">
+  <a href="#create-a-databricks-cluster" class="md-nav__link">
     <span class="md-ellipsis">
-      Set up cluster config
+      Create a Databricks cluster
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#verify-installation" class="md-nav__link">
+  <a href="#create-a-databricks-notebook" class="md-nav__link">
     <span class="md-ellipsis">
-      Verify installation
+      Create a Databricks notebook
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#saving-geometry-in-databricks-delta-lake-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Saving geometry in Databricks Delta Lake tables
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#known-bugs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Known bugs
     </span>
   </a>
   
@@ -4556,36 +4574,54 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#download-sedona-jars" class="md-nav__link">
+  <a href="#databricks-and-sedona-version-requirements" class="md-nav__link">
     <span class="md-ellipsis">
-      Download Sedona jars
+      Databricks and Sedona version requirements
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#create-an-init-script" class="md-nav__link">
+  <a href="#install-the-sedona-library-in-databricks" class="md-nav__link">
     <span class="md-ellipsis">
-      Create an init script
+      Install the Sedona library in Databricks
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#set-up-cluster-config" class="md-nav__link">
+  <a href="#create-a-databricks-cluster" class="md-nav__link">
     <span class="md-ellipsis">
-      Set up cluster config
+      Create a Databricks cluster
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#verify-installation" class="md-nav__link">
+  <a href="#create-a-databricks-notebook" class="md-nav__link">
     <span class="md-ellipsis">
-      Verify installation
+      Create a Databricks notebook
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#saving-geometry-in-databricks-delta-lake-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Saving geometry in Databricks Delta Lake tables
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#known-bugs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Known bugs
     </span>
   </a>
   
@@ -4638,14 +4674,17 @@
  under the License.
  -->
 
-<p>In Databricks advanced editions, you need to install Sedona via <a href="https://docs.databricks.com/clusters/init-scripts.html">cluster init-scripts</a> as described below. Sedona is not guaranteed to be 100% compatible with <code>Databricks photon acceleration</code>. Sedona requires Spark internal APIs to inject many optimization strategies, which sometimes is not accessible in <code>Photon</code>.</p>
-<p>The following steps use DBR including Apache Spark 3.5.x as an example. Please change the Spark version according to your DBR version. Please pay attention to the Spark version postfix and Scala version postfix on our <a href="../maven-coordinates/">Maven Coordinate page</a>. Databricks Spark and Apache Spark's compatibility can be found <a href="https://docs.databricks.com/en/release-notes/runtime/index.html">here</a>.</p>
-<div class="admonition bug">
-<p class="admonition-title">Bug</p>
-<p>Databricks Runtime 16.2 (non-LTS) introduces a change in the json4s dependency, which may lead to compatibility issues with Apache Sedona. We recommend using a currently supported LTS version, such as Databricks Runtime 15.4 LTS or 14.3 LTS, to ensure stability. A patch will be provided once an official Databricks Runtime 16 LTS version is released.</p>
-</div>
-<h3 id="download-sedona-jars">Download Sedona jars<a class="headerlink" href="#download-sedona-jars" title="Permanent link">&para;</a></h3>
-<p>Download the Sedona jars to a DBFS location. You can do that manually via UI or from a notebook by executing this code in a cell:</p>
+<p>You can run Sedona in Databricks to leverage the functionality that Sedona provides.  Here’s an example of a Databricks notebook that’s running Sedona code:</p>
+<p><img alt="Example notebook" src="../../image/databricks/image1.png" /></p>
+<p>Sedona isn’t available in all Databricks environments because of the platform's limitations. This post explains how and where you can run Sedona in Databricks.</p>
+<h2 id="databricks-and-sedona-version-requirements">Databricks and Sedona version requirements<a class="headerlink" href="#databricks-and-sedona-version-requirements" title="Permanent link">&para;</a></h2>
+<p>Databricks and Sedona depend on Spark, Scala, and other libraries.</p>
+<p>For example, one Databricks Runtime 16.4 depends on Scala 2.12 and Spark 3.5.  Here are the version requirements for a few Databricks runtimes.</p>
+<p><img alt="Databricks runtimes" src="../../image/databricks/image2.png" /></p>
+<p>If you use a Databricks Runtime compiled with Spark 3.5 and Scala 2.12, then you should use a Sedona version compiled with Spark 3.5 and Scala 2.12.  You need to make sure the Scala versions are aligned, even if you’re using the Python or SQL APIs.</p>
+<p>Only some Sedona functions work when Databricks Photon acceleration is enabled, so you can consider disabling Photon when using Sedona for better compatibility.</p>
+<h2 id="install-the-sedona-library-in-databricks">Install the Sedona library in Databricks<a class="headerlink" href="#install-the-sedona-library-in-databricks" title="Permanent link">&para;</a></h2>
+<p>Download the required Sedona packages by executing the following commands:</p>
 <div class="highlight"><pre><span></span><code>%sh
 <span class="c1"># Create JAR directory for Sedona</span>
 mkdir<span class="w"> </span>-p<span class="w"> </span>/Workspace/Shared/sedona/1.7.1
@@ -4655,68 +4694,80 @@ curl<span class="w"> </span>-o<span class="w"> </span>/Workspace/Shared/sedona/1
 
 curl<span class="w"> </span>-o<span class="w"> </span>/Workspace/Shared/sedona/1.7.1/sedona-spark-shaded-3.5_2.12-1.7.1.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/1.7.1/sedona-spark-shaded-3.5_2.12-1.7.1.jar&quot;</span>
 </code></pre></div>
-<p>Of course, you can also do the steps above manually.</p>
-<h3 id="create-an-init-script">Create an init script<a class="headerlink" href="#create-an-init-script" title="Permanent link">&para;</a></h3>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If you are creating a Shared cluster, you won't be able to use init scripts and jars stored under <code>Workspace</code>. Please instead store them in <code>Volumes</code>. The overall process should be the same.</p>
-</div>
-<p>Create an init script in <code>Workspace</code> that loads the Sedona jars into the cluster's default jar directory. You can create that from any notebook by running:</p>
+<p>Here are the software versions used to compile <code>sedona-spark-shaded-3.5_2.12-1.7.1.jar</code>:</p>
+<ul>
+<li>Spark 3.5</li>
+<li>Scala 2.12</li>
+<li>Sedona 1.7.1</li>
+</ul>
+<p>Ensure that you use a Databricks Runtime with versions compatible with this jar.</p>
+<p>You will be able to see these in your Databricks environment after downloading them:</p>
+<p><img alt="Downloaded JARs" src="../../image/databricks/image3.png" /></p>
+<p>Create an init script as follows:</p>
 <div class="highlight"><pre><span></span><code>%sh
 
-<span class="c1"># Create init script directory for Sedona</span>
-mkdir<span class="w"> </span>-p<span class="w"> </span>/Workspace/Shared/sedona/
+# Create init script directory for Sedona
+mkdir -p /Workspace/Shared/sedona/
 
-<span class="c1"># Create init script</span>
-cat<span class="w"> </span>&gt;<span class="w"> </span>/Workspace/Shared/sedona/sedona-init.sh<span class="w"> </span><span class="s">&lt;&lt;&#39;EOF&#39;</span>
-<span class="s">#!/bin/bash</span>
-<span class="s">#</span>
-<span class="s"># File: sedona-init.sh</span>
-<span class="s">#</span>
-<span class="s"># On cluster startup, this script will copy the Sedona jars to the cluster&#39;s default jar directory.</span>
+# Create init script
+cat &gt; /Workspace/Shared/sedona/sedona-init.sh &lt;&lt;&#39;EOF&#39;
+#!/bin/bash
+#
+# File: sedona-init.sh
+#
+# On cluster startup, this script will copy the Sedona jars to the cluster&#39;s default jar directory.
 
-<span class="s">cp /Workspace/Shared/sedona/1.7.1/*.jar /databricks/jars</span>
+cp /Workspace/Shared/sedona/1.7.1/*.jar /databricks/jars
 
-<span class="s">EOF</span>
+EOF
 </code></pre></div>
-<p>Of course, you can also do the steps above manually.</p>
-<h3 id="set-up-cluster-config">Set up cluster config<a class="headerlink" href="#set-up-cluster-config" title="Permanent link">&para;</a></h3>
-<p>From your cluster configuration (<code>Cluster</code> -&gt; <code>Edit</code> -&gt; <code>Configuration</code> -&gt; <code>Advanced options</code> -&gt; <code>Spark</code>) activate the Sedona functions and the kryo serializer by adding to the Spark Config</p>
+<h2 id="create-a-databricks-cluster">Create a Databricks cluster<a class="headerlink" href="#create-a-databricks-cluster" title="Permanent link">&para;</a></h2>
+<p>You need to create a Databricks cluster compatible with the Sedona JAR files.  If you use Sedona JAR files compiled with Scala 2.12, you must use a Databricks cluster that runs Scala 2.12.</p>
+<p>Databricks Photon is only partially compatible with Apache Sedona, so you will have better compatibility if you unselect the Photon button when configuring the cluster.</p>
+<p>Go to the compute tab and configure the cluster:</p>
+<p><img alt="Cluster config" src="../../image/databricks/image4.png" /></p>
+<p>Set the proper cluster configurations:</p>
+<p><img alt="Spark configs" src="../../image/databricks/image5.png" /></p>
+<p>Here’s a list of the cluster configurations that’s easy to copy and paste:</p>
 <div class="highlight"><pre><span></span><code>spark.sql.extensions org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions
 spark.serializer org.apache.spark.serializer.KryoSerializer
 spark.kryo.registrator org.apache.sedona.core.serde.SedonaKryoRegistrator
 spark.sedona.enableParserExtension false
 </code></pre></div>
-<p>From your cluster configuration (<code>Cluster</code> -&gt; <code>Edit</code> -&gt; <code>Configuration</code> -&gt; <code>Advanced options</code> -&gt; <code>Init Scripts</code>) add the newly created <code>Workspace</code> init script</p>
-<table>
-<thead>
-<tr>
-<th>Type</th>
-<th>File path</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Workspace</td>
-<td>/Shared/sedona/sedona-init.sh</td>
-</tr>
-</tbody>
-</table>
-<p>For enabling python support, from the Libraries tab install from PyPI</p>
+<p>Specify the path to the init script:</p>
+<p><img alt="init script" src="../../image/databricks/image6.png" /></p>
+<p>If you are creating a Shared cluster, you won't be able to use init scripts and jars stored under Workspace. Please store them in volumes instead. The overall process should be the same.</p>
+<p>Add the required dependencies in the Library tab:</p>
+<p><img alt="Python libraries" src="../../image/databricks/image7.png" /></p>
+<p>Here’s the full list of libraries:</p>
 <div class="highlight"><pre><span></span><code>apache-sedona==1.7.1
 geopandas==1.0.1
 keplergl==0.3.7
 pydeck==0.9.1
 </code></pre></div>
-<div class="admonition tips">
-<p class="admonition-title">Tips</p>
-<p>You need to install the Sedona libraries via init script because the libraries installed via UI are installed after the cluster has already started, and therefore the classes specified by the config <code>spark.sql.extensions</code>, <code>spark.serializer</code>, and <code>spark.kryo.registrator</code> are not available at startup time.*</p>
-</div>
-<h3 id="verify-installation">Verify installation<a class="headerlink" href="#verify-installation" title="Permanent link">&para;</a></h3>
-<p>After you have started the cluster, you can verify that Sedona is correctly installed by running the following code in a notebook:</p>
-<div class="highlight"><pre><span></span><code><span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT ST_Point(1, 1)&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<p>Then click “Create compute” to start the cluster.</p>
+<h2 id="create-a-databricks-notebook">Create a Databricks notebook<a class="headerlink" href="#create-a-databricks-notebook" title="Permanent link">&para;</a></h2>
+<p>Create a Databricks notebook and connect it to the cluster.  Verify that you can run a Python computation with a Sedona function:</p>
+<p><img alt="Python computation" src="../../image/databricks/image1.png" /></p>
+<p>You can also use the SQL API as follows:</p>
+<p><img alt="SQL computation" src="../../image/databricks/image8.png" /></p>
+<h2 id="saving-geometry-in-databricks-delta-lake-tables">Saving geometry in Databricks Delta Lake tables<a class="headerlink" href="#saving-geometry-in-databricks-delta-lake-tables" title="Permanent link">&para;</a></h2>
+<p>Here’s how to create a Sedona DataFrame with a geometry column</p>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;POLYGON((1.0 1.0,1.0 3.0,2.0 3.0,2.0 1.0,1.0 1.0))&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;LINESTRING(4.0 1.0,4.0 2.0,6.0 4.0)&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;POINT(9.0 2.0)&#39;</span><span class="p">),</span>
+<span class="p">],</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">])</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;ST_GeomFromWKT(geometry)&quot;</span><span class="p">))</span>
 </code></pre></div>
-<p>Note that: you don't need to run the <code>SedonaRegistrator.registerAll(spark)</code> or <code>SedonaContext.create(spark)</code> in the advanced edition because <code>org.apache.sedona.sql.SedonaSqlExtensions</code> in the Cluster Config will take care of that.</p>
+<p>Write the Sedona DataFrame to a Delta Lake table:</p>
+<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">saveAsTable</span><span class="p">(</span><span class="s2">&quot;your_org.default.geotable&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>Here’s how to read the table: <code>sedona.table("your_org.default.geotable").display()</code></p>
+<p>This is what the results look like in Databricks:</p>
+<p><img alt="Write table" src="../../image/databricks/image9.png" /></p>
+<h2 id="known-bugs">Known bugs<a class="headerlink" href="#known-bugs" title="Permanent link">&para;</a></h2>
+<p>To ensure stability, we recommend using a currently supported Long-Term Support (LTS) version, such as Databricks Runtime 16.4 LTS or 15.4 LTS.  Some Databricks Runtimes, such as 16.2 (non-LTS), are not compatible with Apache Sedona, as this particular runtime introduced a change in the json4s dependency.</p>
 
 
 
@@ -4737,7 +4788,7 @@ pydeck==0.9.1
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="April 7, 2025 16:21:45 UTC">April 7, 2025 16:21:45</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="June 3, 2025 05:54:09 UTC">June 3, 2025 05:54:09</span>
   </span>
 
     
