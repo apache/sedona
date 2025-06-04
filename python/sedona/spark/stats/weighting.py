@@ -60,18 +60,21 @@ def add_distance_band_column(
 
     """
     sedona = SparkSession.getActiveSession()
-    return sedona._jvm.org.apache.sedona.stats.Weighting.addDistanceBandColumn(
-        dataframe._jdf,
-        float(threshold),
-        binary,
-        float(alpha),
-        include_zero_distance_neighbors,
-        include_self,
-        float(self_weight),
-        geometry,
-        use_spheroid,
-        saved_attributes,
-        result_name,
+    return DataFrame(
+        sedona._jvm.org.apache.sedona.stats.Weighting.addDistanceBandColumn(
+            dataframe._jdf,
+            float(threshold),
+            binary,
+            float(alpha),
+            include_zero_distance_neighbors,
+            include_self,
+            float(self_weight),
+            geometry,
+            use_spheroid,
+            saved_attributes,
+            result_name,
+        ),
+        sedona._jsparkSession,
     )
 
 
@@ -110,15 +113,18 @@ def add_binary_distance_band_column(
     """
     sedona = SparkSession.getActiveSession()
 
-    return sedona._jvm.org.apache.sedona.stats.Weighting.addBinaryDistanceBandColumn(
-        dataframe._jdf,
-        float(threshold),
-        include_zero_distance_neighbors,
-        include_self,
-        geometry,
-        use_spheroid,
-        saved_attributes,
-        result_name,
+    return DataFrame(
+        sedona._jvm.org.apache.sedona.stats.Weighting.addBinaryDistanceBandColumn(
+            dataframe._jdf,
+            float(threshold),
+            include_zero_distance_neighbors,
+            include_self,
+            geometry,
+            use_spheroid,
+            saved_attributes,
+            result_name,
+        ),
+        sedona._jsparkSession,
     )
 
 
@@ -161,15 +167,18 @@ def add_weighted_distance_band_column(
     """
     sedona = SparkSession.getActiveSession()
 
-    return sedona._jvm.org.apache.sedona.stats.Weighting.addBinaryDistanceBandColumn(
-        dataframe._jdf,
-        float(threshold),
-        float(alpha),
-        include_zero_distance_neighbors,
-        include_self,
-        float(self_weight),
-        geometry,
-        use_spheroid,
-        saved_attributes,
-        result_name,
+    return DataFrame(
+        sedona._jvm.org.apache.sedona.stats.Weighting.addBinaryDistanceBandColumn(
+            dataframe._jdf,
+            float(threshold),
+            float(alpha),
+            include_zero_distance_neighbors,
+            include_self,
+            float(self_weight),
+            geometry,
+            use_spheroid,
+            saved_attributes,
+            result_name,
+        ),
+        sedona._jsparkSession,
     )
