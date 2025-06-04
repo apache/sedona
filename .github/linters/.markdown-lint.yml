@@ -50,6 +50,9 @@ MD034: false
 # no-emphasis-as-heading - Emphasis used instead of a heading
 MD036: false
 
+# MD038/no-space-in-code Spaces inside code span elements
+MD038: false
+
 # fenced-code-language - Fenced code blocks should have a language specified
 MD040: false
 
@@ -61,3 +64,6 @@ MD046: false
 
 # link-fragments Link fragments should be valid
 MD051: false
+
+# MD059/descriptive-link-text Link text should be descriptive
+MD059: false
