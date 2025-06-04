@@ -33,7 +33,7 @@
         <flink.version>1.19.0</flink.version>
         <flink.scope>compile</flink.scope>
         <scala.compat.version>2.12</scala.compat.version>
-        <geotools.version>33.1</geotools.version>
+        <geotools.version>28.2</geotools.version>
         <log4j.version>2.17.2</log4j.version>
     </properties>
 
