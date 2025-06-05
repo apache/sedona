@@ -20,12 +20,12 @@ package org.apache.sedona.common.raster;
 
 import java.awt.geom.Point2D;
 import org.apache.sedona.common.utils.RasterUtils;
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.geometry.Envelope2D;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.geom.*;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
 
 public class GeometryFunctions {
 
@@ -140,7 +140,7 @@ public class GeometryFunctions {
   }
 
   public static Geometry envelope(GridCoverage2D raster) throws FactoryException {
-    Envelope2D envelope2D = raster.getEnvelope2D();
+    ReferencedEnvelope envelope2D = raster.getEnvelope2D();
 
     Envelope envelope =
         new Envelope(

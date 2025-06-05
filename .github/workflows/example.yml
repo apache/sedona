@@ -50,9 +50,6 @@ jobs:
           - spark: 3.4.2
             spark-compat: '3.4'
             sedona: 1.5.1
-          - spark: 3.3.4
-            spark-compat: '3.0'
-            sedona: 1.5.1
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4

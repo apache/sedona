@@ -23,11 +23,11 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.util.Arrays;
 import org.apache.sedona.common.Constructors;
+import org.geotools.api.referencing.FactoryException;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
-import org.opengis.referencing.FactoryException;
 
 public class RasterBandAccessorsTest extends RasterTestBase {
 
