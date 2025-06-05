@@ -31,14 +31,17 @@ class Moran:
 
     @staticmethod
     def get_global(
-        df: DataFrame, two_tailed: bool = True, id_column: str = "id"
+        df: DataFrame,
+        two_tailed: bool = True,
+        id_column: str = "id",
+        value_column: str = "value",
     ) -> MoranResult:
         sedona = SparkSession.getActiveSession()
 
         _jvm = sedona._jvm
         moran_result = (
             sedona._jvm.org.apache.sedona.stats.autocorelation.Moran.getGlobal(
-                df._jdf, two_tailed, id_column
+                df._jdf, two_tailed, id_column, value_column
             )
         )
 

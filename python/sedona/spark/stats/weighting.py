@@ -61,7 +61,7 @@ def add_distance_band_column(
     """
     sedona = SparkSession.getActiveSession()
     return DataFrame(
-        sedona._jvm.org.apache.sedona.stats.Weighting.addDistanceBandColumn(
+        sedona._jvm.org.apache.sedona.stats.Weighting.addDistanceBandColumnPython(
             dataframe._jdf,
             float(threshold),
             binary,
@@ -114,11 +114,14 @@ def add_binary_distance_band_column(
     sedona = SparkSession.getActiveSession()
 
     return DataFrame(
-        sedona._jvm.org.apache.sedona.stats.Weighting.addBinaryDistanceBandColumn(
+        sedona._jvm.org.apache.sedona.stats.Weighting.addDistanceBandColumnPython(
             dataframe._jdf,
             float(threshold),
+            True,
+            float(-1.0),
             include_zero_distance_neighbors,
             include_self,
+            float(1.0),
             geometry,
             use_spheroid,
             saved_attributes,
@@ -168,13 +171,14 @@ def add_weighted_distance_band_column(
     sedona = SparkSession.getActiveSession()
 
     return DataFrame(
-        sedona._jvm.org.apache.sedona.stats.Weighting.addBinaryDistanceBandColumn(
+        sedona._jvm.org.apache.sedona.stats.Weighting.addDistanceBandColumnPython(
             dataframe._jdf,
             float(threshold),
-            float(alpha),
+            False,
+            alpha,
             include_zero_distance_neighbors,
             include_self,
-            float(self_weight),
+            self_weight,
             geometry,
             use_spheroid,
             saved_attributes,

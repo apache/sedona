@@ -43,6 +43,26 @@ class MoranTest extends TestBaseScala with AutoCorrelationFixtures {
       assert(moranResult.getI > 0.99)
     }
 
+    it("different id and value column names") {
+      val weights = Weighting
+        .addDistanceBandColumn(
+          positiveCorrelationFrame
+            .selectExpr("id AS index", "value as feature_value", "geometry"),
+          1.0,
+          savedAttributes = Seq("index", "feature_value"))
+        .withColumn(
+          "weights",
+          expr("transform(weights, w -> struct(w.neighbor, w.value/size(weights) AS value))"))
+
+      weights.cache().count()
+
+      val moranResult =
+        Moran.getGlobal(weights, idColumn = "index", valueColumnName = "feature_value")
+
+      assert(moranResult.getPNorm < 0.0001)
+      assert(moranResult.getI > 0.99)
+    }
+
     it("correlation is negative") {
       val weights = Weighting
         .addDistanceBandColumn(

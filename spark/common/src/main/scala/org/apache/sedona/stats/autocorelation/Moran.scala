@@ -25,6 +25,7 @@ import org.apache.spark.sql.functions.{col, explode, pow}
 
 object Moran {
   private val ID_COLUMN = "id"
+  private val VALUE_COLUMN = "value"
 
   private def normSf(x: Double, mean: Double = 0.0, stdDev: Double = 1.0): Double = {
     val normalDist = new NormalDistribution(mean, stdDev)
@@ -39,12 +40,15 @@ object Moran {
   def getGlobal(
       dataframe: DataFrame,
       twoTailed: Boolean = true,
-      idColumn: String = ID_COLUMN): MoranResult = {
+      idColumn: String = ID_COLUMN,
+      valueColumnName: String = VALUE_COLUMN): MoranResult = {
     val spark = dataframe.sparkSession
     import spark.implicits._
 
+    dataframe.printSchema()
+
     val data = dataframe
-      .selectExpr("avg(value)", "count(*)")
+      .selectExpr(s"avg($valueColumnName)", "count(*)")
       .as[(Double, Long)]
       .head()
 
@@ -56,7 +60,7 @@ object Moran {
       .select(col(idColumn), explode(col("weights")).alias("col"))
       .select(
         $"$idColumn".alias("id"),
-        $"col.neighbor.id".alias("n_id"),
+        $"col.neighbor.$idColumn".alias("n_id"),
         $"col.value".alias("weight_value"))
 
     val s1Data = explodedWeights
@@ -83,9 +87,9 @@ object Moran {
     val inumData = dataframe
       .selectExpr(
         s"$idColumn AS id",
-        "value",
-        f"value - ${yMean} AS z",
-        f"transform(weights, w -> struct(w.neighbor.id AS id, w.value AS w, w.neighbor.value, w.neighbor.value - ${yMean} AS z)) AS weight")
+        s"$valueColumnName AS value",
+        f"$valueColumnName - ${yMean} AS z",
+        f"transform(weights, w -> struct(w.neighbor.$idColumn AS id, w.value AS w, w.neighbor.$valueColumnName, w.neighbor.$valueColumnName - ${yMean} AS z)) AS weight")
       .selectExpr(
         "z",
         "AGGREGATE(transform(weight, x-> x.z*x.w), CAST(0.0 AS DOUBLE), (acc, x) -> acc + x) AS ZL",

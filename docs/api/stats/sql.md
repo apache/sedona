@@ -135,3 +135,119 @@ names in parentheses are python variable names
 - useSpheroid (use_spheroid) - whether to use a cartesian or spheroidal distance calculation. Default is false
 
 In both cases the output is the input DataFrame with the weights column added to each row.
+
+# MoranI
+
+Moran I is the spatial autocorrelation algorithm, which is using spatial
+location and non-spatial attribute. When the value is close to the 1 it
+means that there is spatial correlation, when it is close to 0 then the
+correlation does not exist and data is randomly distributed. When the
+MoranI autocorrelation value is close to -1 it means that there is negative
+correlation. Negative correlation means that close values has dissimilar values.
+
+You can see spatial correlation values on the figure below
+
+- on the left there is negative correlation (-1)
+- in the middle correlation is positive (1)
+- on the right the correlation is close to zero and data is random.
+
+![moranI.png](../../image/moranI.png)
+
+Moran statistics can be used as the Scala/Java and Python functions.
+As the input function requires weight DataFrame. You can create the
+weight DataFrame using Apache Sedona weighting functions. You need
+to keep in mind that your input has to have id column that uniquely identifies
+the feature and value field. The required minimal schema for the MoranI Apache Sedona
+function is:
+
+```
+ |-- id: integer (nullable = true)
+ |-- value: double (nullable = true)
+ |-- weights: array (nullable = false)
+ |    |-- element: struct (containsNull = false)
+ |    |    |-- neighbor: struct (nullable = false)
+ |    |    |    |-- id: integer (nullable = true)
+ |    |    |    |-- value: double (nullable = true)
+ |    |    |-- value: double (nullable = true)
+```
+
+You can manipulate the value column name and id using function parameters.
+
+To use the Apache Sedona weight functions you need to pass the
+id column and value column to kept parameters.
+
+=== "Scala"
+
+    ```scala
+    val weights = Weighting.addDistanceBandColumn(
+          positiveCorrelationFrame,
+          1.0,
+          savedAttributes = Seq("id", "value")
+    )
+
+    val moranResult = Moran.getGlobal(weights, idColumn = "id")
+
+    // result fields
+    moranResult.getPNorm
+    moranResult.getI
+    moranResult.getZNorm
+    ```
+
+=== "Python"
+
+    ```python
+    from sedona.spark.stats.autocorrelation.moran import Moran
+    from sedona.spark.stats.weighting import add_binary_distance_band_column
+
+    result = add_binary_distance_band_column(
+        df,
+        1.0,
+        saved_attributes=["id", "value"]
+    )
+
+    moran_i_result = Moran.get_global(result)
+
+    ## result fields
+    moran_i_result.p_norm
+    moran_i_result.i
+    moran_i_result.z_norm
+    ```
+
+In the result you get the Z norm, P norm and Moran I value.
+
+The full signatures of the functions
+
+
+=== "Scala"
+
+    ```scala
+    def getGlobal(
+      dataframe: DataFrame,
+      twoTailed: Boolean = true,
+      idColumn: String = ID_COLUMN,
+      valueColumnName: String = VALUE_COLUMN): MoranResult
+
+    // java interface
+    public interface MoranResult {
+        public double getI();
+        public double getPNorm();
+        public double getZNorm();
+    }
+    ```
+
+=== "Python"
+
+    ```python
+    def get_global(
+        df: DataFrame,
+        two_tailed: bool = True,
+        id_column: str = "id",
+        value_column: str = "value",
+    ) -> MoranResult
+
+    @dataclass
+    class MoranResult:
+        i: float
+        p_norm: float
+        z_norm: float
+    ```
