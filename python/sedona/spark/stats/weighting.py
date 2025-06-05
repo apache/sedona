@@ -74,7 +74,7 @@ def add_distance_band_column(
             saved_attributes,
             result_name,
         ),
-        sedona._jsparkSession,
+        sedona,
     )
 
 
@@ -124,7 +124,7 @@ def add_binary_distance_band_column(
             saved_attributes,
             result_name,
         ),
-        sedona._jsparkSession,
+        sedona,
     )
 
 
@@ -180,5 +180,5 @@ def add_weighted_distance_band_column(
             saved_attributes,
             result_name,
         ),
-        sedona._jsparkSession,
+        sedona,
     )
