@@ -217,7 +217,6 @@ In the result you get the Z norm, P norm and Moran I value.
 
 The full signatures of the functions
 
-
 === "Scala"
 
     ```scala
