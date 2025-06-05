@@ -53,7 +53,7 @@ jobs:
             geotools: 'auto'
           - spark: 3.4.3
             sedona: 1.6.0
-            geotools: 33.1 
+            geotools: 28.2
     runs-on: ${{ matrix.os }}
     defaults:
       run:
