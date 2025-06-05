@@ -50,7 +50,7 @@ jobs:
         include:
           - spark: 3.5.1
             sedona: 'latest'
-            geotools: 'auto'
+            geotools: '33.1-rc1'
           - spark: 3.4.3
             sedona: 1.6.0
             geotools: 28.2
