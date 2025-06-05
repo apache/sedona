@@ -134,6 +134,15 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
+      - id: insert-license
+        name: add license for all other files
+        files: ^\.(editorconfig|gitattributes|prettierignore|prettierrc|shellcheckrc)$|^.*/\.gitignore$
+        args:
+          - --comment-style
+          - '|#|'
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.20.0
     hooks:
