@@ -23,8 +23,6 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.sedona_sql.expressions.st_functions.{ST_Distance, ST_DistanceSpheroid}
 import org.apache.spark.sql.{Column, DataFrame}
 
-import scala.collection.mutable
-
 object Weighting {
 
   private val ID_COLUMN = "__id"
@@ -182,7 +180,6 @@ object Weighting {
    *   The input DataFrame with a weight column added containing neighbors and their weights
    *   (always 1) added to each row.
    */
-
   def addBinaryDistanceBandColumn(
       dataframe: DataFrame,
       threshold: Double,
@@ -275,7 +272,7 @@ object Weighting {
       Seq(savedAttributes.toArray: _*).map { s =>
         s.asInstanceOf[String]
       }
-    } else Seq()
+    } else null
 
     addDistanceBandColumn(
       dataframe,
