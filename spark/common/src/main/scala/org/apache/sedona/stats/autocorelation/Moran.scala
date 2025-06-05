@@ -45,8 +45,6 @@ object Moran {
     val spark = dataframe.sparkSession
     import spark.implicits._
 
-    dataframe.printSchema()
-
     val data = dataframe
       .selectExpr(s"avg($valueColumnName)", "count(*)")
       .as[(Double, Long)]
