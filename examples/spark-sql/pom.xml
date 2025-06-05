@@ -34,7 +34,7 @@
         <sedona.scope>compile</sedona.scope>
         <geotools.scope>compile</geotools.scope>
 
-        <geotools.version>33.1</geotools.version>
+        <geotools.version>28.2</geotools.version>
         <jt-jiffle.version>1.1.24</jt-jiffle.version>
         <spark.version>3.4.0</spark.version>
         <spark.compat.version>3.4</spark.compat.version>
