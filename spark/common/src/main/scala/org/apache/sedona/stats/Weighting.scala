@@ -270,7 +270,7 @@ object Weighting {
       resultName: String = "weights"): DataFrame = {
 
     val savedAttributesScala =
-      if (savedAttributes != null) savedAttributes.asScala
+      if (savedAttributes != null) savedAttributes.asScala.toSeq
       else null
 
     addDistanceBandColumn(
