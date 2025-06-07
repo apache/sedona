@@ -21,8 +21,8 @@ default_stages: [pre-commit, pre-push]
 default_language_version:
   # force all unspecified Python hooks to run python3
   python: python3
-  # force all unspecified Node hooks to run Node.js v22.14.0 LTS
-  node: 22.14.0
+  # force all unspecified Node hooks to run Node.js v22.16.0 LTS
+  node: 22.16.0
 minimum_pre_commit_version: '3.2.0'
 repos:
   - repo: meta
@@ -36,8 +36,8 @@ repos:
       - id: prettier
         name: run prettier
         description: format files with prettier
-        entry: prettier --write '**/*.yaml' '**/*.yml'
-        files: \.ya?ml$
+        entry: prettier --write '**/*.js' '**/*.yaml' '**/*.yml'
+        files: \.(js|ya?ml)$
         language: node
         additional_dependencies: ['prettier@3.5.3']
   - repo: https://github.com/Lucas-C/pre-commit-hooks
@@ -125,8 +125,26 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
+      - id: insert-license
+        name: add license for all Python files
+        files: \.py$
+        args:
+          - --comment-style
+          - '|#|'
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
+      - id: insert-license
+        name: add license for all other files
+        files: ^\.(editorconfig|gitattributes|prettierignore|prettierrc|shellcheckrc)$|^.*/\.gitignore$
+        args:
+          - --comment-style
+          - '|#|'
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.19.1
+    rev: v3.20.0
     hooks:
       - id: pyupgrade
         args: [--py37-plus]
@@ -137,7 +155,7 @@ repos:
         name: run black-jupyter
         description: format Python files and Jupyter Notebooks with black
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v20.1.0
+    rev: v20.1.5
     hooks:
       - id: clang-format
         name: run clang-format
@@ -161,7 +179,7 @@ repos:
         args: [--ignore-words=.github/linters/codespell.txt]
         exclude: ^docs/image|^spark/common/src/test/resources|^docs/usecases|^tools/maven/scalafmt|osmpbf/build|^docker/zeppelin
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.24.0
+    rev: v8.27.0
     hooks:
       - id: gitleaks
         name: run gitleaks
@@ -175,7 +193,8 @@ repos:
       - id: check-docstring-first
       - id: check-executables-have-shebangs
       - id: check-illegal-windows-names
-      # - id: check-json
+      - id: check-json
+        exclude: ^docs/usecases/data/testPolygon\.json$|^spark/common/src/test/resources/.*\.json$
       - id: check-merge-conflict
       - id: check-shebang-scripts-are-executable
       - id: check-toml
@@ -222,7 +241,7 @@ repos:
         args: [--config=.github/linters/lychee.toml]
         files: \.md$
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.44.0
+    rev: v0.45.0
     hooks:
       - id: markdownlint
         name: run markdownlint
@@ -238,7 +257,7 @@ repos:
         name: run shellcheck
         description: check Shell scripts with shellcheck
   - repo: https://github.com/adrienverge/yamllint
-    rev: v1.36.2
+    rev: v1.37.1
     hooks:
       - id: yamllint
         name: run yamllint
@@ -247,7 +266,7 @@ repos:
         types: [yaml]
         files: \.ya?ml$
   - repo: https://github.com/shssoichiro/oxipng
-    rev: v9.1.4
+    rev: v9.1.5
     hooks:
       - id: oxipng
         name: run oxipng

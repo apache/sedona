@@ -96,7 +96,7 @@ Here are the contents of the DataFrame:
 Here’s how to run the DBSCAN algorithm:
 
 ```python
-from sedona.stats.clustering.dbscan import dbscan
+from sedona.spark.stats import dbscan
 
 dbscan(df, 1.0, 3).orderBy("id").show()
 ```

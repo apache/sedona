@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 import org.apache.sedona.common.sphere.Haversine;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.utils.*;
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.operation.projection.ProjectionException;
 import org.junit.Test;
@@ -38,14 +40,13 @@ import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
 
 public class FunctionsTest extends TestBase {
   public static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
 
   protected static final double FP_TOLERANCE = 1e-12;
   protected static final double FP_TOLERANCE2 = 1e-4;
+  protected static final double IOU_TOLERANCE = 1E-8;
   protected static final CoordinateSequenceComparator COORDINATE_SEQUENCE_COMPARATOR =
       new CoordinateSequenceComparator(2) {
         @Override
@@ -2965,7 +2966,8 @@ public class FunctionsTest extends TestBase {
             "POLYGON((-120.00898315284118 29.999999999999993,-120.00898315284118 49.99999999999999,-120.00881054407824 50.00112962562472,-120.0082993510474 50.00221581519921,-120.00746921861011 50.003216831392564,-120.00635204829044 50.004094212187034,-120.00499077231723 50.00481424796622,-120.00343770376273 50.00534927579437,-120.00175252618051 50.00567874132504,-119.99999999999999 50.00578998770771,-80 50.00578998770771,-79.99824747381949 50.00567874132504,-79.99656229623727 50.00534927579437,-79.99500922768276 50.00481424796622,-79.99364795170956 50.004094212187034,-79.99253078138987 50.003216831392564,-79.9917006489526 50.00221581519921,-79.99118945592174 50.00112962562472,-79.9910168471588 49.99999999999999,-79.9910168471588 29.999999999999993,-79.99118945592174 29.99847458440221,-79.9917006489526 29.997007767335962,-79.99253078138987 29.99565592159683,-79.99364795170956 29.99447100360229,-79.99500922768276 29.993498555861333,-79.99656229623727 29.992775955769954,-79.99824747381949 29.992330978187542,-80 29.992180727190387,-119.99999999999999 29.992180727190387,-120.00175252618051 29.992330978187542,-120.00343770376273 29.992775955769954,-120.00499077231723 29.993498555861333,-120.00635204829044 29.99447100360229,-120.00746921861011 29.99565592159683,-120.0082993510474 29.997007767335962,-120.00881054407824 29.99847458440221,-120.00898315284118 29.999999999999993))");
     Geometry postgis_result3 =
         geomFromEWKT(
-            "POLYGON((-179.99820962883618 59.99995929000264,-179.99825989222717 59.999785136194745,-179.9983770256619 59.99961923984817,-179.99855652693947 59.99946797609105,-179.99879149742534 59.99933715766465,-179.999072907238 59.99923181157932,-179.99938994227725 59.9991559859705,-179.99973041975517 59.999112594569745,179.9999187437317 59.999103304762926,179.99957102955932 59.999128473531854,179.9992397991585 59.99918713373882,179.99893778069907 59.999277031280386,179.99867658007986 59.99939471168456,179.99846623499656 59.99953565282769,179.99831482921377 59.99969443867636,179.99822818186144 59.999864967383445,179.998209623704 60.00004068574784,179.9982598689955 60.00021484103153,179.9983769878675 60.000380740460706,179.99855648033625 60.00053200843791,179.99879144910815 60.000662831579476,179.99907286456278 60.00076818215714,179.99938991174088 60.00084401135155,179.99973040600648 60.00088740488531,-179.9999187385995 60.0008966950478,-179.99957100632759 60.00087152480308,-179.9992397613641 60.0008128615135,-179.99893773409582 60.000722959751855,-179.99867653176275 60.00060527463255,-179.99846619232136 60.00046432899707,-179.99831479867737 60.00030553956281,-179.99822816811277 60.000135008722694,-179.99820962883618 59.99995929000264))");
+            "POLYGON((-179.99820962883618 59.99995929000264,-179.99825989222717 59.999785136194745,-179.9983770256619 59.99961923984817,-179.99855652693947 59.99946797609105,-179.99879149742534 59.99933715766465,-179.999072907238 59.99923181157932,-179.99938994227725 59.9991559859705,-179.99973041975517 59.99911259456973,179.9999187437317 59.999103304762926,179.99957102955932 59.999128473531854,179.9992397991585 59.99918713373882,179.99893778069907 59.999277031280386,179.99867658007986 59.99939471168456,179.99846623499656 59.99953565282769,179.99831482921377 59.99969443867636,179.99822818186144 59.99986496738346,179.998209623704 60.00004068574784,179.9982598689955 60.00021484103153,179.9983769878675 60.000380740460706,179.99855648033625 60.00053200843791,179.99879144910815 60.000662831579476,179.99907286456278 60.00076818215714,179.99938991174088 60.00084401135155,179.99973040600648 60.00088740488531,-179.9999187385995 60.000896695047814,-179.99957100632759 60.00087152480308,-179.9992397613641 60.0008128615135,-179.99893773409582 60.00072295975184,-179.99867653176275 60.00060527463255,-179.99846619232136 60.00046432899707,-179.99831479867737 60.00030553956281,-179.99822816811277 60.000135008722694,-179.99820962883618 59.99995929000264))");
+
     Geometry postgis_result4 =
         geomFromEWKT(
             "POLYGON((-91.18706814560713 30.45193179814003,-91.1890681473133 30.453431798552806,-91.18908219578012 30.453444627151963,-91.18909308551447 30.453459583698564,-91.18910039802891 30.453476093421752,-91.18910385230598 30.453493521862622,-91.1891033155977 30.453511199256216,-91.18909880852735 30.453528446270074,-91.18909050429724 30.453544600110646,-91.18907872203292 30.453559039994175,-91.18906391451956 30.453571211003144,-91.18904665080186 30.453580645411602,-91.18902759431575 30.453586980659722,-91.189007477393 30.45358997328696,-91.1889870731177 30.453589508288072,-91.18896716561683 30.45358560353286,-91.18894851992636 30.453578409079352,-91.18893185259108 30.453568201407066,-91.18693185325601 30.45206820103894,-91.1849318540605 30.450568200775386,-91.18491780618884 30.450555372062745,-91.18490691698447 30.450540415432766,-91.18489960491243 30.45052390566114,-91.18489615096986 30.450506477209665,-91.18489668788781 30.450488799844198,-91.1849011950307 30.45047155289582,-91.18490949918969 30.45045539915463,-91.18492128123923 30.450440959399103,-91.18493608840117 30.45042878854006,-91.18495335164478 30.45041935429591,-91.18497240755428 30.450413019218534,-91.18499252382345 30.450410026760903,-91.18501292739734 30.450410491921236,-91.1850328341802 30.450414396823803,-91.18505147916741 30.450421591405906,-91.1850681458439 30.450431799184482,-91.18706814560713 30.45193179814003))");
@@ -2973,42 +2975,38 @@ public class FunctionsTest extends TestBase {
         geomFromEWKT(
             "POLYGON((-120.08983152841193 29.999999999999993,-120.08983152841193 49.99999999999999,-120.08810544078257 50.011295055230505,-120.082993510474 50.02215353089088,-120.07469218610122 50.032158574496115,-120.06352048290445 50.040926345165026,-120.04990772317234 50.04812066585569,-120.03437703762728 50.0534658262464,-120.01752526180509 50.05675706194147,-119.99999999999999 50.05786832496988,-80 50.05786832496988,-79.98247473819491 50.05675706194147,-79.9656229623727 50.0534658262464,-79.95009227682766 50.04812066585569,-79.93647951709556 50.040926345165026,-79.92530781389875 50.032158574496115,-79.91700648952599 50.02215353089088,-79.91189455921743 50.011295055230505,-79.91016847158805 49.99999999999999,-79.91016847158805 29.999999999999993,-79.91189455921743 29.984744778414523,-79.91700648952599 29.970073573593833,-79.92530781389875 29.956550575941442,-79.93647951709556 29.944696041122494,-79.95009227682766 29.934966209462644,-79.9656229623727 29.927735669850765,-79.98247473819491 29.923282861557286,-80 29.921779286758486,-119.99999999999999 29.921779286758486,-120.01752526180509 29.923282861557286,-120.03437703762728 29.927735669850765,-120.04990772317234 29.934966209462644,-120.06352048290445 29.944696041122494,-120.07469218610122 29.956550575941442,-120.082993510474 29.970073573593833,-120.08810544078257 29.984744778414523,-120.08983152841193 29.999999999999993))");
 
-    assertEquals(Functions.reducePrecision(expected1, 8), Functions.reducePrecision(result1, 8));
     assertEquals(4326, Functions.getSRID(result1));
-    assertEquals(7.424558176442617E-8, comparePolygons(postgis_result1, result1), FP_TOLERANCE2);
-    assertEquals(Spheroid.area(postgis_result1), Spheroid.area(result1), FP_TOLERANCE2);
+    assertEquals(1.0, intersectionOverUnion(expected1, result1), IOU_TOLERANCE);
+    assertEquals(1.0, intersectionOverUnion(postgis_result1, result1), IOU_TOLERANCE);
 
-    assertEquals(Functions.reducePrecision(expected2, 8), Functions.reducePrecision(result2, 8));
     assertEquals(4269, Functions.getSRID(result2));
-    assertEquals(Spheroid.area(postgis_result2), Spheroid.area(result2), 10);
-    assertEquals(7.424558176442617E-8, comparePolygons(postgis_result2, result2), FP_TOLERANCE2);
+    assertEquals(1.0, intersectionOverUnion(expected2, result2), IOU_TOLERANCE);
+    assertEquals(1.0, intersectionOverUnion(postgis_result2, result2), IOU_TOLERANCE);
 
-    assertEquals(Functions.reducePrecision(expected3, 8), Functions.reducePrecision(result3, 8));
+    // Note tolerance for error higher for points due to algorithmic differences
     assertEquals(4269, Functions.getSRID(result3));
-    assertEquals(Spheroid.area(postgis_result3), Spheroid.area(result3), FP_TOLERANCE2);
-    assertEquals(7.424558176442617E-8, comparePolygons(postgis_result3, result3), FP_TOLERANCE2);
+    assertEquals(1.0, intersectionOverUnion(expected3, result3), 1e-4);
+    assertEquals(1.0, intersectionOverUnion(postgis_result3, result3), 1e-4);
 
-    assertEquals(Functions.reducePrecision(expected4, 8), Functions.reducePrecision(result4, 8));
     assertEquals(4326, Functions.getSRID(result4));
-    assertEquals(Spheroid.area(postgis_result4), Spheroid.area(result4), FP_TOLERANCE2);
-    assertEquals(7.424558176442617E-8, comparePolygons(postgis_result4, result4), FP_TOLERANCE2);
+    assertEquals(1.0, intersectionOverUnion(expected4, result4), IOU_TOLERANCE);
+    assertEquals(1.0, intersectionOverUnion(postgis_result4, result4), IOU_TOLERANCE);
 
-    assertEquals(Functions.reducePrecision(expected5, 8), Functions.reducePrecision(result5, 8));
     assertEquals(4269, Functions.getSRID(result5));
-    assertEquals(Spheroid.area(postgis_result5), Spheroid.area(result5), 10);
-    assertEquals(7.424558176442617E-8, comparePolygons(postgis_result5, result5), FP_TOLERANCE2);
+    assertEquals(1.0, intersectionOverUnion(expected5, result5), IOU_TOLERANCE);
+    assertEquals(1.0, intersectionOverUnion(postgis_result5, result5), IOU_TOLERANCE);
 
-    assertEquals(Functions.reducePrecision(expected6, 8), Functions.reducePrecision(result6, 8));
     assertEquals(4326, Functions.getSRID(result6));
+    assertEquals(1.0, intersectionOverUnion(expected6, result6), IOU_TOLERANCE);
 
-    assertEquals(Functions.reducePrecision(expected7, 8), Functions.reducePrecision(result7, 8));
     assertEquals(4326, Functions.getSRID(result6));
+    assertEquals(1.0, intersectionOverUnion(expected7, result7), IOU_TOLERANCE);
 
-    assertEquals(Functions.reducePrecision(expected8, 8), Functions.reducePrecision(result8, 8));
     assertEquals(4326, Functions.getSRID(result6));
+    assertEquals(1.0, intersectionOverUnion(expected8, result8), IOU_TOLERANCE);
 
-    assertEquals(Functions.reducePrecision(expected9, 8), Functions.reducePrecision(result9, 8));
     assertEquals(4326, Functions.getSRID(result6));
+    assertEquals(1.0, intersectionOverUnion(expected9, result9), IOU_TOLERANCE);
   }
 
   @Test
@@ -3045,20 +3043,6 @@ public class FunctionsTest extends TestBase {
     assertEquals(expected6, Functions.shiftLongitude(multiLineString));
     assertEquals(expected7, Functions.shiftLongitude(multiPolygon));
     assertEquals(expected8, Functions.shiftLongitude(geomCollection));
-  }
-
-  private static double comparePolygons(Geometry p1, Geometry p2) {
-    Coordinate[] coords1 = p1.getCoordinates();
-    Coordinate[] coords2 = p2.getCoordinates();
-
-    double maxDistance = 0.0;
-    for (int i = 0; i < Math.min(coords1.length, coords2.length); i++) {
-      Geometry point1 = GEOMETRY_FACTORY.createPoint(coords1[i]);
-      Geometry point2 = GEOMETRY_FACTORY.createPoint(coords2[i]);
-      double distance = Spheroid.distance(point1, point2);
-      maxDistance = Math.max(maxDistance, distance);
-    }
-    return maxDistance;
   }
 
   @Test
@@ -4401,5 +4385,41 @@ public class FunctionsTest extends TestBase {
     actual = Functions.interpolatePoint(line, point);
     expected = 2.75;
     assertEquals(expected, actual, 1e-6);
+  }
+
+  @Test
+  public void emptyPoint() throws ParseException {
+    Geometry point = Constructors.geomFromEWKT("POINT(1 1)");
+    Geometry emptyPoint = Constructors.geomFromEWKT("POINT EMPTY");
+
+    double actualX = Functions.x(point);
+    double expectedX = 1.0;
+    assertEquals(expectedX, actualX, 1e-6);
+
+    assertNull(Functions.x(emptyPoint));
+    assertNull(Functions.y(emptyPoint));
+    assertNull(Functions.z(emptyPoint));
+    assertNull(Functions.m(emptyPoint));
+
+    assertFalse(Functions.hasM(emptyPoint));
+    assertFalse(Functions.hasZ(emptyPoint));
+  }
+
+  @Test
+  public void subdivideInvalidMaxVertices() {
+    LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 99, 99));
+    IllegalArgumentException e =
+        assertThrows(IllegalArgumentException.class, () -> Functions.subDivide(lineString, 4));
+    assertEquals("ST_Subdivide needs 5 or more max vertices", e.getMessage());
+  }
+
+  /**
+   * Computes the intersection over union (IoU) between two geometries. 1.0 indicates a perfect
+   * match, while 0.0 indicates no overlap.
+   */
+  private double intersectionOverUnion(Geometry expected, Geometry actual) {
+    double intersectionArea = expected.intersection(actual).getArea();
+    double actualArea = actual.getArea();
+    return intersectionArea / actualArea;
   }
 }

@@ -105,19 +105,6 @@
             <groupId>it.geosolutions.jaiext.jiffle</groupId>
             <artifactId>jt-jiffle-language</artifactId>
         </dependency>
-        <!-- These test dependencies are for running map algebra tests -->
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr4-runtime</artifactId>
-            <version>${antlr-runtime.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.janino</groupId>
-            <artifactId>janino</artifactId>
-            <version>${janino-version}</version>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>cdm-core</artifactId>
@@ -130,9 +117,81 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>8</source>
-                    <target>8</target>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <!-- Skip running resolved-pom-maven-plugin since shade will
+                     generate dependency reduced pom which substitutes property
+                     values. resolved-pom-maven-plugin will break pom
+                     installation when working with maven-shade-plugin.  -->
+                <groupId>io.paradoxical</groupId>
+                <artifactId>resolved-pom-maven-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <id>resolve-my-pom</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!--
+                  We need to shade jiffle and its antlr and janino dependencies for the following reasons:
+
+                  1. Databricks runtime uses an older version of janino (3.0.16) that does not work
+                     with jiffle in Spark repl. See https://github.com/apache/sedona/discussions/1945
+
+                  2. Spark 4 uses an incompatible version of antlr at runtime.
+                -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>it.geosolutions.jaiext.jiffle:*</include>
+                                    <include>org.antlr:*</include>
+                                    <include>org.codehaus.janino:*</include>
+                                </includes>
+                            </artifactSet>
+                            <relocations>
+                                <relocation>
+                                    <pattern>it.geosolutions.jaiext.jiffle</pattern>
+                                    <shadedPattern>org.apache.sedona.shaded.jiffle</shadedPattern>
+                                    <excludes>
+                                        <exclude>it.geosolutions.jaiext.jiffle.runtime.*</exclude>
+                                    </excludes>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.antlr.v4.runtime</pattern>
+                                    <shadedPattern>org.apache.sedona.shaded.antlr</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.codehaus</pattern>
+                                    <shadedPattern>org.apache.sedona.shaded.codehaus</shadedPattern>
+                                </relocation>
+                            </relocations>
+                            <filters>
+                                <!--  filter to address "Invalid signature file" issue - see http://stackoverflow.com/a/6743609/589215 -->
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

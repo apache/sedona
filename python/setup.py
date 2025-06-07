@@ -5,9 +5,9 @@
 # to you under the Apache License, Version 2.0 (the
 # "License"); you may not use this file except in compliance
 # with the License.  You may obtain a copy of the License at
-
+#
 #   http://www.apache.org/licenses/LICENSE-2.0
-
+#
 # Unless required by applicable law or agreed to in writing,
 # software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -34,7 +34,7 @@ if os.getenv("ENABLE_ASAN"):
 
 ext_modules = [
     Extension(
-        "sedona.utils.geomserde_speedup",
+        "sedona.spark.utils.geomserde_speedup",
         sources=[
             "src/geomserde_speedup_module.c",
             "src/geomserde.c",
@@ -57,12 +57,13 @@ setup(
     ext_modules=ext_modules,
     long_description=long_description,
     long_description_content_type="text/markdown",
-    python_requires=">=3.6",
+    python_requires=">=3.8",
     install_requires=["attrs", "shapely>=1.7.0"],
     extras_require={
         "spark": ["pyspark>=2.3.0"],
         "pydeck-map": ["geopandas", "pydeck==0.8.0"],
         "kepler-map": ["geopandas", "keplergl==0.3.2"],
+        "flink": ["apache-flink>=1.19.0"],
         "all": [
             "pyspark>=2.3.0",
             "geopandas",

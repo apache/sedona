@@ -45,9 +45,14 @@ env:
   JAI_CODEC_VERSION: '1.1.3'
   JAI_IMAGEIO_VERSION: '1.1'
   DO_NOT_TRACK: true
+  SPARK_LOCAL_IP: 127.0.0.1
 
 permissions:
   contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 jobs:
   build:
@@ -79,14 +84,12 @@ jobs:
             python: '3.8'
           - spark: '3.4.0'
             scala: '2.12.8'
-            python: '3.7'
+            python: '3.8'
           - spark: '3.4.0'
             scala: '2.12.8'
-            python: '3.7'
-            shapely: '1'
-          - spark: '3.3.0'
-            scala: '2.12.8'
             python: '3.8'
+            shapely: '1'
+
     env:
       VENV_PATH: /home/runner/.local/share/virtualenvs/python-${{ matrix.python }}
     steps:
@@ -94,12 +97,12 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '8'
+          java-version: '11'
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
       - name: Cache Maven packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}

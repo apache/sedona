@@ -31,7 +31,7 @@ import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory, Polygon
 import org.locationtech.jts.io.WKTWriter
 import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.distance3d.Distance3DOp
-import org.opengis.referencing.FactoryException
+import org.geotools.api.referencing.FactoryException
 import org.scalatest.{GivenWhenThen, Matchers}
 import org.xml.sax.InputSource
 
@@ -449,7 +449,7 @@ class functionTestScala
       val EPSG_TGT_WKT = EPSG_TGT_CRS.toWKT()
       val epsgFactoryErrorString = EPSG_TGT_WKT.substring(0, EPSG_TGT_WKT.length() - 1)
       val epsgString = "EPSG:4326"
-      val epsgNoSuchAuthorityString = "EPSG:9377"
+      val epsgNoSuchAuthorityString = "EPSG:11111"
       val polygon =
         "POLYGON ((110.54671 55.818002, 110.54671 55.143743, 110.940494 55.143743, 110.940494 55.818002, 110.54671 55.818002))"
       import org.locationtech.jts.io.WKTReader
@@ -3770,4 +3770,14 @@ class functionTestScala
       "The Line has SRID 4326 and Point has SRID 3857. The Line and Point should be in the same SRID.")
   }
 
+  it("should raise an error when using ST_SubDivide with not enough vertices") {
+    val invalidDf = sparkSession.sql("""
+        |SELECT ST_Subdivide(ST_GeomFromWKT('LINESTRING(0 0, 99 99)'), 4) as result
+    """.stripMargin)
+
+    val exception = intercept[Exception] {
+      invalidDf.collect()
+    }
+    exception.getMessage should include("ST_Subdivide needs 5 or more max vertices")
+  }
 }

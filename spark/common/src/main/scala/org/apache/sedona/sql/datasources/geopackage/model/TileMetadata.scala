@@ -19,7 +19,7 @@
 package org.apache.sedona.sql.datasources.geopackage.model
 
 import org.geotools.referencing.CRS
-import org.opengis.referencing.crs.CoordinateReferenceSystem
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem
 
 import scala.collection.mutable
 

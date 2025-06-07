@@ -154,13 +154,7 @@ To compile the source code and test the website on your local machine, please re
 In short, you need to run:
 
 ```
-pip install mkdocs
-pip install mkdocs-jupyter
-pip install mkdocs-material
-pip install mkdocs-macros-plugin
-pip install mkdocs-git-revision-date-localized-plugin
-pip install mike
-pip install pymdown-extensions
+pip install -r requirements-docs.txt
 ```
 
 After installing MkDocs and MkDocs-Material, run these commands in the Sedona root folder:
@@ -173,11 +167,11 @@ mike serve
 
 ## pre-commit
 
-We run [pre-commit](https://pre-commit.com/) with GitHub Actions so installation on your local machine is currently
-optional.
+We run [pre-commit](https://pre-commit.com/) with GitHub Actions so installation on
+your local machine is currently optional.
 
-The pre-commit [configuration file](https://github.com/apache/sedona/blob/master/.pre-commit-config.yaml) is in the
-repository root. Before you can run the hooks, you need to have pre-commit installed.
+The pre-commit [configuration file](https://github.com/apache/sedona/blob/master/.pre-commit-config.yaml)
+is in the repository root. Before you can run the hooks, you need to have pre-commit installed.
 
 The hooks run when running `git commit` and also from the command line with `pre-commit`. Some of the hooks will auto
 fix the code after the hooks fail whilst most will print error messages from the linters. If a hook fails the overall
@@ -187,25 +181,23 @@ are adding a new hook you should always run:
 
 `pre-commit run --all-files`
 
-We are also using pre-commit to check our links with [lychee](https://github.com/lycheeverse/lychee). The lychee hook
-is not self-contained and requires a local lychee installation.
-
 Sometimes you might need to skip a hook to commit because the hook is stopping you from committing or your computer
 might not have all the installation requirements for all the hooks. The `SKIP` variable is comma separated for two or
 more hooks:
 
-`SKIP=lychee git commit -m "foo"`
+`SKIP=codespell git commit -m "foo"`
 
 The same applies when running pre-commit:
 
-`SKIP=lychee pre-commit run --all-files`
+`SKIP=codespell pre-commit run --all-files`
+
+Occasionally you can have more serious problems when using `pre-commit` with `git commit`. You can use `--no-verify` to
+commit and stop `pre-commit` from checking the hooks. For example:
+
+`git commit --no-verify -m "foo"`
 
 If you just want to run one hook for example just run the `markdownlint` hook:
 
 `pre-commit run markdownlint --all-files`
 
-We have a [Makefile](https://github.com/apache/sedona/blob/master/Makefile) in the repository root which has four
-pre-commit convenience commands. For example to run [Make](https://en.wikipedia.org/wiki/Make_(software)) to check the
-links with lychee run:
-
-`make checklinks`
+We have a [Makefile](https://github.com/apache/sedona/blob/master/Makefile) in the repository root which has three pre-commit convenience commands.

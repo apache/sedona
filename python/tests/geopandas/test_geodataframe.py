@@ -1,19 +1,19 @@
-#  Licensed to the Apache Software Foundation (ASF) under one
-#  or more contributor license agreements.  See the NOTICE file
-#  distributed with this work for additional information
-#  regarding copyright ownership.  The ASF licenses this file
-#  to you under the Apache License, Version 2.0 (the
-#  "License"); you may not use this file except in compliance
-#  with the License.  You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
-#  Unless required by applicable law or agreed to in writing,
-#  software distributed under the License is distributed on an
-#  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-#  KIND, either express or implied.  See the License for the
-#  specific language governing permissions and limitations
-#  under the License.
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
 import shutil
 import tempfile
 
@@ -162,17 +162,19 @@ class TestDataframe(TestBase):
         assert type(buffer_df) is GeoDataFrame
 
         # Verify the original columns are preserved
-        assert "geometry1" in buffer_df.columns
+        assert "geometry1_buffered" in buffer_df.columns
         assert "id" in buffer_df.columns
         assert "value" in buffer_df.columns
 
         # Convert to pandas to extract individual geometries
-        pandas_df = buffer_df._internal.spark_frame.select("geometry1").toPandas()
+        pandas_df = buffer_df._internal.spark_frame.select(
+            "geometry1_buffered"
+        ).toPandas()
 
         # Calculate areas to verify buffer was applied correctly
         # Point buffer with radius 0.5 should have area approximately π * 0.5² ≈ 0.785
         # Square buffer with radius 0.5 should expand the 1x1 square to 2x2 square with rounded corners
-        areas = [geom.area for geom in pandas_df["geometry1"]]
+        areas = [geom.area for geom in pandas_df["geometry1_buffered"]]
 
         # Check that square buffer area is greater than original (1.0)
         assert areas[1] > 1.0

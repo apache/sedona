@@ -43,13 +43,17 @@ env:
   MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
   DO_NOT_TRACK: true
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
 jobs:
   build:
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: true
       matrix:
-        spark: [3.3.0, 3.4.0, 3.5.0]
+        spark: [3.4.0, 3.5.0]
         hadoop: [3]
         scala: [2.12.15]
         r: [oldrel, release]
@@ -77,12 +81,12 @@ jobs:
           sudo apt-get -y remove --purge default-jdk adoptopenjdk-11-hotspot || :
         shell: bash
       - uses: actions/checkout@v4
-      - uses: r-lib/actions/setup-r@v2.11.2
+      - uses: r-lib/actions/setup-r@v2.11.3
         with:
           r-version: ${{ matrix.r }}
           use-public-rspm: true
       - name: Query R dependencies
-        uses: r-lib/actions/setup-r-dependencies@v2.11.2
+        uses: r-lib/actions/setup-r-dependencies@v2.11.3
         with:
           cache: true
           extra-packages: |
@@ -90,7 +94,7 @@ jobs:
             any::rcmdcheck
           working-directory: './R'
       - name: Build and check R package
-        uses: r-lib/actions/check-r-package@v2.11.2
+        uses: r-lib/actions/check-r-package@v2.11.3
         with:
           build_args: 'c("--no-build-vignettes", "--no-manual")'
           args: 'c("--no-build-vignettes", "--no-manual", "--no-tests")'
@@ -103,7 +107,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '8'
+          java-version: '11'
           cache: 'maven'
       - name: Get OS name
         id: os-name
@@ -120,7 +124,7 @@ jobs:
       - name: Build Sedona libraries
         run: |
           SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
-          mvn -q clean install -DskipTests -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4}
+          mvn -q clean install -DskipTests -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dgeotools
       - name: Run tests
         run: |
           if [[ "${SPARK_VERSION:0:3}" < "3.3" ]]; then

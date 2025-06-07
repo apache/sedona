@@ -27,14 +27,17 @@ import javax.media.jai.RasterFactory;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.utils.RasterUtils;
+import org.geotools.api.geometry.BoundingBox;
+import org.geotools.api.parameter.ParameterValueGroup;
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.processing.CannotCropException;
 import org.geotools.coverage.processing.operation.Crop;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.geom.Geometry;
-import org.opengis.parameter.ParameterValueGroup;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
 
 public class RasterBandEditors {
   /**
@@ -298,13 +301,19 @@ public class RasterBandEditors {
     singleBandRaster = pair.getLeft();
     geometry = pair.getRight();
 
+    // Use rasterizeGeomExtent for AOI geometries smaller than a pixel
+    double[] metadata = RasterAccessors.metadata(singleBandRaster);
+    ReferencedEnvelope geomEnvelope =
+        Rasterization.rasterizeGeomExtent(geometry, singleBandRaster, metadata, allTouched);
+    Geometry geomExtent = JTS.toGeometry((BoundingBox) geomEnvelope);
+
     // Crop the raster
     // this will shrink the extent of the raster to the geometry
     Crop cropObject = new Crop();
     ParameterValueGroup parameters = cropObject.getParameters();
     parameters.parameter("Source").setValue(singleBandRaster);
     parameters.parameter(Crop.PARAMNAME_DEST_NODATA).setValue(new double[] {noDataValue});
-    parameters.parameter(Crop.PARAMNAME_ROI).setValue(geometry);
+    parameters.parameter(Crop.PARAMNAME_ROI).setValue(geomExtent);
 
     GridCoverage2D newRaster;
     try {
