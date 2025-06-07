@@ -234,10 +234,11 @@ repos:
         args: [--markdown-linebreak-ext=md]
         exclude: ^docs-overrides/main\.html$|\.Rd$
   - repo: https://github.com/lycheeverse/lychee.git
-    rev: v0.15.0
+    rev: lychee-v0.18.1
     hooks:
       - id: lychee
         name: run lychee
+        description: run lychee a fast, async, stream-based link checker written in Rust
         args: [--config=.github/linters/lychee.toml]
         files: \.md$
   - repo: https://github.com/igorshubovych/markdownlint-cli
