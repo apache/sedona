@@ -163,7 +163,7 @@ public class NYCTripTest {
     prop.load(inputProp);
     // PointInputLocation =
     // "file://"+NYCTripTest.class.getClassLoader().getResource("tweets.tsv").getPath();
-    PointInputLocation = "file:////Users/jiayu/Downloads/yellow_tripdata_2009-01.csv";
+    PointInputLocation = "examples/spark-sql/src/test/resources/yellow_tripdata_2009-01-subset.csv";
     PointOffset = 5;
     PointSplitter = FileDataSplitter.CSV;
     PointNumPartitions = 20;
