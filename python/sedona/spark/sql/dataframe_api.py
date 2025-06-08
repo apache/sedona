@@ -92,14 +92,9 @@ def _get_type_list(annotated_type: Type) -> Tuple[Type, ...]:
     :return: Tuple of all types covered by the type annotation.
     :rtype: Tuple[Type, ...]
     """
-    # in 3.8 there is a much nicer way to do this with typing.get_origin
-    # we have to be a bit messy until we drop support for 3.7
-    if (
-        isinstance(annotated_type, typing._GenericAlias)
-        and annotated_type.__origin__._name == "Union"
-    ):
+    if typing.get_origin(annotated_type) is typing.Union:
         # again, there is a really nice method for this in 3.8: typing.get_args
-        valid_types = annotated_type.__args__
+        valid_types = typing.get_args(annotated_type)
     else:
         valid_types = (annotated_type,)
 

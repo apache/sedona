@@ -27,6 +27,8 @@ import java.util.Objects;
 import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.RasterUtils;
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.junit.Assert;
@@ -36,8 +38,6 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.io.ParseException;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
 
 public class FunctionsTest extends RasterTestBase {
 
@@ -88,10 +88,8 @@ public class FunctionsTest extends RasterTestBase {
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
 
-    Geometry point = Constructors.geomFromWKT("POINT (-100 100)", 0);
-    assertNull(
-        "Points outside of the envelope should return null.",
-        PixelFunctions.value(raster, point, 1));
+    Geometry point = Constructors.geomFromWKT("POINT (-90 50)", 0);
+    assertNull(PixelFunctions.value(raster, point, 1));
 
     point = Constructors.geomFromWKT("POINT (-77.9146 37.8916)", 0);
     Double value = PixelFunctions.value(raster, point, 1);

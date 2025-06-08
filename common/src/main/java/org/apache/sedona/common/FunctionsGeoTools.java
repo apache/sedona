@@ -19,6 +19,12 @@
 package org.apache.sedona.common;
 
 import java.util.Set;
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.NoSuchAuthorityCodeException;
+import org.geotools.api.referencing.ReferenceIdentifier;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
+import org.geotools.api.referencing.operation.MathTransform;
+import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.ReferencingFactoryFinder;
@@ -28,12 +34,6 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.operation.buffer.BufferOp;
 import org.locationtech.jts.operation.buffer.BufferParameters;
 import org.locationtech.jts.triangulate.VoronoiDiagramBuilder;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.NoSuchAuthorityCodeException;
-import org.opengis.referencing.ReferenceIdentifier;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
-import org.opengis.referencing.operation.TransformException;
 
 public class FunctionsGeoTools {
 
@@ -202,8 +202,6 @@ public class FunctionsGeoTools {
     if (Functions.crossesDateLine(geometry)) {
       Functions.shiftLongitude(geometry);
     }
-    // geometry = (Predicates.crossesDateLine(geometry)) ? Functions.shiftLongitude(geometry)
-    // : geometry;
 
     // If originalCRS is not set, use WGS84 as the originalCRS for transformation
     String sourceCRSCode = (originalCRS == 0) ? "EPSG:" + WGS84CRS : "EPSG:" + originalCRS;

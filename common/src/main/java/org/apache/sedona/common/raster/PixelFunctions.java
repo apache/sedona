@@ -25,15 +25,15 @@ import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.utils.RasterUtils;
+import org.geotools.api.coverage.PointOutsideCoverageException;
+import org.geotools.api.geometry.Position;
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.geometry.DirectPosition2D;
+import org.geotools.geometry.Position2D;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.locationtech.jts.geom.*;
-import org.opengis.coverage.PointOutsideCoverageException;
-import org.opengis.geometry.DirectPosition;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
 
 public class PixelFunctions {
   private static GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
@@ -289,7 +289,7 @@ public class PixelFunctions {
         result.add(null);
       } else {
         Point point = ensurePoint(geom);
-        DirectPosition directPosition2D = new DirectPosition2D(point.getX(), point.getY());
+        Position directPosition2D = new Position2D(point.getX(), point.getY());
         try {
           rasterGeom.evaluate(directPosition2D, pixelBuffer);
           double pixel = pixelBuffer[band - 1];

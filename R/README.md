@@ -37,7 +37,7 @@ install.packages("apache.sedona")
 
 To use the development version, you will need both the latest version of the package and of the Apache Sedona jars.
 
-To get the latest R package from GtiHub:
+To get the latest R package from GitHub:
 
 ```r
 # Install development version from GitHub
