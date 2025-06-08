@@ -4687,12 +4687,12 @@
 <p>Download the required Sedona packages by executing the following commands:</p>
 <div class="highlight"><pre><span></span><code>%sh
 <span class="c1"># Create JAR directory for Sedona</span>
-mkdir<span class="w"> </span>-p<span class="w"> </span>/Workspace/Shared/sedona/1.7.1
+mkdir<span class="w"> </span>-p<span class="w"> </span>/Workspace/Shared/sedona/1.7.2
 
 <span class="c1"># Download the dependencies from Maven into DBFS</span>
-curl<span class="w"> </span>-o<span class="w"> </span>/Workspace/Shared/sedona/1.7.1/geotools-wrapper-1.7.1-28.5.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.7.1-28.5/geotools-wrapper-1.7.1-28.5.jar&quot;</span>
+curl<span class="w"> </span>-o<span class="w"> </span>/Workspace/Shared/sedona/1.7.2/geotools-wrapper-1.7.2-28.5.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.7.2-28.5/geotools-wrapper-1.7.2-28.5.jar&quot;</span>
 
-curl<span class="w"> </span>-o<span class="w"> </span>/Workspace/Shared/sedona/1.7.1/sedona-spark-shaded-3.5_2.12-1.7.1.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/1.7.1/sedona-spark-shaded-3.5_2.12-1.7.1.jar&quot;</span>
+curl<span class="w"> </span>-o<span class="w"> </span>/Workspace/Shared/sedona/1.7.2/sedona-spark-shaded-3.5_2.12-1.7.2.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/1.7.2/sedona-spark-shaded-3.5_2.12-1.7.2.jar&quot;</span>
 </code></pre></div>
 <p>Here are the software versions used to compile <code>sedona-spark-shaded-3.5_2.12-1.7.1.jar</code>:</p>
 <ul>
@@ -4740,7 +4740,7 @@ spark.sedona.enableParserExtension false
 <p>Add the required dependencies in the Library tab:</p>
 <p><img alt="Python libraries" src="../../image/databricks/image7.png" /></p>
 <p>Here’s the full list of libraries:</p>
-<div class="highlight"><pre><span></span><code>apache-sedona==1.7.1
+<div class="highlight"><pre><span></span><code>apache-sedona==1.7.2
 geopandas==1.0.1
 keplergl==0.3.7
 pydeck==0.9.1
