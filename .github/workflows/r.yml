@@ -39,9 +39,6 @@ on:
       - 'R/**'
       - '.github/workflows/r.yml'
 
-permissions:
-  contents: read
-
 env:
   MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
   DO_NOT_TRACK: true
