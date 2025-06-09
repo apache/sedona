@@ -47,9 +47,13 @@ import org.apache.sedona.core.spatialRDD.PointRDD;
 import org.apache.sedona.core.spatialRDD.PolygonRDD;
 import org.apache.sedona.core.spatialRDD.SpatialRDD;
 import org.apache.spark.SparkException;
-import org.geotools.data.DataStore;
-import org.geotools.data.DataStoreFinder;
-import org.geotools.data.FeatureSource;
+import org.geotools.api.data.DataStore;
+import org.geotools.api.data.DataStoreFinder;
+import org.geotools.api.data.FeatureSource;
+import org.geotools.api.feature.Property;
+import org.geotools.api.feature.simple.SimpleFeature;
+import org.geotools.api.feature.simple.SimpleFeatureType;
+import org.geotools.api.filter.Filter;
 import org.geotools.data.shapefile.files.ShpFiles;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
@@ -60,10 +64,6 @@ import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.MultiPolygon;
-import org.opengis.feature.Property;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.filter.Filter;
 
 public class ShapefileReaderTest extends TestBase {
 

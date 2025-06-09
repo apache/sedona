@@ -19,9 +19,9 @@
 package org.apache.sedona.snowflake.snowsql;
 
 import org.apache.sedona.common.FunctionsGeoTools;
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.operation.TransformException;
 import org.locationtech.jts.geom.Geometry;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
 
 public class GeoToolsWrapper {
   public static Geometry transform(

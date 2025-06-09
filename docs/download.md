@@ -33,19 +33,12 @@ Automatically generated binary JARs (per each Master branch commit): [GitHub Act
 
 ## Versions
 
-### 1.7.1
+### 1.7.2
 
 | |                                    Download from ASF                                     |                                         Checksum                                          |                                      Signature                                      |
 |:-----------------:|:----------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------:|
-|    Source code    | [src](https://www.apache.org/dyn/closer.lua/sedona/1.7.1/apache-sedona-1.7.1-src.tar.gz) | [sha512](https://downloads.apache.org/sedona/1.7.1/apache-sedona-1.7.1-src.tar.gz.sha512) | [asc](https://downloads.apache.org/sedona/1.7.1/apache-sedona-1.7.1-src.tar.gz.asc) |
-|       Binary      | [bin](https://www.apache.org/dyn/closer.lua/sedona/1.7.1/apache-sedona-1.7.1-bin.tar.gz) | [sha512](https://downloads.apache.org/sedona/1.7.1/apache-sedona-1.7.1-bin.tar.gz.sha512) | [asc](https://downloads.apache.org/sedona/1.7.1/apache-sedona-1.7.1-bin.tar.gz.asc) |
-
-### 1.7.0
-
-| |                                    Download from ASF                                     |                                         Checksum                                          |                                      Signature                                      |
-|:-----------------:|:----------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------:|
-|    Source code    | [src](https://www.apache.org/dyn/closer.lua/sedona/1.7.0/apache-sedona-1.7.0-src.tar.gz) | [sha512](https://downloads.apache.org/sedona/1.7.0/apache-sedona-1.7.0-src.tar.gz.sha512) | [asc](https://downloads.apache.org/sedona/1.7.0/apache-sedona-1.7.0-src.tar.gz.asc) |
-|       Binary      | [bin](https://www.apache.org/dyn/closer.lua/sedona/1.7.0/apache-sedona-1.7.0-bin.tar.gz) | [sha512](https://downloads.apache.org/sedona/1.7.0/apache-sedona-1.7.0-bin.tar.gz.sha512) | [asc](https://downloads.apache.org/sedona/1.7.0/apache-sedona-1.7.0-bin.tar.gz.asc) |
+|    Source code    | [src](https://www.apache.org/dyn/closer.lua/sedona/1.7.2/apache-sedona-1.7.2-src.tar.gz) | [sha512](https://downloads.apache.org/sedona/1.7.2/apache-sedona-1.7.2-src.tar.gz.sha512) | [asc](https://downloads.apache.org/sedona/1.7.2/apache-sedona-1.7.2-src.tar.gz.asc) |
+|       Binary      | [bin](https://www.apache.org/dyn/closer.lua/sedona/1.7.2/apache-sedona-1.7.2-bin.tar.gz) | [sha512](https://downloads.apache.org/sedona/1.7.2/apache-sedona-1.7.2-bin.tar.gz.sha512) | [asc](https://downloads.apache.org/sedona/1.7.2/apache-sedona-1.7.2-bin.tar.gz.asc) |
 
 ### 1.6.1
 
