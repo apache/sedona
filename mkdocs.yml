@@ -71,6 +71,7 @@ nav:
           - Concepts:
               - Spatial Joins: tutorial/concepts/spatial-joins.md
               - Clustering Algorithms: tutorial/concepts/clustering-algorithms.md
+              - Distance: tutorial/concepts/distance-spark.md
           - Map visualization SQL app:
               - Scala/Java: tutorial/viz.md
               - Use Apache Zeppelin: tutorial/zeppelin.md
