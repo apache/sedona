@@ -17,7 +17,7 @@
  under the License.
  -->
 
-# Apache Sedona Clustering Algorithms
+# Apache Sedona Clustering Algorithms with Apache Spark
 
 Clustering algorithms group similar data points into “clusters.”  Apache Sedona can run clustering algorithms on large geometric datasets.
 
@@ -28,7 +28,7 @@ Note that the term cluster is overloaded here:
 
 This page uses “cluster” to refer to the output of a clustering algorithm.
 
-## Clustering with DBSCAN
+## Clustering with DBSCAN and Spark
 
 This page explains how to use Apache Sedona to perform density-based spatial clustering of applications with noise (“DBSCAN”).
 
