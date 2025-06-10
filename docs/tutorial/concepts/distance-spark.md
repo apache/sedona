@@ -46,7 +46,7 @@ Now use the `ST_Distance` function to compute the distance between the points.
 
 ```python
 df.withColumn(
-    "distance", 
+    "distance",
     ST_Distance(col("start"), col("end"))
 ).show()
 ```
@@ -85,7 +85,7 @@ Let’s compute the distance between these points now:
 
 ```python
 df.withColumn(
-    "st_distance_sphere", 
+    "st_distance_sphere",
     ST_DistanceSphere(col("place1"), col("place2"))
 ).show()
 ```
@@ -111,7 +111,7 @@ Let’s use the same DataFrame from the previous section, but compute the distan
 
 ```python
 res = df.withColumn(
-    "st_distance_spheroid", 
+    "st_distance_spheroid",
     ST_DistanceSpheroid(col("place1"), col("place2"))
 )
 res.select("place1_name", "place2_name", "st_distance_spheroid").show()
@@ -221,7 +221,7 @@ Compute the Frechet distance:
 
 ```python
 res = df.withColumn(
-    "frechet_distance", 
+    "frechet_distance",
     ST_FrechetDistance(col("geometry1"), col("geometry2"))
 )
 ```
