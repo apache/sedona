@@ -44,26 +44,29 @@ class TestBase:
 
             builder = SedonaContext.builder().appName("SedonaSparkTest")
             if SPARK_REMOTE:
-                builder = (
-                    builder.remote(SPARK_REMOTE)
-                    .config(
+                builder = builder.remote(SPARK_REMOTE).config(
+                    "spark.sql.extensions",
+                    "org.apache.sedona.sql.SedonaSqlExtensions",
+                )
+
+                # Connect is packaged with Spark 4+
+                if pyspark.__version__ < "4":
+                    builder = builder.config(
                         "spark.jars.packages",
                         f"org.apache.spark:spark-connect_2.12:{pyspark.__version__}",
                     )
-                    .config(
-                        "spark.sql.extensions",
-                        "org.apache.sedona.sql.SedonaSqlExtensions",
-                    )
-                    .config(
-                        "spark.sedona.stac.load.itemsLimitMax",
-                        "20",
-                    )
-                )
             else:
-                builder = builder.master("local[*]").config(
+                builder = builder.master("local[*]")
+
+            builder = (
+                builder.config(
                     "spark.sedona.stac.load.itemsLimitMax",
                     "20",
                 )
+                # Pandas on PySpark doesn't work with ANSI mode, which is enabled by default
+                # in Spark 4
+                .config("spark.sql.ansi.enabled", "false")
+            )
 
             # Allows the Sedona .jar to be explicitly set by the caller (e.g, to run
             # pytest against a freshly-built development version of Sedona)
