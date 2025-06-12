@@ -20,6 +20,7 @@ package org.apache.sedona.snowflake.snowsql;
 
 import java.io.IOException;
 import org.apache.sedona.common.Functions;
+import org.apache.sedona.common.FunctionsApacheSIS;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.Predicates;
 import org.apache.sedona.common.sphere.Haversine;
@@ -1295,7 +1296,7 @@ public class UDFsV2 {
       returnTypes = "Geometry")
   public static String ST_Transform(String geometry, String sourceCRS, String targetCRS) {
     return GeometrySerde.serGeoJson(
-        GeoToolsWrapper.transform(GeometrySerde.deserGeoJson(geometry), sourceCRS, targetCRS));
+        FunctionsApacheSIS.transform(GeometrySerde.deserGeoJson(geometry), sourceCRS, targetCRS));
   }
 
   @UDFAnnotations.ParamMeta(
@@ -1305,7 +1306,7 @@ public class UDFsV2 {
   public static String ST_Transform(
       String geometry, String sourceCRS, String targetCRS, boolean lenient) {
     return GeometrySerde.serGeoJson(
-        GeoToolsWrapper.transform(
+        FunctionsApacheSIS.transform(
             GeometrySerde.deserGeoJson(geometry), sourceCRS, targetCRS, lenient));
   }
 

@@ -72,6 +72,7 @@ public class FunctionsGeoTools {
       throws FactoryException, TransformException {
     // If sourceCRS is not specified, try to get it from the geometry
     if (sourceCRScode == null) {
+
       int srid = geometry.getSRID();
       if (srid != 0) {
         sourceCRScode = "epsg:" + srid;

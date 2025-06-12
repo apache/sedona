@@ -113,6 +113,10 @@
             <groupId>edu.ucar</groupId>
             <artifactId>cdm-core</artifactId>
         </dependency>
+        <dependency>
+             <groupId>org.apache.sis.core</groupId>
+             <artifactId>sis-referencing</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>

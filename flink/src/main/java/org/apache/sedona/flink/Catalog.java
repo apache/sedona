@@ -98,7 +98,7 @@ public class Catalog {
       new Functions.ST_LineLocatePoint(),
       new Functions.ST_LocateAlong(),
       new Functions.ST_LongestLine(),
-      new FunctionsGeoTools.ST_Transform(),
+      new FunctionsApacheSIS.ST_Transform(),
       new Functions.ST_FlipCoordinates(),
       new Functions.ST_GeoHash(),
       new Functions.ST_Perimeter(),
