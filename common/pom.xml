@@ -120,6 +120,11 @@
             <artifactId>janino</artifactId>
             <version>${janino-version}</version>
         </dependency>
+        <!-- For Apache SIS based ST_TRANSFORM -->
+        <dependency>
+             <groupId>org.apache.sis.core</groupId>
+             <artifactId>sis-referencing</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>

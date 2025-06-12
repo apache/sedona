@@ -20,14 +20,12 @@ package org.apache.sedona.core.spatialOperator;
 
 import java.io.Serializable;
 import java.util.List;
-import org.apache.sedona.common.FunctionsGeoTools;
+import org.apache.sedona.common.FunctionsApacheSIS;
 import org.apache.sedona.core.knnJudgement.GeometryDistanceComparator;
 import org.apache.sedona.core.knnJudgement.KnnJudgement;
 import org.apache.sedona.core.knnJudgement.KnnJudgementUsingIndex;
 import org.apache.sedona.core.spatialRDD.SpatialRDD;
 import org.apache.spark.api.java.JavaRDD;
-import org.geotools.api.referencing.FactoryException;
-import org.geotools.api.referencing.operation.TransformException;
 import org.locationtech.jts.geom.Geometry;
 
 // TODO: Auto-generated Javadoc
@@ -48,16 +46,12 @@ public class KNNQuery implements Serializable {
       SpatialRDD<T> spatialRDD, U originalQueryPoint, Integer k, boolean useIndex) {
     U queryCenter = originalQueryPoint;
     if (spatialRDD.getCRStransformation()) {
-      try {
-        queryCenter =
-            (U)
-                FunctionsGeoTools.transform(
-                    originalQueryPoint,
-                    spatialRDD.getSourceEpsgCode(),
-                    spatialRDD.getTargetEpgsgCode());
-      } catch (FactoryException | TransformException e) {
-        throw new RuntimeException(e);
-      }
+      queryCenter =
+          (U)
+              FunctionsApacheSIS.transform(
+                  originalQueryPoint,
+                  spatialRDD.getSourceEpsgCode(),
+                  spatialRDD.getTargetEpgsgCode());
     }
 
     if (useIndex) {

@@ -74,6 +74,7 @@
         <jts.version>1.20.0</jts.version>
         <jts2geojson.version>0.16.1</jts2geojson.version>
         <spatial4j.version>0.8</spatial4j.version>
+        <sis.version>1.4</sis.version>
 
         <jt-jiffle.version>1.1.24</jt-jiffle.version>
         <janino-version>3.1.9</janino-version>
@@ -283,7 +284,12 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-           <dependency>
+            <dependency>
+                <groupId>org.apache.sis.core</groupId>
+                <artifactId>sis-referencing</artifactId>
+                <version>${sis.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.hadoop</groupId>
                 <artifactId>hadoop-client</artifactId>
                 <version>${hadoop.version}</version>
@@ -565,6 +571,7 @@
                         </execution>
                     </executions>
                 </plugin>
+
             </plugins>
         </pluginManagement>
         <plugins>
