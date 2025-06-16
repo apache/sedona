@@ -271,5 +271,5 @@ repos:
       - id: zizmor
         name: zizmor - static analysis for GitHub Actions
         description: Scan GitHub Actions workflows for security issues
-        files: ".github/workflows/.*\\.ya?ml$"
-        args: []
+        files: ".github/workflows/.*\.ya?ml$"
+  
