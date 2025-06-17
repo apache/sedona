@@ -266,10 +266,9 @@ repos:
         description: check PNG files with oxipng
         args: ['-o', '4', '--strip', 'safe', '--alpha']
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: v1.9.0
-    hooks:
-      - id: zizmor
-        name: zizmor - static analysis for GitHub Actions
-        description: Scan GitHub Actions workflows for security issues
-        files: ".github/workflows/.*\.ya?ml$"
-  
+  rev: v1.9.0
+  hooks:
+    - id: zizmor
+      name: zizmor - static analysis for GitHub Actions
+      description: Scan GitHub Actions workflows for security issues
+      files: '.github/workflows/.*\.ya?ml$'
