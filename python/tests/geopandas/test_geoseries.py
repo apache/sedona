@@ -115,6 +115,7 @@ def check_geoseries(s):
     assert isinstance(s, GeoSeries)
     assert isinstance(s.geometry, GeoSeries)
 
+
 def check_geoseries_equal(s1, s2):
     check_geoseries(s1)
     check_geoseries(s2)

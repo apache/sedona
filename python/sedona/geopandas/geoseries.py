@@ -28,7 +28,7 @@ from pyspark.pandas.series import first_series
 from pyspark.pandas.utils import scol_for
 from pyspark.sql.types import BinaryType
 
-from shapely import from_wkb
+import shapely
 
 from sedona.geopandas._typing import Label
 from sedona.geopandas.base import GeoFrame
@@ -230,7 +230,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         return self._to_geopandas()
 
     def _to_geopandas(self) -> gpd.GeoSeries:
-        return gpd.GeoSeries(self._to_internal_pandas().map(lambda wkb: from_wkb(bytes(wkb))))
+        return gpd.GeoSeries(
+            self._to_internal_pandas().map(lambda wkb: shapely.wkb.loads(bytes(wkb)))
+        )
 
     @property
     def geometry(self) -> "GeoSeries":
