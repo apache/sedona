@@ -28,6 +28,8 @@ from pyspark.pandas.series import first_series
 from pyspark.pandas.utils import scol_for
 from pyspark.sql.types import BinaryType
 
+from shapely import from_wkb
+
 from sedona.geopandas._typing import Label
 from sedona.geopandas.base import GeoFrame
 from sedona.geopandas.geodataframe import GeoDataFrame
@@ -42,6 +44,18 @@ class GeoSeries(GeoFrame, pspd.Series):
     def __getitem__(self, key: Any) -> Any:
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
+
+    def __repr__(self) -> str:
+        """
+        Return a string representation of the GeoSeries in WKT format.
+        """
+        try:
+            pandas_series = self.to_geopandas()
+            return gpd.GeoSeries(pandas_series).__repr__()
+
+        except Exception as e:
+            # Fallback to parent's representation if conversion fails
+            return super().__repr__()
 
     def __init__(
         self,
@@ -206,13 +220,17 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
-    def to_geopandas(self) -> Union[gpd.GeoDataFrame, pd.Series]:
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def to_geopandas(self) -> gpd.GeoSeries:
+        """
+        Convert the GeoSeries to a geopandas GeoSeries.
 
-    def _to_geopandas(self) -> Union[gpd.GeoDataFrame, pd.Series]:
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        Returns:
+        - geopandas.GeoSeries: A geopandas GeoSeries.
+        """
+        return self._to_geopandas()
+
+    def _to_geopandas(self) -> gpd.GeoSeries:
+        return gpd.GeoSeries(self._to_internal_pandas().map(lambda wkb: from_wkb(bytes(wkb))))
 
     @property
     def geometry(self) -> "GeoSeries":
