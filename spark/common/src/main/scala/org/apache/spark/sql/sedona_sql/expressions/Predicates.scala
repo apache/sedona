@@ -22,7 +22,7 @@ import org.apache.sedona.common.Predicates
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, NullIntolerant}
+import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types.{AbstractDataType, BooleanType, DataType}
 import org.locationtech.jts.geom.Geometry
@@ -32,7 +32,7 @@ abstract class ST_Predicate
     extends Expression
     with FoldableExpression
     with ExpectsInputTypes
-    with NullIntolerant {
+    with NullIntolerantShim {
 
   def inputExpressions: Seq[Expression]
 
