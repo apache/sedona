@@ -211,6 +211,8 @@ public class S2Geography {
         return PointGeography.decodeTagged(in, tag);
         case POLYLINE:
           return PolylineGeography.decodeTagged(in, tag);
+      case POLYGON:
+          return PolygonGeography.decodeTagged(in, tag);
       default:
         throw new IllegalArgumentException("Unsupported kind " + kind);
     }
