@@ -85,7 +85,7 @@ public class PolylineGeographyTest {
 
   @Test
   public void testEncodedMultiPolyline() throws IOException {
-
+    // create multiple polylines
     S2Point a = S2LatLng.fromDegrees(45, -64).toPoint();
     S2Point b = S2LatLng.fromDegrees(0, 0).toPoint();
     S2Point c = S2LatLng.fromDegrees(-30, 20).toPoint();
