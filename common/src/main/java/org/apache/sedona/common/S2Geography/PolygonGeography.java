@@ -20,7 +20,6 @@ package org.apache.sedona.common.S2Geography;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.geometry.*;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -105,7 +104,8 @@ public class PolygonGeography extends S2Geography {
     leOut.flush();
   }
 
-  public static PolygonGeography decodeTagged(DataInputStream in, EncodeTag tag) throws IOException {
+  public static PolygonGeography decodeTagged(DataInputStream in, EncodeTag tag)
+      throws IOException {
     PolygonGeography geo = new PolygonGeography();
 
     // EMPTY?

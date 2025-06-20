@@ -20,8 +20,6 @@ package org.apache.sedona.common.S2Geography;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.geometry.*;
-import com.google.common.io.LittleEndianDataOutputStream;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -112,34 +110,34 @@ public class PolylineGeography extends S2Geography {
     leOut.flush();
   }
 
-    public static PolylineGeography decodeTagged(DataInputStream in, EncodeTag tag) throws IOException {
-      // 1) Instantiate an empty geography
-      PolylineGeography geo = new PolylineGeography();
+  public static PolylineGeography decodeTagged(DataInputStream in, EncodeTag tag)
+      throws IOException {
+    // 1) Instantiate an empty geography
+    PolylineGeography geo = new PolylineGeography();
 
-      // EMPTY?
-      if ((tag.getFlags() & EncodeTag.FLAG_EMPTY) != 0) {
-        return geo;
-      }
-
-      // 3) Skip past any covering cell-IDs written by encodeTagged
-      tag.skipCovering(in);
-
-      // 4) Ensure we have at least 4 bytes for the count
-      if (in.available() < Integer.BYTES) {
-        throw new IOException(
-                "PolylineGeography.decodeTagged error: insufficient header bytes");
-      }
-
-      //5) Read the number of polylines (4-byte little-endian int)
-      int count = in.readInt();
-
-      // 6) Loop and decode each polyline
-      for (int i = 0; i < count; i++) {
-        // This will read the version byte, then dispatch to decodeLossless or decodeCompressed
-        S2Polyline pl = S2Polyline.decode(in);
-        geo.polylines.add(pl);
-      }
-
+    // EMPTY?
+    if ((tag.getFlags() & EncodeTag.FLAG_EMPTY) != 0) {
       return geo;
     }
+
+    // 3) Skip past any covering cell-IDs written by encodeTagged
+    tag.skipCovering(in);
+
+    // 4) Ensure we have at least 4 bytes for the count
+    if (in.available() < Integer.BYTES) {
+      throw new IOException("PolylineGeography.decodeTagged error: insufficient header bytes");
+    }
+
+    // 5) Read the number of polylines (4-byte little-endian int)
+    int count = in.readInt();
+
+    // 6) Loop and decode each polyline
+    for (int i = 0; i < count; i++) {
+      // This will read the version byte, then dispatch to decodeLossless or decodeCompressed
+      S2Polyline pl = S2Polyline.decode(in);
+      geo.polylines.add(pl);
+    }
+
+    return geo;
+  }
 }
