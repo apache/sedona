@@ -80,7 +80,7 @@ public abstract class CountingPointVectorCoder implements S2Coder<S2Point.Shape>
     }
   }
   // [varint(count=N)] [point_0.x][point_0.y][point_0.z] … [point_{N-1}.x][…]
-  private static long readVarInt(InputStream in) throws IOException {
+  static long readVarInt(InputStream in) throws IOException {
     long res = 0;
     int shift = 0;
     while (true) {

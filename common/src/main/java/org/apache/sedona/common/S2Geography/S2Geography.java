@@ -116,7 +116,16 @@ public class S2Geography {
    * Region().GetCovering() directly and to return a small number of cells that can be used to
    * compute a possible intersection quickly.
    */
-  public void getCellUnionBound(List<S2CellId> cellIds) {}
+  public void getCellUnionBound(List<S2CellId> cellIds) {
+    // Build a shape index of all shapes in this geography
+    S2ShapeIndex index = new S2ShapeIndex();
+    for (int i = 0; i < numShapes(); i++) {
+      index.add(shape(i));
+    }
+    // Create a region from the index and delegate covering
+    S2ShapeIndexRegion region = new S2ShapeIndexRegion(index);
+    region.getCellUnionBound(cellIds);
+  }
 
   // ─── Encoding / decoding machinery ────────────────────────────────────────────
   /**
@@ -200,7 +209,8 @@ public class S2Geography {
     switch (kind) {
       case POINT:
         return PointGeography.decodeTagged(in, tag);
-        // …
+        case POLYLINE:
+          return PolylineGeography.decodeTagged(in, tag);
       default:
         throw new IllegalArgumentException("Unsupported kind " + kind);
     }
