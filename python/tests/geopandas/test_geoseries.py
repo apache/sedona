@@ -17,6 +17,7 @@
 import os
 import shutil
 import tempfile
+from geopandas.testing import assert_geoseries_equal
 
 from shapely.geometry import (
     Point,
@@ -44,7 +45,7 @@ class TestSeries(TestBase):
 
     def test_constructor(self):
         s = GeoSeries([Point(x, x) for x in range(3)])
-        check_geoseries(s)
+        check_geoseries_equal(s, s)
 
     def test_psdf(self):
         # this is to make sure the spark session works with pandas on spark api
@@ -109,6 +110,13 @@ class TestSeries(TestBase):
 # -----------------------------------------------------------------------------
 
 
-def check_geoseries(s):
-    assert isinstance(s, GeoSeries)
-    assert isinstance(s.geometry, GeoSeries)
+def check_geoseries_equal(s1, s2):
+    assert isinstance(s1, GeoSeries)
+    assert isinstance(s1.geometry, GeoSeries)
+    assert isinstance(s2, GeoSeries)
+    assert isinstance(s2.geometry, GeoSeries)
+    if isinstance(s1, GeoSeries):
+        s1 = s1.to_geopandas()
+    if isinstance(s2, GeoSeries):
+        s2 = s2.to_geopandas()
+    assert_geoseries_equal(s1, s2)

@@ -42,7 +42,7 @@ Everyone is welcome to join our community events. We have a community office hou
 
 ## Discord Server
 
-[![Apache Sedona Community Discord Server](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://discord.gg/9A3k5dEBsY)
+[![Apache Sedona Community Discord Server](https://dcbadge.limes.pink/api/server/https://discord.gg/9A3k5dEBsY)](https://discord.gg/9A3k5dEBsY)
 
 ## Get help
 
