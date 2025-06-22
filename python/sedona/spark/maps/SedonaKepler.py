@@ -22,13 +22,25 @@ from sedona.spark.sql.types import RasterType
 class SedonaKepler:
 
     @classmethod
-    def create_map(cls, df=None, name="unnamed", config=None):
+    def create_map(
+        cls,
+        df=None,
+        name="unnamed",
+        config=None,
+        height=600,
+        use_arrow=False,
+        show_docs=False,
+    ):
         """
         Creates a map visualization using kepler, optionally taking a sedona dataFrame as data input
         :param df: [Optional] SedonaDataFrame to plot on the map
         :param name: [Optional] Name to be associated with the given
         dataframe, if a df is passed with no name, a default name of 'unnamed' is set for it.
-        param config: [Optional] A map config to be applied to the rendered map :return: A map object
+        param config: [Optional] A map config to be applied to the rendered map
+        param height: [Optional] Height of the map in pixels, default is 600
+        param use_arrow: [Optional] Whether to use arrow for data transfer, default is False
+        param show_docs: [Optional] Whether to show the documentation, default is False
+        :return: A map object
         """
 
         try:
@@ -37,7 +49,7 @@ class SedonaKepler:
             msg = "Install apache-sedona[kepler-map] to convert sedona dataframes to kepler maps."
             raise ImportError(msg) from None
 
-        kepler_map = KeplerGl()
+        kepler_map = KeplerGl(height=height, use_arrow=use_arrow, show_docs=show_docs)
         if df is not None:
             SedonaKepler.add_df(kepler_map, df, name)
 
