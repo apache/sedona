@@ -18,6 +18,9 @@ import os
 import shutil
 import tempfile
 import pytest
+import pandas as pd
+import geopandas as gpd
+from pandas.testing import assert_series_equal
 from geopandas.testing import assert_geoseries_equal
 
 from shapely.geometry import (
@@ -46,23 +49,23 @@ class TestSeries(TestBase):
         self.g3 = GeoSeries([self.t1, self.t2], crs="epsg:4326")
         self.g4 = GeoSeries([self.t2, self.t1])
 
-        self.points = GeoSeries([Point(x, x+1) for x in range(3)])
+        self.points = [Point(x, x+1) for x in range(3)]
 
-        self.multipoints = GeoSeries([MultiPoint([(x, x+1), (x+2, x+3)]) for x in range(3)])
+        self.multipoints = [MultiPoint([(x, x+1), (x+2, x+3)]) for x in range(3)]
 
-        self.linestrings = GeoSeries([LineString([(x, x+1), (x+2, x+3)]) for x in range(3)])
+        self.linestrings = [LineString([(x, x+1), (x+2, x+3)]) for x in range(3)]
 
-        self.multilinestrings = GeoSeries([MultiLineString([[[x, x+1], [x+2, x+3]], [[x+4, x+5], [x+6, x+7]]]) for x in range(3)])
+        self.multilinestrings = [MultiLineString([[[x, x+1], [x+2, x+3]], [[x+4, x+5], [x+6, x+7]]]) for x in range(3)]
 
-        self.polygons = GeoSeries([Polygon([(x, 0), (x+1, 0), (x+2, 1), (x+3, 1)]) for x in range(3)])
+        self.polygons = [Polygon([(x, 0), (x+1, 0), (x+2, 1), (x+3, 1)]) for x in range(3)]
 
-        self.multipolygons = GeoSeries(MultiPolygon([([(0.0, 0.0), (0.0, 1.0), (1.0, 0.0)], [[(0.1, 0.1), (0.1, 0.2), (0.2, 0.1), (0.1, 0.1)]])]))
+        self.multipolygons = MultiPolygon([([(0.0, 0.0), (0.0, 1.0), (1.0, 0.0)], [[(0.1, 0.1), (0.1, 0.2), (0.2, 0.1), (0.1, 0.1)]])])
 
-        self.geomcollection = GeoSeries([GeometryCollection([
+        self.geomcollection = [GeometryCollection([
             MultiPoint([(0, 0), (1, 1)]),
             MultiLineString([[(0, 0), (1, 1)], [(2, 2), (3, 3)]]),
             MultiPolygon([([(0.0, 0.0), (0.0, 1.0), (1.0, 0.0)], [[(0.1, 0.1), (0.1, 0.2), (0.2, 0.1), (0.1, 0.1)]])])
-        ])])
+        ])]
 
     def teardown_method(self):
         shutil.rmtree(self.tempdir)
@@ -71,13 +74,13 @@ class TestSeries(TestBase):
         s = GeoSeries([Point(x, x) for x in range(3)])
         check_geoseries_equal(s, s)
 
-        check_geoseries_equal(self.points, self.points)
-        check_geoseries_equal(self.multipoints, self.multipoints)
-        check_geoseries_equal(self.linestrings, self.linestrings)
-        check_geoseries_equal(self.multilinestrings, self.multilinestrings)
-        check_geoseries_equal(self.polygons, self.polygons)
-        check_geoseries_equal(self.multipolygons, self.multipolygons)
-        check_geoseries_equal(self.geomcollection, self.geomcollection)
+        check_geoseries_equal(GeoSeries(self.points), GeoSeries(self.points))
+        check_geoseries_equal(GeoSeries(self.multipoints), GeoSeries(self.multipoints))
+        check_geoseries_equal(GeoSeries(self.linestrings), GeoSeries(self.linestrings))
+        check_geoseries_equal(GeoSeries(self.multilinestrings), GeoSeries(self.multilinestrings))
+        check_geoseries_equal(GeoSeries(self.polygons), GeoSeries(self.polygons))
+        check_geoseries_equal(GeoSeries(self.multipolygons), GeoSeries(self.multipolygons))
+        check_geoseries_equal(GeoSeries(self.geomcollection), GeoSeries(self.geomcollection))
 
     def test_non_geom_fails(self):
         with pytest.raises(TypeError):
@@ -122,8 +125,13 @@ class TestSeries(TestBase):
     def test_area(self):
         area = self.g1.area
         assert area is not None
-        assert type(area) is GeoSeries
+        assert type(area) is pd.Series
         assert area.count() == 2
+
+        for geom in [self.points, self.multipoints, self.linestrings, self.multilinestrings, self.polygons, self.multipolygons, self.geomcollection]:
+            sgpd_series = GeoSeries(geom).area
+            gpd_series = gpd.GeoSeries(geom).area
+            check_pd_series_equal(sgpd_series, gpd_series)
 
     def test_buffer(self):
         buffer = self.g1.buffer(0.2)
@@ -134,7 +142,7 @@ class TestSeries(TestBase):
     def test_buffer_then_area(self):
         area = self.g1.buffer(0.2).area
         assert area is not None
-        assert type(area) is GeoSeries
+        assert type(area) is pd.Series
         assert area.count() == 2
 
     def test_buffer_then_geoparquet(self):
@@ -158,3 +166,8 @@ def check_geoseries_equal(s1, s2):
     s1 = s1.to_geopandas()
     s2 = s2.to_geopandas()
     assert_geoseries_equal(s1, s2, check_less_precise=True)
+
+def check_pd_series_equal(s1, s2):
+    assert isinstance(s1, pd.Series)
+    assert isinstance(s2, pd.Series)
+    assert_series_equal(s1, s2, check_less_precise=True)

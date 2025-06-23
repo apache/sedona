@@ -274,7 +274,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             return self
 
     @property
-    def area(self) -> "GeoSeries":
+    def area(self) -> pd.Series:
         """
         Returns a Series containing the area of each geometry in the GeoSeries expressed in the units of the CRS.
 
@@ -295,7 +295,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         1    4.0
         dtype: float64
         """
-        return self._process_geometry_column("ST_Area", rename="area")
+        return self._process_geometry_column("ST_Area", rename="area").to_pandas()
 
     @property
     def crs(self):
@@ -521,7 +521,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         mitre_limit=5.0,
         single_sided=False,
         **kwargs,
-    ):
+    ) -> "GeoSeries":
         """
         Returns a GeoSeries of geometries representing all points within a given distance of each geometric object.
 
