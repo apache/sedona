@@ -17,6 +17,7 @@
 import os
 import shutil
 import tempfile
+import pytest
 from geopandas.testing import assert_geoseries_equal
 
 from shapely.geometry import (
@@ -46,6 +47,15 @@ class TestSeries(TestBase):
     def test_constructor(self):
         s = GeoSeries([Point(x, x) for x in range(3)])
         check_geoseries_equal(s, s)
+
+    def test_non_geom_fails(self):
+        with pytest.raises(TypeError):
+            GeoSeries([0, 1, 2])
+        with pytest.raises(TypeError):
+            GeoSeries([0, 1, 2], crs="epsg:4326")
+
+        with pytest.raises(TypeError):
+            GeoSeries(["a", "b", "c"])
 
     def test_psdf(self):
         # this is to make sure the spark session works with pandas on spark api
