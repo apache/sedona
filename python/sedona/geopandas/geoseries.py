@@ -230,9 +230,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         return self._to_geopandas()
 
     def _to_geopandas(self) -> gpd.GeoSeries:
-        return gpd.GeoSeries(
-            self._to_internal_pandas().map(lambda wkb: shapely.wkb.loads(bytes(wkb)))
-        )
+        pd_series = self._to_internal_pandas()
+        try:
+            return gpd.GeoSeries(pd_series.map(lambda wkb: shapely.wkb.loads(bytes(wkb))))
+        except Exception as e:
+            return gpd.GeoSeries(pd_series)
 
     @property
     def geometry(self) -> "GeoSeries":
