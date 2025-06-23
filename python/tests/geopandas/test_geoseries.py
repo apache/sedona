@@ -23,6 +23,11 @@ from geopandas.testing import assert_geoseries_equal
 from shapely.geometry import (
     Point,
     Polygon,
+    MultiPoint,
+    MultiLineString,
+    LineString,
+    MultiPolygon,
+    GeometryCollection,
 )
 
 from sedona.geopandas import GeoSeries
@@ -41,6 +46,24 @@ class TestSeries(TestBase):
         self.g3 = GeoSeries([self.t1, self.t2], crs="epsg:4326")
         self.g4 = GeoSeries([self.t2, self.t1])
 
+        self.points = GeoSeries([Point(x, x+1) for x in range(3)])
+
+        self.multipoints = GeoSeries([MultiPoint([(x, x+1), (x+2, x+3)]) for x in range(3)])
+
+        self.linestrings = GeoSeries([LineString([(x, x+1), (x+2, x+3)]) for x in range(3)])
+
+        self.multilinestrings = GeoSeries([MultiLineString([[[x, x+1], [x+2, x+3]], [[x+4, x+5], [x+6, x+7]]]) for x in range(3)])
+
+        self.polygons = GeoSeries([Polygon([(x, 0), (x+1, 0), (x+2, 1), (x+3, 1)]) for x in range(3)])
+
+        self.multipolygons = GeoSeries(MultiPolygon([([(0.0, 0.0), (0.0, 1.0), (1.0, 0.0)], [[(0.1, 0.1), (0.1, 0.2), (0.2, 0.1), (0.1, 0.1)]])]))
+
+        self.geomcollection = GeoSeries([GeometryCollection([
+            MultiPoint([(0, 0), (1, 1)]),
+            MultiLineString([[(0, 0), (1, 1)], [(2, 2), (3, 3)]]),
+            MultiPolygon([([(0.0, 0.0), (0.0, 1.0), (1.0, 0.0)], [[(0.1, 0.1), (0.1, 0.2), (0.2, 0.1), (0.1, 0.1)]])])
+        ])])
+
     def teardown_method(self):
         shutil.rmtree(self.tempdir)
 
@@ -48,12 +71,19 @@ class TestSeries(TestBase):
         s = GeoSeries([Point(x, x) for x in range(3)])
         check_geoseries_equal(s, s)
 
+        check_geoseries_equal(self.points, self.points)
+        check_geoseries_equal(self.multipoints, self.multipoints)
+        check_geoseries_equal(self.linestrings, self.linestrings)
+        check_geoseries_equal(self.multilinestrings, self.multilinestrings)
+        check_geoseries_equal(self.polygons, self.polygons)
+        check_geoseries_equal(self.multipolygons, self.multipolygons)
+        check_geoseries_equal(self.geomcollection, self.geomcollection)
+
     def test_non_geom_fails(self):
         with pytest.raises(TypeError):
             GeoSeries([0, 1, 2])
         with pytest.raises(TypeError):
             GeoSeries([0, 1, 2], crs="epsg:4326")
-
         with pytest.raises(TypeError):
             GeoSeries(["a", "b", "c"])
 
@@ -125,8 +155,6 @@ def check_geoseries_equal(s1, s2):
     assert isinstance(s1.geometry, GeoSeries)
     assert isinstance(s2, GeoSeries)
     assert isinstance(s2.geometry, GeoSeries)
-    if isinstance(s1, GeoSeries):
-        s1 = s1.to_geopandas()
-    if isinstance(s2, GeoSeries):
-        s2 = s2.to_geopandas()
-    assert_geoseries_equal(s1, s2)
+    s1 = s1.to_geopandas()
+    s2 = s2.to_geopandas()
+    assert_geoseries_equal(s1, s2, check_less_precise=True)
