@@ -49,23 +49,48 @@ class TestSeries(TestBase):
         self.g3 = GeoSeries([self.t1, self.t2], crs="epsg:4326")
         self.g4 = GeoSeries([self.t2, self.t1])
 
-        self.points = [Point(x, x+1) for x in range(3)]
+        self.points = [Point(x, x + 1) for x in range(3)]
 
-        self.multipoints = [MultiPoint([(x, x+1), (x+2, x+3)]) for x in range(3)]
+        self.multipoints = [MultiPoint([(x, x + 1), (x + 2, x + 3)]) for x in range(3)]
 
-        self.linestrings = [LineString([(x, x+1), (x+2, x+3)]) for x in range(3)]
+        self.linestrings = [LineString([(x, x + 1), (x + 2, x + 3)]) for x in range(3)]
 
-        self.multilinestrings = [MultiLineString([[[x, x+1], [x+2, x+3]], [[x+4, x+5], [x+6, x+7]]]) for x in range(3)]
+        self.multilinestrings = [
+            MultiLineString(
+                [[[x, x + 1], [x + 2, x + 3]], [[x + 4, x + 5], [x + 6, x + 7]]]
+            )
+            for x in range(3)
+        ]
 
-        self.polygons = [Polygon([(x, 0), (x+1, 0), (x+2, 1), (x+3, 1)]) for x in range(3)]
+        self.polygons = [
+            Polygon([(x, 0), (x + 1, 0), (x + 2, 1), (x + 3, 1)]) for x in range(3)
+        ]
 
-        self.multipolygons = MultiPolygon([([(0.0, 0.0), (0.0, 1.0), (1.0, 0.0)], [[(0.1, 0.1), (0.1, 0.2), (0.2, 0.1), (0.1, 0.1)]])])
+        self.multipolygons = MultiPolygon(
+            [
+                (
+                    [(0.0, 0.0), (0.0, 1.0), (1.0, 0.0)],
+                    [[(0.1, 0.1), (0.1, 0.2), (0.2, 0.1), (0.1, 0.1)]],
+                )
+            ]
+        )
 
-        self.geomcollection = [GeometryCollection([
-            MultiPoint([(0, 0), (1, 1)]),
-            MultiLineString([[(0, 0), (1, 1)], [(2, 2), (3, 3)]]),
-            MultiPolygon([([(0.0, 0.0), (0.0, 1.0), (1.0, 0.0)], [[(0.1, 0.1), (0.1, 0.2), (0.2, 0.1), (0.1, 0.1)]])])
-        ])]
+        self.geomcollection = [
+            GeometryCollection(
+                [
+                    MultiPoint([(0, 0), (1, 1)]),
+                    MultiLineString([[(0, 0), (1, 1)], [(2, 2), (3, 3)]]),
+                    MultiPolygon(
+                        [
+                            (
+                                [(0.0, 0.0), (0.0, 1.0), (1.0, 0.0)],
+                                [[(0.1, 0.1), (0.1, 0.2), (0.2, 0.1), (0.1, 0.1)]],
+                            )
+                        ]
+                    ),
+                ]
+            )
+        ]
 
     def teardown_method(self):
         shutil.rmtree(self.tempdir)
@@ -90,7 +115,15 @@ class TestSeries(TestBase):
             GeoSeries(["a", "b", "c"])
 
     def test_to_geopandas(self):
-        for geom in [self.points, self.multipoints, self.linestrings, self.multilinestrings, self.polygons, self.multipolygons, self.geomcollection]:
+        for geom in [
+            self.points,
+            self.multipoints,
+            self.linestrings,
+            self.multilinestrings,
+            self.polygons,
+            self.multipolygons,
+            self.geomcollection,
+        ]:
             sgpd_result = GeoSeries(geom)
             gpd_result = gpd.GeoSeries(geom)
             check_sgpd_equals_gpd(sgpd_result, gpd_result)
@@ -133,7 +166,15 @@ class TestSeries(TestBase):
         assert type(area) is pd.Series
         assert area.count() == 2
 
-        for geom in [self.points, self.multipoints, self.linestrings, self.multilinestrings, self.polygons, self.multipolygons, self.geomcollection]:
+        for geom in [
+            self.points,
+            self.multipoints,
+            self.linestrings,
+            self.multilinestrings,
+            self.polygons,
+            self.multipolygons,
+            self.geomcollection,
+        ]:
             sgpd_result = GeoSeries(geom).area
             gpd_result = gpd.GeoSeries(geom).area
             check_sgpd_equals_gpd(sgpd_result, gpd_result)
@@ -144,7 +185,17 @@ class TestSeries(TestBase):
         assert type(buffer) is GeoSeries
         assert buffer.count() == 2
 
-        for i, geom in enumerate([self.points, self.multipoints, self.linestrings, self.multilinestrings, self.polygons, self.multipolygons, self.geomcollection]):
+        for i, geom in enumerate(
+            [
+                self.points,
+                self.multipoints,
+                self.linestrings,
+                self.multilinestrings,
+                self.polygons,
+                self.multipolygons,
+                self.geomcollection,
+            ]
+        ):
             sgpd_result = GeoSeries(geom).buffer(0.2)
             gpd_result = gpd.GeoSeries(geom).buffer(0.2)
             # check_sgpd_equals_gpd(sgpd_result, gpd_result)  # TODO: results are too far off to pass
@@ -172,12 +223,15 @@ def check_is_sgpd_series(s):
     assert isinstance(s, GeoSeries)
     assert isinstance(s.geometry, GeoSeries)
 
+
 def check_sgpd_equals_gpd(sgpd_result, gpd_result):
     if isinstance(gpd_result, gpd.GeoSeries):
         check_is_sgpd_series(sgpd_result)
         assert isinstance(gpd_result, gpd.GeoSeries)
         assert isinstance(gpd_result.geometry, gpd.GeoSeries)
-        assert_geoseries_equal(sgpd_result.to_geopandas(), gpd_result, check_less_precise=True)
+        assert_geoseries_equal(
+            sgpd_result.to_geopandas(), gpd_result, check_less_precise=True
+        )
     # if gpd_result is a pd.Series, both should be
     else:
         assert isinstance(gpd_result, pd.Series)
