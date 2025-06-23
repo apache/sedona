@@ -50,8 +50,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         Return a string representation of the GeoSeries in WKT format.
         """
         try:
-            pandas_series = self.to_geopandas()
-            return gpd.GeoSeries(pandas_series).__repr__()
+            gpd_series = self.to_geopandas()
+            return gpd_series.__repr__()
 
         except Exception as e:
             # Fallback to parent's representation if conversion fails
