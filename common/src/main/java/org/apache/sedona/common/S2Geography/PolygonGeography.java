@@ -27,8 +27,11 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class PolygonGeography extends S2Geography {
+  private static final Logger logger = Logger.getLogger(PolygonGeography.class.getName());
+
   private final List<S2Polygon> polygons;
 
   public PolygonGeography() {
@@ -49,7 +52,7 @@ public class PolygonGeography extends S2Geography {
 
   @Override
   public int dimension() {
-    return 2;
+    return polygons.isEmpty() ? -1 : 2;
   }
 
   @Override
@@ -78,38 +81,46 @@ public class PolygonGeography extends S2Geography {
   }
 
   @Override
-  public void encodeTagged(OutputStream os, EncodeOptions opts) throws IOException {
-    DataOutputStream leOut = new DataOutputStream(os);
-    // 1) Write tag header
-    EncodeTag tag = new EncodeTag();
-    tag.setKind(GeographyKind.POLYGON);
-    tag.encode(leOut);
+  public void encode(OutputStream os, EncodeOptions opts) throws IOException {
+    DataOutputStream out = new DataOutputStream(os);
 
-    // 2) Write covering cells if requested
+    // 1) Serialize any covering cells (if you have them)
+    List<S2CellId> cover = new ArrayList<>();
     if (opts.isIncludeCovering()) {
-      List<S2CellId> cover = new ArrayList<>();
       getCellUnionBound(cover);
-      for (S2CellId cid : cover) {
-        leOut.writeLong(cid.id());
+      if (cover.size() > 255) {
+        cover.clear();
+        logger.warning("Covering size too large (> 255) — clear Covering");
       }
     }
 
+    // 2) Write tag header (unchanged) using leOut.writeByte(...)
+    EncodeTag tag = new EncodeTag(opts);
+    tag.setKind(GeographyKind.POLYGON);
+    tag.setCoveringSize((byte) cover.size());
+    tag.encode(out);
+    for (S2CellId c2 : cover) {
+      out.writeLong(c2.id());
+    }
+
     // 3) Write number of polygons
-    leOut.writeInt(polygons.size());
+    out.writeInt(polygons.size());
 
     // 4) Encode each polygon
     for (S2Polygon poly : polygons) {
-      poly.encode(leOut);
+      poly.encode(out);
     }
-    leOut.flush();
+    out.flush();
   }
 
-  public static PolygonGeography decodeTagged(DataInputStream in, EncodeTag tag)
-      throws IOException {
+  public static PolygonGeography decode(DataInputStream in) throws IOException {
     PolygonGeography geo = new PolygonGeography();
 
-    // EMPTY?
+    EncodeTag tag = new EncodeTag();
+    tag = EncodeTag.decode(in);
+    // EMPTY
     if ((tag.getFlags() & EncodeTag.FLAG_EMPTY) != 0) {
+      logger.fine("Decoded empty PolygonGeography.");
       return geo;
     }
 

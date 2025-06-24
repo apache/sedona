@@ -24,9 +24,12 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Logger;
 
 /** A Geography representing zero or more polylines using S2Polyline. */
 public class PolylineGeography extends S2Geography {
+  private static final Logger logger = Logger.getLogger(PolylineGeography.class.getName());
+
   private final List<S2Polyline> polylines;
 
   private static int sizeofInt() {
@@ -51,7 +54,7 @@ public class PolylineGeography extends S2Geography {
 
   @Override
   public int dimension() {
-    return 1;
+    return polylines.isEmpty() ? -1 : 1;
   }
 
   @Override
@@ -83,40 +86,49 @@ public class PolylineGeography extends S2Geography {
   }
 
   @Override
-  public void encodeTagged(OutputStream os, EncodeOptions opts) throws IOException {
+  public void encode(OutputStream os, EncodeOptions opts) throws IOException {
     // Wrap your stream in a little-endian DataOutput
-    DataOutputStream leOut = new DataOutputStream(os);
-    // 1) Write tag header (unchanged) using leOut.writeByte(...)
-    EncodeTag tag = new EncodeTag();
-    tag.setKind(GeographyKind.POLYLINE);
-    // … include flags / covering …
-    tag.encode(leOut);
+    DataOutputStream out = new DataOutputStream(os);
 
-    // 2) Serialize any covering cells (if you have them)
+    // 1) Serialize any covering cells (if you have them)
     List<S2CellId> cover = new ArrayList<>();
-    if (opts.isIncludeCovering()) getCellUnionBound(cover);
-    for (S2CellId cid : cover) {
-      leOut.writeLong(cid.id());
+    if (opts.isIncludeCovering()) {
+      getCellUnionBound(cover);
+      if (cover.size() > 255) {
+        cover.clear();
+        logger.warning("Covering size too large (> 255) — clear Covering");
+      }
+    }
+
+    // 2) Write tag header (unchanged) using leOut.writeByte(...)
+    EncodeTag tag = new EncodeTag(opts);
+    tag.setKind(GeographyKind.POLYLINE);
+    tag.setCoveringSize((byte) cover.size());
+    tag.encode(out);
+    for (S2CellId c2 : cover) {
+      out.writeLong(c2.id());
     }
 
     // 3) **Critical**: write the number of polylines in little-endian
-    leOut.writeInt(polylines.size());
+    out.writeInt(polylines.size());
 
+    // Encode point payload using selected hint
     // 4) Delegate each polyline’s payload (which itself writes little-endian)
     for (S2Polyline pl : polylines) {
-      pl.encode(leOut);
+      pl.encode(out);
     }
-
-    leOut.flush();
+    out.flush();
   }
 
-  public static PolylineGeography decodeTagged(DataInputStream in, EncodeTag tag)
-      throws IOException {
+  public static PolylineGeography decode(DataInputStream in) throws IOException {
     // 1) Instantiate an empty geography
     PolylineGeography geo = new PolylineGeography();
 
-    // EMPTY?
+    EncodeTag tag = new EncodeTag();
+    tag = EncodeTag.decode(in);
+    // EMPTY
     if ((tag.getFlags() & EncodeTag.FLAG_EMPTY) != 0) {
+      logger.fine("Decoded empty PointGeography.");
       return geo;
     }
 

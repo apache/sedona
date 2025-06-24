@@ -19,19 +19,27 @@
 package org.apache.sedona.common.S2Geography;
 
 import com.google.common.geometry.*;
+import com.google.common.geometry.PrimitiveArrays.Bytes;
+import com.google.common.geometry.PrimitiveArrays.Cursor;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class PointGeography extends S2Geography {
-  // Underlying list of points
+  private static final Logger logger = Logger.getLogger(PointGeography.class.getName());
+
   private final List<S2Point> points = new ArrayList<>();
 
   /** Constructs an empty PointGeography. */
   public PointGeography() {
     super(GeographyKind.POINT);
+  }
+
+  /** Constructs especially for CELL_CENTER */
+  private PointGeography(GeographyKind kind, S2Point point) {
+    super(kind); // can be POINT or CELL_CENTER
+    points.add(point);
   }
 
   /** Constructs a single-point geography. */
@@ -48,25 +56,17 @@ public class PointGeography extends S2Geography {
 
   @Override
   public int dimension() {
-    // Points are 0-dimensional (or -1 if empty)
     return points.isEmpty() ? -1 : 0;
   }
 
   @Override
   public int numShapes() {
-    // Represent all points as a single composite shape
     return points.isEmpty() ? 0 : 1;
   }
 
   @Override
   public S2Shape shape(int id) {
-    if (numShapes() == 0) {
-      throw new IllegalStateException("No shapes in empty PointGeography");
-    }
-    if (id != 0) {
-      throw new IllegalArgumentException("Shape id out of bounds: " + id);
-    }
-    return new PointShape(points);
+    return S2Point.Shape.fromList(points);
   }
 
   @Override
@@ -81,8 +81,7 @@ public class PointGeography extends S2Geography {
       for (S2Point p : points) {
         pointRegionCollection.add(new S2PointRegion(p));
       }
-      S2RegionUnion union = new S2RegionUnion(pointRegionCollection);
-      return union;
+      return new S2RegionUnion(pointRegionCollection);
     }
   }
 
@@ -109,25 +108,12 @@ public class PointGeography extends S2Geography {
   // -------------------------------------------------------
 
   @Override
-  public void encodeTagged(OutputStream os, EncodeOptions opts) throws IOException {
+  public void encode(OutputStream os, EncodeOptions opts) throws IOException {
     DataOutputStream out = new DataOutputStream(os);
 
-    // CELL_CENTER path
-    if (points.size() == 1 && opts.getCodingHint() == EncodeOptions.CodingHint.COMPACT) {
-      S2CellId cid = S2CellId.fromPoint(points.get(0));
-      if (cid.level() >= 23) {
-        out.writeByte(S2Geography.GeographyKind.CELL_CENTER.getKind());
-        out.writeByte(0);
-        out.writeByte(1);
-        out.writeByte(0);
-        out.writeLong(cid.id());
-        return;
-      }
-    }
-
-    // EMPTY path
+    // EMPTY
     if (points.isEmpty()) {
-      EncodeTag tag = new EncodeTag();
+      EncodeTag tag = new EncodeTag(opts);
       tag.setKind(GeographyKind.POINT);
       tag.setFlags((byte) (tag.getFlags() | EncodeTag.FLAG_EMPTY));
       tag.setCoveringSize((byte) 0);
@@ -135,34 +121,85 @@ public class PointGeography extends S2Geography {
       return;
     }
 
-    // header POINT
+    if (points.size() == 1 && opts.getCodingHint() == EncodeOptions.CodingHint.COMPACT) {
+      S2CellId cid = S2CellId.fromPoint(points.get(0));
+      if (cid.level() >= 23) {
+        out.writeByte(GeographyKind.CELL_CENTER.getKind());
+        out.writeByte(0); // POINT kind
+        out.writeByte(1); // flag
+        out.writeByte(0); // coveringSize
+        out.writeByte(2); // COMPACT encode type
+        out.writeLong(cid.id());
+        return;
+      }
+    }
+
+    // Compute covering if requested
     List<S2CellId> cover = new ArrayList<>();
-    EncodeTag tag = new EncodeTag();
+    if (opts.isIncludeCovering()) {
+      getCellUnionBound(cover);
+      if (cover.size() > 255) {
+        cover.clear();
+        logger.warning("Covering size too large (> 255) — clear Covering");
+      }
+    }
+    // Write tag and covering
+    EncodeTag tag = new EncodeTag(opts);
     tag.setKind(GeographyKind.POINT);
-    if (opts.isIncludeCovering()) getCellUnionBound(cover);
     tag.setCoveringSize((byte) cover.size());
     tag.encode(out);
-    for (var c2 : cover) out.writeLong(c2.id());
+    for (S2CellId c2 : cover) {
+      out.writeLong(c2.id());
+    }
 
-    // payload
+    // Encode point payload using selected hint
     S2Point.Shape shp = S2Point.Shape.fromList(points);
     if (opts.getCodingHint() == EncodeOptions.CodingHint.FAST) {
-      CountingPointVectorCoder.INSTANCE.encode(shp, out);
+      S2Point.Shape.FAST_CODER.encode(shp, out);
     } else {
-      PointShapeCoders.COMPACT.encode(shp, out);
+      S2Point.Shape.COMPACT_CODER.encode(shp, out);
     }
   }
 
-  public static PointGeography decodeTagged(DataInputStream in, EncodeTag tag) throws IOException {
+  public static PointGeography decode(DataInputStream in) throws IOException {
+    EncodeTag tag = new EncodeTag();
+    tag = EncodeTag.decode(in);
+    int coverSize = tag.getCoveringSize() & 0xFF;
+
     PointGeography geo = new PointGeography();
-    // EMPTY?
+    // EMPTY
     if ((tag.getFlags() & EncodeTag.FLAG_EMPTY) != 0) {
+      logger.fine("Decoded empty PointGeography.");
       return geo;
     }
 
-    // RAW-vector (FAST) decode: varint count + nPoints × (double x,y,z)
-    // FULL-FAST: varint count + n×(x,y,z)
-    geo.points.addAll(CountingPointVectorCoder.INSTANCE.decode(in));
+    // Optimized 1-point COMPACT situation
+    if (tag.getKind() == GeographyKind.CELL_CENTER && tag.getEncodeType() == 2) {
+      long id = in.readLong();
+      geo = new PointGeography(new S2CellId(id).toPoint());
+      logger.fine("Decoded compact single-point geography via cell center.");
+      return geo;
+    }
+
+    // skip cover
+    for (int i = 0; i < coverSize; i++) {
+      in.readLong();
+    }
+
+    // Read remaining bytes into buffer
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    byte[] buffer = new byte[1024];
+    int len;
+    while ((len = in.read(buffer)) != -1) {
+      baos.write(buffer, 0, len);
+    }
+
+    PrimitiveArrays.Bytes bytes = Bytes.fromByteArray(baos.toByteArray());
+    Cursor cursor = bytes.cursor();
+    List<S2Point> points = new ArrayList<>();
+    if (tag.getEncodeType() == 1) points = S2PointVectorCoder.FAST.decode(bytes, cursor);
+    else if (tag.getEncodeType() == 2) points = S2PointVectorCoder.COMPACT.decode(bytes, cursor);
+    geo.points.addAll(points);
     return geo;
   }
 }

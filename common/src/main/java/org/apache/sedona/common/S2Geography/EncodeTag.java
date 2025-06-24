@@ -25,16 +25,40 @@ import java.io.IOException;
 import java.util.List;
 import org.apache.sedona.common.S2Geography.S2Geography.GeographyKind;
 
+/**
+ * A 4 byte prefix for encoded geographies. 4 bytes is essential so that German-style strings store
+ * these bytes in their prefix (i.e., don't have to load any auxiliary buffers to inspect this
+ * information).
+ */
 public class EncodeTag {
+  /**
+   * Subclass of S2Geography whose decode() method will be invoked. Encoded using a single unsigned
+   * byte (represented as an int in Java, range 0–255).
+   */
   private GeographyKind kind = GeographyKind.UNINITIALIZED;
+  /**
+   * Flags for encoding metadata. Currently, only {@code kFlagEmpty} is supported, which is set if
+   * and only if the geography contains zero shapes.
+   */
   private byte flags = 0;
+  /**
+   * Number of S2CellId entries that follow this tag. A value of zero (i.e., an empty covering)
+   * means no covering was written, but this does not imply that the geography itself is empty.
+   */
   private byte coveringSize = 0;
+  /** Reserved byte for future use. Must be set to 0. */
   private byte reserved = 0;
 
   /** If set, geography has zero shapes. */
   public static final byte FLAG_EMPTY = 1;
 
+  private byte encodeType = 1; // fast: 1 ; compact: 2
+
   public EncodeTag() {}
+
+  public EncodeTag(EncodeOptions opts) {
+    this.encodeType = (byte) (opts.getCodingHint() == EncodeOptions.CodingHint.FAST ? 1 : 2);
+  }
 
   // ——— Write the 4-byte tag header ——————————————————————————————————————
 
@@ -43,7 +67,8 @@ public class EncodeTag {
     out.writeByte(kind.getKind());
     out.writeByte(flags);
     out.writeByte(coveringSize);
-    out.writeByte(reserved); // <-- this makes it 4 bytes
+    out.writeByte(reserved);
+    out.writeByte(encodeType);
   }
   // ——— Read it back ————————————————————————————————————————————————
 
@@ -53,8 +78,10 @@ public class EncodeTag {
     tag.kind = GeographyKind.fromKind(in.readUnsignedByte());
     tag.flags = (byte) in.readUnsignedByte();
     tag.coveringSize = (byte) in.readUnsignedByte();
-    int r = in.readUnsignedByte();
-    if (r != 0) throw new IOException("Reserved header byte must be 0, was " + r);
+    tag.reserved = (byte) in.readUnsignedByte();
+    if (tag.reserved != 0)
+      throw new IOException("Reserved header byte must be 0, was " + tag.reserved);
+    tag.encodeType = in.readByte();
     return tag;
   }
 
@@ -87,7 +114,7 @@ public class EncodeTag {
   // ——— Getters / setters ——————————————————————————————————————————
 
   public GeographyKind getKind() {
-    return kind;
+    return this.kind;
   }
 
   public void setKind(GeographyKind kind) {
@@ -100,6 +127,14 @@ public class EncodeTag {
 
   public void setFlags(byte flags) {
     this.flags = flags;
+  }
+
+  public void setEncodeType(byte type) {
+    this.encodeType = type;
+  }
+
+  public byte getEncodeType() {
+    return encodeType;
   }
 
   public byte getCoveringSize() {

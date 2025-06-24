@@ -48,24 +48,24 @@ public class PolygonGeographyTest {
     S2Loop polyline = new S2Loop(points);
     S2Polygon poly = new S2Polygon(polyline);
     System.out.println(poly.toString());
-    PolygonGeography pg = new PolygonGeography(poly);
+    PolygonGeography geo = new PolygonGeography(poly);
 
     // Encode the geography with tagging
-    pg.encodeTagged(baos, new EncodeOptions());
+    geo.encode(baos, new EncodeOptions());
 
     // Decode from the bytes
     byte[] encodedBytes = baos.toByteArray();
     DataInputStream dis = new DataInputStream(new ByteArrayInputStream(encodedBytes));
-    S2Geography roundtrip = S2Geography.decodeTagged(dis);
+    S2Geography roundtrip = geo.decode(dis);
 
     // Verify kind
     assertEquals(S2Geography.GeographyKind.POLYGON, roundtrip.kind);
     System.out.println(roundtrip.toString());
     // Extract polygon and build WKT string
     // Extract decoded polygon
-    assertEquals(1, pg.getPolygons().size());
+    assertEquals(1, geo.getPolygons().size());
 
-    S2Polygon pl = pg.getPolygons().get(0);
+    S2Polygon pl = geo.getPolygons().get(0);
     // Reconstruct WKT from first loop
     S2Loop loop = pl.loop(0);
     StringBuilder sb = new StringBuilder("POLYGON ((");

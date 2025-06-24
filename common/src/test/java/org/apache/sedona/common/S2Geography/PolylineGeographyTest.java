@@ -49,12 +49,12 @@ public class PolylineGeographyTest {
     PolylineGeography geog = new PolylineGeography(polyline);
 
     // Encode the geography with tagging
-    geog.encodeTagged(baos, new EncodeOptions());
+    geog.encode(baos, new EncodeOptions());
 
     // Decode from the bytes
     byte[] encodedBytes = baos.toByteArray();
     DataInputStream dis = new DataInputStream(new ByteArrayInputStream(encodedBytes));
-    S2Geography roundtrip = S2Geography.decodeTagged(dis);
+    S2Geography roundtrip = geog.decode(dis);
 
     // Verify kind
     assertEquals(S2Geography.GeographyKind.POLYLINE, roundtrip.kind);
@@ -99,11 +99,11 @@ public class PolylineGeographyTest {
 
     // 3) Encode to bytes
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    geog.encodeTagged(baos, new EncodeOptions());
+    geog.encode(baos, new EncodeOptions());
 
     // 4) Decode back
     DataInputStream dis = new DataInputStream(new ByteArrayInputStream(baos.toByteArray()));
-    S2Geography decoded = S2Geography.decodeTagged(dis);
+    S2Geography decoded = geog.decode(dis);
 
     // 5) Verify it’s a PolylineGeography with two members
     assertTrue(decoded instanceof PolylineGeography);

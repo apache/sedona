@@ -39,13 +39,12 @@ public class PointGeographyTest {
     assertTrue(geog.getPoints().isEmpty());
 
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    geog.encodeTagged(baos, new EncodeOptions());
+    geog.encode(baos, new EncodeOptions());
     byte[] data = baos.toByteArray();
-    assertEquals(4, data.length);
+    assertEquals(5, data.length);
 
     // 2) Create a single-point geography at lat=45°, lng=-64°
     S2Point pt = S2LatLng.fromDegrees(45, -64).toPoint();
-    System.out.println(pt.toString());
     PointGeography geog2 = new PointGeography(pt);
     assertEquals(1, geog2.numShapes());
     assertEquals(0, geog2.dimension());
@@ -53,17 +52,16 @@ public class PointGeographyTest {
     assertEquals(1, originalPts.size());
     assertEquals(pt, originalPts.get(0));
 
-    // 2) EncodeTagged
+    // 3) EncodeTagged
     ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
-    geog2.encodeTagged(baos2, new EncodeOptions());
+    geog2.encode(baos2, new EncodeOptions());
     byte[] data2 = baos2.toByteArray();
     // should be >4 bytes (header+payload)
-    assertTrue(data2.length > 4);
+    assertTrue(data2.length > 5);
   }
 
   @Test
   public void testEmptyPointEncodeDecode() throws IOException {
-    // --- C++ TEST: EmptyPoint ---
     // 1) Create an empty geography
     PointGeography geog = new PointGeography();
     assertEquals(S2Geography.GeographyKind.POINT, geog.kind);
@@ -74,13 +72,13 @@ public class PointGeographyTest {
 
     // 2) EncodeTagged
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    geog.encodeTagged(baos, new EncodeOptions());
+    geog.encode(baos, new EncodeOptions());
     byte[] data = baos.toByteArray();
 
     // 3) DecodeTagged
     DataInputStream din = new DataInputStream(new ByteArrayInputStream(data));
     // 3b) Now delegate to the dispatch method that takes (DataInputStream, EncodeTag)
-    S2Geography decoded = S2Geography.decodeTagged(din);
+    S2Geography decoded = geog.decode(din);
 
     assertTrue(decoded instanceof PointGeography);
     PointGeography round = (PointGeography) decoded;
@@ -106,25 +104,24 @@ public class PointGeographyTest {
 
     // 2) EncodeTagged
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    geog.encodeTagged(baos, new EncodeOptions());
+    geog.encode(baos, new EncodeOptions());
     byte[] data = baos.toByteArray();
 
     // 3) DecodeTagged
     DataInputStream din = new DataInputStream(new ByteArrayInputStream(data));
-    S2Geography decoded = S2Geography.decodeTagged(din);
+    PointGeography decoded = geog.decode(din);
     assertTrue(decoded instanceof PointGeography);
-    PointGeography round = (PointGeography) decoded;
 
     // 4) Verify everything round-tripped
-    assertEquals(1, round.numShapes());
-    assertEquals(0, round.dimension());
-    List<S2Point> roundPts = round.getPoints();
+    assertEquals(1, decoded.numShapes());
+    assertEquals(0, decoded.dimension());
+    List<S2Point> roundPts = decoded.getPoints();
     assertEquals(1, roundPts.size());
     assertEquals(pt, roundPts.get(0));
 
     System.out.println(roundPts.toString());
     // 1) Get the point and turn it into WKT with 6 decimal places:
-    S2Point p = round.getPoints().get(0);
+    S2Point p = decoded.getPoints().get(0);
     S2LatLng ll = new S2LatLng(p);
     String wkt =
         String.format(
@@ -135,7 +132,7 @@ public class PointGeographyTest {
     System.out.println(wkt);
     assertEquals("POINT (-64.000000 45.000000)", wkt);
     // 5) region() should contain exactly that point
-    S2Region region = round.region();
+    S2Region region = decoded.region();
     // Single-point region can be represented as a tiny cap containing only pt
     assertTrue(region.contains(pt));
   }
@@ -154,11 +151,11 @@ public class PointGeographyTest {
     opts.setCodingHint(EncodeOptions.CodingHint.COMPACT);
 
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    geog.encodeTagged(baos, opts);
+    geog.encode(baos, opts);
     byte[] data = baos.toByteArray();
 
-    // Exactly 4-byte header + 8-byte cell-id
-    assertEquals(12, data.length);
+    // Exactly 5-byte header + 8-byte cell-id
+    assertEquals(13, data.length);
 
     // 3) Peek at the tag + covering
     DataInputStream in1 = new DataInputStream(new ByteArrayInputStream(data));
@@ -177,13 +174,37 @@ public class PointGeographyTest {
 
     // 4) Now round-trip the entire geography
     PointGeography round =
-        (PointGeography)
-            S2Geography.decodeTagged(new DataInputStream(new ByteArrayInputStream(data)));
+        (PointGeography) geog.decode(new DataInputStream(new ByteArrayInputStream(data)));
     System.out.println(round.getPoints().toString());
 
     // It should still be a single‐point geography
     assertEquals(1, round.getPoints().size());
     // And the point should be exactly the snapped cell‐center
     assertEquals(ptSnapped, round.getPoints().get(0));
+  }
+
+  @Test
+  public void testEncodedListPoints() throws IOException {
+    // 1) Build two points
+    S2Point pt1 = S2LatLng.fromDegrees(45, -64).toPoint();
+    S2Point pt2 = S2LatLng.fromDegrees(70, -40).toPoint();
+
+    // 2) Encode both points
+    PointGeography geog = new PointGeography(List.of(pt1, pt2));
+    EncodeOptions opts = new EncodeOptions();
+    opts.setCodingHint(EncodeOptions.CodingHint.COMPACT);
+
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    geog.encode(baos, opts);
+    byte[] data = baos.toByteArray();
+
+    // 3) Decode round-trip
+    PointGeography round =
+        (PointGeography) geog.decode(new DataInputStream(new ByteArrayInputStream(data)));
+
+    // 4) Assert round-trip matches
+    assertEquals(2, round.getPoints().size());
+    assertEquals(pt1, round.getPoints().get(0));
+    assertEquals(pt2, round.getPoints().get(1));
   }
 }
