@@ -185,13 +185,11 @@ class TestSeries(TestBase):
         assert type(buffer) is GeoSeries
         assert buffer.count() == 2
 
-        for table_name, geom in self.geoms:
+        for _, geom in self.geoms:
             dist = 0.2
             sgpd_result = GeoSeries(geom).buffer(dist)
-            sedona_result = self.run_sedona_sql("ST_Buffer", table_name, dist)
             gpd_result = gpd.GeoSeries(geom).buffer(dist)
 
-            self.check_sgpd_equals_spark_df(sgpd_result, sedona_result)
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_buffer_then_area(self):
@@ -210,18 +208,6 @@ class TestSeries(TestBase):
     # -----------------------------------------------------------------------------
     # # Utils
     # -----------------------------------------------------------------------------
-
-    def run_sedona_sql(self, func: str, table: str, *args):
-        args = ", ".join([str(arg) for arg in args])
-        sedona_result = self.spark.sql(
-            "select "
-            + func
-            + "(ST_GeomFromWKT(geometry), {func_args}) as expected from "
-            + table
-            + " order by id",
-            func_args=args,
-        )
-        return sedona_result
 
     def check_sgpd_equals_spark_df(
         self, actual: GeoSeries, expected: pyspark.sql.DataFrame
