@@ -30,6 +30,7 @@ title: Geospatial Data on Iceberg - The Lakehouse Advantage
  -->
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 14074d417b ([DOCS] putting metadata at top)
 # Geospatial Data on Iceberg: The Lakehouse Advantage
 
@@ -39,21 +40,36 @@ and differentiate its approach from standard data warehouses and data lakes.
 This post discusses the benefits of Lakehouse architecture for spatial
 tables, comparing the Lakehouse approach to standard data warehouses and data lakes.
 >>>>>>> 3128e022f4 (blog refinements)
+=======
+TODO: Rework intro
+
+This post discusses the benefits of Lakehouse architecture for spatial
+tables, comparing the Lakehouse approach to that of data warehouses and data lakes.
+>>>>>>> bad3190a21 (formatting fixes)
 
 While spatial data requires different types of metadata and optimizations,
-it doesn't require entirely different file formats.
+it _doesn't_ require entirely different file formats.
 
-Recent advancements, specifically the addition of native geometry/geography types to
-Apache Parquet and the Apache Iceberg V3 specification, now enable the spatial data community
-to fully integrate with Lakehouse architectures.
-<!-- more -->
+#### Key Points
+
+* Geospatial Data has native support in Apache Parquet and Apache Iceberg.
+* TODO
+
+Recent advancements, specifically the addition of native support for geometry/geography types to
+Apache Parquet and the Apache Iceberg V3 specification, enable the spatial data community
+to fully integrate with and leverage the benefits of Lakehouse architectures.
 
 Many of the benefits that Lakehouses provide for tabular data also apply to spatial data, including:
+<!-- more -->
 
-* **Versioned data:** Lakehouses automatically track changes to spatial features over time, creating distinct versions ideal for historical analysis and auditing how geometries or attributes evolved.
-* **Time travel:** Versioning lets you query spatial data (like features, boundaries, or locations) exactly as that data existed at a specific prior time, crucial for understanding historical spatial analysis.
-* **Schema enforcement:** Lakehouses enforce schemas to ensure spatial data consistency by guaranteeing correct geometry types and attribute formats, which improve data quality and query reliability.
-* **Database optimizations:** Techniques like geographic partitioning, data skipping using bounding boxes, and columnar storage accelerate spatial queries and improve storage efficiency within Lakehouse.
+* **Versioned data:** Lakehouses automatically track changes to spatial features over time, creating
+distinct versions ideal for historical analysis and auditing how geometries or attributes evolved.
+* **Time travel:** Versioning lets you query spatial data (including boundaries and specific locations) exactly as
+that data existed at a specific time in the past, crucial for historical spatial analysis.
+* **Schema enforcement:** Lakehouses enforce schemas to ensure spatial data consistency by guaranteeing correct
+geometry types and attribute formats, which improve data quality and query reliability.
+* **Database optimizations:** Techniques like geographic partitioning, data skipping using
+bounding boxes, and columnar storage can accelerate spatial queries and improve storage efficiency within Lakehouses.
 
 ## Data Lakehouse architecture overview
 
@@ -83,27 +99,50 @@ The Lakehouse Architecture offers several advantages:
 * Lakehouses support all the features familiar to data warehouses, like reliable transactions, Data Manipulation Language (DML) operations, and RBAC.
 * Lakehouses are performant enough for low-latency applications like BI dashboards.
 * Lakehouses are interoperable with proprietary tools like BigQuery, Redshift, or Esri.
-* You can store Lakehouses in cloud-based storage systems without any additional charges.
-* Lakehouses are compatible with any engine. You can use one engine for ingestion, another for ETL, and a third for Machine Learning. The architecture encourages using the best engine for the job.
+* Lakehouses leverage the cost-efficiency of cloud object storage (similar to data lakes) for data storage.
+* Lakehouses are highly compatible with existing compute engines.
+    * You can use one engine for ingestion, another for ETL, and a third for Machine Learning.
 
 ## Lakehouses & spatial data
 
-Earlier, we mentioned 2 important features of Lakehouses: Single-table transactions and RBAC. Let's delve into how these 2 features can be beneficial for working with spatial data.
+Earlier, we mentioned 2 important features of Lakehouses: Single-table transactions and RBAC.
+Let's discuss how these 2 features can be beneficial for working with spatial data.
 
-### Single-table transactions
+### An example of single-table transactions
 
-Imagine a retail company is closing a store in New Jersey. Let's assume that this company maintains 3 different tables: `stores` (containing point geometry), `sales_territories` (containing polygon geometry), and `sales_performance` (containing no geometry).
+Imagine a retail company is closing a store in New Jersey.
 
-These tables are interdependent: The `store_id` field is in `stores` and `sales_territories` and `territory_id` is in `sales_territories` and `sales_performance`.
+Let's assume that this company maintains 3 different tables:
 
-The `stores` table is indirectly linked to `sales_performance` via the `sales_territories` table.
+1. `stores`(containing point geometry)
+1. `sales_territories` (containing polygon geometry)
+1. `sales_performance` (containing no geometry)
 
-With **single-table transactions**, as featured in many Lakehouses, each update to an individual table is atomic (all-or-nothing). In this scenario, when a store is closed:
+These tables are interdependent:
 
-The operation to update the store's status in the `stores` table is completed as one atomic transaction on that table.
+* The `store_id` field is included in `stores` and `sales_territories`.
+* The `territory_id` field is included in `sales_territories` and `sales_performance`.
 
-Any corresponding changes to the `sales_territories` table (e.g., altering polygon boundaries or updating `store_id` associations) would be a separate atomic transaction on the `sales_territories` table.
-Similarly, updates to the `sales_performance` table (e.g., adjusting sales targets linked to the `territory_id`) would be performed as an atomic transaction on that specific table.
+As a result: The `stores` table is indirectly linked to `sales_performance` via the `sales_territories` table.
+
+!!!abstract "Single-table transactions: All or Nothing"
+    With **single-table transactions**, as featured in many Lakehouses, each update to an
+    individual table is atomic--either _all_ parts of the change succeed and are committed,
+    or the entire change is rolled back, leaving the table in its original
+    state before the transaction began.
+
+When a store is closed:
+
+Changes to a store's status in the `stores` table occur as a single, atomic transaction.
+
+Any corresponding changes to the `sales_territories` table (e.g., altering polygon
+boundaries or updating `store_id` associations) would be a _separate_ atomic transaction
+on the `sales_territories` table.
+
+Similarly, updates to the `sales_performance` table (e.g., adjusting sales targets linked to the `territory_id`)
+would be performed as an atomic transaction on that specific table.
+
+TODO: Describe diagram
 
 ```mermaid
 erDiagram
@@ -135,15 +174,16 @@ erDiagram
     }
 ```
 
-This individual atomicity ensures that each table remains consistent after its specific update. For example, the `stores` table won't be left in a partially updated state.
+This individual atomicity ensures that each table remains consistent after its specific update.
+For example, the `stores` table won't be left in a partially updated state.
 
 To ensure data consistency across all three tables (`stores`, `sales_territories`, and `sales_performance`) for the entire
 business operation of closing a store, these individual atomic operations on each table would typically be executed in sequence.
 
-While single-table transactions don't automatically "package" these three distinct table updates into a single overarching transaction that
-makes them all visible simultaneously (that would require multi-table transaction capabilities), they are foundational.
+Single-table transactions don't automatically "package" these three distinct table updates into a single overarching transaction,
+that would require multi-table transaction capabilities.
 
-By ensuring each step is completed successfully and atomically, the overall process is far more reliable.
+However, by ensuring that each step is completed successfully and atomically, the overall process is far more reliable.
 
 If an update to `sales_territories` were to fail, the `stores` table (from its preceding successful transaction) would
 remain consistent, and the `sales_territories` table would roll back its own failed changes, preventing corruption within that table.
@@ -155,7 +195,7 @@ Now, let's see how Lakehouses differ from Data Lakes.
 
 ## Lakehouses vs. Data Lakes
 
-In contrast, Data Lakes store data in files without a metadata layer, so they don't guarantee reliable transactions.
+In contrast to Data Lakehouses, Data Lakes store data in files without a metadata layer, so they don't guarantee reliable transactions.
 
 The following are a few examples of data lakes:
 
@@ -166,27 +206,45 @@ The following are a few examples of data lakes:
 Generally, data lakes lack built-in mechanisms to coordinate atomic changes across multiple files or objects.
 As a result of this and other architectural limitations, data lakes do not support reliable single-table transactions.
 
-Consequently, traditional data lakes present challenges for common data tasks: they struggle to efficiently execute developer-centric operations like `DELETE` and `MERGE`; modifying datasets often requires downtime to maintain consistency during file rewrites; and they typically lack the sophisticated performance optimizations (like advanced indexing) found in more performant database systems.
+Consequently, traditional data lakes present challenges for common data tasks:
 
-The Lakehouse metadata layer is relatively small, so the storage costs for a Lakehouse and a data lake are about the same. However, Lakehouses allow for better performance, so compute expenses can be generally lower than those of a data lake.
+* Data Lakes struggle to efficiently execute developer-centric operations like `DELETE` and `MERGE`.
+* Data Lakes often require downtime to modify datasets in order to maintain consistency during file rewrites.
+* Data Lakes typically lack the sophisticated performance optimizations (like advanced indexing) found in more performant database systems.
+
+The Lakehouse metadata layer is relatively small, effectively making storage costs comparable to that
+of a Data Lake. However, because Lakehouses allow for better query performance, you can generally expect
+lower compute costs compared to Data Lakes.
 
 ## Lakehouses vs. Data Warehouses
 
-A Data Warehouse is an analytics system typically powered by a proprietary engine with similarly proprietary file formats. However, due to many modern customers wanting to avoid vendor-lock-in via a proprietary file format, data warehouses also began supporting Lakehouse Storage Systems in addition to proprietary file formats.
+A Data Warehouse is an analytics system typically powered by a proprietary engine with similarly proprietary file formats.
+
+However, due to many customers wanting to avoid vendor-lock-in via a proprietary file format, data warehouses
+also began supporting Lakehouse Storage Systems in addition to proprietary file formats.
 
 Still, data warehouses generally exhibit the following limitations:
 
-* Pricing models frequently package storage and compute, requiring users to pay for more compute even if they only need more storage.
+* Pricing models frequently package storage and compute, which
+could require users to pay for more compute even if they only need more storage.
 * Storing data in proprietary file formats limits compatibility with other engines.
-* Querying data stored in open file formats **can result** in slower performance compared to proprietary formats. Performance can suffer in shared compute environments when resource-intensive queries from one user impact others.
+* Querying data stored in open file formats _can_ result in slower performance compared
+  to proprietary formats due to being built specifically for a specific compute engine.
+* Performance can suffer in shared compute environments when resource-intensive queries from one user impact others.
 
-Many modern enterprises prefer the Lakehouse architecture because it's vendor-neutral, low-cost, and open–compatible with any engine that builds a connector.
+Many modern enterprises prefer the Lakehouse architecture because Data Lakehouses
+are vendor-neutral, low-cost, and compatible with different compute engines.
 
-In the next section, we'll discuss how to create tables with Iceberg.
+In the next section, we'll discuss how to create an Apache Iceberg table, an
+open-source table format used primarily with Data Lakehouses.
 
-## Creating tables with Iceberg
+## Creating tables with Apache Iceberg
 
-The following code sample demonstrates how to create and populate an Iceberg table within a Lakehouse. In this example, we'll create a `customers` table with `id` and `first_name` columns:
+The following code sample demonstrates how to create and populate an Apache Iceberg table within a Lakehouse.
+
+In this sample (simplified for explanatory purposes), we'll create a `customers` table with `id` and `first_name` columns:
+
+TODO: what variable imports are needed
 
 ```py
 CREATE TABLE local.db.customers (id string, first_name string)
@@ -206,7 +264,7 @@ df = sedona.createDataFrame([
 df.write.format("iceberg").mode("append").saveAsTable("local.db.customers")
 ```
 
-Finally, run a query on the `customers` table:
+Let's take a look at the `customers` table we just created:
 
 ```py
 sedona.table("local.db.customers").show()
@@ -220,13 +278,16 @@ sedona.table("local.db.customers").show()
 +---+----------+
 ```
 
-Creating a table with tabular data is straightforward. Now let's see how to make a table with spatial data in Iceberg.
+As you can see, creating a table with tabular data is straightforward.
+Now, let's see how to make a table with spatial data in Apache Iceberg.
 
-## Creating spatial tables with Iceberg v3
+## Creating spatial columns in Apache Iceberg v3
 
-With Iceberg announcing native support for geospatial data, we can include spatial columns in tables without any special data accommodations.
+With Iceberg announcing native support for geospatial data, we can include spatial columns
+in tables without any special data accommodations.
 
-Let's create a customer_purchases table with a purchase_location column that contains Point Geometry of the different store locations
+Let's create a `customer_purchases` table with a `purchase_location` column that contains
+the `Point` Geometry of the different store locations:
 
 ```py
 CREATE TABLE local.db.customer_purchases (id string, price double, geometry geometry)
@@ -253,17 +314,23 @@ df = sedona.createDataFrame([
 df.write.format("iceberg").mode("append").saveAsTable("local.db.customer_purchases")
 ```
 
-The spatial table uses `Point` geometries for exact purchase locations and `Polygon` geometries for purchases tied to an approximate region.
+The spatial table uses `Point` geometries for exact purchase locations
+and `Polygon` geometries for purchases tied to an approximate region.
 
-## Joining an Iceberg tabular table with a spatial table
+## Joining tables containing spatial and non-spatial data
 
+<<<<<<< HEAD
 Let's discuss how to join the customers and customer_purchases tables.
+=======
+Let's discuss how to use Sedona to join the non-spatial data
+in the `customers` table with the spatial data in the `customer_purchases` table.
+>>>>>>> bad3190a21 (formatting fixes)
 
 ```py
 customers = sedona.table("local.db.customers")
 purchases = sedona.table("local.db.customer_purchases")
 
-joined = customers.join(purchases, "id")
+joined = customers.join(purchases, "id") TODO more descriptive variable name
 joined.show()
 
 
@@ -278,14 +345,18 @@ joined.show()
 
 Now, we can see the customer information and the location of their purchases all in one table.
 
-It's easy to join any tables with Sedona, regardless of the underlying file format, because Sedona has so
-many built-in file readers (e.g., you can easily join one table stored in Shapefiles and another stored
-in GeoParquet files). But it's even easier when Iceberg stores the tabular and spatial tables in the same catalog.
+You can join tables with Sedona, regardless of that table's underlying file
+format, because Sedona has so many built-in file readers.
+
+For example, with Apache Sedona, you can join one table loaded from Shapefiles
+with another table loaded from GeoParquet, an extension of the open source Apache Parquet file format.
 
 !!!tip "Best Practice: Co-location can optimize spatial tables in Lakehouses"
-    To speed up your Lakehouse queries, you can co-locate similar data in the same files and eliminate excessively small files.
+    Consider the following co-location tips to optimize your spatial data queries: TODO
+        * To speed up your Lakehouse queries, you can co-locate similar data in the same files and eliminate excessively small files.
+        * Use Apache Iceberg to store the tabular and spatial tables in the same catalog. TODO
 
-Let's look at the following spatial table stored in GeoParquet. This table is the Overture Maps Foundation buildings dataset.
+Let's look at the following GeoParquet table. This table is the Overture Maps Foundation buildings dataset.
 
 ```py
 (
@@ -300,7 +371,7 @@ Let's look at the following spatial table stored in GeoParquet. This table is th
 ```py
 import pyspark.sql.functions as sql_funcs
 
-# Assume 'sedona' is the configured SparkSession from Section 0
+# Assume 'sedona' is a configured SparkSession
 
 # Define the Overture Maps source path (condensed)
 overture_release = "2025-03-19.0" # Define the specific release date
