@@ -352,6 +352,7 @@ For example, with Apache Sedona, you can join one table loaded from Shapefiles
 with another table loaded from GeoParquet, an extension of the open source Apache Parquet file format.
 
 !!!tip "Best Practice: Co-location can optimize spatial tables in Lakehouses"
+
     Consider the following co-location tips to optimize your spatial data queries: TODO
         * To speed up your Lakehouse queries, you can co-locate similar data in the same files and eliminate excessively small files.
         * Use Apache Iceberg to store the tabular and spatial tables in the same catalog. TODO
@@ -690,7 +691,7 @@ else:
 Lakehouse architecture offers many advantages for the data community, and
 with the native support native for `geometry` and `geography` (GEO) data types
 in Iceberg, the spatial community can now take advantage of these benefits.
-This marks a fundamental shift from simply storing spatial data *within*
+This marks a fundamental shift from simply storing spatial data _within_
 generic types (like binary WKB or string WKT).
 
 This native support is expected to improve interoperability and performance
