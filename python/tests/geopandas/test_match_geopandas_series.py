@@ -39,7 +39,7 @@ from tests.test_base import TestBase
 import pyspark.pandas as ps
 
 
-class TestSeries(TestBase):
+class TestMatchGeopandasSeries(TestBase):
     def setup_method(self):
         self.tempdir = tempfile.mkdtemp()
         self.t1 = Polygon([(0, 0), (1, 0), (1, 1)])
@@ -171,7 +171,7 @@ class TestSeries(TestBase):
     def test_area(self):
         area = self.g1.area
         assert area is not None
-        assert type(area) is pd.Series
+        assert type(area) is ps.Series
         assert area.count() == 2
 
         for _, geom in self.geoms:
@@ -195,7 +195,7 @@ class TestSeries(TestBase):
     def test_buffer_then_area(self):
         area = self.g1.buffer(0.2).area
         assert area is not None
-        assert type(area) is pd.Series
+        assert type(area) is ps.Series
         assert area.count() == 2
 
     def test_buffer_then_geoparquet(self):
@@ -229,7 +229,7 @@ class TestSeries(TestBase):
                 a, e, tolerance=1e-2
             )  # increased tolerance from 1e-6
 
-    def check_pd_series_equal(self, actual: pd.Series, expected: pd.Series):
-        assert isinstance(actual, pd.Series)
+    def check_pd_series_equal(self, actual: ps.Series, expected: pd.Series):
+        assert isinstance(actual, ps.Series)
         assert isinstance(expected, pd.Series)
-        assert_series_equal(actual, expected, check_less_precise=True)
+        assert_series_equal(actual.to_pandas(), expected, check_less_precise=True)

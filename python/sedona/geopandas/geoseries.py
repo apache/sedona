@@ -176,7 +176,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             A GeoSeries with the operation applied to the geometry column.
         """
         # Find the first column with BinaryType or GeometryType
-        first_col = self.get_first_geometry_column()
+        first_col = self.get_first_geometry_column()  # TODO: fixme
 
         if first_col:
             data_type = self._internal.spark_frame.schema[first_col].dataType
@@ -238,6 +238,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         except Exception as e:
             return gpd.GeoSeries(pd_series)
 
+    def to_spark_pandas(self) -> pspd.Series:
+        return pspd.Series(self._to_internal_pandas())
+
     @property
     def geometry(self) -> "GeoSeries":
         return self
@@ -278,7 +281,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             return self
 
     @property
-    def area(self) -> pd.Series:
+    def area(self) -> pspd.Series:
         """
         Returns a Series containing the area of each geometry in the GeoSeries expressed in the units of the CRS.
 
@@ -299,7 +302,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         1    4.0
         dtype: float64
         """
-        return self._process_geometry_column("ST_Area", rename="area").to_pandas()
+        return self._process_geometry_column("ST_Area", rename="area").to_spark_pandas()
 
     @property
     def crs(self):
