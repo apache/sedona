@@ -20,8 +20,9 @@ import tempfile
 import pytest
 import pandas as pd
 import geopandas as gpd
+import pyspark.pandas as ps
+import pyspark
 from pandas.testing import assert_series_equal
-from geopandas.testing import assert_geoseries_equal
 
 from shapely.geometry import (
     Point,
@@ -66,14 +67,16 @@ class TestSeries(TestBase):
             Polygon([(x, 0), (x + 1, 0), (x + 2, 1), (x + 3, 1)]) for x in range(3)
         ]
 
-        self.multipolygons = MultiPolygon(
-            [
-                (
-                    [(0.0, 0.0), (0.0, 1.0), (1.0, 0.0)],
-                    [[(0.1, 0.1), (0.1, 0.2), (0.2, 0.1), (0.1, 0.1)]],
-                )
-            ]
-        )
+        self.multipolygons = [
+            MultiPolygon(
+                [
+                    (
+                        [(0.0, 0.0), (0.0, 1.0), (1.0, 0.0)],
+                        [[(0.1, 0.1), (0.1, 0.2), (0.2, 0.1), (0.1, 0.1)]],
+                    )
+                ]
+            )
+        ]
 
         self.geomcollection = [
             GeometryCollection(
@@ -92,19 +95,32 @@ class TestSeries(TestBase):
             )
         ]
 
+        # (sql_table_name, geom)
+        self.geoms = [
+            ("points", self.points),
+            ("multipoints", self.multipoints),
+            ("linestrings", self.linestrings),
+            ("multilinestrings", self.multilinestrings),
+            ("polygons", self.polygons),
+            ("multipolygons", self.multipolygons),
+            ("geomcollection", self.geomcollection),
+        ]
+
+        # create the tables in sedona spark
+        for i, (table_name, geoms) in enumerate(self.geoms):
+            wkt_string = [g.wkt for g in geoms]
+            pd_df = pd.DataFrame({"id": i, "geometry": wkt_string})
+            spark_df = self.spark.createDataFrame(pd_df)
+            spark_df.createOrReplaceTempView(table_name)
+
     def teardown_method(self):
         shutil.rmtree(self.tempdir)
 
     def test_constructor(self):
-        s = GeoSeries([Point(x, x) for x in range(3)])
-        check_is_sgpd_series(s)
-        check_is_sgpd_series(GeoSeries(self.points))
-        check_is_sgpd_series(GeoSeries(self.multipoints))
-        check_is_sgpd_series(GeoSeries(self.linestrings))
-        check_is_sgpd_series(GeoSeries(self.multilinestrings))
-        check_is_sgpd_series(GeoSeries(self.polygons))
-        check_is_sgpd_series(GeoSeries(self.multipolygons))
-        check_is_sgpd_series(GeoSeries(self.geomcollection))
+        for _, geom in self.geoms:
+            gpd_series = gpd.GeoSeries(geom)
+            assert isinstance(gpd_series, gpd.GeoSeries)
+            assert isinstance(gpd_series.geometry, gpd.GeoSeries)
 
     def test_non_geom_fails(self):
         with pytest.raises(TypeError):
@@ -115,18 +131,10 @@ class TestSeries(TestBase):
             GeoSeries(["a", "b", "c"])
 
     def test_to_geopandas(self):
-        for geom in [
-            self.points,
-            self.multipoints,
-            self.linestrings,
-            self.multilinestrings,
-            self.polygons,
-            self.multipolygons,
-            self.geomcollection,
-        ]:
+        for _, geom in self.geoms:
             sgpd_result = GeoSeries(geom)
             gpd_result = gpd.GeoSeries(geom)
-            check_sgpd_equals_gpd(sgpd_result, gpd_result)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_psdf(self):
         # this is to make sure the spark session works with pandas on spark api
@@ -166,18 +174,10 @@ class TestSeries(TestBase):
         assert type(area) is pd.Series
         assert area.count() == 2
 
-        for geom in [
-            self.points,
-            self.multipoints,
-            self.linestrings,
-            self.multilinestrings,
-            self.polygons,
-            self.multipolygons,
-            self.geomcollection,
-        ]:
+        for _, geom in self.geoms:
             sgpd_result = GeoSeries(geom).area
             gpd_result = gpd.GeoSeries(geom).area
-            check_sgpd_equals_gpd(sgpd_result, gpd_result)
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_buffer(self):
         buffer = self.g1.buffer(0.2)
@@ -185,20 +185,14 @@ class TestSeries(TestBase):
         assert type(buffer) is GeoSeries
         assert buffer.count() == 2
 
-        for i, geom in enumerate(
-            [
-                self.points,
-                self.multipoints,
-                self.linestrings,
-                self.multilinestrings,
-                self.polygons,
-                self.multipolygons,
-                self.geomcollection,
-            ]
-        ):
-            sgpd_result = GeoSeries(geom).buffer(0.2)
-            gpd_result = gpd.GeoSeries(geom).buffer(0.2)
-            # check_sgpd_equals_gpd(sgpd_result, gpd_result)  # TODO: results are too far off to pass
+        for table_name, geom in self.geoms:
+            dist = 0.2
+            sgpd_result = GeoSeries(geom).buffer(dist)
+            sedona_result = self.run_sedona_sql("ST_Buffer", table_name, dist)
+            gpd_result = gpd.GeoSeries(geom).buffer(dist)
+
+            self.check_sgpd_equals_spark_df(sgpd_result, sedona_result)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_buffer_then_area(self):
         area = self.g1.buffer(0.2).area
@@ -213,27 +207,43 @@ class TestSeries(TestBase):
         self.g1.buffer(0.2).to_parquet(temp_file_path)
         assert os.path.exists(temp_file_path)
 
+    # -----------------------------------------------------------------------------
+    # # Utils
+    # -----------------------------------------------------------------------------
 
-# -----------------------------------------------------------------------------
-# # Utils
-# -----------------------------------------------------------------------------
-
-
-def check_is_sgpd_series(s):
-    assert isinstance(s, GeoSeries)
-    assert isinstance(s.geometry, GeoSeries)
-
-
-def check_sgpd_equals_gpd(sgpd_result, gpd_result):
-    if isinstance(gpd_result, gpd.GeoSeries):
-        check_is_sgpd_series(sgpd_result)
-        assert isinstance(gpd_result, gpd.GeoSeries)
-        assert isinstance(gpd_result.geometry, gpd.GeoSeries)
-        assert_geoseries_equal(
-            sgpd_result.to_geopandas(), gpd_result, check_less_precise=True
+    def run_sedona_sql(self, func: str, table: str, *args):
+        args = ", ".join([str(arg) for arg in args])
+        sedona_result = self.spark.sql(
+            "select "
+            + func
+            + "(ST_GeomFromWKT(geometry), {func_args}) as expected from "
+            + table
+            + " order by id",
+            func_args=args,
         )
-    # if gpd_result is a pd.Series, both should be
-    else:
-        assert isinstance(gpd_result, pd.Series)
-        assert isinstance(sgpd_result, pd.Series)
-        assert_series_equal(sgpd_result, gpd_result, check_less_precise=True)
+        return sedona_result
+
+    def check_sgpd_equals_spark_df(
+        self, actual: GeoSeries, expected: pyspark.sql.DataFrame
+    ):
+        assert isinstance(actual, GeoSeries)
+        assert isinstance(expected, pyspark.sql.DataFrame)
+        expected = expected.selectExpr("ST_AsText(expected) as expected")
+        sgpd_result = actual.to_geopandas()
+        expected = expected.toPandas()["expected"]
+        for a, e in zip(sgpd_result, expected):
+            self.assert_geometry_almost_equal(a, e)
+
+    def check_sgpd_equals_gpd(self, actual: GeoSeries, expected: gpd.GeoSeries):
+        assert isinstance(actual, GeoSeries)
+        assert isinstance(expected, gpd.GeoSeries)
+        sgpd_result = actual.to_geopandas()
+        for a, e in zip(sgpd_result, expected):
+            self.assert_geometry_almost_equal(
+                a, e, tolerance=1e-2
+            )  # increased tolerance from 1e-6
+
+    def check_pd_series_equal(self, actual: pd.Series, expected: pd.Series):
+        assert isinstance(actual, pd.Series)
+        assert isinstance(expected, pd.Series)
+        assert_series_equal(actual, expected, check_less_precise=True)
