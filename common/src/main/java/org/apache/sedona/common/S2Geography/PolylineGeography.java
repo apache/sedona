@@ -18,6 +18,8 @@
  */
 package org.apache.sedona.common.S2Geography;
 
+import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.kryo.io.UnsafeInput;
 import com.google.common.collect.ImmutableList;
 import com.google.common.geometry.*;
 import java.io.*;
@@ -86,70 +88,48 @@ public class PolylineGeography extends S2Geography {
   }
 
   @Override
-  public void encode(OutputStream os, EncodeOptions opts) throws IOException {
-    // Wrap your stream in a little-endian DataOutput
-    DataOutputStream out = new DataOutputStream(os);
-
-    // 1) Serialize any covering cells (if you have them)
-    List<S2CellId> cover = new ArrayList<>();
-    if (opts.isIncludeCovering()) {
-      getCellUnionBound(cover);
-      if (cover.size() > 255) {
-        cover.clear();
-        logger.warning("Covering size too large (> 255) — clear Covering");
-      }
-    }
-
-    // 2) Write tag header (unchanged) using leOut.writeByte(...)
-    EncodeTag tag = new EncodeTag(opts);
-    tag.setKind(GeographyKind.POLYLINE);
-    tag.setCoveringSize((byte) cover.size());
-    tag.encode(out);
-    for (S2CellId c2 : cover) {
-      out.writeLong(c2.id());
-    }
-
-    // 3) **Critical**: write the number of polylines in little-endian
+  public void encode(Output out, EncodeOptions opts) throws IOException {
+    // 1) Write number of polylines as a 4-byte Kryo int
     out.writeInt(polylines.size());
 
-    // Encode point payload using selected hint
-    // 4) Delegate each polyline’s payload (which itself writes little-endian)
+    // 2) Encode point payload using selected hint
+    boolean useFast = opts.getCodingHint() == EncodeOptions.CodingHint.FAST;
     for (S2Polyline pl : polylines) {
-      pl.encode(out);
+      if (useFast) {
+        S2Polyline.FAST_CODER.encode(pl, out);
+      } else {
+        S2Polyline.COMPACT_CODER.encode(pl, out);
+      }
+      out.flush();
     }
-    out.flush();
   }
 
-  public static PolylineGeography decode(DataInputStream in) throws IOException {
+  public static PolylineGeography decode(UnsafeInput in, EncodeTag tag) throws IOException {
     // 1) Instantiate an empty geography
     PolylineGeography geo = new PolylineGeography();
 
-    EncodeTag tag = new EncodeTag();
-    tag = EncodeTag.decode(in);
     // EMPTY
     if ((tag.getFlags() & EncodeTag.FLAG_EMPTY) != 0) {
       logger.fine("Decoded empty PointGeography.");
       return geo;
     }
 
-    // 3) Skip past any covering cell-IDs written by encodeTagged
+    // 2) Skip past any covering cell-IDs written by encodeTagged
     tag.skipCovering(in);
 
-    // 4) Ensure we have at least 4 bytes for the count
+    // 3) Ensure we have at least 4 bytes for the count
     if (in.available() < Integer.BYTES) {
       throw new IOException("PolylineGeography.decodeTagged error: insufficient header bytes");
     }
 
-    // 5) Read the number of polylines (4-byte little-endian int)
+    // 5) Read the number of polylines (4-byte)
     int count = in.readInt();
 
-    // 6) Loop and decode each polyline
+    // 6) For each polyline, read its block and let S2Polyline.decode(InputStream) do the rest
     for (int i = 0; i < count; i++) {
-      // This will read the version byte, then dispatch to decodeLossless or decodeCompressed
       S2Polyline pl = S2Polyline.decode(in);
       geo.polylines.add(pl);
     }
-
     return geo;
   }
 }

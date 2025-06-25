@@ -18,12 +18,11 @@
  */
 package org.apache.sedona.common.S2Geography;
 
+import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.kryo.io.UnsafeInput;
 import com.google.common.collect.ImmutableList;
 import com.google.common.geometry.*;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -81,28 +80,7 @@ public class PolygonGeography extends S2Geography {
   }
 
   @Override
-  public void encode(OutputStream os, EncodeOptions opts) throws IOException {
-    DataOutputStream out = new DataOutputStream(os);
-
-    // 1) Serialize any covering cells (if you have them)
-    List<S2CellId> cover = new ArrayList<>();
-    if (opts.isIncludeCovering()) {
-      getCellUnionBound(cover);
-      if (cover.size() > 255) {
-        cover.clear();
-        logger.warning("Covering size too large (> 255) — clear Covering");
-      }
-    }
-
-    // 2) Write tag header (unchanged) using leOut.writeByte(...)
-    EncodeTag tag = new EncodeTag(opts);
-    tag.setKind(GeographyKind.POLYGON);
-    tag.setCoveringSize((byte) cover.size());
-    tag.encode(out);
-    for (S2CellId c2 : cover) {
-      out.writeLong(c2.id());
-    }
-
+  public void encode(Output out, EncodeOptions opts) throws IOException {
     // 3) Write number of polygons
     out.writeInt(polygons.size());
 
@@ -113,24 +91,24 @@ public class PolygonGeography extends S2Geography {
     out.flush();
   }
 
-  public static PolygonGeography decode(DataInputStream in) throws IOException {
+  public static PolygonGeography decode(UnsafeInput in, EncodeTag tag) throws IOException {
     PolygonGeography geo = new PolygonGeography();
 
-    EncodeTag tag = new EncodeTag();
-    tag = EncodeTag.decode(in);
     // EMPTY
     if ((tag.getFlags() & EncodeTag.FLAG_EMPTY) != 0) {
       logger.fine("Decoded empty PolygonGeography.");
       return geo;
     }
 
-    // Skip any covering cells
+    // 2) Skip past any covering cell-IDs written by encodeTagged
     tag.skipCovering(in);
 
-    // Read polygon count
+    // 3) Ensure we have at least 4 bytes for the count
     if (in.available() < Integer.BYTES) {
       throw new IOException("PolygonGeography.decodeTagged error: insufficient header bytes");
     }
+
+    // 5) Read the number of polylines (4-byte)
     int count = in.readInt();
 
     // Decode each polygon

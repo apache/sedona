@@ -18,16 +18,21 @@
  */
 package org.apache.sedona.common.S2Geography;
 
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.kryo.io.UnsafeOutput;
 import com.google.common.geometry.*;
 import com.google.common.geometry.PrimitiveArrays.Bytes;
-import com.google.common.geometry.PrimitiveArrays.Cursor;
 import java.io.*;
 import java.util.*;
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PointGeography extends S2Geography {
-  private static final Logger logger = Logger.getLogger(PointGeography.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(PointGeography.class.getName());
+
+  private static final int BUFFER_SIZE = 4 * 1024;
 
   private final List<S2Point> points = new ArrayList<>();
 
@@ -100,7 +105,8 @@ public class PointGeography extends S2Geography {
 
   /** Returns an immutable view of the points. */
   public List<S2Point> getPoints() {
-    return Collections.unmodifiableList(points);
+    // List.copyOf makes an unmodifiable copy under the hood
+    return List.copyOf(points);
   }
 
   // -------------------------------------------------------
@@ -108,21 +114,15 @@ public class PointGeography extends S2Geography {
   // -------------------------------------------------------
 
   @Override
-  public void encode(OutputStream os, EncodeOptions opts) throws IOException {
-    DataOutputStream out = new DataOutputStream(os);
-
-    // EMPTY
-    if (points.isEmpty()) {
-      EncodeTag tag = new EncodeTag(opts);
-      tag.setKind(GeographyKind.POINT);
-      tag.setFlags((byte) (tag.getFlags() | EncodeTag.FLAG_EMPTY));
-      tag.setCoveringSize((byte) 0);
-      tag.encode(out);
-      return;
-    }
-
+  public void encodeTagged(OutputStream os, EncodeOptions opts) throws IOException {
+    UnsafeOutput out = new UnsafeOutput(os, BUFFER_SIZE);
     if (points.size() == 1 && opts.getCodingHint() == EncodeOptions.CodingHint.COMPACT) {
+      // Optimized encoding which only uses covering to represent the point
       S2CellId cid = S2CellId.fromPoint(points.get(0));
+      // Only encode this for very high levels: because the covering *is* the
+      // representation, we will have a very loose covering if the level is low.
+      // Level 23 has a cell size of ~1 meter
+      // (http://s2geometry.io/resources/s2cell_statistics)
       if (cid.level() >= 23) {
         out.writeByte(GeographyKind.CELL_CENTER.getKind());
         out.writeByte(0); // POINT kind
@@ -130,75 +130,85 @@ public class PointGeography extends S2Geography {
         out.writeByte(0); // coveringSize
         out.writeByte(2); // COMPACT encode type
         out.writeLong(cid.id());
+        out.flush();
         return;
       }
+      super.encodeTagged(os, opts); // Not exactly encodable as a cell center
     }
+    // In other cases, fallback to the default encodeTagged implementation:
+    super.encodeTagged(os, opts);
+  }
 
-    // Compute covering if requested
-    List<S2CellId> cover = new ArrayList<>();
-    if (opts.isIncludeCovering()) {
-      getCellUnionBound(cover);
-      if (cover.size() > 255) {
-        cover.clear();
-        logger.warning("Covering size too large (> 255) — clear Covering");
-      }
-    }
-    // Write tag and covering
-    EncodeTag tag = new EncodeTag(opts);
-    tag.setKind(GeographyKind.POINT);
-    tag.setCoveringSize((byte) cover.size());
-    tag.encode(out);
-    for (S2CellId c2 : cover) {
-      out.writeLong(c2.id());
-    }
-
+  @Override
+  protected void encode(Output out, EncodeOptions opts) throws IOException {
     // Encode point payload using selected hint
     S2Point.Shape shp = S2Point.Shape.fromList(points);
-    if (opts.getCodingHint() == EncodeOptions.CodingHint.FAST) {
-      S2Point.Shape.FAST_CODER.encode(shp, out);
-    } else {
-      S2Point.Shape.COMPACT_CODER.encode(shp, out);
+    switch (opts.getCodingHint()) {
+      case FAST:
+        S2Point.Shape.FAST_CODER.encode(shp, out);
+        break;
+      case COMPACT:
+        S2Point.Shape.COMPACT_CODER.encode(shp, out);
     }
   }
 
-  public static PointGeography decode(DataInputStream in) throws IOException {
-    EncodeTag tag = new EncodeTag();
-    tag = EncodeTag.decode(in);
-    int coverSize = tag.getCoveringSize() & 0xFF;
-
+  public static PointGeography decode(Input in, EncodeTag tag) throws IOException {
     PointGeography geo = new PointGeography();
+
     // EMPTY
     if ((tag.getFlags() & EncodeTag.FLAG_EMPTY) != 0) {
-      logger.fine("Decoded empty PointGeography.");
+      logger.warn("Decoded empty PointGeography.");
       return geo;
     }
 
     // Optimized 1-point COMPACT situation
-    if (tag.getKind() == GeographyKind.CELL_CENTER && tag.getEncodeType() == 2) {
+    if (tag.getKind() == GeographyKind.CELL_CENTER) {
       long id = in.readLong();
       geo = new PointGeography(new S2CellId(id).toPoint());
-      logger.fine("Decoded compact single-point geography via cell center.");
+      logger.info("Decoded compact single-point geography via cell center.");
       return geo;
     }
 
     // skip cover
-    for (int i = 0; i < coverSize; i++) {
-      in.readLong();
-    }
+    tag.skipCovering(in);
 
-    // Read remaining bytes into buffer
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    byte[] buffer = new byte[1024];
-    int len;
-    while ((len = in.read(buffer)) != -1) {
-      baos.write(buffer, 0, len);
-    }
+    // Grab Kryo’s backing buffer & bounds
+    Input kryoIn = (Input) in;
+    final byte[] backing = kryoIn.getBuffer();
+    final int start = kryoIn.position();
+    final int end = kryoIn.limit();
+    final long length = (long) end - start; // fits in an int normally
 
-    PrimitiveArrays.Bytes bytes = Bytes.fromByteArray(baos.toByteArray());
-    Cursor cursor = bytes.cursor();
-    List<S2Point> points = new ArrayList<>();
-    if (tag.getEncodeType() == 1) points = S2PointVectorCoder.FAST.decode(bytes, cursor);
-    else if (tag.getEncodeType() == 2) points = S2PointVectorCoder.COMPACT.decode(bytes, cursor);
+    // Zero-copy Bytes view
+    Bytes bytes =
+        new Bytes() {
+          @Override
+          public long length() {
+            return length;
+          }
+
+          @Override
+          public byte get(long idx) {
+            if (idx < 0 || idx >= length) {
+              throw new IndexOutOfBoundsException(idx + " not in [0," + length + ")");
+            }
+            // safe to cast to int because length <= backing.length
+            return backing[start + (int) idx];
+          }
+        };
+
+    PrimitiveArrays.Cursor cursor = bytes.cursor();
+    List<S2Point> points;
+    switch (tag.getEncodeType()) {
+      case 1:
+        points = S2Point.Shape.FAST_CODER.decode(bytes, cursor);
+        break;
+      case 2:
+        points = S2Point.Shape.COMPACT_CODER.decode(bytes, cursor);
+        break;
+      default:
+        throw new IllegalArgumentException("Unknown coding hint");
+    }
     geo.points.addAll(points);
     return geo;
   }

@@ -18,17 +18,18 @@
  */
 package org.apache.sedona.common.S2Geography;
 
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.kryo.io.UnsafeInput;
 import com.google.common.geometry.S2CellId;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 import org.apache.sedona.common.S2Geography.S2Geography.GeographyKind;
 
 /**
- * A 4 byte prefix for encoded geographies. 4 bytes is essential so that German-style strings store
- * these bytes in their prefix (i.e., don't have to load any auxiliary buffers to inspect this
- * information).
+ * A 5 byte prefix for encoded geographies. Builds a 5-byte header (EncodeTag) containing 1 byte:
+ * kind 1 byte: flags 1 byte: coveringSize 1 byte: reserved (must be 0) 1 byte: encodeType (fast vs.
+ * compact)
  */
 public class EncodeTag {
   /**
@@ -63,7 +64,7 @@ public class EncodeTag {
   // ——— Write the 4-byte tag header ——————————————————————————————————————
 
   /** Write exactly 4 bytes: [kind|flags|coveringSize|reserved]. */
-  public void encode(DataOutputStream out) throws IOException {
+  public void encode(Output out) throws IOException {
     out.writeByte(kind.getKind());
     out.writeByte(flags);
     out.writeByte(coveringSize);
@@ -72,13 +73,13 @@ public class EncodeTag {
   }
   // ——— Read it back ————————————————————————————————————————————————
 
-  /** Reads exactly 4 bytes (in the same order) from the stream. */
-  public static EncodeTag decode(DataInputStream in) throws IOException {
+  /** Reads exactly 5 bytes (in the same order) from the stream. */
+  public static EncodeTag decode(Input in) throws IOException {
     EncodeTag tag = new EncodeTag();
-    tag.kind = GeographyKind.fromKind(in.readUnsignedByte());
-    tag.flags = (byte) in.readUnsignedByte();
-    tag.coveringSize = (byte) in.readUnsignedByte();
-    tag.reserved = (byte) in.readUnsignedByte();
+    tag.kind = GeographyKind.fromKind(in.readByte());
+    tag.flags = in.readByte();
+    tag.coveringSize = in.readByte();
+    tag.reserved = in.readByte();
     if (tag.reserved != 0)
       throw new IOException("Reserved header byte must be 0, was " + tag.reserved);
     tag.encodeType = in.readByte();
@@ -88,7 +89,8 @@ public class EncodeTag {
   // ——— Helpers for the optional covering list —————————————————————————
 
   /** Read coveringSize many cell-ids and add them to cellIds. */
-  public void decodeCovering(DataInputStream in, List<S2CellId> cellIds) throws IOException {
+  public void decodeCovering(InputStream is, List<S2CellId> cellIds) throws IOException {
+    UnsafeInput in = new UnsafeInput(is);
     int count = coveringSize & 0xFF;
     for (int i = 0; i < count; i++) {
       long id = in.readLong();
@@ -97,7 +99,8 @@ public class EncodeTag {
   }
 
   /** Skip over coveringSize many cell-ids in the stream. */
-  public void skipCovering(DataInputStream in) throws IOException {
+  public void skipCovering(InputStream is) throws IOException {
+    UnsafeInput in = new UnsafeInput(is);
     int count = coveringSize & 0xFF;
     for (int i = 0; i < count; i++) {
       in.readLong();

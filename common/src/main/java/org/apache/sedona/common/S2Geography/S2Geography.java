@@ -18,15 +18,25 @@
  */
 package org.apache.sedona.common.S2Geography;
 
+import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.kryo.io.UnsafeInput;
+import com.esotericsoftware.kryo.io.UnsafeOutput;
 import com.google.common.geometry.*;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An abstract class represent S2Geography. Has 6 subtypes of geography: POINT, POLYLINE, POLYGON,
  * GEOGRAPHY_COLLECTION, SHAPE_INDEX, ENCODED_SHAPE_INDEX.
  */
 public abstract class S2Geography {
+  private static final Logger logger = LoggerFactory.getLogger(S2Geography.class.getName());
+
+  private static final int BUFFER_SIZE = 4 * 1024;
+
   protected final GeographyKind kind;
 
   protected S2Geography(GeographyKind kind) {
@@ -135,7 +145,64 @@ public abstract class S2Geography {
    * @param opts CodingHint.FAST / CodingHint.COMPACT / Include or omit the cell‐union covering
    *     prefix
    */
-  public abstract void encode(OutputStream os, EncodeOptions opts) throws IOException;
+  public void encodeTagged(OutputStream os, EncodeOptions opts) throws IOException {
+    UnsafeOutput out = new UnsafeOutput(os, BUFFER_SIZE);
+    EncodeTag tag = new EncodeTag(opts);
+    List<S2CellId> cover = new ArrayList<>();
 
-  // public abstract S2Geography decode(DataInputStream in) throws IOException;
+    // EMPTY
+    if (this.numShapes() == 0) {
+      tag.setKind(GeographyKind.fromKind(this.kind.kind));
+      tag.setFlags((byte) (tag.getFlags() | EncodeTag.FLAG_EMPTY));
+      tag.setCoveringSize((byte) 0);
+      tag.encode(out);
+      out.flush();
+      return;
+    }
+
+    // 1) Get covering if needed
+    if (opts.isIncludeCovering()) {
+      getCellUnionBound(cover);
+      if (cover.size() > 256) {
+        cover.clear();
+        logger.warn("Covering size too large (> 256) — clear Covering");
+      }
+    }
+
+    // 2) Write tag header
+    tag.setKind(GeographyKind.fromKind(this.kind.kind));
+    tag.setCoveringSize((byte) cover.size());
+    tag.encode(out);
+
+    // Encode the covering
+    for (S2CellId c2 : cover) {
+      out.writeLong(c2.id());
+    }
+
+    // 3) Write the geography
+    this.encode(out, opts);
+    out.flush();
+  }
+
+  public S2Geography decodeTagged(InputStream is) throws IOException {
+    UnsafeInput in = new UnsafeInput(is, BUFFER_SIZE);
+
+    // 1) decode the tag
+    EncodeTag tag = EncodeTag.decode(in);
+
+    // 2) dispatch to subclass's decode method according to tag.kind
+    switch (tag.getKind()) {
+      case CELL_CENTER:
+      case POINT:
+        return PointGeography.decode(in, tag);
+      case POLYLINE:
+        return PolylineGeography.decode(in, tag);
+      case POLYGON:
+        return PolygonGeography.decode(in, tag);
+      default:
+        throw new IOException("Unsupported GeographyKind for decoding: " + tag.getKind());
+    }
+  }
+
+  protected abstract void encode(Output os, EncodeOptions opts) throws IOException;
 }

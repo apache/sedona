@@ -26,7 +26,6 @@ import com.google.common.geometry.S2Point;
 import com.google.common.geometry.S2Polyline;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,12 +48,12 @@ public class PolylineGeographyTest {
     PolylineGeography geog = new PolylineGeography(polyline);
 
     // Encode the geography with tagging
-    geog.encode(baos, new EncodeOptions());
+    geog.encodeTagged(baos, new EncodeOptions());
 
     // Decode from the bytes
     byte[] encodedBytes = baos.toByteArray();
-    DataInputStream dis = new DataInputStream(new ByteArrayInputStream(encodedBytes));
-    S2Geography roundtrip = geog.decode(dis);
+    ByteArrayInputStream dis = new ByteArrayInputStream(encodedBytes);
+    S2Geography roundtrip = geog.decodeTagged(dis);
 
     // Verify kind
     assertEquals(S2Geography.GeographyKind.POLYLINE, roundtrip.kind);
@@ -99,11 +98,45 @@ public class PolylineGeographyTest {
 
     // 3) Encode to bytes
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    geog.encode(baos, new EncodeOptions());
+    geog.encodeTagged(baos, new EncodeOptions());
 
     // 4) Decode back
-    DataInputStream dis = new DataInputStream(new ByteArrayInputStream(baos.toByteArray()));
-    S2Geography decoded = geog.decode(dis);
+    ByteArrayInputStream dis = new ByteArrayInputStream(baos.toByteArray());
+    S2Geography decoded = geog.decodeTagged(dis);
+
+    // 5) Verify it’s a PolylineGeography with two members
+    assertTrue(decoded instanceof PolylineGeography);
+    PolylineGeography pg = (PolylineGeography) decoded;
+    assertEquals(2, pg.getPolylines().size());
+
+    // 6) Check each one matches the original
+    assertTrue(pg.getPolylines().get(0).equals(poly1));
+    assertTrue(pg.getPolylines().get(1).equals(poly2));
+  }
+
+  @Test
+  public void testEncodedMultiPolylineHint() throws IOException {
+    // create multiple polylines
+    S2Point a = S2LatLng.fromDegrees(45, -64).toPoint();
+    S2Point b = S2LatLng.fromDegrees(0, 0).toPoint();
+    S2Point c = S2LatLng.fromDegrees(-30, 20).toPoint();
+    S2Point d = S2LatLng.fromDegrees(10, -10).toPoint();
+
+    S2Polyline poly1 = new S2Polyline(List.of(a, b));
+    S2Polyline poly2 = new S2Polyline(List.of(c, d));
+
+    // 2) Wrap both in a single geography
+    PolylineGeography geog = new PolylineGeography(List.of(poly1, poly2));
+
+    // 3) Encode to bytes
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    EncodeOptions encodeOptions = new EncodeOptions();
+    encodeOptions.setCodingHint(EncodeOptions.CodingHint.COMPACT);
+    geog.encodeTagged(baos, encodeOptions);
+
+    // 4) Decode back
+    ByteArrayInputStream dis = new ByteArrayInputStream(baos.toByteArray());
+    S2Geography decoded = geog.decodeTagged(dis);
 
     // 5) Verify it’s a PolylineGeography with two members
     assertTrue(decoded instanceof PolylineGeography);

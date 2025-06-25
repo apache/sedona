@@ -24,7 +24,6 @@ import static org.junit.Assert.assertTrue;
 import com.google.common.geometry.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,12 +50,12 @@ public class PolygonGeographyTest {
     PolygonGeography geo = new PolygonGeography(poly);
 
     // Encode the geography with tagging
-    geo.encode(baos, new EncodeOptions());
+    geo.encodeTagged(baos, new EncodeOptions());
 
     // Decode from the bytes
     byte[] encodedBytes = baos.toByteArray();
-    DataInputStream dis = new DataInputStream(new ByteArrayInputStream(encodedBytes));
-    S2Geography roundtrip = geo.decode(dis);
+    ByteArrayInputStream dis = new ByteArrayInputStream(encodedBytes);
+    S2Geography roundtrip = geo.decodeTagged(dis);
 
     // Verify kind
     assertEquals(S2Geography.GeographyKind.POLYGON, roundtrip.kind);
