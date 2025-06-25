@@ -122,7 +122,11 @@ sudo pip3 install -U virtualenvwrapper
 sudo pip3 install -U pipenv
 ```
 
-Homebrew can be used to install libgeos-dev in macOS: `brew install geos`
+Homebrew can be used to install libgeos-dev in macOS:
+
+```
+brew install geos
+```
 
 6) Set up pipenv to the desired Python version: 3.7, 3.8, or 3.9
 
