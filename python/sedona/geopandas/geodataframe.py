@@ -148,7 +148,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             assert dtype is None
             assert not copy
             if index is None:
-                internal = InternalFrame(spark_frame=data._internal.spark_frame)
+                internal = InternalFrame(
+                    spark_frame=data._internal.spark_frame, index_spark_columns=None
+                )
                 object.__setattr__(self, "_internal_frame", internal)
         elif isinstance(data, SparkDataFrame):
             assert columns is None
