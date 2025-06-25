@@ -171,6 +171,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             gdf = gpd.GeoDataFrame(df)
             # convert each geometry column to wkb type
             import shapely
+
             for col in gdf.columns:
                 # It's possible we get a list, dict, pd.Series, gpd.GeoSeries, etc of shapely.Geometry objects.
                 if len(gdf[col]) > 0 and isinstance(gdf[col].iloc[0], shapely.Geometry):

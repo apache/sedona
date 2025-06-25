@@ -122,7 +122,10 @@ class TestDataframe(TestBase):
 
         # Assert the geometry column has the correct type and is not nullable
         geometry_field = schema["geometry1"]
-        assert geometry_field.dataType.typeName() == "geometrytype" or geometry_field.dataType.typeName() == "binary"
+        assert (
+            geometry_field.dataType.typeName() == "geometrytype"
+            or geometry_field.dataType.typeName() == "binary"
+        )
         assert not geometry_field.nullable
 
         # Assert non-geometry columns are present with correct types
@@ -146,16 +149,25 @@ class TestDataframe(TestBase):
         schema = df._internal.spark_frame.schema
         # Assert both geometry columns have the correct type
         geometry_field1 = schema["geometry1"]
-        assert geometry_field1.dataType.typeName() == "geometrytype" or geometry_field1.dataType.typeName() == "binary"
+        assert (
+            geometry_field1.dataType.typeName() == "geometrytype"
+            or geometry_field1.dataType.typeName() == "binary"
+        )
         assert not geometry_field1.nullable
 
         geometry_field2 = schema["geometry2"]
-        assert geometry_field2.dataType.typeName() == "geometrytype" or geometry_field2.dataType.typeName() == "binary"
+        assert (
+            geometry_field2.dataType.typeName() == "geometrytype"
+            or geometry_field2.dataType.typeName() == "binary"
+        )
         assert not geometry_field2.nullable
 
         # Check non-geometry column
         attribute_field = schema["attribute"]
-        assert attribute_field.dataType.typeName() != "geometrytype" and attribute_field.dataType.typeName() != "binary"
+        assert (
+            attribute_field.dataType.typeName() != "geometrytype"
+            and attribute_field.dataType.typeName() != "binary"
+        )
 
     def test_copy(self):
         df = GeoDataFrame([Point(x, x) for x in range(3)], name="test_df")
