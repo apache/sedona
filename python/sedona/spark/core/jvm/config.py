@@ -23,7 +23,6 @@ import warnings
 from re import findall
 from typing import Optional, Tuple
 
-from py4j.protocol import Py4JJavaError
 from pyspark.sql import SparkSession
 
 from sedona.spark.utils.decorators import classproperty
@@ -189,7 +188,7 @@ class SparkJars:
 
         try:
             used_jar_files = java_spark_conf.get(value)
-        except Py4JJavaError:
+        except Exception:
             error_message = f"Didn't find the value of {value} from SparkConf"
             logging.info(error_message)
 

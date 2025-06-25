@@ -24,14 +24,14 @@ import org.apache.sedona.core.utils.SedonaConf
 import org.apache.spark.sql.catalyst.expressions.{And, EqualNullSafe, EqualTo, Expression, LessThan, LessThanOrEqual}
 import org.apache.spark.sql.catalyst.plans._
 import org.apache.spark.sql.catalyst.plans.logical._
-import org.apache.spark.sql.execution.SparkPlan
+import org.apache.spark.sql.execution.{SparkPlan, SparkStrategy}
 import org.apache.spark.sql.execution.datasources.LogicalRelation
 import org.apache.spark.sql.execution.datasources.v2.DataSourceV2ScanRelation
 import org.apache.spark.sql.sedona_sql.UDT.RasterUDT
 import org.apache.spark.sql.sedona_sql.expressions.{ST_KNN, _}
 import org.apache.spark.sql.sedona_sql.expressions.raster._
 import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils.splitConjunctivePredicates
-import org.apache.spark.sql.{SparkSession, Strategy}
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils.{matchDistanceExpressionToJoinSide, matchExpressionsToPlans, matches}
 
 case class JoinQueryDetection(
@@ -52,7 +52,7 @@ case class JoinQueryDetection(
  *
  * Plans `BroadcastIndexJoinExec` for inner joins on spatial relationships with a broadcast hint.
  */
-class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
+class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
 
   private def getJoinDetection(
       left: LogicalPlan,
@@ -960,7 +960,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends Strategy {
       case Project(_, child) => containPlanFilterPushdown(child)
       case Join(left, right, _, _, _) =>
         containPlanFilterPushdown(left) || containPlanFilterPushdown(right)
-      case Aggregate(_, _, child) => containPlanFilterPushdown(child)
+      case a: Aggregate => containPlanFilterPushdown(a.child)
       case _: LogicalRelation | _: DataSourceV2ScanRelation => false
 
       // Default case to check other children
