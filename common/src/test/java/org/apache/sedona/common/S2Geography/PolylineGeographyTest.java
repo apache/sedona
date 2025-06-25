@@ -18,13 +18,9 @@
  */
 package org.apache.sedona.common.S2Geography;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import com.google.common.geometry.S2LatLng;
 import com.google.common.geometry.S2Point;
 import com.google.common.geometry.S2Polyline;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,49 +33,13 @@ public class PolylineGeographyTest {
     // Create two points
     S2Point ptStart = S2LatLng.fromDegrees(45, -64).toPoint();
     S2Point ptEnd = S2LatLng.fromDegrees(0, 0).toPoint();
-
-    // Prepare encoder output
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     // Build a single polyline and wrap in geography
     List<S2Point> points = new ArrayList<>();
     points.add(ptStart);
     points.add(ptEnd);
     S2Polyline polyline = new S2Polyline(points);
     PolylineGeography geog = new PolylineGeography(polyline);
-
-    // Encode the geography with tagging
-    geog.encodeTagged(baos, new EncodeOptions());
-
-    // Decode from the bytes
-    byte[] encodedBytes = baos.toByteArray();
-    ByteArrayInputStream dis = new ByteArrayInputStream(encodedBytes);
-    S2Geography roundtrip = geog.decodeTagged(dis);
-
-    // Verify kind
-    assertEquals(S2Geography.GeographyKind.POLYLINE, roundtrip.kind);
-    System.out.println(roundtrip.toString());
-    S2Polyline pl = (S2Polyline) roundtrip.shape(0);
-    StringBuilder sb = new StringBuilder("LINESTRING (");
-    for (int i = 0; i < pl.numVertices(); i++) {
-      S2Point p = pl.vertex(i);
-      S2LatLng ll = new S2LatLng(p);
-      if (i > 0) sb.append(", ");
-      // WKT is “lon lat”
-      sb.append(String.format("%.0f %.0f", ll.lng().degrees(), ll.lat().degrees()));
-    }
-    sb.append(")");
-    System.out.println(sb.toString());
-    // Verify WKT representation (assuming toWkt() is implemented)
-    assertEquals("LINESTRING (-64 45, 0 0)", sb.toString());
-
-    // Downcast and inspect internal polylines
-    assertTrue(roundtrip instanceof PolylineGeography);
-    PolylineGeography rtTyped = (PolylineGeography) roundtrip;
-    assertEquals(1, rtTyped.getPolylines().size());
-    S2Polyline decodedPolyline = rtTyped.getPolylines().get(0);
-
-    // Compare geometry equality
-    assertTrue(decodedPolyline.equals(polyline));
+    TestHelper.assertRoundTrip(geog, new EncodeOptions());
   }
 
   @Test
@@ -95,23 +55,7 @@ public class PolylineGeographyTest {
 
     // 2) Wrap both in a single geography
     PolylineGeography geog = new PolylineGeography(List.of(poly1, poly2));
-
-    // 3) Encode to bytes
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    geog.encodeTagged(baos, new EncodeOptions());
-
-    // 4) Decode back
-    ByteArrayInputStream dis = new ByteArrayInputStream(baos.toByteArray());
-    S2Geography decoded = geog.decodeTagged(dis);
-
-    // 5) Verify it’s a PolylineGeography with two members
-    assertTrue(decoded instanceof PolylineGeography);
-    PolylineGeography pg = (PolylineGeography) decoded;
-    assertEquals(2, pg.getPolylines().size());
-
-    // 6) Check each one matches the original
-    assertTrue(pg.getPolylines().get(0).equals(poly1));
-    assertTrue(pg.getPolylines().get(1).equals(poly2));
+    TestHelper.assertRoundTrip(geog, new EncodeOptions());
   }
 
   @Test
@@ -132,19 +76,6 @@ public class PolylineGeographyTest {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     EncodeOptions encodeOptions = new EncodeOptions();
     encodeOptions.setCodingHint(EncodeOptions.CodingHint.COMPACT);
-    geog.encodeTagged(baos, encodeOptions);
-
-    // 4) Decode back
-    ByteArrayInputStream dis = new ByteArrayInputStream(baos.toByteArray());
-    S2Geography decoded = geog.decodeTagged(dis);
-
-    // 5) Verify it’s a PolylineGeography with two members
-    assertTrue(decoded instanceof PolylineGeography);
-    PolylineGeography pg = (PolylineGeography) decoded;
-    assertEquals(2, pg.getPolylines().size());
-
-    // 6) Check each one matches the original
-    assertTrue(pg.getPolylines().get(0).equals(poly1));
-    assertTrue(pg.getPolylines().get(1).equals(poly2));
+    TestHelper.assertRoundTrip(geog, new EncodeOptions());
   }
 }

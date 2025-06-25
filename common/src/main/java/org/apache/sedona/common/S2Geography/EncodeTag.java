@@ -27,9 +27,8 @@ import java.util.List;
 import org.apache.sedona.common.S2Geography.S2Geography.GeographyKind;
 
 /**
- * A 5 byte prefix for encoded geographies. Builds a 5-byte header (EncodeTag) containing 1 byte:
- * kind 1 byte: flags 1 byte: coveringSize 1 byte: reserved (must be 0) 1 byte: encodeType (fast vs.
- * compact)
+ * A 4 byte prefix for encoded geographies. Builds a 5-byte header (EncodeTag) containing 1 byte:
+ * kind 1 byte: flags 1 byte: coveringSize 1 byte: reserved (must be 0)
  */
 public class EncodeTag {
   /**
@@ -42,6 +41,12 @@ public class EncodeTag {
    * and only if the geography contains zero shapes.
    */
   private byte flags = 0;
+  // ——— Bit‐masks for our one‐byte flags field ———————————————————
+  /** set if geography has zero shapes */
+  public static final byte FLAG_EMPTY = 1 << 0;
+  /** set if using COMPACT coding; if clear, we’ll treat as FAST */
+  public static final byte FLAG_COMPACT = 1 << 1;
+  // bits 2–7 are still unused (formerly “reserved”)
   /**
    * Number of S2CellId entries that follow this tag. A value of zero (i.e., an empty covering)
    * means no covering was written, but this does not imply that the geography itself is empty.
@@ -50,26 +55,20 @@ public class EncodeTag {
   /** Reserved byte for future use. Must be set to 0. */
   private byte reserved = 0;
 
-  /** If set, geography has zero shapes. */
-  public static final byte FLAG_EMPTY = 1;
-
-  private byte encodeType = 1; // fast: 1 ; compact: 2
-
+  // ——— Write the 4-byte tag header ——————————————————————————————————————
   public EncodeTag() {}
 
   public EncodeTag(EncodeOptions opts) {
-    this.encodeType = (byte) (opts.getCodingHint() == EncodeOptions.CodingHint.FAST ? 1 : 2);
+    if (opts.getCodingHint() == EncodeOptions.CodingHint.COMPACT) {
+      flags |= FLAG_COMPACT;
+    }
   }
-
-  // ——— Write the 4-byte tag header ——————————————————————————————————————
-
   /** Write exactly 4 bytes: [kind|flags|coveringSize|reserved]. */
   public void encode(Output out) throws IOException {
     out.writeByte(kind.getKind());
     out.writeByte(flags);
     out.writeByte(coveringSize);
     out.writeByte(reserved);
-    out.writeByte(encodeType);
   }
   // ——— Read it back ————————————————————————————————————————————————
 
@@ -82,15 +81,13 @@ public class EncodeTag {
     tag.reserved = in.readByte();
     if (tag.reserved != 0)
       throw new IOException("Reserved header byte must be 0, was " + tag.reserved);
-    tag.encodeType = in.readByte();
     return tag;
   }
 
   // ——— Helpers for the optional covering list —————————————————————————
 
   /** Read coveringSize many cell-ids and add them to cellIds. */
-  public void decodeCovering(InputStream is, List<S2CellId> cellIds) throws IOException {
-    UnsafeInput in = new UnsafeInput(is);
+  public void decodeCovering(UnsafeInput in, List<S2CellId> cellIds) throws IOException {
     int count = coveringSize & 0xFF;
     for (int i = 0; i < count; i++) {
       long id = in.readLong();
@@ -99,8 +96,7 @@ public class EncodeTag {
   }
 
   /** Skip over coveringSize many cell-ids in the stream. */
-  public void skipCovering(InputStream is) throws IOException {
-    UnsafeInput in = new UnsafeInput(is);
+  public void skipCovering(UnsafeInput in) throws IOException {
     int count = coveringSize & 0xFF;
     for (int i = 0; i < count; i++) {
       in.readLong();
@@ -132,19 +128,35 @@ public class EncodeTag {
     this.flags = flags;
   }
 
-  public void setEncodeType(byte type) {
-    this.encodeType = type;
-  }
-
-  public byte getEncodeType() {
-    return encodeType;
-  }
-
   public byte getCoveringSize() {
     return coveringSize;
   }
 
   public void setCoveringSize(byte size) {
     this.coveringSize = size;
+  }
+
+  /** mark or unmark the EMPTY flag */
+  public void setEmpty(boolean empty) {
+    if (empty) flags |= FLAG_EMPTY;
+    else flags &= ~FLAG_EMPTY;
+  }
+
+  /** choose COMPACT (true) or FAST (false) */
+  public void setCompact(boolean compact) {
+    if (compact) flags |= FLAG_COMPACT;
+    else flags &= ~FLAG_COMPACT;
+  }
+
+  public boolean isEmpty() {
+    return (flags & FLAG_EMPTY) != 0;
+  }
+
+  public boolean isCompact() {
+    return (flags & FLAG_COMPACT) != 0;
+  }
+
+  public boolean isFast() {
+    return !isCompact();
   }
 }

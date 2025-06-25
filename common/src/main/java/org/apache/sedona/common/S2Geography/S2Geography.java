@@ -18,7 +18,6 @@
  */
 package org.apache.sedona.common.S2Geography;
 
-import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.io.UnsafeInput;
 import com.esotericsoftware.kryo.io.UnsafeOutput;
 import com.google.common.geometry.*;
@@ -204,5 +203,5 @@ public abstract class S2Geography {
     }
   }
 
-  protected abstract void encode(Output os, EncodeOptions opts) throws IOException;
+  protected abstract void encode(UnsafeOutput os, EncodeOptions opts) throws IOException;
 }

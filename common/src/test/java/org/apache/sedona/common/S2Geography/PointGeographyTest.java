@@ -21,8 +21,6 @@ package org.apache.sedona.common.S2Geography;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.UnsafeInput;
 import com.google.common.geometry.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -44,7 +42,7 @@ public class PointGeographyTest {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     geog.encodeTagged(baos, new EncodeOptions());
     byte[] data = baos.toByteArray();
-    assertEquals(5, data.length);
+    assertEquals(4, data.length);
 
     // 2) Create a single-point geography at lat=45°, lng=-64°
     S2Point pt = S2LatLng.fromDegrees(45, -64).toPoint();
@@ -60,85 +58,22 @@ public class PointGeographyTest {
     geog2.encodeTagged(baos2, new EncodeOptions());
     byte[] data2 = baos2.toByteArray();
     // should be >4 bytes (header+payload)
-    assertTrue(data2.length > 5);
+    assertTrue(data2.length > 4);
   }
 
   @Test
   public void testEmptyPointEncodeDecode() throws IOException {
     // 1) Create an empty geography
     PointGeography geog = new PointGeography();
-    assertEquals(S2Geography.GeographyKind.POINT, geog.kind);
-    assertEquals(0, geog.numShapes());
-    // Java returns -1 for no shapes; if yours returns 0, adjust accordingly
-    assertEquals(-1, geog.dimension());
-    assertTrue(geog.getPoints().isEmpty());
-
-    // 2) EncodeTagged
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    geog.encodeTagged(baos, new EncodeOptions());
-    byte[] data = baos.toByteArray();
-
-    // 3) DecodeTagged
-    ByteArrayInputStream din = new ByteArrayInputStream(data);
-    // 3b) Now delegate to the dispatch method that takes (DataInputStream, EncodeTag)
-    S2Geography decoded = geog.decodeTagged(din);
-
-    assertTrue(decoded instanceof PointGeography);
-    PointGeography round = (PointGeography) decoded;
-    assertTrue(round.getPoints().isEmpty());
-
-    // 4) region() should be an empty cap
-    S2Region region = round.region();
-    assertTrue(region instanceof S2Cap);
-    assertTrue(((S2Cap) region).isEmpty());
+    TestHelper.assertRoundTrip(geog, new EncodeOptions());
   }
 
   @Test
   public void testEncodedPoint() throws IOException {
     // 1) Create a single-point geography at lat=45°, lng=-64°
     S2Point pt = S2LatLng.fromDegrees(45, -64).toPoint();
-    System.out.println(pt.toString());
     PointGeography geog = new PointGeography(pt);
-    assertEquals(1, geog.numShapes());
-    assertEquals(0, geog.dimension());
-    List<S2Point> originalPts = geog.getPoints();
-    assertEquals(1, originalPts.size());
-    assertEquals(pt, originalPts.get(0));
-
-    // 2) EncodeTagged
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    geog.encodeTagged(baos, new EncodeOptions());
-    byte[] data = baos.toByteArray();
-
-    // 3) DecodeTagged
-    ByteArrayInputStream din = new ByteArrayInputStream(data);
-    PointGeography decoded = (PointGeography) geog.decodeTagged(din);
-    assertTrue(decoded instanceof PointGeography);
-
-    // 4) Verify everything round-tripped
-    assertEquals(1, decoded.numShapes());
-    assertEquals(0, decoded.dimension());
-    // 4) Now round-trip the entire geography
-    System.out.println(decoded.getPoints().toString());
-
-    // It should still be a single‐point geography
-    assertEquals(1, decoded.getPoints().size());
-
-    // 1) Get the point and turn it into WKT with 6 decimal places:
-    S2Point p = ((PointGeography) decoded).getPoints().get(0);
-    S2LatLng ll = new S2LatLng(p);
-    String wkt =
-        String.format(
-            "POINT (%.6f %.6f)",
-            ll.lng().degrees(), // longitude first
-            ll.lat().degrees() // then latitude
-            );
-    System.out.println(wkt);
-    assertEquals("POINT (-64.000000 45.000000)", wkt);
-    // 5) region() should contain exactly that point
-    S2Region region = decoded.region();
-    // Single-point region can be represented as a tiny cap containing only pt
-    assertTrue(region.contains(pt));
+    TestHelper.assertRoundTrip(geog, new EncodeOptions());
   }
 
   @Test
@@ -153,37 +88,7 @@ public class PointGeographyTest {
     PointGeography geog = new PointGeography(ptSnapped);
     EncodeOptions opts = new EncodeOptions();
     opts.setCodingHint(EncodeOptions.CodingHint.COMPACT);
-
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    geog.encodeTagged(baos, opts);
-    byte[] data = baos.toByteArray();
-
-    // Exactly 5-byte header + 8-byte cell-id
-    assertEquals(13, data.length);
-
-    // 3) Peek at the tag + covering
-    Input in1 = new Input(data);
-
-    // Read and decode the 4-byte header
-    EncodeTag tag = EncodeTag.decode(in1);
-    assertEquals(S2Geography.GeographyKind.CELL_CENTER, tag.getKind());
-    assertEquals(1, tag.getCoveringSize() & 0xFF);
-
-    // Read the single cell in the covering
-    List<S2CellId> cover = new ArrayList<>();
-    tag.decodeCovering(in1, cover);
-    assertEquals(1, cover.size());
-    // Covering must contain the original unsnapped cell
-    assertEquals(cellId, cover.get(0));
-
-    // 4) Now round-trip the entire geography
-    PointGeography round = (PointGeography) geog.decodeTagged(new ByteArrayInputStream(data));
-    System.out.println(round.getPoints().toString());
-
-    // It should still be a single‐point geography
-    assertEquals(1, round.getPoints().size());
-    // And the point should be exactly the snapped cell‐center
-    assertEquals(ptSnapped, round.getPoints().get(0));
+    TestHelper.assertRoundTrip(geog, opts);
   }
 
   @Test
@@ -196,19 +101,82 @@ public class PointGeographyTest {
     PointGeography geog = new PointGeography(List.of(pt1, pt2));
     EncodeOptions opts = new EncodeOptions();
     opts.setCodingHint(EncodeOptions.CodingHint.COMPACT);
+    TestHelper.assertRoundTrip(geog, opts);
+  }
 
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    geog.encodeTagged(baos, opts);
-    byte[] data = baos.toByteArray();
+  @Test
+  public void testPointCoveringEnabled() throws IOException {
+    // single point geography
+    S2Point pt = S2LatLng.fromDegrees(45, -64).toPoint();
+    PointGeography geo = new PointGeography(pt);
+    EncodeOptions opts = new EncodeOptions();
+    opts.setIncludeCovering(true);
 
-    // 3) Decode round-trip
-    PointGeography round =
-        (PointGeography) geog.decodeTagged(new UnsafeInput(new ByteArrayInputStream(data)));
+    // should write a non-zero coveringSize
+    TestHelper.assertCovering(geo, opts);
+  }
 
-    // 4) Assert round-trip matches
-    assertEquals(2, round.getPoints().size());
-    assertEquals(geog.getPoints(), round.getPoints());
-    assertEquals(pt1, round.getPoints().get(0));
-    assertEquals(pt2, round.getPoints().get(1));
+  @Test
+  public void testPointCoveringDisabled() throws IOException {
+    // single point geography
+    S2Point pt = S2LatLng.fromDegrees(45, -64).toPoint();
+    PointGeography geo = new PointGeography(pt);
+    EncodeOptions opts = new EncodeOptions();
+    opts.setIncludeCovering(false);
+
+    // should write coveringSize == 0
+    TestHelper.assertCovering(geo, opts);
+  }
+
+  @Test
+  public void testSmallPointUnionCovering() throws IOException {
+    // fewer than 10 points: each point should produce one cell
+    List<S2Point> pts = new ArrayList<>();
+    for (int i = 0; i < 5; i++) {
+      pts.add(S2LatLng.fromDegrees(i * 10, i * 5).toPoint());
+    }
+    PointGeography geo = new PointGeography(pts);
+    List<S2CellId> cells = new ArrayList<>();
+    geo.getCellUnionBound(cells);
+    assertEquals("Should cover each point individually", pts.size(), cells.size());
+    // ensure each cell's center matches the original point upon decoding
+    for (int i = 0; i < pts.size(); i++) {
+      S2CellId center = new S2CellId(cells.get(i).id());
+      assertEquals("Cell center should round-trip point", S2CellId.fromPoint(pts.get(i)), center);
+    }
+  }
+
+  @Test
+  public void testLargePointUnionCovering() {
+    // 1) Build 100 distinct points
+    List<S2Point> pts = new ArrayList<>();
+    for (int i = 0; i < 100; i++) {
+      double lat = i * 0.5 - 25;
+      double lng = (i * 3.6) - 180;
+      pts.add(S2LatLng.fromDegrees(lat, lng).toPoint());
+    }
+
+    // 2) Create your geography
+    PointGeography geo = new PointGeography(pts);
+
+    // 3) Ask it for its cell-union bound
+    List<S2CellId> cover = new ArrayList<>();
+    geo.getCellUnionBound(cover);
+
+    // 4) Check the size is non-zero (or == some expected value)
+    assertTrue("Covering size should be > 0", cover.size() > 0);
+
+    // 5) Verify *every* input point lies in at least one covering cell
+    for (S2Point p : pts) {
+      boolean covered = false;
+      for (S2CellId cid : cover) {
+        S2Cell cell = new S2Cell(cid);
+        if (cell.contains(p)) {
+          covered = true;
+          break;
+        }
+      }
+      assertTrue("Point " + p + " was not covered by any cell", covered);
+    }
   }
 }

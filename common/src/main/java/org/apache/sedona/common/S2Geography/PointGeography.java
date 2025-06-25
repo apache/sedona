@@ -20,6 +20,7 @@ package org.apache.sedona.common.S2Geography;
 
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.kryo.io.UnsafeInput;
 import com.esotericsoftware.kryo.io.UnsafeOutput;
 import com.google.common.geometry.*;
 import com.google.common.geometry.PrimitiveArrays.Bytes;
@@ -128,31 +129,53 @@ public class PointGeography extends S2Geography {
         out.writeByte(0); // POINT kind
         out.writeByte(1); // flag
         out.writeByte(0); // coveringSize
-        out.writeByte(2); // COMPACT encode type
         out.writeLong(cid.id());
         out.flush();
         return;
       }
-      super.encodeTagged(os, opts); // Not exactly encodable as a cell center
     }
     // In other cases, fallback to the default encodeTagged implementation:
-    super.encodeTagged(os, opts);
+    super.encodeTagged(out, opts);
   }
 
   @Override
-  protected void encode(Output out, EncodeOptions opts) throws IOException {
+  protected void encode(UnsafeOutput out, EncodeOptions opts) throws IOException {
+    // now the *payload* must go into its own buffer:
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    Output tmpOut = new Output(baos);
+
     // Encode point payload using selected hint
     S2Point.Shape shp = S2Point.Shape.fromList(points);
     switch (opts.getCodingHint()) {
       case FAST:
-        S2Point.Shape.FAST_CODER.encode(shp, out);
+        S2Point.Shape.FAST_CODER.encode(shp, tmpOut);
         break;
       case COMPACT:
-        S2Point.Shape.COMPACT_CODER.encode(shp, out);
+        S2Point.Shape.COMPACT_CODER.encode(shp, tmpOut);
     }
+    tmpOut.flush();
+
+    // grab exactly those bytes:
+    byte[] payload = baos.toByteArray();
+
+    // 4) length-prefix + payload
+    // use writeInt(len, false) so it's exactly 4 bytes
+    out.writeInt(payload.length, /* optimizePositive= */ false);
+    out.writeBytes(payload);
+
+    out.flush();
   }
 
+  /** This is what decodeTagged() actually calls */
   public static PointGeography decode(Input in, EncodeTag tag) throws IOException {
+    // cast to UnsafeInput—will work if you always pass a Kryo-backed stream
+    if (!(in instanceof UnsafeInput)) {
+      throw new IllegalArgumentException("Expected UnsafeInput");
+    }
+    return decode((UnsafeInput) in, tag);
+  }
+
+  public static PointGeography decode(UnsafeInput in, EncodeTag tag) throws IOException {
     PointGeography geo = new PointGeography();
 
     // EMPTY
@@ -172,44 +195,47 @@ public class PointGeography extends S2Geography {
     // skip cover
     tag.skipCovering(in);
 
-    // Grab Kryo’s backing buffer & bounds
-    Input kryoIn = (Input) in;
-    final byte[] backing = kryoIn.getBuffer();
-    final int start = kryoIn.position();
-    final int end = kryoIn.limit();
-    final long length = (long) end - start; // fits in an int normally
+    // The S2 Coder interface of Java makes it hard to decode data using streams,
+    // we can write an integer indicating the total length of the encoded point before the actual
+    // payload in encode.
+    // We can read the length and read the entire payload into a byte array, then call the decode
+    // function of S2 Coder.
+    // TODO: This results in in-compatible encoding format with the C++ implementation,
+    // but we can do this for now until we need to exchange data with some native components.
+    // 1) read our 4-byte length prefix
+    int length = in.readInt(/* optimizePositive= */ false);
+    if (length < 0) {
+      throw new IOException("Invalid payload length: " + length);
+    }
 
-    // Zero-copy Bytes view
+    // 2) read exactly that many bytes
+    byte[] payload = new byte[length];
+    in.readBytes(payload, 0, length);
+
+    // 3) hand *only* those bytes to S2‐Coder via Bytes adapter
     Bytes bytes =
         new Bytes() {
           @Override
           public long length() {
-            return length;
+            return payload.length;
           }
 
           @Override
-          public byte get(long idx) {
-            if (idx < 0 || idx >= length) {
-              throw new IndexOutOfBoundsException(idx + " not in [0," + length + ")");
-            }
-            // safe to cast to int because length <= backing.length
-            return backing[start + (int) idx];
+          public byte get(long i) {
+            return payload[(int) i];
           }
         };
-
     PrimitiveArrays.Cursor cursor = bytes.cursor();
-    List<S2Point> points;
-    switch (tag.getEncodeType()) {
-      case 1:
-        points = S2Point.Shape.FAST_CODER.decode(bytes, cursor);
-        break;
-      case 2:
-        points = S2Point.Shape.COMPACT_CODER.decode(bytes, cursor);
-        break;
-      default:
-        throw new IllegalArgumentException("Unknown coding hint");
+
+    // pick the right decoder
+    List<S2Point> pts;
+    if (tag.isCompact()) {
+      pts = S2Point.Shape.COMPACT_CODER.decode(bytes, cursor);
+    } else {
+      pts = S2Point.Shape.FAST_CODER.decode(bytes, cursor);
     }
-    geo.points.addAll(points);
+
+    geo.points.addAll(pts);
     return geo;
   }
 }

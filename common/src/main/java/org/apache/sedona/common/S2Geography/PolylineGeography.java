@@ -18,8 +18,9 @@
  */
 package org.apache.sedona.common.S2Geography;
 
-import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.UnsafeInput;
+import com.esotericsoftware.kryo.io.UnsafeOutput;
 import com.google.common.collect.ImmutableList;
 import com.google.common.geometry.*;
 import java.io.*;
@@ -88,7 +89,7 @@ public class PolylineGeography extends S2Geography {
   }
 
   @Override
-  public void encode(Output out, EncodeOptions opts) throws IOException {
+  public void encode(UnsafeOutput out, EncodeOptions opts) throws IOException {
     // 1) Write number of polylines as a 4-byte Kryo int
     out.writeInt(polylines.size());
 
@@ -102,6 +103,15 @@ public class PolylineGeography extends S2Geography {
       }
       out.flush();
     }
+  }
+
+  /** This is what decodeTagged() actually calls */
+  public static PolylineGeography decode(Input in, EncodeTag tag) throws IOException {
+    // cast to UnsafeInput—will work if you always pass a Kryo-backed stream
+    if (!(in instanceof UnsafeInput)) {
+      throw new IllegalArgumentException("Expected UnsafeInput");
+    }
+    return decode((UnsafeInput) in, tag);
   }
 
   public static PolylineGeography decode(UnsafeInput in, EncodeTag tag) throws IOException {

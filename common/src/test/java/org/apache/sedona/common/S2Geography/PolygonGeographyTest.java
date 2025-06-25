@@ -18,12 +18,7 @@
  */
 package org.apache.sedona.common.S2Geography;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import com.google.common.geometry.*;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,9 +30,6 @@ public class PolygonGeographyTest {
     S2Point pt = S2LatLng.fromDegrees(45, -64).toPoint();
     S2Point pt_mid = S2LatLng.fromDegrees(45, 0).toPoint();
     S2Point pt_end = S2LatLng.fromDegrees(0, 0).toPoint();
-
-    // Prepare encoder output
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     // Build a single polygon and wrap in geography
     List<S2Point> points = new ArrayList<>();
     points.add(pt);
@@ -49,40 +41,6 @@ public class PolygonGeographyTest {
     System.out.println(poly.toString());
     PolygonGeography geo = new PolygonGeography(poly);
 
-    // Encode the geography with tagging
-    geo.encodeTagged(baos, new EncodeOptions());
-
-    // Decode from the bytes
-    byte[] encodedBytes = baos.toByteArray();
-    ByteArrayInputStream dis = new ByteArrayInputStream(encodedBytes);
-    S2Geography roundtrip = geo.decodeTagged(dis);
-
-    // Verify kind
-    assertEquals(S2Geography.GeographyKind.POLYGON, roundtrip.kind);
-    System.out.println(roundtrip.toString());
-    // Extract polygon and build WKT string
-    // Extract decoded polygon
-    assertEquals(1, geo.getPolygons().size());
-
-    S2Polygon pl = geo.getPolygons().get(0);
-    // Reconstruct WKT from first loop
-    S2Loop loop = pl.loop(0);
-    StringBuilder sb = new StringBuilder("POLYGON ((");
-    for (int i = 0; i < loop.numVertices(); i++) {
-      if (i > 0) sb.append(", ");
-      S2LatLng ll = new S2LatLng(loop.vertex(i));
-      sb.append(String.format("%.0f %.0f", ll.lng().degrees(), ll.lat().degrees()));
-    }
-    sb.append("))");
-    // Build a simple triangle polygon: POLYGON ((-64 45, 0 45, 0 0, -64 45))
-    String wkt = "POLYGON ((-64 45, 0 45, 0 0, -64 45))";
-    assertEquals(wkt, sb.toString());
-    assertTrue(roundtrip instanceof PolygonGeography);
-    PolygonGeography rtTyped = (PolygonGeography) roundtrip;
-    assertEquals(1, rtTyped.getPolygons().size());
-    S2Polygon decodedPolygon = rtTyped.getPolygons().get(0);
-
-    // Compare geometry equality
-    assertTrue(decodedPolygon.equals(poly));
+    TestHelper.assertRoundTrip(geo, new EncodeOptions());
   }
 }
