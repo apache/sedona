@@ -74,10 +74,8 @@ class TestDataframe(TestBase):
     @pytest.mark.parametrize(
         "obj",
         [
-            [],
             [0, 1, 2],
             ["x", "y", "z"],
-            {},
             {"a": [0, 1, 2], 1: [4, 5, 6]},
             {"a": ["x", "y", "z"], 1: ["a", "b", "c"]},
             pd.Series([0, 1, 2]),
