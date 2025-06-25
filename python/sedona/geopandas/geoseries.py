@@ -50,8 +50,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         Return a string representation of the GeoSeries in WKT format.
         """
         try:
-            pandas_series = self.to_geopandas()
-            return gpd.GeoSeries(pandas_series).__repr__()
+            gpd_series = self.to_geopandas()
+            return gpd_series.__repr__()
 
         except Exception as e:
             # Fallback to parent's representation if conversion fails
@@ -176,7 +176,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             A GeoSeries with the operation applied to the geometry column.
         """
         # Find the first column with BinaryType or GeometryType
-        first_col = self.get_first_geometry_column()
+        first_col = self.get_first_geometry_column()  # TODO: fixme
 
         if first_col:
             data_type = self._internal.spark_frame.schema[first_col].dataType
@@ -230,9 +230,16 @@ class GeoSeries(GeoFrame, pspd.Series):
         return self._to_geopandas()
 
     def _to_geopandas(self) -> gpd.GeoSeries:
-        return gpd.GeoSeries(
-            self._to_internal_pandas().map(lambda wkb: shapely.wkb.loads(bytes(wkb)))
-        )
+        pd_series = self._to_internal_pandas()
+        try:
+            return gpd.GeoSeries(
+                pd_series.map(lambda wkb: shapely.wkb.loads(bytes(wkb)))
+            )
+        except Exception as e:
+            return gpd.GeoSeries(pd_series)
+
+    def to_spark_pandas(self) -> pspd.Series:
+        return pspd.Series(self._to_internal_pandas())
 
     @property
     def geometry(self) -> "GeoSeries":
@@ -274,7 +281,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             return self
 
     @property
-    def area(self) -> "GeoSeries":
+    def area(self) -> pspd.Series:
         """
         Returns a Series containing the area of each geometry in the GeoSeries expressed in the units of the CRS.
 
@@ -295,7 +302,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         1    4.0
         dtype: float64
         """
-        return self._process_geometry_column("ST_Area", rename="area")
+        return self._process_geometry_column("ST_Area", rename="area").to_spark_pandas()
 
     @property
     def crs(self):
@@ -521,7 +528,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         mitre_limit=5.0,
         single_sided=False,
         **kwargs,
-    ):
+    ) -> "GeoSeries":
         """
         Returns a GeoSeries of geometries representing all points within a given distance of each geometric object.
 
