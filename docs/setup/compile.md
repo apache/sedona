@@ -87,6 +87,14 @@ export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop3
 export PYTHONPATH=$SPARK_HOME/python
 ```
 
+2. Install Spark if you haven't already
+
+```
+wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.tgz
+tar -xvzf spark-${SPARK_VERSION}-bin-hadoop3.tgz
+rm spark-${SPARK_VERSION}-bin-hadoop3.tgz
+```
+
 2. Put JAI jars to ==SPARK_HOME/jars/== folder.
 
 ```
