@@ -216,3 +216,9 @@ If you just want to run one hook for example just run the `markdownlint` hook:
 `pre-commit run markdownlint --all-files`
 
 We have a [Makefile](https://github.com/apache/sedona/blob/master/Makefile) in the repository root which has three pre-commit convenience commands.
+
+For example, you can run the following to setup pre-commit to run before each commit
+
+```
+make checkinstall
+```
