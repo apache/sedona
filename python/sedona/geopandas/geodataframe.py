@@ -174,7 +174,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
             for col in gdf.columns:
                 # It's possible we get a list, dict, pd.Series, gpd.GeoSeries, etc of shapely.Geometry objects.
-                if len(gdf[col]) > 0 and isinstance(gdf[col].iloc[0], shapely.Geometry):
+                if len(gdf[col]) > 0 and isinstance(gdf[col].iloc[0], shapely.geometry.base.BaseGeometry):
                     gdf[col] = gdf[col].apply(lambda geom: geom.wkb)
             pdf = pd.DataFrame(gdf)
             # initialize the parent class pyspark Dataframe with the pandas Series
