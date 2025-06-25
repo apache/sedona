@@ -141,17 +141,12 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         if isinstance(data, (GeoDataFrame, GeoSeries)):
             assert dtype is None
             assert not copy
-            self._anchor = data
-            self._col_label = index
+            super().__init__(data, index=index, dtype=dtype, copy=copy)
         elif isinstance(data, (PandasOnSparkSeries, PandasOnSparkDataFrame)):
             assert columns is None
             assert dtype is None
             assert not copy
-            if index is None:
-                internal = InternalFrame(
-                    spark_frame=data._internal.spark_frame, index_spark_columns=None
-                )
-                object.__setattr__(self, "_internal_frame", internal)
+            super().__init__(data, index=index, dtype=dtype)
         elif isinstance(data, SparkDataFrame):
             assert columns is None
             assert dtype is None
