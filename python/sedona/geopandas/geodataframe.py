@@ -175,8 +175,10 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 )
             gdf = gpd.GeoDataFrame(df)
             # convert each geometry column to wkb type
+            import shapely
             for col in gdf.columns:
-                if isinstance(gdf[col], gpd.GeoSeries):
+                # It's possible we get a list, dict, pd.Series, gpd.GeoSeries, etc of shapely.Geometry objects.
+                if len(gdf[col]) > 0 and isinstance(gdf[col].iloc[0], shapely.Geometry):
                     gdf[col] = gdf[col].apply(lambda geom: geom.wkb)
             pdf = pd.DataFrame(gdf)
             # initialize the parent class pyspark Dataframe with the pandas Series
