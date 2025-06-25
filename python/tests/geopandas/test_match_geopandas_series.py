@@ -232,4 +232,4 @@ class TestMatchGeopandasSeries(TestBase):
     def check_pd_series_equal(self, actual: ps.Series, expected: pd.Series):
         assert isinstance(actual, ps.Series)
         assert isinstance(expected, pd.Series)
-        assert_series_equal(actual.to_pandas(), expected, check_less_precise=True)
+        assert_series_equal(actual.to_pandas(), expected)
