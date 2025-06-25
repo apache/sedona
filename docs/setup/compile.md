@@ -77,7 +77,7 @@ Sedona uses GitHub Actions to automatically generate jars per commit. You can go
 
 ## Run Python test
 
-1. Set up the environment variable SPARK_HOME and PYTHONPATH
+1) Set up the environment variable SPARK_HOME and PYTHONPATH
 
 For example,
 
@@ -87,7 +87,7 @@ export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop3
 export PYTHONPATH=$SPARK_HOME/python
 ```
 
-2. Install Spark if you haven't already
+2) Install Spark if you haven't already
 
 ```
 wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.tgz
@@ -95,7 +95,7 @@ tar -xvzf spark-${SPARK_VERSION}-bin-hadoop3.tgz
 rm spark-${SPARK_VERSION}-bin-hadoop3.tgz
 ```
 
-2. Put JAI jars to ==SPARK_HOME/jars/== folder.
+3) Put JAI jars to ==SPARK_HOME/jars/== folder.
 
 ```
 export JAI_CORE_VERSION="1.1.3"
@@ -106,13 +106,13 @@ wget -P $SPARK_HOME/jars/ https://repo.osgeo.org/repository/release/javax/media/
 wget -P $SPARK_HOME/jars/ https://repo.osgeo.org/repository/release/javax/media/jai_imageio/${JAI_IMAGEIO_VERSION}/jai_imageio-${JAI_IMAGEIO_VERSION}.jar
 ```
 
-3. Compile the Sedona Scala and Java code with `-Dgeotools` and then copy the ==sedona-spark-shaded-{{ sedona.current_version }}.jar== to ==SPARK_HOME/jars/== folder.
+4) Compile the Sedona Scala and Java code with `-Dgeotools` and then copy the ==sedona-spark-shaded-{{ sedona.current_version }}.jar== to ==SPARK_HOME/jars/== folder.
 
 ```
 cp spark-shaded/target/sedona-spark-shaded-*.jar $SPARK_HOME/jars/
 ```
 
-4. Install the following libraries
+5) Install the following libraries
 
 ```
 sudo apt-get -y install python3-pip python-dev libgeos-dev
@@ -123,14 +123,15 @@ sudo pip3 install -U pipenv
 ```
 
 Homebrew can be used to install libgeos-dev in macOS: `brew install geos`
-5. Set up pipenv to the desired Python version: 3.7, 3.8, or 3.9
+
+6) Set up pipenv to the desired Python version: 3.7, 3.8, or 3.9
 
 ```
 cd python
 pipenv --python 3.7
 ```
 
-6. Install the PySpark version and the other dependency
+7) Install the PySpark version and the other dependency
 
 ```
 cd python
@@ -140,7 +141,8 @@ pipenv install --dev
 
 `pipenv install pyspark` installs the latest version of pyspark.
 In order to remain consistent with the installed spark version, use `pipenv install pyspark==<spark_version>`
-7. Run the Python tests
+
+8) Run the Python tests
 
 ```
 cd python
