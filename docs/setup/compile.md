@@ -82,7 +82,8 @@ Sedona uses GitHub Actions to automatically generate jars per commit. You can go
 For example,
 
 ```
-export SPARK_HOME=$PWD/spark-3.0.1-bin-hadoop2.7
+export SPARK_VERSION=3.4.0
+export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop3
 export PYTHONPATH=$SPARK_HOME/python
 ```
 
@@ -125,7 +126,7 @@ pipenv --python 3.7
 
 ```
 cd python
-pipenv install pyspark
+pipenv install pyspark==${SPARK_VERSION}
 pipenv install --dev
 ```
 
