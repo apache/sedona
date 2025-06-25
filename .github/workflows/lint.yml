@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+# https://pre-commit.com/
 name: Lint
 
 on: [pull_request]

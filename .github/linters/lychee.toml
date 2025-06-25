@@ -1,0 +1,36 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+exclude = ["docs/api/javadoc/sql/org/apache/sedona/sql/utils/index.html$",
+    "docs/api/scaladoc/spark/org/apache/sedona/sql/utils/index.html$",
+    "docs/javadoc/spark",
+    "docs/scaladoc/spark/org/apache/sedona/sql/utils/index.html$",
+    "spark://localhost:.*",
+    "https://dl.acm.org/doi/abs/10.1145/3318464.3389701",
+    "https://github.com/apache/sedona/tree/master/examples/spark-viz",
+    "https://github.com/apache/sedona/tree/master/examples/viz",
+    "https://issues.apache.org/jira.*",
+    "https://keyserver.pgp.com/.*",
+    "http://localhost:.*",
+    "https://mvnrepository.com/.*",
+    "https://whimsy.apache.org/officers/acreq.*",
+    "https://whimsy.apache.org/roster/pmc/sedona.*",
+    "https://www.datasyslab.net/",
+    "https://www.java.com/",
+    "https://www.researchgate.net/figure/Relation-between-the-cartesian-axes-x-y-and-i-j-axes-of-the-pixels_fig3_313860913",
+    "https://www.youtube.com/.*",
+    "https://x.com/ApacheSedona"]
