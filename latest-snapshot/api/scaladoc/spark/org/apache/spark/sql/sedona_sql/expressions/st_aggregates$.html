@@ -199,10 +199,6 @@
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions">expressions</a></dd></dl></div>
     </li><li class="current-entities indented6">
                         <span class="separator"></span>
-                        <a class="trait" href="DataFrameAPI.html" title=""></a>
-                        <a href="DataFrameAPI.html" title="">DataFrameAPI</a>
-                      </li><li class="current-entities indented6">
-                        <span class="separator"></span>
                         <a class="trait" href="DataframePhysicalFunction.html" title="DataframePhysicalFunctions are Functions that will be replaced with a Physical Node for their evaluation."></a>
                         <a href="DataframePhysicalFunction.html" title="DataframePhysicalFunctions are Functions that will be replaced with a Physical Node for their evaluation.">DataframePhysicalFunction</a>
                       </li><li class="current-entities indented6">
@@ -249,6 +245,10 @@
                         <span class="separator"></span>
                         <a class="object" href="InferredTypes$.html" title=""></a>
                         <a href="InferredTypes$.html" title="">InferredTypes</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="trait" href="NullIntolerantShim.html" title=""></a>
+                        <a href="NullIntolerantShim.html" title="">NullIntolerantShim</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="trait" href="PhysicalFunction.html" title="PhysicalFunctions are Functions that will be replaced with a Physical Node for their evaluation."></a>
@@ -1172,7 +1172,7 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">st_aggregates</span><span class="result"> extends <a href="DataFrameAPI.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.DataFrameAPI">DataFrameAPI</a></span>
+        <span class="name">st_aggregates</span>
       </span>
       </h4>
 
@@ -1181,7 +1181,7 @@
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="DataFrameAPI.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.DataFrameAPI">DataFrameAPI</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -1207,7 +1207,7 @@
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="org.apache.spark.sql.sedona_sql.expressions.st_aggregates"><span>st_aggregates</span></li><li class="in" name="org.apache.spark.sql.sedona_sql.expressions.DataFrameAPI"><span>DataFrameAPI</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="org.apache.spark.sql.sedona_sql.expressions.st_aggregates"><span>st_aggregates</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -1668,54 +1668,6 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.DataFrameAPI#wrapAggregator" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="wrapAggregator[A&lt;:org.apache.spark.sql.expressions.UserDefinedAggregateFunction](arg:Any*)(implicitevidence$3:scala.reflect.ClassTag[A]):org.apache.spark.sql.Column"></a><a id="wrapAggregator[A&lt;:UserDefinedAggregateFunction](Any*)(ClassTag[A]):Column"></a>
-      <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/st_aggregates$.html#wrapAggregator[A&lt;:org.apache.spark.sql.expressions.UserDefinedAggregateFunction](arg:Any*)(implicitevidence$3:scala.reflect.ClassTag[A]):org.apache.spark.sql.Column" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">wrapAggregator</span><span class="tparams">[<span name="A">A &lt;: <span class="extype" name="org.apache.spark.sql.expressions.UserDefinedAggregateFunction">UserDefinedAggregateFunction</span></span>]</span><span class="params">(<span name="arg">arg: <span class="extype" name="scala.Any">Any</span>*</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.reflect.ClassTag">ClassTag</span>[<span class="extype" name="org.apache.spark.sql.sedona_sql.expressions.DataFrameAPI.wrapAggregator.A">A</span>]</span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="DataFrameAPI.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.DataFrameAPI">DataFrameAPI</a></dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.DataFrameAPI#wrapExpression" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="wrapExpression[E&lt;:org.apache.spark.sql.catalyst.expressions.Expression](args:Any*)(implicitevidence$1:scala.reflect.ClassTag[E]):org.apache.spark.sql.Column"></a><a id="wrapExpression[E&lt;:Expression](Any*)(ClassTag[E]):Column"></a>
-      <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/st_aggregates$.html#wrapExpression[E&lt;:org.apache.spark.sql.catalyst.expressions.Expression](args:Any*)(implicitevidence$1:scala.reflect.ClassTag[E]):org.apache.spark.sql.Column" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">wrapExpression</span><span class="tparams">[<span name="E">E &lt;: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>]</span><span class="params">(<span name="args">args: <span class="extype" name="scala.Any">Any</span>*</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.reflect.ClassTag">ClassTag</span>[<span class="extype" name="org.apache.spark.sql.sedona_sql.expressions.DataFrameAPI.wrapExpression.E">E</span>]</span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="DataFrameAPI.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.DataFrameAPI">DataFrameAPI</a></dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.DataFrameAPI#wrapVarArgExpression" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="wrapVarArgExpression[E&lt;:org.apache.spark.sql.catalyst.expressions.Expression](arg:Seq[Any])(implicitevidence$2:scala.reflect.ClassTag[E]):org.apache.spark.sql.Column"></a><a id="wrapVarArgExpression[E&lt;:Expression](Seq[Any])(ClassTag[E]):Column"></a>
-      <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/st_aggregates$.html#wrapVarArgExpression[E&lt;:org.apache.spark.sql.catalyst.expressions.Expression](arg:Seq[Any])(implicitevidence$2:scala.reflect.ClassTag[E]):org.apache.spark.sql.Column" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">wrapVarArgExpression</span><span class="tparams">[<span name="E">E &lt;: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>]</span><span class="params">(<span name="arg">arg: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Any">Any</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.reflect.ClassTag">ClassTag</span>[<span class="extype" name="org.apache.spark.sql.sedona_sql.expressions.DataFrameAPI.wrapVarArgExpression.E">E</span>]</span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Column">Column</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="DataFrameAPI.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.DataFrameAPI">DataFrameAPI</a></dd></dl></div>
     </li>
               </ol>
             </div>
@@ -1753,9 +1705,7 @@
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="org.apache.spark.sql.sedona_sql.expressions.DataFrameAPI">
-              <h3>Inherited from <a href="DataFrameAPI.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.DataFrameAPI">DataFrameAPI</a></h3>
-            </div><div class="parent" name="scala.AnyRef">
+        <div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>

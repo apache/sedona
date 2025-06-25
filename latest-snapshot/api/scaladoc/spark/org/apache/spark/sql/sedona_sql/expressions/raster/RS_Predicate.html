@@ -608,7 +608,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">RS_Predicate</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <a href="../FoldableExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.FoldableExpression">FoldableExpression</a> with <span class="extype" name="org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes">ExpectsInputTypes</span> with <span class="extype" name="org.apache.spark.sql.catalyst.expressions.NullIntolerant">NullIntolerant</span></span>
+        <span class="name">RS_Predicate</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <a href="../FoldableExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.FoldableExpression">FoldableExpression</a> with <span class="extype" name="org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes">ExpectsInputTypes</span> with <a href="../NullIntolerantShim.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.NullIntolerantShim">NullIntolerantShim</a></span>
       </span>
       </h4>
 
@@ -617,7 +617,7 @@
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><span class="extype" name="org.apache.spark.sql.catalyst.expressions.NullIntolerant">NullIntolerant</span>, <span class="extype" name="org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes">ExpectsInputTypes</span>, <a href="../FoldableExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.FoldableExpression">FoldableExpression</a>, <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>, <span class="extype" name="org.apache.spark.sql.catalyst.trees.TreeNode">TreeNode</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>], <span class="extype" name="org.apache.spark.sql.catalyst.trees.TreePatternBits">TreePatternBits</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><a href="../NullIntolerantShim.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.NullIntolerantShim">NullIntolerantShim</a>, <span class="extype" name="org.apache.spark.sql.catalyst.expressions.NullIntolerant">NullIntolerant</span>, <span class="extype" name="org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes">ExpectsInputTypes</span>, <a href="../FoldableExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.FoldableExpression">FoldableExpression</a>, <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>, <span class="extype" name="org.apache.spark.sql.catalyst.trees.TreeNode">TreeNode</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>], <span class="extype" name="org.apache.spark.sql.catalyst.trees.TreePatternBits">TreePatternBits</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block">
             <span class="toggle">
               Known Subclasses
@@ -648,7 +648,7 @@
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Predicate"><span>RS_Predicate</span></li><li class="in" name="org.apache.spark.sql.catalyst.expressions.NullIntolerant"><span>NullIntolerant</span></li><li class="in" name="org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes"><span>ExpectsInputTypes</span></li><li class="in" name="org.apache.spark.sql.sedona_sql.expressions.FoldableExpression"><span>FoldableExpression</span></li><li class="in" name="org.apache.spark.sql.catalyst.expressions.Expression"><span>Expression</span></li><li class="in" name="org.apache.spark.sql.catalyst.trees.TreeNode"><span>TreeNode</span></li><li class="in" name="org.apache.spark.sql.catalyst.trees.TreePatternBits"><span>TreePatternBits</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="org.apache.spark.sql.sedona_sql.expressions.raster.RS_Predicate"><span>RS_Predicate</span></li><li class="in" name="org.apache.spark.sql.sedona_sql.expressions.NullIntolerantShim"><span>NullIntolerantShim</span></li><li class="in" name="org.apache.spark.sql.catalyst.expressions.NullIntolerant"><span>NullIntolerant</span></li><li class="in" name="org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes"><span>ExpectsInputTypes</span></li><li class="in" name="org.apache.spark.sql.sedona_sql.expressions.FoldableExpression"><span>FoldableExpression</span></li><li class="in" name="org.apache.spark.sql.catalyst.expressions.Expression"><span>Expression</span></li><li class="in" name="org.apache.spark.sql.catalyst.trees.TreeNode"><span>TreeNode</span></li><li class="in" name="org.apache.spark.sql.catalyst.trees.TreePatternBits"><span>TreePatternBits</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -2532,7 +2532,9 @@
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="org.apache.spark.sql.catalyst.expressions.NullIntolerant">
+        <div class="parent" name="org.apache.spark.sql.sedona_sql.expressions.NullIntolerantShim">
+              <h3>Inherited from <a href="../NullIntolerantShim.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.NullIntolerantShim">NullIntolerantShim</a></h3>
+            </div><div class="parent" name="org.apache.spark.sql.catalyst.expressions.NullIntolerant">
               <h3>Inherited from <span class="extype" name="org.apache.spark.sql.catalyst.expressions.NullIntolerant">NullIntolerant</span></h3>
             </div><div class="parent" name="org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes">
               <h3>Inherited from <span class="extype" name="org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes">ExpectsInputTypes</span></h3>

@@ -247,10 +247,6 @@
       
     </li><li class="current-entities indented6">
                         <span class="separator"></span>
-                        <a class="trait" href="DataFrameAPI.html" title=""></a>
-                        <a href="DataFrameAPI.html" title="">DataFrameAPI</a>
-                      </li><li class="current-entities indented6">
-                        <span class="separator"></span>
                         <a class="trait" href="DataframePhysicalFunction.html" title="DataframePhysicalFunctions are Functions that will be replaced with a Physical Node for their evaluation."></a>
                         <a href="DataframePhysicalFunction.html" title="DataframePhysicalFunctions are Functions that will be replaced with a Physical Node for their evaluation.">DataframePhysicalFunction</a>
                       </li><li class="current-entities indented6">
@@ -297,6 +293,10 @@
                         <span class="separator"></span>
                         <a class="object" href="InferredTypes$.html" title=""></a>
                         <a href="InferredTypes$.html" title="">InferredTypes</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="trait" href="NullIntolerantShim.html" title=""></a>
+                        <a href="NullIntolerantShim.html" title="">NullIntolerantShim</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="trait" href="PhysicalFunction.html" title="PhysicalFunctions are Functions that will be replaced with a Physical Node for their evaluation."></a>
@@ -1340,23 +1340,7 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="org.apache.spark.sql.sedona_sql.expressions.DataFrameAPI" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="DataFrameAPIextendsAnyRef"></a><a id="DataFrameAPI:DataFrameAPI"></a>
-      <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/DataFrameAPI.html" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="DataFrameAPI.html"><span class="name">DataFrameAPI</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
-      </span>
-      
-      
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.DataframePhysicalFunction" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+              <ol><li name="org.apache.spark.sql.sedona_sql.expressions.DataframePhysicalFunction" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="DataframePhysicalFunctionextendsExpressionwithPhysicalFunction"></a><a id="DataframePhysicalFunction:DataframePhysicalFunction"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/DataframePhysicalFunction.html" title="Permalink">
@@ -1476,6 +1460,22 @@ foldable, then the expression itself is foldable.
       </span>
       
       <p class="shortcomment cmt">Custom exception to include the input row and the original exception message.</p>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.NullIntolerantShim" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="NullIntolerantShimextendsExpressionwithNullIntolerant"></a><a id="NullIntolerantShim:NullIntolerantShim"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/NullIntolerantShim.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="NullIntolerantShim.html"><span class="name">NullIntolerantShim</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <span class="extype" name="org.apache.spark.sql.catalyst.expressions.NullIntolerant">NullIntolerant</span></span>
+      </span>
+      
+      
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="PhysicalFunctionextendsExpressionwithImplicitCastInputTypeswithUnevaluablewithSerializable"></a><a id="PhysicalFunction:PhysicalFunction"></a>
       <span class="permalink">
@@ -4278,7 +4278,7 @@ separated by a delimiter.
       
       
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.ST_Predicate" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="ST_PredicateextendsExpressionwithFoldableExpressionwithExpectsInputTypeswithNullIntolerant"></a><a id="ST_Predicate:ST_Predicate"></a>
+      <a id="ST_PredicateextendsExpressionwithFoldableExpressionwithExpectsInputTypeswithNullIntolerantShim"></a><a id="ST_Predicate:ST_Predicate"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ST_Predicate.html" title="Permalink">
         <i class="material-icons"></i>
@@ -4289,7 +4289,7 @@ separated by a delimiter.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="" href="ST_Predicate.html"><span class="name">ST_Predicate</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <a href="FoldableExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.FoldableExpression">FoldableExpression</a> with <span class="extype" name="org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes">ExpectsInputTypes</span> with <span class="extype" name="org.apache.spark.sql.catalyst.expressions.NullIntolerant">NullIntolerant</span></span>
+        <a title="" href="ST_Predicate.html"><span class="name">ST_Predicate</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <a href="FoldableExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.FoldableExpression">FoldableExpression</a> with <span class="extype" name="org.apache.spark.sql.catalyst.expressions.ExpectsInputTypes">ExpectsInputTypes</span> with <a href="NullIntolerantShim.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.NullIntolerantShim">NullIntolerantShim</a></span>
       </span>
       
       
@@ -5320,7 +5320,7 @@ expressions much easier.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="st_aggregates$.html"><span class="name">st_aggregates</span></a><span class="result"> extends <a href="DataFrameAPI.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.DataFrameAPI">DataFrameAPI</a></span>
+        <a title="" href="st_aggregates$.html"><span class="name">st_aggregates</span></a>
       </span>
       
       
@@ -5336,7 +5336,7 @@ expressions much easier.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="st_constructors$.html"><span class="name">st_constructors</span></a><span class="result"> extends <a href="DataFrameAPI.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.DataFrameAPI">DataFrameAPI</a></span>
+        <a title="" href="st_constructors$.html"><span class="name">st_constructors</span></a>
       </span>
       
       
@@ -5352,7 +5352,7 @@ expressions much easier.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="st_functions$.html"><span class="name">st_functions</span></a><span class="result"> extends <a href="DataFrameAPI.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.DataFrameAPI">DataFrameAPI</a></span>
+        <a title="" href="st_functions$.html"><span class="name">st_functions</span></a>
       </span>
       
       
@@ -5368,7 +5368,7 @@ expressions much easier.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="st_predicates$.html"><span class="name">st_predicates</span></a><span class="result"> extends <a href="DataFrameAPI.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.DataFrameAPI">DataFrameAPI</a></span>
+        <a title="" href="st_predicates$.html"><span class="name">st_predicates</span></a>
       </span>
       
       
