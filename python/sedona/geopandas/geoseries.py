@@ -326,14 +326,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Keep the same column name instead of renaming it
         result = self._process_geometry_column("ST_SetSRID", rename="", srid=new_epsg)
 
-        if not inplace:
-            return result
-        else:
-            # TODO: inplace not correctly implemented yet
-            self = result
-            # self._internal = result._internal  # these don't work
-            # self._anchor = result._anchor
+        if inplace:
+            self._update_anchor(result._to_spark_pandas_df())
             return None
+
+        return result
 
     def _process_geometry_column(
         self, operation: str, rename: str, *args, **kwargs
@@ -423,7 +420,10 @@ class GeoSeries(GeoFrame, pspd.Series):
             return gpd.GeoSeries(pd_series)
 
     def to_spark_pandas(self) -> pspd.Series:
-        return pspd.Series(self._to_internal_pandas())
+        return pspd.Series(self._psdf._to_internal_pandas())
+
+    def _to_spark_pandas_df(self) -> pspd.DataFrame:
+        return pspd.DataFrame(self._psdf._internal)
 
     @property
     def geometry(self) -> "GeoSeries":
@@ -915,7 +915,7 @@ class GeoSeries(GeoFrame, pspd.Series):
     # # Utils
     # -----------------------------------------------------------------------------
 
-    def get_first_geometry_column(self):
+    def get_first_geometry_column(self) -> Union[str, None]:
         first_binary_or_geometry_col = next(
             (
                 field.name

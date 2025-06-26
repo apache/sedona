@@ -301,6 +301,8 @@ class TestGeoSeries(TestBase):
         geo_series = geo_series.set_crs(None, allow_override=True)
         assert geo_series.crs == None
 
-        # TODO: inplace not correctly implemented yet
-        # geo_series.set_crs(4326, inplace=True)
-        # assert geo_series.crs.to_epsg() == 4326
+        geo_series.set_crs(4326, inplace=True)
+        assert geo_series.crs.to_epsg() == 4326
+
+        geo_series = sgpd.GeoSeries(self.geoseries, crs=4326)
+        assert geo_series.crs.to_epsg() == 4326
