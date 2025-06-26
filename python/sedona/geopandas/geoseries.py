@@ -381,10 +381,10 @@ class GeoSeries(GeoFrame, pspd.Series):
 
             if isinstance(data_type, BinaryType):
                 sql_expr = (
-                    f"{operation}(ST_GeomFromWKB(`{first_col}`){params}) as {rename}"
+                    f"{operation}(ST_GeomFromWKB(`{first_col}`){params}) as `{rename}`"
                 )
             else:
-                sql_expr = f"{operation}(`{first_col}`{params}) as {rename}"
+                sql_expr = f"{operation}(`{first_col}`{params}) as `{rename}`"
 
             sdf = self._internal.spark_frame.selectExpr(sql_expr)
             internal = InternalFrame(
