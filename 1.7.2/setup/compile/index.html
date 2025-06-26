@@ -4700,7 +4700,7 @@
 <h2 id="compile-scala-java-source-code">Compile Scala / Java source code<a class="headerlink" href="#compile-scala-java-source-code" title="Permanent link">&para;</a></h2>
 <p>Sedona Scala/Java code is a project with multiple modules. Each module is a Scala/Java mixed project which is managed by Apache Maven 3.</p>
 <ul>
-<li>Make sure your Linux/Mac machine has Java 1.8, Apache Maven 3.3.1+, and Python3.7+. The compilation of Sedona is not tested on Windows machines.</li>
+<li>Make sure your Linux/Mac machine has Java 1.11, Apache Maven 3.3.1+, and Python3.8+. The compilation of Sedona is not tested on Windows machines.</li>
 </ul>
 <p>To compile all modules, please make sure you are in the root folder of all modules. Then enter the following command in the terminal:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Without unit tests</label><label for="__tabbed_1_2">With unit tests</label><label for="__tabbed_1_3">With Geotools jars packaged</label></div>
@@ -4753,16 +4753,18 @@ Please replace <code>3.3</code> with Spark major.minor version when building for
 <h3 id="download-staged-jars">Download staged jars<a class="headerlink" href="#download-staged-jars" title="Permanent link">&para;</a></h3>
 <p>Sedona uses GitHub Actions to automatically generate jars per commit. You can go <a href="https://github.com/apache/sedona/actions/workflows/java.yml">here</a> and download the jars by clicking the commits <mark>Artifacts</mark> tag.</p>
 <h2 id="run-python-test">Run Python test<a class="headerlink" href="#run-python-test" title="Permanent link">&para;</a></h2>
-<ol>
-<li>Set up the environment variable SPARK_HOME and PYTHONPATH</li>
-</ol>
+<p>1) Set up the environment variable SPARK_HOME and PYTHONPATH</p>
 <p>For example,</p>
-<div class="highlight"><pre><span></span><code>export SPARK_HOME=$PWD/spark-3.0.1-bin-hadoop2.7
+<div class="highlight"><pre><span></span><code>export SPARK_VERSION=3.4.0
+export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop3
 export PYTHONPATH=$SPARK_HOME/python
 </code></pre></div>
-<ol>
-<li>Put JAI jars to <mark>SPARK_HOME/jars/</mark> folder.</li>
-</ol>
+<p>2) Install Spark if you haven't already</p>
+<div class="highlight"><pre><span></span><code>wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.tgz
+tar -xvzf spark-${SPARK_VERSION}-bin-hadoop3.tgz
+rm spark-${SPARK_VERSION}-bin-hadoop3.tgz
+</code></pre></div>
+<p>3) Put JAI jars to <mark>SPARK_HOME/jars/</mark> folder.</p>
 <div class="highlight"><pre><span></span><code>export JAI_CORE_VERSION=&quot;1.1.3&quot;
 export JAI_CODEC_VERSION=&quot;1.1.3&quot;
 export JAI_IMAGEIO_VERSION=&quot;1.1&quot;
@@ -4770,35 +4772,31 @@ wget -P $SPARK_HOME/jars/ https://repo.osgeo.org/repository/release/javax/media/
 wget -P $SPARK_HOME/jars/ https://repo.osgeo.org/repository/release/javax/media/jai_codec/${JAI_CODEC_VERSION}/jai_codec-${JAI_CODEC_VERSION}.jar
 wget -P $SPARK_HOME/jars/ https://repo.osgeo.org/repository/release/javax/media/jai_imageio/${JAI_IMAGEIO_VERSION}/jai_imageio-${JAI_IMAGEIO_VERSION}.jar
 </code></pre></div>
-<ol>
-<li>Compile the Sedona Scala and Java code with <code>-Dgeotools</code> and then copy the <mark>sedona-spark-shaded-1.7.2.jar</mark> to <mark>SPARK_HOME/jars/</mark> folder.</li>
-</ol>
-<div class="highlight"><pre><span></span><code>cp spark-shaded/target/sedona-spark-shaded-xxx.jar $SPARK_HOME/jars/
+<p>4) Compile the Sedona Scala and Java code with <code>-Dgeotools</code> and then copy the <mark>sedona-spark-shaded-1.7.2.jar</mark> to <mark>SPARK_HOME/jars/</mark> folder.</p>
+<div class="highlight"><pre><span></span><code>cp spark-shaded/target/sedona-spark-shaded-*.jar $SPARK_HOME/jars/
 </code></pre></div>
-<ol>
-<li>Install the following libraries</li>
-</ol>
+<p>5) Install the following libraries</p>
 <div class="highlight"><pre><span></span><code>sudo apt-get -y install python3-pip python-dev libgeos-dev
 sudo pip3 install -U setuptools
 sudo pip3 install -U wheel
 sudo pip3 install -U virtualenvwrapper
 sudo pip3 install -U pipenv
 </code></pre></div>
-<p>Homebrew can be used to install libgeos-dev in macOS: <code>brew install geos</code>
-5. Set up pipenv to the desired Python version: 3.7, 3.8, or 3.9</p>
-<div class="highlight"><pre><span></span><code>cd python
-pipenv --python 3.7
+<p>Homebrew can be used to install libgeos-dev in macOS:</p>
+<div class="highlight"><pre><span></span><code>brew install geos
 </code></pre></div>
-<ol>
-<li>Install the PySpark version and the other dependency</li>
-</ol>
+<p>6) Set up pipenv to the desired Python version: 3.8, 3.9, or 3.10</p>
 <div class="highlight"><pre><span></span><code>cd python
-pipenv install pyspark
+pipenv --python 3.8
+</code></pre></div>
+<p>7) Install the PySpark version and the other dependency</p>
+<div class="highlight"><pre><span></span><code>cd python
+pipenv install pyspark==${SPARK_VERSION}
 pipenv install --dev
 </code></pre></div>
 <p><code>pipenv install pyspark</code> installs the latest version of pyspark.
-In order to remain consistent with the installed spark version, use <code>pipenv install pyspark==&lt;spark_version&gt;</code>
-7. Run the Python tests</p>
+In order to remain consistent with the installed spark version, use <code>pipenv install pyspark==&lt;spark_version&gt;</code></p>
+<p>8) Run the Python tests</p>
 <div class="highlight"><pre><span></span><code>cd python
 pipenv run python setup.py build_ext --inplace
 pipenv run pytest tests
@@ -4836,6 +4834,9 @@ you should always run:</p>
 <p>Sometimes you might need to skip a hook to commit for example:</p>
 <p><code>SKIP=markdownlint git commit -m "foo"</code></p>
 <p>We have a <a href="https://github.com/apache/sedona/blob/master/Makefile">Makefile</a> in the repository root which has three pre-commit convenience commands.</p>
+<p>For example, you can run the following to setup pre-commit to run before each commit</p>
+<div class="highlight"><pre><span></span><code>make checkinstall
+</code></pre></div>
 
 
 
@@ -4856,7 +4857,7 @@ you should always run:</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="March 19, 2025 08:09:09 UTC">March 19, 2025 08:09:09</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="June 25, 2025 23:55:26 UTC">June 25, 2025 23:55:26</span>
   </span>
 
     
