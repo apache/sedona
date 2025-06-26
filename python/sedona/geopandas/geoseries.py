@@ -328,16 +328,15 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         # 0 indicates no srid in sedona
         new_epsg = crs.to_epsg() if crs else 0
-        result = self._process_geometry_column(
-            "ST_SetSRID", rename="TODO_use_old_column_name", srid=new_epsg
-        )
+        # Keep the same column name instead of renaming it
+        result = self._process_geometry_column("ST_SetSRID", rename="", srid=new_epsg)
 
         if not inplace:
             return result
         else:
             # TODO: inplace not correctly implemented yet
             self = result
-            # self._internal = result._internal
+            # self._internal = result._internal  # these don't work
             # self._anchor = result._anchor
             return None
 
@@ -352,7 +351,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         operation : str
             The spatial operation to apply (e.g., 'ST_Area', 'ST_Buffer').
         rename : str
-            The name of the resulting column.
+            The name of the resulting column. If empty, the old column name is maintained.
         args : tuple
             Positional arguments for the operation.
         kwargs : dict
@@ -382,6 +381,8 @@ class GeoSeries(GeoFrame, pspd.Series):
                     for arg in all_args
                 ]
                 params = f", {', '.join(params_list)}"
+
+            rename = first_col if not rename else rename
 
             if isinstance(data_type, BinaryType):
                 sql_expr = (
