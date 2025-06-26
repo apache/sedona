@@ -198,6 +198,8 @@ public abstract class S2Geography {
         return PolylineGeography.decode(in, tag);
       case POLYGON:
         return PolygonGeography.decode(in, tag);
+      case GEOGRAPHY_COLLECTION:
+        return GeographyCollection.decode(in, tag);
       default:
         throw new IOException("Unsupported GeographyKind for decoding: " + tag.getKind());
     }

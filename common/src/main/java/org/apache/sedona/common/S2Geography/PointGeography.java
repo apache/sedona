@@ -125,10 +125,11 @@ public class PointGeography extends S2Geography {
       // Level 23 has a cell size of ~1 meter
       // (http://s2geometry.io/resources/s2cell_statistics)
       if (cid.level() >= 23) {
-        out.writeByte(GeographyKind.CELL_CENTER.getKind());
-        out.writeByte(0); // POINT kind
-        out.writeByte(1); // flag
-        out.writeByte(0); // coveringSize
+        EncodeTag tag = new EncodeTag();
+        tag.setKind(GeographyKind.CELL_CENTER);
+        tag.setCompact(true);
+        tag.setCoveringSize((byte) 1);
+        tag.encode(out);
         out.writeLong(cid.id());
         out.flush();
         return;

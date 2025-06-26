@@ -81,10 +81,9 @@
             <groupId>org.locationtech.spatial4j</groupId>
             <artifactId>spatial4j</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.google.geometry</groupId>-->
-<!--            <artifactId>s2-geometry</artifactId>-->
-<!--        </dependency>-->
+        <!-- org.datasyslab:s2-geometry-library is a fork of com.google.geometry:s2-geometry-library-->
+        <!-- as implementation requirements of apache sedona issue link: -->
+        <!-- https://github.com/apache/sedona/issues/1996 -->
         <dependency>
             <groupId>org.datasyslab</groupId>
             <artifactId>s2-geometry-library</artifactId>
@@ -113,12 +112,6 @@
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>cdm-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
-            <version>4.4</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
     <build>
@@ -190,7 +183,7 @@
                                     <shadedPattern>org.apache.sedona.shaded.codehaus</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>com.google.common.geometry;</pattern>
+                                    <pattern>com.google.common.geometry</pattern>
                                     <shadedPattern>org.apache.sedona.shaded.s2</shadedPattern>
                                 </relocation>
                             </relocations>

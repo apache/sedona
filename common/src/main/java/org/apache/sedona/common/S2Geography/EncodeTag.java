@@ -37,8 +37,9 @@ public class EncodeTag {
    */
   private GeographyKind kind = GeographyKind.UNINITIALIZED;
   /**
-   * Flags for encoding metadata. Currently, only {@code kFlagEmpty} is supported, which is set if
-   * and only if the geography contains zero shapes.
+   * Flags for encoding metadata. one flag {@code kFlagEmpty} is supported, which is set if and only
+   * if the geography contains zero shapes. second flag {@code FlagCompact}, which is set if user
+   * set COMPACT encoding type
    */
   private byte flags = 0;
   // ——— Bit‐masks for our one‐byte flags field ———————————————————
@@ -72,7 +73,7 @@ public class EncodeTag {
   }
   // ——— Read it back ————————————————————————————————————————————————
 
-  /** Reads exactly 5 bytes (in the same order) from the stream. */
+  /** Reads exactly 4 bytes (in the same order) from the stream. */
   public static EncodeTag decode(Input in) throws IOException {
     EncodeTag tag = new EncodeTag();
     tag.kind = GeographyKind.fromKind(in.readByte());

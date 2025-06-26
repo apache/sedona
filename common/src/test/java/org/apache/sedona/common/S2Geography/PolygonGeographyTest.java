@@ -38,7 +38,6 @@ public class PolygonGeographyTest {
     points.add(pt);
     S2Loop polyline = new S2Loop(points);
     S2Polygon poly = new S2Polygon(polyline);
-    System.out.println(poly.toString());
     PolygonGeography geo = new PolygonGeography(poly);
 
     TestHelper.assertRoundTrip(geo, new EncodeOptions());

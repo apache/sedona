@@ -82,7 +82,6 @@ public class PointGeographyTest {
     S2Point pt = S2LatLng.fromDegrees(45, -64).toPoint();
     S2CellId cellId = S2CellId.fromPoint(pt);
     S2Point ptSnapped = cellId.toPoint();
-    System.out.println(ptSnapped.toString());
 
     // 2) EncodeTagged in COMPACT mode
     PointGeography geog = new PointGeography(ptSnapped);
