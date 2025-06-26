@@ -17,10 +17,11 @@
 
 import os
 import typing
-from typing import Any, Union
+from typing import Any, Union, Literal
 
 import geopandas as gpd
 import pandas as pd
+from pyproj import CRS
 import pyspark.pandas as pspd
 from pyspark.pandas import Series as PandasOnSparkSeries
 from pyspark.pandas._typing import Dtype
@@ -126,6 +127,17 @@ class GeoSeries(GeoFrame, pspd.Series):
 
             self._anchor = data
             self._col_label = index
+
+            data_crs = None
+            if hasattr(data, "crs"):
+                data_crs = data.crs
+            if data_crs is not None and crs is not None and data_crs != crs:
+                raise ValueError(
+                    "CRS mismatch between CRS of the passed geometries "
+                    "and 'crs'. Use 'GeoSeries.set_crs(crs, "
+                    "allow_override=True)' to overwrite CRS or "
+                    "'GeoSeries.to_crs(crs)' to reproject geometries. "
+                )
         else:
             if isinstance(data, pd.Series):
                 assert index is None
@@ -154,6 +166,180 @@ class GeoSeries(GeoFrame, pspd.Series):
                 copy=copy,
                 fastpath=fastpath,
             )
+
+        if crs:
+            self.set_crs(crs, inplace=True)
+
+    @property
+    def crs(self) -> Union[CRS, None]:
+        """The Coordinate Reference System (CRS) as a ``pyproj.CRS`` object.
+
+        Returns None if the CRS is not set, and to set the value it
+        :getter: Returns a ``pyproj.CRS`` or None. When setting, the value
+        can be anything accepted by
+        :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
+        such as an authority string (eg "EPSG:4326") or a WKT string.
+
+        Examples
+        --------
+        >>> s.crs  # doctest: +SKIP
+        <Geographic 2D CRS: EPSG:4326>
+        Name: WGS 84
+        Axis Info [ellipsoidal]:
+        - Lat[north]: Geodetic latitude (degree)
+        - Lon[east]: Geodetic longitude (degree)
+        Area of Use:
+        - name: World
+        - bounds: (-180.0, -90.0, 180.0, 90.0)
+        Datum: World Geodetic System 1984
+        - Ellipsoid: WGS 84
+        - Prime Meridian: Greenwich
+
+        See Also
+        --------
+        GeoSeries.set_crs : assign CRS
+        GeoSeries.to_crs : re-project to another CRS
+        """
+        tmp_df = self._process_geometry_column("ST_SRID", rename="crs")
+        srid = tmp_df.to_pandas().iloc[0]
+        # Sedona returns 0 if doesn't exist
+        return CRS.from_user_input(srid) if srid else None
+
+    @crs.setter
+    def crs(self, value: Union[CRS, None]):
+        # Implementation of the abstract method
+        self.set_crs(value, inplace=True)
+
+    @typing.overload
+    def set_crs(
+        self,
+        crs: Union[Any, None] = None,
+        epsg: Union[int, None] = None,
+        inplace: Literal[True] = True,
+        allow_override: bool = False,
+    ) -> None: ...
+
+    @typing.overload
+    def set_crs(
+        self,
+        crs: Union[Any, None] = None,
+        epsg: Union[int, None] = None,
+        inplace: Literal[False] = False,
+        allow_override: bool = False,
+    ) -> "GeoSeries": ...
+
+    def set_crs(
+        self,
+        crs: Union[Any, None] = None,
+        epsg: Union[int, None] = None,
+        inplace: bool = False,
+        allow_override: bool = False,
+    ) -> Union["GeoSeries", None]:
+        """
+        Set the Coordinate Reference System (CRS) of a ``GeoSeries``.
+
+        Pass ``None`` to remove CRS from the ``GeoSeries``.
+
+        Notes
+        -----
+        The underlying geometries are not transformed to this CRS. To
+        transform the geometries to a new CRS, use the ``to_crs`` method.
+
+        Parameters
+        ----------
+        crs : pyproj.CRS | None, optional
+            The value can be anything accepted
+            by :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
+            such as an authority string (eg "EPSG:4326") or a WKT string.
+        epsg : int, optional if `crs` is specified
+            EPSG code specifying the projection.
+        inplace : bool, default False
+            If True, the CRS of the GeoSeries will be changed in place
+            (while still returning the result) instead of making a copy of
+            the GeoSeries.
+        allow_override : bool, default False
+            If the the GeoSeries already has a CRS, allow to replace the
+            existing CRS, even when both are not equal.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point
+        >>> s = geopandas.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        >>> s
+        0    POINT (1 1)
+        1    POINT (2 2)
+        2    POINT (3 3)
+        dtype: geometry
+
+        Setting CRS to a GeoSeries without one:
+
+        >>> s.crs is None
+        True
+
+        >>> s = s.set_crs('epsg:3857')
+        >>> s.crs  # doctest: +SKIP
+        <Projected CRS: EPSG:3857>
+        Name: WGS 84 / Pseudo-Mercator
+        Axis Info [cartesian]:
+        - X[east]: Easting (metre)
+        - Y[north]: Northing (metre)
+        Area of Use:
+        - name: World - 85°S to 85°N
+        - bounds: (-180.0, -85.06, 180.0, 85.06)
+        Coordinate Operation:
+        - name: Popular Visualisation Pseudo-Mercator
+        - method: Popular Visualisation Pseudo Mercator
+        Datum: World Geodetic System 1984
+        - Ellipsoid: WGS 84
+        - Prime Meridian: Greenwich
+
+        Overriding existing CRS:
+
+        >>> s = s.set_crs(4326, allow_override=True)
+
+        Without ``allow_override=True``, ``set_crs`` returns an error if you try to
+        override CRS.
+
+        See Also
+        --------
+        GeoSeries.to_crs : re-project to another CRS
+
+        """
+        from pyproj import CRS
+
+        if crs is not None:
+            crs = CRS.from_user_input(crs)
+        elif epsg is not None:
+            crs = CRS.from_epsg(epsg)
+
+        curr_crs = self.crs
+
+        if not allow_override and curr_crs is not None and not curr_crs == crs:
+            raise ValueError(
+                "The GeoSeries already has a CRS which is not equal to the passed "
+                "CRS. Specify 'allow_override=True' to allow replacing the existing "
+                "CRS without doing any transformation. If you actually want to "
+                "transform the geometries, use 'GeoSeries.to_crs' instead."
+            )
+
+        # 0 indicates no srid in sedona
+        new_epsg = crs.to_epsg() if crs else 0
+        result = self._process_geometry_column(
+            "ST_SetSRID", rename="TODO_use_old_column_name", srid=new_epsg
+        )
+
+        if not inplace:
+            return result
+        else:
+            # TODO: inplace not correctly implemented yet
+            self = result
+            # self._internal = result._internal
+            # self._anchor = result._anchor
+            return None
 
     def _process_geometry_column(
         self, operation: str, rename: str, *args, **kwargs
@@ -305,16 +491,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         dtype: float64
         """
         return self._process_geometry_column("ST_Area", rename="area").to_spark_pandas()
-
-    @property
-    def crs(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @crs.setter
-    def crs(self, value):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
 
     @property
     def geom_type(self):
