@@ -141,15 +141,12 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         if isinstance(data, (GeoDataFrame, GeoSeries)):
             assert dtype is None
             assert not copy
-            self._anchor = data
-            self._col_label = index
+            super().__init__(data, index=index, dtype=dtype, copy=copy)
         elif isinstance(data, (PandasOnSparkSeries, PandasOnSparkDataFrame)):
             assert columns is None
             assert dtype is None
             assert not copy
-            if index is None:
-                internal = InternalFrame(spark_frame=data._internal.spark_frame)
-                object.__setattr__(self, "_internal_frame", internal)
+            super().__init__(data, index=index, dtype=dtype)
         elif isinstance(data, SparkDataFrame):
             assert columns is None
             assert dtype is None
@@ -173,8 +170,13 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 )
             gdf = gpd.GeoDataFrame(df)
             # convert each geometry column to wkb type
+            import shapely
+
             for col in gdf.columns:
-                if isinstance(gdf[col], gpd.GeoSeries):
+                # It's possible we get a list, dict, pd.Series, gpd.GeoSeries, etc of shapely.Geometry objects.
+                if len(gdf[col]) > 0 and isinstance(
+                    gdf[col].iloc[0], shapely.geometry.base.BaseGeometry
+                ):
                     gdf[col] = gdf[col].apply(lambda geom: geom.wkb)
             pdf = pd.DataFrame(gdf)
             # initialize the parent class pyspark Dataframe with the pandas Series
