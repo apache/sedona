@@ -73,7 +73,6 @@ public class PolylineGeographyTest {
     PolylineGeography geog = new PolylineGeography(List.of(poly1, poly2));
 
     // 3) Encode to bytes
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     EncodeOptions encodeOptions = new EncodeOptions();
     encodeOptions.setCodingHint(EncodeOptions.CodingHint.COMPACT);
     TestHelper.assertRoundTrip(geog, new EncodeOptions());

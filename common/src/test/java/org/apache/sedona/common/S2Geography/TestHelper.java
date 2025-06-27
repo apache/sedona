@@ -74,28 +74,24 @@ public class TestHelper {
       }
 
     } else if (original instanceof PolygonGeography && decoded instanceof PolygonGeography) {
-      List<S2Polygon> a = ((PolygonGeography) original).getPolygons();
-      List<S2Polygon> b = ((PolygonGeography) decoded).getPolygons();
-      assertEquals("Polygon list size mismatch", a.size(), b.size());
-      for (int i = 0; i < a.size(); i++) {
-        S2Polygon pgOrig = a.get(i);
-        S2Polygon pgDec = b.get(i);
+      PolygonGeography a = (PolygonGeography) original;
+      PolygonGeography b = (PolygonGeography) decoded;
+
+      S2Polygon pgOrig = a.polygon;
+      S2Polygon pgDec = b.polygon;
+      assertEquals(
+          "Loop count mismatch in polygon[" + 1 + "]", pgOrig.numLoops(), pgDec.numLoops());
+      S2Loop loopOrig = pgOrig.loop(0);
+      S2Loop loopDec = pgDec.loop(0);
+      assertEquals(
+          "Vertex count mismatch in loop[" + 1 + "] of polygon[" + 1 + "]",
+          loopOrig.numVertices(),
+          loopDec.numVertices());
+      for (int v = 0; v < loopOrig.numVertices(); v++) {
         assertEquals(
-            "Loop count mismatch in polygon[" + i + "]", pgOrig.numLoops(), pgDec.numLoops());
-        for (int l = 0; l < pgOrig.numLoops(); l++) {
-          S2Loop loopOrig = pgOrig.loop(l);
-          S2Loop loopDec = pgDec.loop(l);
-          assertEquals(
-              "Vertex count mismatch in loop[" + l + "] of polygon[" + i + "]",
-              loopOrig.numVertices(),
-              loopDec.numVertices());
-          for (int v = 0; v < loopOrig.numVertices(); v++) {
-            assertEquals(
-                "Vertex mismatch at polygon[" + i + "] loop[" + l + "] vertex[" + v + "]",
-                loopOrig.vertex(v),
-                loopDec.vertex(v));
-          }
-        }
+            "Vertex mismatch at polygon[" + 1 + "] loop[" + 1 + "] vertex[" + v + "]",
+            loopOrig.vertex(v),
+            loopDec.vertex(v));
       }
     }
   }

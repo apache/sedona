@@ -21,7 +21,6 @@ package org.apache.sedona.common.S2Geography;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.UnsafeInput;
 import com.esotericsoftware.kryo.io.UnsafeOutput;
-import com.google.common.collect.ImmutableList;
 import com.google.common.geometry.*;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,42 +31,39 @@ import java.util.logging.Logger;
 public class PolygonGeography extends S2Geography {
   private static final Logger logger = Logger.getLogger(PolygonGeography.class.getName());
 
-  private final List<S2Polygon> polygons;
+  public final S2Polygon polygon;
 
   public PolygonGeography() {
     super(GeographyKind.POLYGON);
-    this.polygons = new ArrayList<>();
+    this.polygon = null;
   }
 
   public PolygonGeography(S2Polygon polygon) {
     super(GeographyKind.POLYGON);
-    this.polygons = new ArrayList<>();
-    this.polygons.add(polygon);
-  }
-
-  public PolygonGeography(List<S2Polygon> polygons) {
-    super(GeographyKind.POLYGON);
-    this.polygons = new ArrayList<>(polygons);
+    this.polygon = polygon;
   }
 
   @Override
   public int dimension() {
-    return polygons.isEmpty() ? -1 : 2;
+    return polygon == null ? -1 : 2;
   }
 
   @Override
   public int numShapes() {
-    return polygons.size();
+    return polygon == null ? 0 : 1;
   }
 
   @Override
   public S2Shape shape(int id) {
-    return polygons.get(id).shape();
+    assert polygon != null;
+    return polygon.shape();
   }
 
   @Override
   public S2Region region() {
-    Collection<S2Region> regionCollection = new ArrayList<>(polygons);
+    S2RegionWrapper s2RegionWrapper = new S2RegionWrapper(polygon);
+    Collection<S2Region> regionCollection = new ArrayList<>();
+    regionCollection.add(s2RegionWrapper);
     return new S2RegionUnion(regionCollection);
   }
 
@@ -76,19 +72,12 @@ public class PolygonGeography extends S2Geography {
     super.getCellUnionBound(cellIds);
   }
 
-  public List<S2Polygon> getPolygons() {
-    return ImmutableList.copyOf(polygons);
-  }
-
   @Override
   public void encode(UnsafeOutput out, EncodeOptions opts) throws IOException {
-    // 3) Write number of polygons
-    out.writeInt(polygons.size());
-
-    // 4) Encode each polygon
-    for (S2Polygon poly : polygons) {
-      poly.encode(out);
-    }
+    // 3) Write number of polygon
+    out.writeInt(numShapes());
+    // 4) Encode polygon
+    polygon.encode(out);
     out.flush();
   }
 
@@ -122,10 +111,10 @@ public class PolygonGeography extends S2Geography {
     int count = in.readInt();
 
     // Decode each polygon
-    for (int i = 0; i < count; i++) {
-      S2Polygon poly = S2Polygon.decode(in);
-      geo.polygons.add(poly);
-    }
+
+    S2Polygon poly = S2Polygon.decode(in);
+    geo = new PolygonGeography(poly);
+
     return geo;
   }
 }

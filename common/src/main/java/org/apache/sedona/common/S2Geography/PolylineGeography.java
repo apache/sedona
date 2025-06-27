@@ -33,7 +33,7 @@ import java.util.logging.Logger;
 public class PolylineGeography extends S2Geography {
   private static final Logger logger = Logger.getLogger(PolylineGeography.class.getName());
 
-  private final List<S2Polyline> polylines;
+  public final List<S2Polyline> polylines;
 
   private static int sizeofInt() {
     return Integer.BYTES;
@@ -73,7 +73,11 @@ public class PolylineGeography extends S2Geography {
   @Override
   public S2Region region() {
     Collection<S2Region> polylineRegionCollection = new ArrayList<>();
-    polylineRegionCollection.addAll(polylines);
+    S2RegionWrapper s2RegionWrapper;
+    for (S2Polyline polyline : polylines) {
+      s2RegionWrapper = new S2RegionWrapper(polyline);
+      polylineRegionCollection.add(s2RegionWrapper);
+    }
     S2RegionUnion union = new S2RegionUnion(polylineRegionCollection);
     return union;
   }

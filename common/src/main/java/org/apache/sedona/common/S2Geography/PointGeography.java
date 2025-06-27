@@ -35,7 +35,7 @@ public class PointGeography extends S2Geography {
 
   private static final int BUFFER_SIZE = 4 * 1024;
 
-  private final List<S2Point> points = new ArrayList<>();
+  public final List<S2Point> points = new ArrayList<>();
 
   /** Constructs an empty PointGeography. */
   public PointGeography() {
