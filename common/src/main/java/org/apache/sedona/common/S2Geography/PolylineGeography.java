@@ -100,8 +100,8 @@ public class PolylineGeography extends S2Geography {
       } else {
         S2Polyline.COMPACT_CODER.encode(pl, out);
       }
-      out.flush();
     }
+    out.flush();
   }
 
   /** This is what decodeTagged() actually calls */

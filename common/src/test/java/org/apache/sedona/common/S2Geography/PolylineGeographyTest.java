@@ -74,6 +74,6 @@ public class PolylineGeographyTest {
     // 3) Encode to bytes
     EncodeOptions encodeOptions = new EncodeOptions();
     encodeOptions.setCodingHint(EncodeOptions.CodingHint.COMPACT);
-    TestHelper.assertRoundTrip(geog, new EncodeOptions());
+    TestHelper.assertRoundTrip(geog, encodeOptions);
   }
 }

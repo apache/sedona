@@ -23,8 +23,6 @@ import com.esotericsoftware.kryo.io.UnsafeInput;
 import com.esotericsoftware.kryo.io.UnsafeOutput;
 import com.google.common.geometry.*;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -35,7 +33,7 @@ public class PolygonGeography extends S2Geography {
 
   public PolygonGeography() {
     super(GeographyKind.POLYGON);
-    this.polygon = new  S2Polygon();
+    this.polygon = new S2Polygon();
   }
 
   public PolygonGeography(S2Polygon polygon) {
@@ -106,8 +104,11 @@ public class PolygonGeography extends S2Geography {
 
     // 4) Read the number of polylines (4-byte)
     int count = in.readInt();
-
     // Decode each polygon
+    if (count != 1) {
+      throw new IOException(
+          "PolygonGeography.decode error: expected exactly one polygon, but found " + count);
+    }
 
     S2Polygon poly = S2Polygon.decode(in);
     geo = new PolygonGeography(poly);

@@ -184,11 +184,14 @@ public abstract class S2Geography {
   }
 
   public S2Geography decodeTagged(InputStream is) throws IOException {
-    UnsafeInput in = new UnsafeInput(is, BUFFER_SIZE);
-
+    // wrap ONCE
+    UnsafeInput kryoIn = new UnsafeInput(is, BUFFER_SIZE);
+    EncodeTag topTag = EncodeTag.decode(kryoIn);
     // 1) decode the tag
-    EncodeTag tag = EncodeTag.decode(in);
+    return S2Geography.decode(kryoIn, topTag);
+  }
 
+  public static S2Geography decode(UnsafeInput in, EncodeTag tag) throws IOException {
     // 2) dispatch to subclass's decode method according to tag.kind
     switch (tag.getKind()) {
       case CELL_CENTER:
@@ -198,8 +201,10 @@ public abstract class S2Geography {
         return PolylineGeography.decode(in, tag);
       case POLYGON:
         return PolygonGeography.decode(in, tag);
-      case GEOGRAPHY_COLLECTION:
-        return GeographyCollection.decode(in, tag);
+        //      case GEOGRAPHY_COLLECTION:
+        //        return GeographyCollection.decode(in, tag);
+        //      case SHAPE_INDEX:
+        //        return EncodedShapeIndexGeography.decode(in, tag);
       default:
         throw new IOException("Unsupported GeographyKind for decoding: " + tag.getKind());
     }
