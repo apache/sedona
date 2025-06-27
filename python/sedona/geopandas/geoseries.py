@@ -253,7 +253,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             (while still returning the result) instead of making a copy of
             the GeoSeries.
         allow_override : bool, default False
-            If the the GeoSeries already has a CRS, allow to replace the
+            If the GeoSeries already has a CRS, allow to replace the
             existing CRS, even when both are not equal.
 
         Returns
