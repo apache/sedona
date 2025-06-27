@@ -66,3 +66,82 @@ class TestGeoSeries(TestBase):
         expected = gpd.GeoSeries([wkt.loads(wkt_str) for wkt_str in expected])
         assert result.count() > 0
         self.check_sgpd_equals_gpd(result, expected)
+
+    def test_geometry(self):
+        sgpd_geoseries = sgpd.GeoSeries([Point(0, 0), Point(1, 1)])
+        assert isinstance(sgpd_geoseries.geometry, sgpd.GeoSeries)
+        assert_series_equal(
+            sgpd_geoseries.geometry.to_pandas(), sgpd_geoseries.to_pandas()
+        )
+
+    def test_x(self):
+        pass
+
+    def test_y(self):
+        pass
+
+    def test_z(self):
+        pass
+
+    def test_m(self):
+        pass
+
+    def test_from_file(self):
+        pass
+
+    def test_from_wkb(self):
+        pass
+
+    def test_from_wkt(self):
+        pass
+
+    def test_from_xy(self):
+        pass
+
+    def test_from_shapely(self):
+        pass
+
+    def test_from_arrow(self):
+        pass
+
+    def test_to_file(self):
+        pass
+
+    def test_isna(self):
+        pass
+
+    def test_isnull(self):
+        pass
+
+    def test_notna(self):
+        pass
+
+    def test_notnull(self):
+        pass
+
+    def test_fillna(self):
+        pass
+
+    def test_explode(self):
+        pass
+
+    def test_to_crs(self):
+        pass
+
+    def test_estimate_utm_crs(self):
+        pass
+
+    def test_to_json(self):
+        pass
+
+    def test_to_wkb(self):
+        pass
+
+    def test_to_wkt(self):
+        pass
+
+    def test_to_arrow(self):
+        pass
+
+    def test_clip(self):
+        pass

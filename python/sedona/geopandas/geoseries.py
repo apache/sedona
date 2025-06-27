@@ -15,6 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import os
+import typing
 from typing import Any, Union
 
 import geopandas as gpd
@@ -615,6 +617,127 @@ class GeoSeries(GeoFrame, pspd.Series):
             on_attribute,
             **kwargs,
         )
+
+    @property
+    def geometry(self) -> "GeoSeries":
+        return self
+
+    @property
+    def x(self) -> pspd.Series:
+        raise NotImplementedError("GeoSeries.x() is not implemented yet.")
+
+    @property
+    def y(self) -> pspd.Series:
+        raise NotImplementedError("GeoSeries.y() is not implemented yet.")
+
+    @property
+    def z(self) -> pspd.Series:
+        raise NotImplementedError("GeoSeries.z() is not implemented yet.")
+
+    @property
+    def m(self) -> pspd.Series:
+        raise NotImplementedError("GeoSeries.m() is not implemented yet.")
+
+    @classmethod
+    def from_file(
+        cls, filename: Union[os.PathLike, typing.IO], **kwargs
+    ) -> "GeoSeries":
+        raise NotImplementedError("GeoSeries.from_file() is not implemented yet.")
+
+    @classmethod
+    def from_wkb(
+        cls,
+        data,
+        index=None,
+        crs: Union[Any, None] = None,
+        on_invalid="raise",
+        **kwargs,
+    ) -> "GeoSeries":
+        raise NotImplementedError("GeoSeries.from_wkb() is not implemented yet.")
+
+    @classmethod
+    def from_wkt(
+        cls,
+        data,
+        index=None,
+        crs: Union[Any, None] = None,
+        on_invalid="raise",
+        **kwargs,
+    ) -> "GeoSeries":
+        raise NotImplementedError("GeoSeries.from_wkt() is not implemented yet.")
+
+    @classmethod
+    def from_xy(cls, x, y, z=None, index=None, crs=None, **kwargs) -> "GeoSeries":
+        raise NotImplementedError("GeoSeries.from_xy() is not implemented yet.")
+
+    @classmethod
+    def from_shapely(
+        cls, data, index=None, crs: Union[Any, None] = None, **kwargs
+    ) -> "GeoSeries":
+        raise NotImplementedError("GeoSeries.from_shapely() is not implemented yet.")
+
+    @classmethod
+    def from_arrow(cls, arr, **kwargs) -> "GeoSeries":
+        raise NotImplementedError("GeoSeries.from_arrow() is not implemented yet.")
+
+    def to_file(
+        self,
+        filename: Union[os.PathLike, typing.IO],
+        driver: Union[str, None] = None,
+        index: Union[bool, None] = None,
+        **kwargs,
+    ):
+        raise NotImplementedError("GeoSeries.to_file() is not implemented yet.")
+
+    def isna(self) -> pspd.Series:
+        raise NotImplementedError("GeoSeries.isna() is not implemented yet.")
+
+    def isnull(self) -> pspd.Series:
+        raise NotImplementedError("GeoSeries.isnull() is not implemented yet.")
+
+    def notna(self) -> pspd.Series:
+        raise NotImplementedError("GeoSeries.notna() is not implemented yet.")
+
+    def notnull(self) -> pspd.Series:
+        """Alias for `notna` method. See `notna` for more detail."""
+        return self.notna()
+
+    def fillna(self, value: Any) -> "GeoSeries":
+        raise NotImplementedError("GeoSeries.fillna() is not implemented yet.")
+
+    def explode(self, ignore_index=False, index_parts=False) -> "GeoSeries":
+        raise NotImplementedError("GeoSeries.explode() is not implemented yet.")
+
+    def to_crs(
+        self, crs: Union[Any, None] = None, epsg: Union[int, None] = None
+    ) -> "GeoSeries":
+        raise NotImplementedError("GeoSeries.to_crs() is not implemented yet.")
+
+    def estimate_utm_crs(self, datum_name: str = "WGS 84"):
+        raise NotImplementedError(
+            "GeoSeries.estimate_utm_crs() is not implemented yet."
+        )
+
+    def to_json(
+        self,
+        show_bbox: bool = True,
+        drop_id: bool = False,
+        to_wgs84: bool = False,
+        **kwargs,
+    ) -> str:
+        raise NotImplementedError("GeoSeries.to_json() is not implemented yet.")
+
+    def to_wkb(self, hex: bool = False, **kwargs) -> pspd.Series:
+        raise NotImplementedError("GeoSeries.to_wkb() is not implemented yet.")
+
+    def to_wkt(self, **kwargs) -> pspd.Series:
+        raise NotImplementedError("GeoSeries.to_wkt() is not implemented yet.")
+
+    def to_arrow(self, geometry_encoding="WKB", interleaved=True, include_z=None):
+        raise NotImplementedError("GeoSeries.to_arrow() is not implemented yet.")
+
+    def clip(self, mask, keep_geom_type: bool = False, sort=False) -> "GeoSeries":
+        raise NotImplementedError("GeoSeries.clip() is not implemented yet.")
 
     # -----------------------------------------------------------------------------
     # # Utils
