@@ -35,7 +35,7 @@ public class PolygonGeography extends S2Geography {
 
   public PolygonGeography() {
     super(GeographyKind.POLYGON);
-    this.polygon = null;
+    this.polygon = new  S2Polygon();
   }
 
   public PolygonGeography(S2Polygon polygon) {
@@ -61,10 +61,7 @@ public class PolygonGeography extends S2Geography {
 
   @Override
   public S2Region region() {
-    S2RegionWrapper s2RegionWrapper = new S2RegionWrapper(polygon);
-    Collection<S2Region> regionCollection = new ArrayList<>();
-    regionCollection.add(s2RegionWrapper);
-    return new S2RegionUnion(regionCollection);
+    return this.polygon;
   }
 
   @Override
@@ -107,7 +104,7 @@ public class PolygonGeography extends S2Geography {
       throw new IOException("PolygonGeography.decodeTagged error: insufficient header bytes");
     }
 
-    // 5) Read the number of polylines (4-byte)
+    // 4) Read the number of polylines (4-byte)
     int count = in.readInt();
 
     // Decode each polygon

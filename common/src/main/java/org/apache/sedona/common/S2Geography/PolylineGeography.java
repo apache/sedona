@@ -73,13 +73,8 @@ public class PolylineGeography extends S2Geography {
   @Override
   public S2Region region() {
     Collection<S2Region> polylineRegionCollection = new ArrayList<>();
-    S2RegionWrapper s2RegionWrapper;
-    for (S2Polyline polyline : polylines) {
-      s2RegionWrapper = new S2RegionWrapper(polyline);
-      polylineRegionCollection.add(s2RegionWrapper);
-    }
-    S2RegionUnion union = new S2RegionUnion(polylineRegionCollection);
-    return union;
+    polylineRegionCollection.addAll(polylines);
+    return new S2RegionUnion(polylineRegionCollection);
   }
 
   @Override
