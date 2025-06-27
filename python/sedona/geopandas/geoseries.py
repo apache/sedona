@@ -624,15 +624,89 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def x(self) -> pspd.Series:
-        raise NotImplementedError("GeoSeries.x() is not implemented yet.")
+        """Return the x location of point geometries in a GeoSeries
+
+        Returns
+        -------
+        pandas.Series
+
+        Examples
+        --------
+
+        >>> from shapely.geometry import Point
+        >>> s = geopandas.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        >>> s.x
+        0    1.0
+        1    2.0
+        2    3.0
+        dtype: float64
+
+        See Also
+        --------
+
+        GeoSeries.y
+        GeoSeries.z
+
+        """
+        return self._process_geometry_column("ST_X", rename="x").to_spark_pandas()
 
     @property
     def y(self) -> pspd.Series:
-        raise NotImplementedError("GeoSeries.y() is not implemented yet.")
+        """Return the y location of point geometries in a GeoSeries
+
+        Returns
+        -------
+        pandas.Series
+
+        Examples
+        --------
+
+        >>> from shapely.geometry import Point
+        >>> s = geopandas.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        >>> s.y
+        0    1.0
+        1    2.0
+        2    3.0
+        dtype: float64
+
+        See Also
+        --------
+
+        GeoSeries.x
+        GeoSeries.z
+        GeoSeries.m
+
+        """
+        return self._process_geometry_column("ST_Y", rename="y").to_spark_pandas()
 
     @property
     def z(self) -> pspd.Series:
-        raise NotImplementedError("GeoSeries.z() is not implemented yet.")
+        """Return the z location of point geometries in a GeoSeries
+
+        Returns
+        -------
+        pandas.Series
+
+        Examples
+        --------
+
+        >>> from shapely.geometry import Point
+        >>> s = geopandas.GeoSeries([Point(1, 1, 1), Point(2, 2, 2), Point(3, 3, 3)])
+        >>> s.z
+        0    1.0
+        1    2.0
+        2    3.0
+        dtype: float64
+
+        See Also
+        --------
+
+        GeoSeries.x
+        GeoSeries.y
+        GeoSeries.m
+
+        """
+        return self._process_geometry_column("ST_Z", rename="z").to_spark_pandas()
 
     @property
     def m(self) -> pspd.Series:

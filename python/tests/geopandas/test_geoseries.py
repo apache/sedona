@@ -75,13 +75,28 @@ class TestGeoSeries(TestBase):
         )
 
     def test_x(self):
-        pass
+        geoseries = sgpd.GeoSeries(
+            [Point(0, -1, 2.5), Point(2.5, 0, -1), Point(-1, 2.5, 0), Point(-1, 0)]
+        )
+        result = geoseries.x.to_pandas()
+        expected = pd.Series([0, 2.5, -1, -1])
+        assert_series_equal(result, expected)
 
     def test_y(self):
-        pass
+        geoseries = sgpd.GeoSeries(
+            [Point(0, -1, 2.5), Point(2.5, 0, -1), Point(-1, 2.5, 0), Point(-1, 0)]
+        )
+        result = geoseries.y.to_pandas()
+        expected = pd.Series([-1, 0, 2.5, 0])
+        assert_series_equal(result, expected)
 
     def test_z(self):
-        pass
+        geoseries = sgpd.GeoSeries(
+            [Point(0, -1, 2.5), Point(2.5, 0, -1), Point(-1, 2.5, 0), Point(-1, 0)]
+        )
+        result = geoseries.z.to_pandas()
+        expected = pd.Series([2.5, -1, 0, None])
+        assert_series_equal(result, expected)
 
     def test_m(self):
         pass
