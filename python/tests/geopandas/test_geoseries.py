@@ -66,3 +66,223 @@ class TestGeoSeries(TestBase):
         expected = gpd.GeoSeries([wkt.loads(wkt_str) for wkt_str in expected])
         assert result.count() > 0
         self.check_sgpd_equals_gpd(result, expected)
+
+    def test_geometry(self):
+        sgpd_geoseries = sgpd.GeoSeries([Point(0, 0), Point(1, 1)])
+        assert isinstance(sgpd_geoseries.geometry, sgpd.GeoSeries)
+        assert_series_equal(
+            sgpd_geoseries.geometry.to_pandas(), sgpd_geoseries.to_pandas()
+        )
+
+    def test_x(self):
+        pass
+
+    def test_y(self):
+        pass
+
+    def test_z(self):
+        pass
+
+    def test_m(self):
+        pass
+
+    def test_from_file(self):
+        pass
+
+    def test_from_wkb(self):
+        pass
+
+    def test_from_wkt(self):
+        pass
+
+    def test_from_xy(self):
+        pass
+
+    def test_from_shapely(self):
+        pass
+
+    def test_from_arrow(self):
+        pass
+
+    def test_to_file(self):
+        pass
+
+    def test_isna(self):
+        pass
+
+    def test_isnull(self):
+        pass
+
+    def test_notna(self):
+        pass
+
+    def test_notnull(self):
+        pass
+
+    def test_fillna(self):
+        pass
+
+    def test_explode(self):
+        pass
+
+    def test_to_crs(self):
+        pass
+
+    def test_estimate_utm_crs(self):
+        pass
+
+    def test_to_json(self):
+        pass
+
+    def test_to_wkb(self):
+        pass
+
+    def test_to_wkt(self):
+        pass
+
+    def test_to_arrow(self):
+        pass
+
+    def test_clip(self):
+        pass
+
+    def test_geom_type(self):
+        pass
+
+    def test_type(self):
+        pass
+
+    def test_length(self):
+        pass
+
+    def test_is_valid(self):
+        pass
+
+    def test_is_valid_reason(self):
+        pass
+
+    def test_is_empty(self):
+        pass
+
+    def test_count_coordinates(self):
+        pass
+
+    def test_count_geometries(self):
+        pass
+
+    def test_count_interior_rings(self):
+        pass
+
+    def test_is_simple(self):
+        pass
+
+    def test_is_ring(self):
+        pass
+
+    def test_is_ccw(self):
+        pass
+
+    def test_is_closed(self):
+        pass
+
+    def test_has_z(self):
+        pass
+
+    def test_get_precision(self):
+        pass
+
+    def test_get_geometry(self):
+        pass
+
+    def test_boundary(self):
+        pass
+
+    def test_centroid(self):
+        pass
+
+    def test_concave_hull(self):
+        pass
+
+    def test_convex_hull(self):
+        pass
+
+    def test_delaunay_triangles(self):
+        pass
+
+    def test_voronoi_polygons(self):
+        pass
+
+    def test_envelope(self):
+        pass
+
+    def test_minimum_rotated_rectangle(self):
+        pass
+
+    def test_exterior(self):
+        pass
+
+    def test_extract_unique_points(self):
+        pass
+
+    def test_offset_curve(self):
+        pass
+
+    def test_interiors(self):
+        pass
+
+    def test_remove_repeated_points(self):
+        pass
+
+    def test_set_precision(self):
+        pass
+
+    def test_representative_point(self):
+        pass
+
+    def test_minimum_bounding_circle(self):
+        pass
+
+    def test_minimum_bounding_radius(self):
+        pass
+
+    def test_minimum_clearance(self):
+        pass
+
+    def test_normalize(self):
+        pass
+
+    def test_make_valid(self):
+        pass
+
+    def test_reverse(self):
+        pass
+
+    def test_segmentize(self):
+        pass
+
+    def test_transform(self):
+        pass
+
+    def test_force_2d(self):
+        pass
+
+    def test_force_3d(self):
+        pass
+
+    def test_line_merge(self):
+        pass
+
+    def test_unary_union(self):
+        pass
+
+    def test_union_all(self):
+        pass
+
+    def test_intersection_all(self):
+        pass
+
+    def test_contains(self):
+        pass
+
+    def test_contains_properly(self):
+        pass
