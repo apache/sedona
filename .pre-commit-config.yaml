@@ -70,7 +70,7 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-      - id: insert-license
+      - id: insert-license-xml
         name: add license for all XML files
         files: \.xml$
         args:
@@ -294,3 +294,6 @@ repos:
         name: run oxipng
         description: check PNG files with oxipng
         args: ['-o', '4', '--strip', 'safe', '--alpha']
+
+
+        
