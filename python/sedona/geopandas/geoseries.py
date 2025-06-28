@@ -334,9 +334,48 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    def is_valid(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def is_valid(self) -> pspd.Series:
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        geometries that are valid.
+
+        Examples
+        --------
+
+        An example with one invalid polygon (a bowtie geometry crossing itself)
+        and one missing geometry:
+
+        >>> from shapely.geometry import Polygon
+        >>> s = geopandas.GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
+        ...         Polygon([(0,0), (1, 1), (1, 0), (0, 1)]),  # bowtie geometry
+        ...         Polygon([(0, 0), (2, 2), (2, 0)]),
+        ...         None
+        ...     ]
+        ... )
+        >>> s
+        0         POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1    POLYGON ((0 0, 1 1, 1 0, 0 1, 0 0))
+        2         POLYGON ((0 0, 2 2, 2 0, 0 0))
+        3                                   None
+        dtype: geometry
+
+        >>> s.is_valid
+        0     True
+        1    False
+        2     True
+        3    False
+        dtype: bool
+
+        See also
+        --------
+        GeoSeries.is_valid_reason : reason for invalidity
+        """
+        return (
+            self._process_geometry_column("ST_IsValid", rename="is_valid")
+            .to_spark_pandas()
+            .astype("bool")
+        )
 
     def is_valid_reason(self):
         # Implementation of the abstract method
