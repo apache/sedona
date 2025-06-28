@@ -291,7 +291,11 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_length(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).length
+            assert isinstance(sgpd_result, ps.Series)
+            gpd_result = gpd.GeoSeries(geom).length
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_is_valid(self):
         pass

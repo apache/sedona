@@ -352,7 +352,43 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def length(self) -> pspd.Series:
-        raise NotImplementedError("This method is not implemented yet.")
+        """
+        Returns a Series containing the length of each geometry in the GeoSeries.
+
+        In the case of a (Multi)Polygon it measures the length of its exterior (i.e. perimeter).
+
+        For a GeometryCollection it measures sums the values for each of the individual geometries.
+
+        Returns
+        -------
+        Series
+            A Series containing the length of each geometry.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Polygon
+        >>> import geopandas as gpd
+        >>> from sedona.geopandas import GeoSeries
+
+        >>> gs = GeoSeries([Point(0, 0), LineString([(0, 0), (1, 1)]), Polygon([(0, 0), (1, 0), (1, 1)]), GeometryCollection([Point(0, 0), LineString([(0, 0), (1, 1)]), Polygon([(0, 0), (1, 0), (1, 1)])])])
+        >>> gs.length
+        0    0.000000
+        1    1.414214
+        2    3.414214
+        3    4.828427
+        dtype: float64
+        """
+        col = self.get_first_geometry_column()
+        select = f"""
+            CASE
+                WHEN GeometryType(`{col}`) IN ('LINESTRING', 'MULTILINESTRING') THEN ST_Length(`{col}`)
+                WHEN GeometryType(`{col}`) IN ('POLYGON', 'MULTIPOLYGON') THEN ST_Perimeter(`{col}`)
+                WHEN GeometryType(`{col}`) IN ('POINT', 'MULTIPOINT') THEN 0.0
+                WHEN GeometryType(`{col}`) IN ('GEOMETRYCOLLECTION') THEN ST_Length(`{col}`) + ST_Perimeter(`{col}`)
+            END"""
+        return self._query_geometry_column(
+            select, col, rename="length"
+        ).to_spark_pandas()
 
     @property
     def is_valid(self):
