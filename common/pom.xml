@@ -81,9 +81,13 @@
             <groupId>org.locationtech.spatial4j</groupId>
             <artifactId>spatial4j</artifactId>
         </dependency>
+        <!-- org.datasyslab:s2-geometry-library is a fork of com.google.geometry:s2-geometry-library-->
+        <!-- as implementation requirements of apache sedona issue link: -->
+        <!-- https://github.com/apache/sedona/issues/1996 -->
         <dependency>
-            <groupId>com.google.geometry</groupId>
-            <artifactId>s2-geometry</artifactId>
+            <groupId>org.datasyslab</groupId>
+            <artifactId>s2-geometry-library</artifactId>
+            <version>20250620-rc1</version>
         </dependency>
         <dependency>
             <groupId>com.uber</groupId>
@@ -159,6 +163,7 @@
                                     <include>it.geosolutions.jaiext.jiffle:*</include>
                                     <include>org.antlr:*</include>
                                     <include>org.codehaus.janino:*</include>
+                                    <include>org.datasyslab:s2-geometry-library</include>
                                 </includes>
                             </artifactSet>
                             <relocations>
@@ -176,6 +181,10 @@
                                 <relocation>
                                     <pattern>org.codehaus</pattern>
                                     <shadedPattern>org.apache.sedona.shaded.codehaus</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.google.common.geometry</pattern>
+                                    <shadedPattern>org.apache.sedona.shaded.s2</shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>
