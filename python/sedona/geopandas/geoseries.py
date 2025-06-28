@@ -144,7 +144,9 @@ class GeoSeries(GeoFrame, pspd.Series):
                     fastpath=fastpath,
                 )
             gs = gpd.GeoSeries(s)
-            pdf = pd.Series(gs.apply(lambda geom: geom.wkb))
+            pdf = pd.Series(
+                gs.apply(lambda geom: geom.wkb if geom is not None else None)
+            )
             # initialize the parent class pyspark Series with the pandas Series
             super().__init__(
                 data=pdf,
