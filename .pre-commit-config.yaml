@@ -14,7 +14,6 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
 ---
 # https://pre-commit.com/#installation
 default_stages: [pre-commit, pre-push]
@@ -67,6 +66,15 @@ repos:
         args:
           - --comment-style
           - '/*|*|*/'
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
+      - id: insert-license
+        name: add license for all XML files
+        files: \.xml$
+        args:
+          - --comment-style
+          - '<!--|  ~|  -->'
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
