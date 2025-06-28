@@ -1,0 +1,7 @@
+spark/common/src/test/resources/shapefiles/polygon/map.xml
+examples/flink-sql/src/test/resources/scalastyle_config.xml
+spark/common/src/test/resources/shapefiles/polygon/map1.xml
+examples/spark-sql/src/test/resources/scalastyle_config.xml
+spark/common/src/test/resources/shapefiles/polygon/map.xml
+examples/flink-sql/src/test/resources/scalastyle_config.xml
+spark/common/src/test/resources/shapefiles/polygon/map1.xml
