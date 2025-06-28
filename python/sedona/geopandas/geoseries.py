@@ -317,9 +317,31 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    def geom_type(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def geom_type(self) -> pspd.Series:
+        """
+        Returns a series of strings specifying the geometry type of each geometry of each object.
+
+        Note: Unlike the original geopandas, this method returns the strings in all caps
+
+        Returns
+        -------
+        Series
+            A Series containing the geometry type of each geometry.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Polygon, Point
+        >>> from sedona.geopandas import GeoSeries
+
+        >>> gs = GeoSeries([Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), Point(0, 0)])
+        >>> gs.geom_type
+        0    POLYGON
+        1    POINT
+        dtype: object
+        """
+        return self._process_geometry_column(
+            "GeometryType", rename="geom_type"
+        ).to_spark_pandas()
 
     @property
     def type(self):

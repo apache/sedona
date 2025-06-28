@@ -285,7 +285,13 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_geom_type(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).geom_type
+            assert isinstance(sgpd_result, ps.Series)
+            gpd_result = gpd.GeoSeries(geom).geom_type
+            # Geopandas doesn't return the strings in all caps like sedona does
+            gpd_result = gpd_result.str.upper()
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_type(self):
         pass
