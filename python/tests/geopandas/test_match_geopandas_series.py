@@ -246,10 +246,18 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_isna(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).isna()
+            assert isinstance(sgpd_result, ps.Series)
+            gpd_result = gpd.GeoSeries(geom).isna()
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_isnull(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).isnull()
+            assert isinstance(sgpd_result, ps.Series)
+            gpd_result = gpd.GeoSeries(geom).isnull()
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_notna(self):
         pass

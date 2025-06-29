@@ -109,10 +109,16 @@ class TestGeoSeries(TestBase):
         pass
 
     def test_isna(self):
-        pass
+        geoseries = GeoSeries([Polygon([(0, 0), (1, 1), (0, 1)]), None, Polygon([])])
+        result = geoseries.isna()
+        expected = pd.Series([False, True, False])
+        assert_series_equal(result.to_pandas(), expected)
 
     def test_isnull(self):
-        pass
+        geoseries = GeoSeries([Polygon([(0, 0), (1, 1), (0, 1)]), None, Polygon([])])
+        result = geoseries.isnull()
+        expected = pd.Series([False, True, False])
+        assert_series_equal(result.to_pandas(), expected)
 
     def test_notna(self):
         pass
