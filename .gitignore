@@ -43,5 +43,3 @@ target
 *.clean
 *.orig
 
-# Backup files
-*.bak
