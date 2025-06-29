@@ -172,7 +172,13 @@ class TestGeoSeries(TestBase):
         pass
 
     def test_is_empty(self):
-        pass
+        geoseries = sgpd.GeoSeries(
+            [Point(), Point(2, 1), Polygon([(0, 0), (1, 1), (0, 1)]), None],
+        )
+
+        result = geoseries.is_empty
+        expected = pd.Series([True, False, False, False])
+        assert_series_equal(result.to_pandas(), expected)
 
     def test_count_coordinates(self):
         pass

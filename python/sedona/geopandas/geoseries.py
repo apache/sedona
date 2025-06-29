@@ -382,9 +382,40 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    def is_empty(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def is_empty(self) -> pspd.Series:
+        """
+        Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        empty geometries.
+
+        Examples
+        --------
+        An example of a GeoDataFrame with one empty point, one point and one missing
+        value:
+
+        >>> from shapely.geometry import Point
+        >>> d = {'geometry': [Point(), Point(2, 1), None]}
+        >>> gdf = geopandas.GeoDataFrame(d, crs="EPSG:4326")
+        >>> gdf
+            geometry
+        0  POINT EMPTY
+        1  POINT (2 1)
+        2         None
+
+        >>> gdf.is_empty
+        0     True
+        1    False
+        2    False
+        dtype: bool
+
+        See Also
+        --------
+        GeoSeries.isna : detect missing values
+        """
+        return (
+            self._process_geometry_column("ST_IsEmpty", rename="is_empty")
+            .to_spark_pandas()
+            .astype("bool")
+        )
 
     def count_coordinates(self):
         # Implementation of the abstract method
