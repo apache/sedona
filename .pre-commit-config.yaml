@@ -70,7 +70,7 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-      - id: insert-license-xml
+      - id: insert-license
         name: add license for all XML files
         files: \.xml$
         args:
