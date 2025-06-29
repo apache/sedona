@@ -294,13 +294,21 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_is_valid(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).is_valid
+            assert isinstance(sgpd_result, ps.Series)
+            gpd_result = gpd.GeoSeries(geom).is_valid
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_is_valid_reason(self):
         pass
 
     def test_is_empty(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).is_empty
+            assert isinstance(sgpd_result, ps.Series)
+            gpd_result = gpd.GeoSeries(geom).is_empty
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_count_coordinates(self):
         pass

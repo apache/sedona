@@ -156,13 +156,29 @@ class TestGeoSeries(TestBase):
         pass
 
     def test_is_valid(self):
-        pass
+        geoseries = sgpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                Polygon([(0, 0), (1, 1), (1, 0), (0, 1)]),  # bowtie geometry
+                Polygon([(0, 0), (2, 2), (2, 0)]),
+                None,
+            ]
+        )
+        result = geoseries.is_valid
+        expected = pd.Series([True, False, True, False])
+        assert_series_equal(result.to_pandas(), expected)
 
     def test_is_valid_reason(self):
         pass
 
     def test_is_empty(self):
-        pass
+        geoseries = sgpd.GeoSeries(
+            [Point(), Point(2, 1), Polygon([(0, 0), (1, 1), (0, 1)]), None],
+        )
+
+        result = geoseries.is_empty
+        expected = pd.Series([True, False, False, False])
+        assert_series_equal(result.to_pandas(), expected)
 
     def test_count_coordinates(self):
         pass
