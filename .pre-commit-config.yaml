@@ -292,7 +292,3 @@ repos:
         name: run oxipng
         description: check PNG files with oxipng
         args: ['-o', '4', '--strip', 'safe', '--alpha']
-
-
-
-        
