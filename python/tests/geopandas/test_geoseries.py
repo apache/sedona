@@ -287,6 +287,7 @@ class TestGeoSeries(TestBase):
 
     def test_contains_properly(self):
         pass
+
     def test_set_crs(self):
         geo_series = sgpd.GeoSeries(self.geoseries)
         assert geo_series.crs == None
