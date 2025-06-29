@@ -42,3 +42,6 @@ target
 *.bak
 *.clean
 *.orig
+
+# Backup files
+*.bak
