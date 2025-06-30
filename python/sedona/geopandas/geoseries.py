@@ -411,6 +411,12 @@ class GeoSeries(GeoFrame, pspd.Series):
         Returns:
         - geopandas.GeoSeries: A geopandas GeoSeries.
         """
+        from pyspark.pandas.utils import log_advice
+
+        log_advice(
+            "`to_geopandas` loads all data into the driver's memory. "
+            "It should only be used if the resulting geopandas GeoSeries is expected to be small."
+        )
         return self._to_geopandas()
 
     def _to_geopandas(self) -> gpd.GeoSeries:
