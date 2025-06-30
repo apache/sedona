@@ -21,7 +21,6 @@ from typing import Any, Union, Literal
 
 import geopandas as gpd
 import pandas as pd
-from pyproj import CRS
 import pyspark.pandas as pspd
 from pyspark.pandas import Series as PandasOnSparkSeries
 from pyspark.pandas._typing import Dtype
@@ -166,7 +165,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             self.set_crs(crs, inplace=True)
 
     @property
-    def crs(self) -> Union[CRS, None]:
+    def crs(self) -> Union["CRS", None]:
         """The Coordinate Reference System (CRS) as a ``pyproj.CRS`` object.
 
         Returns None if the CRS is not set, and to set the value it
@@ -197,13 +196,15 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.set_crs : assign CRS
         GeoSeries.to_crs : re-project to another CRS
         """
+        from pyproj import CRS
+
         tmp_df = self._process_geometry_column("ST_SRID", rename="crs")
         srid = tmp_df.take([0])[0]
         # Sedona returns 0 if doesn't exist
         return CRS.from_user_input(srid) if srid else None
 
     @crs.setter
-    def crs(self, value: Union[CRS, None]):
+    def crs(self, value: Union["CRS", None]):
         # Implementation of the abstract method
         self.set_crs(value, inplace=True)
 
