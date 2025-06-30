@@ -196,7 +196,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.to_crs : re-project to another CRS
         """
         tmp_df = self._process_geometry_column("ST_SRID", rename="crs")
-        srid = tmp_df.to_pandas().iloc[0]
+        srid = tmp_df.take([0])[0]
         # Sedona returns 0 if doesn't exist
         return CRS.from_user_input(srid) if srid else None
 
