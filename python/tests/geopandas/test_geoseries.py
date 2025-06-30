@@ -20,7 +20,7 @@ import geopandas as gpd
 import sedona.geopandas as sgpd
 from tests.test_base import TestBase
 from shapely import wkt
-from shapely.geometry import Point, LineString, Polygon, GeometryCollection
+from shapely.geometry import Point, LineString, Polygon, GeometryCollection, LinearRing
 from pandas.testing import assert_series_equal
 
 
@@ -190,7 +190,17 @@ class TestGeoSeries(TestBase):
         pass
 
     def test_is_simple(self):
-        pass
+        s = sgpd.GeoSeries(
+            [
+                LineString([(0, 0), (1, 1), (1, -1), (0, 1)]),
+                LineString([(0, 0), (1, 1), (1, -1)]),
+                LinearRing([(0, 0), (1, 1), (1, -1), (0, 1)]),
+                LinearRing([(0, 0), (-1, 1), (-1, -1), (1, -1)]),
+            ]
+        )
+        result = s.is_simple
+        expected = pd.Series([False, True, False, True])
+        assert_series_equal(result.to_pandas(), expected)
 
     def test_is_ring(self):
         pass

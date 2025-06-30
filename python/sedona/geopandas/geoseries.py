@@ -430,9 +430,36 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    def is_simple(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def is_simple(self) -> pspd.Series:
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        geometries that do not cross themselves.
+
+        This is meaningful only for `LineStrings` and `LinearRings`.
+
+        Examples
+        --------
+        >>> from shapely.geometry import LineString
+        >>> s = geopandas.GeoSeries(
+        ...     [
+        ...         LineString([(0, 0), (1, 1), (1, -1), (0, 1)]),
+        ...         LineString([(0, 0), (1, 1), (1, -1)]),
+        ...     ]
+        ... )
+        >>> s
+        0    LINESTRING (0 0, 1 1, 1 -1, 0 1)
+        1         LINESTRING (0 0, 1 1, 1 -1)
+        dtype: geometry
+
+        >>> s.is_simple
+        0    False
+        1     True
+        dtype: bool
+        """
+        return (
+            self._process_geometry_column("ST_IsSimple", rename="is_simple")
+            .to_spark_pandas()
+            .astype("bool")
+        )
 
     @property
     def is_ring(self):
