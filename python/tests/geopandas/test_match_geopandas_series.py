@@ -245,25 +245,27 @@ class TestMatchGeopandasSeries(TestBase):
     def test_to_file(self):
         pass
 
-    def test_isna(self):
+    @pytest.mark.parametrize("fun", ["isna", "isnull"])
+    def test_isna(self, fun):
         for _, geom in self.geoms:
-            sgpd_result = GeoSeries(geom).isna()
+            sgpd_result = getattr(GeoSeries(geom), fun)()
             assert isinstance(sgpd_result, ps.Series)
-            gpd_result = gpd.GeoSeries(geom).isna()
+            gpd_result = getattr(gpd.GeoSeries(geom), fun)()
             self.check_pd_series_equal(sgpd_result, gpd_result)
 
-    def test_isnull(self):
+    @pytest.mark.parametrize("fun", ["notna", "notnull"])
+    def test_notna(self, fun):
         for _, geom in self.geoms:
-            sgpd_result = GeoSeries(geom).isnull()
+            sgpd_result = getattr(GeoSeries(geom), fun)()
             assert isinstance(sgpd_result, ps.Series)
-            gpd_result = gpd.GeoSeries(geom).isnull()
+            gpd_result = getattr(gpd.GeoSeries(geom), fun)()
             self.check_pd_series_equal(sgpd_result, gpd_result)
 
-    def test_notna(self):
-        pass
-
-    def test_notnull(self):
-        pass
+        data = [Point(0, 0), None]
+        series = GeoSeries(data)
+        sgpd_result = series.notna()
+        gpd_result = gpd.GeoSeries(data).notna()
+        self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_fillna(self):
         pass
