@@ -27,7 +27,7 @@ from pyspark.pandas._typing import Dtype
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas.internal import InternalFrame
 from pyspark.pandas.series import first_series
-from pyspark.pandas.utils import scol_for
+from pyspark.pandas.utils import scol_for, log_advice
 from pyspark.sql.types import BinaryType
 
 import shapely
@@ -52,7 +52,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         Return a string representation of the GeoSeries in WKT format.
         """
         try:
-            gpd_series = self.to_geopandas()
+            gpd_series = self._to_geopandas()
             return gpd_series.__repr__()
 
         except Exception as e:
@@ -229,9 +229,16 @@ class GeoSeries(GeoFrame, pspd.Series):
         Returns:
         - geopandas.GeoSeries: A geopandas GeoSeries.
         """
+        log_advice(
+            "`to_geopandas` loads all data into the driver's memory. "
+            "It should only be used if the resulting geopandas Series is expected to be small."
+        )
         return self._to_geopandas()
 
     def _to_geopandas(self) -> gpd.GeoSeries:
+        """
+        Same as `to_geopandas()`, without issuing the advice log for internal usage.
+        """
         pd_series = self._to_internal_pandas()
         try:
             return gpd.GeoSeries(
@@ -241,6 +248,11 @@ class GeoSeries(GeoFrame, pspd.Series):
             return gpd.GeoSeries(pd_series)
 
     def to_spark_pandas(self) -> pspd.Series:
+        """
+        Convert the GeoSeries to a Spark pandas Series.
+        Returns:
+        - pyspark.pandas.Series: A Spark pandas Series containing the geometries in WKB format.
+        """
         return pspd.Series(self._to_internal_pandas())
 
     @property
