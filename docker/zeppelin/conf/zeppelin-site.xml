@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <!--
   ~ Licensed to the Apache Software Foundation (ASF) under one
   ~ or more contributor license agreements.  See the NOTICE file
@@ -16,9 +17,8 @@
   ~ KIND, either express or implied.  See the License for the
   ~ specific language governing permissions and limitations
   ~ under the License.
-  -->
+-->
 <configuration>
-
 <property>
   <name>zeppelin.server.addr</name>
   <value>0.0.0.0</value>
@@ -103,19 +103,261 @@
   <description>Value to enable/disable version control support in Notes</description>
 </property>
 
+<!-- Google Cloud Storage notebook storage -->
+<!--
+<property>
+  <name>zeppelin.notebook.gcs.dir</name>
+  <value></value>
+  <description>
+    A GCS path in the form gs://bucketname/path/to/dir.
+    Notes are stored at {zeppelin.notebook.gcs.dir}/{notebook-name}_{notebook-id}.zpln
+ </description>
+</property>
+
+<property>
+  <name>zeppelin.notebook.gcs.credentialsJsonFilePath</name>
+  <value>path/to/key.json</value>
+  <description>
+    Path to GCS credential key file for authentication with Google Storage.
+ </description>
+</property>
 
 
+<property>
+  <name>zeppelin.notebook.storage</name>
+  <value>org.apache.zeppelin.notebook.repo.GCSNotebookRepo</value>
+  <description>notebook persistence layer implementation</description>
+</property>
+-->
 
+<!-- Amazon S3 notebook storage -->
+<!-- Creates the following directory structure: s3://{bucket}/{username}/{notebook-id}/note.json -->
+<!--
+<property>
+  <name>zeppelin.notebook.s3.user</name>
+  <value>user</value>
+  <description>user name for s3 folder structure</description>
+</property>
 
+<property>
+  <name>zeppelin.notebook.s3.bucket</name>
+  <value>zeppelin</value>
+  <description>bucket name for notebook storage</description>
+</property>
 
+<property>
+  <name>zeppelin.notebook.s3.endpoint</name>
+  <value>s3.amazonaws.com</value>
+  <description>endpoint for s3 bucket</description>
+</property>
 
+<property>
+  <name>zeppelin.notebook.s3.timeout</name>
+  <value>120000</value>
+  <description>s3 bucket endpoint request timeout in msec.</description>
+</property>
 
+<property>
+  <name>zeppelin.notebook.storage</name>
+  <value>org.apache.zeppelin.notebook.repo.S3NotebookRepo</value>
+  <description>notebook persistence layer implementation</description>
+</property>
 
+-->
 
+<!-- Additionally, encryption is supported for notebook data stored in S3 -->
+<!-- Use the AWS KMS to encrypt data -->
+<!-- If used, the EC2 role assigned to the EMR cluster must have rights to use the given key -->
+<!-- See https://aws.amazon.com/kms/ and http://docs.aws.amazon.com/kms/latest/developerguide/concepts.html -->
+<!--
+<property>
+  <name>zeppelin.notebook.s3.kmsKeyID</name>
+  <value>AWS-KMS-Key-UUID</value>
+  <description>AWS KMS key ID used to encrypt notebook data in S3</description>
+</property>
+-->
 
+<!-- provide region of your KMS key -->
+<!-- See http://docs.aws.amazon.com/general/latest/gr/rande.html#kms_region for region codes names -->
+<!--
+<property>
+  <name>zeppelin.notebook.s3.kmsKeyRegion</name>
+  <value>us-east-1</value>
+  <description>AWS KMS key region in your AWS account</description>
+</property>
+-->
 
+<!-- Use a custom encryption materials provider to encrypt data -->
+<!-- No configuration is given to the provider, so you must use system properties or another means to configure -->
+<!-- See https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/s3/model/EncryptionMaterialsProvider.html -->
+<!--
+<property>
+  <name>zeppelin.notebook.s3.encryptionMaterialsProvider</name>
+  <value>provider implementation class name</value>
+  <description>Custom encryption materials provider used to encrypt notebook data in S3</description>
+</property>
+-->
 
+<!-- Server-side encryption enabled for notebooks -->
+<!--
+<property>
+  <name>zeppelin.notebook.s3.sse</name>
+  <value>true</value>
+  <description>Server-side encryption enabled for notebooks</description>
+</property>
+-->
 
+<!-- Path style access for S3 bucket -->
+<!--
+<property>
+  <name>zeppelin.notebook.s3.pathStyleAccess</name>
+  <value>true</value>
+  <description>Path style access for S3 bucket</description>
+</property>
+-->
+
+<!-- S3 Object Permissions (Canned ACL) for notebooks -->
+<!--
+<property>
+  <name>zeppelin.notebook.s3.cannedAcl</name>
+  <value>BucketOwnerFullControl</value>
+  <description>Saves notebooks in S3 with the given Canned Access Control List.</description>
+</property>
+-->
+
+<!-- Optional override to control which signature algorithm should be used to sign AWS requests -->
+<!-- Set this property to "S3SignerType" if your AWS S3 compatible APIs support only AWS Signature Version 2 such as Ceph. -->
+<!--
+<property>
+  <name>zeppelin.notebook.s3.signerOverride</name>
+  <value>S3SignerType</value>
+  <description>optional override to control which signature algorithm should be used to sign AWS requests</description>
+</property>
+-->
+
+<!-- Aliyun OSS notebook storage -->
+<!-- Creates the following directory structure: oss://{bucket}/{notebook_dir}/note_path -->
+<!--
+
+<property>
+  <name>zeppelin.notebook.oss.bucket</name>
+  <value>zeppelin</value>
+  <description>bucket name for notebook storage</description>
+</property>
+
+<property>
+  <name>zeppelin.notebook.oss.endpoint</name>
+  <value>http://oss-cn-hangzhou.aliyuncs.com</value>
+  <description>endpoint for oss bucket</description>
+</property>
+
+<property>
+  <name>zeppelin.notebook.oss.accesskeyid</name>
+  <value></value>
+  <description>Access key id for your OSS account</description>
+</property>
+
+<property>
+  <name>zeppelin.notebook.oss.accesskeysecret</name>
+  <value></value>
+  <description>Access key secret for your OSS account</description>
+</property>
+
+<property>
+  <name>zeppelin.notebook.storage</name>
+  <value>org.apache.zeppelin.notebook.repo.OSSNotebookRepo</value>
+  <description>notebook persistence layer implementation</description>
+</property>
+
+-->
+
+<!-- If using Azure for storage use the following settings -->
+<!--
+<property>
+  <name>zeppelin.notebook.azure.connectionString</name>
+  <value>DefaultEndpointsProtocol=https;AccountName=<accountName>;AccountKey=<accountKey></value>
+  <description>Azure account credentials</description>
+</property>
+
+<property>
+  <name>zeppelin.notebook.azure.share</name>
+  <value>zeppelin</value>
+  <description>share name for notebook storage</description>
+</property>
+
+<property>
+  <name>zeppelin.notebook.azure.user</name>
+  <value>user</value>
+  <description>optional user name for Azure folder structure</description>
+</property>
+
+<property>
+  <name>zeppelin.notebook.storage</name>
+  <value>org.apache.zeppelin.notebook.repo.AzureNotebookRepo</value>
+  <description>notebook persistence layer implementation</description>
+</property>
+-->
+
+<!-- Notebook storage layer using local file system
+<property>
+  <name>zeppelin.notebook.storage</name>
+  <value>org.apache.zeppelin.notebook.repo.VFSNotebookRepo</value>
+  <description>local notebook persistence layer implementation</description>
+</property>
+-->
+
+<!-- Notebook storage layer using hadoop compatible file system
+<property>
+  <name>zeppelin.notebook.storage</name>
+  <value>org.apache.zeppelin.notebook.repo.FileSystemNotebookRepo</value>
+  <description>Hadoop compatible file system notebook persistence layer implementation, such as local file system, hdfs, azure wasb, s3 and etc.</description>
+</property>
+
+<property>
+  <name>zeppelin.server.kerberos.keytab</name>
+  <value></value>
+  <description>keytab for accessing kerberized hdfs</description>
+</property>
+
+<property>
+  <name>zeppelin.server.kerberos.principal</name>
+  <value></value>
+  <description>principal for accessing kerberized hdfs</description>
+</property>
+-->
+
+<!-- MongoDB notebook storage -->
+<!--
+<property>
+  <name>zeppelin.notebook.storage</name>
+  <value>org.apache.zeppelin.notebook.repo.MongoNotebookRepo</value>
+  <description>notebook persistence layer implementation</description>
+</property>
+
+<property>
+  <name>zeppelin.notebook.mongo.uri</name>
+  <value>mongodb://localhost</value>
+  <description>MongoDB connection URI used to connect to a MongoDB database server</description>
+</property>
+
+<property>
+  <name>zeppelin.notebook.mongo.database</name>
+  <value>zeppelin</value>
+  <description>database name for notebook storage</description>
+</property>
+
+<property>
+  <name>zeppelin.notebook.mongo.collection</name>
+  <value>notes</value>
+  <description>collection name for notebook storage</description>
+</property>
+
+<property>
+  <name>zeppelin.notebook.mongo.autoimport</name>
+  <value>false</value>
+  <description>import local notes into MongoDB automatically on startup, reset to false after import to avoid repeated import</description>
+</property>
+-->
 
 <property>
   <name>zeppelin.notebook.storage</name>
@@ -171,6 +413,13 @@
   <description>Remote Yarn package installer url for Helium dependency loader</description>
 </property>
 
+<!--
+<property>
+  <name>zeppelin.helium.registry</name>
+  <value>helium,https://zeppelin.apache.org/helium.json</value>
+  <description>Location of external Helium Registry</description>
+</property>
+-->
 
 <property>
   <name>zeppelin.interpreter.group.default</name>
@@ -220,6 +469,13 @@
   <description>Keystore password. Can be obfuscated by the Jetty Password tool</description>
 </property>
 
+<!--
+<property>
+  <name>zeppelin.ssl.key.manager.password</name>
+  <value>change me</value>
+  <description>Key Manager password. Defaults to keystore password. Can be obfuscated.</description>
+</property>
+-->
 
 <property>
   <name>zeppelin.ssl.truststore.path</name>
@@ -233,10 +489,45 @@
   <description>The format of the given truststore (e.g. JKS or PKCS12). Defaults to the same type as the keystore type</description>
 </property>
 
+<!--
+<property>
+  <name>zeppelin.ssl.truststore.password</name>
+  <value>change me</value>
+  <description>Truststore password. Can be obfuscated by the Jetty Password tool. Defaults to the keystore password</description>
+</property>
+-->
 
+<!--
+<property>
+  <name>zeppelin.ssl.pem.key</name>
+  <value></value>
+  <description>This directive points to the PEM-encoded private key file for the server.</description>
+</property>
+-->
 
+<!--
+<property>
+  <name>zeppelin.ssl.pem.key.password</name>
+  <value></value>
+  <description>Password of the PEM-encoded private key.</description>
+</property>
+-->
 
+<!--
+<property>
+  <name>zeppelin.ssl.pem.cert</name>
+  <value></value>
+  <description>This directive points to a file with certificate data in PEM format.</description>
+</property>
+-->
 
+<!--
+<property>
+  <name>zeppelin.ssl.pem.ca</name>
+  <value></value>
+  <description>This directive sets the all-in-one file where you can assemble the Certificates of Certification Authorities (CA) whose clients you deal with. These are used for Client Authentication. Such a file is simply the concatenation of the various PEM-encoded Certificate files.</description>
+</property>
+-->
 
 <property>
   <name>zeppelin.server.allowed.origins</name>
@@ -280,6 +571,26 @@
   <description>Check interval in secs for yarn apps monitors</description>
 </property>
 
+<!--
+<property>
+  <name>zeppelin.interpreter.lifecyclemanager.class</name>
+  <value>org.apache.zeppelin.interpreter.lifecycle.TimeoutLifecycleManager</value>
+  <description>LifecycleManager class for managing the lifecycle of interpreters, by default interpreter will
+  be closed after timeout</description>
+</property>
+
+<property>
+  <name>zeppelin.interpreter.lifecyclemanager.timeout.checkinterval</name>
+  <value>1m</value>
+  <description>Interval to checking whether interpreter is time out</description>
+</property>
+
+<property>
+  <name>zeppelin.interpreter.lifecyclemanager.timeout.threshold</name>
+  <value>1h</value>
+  <description>Interpreter timeout threshold, by default it is 1 hour</description>
+</property>
+-->
 
 <property>
     <name>zeppelin.server.jetty.name</name>
@@ -287,9 +598,51 @@
     <description>Hardcoding Application Server name to Prevent Fingerprinting</description>
 </property>
 
+<!--
+<property>
+    <name>zeppelin.server.send.jetty.name</name>
+    <value>false</value>
+    <description>If set to false, will not show the Jetty version to prevent Fingerprinting</description>
+</property>
+-->
 
+<!--
+<property>
+    <name>zeppelin.server.jetty.request.header.size</name>
+    <value>8192</value>
+    <description>Http Request Header Size Limit (to prevent HTTP 413)</description>
+</property>
+-->
 
+<!--
+<property>
+    <name>zeppelin.server.jetty.thread.pool.max</name>
+    <value>400</value>
+    <description>Max Thread pool number for QueuedThreadPool in Jetty Server</description>
+</property>
+-->
+<!--
+<property>
+    <name>zeppelin.server.jetty.thread.pool.min</name>
+    <value>8</value>
+    <description>Min Thread pool number for QueuedThreadPool in Jetty Server</description>
+</property>
+-->
+<!--
+<property>
+    <name>zeppelin.server.jetty.thread.pool.timeout</name>
+    <value>30</value>
+    <description>Timeout number for QueuedThreadPool in Jetty Server</description>
+</property>
+-->
 
+<!--
+<property>
+    <name>zeppelin.server.authorization.header.clear</name>
+    <value>true</value>
+    <description>Authorization header to be cleared if server is running as authcBasic</description>
+</property>
+-->
 
 <property>
   <name>zeppelin.server.xframe.options</name>
@@ -297,6 +650,13 @@
   <description>The X-Frame-Options HTTP response header can be used to indicate whether or not a browser should be allowed to render a page in a frame/iframe/object.</description>
 </property>
 
+<!--
+<property>
+  <name>zeppelin.server.strict.transport</name>
+  <value>max-age=631138519</value>
+  <description>The HTTP Strict-Transport-Security response header is a security feature that lets a web site tell browsers that it should only be communicated with using HTTPS, instead of using HTTP. Enable this when Zeppelin is running on HTTPS. Value is in Seconds, the default value is equivalent to 20 years.</description>
+</property>
+-->
 
 <property>
   <name>zeppelin.server.xxss.protection</name>
@@ -310,11 +670,86 @@
   <description>The HTTP X-Content-Type-Options response header helps to prevent MIME type sniffing attacks. It directs the browser to honor the type specified in the Content-Type header, rather than trying to determine the type from the content itself. The default value "nosniff" is really the only meaningful value. This header is supported on all browsers except Safari and Safari on iOS.</description>
 </property>
 
+<!--
+<property>
+  <name>zeppelin.server.html.body.addon</name>
+  <value><![CDATA[<script defer src="https://url/to/my/lib.min.js" /><script defer src="https://url/to/other/lib.min.js" />]]></value>
+  <description>Addon html code to be placed at the end of the html->body section in index.html delivered by zeppelin server.</description>
+</property>
+
+<property>
+  <name>zeppelin.server.html.head.addon</name>
+  <value></value>
+  <description>Addon html code to be placed at the end of the html->head section in index.html delivered by zeppelin server.</description>
+</property>
+-->
 
 
+<!--
+<property>
+  <name>zeppelin.interpreter.callback.portRange</name>
+  <value>10000:10010</value>
+</property>
+-->
 
+<!--
+<property>
+  <name>zeppelin.recovery.storage.class</name>
+  <value>org.apache.zeppelin.interpreter.recovery.LocalRecoveryStorage</value>
+  <description>ReoveryStorage implementation based on java native local file system</description>
+</property>
 
+<property>
+  <name>zeppelin.recovery.storage.class</name>
+  <value>org.apache.zeppelin.interpreter.recovery.FileSystemRecoveryStorage</value>
+  <description>ReoveryStorage implementation based on hadoop FileSystem</description>
+</property>
+-->
 
+<!--
+<property>
+  <name>zeppelin.recovery.dir</name>
+  <value>recovery</value>
+  <description>Location where recovery metadata is stored</description>
+</property>
+-->
+
+<!-- GitHub configurations
+<property>
+  <name>zeppelin.notebook.git.remote.url</name>
+  <value></value>
+  <description>remote Git repository URL</description>
+</property>
+
+<property>
+  <name>zeppelin.notebook.git.remote.username</name>
+  <value>token</value>
+  <description>remote Git repository username</description>
+</property>
+
+<property>
+  <name>zeppelin.notebook.git.remote.access-token</name>
+  <value></value>
+  <description>remote Git repository password</description>
+</property>
+
+<property>
+  <name>zeppelin.notebook.git.remote.origin</name>
+  <value>origin</value>
+  <description>Git repository remote</description>
+</property>
+
+<property>
+  <name>zeppelin.notebook.cron.enable</name>
+  <value>false</value>
+  <description>Notebook enable cron scheduler feature</description>
+</property>
+<property>
+  <name>zeppelin.notebook.cron.folders</name>
+  <value></value>
+  <description>Notebook cron folders</description>
+</property>
+-->
 
 <property>
   <name>zeppelin.run.mode</name>
