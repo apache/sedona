@@ -17,7 +17,7 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<scalastyle>
+<scalastyle commentFilter="enabled">
  <name>Scalastyle standard configuration</name>
  <check class="org.scalastyle.file.FileTabChecker" level="warning" enabled="true"/>
  <check class="org.scalastyle.file.FileLengthChecker" level="warning" enabled="true">
