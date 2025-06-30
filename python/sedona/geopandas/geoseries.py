@@ -27,7 +27,7 @@ from pyspark.pandas._typing import Dtype
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas.internal import InternalFrame
 from pyspark.pandas.series import first_series
-from pyspark.pandas.utils import scol_for
+from pyspark.pandas.utils import scol_for, log_advice
 from pyspark.sql.types import BinaryType
 
 import shapely
@@ -420,6 +420,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         return self._to_geopandas()
 
     def _to_geopandas(self) -> gpd.GeoSeries:
+        """
+        Same as `to_geopandas()`, without issuing the advice log for internal usage.
+        """
         pd_series = self._to_internal_pandas()
         try:
             return gpd.GeoSeries(
