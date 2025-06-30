@@ -336,7 +336,10 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_has_z(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).has_z
+            gpd_result = gpd.GeoSeries(geom).has_z
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_get_precision(self):
         pass

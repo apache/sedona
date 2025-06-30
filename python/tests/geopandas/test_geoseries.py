@@ -202,7 +202,17 @@ class TestGeoSeries(TestBase):
         pass
 
     def test_has_z(self):
-        pass
+        s = sgpd.GeoSeries(
+            [
+                Point(0, 1),
+                Point(0, 1, 2),
+                Polygon([(0, 0, 1), (0, 1, 2), (1, 1, 3), (0, 0, 1)]),
+                Polygon([(0, 0), (0, 1), (1, 1), (0, 0)]),
+            ]
+        )
+        result = s.has_z
+        expected = pd.Series([False, True, True, False])
+        assert_series_equal(result.to_pandas(), expected)
 
     def test_get_precision(self):
         pass

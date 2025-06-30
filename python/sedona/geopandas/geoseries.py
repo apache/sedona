@@ -378,9 +378,37 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    def has_z(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def has_z(self) -> pspd.Series:
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        features that have a z-component.
+
+        Notes
+        -----
+        Every operation in GeoPandas is planar, i.e. the potential third
+        dimension is not taken into account.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point
+        >>> s = geopandas.GeoSeries(
+        ...     [
+        ...         Point(0, 1),
+        ...         Point(0, 1, 2),
+        ...     ]
+        ... )
+        >>> s
+        0        POINT (0 1)
+        1    POINT Z (0 1 2)
+        dtype: geometry
+
+        >>> s.has_z
+        0    False
+        1     True
+        dtype: bool
+        """
+        return self._process_geometry_column(
+            "ST_HasZ", rename="has_z"
+        ).to_spark_pandas()
 
     def get_precision(self):
         # Implementation of the abstract method
