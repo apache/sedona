@@ -660,9 +660,46 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    def boundary(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def boundary(self) -> "GeoSeries":
+        """Returns a ``GeoSeries`` of lower dimensional objects representing
+        each geometry's set-theoretic `boundary`.
+
+        Examples
+        --------
+
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = geopandas.GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
+        ...         LineString([(0, 0), (1, 1), (1, 0)]),
+        ...         Point(0, 0),
+        ...     ]
+        ... )
+        >>> s
+        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1        LINESTRING (0 0, 1 1, 1 0)
+        2                       POINT (0 0)
+        dtype: geometry
+
+        >>> s.boundary
+        0    LINESTRING (0 0, 1 1, 0 1, 0 0)
+        1          MULTIPOINT ((0 0), (1 0))
+        2           GEOMETRYCOLLECTION EMPTY
+        dtype: geometry
+
+        See also
+        --------
+        GeoSeries.exterior : outer boundary (without interior rings)
+
+        """
+        col = self.get_first_geometry_column()
+        # Geopandas seems to always return NULL for GeometryCollections, so we handle it separately
+        select = f"""
+            CASE
+                WHEN GeometryType(`{col}`) IN ('GEOMETRYCOLLECTION') THEN NULL
+                ELSE ST_Boundary(`{col}`)
+            END"""
+        return self._query_geometry_column(select, col, rename="boundary")
 
     @property
     def centroid(self):
