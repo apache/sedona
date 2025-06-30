@@ -175,6 +175,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
         such as an authority string (eg "EPSG:4326") or a WKT string.
 
+        Note: This assumes all records in the GeoSeries are assumed to have the same CRS.
+
         Examples
         --------
         >>> s.crs  # doctest: +SKIP
