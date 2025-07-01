@@ -420,6 +420,13 @@ class TestMatchGeopandasSeries(TestBase):
     def test_union_all(self):
         pass
 
+    def test_intersects(self):
+        for _, geom in self.geoms:
+            for _, geom2 in self.geoms:
+                sgpd_result = GeoSeries(geom).intersects(GeoSeries(geom2))
+                gpd_result = gpd.GeoSeries(geom).intersects(gpd.GeoSeries(geom2))
+                self.check_pd_series_equal(sgpd_result, gpd_result)
+
     def test_intersection(self):
         geometries = [
             Polygon([(0, 0), (1, 0), (1, 1)]),

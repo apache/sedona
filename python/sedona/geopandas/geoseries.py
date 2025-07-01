@@ -32,6 +32,7 @@ from pyspark.pandas.utils import scol_for
 from pyspark.sql.types import BinaryType
 
 import shapely
+from shapely.geometry.base import BaseGeometry
 
 from sedona.geopandas._typing import Label
 from sedona.geopandas.base import GeoFrame
@@ -583,7 +584,94 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
-    def intersection(self, other, align=None) -> "GeoSeries":
+    def intersects(
+        self, other: Union["GeoSeries", BaseGeometry], align: Union[bool, None] = None
+    ) -> pspd.Series:
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        each aligned geometry that intersects `other`.
+
+        An object is said to intersect `other` if its `boundary` and `interior`
+        intersects in any way with those of the other.
+
+        The operation works on a 1-to-1 row-wise manner:
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The GeoSeries (elementwise) or geometric object to test if is
+            intersected.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved. (not supported in Sedona Geopandas)
+
+        Returns
+        -------
+        Series (bool)
+
+        Examples
+        --------
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = geopandas.GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
+        ...         LineString([(0, 0), (2, 2)]),
+        ...         LineString([(2, 0), (0, 2)]),
+        ...         Point(0, 1),
+        ...     ],
+        ... )
+        >>> s2 = geopandas.GeoSeries(
+        ...     [
+        ...         LineString([(1, 0), (1, 3)]),
+        ...         LineString([(2, 0), (0, 2)]),
+        ...         Point(1, 1),
+        ...         Point(-100, -100),
+        ...     ],
+        ...     index=range(1, 5),
+        ... )
+
+        We can check two GeoSeries against each other, row by row.
+        The GeoSeries above have different indices. We align both GeoSeries
+        based on index values and compare elements with the same index:
+
+        >>> s.intersects(s2)
+        0     True
+        1     True
+        2     True
+        3    False
+        dtype: bool
+
+        We can also check if each geometry of GeoSeries intersects a single
+        geometry:
+
+        >>> line = LineString([(-1, 1), (3, 1)])
+        >>> s.intersects(line)
+        0    True
+        1    True
+        2    True
+        3    True
+        dtype: bool
+
+        Notes
+        -----
+        This method works in a row-wise manner. It does not check if an element
+        of one GeoSeries ``crosses`` *any* element of the other one.
+
+        See also
+        --------
+        GeoSeries.disjoint
+        GeoSeries.crosses
+        GeoSeries.touches
+        GeoSeries.intersection
+        """
+        return (
+            self._row_wise_operation("ST_Intersects", other, align)
+            .to_spark_pandas()
+            .astype("bool")
+        )
+
+    def intersection(
+        self, other: Union["GeoSeries", BaseGeometry], align: Union[bool, None] = None
+    ) -> "GeoSeries":
         """Returns a ``GeoSeries`` of the intersection of points in each
         aligned geometry with `other`.
 
@@ -595,8 +683,8 @@ class GeoSeries(GeoFrame, pspd.Series):
             The Geoseries (elementwise) or geometric object to find the
             intersection with.
         align : bool | None (default None)
-            If True, automatically aligns GeoSeries based on their indices.
-            If False, the order of elements is preserved. None defaults to True. (not supported in Sedona Geopandas)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved. (not supported in Sedona Geopandas)
 
         Returns
         -------
@@ -663,12 +751,21 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.symmetric_difference
         GeoSeries.union
         """
+        return self._row_wise_operation("ST_Intersection", other, align)
+
+    def _row_wise_operation(
+        self,
+        operation: str,
+        other: Union["GeoSeries", BaseGeometry],
+        align: Union[bool, None],
+    ):
         from pyspark.sql.functions import col
 
+        # Note: this is specifically False. None is valid since it defaults to True similar to geopandas
         if align is False:
             raise NotImplementedError("Sedona Geopandas does not support align=False")
 
-        if isinstance(other, shapely.geometry.base.BaseGeometry):
+        if isinstance(other, BaseGeometry):
             other = GeoSeries([other] * len(self))
 
         assert isinstance(other, GeoSeries), f"Invalid type for other: {type(other)}"
@@ -681,7 +778,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
         joined_df = df.join(other_df, on=PS_INDEX_COL, how="outer")
         return self._query_geometry_column(
-            "ST_Intersection(`L`, `R`)",
+            f"{operation}(`L`, `R`)",
             cols=["L", "R"],
             rename="intersection",
             df=joined_df,
