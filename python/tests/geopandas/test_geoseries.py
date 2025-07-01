@@ -108,7 +108,23 @@ class TestGeoSeries(TestBase):
         pass
 
     def test_from_wkb(self):
-        pass
+        wkbs = [
+            (
+                b"\x01\x01\x00\x00\x00\x00\x00\x00\x00"
+                b"\x00\x00\xf0?\x00\x00\x00\x00\x00\x00\xf0?"
+            ),
+            (
+                b"\x01\x01\x00\x00\x00\x00\x00\x00\x00"
+                b"\x00\x00\x00@\x00\x00\x00\x00\x00\x00\x00@"
+            ),
+            (
+                b"\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00"
+                b"\x00\x08@\x00\x00\x00\x00\x00\x00\x08@"
+            ),
+        ]
+        s = sgpd.GeoSeries.from_wkb(wkbs)
+        expected = gpd.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        self.check_sgpd_equals_gpd(s, expected)
 
     def test_from_wkt(self):
         wkts = [

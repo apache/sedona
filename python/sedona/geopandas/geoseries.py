@@ -1007,7 +1007,82 @@ class GeoSeries(GeoFrame, pspd.Series):
         on_invalid="raise",
         **kwargs,
     ) -> "GeoSeries":
-        raise NotImplementedError("GeoSeries.from_wkb() is not implemented yet.")
+        r"""
+        Alternate constructor to create a ``GeoSeries``
+        from a list or array of WKB objects
+
+        Parameters
+        ----------
+        data : array-like or Series
+            Series, list or array of WKB objects
+        index : array-like or Index
+            The index for the GeoSeries.
+        crs : value, optional
+            Coordinate Reference System of the geometry objects. Can be anything
+            accepted by
+            :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
+            such as an authority string (eg "EPSG:4326") or a WKT string.
+        on_invalid: {"raise", "warn", "ignore"}, default "raise"
+            - raise: an exception will be raised if a WKB input geometry is invalid.
+            - warn: a warning will be raised and invalid WKB geometries will be returned
+              as None.
+            - ignore: invalid WKB geometries will be returned as None without a warning.
+            - fix: an effort is made to fix invalid input geometries (e.g. close
+              unclosed rings). If this is not possible, they are returned as ``None``
+              without a warning. Requires GEOS >= 3.11 and shapely >= 2.1.
+
+        kwargs
+            Additional arguments passed to the Series constructor,
+            e.g. ``name``.
+
+        Returns
+        -------
+        GeoSeries
+
+        See Also
+        --------
+        GeoSeries.from_wkt
+
+        Examples
+        --------
+
+        >>> wkbs = [
+        ... (
+        ...     b"\x01\x01\x00\x00\x00\x00\x00\x00\x00"
+        ...     b"\x00\x00\xf0?\x00\x00\x00\x00\x00\x00\xf0?"
+        ... ),
+        ... (
+        ...     b"\x01\x01\x00\x00\x00\x00\x00\x00\x00"
+        ...     b"\x00\x00\x00@\x00\x00\x00\x00\x00\x00\x00@"
+        ... ),
+        ... (
+        ...    b"\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00"
+        ...    b"\x00\x08@\x00\x00\x00\x00\x00\x00\x08@"
+        ... ),
+        ... ]
+        >>> s = geopandas.GeoSeries.from_wkb(wkbs)
+        >>> s
+        0    POINT (1 1)
+        1    POINT (2 2)
+        2    POINT (3 3)
+        dtype: geometry
+        """
+        if on_invalid != "raise":
+            raise NotImplementedError(
+                "GeoSeries.from_wkb(): only on_invalid='raise' is implemented"
+            )
+
+        from pyspark.sql.types import StructType, StructField, BinaryType
+
+        schema = StructType([StructField("data", BinaryType(), True)])
+        return cls._create_from_select(
+            f"ST_GeomFromWKB(`data`)",
+            data,
+            schema,
+            index,
+            crs,
+            **kwargs,
+        )
 
     @classmethod
     def from_wkt(
@@ -1070,12 +1145,20 @@ class GeoSeries(GeoFrame, pspd.Series):
         2    POINT (3 3)
         dtype: geometry
         """
+        if on_invalid != "raise":
+            raise NotImplementedError(
+                "GeoSeries.from_wkt(): only on_invalid='raise' is implemented"
+            )
+
+        from pyspark.sql.types import StructType, StructField, StringType
+
+        schema = StructType([StructField("data", StringType(), True)])
         return cls._create_from_select(
-            f"ST_GeomFromText(`data`) as geometry",
+            f"ST_GeomFromText(`data`)",
             data,
+            schema,
             index,
             crs,
-            on_invalid,
             **kwargs,
         )
 
@@ -1095,22 +1178,18 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @classmethod
     def _create_from_select(
-        cls, select: str, data, index, crs, on_invalid, **kwargs
+        cls, select: str, data, schema, index, crs, **kwargs
     ) -> "GeoSeries":
-        if on_invalid != "raise":
-            raise NotImplementedError(
-                "GeoSeries.from_wkt(): only on_invalid='raise' is implemented"
-            )
 
         from pyspark.pandas.utils import default_session
-        from pyspark.sql.types import StringType, StructType, StructField
         from pyspark.pandas.internal import InternalField
         import numpy as np
 
         if isinstance(data, list) and not isinstance(data[0], tuple):
             data = [(obj,) for obj in data]
 
-        schema = StructType([StructField("data", StringType(), True)])
+        select = f"{select} as geometry"
+
         spark_df = default_session().createDataFrame(data, schema=schema)
         spark_df = spark_df.selectExpr(select)
 
