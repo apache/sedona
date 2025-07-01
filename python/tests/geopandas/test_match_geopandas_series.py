@@ -358,7 +358,10 @@ class TestMatchGeopandasSeries(TestBase):
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_centroid(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).centroid
+            gpd_result = gpd.GeoSeries(geom).centroid
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_concave_hull(self):
         pass
