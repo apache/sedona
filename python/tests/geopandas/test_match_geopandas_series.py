@@ -213,13 +213,25 @@ class TestMatchGeopandasSeries(TestBase):
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_x(self):
-        pass
+        for pt in self.points:
+            sgpd_result = GeoSeries(pt).x
+            assert isinstance(sgpd_result, ps.Series)
+            gpd_result = gpd.GeoSeries(pt).x
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_y(self):
-        pass
+        for pt in self.points:
+            sgpd_result = GeoSeries(pt).y
+            assert isinstance(sgpd_result, ps.Series)
+            gpd_result = gpd.GeoSeries(pt).y
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_z(self):
-        pass
+        for pt in self.points:
+            sgpd_result = GeoSeries(pt).z
+            assert isinstance(sgpd_result, ps.Series)
+            gpd_result = gpd.GeoSeries(pt).z
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_m(self):
         pass
@@ -328,7 +340,10 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_has_z(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).has_z
+            gpd_result = gpd.GeoSeries(geom).has_z
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_get_precision(self):
         pass

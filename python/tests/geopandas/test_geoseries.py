@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import numpy as np
 import pytest
 import pandas as pd
 import geopandas as gpd
@@ -77,13 +78,28 @@ class TestGeoSeries(TestBase):
         )
 
     def test_x(self):
-        pass
+        geoseries = sgpd.GeoSeries(
+            [Point(0, -1, 2.5), Point(2.5, 0, -1), Point(-1, 2.5, 0), Point(-1, 0)]
+        )
+        result = geoseries.x.to_pandas()
+        expected = pd.Series([0, 2.5, -1, -1])
+        assert_series_equal(result, expected)
 
     def test_y(self):
-        pass
+        geoseries = sgpd.GeoSeries(
+            [Point(0, -1, 2.5), Point(2.5, 0, -1), Point(-1, 2.5, 0), Point(-1, 0)]
+        )
+        result = geoseries.y.to_pandas()
+        expected = pd.Series([-1, 0, 2.5, 0])
+        assert_series_equal(result, expected)
 
     def test_z(self):
-        pass
+        geoseries = sgpd.GeoSeries(
+            [Point(0, -1, 2.5), Point(2.5, 0, -1), Point(-1, 2.5, 0), Point(-1, 0)]
+        )
+        result = geoseries.z.to_pandas()
+        expected = pd.Series([2.5, -1, 0, np.nan])
+        assert_series_equal(result, expected)
 
     def test_m(self):
         pass
@@ -204,7 +220,17 @@ class TestGeoSeries(TestBase):
         pass
 
     def test_has_z(self):
-        pass
+        s = sgpd.GeoSeries(
+            [
+                Point(0, 1),
+                Point(0, 1, 2),
+                Polygon([(0, 0, 1), (0, 1, 2), (1, 1, 3), (0, 0, 1)]),
+                Polygon([(0, 0), (0, 1), (1, 1), (0, 0)]),
+            ]
+        )
+        result = s.has_z
+        expected = pd.Series([False, True, True, False])
+        assert_series_equal(result.to_pandas(), expected)
 
     def test_get_precision(self):
         pass

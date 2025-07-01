@@ -619,9 +619,37 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    def has_z(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def has_z(self) -> pspd.Series:
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        features that have a z-component.
+
+        Notes
+        -----
+        Every operation in GeoPandas is planar, i.e. the potential third
+        dimension is not taken into account.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point
+        >>> s = geopandas.GeoSeries(
+        ...     [
+        ...         Point(0, 1),
+        ...         Point(0, 1, 2),
+        ...     ]
+        ... )
+        >>> s
+        0        POINT (0 1)
+        1    POINT Z (0 1 2)
+        dtype: geometry
+
+        >>> s.has_z
+        0    False
+        1     True
+        dtype: bool
+        """
+        return self._process_geometry_column(
+            "ST_HasZ", rename="has_z"
+        ).to_spark_pandas()
 
     def get_precision(self):
         # Implementation of the abstract method
@@ -865,15 +893,89 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def x(self) -> pspd.Series:
-        raise NotImplementedError("GeoSeries.x() is not implemented yet.")
+        """Return the x location of point geometries in a GeoSeries
+
+        Returns
+        -------
+        pandas.Series
+
+        Examples
+        --------
+
+        >>> from shapely.geometry import Point
+        >>> s = geopandas.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        >>> s.x
+        0    1.0
+        1    2.0
+        2    3.0
+        dtype: float64
+
+        See Also
+        --------
+
+        GeoSeries.y
+        GeoSeries.z
+
+        """
+        return self._process_geometry_column("ST_X", rename="x").to_spark_pandas()
 
     @property
     def y(self) -> pspd.Series:
-        raise NotImplementedError("GeoSeries.y() is not implemented yet.")
+        """Return the y location of point geometries in a GeoSeries
+
+        Returns
+        -------
+        pandas.Series
+
+        Examples
+        --------
+
+        >>> from shapely.geometry import Point
+        >>> s = geopandas.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        >>> s.y
+        0    1.0
+        1    2.0
+        2    3.0
+        dtype: float64
+
+        See Also
+        --------
+
+        GeoSeries.x
+        GeoSeries.z
+        GeoSeries.m
+
+        """
+        return self._process_geometry_column("ST_Y", rename="y").to_spark_pandas()
 
     @property
     def z(self) -> pspd.Series:
-        raise NotImplementedError("GeoSeries.z() is not implemented yet.")
+        """Return the z location of point geometries in a GeoSeries
+
+        Returns
+        -------
+        pandas.Series
+
+        Examples
+        --------
+
+        >>> from shapely.geometry import Point
+        >>> s = geopandas.GeoSeries([Point(1, 1, 1), Point(2, 2, 2), Point(3, 3, 3)])
+        >>> s.z
+        0    1.0
+        1    2.0
+        2    3.0
+        dtype: float64
+
+        See Also
+        --------
+
+        GeoSeries.x
+        GeoSeries.y
+        GeoSeries.m
+
+        """
+        return self._process_geometry_column("ST_Z", rename="z").to_spark_pandas()
 
     @property
     def m(self) -> pspd.Series:
