@@ -429,6 +429,20 @@ class TestMatchGeopandasSeries(TestBase):
     def test_contains_properly(self):
         pass
 
+    def test_set_crs(self):
+        for _, geom in self.geoms:
+            sgpd_series = GeoSeries(geom)
+            gpd_series = gpd.GeoSeries(geom)
+            assert sgpd_series.crs == gpd_series.crs
+
+            sgpd_series = sgpd_series.set_crs(epsg=4326)
+            gpd_series = gpd_series.set_crs(epsg=4326)
+            assert sgpd_series.crs == gpd_series.crs
+
+            sgpd_series = sgpd_series.set_crs(epsg=3857, allow_override=True)
+            gpd_series = gpd_series.set_crs(epsg=3857, allow_override=True)
+            assert sgpd_series.crs == gpd_series.crs
+
     # -----------------------------------------------------------------------------
     # # Utils
     # -----------------------------------------------------------------------------
