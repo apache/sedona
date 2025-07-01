@@ -119,9 +119,6 @@ class GeoSeries(GeoFrame, pspd.Series):
             assert not copy
             assert not fastpath
 
-            self._anchor = data
-            self._col_label = index
-
             data_crs = None
             if hasattr(data, "crs"):
                 data_crs = data.crs
@@ -132,17 +129,20 @@ class GeoSeries(GeoFrame, pspd.Series):
                     "allow_override=True)' to overwrite CRS or "
                     "'GeoSeries.to_crs(crs)' to reproject geometries. "
                 )
-            # This is a temporary workaround since pandas on pyspark errors when creating a ps.Series from a ps.Series
-            # This is NOT a scalable solution, but should be resolved if/once https://github.com/apache/spark/pull/51300 is merged in
-            data = data.to_pandas()
+            # This is a temporary workaround since pyspark errors when creating a ps.Series from a ps.Series
+            # This is NOT a scalable solution since we call to_pandas() on the data and is a hacky solution
+            # but this should be resolved if/once https://github.com/apache/spark/pull/51300 is merged in.
+            # For now, we reset self._anchor = data to have keep the geometry information (e.g crs) that's lost in to_pandas()
             super().__init__(
-                data=data,
+                data=data.to_pandas(),
                 index=index,
                 dtype=dtype,
                 name=name,
                 copy=copy,
                 fastpath=fastpath,
             )
+
+            self._anchor = data
         else:
             if isinstance(data, pd.Series):
                 assert index is None
