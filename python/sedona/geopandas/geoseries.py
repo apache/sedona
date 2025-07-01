@@ -17,7 +17,7 @@
 
 import os
 import typing
-from typing import Any, Union
+from typing import Any, Union, Literal
 
 import geopandas as gpd
 import pandas as pd
@@ -27,7 +27,7 @@ from pyspark.pandas._typing import Dtype
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas.internal import InternalFrame
 from pyspark.pandas.series import first_series
-from pyspark.pandas.utils import scol_for
+from pyspark.pandas.utils import scol_for, log_advice
 from pyspark.sql.types import BinaryType
 
 import shapely
@@ -51,13 +51,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         """
         Return a string representation of the GeoSeries in WKT format.
         """
-        try:
-            gpd_series = self.to_geopandas()
-            return gpd_series.__repr__()
-
-        except Exception as e:
-            # Fallback to parent's representation if conversion fails
-            return super().__repr__()
+        gpd_series = self.to_geopandas()
+        return gpd_series.__repr__()
 
     def __init__(
         self,
@@ -126,6 +121,17 @@ class GeoSeries(GeoFrame, pspd.Series):
 
             self._anchor = data
             self._col_label = index
+
+            data_crs = None
+            if hasattr(data, "crs"):
+                data_crs = data.crs
+            if data_crs is not None and crs is not None and data_crs != crs:
+                raise ValueError(
+                    "CRS mismatch between CRS of the passed geometries "
+                    "and 'crs'. Use 'GeoSeries.set_crs(crs, "
+                    "allow_override=True)' to overwrite CRS or "
+                    "'GeoSeries.to_crs(crs)' to reproject geometries. "
+                )
         else:
             if isinstance(data, pd.Series):
                 assert index is None
@@ -157,6 +163,180 @@ class GeoSeries(GeoFrame, pspd.Series):
                 fastpath=fastpath,
             )
 
+        if crs:
+            self.set_crs(crs, inplace=True)
+
+    @property
+    def crs(self) -> Union["CRS", None]:
+        """The Coordinate Reference System (CRS) as a ``pyproj.CRS`` object.
+
+        Returns None if the CRS is not set, and to set the value it
+        :getter: Returns a ``pyproj.CRS`` or None. When setting, the value
+        can be anything accepted by
+        :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
+        such as an authority string (eg "EPSG:4326") or a WKT string.
+
+        Note: This assumes all records in the GeoSeries are assumed to have the same CRS.
+
+        Examples
+        --------
+        >>> s.crs  # doctest: +SKIP
+        <Geographic 2D CRS: EPSG:4326>
+        Name: WGS 84
+        Axis Info [ellipsoidal]:
+        - Lat[north]: Geodetic latitude (degree)
+        - Lon[east]: Geodetic longitude (degree)
+        Area of Use:
+        - name: World
+        - bounds: (-180.0, -90.0, 180.0, 90.0)
+        Datum: World Geodetic System 1984
+        - Ellipsoid: WGS 84
+        - Prime Meridian: Greenwich
+
+        See Also
+        --------
+        GeoSeries.set_crs : assign CRS
+        GeoSeries.to_crs : re-project to another CRS
+        """
+        from pyproj import CRS
+
+        tmp_df = self._process_geometry_column("ST_SRID", rename="crs")
+        srid = tmp_df.take([0])[0]
+        # Sedona returns 0 if doesn't exist
+        return CRS.from_user_input(srid) if srid else None
+
+    @crs.setter
+    def crs(self, value: Union["CRS", None]):
+        # Implementation of the abstract method
+        self.set_crs(value, inplace=True)
+
+    @typing.overload
+    def set_crs(
+        self,
+        crs: Union[Any, None] = None,
+        epsg: Union[int, None] = None,
+        inplace: Literal[True] = True,
+        allow_override: bool = False,
+    ) -> None: ...
+
+    @typing.overload
+    def set_crs(
+        self,
+        crs: Union[Any, None] = None,
+        epsg: Union[int, None] = None,
+        inplace: Literal[False] = False,
+        allow_override: bool = False,
+    ) -> "GeoSeries": ...
+
+    def set_crs(
+        self,
+        crs: Union[Any, None] = None,
+        epsg: Union[int, None] = None,
+        inplace: bool = False,
+        allow_override: bool = False,
+    ) -> Union["GeoSeries", None]:
+        """
+        Set the Coordinate Reference System (CRS) of a ``GeoSeries``.
+
+        Pass ``None`` to remove CRS from the ``GeoSeries``.
+
+        Notes
+        -----
+        The underlying geometries are not transformed to this CRS. To
+        transform the geometries to a new CRS, use the ``to_crs`` method.
+
+        Parameters
+        ----------
+        crs : pyproj.CRS | None, optional
+            The value can be anything accepted
+            by :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
+            such as an authority string (eg "EPSG:4326") or a WKT string.
+        epsg : int, optional if `crs` is specified
+            EPSG code specifying the projection.
+        inplace : bool, default False
+            If True, the CRS of the GeoSeries will be changed in place
+            (while still returning the result) instead of making a copy of
+            the GeoSeries.
+        allow_override : bool, default False
+            If the GeoSeries already has a CRS, allow to replace the
+            existing CRS, even when both are not equal.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point
+        >>> s = geopandas.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        >>> s
+        0    POINT (1 1)
+        1    POINT (2 2)
+        2    POINT (3 3)
+        dtype: geometry
+
+        Setting CRS to a GeoSeries without one:
+
+        >>> s.crs is None
+        True
+
+        >>> s = s.set_crs('epsg:3857')
+        >>> s.crs  # doctest: +SKIP
+        <Projected CRS: EPSG:3857>
+        Name: WGS 84 / Pseudo-Mercator
+        Axis Info [cartesian]:
+        - X[east]: Easting (metre)
+        - Y[north]: Northing (metre)
+        Area of Use:
+        - name: World - 85°S to 85°N
+        - bounds: (-180.0, -85.06, 180.0, 85.06)
+        Coordinate Operation:
+        - name: Popular Visualisation Pseudo-Mercator
+        - method: Popular Visualisation Pseudo Mercator
+        Datum: World Geodetic System 1984
+        - Ellipsoid: WGS 84
+        - Prime Meridian: Greenwich
+
+        Overriding existing CRS:
+
+        >>> s = s.set_crs(4326, allow_override=True)
+
+        Without ``allow_override=True``, ``set_crs`` returns an error if you try to
+        override CRS.
+
+        See Also
+        --------
+        GeoSeries.to_crs : re-project to another CRS
+
+        """
+        from pyproj import CRS
+
+        if crs is not None:
+            crs = CRS.from_user_input(crs)
+        elif epsg is not None:
+            crs = CRS.from_epsg(epsg)
+
+        curr_crs = self.crs
+
+        if not allow_override and curr_crs is not None and not curr_crs == crs:
+            raise ValueError(
+                "The GeoSeries already has a CRS which is not equal to the passed "
+                "CRS. Specify 'allow_override=True' to allow replacing the existing "
+                "CRS without doing any transformation. If you actually want to "
+                "transform the geometries, use 'GeoSeries.to_crs' instead."
+            )
+
+        # 0 indicates no srid in sedona
+        new_epsg = crs.to_epsg() if crs else 0
+        # Keep the same column name instead of renaming it
+        result = self._process_geometry_column("ST_SetSRID", rename="", srid=new_epsg)
+
+        if inplace:
+            self._update_anchor(result._to_spark_pandas_df())
+            return None
+
+        return result
+
     def _process_geometry_column(
         self, operation: str, rename: str, *args, **kwargs
     ) -> "GeoSeries":
@@ -169,7 +349,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         operation : str
             The spatial operation to apply (e.g., 'ST_Area', 'ST_Buffer').
         rename : str
-            The name of the resulting column.
+            The name of the resulting column. If empty, the old column name is maintained.
         args : tuple
             Positional arguments for the operation.
         kwargs : dict
@@ -258,9 +438,18 @@ class GeoSeries(GeoFrame, pspd.Series):
         Returns:
         - geopandas.GeoSeries: A geopandas GeoSeries.
         """
+        from pyspark.pandas.utils import log_advice
+
+        log_advice(
+            "`to_geopandas` loads all data into the driver's memory. "
+            "It should only be used if the resulting geopandas GeoSeries is expected to be small."
+        )
         return self._to_geopandas()
 
     def _to_geopandas(self) -> gpd.GeoSeries:
+        """
+        Same as `to_geopandas()`, without issuing the advice log for internal usage.
+        """
         pd_series = self._to_internal_pandas()
         try:
             return gpd.GeoSeries(
@@ -270,7 +459,10 @@ class GeoSeries(GeoFrame, pspd.Series):
             return gpd.GeoSeries(pd_series)
 
     def to_spark_pandas(self) -> pspd.Series:
-        return pspd.Series(self._to_internal_pandas())
+        return pspd.Series(self._psdf._to_internal_pandas())
+
+    def _to_spark_pandas_df(self) -> pspd.DataFrame:
+        return pspd.DataFrame(self._psdf._internal)
 
     @property
     def geometry(self) -> "GeoSeries":
@@ -334,16 +526,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         dtype: float64
         """
         return self._process_geometry_column("ST_Area", rename="area").to_spark_pandas()
-
-    @property
-    def crs(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @crs.setter
-    def crs(self, value):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
 
     @property
     def geom_type(self):
@@ -882,7 +1064,7 @@ class GeoSeries(GeoFrame, pspd.Series):
     # # Utils
     # -----------------------------------------------------------------------------
 
-    def get_first_geometry_column(self):
+    def get_first_geometry_column(self) -> Union[str, None]:
         first_binary_or_geometry_col = next(
             (
                 field.name
