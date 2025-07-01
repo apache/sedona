@@ -1164,7 +1164,83 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @classmethod
     def from_xy(cls, x, y, z=None, index=None, crs=None, **kwargs) -> "GeoSeries":
-        raise NotImplementedError("GeoSeries.from_xy() is not implemented yet.")
+        """
+        Alternate constructor to create a :class:`~geopandas.GeoSeries` of Point
+        geometries from lists or arrays of x, y(, z) coordinates
+
+        In case of geographic coordinates, it is assumed that longitude is captured
+        by ``x`` coordinates and latitude by ``y``.
+
+        Parameters
+        ----------
+        x, y, z : iterable
+        index : array-like or Index, optional
+            The index for the GeoSeries. If not given and all coordinate inputs
+            are Series with an equal index, that index is used.
+        crs : value, optional
+            Coordinate Reference System of the geometry objects. Can be anything
+            accepted by
+            :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
+            such as an authority string (eg "EPSG:4326") or a WKT string.
+        **kwargs
+            Additional arguments passed to the Series constructor,
+            e.g. ``name``.
+
+        Returns
+        -------
+        GeoSeries
+
+        See Also
+        --------
+        GeoSeries.from_wkt
+        points_from_xy
+
+        Examples
+        --------
+
+        >>> x = [2.5, 5, -3.0]
+        >>> y = [0.5, 1, 1.5]
+        >>> s = geopandas.GeoSeries.from_xy(x, y, crs="EPSG:4326")
+        >>> s
+        0    POINT (2.5 0.5)
+        1    POINT (5 1)
+        2    POINT (-3 1.5)
+        dtype: geometry
+        """
+        from pyspark.sql.types import StructType, StructField, DoubleType
+
+        schema = StructType(
+            [StructField("x", DoubleType(), True), StructField("y", DoubleType(), True)]
+        )
+
+        # Spark doesn't automatically cast ints to floats for us
+        x = [float(num) for num in x]
+        y = [float(num) for num in y]
+        z = [float(num) for num in z] if z else None
+
+        if z:
+            data = list(zip(x, y, z))
+            select = f"ST_PointZ(`x`, `y`, `z`)"
+            schema.add(StructField("z", DoubleType(), True))
+        else:
+            data = list(zip(x, y))
+            select = f"ST_Point(`x`, `y`)"
+
+        geoseries = cls._create_from_select(
+            select,
+            data,
+            schema,
+            index,
+            crs,
+            **kwargs,
+        )
+
+        if crs:
+            from pyproj import CRS
+
+            geoseries.crs = CRS.from_user_input(crs).to_epsg()
+
+        return geoseries
 
     @classmethod
     def from_shapely(
@@ -1185,11 +1261,13 @@ class GeoSeries(GeoFrame, pspd.Series):
         from pyspark.pandas.internal import InternalField
         import numpy as np
 
-        if isinstance(data, list) and not isinstance(data[0], tuple):
+        if isinstance(data, list) and not isinstance(data[0], (tuple, list)):
             data = [(obj,) for obj in data]
 
         select = f"{select} as geometry"
 
+        print(data)
+        print(select)
         spark_df = default_session().createDataFrame(data, schema=schema)
         spark_df = spark_df.selectExpr(select)
 
