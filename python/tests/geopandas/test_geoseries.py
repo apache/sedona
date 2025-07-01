@@ -111,7 +111,14 @@ class TestGeoSeries(TestBase):
         pass
 
     def test_from_wkt(self):
-        pass
+        wkts = [
+            "POINT (1 1)",
+            "POINT (2 2)",
+            "POINT (3 3)",
+        ]
+        s = sgpd.GeoSeries.from_wkt(wkts)
+        expected = gpd.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        self.check_sgpd_equals_gpd(s, expected)
 
     def test_from_xy(self):
         pass

@@ -132,6 +132,17 @@ class GeoSeries(GeoFrame, pspd.Series):
                     "allow_override=True)' to overwrite CRS or "
                     "'GeoSeries.to_crs(crs)' to reproject geometries. "
                 )
+            # This is a temporary workaround since pandas on pyspark errors when creating a ps.Series from a ps.Series
+            # This is NOT a scalable solution, but should be resolved if/once https://github.com/apache/spark/pull/51300 is merged in
+            data = data.to_pandas()
+            super().__init__(
+                data=data,
+                index=index,
+                dtype=dtype,
+                name=name,
+                copy=copy,
+                fastpath=fastpath,
+            )
         else:
             if isinstance(data, pd.Series):
                 assert index is None
@@ -1007,7 +1018,66 @@ class GeoSeries(GeoFrame, pspd.Series):
         on_invalid="raise",
         **kwargs,
     ) -> "GeoSeries":
-        raise NotImplementedError("GeoSeries.from_wkt() is not implemented yet.")
+        """
+        Alternate constructor to create a ``GeoSeries``
+        from a list or array of WKT objects
+
+        Parameters
+        ----------
+        data : array-like, Series
+            Series, list, or array of WKT objects
+        index : array-like or Index
+            The index for the GeoSeries.
+        crs : value, optional
+            Coordinate Reference System of the geometry objects. Can be anything
+            accepted by
+            :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
+            such as an authority string (eg "EPSG:4326") or a WKT string.
+        on_invalid : {"raise", "warn", "ignore"}, default "raise"
+            - raise: an exception will be raised if a WKT input geometry is invalid.
+            - warn: a warning will be raised and invalid WKT geometries will be
+              returned as ``None``.
+            - ignore: invalid WKT geometries will be returned as ``None`` without a
+              warning.
+            - fix: an effort is made to fix invalid input geometries (e.g. close
+              unclosed rings). If this is not possible, they are returned as ``None``
+              without a warning. Requires GEOS >= 3.11 and shapely >= 2.1.
+
+        kwargs
+            Additional arguments passed to the Series constructor,
+            e.g. ``name``.
+
+        Returns
+        -------
+        GeoSeries
+
+        See Also
+        --------
+        GeoSeries.from_wkb
+
+        Examples
+        --------
+
+        >>> wkts = [
+        ... 'POINT (1 1)',
+        ... 'POINT (2 2)',
+        ... 'POINT (3 3)',
+        ... ]
+        >>> s = geopandas.GeoSeries.from_wkt(wkts)
+        >>> s
+        0    POINT (1 1)
+        1    POINT (2 2)
+        2    POINT (3 3)
+        dtype: geometry
+        """
+        return cls._create_from_select(
+            f"ST_GeomFromText(`data`) as geometry",
+            data,
+            index,
+            crs,
+            on_invalid,
+            **kwargs,
+        )
 
     @classmethod
     def from_xy(cls, x, y, z=None, index=None, crs=None, **kwargs) -> "GeoSeries":
@@ -1022,6 +1092,44 @@ class GeoSeries(GeoFrame, pspd.Series):
     @classmethod
     def from_arrow(cls, arr, **kwargs) -> "GeoSeries":
         raise NotImplementedError("GeoSeries.from_arrow() is not implemented yet.")
+
+    @classmethod
+    def _create_from_select(
+        cls, select: str, data, index, crs, on_invalid, **kwargs
+    ) -> "GeoSeries":
+        if on_invalid != "raise":
+            raise NotImplementedError(
+                "GeoSeries.from_wkt(): only on_invalid='raise' is implemented"
+            )
+
+        from pyspark.pandas.utils import default_session
+        from pyspark.sql.types import StringType, StructType, StructField
+        from pyspark.pandas.internal import InternalField
+        import numpy as np
+
+        if isinstance(data, list) and not isinstance(data[0], tuple):
+            data = [(obj,) for obj in data]
+
+        schema = StructType([StructField("data", StringType(), True)])
+        spark_df = default_session().createDataFrame(data, schema=schema)
+        spark_df = spark_df.selectExpr(select)
+
+        internal = InternalFrame(
+            spark_frame=spark_df,
+            index_spark_columns=None,
+            column_labels=[("geometry",)],
+            data_spark_columns=[scol_for(spark_df, "geometry")],
+            data_fields=[
+                InternalField(np.dtype("object"), spark_df.schema["geometry"])
+            ],
+            column_label_names=[("geometry",)],
+        )
+        return GeoSeries(
+            first_series(PandasOnSparkDataFrame(internal)),
+            index,
+            crs=crs,
+            name=kwargs.get("name", None),
+        )
 
     def to_file(
         self,

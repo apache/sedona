@@ -243,7 +243,13 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_from_wkt(self):
-        pass
+        from shapely import to_wkt
+
+        for _, geom in self.geoms:
+            wkt = [to_wkt(g) for g in geom]
+            sgpd_result = GeoSeries.from_wkt(wkt)
+            gpd_result = gpd.GeoSeries.from_wkt(wkt)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_from_xy(self):
         pass
