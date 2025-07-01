@@ -19,6 +19,7 @@ import pytest
 import pandas as pd
 import geopandas as gpd
 import sedona.geopandas as sgpd
+from sedona.geopandas import GeoSeries
 from tests.test_base import TestBase
 from shapely import wkt
 from shapely.geometry import Point, LineString, Polygon, GeometryCollection
@@ -154,7 +155,23 @@ class TestGeoSeries(TestBase):
         pass
 
     def test_length(self):
-        pass
+        geoseries = GeoSeries(
+            [
+                Point(0, 0),
+                LineString([(0, 0), (1, 1)]),
+                Polygon([(0, 0), (1, 0), (1, 1)]),
+                GeometryCollection(
+                    [
+                        Point(0, 0),
+                        LineString([(0, 0), (1, 1)]),
+                        Polygon([(0, 0), (1, 0), (1, 1)]),
+                    ]
+                ),
+            ]
+        )
+        result = geoseries.length.to_pandas()
+        expected = pd.Series([0.000000, 1.414214, 3.414214, 4.828427])
+        assert_series_equal(result, expected)
 
     def test_is_valid(self):
         pass

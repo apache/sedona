@@ -340,6 +340,7 @@ class GeoSeries(GeoFrame, pspd.Series):
     ) -> "GeoSeries":
         """
         Helper method to process a single geometry column with a specified operation.
+        This method wraps the _query_geometry_column method for simpler convenient use.
 
         Parameters
         ----------
@@ -360,44 +361,65 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Find the first column with BinaryType or GeometryType
         first_col = self.get_first_geometry_column()  # TODO: fixme
 
-        if first_col:
-            data_type = self._internal.spark_frame.schema[first_col].dataType
+        # Handle both positional and keyword arguments
+        all_args = list(args)
+        for k, v in kwargs.items():
+            all_args.append(v)
 
-            # Handle both positional and keyword arguments
-            all_args = list(args)
-            for k, v in kwargs.items():
-                all_args.append(v)
+        # Join all arguments as comma-separated values
+        params = ""
+        if all_args:
+            params_list = [
+                str(arg) if isinstance(arg, (int, float)) else repr(arg)
+                for arg in all_args
+            ]
+            params = f", {', '.join(params_list)}"
 
-            # Join all arguments as comma-separated values
-            params = ""
-            if all_args:
-                params_list = [
-                    str(arg) if isinstance(arg, (int, float)) else repr(arg)
-                    for arg in all_args
-                ]
-                params = f", {', '.join(params_list)}"
+        sql_expr = f"{operation}(`{first_col}`{params})"
 
-            rename = first_col if not rename else rename
+        return self._query_geometry_column(sql_expr, first_col, rename)
 
-            if isinstance(data_type, BinaryType):
-                sql_expr = (
-                    f"{operation}(ST_GeomFromWKB(`{first_col}`){params}) as `{rename}`"
-                )
-            else:
-                sql_expr = f"{operation}(`{first_col}`{params}) as `{rename}`"
+    def _query_geometry_column(
+        self, query: str, col: Union[str, None], rename: str
+    ) -> "GeoSeries":
+        """
+        Helper method to query a single geometry column with a specified operation.
 
-            sdf = self._internal.spark_frame.selectExpr(sql_expr)
-            internal = InternalFrame(
-                spark_frame=sdf,
-                index_spark_columns=None,
-                column_labels=[self._column_label],
-                data_spark_columns=[scol_for(sdf, rename)],
-                data_fields=[self._internal.data_fields[0]],
-                column_label_names=self._internal.column_label_names,
-            )
-            return _to_geo_series(first_series(PandasOnSparkDataFrame(internal)))
-        else:
+        Parameters
+        ----------
+        query : str
+            The query to apply to the geometry column.
+        col : str
+            The name of the column to query.
+        rename : str
+            The name of the resulting column.
+
+        Returns
+        -------
+        GeoSeries
+            A GeoSeries with the operation applied to the geometry column.
+        """
+        if not col:
             raise ValueError("No valid geometry column found.")
+
+        data_type = self._internal.spark_frame.schema[col].dataType
+
+        if isinstance(data_type, BinaryType):
+            # the backticks here are important so we don't match strings that happen to be the same as the column name
+            query = query.replace(f"`{col}`", f"ST_GeomFromWKB(`{col}`)")
+
+        sql_expr = f"{query} as `{rename}`"
+
+        sdf = self._internal.spark_frame.selectExpr(sql_expr)
+        internal = InternalFrame(
+            spark_frame=sdf,
+            index_spark_columns=None,
+            column_labels=[self._column_label],
+            data_spark_columns=[scol_for(sdf, rename)],
+            data_fields=[self._internal.data_fields[0]],
+            column_label_names=self._internal.column_label_names,
+        )
+        return _to_geo_series(first_series(PandasOnSparkDataFrame(internal)))
 
     @property
     def dtypes(self) -> Union[gpd.GeoSeries, pd.Series, Dtype]:
@@ -511,9 +533,44 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    def length(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def length(self) -> pspd.Series:
+        """
+        Returns a Series containing the length of each geometry in the GeoSeries.
+
+        In the case of a (Multi)Polygon it measures the length of its exterior (i.e. perimeter).
+
+        For a GeometryCollection it measures sums the values for each of the individual geometries.
+
+        Returns
+        -------
+        Series
+            A Series containing the length of each geometry.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Polygon
+        >>> import geopandas as gpd
+        >>> from sedona.geopandas import GeoSeries
+
+        >>> gs = GeoSeries([Point(0, 0), LineString([(0, 0), (1, 1)]), Polygon([(0, 0), (1, 0), (1, 1)]), GeometryCollection([Point(0, 0), LineString([(0, 0), (1, 1)]), Polygon([(0, 0), (1, 0), (1, 1)])])])
+        >>> gs.length
+        0    0.000000
+        1    1.414214
+        2    3.414214
+        3    4.828427
+        dtype: float64
+        """
+        col = self.get_first_geometry_column()
+        select = f"""
+            CASE
+                WHEN GeometryType(`{col}`) IN ('LINESTRING', 'MULTILINESTRING') THEN ST_Length(`{col}`)
+                WHEN GeometryType(`{col}`) IN ('POLYGON', 'MULTIPOLYGON') THEN ST_Perimeter(`{col}`)
+                WHEN GeometryType(`{col}`) IN ('POINT', 'MULTIPOINT') THEN 0.0
+                WHEN GeometryType(`{col}`) IN ('GEOMETRYCOLLECTION') THEN ST_Length(`{col}`) + ST_Perimeter(`{col}`)
+            END"""
+        return self._query_geometry_column(
+            select, col, rename="length"
+        ).to_spark_pandas()
 
     @property
     def is_valid(self):
