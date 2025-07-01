@@ -420,6 +420,21 @@ class TestMatchGeopandasSeries(TestBase):
     def test_union_all(self):
         pass
 
+    def test_intersection(self):
+        geometries = [
+            Polygon([(0, 0), (1, 0), (1, 1)]),
+            Polygon([(2, 0), (3, 0), (3, 1)]),
+            Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+            Polygon([(0, 0), (3, 0), (3, 3), (0, 2)]),
+            Polygon([(2, 0), (3, 0), (3, 3), (2, 3)]),
+            Point(0, 0),
+        ]
+        for g1 in geometries:
+            for g2 in geometries:
+                sgpd_result = GeoSeries(g1).intersection(GeoSeries(g2))
+                gpd_result = gpd.GeoSeries(g1).intersection(gpd.GeoSeries(g2))
+                self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
     def test_intersection_all(self):
         pass
 
@@ -449,6 +464,9 @@ class TestMatchGeopandasSeries(TestBase):
         assert isinstance(expected, gpd.GeoSeries)
         sgpd_result = actual.to_geopandas()
         for a, e in zip(sgpd_result, expected):
+            # Sometimes sedona and geopandas both return empty geometries but of different types (e.g Point and Polygon)
+            if a.is_empty and e.is_empty:
+                continue
             self.assert_geometry_almost_equal(
                 a, e, tolerance=1e-2
             )  # increased tolerance from 1e-6
