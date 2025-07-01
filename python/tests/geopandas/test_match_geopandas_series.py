@@ -376,7 +376,10 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_envelope(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).envelope
+            gpd_result = gpd.GeoSeries(geom).envelope
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_minimum_rotated_rectangle(self):
         pass
