@@ -32,6 +32,7 @@ from shapely.geometry import (
     LineString,
     MultiPolygon,
     GeometryCollection,
+    LinearRing,
 )
 
 from sedona.geopandas import GeoSeries
@@ -213,13 +214,25 @@ class TestMatchGeopandasSeries(TestBase):
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_x(self):
-        pass
+        for pt in self.points:
+            sgpd_result = GeoSeries(pt).x
+            assert isinstance(sgpd_result, ps.Series)
+            gpd_result = gpd.GeoSeries(pt).x
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_y(self):
-        pass
+        for pt in self.points:
+            sgpd_result = GeoSeries(pt).y
+            assert isinstance(sgpd_result, ps.Series)
+            gpd_result = gpd.GeoSeries(pt).y
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_z(self):
-        pass
+        for pt in self.points:
+            sgpd_result = GeoSeries(pt).z
+            assert isinstance(sgpd_result, ps.Series)
+            gpd_result = gpd.GeoSeries(pt).z
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_m(self):
         pass
@@ -297,16 +310,28 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_length(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).length
+            assert isinstance(sgpd_result, ps.Series)
+            gpd_result = gpd.GeoSeries(geom).length
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_is_valid(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).is_valid
+            assert isinstance(sgpd_result, ps.Series)
+            gpd_result = gpd.GeoSeries(geom).is_valid
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_is_valid_reason(self):
         pass
 
     def test_is_empty(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).is_empty
+            assert isinstance(sgpd_result, ps.Series)
+            gpd_result = gpd.GeoSeries(geom).is_empty
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_count_coordinates(self):
         pass
@@ -318,7 +343,16 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_is_simple(self):
-        pass
+        data = [
+            LineString([(0, 0), (0, 0)]),
+            LineString([(0, 0), (1, 1), (1, -1), (0, 1)]),
+            LineString([(0, 0), (1, 1), (0, 0)]),
+            LinearRing([(0, 0), (1, 1), (1, 0), (0, 1), (0, 0)]),
+            LinearRing([(0, 0), (-1, 1), (-1, -1), (1, -1)]),
+        ]
+        sgpd_result = GeoSeries(data).is_simple
+        gpd_result = gpd.GeoSeries(data).is_simple
+        self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_is_ring(self):
         pass
@@ -330,7 +364,10 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_has_z(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).has_z
+            gpd_result = gpd.GeoSeries(geom).has_z
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_get_precision(self):
         pass
@@ -422,6 +459,28 @@ class TestMatchGeopandasSeries(TestBase):
     def test_union_all(self):
         pass
 
+    def test_intersects(self):
+        for _, geom in self.geoms:
+            for _, geom2 in self.geoms:
+                sgpd_result = GeoSeries(geom).intersects(GeoSeries(geom2))
+                gpd_result = gpd.GeoSeries(geom).intersects(gpd.GeoSeries(geom2))
+                self.check_pd_series_equal(sgpd_result, gpd_result)
+
+    def test_intersection(self):
+        geometries = [
+            Polygon([(0, 0), (1, 0), (1, 1)]),
+            Polygon([(2, 0), (3, 0), (3, 1)]),
+            Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+            Polygon([(0, 0), (3, 0), (3, 3), (0, 2)]),
+            Polygon([(2, 0), (3, 0), (3, 3), (2, 3)]),
+            Point(0, 0),
+        ]
+        for g1 in geometries:
+            for g2 in geometries:
+                sgpd_result = GeoSeries(g1).intersection(GeoSeries(g2))
+                gpd_result = gpd.GeoSeries(g1).intersection(gpd.GeoSeries(g2))
+                self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
     def test_intersection_all(self):
         pass
 
@@ -465,6 +524,9 @@ class TestMatchGeopandasSeries(TestBase):
         assert isinstance(expected, gpd.GeoSeries)
         sgpd_result = actual.to_geopandas()
         for a, e in zip(sgpd_result, expected):
+            # Sometimes sedona and geopandas both return empty geometries but of different types (e.g Point and Polygon)
+            if a.is_empty and e.is_empty:
+                continue
             self.assert_geometry_almost_equal(
                 a, e, tolerance=1e-2
             )  # increased tolerance from 1e-6
