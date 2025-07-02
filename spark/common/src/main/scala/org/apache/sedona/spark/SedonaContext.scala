@@ -26,10 +26,11 @@ import org.apache.sedona.sql.UDT.UdtRegistrator
 import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.catalyst.rules.Rule
+import org.apache.spark.sql.execution.SparkStrategy
 import org.apache.spark.sql.sedona_sql.optimization._
 import org.apache.spark.sql.sedona_sql.strategy.join.JoinQueryDetector
 import org.apache.spark.sql.sedona_sql.strategy.physical.function.EvalPhysicalFunctionStrategy
-import org.apache.spark.sql.{SQLContext, SparkSession, Strategy}
+import org.apache.spark.sql.{SQLContext, SparkSession}
 
 import scala.annotation.StaticAnnotation
 import scala.util.Try
@@ -72,7 +73,7 @@ object SedonaContext {
         .forName("org.apache.spark.sql.udf.SedonaArrowStrategy")
         .getDeclaredConstructor()
         .newInstance()
-        .asInstanceOf[Strategy])
+        .asInstanceOf[SparkStrategy])
 
     val extractSedonaUDFRule =
       Try(

@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import pyspark
 import pyspark.sql.functions as f
 import pytest
 from sklearn.cluster import DBSCAN as sklearnDBSCAN
@@ -25,6 +26,9 @@ from sedona.spark.sql.st_functions import ST_Buffer
 from sedona.spark.stats import dbscan
 
 
+@pytest.mark.skipif(
+    pyspark.__version__ >= "4", reason="DBSCAN is not supported yet on Spark 4"
+)
 class TestDBScan(TestBase):
 
     @pytest.fixture

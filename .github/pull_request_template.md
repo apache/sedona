@@ -7,7 +7,7 @@
 ## Is this PR related to a ticket?
 
 - Yes, and the PR name follows the format `[SEDONA-XXX] my subject`.
-- Yes, and the PR name follows the format `[GH-XXX] my subject`.
+- Yes, and the PR name follows the format `[GH-XXX] my subject`. Closes #<issue_number>
 
 - No:
   - this is a documentation update. The PR name follows the format `[DOCS] my subject`

@@ -19,7 +19,7 @@
 
 Before starting the Sedona journey, you need to make sure your Apache Spark cluster is ready.
 
-There are two ways to use a Scala or Java library with Apache Spark. You can user either one to run Sedona.
+There are two ways to use a Scala or Java library with Apache Spark. You can use either one to run Sedona.
 
 * Spark interactive Scala or SQL shell: easy to start, good for new learners to try simple functions
 * Self-contained Scala / Java project: a steep learning curve of package management, but good for large projects
