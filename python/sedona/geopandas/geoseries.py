@@ -468,10 +468,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         pd_series = self._to_internal_pandas()
         try:
             return gpd.GeoSeries(
-                pd_series.map(lambda wkb: shapely.wkb.loads(bytes(wkb)))
+                pd_series.map(lambda wkb: shapely.wkb.loads(bytes(wkb))), crs=self.crs
             )
         except Exception as e:
-            return gpd.GeoSeries(pd_series)
+            return gpd.GeoSeries(pd_series, crs=self.crs)
 
     def to_spark_pandas(self) -> pspd.Series:
         return pspd.Series(self._psdf._to_internal_pandas())
@@ -1383,7 +1383,102 @@ class GeoSeries(GeoFrame, pspd.Series):
     def to_crs(
         self, crs: Union[Any, None] = None, epsg: Union[int, None] = None
     ) -> "GeoSeries":
-        raise NotImplementedError("GeoSeries.to_crs() is not implemented yet.")
+        """Returns a ``GeoSeries`` with all geometries transformed to a new
+        coordinate reference system.
+
+        Transform all geometries in a GeoSeries to a different coordinate
+        reference system.  The ``crs`` attribute on the current GeoSeries must
+        be set.  Either ``crs`` or ``epsg`` may be specified for output.
+
+        This method will transform all points in all objects.  It has no notion
+        of projecting entire geometries.  All segments joining points are
+        assumed to be lines in the current projection, not geodesics.  Objects
+        crossing the dateline (or other projection boundary) will have
+        undesirable behavior.
+
+        Parameters
+        ----------
+        crs : pyproj.CRS, optional if `epsg` is specified
+            The value can be anything accepted
+            by :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
+            such as an authority string (eg "EPSG:4326") or a WKT string.
+        epsg : int, optional if `crs` is specified
+            EPSG code specifying output projection.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point
+        >>> from geopandas.array import from_shapely, to_wkt
+        >>> a = from_shapely([Point(1, 1), Point(2, 2), Point(3, 3)], crs=4326)
+        >>> to_wkt(a)
+        array(['POINT (1 1)', 'POINT (2 2)', 'POINT (3 3)'], dtype=object)
+        >>> a.crs  # doctest: +SKIP
+        <Geographic 2D CRS: EPSG:4326>
+        Name: WGS 84
+        Axis Info [ellipsoidal]:
+        - Lat[north]: Geodetic latitude (degree)
+        - Lon[east]: Geodetic longitude (degree)
+        Area of Use:
+        - name: World
+        - bounds: (-180.0, -90.0, 180.0, 90.0)
+        Datum: World Geodetic System 1984
+        - Ellipsoid: WGS 84
+        - Prime Meridian: Greenwich
+
+        >>> a = a.to_crs(3857)
+        >>> to_wkt(a)
+        array(['POINT (111319.490793 111325.142866)',
+               'POINT (222638.981587 222684.208506)',
+               'POINT (333958.47238 334111.171402)'], dtype=object)
+        >>> a.crs  # doctest: +SKIP
+        <Projected CRS: EPSG:3857>
+        Name: WGS 84 / Pseudo-Mercator
+        Axis Info [cartesian]:
+        - X[east]: Easting (metre)
+        - Y[north]: Northing (metre)
+        Area of Use:
+        - name: World - 85°S to 85°N
+        - bounds: (-180.0, -85.06, 180.0, 85.06)
+        Coordinate Operation:
+        - name: Popular Visualisation Pseudo-Mercator
+        - method: Popular Visualisation Pseudo Mercator
+        Datum: World Geodetic System 1984
+        - Ellipsoid: WGS 84
+        - Prime Meridian: Greenwich
+
+        """
+
+        from pyproj import CRS
+
+        old_crs = self.crs
+        if old_crs is None:
+            raise ValueError(
+                "Cannot transform naive geometries.  "
+                "Please set a crs on the object first."
+            )
+        assert isinstance(old_crs, CRS)
+
+        if crs is not None:
+            crs = CRS.from_user_input(crs)
+        elif epsg is not None:
+            crs = CRS.from_epsg(epsg)
+        else:
+            raise ValueError("Must pass either crs or epsg.")
+
+        # skip if the input CRS and output CRS are the exact same
+        if old_crs.is_exact_same(crs):
+            return self
+
+        col = self.get_first_geometry_column()
+        return self._query_geometry_column(
+            f"ST_Transform(`{col}`, 'EPSG:{old_crs.to_epsg()}', 'EPSG:{crs.to_epsg()}')",
+            col,
+            "",
+        )
 
     def estimate_utm_crs(self, datum_name: str = "WGS 84"):
         raise NotImplementedError(

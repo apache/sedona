@@ -146,7 +146,21 @@ class TestGeoSeries(TestBase):
         pass
 
     def test_to_crs(self):
-        pass
+        from pyproj import CRS
+
+        geoseries = sgpd.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)], crs=4326)
+        assert isinstance(geoseries.crs, CRS) and geoseries.crs.to_epsg() == 4326
+        result = geoseries.to_crs(3857)
+        assert isinstance(result.crs, CRS) and result.crs.to_epsg() == 3857
+        expected = gpd.GeoSeries(
+            [
+                Point(111319.49079327356, 111325.14286638486),
+                Point(222638.98158654712, 222684.20850554455),
+                Point(333958.4723798207, 334111.1714019597),
+            ],
+            crs=3857,
+        )
+        self.check_sgpd_equals_gpd(result, expected)
 
     def test_estimate_utm_crs(self):
         pass
