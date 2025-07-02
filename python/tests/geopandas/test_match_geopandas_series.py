@@ -313,7 +313,27 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_is_valid_reason(self):
-        pass
+        data = [
+            Polygon([(0, 0), (1, 1), (0, 1)]),
+            Polygon([(0, 0), (1, 1), (1, 0), (0, 1)]),  # bowtie geometry
+            Polygon([(0, 0), (2, 2), (2, 0)]),
+            Polygon(
+                [(0, 0), (2, 0), (1, 1), (2, 2), (0, 2), (1, 1), (0, 0)]
+            ),  # ring intersection
+            None,
+        ]
+        sgpd_result = GeoSeries(data).is_valid_reason()
+        assert isinstance(sgpd_result, ps.Series)
+        gpd_result = gpd.GeoSeries(data).is_valid_reason()
+        for a, e in zip(sgpd_result.to_pandas(), gpd_result):
+            if a is None and e is None:
+                continue
+            if a == "Valid Geometry":
+                assert e == "Valid Geometry"
+            elif "Self-intersection" in a:
+                assert "Self-intersection" in e
+            else:
+                raise ValueError(f"Unexpected result: {a} not equivalent to {e}")
 
     def test_is_empty(self):
         pass

@@ -193,7 +193,28 @@ class TestGeoSeries(TestBase):
         pass
 
     def test_is_valid_reason(self):
-        pass
+        s = sgpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                Polygon([(0, 0), (1, 1), (1, 0), (0, 1)]),  # bowtie geometry
+                Polygon([(0, 0), (2, 2), (2, 0)]),
+                Polygon(
+                    [(0, 0), (2, 0), (1, 1), (2, 2), (0, 2), (1, 1), (0, 0)]
+                ),  # ring intersection
+                None,
+            ]
+        )
+        result = s.is_valid_reason().to_pandas()
+        expected = pd.Series(
+            [
+                "Valid Geometry",
+                "Self-intersection at or near point (0.5, 0.5, NaN)",
+                "Valid Geometry",
+                "Ring Self-intersection at or near point (1.0, 1.0)",
+                None,
+            ]
+        )
+        assert_series_equal(result, expected)
 
     def test_is_empty(self):
         pass

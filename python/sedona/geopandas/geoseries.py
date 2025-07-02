@@ -150,7 +150,9 @@ class GeoSeries(GeoFrame, pspd.Series):
                     fastpath=fastpath,
                 )
             gs = gpd.GeoSeries(s)
-            pdf = pd.Series(gs.apply(lambda geom: geom.wkb))
+            pdf = pd.Series(
+                gs.apply(lambda geom: geom.wkb if geom is not None else None)
+            )
             # initialize the parent class pyspark Series with the pandas Series
             super().__init__(
                 data=pdf,
@@ -577,9 +579,49 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
-    def is_valid_reason(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def is_valid_reason(self) -> pspd.Series:
+        """Returns a ``Series`` of strings with the reason for invalidity of
+        each geometry.
+
+        Examples
+        --------
+
+        An example with one invalid polygon (a bowtie geometry crossing itself)
+        and one missing geometry:
+
+        >>> from shapely.geometry import Polygon
+        >>> s = geopandas.GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
+        ...         Polygon([(0,0), (1, 1), (1, 0), (0, 1)]),  # bowtie geometry
+        ...         Polygon([(0, 0), (2, 2), (2, 0)]),
+        ...         Polygon([(0, 0), (2, 0), (1, 1), (2, 2), (0, 2), (1, 1), (0, 0)]),
+        ...         None
+        ...     ]
+        ... )
+        >>> s
+        0         POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1    POLYGON ((0 0, 1 1, 1 0, 0 1, 0 0))
+        2         POLYGON ((0 0, 2 2, 2 0, 0 0))
+        3                                   None
+        dtype: geometry
+
+        >>> s.is_valid_reason()
+        0    Valid Geometry
+        1    Self-intersection at or near point (0.5, 0.5, NaN)
+        2    Valid Geometry
+        3    Ring Self-intersection at or near point (1.0, 1.0)
+        4    None
+        dtype: object
+
+        See also
+        --------
+        GeoSeries.is_valid : detect invalid geometries
+        GeoSeries.make_valid : fix invalid geometries
+        """
+        return self._process_geometry_column(
+            "ST_IsValidReason", rename="is_valid_reason"
+        ).to_spark_pandas()
 
     @property
     def is_empty(self):
