@@ -62,6 +62,9 @@ jobs:
       fail-fast: true
       matrix:
         include:
+          - spark: 4.0.0
+            scala: 2.13.8
+            jdk: '17'
           - spark: 3.5.0
             scala: 2.13.8
             jdk: '11'
@@ -102,6 +105,11 @@ jobs:
 
           if [ "${SPARK_VERSION}" == "3.5.0" ]; then
               pip install pyspark==3.5.0 pandas shapely apache-sedona pyarrow
+              export SPARK_HOME=$(python -c "import pyspark; print(pyspark.__path__[0])")
+          fi
+
+          if [ "${SPARK_VERSION}" == "4.0.0" ]; then
+              pip install pyspark==4.0.0 pandas shapely apache-sedona pyarrow
               export SPARK_HOME=$(python -c "import pyspark; print(pyspark.__path__[0])")
           fi
 

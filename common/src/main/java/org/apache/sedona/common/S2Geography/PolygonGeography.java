@@ -43,12 +43,12 @@ public class PolygonGeography extends S2Geography {
 
   @Override
   public int dimension() {
-    return polygon == null ? -1 : 2;
+    return 2;
   }
 
   @Override
   public int numShapes() {
-    return polygon == null ? 0 : 1;
+    return polygon.isEmpty() ? 0 : 1;
   }
 
   @Override
@@ -69,9 +69,6 @@ public class PolygonGeography extends S2Geography {
 
   @Override
   public void encode(UnsafeOutput out, EncodeOptions opts) throws IOException {
-    // 3) Write number of polygon
-    out.writeInt(numShapes());
-    // 4) Encode polygon
     polygon.encode(out);
     out.flush();
   }
@@ -96,19 +93,6 @@ public class PolygonGeography extends S2Geography {
 
     // 2) Skip past any covering cell-IDs written by encodeTagged
     tag.skipCovering(in);
-
-    // 3) Ensure we have at least 4 bytes for the count
-    if (in.available() < Integer.BYTES) {
-      throw new IOException("PolygonGeography.decodeTagged error: insufficient header bytes");
-    }
-
-    // 4) Read the number of polylines (4-byte)
-    int count = in.readInt();
-    // Decode each polygon
-    if (count != 1) {
-      throw new IOException(
-          "PolygonGeography.decode error: expected exactly one polygon, but found " + count);
-    }
 
     S2Polygon poly = S2Polygon.decode(in);
     geo = new PolygonGeography(poly);
