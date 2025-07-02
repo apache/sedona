@@ -1266,8 +1266,6 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         select = f"{select} as geometry"
 
-        print(data)
-        print(select)
         spark_df = default_session().createDataFrame(data, schema=schema)
         spark_df = spark_df.selectExpr(select)
 
