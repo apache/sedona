@@ -23,7 +23,7 @@ import sedona.geopandas as sgpd
 from sedona.geopandas import GeoSeries
 from tests.test_base import TestBase
 from shapely import wkt
-from shapely.geometry import Point, LineString, Polygon, GeometryCollection
+from shapely.geometry import Point, LineString, Polygon, GeometryCollection, LinearRing
 from pandas.testing import assert_series_equal
 
 
@@ -192,13 +192,29 @@ class TestGeoSeries(TestBase):
         assert_series_equal(result, expected)
 
     def test_is_valid(self):
-        pass
+        geoseries = sgpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                Polygon([(0, 0), (1, 1), (1, 0), (0, 1)]),  # bowtie geometry
+                Polygon([(0, 0), (2, 2), (2, 0)]),
+                None,
+            ]
+        )
+        result = geoseries.is_valid
+        expected = pd.Series([True, False, True, False])
+        assert_series_equal(result.to_pandas(), expected)
 
     def test_is_valid_reason(self):
         pass
 
     def test_is_empty(self):
-        pass
+        geoseries = sgpd.GeoSeries(
+            [Point(), Point(2, 1), Polygon([(0, 0), (1, 1), (0, 1)]), None],
+        )
+
+        result = geoseries.is_empty
+        expected = pd.Series([True, False, False, False])
+        assert_series_equal(result.to_pandas(), expected)
 
     def test_count_coordinates(self):
         pass
@@ -210,7 +226,17 @@ class TestGeoSeries(TestBase):
         pass
 
     def test_is_simple(self):
-        pass
+        s = sgpd.GeoSeries(
+            [
+                LineString([(0, 0), (1, 1), (1, -1), (0, 1)]),
+                LineString([(0, 0), (1, 1), (1, -1)]),
+                LinearRing([(0, 0), (1, 1), (1, -1), (0, 1)]),
+                LinearRing([(0, 0), (-1, 1), (-1, -1), (1, -1)]),
+            ]
+        )
+        result = s.is_simple
+        expected = pd.Series([False, True, False, True])
+        assert_series_equal(result.to_pandas(), expected)
 
     def test_is_ring(self):
         pass

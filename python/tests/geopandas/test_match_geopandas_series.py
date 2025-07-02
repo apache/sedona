@@ -32,6 +32,7 @@ from shapely.geometry import (
     LineString,
     MultiPolygon,
     GeometryCollection,
+    LinearRing,
 )
 
 from sedona.geopandas import GeoSeries
@@ -310,13 +311,21 @@ class TestMatchGeopandasSeries(TestBase):
             self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_is_valid(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).is_valid
+            assert isinstance(sgpd_result, ps.Series)
+            gpd_result = gpd.GeoSeries(geom).is_valid
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_is_valid_reason(self):
         pass
 
     def test_is_empty(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).is_empty
+            assert isinstance(sgpd_result, ps.Series)
+            gpd_result = gpd.GeoSeries(geom).is_empty
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_count_coordinates(self):
         pass
@@ -328,7 +337,16 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_is_simple(self):
-        pass
+        data = [
+            LineString([(0, 0), (0, 0)]),
+            LineString([(0, 0), (1, 1), (1, -1), (0, 1)]),
+            LineString([(0, 0), (1, 1), (0, 0)]),
+            LinearRing([(0, 0), (1, 1), (1, 0), (0, 1), (0, 0)]),
+            LinearRing([(0, 0), (-1, 1), (-1, -1), (1, -1)]),
+        ]
+        sgpd_result = GeoSeries(data).is_simple
+        gpd_result = gpd.GeoSeries(data).is_simple
+        self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_is_ring(self):
         pass
