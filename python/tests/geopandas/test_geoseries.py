@@ -23,7 +23,13 @@ import sedona.geopandas as sgpd
 from sedona.geopandas import GeoSeries
 from tests.test_base import TestBase
 from shapely import wkt
-from shapely.geometry import Point, LineString, Polygon, GeometryCollection
+from shapely.geometry import (
+    Point,
+    LineString,
+    Polygon,
+    MultiPolygon,
+    GeometryCollection,
+)
 from pandas.testing import assert_series_equal
 
 
@@ -317,7 +323,56 @@ class TestGeoSeries(TestBase):
         pass
 
     def test_make_valid(self):
-        pass
+        s = sgpd.GeoSeries(
+            [
+                Polygon([(0, 0), (0, 2), (1, 1), (2, 2), (2, 0), (1, 1), (0, 0)]),
+                Polygon([(0, 2), (0, 1), (2, 0), (0, 0), (0, 2)]),
+                LineString([(0, 0), (1, 1), (1, 0)]),
+            ],
+        )
+        result = s.make_valid(method="structure")
+
+        expected = gpd.GeoSeries(
+            [
+                MultiPolygon(
+                    [
+                        Polygon([(1, 1), (0, 0), (0, 2), (1, 1)]),
+                        Polygon([(2, 0), (1, 1), (2, 2), (2, 0)]),
+                    ]
+                ),
+                Polygon([(0, 1), (2, 0), (0, 0), (0, 1)]),
+                LineString([(0, 0), (1, 1), (1, 0)]),
+            ]
+        )
+
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = s.make_valid(method="structure", keep_collapsed=False)
+        expected = gpd.GeoSeries(
+            [
+                MultiPolygon(
+                    [
+                        Polygon([(1, 1), (0, 0), (0, 2), (1, 1)]),
+                        Polygon([(2, 0), (1, 1), (2, 2), (2, 0)]),
+                    ]
+                ),
+                Polygon([(0, 1), (2, 0), (0, 0), (0, 1)]),
+                LineString([(0, 0), (1, 1), (1, 0)]),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = GeoSeries(
+            [Polygon([(0, 0), (1, 1), (1, 2), (1, 1), (0, 0)])]
+        ).make_valid(method="structure", keep_collapsed=True)
+        expected = gpd.GeoSeries([LineString([(0, 0), (1, 1), (1, 2), (1, 1), (0, 0)])])
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = GeoSeries(
+            [Polygon([(0, 0), (1, 1), (1, 2), (1, 1), (0, 0)])]
+        ).make_valid(method="structure", keep_collapsed=False)
+        expected = gpd.GeoSeries([Polygon()])
+        self.check_sgpd_equals_gpd(result, expected)
 
     def test_reverse(self):
         pass

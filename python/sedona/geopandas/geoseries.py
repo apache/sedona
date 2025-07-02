@@ -783,9 +783,72 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
-    def make_valid(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def make_valid(self, *, method="linework", keep_collapsed=True) -> "GeoSeries":
+        """Repairs invalid geometries.
+
+        Returns a ``GeoSeries`` with valid geometries.
+
+        If the input geometry is already valid, then it will be preserved.
+        In many cases, in order to create a valid geometry, the input
+        geometry must be split into multiple parts or multiple geometries.
+        If the geometry must be split into multiple parts of the same type
+        to be made valid, then a multi-part geometry will be returned
+        (e.g. a MultiPolygon).
+        If the geometry must be split into multiple parts of different types
+        to be made valid, then a GeometryCollection will be returned.
+
+        In Sedona, only the 'structure' method is available:
+
+        * the 'structure' algorithm tries to reason from the structure of the
+          input to find the 'correct' repair: exterior rings bound area,
+          interior holes exclude area. It first makes all rings valid, then
+          shells are merged and holes are subtracted from the shells to
+          generate valid result. It assumes that holes and shells are correctly
+          categorized in the input geometry.
+
+        Parameters
+        ----------
+        method : {'linework', 'structure'}, default 'linework'
+            Algorithm to use when repairing geometry. Sedona Geopandas only supports the 'structure' method.
+            The default method is "linework" to match compatibility with Geopandas, but it must be explicitly set to
+            'structure' to use the Sedona implementation.
+
+        keep_collapsed : bool, default True
+            For the 'structure' method, True will keep components that have
+            collapsed into a lower dimensionality. For example, a ring
+            collapsing to a line, or a line collapsing to a point.
+
+        Examples
+        --------
+        >>> from shapely.geometry import MultiPolygon, Polygon, LineString, Point
+        >>> s = geopandas.GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (0, 2), (1, 1), (2, 2), (2, 0), (1, 1), (0, 0)]),
+        ...         Polygon([(0, 2), (0, 1), (2, 0), (0, 0), (0, 2)]),
+        ...         LineString([(0, 0), (1, 1), (1, 0)]),
+        ...     ],
+        ... )
+        >>> s
+        0    POLYGON ((0 0, 0 2, 1 1, 2 2, 2 0, 1 1, 0 0))
+        1              POLYGON ((0 2, 0 1, 2 0, 0 0, 0 2))
+        2                       LINESTRING (0 0, 1 1, 1 0)
+        dtype: geometry
+
+        >>> s.make_valid()
+        0    MULTIPOLYGON (((1 1, 0 0, 0 2, 1 1)), ((2 0, 1...
+        1                       POLYGON ((0 1, 2 0, 0 0, 0 1))
+        2                           LINESTRING (0 0, 1 1, 1 0)
+        dtype: geometry
+        """
+
+        if method != "structure":
+            raise ValueError(
+                "Sedona only supports the 'structure' method for make_valid"
+            )
+
+        col = self.get_first_geometry_column()
+        select = f"ST_MakeValid(`{col}`, {keep_collapsed})"
+        return self._query_geometry_column(select, col, rename="make_valid")
 
     def reverse(self):
         # Implementation of the abstract method

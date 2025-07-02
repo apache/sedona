@@ -429,7 +429,25 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_make_valid(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).make_valid(method="structure")
+            gpd_result = gpd.GeoSeries(geom).make_valid(method="structure")
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).make_valid(
+                method="structure", keep_collapsed=False
+            )
+            gpd_result = gpd.GeoSeries(geom).make_valid(
+                method="structure", keep_collapsed=False
+            )
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # Ensure default method="linework" fails
+        with pytest.raises(ValueError):
+            GeoSeries([Point(0, 0)]).make_valid()
+        with pytest.raises(ValueError):
+            GeoSeries([Point(0, 0)]).make_valid(method="linework")
 
     def test_reverse(self):
         pass
