@@ -23,7 +23,7 @@ import geopandas as gpd
 import pyspark.pandas as ps
 import pyspark
 from pandas.testing import assert_series_equal
-
+import shapely
 from shapely.geometry import (
     Point,
     Polygon,
@@ -353,6 +353,11 @@ class TestMatchGeopandasSeries(TestBase):
 
     def test_boundary(self):
         for _, geom in self.geoms:
+            # Shapely < 2.0 doesn't support GeometryCollection for boundary operation
+            if shapely.__version__ < "2.0.0" and isinstance(
+                geom[0], GeometryCollection
+            ):
+                continue
             sgpd_result = GeoSeries(geom).boundary
             gpd_result = gpd.GeoSeries(geom).boundary
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)

@@ -693,7 +693,8 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         """
         col = self.get_first_geometry_column()
-        # Geopandas seems to always return NULL for GeometryCollections, so we handle it separately
+        # Geopandas and shapely return NULL for GeometryCollections, so we handle it separately
+        # https://shapely.readthedocs.io/en/stable/reference/shapely.boundary.html
         select = f"""
             CASE
                 WHEN GeometryType(`{col}`) IN ('GEOMETRYCOLLECTION') THEN NULL
