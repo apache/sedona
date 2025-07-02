@@ -39,7 +39,7 @@ from sedona.geopandas.base import GeoFrame
 from sedona.geopandas.geodataframe import GeoDataFrame
 from sedona.geopandas.geoindex import GeoIndex
 
-PS_INDEX_COL = "__index_level_0__"
+from pyspark.pandas.internal import SPARK_DEFAULT_INDEX_NAME  # __index_level_0__
 
 
 class GeoSeries(GeoFrame, pspd.Series):
@@ -991,13 +991,16 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         assert isinstance(other, GeoSeries), f"Invalid type for other: {type(other)}"
 
+        # TODO: this does not yet support multi-index
         df = self._internal.spark_frame.select(
-            col(self.get_first_geometry_column()).alias("L"), col(PS_INDEX_COL)
+            col(self.get_first_geometry_column()).alias("L"),
+            col(SPARK_DEFAULT_INDEX_NAME),
         )
         other_df = other._internal.spark_frame.select(
-            col(other.get_first_geometry_column()).alias("R"), col(PS_INDEX_COL)
+            col(other.get_first_geometry_column()).alias("R"),
+            col(SPARK_DEFAULT_INDEX_NAME),
         )
-        joined_df = df.join(other_df, on=PS_INDEX_COL, how="outer")
+        joined_df = df.join(other_df, on=SPARK_DEFAULT_INDEX_NAME, how="outer")
         return self._query_geometry_column(
             select,
             cols=["L", "R"],
