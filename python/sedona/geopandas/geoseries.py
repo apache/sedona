@@ -876,7 +876,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.intersection
         """
         return (
-            self._row_wise_operation("ST_Intersects", other, align)
+            self._row_wise_operation(
+                "ST_Intersects(`L`, `R`)", other, align, rename="intersects"
+            )
             .to_spark_pandas()
             .astype("bool")
         )
@@ -963,14 +965,21 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.symmetric_difference
         GeoSeries.union
         """
-        return self._row_wise_operation("ST_Intersection", other, align)
+        return self._row_wise_operation(
+            "ST_Intersection(`L`, `R`)", other, align, rename="intersection"
+        )
 
     def _row_wise_operation(
         self,
-        operation: str,
+        select: str,
         other: Union["GeoSeries", BaseGeometry],
         align: Union[bool, None],
+        rename: str,
     ):
+        """
+        Helper function to perform a row-wise operation on two GeoSeries.
+        The self column and other column are aliased to `L` and `R`, respectively.
+        """
         from pyspark.sql.functions import col
 
         # Note: this is specifically False. None is valid since it defaults to True similar to geopandas
@@ -990,9 +999,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
         joined_df = df.join(other_df, on=PS_INDEX_COL, how="outer")
         return self._query_geometry_column(
-            f"{operation}(`L`, `R`)",
+            select,
             cols=["L", "R"],
-            rename="intersection",
+            rename=rename,
             df=joined_df,
         )
 
