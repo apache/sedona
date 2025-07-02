@@ -17,11 +17,12 @@
 
 import os
 import typing
-from typing import Any, Union, Literal
+from typing import Any, Union, Literal, List
 
 import geopandas as gpd
 import pandas as pd
 import pyspark.pandas as pspd
+import pyspark
 from pyspark.pandas import Series as PandasOnSparkSeries
 from pyspark.pandas._typing import Dtype
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
@@ -31,11 +32,14 @@ from pyspark.pandas.utils import scol_for, log_advice
 from pyspark.sql.types import BinaryType
 
 import shapely
+from shapely.geometry.base import BaseGeometry
 
 from sedona.geopandas._typing import Label
 from sedona.geopandas.base import GeoFrame
 from sedona.geopandas.geodataframe import GeoDataFrame
 from sedona.geopandas.geoindex import GeoIndex
+
+from pyspark.pandas.internal import SPARK_DEFAULT_INDEX_NAME  # __index_level_0__
 
 
 class GeoSeries(GeoFrame, pspd.Series):
@@ -384,8 +388,9 @@ class GeoSeries(GeoFrame, pspd.Series):
     def _query_geometry_column(
         self,
         query: str,
-        col: Union[str, None],
+        cols: Union[List[str], str],
         rename: str,
+        df: pyspark.sql.DataFrame = None,
     ) -> "GeoSeries":
         """
         Helper method to query a single geometry column with a specified operation.
@@ -394,28 +399,38 @@ class GeoSeries(GeoFrame, pspd.Series):
         ----------
         query : str
             The query to apply to the geometry column.
-        col : str
-            The name of the column to query.
+        cols : List[str] or str
+            The names of the columns to query.
         rename : str
             The name of the resulting column.
+        df : pyspark.sql.DataFrame
+            The dataframe to query. If not provided, the internal dataframe will be used.
 
         Returns
         -------
         GeoSeries
             A GeoSeries with the operation applied to the geometry column.
         """
-        if not col:
+        if not cols:
             raise ValueError("No valid geometry column found.")
 
-        data_type = self._internal.spark_frame.schema[col].dataType
+        if isinstance(cols, str):
+            cols = [cols]
 
-        if isinstance(data_type, BinaryType):
-            # the backticks here are important so we don't match strings that happen to be the same as the column name
-            query = query.replace(f"`{col}`", f"ST_GeomFromWKB(`{col}`)")
+        df = self._internal.spark_frame if df is None else df
+
+        for col in cols:
+            data_type = df.schema[col].dataType
+
+            rename = col if not rename else rename
+
+            if isinstance(data_type, BinaryType):
+                # the backticks here are important so we don't match strings that happen to be the same as the column name
+                query = query.replace(f"`{col}`", f"ST_GeomFromWKB(`{col}`)")
 
         sql_expr = f"{query} as `{rename}`"
 
-        sdf = self._internal.spark_frame.selectExpr(sql_expr)
+        sdf = df.selectExpr(sql_expr)
         internal = InternalFrame(
             spark_frame=sdf,
             index_spark_columns=None,
@@ -578,18 +593,88 @@ class GeoSeries(GeoFrame, pspd.Series):
         ).to_spark_pandas()
 
     @property
-    def is_valid(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def is_valid(self) -> pspd.Series:
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        geometries that are valid.
+
+        Examples
+        --------
+
+        An example with one invalid polygon (a bowtie geometry crossing itself)
+        and one missing geometry:
+
+        >>> from shapely.geometry import Polygon
+        >>> s = geopandas.GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
+        ...         Polygon([(0,0), (1, 1), (1, 0), (0, 1)]),  # bowtie geometry
+        ...         Polygon([(0, 0), (2, 2), (2, 0)]),
+        ...         None
+        ...     ]
+        ... )
+        >>> s
+        0         POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1    POLYGON ((0 0, 1 1, 1 0, 0 1, 0 0))
+        2         POLYGON ((0 0, 2 2, 2 0, 0 0))
+        3                                   None
+        dtype: geometry
+
+        >>> s.is_valid
+        0     True
+        1    False
+        2     True
+        3    False
+        dtype: bool
+
+        See also
+        --------
+        GeoSeries.is_valid_reason : reason for invalidity
+        """
+        return (
+            self._process_geometry_column("ST_IsValid", rename="is_valid")
+            .to_spark_pandas()
+            .astype("bool")
+        )
 
     def is_valid_reason(self):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    def is_empty(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def is_empty(self) -> pspd.Series:
+        """
+        Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        empty geometries.
+
+        Examples
+        --------
+        An example of a GeoDataFrame with one empty point, one point and one missing
+        value:
+
+        >>> from shapely.geometry import Point
+        >>> d = {'geometry': [Point(), Point(2, 1), None]}
+        >>> gdf = geopandas.GeoDataFrame(d, crs="EPSG:4326")
+        >>> gdf
+            geometry
+        0  POINT EMPTY
+        1  POINT (2 1)
+        2         None
+
+        >>> gdf.is_empty
+        0     True
+        1    False
+        2    False
+        dtype: bool
+
+        See Also
+        --------
+        GeoSeries.isna : detect missing values
+        """
+        return (
+            self._process_geometry_column("ST_IsEmpty", rename="is_empty")
+            .to_spark_pandas()
+            .astype("bool")
+        )
 
     def count_coordinates(self):
         # Implementation of the abstract method
@@ -604,9 +689,36 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    def is_simple(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def is_simple(self) -> pspd.Series:
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        geometries that do not cross themselves.
+
+        This is meaningful only for `LineStrings` and `LinearRings`.
+
+        Examples
+        --------
+        >>> from shapely.geometry import LineString
+        >>> s = geopandas.GeoSeries(
+        ...     [
+        ...         LineString([(0, 0), (1, 1), (1, -1), (0, 1)]),
+        ...         LineString([(0, 0), (1, 1), (1, -1)]),
+        ...     ]
+        ... )
+        >>> s
+        0    LINESTRING (0 0, 1 1, 1 -1, 0 1)
+        1         LINESTRING (0 0, 1 1, 1 -1)
+        dtype: geometry
+
+        >>> s.is_simple
+        0    False
+        1     True
+        dtype: bool
+        """
+        return (
+            self._process_geometry_column("ST_IsSimple", rename="is_simple")
+            .to_spark_pandas()
+            .astype("bool")
+        )
 
     @property
     def is_ring(self):
@@ -624,9 +736,37 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    def has_z(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def has_z(self) -> pspd.Series:
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        features that have a z-component.
+
+        Notes
+        -----
+        Every operation in GeoPandas is planar, i.e. the potential third
+        dimension is not taken into account.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point
+        >>> s = geopandas.GeoSeries(
+        ...     [
+        ...         Point(0, 1),
+        ...         Point(0, 1, 2),
+        ...     ]
+        ... )
+        >>> s
+        0        POINT (0 1)
+        1    POINT Z (0 1 2)
+        dtype: geometry
+
+        >>> s.has_z
+        0    False
+        1     True
+        dtype: bool
+        """
+        return self._process_geometry_column(
+            "ST_HasZ", rename="has_z"
+        ).to_spark_pandas()
 
     def get_precision(self):
         # Implementation of the abstract method
@@ -755,6 +895,218 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
+    def intersects(
+        self, other: Union["GeoSeries", BaseGeometry], align: Union[bool, None] = None
+    ) -> pspd.Series:
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        each aligned geometry that intersects `other`.
+
+        An object is said to intersect `other` if its `boundary` and `interior`
+        intersects in any way with those of the other.
+
+        The operation works on a 1-to-1 row-wise manner:
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The GeoSeries (elementwise) or geometric object to test if is
+            intersected.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved. (not supported in Sedona Geopandas)
+
+        Returns
+        -------
+        Series (bool)
+
+        Examples
+        --------
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = geopandas.GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
+        ...         LineString([(0, 0), (2, 2)]),
+        ...         LineString([(2, 0), (0, 2)]),
+        ...         Point(0, 1),
+        ...     ],
+        ... )
+        >>> s2 = geopandas.GeoSeries(
+        ...     [
+        ...         LineString([(1, 0), (1, 3)]),
+        ...         LineString([(2, 0), (0, 2)]),
+        ...         Point(1, 1),
+        ...         Point(-100, -100),
+        ...     ],
+        ...     index=range(1, 5),
+        ... )
+
+        We can check two GeoSeries against each other, row by row.
+        The GeoSeries above have different indices. We align both GeoSeries
+        based on index values and compare elements with the same index:
+
+        >>> s.intersects(s2)
+        0     True
+        1     True
+        2     True
+        3    False
+        dtype: bool
+
+        We can also check if each geometry of GeoSeries intersects a single
+        geometry:
+
+        >>> line = LineString([(-1, 1), (3, 1)])
+        >>> s.intersects(line)
+        0    True
+        1    True
+        2    True
+        3    True
+        dtype: bool
+
+        Notes
+        -----
+        This method works in a row-wise manner. It does not check if an element
+        of one GeoSeries ``crosses`` *any* element of the other one.
+
+        See also
+        --------
+        GeoSeries.disjoint
+        GeoSeries.crosses
+        GeoSeries.touches
+        GeoSeries.intersection
+        """
+        return (
+            self._row_wise_operation(
+                "ST_Intersects(`L`, `R`)", other, align, rename="intersects"
+            )
+            .to_spark_pandas()
+            .astype("bool")
+        )
+
+    def intersection(
+        self, other: Union["GeoSeries", BaseGeometry], align: Union[bool, None] = None
+    ) -> "GeoSeries":
+        """Returns a ``GeoSeries`` of the intersection of points in each
+        aligned geometry with `other`.
+
+        The operation works on a 1-to-1 row-wise manner:
+
+        Parameters
+        ----------
+        other : Geoseries or geometric object
+            The Geoseries (elementwise) or geometric object to find the
+            intersection with.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved. (not supported in Sedona Geopandas)
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = geopandas.GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
+        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
+        ...         LineString([(0, 0), (2, 2)]),
+        ...         LineString([(2, 0), (0, 2)]),
+        ...         Point(0, 1),
+        ...     ],
+        ... )
+        >>> s2 = geopandas.GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
+        ...         LineString([(1, 0), (1, 3)]),
+        ...         LineString([(2, 0), (0, 2)]),
+        ...         Point(1, 1),
+        ...         Point(-100, -100),
+        ...     ],
+        ... )
+
+        We can do an intersection of each geometry and a single
+        shapely geometry:
+
+        >>> geom = Polygon([(-0.5, -0.5), (-0.5, 2.5), (2.5, 2.5), (2.5, -0.5), (-0.5, -0.5)])
+        >>> s.intersection(geom)
+            Polygon([(0, 0), (2, 2), (0, 2)]),
+            Polygon([(0, 0), (2, 2), (0, 2)]),
+            LineString([(0, 0), (2, 2)]),
+            LineString([(2, 0), (0, 2)]),
+            Point(0, 1),
+        dtype: geometry
+
+        >>> geom = Polygon([(-0.5, -0.5), (-0.5, 2.5), (2.5, 2.5), (2.5, -0.5), (-0.5, -0.5)])
+        >>> s.intersection(Polygon([(0, 0), (1, 1), (0, 1)]))
+        0         POLYGON ((0 0, 2 2, 0 2))
+        1         POLYGON ((0 0, 2 2, 0 2))
+        2             LINESTRING (0 0, 2 2)
+        3             LINESTRING (2 0, 0 2)
+        4                       POINT (0 1)
+        dtype: geometry
+
+        We can also check two GeoSeries against each other, row by row.
+        The GeoSeries above have different indices. We align both GeoSeries
+        based on index values and compare elements with the same index.
+
+        >>> s.intersection(s2)
+        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1             LINESTRING (1 1, 1 2)
+        2                       POINT (1 1)
+        3                       POINT (1 1)
+        4                     POLYGON EMPTY
+        dtype: geometry
+
+        See Also
+        --------
+        GeoSeries.difference
+        GeoSeries.symmetric_difference
+        GeoSeries.union
+        """
+        return self._row_wise_operation(
+            "ST_Intersection(`L`, `R`)", other, align, rename="intersection"
+        )
+
+    def _row_wise_operation(
+        self,
+        select: str,
+        other: Union["GeoSeries", BaseGeometry],
+        align: Union[bool, None],
+        rename: str,
+    ):
+        """
+        Helper function to perform a row-wise operation on two GeoSeries.
+        The self column and other column are aliased to `L` and `R`, respectively.
+        """
+        from pyspark.sql.functions import col
+
+        # Note: this is specifically False. None is valid since it defaults to True similar to geopandas
+        if align is False:
+            raise NotImplementedError("Sedona Geopandas does not support align=False")
+
+        if isinstance(other, BaseGeometry):
+            other = GeoSeries([other] * len(self))
+
+        assert isinstance(other, GeoSeries), f"Invalid type for other: {type(other)}"
+
+        # TODO: this does not yet support multi-index
+        df = self._internal.spark_frame.select(
+            col(self.get_first_geometry_column()).alias("L"),
+            col(SPARK_DEFAULT_INDEX_NAME),
+        )
+        other_df = other._internal.spark_frame.select(
+            col(other.get_first_geometry_column()).alias("R"),
+            col(SPARK_DEFAULT_INDEX_NAME),
+        )
+        joined_df = df.join(other_df, on=SPARK_DEFAULT_INDEX_NAME, how="outer")
+        return self._query_geometry_column(
+            select,
+            cols=["L", "R"],
+            rename=rename,
+            df=joined_df,
+        )
+
     def intersection_all(self):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
@@ -870,15 +1222,89 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def x(self) -> pspd.Series:
-        raise NotImplementedError("GeoSeries.x() is not implemented yet.")
+        """Return the x location of point geometries in a GeoSeries
+
+        Returns
+        -------
+        pandas.Series
+
+        Examples
+        --------
+
+        >>> from shapely.geometry import Point
+        >>> s = geopandas.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        >>> s.x
+        0    1.0
+        1    2.0
+        2    3.0
+        dtype: float64
+
+        See Also
+        --------
+
+        GeoSeries.y
+        GeoSeries.z
+
+        """
+        return self._process_geometry_column("ST_X", rename="x").to_spark_pandas()
 
     @property
     def y(self) -> pspd.Series:
-        raise NotImplementedError("GeoSeries.y() is not implemented yet.")
+        """Return the y location of point geometries in a GeoSeries
+
+        Returns
+        -------
+        pandas.Series
+
+        Examples
+        --------
+
+        >>> from shapely.geometry import Point
+        >>> s = geopandas.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        >>> s.y
+        0    1.0
+        1    2.0
+        2    3.0
+        dtype: float64
+
+        See Also
+        --------
+
+        GeoSeries.x
+        GeoSeries.z
+        GeoSeries.m
+
+        """
+        return self._process_geometry_column("ST_Y", rename="y").to_spark_pandas()
 
     @property
     def z(self) -> pspd.Series:
-        raise NotImplementedError("GeoSeries.z() is not implemented yet.")
+        """Return the z location of point geometries in a GeoSeries
+
+        Returns
+        -------
+        pandas.Series
+
+        Examples
+        --------
+
+        >>> from shapely.geometry import Point
+        >>> s = geopandas.GeoSeries([Point(1, 1, 1), Point(2, 2, 2), Point(3, 3, 3)])
+        >>> s.z
+        0    1.0
+        1    2.0
+        2    3.0
+        dtype: float64
+
+        See Also
+        --------
+
+        GeoSeries.x
+        GeoSeries.y
+        GeoSeries.m
+
+        """
+        return self._process_geometry_column("ST_Z", rename="z").to_spark_pandas()
 
     @property
     def m(self) -> pspd.Series:
