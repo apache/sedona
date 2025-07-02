@@ -429,6 +429,11 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_make_valid(self):
+        import shapely
+
+        # 'structure' method requires shapely >= 2.1.0
+        if shapely.__version__ < "2.1.0":
+            return
         for _, geom in self.geoms:
             sgpd_result = GeoSeries(geom).make_valid(method="structure")
             gpd_result = gpd.GeoSeries(geom).make_valid(method="structure")
