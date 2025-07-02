@@ -313,6 +313,9 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_is_valid_reason(self):
+        # is_valid_reason was added in geopandas 1.0.0
+        if gpd.__version__ < "1.0.0":
+            return
         data = [
             Polygon([(0, 0), (1, 1), (0, 1)]),
             Polygon([(0, 0), (1, 1), (1, 0), (0, 1)]),  # bowtie geometry
