@@ -26,21 +26,21 @@ spark_extension_version=$4
 spark_compat_version=${spark_version:0:3}
 sedona_spark_version=${spark_compat_version}
 if [ "${spark_version:0:1}" -eq "3" ] && [ "${spark_version:2:1}" -le "3" ]; then
-    # 3.0, 3.1, 3.2, 3.3
-    sedona_spark_version=3.0
+  # 3.0, 3.1, 3.2, 3.3
+  sedona_spark_version=3.0
 fi
 
 if [ "$sedona_version" = "latest" ]; then
-    # Code to execute when SEDONA_VERSION is "latest"
-    cp "${SEDONA_HOME}"/spark-shaded/target/sedona-spark-shaded-*.jar "${SPARK_HOME}"/jars/
-	cd "${SEDONA_HOME}"/python;pip3 install .
+  # Code to execute when SEDONA_VERSION is "latest"
+  cp "${SEDONA_HOME}"/spark-shaded/target/sedona-spark-shaded-*.jar "${SPARK_HOME}"/jars/
+  cd "${SEDONA_HOME}"/python;pip3 install .
 else
-    # Code to execute when SEDONA_VERSION is not "latest"
-    # Download Sedona
-	curl --retry 5 --retry-delay 10 --retry-connrefused https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-"${sedona_spark_version}"_2.12/"${sedona_version}"/sedona-spark-shaded-"${sedona_spark_version}"_2.12-"${sedona_version}".jar -o "$SPARK_HOME"/jars/sedona-spark-shaded-"${sedona_spark_version}"_2.12-"${sedona_version}".jar
+  # Code to execute when SEDONA_VERSION is not "latest"
+  # Download Sedona
+  curl --retry 5 --retry-delay 10 --retry-connrefused https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-"${sedona_spark_version}"_2.12/"${sedona_version}"/sedona-spark-shaded-"${sedona_spark_version}"_2.12-"${sedona_version}".jar -o "$SPARK_HOME"/jars/sedona-spark-shaded-"${sedona_spark_version}"_2.12-"${sedona_version}".jar
 
-	# Install Sedona Python
-	pip3 install apache-sedona=="${sedona_version}"
+  # Install Sedona Python
+  pip3 install apache-sedona=="${sedona_version}"
 fi
 
 # Download gresearch spark extension
