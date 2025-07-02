@@ -188,16 +188,36 @@ repos:
     rev: v5.0.0
     hooks:
       - id: check-ast
+        name: run check-ast
+        description: check Python files for syntax errors
       - id: check-builtin-literals
+        name: run check-builtin-literals
+        description: check Python files for proper use of built-in literals
       - id: check-case-conflict
+        name: run check-case-conflict
+        description: check for case conflicts in file names
       - id: check-docstring-first
+        name: run check-docstring-first
+        description: check that docstrings are at the start of functions
       - id: check-executables-have-shebangs
+        name: run check-executables-have-shebangs
+        description: check that executable scripts have shebang lines
       - id: check-illegal-windows-names
+        name: run check-illegal-windows-names
+        description: check for Windows-illegal file names
       - id: check-json
+        name: run check-json
+        description: check JSON files for syntax errors
         exclude: ^docs/usecases/data/testPolygon\.json$|^spark/common/src/test/resources/.*\.json$
       - id: check-merge-conflict
+        name: run check-merge-conflict
+        description: check for merge conflict markers
       - id: check-shebang-scripts-are-executable
+        name: run check-shebang-scripts-are-executable
+        description: check that scripts with shebangs are executable
       - id: check-toml
+        name: run check-toml
+        description: check TOML files for syntax errors
       - id: check-vcs-permalinks
       - id: check-xml
       - id: check-yaml

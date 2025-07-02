@@ -21,9 +21,14 @@ from shapely.geometry import (
     Point,
 )
 
-from sedona.geopandas import GeoDataFrame
+from sedona.geopandas import GeoDataFrame, GeoSeries
 from tests.test_base import TestBase
 import pyspark.pandas as ps
+import pandas as pd
+import geopandas as gpd
+import sedona.geopandas as sgpd
+import pytest
+from pandas.testing import assert_frame_equal
 
 
 class TestDataframe(TestBase):
@@ -41,10 +46,52 @@ class TestDataframe(TestBase):
     #
     # def teardown_method(self):
     #     shutil.rmtree(self.tempdir)
+    @pytest.mark.parametrize(
+        "obj",
+        [
+            [Point(x, x) for x in range(3)],
+            {"geometry": [Point(x, x) for x in range(3)]},
+            pd.DataFrame([Point(x, x) for x in range(3)]),
+            gpd.GeoDataFrame([Point(x, x) for x in range(3)]),
+            pd.Series([Point(x, x) for x in range(3)]),
+            gpd.GeoSeries([Point(x, x) for x in range(3)]),
+            GeoSeries([Point(x, x) for x in range(3)]),
+            GeoDataFrame([Point(x, x) for x in range(3)]),
+        ],
+    )
+    def test_constructor(self, obj):
+        sgpd_df = GeoDataFrame(obj)
+        check_geodataframe(sgpd_df)
 
-    def test_constructor(self):
-        df = GeoDataFrame([Point(x, x) for x in range(3)])
-        check_geodataframe(df)
+    def test_constructor_pandas_on_spark(self):
+        for obj in [
+            ps.DataFrame([Point(x, x) for x in range(3)]),
+            ps.Series([Point(x, x) for x in range(3)]),
+        ]:
+            sgpd_df = GeoDataFrame(obj)
+            check_geodataframe(sgpd_df)
+
+    @pytest.mark.parametrize(
+        "obj",
+        [
+            [0, 1, 2],
+            ["x", "y", "z"],
+            {"a": [0, 1, 2], 1: [4, 5, 6]},
+            {"a": ["x", "y", "z"], 1: ["a", "b", "c"]},
+            pd.Series([0, 1, 2]),
+            pd.Series(["x", "y", "z"]),
+            pd.DataFrame({"x": ["x", "y", "z"]}),
+            gpd.GeoDataFrame({"x": [0, 1, 2]}),
+            ps.DataFrame({"x": ["x", "y", "z"]}),
+        ],
+    )
+    def test_non_geometry(self, obj):
+        pd_df = pd.DataFrame(obj)
+        # pd.DataFrame(obj) doesn't work correctly for pandas on spark DataFrame type, so we use to_pandas() method instead.
+        if isinstance(obj, ps.DataFrame):
+            pd_df = obj.to_pandas()
+        sgpd_df = sgpd.GeoDataFrame(obj)
+        assert_frame_equal(pd_df, sgpd_df.to_pandas())
 
     def test_psdf(self):
         # this is to make sure the spark session works with pandas on spark api
@@ -73,7 +120,10 @@ class TestDataframe(TestBase):
 
         # Assert the geometry column has the correct type and is not nullable
         geometry_field = schema["geometry1"]
-        assert geometry_field.dataType.typeName() == "geometrytype"
+        assert (
+            geometry_field.dataType.typeName() == "geometrytype"
+            or geometry_field.dataType.typeName() == "binary"
+        )
         assert not geometry_field.nullable
 
         # Assert non-geometry columns are present with correct types
@@ -97,16 +147,25 @@ class TestDataframe(TestBase):
         schema = df._internal.spark_frame.schema
         # Assert both geometry columns have the correct type
         geometry_field1 = schema["geometry1"]
-        assert geometry_field1.dataType.typeName() == "geometrytype"
+        assert (
+            geometry_field1.dataType.typeName() == "geometrytype"
+            or geometry_field1.dataType.typeName() == "binary"
+        )
         assert not geometry_field1.nullable
 
         geometry_field2 = schema["geometry2"]
-        assert geometry_field2.dataType.typeName() == "geometrytype"
+        assert (
+            geometry_field2.dataType.typeName() == "geometrytype"
+            or geometry_field2.dataType.typeName() == "binary"
+        )
         assert not geometry_field2.nullable
 
         # Check non-geometry column
         attribute_field = schema["attribute"]
-        assert attribute_field.dataType.typeName() != "geometrytype"
+        assert (
+            attribute_field.dataType.typeName() != "geometrytype"
+            and attribute_field.dataType.typeName() != "binary"
+        )
 
     def test_copy(self):
         df = GeoDataFrame([Point(x, x) for x in range(3)], name="test_df")

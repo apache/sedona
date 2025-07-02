@@ -18,14 +18,13 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.physical.function
 
-import org.apache.spark.sql.Strategy
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
-import org.apache.spark.sql.execution.SparkPlan
+import org.apache.spark.sql.execution.{SparkPlan, SparkStrategy}
 import org.apache.spark.sql.sedona_sql.plans.logical.EvalPhysicalFunction
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.sedona_sql.expressions.PhysicalFunction
 
-class EvalPhysicalFunctionStrategy(spark: SparkSession) extends Strategy {
+class EvalPhysicalFunctionStrategy(spark: SparkSession) extends SparkStrategy {
 
   override def apply(plan: LogicalPlan): Seq[SparkPlan] = {
     plan match {
