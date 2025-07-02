@@ -271,7 +271,29 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_fillna(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).fillna()
+            gpd_result = gpd.GeoSeries(geom).fillna()
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        data = [None, None, None, None, Point(0, 1)]
+        sgpd_result = GeoSeries(data).fillna()
+        gpd_result = gpd.GeoSeries(data).fillna()
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        fill_data = [Point(-1, -1), Point(-2, -2), Point(2, 3)]
+        sgpd_result = GeoSeries(data).fillna(GeoSeries(fill_data))
+        gpd_result = gpd.GeoSeries(data).fillna(gpd.GeoSeries(fill_data))
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # Ensure filling with np.nan or pd.NA returns None
+        # but filling None return empty geometry
+        import numpy as np
+
+        for fill_val in [np.nan, pd.NA, None]:
+            sgpd_result = GeoSeries(data).fillna(fill_val)
+            gpd_result = gpd.GeoSeries(data).fillna(fill_val)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_explode(self):
         pass
@@ -518,8 +540,11 @@ class TestMatchGeopandasSeries(TestBase):
         assert isinstance(expected, gpd.GeoSeries)
         sgpd_result = actual.to_geopandas()
         for a, e in zip(sgpd_result, expected):
+            if a is None or e is None:
+                assert a is None and e is None
+                continue
             # Sometimes sedona and geopandas both return empty geometries but of different types (e.g Point and Polygon)
-            if a.is_empty and e.is_empty:
+            elif a.is_empty and e.is_empty:
                 continue
             self.assert_geometry_almost_equal(
                 a, e, tolerance=1e-2
