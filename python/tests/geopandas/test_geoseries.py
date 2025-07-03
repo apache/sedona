@@ -50,7 +50,10 @@ class TestGeoSeries(TestBase):
         assert len(actual) == len(expected)
         sgpd_result = actual.to_geopandas()
         for a, e in zip(sgpd_result, expected):
-            if a.is_empty and e.is_empty:
+            if a is None or e is None:
+                assert a is None and e is None
+                continue
+            elif a.is_empty and e.is_empty:
                 continue
             self.assert_geometry_almost_equal(a, e)
 
@@ -377,6 +380,23 @@ class TestGeoSeries(TestBase):
         expected = pd.Series([True, True, True, True])
         assert_series_equal(result.to_pandas(), expected)
 
+        # from the original doc string
+        s2 = sgpd.GeoSeries(
+            [
+                LineString([(1, 0), (1, 3)]),
+                LineString([(2, 0), (0, 2)]),
+                Point(1, 1),
+                Point(0, 1),
+            ],
+            index=range(1, 5),
+        )
+
+        result = s.intersects(s2, align=True)
+        expected = pd.Series([False, True, True, False, False])
+
+        result = s.intersects(s2, align=False)
+        expected = pd.Series([True, True, True, True])
+
     def test_intersection(self):
         s = sgpd.GeoSeries(
             [
@@ -424,8 +444,50 @@ class TestGeoSeries(TestBase):
         )
         self.check_sgpd_equals_gpd(result, expected)
 
-        with pytest.raises(NotImplementedError):
-            s.intersection(s2, align=False)
+        # from the original doc string
+        s = sgpd.GeoSeries(
+            [
+                Polygon([(0, 0), (2, 2), (0, 2)]),
+                Polygon([(0, 0), (2, 2), (0, 2)]),
+                LineString([(0, 0), (2, 2)]),
+                LineString([(2, 0), (0, 2)]),
+                Point(0, 1),
+            ],
+        )
+        s2 = sgpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                LineString([(1, 0), (1, 3)]),
+                LineString([(2, 0), (0, 2)]),
+                Point(1, 1),
+                Point(0, 1),
+            ],
+            index=range(1, 6),
+        )
+        result = s.intersection(s2, align=True)
+        expected = gpd.GeoSeries(
+            [
+                None,
+                Polygon([(0, 0), (0, 1), (1, 1), (0, 0)]),
+                Point(1, 1),
+                LineString([(2, 0), (0, 2)]),
+                Point(),
+                None,
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = s.intersection(s2, align=False)
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (0, 1), (1, 1), (0, 0)]),
+                LineString([(1, 1), (1, 2)]),
+                Point(1, 1),
+                Point(1, 1),
+                Point(0, 1),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
 
     def test_intersection_all(self):
         pass
