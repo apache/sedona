@@ -23,7 +23,7 @@ import geopandas as gpd
 import pyspark.pandas as ps
 import pyspark
 from pandas.testing import assert_series_equal
-
+import shapely
 from shapely.geometry import (
     Point,
     Polygon,
@@ -370,10 +370,21 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_boundary(self):
-        pass
+        for _, geom in self.geoms:
+            # Shapely < 2.0 doesn't support GeometryCollection for boundary operation
+            if shapely.__version__ < "2.0.0" and isinstance(
+                geom[0], GeometryCollection
+            ):
+                continue
+            sgpd_result = GeoSeries(geom).boundary
+            gpd_result = gpd.GeoSeries(geom).boundary
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_centroid(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).centroid
+            gpd_result = gpd.GeoSeries(geom).centroid
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_concave_hull(self):
         pass
@@ -388,7 +399,10 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_envelope(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).envelope
+            gpd_result = gpd.GeoSeries(geom).envelope
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_minimum_rotated_rectangle(self):
         pass
@@ -518,8 +532,11 @@ class TestMatchGeopandasSeries(TestBase):
         assert isinstance(expected, gpd.GeoSeries)
         sgpd_result = actual.to_geopandas()
         for a, e in zip(sgpd_result, expected):
+            if a is None or e is None:
+                assert a is None and e is None
+                continue
             # Sometimes sedona and geopandas both return empty geometries but of different types (e.g Point and Polygon)
-            if a.is_empty and e.is_empty:
+            elif a.is_empty and e.is_empty:
                 continue
             self.assert_geometry_almost_equal(
                 a, e, tolerance=1e-2
