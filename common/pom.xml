@@ -89,11 +89,6 @@
             <artifactId>s2-geometry-library</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${googles2-guava.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.uber</groupId>
             <artifactId>h3</artifactId>
         </dependency>
@@ -176,16 +171,6 @@
                                     <include>it.geosolutions.jaiext.jiffle:*</include>
                                     <include>org.antlr:*</include>
                                     <include>org.codehaus.janino:*</include>
-
-                                    <!--
-                                      We shade our own released version of s2-geometry-library to avoid conflicts with
-                                      any other official com.google.geometry:s2-geometry in the runtime environment.
-
-                                      Our new s2-geometry-library requires a version of guava higher than what Spark
-                                      ships with, so we shade it as well to make s2-geometry-library work.
-                                    -->
-                                    <include>org.datasyslab:s2-geometry-library</include>
-                                    <include>com.google.guava:guava</include>
                                 </includes>
                             </artifactSet>
                             <relocations>
@@ -203,14 +188,6 @@
                                 <relocation>
                                     <pattern>org.codehaus</pattern>
                                     <shadedPattern>org.apache.sedona.shaded.codehaus</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.google.common.geometry</pattern>
-                                    <shadedPattern>org.apache.sedona.shaded.s2</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.google.common</pattern>
-                                    <shadedPattern>org.apache.sedona.shaded.guava</shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>

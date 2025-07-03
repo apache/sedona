@@ -56,14 +56,6 @@
                     <groupId>org.codehaus.janino</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
-                <exclusion>
-                    <groupId>org.datasyslab</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -249,6 +241,23 @@
                                     <exclude>commons-logging:commons-logging</exclude>
                                 </excludes>
                             </artifactSet>
+                            <relocations>
+                                <!--
+                                  We relocate our own released version of s2-geometry-library to avoid conflicts with
+                                  any other official com.google.geometry:s2-geometry in the runtime environment.
+
+                                  Our new s2-geometry-library requires a version of guava higher than what Spark
+                                  ships with, so we relocate it as well to make s2-geometry-library work.
+                                -->
+                                <relocation>
+                                    <pattern>com.google.common.geometry</pattern>
+                                    <shadedPattern>org.apache.sedona.shaded.s2</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.google.common</pattern>
+                                    <shadedPattern>org.apache.sedona.shaded.guava</shadedPattern>
+                                </relocation>
+                            </relocations>
                             <filters>
                                 <!--  filter to address "Invalid signature file" issue - see http://stackoverflow.com/a/6743609/589215 -->
                                 <filter>

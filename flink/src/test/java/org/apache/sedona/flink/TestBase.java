@@ -21,11 +21,11 @@ package org.apache.sedona.flink;
 import static org.apache.flink.table.api.Expressions.*;
 import static org.junit.Assert.fail;
 
+import com.google.common.math.DoubleMath;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.commons.math3.util.Precision;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -72,7 +72,7 @@ public class TestBase {
           for (int d = 0; d < dimension; d++) {
             double ord1 = s1.getOrdinate(i, d);
             double ord2 = s2.getOrdinate(i, d);
-            int comp = Precision.compareTo(ord1, ord2, FP_TOLERANCE);
+            int comp = DoubleMath.fuzzyCompare(ord1, ord2, FP_TOLERANCE);
             if (comp != 0) return comp;
           }
           return 0;
