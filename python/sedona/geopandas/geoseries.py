@@ -921,8 +921,10 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
+
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (2, 2), (0, 2)]),
         ...         LineString([(0, 0), (2, 2)]),
@@ -930,7 +932,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         ...         Point(0, 1),
         ...     ],
         ... )
-        >>> s2 = geopandas.GeoSeries(
+        >>> s2 = GeoSeries(
         ...     [
         ...         LineString([(1, 0), (1, 3)]),
         ...         LineString([(2, 0), (0, 2)]),
@@ -1005,8 +1007,10 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
+
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (2, 2), (0, 2)]),
         ...         Polygon([(0, 0), (2, 2), (0, 2)]),
@@ -1015,7 +1019,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         ...         Point(0, 1),
         ...     ],
         ... )
-        >>> s2 = geopandas.GeoSeries(
+        >>> s2 = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (1, 1), (0, 1)]),
         ...         LineString([(1, 0), (1, 3)]),
@@ -1373,8 +1377,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
 
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [Polygon([(0, 0), (1, 1), (0, 1)]), None, Polygon([])]
         ... )
         >>> s
@@ -1418,8 +1423,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
 
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [Polygon([(0, 0), (1, 1), (0, 1)]), None, Polygon([])]
         ... )
         >>> s
