@@ -192,18 +192,20 @@ class TestGeoSeries(TestBase):
                     ]
                 ),
                 GeometryCollection([Point(0, 0), LineString([(0, 0), (1, 1)])]),
+                LinearRing([(0, 0), (1, 1), (1, 0), (0, 1), (0, 0)]),
             ]
         )
         result = geoseries.geom_type
         expected = pd.Series(
             [
-                "POINT",
-                "MULTIPOINT",
-                "LINESTRING",
-                "MULTILINESTRING",
-                "POLYGON",
-                "MULTIPOLYGON",
-                "GEOMETRYCOLLECTION",
+                "Point",
+                "MultiPoint",
+                "LineString",
+                "MultiLineString",
+                "Polygon",
+                "MultiPolygon",
+                "GeometryCollection",
+                "LineString",  # Note: Sedona returns LineString instead of LinearRing
             ]
         )
         assert_series_equal(result.to_pandas(), expected)

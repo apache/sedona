@@ -547,7 +547,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         """
         Returns a series of strings specifying the geometry type of each geometry of each object.
 
-        Note: Unlike the original geopandas, this method returns the strings in all caps
+        Note: Unlike Geopandas, Sedona returns LineString instead of LinearRing.
 
         Returns
         -------
@@ -565,9 +565,22 @@ class GeoSeries(GeoFrame, pspd.Series):
         1    POINT
         dtype: object
         """
-        return self._process_geometry_column(
+        result = self._process_geometry_column(
             "GeometryType", rename="geom_type"
         ).to_spark_pandas()
+
+        # Sedona returns the string in all caps unlike Geopandas
+        sgpd_to_gpg_name_map = {
+            "POINT": "Point",
+            "LINESTRING": "LineString",
+            "POLYGON": "Polygon",
+            "MULTIPOINT": "MultiPoint",
+            "MULTILINESTRING": "MultiLineString",
+            "MULTIPOLYGON": "MultiPolygon",
+            "GEOMETRYCOLLECTION": "GeometryCollection",
+        }
+        result = result.map(lambda x: sgpd_to_gpg_name_map.get(x, x))
+        return result
 
     @property
     def type(self):
