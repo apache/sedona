@@ -1399,8 +1399,10 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
+
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (1, 1), (0, 1)]),
         ...         None,
@@ -1432,7 +1434,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         Filled with another GeoSeries.
 
         >>> from shapely.geometry import Point
-        >>> s_fill = geopandas.GeoSeries(
+        >>> s_fill = GeoSeries(
         ...     [
         ...         Point(0, 0),
         ...         Point(1, 1),
