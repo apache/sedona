@@ -1634,11 +1634,11 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
           |""".stripMargin)
 
       var actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'mode')").first().get(0)
-      assertEquals(10.0, actual)
+      assertNull(actual)
 
       val statsDf = df.selectExpr("RS_ZonalStatsAll(raster, geom) as stats")
       actual = statsDf.first().getStruct(0).toSeq.slice(0, 9)
-      val expected = Seq(1.0, 10.0, 10.0, 10.0, 10.0, 0.0, 0.0, 10.0, 10.0)
+      val expected = Seq(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
       assertTrue(expected.equals(actual))
     }
 
@@ -1651,20 +1651,20 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         "ST_GeomFromWKT('POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))', 26918) as geom")
       var actual =
         df.selectExpr("RS_ZonalStats(raster, geom, 1, 'sum', false, true)").first().get(0)
-      assertEquals(1.0896994e7, actual)
+      assertEquals(1.0795427e7, actual)
 
       actual =
         df.selectExpr("RS_ZonalStats(raster, geom, 1, 'count', false, false)").first().get(0)
-      assertEquals(185953.0, actual)
+      assertEquals(185104.0, actual)
 
       actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'mean', true, false)").first().get(0)
       assertEquals(58.650240700685295, actual)
 
-      actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'variance')").first().get(0)
-      assertEquals(8563.303492088418, actual)
+      actual = df.selectExpr(s"RS_ZonalStats(raster, geom, 1, 'variance')").first().get(0)
+      assertEquals(8534.098251841822, actual)
 
-      actual = df.selectExpr("RS_ZonalStats(raster, geom, 'sd')").first().get(0)
-      assertEquals(92.53811912983977, actual)
+      actual = df.selectExpr(s"RS_ZonalStats(raster, geom, 'sd')").first().get(0)
+      assertEquals(92.3801832204387, actual)
 
       // Test with a polygon in EPSG:4326
       actual = df
@@ -1721,8 +1721,8 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .getStruct(0)
         .toSeq
         .slice(0, 9)
-      val expected = Seq(185953.0, 1.0896994e7, 58.600796975566816, 0.0, 0.0, 92.53811912983977,
-        8563.303492088418, 0.0, 255.0)
+      val expected = Seq(185104.0, 1.0795427e7, 58.32087367104147, 0.0, 0.0, 92.3801832204387,
+        8534.098251841822, 0.0, 255.0)
       assertTrue(expected.equals(actual))
 
       // Test with a polygon that does not intersect the raster in lenient mode

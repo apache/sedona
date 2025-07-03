@@ -549,14 +549,14 @@ public class Rasterization {
         // Calculate scan line limits to iterate between for each segment
         // Using BigDecimal to avoid floating point errors
         double yStart =
-            Math.ceil(
+            Math.round(
                 (BigDecimal.valueOf(params.upperLeftY)
                         .subtract(BigDecimal.valueOf(worldP1.y))
                         .divide(BigDecimal.valueOf(params.scaleY), RoundingMode.CEILING))
                     .doubleValue());
 
         double yEnd =
-            Math.floor(
+            Math.round(
                 (BigDecimal.valueOf(params.upperLeftY)
                         .subtract(BigDecimal.valueOf(worldP2.y))
                         .divide(BigDecimal.valueOf(params.scaleY), RoundingMode.FLOOR))
@@ -581,17 +581,15 @@ public class Rasterization {
           }
         } else {
           double slope = (worldP2.y - worldP1.y) / (worldP2.x - worldP1.x);
-          //        System.out.println("slope: " + slope);
 
           for (double y = yStart; y >= yEnd; y--) {
             double xIntercept = p1X + ((p1Y - y) / slope);
-            if ((xIntercept < 0) || (xIntercept >= params.writableRaster.getWidth())) {
-              continue; // skip xIntercepts outside geomExtent
+            double xMin = (geomExtent.getMinX() - params.upperLeftX) / params.scaleX;
+            double xMax = (geomExtent.getMaxX() - params.upperLeftX) / params.scaleX;
+            if ((xIntercept < xMin) || (xIntercept >= xMax)) {
+              continue; // Skip xIntercepts outside geomExtent
             }
-            if (!scanlineIntersections.containsKey(y)) {
-              scanlineIntersections.put(y, new TreeSet<>());
-            }
-            scanlineIntersections.get(y).add(xIntercept);
+            scanlineIntersections.computeIfAbsent(y, k -> new TreeSet<>()).add(xIntercept);
           }
         }
       }
