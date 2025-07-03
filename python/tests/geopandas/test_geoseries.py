@@ -23,7 +23,14 @@ import sedona.geopandas as sgpd
 from sedona.geopandas import GeoSeries
 from tests.test_base import TestBase
 from shapely import wkt
-from shapely.geometry import Point, LineString, Polygon, GeometryCollection, LinearRing
+from shapely.geometry import (
+    Point,
+    LineString,
+    Polygon,
+    MultiPolygon,
+    GeometryCollection,
+    LinearRing,
+)
 from pandas.testing import assert_series_equal
 
 
@@ -50,7 +57,10 @@ class TestGeoSeries(TestBase):
         assert len(actual) == len(expected)
         sgpd_result = actual.to_geopandas()
         for a, e in zip(sgpd_result, expected):
-            if a.is_empty and e.is_empty:
+            if a is None or e is None:
+                assert a is None and e is None
+                continue
+            elif a.is_empty and e.is_empty:
                 continue
             self.assert_geometry_almost_equal(a, e)
 
@@ -205,7 +215,28 @@ class TestGeoSeries(TestBase):
         assert_series_equal(result.to_pandas(), expected)
 
     def test_is_valid_reason(self):
-        pass
+        s = sgpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                Polygon([(0, 0), (1, 1), (1, 0), (0, 1)]),  # bowtie geometry
+                Polygon([(0, 0), (2, 2), (2, 0)]),
+                Polygon(
+                    [(0, 0), (2, 0), (1, 1), (2, 2), (0, 2), (1, 1), (0, 0)]
+                ),  # ring intersection
+                None,
+            ]
+        )
+        result = s.is_valid_reason().to_pandas()
+        expected = pd.Series(
+            [
+                "Valid Geometry",
+                "Self-intersection at or near point (0.5, 0.5, NaN)",
+                "Valid Geometry",
+                "Ring Self-intersection at or near point (1.0, 1.0)",
+                None,
+            ]
+        )
+        assert_series_equal(result, expected)
 
     def test_is_empty(self):
         geoseries = sgpd.GeoSeries(
@@ -324,7 +355,56 @@ class TestGeoSeries(TestBase):
         pass
 
     def test_make_valid(self):
-        pass
+        s = sgpd.GeoSeries(
+            [
+                Polygon([(0, 0), (0, 2), (1, 1), (2, 2), (2, 0), (1, 1), (0, 0)]),
+                Polygon([(0, 2), (0, 1), (2, 0), (0, 0), (0, 2)]),
+                LineString([(0, 0), (1, 1), (1, 0)]),
+            ],
+        )
+        result = s.make_valid(method="structure")
+
+        expected = gpd.GeoSeries(
+            [
+                MultiPolygon(
+                    [
+                        Polygon([(1, 1), (0, 0), (0, 2), (1, 1)]),
+                        Polygon([(2, 0), (1, 1), (2, 2), (2, 0)]),
+                    ]
+                ),
+                Polygon([(0, 1), (2, 0), (0, 0), (0, 1)]),
+                LineString([(0, 0), (1, 1), (1, 0)]),
+            ]
+        )
+
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = s.make_valid(method="structure", keep_collapsed=False)
+        expected = gpd.GeoSeries(
+            [
+                MultiPolygon(
+                    [
+                        Polygon([(1, 1), (0, 0), (0, 2), (1, 1)]),
+                        Polygon([(2, 0), (1, 1), (2, 2), (2, 0)]),
+                    ]
+                ),
+                Polygon([(0, 1), (2, 0), (0, 0), (0, 1)]),
+                LineString([(0, 0), (1, 1), (1, 0)]),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = GeoSeries(
+            [Polygon([(0, 0), (1, 1), (1, 2), (1, 1), (0, 0)])]
+        ).make_valid(method="structure", keep_collapsed=True)
+        expected = gpd.GeoSeries([LineString([(0, 0), (1, 1), (1, 2), (1, 1), (0, 0)])])
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = GeoSeries(
+            [Polygon([(0, 0), (1, 1), (1, 2), (1, 1), (0, 0)])]
+        ).make_valid(method="structure", keep_collapsed=False)
+        expected = gpd.GeoSeries([Polygon()])
+        self.check_sgpd_equals_gpd(result, expected)
 
     def test_reverse(self):
         pass
