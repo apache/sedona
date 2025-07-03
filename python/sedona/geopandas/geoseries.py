@@ -470,7 +470,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             return gpd.GeoSeries(
                 pd_series.map(lambda wkb: shapely.wkb.loads(bytes(wkb))), crs=self.crs
             )
-        except Exception as e:
+        except TypeError:
             return gpd.GeoSeries(pd_series, crs=self.crs)
 
     def to_spark_pandas(self) -> pspd.Series:
