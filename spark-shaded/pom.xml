@@ -257,6 +257,10 @@
                                     <pattern>com.google.common</pattern>
                                     <shadedPattern>org.apache.sedona.shaded.guava</shadedPattern>
                                 </relocation>
+                                <relocation>
+                                    <pattern>it.unimi.dsi.fastutil</pattern>
+                                    <shadedPattern>org.apache.sedona.shaded.fastutil</shadedPattern>
+                                </relocation>
                             </relocations>
                             <filters>
                                 <!--  filter to address "Invalid signature file" issue - see http://stackoverflow.com/a/6743609/589215 -->
