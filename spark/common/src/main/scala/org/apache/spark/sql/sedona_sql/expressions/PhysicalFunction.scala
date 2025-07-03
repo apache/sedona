@@ -25,6 +25,8 @@ import org.apache.spark.sql.execution.{LogicalRDD, SparkPlan}
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 
+import org.apache.spark.sql.sedona_sql.DataFrameShims
+
 import scala.reflect.ClassTag
 
 /**
@@ -101,7 +103,7 @@ trait DataframePhysicalFunction extends PhysicalFunction {
 
   override def execute(plan: SparkPlan, resultAttrs: Seq[Attribute]): RDD[InternalRow] = {
     val df = transformDataframe(
-      Dataset.ofRows(sparkSession, LogicalRDD(plan.output, plan.execute())(sparkSession)),
+      DataFrameShims.createDataFrame(sparkSession, plan.execute(), plan.schema),
       resultAttrs)
     df.queryExecution.toRdd
   }

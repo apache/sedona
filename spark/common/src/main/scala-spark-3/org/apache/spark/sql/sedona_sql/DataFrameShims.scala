@@ -16,31 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.expressions
+package org.apache.spark.sql.sedona_sql
 
 import scala.reflect.ClassTag
 
+import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.{Column, DataFrame, SparkSession}
+import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{Expression, Literal}
-import org.apache.spark.sql.Column
 import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
 import org.apache.spark.sql.execution.aggregate.ScalaUDAF
+import org.apache.spark.sql.functions.lit
+import org.apache.spark.sql.types.StructType
 
-trait DataFrameAPI {
-  protected def wrapExpression[E <: Expression: ClassTag](args: Any*): Column = {
-    val exprArgs = args.map(_ match {
-      case c: Column => c.expr
-      case s: String => Column(s).expr
-      case e: Expression => e
-      case x: Any => Literal(x)
-      case null => Literal(null)
-    })
-    val expressionConstructor =
-      implicitly[ClassTag[E]].runtimeClass.getConstructor(classOf[Seq[Expression]])
-    val expressionInstance = expressionConstructor.newInstance(exprArgs).asInstanceOf[E]
-    Column(expressionInstance)
+object DataFrameShims {
+
+  private[sedona_sql] def wrapExpression[E <: Expression: ClassTag](args: Any*): Column = {
+    wrapVarArgExpression[E](args)
   }
 
-  protected def wrapVarArgExpression[E <: Expression: ClassTag](arg: Seq[Any]): Column = {
+  private[sedona_sql] def wrapVarArgExpression[E <: Expression: ClassTag](arg: Seq[Any]): Column = {
+    val runtimeClass = implicitly[ClassTag[E]].runtimeClass
     val exprArgs = arg.map(_ match {
       case c: Column => c.expr
       case s: String => Column(s).expr
@@ -48,13 +44,13 @@ trait DataFrameAPI {
       case x: Any => Literal(x)
       case null => Literal(null)
     })
-    val expressionConstructor =
-      implicitly[ClassTag[E]].runtimeClass.getConstructor(classOf[Seq[Expression]])
+    val expressionConstructor = runtimeClass.getConstructor(classOf[Seq[Expression]])
     val expressionInstance = expressionConstructor.newInstance(exprArgs).asInstanceOf[E]
     Column(expressionInstance)
   }
 
-  protected def wrapAggregator[A <: UserDefinedAggregateFunction: ClassTag](arg: Any*): Column = {
+  private[sedona_sql] def wrapAggregator[A <: UserDefinedAggregateFunction: ClassTag](arg: Any*): Column = {
+    val runtimeClass = implicitly[ClassTag[A]].runtimeClass
     val exprArgs = arg.map(_ match {
       case c: Column => c.expr
       case s: String => Column(s).expr
@@ -62,11 +58,17 @@ trait DataFrameAPI {
       case x: Any => Literal(x)
       case null => Literal(null)
     })
-    val aggregatorClass = implicitly[ClassTag[A]].runtimeClass
-    val aggregatorConstructor = aggregatorClass.getConstructor()
+    val aggregatorConstructor = runtimeClass.getConstructor()
     val aggregatorInstance =
       aggregatorConstructor.newInstance().asInstanceOf[UserDefinedAggregateFunction]
     val scalaAggregator = ScalaUDAF(exprArgs, aggregatorInstance)
     Column(scalaAggregator)
+  }
+
+  private[sedona_sql] def createDataFrame(
+      sparkSession: SparkSession,
+      rdd: RDD[InternalRow],
+      schema: StructType): DataFrame = {
+    sparkSession.internalCreateDataFrame(rdd, schema)
   }
 }

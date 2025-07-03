@@ -17,13 +17,13 @@
  under the License.
  -->
 
-# Apache Sedona Spatial Joins
+# Apache Sedona Spatial Joins with Spark
 
 This post explains how to perform spatial joins with Apache Sedona. You will learn about the different types of spatial joins and how to run them efficiently.
 
 This page provides basic examples that clearly illustrate the key conceptual points of spatial joins.  It also elaborates on spatial join concepts for real-world-sized datasets and highlights key performance enhancements.
 
-## Spatial join within
+## Spatial join within using Spark
 
 Look at the following graph containing three points and two polygons.  `point_b` is within `polygon_y`, `point_c` is within `polygon_x`, and `point_a` isn’t within any polygon.
 
@@ -102,7 +102,7 @@ Here’s the same result:
 +--------+----------+
 ```
 
-## Spatial join crosses
+## Spatial join crosses with Spark
 
 Look at the following graph containing one polygon and two lines.  `line_a` and `line_b` cross `polygon_x`.  `line_c` does not cross `polygon_x`.
 
@@ -132,7 +132,7 @@ Here is the result:
 
 A spatial join with `ST_Crosses` lets us identify the lines that cross the polygon.
 
-## Spatial join with touches
+## Spatial join with touches using Spark
 
 Suppose you have a polygon and two lines.  `line_a` does not touch the polygon, and `line_b` does touch the polygon.  See the following diagram:
 
@@ -188,7 +188,7 @@ Here’s the result of the join:
 
 Now, let’s look at running a join to see if points are within a polygon.
 
-## Spatial join overlaps
+## Spatial join overlaps with Spark
 
 The following diagram shows two polygons and a few shapes.  `polygon_a` overlaps `polygon_x`.  Neither `line_b`, `line_c`, or `point_d` overlap with `polygon_y` or `polygon_x`.
 
@@ -217,7 +217,7 @@ Here is the result:
 +--------+----------+
 ```
 
-## Spatial join K-nearest neighbors (KNN spatial join)
+## Spatial join K-nearest neighbors (KNN spatial join) with Spark
 
 Suppose you have tables with addresses and coffee shop locations.  You’d like to find the two nearest coffee shops to each address.
 
@@ -278,7 +278,7 @@ Here’s a visualization of the results:
 
 You can easily see the coffee shops that are closest to each address.
 
-## Spatial distance join
+## Spatial distance join with Spark
 
 Look at the following graph, which shows a point and different transit stations. Let’s perform a spatial join to find all the transit stations within 2.5 units of the point.
 
@@ -335,7 +335,7 @@ Sedona is an excellent tool for finding locations within a certain distance from
 
 Sedona uses the Euclidean distance between two objects so the distance unit has the same CRS of the original coordinates. To directly operate on WGS84 coordinates with meter distance, you should use `ST_DistanceSphere`, `ST_DistanceSpheroid`, or `ST_DWithnin(useSpheroid = true)`.
 
-## Spatial range join
+## Spatial range join with Spark
 
 All joins triggered by `ST_Intersects`, `ST_Contains`, `ST_Within`, `ST_DWithin`, `ST_Touches`, and `ST_Crosses` are considered a range join.  This section illustrates another range join, but we've already covered several range joins on this page.
 
@@ -393,7 +393,7 @@ Here are the results:
 
 Range joins are helpful in many practical applications.
 
-## Spatial join optimizations
+## Spatial join optimizations for Sedona and Apache Spark
 
 You can optimize spatial joins by using better file formats, indexing your data, or optimizing your queries.
 

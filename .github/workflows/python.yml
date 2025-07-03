@@ -60,33 +60,46 @@ jobs:
     strategy:
       matrix:
         include:
+          - spark: '4.0.0'
+            scala: '2.13.8'
+            java: '17'
+            python: '3.10'
           - spark: '3.5.0'
             scala: '2.12.8'
+            java: '11'
             python: '3.10'
             shapely: '1'
           - spark: '3.5.0'
             scala: '2.12.8'
+            java: '11'
             python: '3.10'
           - spark: '3.5.0'
             scala: '2.12.8'
+            java: '11'
             python: '3.9'
           - spark: '3.5.0'
             scala: '2.12.8'
+            java: '11'
             python: '3.8'
           - spark: '3.4.0'
             scala: '2.12.8'
+            java: '11'
             python: '3.10'
           - spark: '3.4.0'
             scala: '2.12.8'
+            java: '11'
             python: '3.9'
           - spark: '3.4.0'
             scala: '2.12.8'
+            java: '11'
             python: '3.8'
           - spark: '3.4.0'
             scala: '2.12.8'
+            java: '11'
             python: '3.8'
           - spark: '3.4.0'
             scala: '2.12.8'
+            java: '11'
             python: '3.8'
             shapely: '1'
 
@@ -97,7 +110,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '11'
+          java-version: '${{ matrix.java }}'
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
@@ -123,11 +136,16 @@ jobs:
           SPARK_VERSION: ${{ matrix.spark }}
           PYTHON_VERSION: ${{ matrix.python }}
           SHAPELY_VERSION: ${{ matrix.shapely }}
+          PANDAS_VERSION: ${{ matrix.pandas }}
         run: |
           cd python
           if [ "${SHAPELY_VERSION}" == "1" ]; then
             echo "Patching Pipfile to use Shapely 1.x"
             sed -i 's/^shapely.*$/shapely="<2.0.0"/g' Pipfile
+          fi
+          if [ "${PANDAS_VERSION}" == "1" ]; then
+            echo "Patching Pipfile to use Pandas 1.x"
+            sed -i 's/^pandas.*$/pandas="<2.0.0"/g' Pipfile
           fi
           export PIPENV_CUSTOM_VENV_NAME=python-${PYTHON_VERSION}
           pipenv --python ${PYTHON_VERSION}

@@ -18,6 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.adapters
 
+import org.apache.sedona.core.spatialPartitioning.GenericUniquePartitioner
 import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.sedona.util.DfUtils
@@ -26,9 +27,9 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.types.{DataType, StructType}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
+import org.apache.spark.sql.sedona_sql.DataFrameShims
 import org.locationtech.jts.geom.Geometry
 import org.slf4j.{Logger, LoggerFactory}
-import org.apache.sedona.core.spatialPartitioning.GenericUniquePartitioner
 
 /**
  * Adapter for converting between DataFrame and SpatialRDD. It provides methods to convert
@@ -139,7 +140,7 @@ object StructuredAdapter {
       val row = geometry.getUserData.asInstanceOf[InternalRow]
       row
     })
-    sparkSession.internalCreateDataFrame(rowRdd, spatialRDD.schema)
+    DataFrameShims.createDataFrame(sparkSession, rowRdd, spatialRDD.schema)
   }
 
   /**
@@ -166,7 +167,7 @@ object StructuredAdapter {
       val row = geometry.getUserData.asInstanceOf[InternalRow]
       row
     })
-    sparkSession.internalCreateDataFrame(rowRdd, spatialRDD.schema)
+    DataFrameShims.createDataFrame(sparkSession, rowRdd, spatialRDD.schema)
   }
 
   /**
@@ -213,7 +214,8 @@ object StructuredAdapter {
       val rightRow = pair._2.getUserData.asInstanceOf[InternalRow].toSeq(rightSchema)
       InternalRow.fromSeq(leftRow ++ rightRow)
     })
-    sparkSession.internalCreateDataFrame(
+    DataFrameShims.createDataFrame(
+      sparkSession,
       rowRdd,
       StructType(leftSchema.fields ++ rightSchema.fields))
   }
