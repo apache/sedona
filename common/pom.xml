@@ -91,7 +91,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.4.7-jre</version>
+            <version>${googles2-guava.version}</version>
         </dependency>
         <dependency>
             <groupId>com.uber</groupId>
@@ -117,7 +117,9 @@
             <groupId>edu.ucar</groupId>
             <artifactId>cdm-core</artifactId>
         </dependency>
-        <!-- For shading a janino package that works with Spark for jiffle -->
+        <!-- For shading a janino package that works with Spark for jiffle. We don't add this to
+             dependencyManagement in parent pom.xml because we don't want to mess up with the
+             janino versions required by Spark. -->
         <dependency>
             <groupId>org.codehaus.janino</groupId>
             <artifactId>janino</artifactId>
