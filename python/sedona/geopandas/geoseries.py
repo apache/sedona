@@ -646,8 +646,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         An example with one invalid polygon (a bowtie geometry crossing itself)
         and one missing geometry:
 
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (1, 1), (0, 1)]),
         ...         Polygon([(0,0), (1, 1), (1, 0), (0, 1)]),  # bowtie geometry
@@ -935,8 +936,10 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
+
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import MultiPolygon, Polygon, LineString, Point
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (0, 2), (1, 1), (2, 2), (2, 0), (1, 1), (0, 0)]),
         ...         Polygon([(0, 2), (0, 1), (2, 0), (0, 0), (0, 2)]),
