@@ -1412,11 +1412,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
         >>> from shapely.geometry import Point
-        >>> from geopandas.array import from_shapely, to_wkt
-        >>> a = from_shapely([Point(1, 1), Point(2, 2), Point(3, 3)], crs=4326)
-        >>> to_wkt(a)
-        array(['POINT (1 1)', 'POINT (2 2)', 'POINT (3 3)'], dtype=object)
-        >>> a.crs  # doctest: +SKIP
+        >>> import sedona.geopandas as sgpd
+        >>> geoseries = sgpd.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)], crs=4326)
+        >>> geoseries.crs
         <Geographic 2D CRS: EPSG:4326>
         Name: WGS 84
         Axis Info [ellipsoidal]:
@@ -1429,12 +1427,13 @@ class GeoSeries(GeoFrame, pspd.Series):
         - Ellipsoid: WGS 84
         - Prime Meridian: Greenwich
 
-        >>> a = a.to_crs(3857)
-        >>> to_wkt(a)
-        array(['POINT (111319.490793 111325.142866)',
-               'POINT (222638.981587 222684.208506)',
-               'POINT (333958.47238 334111.171402)'], dtype=object)
-        >>> a.crs  # doctest: +SKIP
+        >>> geoseries = geoseries.to_crs(3857)
+        >>> print(geoseries)
+        0    POINT (111319.491 111325.143)
+        1    POINT (222638.982 222684.209)
+        2    POINT (333958.472 334111.171)
+        dtype: geometry
+        >>> geoseries.crs
         <Projected CRS: EPSG:3857>
         Name: WGS 84 / Pseudo-Mercator
         Axis Info [cartesian]:
