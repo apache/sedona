@@ -271,8 +271,9 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Point
-        >>> s = geopandas.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        >>> s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
         >>> s
         0    POINT (1 1)
         1    POINT (2 2)
@@ -501,7 +502,6 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples:
         >>> from shapely.geometry import Point
-        >>> import geopandas as gpd
         >>> from sedona.geopandas import GeoSeries
 
         >>> gs = GeoSeries([Point(1, 1), Point(2, 2)])
@@ -531,7 +531,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
         >>> from shapely.geometry import Polygon
-        >>> import geopandas as gpd
         >>> from sedona.geopandas import GeoSeries
 
         >>> gs = GeoSeries([Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])])
@@ -569,7 +568,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
         >>> from shapely.geometry import Polygon
-        >>> import geopandas as gpd
         >>> from sedona.geopandas import GeoSeries
 
         >>> gs = GeoSeries([Point(0, 0), LineString([(0, 0), (1, 1)]), Polygon([(0, 0), (1, 0), (1, 1)]), GeometryCollection([Point(0, 0), LineString([(0, 0), (1, 1)]), Polygon([(0, 0), (1, 0), (1, 1)])])])
@@ -603,8 +601,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         An example with one invalid polygon (a bowtie geometry crossing itself)
         and one missing geometry:
 
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (1, 1), (0, 1)]),
         ...         Polygon([(0,0), (1, 1), (1, 0), (0, 1)]),  # bowtie geometry
@@ -651,16 +650,15 @@ class GeoSeries(GeoFrame, pspd.Series):
         An example of a GeoDataFrame with one empty point, one point and one missing
         value:
 
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Point
-        >>> d = {'geometry': [Point(), Point(2, 1), None]}
-        >>> gdf = geopandas.GeoDataFrame(d, crs="EPSG:4326")
-        >>> gdf
-            geometry
+        >>> geoseries = GeoSeries([Point(), Point(2, 1), None], crs="EPSG:4326")
+        >>> geoseries
         0  POINT EMPTY
         1  POINT (2 1)
         2         None
 
-        >>> gdf.is_empty
+        >>> geoseries.is_empty
         0     True
         1    False
         2    False
@@ -697,8 +695,9 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import LineString
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         LineString([(0, 0), (1, 1), (1, -1), (0, 1)]),
         ...         LineString([(0, 0), (1, 1), (1, -1)]),
@@ -747,8 +746,9 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Point
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         Point(0, 1),
         ...         Point(0, 1, 2),
@@ -921,8 +921,9 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (2, 2), (0, 2)]),
         ...         LineString([(0, 0), (2, 2)]),
@@ -930,7 +931,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         ...         Point(0, 1),
         ...     ],
         ... )
-        >>> s2 = geopandas.GeoSeries(
+        >>> s2 = GeoSeries(
         ...     [
         ...         LineString([(1, 0), (1, 3)]),
         ...         LineString([(2, 0), (0, 2)]),
@@ -1005,8 +1006,9 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (2, 2), (0, 2)]),
         ...         Polygon([(0, 0), (2, 2), (0, 2)]),
@@ -1015,7 +1017,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         ...         Point(0, 1),
         ...     ],
         ... )
-        >>> s2 = geopandas.GeoSeries(
+        >>> s2 = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (1, 1), (0, 1)]),
         ...         LineString([(1, 0), (1, 3)]),
@@ -1231,8 +1233,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
 
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Point
-        >>> s = geopandas.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        >>> s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
         >>> s.x
         0    1.0
         1    2.0
@@ -1259,8 +1262,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
 
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Point
-        >>> s = geopandas.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        >>> s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
         >>> s.y
         0    1.0
         1    2.0
@@ -1288,8 +1292,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
 
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Point
-        >>> s = geopandas.GeoSeries([Point(1, 1, 1), Point(2, 2, 2), Point(3, 3, 3)])
+        >>> s = GeoSeries([Point(1, 1, 1), Point(2, 2, 2), Point(3, 3, 3)])
         >>> s.z
         0    1.0
         1    2.0
@@ -1412,8 +1417,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
         >>> from shapely.geometry import Point
-        >>> import sedona.geopandas as sgpd
-        >>> geoseries = sgpd.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)], crs=4326)
+        >>> from sedona.geopandas import GeoSeries
+        >>> geoseries = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)], crs=4326)
         >>> geoseries.crs
         <Geographic 2D CRS: EPSG:4326>
         Name: WGS 84
