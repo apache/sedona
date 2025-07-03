@@ -52,6 +52,14 @@
                     <groupId>it.geosolutions.jaiext.jiffle</groupId>
                     <artifactId>jt-jiffle-language</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.datasyslab</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
