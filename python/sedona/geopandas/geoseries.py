@@ -784,8 +784,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
 
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (1, 1), (0, 1)]),
         ...         LineString([(0, 0), (1, 1), (1, 0)]),
@@ -829,8 +830,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
 
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (1, 1), (0, 1)]),
         ...         LineString([(0, 0), (1, 1), (1, 0)]),
@@ -884,8 +886,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
 
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, Point, MultiPoint
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (1, 1), (0, 1)]),
         ...         LineString([(0, 0), (1, 1), (1, 0)]),
