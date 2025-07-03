@@ -29,10 +29,7 @@ import java.util.stream.Collectors;
 import org.apache.sedona.common.sphere.Haversine;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.utils.*;
-import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.operation.TransformException;
-import org.geotools.referencing.CRS;
-import org.geotools.referencing.operation.projection.ProjectionException;
 import org.junit.Test;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
@@ -749,11 +746,11 @@ public class FunctionsTest extends TestBase {
 
   @Test
   public void envelopeAndCentroidSRID() throws ParseException {
-    Geometry geom = Constructors.geomFromWKT("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))", 3857);
+    Geometry geom = Constructors.geomFromWKT("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))", 4979);
     Geometry envelope = Functions.envelope(geom);
-    assertEquals(3857, envelope.getSRID());
+    assertEquals(4979, envelope.getSRID());
     Geometry centroid = Functions.getCentroid(geom);
-    assertEquals(3857, centroid.getSRID());
+    assertEquals(4979, centroid.getSRID());
   }
 
   @Test
@@ -2867,10 +2864,10 @@ public class FunctionsTest extends TestBase {
 
   @Test
   public void testBufferSRID() throws ParseException {
-    Geometry geom = geomFromWKT("POINT (10 20)", 3857);
+    Geometry geom = geomFromWKT("POINT (10 20)", 4979);
     Geometry buffered = Functions.buffer(geom, 1);
-    assertEquals(3857, buffered.getSRID());
-    assertEquals(3857, buffered.getFactory().getSRID());
+    assertEquals(4979, buffered.getSRID());
+    assertEquals(4979, buffered.getFactory().getSRID());
 
     geom = geomFromWKT("POINT (10 20)", 4326);
     buffered = Functions.buffer(geom, 1, true);
@@ -3936,57 +3933,127 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
-  public void transform() throws FactoryException, TransformException {
+  public void transform() throws org.opengis.util.FactoryException, TransformException {
+    /**
+     * Validating without SIS EPSG dataset. The following CRS codes are currently available as
+     * Apache SIS Common codes: WGS84 (EPSG:4326) WGS72 (EPSG:4322) NAD83 (EPSG:4269) NAD27
+     * (EPSG:4267) ETRS89 (EPSG:4258) ED50 (EPSG:4230) GRS1980 (EPSG:4019) SPHERE (EPSG:4047)
+     */
+    final String WGS84 = "EPSG:4326";
+    final String NAD27 = "EPSG:4267";
+    final String NAD83 = "EPSG:4269";
+    final String ED50 = "EPSG:4230";
+    final int nad27Srid = 4267;
+    final int nad83Srid = 4269;
     // The source and target CRS are the same
-    Point geomExpected = GEOMETRY_FACTORY.createPoint(new Coordinate(120, 60));
-    Geometry geomActual = FunctionsGeoTools.transform(geomExpected, "EPSG:4326", "EPSG:4326");
-    assertEquals(geomExpected.getCoordinate().x, geomActual.getCoordinate().x, FP_TOLERANCE);
-    assertEquals(geomExpected.getCoordinate().y, geomActual.getCoordinate().y, FP_TOLERANCE);
-    assertEquals(4326, geomActual.getSRID());
-    assertEquals(4326, geomActual.getFactory().getSRID());
+    final Point geomExpected = GEOMETRY_FACTORY.createPoint(new Coordinate(120, 60));
+    Geometry geomActual = FunctionsApacheSIS.transform(geomExpected, NAD27, NAD27);
+    // Zero delta on these coordinate checks since the source and target CRS are the same
+    assertEquals(geomExpected.getCoordinate().x, geomActual.getCoordinate().x, 0);
+    assertEquals(geomExpected.getCoordinate().y, geomActual.getCoordinate().y, 0);
+    assertEquals(nad27Srid, geomActual.getSRID());
+    assertEquals(nad27Srid, geomActual.getFactory().getSRID());
 
-    // The source and target CRS are different
-    geomActual = FunctionsGeoTools.transform(geomExpected, "EPSG:4326", "EPSG:3857");
-    assertEquals(1.3358338895192828E7, geomActual.getCoordinate().x, FP_TOLERANCE);
-    assertEquals(8399737.889818355, geomActual.getCoordinate().y, FP_TOLERANCE);
-    assertEquals(3857, geomActual.getSRID());
-    assertEquals(3857, geomActual.getFactory().getSRID());
+    // The source and target CRS are different.
+    // Using verification points from NOAA's EPSG transformation service but
+    Point geomInput = GEOMETRY_FACTORY.createPoint(new Coordinate(-120, 48));
+    geomActual = FunctionsApacheSIS.transform(geomInput, NAD83, NAD27);
+    // large delta on these coordinate checks since validating without EPSG dataset
+    assertEquals(-119.9988138773, geomActual.getCoordinate().x, 1e-2);
+    assertEquals(48.0001387082, geomActual.getCoordinate().y, 1e-2);
+    assertEquals(nad27Srid, geomActual.getSRID());
+    assertEquals(nad27Srid, geomActual.getFactory().getSRID());
 
     // The source CRS is not specified and the geometry has no SRID
     Exception e =
         assertThrows(
             IllegalArgumentException.class,
-            () -> FunctionsGeoTools.transform(geomExpected, "EPSG:3857"));
+            () -> FunctionsApacheSIS.transform(geomExpected, NAD27));
     assertEquals("Source CRS must be specified. No SRID found on geometry.", e.getMessage());
 
     // The source CRS is an invalid SRID
     e =
         assertThrows(
-            FactoryException.class,
-            () -> FunctionsGeoTools.transform(geomExpected, "abcde", "EPSG:3857"));
+            IllegalArgumentException.class,
+            () -> FunctionsApacheSIS.transform(geomExpected, "abcde", NAD83));
     assertTrue(e.getMessage().contains("First failed to read as a well-known CRS code"));
 
     // The source CRS is a WKT CRS string
-    String crsWkt = CRS.decode("EPSG:4326", true).toWKT();
-    geomActual = FunctionsGeoTools.transform(geomExpected, crsWkt, "EPSG:3857");
-    assertEquals(1.3358338895192828E7, geomActual.getCoordinate().x, FP_TOLERANCE);
-    assertEquals(8399737.889818355, geomActual.getCoordinate().y, FP_TOLERANCE);
-    assertEquals(3857, geomActual.getSRID());
-    assertEquals(3857, geomActual.getFactory().getSRID());
+    String crsWkt = FunctionsApacheSIS.parseCRSString(NAD27).toWKT();
+    geomInput = GEOMETRY_FACTORY.createPoint(new Coordinate(-110, 45));
+    geomActual = FunctionsApacheSIS.transform(geomInput, crsWkt, NAD83);
+    assertEquals(-110.0007450884, geomActual.getCoordinate().x, 1E-2);
+    assertEquals(44.9999435027, geomActual.getCoordinate().y, 1E-2);
+    assertEquals(nad83Srid, geomActual.getSRID());
+    assertEquals(nad83Srid, geomActual.getFactory().getSRID());
 
     // The source CRS is not specified but the geometry has a valid SRID
-    geomExpected.setSRID(4326);
-    geomActual = FunctionsGeoTools.transform(geomExpected, "EPSG:3857");
-    assertEquals(1.3358338895192828E7, geomActual.getCoordinate().x, FP_TOLERANCE);
-    assertEquals(8399737.889818355, geomActual.getCoordinate().y, FP_TOLERANCE);
-    assertEquals(3857, geomActual.getSRID());
-    assertEquals(3857, geomActual.getFactory().getSRID());
+    geomInput.setSRID(nad27Srid);
+    geomActual = FunctionsApacheSIS.transform(geomInput, NAD83);
+    assertEquals(-110.0007450884, geomActual.getCoordinate().x, 1E-2);
+    assertEquals(44.99994350267, geomActual.getCoordinate().y, 1E-2);
+    assertEquals(nad83Srid, geomActual.getSRID());
+    assertEquals(nad83Srid, geomActual.getFactory().getSRID());
+  }
 
-    // The source and target CRS are different, and latitude is out of range
-    Point geometryWrong = GEOMETRY_FACTORY.createPoint(new Coordinate(60, 120));
-    assertThrows(
-        ProjectionException.class,
-        () -> FunctionsGeoTools.transform(geometryWrong, "EPSG:4326", "EPSG:3857"));
+  @Test
+  public void transformGeometries() {
+    // Basic validation that the transformed geometries have the same shape as the original
+    Point oP = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+    Geometry tranP = FunctionsApacheSIS.transform(oP, "EPSG:4326", "EPSG:4979");
+    assert (tranP instanceof Point);
+
+    MultiPoint origMP = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0, 0, 2, 2));
+    Geometry tranMP = FunctionsApacheSIS.transform(origMP, "EPSG:4326", "EPSG:4979");
+    assert (tranMP instanceof MultiPoint);
+
+    LinearRing origLR = GEOMETRY_FACTORY.createLinearRing(coordArray(0, 0, 2, 2, 0, 0));
+    Geometry tranLR = FunctionsApacheSIS.transform(origLR, "EPSG:4326", "EPSG:4979");
+    assert (tranLR instanceof LinearRing);
+
+    LineString origLS = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 2, 2));
+    Geometry tranLS = FunctionsApacheSIS.transform(origLS, "EPSG:4326", "EPSG:4979");
+    assert (tranLS instanceof LineString);
+
+    MultiLineString origMLS =
+        GEOMETRY_FACTORY.createMultiLineString(
+            new LineString[] {origLS, GEOMETRY_FACTORY.createLineString(coordArray(3, 3, 5, 5))});
+    Geometry tranMLS = FunctionsApacheSIS.transform(origMLS, "EPSG:4326", "EPSG:4979");
+    assert (tranMLS instanceof MultiLineString);
+
+    Polygon origPoly = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 2, 2, 2, 0, 0, 0));
+    Geometry tranPoly = FunctionsApacheSIS.transform(origPoly, "EPSG:4326", "EPSG:4979");
+    assert (tranPoly instanceof Polygon);
+
+    MultiPolygon origMPoly =
+        GEOMETRY_FACTORY.createMultiPolygon(
+            new Polygon[] {
+              GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 2, 2, 2, 0, 0, 0)),
+              GEOMETRY_FACTORY.createPolygon(coordArray(3, 3, 5, 5, 5, 3, 3, 3))
+            });
+    Geometry tranMPoly = FunctionsApacheSIS.transform(origMPoly, "EPSG:4326", "EPSG:4979");
+    assert (tranMPoly instanceof MultiPolygon);
+    assert (tranMPoly.getNumGeometries() == origMPoly.getNumGeometries());
+    assert (tranMPoly.getGeometryN(0) instanceof Polygon);
+    assert (tranMPoly.getGeometryN(1) instanceof Polygon);
+
+    GeometryCollection origGC =
+        GEOMETRY_FACTORY.createGeometryCollection(
+            new Geometry[] {origMP, origLR, origLS, origPoly, origMPoly});
+    Geometry tranGC = FunctionsApacheSIS.transform(origGC, "EPSG:4326", "EPSG:4979");
+    assert (tranGC instanceof GeometryCollection);
+    assert (tranGC.getNumGeometries() == origGC.getNumGeometries());
+    assert (tranGC.getGeometryN(0) instanceof MultiPoint);
+    assert (tranGC.getGeometryN(0).getNumGeometries() == origMP.getNumGeometries());
+    assert (tranGC.getGeometryN(1) instanceof LinearRing);
+    assert (tranGC.getGeometryN(2) instanceof LineString);
+    assert (tranGC.getGeometryN(3) instanceof Polygon);
+    assert (tranGC.getGeometryN(4) instanceof MultiPolygon);
+    assert (tranGC.getGeometryN(4).getGeometryN(0) instanceof Polygon);
+    assert (tranGC.getGeometryN(4).getGeometryN(1) instanceof Polygon);
+    for (var i = 0; i < tranGC.getNumGeometries(); i++) {
+      assertEquals(4979, tranGC.getGeometryN(i).getSRID());
+    }
   }
 
   @Test

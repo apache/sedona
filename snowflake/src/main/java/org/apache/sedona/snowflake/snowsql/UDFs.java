@@ -20,10 +20,7 @@ package org.apache.sedona.snowflake.snowsql;
 
 import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
-import org.apache.sedona.common.Constructors;
-import org.apache.sedona.common.Functions;
-import org.apache.sedona.common.FunctionsGeoTools;
-import org.apache.sedona.common.Predicates;
+import org.apache.sedona.common.*;
 import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.common.sphere.Haversine;
 import org.apache.sedona.common.sphere.Spheroid;
@@ -1102,14 +1099,14 @@ public class UDFs {
   @UDFAnnotations.ParamMeta(argNames = {"geometry", "sourceCRS", "targetCRS"})
   public static byte[] ST_Transform(byte[] geometry, String sourceCRS, String targetCRS) {
     return GeometrySerde.serialize(
-        GeoToolsWrapper.transform(GeometrySerde.deserialize(geometry), sourceCRS, targetCRS));
+        FunctionsApacheSIS.transform(GeometrySerde.deserialize(geometry), sourceCRS, targetCRS));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry", "sourceCRS", "targetCRS", "lenient"})
   public static byte[] ST_Transform(
       byte[] geometry, String sourceCRS, String targetCRS, boolean lenient) {
     return GeometrySerde.serialize(
-        GeoToolsWrapper.transform(
+        FunctionsApacheSIS.transform(
             GeometrySerde.deserialize(geometry), sourceCRS, targetCRS, lenient));
   }
 

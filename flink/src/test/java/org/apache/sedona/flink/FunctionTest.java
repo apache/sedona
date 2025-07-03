@@ -30,7 +30,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.flink.table.api.Table;
 import org.apache.sedona.flink.expressions.Functions;
-import org.apache.sedona.flink.expressions.FunctionsGeoTools;
+import org.apache.sedona.flink.expressions.FunctionsApacheSIS;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.referencing.CRS;
@@ -472,7 +472,7 @@ public class FunctionTest extends TestBase {
     Table transformedTable =
         pointTable.select(
             call(
-                FunctionsGeoTools.ST_Transform.class.getSimpleName(),
+                FunctionsApacheSIS.ST_Transform.class.getSimpleName(),
                 $(pointColNames[0]),
                 "epsg:4326",
                 "epsg:3857"));
@@ -487,7 +487,7 @@ public class FunctionTest extends TestBase {
         pointTable
             .select(
                 call(
-                    FunctionsGeoTools.ST_Transform.class.getSimpleName(),
+                    FunctionsApacheSIS.ST_Transform.class.getSimpleName(),
                     $(pointColNames[0]),
                     "epsg:3857"))
             .as(pointColNames[0])
@@ -549,7 +549,7 @@ public class FunctionTest extends TestBase {
     Table transformedTable_SRC =
         pointTable.select(
             call(
-                FunctionsGeoTools.ST_Transform.class.getSimpleName(),
+                FunctionsApacheSIS.ST_Transform.class.getSimpleName(),
                 $(pointColNames[0]),
                 SRC_WKT,
                 "epsg:3857"));
@@ -559,7 +559,7 @@ public class FunctionTest extends TestBase {
     Table transformedTable_TGT =
         pointTable.select(
             call(
-                FunctionsGeoTools.ST_Transform.class.getSimpleName(),
+                FunctionsApacheSIS.ST_Transform.class.getSimpleName(),
                 $(pointColNames[0]),
                 "epsg:4326",
                 TGT_WKT));
@@ -569,7 +569,7 @@ public class FunctionTest extends TestBase {
     Table transformedTable_SRC_TGT =
         pointTable.select(
             call(
-                FunctionsGeoTools.ST_Transform.class.getSimpleName(),
+                FunctionsApacheSIS.ST_Transform.class.getSimpleName(),
                 $(pointColNames[0]),
                 SRC_WKT,
                 TGT_WKT));
@@ -579,7 +579,7 @@ public class FunctionTest extends TestBase {
     Table transformedTable_SRC_TGT_lenient =
         pointTable.select(
             call(
-                FunctionsGeoTools.ST_Transform.class.getSimpleName(),
+                FunctionsApacheSIS.ST_Transform.class.getSimpleName(),
                 $(pointColNames[0]),
                 SRC_WKT,
                 TGT_WKT,

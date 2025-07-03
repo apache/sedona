@@ -33,25 +33,11 @@ Please use the artifact with Spark major.minor version in the artifact name. For
 
 If you are using the Scala 2.13 builds of Spark, please use the corresponding packages for Scala 2.13, which are suffixed by `_2.13`.
 
-The optional GeoTools library is required if you want to use CRS transformation, ShapefileReader or GeoTiff reader. This wrapper library is a re-distribution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
+The optional GeoTools library is required if you want to use ShapefileReader or GeoTiff reader. This wrapper library is a re-distribution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
+
+The optional EPSG database is required if you want to use CRS transformation. This library is a re-distribution of EPSG official jars. The only purpose of this library is to bring EPSG jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
 
 !!! abstract "Sedona with Apache Spark and Scala 2.12"
-
-	=== "Spark 3.3 and Scala 2.12"
-
-		```xml
-		<dependency>
-		  <groupId>org.apache.sedona</groupId>
-		  <artifactId>sedona-spark-shaded-3.3_2.12</artifactId>
-		  <version>{{ sedona.current_version }}</version>
-		</dependency>
-		<!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
-		<dependency>
-		    <groupId>org.datasyslab</groupId>
-		    <artifactId>geotools-wrapper</artifactId>
-		    <version>{{ sedona.current_geotools }}</version>
-		</dependency>
-		```
 
 	=== "Spark 3.4 and Scala 2.12"
 
@@ -166,6 +152,18 @@ The optional GeoTools library is required if you want to use CRS transformation,
 		    <groupId>org.datasyslab</groupId>
 		    <artifactId>geotools-wrapper</artifactId>
 		    <version>{{ sedona.current_geotools }}</version>
+		</dependency>
+		```
+
+!!! abstract "Sedona with EPSG database"
+
+	=== "EPSG database 9.8.1+"
+
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sis-embedded-data</artifactId>
+		  <version>{{ sedona.apachesis_version }}</version>
 		</dependency>
 		```
 

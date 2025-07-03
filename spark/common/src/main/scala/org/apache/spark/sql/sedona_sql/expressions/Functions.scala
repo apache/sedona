@@ -19,22 +19,22 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.common.geometryObjects.Geography
-import org.apache.sedona.common.{Functions, FunctionsGeoTools}
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
 import org.apache.sedona.common.utils.{InscribedCircle, ValidDetail}
+import org.apache.sedona.common.{Functions, FunctionsApacheSIS, FunctionsGeoTools}
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, Generator, Nondeterministic}
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.types._
-import org.locationtech.jts.algorithm.MinimumBoundingCircle
-import org.locationtech.jts.geom._
-import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.unsafe.types.UTF8String
 import org.apache.spark.util.Utils
+import org.locationtech.jts.algorithm.MinimumBoundingCircle
+import org.locationtech.jts.geom._
 
 case class ST_LabelPoint(inputExpressions: Seq[Expression])
     extends InferredExpression(
@@ -290,9 +290,9 @@ case class ST_Centroid(inputExpressions: Seq[Expression])
  */
 case class ST_Transform(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction4(FunctionsGeoTools.transform),
-      inferrableFunction3(FunctionsGeoTools.transform),
-      inferrableFunction2(FunctionsGeoTools.transform)) {
+      inferrableFunction4(FunctionsApacheSIS.transform),
+      inferrableFunction3(FunctionsApacheSIS.transform),
+      inferrableFunction2(FunctionsApacheSIS.transform)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

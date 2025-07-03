@@ -18,26 +18,16 @@
  */
 package org.apache.sedona.snowflake.snowsql;
 
-import org.apache.sedona.common.FunctionsGeoTools;
-import org.geotools.api.referencing.FactoryException;
-import org.geotools.api.referencing.operation.TransformException;
+import org.apache.sedona.common.FunctionsApacheSIS;
 import org.locationtech.jts.geom.Geometry;
 
 public class GeoToolsWrapper {
   public static Geometry transform(
       Geometry geometry, String sourceCRS, String targetCRS, boolean lenient) {
-    try {
-      return FunctionsGeoTools.transform(geometry, sourceCRS, targetCRS, lenient);
-    } catch (FactoryException | TransformException e) {
-      throw new RuntimeException(e);
-    }
+    return FunctionsApacheSIS.transform(geometry, sourceCRS, targetCRS, lenient);
   }
 
   public static Geometry transform(Geometry geometry, String sourceCRS, String targetCRS) {
-    try {
-      return FunctionsGeoTools.transform(geometry, sourceCRS, targetCRS);
-    } catch (FactoryException | TransformException e) {
-      throw new RuntimeException(e);
-    }
+    return FunctionsApacheSIS.transform(geometry, sourceCRS, targetCRS);
   }
 }

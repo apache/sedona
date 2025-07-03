@@ -19,11 +19,12 @@
 package org.apache.sedona.sql
 
 import org.apache.commons.codec.binary.Hex
-import org.apache.sedona.common.FunctionsGeoTools
+import org.apache.sedona.common.FunctionsApacheSIS
 import org.apache.sedona.sql.implicits._
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Row}
+import org.geotools.api.referencing.FactoryException
 import org.geotools.referencing.CRS
 import org.junit.Assert.{assertEquals, assertFalse, assertTrue}
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
@@ -31,7 +32,6 @@ import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory, Polygon
 import org.locationtech.jts.io.WKTWriter
 import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.distance3d.Distance3DOp
-import org.geotools.api.referencing.FactoryException
 import org.scalatest.{GivenWhenThen, Matchers}
 import org.xml.sax.InputSource
 
@@ -457,11 +457,11 @@ class functionTestScala
       val polygeom = reader.read(polygon)
 
       intercept[FactoryException] {
-        val d = FunctionsGeoTools.transform(polygeom, epsgString, epsgFactoryErrorString)
+        val d = FunctionsApacheSIS.transform(polygeom, epsgString, epsgFactoryErrorString)
       }
 
       intercept[FactoryException] {
-        val d2 = FunctionsGeoTools.transform(polygeom, epsgString, epsgNoSuchAuthorityString)
+        val d2 = FunctionsApacheSIS.transform(polygeom, epsgString, epsgNoSuchAuthorityString)
       }
 
     }

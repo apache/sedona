@@ -24,7 +24,7 @@ import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.operation.TransformException;
 import org.locationtech.jts.geom.Geometry;
 
-public class FunctionsGeoTools {
+public class FunctionsApacheSIS {
   public static class ST_Transform extends ScalarFunction {
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
     public Geometry eval(
@@ -32,7 +32,7 @@ public class FunctionsGeoTools {
         @DataTypeHint("String") String targetCRS)
         throws FactoryException, TransformException {
       Geometry geom = (Geometry) o;
-      return org.apache.sedona.common.FunctionsGeoTools.transform(geom, targetCRS);
+      return org.apache.sedona.common.FunctionsApacheSIS.transform(geom, targetCRS);
     }
 
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
@@ -42,7 +42,7 @@ public class FunctionsGeoTools {
         @DataTypeHint("String") String targetCRS)
         throws FactoryException, TransformException {
       Geometry geom = (Geometry) o;
-      return org.apache.sedona.common.FunctionsGeoTools.transform(geom, sourceCRS, targetCRS);
+      return org.apache.sedona.common.FunctionsApacheSIS.transform(geom, sourceCRS, targetCRS);
     }
 
     @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
@@ -53,7 +53,7 @@ public class FunctionsGeoTools {
         @DataTypeHint("Boolean") Boolean lenient)
         throws FactoryException, TransformException {
       Geometry geom = (Geometry) o;
-      return org.apache.sedona.common.FunctionsGeoTools.transform(
+      return org.apache.sedona.common.FunctionsApacheSIS.transform(
           geom, sourceCRS, targetCRS, lenient);
     }
   }
