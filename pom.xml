@@ -89,7 +89,7 @@
 
         <flink.version>1.19.0</flink.version>
         <slf4j.version>1.7.36</slf4j.version>
-        <googles2.version>2.0.0</googles2.version>
+        <googles2.version>20250620-rc1</googles2.version>
         <uberh3.version>4.1.1</uberh3.version>
         <scalatest.version>3.1.1</scalatest.version>
         <scala-collection-compat.version>2.5.0</scala-collection-compat.version>
@@ -351,8 +351,8 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>com.google.geometry</groupId>
-                <artifactId>s2-geometry</artifactId>
+                <groupId>org.datasyslab</groupId>
+                <artifactId>s2-geometry-library</artifactId>
                 <version>${googles2.version}</version>
             </dependency>
             <dependency>

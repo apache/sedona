@@ -87,7 +87,6 @@
         <dependency>
             <groupId>org.datasyslab</groupId>
             <artifactId>s2-geometry-library</artifactId>
-            <version>20250620-rc1</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
