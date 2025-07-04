@@ -140,8 +140,23 @@ class GeoSeries(GeoFrame, pspd.Series):
             # This is NOT a scalable solution since we call to_pandas() on the data and is a hacky solution
             # but this should be resolved if/once https://github.com/apache/spark/pull/51300 is merged in.
             # For now, we reset self._anchor = data to have keep the geometry information (e.g crs) that's lost in to_pandas()
+
+            pd_data = data.to_pandas()
+
+            # If has shapely geometries, convert to wkb since pandas-on-pyspark can't understand shapely geometries
+            if (
+                isinstance(pd_data, pd.Series)
+                and any(isinstance(x, BaseGeometry) for x in pd_data)
+            ) or (
+                isinstance(pd_data, pd.DataFrame)
+                and any(isinstance(x, BaseGeometry) for x in pd_data.values.ravel())
+            ):
+                pd_data = pd_data.apply(
+                    lambda geom: geom.wkb if geom is not None else None
+                )
+
             super().__init__(
-                data=data.to_pandas(),
+                data=pd_data,
                 index=index,
                 dtype=dtype,
                 name=name,
@@ -476,10 +491,12 @@ class GeoSeries(GeoFrame, pspd.Series):
         pd_series = self._to_internal_pandas()
         try:
             return gpd.GeoSeries(
-                pd_series.map(lambda wkb: shapely.wkb.loads(bytes(wkb))), crs=self.crs
+                pd_series.map(
+                    lambda wkb: shapely.wkb.loads(bytes(wkb))
+                )  # , crs=self.crs
             )
         except TypeError:
-            return gpd.GeoSeries(pd_series, crs=self.crs)
+            return gpd.GeoSeries(pd_series)  # , crs=self.crs)
 
     def to_spark_pandas(self) -> pspd.Series:
         return pspd.Series(self._psdf._to_internal_pandas())
