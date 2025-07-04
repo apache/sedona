@@ -303,7 +303,14 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_to_crs(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom, crs=4326)
+            gpd_result = gpd.GeoSeries(geom, crs=4326)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+            sgpd_result = sgpd_result.to_crs(epsg=3857)
+            gpd_result = gpd_result.to_crs(epsg=3857)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_estimate_utm_crs(self):
         pass

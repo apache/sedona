@@ -282,8 +282,9 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Point
-        >>> s = geopandas.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        >>> s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
         >>> s
         0    POINT (1 1)
         1    POINT (2 2)
@@ -479,10 +480,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         pd_series = self._to_internal_pandas()
         try:
             return gpd.GeoSeries(
-                pd_series.map(lambda wkb: shapely.wkb.loads(bytes(wkb)))
+                pd_series.map(lambda wkb: shapely.wkb.loads(bytes(wkb))), crs=self.crs
             )
-        except Exception as e:
-            return gpd.GeoSeries(pd_series)
+        except TypeError:
+            return gpd.GeoSeries(pd_series, crs=self.crs)
 
     def to_spark_pandas(self) -> pspd.Series:
         return pspd.Series(self._psdf._to_internal_pandas())
@@ -512,7 +513,6 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples:
         >>> from shapely.geometry import Point
-        >>> import geopandas as gpd
         >>> from sedona.geopandas import GeoSeries
 
         >>> gs = GeoSeries([Point(1, 1), Point(2, 2)])
@@ -542,7 +542,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
         >>> from shapely.geometry import Polygon
-        >>> import geopandas as gpd
         >>> from sedona.geopandas import GeoSeries
 
         >>> gs = GeoSeries([Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])])
@@ -615,7 +614,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
         >>> from shapely.geometry import Polygon
-        >>> import geopandas as gpd
         >>> from sedona.geopandas import GeoSeries
 
         >>> gs = GeoSeries([Point(0, 0), LineString([(0, 0), (1, 1)]), Polygon([(0, 0), (1, 0), (1, 1)]), GeometryCollection([Point(0, 0), LineString([(0, 0), (1, 1)]), Polygon([(0, 0), (1, 0), (1, 1)])])])
@@ -649,8 +647,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         An example with one invalid polygon (a bowtie geometry crossing itself)
         and one missing geometry:
 
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (1, 1), (0, 1)]),
         ...         Polygon([(0,0), (1, 1), (1, 0), (0, 1)]),  # bowtie geometry
@@ -697,16 +696,15 @@ class GeoSeries(GeoFrame, pspd.Series):
         An example of a GeoDataFrame with one empty point, one point and one missing
         value:
 
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Point
-        >>> d = {'geometry': [Point(), Point(2, 1), None]}
-        >>> gdf = geopandas.GeoDataFrame(d, crs="EPSG:4326")
-        >>> gdf
-            geometry
+        >>> geoseries = GeoSeries([Point(), Point(2, 1), None], crs="EPSG:4326")
+        >>> geoseries
         0  POINT EMPTY
         1  POINT (2 1)
         2         None
 
-        >>> gdf.is_empty
+        >>> geoseries.is_empty
         0     True
         1    False
         2    False
@@ -743,8 +741,9 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import LineString
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         LineString([(0, 0), (1, 1), (1, -1), (0, 1)]),
         ...         LineString([(0, 0), (1, 1), (1, -1)]),
@@ -793,8 +792,9 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Point
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         Point(0, 1),
         ...         Point(0, 1, 2),
@@ -967,8 +967,9 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (2, 2), (0, 2)]),
         ...         LineString([(0, 0), (2, 2)]),
@@ -976,7 +977,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         ...         Point(0, 1),
         ...     ],
         ... )
-        >>> s2 = geopandas.GeoSeries(
+        >>> s2 = GeoSeries(
         ...     [
         ...         LineString([(1, 0), (1, 3)]),
         ...         LineString([(2, 0), (0, 2)]),
@@ -1051,8 +1052,9 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (2, 2), (0, 2)]),
         ...         Polygon([(0, 0), (2, 2), (0, 2)]),
@@ -1061,7 +1063,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         ...         Point(0, 1),
         ...     ],
         ... )
-        >>> s2 = geopandas.GeoSeries(
+        >>> s2 = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (1, 1), (0, 1)]),
         ...         LineString([(1, 0), (1, 3)]),
@@ -1277,8 +1279,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
 
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Point
-        >>> s = geopandas.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        >>> s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
         >>> s.x
         0    1.0
         1    2.0
@@ -1305,8 +1308,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
 
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Point
-        >>> s = geopandas.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        >>> s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
         >>> s.y
         0    1.0
         1    2.0
@@ -1334,8 +1338,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
 
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Point
-        >>> s = geopandas.GeoSeries([Point(1, 1, 1), Point(2, 2, 2), Point(3, 3, 3)])
+        >>> s = GeoSeries([Point(1, 1, 1), Point(2, 2, 2), Point(3, 3, 3)])
         >>> s.z
         0    1.0
         1    2.0
@@ -1681,7 +1686,101 @@ class GeoSeries(GeoFrame, pspd.Series):
     def to_crs(
         self, crs: Union[Any, None] = None, epsg: Union[int, None] = None
     ) -> "GeoSeries":
-        raise NotImplementedError("GeoSeries.to_crs() is not implemented yet.")
+        """Returns a ``GeoSeries`` with all geometries transformed to a new
+        coordinate reference system.
+
+        Transform all geometries in a GeoSeries to a different coordinate
+        reference system.  The ``crs`` attribute on the current GeoSeries must
+        be set.  Either ``crs`` or ``epsg`` may be specified for output.
+
+        This method will transform all points in all objects.  It has no notion
+        of projecting entire geometries.  All segments joining points are
+        assumed to be lines in the current projection, not geodesics.  Objects
+        crossing the dateline (or other projection boundary) will have
+        undesirable behavior.
+
+        Parameters
+        ----------
+        crs : pyproj.CRS, optional if `epsg` is specified
+            The value can be anything accepted
+            by :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
+            such as an authority string (eg "EPSG:4326") or a WKT string.
+        epsg : int, optional if `crs` is specified
+            EPSG code specifying output projection.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point
+        >>> from sedona.geopandas import GeoSeries
+        >>> geoseries = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)], crs=4326)
+        >>> geoseries.crs
+        <Geographic 2D CRS: EPSG:4326>
+        Name: WGS 84
+        Axis Info [ellipsoidal]:
+        - Lat[north]: Geodetic latitude (degree)
+        - Lon[east]: Geodetic longitude (degree)
+        Area of Use:
+        - name: World
+        - bounds: (-180.0, -90.0, 180.0, 90.0)
+        Datum: World Geodetic System 1984
+        - Ellipsoid: WGS 84
+        - Prime Meridian: Greenwich
+
+        >>> geoseries = geoseries.to_crs(3857)
+        >>> print(geoseries)
+        0    POINT (111319.491 111325.143)
+        1    POINT (222638.982 222684.209)
+        2    POINT (333958.472 334111.171)
+        dtype: geometry
+        >>> geoseries.crs
+        <Projected CRS: EPSG:3857>
+        Name: WGS 84 / Pseudo-Mercator
+        Axis Info [cartesian]:
+        - X[east]: Easting (metre)
+        - Y[north]: Northing (metre)
+        Area of Use:
+        - name: World - 85°S to 85°N
+        - bounds: (-180.0, -85.06, 180.0, 85.06)
+        Coordinate Operation:
+        - name: Popular Visualisation Pseudo-Mercator
+        - method: Popular Visualisation Pseudo Mercator
+        Datum: World Geodetic System 1984
+        - Ellipsoid: WGS 84
+        - Prime Meridian: Greenwich
+
+        """
+
+        from pyproj import CRS
+
+        old_crs = self.crs
+        if old_crs is None:
+            raise ValueError(
+                "Cannot transform naive geometries.  "
+                "Please set a crs on the object first."
+            )
+        assert isinstance(old_crs, CRS)
+
+        if crs is not None:
+            crs = CRS.from_user_input(crs)
+        elif epsg is not None:
+            crs = CRS.from_epsg(epsg)
+        else:
+            raise ValueError("Must pass either crs or epsg.")
+
+        # skip if the input CRS and output CRS are the exact same
+        if old_crs.is_exact_same(crs):
+            return self
+
+        col = self.get_first_geometry_column()
+        return self._query_geometry_column(
+            f"ST_Transform(`{col}`, 'EPSG:{old_crs.to_epsg()}', 'EPSG:{crs.to_epsg()}')",
+            col,
+            "",
+        )
 
     def estimate_utm_crs(self, datum_name: str = "WGS 84"):
         raise NotImplementedError(
