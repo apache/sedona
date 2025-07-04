@@ -229,7 +229,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         tmp_df = self._process_geometry_column("ST_SRID", rename="crs")
         srid = tmp_df.take([0])[0]
         # Sedona returns 0 if doesn't exist
-        return CRS.from_user_input(srid) if srid else None
+        return CRS.from_user_input(srid) if srid != 0 and not pd.isna(srid) else None
 
     @crs.setter
     def crs(self, value: Union["CRS", None]):
@@ -491,12 +491,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         pd_series = self._to_internal_pandas()
         try:
             return gpd.GeoSeries(
-                pd_series.map(
-                    lambda wkb: shapely.wkb.loads(bytes(wkb))
-                )  # , crs=self.crs
+                pd_series.map(lambda wkb: shapely.wkb.loads(bytes(wkb))), crs=self.crs
             )
         except TypeError:
-            return gpd.GeoSeries(pd_series)  # , crs=self.crs)
+            return gpd.GeoSeries(pd_series, crs=self.crs)
 
     def to_spark_pandas(self) -> pspd.Series:
         return pspd.Series(self._psdf._to_internal_pandas())
