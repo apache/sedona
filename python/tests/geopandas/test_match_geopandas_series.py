@@ -312,8 +312,28 @@ class TestMatchGeopandasSeries(TestBase):
             gpd_result = gpd_result.to_crs(epsg=3857)
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
+    def test_bounds(self):
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).bounds
+            gpd_result = gpd.GeoSeries(geom).bounds
+            pd.testing.assert_frame_equal(
+                sgpd_result.to_pandas(), pd.DataFrame(gpd_result)
+            )
+
+    def test_total_bounds(self):
+        import numpy as np
+
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).total_bounds
+            gpd_result = gpd.GeoSeries(geom).total_bounds
+            np.testing.assert_array_equal(sgpd_result, gpd_result)
+
     def test_estimate_utm_crs(self):
-        pass
+        for crs in ["epsg:4326", "epsg:3857"]:
+            for _, geom in self.geoms:
+                gpd_result = gpd.GeoSeries(geom, crs=crs).estimate_utm_crs()
+                sgpd_result = GeoSeries(geom, crs=crs).estimate_utm_crs()
+                assert sgpd_result == gpd_result
 
     def test_to_json(self):
         pass
