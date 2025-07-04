@@ -89,7 +89,8 @@
 
         <flink.version>1.19.0</flink.version>
         <slf4j.version>1.7.36</slf4j.version>
-        <googles2.version>2.0.0</googles2.version>
+        <googles2.version>20250620-rc1</googles2.version>
+        <guava.version>33.4.7-jre</guava.version>
         <uberh3.version>4.1.1</uberh3.version>
         <scalatest.version>3.1.1</scalatest.version>
         <scala-collection-compat.version>2.5.0</scala-collection-compat.version>
@@ -345,20 +346,20 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>org.codehaus.janino</groupId>
-                <artifactId>janino</artifactId>
-                <version>${janino-version}</version>
-            </dependency>
-            <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>4.13.1</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>com.google.geometry</groupId>
-                <artifactId>s2-geometry</artifactId>
+                <groupId>org.datasyslab</groupId>
+                <artifactId>s2-geometry-library</artifactId>
                 <version>${googles2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.uber</groupId>
