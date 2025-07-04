@@ -956,8 +956,10 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
+
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (2, 2), (0, 2)]),
         ...         LineString([(0, 0), (2, 2)]),
@@ -965,7 +967,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         ...         Point(0, 1),
         ...     ],
         ... )
-        >>> s2 = geopandas.GeoSeries(
+        >>> s2 = GeoSeries(
         ...     [
         ...         LineString([(1, 0), (1, 3)]),
         ...         LineString([(2, 0), (0, 2)]),
@@ -1040,8 +1042,10 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
+
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (2, 2), (0, 2)]),
         ...         Polygon([(0, 0), (2, 2), (0, 2)]),
@@ -1050,7 +1054,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         ...         Point(0, 1),
         ...     ],
         ... )
-        >>> s2 = geopandas.GeoSeries(
+        >>> s2 = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (1, 1), (0, 1)]),
         ...         LineString([(1, 0), (1, 3)]),
@@ -1397,13 +1401,90 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("GeoSeries.to_file() is not implemented yet.")
 
     def isna(self) -> pspd.Series:
-        raise NotImplementedError("GeoSeries.isna() is not implemented yet.")
+        """
+        Detect missing values.
+
+        Returns
+        -------
+        A boolean Series of the same size as the GeoSeries,
+        True where a value is NA.
+
+        Examples
+        --------
+
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon
+        >>> s = GeoSeries(
+        ...     [Polygon([(0, 0), (1, 1), (0, 1)]), None, Polygon([])]
+        ... )
+        >>> s
+        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1                              None
+        2                     POLYGON EMPTY
+        dtype: geometry
+
+        >>> s.isna()
+        0    False
+        1     True
+        2    False
+        dtype: bool
+
+        See Also
+        --------
+        GeoSeries.notna : inverse of isna
+        GeoSeries.is_empty : detect empty geometries
+        """
+        col = self.get_first_geometry_column()
+        select = f"`{col}` IS NULL"
+        return (
+            self._query_geometry_column(select, col, rename="isna")
+            .to_spark_pandas()
+            .astype("bool")
+        )
 
     def isnull(self) -> pspd.Series:
-        raise NotImplementedError("GeoSeries.isnull() is not implemented yet.")
+        """Alias for `isna` method. See `isna` for more detail."""
+        return self.isna()
 
     def notna(self) -> pspd.Series:
-        raise NotImplementedError("GeoSeries.notna() is not implemented yet.")
+        """
+        Detect non-missing values.
+
+        Returns
+        -------
+        A boolean pandas Series of the same size as the GeoSeries,
+        False where a value is NA.
+
+        Examples
+        --------
+
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon
+        >>> s = GeoSeries(
+        ...     [Polygon([(0, 0), (1, 1), (0, 1)]), None, Polygon([])]
+        ... )
+        >>> s
+        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1                              None
+        2                     POLYGON EMPTY
+        dtype: geometry
+
+        >>> s.notna()
+        0     True
+        1    False
+        2     True
+        dtype: bool
+
+        See Also
+        --------
+        GeoSeries.isna : inverse of notna
+        GeoSeries.is_empty : detect empty geometries
+        """
+        col = self.get_first_geometry_column()
+        select = f"`{col}` IS NOT NULL"
+        return self._query_geometry_column(
+            select, col, rename="notna"
+        ).to_spark_pandas()
 
     def notnull(self) -> pspd.Series:
         """Alias for `notna` method. See `notna` for more detail."""
