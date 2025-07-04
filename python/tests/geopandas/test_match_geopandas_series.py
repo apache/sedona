@@ -298,7 +298,10 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_geom_type(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).geom_type
+            gpd_result = gpd.GeoSeries(geom).geom_type
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_type(self):
         pass

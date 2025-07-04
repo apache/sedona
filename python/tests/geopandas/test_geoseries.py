@@ -23,7 +23,16 @@ import sedona.geopandas as sgpd
 from sedona.geopandas import GeoSeries
 from tests.test_base import TestBase
 from shapely import wkt
-from shapely.geometry import Point, LineString, Polygon, GeometryCollection, LinearRing
+from shapely.geometry import (
+    Point,
+    LineString,
+    Polygon,
+    GeometryCollection,
+    MultiPoint,
+    MultiLineString,
+    MultiPolygon,
+    LinearRing,
+)
 from pandas.testing import assert_series_equal
 
 
@@ -167,7 +176,39 @@ class TestGeoSeries(TestBase):
         pass
 
     def test_geom_type(self):
-        pass
+        geoseries = sgpd.GeoSeries(
+            [
+                Point(0, 0),
+                MultiPoint([Point(0, 0), Point(1, 1)]),
+                LineString([(0, 0), (1, 1)]),
+                MultiLineString(
+                    [LineString([(0, 0), (1, 1)]), LineString([(2, 2), (3, 3)])]
+                ),
+                Polygon([(0, 0), (1, 0), (0, 1)]),
+                MultiPolygon(
+                    [
+                        Polygon([(0, 0), (1, 0), (0, 1)]),
+                        Polygon([(2, 2), (3, 2), (2, 3)]),
+                    ]
+                ),
+                GeometryCollection([Point(0, 0), LineString([(0, 0), (1, 1)])]),
+                LinearRing([(0, 0), (1, 1), (1, 0), (0, 1), (0, 0)]),
+            ]
+        )
+        result = geoseries.geom_type
+        expected = pd.Series(
+            [
+                "Point",
+                "MultiPoint",
+                "LineString",
+                "MultiLineString",
+                "Polygon",
+                "MultiPolygon",
+                "GeometryCollection",
+                "LineString",  # Note: Sedona returns LineString instead of LinearRing
+            ]
+        )
+        assert_series_equal(result.to_pandas(), expected)
 
     def test_type(self):
         pass
