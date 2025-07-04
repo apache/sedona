@@ -241,13 +241,39 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_from_wkb(self):
-        pass
+        for _, geom in self.geoms:
+            wkb = [g.wkb for g in geom]
+            sgpd_result = GeoSeries.from_wkb(wkb)
+            gpd_result = gpd.GeoSeries.from_wkb(wkb)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_from_wkt(self):
-        pass
+        for _, geom in self.geoms:
+            wkt = [g.wkt for g in geom]
+            sgpd_result = GeoSeries.from_wkt(wkt)
+            gpd_result = gpd.GeoSeries.from_wkt(wkt)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_from_xy(self):
-        pass
+        tests = [
+            [
+                [2.5, 0.5, 5.0, -2],  # x
+                [5, 10, 0, 1],  # y
+                [-3, 1.5, -1000, 25],  # z
+                "EPSG:4326",
+            ],
+            [
+                [2.5, -0.5, 1, 500],  # x
+                [5, 1, -100, 1000],  # y
+                None,
+                None,
+            ],
+        ]
+        for x, y, z, crs in tests:
+            sgpd_result = GeoSeries.from_xy(x, y, z, crs=crs)
+            gpd_result = gpd.GeoSeries.from_xy(x, y, z, crs=crs)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+            assert sgpd_result.crs == gpd_result.crs
 
     def test_from_shapely(self):
         pass

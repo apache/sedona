@@ -119,13 +119,47 @@ class TestGeoSeries(TestBase):
         pass
 
     def test_from_wkb(self):
-        pass
+        wkbs = [
+            (
+                b"\x01\x01\x00\x00\x00\x00\x00\x00\x00"
+                b"\x00\x00\xf0?\x00\x00\x00\x00\x00\x00\xf0?"
+            ),
+            (
+                b"\x01\x01\x00\x00\x00\x00\x00\x00\x00"
+                b"\x00\x00\x00@\x00\x00\x00\x00\x00\x00\x00@"
+            ),
+            (
+                b"\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00"
+                b"\x00\x08@\x00\x00\x00\x00\x00\x00\x08@"
+            ),
+        ]
+        s = sgpd.GeoSeries.from_wkb(wkbs)
+        expected = gpd.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        self.check_sgpd_equals_gpd(s, expected)
 
     def test_from_wkt(self):
-        pass
+        wkts = [
+            "POINT (1 1)",
+            "POINT (2 2)",
+            "POINT (3 3)",
+        ]
+        s = sgpd.GeoSeries.from_wkt(wkts)
+        expected = gpd.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        self.check_sgpd_equals_gpd(s, expected)
 
     def test_from_xy(self):
-        pass
+        x = [2.5, 5, -3.0]
+        y = [0.5, 1, 1.5]
+        s = sgpd.GeoSeries.from_xy(x, y, crs="EPSG:4326")
+        expected = gpd.GeoSeries([Point(2.5, 0.5), Point(5, 1), Point(-3, 1.5)])
+        self.check_sgpd_equals_gpd(s, expected)
+
+        z = [1, 2, 3]
+        s = sgpd.GeoSeries.from_xy(x, y, z)
+        expected = gpd.GeoSeries(
+            [Point(2.5, 0.5, 1), Point(5, 1, 2), Point(-3, 1.5, 3)]
+        )
+        self.check_sgpd_equals_gpd(s, expected)
 
     def test_from_shapely(self):
         pass
