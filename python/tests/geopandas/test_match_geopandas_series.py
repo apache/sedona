@@ -496,6 +496,15 @@ class TestMatchGeopandasSeries(TestBase):
                 gpd_result = gpd.GeoSeries(geom).intersects(gpd.GeoSeries(geom2))
                 self.check_pd_series_equal(sgpd_result, gpd_result)
 
+                if len(geom) == len(geom2):
+                    sgpd_result = GeoSeries(geom).intersects(
+                        GeoSeries(geom2), align=False
+                    )
+                    gpd_result = gpd.GeoSeries(geom).intersects(
+                        gpd.GeoSeries(geom2), align=False
+                    )
+                    self.check_pd_series_equal(sgpd_result, gpd_result)
+
     def test_intersection(self):
         geometries = [
             Polygon([(0, 0), (1, 0), (1, 1)]),
@@ -510,6 +519,22 @@ class TestMatchGeopandasSeries(TestBase):
                 sgpd_result = GeoSeries(g1).intersection(GeoSeries(g2))
                 gpd_result = gpd.GeoSeries(g1).intersection(gpd.GeoSeries(g2))
                 self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # Ensure both align True and False work correctly
+        for _, g1 in self.geoms:
+            for _, g2 in self.geoms:
+                gpd_series1, gpd_series2 = gpd.GeoSeries(g1), gpd.GeoSeries(g2)
+                # The original geopandas intersection method fails on invalid geometries
+                if not gpd_series1.is_valid.all() or not gpd_series2.is_valid.all():
+                    continue
+                sgpd_result = GeoSeries(g1).intersection(GeoSeries(g2))
+                gpd_result = gpd_series1.intersection(gpd_series2)
+                self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+                if len(g1) == len(g2):
+                    sgpd_result = GeoSeries(g1).intersects(GeoSeries(g2), align=False)
+                    gpd_result = gpd_series1.intersects(gpd_series2, align=False)
+                    self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_intersection_all(self):
         pass
@@ -554,8 +579,11 @@ class TestMatchGeopandasSeries(TestBase):
         assert isinstance(expected, gpd.GeoSeries)
         sgpd_result = actual.to_geopandas()
         for a, e in zip(sgpd_result, expected):
+            if a is None or e is None:
+                assert a is None and e is None
+                continue
             # Sometimes sedona and geopandas both return empty geometries but of different types (e.g Point and Polygon)
-            if a.is_empty and e.is_empty:
+            elif a.is_empty and e.is_empty:
                 continue
             self.assert_geometry_almost_equal(
                 a, e, tolerance=1e-2
