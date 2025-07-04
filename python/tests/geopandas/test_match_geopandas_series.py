@@ -453,11 +453,36 @@ class TestMatchGeopandasSeries(TestBase):
     def test_union_all(self):
         pass
 
+    def test_crosses(self):
+        for _, geom in self.geoms:
+            for _, geom2 in self.geoms:
+                if self.contains_any_geom_collection(geom, geom2):
+                    continue
+
+                # We explicitly specify align=True to quite warnings in geopandas, despite it being the default
+                gpd_result = gpd.GeoSeries(geom).crosses(
+                    gpd.GeoSeries(geom2), align=True
+                )
+                sgpd_result = GeoSeries(geom).crosses(GeoSeries(geom2), align=True)
+                self.check_pd_series_equal(sgpd_result, gpd_result)
+
+                if len(geom) == len(geom2):
+                    sgpd_result = GeoSeries(geom).crosses(GeoSeries(geom2), align=False)
+                    gpd_result = gpd.GeoSeries(geom).crosses(
+                        gpd.GeoSeries(geom2), align=False
+                    )
+                    self.check_pd_series_equal(sgpd_result, gpd_result)
+
+    def test_disjoint(self):
+        pass
+
     def test_intersects(self):
         for _, geom in self.geoms:
             for _, geom2 in self.geoms:
-                sgpd_result = GeoSeries(geom).intersects(GeoSeries(geom2))
-                gpd_result = gpd.GeoSeries(geom).intersects(gpd.GeoSeries(geom2))
+                sgpd_result = GeoSeries(geom).intersects(GeoSeries(geom2), align=True)
+                gpd_result = gpd.GeoSeries(geom).intersects(
+                    gpd.GeoSeries(geom2), align=True
+                )
                 self.check_pd_series_equal(sgpd_result, gpd_result)
 
                 if len(geom) == len(geom2):
@@ -503,8 +528,130 @@ class TestMatchGeopandasSeries(TestBase):
     def test_intersection_all(self):
         pass
 
-    def test_contains(self):
+    def test_overlaps(self):
+        for _, geom in self.geoms:
+            for _, geom2 in self.geoms:
+                # Skip geom == geom2 because Sedona and geopandas have different behavior for geometries that are equal
+                # Sedona's implementation for GeometryCollection differs
+                if geom == geom2 or self.contains_any_geom_collection(geom, geom2):
+                    continue
+
+                sgpd_result = GeoSeries(geom).overlaps(GeoSeries(geom2, align=True))
+                gpd_result = gpd.GeoSeries(geom).overlaps(
+                    gpd.GeoSeries(geom2), align=True
+                )
+                self.check_pd_series_equal(sgpd_result, gpd_result)
+
+                if len(geom) == len(geom2):
+                    sgpd_result = GeoSeries(geom).overlaps(
+                        GeoSeries(geom2), align=False
+                    )
+                    gpd_result = gpd.GeoSeries(geom).overlaps(
+                        gpd.GeoSeries(geom2), align=False
+                    )
+                    self.check_pd_series_equal(sgpd_result, gpd_result)
+
+    def test_touches(self):
+        for _, geom in self.geoms:
+            for _, geom2 in self.geoms:
+                if self.contains_any_geom_collection(geom, geom2):
+                    continue
+                sgpd_result = GeoSeries(geom).touches(GeoSeries(geom2), align=True)
+                gpd_result = gpd.GeoSeries(geom).touches(
+                    gpd.GeoSeries(geom2), align=True
+                )
+                self.check_pd_series_equal(sgpd_result, gpd_result)
+
+                if len(geom) == len(geom2):
+                    sgpd_result = GeoSeries(geom).touches(GeoSeries(geom2), align=False)
+                    gpd_result = gpd.GeoSeries(geom).touches(
+                        gpd.GeoSeries(geom2), align=False
+                    )
+                    self.check_pd_series_equal(sgpd_result, gpd_result)
+
+    def test_within(self):
+        for _, geom in self.geoms:
+            for _, geom2 in self.geoms:
+                # There seems to be a bug in Sedona for ST_Within on identical objects so we skip geom == geom2
+                # https://github.com/apache/sedona/issues/2059
+                if geom == geom2 or self.contains_any_geom_collection(geom, geom2):
+                    continue
+
+                sgpd_result = GeoSeries(geom).within(GeoSeries(geom2), align=True)
+                gpd_result = gpd.GeoSeries(geom).within(
+                    gpd.GeoSeries(geom2), align=True
+                )
+
+                self.check_pd_series_equal(sgpd_result, gpd_result)
+
+                if len(geom) == len(geom2):
+                    sgpd_result = GeoSeries(geom).within(GeoSeries(geom2), align=False)
+                    gpd_result = gpd.GeoSeries(geom).within(
+                        gpd.GeoSeries(geom2), align=False
+                    )
+                    self.check_pd_series_equal(sgpd_result, gpd_result)
+
+    def test_covers(self):
+        for _, geom in self.geoms:
+            for _, geom2 in self.geoms:
+                if geom == geom:
+                    continue
+                sgpd_result = GeoSeries(geom).covers(GeoSeries(geom2), align=True)
+                gpd_result = gpd.GeoSeries(geom).covers(
+                    gpd.GeoSeries(geom2), align=True
+                )
+                self.check_pd_series_equal(sgpd_result, gpd_result)
+
+                if len(geom) == len(geom2):
+                    sgpd_result = GeoSeries(geom).covers(GeoSeries(geom2), align=False)
+                    gpd_result = gpd.GeoSeries(geom).covers(
+                        gpd.GeoSeries(geom2), align=False
+                    )
+                    self.check_pd_series_equal(sgpd_result, gpd_result)
+
+    def test_covered_by(self):
+        for _, geom in self.geoms:
+            for _, geom2 in self.geoms:
+                if geom == geom2 or self.contains_any_geom_collection(geom, geom2):
+                    continue
+
+                sgpd_result = GeoSeries(geom).covered_by(GeoSeries(geom2), align=True)
+                gpd_result = gpd.GeoSeries(geom).covered_by(
+                    gpd.GeoSeries(geom2), align=True
+                )
+                self.check_pd_series_equal(sgpd_result, gpd_result)
+
+                if len(geom) == len(geom2):
+                    sgpd_result = GeoSeries(geom).covered_by(
+                        GeoSeries(geom2), align=False
+                    )
+                    gpd_result = gpd.GeoSeries(geom).covered_by(
+                        gpd.GeoSeries(geom2), align=False
+                    )
+                    self.check_pd_series_equal(sgpd_result, gpd_result)
+
+    def test_intersection_all(self):
         pass
+
+    def test_contains(self):
+        for _, geom in self.geoms:
+            for _, geom2 in self.geoms:
+                if geom == geom2 or self.contains_any_geom_collection(geom, geom2):
+                    continue
+                sgpd_result = GeoSeries(geom).contains(GeoSeries(geom2), align=True)
+                gpd_result = gpd.GeoSeries(geom).contains(
+                    gpd.GeoSeries(geom2), align=True
+                )
+                self.check_pd_series_equal(sgpd_result, gpd_result)
+
+                if len(geom) == len(geom2):
+                    sgpd_result = GeoSeries(geom).contains(
+                        GeoSeries(geom2), align=False
+                    )
+                    gpd_result = gpd.GeoSeries(geom).contains(
+                        gpd.GeoSeries(geom2), align=False
+                    )
+                    self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_contains_properly(self):
         pass
@@ -557,3 +704,8 @@ class TestMatchGeopandasSeries(TestBase):
         assert isinstance(actual, ps.Series)
         assert isinstance(expected, pd.Series)
         assert_series_equal(actual.to_pandas(), expected)
+
+    def contains_any_geom_collection(self, geoms1, geoms2) -> bool:
+        return any(isinstance(g, GeometryCollection) for g in geoms1) or any(
+            isinstance(g, GeometryCollection) for g in geoms2
+        )
