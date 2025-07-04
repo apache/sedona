@@ -51,8 +51,7 @@ class GeoSeries(GeoFrame, pspd.Series):
     """
 
     def __getitem__(self, key: Any) -> Any:
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        return pspd.Series.__getitem__(self, key)
 
     def __repr__(self) -> str:
         """
@@ -1822,10 +1821,208 @@ class GeoSeries(GeoFrame, pspd.Series):
             "",
         )
 
-    def estimate_utm_crs(self, datum_name: str = "WGS 84"):
-        raise NotImplementedError(
-            "GeoSeries.estimate_utm_crs() is not implemented yet."
+    @property
+    def bounds(self) -> pspd.DataFrame:
+        """Returns a ``DataFrame`` with columns ``minx``, ``miny``, ``maxx``,
+        ``maxy`` values containing the bounds for each geometry.
+
+        See ``GeoSeries.total_bounds`` for the limits of the entire series.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point, Polygon, LineString
+        >>> d = {'geometry': [Point(2, 1), Polygon([(0, 0), (1, 1), (1, 0)]),
+        ... LineString([(0, 1), (1, 2)])]}
+        >>> gdf = geopandas.GeoDataFrame(d, crs="EPSG:4326")
+        >>> gdf.bounds
+           minx  miny  maxx  maxy
+        0   2.0   1.0   2.0   1.0
+        1   0.0   0.0   1.0   1.0
+        2   0.0   1.0   1.0   2.0
+
+        You can assign the bounds to the ``GeoDataFrame`` as:
+
+        >>> import pandas as pd
+        >>> gdf = pd.concat([gdf, gdf.bounds], axis=1)
+        >>> gdf
+                                geometry  minx  miny  maxx  maxy
+        0                     POINT (2 1)   2.0   1.0   2.0   1.0
+        1  POLYGON ((0 0, 1 1, 1 0, 0 0))   0.0   0.0   1.0   1.0
+        2           LINESTRING (0 1, 1 2)   0.0   1.0   1.0   2.0
+        """
+        import numpy as np
+
+        col = self.get_first_geometry_column()
+        envelope_series = self._query_geometry_column(
+            f"ST_Envelope(`{col}`)", col, "bounds"
         )
+
+        bounds = {
+            "minx": [],
+            "miny": [],
+            "maxx": [],
+            "maxy": [],
+        }
+
+        # TODO: look into making this computation more efficient
+        for i in range(len(envelope_series)):
+            envelope = envelope_series[i]
+            assert (
+                isinstance(envelope, shapely.geometry.base.BaseGeometry)
+                or envelope is None
+            ), f"Logical Error: Unexpected type {type(envelope)}"
+            minx, miny, maxx, maxy = (
+                envelope.bounds if envelope else (np.nan, np.nan, np.nan, np.nan)
+            )
+            bounds["minx"].append(minx)
+            bounds["miny"].append(miny)
+            bounds["maxx"].append(maxx)
+            bounds["maxy"].append(maxy)
+
+        return pspd.DataFrame(bounds, index=self.index)
+
+    @property
+    def total_bounds(self):
+        """Returns a tuple containing ``minx``, ``miny``, ``maxx``, ``maxy``
+        values for the bounds of the series as a whole.
+
+        See ``GeoSeries.bounds`` for the bounds of the geometries contained in
+        the series.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point, Polygon, LineString
+        >>> d = {'geometry': [Point(3, -1), Polygon([(0, 0), (1, 1), (1, 0)]),
+        ... LineString([(0, 1), (1, 2)])]}
+        >>> gdf = geopandas.GeoDataFrame(d, crs="EPSG:4326")
+        >>> gdf.total_bounds
+        array([ 0., -1.,  3.,  2.])
+        """
+        import numpy as np
+        import warnings
+        from pyspark.sql import functions as F
+
+        if len(self) == 0:
+            # numpy 'min' cannot handle empty arrays
+            # TODO with numpy >= 1.15, the 'initial' argument can be used
+            return np.array([np.nan, np.nan, np.nan, np.nan])
+        ps_df = self.bounds
+        with warnings.catch_warnings():
+            # if all rows are empty geometry / none, nan is expected
+            warnings.filterwarnings(
+                "ignore", r"All-NaN slice encountered", RuntimeWarning
+            )
+            total_bounds_df = ps_df.agg(
+                {
+                    "minx": ["min"],
+                    "miny": ["min"],
+                    "maxx": ["max"],
+                    "maxy": ["max"],
+                }
+            )
+
+            return np.array(
+                (
+                    np.nanmin(total_bounds_df["minx"]["min"]),  # minx
+                    np.nanmin(total_bounds_df["miny"]["min"]),  # miny
+                    np.nanmax(total_bounds_df["maxx"]["max"]),  # maxx
+                    np.nanmax(total_bounds_df["maxy"]["max"]),  # maxy
+                )
+            )
+
+    def estimate_utm_crs(self, datum_name: str = "WGS 84") -> "CRS":
+        """Returns the estimated UTM CRS based on the bounds of the dataset.
+
+        .. versionadded:: 0.9
+
+        .. note:: Requires pyproj 3+
+
+        Parameters
+        ----------
+        datum_name : str, optional
+            The name of the datum to use in the query. Default is WGS 84.
+
+        Returns
+        -------
+        pyproj.CRS
+
+        Examples
+        --------
+        >>> import geodatasets
+        >>> df = geopandas.read_file(
+        ...     geodatasets.get_path("geoda.chicago_commpop")
+        ... )
+        >>> df.geometry.values.estimate_utm_crs()  # doctest: +SKIP
+        <Derived Projected CRS: EPSG:32616>
+        Name: WGS 84 / UTM zone 16N
+        Axis Info [cartesian]:
+        - E[east]: Easting (metre)
+        - N[north]: Northing (metre)
+        Area of Use:
+        - name: Between 90°W and 84°W, northern hemisphere between equator and 84°N,...
+        - bounds: (-90.0, 0.0, -84.0, 84.0)
+        Coordinate Operation:
+        - name: UTM zone 16N
+        - method: Transverse Mercator
+        Datum: World Geodetic System 1984 ensemble
+        - Ellipsoid: WGS 84
+        - Prime Meridian: Greenwich
+        """
+        import numpy as np
+        from pyproj import CRS
+        from pyproj.aoi import AreaOfInterest
+        from pyproj.database import query_utm_crs_info
+
+        # This implementation replicates the implementation in geopandas's implementation exactly.
+        # https://github.com/geopandas/geopandas/blob/main/geopandas/array.py
+        # The only difference is that we use Sedona's total_bounds property which is more efficient and scalable
+        # than the geopandas implementation. The rest of the implementation always executes on 4 points (minx, miny, maxx, maxy),
+        # so the numpy and pyproj implementations are reasonable.
+
+        if not self.crs:
+            raise RuntimeError("crs must be set to estimate UTM CRS.")
+
+        minx, miny, maxx, maxy = self.total_bounds
+        if self.crs.is_geographic:
+            x_center = np.mean([minx, maxx])
+            y_center = np.mean([miny, maxy])
+        # ensure using geographic coordinates
+        else:
+            from pyproj import Transformer
+            from functools import lru_cache
+
+            TransformerFromCRS = lru_cache(Transformer.from_crs)
+
+            transformer = TransformerFromCRS(self.crs, "EPSG:4326", always_xy=True)
+            minx, miny, maxx, maxy = transformer.transform_bounds(
+                minx, miny, maxx, maxy
+            )
+            y_center = np.mean([miny, maxy])
+            # crossed the antimeridian
+            if minx > maxx:
+                # shift maxx from [-180,180] to [0,360]
+                # so both numbers are positive for center calculation
+                # Example: -175 to 185
+                maxx += 360
+                x_center = np.mean([minx, maxx])
+                # shift back to [-180,180]
+                x_center = ((x_center + 180) % 360) - 180
+            else:
+                x_center = np.mean([minx, maxx])
+
+        utm_crs_list = query_utm_crs_info(
+            datum_name=datum_name,
+            area_of_interest=AreaOfInterest(
+                west_lon_degree=x_center,
+                south_lat_degree=y_center,
+                east_lon_degree=x_center,
+                north_lat_degree=y_center,
+            ),
+        )
+        try:
+            return CRS.from_epsg(utm_crs_list[0].code)
+        except IndexError:
+            raise RuntimeError("Unable to determine UTM CRS")
 
     def to_json(
         self,
