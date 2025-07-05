@@ -86,7 +86,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
       rasterDf.write.format("raster").mode(SaveMode.Overwrite).save(tempDir + "/raster-written")
       df = sparkSession.read.format("binaryFile").load(tempDir + "/raster-written/*")
       rasterDf = df.selectExpr("RS_FromGeoTiff(content)")
-      assert(rasterCount == 6)
+      assert(rasterCount == 8)
       assert(rasterDf.count() == 0)
     }
 

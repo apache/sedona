@@ -129,7 +129,7 @@ public class RasterConstructorsTest extends RasterTestBase {
 
     expected =
         new double[] {
-          1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0,
           1.0, 0.0
         };
     assertArrayEquals(expected, actual, 0.1d);
