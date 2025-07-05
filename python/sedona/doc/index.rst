@@ -23,4 +23,3 @@ The following documentation covers the available Python packages in Sedona, incl
    sedona.stac
    sedona.stats
    sedona.utils
-

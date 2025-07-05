@@ -24,24 +24,35 @@ This folder contains the Sphinx-based documentation for the Apache Sedona Python
 ## Prerequisites
 
 Ensure you have the following installed:
+
 - Python 3.6 or later
+
 - `pip` (Python package manager)
+
 - Sphinx and required extensions:
-  ```bash
+
+```bash
   pip install sphinx sphinx_rtd_theme
+```
 
 ## Steps to Build the Documentation
+
 - Navigate to the doc folder:
+
 ```bash
 cd doc
 ```
--
+
 - Clean previous builds: Run the following command to remove any previous build artifacts:
+
 ```bash
 make clean
 ```
+
 - Build the HTML documentation: Use the make command to generate the HTML documentation:
+
 ```bash
 make html
 ```
+
 - View the documentation: Open the generated HTML files located in the _build/html directory in your browser.
