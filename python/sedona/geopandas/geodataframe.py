@@ -28,7 +28,7 @@ from pyspark.pandas.internal import InternalFrame
 
 from sedona.geopandas._typing import Label
 from sedona.geopandas.base import GeoFrame
-from sedona.geopandas.geoindex import GeoIndex
+from sedona.geopandas.sindex import SpatialIndex
 
 
 class GeoDataFrame(GeoFrame, pspd.DataFrame):
@@ -250,7 +250,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    def geoindex(self) -> GeoIndex:
+    def sindex(self) -> SpatialIndex:
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
