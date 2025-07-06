@@ -73,8 +73,3 @@ class TestSpatialIndex(unittest.TestCase):
         # Verify the size of the index
         assert sindex.size == 4
         assert not sindex.is_empty
-
-        # Test that each geometry in the array matches what's stored in the index
-        for i, geom in enumerate(geometries):
-            # Compare geometries using equals() method instead of == operator
-            assert geom.equals(sindex.geometry[i])

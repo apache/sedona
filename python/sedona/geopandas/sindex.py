@@ -49,7 +49,7 @@ class SpatialIndex:
             self.geometry = geometry[column_name].values
         else:
             raise TypeError(
-                "Invalid type for `geometry`. Expected np.array, GeoSeries, or GeoDataFrame."
+                "Invalid type for `geometry`. Expected np.array or PySparkDataFrame."
             )
 
         self.index_type = index_type
