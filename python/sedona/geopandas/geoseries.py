@@ -139,8 +139,23 @@ class GeoSeries(GeoFrame, pspd.Series):
             # This is NOT a scalable solution since we call to_pandas() on the data and is a hacky solution
             # but this should be resolved if/once https://github.com/apache/spark/pull/51300 is merged in.
             # For now, we reset self._anchor = data to have keep the geometry information (e.g crs) that's lost in to_pandas()
+
+            pd_data = data.to_pandas()
+
+            # If has shapely geometries, convert to wkb since pandas-on-pyspark can't understand shapely geometries
+            if (
+                isinstance(pd_data, pd.Series)
+                and any(isinstance(x, BaseGeometry) for x in pd_data)
+            ) or (
+                isinstance(pd_data, pd.DataFrame)
+                and any(isinstance(x, BaseGeometry) for x in pd_data.values.ravel())
+            ):
+                pd_data = pd_data.apply(
+                    lambda geom: geom.wkb if geom is not None else None
+                )
+
             super().__init__(
-                data=data.to_pandas(),
+                data=pd_data,
                 index=index,
                 dtype=dtype,
                 name=name,
@@ -213,7 +228,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         tmp_df = self._process_geometry_column("ST_SRID", rename="crs")
         srid = tmp_df.take([0])[0]
         # Sedona returns 0 if doesn't exist
-        return CRS.from_user_input(srid) if srid else None
+        return CRS.from_user_input(srid) if srid != 0 and not pd.isna(srid) else None
 
     @crs.setter
     def crs(self, value: Union["CRS", None]):
