@@ -76,4 +76,5 @@ class TestSpatialIndex(unittest.TestCase):
 
         # Test that each geometry in the array matches what's stored in the index
         for i, geom in enumerate(geometries):
-            assert sindex.geometry[i] == geom
+            # Compare geometries using equals() method instead of == operator
+            assert geom.equals(sindex.geometry[i])
