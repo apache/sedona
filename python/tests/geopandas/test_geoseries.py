@@ -34,6 +34,7 @@ from shapely.geometry import (
     LinearRing,
 )
 from pandas.testing import assert_series_equal
+import pytest
 
 
 class TestGeoSeries(TestBase):
@@ -173,17 +174,19 @@ class TestGeoSeries(TestBase):
     def test_to_file(self):
         pass
 
-    def test_isna(self):
-        pass
+    @pytest.mark.parametrize("fun", ["isna", "isnull"])
+    def test_isna(self, fun):
+        geoseries = GeoSeries([Polygon([(0, 0), (1, 1), (0, 1)]), None, Polygon([])])
+        result = getattr(geoseries, fun)()
+        expected = pd.Series([False, True, False])
+        assert_series_equal(result.to_pandas(), expected)
 
-    def test_isnull(self):
-        pass
-
-    def test_notna(self):
-        pass
-
-    def test_notnull(self):
-        pass
+    @pytest.mark.parametrize("fun", ["notna", "notnull"])
+    def test_notna(self, fun):
+        geoseries = GeoSeries([Polygon([(0, 0), (1, 1), (0, 1)]), None, Polygon([])])
+        result = getattr(geoseries, fun)()
+        expected = pd.Series([True, False, True])
+        assert_series_equal(result.to_pandas(), expected)
 
     def test_fillna(self):
         pass
