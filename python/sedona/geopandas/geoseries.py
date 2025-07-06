@@ -1803,7 +1803,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         select = f"`{col}` IS NOT NULL"
         return self._query_geometry_column(
             select, col, rename="notna"
-        ).to_spark_pandas()
+        ).to_spark_pandas().astype("bool")
 
     def notnull(self) -> pspd.Series:
         """Alias for `notna` method. See `notna` for more detail."""
