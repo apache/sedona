@@ -1660,10 +1660,10 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'mean', true, false)").first().get(0)
       assertEquals(58.650240700685295, actual)
 
-      actual = df.selectExpr(s"RS_ZonalStats(raster, geom, 1, 'variance')").first().get(0)
+      actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'variance')").first().get(0)
       assertEquals(8534.098251841822, actual)
 
-      actual = df.selectExpr(s"RS_ZonalStats(raster, geom, 'sd')").first().get(0)
+      actual = df.selectExpr("RS_ZonalStats(raster, geom, 'sd')").first().get(0)
       assertEquals(92.3801832204387, actual)
 
       // Test with a polygon in EPSG:4326
