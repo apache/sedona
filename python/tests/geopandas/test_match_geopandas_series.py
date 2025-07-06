@@ -241,13 +241,39 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_from_wkb(self):
-        pass
+        for _, geom in self.geoms:
+            wkb = [g.wkb for g in geom]
+            sgpd_result = GeoSeries.from_wkb(wkb)
+            gpd_result = gpd.GeoSeries.from_wkb(wkb)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_from_wkt(self):
-        pass
+        for _, geom in self.geoms:
+            wkt = [g.wkt for g in geom]
+            sgpd_result = GeoSeries.from_wkt(wkt)
+            gpd_result = gpd.GeoSeries.from_wkt(wkt)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_from_xy(self):
-        pass
+        tests = [
+            [
+                [2.5, 0.5, 5.0, -2],  # x
+                [5, 10, 0, 1],  # y
+                [-3, 1.5, -1000, 25],  # z
+                "EPSG:4326",
+            ],
+            [
+                [2.5, -0.5, 1, 500],  # x
+                [5, 1, -100, 1000],  # y
+                None,
+                None,
+            ],
+        ]
+        for x, y, z, crs in tests:
+            sgpd_result = GeoSeries.from_xy(x, y, z, crs=crs)
+            gpd_result = gpd.GeoSeries.from_xy(x, y, z, crs=crs)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+            assert sgpd_result.crs == gpd_result.crs
 
     def test_from_shapely(self):
         pass
@@ -277,7 +303,14 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_to_crs(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom, crs=4326)
+            gpd_result = gpd.GeoSeries(geom, crs=4326)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+            sgpd_result = sgpd_result.to_crs(epsg=3857)
+            gpd_result = gpd_result.to_crs(epsg=3857)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_estimate_utm_crs(self):
         pass
@@ -298,7 +331,10 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_geom_type(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).geom_type
+            gpd_result = gpd.GeoSeries(geom).geom_type
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_type(self):
         pass
@@ -474,6 +510,15 @@ class TestMatchGeopandasSeries(TestBase):
                 gpd_result = gpd.GeoSeries(geom).intersects(gpd.GeoSeries(geom2))
                 self.check_pd_series_equal(sgpd_result, gpd_result)
 
+                if len(geom) == len(geom2):
+                    sgpd_result = GeoSeries(geom).intersects(
+                        GeoSeries(geom2), align=False
+                    )
+                    gpd_result = gpd.GeoSeries(geom).intersects(
+                        gpd.GeoSeries(geom2), align=False
+                    )
+                    self.check_pd_series_equal(sgpd_result, gpd_result)
+
     def test_intersection(self):
         geometries = [
             Polygon([(0, 0), (1, 0), (1, 1)]),
@@ -488,6 +533,22 @@ class TestMatchGeopandasSeries(TestBase):
                 sgpd_result = GeoSeries(g1).intersection(GeoSeries(g2))
                 gpd_result = gpd.GeoSeries(g1).intersection(gpd.GeoSeries(g2))
                 self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # Ensure both align True and False work correctly
+        for _, g1 in self.geoms:
+            for _, g2 in self.geoms:
+                gpd_series1, gpd_series2 = gpd.GeoSeries(g1), gpd.GeoSeries(g2)
+                # The original geopandas intersection method fails on invalid geometries
+                if not gpd_series1.is_valid.all() or not gpd_series2.is_valid.all():
+                    continue
+                sgpd_result = GeoSeries(g1).intersection(GeoSeries(g2))
+                gpd_result = gpd_series1.intersection(gpd_series2)
+                self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+                if len(g1) == len(g2):
+                    sgpd_result = GeoSeries(g1).intersects(GeoSeries(g2), align=False)
+                    gpd_result = gpd_series1.intersects(gpd_series2, align=False)
+                    self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_intersection_all(self):
         pass
