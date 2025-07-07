@@ -25,8 +25,6 @@ import com.esotericsoftware.kryo.io.UnsafeOutput;
 import com.google.common.geometry.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ShapeIndexGeography extends S2Geography {
   public S2ShapeIndex shapeIndex;
@@ -82,8 +80,19 @@ public class ShapeIndexGeography extends S2Geography {
     for (int i = 0, n = geog.numShapes(); i < n; i++) {
       shapeIndex.add(geog.shape(i));
       // since add() appends to the end, its index is size-1
-      lastId = shapeIndex.getShapes().size() - 1;
+      lastId = shapeIndex.getShapes().size();
     }
+    //C++ return ID as size of set:
+    // int MutableS2ShapeIndex::Add(unique_ptr<S2Shape> shape) {
+    //  // Additions are processed lazily by ApplyUpdates().  Note that in order to
+    //  // avoid unexpected client behavior, this method continues to add shapes
+    //  // even once the specified S2MemoryTracker limit has been exceeded.
+    //  const int id = shapes_.size();
+    //  shape->id_ = id;
+    //  mem_tracker_.AddSpace(&shapes_, 1);
+    //  shapes_.push_back(std::move(shape));
+    //  MarkIndexStale();
+    //  return id;
     return lastId;
   }
 
@@ -93,33 +102,12 @@ public class ShapeIndexGeography extends S2Geography {
     // 0) Prepare a temporary output for the payload
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     Output tmpOut = new Output(baos);
-
-    // 1) Lazy‐decode mode: write each shape individually into a StringVectorEncoder
-    if (opts.isEnableLazyDecode()) {
-      if (opts.getCodingHint() == EncodeOptions.CodingHint.FAST) {
-        throw new IOException("Lazy output only supported with COMPACT hint");
-      }
-      // 1) Encode each shape in the index, using our “compact” path when possible
-      for (S2Shape rawShape : shapeIndex.getShapes()) {
-        // If it's a polygon or 1-chain polyline, do the custom lax encoding…
-        if (!customCompactTaggedShapeEncoder(rawShape, tmpOut)) {
-          // …otherwise fall back to the usual S2Geography encode
-          // (we know every shape in this index is actually an S2Geography)
-          ((S2Geography) rawShape).encode((UnsafeOutput) tmpOut, opts);
-        }
-      }
-    } else {
-      switch (opts.getCodingHint()) {
-        case FAST:
-          for (S2Shape rawShape : shapeIndex.getShapes()) {
-            S2TaggedShapeCoder.FAST.encode((S2Shape) rawShape, tmpOut);
-          }
-          break;
-        case COMPACT:
-          for (S2Shape rawShape : shapeIndex.getShapes()) {
-            S2TaggedShapeCoder.COMPACT.encode((S2Shape) rawShape, tmpOut);
-          }
-      }
+    switch (opts.getCodingHint()) {
+      case FAST:
+        VectorCoder.FAST_SHAPE.encode(shapeIndex.getShapes(), tmpOut);
+        break;
+      case COMPACT:
+        VectorCoder.COMPACT_SHAPE.encode(shapeIndex.getShapes(), tmpOut);
     }
     // 2) Finish payload
     tmpOut.flush();
@@ -146,34 +134,5 @@ public class ShapeIndexGeography extends S2Geography {
 
   public static ShapeIndexGeography decode(UnsafeInput in, EncodeTag tag) throws IOException {
     throw new IOException("Decode() not implemented for ShapeIndexGeography()");
-  }
-
-  /**
-   * Encodes a tagged shape in compact form: - Polygons → converted to a lax polygon shape -
-   * Single-chain polylines → converted to a lax polyline shape - Others → encoded directly
-   */
-  public static boolean customCompactTaggedShapeEncoder(S2Shape shape, Output out)
-      throws IOException {
-    // Polygon case: reify as a lax polygon for compact encoding
-    if (shape instanceof S2Polygon.Shape) {
-      List<Iterable<S2Point>> loops = new ArrayList<>(shape.numChains());
-      for (int i = 0; i < shape.numChains(); i++) {
-        loops.add(shape.chain(i));
-      }
-      S2LaxPolygonShape laxPolygon = S2LaxPolygonShape.create(loops);
-      S2LaxPolygonShape.COMPACT_CODER.encode(laxPolygon, out);
-      return true;
-    }
-    // Polyline case: only when exactly one chain
-    else if (shape instanceof S2Polyline && shape.numChains() == 1) {
-      Iterable<S2Point> verts = shape.chain(0);
-      S2LaxPolylineShape laxPolyline = S2LaxPolylineShape.create(verts);
-      S2LaxPolylineShape.COMPACT_CODER.encode(laxPolyline, out);
-      return true;
-    }
-    // Fallback: encode the original shape directly
-    else {
-      return false;
-    }
   }
 }
