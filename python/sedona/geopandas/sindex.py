@@ -30,23 +30,25 @@ class SpatialIndex:
 
         Parameters
         ----------
-        geometry : np.array of Shapely geometries, or PySparkDataFrame.
+        geometry : np.array of Shapely geometries, PySparkDataFrame column, or PySparkDataFrame
         index_type : str, default "strtree"
             The type of spatial index to use.
         column_name : str, optional
-            The column name to extract geometry from if `geometry` is a GeoDataFrame.
+            The column name to extract geometry from if `geometry` is a PySparkDataFrame.
         """
 
         if isinstance(geometry, np.ndarray):
             self.geometry = geometry
+            self._dataframe = None
+            self._is_spark = False
         elif isinstance(geometry, PySparkDataFrame):
             if column_name is None:
-                raise ValueError("column_name must be specified for PySpark DataFrame.")
-            if column_name not in geometry.columns:
                 raise ValueError(
-                    f"Column '{column_name}' does not exist in the DataFrame."
+                    "column_name must be specified when geometry is a PySparkDataFrame"
                 )
-            self.geometry = geometry[column_name].values
+            self.geometry = geometry[column_name]
+            self._dataframe = geometry
+            self._is_spark = True
         else:
             raise TypeError(
                 "Invalid type for `geometry`. Expected np.array or PySparkDataFrame."
@@ -122,6 +124,8 @@ class SpatialIndex:
         int
             Number of geometries in the index.
         """
+        if self._is_spark:
+            return self.geometry.count()
         return len(self.geometry)
 
     @property

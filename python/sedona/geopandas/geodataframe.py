@@ -250,9 +250,19 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    def sindex(self) -> SpatialIndex:
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def sindex(self) -> SpatialIndex | None:
+        """
+        Returns a spatial index for the GeoDataFrame.
+        The spatial index allows for efficient spatial queries. If the spatial
+        index cannot be created (e.g., no geometry column is present), this
+        property will return None.
+        Returns:
+        - SpatialIndex: The spatial index for the GeoDataFrame.
+        - None: If the spatial index is not supported.
+        """
+        if "geometry" in self.columns:
+            return SpatialIndex(self._internal.spark_frame, column_name="geometry")
+        return None
 
     def copy(self, deep=False):
         """

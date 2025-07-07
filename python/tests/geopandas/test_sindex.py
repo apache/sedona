@@ -17,7 +17,7 @@
 
 import unittest
 import numpy as np
-from shapely.geometry import Point, Polygon, LineString, box
+from shapely.geometry import Point, Polygon, LineString
 from sedona.geopandas import GeoSeries
 from sedona.geopandas.sindex import SpatialIndex
 
