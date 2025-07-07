@@ -21,7 +21,6 @@ package org.apache.sedona.common.S2Geography;
 import com.google.common.geometry.S2CellId;
 import com.google.common.geometry.S2Iterator;
 import com.google.common.geometry.S2ShapeIndex;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +43,7 @@ public class GeographyIndex {
     for (int i = 0; i < geog.numShapes(); i++) {
       index.add(geog.shape(i));
       int shapeId = index.getShapes().size();
-      values.add(shapeId,value);
+      values.add(shapeId, value);
     }
   }
   /** Returns the stored value for a given shape ID. */

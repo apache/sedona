@@ -82,7 +82,7 @@ public class ShapeIndexGeography extends S2Geography {
       // since add() appends to the end, its index is size-1
       lastId = shapeIndex.getShapes().size();
     }
-    //C++ return ID as size of set:
+    // C++ return ID as size of set:
     // int MutableS2ShapeIndex::Add(unique_ptr<S2Shape> shape) {
     //  // Additions are processed lazily by ApplyUpdates().  Note that in order to
     //  // avoid unexpected client behavior, this method continues to add shapes

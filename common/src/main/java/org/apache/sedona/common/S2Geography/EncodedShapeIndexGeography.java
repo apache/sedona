@@ -116,27 +116,25 @@ public class EncodedShapeIndexGeography extends S2Geography {
     in.readBytes(payload, 0, length);
     // 3) hand *only* those bytes to S2‐Coder via Bytes adapter
     PrimitiveArrays.Bytes bytes =
-            new PrimitiveArrays.Bytes() {
-              @Override
-              public long length() {
-                return payload.length;
-              }
+        new PrimitiveArrays.Bytes() {
+          @Override
+          public long length() {
+            return payload.length;
+          }
 
-              @Override
-              public byte get(long i) {
-                return payload[(int) i];
-              }
-            };
+          @Override
+          public byte get(long i) {
+            return payload[(int) i];
+          }
+        };
 
     List<S2Shape> s2Shapes = new ArrayList<>();
-    if (tag.isCompact()){
+    if (tag.isCompact()) {
       s2Shapes = VectorCoder.COMPACT_SHAPE.decode(bytes);
-    }
-    else {
+    } else {
       s2Shapes = VectorCoder.FAST_SHAPE.decode(bytes);
     }
-    for( S2Shape shape : s2Shapes)
-      encodedShapeIndexGeography.addIndex(shape);
+    for (S2Shape shape : s2Shapes) encodedShapeIndexGeography.addIndex(shape);
     return encodedShapeIndexGeography;
   }
 }
