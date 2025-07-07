@@ -65,8 +65,6 @@ class SpatialIndex:
                 "Invalid type for `geometry`. Expected np.array or PySparkDataFrame."
             )
 
-        self.index_type = index_type
-
     def query(self, geometry, predicate=None, sort=False):
         """
         Query the spatial index for geometries that intersect the given geometry.
