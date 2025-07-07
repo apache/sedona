@@ -218,5 +218,6 @@ class SpatialIndex:
             if self.index_type.lower() == "strtree":
                 self._index = STRtree(self.geometry)
             else:
-                # Fallback to STRtree if not supported
-                self._index = STRtree(self.geometry)
+                raise ValueError(
+                    f"Unsupported index type: {self.index_type}. Only 'strtree' is supported for local indexing."
+                )

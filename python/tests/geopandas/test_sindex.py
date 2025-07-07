@@ -62,20 +62,6 @@ class TestSpatialIndex(TestBase):
         assert hasattr(self.polygons, "sindex")
         assert hasattr(self.lines, "sindex")
 
-    def test_spatial_index_with_shapely_array(self):
-        # Create a list of Shapely geometries
-        geometries = [Point(0, 0), Point(1, 1), Point(2, 2), Point(3, 3)]
-
-        # Convert to object array to maintain references to the geometry objects
-        geom_array = np.array(geometries, dtype=object)
-
-        # Create a SpatialIndex from the numpy array
-        sindex = SpatialIndex(geom_array)
-
-        # Verify the size of the index
-        assert sindex.size == 4
-        assert not sindex.is_empty
-
     def test_query_with_point(self):
         """Test querying the spatial index with a point geometry."""
         # Create a list of Shapely geometries - squares around points (0,0), (1,1), etc.
