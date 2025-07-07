@@ -15,17 +15,18 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import unittest
 import numpy as np
 from shapely.geometry import Point, Polygon, LineString
+
+from tests.test_base import TestBase
 from sedona.geopandas import GeoSeries
 from sedona.geopandas.sindex import SpatialIndex
 
 
-class TestSpatialIndex(unittest.TestCase):
+class TestSpatialIndex(TestBase):
     """Tests for the spatial index functionality in GeoSeries."""
 
-    def setUp(self):
+    def setup_method(self):
         """Set up test data."""
         # Create a GeoSeries with point geometries
         self.points = GeoSeries(

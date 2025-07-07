@@ -17,6 +17,11 @@
 
 import numpy as np
 from pyspark.sql import DataFrame as PySparkDataFrame
+from pyspark.sql.functions import expr
+from pyspark.sql.types import BinaryType
+
+from sedona.spark.utils.adapter import Adapter
+from sedona.spark.core.enums import IndexType
 
 
 class SpatialIndex:
@@ -39,16 +44,22 @@ class SpatialIndex:
 
         if isinstance(geometry, np.ndarray):
             self.geometry = geometry
+            self.index_type = index_type
             self._dataframe = None
             self._is_spark = False
+            # Build local index for numpy array
+            self._build_local_index()
         elif isinstance(geometry, PySparkDataFrame):
             if column_name is None:
                 raise ValueError(
                     "column_name must be specified when geometry is a PySparkDataFrame"
                 )
             self.geometry = geometry[column_name]
+            self.index_type = index_type
             self._dataframe = geometry
             self._is_spark = True
+            # Build distributed spatial index
+            self._build_spark_index(column_name)
         else:
             raise TypeError(
                 "Invalid type for `geometry`. Expected np.array or PySparkDataFrame."
@@ -139,3 +150,36 @@ class SpatialIndex:
             True if the index is empty, False otherwise.
         """
         return self.size == 0
+
+    def _build_spark_index(self, column_name):
+        """
+        Build a distributed spatial index on the geometry column of the DataFrame.
+
+        This uses Sedona's built-in indexing functionality.
+        """
+
+        # Convert index_type string to Sedona IndexType enum
+        index_type_map = {"strtree": IndexType.RTREE, "quadtree": IndexType.QUADTREE}
+        sedona_index_type = index_type_map.get(self.index_type.lower(), IndexType.RTREE)
+
+        # Create a SpatialRDD from the DataFrame
+        spatial_rdd = Adapter.toSpatialRdd(self._dataframe, column_name)
+
+        # Build spatial index
+        spatial_rdd.buildIndex(sedona_index_type, False)
+
+        # Store the indexed RDD
+        self._indexed_rdd = spatial_rdd
+
+    def _build_local_index(self):
+        """
+        Build a local spatial index for numpy array of geometries.
+        """
+        from shapely.strtree import STRtree
+
+        if len(self.geometry) > 0:
+            if self.index_type.lower() == "strtree":
+                self._index = STRtree(self.geometry)
+            else:
+                # Fallback to STRtree if not supported
+                self._index = STRtree(self.geometry)
