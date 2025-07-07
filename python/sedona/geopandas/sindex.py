@@ -125,7 +125,7 @@ class SpatialIndex:
             Number of geometries in the index.
         """
         if self._is_spark:
-            return self.geometry.count()
+            return self._dataframe.count()
         return len(self.geometry)
 
     @property
