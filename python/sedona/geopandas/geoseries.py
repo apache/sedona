@@ -1454,7 +1454,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         from shapely.geometry.base import BaseGeometry
         from geopandas.array import GeometryArray
 
-        # TODO: Implement limit
+        # TODO: Implement limit https://github.com/apache/sedona/issues/2068
         if limit:
             raise NotImplementedError(
                 "GeoSeries.fillna() with limit is not implemented yet."
@@ -1484,6 +1484,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             # Replace all None's with empty geometries
             value = value.fillna(None)
 
+            # Coalesce: If the value in L is null, use the corresponding value in R for that row
             select = f"COALESCE(`L`, `R`)"
             result = self._row_wise_operation(
                 select, value, align=None, rename="fillna"
