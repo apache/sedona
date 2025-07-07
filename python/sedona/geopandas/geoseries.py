@@ -39,7 +39,10 @@ from sedona.geopandas.base import GeoFrame
 from sedona.geopandas.geodataframe import GeoDataFrame
 from sedona.geopandas.geoindex import GeoIndex
 
-from pyspark.pandas.internal import SPARK_DEFAULT_INDEX_NAME  # __index_level_0__
+from pyspark.pandas.internal import (
+    SPARK_DEFAULT_INDEX_NAME,  # __index_level_0__
+    NATURAL_ORDER_COLUMN_NAME,
+)
 
 
 class GeoSeries(GeoFrame, pspd.Series):
@@ -123,9 +126,6 @@ class GeoSeries(GeoFrame, pspd.Series):
             assert not copy
             assert not fastpath
 
-            self._anchor = data
-            self._col_label = index
-
             data_crs = None
             if hasattr(data, "crs"):
                 data_crs = data.crs
@@ -136,6 +136,35 @@ class GeoSeries(GeoFrame, pspd.Series):
                     "allow_override=True)' to overwrite CRS or "
                     "'GeoSeries.to_crs(crs)' to reproject geometries. "
                 )
+            # This is a temporary workaround since pyspark errors when creating a ps.Series from a ps.Series
+            # This is NOT a scalable solution since we call to_pandas() on the data and is a hacky solution
+            # but this should be resolved if/once https://github.com/apache/spark/pull/51300 is merged in.
+            # For now, we reset self._anchor = data to have keep the geometry information (e.g crs) that's lost in to_pandas()
+
+            pd_data = data.to_pandas()
+
+            # If has shapely geometries, convert to wkb since pandas-on-pyspark can't understand shapely geometries
+            if (
+                isinstance(pd_data, pd.Series)
+                and any(isinstance(x, BaseGeometry) for x in pd_data)
+            ) or (
+                isinstance(pd_data, pd.DataFrame)
+                and any(isinstance(x, BaseGeometry) for x in pd_data.values.ravel())
+            ):
+                pd_data = pd_data.apply(
+                    lambda geom: geom.wkb if geom is not None else None
+                )
+
+            super().__init__(
+                data=pd_data,
+                index=index,
+                dtype=dtype,
+                name=name,
+                copy=copy,
+                fastpath=fastpath,
+            )
+
+            self._anchor = data
         else:
             if isinstance(data, pd.Series):
                 assert index is None
@@ -158,14 +187,7 @@ class GeoSeries(GeoFrame, pspd.Series):
                 gs.apply(lambda geom: geom.wkb if geom is not None else None)
             )
             # initialize the parent class pyspark Series with the pandas Series
-            super().__init__(
-                data=pdf,
-                index=index,
-                dtype=dtype,
-                name=name,
-                copy=copy,
-                fastpath=fastpath,
-            )
+            super().__init__(data=pdf)
 
         if crs:
             self.set_crs(crs, inplace=True)
@@ -207,7 +229,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         tmp_df = self._process_geometry_column("ST_SRID", rename="crs")
         srid = tmp_df.take([0])[0]
         # Sedona returns 0 if doesn't exist
-        return CRS.from_user_input(srid) if srid else None
+        return CRS.from_user_input(srid) if srid != 0 and not pd.isna(srid) else None
 
     @crs.setter
     def crs(self, value: Union["CRS", None]):
@@ -271,8 +293,9 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Point
-        >>> s = geopandas.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        >>> s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
         >>> s
         0    POINT (1 1)
         1    POINT (2 2)
@@ -472,10 +495,11 @@ class GeoSeries(GeoFrame, pspd.Series):
                     lambda wkb: (
                         shapely.wkb.loads(bytes(wkb)) if not pd.isna(wkb) else None
                     )
-                )
+                ),
+                crs=self.crs,
             )
-        except Exception as e:
-            return gpd.GeoSeries(pd_series)
+        except TypeError:
+            return gpd.GeoSeries(pd_series, crs=self.crs)
 
     def to_spark_pandas(self) -> pspd.Series:
         return pspd.Series(self._psdf._to_internal_pandas())
@@ -505,7 +529,6 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples:
         >>> from shapely.geometry import Point
-        >>> import geopandas as gpd
         >>> from sedona.geopandas import GeoSeries
 
         >>> gs = GeoSeries([Point(1, 1), Point(2, 2)])
@@ -535,7 +558,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
         >>> from shapely.geometry import Polygon
-        >>> import geopandas as gpd
         >>> from sedona.geopandas import GeoSeries
 
         >>> gs = GeoSeries([Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])])
@@ -547,9 +569,44 @@ class GeoSeries(GeoFrame, pspd.Series):
         return self._process_geometry_column("ST_Area", rename="area").to_spark_pandas()
 
     @property
-    def geom_type(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def geom_type(self) -> pspd.Series:
+        """
+        Returns a series of strings specifying the geometry type of each geometry of each object.
+
+        Note: Unlike Geopandas, Sedona returns LineString instead of LinearRing.
+
+        Returns
+        -------
+        Series
+            A Series containing the geometry type of each geometry.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Polygon, Point
+        >>> from sedona.geopandas import GeoSeries
+
+        >>> gs = GeoSeries([Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), Point(0, 0)])
+        >>> gs.geom_type
+        0    POLYGON
+        1    POINT
+        dtype: object
+        """
+        result = self._process_geometry_column(
+            "GeometryType", rename="geom_type"
+        ).to_spark_pandas()
+
+        # Sedona returns the string in all caps unlike Geopandas
+        sgpd_to_gpg_name_map = {
+            "POINT": "Point",
+            "LINESTRING": "LineString",
+            "POLYGON": "Polygon",
+            "MULTIPOINT": "MultiPoint",
+            "MULTILINESTRING": "MultiLineString",
+            "MULTIPOLYGON": "MultiPolygon",
+            "GEOMETRYCOLLECTION": "GeometryCollection",
+        }
+        result = result.map(lambda x: sgpd_to_gpg_name_map.get(x, x))
+        return result
 
     @property
     def type(self):
@@ -573,7 +630,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
         >>> from shapely.geometry import Polygon
-        >>> import geopandas as gpd
         >>> from sedona.geopandas import GeoSeries
 
         >>> gs = GeoSeries([Point(0, 0), LineString([(0, 0), (1, 1)]), Polygon([(0, 0), (1, 0), (1, 1)]), GeometryCollection([Point(0, 0), LineString([(0, 0), (1, 1)]), Polygon([(0, 0), (1, 0), (1, 1)])])])
@@ -607,8 +663,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         An example with one invalid polygon (a bowtie geometry crossing itself)
         and one missing geometry:
 
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (1, 1), (0, 1)]),
         ...         Polygon([(0,0), (1, 1), (1, 0), (0, 1)]),  # bowtie geometry
@@ -640,9 +697,50 @@ class GeoSeries(GeoFrame, pspd.Series):
             .astype("bool")
         )
 
-    def is_valid_reason(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def is_valid_reason(self) -> pspd.Series:
+        """Returns a ``Series`` of strings with the reason for invalidity of
+        each geometry.
+
+        Examples
+        --------
+
+        An example with one invalid polygon (a bowtie geometry crossing itself)
+        and one missing geometry:
+
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
+        ...         Polygon([(0,0), (1, 1), (1, 0), (0, 1)]),  # bowtie geometry
+        ...         Polygon([(0, 0), (2, 2), (2, 0)]),
+        ...         Polygon([(0, 0), (2, 0), (1, 1), (2, 2), (0, 2), (1, 1), (0, 0)]),
+        ...         None
+        ...     ]
+        ... )
+        >>> s
+        0         POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1    POLYGON ((0 0, 1 1, 1 0, 0 1, 0 0))
+        2         POLYGON ((0 0, 2 2, 2 0, 0 0))
+        3                                   None
+        dtype: geometry
+
+        >>> s.is_valid_reason()
+        0    Valid Geometry
+        1    Self-intersection at or near point (0.5, 0.5, NaN)
+        2    Valid Geometry
+        3    Ring Self-intersection at or near point (1.0, 1.0)
+        4    None
+        dtype: object
+
+        See also
+        --------
+        GeoSeries.is_valid : detect invalid geometries
+        GeoSeries.make_valid : fix invalid geometries
+        """
+        return self._process_geometry_column(
+            "ST_IsValidReason", rename="is_valid_reason"
+        ).to_spark_pandas()
 
     @property
     def is_empty(self) -> pspd.Series:
@@ -655,16 +753,15 @@ class GeoSeries(GeoFrame, pspd.Series):
         An example of a GeoDataFrame with one empty point, one point and one missing
         value:
 
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Point
-        >>> d = {'geometry': [Point(), Point(2, 1), None]}
-        >>> gdf = geopandas.GeoDataFrame(d, crs="EPSG:4326")
-        >>> gdf
-            geometry
+        >>> geoseries = GeoSeries([Point(), Point(2, 1), None], crs="EPSG:4326")
+        >>> geoseries
         0  POINT EMPTY
         1  POINT (2 1)
         2         None
 
-        >>> gdf.is_empty
+        >>> geoseries.is_empty
         0     True
         1    False
         2    False
@@ -701,8 +798,9 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import LineString
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         LineString([(0, 0), (1, 1), (1, -1), (0, 1)]),
         ...         LineString([(0, 0), (1, 1), (1, -1)]),
@@ -751,8 +849,9 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Point
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         Point(0, 1),
         ...         Point(0, 1, 2),
@@ -862,9 +961,74 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
-    def make_valid(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def make_valid(self, *, method="linework", keep_collapsed=True) -> "GeoSeries":
+        """Repairs invalid geometries.
+
+        Returns a ``GeoSeries`` with valid geometries.
+
+        If the input geometry is already valid, then it will be preserved.
+        In many cases, in order to create a valid geometry, the input
+        geometry must be split into multiple parts or multiple geometries.
+        If the geometry must be split into multiple parts of the same type
+        to be made valid, then a multi-part geometry will be returned
+        (e.g. a MultiPolygon).
+        If the geometry must be split into multiple parts of different types
+        to be made valid, then a GeometryCollection will be returned.
+
+        In Sedona, only the 'structure' method is available:
+
+        * the 'structure' algorithm tries to reason from the structure of the
+          input to find the 'correct' repair: exterior rings bound area,
+          interior holes exclude area. It first makes all rings valid, then
+          shells are merged and holes are subtracted from the shells to
+          generate valid result. It assumes that holes and shells are correctly
+          categorized in the input geometry.
+
+        Parameters
+        ----------
+        method : {'linework', 'structure'}, default 'linework'
+            Algorithm to use when repairing geometry. Sedona Geopandas only supports the 'structure' method.
+            The default method is "linework" to match compatibility with Geopandas, but it must be explicitly set to
+            'structure' to use the Sedona implementation.
+
+        keep_collapsed : bool, default True
+            For the 'structure' method, True will keep components that have
+            collapsed into a lower dimensionality. For example, a ring
+            collapsing to a line, or a line collapsing to a point.
+
+        Examples
+        --------
+
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import MultiPolygon, Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (0, 2), (1, 1), (2, 2), (2, 0), (1, 1), (0, 0)]),
+        ...         Polygon([(0, 2), (0, 1), (2, 0), (0, 0), (0, 2)]),
+        ...         LineString([(0, 0), (1, 1), (1, 0)]),
+        ...     ],
+        ... )
+        >>> s
+        0    POLYGON ((0 0, 0 2, 1 1, 2 2, 2 0, 1 1, 0 0))
+        1              POLYGON ((0 2, 0 1, 2 0, 0 0, 0 2))
+        2                       LINESTRING (0 0, 1 1, 1 0)
+        dtype: geometry
+
+        >>> s.make_valid()
+        0    MULTIPOLYGON (((1 1, 0 0, 0 2, 1 1)), ((2 0, 1...
+        1                       POLYGON ((0 1, 2 0, 0 0, 0 1))
+        2                           LINESTRING (0 0, 1 1, 1 0)
+        dtype: geometry
+        """
+
+        if method != "structure":
+            raise ValueError(
+                "Sedona only supports the 'structure' method for make_valid"
+            )
+
+        col = self.get_first_geometry_column()
+        select = f"ST_MakeValid(`{col}`, {keep_collapsed})"
+        return self._query_geometry_column(select, col, rename="make_valid")
 
     def reverse(self):
         # Implementation of the abstract method
@@ -908,7 +1072,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         An object is said to intersect `other` if its `boundary` and `interior`
         intersects in any way with those of the other.
 
-        The operation works on a 1-to-1 row-wise manner:
+        The operation works on a 1-to-1 row-wise manner.
 
         Parameters
         ----------
@@ -917,7 +1081,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             intersected.
         align : bool | None (default None)
             If True, automatically aligns GeoSeries based on their indices. None defaults to True.
-            If False, the order of elements is preserved. (not supported in Sedona Geopandas)
+            If False, the order of elements is preserved.
 
         Returns
         -------
@@ -925,8 +1089,9 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (2, 2), (0, 2)]),
         ...         LineString([(0, 0), (2, 2)]),
@@ -934,32 +1099,56 @@ class GeoSeries(GeoFrame, pspd.Series):
         ...         Point(0, 1),
         ...     ],
         ... )
-        >>> s2 = geopandas.GeoSeries(
+        >>> s2 = GeoSeries(
         ...     [
         ...         LineString([(1, 0), (1, 3)]),
         ...         LineString([(2, 0), (0, 2)]),
         ...         Point(1, 1),
-        ...         Point(-100, -100),
+        ...         Point(0, 1),
         ...     ],
         ...     index=range(1, 5),
         ... )
 
-        We can check two GeoSeries against each other, row by row.
-        The GeoSeries above have different indices. We align both GeoSeries
-        based on index values and compare elements with the same index:
+        >>> s
+        0    POLYGON ((0 0, 2 2, 0 2, 0 0))
+        1             LINESTRING (0 0, 2 2)
+        2             LINESTRING (2 0, 0 2)
+        3                       POINT (0 1)
+        dtype: geometry
 
-        >>> s.intersects(s2)
-        0     True
-        1     True
-        2     True
-        3    False
-        dtype: bool
+        >>> s2
+        1    LINESTRING (1 0, 1 3)
+        2    LINESTRING (2 0, 0 2)
+        3              POINT (1 1)
+        4              POINT (0 1)
+        dtype: geometry
 
-        We can also check if each geometry of GeoSeries intersects a single
+        We can check if each geometry of GeoSeries crosses a single
         geometry:
 
         >>> line = LineString([(-1, 1), (3, 1)])
         >>> s.intersects(line)
+        0    True
+        1    True
+        2    True
+        3    True
+        dtype: bool
+
+        We can also check two GeoSeries against each other, row by row.
+        The GeoSeries above have different indices. We can either align both GeoSeries
+        based on index values and compare elements with the same index using
+        ``align=True`` or ignore index and compare elements based on their matching
+        order using ``align=False``:
+
+        >>> s.intersects(s2, align=True)
+        0    False
+        1     True
+        2     True
+        3    False
+        4    False
+        dtype: bool
+
+        >>> s.intersects(s2, align=False)
         0    True
         1    True
         2    True
@@ -992,7 +1181,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         """Returns a ``GeoSeries`` of the intersection of points in each
         aligned geometry with `other`.
 
-        The operation works on a 1-to-1 row-wise manner:
+        The operation works on a 1-to-1 row-wise manner.
 
         Parameters
         ----------
@@ -1001,7 +1190,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             intersection with.
         align : bool | None (default None)
             If True, automatically aligns GeoSeries based on their indices. None defaults to True.
-            If False, the order of elements is preserved. (not supported in Sedona Geopandas)
+            If False, the order of elements is preserved.
 
         Returns
         -------
@@ -1009,8 +1198,9 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = geopandas.GeoSeries(
+        >>> s = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (2, 2), (0, 2)]),
         ...         Polygon([(0, 0), (2, 2), (0, 2)]),
@@ -1019,48 +1209,67 @@ class GeoSeries(GeoFrame, pspd.Series):
         ...         Point(0, 1),
         ...     ],
         ... )
-        >>> s2 = geopandas.GeoSeries(
+        >>> s2 = GeoSeries(
         ...     [
         ...         Polygon([(0, 0), (1, 1), (0, 1)]),
         ...         LineString([(1, 0), (1, 3)]),
         ...         LineString([(2, 0), (0, 2)]),
         ...         Point(1, 1),
-        ...         Point(-100, -100),
+        ...         Point(0, 1),
         ...     ],
+        ...     index=range(1, 6),
         ... )
 
-        We can do an intersection of each geometry and a single
-        shapely geometry:
-
-        >>> geom = Polygon([(-0.5, -0.5), (-0.5, 2.5), (2.5, 2.5), (2.5, -0.5), (-0.5, -0.5)])
-        >>> s.intersection(geom)
-            Polygon([(0, 0), (2, 2), (0, 2)]),
-            Polygon([(0, 0), (2, 2), (0, 2)]),
-            LineString([(0, 0), (2, 2)]),
-            LineString([(2, 0), (0, 2)]),
-            Point(0, 1),
-        dtype: geometry
-
-        >>> geom = Polygon([(-0.5, -0.5), (-0.5, 2.5), (2.5, 2.5), (2.5, -0.5), (-0.5, -0.5)])
-        >>> s.intersection(Polygon([(0, 0), (1, 1), (0, 1)]))
-        0         POLYGON ((0 0, 2 2, 0 2))
-        1         POLYGON ((0 0, 2 2, 0 2))
+        >>> s
+        0    POLYGON ((0 0, 2 2, 0 2, 0 0))
+        1    POLYGON ((0 0, 2 2, 0 2, 0 0))
         2             LINESTRING (0 0, 2 2)
         3             LINESTRING (2 0, 0 2)
         4                       POINT (0 1)
         dtype: geometry
 
-        We can also check two GeoSeries against each other, row by row.
-        The GeoSeries above have different indices. We align both GeoSeries
-        based on index values and compare elements with the same index.
+        >>> s2
+        1    POLYGON ((0 0, 1 1, 0 1, 0 0))
+        2             LINESTRING (1 0, 1 3)
+        3             LINESTRING (2 0, 0 2)
+        4                       POINT (1 1)
+        5                       POINT (0 1)
+        dtype: geometry
 
-        >>> s.intersection(s2)
-        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
+        We can also do intersection of each geometry and a single
+        shapely geometry:
+
+        >>> s.intersection(Polygon([(0, 0), (1, 1), (0, 1)]))
+        0    POLYGON ((0 0, 0 1, 1 1, 0 0))
+        1    POLYGON ((0 0, 0 1, 1 1, 0 0))
+        2             LINESTRING (0 0, 1 1)
+        3                       POINT (1 1)
+        4                       POINT (0 1)
+        dtype: geometry
+
+        We can also check two GeoSeries against each other, row by row.
+        The GeoSeries above have different indices. We can either align both GeoSeries
+        based on index values and compare elements with the same index using
+        ``align=True`` or ignore index and compare elements based on their matching
+        order using ``align=False``:
+
+        >>> s.intersection(s2, align=True)
+        0                              None
+        1    POLYGON ((0 0, 0 1, 1 1, 0 0))
+        2                       POINT (1 1)
+        3             LINESTRING (2 0, 0 2)
+        4                       POINT EMPTY
+        5                              None
+        dtype: geometry
+
+        >>> s.intersection(s2, align=False)
+        0    POLYGON ((0 0, 0 1, 1 1, 0 0))
         1             LINESTRING (1 1, 1 2)
         2                       POINT (1 1)
         3                       POINT (1 1)
-        4                     POLYGON EMPTY
+        4                       POINT (0 1)
         dtype: geometry
+
 
         See Also
         --------
@@ -1086,8 +1295,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         from pyspark.sql.functions import col
 
         # Note: this is specifically False. None is valid since it defaults to True similar to geopandas
-        if align is False:
-            raise NotImplementedError("Sedona Geopandas does not support align=False")
+        index_col = (
+            NATURAL_ORDER_COLUMN_NAME if align is False else SPARK_DEFAULT_INDEX_NAME
+        )
 
         if isinstance(other, BaseGeometry):
             other = GeoSeries([other] * len(self))
@@ -1097,13 +1307,13 @@ class GeoSeries(GeoFrame, pspd.Series):
         # TODO: this does not yet support multi-index
         df = self._internal.spark_frame.select(
             col(self.get_first_geometry_column()).alias("L"),
-            col(SPARK_DEFAULT_INDEX_NAME),
+            col(index_col),
         )
         other_df = other._internal.spark_frame.select(
             col(other.get_first_geometry_column()).alias("R"),
-            col(SPARK_DEFAULT_INDEX_NAME),
+            col(index_col),
         )
-        joined_df = df.join(other_df, on=SPARK_DEFAULT_INDEX_NAME, how="outer")
+        joined_df = df.join(other_df, on=index_col, how="outer")
         return self._query_geometry_column(
             select,
             cols=["L", "R"],
@@ -1235,8 +1445,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
 
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Point
-        >>> s = geopandas.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        >>> s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
         >>> s.x
         0    1.0
         1    2.0
@@ -1263,8 +1474,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
 
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Point
-        >>> s = geopandas.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        >>> s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
         >>> s.y
         0    1.0
         1    2.0
@@ -1292,8 +1504,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
 
+        >>> from sedona.geopandas import GeoSeries
         >>> from shapely.geometry import Point
-        >>> s = geopandas.GeoSeries([Point(1, 1, 1), Point(2, 2, 2), Point(3, 3, 3)])
+        >>> s = GeoSeries([Point(1, 1, 1), Point(2, 2, 2), Point(3, 3, 3)])
         >>> s.z
         0    1.0
         1    2.0
@@ -1329,7 +1542,82 @@ class GeoSeries(GeoFrame, pspd.Series):
         on_invalid="raise",
         **kwargs,
     ) -> "GeoSeries":
-        raise NotImplementedError("GeoSeries.from_wkb() is not implemented yet.")
+        r"""
+        Alternate constructor to create a ``GeoSeries``
+        from a list or array of WKB objects
+
+        Parameters
+        ----------
+        data : array-like or Series
+            Series, list or array of WKB objects
+        index : array-like or Index
+            The index for the GeoSeries.
+        crs : value, optional
+            Coordinate Reference System of the geometry objects. Can be anything
+            accepted by
+            :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
+            such as an authority string (eg "EPSG:4326") or a WKT string.
+        on_invalid: {"raise", "warn", "ignore"}, default "raise"
+            - raise: an exception will be raised if a WKB input geometry is invalid.
+            - warn: a warning will be raised and invalid WKB geometries will be returned
+              as None.
+            - ignore: invalid WKB geometries will be returned as None without a warning.
+            - fix: an effort is made to fix invalid input geometries (e.g. close
+              unclosed rings). If this is not possible, they are returned as ``None``
+              without a warning. Requires GEOS >= 3.11 and shapely >= 2.1.
+
+        kwargs
+            Additional arguments passed to the Series constructor,
+            e.g. ``name``.
+
+        Returns
+        -------
+        GeoSeries
+
+        See Also
+        --------
+        GeoSeries.from_wkt
+
+        Examples
+        --------
+
+        >>> wkbs = [
+        ... (
+        ...     b"\x01\x01\x00\x00\x00\x00\x00\x00\x00"
+        ...     b"\x00\x00\xf0?\x00\x00\x00\x00\x00\x00\xf0?"
+        ... ),
+        ... (
+        ...     b"\x01\x01\x00\x00\x00\x00\x00\x00\x00"
+        ...     b"\x00\x00\x00@\x00\x00\x00\x00\x00\x00\x00@"
+        ... ),
+        ... (
+        ...    b"\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00"
+        ...    b"\x00\x08@\x00\x00\x00\x00\x00\x00\x08@"
+        ... ),
+        ... ]
+        >>> s = geopandas.GeoSeries.from_wkb(wkbs)
+        >>> s
+        0    POINT (1 1)
+        1    POINT (2 2)
+        2    POINT (3 3)
+        dtype: geometry
+        """
+        if on_invalid != "raise":
+            raise NotImplementedError(
+                "GeoSeries.from_wkb(): only on_invalid='raise' is implemented"
+            )
+
+        from pyspark.sql.types import StructType, StructField, BinaryType
+
+        schema = StructType([StructField("data", BinaryType(), True)])
+        return cls._create_from_select(
+            f"ST_GeomFromWKB(`data`)",
+            data,
+            schema,
+            index,
+            crs,
+            **kwargs,
+        )
 
     @classmethod
     def from_wkt(
@@ -1340,11 +1628,154 @@ class GeoSeries(GeoFrame, pspd.Series):
         on_invalid="raise",
         **kwargs,
     ) -> "GeoSeries":
-        raise NotImplementedError("GeoSeries.from_wkt() is not implemented yet.")
+        """
+        Alternate constructor to create a ``GeoSeries``
+        from a list or array of WKT objects
+
+        Parameters
+        ----------
+        data : array-like, Series
+            Series, list, or array of WKT objects
+        index : array-like or Index
+            The index for the GeoSeries.
+        crs : value, optional
+            Coordinate Reference System of the geometry objects. Can be anything
+            accepted by
+            :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
+            such as an authority string (eg "EPSG:4326") or a WKT string.
+        on_invalid : {"raise", "warn", "ignore"}, default "raise"
+            - raise: an exception will be raised if a WKT input geometry is invalid.
+            - warn: a warning will be raised and invalid WKT geometries will be
+              returned as ``None``.
+            - ignore: invalid WKT geometries will be returned as ``None`` without a
+              warning.
+            - fix: an effort is made to fix invalid input geometries (e.g. close
+              unclosed rings). If this is not possible, they are returned as ``None``
+              without a warning. Requires GEOS >= 3.11 and shapely >= 2.1.
+
+        kwargs
+            Additional arguments passed to the Series constructor,
+            e.g. ``name``.
+
+        Returns
+        -------
+        GeoSeries
+
+        See Also
+        --------
+        GeoSeries.from_wkb
+
+        Examples
+        --------
+
+        >>> wkts = [
+        ... 'POINT (1 1)',
+        ... 'POINT (2 2)',
+        ... 'POINT (3 3)',
+        ... ]
+        >>> s = geopandas.GeoSeries.from_wkt(wkts)
+        >>> s
+        0    POINT (1 1)
+        1    POINT (2 2)
+        2    POINT (3 3)
+        dtype: geometry
+        """
+        if on_invalid != "raise":
+            raise NotImplementedError(
+                "GeoSeries.from_wkt(): only on_invalid='raise' is implemented"
+            )
+
+        from pyspark.sql.types import StructType, StructField, StringType
+
+        schema = StructType([StructField("data", StringType(), True)])
+        return cls._create_from_select(
+            f"ST_GeomFromText(`data`)",
+            data,
+            schema,
+            index,
+            crs,
+            **kwargs,
+        )
 
     @classmethod
     def from_xy(cls, x, y, z=None, index=None, crs=None, **kwargs) -> "GeoSeries":
-        raise NotImplementedError("GeoSeries.from_xy() is not implemented yet.")
+        """
+        Alternate constructor to create a :class:`~geopandas.GeoSeries` of Point
+        geometries from lists or arrays of x, y(, z) coordinates
+
+        In case of geographic coordinates, it is assumed that longitude is captured
+        by ``x`` coordinates and latitude by ``y``.
+
+        Parameters
+        ----------
+        x, y, z : iterable
+        index : array-like or Index, optional
+            The index for the GeoSeries. If not given and all coordinate inputs
+            are Series with an equal index, that index is used.
+        crs : value, optional
+            Coordinate Reference System of the geometry objects. Can be anything
+            accepted by
+            :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
+            such as an authority string (eg "EPSG:4326") or a WKT string.
+        **kwargs
+            Additional arguments passed to the Series constructor,
+            e.g. ``name``.
+
+        Returns
+        -------
+        GeoSeries
+
+        See Also
+        --------
+        GeoSeries.from_wkt
+        points_from_xy
+
+        Examples
+        --------
+
+        >>> x = [2.5, 5, -3.0]
+        >>> y = [0.5, 1, 1.5]
+        >>> s = geopandas.GeoSeries.from_xy(x, y, crs="EPSG:4326")
+        >>> s
+        0    POINT (2.5 0.5)
+        1    POINT (5 1)
+        2    POINT (-3 1.5)
+        dtype: geometry
+        """
+        from pyspark.sql.types import StructType, StructField, DoubleType
+
+        schema = StructType(
+            [StructField("x", DoubleType(), True), StructField("y", DoubleType(), True)]
+        )
+
+        # Spark doesn't automatically cast ints to floats for us
+        x = [float(num) for num in x]
+        y = [float(num) for num in y]
+        z = [float(num) for num in z] if z else None
+
+        if z:
+            data = list(zip(x, y, z))
+            select = f"ST_PointZ(`x`, `y`, `z`)"
+            schema.add(StructField("z", DoubleType(), True))
+        else:
+            data = list(zip(x, y))
+            select = f"ST_Point(`x`, `y`)"
+
+        geoseries = cls._create_from_select(
+            select,
+            data,
+            schema,
+            index,
+            crs,
+            **kwargs,
+        )
+
+        if crs:
+            from pyproj import CRS
+
+            geoseries.crs = CRS.from_user_input(crs).to_epsg()
+
+        return geoseries
 
     @classmethod
     def from_shapely(
@@ -1356,6 +1787,40 @@ class GeoSeries(GeoFrame, pspd.Series):
     def from_arrow(cls, arr, **kwargs) -> "GeoSeries":
         raise NotImplementedError("GeoSeries.from_arrow() is not implemented yet.")
 
+    @classmethod
+    def _create_from_select(
+        cls, select: str, data, schema, index, crs, **kwargs
+    ) -> "GeoSeries":
+
+        from pyspark.pandas.utils import default_session
+        from pyspark.pandas.internal import InternalField
+        import numpy as np
+
+        if isinstance(data, list) and not isinstance(data[0], (tuple, list)):
+            data = [(obj,) for obj in data]
+
+        select = f"{select} as geometry"
+
+        spark_df = default_session().createDataFrame(data, schema=schema)
+        spark_df = spark_df.selectExpr(select)
+
+        internal = InternalFrame(
+            spark_frame=spark_df,
+            index_spark_columns=None,
+            column_labels=[("geometry",)],
+            data_spark_columns=[scol_for(spark_df, "geometry")],
+            data_fields=[
+                InternalField(np.dtype("object"), spark_df.schema["geometry"])
+            ],
+            column_label_names=[("geometry",)],
+        )
+        return GeoSeries(
+            first_series(PandasOnSparkDataFrame(internal)),
+            index,
+            crs=crs,
+            name=kwargs.get("name", None),
+        )
+
     def to_file(
         self,
         filename: Union[os.PathLike, typing.IO],
@@ -1366,13 +1831,92 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("GeoSeries.to_file() is not implemented yet.")
 
     def isna(self) -> pspd.Series:
-        raise NotImplementedError("GeoSeries.isna() is not implemented yet.")
+        """
+        Detect missing values.
+
+        Returns
+        -------
+        A boolean Series of the same size as the GeoSeries,
+        True where a value is NA.
+
+        Examples
+        --------
+
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon
+        >>> s = GeoSeries(
+        ...     [Polygon([(0, 0), (1, 1), (0, 1)]), None, Polygon([])]
+        ... )
+        >>> s
+        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1                              None
+        2                     POLYGON EMPTY
+        dtype: geometry
+
+        >>> s.isna()
+        0    False
+        1     True
+        2    False
+        dtype: bool
+
+        See Also
+        --------
+        GeoSeries.notna : inverse of isna
+        GeoSeries.is_empty : detect empty geometries
+        """
+        col = self.get_first_geometry_column()
+        select = f"`{col}` IS NULL"
+        return (
+            self._query_geometry_column(select, col, rename="isna")
+            .to_spark_pandas()
+            .astype("bool")
+        )
 
     def isnull(self) -> pspd.Series:
-        raise NotImplementedError("GeoSeries.isnull() is not implemented yet.")
+        """Alias for `isna` method. See `isna` for more detail."""
+        return self.isna()
 
     def notna(self) -> pspd.Series:
-        raise NotImplementedError("GeoSeries.notna() is not implemented yet.")
+        """
+        Detect non-missing values.
+
+        Returns
+        -------
+        A boolean pandas Series of the same size as the GeoSeries,
+        False where a value is NA.
+
+        Examples
+        --------
+
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon
+        >>> s = GeoSeries(
+        ...     [Polygon([(0, 0), (1, 1), (0, 1)]), None, Polygon([])]
+        ... )
+        >>> s
+        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1                              None
+        2                     POLYGON EMPTY
+        dtype: geometry
+
+        >>> s.notna()
+        0     True
+        1    False
+        2     True
+        dtype: bool
+
+        See Also
+        --------
+        GeoSeries.isna : inverse of notna
+        GeoSeries.is_empty : detect empty geometries
+        """
+        col = self.get_first_geometry_column()
+        select = f"`{col}` IS NOT NULL"
+        return (
+            self._query_geometry_column(select, col, rename="notna")
+            .to_spark_pandas()
+            .astype("bool")
+        )
 
     def notnull(self) -> pspd.Series:
         """Alias for `notna` method. See `notna` for more detail."""
@@ -1508,7 +2052,101 @@ class GeoSeries(GeoFrame, pspd.Series):
     def to_crs(
         self, crs: Union[Any, None] = None, epsg: Union[int, None] = None
     ) -> "GeoSeries":
-        raise NotImplementedError("GeoSeries.to_crs() is not implemented yet.")
+        """Returns a ``GeoSeries`` with all geometries transformed to a new
+        coordinate reference system.
+
+        Transform all geometries in a GeoSeries to a different coordinate
+        reference system.  The ``crs`` attribute on the current GeoSeries must
+        be set.  Either ``crs`` or ``epsg`` may be specified for output.
+
+        This method will transform all points in all objects.  It has no notion
+        of projecting entire geometries.  All segments joining points are
+        assumed to be lines in the current projection, not geodesics.  Objects
+        crossing the dateline (or other projection boundary) will have
+        undesirable behavior.
+
+        Parameters
+        ----------
+        crs : pyproj.CRS, optional if `epsg` is specified
+            The value can be anything accepted
+            by :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
+            such as an authority string (eg "EPSG:4326") or a WKT string.
+        epsg : int, optional if `crs` is specified
+            EPSG code specifying output projection.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point
+        >>> from sedona.geopandas import GeoSeries
+        >>> geoseries = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)], crs=4326)
+        >>> geoseries.crs
+        <Geographic 2D CRS: EPSG:4326>
+        Name: WGS 84
+        Axis Info [ellipsoidal]:
+        - Lat[north]: Geodetic latitude (degree)
+        - Lon[east]: Geodetic longitude (degree)
+        Area of Use:
+        - name: World
+        - bounds: (-180.0, -90.0, 180.0, 90.0)
+        Datum: World Geodetic System 1984
+        - Ellipsoid: WGS 84
+        - Prime Meridian: Greenwich
+
+        >>> geoseries = geoseries.to_crs(3857)
+        >>> print(geoseries)
+        0    POINT (111319.491 111325.143)
+        1    POINT (222638.982 222684.209)
+        2    POINT (333958.472 334111.171)
+        dtype: geometry
+        >>> geoseries.crs
+        <Projected CRS: EPSG:3857>
+        Name: WGS 84 / Pseudo-Mercator
+        Axis Info [cartesian]:
+        - X[east]: Easting (metre)
+        - Y[north]: Northing (metre)
+        Area of Use:
+        - name: World - 85°S to 85°N
+        - bounds: (-180.0, -85.06, 180.0, 85.06)
+        Coordinate Operation:
+        - name: Popular Visualisation Pseudo-Mercator
+        - method: Popular Visualisation Pseudo Mercator
+        Datum: World Geodetic System 1984
+        - Ellipsoid: WGS 84
+        - Prime Meridian: Greenwich
+
+        """
+
+        from pyproj import CRS
+
+        old_crs = self.crs
+        if old_crs is None:
+            raise ValueError(
+                "Cannot transform naive geometries.  "
+                "Please set a crs on the object first."
+            )
+        assert isinstance(old_crs, CRS)
+
+        if crs is not None:
+            crs = CRS.from_user_input(crs)
+        elif epsg is not None:
+            crs = CRS.from_epsg(epsg)
+        else:
+            raise ValueError("Must pass either crs or epsg.")
+
+        # skip if the input CRS and output CRS are the exact same
+        if old_crs.is_exact_same(crs):
+            return self
+
+        col = self.get_first_geometry_column()
+        return self._query_geometry_column(
+            f"ST_Transform(`{col}`, 'EPSG:{old_crs.to_epsg()}', 'EPSG:{crs.to_epsg()}')",
+            col,
+            "",
+        )
 
     def estimate_utm_crs(self, datum_name: str = "WGS 84"):
         raise NotImplementedError(
