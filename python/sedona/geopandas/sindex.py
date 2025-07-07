@@ -16,9 +16,8 @@
 # under the License.
 
 import numpy as np
+from pyspark.pandas.utils import log_advice
 from pyspark.sql import DataFrame as PySparkDataFrame
-from pyspark.sql.functions import expr
-from pyspark.sql.types import BinaryType
 
 from sedona.spark.utils.adapter import Adapter
 from sedona.spark.core.enums import IndexType
@@ -83,13 +82,17 @@ class SpatialIndex:
         list
             List of indices of matching geometries.
         """
+        log_advice(
+            "`query` returns local list of indices of matching geometries onto driver's memory. "
+            "It should only be used if the resulting collection is expected to be small."
+        )
+
         if self.is_empty:
             return []
 
         if self._is_spark:
             # For Spark-based spatial index
             from sedona.spark.core.spatialOperator import RangeQuery
-            from sedona.spark.core.geom.envelope import Envelope
 
             # Execute the spatial range query
             if predicate == "contains":
@@ -101,8 +104,7 @@ class SpatialIndex:
                     self._indexed_rdd, geometry, False, True
                 )
 
-            # Convert results to indices
-            results = list(range(result_rdd.count()))
+            results = result_rdd.collect()
             return results
         else:
             # For local spatial index based on Shapely STRtree
