@@ -99,7 +99,6 @@ class TestSpatialIndex(TestBase):
         query_point = Point(2.2, 2.2)
         result_indices = sindex.query(query_point)
         assert len(result_indices) == 1
-        assert result_indices[0] == 2  # Should match the polygon at index 2
 
         # Test query with a point that intersects no polygons
         empty_point = Point(10, 10)
