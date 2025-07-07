@@ -468,7 +468,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         pd_series = self._to_internal_pandas()
         try:
             return gpd.GeoSeries(
-                pd_series.map(lambda wkb: shapely.wkb.loads(bytes(wkb)))
+                pd_series.map(
+                    lambda wkb: (
+                        shapely.wkb.loads(bytes(wkb)) if not pd.isna(wkb) else None
+                    )
+                )
             )
         except Exception as e:
             return gpd.GeoSeries(pd_series)
