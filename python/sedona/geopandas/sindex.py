@@ -85,8 +85,47 @@ class SpatialIndex:
         list
             List of indices of matching geometries.
         """
-        # Placeholder for range query using Sedona
-        raise NotImplementedError("This method is not implemented yet.")
+        if self.is_empty:
+            return []
+
+        if self._is_spark:
+            # For Spark-based spatial index
+            from sedona.spark.core.spatialOperator import RangeQuery
+            from sedona.spark.core.geom.envelope import Envelope
+
+            # Execute the spatial range query
+            if predicate == "contains":
+                result_rdd = RangeQuery.SpatialRangeQuery(
+                    self._indexed_rdd, geometry, True, True
+                )
+            else:  # Default to intersects
+                result_rdd = RangeQuery.SpatialRangeQuery(
+                    self._indexed_rdd, geometry, False, True
+                )
+
+            # Convert results to indices
+            results = list(range(result_rdd.count()))
+            return results
+        else:
+            # For local spatial index based on Shapely STRtree
+            if predicate == "contains":
+                # STRtree doesn't directly support contains predicate
+                # We need to filter results after querying
+                candidate_indices = self._index.query(geometry)
+                results = [
+                    i for i in candidate_indices if geometry.contains(self.geometry[i])
+                ]
+            else:
+                # Default is intersects
+                results = self._index.query(geometry)
+
+            if sort and results:
+                # Sort by distance to the query geometry if requested
+                results = sorted(
+                    results, key=lambda i: self.geometry[i].distance(geometry)
+                )
+
+            return results
 
     def nearest(self, geometry, k=1, return_distance=False):
         """
