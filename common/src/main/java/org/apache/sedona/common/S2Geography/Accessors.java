@@ -36,7 +36,7 @@ public class Accessors {
     int numOuterLoops = 0;
     for (int i = 0; i < polygonGeography.polygon.numLoops(); i++) {
       S2Loop loop = polygonGeography.polygon.loop(i);
-      if (loop.depth() == 0 && ++numOuterLoops > 10) {
+      if (loop.depth() == 0 && ++numOuterLoops > 1) {
         return true;
       }
     }
@@ -47,7 +47,7 @@ public class Accessors {
    * Returns true if `geog` is a “collection” (i.e. multi‐point, multi‐linestring, or multi‐polygon)
    * rather than a single simple feature.
    */
-  public boolean s2IsCollection(S2Geography geog) {
+  public boolean S2_isCollection(S2Geography geog) {
     int dim = S2_dimension(geog);
     if (dim == -1) {
       return false;
@@ -57,7 +57,6 @@ public class Accessors {
       case 0:
         // point‐collection if more than one point
         return S2_numPoints(geog) > 1;
-
       case 1:
         // multi‐linestring: more than one chain across all shapes
         int chainCount = 0;
@@ -69,20 +68,15 @@ public class Accessors {
           }
         }
         return false;
-
       default:
-        {
-          // polygons (or mixed): delegate to the polygon routine
-          if (geog instanceof PolygonGeography) {
-            return S2_isCollection((PolygonGeography) geog);
-          }
-          // not yet a PolygonGeography → build one, then test
-          // TODO:build
-          //        PolygonGeography built = S2Builder.buildPolygon(geog);
-          //        return isCollection(built);
-        }
+        // polygons (or mixed): delegate to the polygon routine
+        if (geog instanceof PolygonGeography) {
+          return S2_isCollection((PolygonGeography) geog);
+        } else
+          throw new IllegalArgumentException(
+              "Cannot determine collection status for geography type: "
+                  + geog.getClass().getName());
     }
-    return false;
   }
 
   public int S2_dimension(S2Geography s2Geography) {
@@ -115,15 +109,14 @@ public class Accessors {
 
   double S2_area(S2Geography geog) {
     if (S2_dimension(geog) != 2) return 0;
-
     switch (geog.kind) {
       case POLYGON:
         if (geog != null) return S2_area((PolygonGeography) geog);
       case GEOGRAPHY_COLLECTION:
         if (geog != null) return S2_area((GeographyCollection) geog);
+      default:
+        throw new IllegalArgumentException("Unsupported geography kind for area: " + geog.kind);
     }
-    // TODO: build
-    return 0;
   }
 
   public double S2_area(GeographyCollection geographyCollection) {
@@ -138,7 +131,7 @@ public class Accessors {
     return polygonGeography.polygon.getArea();
   }
 
-  public double s2Length(S2Geography geog) {
+  public double s2_length(S2Geography geog) {
     double length = 0.0;
     if (S2_dimension(geog) == 1) {
       for (int i = 0, n = geog.numShapes(); i < n; ++i) {
@@ -155,7 +148,7 @@ public class Accessors {
     return length;
   }
 
-  public double s2Perimeter(S2Geography geog) {
+  public double s2_perimeter(S2Geography geog) {
     double perimeter = 0.0;
     if (S2_dimension(geog) == 2) {
       for (int i = 0, n = geog.numShapes(); i < n; ++i) {
@@ -172,7 +165,7 @@ public class Accessors {
     return perimeter;
   }
 
-  public static double s2X(S2Geography geog) {
+  public static double s2_X(S2Geography geog) {
     double out = Double.NaN;
     for (int i = 0, n = geog.numShapes(); i < n; ++i) {
       S2Shape shape = geog.shape(i);
@@ -194,7 +187,7 @@ public class Accessors {
    * Extract the Y coordinate (latitude in degrees) if this is exactly one point; otherwise returns
    * NaN.
    */
-  public static double s2Y(S2Geography geog) {
+  public static double s2_Y(S2Geography geog) {
     double out = Double.NaN;
     for (int i = 0, n = geog.numShapes(); i < n; ++i) {
       S2Shape shape = geog.shape(i);
@@ -251,44 +244,24 @@ public class Accessors {
         // reset error to “OK”
         error.clear();
         return false;
-
       case 1:
         if (geog instanceof PolylineGeography) {
           return s2FindValidationError((PolylineGeography) geog, error);
         }
-        //        try {
-        //          PolylineGeography built = S2Builder.buildPolyline(geog);
-        //          return s2FindValidationError(built, error);
-        //        } catch (Exception e) {
-        //          error.setError(S2Error.Code.INTERNAL, e.getMessage());
-        //          return true;
-        //        }
-
+        throw new IllegalArgumentException(
+            "Expected PolylineGeography for dimension 1, but got: " + geog.getClass().getName());
       case 2:
         if (geog instanceof PolygonGeography) {
           return s2FindValidationError((PolygonGeography) geog, error);
         }
-        //        try {
-        //          PolygonGeography built = S2Builder.buildPolygon(geog);
-        //          return s2FindValidationError(built, error);
-        //        } catch (Exception e) {
-        //          error.setError(S2Error.Code.INTERNAL, e.getMessage());
-        //          return true;
-        //        }
-
+        throw new IllegalArgumentException(
+            "Expected PolygonGeography for dimension 2, but got: " + geog.getClass().getName());
       default:
         if (geog instanceof GeographyCollection) {
           return s2FindValidationError((GeographyCollection) geog, error);
         }
-        //        try {
-        //          // treat any unknown type as a polygonal collection
-        //          PolygonGeography built = S2Builder.buildPolygon(geog);
-        //          return s2FindValidationError(built, error);
-        //        } catch (Exception e) {
-        //          error.setError(S2Error.Code.INTERNAL, e.getMessage());
-        //          return true;
-        //        }
+        throw new IllegalArgumentException(
+            "Unsupported geography type for validation: " + geog.getClass().getName());
     }
-    return false;
   }
 }

@@ -73,13 +73,6 @@ public class Predicates {
     S2Loop loop = new S2Loop(vertices);
     S2Polygon polygon = new S2Polygon(loop);
     PolygonGeography polygonGeography = new PolygonGeography(polygon);
-    // c++ is using MutableS2ShapeIndex which is missing in Java
-    // MutableS2ShapeIndex is a class for in-memory indexing of polygonal geometry.
-    // The objects in the index are known as "shapes", and may consist of points,
-    // polylines, and/or polygons, possibly overlapping.  The index makes it very
-    // fast to answer queries such as finding nearby shapes, measuring distances,
-    // testing for intersection and containment, etc.  It is one of several
-    // implementations of the S2ShapeIndex interface (see EncodedS2ShapeIndex).
     GeographyIndex geographyIndex = new GeographyIndex();
     geographyIndex.add(polygonGeography, 0);
     return S2BooleanOperation.intersects(geo1.shapeIndex, geographyIndex.getShapeIndex(), options);

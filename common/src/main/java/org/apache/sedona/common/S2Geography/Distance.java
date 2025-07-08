@@ -18,9 +18,6 @@
  */
 package org.apache.sedona.common.S2Geography;
 
-import static com.google.common.geometry.S2EdgeUtil.robustCrossing;
-import static com.google.common.geometry.S2EdgeUtil.updateMinDistance;
-
 import com.google.common.geometry.*;
 import java.util.Optional;
 import org.apache.commons.lang3.tuple.Pair;
@@ -80,6 +77,7 @@ public class Distance {
   // (angular) distance, and returns them as a pair.
   public Pair<S2Point, S2Point> S2_minimumClearanceLineBetween(
       ShapeIndexGeography geo1, ShapeIndexGeography geo2) throws Exception {
+
     S2ShapeIndex index1 = geo1.shapeIndex;
     S2ShapeIndex index2 = geo2.shapeIndex;
 
@@ -90,7 +88,7 @@ public class Distance {
 
     Optional<S2BestEdgesQueryBase.Result> resultVisitor = query.findClosestEdge(queryTarget);
 
-    if (resultVisitor.get().edgeId() == -1) {
+    if (!resultVisitor.isPresent() || resultVisitor.get().edgeId() == -1) {
       return Pair.of(new S2Point(0, 0, 0), new S2Point(0, 0, 0));
     }
 
@@ -133,60 +131,9 @@ public class Distance {
    */
   public static Pair<S2Point, S2Point> getEdgePairClosestPoints(
       S2Point a0, S2Point a1, S2Point b0, S2Point b1) {
-    // crossing sign
-    int crossingSign = robustCrossing(a0, a1, b0, b1);
-    if (crossingSign > 0) {
-      S2Point tmp = S2EdgeUtil.getIntersection(a0, a1, b0, b1);
-      return Pair.of(tmp, tmp);
-    }
-    // Otherwise, find which vertex→opposite-edge distance is minimal.
-    // We save some work by first determining which vertex/edge pair achieves
-    // the minimum distance, and then computing the closest point on that edge.
-    S1ChordAngle minDist = S1ChordAngle.INFINITY;
 
-    // Otherwise, the minimum distance is achieved at an endpoint of at least one of the two edges.
-    // The calculation below computes each of the six distances twice (this could be optimized).
-    int closestVertex = -1;
-    // a0 → edge b0–b1
-    S1ChordAngle d = updateMinDistance(a0, b0, b1, minDist);
-    if (d != minDist) {
-      minDist = d;
-      closestVertex = 0;
-    }
-
-    // a1 → edge b0–b1
-    d = updateMinDistance(a1, b0, b1, minDist);
-    if (d != minDist) {
-      minDist = d;
-      closestVertex = 1;
-    }
-
-    // b0 → edge a0–a1
-    d = updateMinDistance(b0, a0, a1, minDist);
-    if (d != minDist) {
-      minDist = d;
-      closestVertex = 2;
-    }
-
-    // b1 → edge a0–a1
-    d = updateMinDistance(b1, a0, a1, minDist);
-    if (d != minDist) {
-      minDist = d;
-      closestVertex = 3;
-    }
-
-    switch (closestVertex) {
-      case 0:
-        return Pair.of(a0, S2EdgeUtil.project(a0, b0, b1));
-      case 1:
-        return Pair.of(a1, S2EdgeUtil.project(a1, b0, b1));
-      case 2:
-        return Pair.of(S2EdgeUtil.project(b0, a0, a1), b0);
-      case 3:
-        return Pair.of(S2EdgeUtil.project(b1, a0, a1), b1);
-      default:
-        // This should never happen if points are valid.
-        throw new IllegalStateException("No closest vertex found");
-    }
+    S2Shape.MutableEdge resultEdge = new S2Shape.MutableEdge();
+    S2EdgeUtil.getEdgePairClosestPoints(a0, a1, b0, b1, resultEdge);
+    return Pair.of(resultEdge.getStart(), resultEdge.getEnd());
   }
 }
