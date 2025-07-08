@@ -217,8 +217,7 @@ class TestGeoSeries(TestBase):
         ]
         geoseries = sgpd.GeoSeries(d, crs="EPSG:4326")
         result = geoseries.bounds
-        print(gpd.GeoSeries(d, crs="EPSG:4326").bounds)
-        print(result)
+
         expected = pd.DataFrame(
             {
                 "minx": [2.0, 0.0, 0.0, np.nan],

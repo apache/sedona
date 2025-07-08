@@ -1865,36 +1865,39 @@ class GeoSeries(GeoFrame, pspd.Series):
         1  POLYGON ((0 0, 1 1, 1 0, 0 0))   0.0   0.0   1.0   1.0
         2           LINESTRING (0 1, 1 2)   0.0   1.0   1.0   2.0
         """
-        import numpy as np
-
         col = self.get_first_geometry_column()
-        envelope_series = self._query_geometry_column(
-            f"ST_Envelope(`{col}`)", col, "bounds"
+
+        selects = [
+            f"ST_XMin(`{col}`) as minx",
+            f"ST_YMin(`{col}`) as miny",
+            f"ST_XMax(`{col}`) as maxx",
+            f"ST_YMax(`{col}`) as maxy",
+        ]
+
+        df = self._internal.spark_frame
+
+        data_type = df.schema[col].dataType
+
+        if isinstance(data_type, BinaryType):
+            selects = [
+                select.replace(f"`{col}`", f"ST_GeomFromWKB(`{col}`)")
+                for select in selects
+            ]
+
+        sdf = df.selectExpr(*selects)
+        internal = InternalFrame(
+            spark_frame=sdf,
+            index_spark_columns=None,
+            column_labels=[("minx",), ("miny",), ("maxx",), ("maxy",)],
+            data_spark_columns=[
+                scol_for(sdf, "minx"),
+                scol_for(sdf, "miny"),
+                scol_for(sdf, "maxx"),
+                scol_for(sdf, "maxy"),
+            ],
+            column_label_names=None,
         )
-
-        bounds = {
-            "minx": [],
-            "miny": [],
-            "maxx": [],
-            "maxy": [],
-        }
-
-        # TODO: look into making this computation more efficient
-        for i in range(len(envelope_series)):
-            envelope = envelope_series[i]
-            assert (
-                isinstance(envelope, shapely.geometry.base.BaseGeometry)
-                or envelope is None
-            ), f"Logical Error: Unexpected type {type(envelope)}"
-            minx, miny, maxx, maxy = (
-                envelope.bounds if envelope else (np.nan, np.nan, np.nan, np.nan)
-            )
-            bounds["minx"].append(minx)
-            bounds["miny"].append(miny)
-            bounds["maxx"].append(maxx)
-            bounds["maxy"].append(maxy)
-
-        return pspd.DataFrame(bounds, index=self.index)
+        return pspd.DataFrame(internal)
 
     @property
     def total_bounds(self):
