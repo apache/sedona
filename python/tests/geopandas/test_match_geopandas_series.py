@@ -403,7 +403,12 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_get_geometry(self):
-        pass
+        for _, geom in self.geoms:
+            # test negative index, in-bounds index, and out of bounds index
+            for index in [-1, 0, len(geom) + 1]:
+                sgpd_result = GeoSeries(geom).get_geometry(index)
+                gpd_result = gpd.GeoSeries(geom).get_geometry(index)
+                self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_boundary(self):
         pass
