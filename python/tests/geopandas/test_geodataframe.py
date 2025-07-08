@@ -16,22 +16,23 @@
 # under the License.
 import shutil
 import tempfile
+from tkinter import S
 
 from shapely.geometry import (
     Point,
 )
 
 from sedona.geopandas import GeoDataFrame, GeoSeries
-from tests.test_base import TestBase
+from tests.geopandas.test_geopandas_base import TestGeopandasBase
 import pyspark.pandas as ps
 import pandas as pd
 import geopandas as gpd
 import sedona.geopandas as sgpd
 import pytest
-from pandas.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal, assert_series_equal
 
 
-class TestDataframe(TestBase):
+class TestDataframe(TestGeopandasBase):
     # def setup_method(self):
     #     N = 10
     #     self.tempdir = tempfile.mkdtemp()
@@ -171,6 +172,54 @@ class TestDataframe(TestBase):
         df = GeoDataFrame([Point(x, x) for x in range(3)], name="test_df")
         df_copy = df.copy()
         assert type(df_copy) is GeoDataFrame
+
+    def test_set_geometry(self):
+        points1 = [Point(x, x) for x in range(3)]
+        points2 = [Point(x + 5, x + 5) for x in range(3)]
+
+        data = {"geometry1": points1, "geometry2": points2, "attribute": [1, 2, 3]}
+        sgpd_df = sgpd.GeoDataFrame(data)
+
+        # Not geometry col set yet
+        with pytest.raises(AttributeError):
+            _ = sgpd_df.geometry
+
+        sgpd_df = sgpd_df.set_geometry("geometry1")
+
+        assert sgpd_df.geometry.name == "geometry1"
+
+        sgpd_df.set_geometry("geometry2", inplace=True)
+        assert sgpd_df.geometry.name == "geometry2"
+        assert sgpd_df.geometry.name == sgpd_df.active_geometry_name
+
+        # Test the actual values of the geometry column
+        assert_series_equal(
+            sgpd_df.geometry.area.to_pandas(), sgpd_df["geometry2"].area.to_pandas()
+        )
+
+        # unknown column
+        with pytest.raises(ValueError):
+            sgpd_df.set_geometry("nonexistent-column")
+
+        # TODO: add tests checking for crs, once that's implemented correctly
+
+        # geom = GeoSeries([Point(x, y) for x, y in zip(range(5), range(5))], name="geometry2")
+
+        # # new crs - setting should default to GeoSeries' crs
+        # gs = GeoSeries(geom, crs="epsg:3857")
+
+        # new_df = sgpd_df.set_geometry(gs)
+        # assert new_df.crs == "epsg:3857"
+
+        # explicit crs overrides self and dataframe
+        # new_df = sgpd_df.set_geometry(gs, crs="epsg:26909")
+        # assert new_df.crs == "epsg:26909"
+        # assert new_df.geometry.crs == "epsg:26909"
+
+        # # Series should use dataframe's
+        # new_df = sgpd_df.set_geometry(geom.values)
+        # assert new_df.crs == sgpd_df.crs
+        # assert new_df.geometry.crs == sgpd_df.crs
 
     def test_area(self):
         # Create a GeoDataFrame with polygons to test area calculation

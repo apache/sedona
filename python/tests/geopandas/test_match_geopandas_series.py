@@ -21,8 +21,6 @@ import pytest
 import pandas as pd
 import geopandas as gpd
 import pyspark.pandas as ps
-import pyspark
-from pandas.testing import assert_series_equal
 
 from shapely.geometry import (
     Point,
@@ -36,11 +34,11 @@ from shapely.geometry import (
 )
 
 from sedona.geopandas import GeoSeries
-from tests.test_base import TestBase
+from tests.geopandas.test_geopandas_base import TestGeopandasBase
 import pyspark.pandas as ps
 
 
-class TestMatchGeopandasSeries(TestBase):
+class TestMatchGeopandasSeries(TestGeopandasBase):
     def setup_method(self):
         self.tempdir = tempfile.mkdtemp()
         self.t1 = Polygon([(0, 0), (1, 0), (1, 1)])
@@ -614,38 +612,3 @@ class TestMatchGeopandasSeries(TestBase):
             sgpd_series = sgpd_series.set_crs(epsg=3857, allow_override=True)
             gpd_series = gpd_series.set_crs(epsg=3857, allow_override=True)
             assert sgpd_series.crs == gpd_series.crs
-
-    # -----------------------------------------------------------------------------
-    # # Utils
-    # -----------------------------------------------------------------------------
-
-    def check_sgpd_equals_spark_df(
-        self, actual: GeoSeries, expected: pyspark.sql.DataFrame
-    ):
-        assert isinstance(actual, GeoSeries)
-        assert isinstance(expected, pyspark.sql.DataFrame)
-        expected = expected.selectExpr("ST_AsText(expected) as expected")
-        sgpd_result = actual.to_geopandas()
-        expected = expected.toPandas()["expected"]
-        for a, e in zip(sgpd_result, expected):
-            self.assert_geometry_almost_equal(a, e)
-
-    def check_sgpd_equals_gpd(self, actual: GeoSeries, expected: gpd.GeoSeries):
-        assert isinstance(actual, GeoSeries)
-        assert isinstance(expected, gpd.GeoSeries)
-        sgpd_result = actual.to_geopandas()
-        for a, e in zip(sgpd_result, expected):
-            if a is None or e is None:
-                assert a is None and e is None
-                continue
-            # Sometimes sedona and geopandas both return empty geometries but of different types (e.g Point and Polygon)
-            elif a.is_empty and e.is_empty:
-                continue
-            self.assert_geometry_almost_equal(
-                a, e, tolerance=1e-2
-            )  # increased tolerance from 1e-6
-
-    def check_pd_series_equal(self, actual: ps.Series, expected: pd.Series):
-        assert isinstance(actual, ps.Series)
-        assert isinstance(expected, pd.Series)
-        assert_series_equal(actual.to_pandas(), expected)
