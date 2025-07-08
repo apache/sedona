@@ -29,6 +29,7 @@ from shapely.geometry import (
     LinearRing,
 )
 
+from packaging.version import parse as parse_version
 from sedona.geopandas import GeoDataFrame, GeoSeries
 import geopandas as gpd
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
@@ -129,6 +130,21 @@ class TestMatchGeopandasDataFrame(TestGeopandasBase):
         sgpd_df = sgpd_df.set_geometry("points")
         gpd_df = gpd_df.set_geometry("points")
         assert sgpd_df.geometry.name == gpd_df.geometry.name
-        assert sgpd_df.active_geometry_name == gpd_df.active_geometry_name
 
         self.check_sgpd_df_equals_gpd_df(sgpd_df, gpd_df)
+
+    def test_active_geometry_name(self):
+        if parse_version(gpd.__version__) < parse_version("0.14.0"):
+            return
+
+        sgpd_df = GeoDataFrame(self.geometries)
+        gpd_df = gpd.GeoDataFrame(self.geometries)
+
+        sgpd_df = sgpd_df.set_geometry("polygons")
+        gpd_df = gpd_df.set_geometry("polygons")
+        assert sgpd_df.geometry.name == gpd_df.geometry.name
+        assert (
+            sgpd_df.active_geometry_name
+            == gpd_df.active_geometry_name
+            == sgpd_df.geometry.name
+        )

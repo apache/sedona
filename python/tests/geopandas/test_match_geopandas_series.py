@@ -36,6 +36,7 @@ from shapely.geometry import (
 from sedona.geopandas import GeoSeries
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 import pyspark.pandas as ps
+from packaging.version import parse as parse_version
 
 
 class TestMatchGeopandasSeries(TestGeopandasBase):
@@ -363,7 +364,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
     def test_is_valid_reason(self):
         # is_valid_reason was added in geopandas 1.0.0
-        if gpd.__version__ < "1.0.0":
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
             return
         data = [
             Polygon([(0, 0), (1, 1), (0, 1)]),
