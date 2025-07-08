@@ -50,10 +50,13 @@ object implicits {
 
     def userDataToUtf8ByteArray: Array[Byte] = {
       geometry.getUserData match {
+        // Case when user data is null: return an empty UTF-8 byte array
         case null => EMPTY_STRING.getBytes(StandardCharsets.UTF_8)
+        // Case when user data is a String: convert the string to a UTF-8 byte array
         case data: String => data.getBytes(StandardCharsets.UTF_8)
+        // Case for any other type: convert to string, then to a UTF-8 byte array
+        case data => data.toString.getBytes(StandardCharsets.UTF_8)
       }
     }
   }
-
 }
