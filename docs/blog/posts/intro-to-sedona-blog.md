@@ -16,11 +16,10 @@ For several years, Apache Sedona has been the go-to open-source engine for proce
 datasets, extending Apache Spark to handle complex spatial operations with unparalleled speed and efficiency.
 Sedona's capabilities also extend beyond Spark, bringing spatial analytics to the Snowflake data warehouse
 with [SedonaSnow](https://app.snowflake.com/marketplace/listing/GZTYZF0RTY3/wherobots-sedonasnow) and the
-real-time streaming engine Apache Flink.
+real-time streaming engine Apache Flink with a [Spatial SQL integration](https://sedona.apache.org/latest/tutorial/flink/sql/).
+
 <!-- more -->
 
-Now, with this blog, we're creating a place to record and share best practices and news for our
-[Spatial SQL integration](https://sedona.apache.org/latest/tutorial/flink/sql/).
 This new blog is our space to share news and best practices for the entire Sedona ecosystem.
 
 Whether you're a seasoned data scientist, an engineer building robust data pipelines, or a GIS enthusiast, this is
