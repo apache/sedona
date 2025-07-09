@@ -185,9 +185,6 @@ theme:
     - navigation.tabs.sticky
     - navigation.top
 extra:
-  analytics:
-    provider: google
-    property: G-D4ED50QSVC
   version:
     provider: mike
     default:
