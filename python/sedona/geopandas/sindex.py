@@ -19,7 +19,7 @@ import numpy as np
 from pyspark.pandas.utils import log_advice
 from pyspark.sql import DataFrame as PySparkDataFrame
 
-from sedona.spark.utils.adapter import Adapter
+from sedona.spark import StructuredAdapter
 from sedona.spark.core.enums import IndexType
 
 
@@ -202,7 +202,7 @@ class SpatialIndex:
         sedona_index_type = index_type_map.get(self.index_type.lower(), IndexType.RTREE)
 
         # Create a SpatialRDD from the DataFrame
-        spatial_rdd = Adapter.toSpatialRdd(self._dataframe, column_name)
+        spatial_rdd = StructuredAdapter.toSpatialRdd(self._dataframe, column_name)
 
         # Build spatial index
         spatial_rdd.buildIndex(sedona_index_type, False)
