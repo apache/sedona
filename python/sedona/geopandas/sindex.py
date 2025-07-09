@@ -145,8 +145,42 @@ class SpatialIndex:
         list or tuple
             List of indices of nearest geometries, optionally with distances.
         """
-        # Placeholder for KNN query using Sedona
-        raise NotImplementedError("This method is not implemented yet.")
+        log_advice(
+            "`nearest` returns local list of indices of matching geometries onto driver's memory. "
+            "It should only be used if the resulting collection is expected to be small."
+        )
+
+        if self.is_empty:
+            return [] if not return_distance else ([], [])
+
+        if self._is_spark:
+            # For Spark-based spatial index
+            from sedona.spark.core.spatialOperator import KNNQuery
+
+            # Execute the KNN query
+            results = KNNQuery.SpatialKnnQuery(self._indexed_rdd, geometry, k, False)
+
+            if return_distance:
+                # Calculate distances if requested
+                distances = [
+                    geom.distance(geometry) for geom in [row.geom for row in results]
+                ]
+                return results, distances
+            return results
+        else:
+            # For local spatial index based on Shapely STRtree
+            if k > len(self.geometry):
+                k = len(self.geometry)
+
+            # Get all geometries and calculate distances
+            distances = np.array([geom.distance(geometry) for geom in self.geometry])
+
+            # Get indices of k nearest neighbors
+            indices = np.argsort(distances)[:k]
+
+            if return_distance:
+                return indices.tolist(), distances[indices].tolist()
+            return indices.tolist()
 
     def intersection(self, bounds):
         """
