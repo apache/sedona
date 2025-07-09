@@ -35,6 +35,14 @@
     <properties>
         <maven.deploy.skip>false</maven.deploy.skip>
     </properties>
+    <!--TODO use maven central-->
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>Wherobots Apache Maven Packages on GitHub</name>
+            <url>https://maven.pkg.github.com/wherobots/packages</url>
+        </repository>
+    </distributionManagement>
 
     <dependencies>
         <dependency>
@@ -239,6 +247,18 @@
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!--TODO publish to maven central, use non-snapshot version-->
+        <dependency>
+            <groupId>com.wherobots</groupId>
+            <artifactId>jpostal</artifactId>
+            <version>1.2.1-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-compress</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

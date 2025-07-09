@@ -29,6 +29,8 @@ object Catalog extends AbstractCatalog {
 
   override val expressions: Seq[FunctionDescription] = Seq(
     // Expression for vectors
+    function[ExpandAddress](),
+    function[ParseAddress](),
     function[GeometryType](),
     function[ST_LabelPoint](),
     function[ST_PointFromText](),

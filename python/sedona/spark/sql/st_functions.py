@@ -20,7 +20,7 @@ from functools import partial
 from typing import Optional, Union
 
 from pyspark.sql import Column
-from pyspark.sql.functions import lit
+from pyspark.sql.functions import lit, col
 
 from sedona.spark.sql.dataframe_api import (
     ColumnOrName,
@@ -30,6 +30,29 @@ from sedona.spark.sql.dataframe_api import (
 )
 
 _call_st_function = partial(call_sedona_function, "st_functions")
+
+
+def ExpandAddress(address: ColumnOrName):  # noqa: N802
+    """Normalize an address string into its canonical forms.
+
+    :param address: The address string or column to normalize.
+    :return: An array of normalized address strings.
+    """
+    if isinstance(address, str):
+        address = col(address)
+    return _call_st_function("ExpandAddress", (address,))
+
+
+@validate_argument_types
+def ParseAddress(address: ColumnOrName):  # noqa: N802
+    """Parse an address string into its components (label/value pairs).
+
+    :param address: The address string or column to parse.
+    :return: An array of maps with label/value pairs for address components.
+    """
+    if isinstance(address, str):
+        address = col(address)
+    return _call_st_function("ParseAddress", (address,))
 
 
 @validate_argument_types

@@ -25,6 +25,8 @@ import org.locationtech.jts.operation.buffer.BufferParameters
 import org.apache.spark.sql.sedona_sql.DataFrameShims._
 
 object st_functions {
+  def ExpandAddress(address: Column): Column = wrapExpression[ExpandAddress](address)
+  def ParseAddress(address: Column): Column = wrapExpression[ParseAddress](address)
   def GeometryType(geometry: Column): Column = wrapExpression[GeometryType](geometry)
   def GeometryType(geometry: String): Column = wrapExpression[GeometryType](geometry)
 
