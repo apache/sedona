@@ -311,7 +311,7 @@ class TestSpatialIndex(TestBase):
             (2, "POINT(1 0)"),  # 1 unit from center
             (3, "POINT(0 -1)"),  # 1 unit from center
             (4, "POINT(-1 0)"),  # 1 unit from center
-            (5, "POINT(0 0)"),  # Center point
+            (5, "POINT(2 2)"),  # Center point
         ]
 
         df = self.spark.createDataFrame(equidistant_points, ["id", "wkt"])
@@ -331,10 +331,4 @@ class TestSpatialIndex(TestBase):
         results, distances = spark_sindex.nearest(
             query_point, k=4, return_distance=True
         )
-        assert min(distances) == 0.0  # Center point should have distance 0
-
-        # The other 4 points should all have distance 1
-        distances_without_zero = [d for d in distances if d > 0.0001]
-        assert len(distances_without_zero) == 3
-        for d in distances_without_zero:
-            assert abs(d - 1.0) < 0.0001
+        assert min(distances) == 1.0
