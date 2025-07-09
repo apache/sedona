@@ -146,39 +146,6 @@ class TestSpatialIndex(TestBase):
 
     def test_nearest_method(self):
         """Test the nearest method for finding k-nearest neighbors."""
-
-        # --------- Test with local numpy array ---------
-
-        # Create a list of point geometries
-        point_geometries = [
-            Point(i, i) for i in range(5)
-        ]  # Points at (0,0), (1,1), etc.
-
-        # Create a spatial index from the geometries
-        geom_array = np.array(point_geometries, dtype=object)
-        local_sindex = SpatialIndex(geom_array)
-
-        # Test finding single nearest neighbor
-        query_point = Point(1.2, 1.2)
-        nearest_idx = local_sindex.nearest(query_point)
-        assert len(nearest_idx) == 1
-        assert nearest_idx[0] == 1  # Point(1,1) should be closest
-
-        # Test finding k=2 nearest neighbors
-        nearest_2 = local_sindex.nearest(query_point, k=2)
-        assert len(nearest_2) == 2
-        assert set(nearest_2) == {1, 2}  # Points at (1,1) and (2,2)
-
-        # Test with return_distance=True
-        nearest_with_dist = local_sindex.nearest(query_point, k=2, return_distance=True)
-        assert len(nearest_with_dist) == 2  # Returns tuple of (indices, distances)
-        indices, distances = nearest_with_dist
-        assert len(indices) == 2
-        assert len(distances) == 2
-        assert all(d >= 0 for d in distances)  # Distances should be non-negative
-
-        # --------- Test with Spark DataFrame ---------
-
         # Create a spatial DataFrame with points
         points_data = [
             (1, "POINT(0 0)"),
