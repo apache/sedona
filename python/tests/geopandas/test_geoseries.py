@@ -211,8 +211,74 @@ class TestGeoSeries(TestBase):
         )
         self.check_sgpd_equals_gpd(result, expected)
 
+    def test_bounds(self):
+        d = [
+            Point(2, 1),
+            Polygon([(0, 0), (1, 1), (1, 0)]),
+            LineString([(0, 1), (1, 2)]),
+            None,
+        ]
+        geoseries = sgpd.GeoSeries(d, crs="EPSG:4326")
+        result = geoseries.bounds
+
+        expected = pd.DataFrame(
+            {
+                "minx": [2.0, 0.0, 0.0, np.nan],
+                "miny": [1.0, 0.0, 1.0, np.nan],
+                "maxx": [2.0, 1.0, 1.0, np.nan],
+                "maxy": [1.0, 1.0, 2.0, np.nan],
+            }
+        )
+        pd.testing.assert_frame_equal(result.to_pandas(), expected)
+
+    def test_total_bounds(self):
+        d = [
+            Point(3, -1),
+            Polygon([(0, 0), (1, 1), (1, 0)]),
+            LineString([(0, 1), (1, 2)]),
+            None,
+        ]
+        geoseries = sgpd.GeoSeries(d, crs="EPSG:4326")
+        result = geoseries.total_bounds
+        expected = np.array([0.0, -1.0, 3.0, 2.0])
+        np.testing.assert_array_equal(result, expected)
+
+    # These tests were taken directly from the TestEstimateUtmCrs class in the geopandas test suite
+    # https://github.com/geopandas/geopandas/blob/main/geopandas/tests/test_array.py
     def test_estimate_utm_crs(self):
-        pass
+        from pyproj import CRS
+
+        # setup
+        esb = Point(-73.9847, 40.7484)
+        sol = Point(-74.0446, 40.6893)
+        landmarks = sgpd.GeoSeries([esb, sol], crs="epsg:4326")
+
+        # geographic
+        assert landmarks.estimate_utm_crs() == CRS("EPSG:32618")
+        assert landmarks.estimate_utm_crs("NAD83") == CRS("EPSG:26918")
+
+        # projected
+        assert landmarks.to_crs("EPSG:3857").estimate_utm_crs() == CRS("EPSG:32618")
+
+        # antimeridian
+        antimeridian = sgpd.GeoSeries(
+            [
+                Point(1722483.900174921, 5228058.6143420935),
+                Point(4624385.494808555, 8692574.544944234),
+            ],
+            crs="EPSG:3851",
+        )
+        assert antimeridian.estimate_utm_crs() == CRS("EPSG:32760")
+
+        # out of bounds
+        with pytest.raises(RuntimeError, match="Unable to determine UTM CRS"):
+            sgpd.GeoSeries(
+                [Polygon([(0, 90), (1, 90), (2, 90)])], crs="EPSG:4326"
+            ).estimate_utm_crs()
+
+        # missing crs
+        with pytest.raises(RuntimeError, match="crs must be set"):
+            sgpd.GeoSeries([Polygon([(0, 90), (1, 90), (2, 90)])]).estimate_utm_crs()
 
     def test_to_json(self):
         pass
