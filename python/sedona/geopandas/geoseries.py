@@ -37,7 +37,7 @@ from shapely.geometry.base import BaseGeometry
 from sedona.geopandas._typing import Label
 from sedona.geopandas.base import GeoFrame
 from sedona.geopandas.geodataframe import GeoDataFrame
-from sedona.geopandas.geoindex import GeoIndex
+from sedona.geopandas.sindex import SpatialIndex
 
 from pyspark.pandas.internal import (
     SPARK_DEFAULT_INDEX_NAME,  # __index_level_0__
@@ -506,9 +506,30 @@ class GeoSeries(GeoFrame, pspd.Series):
         return self
 
     @property
-    def geoindex(self) -> "GeoIndex":
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def sindex(self) -> SpatialIndex:
+        """
+        Returns a spatial index built from the geometries.
+
+        Returns
+        -------
+        SpatialIndex
+            The spatial index for this GeoDataFrame.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point
+        >>> from sedona.geopandas import GeoDataFrame
+        >>>
+        >>> gdf = GeoDataFrame([{"geometry": Point(1, 1), "value": 1},
+        ...                     {"geometry": Point(2, 2), "value": 2}])
+        >>> index = gdf.sindex
+        >>> index.size
+        2
+        """
+        geometry_column = self.get_first_geometry_column()
+        if geometry_column is None:
+            raise ValueError("No geometry column found in GeoSeries")
+        return SpatialIndex(self._internal.spark_frame, column_name=geometry_column)
 
     def copy(self, deep=False):
         """

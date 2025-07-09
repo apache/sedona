@@ -28,7 +28,7 @@ from pyspark.pandas.internal import InternalFrame
 
 from sedona.geopandas._typing import Label
 from sedona.geopandas.base import GeoFrame
-from sedona.geopandas.geoindex import GeoIndex
+from sedona.geopandas.sindex import SpatialIndex
 
 
 class GeoDataFrame(GeoFrame, pspd.DataFrame):
@@ -250,9 +250,19 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    def geoindex(self) -> GeoIndex:
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def sindex(self) -> SpatialIndex | None:
+        """
+        Returns a spatial index for the GeoDataFrame.
+        The spatial index allows for efficient spatial queries. If the spatial
+        index cannot be created (e.g., no geometry column is present), this
+        property will return None.
+        Returns:
+        - SpatialIndex: The spatial index for the GeoDataFrame.
+        - None: If the spatial index is not supported.
+        """
+        if "geometry" in self.columns:
+            return SpatialIndex(self._internal.spark_frame, column_name="geometry")
+        return None
 
     def copy(self, deep=False):
         """
