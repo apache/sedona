@@ -16,7 +16,6 @@
 # under the License.
 import shutil
 import tempfile
-from tkinter import S
 
 from shapely.geometry import (
     Point,
