@@ -235,6 +235,25 @@ class TestDataframe(TestGeopandasBase):
         df.set_geometry("geometry2", inplace=True)
         assert df.geometry.name == df.active_geometry_name == "geometry2"
 
+    def test_rename_geometry(self):
+        if parse_version(gpd.__version__) >= parse_version("0.14.0"):
+            return
+
+        points1 = [Point(x, x) for x in range(3)]
+        points2 = [Point(x + 5, x + 5) for x in range(3)]
+
+        data = {"geometry1": points1, "geometry2": points2, "attribute": [1, 2, 3]}
+        df = GeoDataFrame(data)
+        df = df.set_geometry("geometry1")
+        assert df.geometry.name == "geometry1"
+
+        df = df.rename_geometry("geometry2")
+        assert df.geometry.name == "geometry2"
+
+        # test inplace rename
+        df.rename_geometry("geometry3", inplace=True)
+        assert df.geometry.name == "geometry3"
+
     def test_area(self):
         # Create a GeoDataFrame with polygons to test area calculation
         from shapely.geometry import Polygon

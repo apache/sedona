@@ -134,7 +134,7 @@ class TestMatchGeopandasDataFrame(TestGeopandasBase):
         self.check_sgpd_df_equals_gpd_df(sgpd_df, gpd_df)
 
     def test_active_geometry_name(self):
-        if parse_version(gpd.__version__) < parse_version("0.14.0"):
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
             return
 
         sgpd_df = GeoDataFrame(self.geometries)
@@ -148,3 +148,21 @@ class TestMatchGeopandasDataFrame(TestGeopandasBase):
             == gpd_df.active_geometry_name
             == sgpd_df.geometry.name
         )
+
+    def test_rename_geometry(self):
+        sgpd_df = GeoDataFrame(self.geometries)
+        gpd_df = gpd.GeoDataFrame(self.geometries)
+
+        sgpd_df = sgpd_df.set_geometry("polygons")
+        gpd_df = gpd_df.set_geometry("polygons")
+        assert sgpd_df.geometry.name == gpd_df.geometry.name
+
+        # test inplace
+        sgpd_df.rename_geometry("random", inplace=True)
+        gpd_df.rename_geometry("random", inplace=True)
+        assert sgpd_df.geometry.name == gpd_df.geometry.name
+
+        # Ensure the names are different when we rename to different names
+        sgpd_df = sgpd_df.rename_geometry("name1")
+        gpd_df = gpd_df.rename_geometry("name2")
+        assert sgpd_df.geometry.name != gpd_df.geometry.name

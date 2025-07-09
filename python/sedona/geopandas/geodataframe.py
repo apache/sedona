@@ -307,9 +307,10 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         Examples
         --------
+        >>> from sedona.geopandas import GeoDataFrame
         >>> from shapely.geometry import Point
         >>> d = {'col1': ['name1', 'name2'], 'geometry': [Point(1, 2), Point(2, 1)]}
-        >>> gdf = geopandas.GeoDataFrame(d, crs="EPSG:4326")
+        >>> gdf = GeoDataFrame(d, crs="EPSG:4326")
         >>> gdf
             col1     geometry
         0  name1  POINT (1 2)
@@ -422,6 +423,62 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         if not inplace:
             return frame
+
+    @typing.overload
+    def rename_geometry(
+        self,
+        col: str,
+        inplace: Literal[True] = ...,
+    ) -> None: ...
+
+    @typing.overload
+    def rename_geometry(
+        self,
+        col: str,
+        inplace: Literal[False] = ...,
+    ) -> GeoDataFrame: ...
+
+    def rename_geometry(self, col: str, inplace: bool = False) -> GeoDataFrame | None:
+        """
+        Renames the GeoDataFrame geometry column to
+        the specified name. By default yields a new object.
+
+        The original geometry column is replaced with the input.
+
+        Parameters
+        ----------
+        col : new geometry column label
+        inplace : boolean, default False
+            Modify the GeoDataFrame in place (without creating a new object)
+
+        Examples
+        --------
+        >>> from sedona.geopandas import GeoDataFrame
+        >>> from shapely.geometry import Point
+        >>> d = {'col1': ['name1', 'name2'], 'geometry': [Point(1, 2), Point(2, 1)]}
+        >>> df = GeoDataFrame(d, crs="EPSG:4326")
+        >>> df1 = df.rename_geometry('geom1')
+        >>> df1.geometry.name
+        'geom1'
+        >>> df.rename_geometry('geom1', inplace=True)
+        >>> df.geometry.name
+        'geom1'
+
+
+        See also
+        --------
+        GeoDataFrame.set_geometry : set the active geometry
+        """
+        geometry_col = self.geometry.name
+        if col in self.columns:
+            raise ValueError(f"Column named {col} already exists")
+        else:
+            if not inplace:
+                sdf = self.rename(columns={geometry_col: col})
+                return GeoDataFrame(sdf).set_geometry(col)
+
+            self.rename(columns={geometry_col: col}, inplace=inplace)
+            self.set_geometry(col, inplace=inplace)
 
     @property
     def active_geometry_name(self) -> Any:
