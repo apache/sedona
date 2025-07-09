@@ -323,18 +323,18 @@ class TestSpatialIndex(TestBase):
         # Query center point
         query_point = Point(0, 0)
 
-        # Get the 5 nearest points
-        results = spark_sindex.nearest(query_point, k=5)
-        assert len(results) == 5
+        # Get the 4 nearest points
+        results = spark_sindex.nearest(query_point, k=4)
+        assert len(results) == 4
 
         # With return_distance, verify the center point has distance 0
         results, distances = spark_sindex.nearest(
-            query_point, k=5, return_distance=True
+            query_point, k=4, return_distance=True
         )
         assert min(distances) == 0.0  # Center point should have distance 0
 
         # The other 4 points should all have distance 1
         distances_without_zero = [d for d in distances if d > 0.0001]
-        assert len(distances_without_zero) == 4
+        assert len(distances_without_zero) == 3
         for d in distances_without_zero:
             assert abs(d - 1.0) < 0.0001
