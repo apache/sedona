@@ -119,6 +119,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         def try_geom_to_ewkb(x) -> bytes:
             if isinstance(x, BaseGeometry):
+                print("shapely version: ", shapely.__version__)
                 srid = shapely.get_srid(x)
                 return shapely.wkb.dumps(x, srid=srid)
             elif isinstance(x, bytearray):
