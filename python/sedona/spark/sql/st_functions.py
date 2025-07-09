@@ -20,7 +20,7 @@ from functools import partial
 from typing import Optional, Union
 
 from pyspark.sql import Column
-from pyspark.sql.functions import lit, col
+from pyspark.sql.functions import lit
 
 from sedona.spark.sql.dataframe_api import (
     ColumnOrName,
@@ -38,9 +38,7 @@ def ExpandAddress(address: ColumnOrName):  # noqa: N802
     :param address: The address string or column to normalize.
     :return: An array of normalized address strings.
     """
-    if isinstance(address, str):
-        address = col(address)
-    return _call_st_function("ExpandAddress", (address,))
+    return _call_st_function("ExpandAddress", address)
 
 
 @validate_argument_types
@@ -50,9 +48,7 @@ def ParseAddress(address: ColumnOrName):  # noqa: N802
     :param address: The address string or column to parse.
     :return: An array of maps with label/value pairs for address components.
     """
-    if isinstance(address, str):
-        address = col(address)
-    return _call_st_function("ParseAddress", (address,))
+    return _call_st_function("ParseAddress", address)
 
 
 @validate_argument_types
