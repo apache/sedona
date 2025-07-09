@@ -117,6 +117,16 @@ class GeoSeries(GeoFrame, pspd.Series):
         self._anchor: GeoDataFrame
         self._col_label: Label
 
+        def try_geom_to_ewkb(x) -> bytes:
+            if isinstance(x, BaseGeometry):
+                return shapely.to_wkb(x, include_srid=True)
+            elif isinstance(x, bytearray):
+                return bytes(x)
+            elif x is None or isinstance(x, bytes):
+                return x
+            else:
+                raise TypeError(f"expected geometry or bytes, got {type(x)}: {x}")
+
         if isinstance(
             data, (GeoDataFrame, GeoSeries, PandasOnSparkSeries, PandasOnSparkDataFrame)
         ):
@@ -142,17 +152,10 @@ class GeoSeries(GeoFrame, pspd.Series):
 
             pd_data = data.to_pandas()
 
-            # If has shapely geometries, convert to wkb since pandas-on-pyspark can't understand shapely geometries
-            if (
-                isinstance(pd_data, pd.Series)
-                and any(isinstance(x, BaseGeometry) for x in pd_data)
-            ) or (
-                isinstance(pd_data, pd.DataFrame)
-                and any(isinstance(x, BaseGeometry) for x in pd_data.values.ravel())
-            ):
-                pd_data = pd_data.apply(
-                    lambda geom: geom.wkb if geom is not None else None
-                )
+            try:
+                pd_data = pd_data.apply(try_geom_to_ewkb)
+            except Exception as e:
+                raise TypeError(f"Non-geometry column passed to GeoSeries: {e}")
 
             super().__init__(
                 data=pd_data,
@@ -181,10 +184,12 @@ class GeoSeries(GeoFrame, pspd.Series):
                     copy=copy,
                     fastpath=fastpath,
                 )
-            gs = gpd.GeoSeries(s)
-            pdf = pd.Series(
-                gs.apply(lambda geom: geom.wkb if geom is not None else None)
-            )
+
+            try:
+                pdf = s.apply(try_geom_to_ewkb)
+            except Exception as e:
+                raise TypeError(f"Non-geometry column passed to GeoSeries: {e}")
+
             # initialize the parent class pyspark Series with the pandas Series
             super().__init__(data=pdf)
 
@@ -225,7 +230,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         """
         from pyproj import CRS
 
-        tmp_df = self._process_geometry_column("ST_SRID", rename="crs")
+        tmp_df = self._process_geometry_column(
+            "ST_SRID", rename="crs", returns_geom=False
+        )
         srid = tmp_df.take([0])[0]
         # Sedona returns 0 if doesn't exist
         return CRS.from_user_input(srid) if srid != 0 and not pd.isna(srid) else None
@@ -354,18 +361,22 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         # 0 indicates no srid in sedona
         new_epsg = crs.to_epsg() if crs else 0
+        col = self.get_first_geometry_column()
+
+        select = f"ST_SetSRID(`{col}`, {new_epsg})"
+
         # Keep the same column name instead of renaming it
-        result = self._process_geometry_column("ST_SetSRID", rename="", srid=new_epsg)
+        result = self._query_geometry_column(select, col, rename="")
 
         if inplace:
-            self._update_anchor(result._to_spark_pandas_df())
+            self._update_anchor(_to_spark_pandas_df(result))
             return None
 
         return result
 
     def _process_geometry_column(
-        self, operation: str, rename: str, *args, **kwargs
-    ) -> "GeoSeries":
+        self, operation: str, rename: str, returns_geom: bool = True, *args, **kwargs
+    ) -> Union["GeoSeries", pspd.Series]:
         """
         Helper method to process a single geometry column with a specified operation.
         This method wraps the _query_geometry_column method for simpler convenient use.
@@ -405,7 +416,9 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         sql_expr = f"{operation}(`{first_col}`{params})"
 
-        return self._query_geometry_column(sql_expr, first_col, rename)
+        return self._query_geometry_column(
+            sql_expr, first_col, rename, returns_geom=returns_geom
+        )
 
     def _query_geometry_column(
         self,
@@ -413,7 +426,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         cols: Union[List[str], str],
         rename: str,
         df: pyspark.sql.DataFrame = None,
-    ) -> "GeoSeries":
+        returns_geom: bool = True,
+    ) -> Union["GeoSeries", pspd.Series]:
         """
         Helper method to query a single geometry column with a specified operation.
 
@@ -427,6 +441,8 @@ class GeoSeries(GeoFrame, pspd.Series):
             The name of the resulting column.
         df : pyspark.sql.DataFrame
             The dataframe to query. If not provided, the internal dataframe will be used.
+        returns_geom : bool, default True
+            If True, the geometry column will be converted back to EWKB format.
 
         Returns
         -------
@@ -436,23 +452,36 @@ class GeoSeries(GeoFrame, pspd.Series):
         if not cols:
             raise ValueError("No valid geometry column found.")
 
-        if isinstance(cols, str):
-            cols = [cols]
-
         df = self._internal.spark_frame if df is None else df
 
-        for col in cols:
+        if isinstance(cols, str):
+            col = cols
             data_type = df.schema[col].dataType
+            if isinstance(data_type, BinaryType):
+                query = query.replace(f"`{cols}`", f"ST_GeomFromWKB(`{cols}`)")
+
+            # Convert back to EWKB format if the return type is a geometry
+            if returns_geom:
+                query = f"ST_AsEWKB({query})"
 
             rename = col if not rename else rename
 
-            if isinstance(data_type, BinaryType):
-                # the backticks here are important so we don't match strings that happen to be the same as the column name
-                query = query.replace(f"`{col}`", f"ST_GeomFromWKB(`{col}`)")
+            query = f"{query} as `{rename}`"
 
-        sql_expr = f"{query} as `{rename}`"
+        elif isinstance(cols, list):
+            for col in cols:
+                data_type = df.schema[col].dataType
 
-        sdf = df.selectExpr(sql_expr)
+                if isinstance(data_type, BinaryType):
+                    # the backticks here are important so we don't match strings that happen to be the same as the column name
+                    query = query.replace(f"`{col}`", f"ST_GeomFromWKB(`{col}`)")
+
+            # must have rename for multiple columns since we don't know which name to default to
+            assert rename
+
+            query = f"{query} as `{rename}`"
+
+        sdf = df.selectExpr(query)
         internal = InternalFrame(
             spark_frame=sdf,
             index_spark_columns=None,
@@ -461,7 +490,9 @@ class GeoSeries(GeoFrame, pspd.Series):
             data_fields=[self._internal.data_fields[0]],
             column_label_names=self._internal.column_label_names,
         )
-        return _to_geo_series(first_series(PandasOnSparkDataFrame(internal)))
+        ps_series = first_series(PandasOnSparkDataFrame(internal))
+
+        return GeoSeries(ps_series) if returns_geom else ps_series
 
     @property
     def dtypes(self) -> Union[gpd.GeoSeries, pd.Series, Dtype]:
@@ -497,9 +528,6 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     def to_spark_pandas(self) -> pspd.Series:
         return pspd.Series(self._psdf._to_internal_pandas())
-
-    def _to_spark_pandas_df(self) -> pspd.DataFrame:
-        return pspd.DataFrame(self._psdf._internal)
 
     @property
     def geometry(self) -> "GeoSeries":
@@ -581,7 +609,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         1    4.0
         dtype: float64
         """
-        return self._process_geometry_column("ST_Area", rename="area").to_spark_pandas()
+        return self._process_geometry_column(
+            "ST_Area", rename="area", returns_geom=False
+        )
 
     @property
     def geom_type(self) -> pspd.Series:
@@ -607,8 +637,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         dtype: object
         """
         result = self._process_geometry_column(
-            "GeometryType", rename="geom_type"
-        ).to_spark_pandas()
+            "GeometryType", rename="geom_type", returns_geom=False
+        )
 
         # Sedona returns the string in all caps unlike Geopandas
         sgpd_to_gpg_name_map = {
@@ -664,8 +694,8 @@ class GeoSeries(GeoFrame, pspd.Series):
                 WHEN GeometryType(`{col}`) IN ('GEOMETRYCOLLECTION') THEN ST_Length(`{col}`) + ST_Perimeter(`{col}`)
             END"""
         return self._query_geometry_column(
-            select, col, rename="length"
-        ).to_spark_pandas()
+            select, col, rename="length", returns_geom=False
+        )
 
     @property
     def is_valid(self) -> pspd.Series:
@@ -706,11 +736,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         --------
         GeoSeries.is_valid_reason : reason for invalidity
         """
-        return (
-            self._process_geometry_column("ST_IsValid", rename="is_valid")
-            .to_spark_pandas()
-            .astype("bool")
+        result = self._process_geometry_column(
+            "ST_IsValid", rename="is_valid", returns_geom=False
         )
+        return to_bool(result)
 
     def is_valid_reason(self) -> pspd.Series:
         """Returns a ``Series`` of strings with the reason for invalidity of
@@ -754,8 +783,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.make_valid : fix invalid geometries
         """
         return self._process_geometry_column(
-            "ST_IsValidReason", rename="is_valid_reason"
-        ).to_spark_pandas()
+            "ST_IsValidReason", rename="is_valid_reason", returns_geom=False
+        )
 
     @property
     def is_empty(self) -> pspd.Series:
@@ -786,11 +815,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         --------
         GeoSeries.isna : detect missing values
         """
-        return (
-            self._process_geometry_column("ST_IsEmpty", rename="is_empty")
-            .to_spark_pandas()
-            .astype("bool")
+        result = self._process_geometry_column(
+            "ST_IsEmpty", rename="is_empty", returns_geom=False
         )
+        return to_bool(result)
 
     def count_coordinates(self):
         # Implementation of the abstract method
@@ -831,11 +859,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         1     True
         dtype: bool
         """
-        return (
-            self._process_geometry_column("ST_IsSimple", rename="is_simple")
-            .to_spark_pandas()
-            .astype("bool")
+        result = self._process_geometry_column(
+            "ST_IsSimple", rename="is_simple", returns_geom=False
         )
+        return to_bool(result)
 
     @property
     def is_ring(self):
@@ -883,8 +910,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         dtype: bool
         """
         return self._process_geometry_column(
-            "ST_HasZ", rename="has_z"
-        ).to_spark_pandas()
+            "ST_HasZ", rename="has_z", returns_geom=False
+        )
 
     def get_precision(self):
         # Implementation of the abstract method
@@ -1182,13 +1209,22 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.touches
         GeoSeries.intersection
         """
-        return (
-            self._row_wise_operation(
-                "ST_Intersects(`L`, `R`)", other, align, rename="intersects"
-            )
-            .to_spark_pandas()
-            .astype("bool")
+
+        select = "ST_Intersects(`L`, `R`)"
+
+        # ps.Series.fillna() call in to_bool, doesn't work for the output for
+        # intersects here for some reason. So we manually handle the nulls here.
+        select = f"""
+            CASE
+                WHEN `L` IS NULL OR `R` IS NULL THEN FALSE
+                ELSE {select}
+            END
+        """
+
+        result = self._row_wise_operation(
+            select, other, align, rename="intersects", returns_geom=False
         )
+        return to_bool(result)
 
     def intersection(
         self, other: Union["GeoSeries", BaseGeometry], align: Union[bool, None] = None
@@ -1302,6 +1338,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         other: Union["GeoSeries", BaseGeometry],
         align: Union[bool, None],
         rename: str,
+        returns_geom: bool = True,
     ):
         """
         Helper function to perform a row-wise operation on two GeoSeries.
@@ -1334,6 +1371,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             cols=["L", "R"],
             rename=rename,
             df=joined_df,
+            returns_geom=returns_geom,
         )
 
     def intersection_all(self):
@@ -1476,7 +1514,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.z
 
         """
-        return self._process_geometry_column("ST_X", rename="x").to_spark_pandas()
+        return self._process_geometry_column("ST_X", rename="x", returns_geom=False)
 
     @property
     def y(self) -> pspd.Series:
@@ -1506,7 +1544,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.m
 
         """
-        return self._process_geometry_column("ST_Y", rename="y").to_spark_pandas()
+        return self._process_geometry_column("ST_Y", rename="y", returns_geom=False)
 
     @property
     def z(self) -> pspd.Series:
@@ -1536,7 +1574,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.m
 
         """
-        return self._process_geometry_column("ST_Z", rename="z").to_spark_pandas()
+        return self._process_geometry_column("ST_Z", rename="z", returns_geom=False)
 
     @property
     def m(self) -> pspd.Series:
@@ -1881,11 +1919,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         """
         col = self.get_first_geometry_column()
         select = f"`{col}` IS NULL"
-        return (
-            self._query_geometry_column(select, col, rename="isna")
-            .to_spark_pandas()
-            .astype("bool")
+        result = self._query_geometry_column(
+            select, col, rename="isna", returns_geom=False
         )
+        return to_bool(result)
 
     def isnull(self) -> pspd.Series:
         """Alias for `isna` method. See `isna` for more detail."""
@@ -1927,11 +1964,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         """
         col = self.get_first_geometry_column()
         select = f"`{col}` IS NOT NULL"
-        return (
-            self._query_geometry_column(select, col, rename="notna")
-            .to_spark_pandas()
-            .astype("bool")
+
+        result = self._query_geometry_column(
+            select, col, rename="notna", returns_geom=False
         )
+        return to_bool(result)
 
     def notnull(self) -> pspd.Series:
         """Alias for `notna` method. See `notna` for more detail."""
@@ -2273,7 +2310,7 @@ class GeoSeries(GeoFrame, pspd.Series):
     # # Utils
     # -----------------------------------------------------------------------------
 
-    def get_first_geometry_column(self) -> Union[str, None]:
+    def get_first_geometry_column(self) -> str:
         first_binary_or_geometry_col = next(
             (
                 field.name
@@ -2283,12 +2320,32 @@ class GeoSeries(GeoFrame, pspd.Series):
             ),
             None,
         )
+        if first_binary_or_geometry_col is None:
+            raise ValueError(
+                "get_first_geometry_column: No geometry column found in the GeoSeries."
+            )
+
         return first_binary_or_geometry_col
 
 
 # -----------------------------------------------------------------------------
 # # Utils
 # -----------------------------------------------------------------------------
+
+
+def _to_spark_pandas_df(ps_series: pspd.Series) -> pspd.DataFrame:
+    return pspd.DataFrame(ps_series._psdf._internal)
+
+
+def to_bool(ps_series: pspd.Series, default: bool = False) -> pspd.Series:
+    """
+    Cast a ps.Series to bool type if it's not one, converting None values to the default value.
+    """
+    if ps_series.dtype.name != "bool":
+        # fill None values with the default value
+        ps_series.fillna(default, inplace=True)
+
+    return ps_series
 
 
 def _to_geo_series(df: PandasOnSparkSeries) -> GeoSeries:
