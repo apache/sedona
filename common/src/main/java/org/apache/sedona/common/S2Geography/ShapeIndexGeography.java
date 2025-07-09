@@ -105,14 +105,6 @@ public class ShapeIndexGeography extends S2Geography {
 
   // decode
   /** This is what decodeTagged() actually calls */
-  public static ShapeIndexGeography decode(Input in, EncodeTag tag) throws IOException {
-    // cast to UnsafeInput—will work if you always pass a Kryo-backed stream
-    if (!(in instanceof UnsafeInput)) {
-      throw new IllegalArgumentException("Expected UnsafeInput");
-    }
-    return decode((UnsafeInput) in, tag);
-  }
-
   public static ShapeIndexGeography decode(UnsafeInput in, EncodeTag tag) throws IOException {
     throw new IOException("Decode() not implemented for ShapeIndexGeography()");
   }

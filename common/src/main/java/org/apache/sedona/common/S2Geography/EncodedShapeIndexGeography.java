@@ -99,7 +99,7 @@ public class EncodedShapeIndexGeography extends S2Geography {
 
     // EMPTY
     if ((tag.getFlags() & EncodeTag.FLAG_EMPTY) != 0) {
-      logger.fine("Decoded empty PolygonGeography.");
+      logger.fine("Decoded empty EncodedShapeIndexGeography.");
       return encodedShapeIndexGeography;
     }
 
