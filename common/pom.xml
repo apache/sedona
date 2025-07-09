@@ -87,7 +87,6 @@
         <dependency>
             <groupId>org.datasyslab</groupId>
             <artifactId>s2-geometry-library</artifactId>
-            <version>20250620-rc1</version>
         </dependency>
         <dependency>
             <groupId>com.uber</groupId>
@@ -112,6 +111,14 @@
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>cdm-core</artifactId>
+        </dependency>
+        <!-- For shading a janino package that works with Spark for jiffle. We don't add this to
+             dependencyManagement in parent pom.xml because we don't want to mess up with the
+             janino versions required by Spark. -->
+        <dependency>
+            <groupId>org.codehaus.janino</groupId>
+            <artifactId>janino</artifactId>
+            <version>${janino-version}</version>
         </dependency>
     </dependencies>
     <build>
@@ -163,7 +170,6 @@
                                     <include>it.geosolutions.jaiext.jiffle:*</include>
                                     <include>org.antlr:*</include>
                                     <include>org.codehaus.janino:*</include>
-                                    <include>org.datasyslab:s2-geometry-library</include>
                                 </includes>
                             </artifactSet>
                             <relocations>
@@ -181,10 +187,6 @@
                                 <relocation>
                                     <pattern>org.codehaus</pattern>
                                     <shadedPattern>org.apache.sedona.shaded.codehaus</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.google.common.geometry</pattern>
-                                    <shadedPattern>org.apache.sedona.shaded.s2</shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>
