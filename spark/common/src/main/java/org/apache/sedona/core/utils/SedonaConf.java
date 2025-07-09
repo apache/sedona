@@ -166,7 +166,7 @@ public class SedonaConf implements Serializable {
     // Parameters for libpostal integration
     String libPostalDataDir =
         confGetter.get(
-            "wherobots.tools.libpostal.dataDir",
+            "spark.sedona.libpostal.dataDir",
             Paths.get(System.getProperty("java.io.tmpdir"))
                 .resolve(Paths.get("libpostal"))
                 .toString());
@@ -176,7 +176,7 @@ public class SedonaConf implements Serializable {
     this.libPostalDataDir = libPostalDataDir;
 
     this.libPostalUseSenzing =
-        Boolean.parseBoolean(confGetter.get("wherobots.tools.libpostal.useSenzing", "true"));
+        Boolean.parseBoolean(confGetter.get("spark.sedona.libpostal.useSenzing", "true"));
   }
 
   // Helper method to prioritize `sedona.*` over `spark.sedona.*`
