@@ -119,9 +119,14 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         def try_geom_to_ewkb(x) -> bytes:
             if isinstance(x, BaseGeometry):
-                print("shapely version: ", shapely.__version__)
-                srid = shapely.get_srid(x)
-                return shapely.wkb.dumps(x, srid=srid)
+                kwargs = {}
+                if crs:
+                    from pyproj import CRS
+
+                    srid = CRS.from_user_input(crs)
+                    kwargs["srid"] = srid.to_epsg()
+
+                return shapely.wkb.dumps(x, *kwargs)
             elif isinstance(x, bytearray):
                 return bytes(x)
             elif x is None or isinstance(x, bytes):
@@ -167,8 +172,6 @@ class GeoSeries(GeoFrame, pspd.Series):
                 copy=copy,
                 fastpath=fastpath,
             )
-
-            self._anchor = data
         else:
             if isinstance(data, pd.Series):
                 assert index is None
@@ -194,6 +197,14 @@ class GeoSeries(GeoFrame, pspd.Series):
 
             # initialize the parent class pyspark Series with the pandas Series
             super().__init__(data=pdf)
+
+        # manually set it to binary type
+        col = next(
+            field.name
+            for field in self._internal.spark_frame.schema.fields
+            if field.name not in (NATURAL_ORDER_COLUMN_NAME, SPARK_DEFAULT_INDEX_NAME)
+        )
+        self._internal.spark_frame.schema[col].dataType = BinaryType()
 
         if crs:
             self.set_crs(crs, inplace=True)
@@ -523,7 +534,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         pd_series = self._to_internal_pandas()
         try:
             return gpd.GeoSeries(
-                pd_series.map(lambda wkb: shapely.wkb.loads(bytes(wkb))), crs=self.crs
+                pd_series.map(
+                    lambda wkb: shapely.wkb.loads(bytes(wkb)) if wkb else None
+                ),
+                crs=self.crs,
             )
         except TypeError:
             return gpd.GeoSeries(pd_series, crs=self.crs)
@@ -2322,12 +2336,12 @@ class GeoSeries(GeoFrame, pspd.Series):
             ),
             None,
         )
-        if first_binary_or_geometry_col is None:
-            raise ValueError(
-                "get_first_geometry_column: No geometry column found in the GeoSeries."
-            )
+        if first_binary_or_geometry_col:
+            return first_binary_or_geometry_col
 
-        return first_binary_or_geometry_col
+        raise ValueError(
+            "get_first_geometry_column: No geometry column found in the GeoSeries."
+        )
 
 
 # -----------------------------------------------------------------------------
