@@ -1,3 +1,15 @@
+---
+date:
+  created: 2025-07-09
+links:
+  - Apache Sedona Discord: https://discord.com/invite/9A3k5dEBsY
+  - SedonaSnow: https://app.snowflake.com/marketplace/listing/GZTYZF0RTY3/wherobots-sedonasnow
+  - Apache Sedona on Apache Flink: https://sedona.apache.org/latest/tutorial/flink/sql/
+authors:
+  - kelly
+title: Welcome to the Apache Sedona Blog!
+---
+
 <!--
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -16,18 +28,6 @@
 # specific language governing permissions and limitations
 # under the License.
 -->
-
----
-date:
-  created: 2025-07-09
-links:
-  - Apache Sedona Discord: https://discord.com/invite/9A3k5dEBsY
-  - SedonaSnow: https://app.snowflake.com/marketplace/listing/GZTYZF0RTY3/wherobots-sedonasnow
-  - Apache Sedona on Apache Flink: https://sedona.apache.org/latest/tutorial/flink/sql/
-authors:
-  - kelly
-title: Welcome to the Apache Sedona Blog!
----
 
 Welcome to the brand-new blog for Apache Sedona!
 
