@@ -222,7 +222,7 @@ class TestDataframe(TestGeopandasBase):
         # assert new_df.geometry.crs == sgpd_df.crs
 
     def test_active_geometry_name(self):
-        if parse_version(gpd.__version__) >= parse_version("0.14.0"):
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
             return
 
         points1 = [Point(x, x) for x in range(3)]
@@ -236,9 +236,6 @@ class TestDataframe(TestGeopandasBase):
         assert df.geometry.name == df.active_geometry_name == "geometry2"
 
     def test_rename_geometry(self):
-        if parse_version(gpd.__version__) >= parse_version("0.14.0"):
-            return
-
         points1 = [Point(x, x) for x in range(3)]
         points2 = [Point(x + 5, x + 5) for x in range(3)]
 
@@ -247,12 +244,12 @@ class TestDataframe(TestGeopandasBase):
         df = df.set_geometry("geometry1")
         assert df.geometry.name == "geometry1"
 
-        df = df.rename_geometry("geometry2")
-        assert df.geometry.name == "geometry2"
+        df = df.rename_geometry("geometry3")
+        assert df.geometry.name == "geometry3"
 
         # test inplace rename
-        df.rename_geometry("geometry3", inplace=True)
-        assert df.geometry.name == "geometry3"
+        df.rename_geometry("geometry4", inplace=True)
+        assert df.geometry.name == "geometry4"
 
     def test_area(self):
         # Create a GeoDataFrame with polygons to test area calculation
