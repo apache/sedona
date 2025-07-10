@@ -1449,8 +1449,19 @@ class GeoSeries(GeoFrame, pspd.Series):
         - kwargs: Any
             Additional arguments to pass to the Sedona DataFrame output function.
         """
+        col = self.get_first_geometry_column()
+
+        # Convert WKB to Sedona geometry objects
+        # Specify returns_geom=False to avoid turning it back into EWKB
+        result = self._query_geometry_column(
+            f"`{col}`",
+            cols=col,
+            rename="wkb",
+            returns_geom=False,
+        )
+
         # Use the Spark DataFrame's write method to write to GeoParquet format
-        self._internal.spark_frame.write.format("geoparquet").save(path, **kwargs)
+        result._internal.spark_frame.write.format("geoparquet").save(path, **kwargs)
 
     def sjoin(
         self,
