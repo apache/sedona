@@ -79,7 +79,7 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-        exclude: ^docs/index\.md$|^\.github/pull_request_template\.md$|\.github/issue_template\.md$|^docs/blog/posts/.*\.md$
+        exclude: ^docs/index\.md$|^\.github/pull_request_template\.md$|\.github/issue_template\.md$|^docs/blog/.*\.md$
       - id: insert-license
         name: add license for all Makefile files
         files: ^Makefile$
