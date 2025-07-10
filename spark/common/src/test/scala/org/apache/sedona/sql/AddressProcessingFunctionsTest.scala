@@ -136,8 +136,8 @@ class AddressProcessingFunctionsTest extends TestBaseScala with BeforeAndAfterEa
     it("should return expected normalized forms using ExpandAddress") {
       val result = sparkSession
         .range(1)
-        .select(ExpandAddress(f.lit("781 Franklin Ave Crown Heights Brooklyn NY 11216 USA")).alias(
-          "address"))
+        .select(ExpandAddress(f.lit("781 Franklin Ave Crown Heights Brooklyn NY 11216 USA"))
+          .alias("address"))
         .take(1)(0)(0)
         .asInstanceOf[mutable.Seq[String]]
       assert(result.contains("781 franklin avenue crown heights brooklyn new york 11216 usa"))
@@ -190,7 +190,8 @@ class AddressProcessingFunctionsTest extends TestBaseScala with BeforeAndAfterEa
       assert(expected sameElements actual)
     }
 
-    it("should return the same values as non-codegen for ExpandAddress and ParseAddress for null input") {
+    it(
+      "should return the same values as non-codegen for ExpandAddress and ParseAddress for null input") {
       val expected = sparkSession
         .range(1)
         .select(
