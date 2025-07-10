@@ -106,12 +106,12 @@ jobs:
         run: |
           SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
 
-          if [ "${SPARK_VERSION}" == "3.5.0" ]; then
+          if [ "${SPARK_VERSION:0:3}" == "3.5" ]; then
               pip install pyspark==3.5.0 pandas shapely apache-sedona pyarrow
               export SPARK_HOME=$(python -c "import pyspark; print(pyspark.__path__[0])")
           fi
 
-          if [ "${SPARK_VERSION}" == "4.0.0" ]; then
+          if [ "${SPARK_VERSION:0:3}" == "4.0" ]; then
               pip install pyspark==4.0.0 pandas shapely apache-sedona pyarrow
               export SPARK_HOME=$(python -c "import pyspark; print(pyspark.__path__[0])")
           fi
