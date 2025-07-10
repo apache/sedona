@@ -590,6 +590,20 @@ class TestMatchGeopandasSeries(TestBase):
             Polygon([(2, 0), (3, 0), (3, 3), (2, 3)]),
             Point(0, 0),
         ]
+
+        # Ensure resulting index behavior is correct for align=False (retain the left's index)
+        index1 = range(1, len(geometries) + 1)
+        index2 = range(len(geometries))
+        sgpd_result = GeoSeries(geometries, index1).intersection(
+            GeoSeries(geometries, index2), align=False
+        )
+
+        gpd_result = gpd.GeoSeries(geometries, index1).intersection(
+            gpd.GeoSeries(geometries, index2), align=False
+        )
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+        assert sgpd_result.index.to_pandas().equals(gpd_result.index)
+
         for g1 in geometries:
             for g2 in geometries:
                 sgpd_result = GeoSeries(g1).intersection(GeoSeries(g2))
