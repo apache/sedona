@@ -87,7 +87,7 @@ public class SedonaConf implements Serializable {
 
           @Override
           public String get(String key) {
-            return sparkConf.get(key);
+            return sparkConf.get(key, null);
           }
 
           public boolean contains(String key) {
