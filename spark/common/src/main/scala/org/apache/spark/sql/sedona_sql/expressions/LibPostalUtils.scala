@@ -31,8 +31,16 @@ object LibPostalUtils {
       .build()
   }
 
-  def getParserFromConf(dataDir: String, useSenzing: Boolean): AddressParser =
+  def getParserFromConf(dataDir: String, useSenzing: Boolean): AddressParser = {
+    require(
+      System.getProperty("java.version").split("\\.")(0).toInt >= 17,
+      "Libpostal Integration requires at least Java 17")
     AddressParser.getInstanceConfig(getConfig(dataDir, useSenzing))
-  def getExpanderFromConf(dataDir: String, useSenzing: Boolean): AddressExpander =
+  }
+  def getExpanderFromConf(dataDir: String, useSenzing: Boolean): AddressExpander = {
+    require(
+      System.getProperty("java.version").split("\\.")(0).toInt >= 17,
+      "Libpostal Integration requires at least Java 17")
     AddressExpander.getInstanceConfig(getConfig(dataDir, useSenzing))
+  }
 }
