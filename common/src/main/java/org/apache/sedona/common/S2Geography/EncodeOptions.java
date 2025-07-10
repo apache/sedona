@@ -36,6 +36,11 @@ public class EncodeOptions {
 
   public EncodeOptions() {}
 
+  public EncodeOptions(EncodeOptions other) {
+    this.codingHint = other.codingHint;
+    this.enableLazyDecode = other.enableLazyDecode;
+    this.includeCovering = other.includeCovering;
+  }
   /** Control FAST vs. COMPACT encoding. */
   public void setCodingHint(CodingHint hint) {
     this.codingHint = hint;

@@ -18,7 +18,6 @@
  */
 package org.apache.sedona.common.S2Geography;
 
-import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.io.UnsafeInput;
 import com.esotericsoftware.kryo.io.UnsafeOutput;
@@ -70,30 +69,11 @@ public class ShapeIndexGeography extends S2Geography {
   public S2Region region() {
     return new S2ShapeIndexRegion(shapeIndex);
   }
-  /**
-   * Index every S2Shape from the given Geography.
-   *
-   * @return the last shapeId assigned.
-   */
-  public int addIndex(S2Geography geog) {
-    int lastId = -1;
+  /** Index every S2Shape from the given Geography. */
+  public void addIndex(S2Geography geog) {
     for (int i = 0, n = geog.numShapes(); i < n; i++) {
       shapeIndex.add(geog.shape(i));
-      // since add() appends to the end, its index is size-1
-      lastId = shapeIndex.getShapes().size();
     }
-    // C++ return ID as size of set:
-    // int MutableS2ShapeIndex::Add(unique_ptr<S2Shape> shape) {
-    //  // Additions are processed lazily by ApplyUpdates().  Note that in order to
-    //  // avoid unexpected client behavior, this method continues to add shapes
-    //  // even once the specified S2MemoryTracker limit has been exceeded.
-    //  const int id = shapes_.size();
-    //  shape->id_ = id;
-    //  mem_tracker_.AddSpace(&shapes_, 1);
-    //  shapes_.push_back(std::move(shape));
-    //  MarkIndexStale();
-    //  return id;
-    return lastId;
   }
 
   // encode
@@ -124,14 +104,6 @@ public class ShapeIndexGeography extends S2Geography {
 
   // decode
   /** This is what decodeTagged() actually calls */
-  public static ShapeIndexGeography decode(Input in, EncodeTag tag) throws IOException {
-    // cast to UnsafeInput—will work if you always pass a Kryo-backed stream
-    if (!(in instanceof UnsafeInput)) {
-      throw new IllegalArgumentException("Expected UnsafeInput");
-    }
-    return decode((UnsafeInput) in, tag);
-  }
-
   public static ShapeIndexGeography decode(UnsafeInput in, EncodeTag tag) throws IOException {
     throw new IOException("Decode() not implemented for ShapeIndexGeography()");
   }

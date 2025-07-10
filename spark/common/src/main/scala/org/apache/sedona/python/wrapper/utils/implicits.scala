@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.python.wrapper.utils
 
+import org.apache.spark.sql.catalyst.expressions.UnsafeRow
 import org.locationtech.jts.geom.Geometry
 
 import java.nio.charset.StandardCharsets
@@ -50,10 +51,17 @@ object implicits {
 
     def userDataToUtf8ByteArray: Array[Byte] = {
       geometry.getUserData match {
+        // Case when user data is null: return an empty UTF-8 byte array
         case null => EMPTY_STRING.getBytes(StandardCharsets.UTF_8)
+        // Case when user data is a String: convert the string to a UTF-8 byte array
         case data: String => data.getBytes(StandardCharsets.UTF_8)
+        // Case when user data is already an Array[Byte]: return as is
+        case data: Array[Byte] => data
+        // Case when user data is an UnsafeRow: use its getBytes method
+        case data: UnsafeRow => data.getBytes
+        // Case for any other type: convert to string, then to a UTF-8 byte array
+        case data => data.toString.getBytes(StandardCharsets.UTF_8)
       }
     }
   }
-
 }
