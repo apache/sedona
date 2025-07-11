@@ -21,13 +21,14 @@ package org.apache.sedona.common.S2Geography;
 import com.google.common.geometry.S2CellId;
 import com.google.common.geometry.S2Iterator;
 import com.google.common.geometry.S2ShapeIndex;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 public class GeographyIndex {
   private final S2ShapeIndex index;
-  private int[] values;
+  private List<Integer> values;
 
   public GeographyIndex() {
     this(new S2ShapeIndex.Options());
@@ -35,25 +36,19 @@ public class GeographyIndex {
 
   public GeographyIndex(S2ShapeIndex.Options options) {
     this.index = new S2ShapeIndex(options);
-    this.values = new int[0];
+    this.values = new ArrayList<>(); // list of shape id
   }
 
   public void add(S2Geography geog, int value) {
-    // Determine total slots needed in the array
-    int currentLength = (values == null ? 0 : values.length);
-    int needed = currentLength + geog.numShapes();
-    values = expand(values, needed);
     for (int i = 0; i < geog.numShapes(); i++) {
-      // Determine new shape ID as current number of shapes
-      int newShapeId = currentLength + i;
-      // Add shape to the index
       index.add(geog.shape(i));
-      values[newShapeId] = value;
+      int shapeId = index.getShapes().size();
+      values.add(shapeId, value);
     }
   }
   /** Returns the stored value for a given shape ID. */
   public int value(int shapeId) {
-    return values[shapeId];
+    return values.get(shapeId);
   }
 
   /** Provides read-only access to the underlying S2ShapeIndex. */

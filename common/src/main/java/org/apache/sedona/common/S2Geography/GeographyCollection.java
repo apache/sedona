@@ -95,12 +95,12 @@ public class GeographyCollection extends S2Geography {
   @Override
   public void encode(UnsafeOutput out, EncodeOptions opts) throws IOException {
     // Top-level collection encodes its size and then each child with tagging
-    // Never include coverings for children (only a top-level concept)
-    EncodeOptions child_options = opts;
-    child_options.setIncludeCovering(false);
+    // Never include coverings for children (only a top-level concept
+    EncodeOptions childOptions = new EncodeOptions(opts);
+    childOptions.setIncludeCovering(false);
     out.writeInt(features.size());
     for (S2Geography feature : features) {
-      feature.encodeTagged(out, child_options);
+      feature.encodeTagged(out, opts);
     }
     out.flush();
   }
@@ -120,7 +120,7 @@ public class GeographyCollection extends S2Geography {
 
     // 3) Ensure we have at least 4 bytes for the count
     if (in.available() < Integer.BYTES) {
-      throw new IOException("PolygonGeography.decodeTagged error: insufficient header bytes");
+      throw new IOException("GeographyCollection.decodeTagged error: insufficient header bytes");
     }
 
     // Read feature count

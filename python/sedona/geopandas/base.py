@@ -75,7 +75,7 @@ class GeoFrame(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def geoindex(self) -> "GeoIndex":
+    def sindex(self) -> "SpatialIndex":
         raise NotImplementedError("This method is not implemented yet.")
 
     @abstractmethod

@@ -23,6 +23,8 @@ import com.esotericsoftware.kryo.io.UnsafeInput;
 import com.esotericsoftware.kryo.io.UnsafeOutput;
 import com.google.common.geometry.*;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class EncodedShapeIndexGeography extends S2Geography {
@@ -97,7 +99,7 @@ public class EncodedShapeIndexGeography extends S2Geography {
 
     // EMPTY
     if ((tag.getFlags() & EncodeTag.FLAG_EMPTY) != 0) {
-      logger.fine("Decoded empty PolygonGeography.");
+      logger.fine("Decoded empty EncodedShapeIndexGeography.");
       return encodedShapeIndexGeography;
     }
 
@@ -112,7 +114,6 @@ public class EncodedShapeIndexGeography extends S2Geography {
     // 2) read exactly that many bytes
     byte[] payload = new byte[length];
     in.readBytes(payload, 0, length);
-
     // 3) hand *only* those bytes to S2‐Coder via Bytes adapter
     PrimitiveArrays.Bytes bytes =
         new PrimitiveArrays.Bytes() {
@@ -126,15 +127,14 @@ public class EncodedShapeIndexGeography extends S2Geography {
             return payload[(int) i];
           }
         };
-    PrimitiveArrays.Cursor cursor = bytes.cursor();
-    // 4) Decode *all* shapes into a encodedShapeIndexGeography
-    while (cursor.position < bytes.length()) {
-      S2Shape shape =
-          tag.isCompact()
-              ? S2TaggedShapeCoder.COMPACT.decode(bytes, cursor)
-              : S2TaggedShapeCoder.FAST.decode(bytes, cursor);
-      encodedShapeIndexGeography.addIndex(shape);
+
+    List<S2Shape> s2Shapes = new ArrayList<>();
+    if (tag.isCompact()) {
+      s2Shapes = VectorCoder.COMPACT_SHAPE.decode(bytes);
+    } else {
+      s2Shapes = VectorCoder.FAST_SHAPE.decode(bytes);
     }
+    for (S2Shape shape : s2Shapes) encodedShapeIndexGeography.addIndex(shape);
     return encodedShapeIndexGeography;
   }
 }
