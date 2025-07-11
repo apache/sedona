@@ -129,6 +129,10 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             GeoSeries([0, 1, 2], crs="epsg:4326")
         with pytest.raises(TypeError):
             GeoSeries(["a", "b", "c"])
+        with pytest.raises(TypeError):
+            GeoSeries(pd.Series([0, 1, 2]), crs="epsg:4326")
+        with pytest.raises(TypeError):
+            GeoSeries(ps.Series([0, 1, 2]))
 
     def test_to_geopandas(self):
         for _, geom in self.geoms:
@@ -321,8 +325,28 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             gpd_result = gpd_result.to_crs(epsg=3857)
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
+    def test_bounds(self):
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).bounds
+            gpd_result = gpd.GeoSeries(geom).bounds
+            pd.testing.assert_frame_equal(
+                sgpd_result.to_pandas(), pd.DataFrame(gpd_result)
+            )
+
+    def test_total_bounds(self):
+        import numpy as np
+
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).total_bounds
+            gpd_result = gpd.GeoSeries(geom).total_bounds
+            np.testing.assert_array_equal(sgpd_result, gpd_result)
+
     def test_estimate_utm_crs(self):
-        pass
+        for crs in ["epsg:4326", "epsg:3857"]:
+            for _, geom in self.geoms:
+                gpd_result = gpd.GeoSeries(geom, crs=crs).estimate_utm_crs()
+                sgpd_result = GeoSeries(geom, crs=crs).estimate_utm_crs()
+                assert sgpd_result == gpd_result
 
     def test_to_json(self):
         pass
@@ -569,6 +593,20 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             Polygon([(2, 0), (3, 0), (3, 3), (2, 3)]),
             Point(0, 0),
         ]
+
+        # Ensure resulting index behavior is correct for align=False (retain the left's index)
+        index1 = range(1, len(geometries) + 1)
+        index2 = range(len(geometries))
+        sgpd_result = GeoSeries(geometries, index1).intersection(
+            GeoSeries(geometries, index2), align=False
+        )
+
+        gpd_result = gpd.GeoSeries(geometries, index1).intersection(
+            gpd.GeoSeries(geometries, index2), align=False
+        )
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+        assert sgpd_result.index.to_pandas().equals(gpd_result.index)
+
         for g1 in geometries:
             for g2 in geometries:
                 sgpd_result = GeoSeries(g1).intersection(GeoSeries(g2))
@@ -587,9 +625,9 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                 self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
                 if len(g1) == len(g2):
-                    sgpd_result = GeoSeries(g1).intersects(GeoSeries(g2), align=False)
-                    gpd_result = gpd_series1.intersects(gpd_series2, align=False)
-                    self.check_pd_series_equal(sgpd_result, gpd_result)
+                    sgpd_result = GeoSeries(g1).intersection(GeoSeries(g2), align=False)
+                    gpd_result = gpd_series1.intersection(gpd_series2, align=False)
+                    self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_intersection_all(self):
         pass
