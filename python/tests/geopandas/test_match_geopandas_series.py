@@ -130,6 +130,10 @@ class TestMatchGeopandasSeries(TestBase):
             GeoSeries([0, 1, 2], crs="epsg:4326")
         with pytest.raises(TypeError):
             GeoSeries(["a", "b", "c"])
+        with pytest.raises(TypeError):
+            GeoSeries(pd.Series([0, 1, 2]), crs="epsg:4326")
+        with pytest.raises(TypeError):
+            GeoSeries(ps.Series([0, 1, 2]))
 
     def test_to_geopandas(self):
         for _, geom in self.geoms:
@@ -608,9 +612,9 @@ class TestMatchGeopandasSeries(TestBase):
                 self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
                 if len(g1) == len(g2):
-                    sgpd_result = GeoSeries(g1).intersects(GeoSeries(g2), align=False)
-                    gpd_result = gpd_series1.intersects(gpd_series2, align=False)
-                    self.check_pd_series_equal(sgpd_result, gpd_result)
+                    sgpd_result = GeoSeries(g1).intersection(GeoSeries(g2), align=False)
+                    gpd_result = gpd_series1.intersection(gpd_series2, align=False)
+                    self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_intersection_all(self):
         pass
