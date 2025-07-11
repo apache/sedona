@@ -422,6 +422,18 @@
             <id>Spark Packages</id>
             <url>https://repos.spark-packages.org/</url>
         </repository>
+<!--        TODO remove me and use jpostal actual release-->
+        <repository>
+            <id>sonatype-snapshots</id>
+            <name>Wherobots Snapshots Repository</name>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
     </repositories>
     <build>
         <pluginManagement>
