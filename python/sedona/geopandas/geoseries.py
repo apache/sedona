@@ -172,6 +172,8 @@ class GeoSeries(GeoFrame, pspd.Series):
                 copy=copy,
                 fastpath=fastpath,
             )
+
+            self._anchor = data
         else:
             if isinstance(data, pd.Series):
                 assert index is None
@@ -472,13 +474,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             if isinstance(data_type, BinaryType):
                 query = query.replace(f"`{cols}`", f"ST_GeomFromWKB(`{cols}`)")
 
-            # Convert back to EWKB format if the return type is a geometry
-            if returns_geom:
-                query = f"ST_AsEWKB({query})"
-
             rename = col if not rename else rename
-
-            query = f"{query} as `{rename}`"
 
         elif isinstance(cols, list):
             for col in cols:
@@ -491,7 +487,11 @@ class GeoSeries(GeoFrame, pspd.Series):
             # must have rename for multiple columns since we don't know which name to default to
             assert rename
 
-            query = f"{query} as `{rename}`"
+        # Convert back to EWKB format if the return type is a geometry
+        if returns_geom:
+            query = f"ST_AsEWKB({query})"
+
+        query = f"{query} as `{rename}`"
 
         # We always select NATURAL_ORDER_COLUMN_NAME, to avoid having to regenerate it in the result
         # We always select SPARK_DEFAULT_INDEX_NAME, to retain series index info
@@ -1887,7 +1887,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         if isinstance(data, list) and not isinstance(data[0], (tuple, list)):
             data = [(obj,) for obj in data]
 
-        select = f"{select} as geometry"
+        select = f"ST_AsEWKB({select}) as geometry"
 
         spark_df = default_session().createDataFrame(data, schema=schema)
         spark_df = spark_df.selectExpr(select)
