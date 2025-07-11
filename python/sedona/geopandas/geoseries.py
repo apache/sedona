@@ -1325,7 +1325,8 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         assert isinstance(other, GeoSeries), f"Invalid type for other: {type(other)}"
 
-        # TODO: this does not yet support multi-index
+        # This code assumes there is only one index (SPARK_DEFAULT_INDEX_NAME)
+        # and would need to be updated if Sedona later supports multi-index
         df = self._internal.spark_frame.select(
             col(self.get_first_geometry_column()).alias("L"),
             # For the left side:
