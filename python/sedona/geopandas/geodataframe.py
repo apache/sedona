@@ -109,7 +109,10 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             ps_series = pspd.DataFrame.__getitem__(self, column_name)
 
             try:
-                return sgpd.GeoSeries(ps_series)
+                result = sgpd.GeoSeries(ps_series)
+                # from pyspark.pandas.utils import same_anchor
+                # print("getitem same_anchor(result, self):", same_anchor(result, self))
+                return result
             except:
                 return ps_series
 
@@ -189,10 +192,33 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             gdf = gpd.GeoDataFrame(df)
             # convert each geometry column to wkb type
 
+            # import shapely
+            # def try_geom_to_ewkb(x) -> bytes:
+            #     if isinstance(x, BaseGeometry):
+            #         kwargs = {}
+            #         if crs:
+            #             from pyproj import CRS
+
+            #             srid = CRS.from_user_input(crs)
+            #             kwargs["srid"] = srid.to_epsg()
+
+            #         return shapely.wkb.dumps(x, **kwargs)
+            #     elif isinstance(x, bytearray):
+            #         return bytes(x)
+            #     elif x is None or isinstance(x, bytes):
+            #         return x
+            #     else:
+            #         raise TypeError(f"expected geometry or bytes, got {type(x)}: {x}")
+
             for col in gdf.columns:
                 # It's possible we get a list, dict, pd.Series, gpd.GeoSeries, etc of shapely.Geometry objects.
                 if len(gdf[col]) > 0 and isinstance(gdf[col].iloc[0], BaseGeometry):
                     gdf[col] = gdf[col].apply(lambda geom: geom.wkb)
+            #     try:
+            #         gdf[col] = gdf[col].apply(try_geom_to_ewkb)
+            #     except:
+            #         pass
+
             pdf = pd.DataFrame(gdf)
 
             # initialize the parent class pyspark Dataframe with the pandas Series
@@ -371,6 +397,8 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         else:  # should be a colname
             try:
                 level = frame[col]
+                # from pyspark.pandas.utils import same_anchor
+                # print("same_anchor(level, frame):", same_anchor(level, frame))
             except KeyError:
                 raise ValueError(f"Unknown column {col}")
             if isinstance(level, (sgpd.GeoDataFrame, gpd.GeoDataFrame)):
@@ -413,7 +441,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         # This operation throws a warning to the user asking them to set pspd.set_option('compute.ops_on_diff_frames', True)
         # to allow operations on different frames. We pass these warnings on to the user so they must manually set it themselves.
         if level.crs != crs:
-            level.crs = crs
+            level.set_crs(crs, inplace=True, allow_override=True)
 
         frame._geometry_column_name = geo_column_name
         frame[geo_column_name] = level
@@ -643,13 +671,11 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
     @property
     def crs(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        return self.geometry.crs
 
     @crs.setter
     def crs(self, value):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        self.geometry.crs = value
 
     @property
     def geom_type(self):

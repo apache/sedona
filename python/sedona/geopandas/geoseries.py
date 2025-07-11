@@ -117,7 +117,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         self._anchor: GeoDataFrame
         self._col_label: Label
 
+        use_same_anchor = True
+
         def try_geom_to_ewkb(x) -> bytes:
+            nonlocal use_same_anchor
             if isinstance(x, BaseGeometry):
                 kwargs = {}
                 if crs:
@@ -125,9 +128,11 @@ class GeoSeries(GeoFrame, pspd.Series):
 
                     srid = CRS.from_user_input(crs)
                     kwargs["srid"] = srid.to_epsg()
+                use_same_anchor = False
 
                 return shapely.wkb.dumps(x, **kwargs)
             elif isinstance(x, bytearray):
+                use_same_anchor = False
                 return bytes(x)
             elif x is None or isinstance(x, bytes):
                 return x
@@ -173,7 +178,8 @@ class GeoSeries(GeoFrame, pspd.Series):
                 fastpath=fastpath,
             )
 
-            self._anchor = data
+            if use_same_anchor:
+                self._anchor = data
         else:
             if isinstance(data, pd.Series):
                 assert index is None

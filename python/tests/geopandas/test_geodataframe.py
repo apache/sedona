@@ -174,21 +174,24 @@ class TestDataframe(TestGeopandasBase):
         assert type(df_copy) is GeoDataFrame
 
     def test_set_geometry(self):
+        # ps.set_option("compute.ops_on_diff_frames", True)
         points1 = [Point(x, x) for x in range(3)]
         points2 = [Point(x + 5, x + 5) for x in range(3)]
 
         data = {"geometry1": points1, "geometry2": points2, "attribute": [1, 2, 3]}
         sgpd_df = sgpd.GeoDataFrame(data)
 
-        # Not geometry col set yet
+        # No geometry column set yet
         with pytest.raises(AttributeError):
             _ = sgpd_df.geometry
 
-        sgpd_df = sgpd_df.set_geometry("geometry1")
+        with self.ps_allow_diff_frames():  # TODO: remove
+            sgpd_df = sgpd_df.set_geometry("geometry1")
 
         assert sgpd_df.geometry.name == "geometry1"
 
-        sgpd_df.set_geometry("geometry2", inplace=True)
+        with self.ps_allow_diff_frames():  # TODO: remove
+            sgpd_df.set_geometry("geometry2", inplace=True)
         assert sgpd_df.geometry.name == "geometry2"
 
         # Test the actual values of the geometry column
@@ -200,25 +203,33 @@ class TestDataframe(TestGeopandasBase):
         with pytest.raises(ValueError):
             sgpd_df.set_geometry("nonexistent-column")
 
-        # TODO: add tests checking for crs, once that's implemented correctly
+        geom = GeoSeries(
+            [Point(x, y) for x, y in zip(range(5), range(5))], name="geometry2"
+        )
 
-        # geom = GeoSeries([Point(x, y) for x, y in zip(range(5), range(5))], name="geometry2")
+        # new crs - setting should default to GeoSeries' crs
+        gs = GeoSeries(geom, crs="epsg:3857")
 
-        # # new crs - setting should default to GeoSeries' crs
-        # gs = GeoSeries(geom, crs="epsg:3857")
+        with self.ps_allow_diff_frames():
+            new_df = sgpd_df.set_geometry(gs)
 
-        # new_df = sgpd_df.set_geometry(gs)
-        # assert new_df.crs == "epsg:3857"
+        assert new_df.crs == "epsg:3857"
 
         # explicit crs overrides self and dataframe
-        # new_df = sgpd_df.set_geometry(gs, crs="epsg:26909")
-        # assert new_df.crs == "epsg:26909"
-        # assert new_df.geometry.crs == "epsg:26909"
+        with self.ps_allow_diff_frames():
+            new_df = sgpd_df.set_geometry(gs, crs="epsg:26909")
 
-        # # Series should use dataframe's
-        # new_df = sgpd_df.set_geometry(geom.values)
-        # assert new_df.crs == sgpd_df.crs
-        # assert new_df.geometry.crs == sgpd_df.crs
+        assert new_df.crs == "epsg:26909"
+        assert new_df.geometry.crs == "epsg:26909"
+
+        # Series should use dataframe's crs
+        with self.ps_allow_diff_frames():
+            new_df = sgpd_df.set_geometry(geom.values)
+
+        assert new_df.crs == sgpd_df.crs
+        assert new_df.geometry.crs == sgpd_df.crs
+
+        # ps.reset_option("compute.ops_on_diff_frames")
 
     def test_active_geometry_name(self):
         if parse_version(gpd.__version__) < parse_version("1.0.0"):

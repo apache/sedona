@@ -22,6 +22,7 @@ import geopandas as gpd
 import pandas as pd
 import pyspark.pandas as ps
 from pandas.testing import assert_series_equal
+from contextlib import contextmanager
 
 
 class TestGeopandasBase(TestBase):
@@ -82,3 +83,20 @@ class TestGeopandasBase(TestBase):
         assert isinstance(actual, ps.Series)
         assert isinstance(expected, pd.Series)
         assert_series_equal(actual.to_pandas(), expected)
+
+    @contextmanager
+    def ps_allow_diff_frames(self):
+        """
+        A context manager to temporarily set a compute.ops_on_diff_frames option.
+        """
+        already_set = ps.get_option("compute.ops_on_diff_frames")
+        if already_set:
+            raise Exception("compute.ops_on_diff_frames is already set")
+
+        try:
+            ps.set_option("compute.ops_on_diff_frames", True)
+
+            # Yield control to the code inside the 'with' block
+            yield
+        finally:
+            ps.reset_option("compute.ops_on_diff_frames")
