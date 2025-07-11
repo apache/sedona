@@ -299,3 +299,117 @@ class TestSpatialIndex(TestBase):
             query_point, k=4, return_distance=True
         )
         assert min(distances) == 1.0
+
+    def test_intersection_method(self):
+        """Test the intersection method for finding geometries that intersect a bounding box."""
+
+        # Create a spatial DataFrame with polygons
+        polygons_data = [
+            (1, "POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))"),
+            (2, "POLYGON((1 1, 2 1, 2 2, 1 2, 1 1))"),
+            (3, "POLYGON((2 2, 3 2, 3 3, 2 3, 2 2))"),
+            (4, "POLYGON((3 3, 4 3, 4 4, 3 4, 3 3))"),
+            (5, "POLYGON((4 4, 5 4, 5 5, 4 5, 4 4))"),
+        ]
+
+        df = self.spark.createDataFrame(polygons_data, ["id", "wkt"])
+        spatial_df = df.withColumn("geometry", expr("ST_GeomFromWKT(wkt)"))
+
+        # Create a SpatialIndex from the DataFrame
+        spark_sindex = SpatialIndex(
+            spatial_df, index_type="strtree", column_name="geometry"
+        )
+
+        # Test intersection with a bounding box that should intersect with middle polygons
+        bounds = (
+            1.5,
+            1.5,
+            3.5,
+            3.5,
+        )  # Should intersect with polygons at (2,2) and (3,3)
+        result_rows = spark_sindex.intersection(bounds)
+
+        # Verify correct results are returned
+        assert len(result_rows) >= 2
+
+        # Test with bounds that don't intersect any geometry
+        empty_bounds = (10, 10, 11, 11)
+        empty_results = spark_sindex.intersection(empty_bounds)
+        assert len(empty_results) == 0
+
+        # Test with bounds that cover all geometries
+        full_bounds = (-1, -1, 6, 6)
+        full_results = spark_sindex.intersection(full_bounds)
+        assert len(full_results) == 5  # Should match all 5 polygons
+
+    def test_intersection_with_points(self):
+        """Test the intersection method with point geometries."""
+        # Create a spatial DataFrame with points
+        points_data = [
+            (1, "POINT(0 0)"),
+            (2, "POINT(1 1)"),
+            (3, "POINT(2 2)"),
+            (4, "POINT(3 3)"),
+            (5, "POINT(4 4)"),
+        ]
+
+        df = self.spark.createDataFrame(points_data, ["id", "wkt"])
+        spatial_df = df.withColumn("geometry", expr("ST_GeomFromWKT(wkt)"))
+        spark_sindex = SpatialIndex(
+            spatial_df, index_type="strtree", column_name="geometry"
+        )
+
+        # Test with bounds containing points 2, 3
+        bounds = (0.5, 0.5, 2.5, 2.5)
+        results = spark_sindex.intersection(bounds)
+
+        # Verify correct results
+        assert len(results) == 2
+
+    def test_intersection_with_linestrings(self):
+        """Test the intersection method with linestring geometries."""
+        # Create a spatial DataFrame with linestrings
+        lines_data = [
+            (1, "LINESTRING(0 0, 1 1)"),
+            (2, "LINESTRING(1 1, 2 2)"),
+            (3, "LINESTRING(2 2, 3 3)"),
+            (4, "LINESTRING(3 3, 4 4)"),
+            (5, "LINESTRING(4 4, 5 5)"),
+        ]
+
+        df = self.spark.createDataFrame(lines_data, ["id", "wkt"])
+        spatial_df = df.withColumn("geometry", expr("ST_GeomFromWKT(wkt)"))
+        spark_sindex = SpatialIndex(
+            spatial_df, index_type="strtree", column_name="geometry"
+        )
+
+        # Test with bounds crossing lines 2, 3
+        bounds = (1.5, 1.5, 2.5, 2.5)
+        results = spark_sindex.intersection(bounds)
+
+        # Verify results
+        assert len(results) == 2
+
+    def test_intersection_with_mixed_geometries(self):
+        """Test the intersection method with mixed geometry types."""
+        # Create a spatial DataFrame with mixed geometry types
+        mixed_data = [
+            (1, "POINT(0 0)"),
+            (2, "LINESTRING(1 1, 2 2)"),
+            (3, "POLYGON((2 2, 3 2, 3 3, 2 3, 2 2))"),
+            (4, "POINT(3 3)"),
+            (5, "LINESTRING(4 4, 5 5)"),
+        ]
+
+        df = self.spark.createDataFrame(mixed_data, ["id", "wkt"])
+        spatial_df = df.withColumn("geometry", expr("ST_GeomFromWKT(wkt)"))
+        spark_sindex = SpatialIndex(
+            spatial_df, index_type="strtree", column_name="geometry"
+        )
+
+        # Test with bounds that should intersect with polygon and point
+        bounds = (2.5, 2.5, 3.5, 3.5)
+        results = spark_sindex.intersection(bounds)
+
+        # Verify results
+        assert len(results) == 2
