@@ -21,14 +21,11 @@ package org.apache.sedona.common.S2Geography;
 import com.google.common.geometry.S2CellId;
 import com.google.common.geometry.S2Iterator;
 import com.google.common.geometry.S2ShapeIndex;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class GeographyIndex {
   private final S2ShapeIndex index;
-  private List<Integer> values;
+  private final List<Integer> values;
 
   public GeographyIndex() {
     this(new S2ShapeIndex.Options());
@@ -36,7 +33,7 @@ public class GeographyIndex {
 
   public GeographyIndex(S2ShapeIndex.Options options) {
     this.index = new S2ShapeIndex(options);
-    this.values = new ArrayList<>(); // list of shape id
+    this.values = new ArrayList<>(Collections.singletonList(-1)); // list of shape id
   }
 
   public void add(S2Geography geog, int value) {

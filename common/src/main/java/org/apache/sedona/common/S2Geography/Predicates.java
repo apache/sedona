@@ -20,9 +20,7 @@ package org.apache.sedona.common.S2Geography;
 
 import com.google.common.geometry.*;
 import com.google.common.geometry.Projection;
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.sedona.common.S2Geography.Accessors.*;
+import java.util.*;
 
 public class Predicates {
 
@@ -58,12 +56,23 @@ public class Predicates {
     R2Vector lt = new R2Vector(rect.lngLo().degrees(), rect.latHi().degrees());
 
     // 3) Walk the four edges (bottom, right, top, left)
-    List<S2Point> vertices = new ArrayList<>();
-    tessellator.appendUnprojected(lb, rb, vertices);
-    tessellator.appendUnprojected(rb, rt, vertices);
-    tessellator.appendUnprojected(rt, lt, vertices);
-    tessellator.appendUnprojected(lt, lb, vertices);
+    // Build the four corner vectors in a LinkedHashSet to preserve insertion order
+    LinkedHashSet<R2Vector> corners = new LinkedHashSet<>();
+    corners.add(lb); // lower-left
+    corners.add(rb); // lower-right
+    corners.add(rt); // upper-right
+    corners.add(lt); // upper-left
 
+    // Convert those unique 2D points into an ordered List
+    List<R2Vector> pts2d = new ArrayList<>(corners);
+    List<S2Point> vertices = new ArrayList<>();
+
+    // 5) Walk each edge of the rectangle exactly once (wrapping at the end)
+    for (int i = 0; i < pts2d.size(); i++) {
+      R2Vector a = pts2d.get(i);
+      R2Vector b = pts2d.get((i + 1) % pts2d.size());
+      tessellator.appendUnprojected(a, b, vertices);
+    }
     // c++ using S2LaxLoopShape which is missing in Java
     // S2LaxLoopShape represents a closed loop of edges surrounding an interior
     // region.  It is similar to S2Loop::Shape except that this class allows
