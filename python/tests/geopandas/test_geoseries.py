@@ -626,6 +626,8 @@ class TestGeoSeries(TestBase):
         expected = pd.Series([True, True, True, True])
 
     def test_intersection(self):
+        import pyspark.pandas as ps
+
         s = sgpd.GeoSeries(
             [
                 Polygon([(0, 0), (2, 2), (0, 2)]),
@@ -691,7 +693,15 @@ class TestGeoSeries(TestBase):
                 Point(0, 1),
             ],
             index=range(1, 6),
+            crs=4326,
         )
+
+        # Ensure the index is preserved when crs is set (previously an issue)
+        expected_index = ps.Index(range(1, 6))
+        ps.set_option("compute.ops_on_diff_frames", True)
+        assert s2.index.equals(expected_index)
+        ps.reset_option("compute.ops_on_diff_frames")
+
         result = s.intersection(s2, align=True)
         expected = gpd.GeoSeries(
             [
@@ -705,7 +715,7 @@ class TestGeoSeries(TestBase):
         )
         self.check_sgpd_equals_gpd(result, expected)
 
-        result = s.intersection(s2, align=False)
+        result = s2.intersection(s, align=False)
         expected = gpd.GeoSeries(
             [
                 Polygon([(0, 0), (0, 1), (1, 1), (0, 0)]),
@@ -713,9 +723,13 @@ class TestGeoSeries(TestBase):
                 Point(1, 1),
                 Point(1, 1),
                 Point(0, 1),
-            ]
+            ],
+            index=range(1, 6),  # left's index
         )
         self.check_sgpd_equals_gpd(result, expected)
+
+        # Ensure result of align=False retains the left's index
+        assert result.index.to_pandas().equals(expected.index)
 
     def test_intersection_all(self):
         pass

@@ -243,10 +243,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         """
         from pyproj import CRS
 
-        tmp_df = self._process_geometry_column(
-            "ST_SRID", rename="crs", returns_geom=False
-        )
-        srid = tmp_df.take([0])[0]
+        tmp = self._process_geometry_column("ST_SRID", rename="crs", returns_geom=False)
+        ps_series = tmp.take([0])
+        srid = ps_series.iloc[0]
         # Sedona returns 0 if doesn't exist
         return CRS.from_user_input(srid) if srid != 0 and not pd.isna(srid) else None
 
@@ -494,14 +493,17 @@ class GeoSeries(GeoFrame, pspd.Series):
 
             query = f"{query} as `{rename}`"
 
-        sdf = df.selectExpr(query)
-        internal = InternalFrame(
+        # We always select NATURAL_ORDER_COLUMN_NAME, to avoid having to regenerate it in the result
+        # We always select SPARK_DEFAULT_INDEX_NAME, to retain series index info
+        sdf = df.selectExpr(query, SPARK_DEFAULT_INDEX_NAME, NATURAL_ORDER_COLUMN_NAME)
+
+        internal = self._internal.copy(
             spark_frame=sdf,
-            index_spark_columns=None,
-            column_labels=[self._column_label],
+            index_fields=[self._internal.index_fields[0]],
+            index_spark_columns=[scol_for(sdf, SPARK_DEFAULT_INDEX_NAME)],
             data_spark_columns=[scol_for(sdf, rename)],
-            data_fields=[self._internal.data_fields[0]],
-            column_label_names=self._internal.column_label_names,
+            data_fields=[self._internal.data_fields[0].copy(name=rename)],
+            column_label_names=[(rename,)],
         )
         ps_series = first_series(PandasOnSparkDataFrame(internal))
 
@@ -1372,13 +1374,19 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         assert isinstance(other, GeoSeries), f"Invalid type for other: {type(other)}"
 
-        # TODO: this does not yet support multi-index
+        # This code assumes there is only one index (SPARK_DEFAULT_INDEX_NAME)
+        # and would need to be updated if Sedona later supports multi-index
         df = self._internal.spark_frame.select(
             col(self.get_first_geometry_column()).alias("L"),
-            col(index_col),
+            # For the left side:
+            # - We always select NATURAL_ORDER_COLUMN_NAME, to avoid having to regenerate it in the result
+            # - We always select SPARK_DEFAULT_INDEX_NAME, to retain series index info
+            col(NATURAL_ORDER_COLUMN_NAME),
+            col(SPARK_DEFAULT_INDEX_NAME),
         )
         other_df = other._internal.spark_frame.select(
             col(other.get_first_geometry_column()).alias("R"),
+            # for the right side, we only need the column that we are joining on
             col(index_col),
         )
         joined_df = df.join(other_df, on=index_col, how="outer")
