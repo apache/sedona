@@ -126,7 +126,7 @@ class GeoSeries(GeoFrame, pspd.Series):
                     srid = CRS.from_user_input(crs)
                     kwargs["srid"] = srid.to_epsg()
 
-                return shapely.wkb.dumps(x, *kwargs)
+                return shapely.wkb.dumps(x, **kwargs)
             elif isinstance(x, bytearray):
                 return bytes(x)
             elif x is None or isinstance(x, bytes):
