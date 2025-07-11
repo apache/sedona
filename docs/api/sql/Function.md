@@ -22,9 +22,6 @@
 Introduction: Returns an array of expanded forms of the input address string. This is backed by the [libpostal](https://github.com/openvenues/libpostal) library's address expanding functionality.
 
 !!!Note
-    Jpostal requires at least Java 17 to run. Make sure your spark runtime is using at least Java 17 if you plan to use this function.
-
-!!!Note
     Jpostal requires at least 2 GB of free disk space to store the data files used for address parsing and expanding. The data files are downloaded automatically when the function is called for the first time.
 
 !!!Note
@@ -49,9 +46,6 @@ Output:
 ## ParseAddress
 
 Introduction: Returns an array of the components (e.g. street, postal code) of the input address string. This is backed by the [libpostal](https://github.com/openvenues/libpostal) library's address parsing functionality.
-
-!!!Note
-    Jpostal requires at least Java 17 to run. Make sure your spark runtime is using at least Java 17 if you plan to use this function.
 
 !!!Note
     Jpostal requires at least 2 GB of free disk space to store the data files used for address parsing and expanding. The data files are downloaded automatically when the library is initialized.

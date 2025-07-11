@@ -54,10 +54,6 @@ class AddressProcessingFunctionsTest extends TestBaseScala with BeforeAndAfterEa
 
   describe("ExpandAddress") {
     it("should return expected normalized forms") {
-      assume(
-        System.getProperty("java.version").split("\\.")(0).toInt >= 17,
-        "Libpostal requires at least Java 17")
-
       val resultDf = sparkSession
         .sql(
           "SELECT ExpandAddress('781 Franklin Ave Crown Heights Brooklyn NY 11216 USA') as normalized")
@@ -69,19 +65,11 @@ class AddressProcessingFunctionsTest extends TestBaseScala with BeforeAndAfterEa
     }
 
     it("should return null for null input") {
-      assume(
-        System.getProperty("java.version").split("\\.")(0).toInt >= 17,
-        "Libpostal requires at least Java 17")
-
       val result = sparkSession.sql("SELECT ExpandAddress(NULL) as normalized").collect()
       assert(result.head.get(0) == null)
     }
 
     it("should should work when chained with explode") {
-      assume(
-        System.getProperty("java.version").split("\\.")(0).toInt >= 17,
-        "Libpostal requires at least Java 17")
-
       val result = sparkSession
         .sql("SELECT Explode(ExpandAddress('781 Franklin Ave Crown Heights Brooklyn NY 11216 USA')) as normalized")
         .collect()
@@ -92,10 +80,6 @@ class AddressProcessingFunctionsTest extends TestBaseScala with BeforeAndAfterEa
 
   describe("ParseAddress") {
     it("should return expected label/value pairs") {
-      assume(
-        System.getProperty("java.version").split("\\.")(0).toInt >= 17,
-        "Libpostal requires at least Java 17")
-
       val resultDf = sparkSession
         .sql(
           "SELECT ParseAddress('781 Franklin Ave Crown Heights Brooklyn NY 11216 USA') as parsed")
@@ -121,19 +105,11 @@ class AddressProcessingFunctionsTest extends TestBaseScala with BeforeAndAfterEa
     }
 
     it("should return null for null input") {
-      assume(
-        System.getProperty("java.version").split("\\.")(0).toInt >= 17,
-        "Libpostal requires at least Java 17")
-
       val result = sparkSession.sql("SELECT ParseAddress(NULL) as parsed").collect()
       assert(result.head.get(0) == null)
     }
 
     it("should should work when chained with explode") {
-      assume(
-        System.getProperty("java.version").split("\\.")(0).toInt >= 17,
-        "Libpostal requires at least Java 17")
-
       val result = sparkSession
         .sql("SELECT Explode(ParseAddress('781 Franklin Ave Crown Heights Brooklyn NY 11216 USA')) as parsed")
         .collect()
@@ -158,10 +134,6 @@ class AddressProcessingFunctionsTest extends TestBaseScala with BeforeAndAfterEa
 
   describe("DataFrame API") {
     it("should return expected normalized forms using ExpandAddress") {
-      assume(
-        System.getProperty("java.version").split("\\.")(0).toInt >= 17,
-        "Libpostal requires at least Java 17")
-
       val result = sparkSession
         .range(1)
         .select(ExpandAddress(f.lit("781 Franklin Ave Crown Heights Brooklyn NY 11216 USA"))
@@ -172,10 +144,6 @@ class AddressProcessingFunctionsTest extends TestBaseScala with BeforeAndAfterEa
     }
 
     it("should return expected label/value pairs using ParseAddress") {
-      assume(
-        System.getProperty("java.version").split("\\.")(0).toInt >= 17,
-        "Libpostal requires at least Java 17")
-
       val result = sparkSession
         .range(1)
         .select(ParseAddress(f.lit("781 Franklin Ave Crown Heights Brooklyn NY 11216 USA")))
@@ -201,10 +169,6 @@ class AddressProcessingFunctionsTest extends TestBaseScala with BeforeAndAfterEa
 
   describe("Codegen") {
     it("should return the same values as non-codegen for ExpandAddress and ParseAddress") {
-      assume(
-        System.getProperty("java.version").split("\\.")(0).toInt >= 17,
-        "Libpostal requires at least Java 17")
-
       val expected = sparkSession
         .range(1)
         .select(
@@ -228,10 +192,6 @@ class AddressProcessingFunctionsTest extends TestBaseScala with BeforeAndAfterEa
 
     it(
       "should return the same values as non-codegen for ExpandAddress and ParseAddress for null input") {
-      assume(
-        System.getProperty("java.version").split("\\.")(0).toInt >= 17,
-        "Libpostal requires at least Java 17")
-
       val expected = sparkSession
         .range(1)
         .select(
@@ -252,10 +212,6 @@ class AddressProcessingFunctionsTest extends TestBaseScala with BeforeAndAfterEa
     }
 
     it("should return the same values as non-code-gen case with explode") {
-      assume(
-        System.getProperty("java.version").split("\\.")(0).toInt >= 17,
-        "Libpostal requires at least Java 17")
-
       // debugging reveals this goes through codegen, but not sure why
       val codeGenResult = sparkSession
         .range(1)
