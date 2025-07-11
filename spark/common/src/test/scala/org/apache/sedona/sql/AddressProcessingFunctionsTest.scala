@@ -22,11 +22,13 @@ import org.apache.sedona.core.utils.SedonaConf
 import org.apache.spark.sql.sedona_sql.expressions.st_functions.{ExpandAddress, ParseAddress}
 import org.apache.spark.sql.{Row, functions => f}
 import org.scalatest.BeforeAndAfterEach
+import org.slf4j.LoggerFactory
 
 import java.nio.file.{Files, Paths}
 import scala.collection.mutable
 
 class AddressProcessingFunctionsTest extends TestBaseScala with BeforeAndAfterEach {
+  private val logger = LoggerFactory.getLogger(getClass)
   var clearedLibPostal = false
 
   def clearLibpostalDataDir(): String = {
@@ -38,7 +40,8 @@ class AddressProcessingFunctionsTest extends TestBaseScala with BeforeAndAfterEa
           .sorted(java.util.Comparator.reverseOrder())
           .forEach(path => Files.deleteIfExists(path))
       } catch {
-        case e: Exception => println(s"Failed to clear libpostal data directory: ${e.getMessage}")
+        case e: Exception =>
+          logger.warn(s"Failed to clear libpostal data directory: ${e.getMessage}")
       }
     }
     dir
@@ -57,7 +60,10 @@ class AddressProcessingFunctionsTest extends TestBaseScala with BeforeAndAfterEa
       val resultDf = sparkSession
         .sql(
           "SELECT ExpandAddress('781 Franklin Ave Crown Heights Brooklyn NY 11216 USA') as normalized")
-      resultDf.show() // Tests a deserialization step that collect does not
+      resultDf.write
+        .format("noop")
+        .mode("overwrite")
+        .save() // Tests a deserialization step that collect does not
       val result = resultDf.collect
         .take(1)(0)(0)
         .asInstanceOf[mutable.Seq[String]]
@@ -83,7 +89,10 @@ class AddressProcessingFunctionsTest extends TestBaseScala with BeforeAndAfterEa
       val resultDf = sparkSession
         .sql(
           "SELECT ParseAddress('781 Franklin Ave Crown Heights Brooklyn NY 11216 USA') as parsed")
-      resultDf.show() // Tests a deserialization step that collect does not
+      resultDf.write
+        .format("noop")
+        .mode("overwrite")
+        .save() // Tests a deserialization step that collect does not
       val result = resultDf
         .take(1)(0)(0)
         .asInstanceOf[mutable.Seq[Row]]
