@@ -27,7 +27,7 @@ import java.nio.file.{Files, Paths}
 import scala.collection.mutable
 
 class AddressProcessingFunctionsTest extends TestBaseScala with BeforeAndAfterEach {
-  var clearedLibPostal = true
+  var clearedLibPostal = false
 
   def clearLibpostalDataDir(): String = {
     val dir = SedonaConf.fromActiveSession().getLibPostalDataDir
