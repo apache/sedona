@@ -365,21 +365,35 @@ class TestGeoSeries(TestBase):
                 GeometryCollection(
                     [MultiPoint([(0, 0), (1, 1), (0, 1), (1, 0)]), Point(0, 1)]
                 ),
+                Polygon(),
+                GeometryCollection(),
             ]
         )
 
         result = s.get_geometry(0)
         expected = gpd.GeoSeries(
-            [Point(0, 0), Point(0, 0), MultiPoint([(0, 0), (1, 1), (0, 1), (1, 0)])]
+            [
+                Point(0, 0),
+                Point(0, 0),
+                MultiPoint([(0, 0), (1, 1), (0, 1), (1, 0)]),
+                Polygon(),
+                None,
+            ]
         )
         self.check_sgpd_equals_gpd(result, expected)
 
         result = s.get_geometry(1)
-        expected = gpd.GeoSeries([None, Point(1, 1), Point(0, 1)])
+        expected = gpd.GeoSeries([None, Point(1, 1), Point(0, 1), None, None])
         self.check_sgpd_equals_gpd(result, expected)
 
         result = s.get_geometry(-1)
-        expected = gpd.GeoSeries([Point(0, 0), Point(1, 0), Point(0, 1)])
+        expected = gpd.GeoSeries(
+            [Point(0, 0), Point(1, 0), Point(0, 1), Polygon(), None]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = s.get_geometry(2)
+        expected = gpd.GeoSeries([None, Point(0, 1), None, None, None])
         self.check_sgpd_equals_gpd(result, expected)
 
     def test_boundary(self):

@@ -830,7 +830,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("This method is not implemented yet.")
 
     def get_geometry(self, index) -> "GeoSeries":
-        """Returns the n-th geometry from a collection of geometries.
+        """Returns the n-th geometry from a collection of geometries (0-indexed).
+
+        If the index is non-negative, it returns the geometry at that index.
+        If the index is negative, it counts backward from the end of the collection (e.g., -1 returns the last geometry).
+        Returns None if the index is out of bounds.
 
         Parameters
         ----------
@@ -856,30 +860,40 @@ class GeoSeries(GeoFrame, pspd.Series):
         ...         GeometryCollection(
         ...             [MultiPoint([(0, 0), (1, 1), (0, 1), (1, 0)]), Point(0, 1)]
         ...         ),
+        ...         Polygon(),
+        ...         GeometryCollection(),
         ...     ]
         ... )
         >>> s
         0                                          POINT (0 0)
         1              MULTIPOINT ((0 0), (1 1), (0 1), (1 0))
         2    GEOMETRYCOLLECTION (MULTIPOINT ((0 0), (1 1), ...
+        3                                        POLYGON EMPTY
+        4                             GEOMETRYCOLLECTION EMPTY
         dtype: geometry
 
         >>> s.get_geometry(0)
         0                                POINT (0 0)
         1                                POINT (0 0)
         2    MULTIPOINT ((0 0), (1 1), (0 1), (1 0))
+        3                              POLYGON EMPTY
+        4                                       None
         dtype: geometry
 
         >>> s.get_geometry(1)
         0           None
         1    POINT (1 1)
         2    POINT (0 1)
+        3           None
+        4           None
         dtype: geometry
 
         >>> s.get_geometry(-1)
         0    POINT (0 0)
         1    POINT (1 0)
         2    POINT (0 1)
+        3  POLYGON EMPTY
+        4           None
         dtype: geometry
 
         """
@@ -889,6 +903,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         ST_GeometryN(
             `L`,
             CASE
+                WHEN ST_NumGeometries(`L`) + `R` < 0 THEN NULL
                 WHEN `R` < 0 THEN ST_NumGeometries(`L`) + `R`
                 ELSE `R`
             END

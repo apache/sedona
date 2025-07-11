@@ -414,6 +414,13 @@ class TestMatchGeopandasSeries(TestBase):
                 gpd_result = gpd.GeoSeries(geom).get_geometry(index)
                 self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
+        data = [GeometryCollection(), Polygon(), MultiPolygon()]
+
+        for idx in [-2, -1, 0, 1]:
+            sgpd_result = GeoSeries(data).get_geometry(idx)
+            gpd_result = gpd.GeoSeries(data).get_geometry(idx)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
     def test_boundary(self):
         pass
 
