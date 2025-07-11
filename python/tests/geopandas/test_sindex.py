@@ -143,3 +143,273 @@ class TestSpatialIndex(TestBase):
 
         # Verify no results for point outside
         assert len(outside_results) == 0
+
+    def test_nearest_method(self):
+        """Test the nearest method for finding k-nearest neighbors."""
+        # Create a spatial DataFrame with points
+        points_data = [
+            (1, "POINT(0 0)"),
+            (2, "POINT(1 1)"),
+            (3, "POINT(2 2)"),
+            (4, "POINT(3 3)"),
+            (5, "POINT(4 4)"),
+        ]
+
+        df = self.spark.createDataFrame(points_data, ["id", "wkt"])
+        spatial_df = df.withColumn("geometry", expr("ST_GeomFromWKT(wkt)"))
+
+        # Create a SpatialIndex from the DataFrame
+        spark_sindex = SpatialIndex(
+            spatial_df, index_type="strtree", column_name="geometry"
+        )
+
+        # Test finding single nearest neighbor
+        query_point = Point(1.2, 1.2)
+        nearest_result = spark_sindex.nearest(query_point)
+        assert len(nearest_result) == 1
+
+        # The nearest point should have id=2 (POINT(1 1))
+        assert nearest_result[0].geom.wkt == "POINT (1 1)"
+
+        # Test finding k=2 nearest neighbors
+        nearest_2_results = spark_sindex.nearest(query_point, k=2)
+        assert len(nearest_2_results) == 2
+
+        # Test with return_distance=True
+        nearest_with_dist = spark_sindex.nearest(query_point, k=2, return_distance=True)
+        assert len(nearest_with_dist) == 2  # Returns tuple of (rows, distances)
+        rows, distances = nearest_with_dist
+        assert len(rows) == 2
+        assert len(distances) == 2
+        assert all(d >= 0 for d in distances)  # Distances should be non-negative
+
+    def test_nearest_spark_with_various_geometries(self):
+        """Test nearest with different geometry types in Spark mode."""
+        # Create a spatial DataFrame with mixed geometry types
+        mixed_data = [
+            (1, "POINT(0 0)"),
+            (2, "LINESTRING(1 1, 2 2)"),
+            (3, "POLYGON((2 2, 3 2, 3 3, 2 3, 2 2))"),
+            (4, "POINT(3 3)"),
+            (5, "POLYGON((4 4, 5 4, 5 5, 4 5, 4 4))"),
+        ]
+
+        df = self.spark.createDataFrame(mixed_data, ["id", "wkt"])
+        spatial_df = df.withColumn("geometry", expr("ST_GeomFromWKT(wkt)"))
+        spark_sindex = SpatialIndex(
+            spatial_df, index_type="strtree", column_name="geometry"
+        )
+
+        # Test with point query
+        query_point = Point(2.5, 2.5)
+        nearest_geom = spark_sindex.nearest(query_point)
+
+        # Should find polygon containing the point
+        assert len(nearest_geom) == 1
+        assert "POLYGON" in nearest_geom[0].geom.wkt
+
+        # Test with linestring query
+        query_line = LineString([(1.5, 1.5), (2.5, 2.5)])
+        nearest_to_line = spark_sindex.nearest(query_line)
+        assert len(nearest_to_line) == 1
+
+    def test_nearest_spark_with_less_results_than_k(self):
+        """Test nearest when less or no results are expected."""
+        # Create DataFrame with only one point
+        single_point = [(1, "POINT(0 0)")]
+        df = self.spark.createDataFrame(single_point, ["id", "wkt"])
+        spatial_df = df.withColumn("geometry", expr("ST_GeomFromWKT(wkt)"))
+        spark_sindex = SpatialIndex(
+            spatial_df, index_type="strtree", column_name="geometry"
+        )
+
+        # Query with k=5 when only 1 point exists
+        results = spark_sindex.nearest(Point(0.1, 0.1), k=5)
+        assert len(results) == 1  # Should only return the one available point
+
+    def test_nearest_spark_with_distance_verification(self):
+        """Test that nearest returns results in correct distance order."""
+        # Create points in a grid pattern
+        grid_points = [
+            (1, "POINT(0 0)"),
+            (2, "POINT(1 0)"),
+            (3, "POINT(0 1)"),
+            (4, "POINT(1 1)"),
+            (5, "POINT(2 2)"),
+        ]
+
+        df = self.spark.createDataFrame(grid_points, ["id", "wkt"])
+        spatial_df = df.withColumn("geometry", expr("ST_GeomFromWKT(wkt)"))
+        spark_sindex = SpatialIndex(
+            spatial_df, index_type="strtree", column_name="geometry"
+        )
+
+        # Query point at (0.5, 0.5)
+        query_point = Point(0.5, 0.5)
+
+        # Get 3 nearest with distances
+        results, distances = spark_sindex.nearest(
+            query_point, k=3, return_distance=True
+        )
+
+        # Verify distances are in ascending order
+        assert distances[0] <= distances[1] <= distances[2]
+
+        # Manually calculate expected distances
+        expected_nearest_points = [
+            Point(0, 0),
+            Point(1, 0),
+            Point(0, 1),
+            Point(1, 1),
+            Point(2, 2),
+        ]
+        expected_distances = [p.distance(query_point) for p in expected_nearest_points]
+        expected_distances.sort()
+
+        # Verify the first 3 distances match our calculations
+        for i in range(3):
+            assert abs(distances[i] - expected_distances[i]) < 0.0001
+
+    def test_nearest_spark_with_identical_distances(self):
+        """Test nearest when multiple geometries have identical distances."""
+        # Create points that are equidistant from center
+        equidistant_points = [
+            (1, "POINT(0 1)"),  # 1 unit from center
+            (2, "POINT(1 0)"),  # 1 unit from center
+            (3, "POINT(0 -1)"),  # 1 unit from center
+            (4, "POINT(-1 0)"),  # 1 unit from center
+            (5, "POINT(2 2)"),  # Center point
+        ]
+
+        df = self.spark.createDataFrame(equidistant_points, ["id", "wkt"])
+        spatial_df = df.withColumn("geometry", expr("ST_GeomFromWKT(wkt)"))
+        spark_sindex = SpatialIndex(
+            spatial_df, index_type="strtree", column_name="geometry"
+        )
+
+        # Query center point
+        query_point = Point(0, 0)
+
+        # Get the 4 nearest points
+        results = spark_sindex.nearest(query_point, k=4)
+        assert len(results) == 4
+
+        # With return_distance, verify the center point has distance 0
+        results, distances = spark_sindex.nearest(
+            query_point, k=4, return_distance=True
+        )
+        assert min(distances) == 1.0
+
+    def test_intersection_method(self):
+        """Test the intersection method for finding geometries that intersect a bounding box."""
+
+        # Create a spatial DataFrame with polygons
+        polygons_data = [
+            (1, "POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))"),
+            (2, "POLYGON((1 1, 2 1, 2 2, 1 2, 1 1))"),
+            (3, "POLYGON((2 2, 3 2, 3 3, 2 3, 2 2))"),
+            (4, "POLYGON((3 3, 4 3, 4 4, 3 4, 3 3))"),
+            (5, "POLYGON((4 4, 5 4, 5 5, 4 5, 4 4))"),
+        ]
+
+        df = self.spark.createDataFrame(polygons_data, ["id", "wkt"])
+        spatial_df = df.withColumn("geometry", expr("ST_GeomFromWKT(wkt)"))
+
+        # Create a SpatialIndex from the DataFrame
+        spark_sindex = SpatialIndex(
+            spatial_df, index_type="strtree", column_name="geometry"
+        )
+
+        # Test intersection with a bounding box that should intersect with middle polygons
+        bounds = (
+            1.5,
+            1.5,
+            3.5,
+            3.5,
+        )  # Should intersect with polygons at (2,2) and (3,3)
+        result_rows = spark_sindex.intersection(bounds)
+
+        # Verify correct results are returned
+        assert len(result_rows) >= 2
+
+        # Test with bounds that don't intersect any geometry
+        empty_bounds = (10, 10, 11, 11)
+        empty_results = spark_sindex.intersection(empty_bounds)
+        assert len(empty_results) == 0
+
+        # Test with bounds that cover all geometries
+        full_bounds = (-1, -1, 6, 6)
+        full_results = spark_sindex.intersection(full_bounds)
+        assert len(full_results) == 5  # Should match all 5 polygons
+
+    def test_intersection_with_points(self):
+        """Test the intersection method with point geometries."""
+        # Create a spatial DataFrame with points
+        points_data = [
+            (1, "POINT(0 0)"),
+            (2, "POINT(1 1)"),
+            (3, "POINT(2 2)"),
+            (4, "POINT(3 3)"),
+            (5, "POINT(4 4)"),
+        ]
+
+        df = self.spark.createDataFrame(points_data, ["id", "wkt"])
+        spatial_df = df.withColumn("geometry", expr("ST_GeomFromWKT(wkt)"))
+        spark_sindex = SpatialIndex(
+            spatial_df, index_type="strtree", column_name="geometry"
+        )
+
+        # Test with bounds containing points 2, 3
+        bounds = (0.5, 0.5, 2.5, 2.5)
+        results = spark_sindex.intersection(bounds)
+
+        # Verify correct results
+        assert len(results) == 2
+
+    def test_intersection_with_linestrings(self):
+        """Test the intersection method with linestring geometries."""
+        # Create a spatial DataFrame with linestrings
+        lines_data = [
+            (1, "LINESTRING(0 0, 1 1)"),
+            (2, "LINESTRING(1 1, 2 2)"),
+            (3, "LINESTRING(2 2, 3 3)"),
+            (4, "LINESTRING(3 3, 4 4)"),
+            (5, "LINESTRING(4 4, 5 5)"),
+        ]
+
+        df = self.spark.createDataFrame(lines_data, ["id", "wkt"])
+        spatial_df = df.withColumn("geometry", expr("ST_GeomFromWKT(wkt)"))
+        spark_sindex = SpatialIndex(
+            spatial_df, index_type="strtree", column_name="geometry"
+        )
+
+        # Test with bounds crossing lines 2, 3
+        bounds = (1.5, 1.5, 2.5, 2.5)
+        results = spark_sindex.intersection(bounds)
+
+        # Verify results
+        assert len(results) == 2
+
+    def test_intersection_with_mixed_geometries(self):
+        """Test the intersection method with mixed geometry types."""
+        # Create a spatial DataFrame with mixed geometry types
+        mixed_data = [
+            (1, "POINT(0 0)"),
+            (2, "LINESTRING(1 1, 2 2)"),
+            (3, "POLYGON((2 2, 3 2, 3 3, 2 3, 2 2))"),
+            (4, "POINT(3 3)"),
+            (5, "LINESTRING(4 4, 5 5)"),
+        ]
+
+        df = self.spark.createDataFrame(mixed_data, ["id", "wkt"])
+        spatial_df = df.withColumn("geometry", expr("ST_GeomFromWKT(wkt)"))
+        spark_sindex = SpatialIndex(
+            spatial_df, index_type="strtree", column_name="geometry"
+        )
+
+        # Test with bounds that should intersect with polygon and point
+        bounds = (2.5, 2.5, 3.5, 3.5)
+        results = spark_sindex.intersection(bounds)
+
+        # Verify results
+        assert len(results) == 2

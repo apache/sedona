@@ -69,7 +69,6 @@ public class PolygonGeography extends S2Geography {
 
   @Override
   public void encode(UnsafeOutput out, EncodeOptions opts) throws IOException {
-    // Encode polygon
     polygon.encode(out);
     out.flush();
   }
