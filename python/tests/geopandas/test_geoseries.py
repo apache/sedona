@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import shapely
 import numpy as np
 import pytest
 import pandas as pd
@@ -446,6 +447,10 @@ class TestGeoSeries(TestBase):
         pass
 
     def test_get_geometry(self):
+        # Shapely 1 seems to have a bug where Polygon() is incorrectly interpreted as a GeometryCollection
+        if shapely.__version__ < "2.0.0":
+            return
+
         from shapely.geometry import MultiPoint
 
         s = GeoSeries(
