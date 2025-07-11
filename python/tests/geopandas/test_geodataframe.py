@@ -174,7 +174,6 @@ class TestDataframe(TestGeopandasBase):
         assert type(df_copy) is GeoDataFrame
 
     def test_set_geometry(self):
-        # ps.set_option("compute.ops_on_diff_frames", True)
         points1 = [Point(x, x) for x in range(3)]
         points2 = [Point(x + 5, x + 5) for x in range(3)]
 
@@ -185,12 +184,14 @@ class TestDataframe(TestGeopandasBase):
         with pytest.raises(AttributeError):
             _ = sgpd_df.geometry
 
-        with self.ps_allow_diff_frames():  # TODO: remove
+        # TODO: Try to optimize this with self.ps_allow_diff_frames() away
+        with self.ps_allow_diff_frames():
             sgpd_df = sgpd_df.set_geometry("geometry1")
 
         assert sgpd_df.geometry.name == "geometry1"
 
-        with self.ps_allow_diff_frames():  # TODO: remove
+        # TODO: Try to optimize this with self.ps_allow_diff_frames() away
+        with self.ps_allow_diff_frames():
             sgpd_df.set_geometry("geometry2", inplace=True)
         assert sgpd_df.geometry.name == "geometry2"
 
@@ -228,8 +229,6 @@ class TestDataframe(TestGeopandasBase):
 
         assert new_df.crs == sgpd_df.crs
         assert new_df.geometry.crs == sgpd_df.crs
-
-        # ps.reset_option("compute.ops_on_diff_frames")
 
     def test_active_geometry_name(self):
         if parse_version(gpd.__version__) < parse_version("1.0.0"):

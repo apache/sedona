@@ -21,6 +21,7 @@ import typing
 
 import warnings
 import numpy as np
+import shapely
 import geopandas as gpd
 import pandas as pd
 import pyspark.pandas as pspd
@@ -110,8 +111,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
             try:
                 result = sgpd.GeoSeries(ps_series)
-                # from pyspark.pandas.utils import same_anchor
-                # print("getitem same_anchor(result, self):", same_anchor(result, self))
                 return result
             except:
                 return ps_series
@@ -159,19 +158,48 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         from sedona.geopandas import GeoSeries
         from pyspark.sql import DataFrame as SparkDataFrame
 
+        def try_geom_to_ewkb(x) -> bytes:
+            if isinstance(x, BaseGeometry):
+                kwargs = {}
+                if crs:
+                    from pyproj import CRS
+
+                    srid = CRS.from_user_input(crs)
+                    kwargs["srid"] = srid.to_epsg()
+
+                return shapely.wkb.dumps(x, **kwargs)
+            elif isinstance(x, bytearray):
+                return bytes(x)
+            elif x is None or isinstance(x, bytes):
+                return x
+            else:
+                raise TypeError(f"expected geometry or bytes, got {type(x)}: {x}")
+
         if isinstance(data, (GeoDataFrame, GeoSeries)):
             assert dtype is None
             assert not copy
+
+            if data.crs is None:
+                data.crs = crs
+
             super().__init__(data, index=index, dtype=dtype, copy=copy)
         elif isinstance(data, (PandasOnSparkSeries, PandasOnSparkDataFrame)):
             assert columns is None
             assert dtype is None
             assert not copy
+
+            if isinstance(data, PandasOnSparkSeries):
+                data = data.to_pandas()
+            else:
+                for col in data.columns:
+                    data[col] = data[col].apply(try_geom_to_ewkb)
+
             super().__init__(data, index=index, dtype=dtype)
         elif isinstance(data, SparkDataFrame):
             assert columns is None
             assert dtype is None
             assert not copy
+
             if index is None:
                 internal = InternalFrame(spark_frame=data, index_spark_columns=None)
                 object.__setattr__(self, "_internal_frame", internal)
@@ -192,32 +220,12 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             gdf = gpd.GeoDataFrame(df)
             # convert each geometry column to wkb type
 
-            # import shapely
-            # def try_geom_to_ewkb(x) -> bytes:
-            #     if isinstance(x, BaseGeometry):
-            #         kwargs = {}
-            #         if crs:
-            #             from pyproj import CRS
-
-            #             srid = CRS.from_user_input(crs)
-            #             kwargs["srid"] = srid.to_epsg()
-
-            #         return shapely.wkb.dumps(x, **kwargs)
-            #     elif isinstance(x, bytearray):
-            #         return bytes(x)
-            #     elif x is None or isinstance(x, bytes):
-            #         return x
-            #     else:
-            #         raise TypeError(f"expected geometry or bytes, got {type(x)}: {x}")
-
             for col in gdf.columns:
                 # It's possible we get a list, dict, pd.Series, gpd.GeoSeries, etc of shapely.Geometry objects.
-                if len(gdf[col]) > 0 and isinstance(gdf[col].iloc[0], BaseGeometry):
-                    gdf[col] = gdf[col].apply(lambda geom: geom.wkb)
-            #     try:
-            #         gdf[col] = gdf[col].apply(try_geom_to_ewkb)
-            #     except:
-            #         pass
+                try:
+                    gdf[col] = gdf[col].apply(try_geom_to_ewkb)
+                except TypeError:
+                    pass
 
             pdf = pd.DataFrame(gdf)
 
@@ -397,8 +405,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         else:  # should be a colname
             try:
                 level = frame[col]
-                # from pyspark.pandas.utils import same_anchor
-                # print("same_anchor(level, frame):", same_anchor(level, frame))
+                from pyspark.pandas.utils import same_anchor
+
+                print("same_anchor(level, frame):", same_anchor(level, frame))
             except KeyError:
                 raise ValueError(f"Unknown column {col}")
             if isinstance(level, (sgpd.GeoDataFrame, gpd.GeoDataFrame)):
