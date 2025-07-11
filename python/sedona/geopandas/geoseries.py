@@ -157,12 +157,26 @@ class GeoSeries(GeoFrame, pspd.Series):
             # but this should be resolved if/once https://github.com/apache/spark/pull/51300 is merged in.
             # For now, we reset self._anchor = data to have keep the geometry information (e.g crs) that's lost in to_pandas()
 
-            pd_data = data.to_pandas()
-
             try:
-                pd_data = pd_data.apply(try_geom_to_ewkb)
+                data = data.apply(try_geom_to_ewkb)
             except Exception as e:
                 raise TypeError(f"Non-geometry column passed to GeoSeries: {e}")
+
+            if isinstance(data, pspd.Series):
+                index = data._col_label
+                data = pspd.DataFrame(data)
+
+            if not index:
+                index = data._internal.column_labels[0]
+
+            pd_data = data
+
+            # pd_data = data.to_pandas()
+
+            # try:
+            #     pd_data = pd_data.apply(try_geom_to_ewkb)
+            # except Exception as e:
+            #     raise TypeError(f"Non-geometry column passed to GeoSeries: {e}")
 
             super().__init__(
                 data=pd_data,
@@ -535,9 +549,21 @@ class GeoSeries(GeoFrame, pspd.Series):
         """
         pd_series = self._to_internal_pandas()
         try:
+
+            def try_wkb_to_geom(wkb):
+                if wkb:
+                    try:
+                        return shapely.from_wkb(bytes(wkb))
+                    except Exception as e:
+                        print(f"Error converting WKB to geometry: {e}\n{bytes(wkb)}")
+
+                return None
+
             return gpd.GeoSeries(
                 pd_series.map(
-                    lambda wkb: shapely.wkb.loads(bytes(wkb)) if wkb else None
+                    # lambda wkb: shapely.wkb.loads(bytes(wkb)) if wkb else None
+                    # lambda wkb: shapely.from_wkb(bytes(wkb)) if wkb else None
+                    try_wkb_to_geom
                 ),
                 crs=self.crs,
             )
