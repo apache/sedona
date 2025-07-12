@@ -42,6 +42,12 @@ public abstract class S2Geography {
     this.kind = kind;
   }
 
+  public void setSRID(int srid) {}
+
+  public int getSRID() {
+    return -1;
+  }
+
   public enum GeographyKind {
     UNINITIALIZED(0),
     POINT(1),

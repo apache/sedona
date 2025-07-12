@@ -27,6 +27,9 @@ import com.google.common.geometry.PrimitiveArrays.Bytes;
 import java.io.*;
 import java.util.*;
 import java.util.List;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateSequence;
+import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +70,7 @@ public class PointGeography extends S2Geography {
 
   @Override
   public int numShapes() {
-    return points.isEmpty() ? 0 : 1;
+    return points.size();
   }
 
   @Override
@@ -238,5 +241,19 @@ public class PointGeography extends S2Geography {
 
     geo.points.addAll(pts);
     return geo;
+  }
+
+  public CoordinateSequence getCoordinateSequence() {
+    List<S2Point> pts = getPoints();
+    Coordinate[] coordArray = new Coordinate[pts.size()];
+    for (int i = 0; i < pts.size(); i++) {
+      S2Point pt = pts.get(i);
+      S2LatLng ll = new S2LatLng(pt);
+      double lat = ll.latDegrees();
+      double lon = ll.lngDegrees();
+      Coordinate c = new Coordinate(lon, lat);
+      coordArray[i] = c;
+    }
+    return new CoordinateArraySequence(coordArray);
   }
 }
