@@ -192,7 +192,10 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 data = data.to_pandas()
             else:
                 for col in data.columns:
-                    data[col] = data[col].apply(try_geom_to_ewkb)
+                    try:
+                        data[col] = data[col].apply(try_geom_to_ewkb)
+                    except TypeError:
+                        pass
 
             super().__init__(data, index=index, dtype=dtype)
         elif isinstance(data, SparkDataFrame):
@@ -405,9 +408,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         else:  # should be a colname
             try:
                 level = frame[col]
-                from pyspark.pandas.utils import same_anchor
-
-                print("same_anchor(level, frame):", same_anchor(level, frame))
             except KeyError:
                 raise ValueError(f"Unknown column {col}")
             if isinstance(level, (sgpd.GeoDataFrame, gpd.GeoDataFrame)):

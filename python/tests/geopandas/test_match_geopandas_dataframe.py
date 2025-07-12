@@ -127,7 +127,8 @@ class TestMatchGeopandasDataFrame(TestGeopandasBase):
         sgpd_df = GeoDataFrame(self.geometries)
         gpd_df = gpd.GeoDataFrame(self.geometries)
 
-        sgpd_df = sgpd_df.set_geometry("points")
+        with self.ps_allow_diff_frames():
+            sgpd_df = sgpd_df.set_geometry("points")
         gpd_df = gpd_df.set_geometry("points")
         assert sgpd_df.geometry.name == gpd_df.geometry.name
 
@@ -140,7 +141,8 @@ class TestMatchGeopandasDataFrame(TestGeopandasBase):
         sgpd_df = GeoDataFrame(self.geometries)
         gpd_df = gpd.GeoDataFrame(self.geometries)
 
-        sgpd_df = sgpd_df.set_geometry("polygons")
+        with self.ps_allow_diff_frames():
+            sgpd_df = sgpd_df.set_geometry("polygons")
         gpd_df = gpd_df.set_geometry("polygons")
         assert sgpd_df.geometry.name == gpd_df.geometry.name
         assert (
@@ -153,16 +155,19 @@ class TestMatchGeopandasDataFrame(TestGeopandasBase):
         sgpd_df = GeoDataFrame(self.geometries)
         gpd_df = gpd.GeoDataFrame(self.geometries)
 
-        sgpd_df = sgpd_df.set_geometry("polygons")
+        with self.ps_allow_diff_frames():
+            sgpd_df = sgpd_df.set_geometry("polygons")
         gpd_df = gpd_df.set_geometry("polygons")
         assert sgpd_df.geometry.name == gpd_df.geometry.name
 
         # test inplace
-        sgpd_df.rename_geometry("random", inplace=True)
+        with self.ps_allow_diff_frames():
+            sgpd_df.rename_geometry("random", inplace=True)
         gpd_df.rename_geometry("random", inplace=True)
         assert sgpd_df.geometry.name == gpd_df.geometry.name
 
         # Ensure the names are different when we rename to different names
-        sgpd_df = sgpd_df.rename_geometry("name1")
+        with self.ps_allow_diff_frames():
+            sgpd_df = sgpd_df.rename_geometry("name1")
         gpd_df = gpd_df.rename_geometry("name2")
         assert sgpd_df.geometry.name != gpd_df.geometry.name
