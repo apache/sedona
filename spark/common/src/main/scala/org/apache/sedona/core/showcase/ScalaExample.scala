@@ -21,7 +21,6 @@ package org.apache.sedona.core.showcase
 import org.apache.log4j.{Level, Logger}
 import org.apache.sedona.common.enums.FileDataSplitter
 import org.apache.sedona.core.enums.{GridType, IndexType}
-import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileRDD
 import org.apache.sedona.core.serde.SedonaKryoRegistrator
 import org.apache.sedona.core.spatialOperator.{JoinQuery, KNNQuery, RangeQuery, SpatialPredicate}
 import org.apache.sedona.core.spatialRDD.{CircleRDD, PointRDD, PolygonRDD}
@@ -253,24 +252,4 @@ object ScalaExample extends App {
         .count
     }
   }
-
-  @throws[Exception]
-  def testLoadShapefileIntoPolygonRDD(): Unit = {
-    val shapefileRDD = new ShapefileRDD(sc, ShapeFileInputLocation)
-    val spatialRDD = new PolygonRDD(shapefileRDD.getPolygonRDD)
-    try
-      RangeQuery
-        .SpatialRangeQuery(
-          spatialRDD,
-          new Envelope(-180, 180, -90, 90),
-          SpatialPredicate.COVERED_BY,
-          false)
-        .count
-    catch {
-      case e: Exception =>
-        // TODO Auto-generated catch block
-        e.printStackTrace()
-    }
-  }
-
 }

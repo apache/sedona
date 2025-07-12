@@ -329,7 +329,10 @@ public class ShapefileReaderTest extends TestBase {
   }
 
   private String getShapeFilePath(String fileName) {
-    return ShapefileRDDTest.class.getClassLoader().getResource("shapefiles/" + fileName).getPath();
+    return ShapefileReaderTest.class
+        .getClassLoader()
+        .getResource("shapefiles/" + fileName)
+        .getPath();
   }
 
   private FeatureCollection<SimpleFeatureType, SimpleFeature> loadFeatures(String filePath)
