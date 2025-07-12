@@ -492,10 +492,42 @@ class TestGeoSeries(TestBase):
         self.check_sgpd_equals_gpd(result, expected)
 
     def test_boundary(self):
-        pass
+        s = sgpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                LineString([(0, 0), (1, 1), (1, 0)]),
+                Point(0, 0),
+                GeometryCollection([Point(0, 0)]),
+            ]
+        )
+        result = s.boundary
+        expected = gpd.GeoSeries(
+            [
+                LineString([(0, 0), (1, 1), (0, 1), (0, 0)]),
+                MultiPoint([(0, 0), (1, 0)]),
+                GeometryCollection([]),
+                None,
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
 
     def test_centroid(self):
-        pass
+        s = sgpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                LineString([(0, 0), (1, 1), (1, 0)]),
+                Point(0, 0),
+            ]
+        )
+        result = s.centroid
+        expected = gpd.GeoSeries(
+            [
+                Point(0.3333333333333333, 0.6666666666666666),
+                Point(0.7071067811865476, 0.5),
+                Point(0, 0),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
 
     def test_concave_hull(self):
         pass
@@ -510,7 +542,24 @@ class TestGeoSeries(TestBase):
         pass
 
     def test_envelope(self):
-        pass
+        s = sgpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                LineString([(0, 0), (1, 1), (1, 0)]),
+                MultiPoint([(0, 0), (1, 1)]),
+                Point(0, 0),
+            ]
+        )
+        result = s.envelope
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)]),
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)]),
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)]),
+                Point(0, 0),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
 
     def test_minimum_rotated_rectangle(self):
         pass
