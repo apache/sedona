@@ -134,6 +134,7 @@ nav:
               - Function (Snowflake): api/snowflake/vector-data/Function.md
               - Aggregate Function (Snowflake): api/snowflake/vector-data/AggregateFunction.md
               - Predicate (Snowflake): api/snowflake/vector-data/Predicate.md
+  - Blog: blog/index.md
   - Community:
       - Community: community/contact.md
       - Contributor Guide:
@@ -223,7 +224,11 @@ markdown_extensions:
   - pymdownx.magiclink
   - pymdownx.mark
   - pymdownx.smartsymbols
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.tasklist:
@@ -233,6 +238,15 @@ plugins:
   - search:
   # prebuild_index: true
   - macros
+  - blog:
+      # Format for displaying the date of blog posts (e.g., "full" for full date format)
+      post_date_format: full
+      # Whether to include a table of contents (TOC) for blog posts
+      blog_toc: true
+      # Format for displaying dates in the blog archive (e.g., "MMMM yyyy" for "January 2023")
+      archive_date_format: MMMM yyyy
+      # Maximum number of authors to display in the post excerpt
+      post_excerpt_max_authors: 5
   - git-revision-date-localized:
       type: datetime
   - mike:
