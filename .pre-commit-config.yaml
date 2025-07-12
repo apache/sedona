@@ -14,7 +14,6 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
 ---
 # https://pre-commit.com/#installation
 default_stages: [pre-commit, pre-push]
@@ -285,3 +284,4 @@ repos:
         name: run oxipng
         description: check PNG files with oxipng
         args: ['--fix', '-o', '4', '--strip', 'safe', '--alpha']
+        args: ['-o', '4', '--strip', 'safe', '--alpha']
