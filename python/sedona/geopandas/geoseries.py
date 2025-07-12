@@ -537,7 +537,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         try:
             return gpd.GeoSeries(
                 pd_series.map(
-                    lambda wkb: shapely.wkb.loads(bytes(wkb)) if wkb else None
+                    lambda wkb: (
+                        shapely.wkb.loads(bytes(wkb)) if not pd.isna(wkb) else None
+                    )
                 ),
                 crs=self.crs,
             )
@@ -1029,14 +1031,85 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
     @property
-    def boundary(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def boundary(self) -> "GeoSeries":
+        """Returns a ``GeoSeries`` of lower dimensional objects representing
+        each geometry's set-theoretic `boundary`.
+
+        Examples
+        --------
+
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
+        ...         LineString([(0, 0), (1, 1), (1, 0)]),
+        ...         Point(0, 0),
+        ...     ]
+        ... )
+        >>> s
+        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1        LINESTRING (0 0, 1 1, 1 0)
+        2                       POINT (0 0)
+        dtype: geometry
+
+        >>> s.boundary
+        0    LINESTRING (0 0, 1 1, 0 1, 0 0)
+        1          MULTIPOINT ((0 0), (1 0))
+        2           GEOMETRYCOLLECTION EMPTY
+        dtype: geometry
+
+        See also
+        --------
+        GeoSeries.exterior : outer boundary (without interior rings)
+
+        """
+        col = self.get_first_geometry_column()
+        # Geopandas and shapely return NULL for GeometryCollections, so we handle it separately
+        # https://shapely.readthedocs.io/en/stable/reference/shapely.boundary.html
+        select = f"""
+            CASE
+                WHEN GeometryType(`{col}`) IN ('GEOMETRYCOLLECTION') THEN NULL
+                ELSE ST_Boundary(`{col}`)
+            END"""
+        return self._query_geometry_column(select, col, rename="boundary")
 
     @property
-    def centroid(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def centroid(self) -> "GeoSeries":
+        """Returns a ``GeoSeries`` of points representing the centroid of each
+        geometry.
+
+        Note that centroid does not have to be on or within original geometry.
+
+        Examples
+        --------
+
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
+        ...         LineString([(0, 0), (1, 1), (1, 0)]),
+        ...         Point(0, 0),
+        ...     ]
+        ... )
+        >>> s
+        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1        LINESTRING (0 0, 1 1, 1 0)
+        2                       POINT (0 0)
+        dtype: geometry
+
+        >>> s.centroid
+        0    POINT (0.33333 0.66667)
+        1        POINT (0.70711 0.5)
+        2                POINT (0 0)
+        dtype: geometry
+
+        See also
+        --------
+        GeoSeries.representative_point : point guaranteed to be within each geometry
+        """
+        return self._process_geometry_column("ST_Centroid", rename="centroid")
 
     def concave_hull(self, ratio=0.0, allow_holes=False):
         # Implementation of the abstract method
@@ -1056,9 +1129,46 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    def envelope(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def envelope(self) -> "GeoSeries":
+        """Returns a ``GeoSeries`` of geometries representing the envelope of
+        each geometry.
+
+        The envelope of a geometry is the bounding rectangle. That is, the
+        point or smallest rectangular polygon (with sides parallel to the
+        coordinate axes) that contains the geometry.
+
+        Examples
+        --------
+
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, Point, MultiPoint
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
+        ...         LineString([(0, 0), (1, 1), (1, 0)]),
+        ...         MultiPoint([(0, 0), (1, 1)]),
+        ...         Point(0, 0),
+        ...     ]
+        ... )
+        >>> s
+        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1        LINESTRING (0 0, 1 1, 1 0)
+        2         MULTIPOINT ((0 0), (1 1))
+        3                       POINT (0 0)
+        dtype: geometry
+
+        >>> s.envelope
+        0    POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))
+        1    POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))
+        2    POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))
+        3                            POINT (0 0)
+        dtype: geometry
+
+        See also
+        --------
+        GeoSeries.convex_hull : convex hull geometry
+        """
+        return self._process_geometry_column("ST_Envelope", rename="envelope")
 
     def minimum_rotated_rectangle(self):
         # Implementation of the abstract method
