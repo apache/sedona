@@ -942,6 +942,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         If the index is negative, it counts backward from the end of the collection (e.g., -1 returns the last geometry).
         Returns None if the index is out of bounds.
 
+        Note: Simple geometries act as length-1 collections
+
+        Note: Using Shapely < 2.0, may lead to different results for empty simple geometries due to how
+        shapely interprets them.
+
         Parameters
         ----------
         index : int or array_like
