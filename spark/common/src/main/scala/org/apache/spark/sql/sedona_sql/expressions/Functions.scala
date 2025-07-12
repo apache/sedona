@@ -22,19 +22,23 @@ import org.apache.sedona.common.geometryObjects.Geography
 import org.apache.sedona.common.{Functions, FunctionsGeoTools}
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
 import org.apache.sedona.common.utils.{InscribedCircle, ValidDetail}
+import org.apache.sedona.core.utils.SedonaConf
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, Generator, Nondeterministic}
-import org.apache.spark.sql.catalyst.util.ArrayData
+import org.apache.spark.sql.catalyst.expressions.codegen.{CodegenContext, CodegenFallback, ExprCode}
+import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, Generator, ImplicitCastInputTypes, Nondeterministic, UnaryExpression}
+import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.types._
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom._
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
+import org.apache.spark.sql.sedona_sql.expressions.LibPostalUtils.{getExpanderFromConf, getParserFromConf}
 import org.apache.spark.unsafe.types.UTF8String
 import org.apache.spark.util.Utils
+import com.mapzen.jpostal.{AddressExpander, AddressParser}
+import org.apache.spark.sql.catalyst.expressions.codegen.Block.BlockHelper
 
 case class ST_LabelPoint(inputExpressions: Seq[Expression])
     extends InferredExpression(
@@ -1830,4 +1834,141 @@ case class ST_InterpolatePoint(inputExpressions: Seq[Expression])
     extends InferredExpression(inferrableFunction2(Functions.interpolatePoint)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) =
     copy(inputExpressions = newChildren)
+}
+
+case class ExpandAddress(address: Expression)
+    extends UnaryExpression
+    with ImplicitCastInputTypes
+    with CodegenFallback
+    with FoldableExpression
+    with Serializable {
+
+  def this(children: Seq[Expression]) = this(children.head)
+
+  lazy private final val expander = {
+    val conf = SedonaConf.fromSparkEnv
+    getExpanderFromConf(conf.getLibPostalDataDir, conf.getLibPostalUseSenzing)
+  }
+
+  override def nullable: Boolean = true
+
+  override def inputTypes: Seq[AbstractDataType] = Seq(StringType)
+
+  override def dataType: DataType = ArrayType(StringType)
+
+  override def eval(input: InternalRow): Any = {
+    val addressVal = address.eval(input)
+    if (addressVal == null) {
+      null
+    } else {
+      new GenericArrayData(
+        expander
+          .expandAddress(addressVal.asInstanceOf[UTF8String].toString)
+          .map(UTF8String.fromString))
+    }
+  }
+
+  override protected def doGenCode(ctx: CodegenContext, ev: ExprCode): ExprCode = {
+    val expanderRef = ctx.addReferenceObj("expander", expander, classOf[AddressExpander].getName)
+    val utf8StringClass = "org.apache.spark.unsafe.types.UTF8String"
+    val arrayDataClass = "org.apache.spark.sql.catalyst.util.GenericArrayData"
+    val addressRef = child.genCode(ctx)
+    val address = addressRef.value
+    ev.copy(code = code"""
+          ${addressRef.code}
+          boolean ${ev.isNull} = ${addressRef.isNull};
+          $arrayDataClass ${ev.value} = null;
+
+          if (!${ev.isNull}) {
+            String[] expandedAddressArray = $expanderRef.expandAddress($address.toString());
+            $utf8StringClass[] utf8Strings = new $utf8StringClass[expandedAddressArray.length];
+            for (int j = 0; j < expandedAddressArray.length; j++) {
+              utf8Strings[j] = $utf8StringClass.fromString(expandedAddressArray[j]);
+            }
+            ${ev.value} = new $arrayDataClass(utf8Strings);
+          } else {
+            ${ev.value} = new $arrayDataClass(new $utf8StringClass[0]);
+          }""".stripMargin)
+  }
+
+  override def toString: String = s"ExpandAddress($address)"
+
+  override def child: Expression = address
+
+  override protected def withNewChildInternal(newChild: Expression): Expression =
+    ExpandAddress(newChild)
+}
+
+case class ParseAddress(address: Expression)
+    extends UnaryExpression
+    with ImplicitCastInputTypes
+    with CodegenFallback
+    with FoldableExpression
+    with Serializable {
+
+  def this(children: Seq[Expression]) = this(children.head)
+
+  lazy private final val parser = {
+    val conf = SedonaConf.fromSparkEnv
+    getParserFromConf(conf.getLibPostalDataDir, conf.getLibPostalUseSenzing)
+  }
+
+  override def nullable: Boolean = true
+
+  override def inputTypes: Seq[AbstractDataType] = Seq(StringType)
+
+  override def dataType: DataType = ArrayType(
+    StructType(Seq(StructField("label", StringType), StructField("value", StringType))))
+
+  override def eval(input: InternalRow): Any = {
+    val addressVal = address.eval(input)
+    if (addressVal == null) {
+      null
+    } else {
+      new GenericArrayData(
+        parser
+          .parseAddress(addressVal.asInstanceOf[UTF8String].toString)
+          .map(component =>
+            InternalRow(
+              UTF8String
+                .fromString(component.getLabel),
+              UTF8String.fromString(component.getValue))))
+    }
+  }
+
+  override protected def doGenCode(ctx: CodegenContext, ev: ExprCode): ExprCode = {
+    val parserRef = ctx.addReferenceObj("parser", parser, classOf[AddressParser].getName)
+    val arrayDataClass = "org.apache.spark.sql.catalyst.util.GenericArrayData"
+    val internalRowClass = "org.apache.spark.sql.catalyst.expressions.GenericInternalRow"
+
+    val addressRef = child.genCode(ctx)
+    val address = addressRef.value
+    val code = code"""
+        ${addressRef.code}
+        boolean ${ev.isNull} = ${addressRef.isNull};
+        $arrayDataClass ${ev.value};
+
+        if (!${ev.isNull}) {
+          com.mapzen.jpostal.ParsedComponent[] components = $parserRef.parseAddress($address.toString());
+          $internalRowClass[] rows = new $internalRowClass[components.length];
+          for (int j = 0; j < components.length; j++) {
+            Object[] fields = new Object[2];
+            fields[0] = UTF8String.fromString(components[j].getLabel());
+            fields[1] = UTF8String.fromString(components[j].getValue());
+            $internalRowClass row = new GenericInternalRow(fields);
+            rows[j] = row;
+          }
+          ${ev.value} = new $arrayDataClass(rows);
+        } else {
+          ${ev.value} = new $arrayDataClass(new $internalRowClass[0]);
+        }""".stripMargin
+    ev.copy(code = code)
+  }
+
+  override def toString: String = s"ParseAddress($address)"
+
+  override def child: Expression = address
+
+  override protected def withNewChildInternal(newChild: Expression): Expression = ParseAddress(
+    newChild)
 }

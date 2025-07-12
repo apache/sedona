@@ -1783,3 +1783,29 @@ class TestDataFrameAPI(TestBase):
         df.withColumn(
             "localOutlierFactor", ST_LocalOutlierFactor("geometry", 2, False)
         ).collect()
+
+    def test_expand_address_df_api(self):
+        df = (
+            self.spark.range(1)
+            .selectExpr(
+                "'781 Franklin Ave Crown Heights Brooklyn NY 11216 USA' as address"
+            )
+            .cache()
+        )  # cache to avoid Constant Folding Optimization
+        df = df.select(ExpandAddress("address").alias("normalized"))
+        # Actually running downloads the model and is very expensive, so we just check the plan
+        # Checking the plan should allow us to verify that the function is correctly registered
+        df.explain()
+
+    def test_parse_address_df_api(self):
+        df = (
+            self.spark.range(1)
+            .selectExpr(
+                "'781 Franklin Ave Crown Heights Brooklyn NY 11216 USA' as address"
+            )
+            .cache()
+        )  # cache to avoid Constant Folding Optimization
+        df = df.select(ParseAddress(f.col("address")).alias("parsed"))
+        # Actually running downloads the model and is very expensive, so we just check the plan
+        # Checking the plan should allow us to verify that the function is correctly registered
+        df.explain()

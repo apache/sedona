@@ -17,6 +17,58 @@
  under the License.
  -->
 
+## ExpandAddress
+
+Introduction: Returns an array of expanded forms of the input address string. This is backed by the [libpostal](https://github.com/openvenues/libpostal) library's address expanding functionality.
+
+!!!Note
+    Jpostal requires at least 2 GB of free disk space to store the data files used for address parsing and expanding. The data files are downloaded automatically when the function is called for the first time.
+
+!!!Note
+    The version of jpostal installed with this package only supports Linux and MacOS. If you are using Windows, you will need to install libjpostal and libpostal manually and ensure that they are available in your `java.library.path`.
+
+Format: `ExpandAddress (address: String)`
+
+Since: `v1.8.0`
+
+SQL Example
+
+```sql
+SELECT ExpandAddress("100 W 1st St, Los Angeles, CA 90012");
+```
+
+Output:
+
+```
+[100 w 1st saint, 100 w 1st street, 100 west 1st saint, 100 west 1st street, 100 w 1 saint, 100 w 1 street, 100 west 1 saint, 100 west 1 street]
+```
+
+## ParseAddress
+
+Introduction: Returns an array of the components (e.g. street, postal code) of the input address string. This is backed by the [libpostal](https://github.com/openvenues/libpostal) library's address parsing functionality.
+
+!!!Note
+    Jpostal requires at least 2 GB of free disk space to store the data files used for address parsing and expanding. The data files are downloaded automatically when the library is initialized.
+
+!!!Note
+    The version of jpostal installed with this package only supports Linux and MacOS. If you are using Windows, you will need to install libjpostal and libpostal manually and ensure that they are available in your `java.library.path`.
+
+Format: `ParseAddress (address: String)`
+
+Since: `v1.8.0`
+
+SQL Example
+
+```sql
+SELECT ParseAddress("100 W 1st St, Los Angeles, CA 90012");
+```
+
+Output:
+
+```
+[{house_number, 100}, {road, w 1st st}, {city, los angeles}, {state, ca}, {postcode, 90012}]
+```
+
 ## GeometryType
 
 Introduction: Returns the type of the geometry as a string. Eg: 'LINESTRING', 'POLYGON', 'MULTIPOINT', etc. This function also indicates if the geometry is measured, by returning a string of the form 'POINTM'.
