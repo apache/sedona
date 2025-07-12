@@ -935,9 +935,98 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
-    def get_geometry(self, index):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def get_geometry(self, index) -> "GeoSeries":
+        """Returns the n-th geometry from a collection of geometries (0-indexed).
+
+        If the index is non-negative, it returns the geometry at that index.
+        If the index is negative, it counts backward from the end of the collection (e.g., -1 returns the last geometry).
+        Returns None if the index is out of bounds.
+
+        Note: Simple geometries act as length-1 collections
+
+        Note: Using Shapely < 2.0, may lead to different results for empty simple geometries due to how
+        shapely interprets them.
+
+        Parameters
+        ----------
+        index : int or array_like
+            Position of a geometry to be retrieved within its collection
+
+        Returns
+        -------
+        GeoSeries
+
+        Notes
+        -----
+        Simple geometries act as collections of length 1. Any out-of-range index value
+        returns None.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point, MultiPoint, GeometryCollection
+        >>> s = geopandas.GeoSeries(
+        ...     [
+        ...         Point(0, 0),
+        ...         MultiPoint([(0, 0), (1, 1), (0, 1), (1, 0)]),
+        ...         GeometryCollection(
+        ...             [MultiPoint([(0, 0), (1, 1), (0, 1), (1, 0)]), Point(0, 1)]
+        ...         ),
+        ...         Polygon(),
+        ...         GeometryCollection(),
+        ...     ]
+        ... )
+        >>> s
+        0                                          POINT (0 0)
+        1              MULTIPOINT ((0 0), (1 1), (0 1), (1 0))
+        2    GEOMETRYCOLLECTION (MULTIPOINT ((0 0), (1 1), ...
+        3                                        POLYGON EMPTY
+        4                             GEOMETRYCOLLECTION EMPTY
+        dtype: geometry
+
+        >>> s.get_geometry(0)
+        0                                POINT (0 0)
+        1                                POINT (0 0)
+        2    MULTIPOINT ((0 0), (1 1), (0 1), (1 0))
+        3                              POLYGON EMPTY
+        4                                       None
+        dtype: geometry
+
+        >>> s.get_geometry(1)
+        0           None
+        1    POINT (1 1)
+        2    POINT (0 1)
+        3           None
+        4           None
+        dtype: geometry
+
+        >>> s.get_geometry(-1)
+        0    POINT (0 0)
+        1    POINT (1 0)
+        2    POINT (0 1)
+        3  POLYGON EMPTY
+        4           None
+        dtype: geometry
+
+        """
+
+        # Sedona errors on negative indexes, so we use a case statement to handle it ourselves
+        select = """
+        ST_GeometryN(
+            `L`,
+            CASE
+                WHEN ST_NumGeometries(`L`) + `R` < 0 THEN NULL
+                WHEN `R` < 0 THEN ST_NumGeometries(`L`) + `R`
+                ELSE `R`
+            END
+        )
+        """
+
+        return self._row_wise_operation(
+            select,
+            index,
+            align=False,
+            rename="get_geometry",
+        )
 
     @property
     def boundary(self):
@@ -1353,7 +1442,7 @@ class GeoSeries(GeoFrame, pspd.Series):
     def _row_wise_operation(
         self,
         select: str,
-        other: Union["GeoSeries", BaseGeometry],
+        other: Any,
         align: Union[bool, None],
         rename: str,
         returns_geom: bool = True,
@@ -1372,7 +1461,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         if isinstance(other, BaseGeometry):
             other = GeoSeries([other] * len(self))
 
-        assert isinstance(other, GeoSeries), f"Invalid type for other: {type(other)}"
+        # e.g int input
+        if not isinstance(other, pspd.Series):
+            other = pspd.Series([other] * len(self))
+
+        assert isinstance(other, pspd.Series), f"Invalid type for other: {type(other)}"
 
         # This code assumes there is only one index (SPARK_DEFAULT_INDEX_NAME)
         # and would need to be updated if Sedona later supports multi-index
@@ -1385,7 +1478,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             col(SPARK_DEFAULT_INDEX_NAME),
         )
         other_df = other._internal.spark_frame.select(
-            col(other.get_first_geometry_column()).alias("R"),
+            col(_get_first_column_name(other)).alias("R"),
             # for the right side, we only need the column that we are joining on
             col(index_col),
         )
@@ -2366,6 +2459,23 @@ class GeoSeries(GeoFrame, pspd.Series):
 # -----------------------------------------------------------------------------
 # # Utils
 # -----------------------------------------------------------------------------
+
+
+def _get_first_column_name(series: pspd.Series) -> str:
+    """
+    Get the first column name of a Series.
+
+    Parameters:
+    - series: The input Series.
+
+    Returns:
+    - str: The first column name of the Series.
+    """
+    return next(
+        field.name
+        for field in series._internal.spark_frame.schema.fields
+        if field.name not in (SPARK_DEFAULT_INDEX_NAME, NATURAL_ORDER_COLUMN_NAME)
+    )
 
 
 def _to_spark_pandas_df(ps_series: pspd.Series) -> pspd.DataFrame:

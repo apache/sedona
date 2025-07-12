@@ -38,6 +38,7 @@ from shapely.geometry import (
 from sedona.geopandas import GeoSeries
 from tests.test_base import TestBase
 import pyspark.pandas as ps
+from packaging.version import parse as parse_version
 
 
 class TestMatchGeopandasSeries(TestBase):
@@ -460,7 +461,22 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_get_geometry(self):
-        pass
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            return
+
+        for _, geom in self.geoms:
+            # test negative index, in-bounds index, and out of bounds index
+            for index in [-1, 0, len(geom) + 1]:
+                sgpd_result = GeoSeries(geom).get_geometry(index)
+                gpd_result = gpd.GeoSeries(geom).get_geometry(index)
+                self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        data = [GeometryCollection(), Polygon(), MultiPolygon()]
+
+        for idx in [-2, -1, 0, 1]:
+            sgpd_result = GeoSeries(data).get_geometry(idx)
+            gpd_result = gpd.GeoSeries(data).get_geometry(idx)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_boundary(self):
         pass

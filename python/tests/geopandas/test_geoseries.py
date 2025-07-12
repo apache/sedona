@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import shapely
 import numpy as np
 import pytest
 import pandas as pd
@@ -446,7 +447,49 @@ class TestGeoSeries(TestBase):
         pass
 
     def test_get_geometry(self):
-        pass
+        # Shapely 1 seems to have a bug where Polygon() is incorrectly interpreted as a GeometryCollection
+        if shapely.__version__ < "2.0.0":
+            return
+
+        from shapely.geometry import MultiPoint
+
+        s = GeoSeries(
+            [
+                Point(0, 0),
+                MultiPoint([(0, 0), (1, 1), (0, 1), (1, 0)]),
+                GeometryCollection(
+                    [MultiPoint([(0, 0), (1, 1), (0, 1), (1, 0)]), Point(0, 1)]
+                ),
+                Polygon(),
+                GeometryCollection(),
+            ]
+        )
+
+        result = s.get_geometry(0)
+        expected = gpd.GeoSeries(
+            [
+                Point(0, 0),
+                Point(0, 0),
+                MultiPoint([(0, 0), (1, 1), (0, 1), (1, 0)]),
+                Polygon(),
+                None,
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = s.get_geometry(1)
+        expected = gpd.GeoSeries([None, Point(1, 1), Point(0, 1), None, None])
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = s.get_geometry(-1)
+        expected = gpd.GeoSeries(
+            [Point(0, 0), Point(1, 0), Point(0, 1), Polygon(), None]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = s.get_geometry(2)
+        expected = gpd.GeoSeries([None, Point(0, 1), None, None, None])
+        self.check_sgpd_equals_gpd(result, expected)
 
     def test_boundary(self):
         pass
