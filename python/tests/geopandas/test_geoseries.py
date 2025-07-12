@@ -190,7 +190,66 @@ class TestGeoSeries(TestBase):
         assert_series_equal(result.to_pandas(), expected)
 
     def test_fillna(self):
-        pass
+        s = sgpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                None,
+                Polygon([(0, 0), (-1, 1), (0, -1)]),
+            ]
+        )
+        result = s.fillna()
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                GeometryCollection(),
+                Polygon([(0, 0), (-1, 1), (0, -1)]),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+        result = s.fillna(Polygon([(0, 1), (2, 1), (1, 2)]))
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                Polygon([(0, 1), (2, 1), (1, 2)]),
+                Polygon([(0, 0), (-1, 1), (0, -1)]),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        s_fill = sgpd.GeoSeries(
+            [
+                Point(0, 0),
+                Point(1, 1),
+                Point(2, 2),
+            ]
+        )
+        result = s.fillna(s_fill)
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                Point(1, 1),
+                Polygon([(0, 0), (-1, 1), (0, -1)]),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        data = [None, Point(0, 0), None]
+        # Ensure filling with np.nan or pd.NA returns None
+        import numpy as np
+
+        for fill_val in [np.nan, pd.NA]:
+            result = GeoSeries(data).fillna(fill_val)
+            expected = gpd.GeoSeries([None, Point(0, 0), None])
+            self.check_sgpd_equals_gpd(result, expected)
+
+        # Ensure filling with None is empty GeometryColleciton and not None
+        # Also check that inplace works
+        result = GeoSeries(data)
+        result.fillna(None, inplace=True)
+        expected = gpd.GeoSeries(
+            [GeometryCollection(), Point(0, 0), GeometryCollection()]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
 
     def test_explode(self):
         pass
