@@ -57,7 +57,7 @@ public class SedonaConfTest {
     assertEquals(-1, SedonaConf.bytesFromString("-1"));
     assertEquals(1024, SedonaConf.bytesFromString("1k"));
     assertEquals(2097152, SedonaConf.bytesFromString("2MB"));
-    // fromSparkEnv means we dont have access to default values so sometimes we get null as input
+    // fromSparkEnv means we don't have access to default values so sometimes we get null as input
     assertEquals(0, SedonaConf.bytesFromString(null));
   }
 }
