@@ -1887,7 +1887,7 @@ case class ExpandAddress(address: Expression)
             }
             ${ev.value} = new $arrayDataClass(utf8Strings);
           } else {
-            ${ev.value} = new $arrayDataClass(new $utf8StringClass[0]);
+            ${ev.value} = null;
           }""".stripMargin)
   }
 
@@ -1960,7 +1960,7 @@ case class ParseAddress(address: Expression)
           }
           ${ev.value} = new $arrayDataClass(rows);
         } else {
-          ${ev.value} = new $arrayDataClass(new $internalRowClass[0]);
+          ${ev.value} = null;
         }""".stripMargin
     ev.copy(code = code)
   }
