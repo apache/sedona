@@ -118,7 +118,7 @@ class AddressProcessingFunctionsTest extends TestBaseScala with BeforeAndAfterEa
       assert(result.head.get(0) == null)
     }
 
-    it("should should work when chained with explode") {
+    it("should work when chained with explode") {
       val result = sparkSession
         .sql("SELECT Explode(ParseAddress('781 Franklin Ave Crown Heights Brooklyn NY 11216 USA')) as parsed")
         .collect()
