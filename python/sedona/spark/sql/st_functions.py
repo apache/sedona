@@ -32,6 +32,7 @@ from sedona.spark.sql.dataframe_api import (
 _call_st_function = partial(call_sedona_function, "st_functions")
 
 
+@validate_argument_types
 def ExpandAddress(address: ColumnOrName):  # noqa: N802
     """Normalize an address string into its canonical forms.
 
