@@ -257,16 +257,18 @@ class TestDataframe(TestGeopandasBase):
         data = {"geometry1": points1, "geometry2": points2, "attribute": [1, 2, 3]}
         df = GeoDataFrame(data)
 
-        # TODO: Try to optimize this with self.ps_allow_diff_frames() away
+        # TODO: Try to optimize all of these with self.ps_allow_diff_frames() calls away
         with self.ps_allow_diff_frames():
             df = df.set_geometry("geometry1")
         assert df.geometry.name == "geometry1"
 
-        df = df.rename_geometry("geometry3")
+        with self.ps_allow_diff_frames():
+            df = df.rename_geometry("geometry3")
         assert df.geometry.name == "geometry3"
 
         # test inplace rename
-        df.rename_geometry("geometry4", inplace=True)
+        with self.ps_allow_diff_frames():
+            df.rename_geometry("geometry4", inplace=True)
         assert df.geometry.name == "geometry4"
 
     def test_area(self):

@@ -515,11 +515,6 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         return GeoSeries(ps_series) if returns_geom else ps_series
 
-    @property
-    def dtypes(self) -> Union[gpd.GeoSeries, pd.Series, Dtype]:
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
     def to_geopandas(self) -> gpd.GeoSeries:
         """
         Convert the GeoSeries to a geopandas GeoSeries.

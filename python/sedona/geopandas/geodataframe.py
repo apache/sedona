@@ -16,7 +16,7 @@
 # under the License.
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Any, Literal, Callable, Union
 import typing
 
 import warnings
@@ -41,25 +41,6 @@ from geopandas.array import GeometryDtype
 from shapely.geometry.base import BaseGeometry
 
 register_extension_dtype(GeometryDtype)
-
-
-def _ensure_geometry(data, crs: Any | None = None) -> sgpd.GeoSeries:
-    """
-    Ensure the data is of geometry dtype or converted to it.
-
-    If input is a (Geo)Series, output is a GeoSeries, otherwise output
-    is GeometryArray.
-
-    If the input is a GeometryDtype with a set CRS, `crs` is ignored.
-    """
-    if isinstance(data, sgpd.GeoSeries):
-        if data.crs is None and crs is not None:
-            # Avoids caching issues/crs sharing issues
-            data = data.copy()
-            data.crs = crs
-        return data
-    else:
-        return sgpd.GeoSeries(data, crs=crs)
 
 
 class GeoDataFrame(GeoFrame, pspd.DataFrame):
@@ -158,6 +139,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         from sedona.geopandas import GeoSeries
         from pyspark.sql import DataFrame as SparkDataFrame
 
+        # Simplified version of the function from GeoSeries.__init__()
         def try_geom_to_ewkb(x) -> bytes:
             if isinstance(x, BaseGeometry):
                 kwargs = {}
@@ -175,29 +157,42 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             else:
                 raise TypeError(f"expected geometry or bytes, got {type(x)}: {x}")
 
-        if isinstance(data, (GeoDataFrame, GeoSeries)):
-            assert dtype is None
-            assert not copy
+        def safe_apply_to_each_column(
+            df: pd.DataFrame | pspd.DataFrame, func: Callable
+        ):
+            # try except won't work here for ps.DataFrame case, so we use first_valid_index() instead
+            for col in df.columns:
+                first_idx = df[col].first_valid_index()
+                if first_idx is not None and isinstance(
+                    df[col][first_idx], BaseGeometry
+                ):
+                    df[col] = df[col].apply(try_geom_to_ewkb)
+            return df
 
+        if isinstance(data, GeoDataFrame):
+            if data._safe_get_crs() is None:
+                data.crs = crs
+        elif isinstance(data, GeoSeries):
             if data.crs is None:
                 data.crs = crs
 
-            super().__init__(data, index=index, dtype=dtype, copy=copy)
-        elif isinstance(data, (PandasOnSparkSeries, PandasOnSparkDataFrame)):
-            assert columns is None
-            assert dtype is None
-            assert not copy
+            # For each of these super().__init__() calls, we let pyspark decide which inputs are valid or not
+            # instead of calling e.g assert not dtype ourselves.
+            # This way, if Spark adds support later, than we inherit those changes naturally
+            super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
+        elif isinstance(data, PandasOnSparkDataFrame):
 
-            if isinstance(data, PandasOnSparkSeries):
-                data = data.to_pandas()
-            else:
-                for col in data.columns:
-                    try:
-                        data[col] = data[col].apply(try_geom_to_ewkb)
-                    except TypeError:
-                        pass
+            data = safe_apply_to_each_column(data, try_geom_to_ewkb)
 
-            super().__init__(data, index=index, dtype=dtype)
+            super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
+        elif isinstance(data, PandasOnSparkSeries):
+
+            try:
+                data = GeoSeries(data)
+            except TypeError:
+                pass
+
+            super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
         elif isinstance(data, SparkDataFrame):
             assert columns is None
             assert dtype is None
@@ -223,12 +218,8 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             gdf = gpd.GeoDataFrame(df)
             # convert each geometry column to wkb type
 
-            for col in gdf.columns:
-                # It's possible we get a list, dict, pd.Series, gpd.GeoSeries, etc of shapely.Geometry objects.
-                try:
-                    gdf[col] = gdf[col].apply(try_geom_to_ewkb)
-                except TypeError:
-                    pass
+            # It's possible we get a list, dict, pd.Series, gpd.GeoSeries, etc of shapely.Geometry objects.
+            gdf = safe_apply_to_each_column(gdf, try_geom_to_ewkb)
 
             pdf = pd.DataFrame(gdf)
 
@@ -242,6 +233,8 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         if isinstance(data, (GeoDataFrame, gpd.GeoDataFrame)):
             self._geometry_column_name = data._geometry_column_name
+            if crs is not None and data.crs != crs:
+                raise ValueError(crs_mismatch_error)
 
     def _get_geometry(self) -> sgpd.GeoSeries:
         if self._geometry_column_name not in self:
@@ -275,6 +268,10 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         return self[self._geometry_column_name]
 
     def _set_geometry(self, col):
+        # This check is included in the original geopandas. Note that this prevents assigning a str to the property
+        # e.g. df.geometry = "geometry"
+        # However the user can still use specify a str in the public .set_geometry() method
+        # ie. df.geometry = "geometry1" errors, but df.set_geometry("geometry1") works
         if not pd.api.types.is_list_like(col):
             raise ValueError("Must use a list-like to set the geometry property")
         self.set_geometry(col, inplace=True)
@@ -507,12 +504,17 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         if col in self.columns:
             raise ValueError(f"Column named {col} already exists")
         else:
-            if not inplace:
-                sdf = self.rename(columns={geometry_col: col})
-                return GeoDataFrame(sdf).set_geometry(col)
+            if inplace:
+                self.rename(columns={geometry_col: col}, inplace=inplace)
+                self.set_geometry(col, inplace=inplace)
+                return None
 
-            self.rename(columns={geometry_col: col}, inplace=inplace)
-            self.set_geometry(col, inplace=inplace)
+            # The same .rename().set_geometry() logic errors for this case, so we do it manually instead
+            ps_series = self._psser_for((geometry_col,)).rename(col)
+            sdf = self.copy()
+            sdf[col] = ps_series
+            sdf = sdf.set_geometry(col)
+            return sdf
 
     @property
     def active_geometry_name(self) -> Any:
@@ -586,18 +588,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         sdf = self._internal.spark_frame.selectExpr(*select_expressions)
         return GeoDataFrame(sdf)
-
-    @property
-    def dtypes(self) -> gpd.GeoSeries | pd.Series | Dtype:
-        return pd.Series(
-            [self._psser_for(label).dtype for label in self._internal.column_labels],
-            index=pd.Index(
-                [
-                    label if len(label) > 1 else label[0]
-                    for label in self._internal.column_labels
-                ]
-            ),
-        )
 
     def to_geopandas(self) -> gpd.GeoDataFrame | pd.Series:
         # Implementation of the abstract method
@@ -678,12 +668,25 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         """
         return self._process_geometry_columns("ST_Area", rename_suffix="_area")
 
+    def _safe_get_crs(self):
+        """
+        Helper method for getting the crs of the GeoDataframe safely.
+        Returns None if no geometry column is set instead of raising an error.
+        """
+        try:
+            return self.geometry.crs
+        except AttributeError:
+            return None
+
     @property
     def crs(self):
         return self.geometry.crs
 
     @crs.setter
     def crs(self, value):
+        # Avoid trying to access the geometry column (which might be missing) if crs is None
+        if value is None:
+            return
         self.geometry.crs = value
 
     @property
@@ -1022,3 +1025,27 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         """
         # Use the Spark DataFrame's write method to write to GeoParquet format
         self._internal.spark_frame.write.format("geoparquet").save(path, **kwargs)
+
+
+# -----------------------------------------------------------------------------
+# # Utils
+# -----------------------------------------------------------------------------
+
+
+def _ensure_geometry(data, crs: Any | None = None) -> sgpd.GeoSeries:
+    """
+    Ensure the data is of geometry dtype or converted to it.
+
+    If input is a (Geo)Series, output is a GeoSeries, otherwise output
+    is GeometryArray.
+
+    If the input is a GeometryDtype with a set CRS, `crs` is ignored.
+    """
+    if isinstance(data, sgpd.GeoSeries):
+        if data.crs is None and crs is not None:
+            # Avoids caching issues/crs sharing issues
+            data = data.copy()
+            data.crs = crs
+        return data
+    else:
+        return sgpd.GeoSeries(data, crs=crs)
