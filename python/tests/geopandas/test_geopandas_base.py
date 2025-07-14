@@ -89,10 +89,6 @@ class TestGeopandasBase(TestBase):
         """
         A context manager to temporarily set a compute.ops_on_diff_frames option.
         """
-        already_set = ps.get_option("compute.ops_on_diff_frames")
-        if already_set:
-            raise Exception("compute.ops_on_diff_frames is already set")
-
         try:
             ps.set_option("compute.ops_on_diff_frames", True)
 
