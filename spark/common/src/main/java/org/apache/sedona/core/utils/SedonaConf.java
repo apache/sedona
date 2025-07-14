@@ -250,6 +250,9 @@ public class SedonaConf implements Serializable {
   }
 
   static long bytesFromString(String str) {
+    if (str == null || str.isEmpty()) {
+      return 0;
+    }
     if (str.startsWith("-")) {
       return -1 * Utils.byteStringAsBytes(str.substring(1));
     } else {

@@ -196,6 +196,7 @@ class AddressProcessingFunctionsTest extends TestBaseScala with BeforeAndAfterEa
           ParseAddress(f.col("address")).alias("parsed"))
         .collect()
 
+      sparkSession.catalog.clearCache()
       assert(expected sameElements actual)
     }
 
@@ -217,6 +218,7 @@ class AddressProcessingFunctionsTest extends TestBaseScala with BeforeAndAfterEa
           ParseAddress(f.col("address")).alias("parsed"))
         .collect()
 
+      sparkSession.catalog.clearCache()
       assert(expected sameElements actual)
     }
 
@@ -240,6 +242,7 @@ class AddressProcessingFunctionsTest extends TestBaseScala with BeforeAndAfterEa
         .drop("id", "address")
         .collect()
 
+      sparkSession.catalog.clearCache()
       assert(codeGenResult sameElements nonCodeGenResult)
     }
   }
