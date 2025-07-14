@@ -21,7 +21,9 @@ import pytest
 import pandas as pd
 import geopandas as gpd
 import pyspark.pandas as ps
-
+import pyspark
+from pandas.testing import assert_series_equal
+import shapely
 from shapely.geometry import (
     Point,
     Polygon,
@@ -459,13 +461,39 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_get_geometry(self):
-        pass
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            return
+
+        for _, geom in self.geoms:
+            # test negative index, in-bounds index, and out of bounds index
+            for index in [-1, 0, len(geom) + 1]:
+                sgpd_result = GeoSeries(geom).get_geometry(index)
+                gpd_result = gpd.GeoSeries(geom).get_geometry(index)
+                self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        data = [GeometryCollection(), Polygon(), MultiPolygon()]
+
+        for idx in [-2, -1, 0, 1]:
+            sgpd_result = GeoSeries(data).get_geometry(idx)
+            gpd_result = gpd.GeoSeries(data).get_geometry(idx)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_boundary(self):
-        pass
+        for _, geom in self.geoms:
+            # Shapely < 2.0 doesn't support GeometryCollection for boundary operation
+            if shapely.__version__ < "2.0.0" and isinstance(
+                geom[0], GeometryCollection
+            ):
+                continue
+            sgpd_result = GeoSeries(geom).boundary
+            gpd_result = gpd.GeoSeries(geom).boundary
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_centroid(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).centroid
+            gpd_result = gpd.GeoSeries(geom).centroid
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_concave_hull(self):
         pass
@@ -480,7 +508,10 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_envelope(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).envelope
+            gpd_result = gpd.GeoSeries(geom).envelope
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_minimum_rotated_rectangle(self):
         pass
