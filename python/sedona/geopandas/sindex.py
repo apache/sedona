@@ -25,6 +25,7 @@ from sedona.spark.core.enums import IndexType
 # Add this near the top of the file, after imports
 ALLOWED_PREDICATES = ["intersects", "contains"]
 
+
 class SpatialIndex:
     """
     A wrapper around Sedona's spatial index functionality.
