@@ -2668,7 +2668,56 @@ class GeoSeries(GeoFrame, pspd.Series):
         to_wgs84: bool = False,
         **kwargs,
     ) -> str:
-        raise NotImplementedError("GeoSeries.to_json() is not implemented yet.")
+        """
+        Returns a GeoJSON string representation of the GeoSeries.
+
+        Parameters
+        ----------
+        show_bbox : bool, optional, default: True
+            Include bbox (bounds) in the geojson
+        drop_id : bool, default: False
+            Whether to retain the index of the GeoSeries as the id property
+            in the generated GeoJSON. Default is False, but may want True
+            if the index is just arbitrary row numbers.
+        to_wgs84: bool, optional, default: False
+            If the CRS is set on the active geometry column it is exported as
+            WGS84 (EPSG:4326) to meet the `2016 GeoJSON specification
+            <https://tools.ietf.org/html/rfc7946>`_.
+            Set to True to force re-projection and set to False to ignore CRS. False by
+            default.
+
+        *kwargs* that will be passed to json.dumps().
+
+        Returns
+        -------
+        JSON string
+
+        Examples
+        --------
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Point
+        >>> s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        >>> s
+        0    POINT (1 1)
+        1    POINT (2 2)
+        2    POINT (3 3)
+        dtype: geometry
+
+        >>> s.to_json()
+        '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "pr\
+operties": {}, "geometry": {"type": "Point", "coordinates": [1.0, 1.0]}, "bbox": [1.0,\
+ 1.0, 1.0, 1.0]}, {"id": "1", "type": "Feature", "properties": {}, "geometry": {"type"\
+: "Point", "coordinates": [2.0, 2.0]}, "bbox": [2.0, 2.0, 2.0, 2.0]}, {"id": "2", "typ\
+e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3.0, 3.\
+0]}, "bbox": [3.0, 3.0, 3.0, 3.0]}], "bbox": [1.0, 1.0, 3.0, 3.0]}'
+
+        See Also
+        --------
+        GeoSeries.to_file : write GeoSeries to file
+        """
+        return self._to_geoframe(name="geometry").to_json(
+            na="null", show_bbox=show_bbox, drop_id=drop_id, to_wgs84=to_wgs84, **kwargs
+        )
 
     def to_wkb(self, hex: bool = False, **kwargs) -> pspd.Series:
         raise NotImplementedError("GeoSeries.to_wkb() is not implemented yet.")
@@ -2677,7 +2726,79 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("GeoSeries.to_wkt() is not implemented yet.")
 
     def to_arrow(self, geometry_encoding="WKB", interleaved=True, include_z=None):
-        raise NotImplementedError("GeoSeries.to_arrow() is not implemented yet.")
+        """Encode a GeoSeries to GeoArrow format.
+
+        See https://geoarrow.org/ for details on the GeoArrow specification.
+
+        This functions returns a generic Arrow array object implementing
+        the `Arrow PyCapsule Protocol`_ (i.e. having an ``__arrow_c_array__``
+        method). This object can then be consumed by your Arrow implementation
+        of choice that supports this protocol.
+
+        .. _Arrow PyCapsule Protocol: https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html
+
+        .. versionadded:: 1.0
+
+        Parameters
+        ----------
+        geometry_encoding : {'WKB', 'geoarrow' }, default 'WKB'
+            The GeoArrow encoding to use for the data conversion.
+        interleaved : bool, default True
+            Only relevant for 'geoarrow' encoding. If True, the geometries'
+            coordinates are interleaved in a single fixed size list array.
+            If False, the coordinates are stored as separate arrays in a
+            struct type.
+        include_z : bool, default None
+            Only relevant for 'geoarrow' encoding (for WKB, the dimensionality
+            of the individual geometries is preserved).
+            If False, return 2D geometries. If True, include the third dimension
+            in the output (if a geometry has no third dimension, the z-coordinates
+            will be NaN). By default, will infer the dimensionality from the
+            input geometries. Note that this inference can be unreliable with
+            empty geometries (for a guaranteed result, it is recommended to
+            specify the keyword).
+
+        Returns
+        -------
+        GeoArrowArray
+            A generic Arrow array object with geometry data encoded to GeoArrow.
+
+        Examples
+        --------
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Point
+        >>> gser = GeoSeries([Point(1, 2), Point(2, 1)])
+        >>> gser
+        0    POINT (1 2)
+        1    POINT (2 1)
+        dtype: geometry
+
+        >>> arrow_array = gser.to_arrow()
+        >>> arrow_array
+        <geopandas.io._geoarrow.GeoArrowArray object at ...>
+
+        The returned array object needs to be consumed by a library implementing
+        the Arrow PyCapsule Protocol. For example, wrapping the data as a
+        pyarrow.Array (requires pyarrow >= 14.0):
+
+        >>> import pyarrow as pa
+        >>> array = pa.array(arrow_array)
+        >>> array
+        <pyarrow.lib.BinaryArray object at ...>
+        [
+          0101000000000000000000F03F0000000000000040,
+          01010000000000000000000040000000000000F03F
+        ]
+
+        """
+        # Because this function returns the arrow array in memory, we simply rely on geopandas's implementation.
+        # This also returns a geopandas specific data type, which can be converted to an actual pyarrow array,
+        # so there is no direct Sedona equivalent. This way we also get all of the arguments implemented for free.
+        return self.to_geopandas().to_arrow(
+            geometry_encoding=geometry_encoding,
+            interleaved=interleaved,
+            include_z=include_z,
+        )
 
     def clip(self, mask, keep_geom_type: bool = False, sort=False) -> "GeoSeries":
         raise NotImplementedError("GeoSeries.clip() is not implemented yet.")
@@ -2702,6 +2823,15 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise ValueError(
             "get_first_geometry_column: No geometry column found in the GeoSeries."
         )
+
+    def _to_geoframe(self, name=None):
+        if name is not None:
+            renamed = self.rename(name)
+        elif self._column_label is None:
+            renamed = self.rename("geometry")
+        else:
+            renamed = self
+        return GeoDataFrame(pspd.DataFrame(renamed._internal))
 
 
 # -----------------------------------------------------------------------------

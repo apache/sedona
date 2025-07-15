@@ -977,7 +977,7 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
             col1     geometry
         0  name1  POINT (1 2)
         1  name2  POINT (2 1)
-        >>> arrow_table = gdf.to_arrow()
+        >>> arrow_table = gdf.to_arrow(index=False)
         >>> arrow_table
         <geopandas.io._geoarrow.ArrowTable object at ...>
         The returned data object needs to be consumed by a library implementing
@@ -995,7 +995,8 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
 01010000000000000000000040000000000000F03F]]
         """
         # Because this function returns the arrow table in memory, we simply rely on geopandas's implementation.
-        # This way we also get all of the arguments implemented for free.
+        # This also returns a geopandas specific data type, which can be converted to an actual pyarrow table,
+        # so there is no direct Sedona equivalent. This way we also get all of the arguments implemented for free.
         return self.to_geopandas().to_arrow(
             index=index,
             geometry_encoding=geometry_encoding,

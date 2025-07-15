@@ -362,16 +362,19 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
         with self.ps_allow_diff_frames():
             gdf = GeoDataFrame(data, index=pd.Index([1, 2]))
 
-        arrow_table = gdf.to_arrow()
+        result = pa.table(gdf.to_arrow(index=False))
 
-        table = pa.table(arrow_table)
+        expected = pa.table(
+            {
+                "col1": ["name1", "name2"],
+                "geometry": [
+                    bytes.fromhex("0101000000000000000000F03F0000000000000040"),
+                    bytes.fromhex("01010000000000000000000040000000000000F03F"),
+                ],
+            }
+        )
 
-        data = {"col1": ["name1", "name2"], "geometry": [Point(1, 2), Point(2, 1)]}
-        gpd_df = gpd.GeoDataFrame(data, index=pd.Index([1, 2]))
-
-        expected = pa.table(gpd_df.to_arrow())
-
-        assert table.equals(expected)
+        assert result.equals(expected)
 
 
 # -----------------------------------------------------------------------------
