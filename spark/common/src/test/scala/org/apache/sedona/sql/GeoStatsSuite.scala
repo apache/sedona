@@ -134,13 +134,9 @@ class GeoStatsSuite extends TestBaseScala {
     assert(sqlDf.join(functionDf, "id").count() == getData.count())
   }
 
-  it("test dbscan function returns longs when spark.graphframes.useLabelsAsComponents = false") {
-    val sparkVersionParts = spark.version.split("\\.")
-    assume(
-      sparkVersionParts(0).toInt + sparkVersionParts(1).toInt / 10.0 >= 3.5,
-      "only graphframes 0.9.0+ supports labels as components")
+  it("dbscan function should ignore spark.graphframes.useLabelsAsComponents = true") {
 
-    sparkSession.conf.set("spark.graphframes.useLabelsAsComponents", "false")
+    sparkSession.conf.set("spark.graphframes.useLabelsAsComponents", "true")
 
     val sqlDf = getData
       .withColumn("sql_results", expr("ST_DBSCAN(geometry, 1.0, 4, false)"))
