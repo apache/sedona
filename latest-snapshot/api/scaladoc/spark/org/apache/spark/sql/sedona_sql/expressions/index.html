@@ -251,6 +251,10 @@
                         <a href="DataframePhysicalFunction.html" title="DataframePhysicalFunctions are Functions that will be replaced with a Physical Node for their evaluation.">DataframePhysicalFunction</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="class" href="ExpandAddress.html" title=""></a>
+                        <a href="ExpandAddress.html" title="">ExpandAddress</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="trait" href="FoldableExpression.html" title="Make expression foldable by constant folding optimizer."></a>
                         <a href="FoldableExpression.html" title="Make expression foldable by constant folding optimizer.">FoldableExpression</a>
                       </li><li class="current-entities indented6">
@@ -295,8 +299,16 @@
                         <a href="InferredTypes$.html" title="">InferredTypes</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="object" href="LibPostalUtils$.html" title=""></a>
+                        <a href="LibPostalUtils$.html" title="">LibPostalUtils</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="trait" href="NullIntolerantShim.html" title=""></a>
                         <a href="NullIntolerantShim.html" title="">NullIntolerantShim</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="class" href="ParseAddress.html" title=""></a>
+                        <a href="ParseAddress.html" title="">ParseAddress</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="trait" href="PhysicalFunction.html" title="PhysicalFunctions are Functions that will be replaced with a Physical Node for their evaluation."></a>
@@ -1362,6 +1374,22 @@ conversion of the RDD[InternalRow] to a DataFrame and back. Each DataframePhysic
 should implement transformDataframe. The output dataframe should have the same schema as the
 input dataframe, except for the resultAttrs which should be added to the output dataframe.
 </p></div></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ExpandAddress" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ExpandAddressextendsUnaryExpressionwithImplicitCastInputTypeswithCodegenFallbackwithFoldableExpressionwithSerializablewithProduct"></a><a id="ExpandAddress:ExpandAddress"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ExpandAddress.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ExpandAddress.html"><span class="name">ExpandAddress</span></a><span class="params">(<span name="address">address: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.UnaryExpression">UnaryExpression</span> with <span class="extype" name="org.apache.spark.sql.catalyst.expressions.ImplicitCastInputTypes">ImplicitCastInputTypes</span> with <span class="extype" name="org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback">CodegenFallback</span> with <a href="FoldableExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.FoldableExpression">FoldableExpression</a> with <span class="extype" name="scala.Serializable">Serializable</span> with <span class="extype" name="scala.Product">Product</span></span>
+      </span>
+      
+      
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.FoldableExpression" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="FoldableExpressionextendsExpression"></a><a id="FoldableExpression:FoldableExpression"></a>
       <span class="permalink">
@@ -1473,6 +1501,22 @@ foldable, then the expression itself is foldable.
       </span>
       <span class="symbol">
         <a title="" href="NullIntolerantShim.html"><span class="name">NullIntolerantShim</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span> with <span class="extype" name="org.apache.spark.sql.catalyst.expressions.NullIntolerant">NullIntolerant</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.ParseAddress" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParseAddressextendsUnaryExpressionwithImplicitCastInputTypeswithCodegenFallbackwithFoldableExpressionwithSerializablewithProduct"></a><a id="ParseAddress:ParseAddress"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/ParseAddress.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ParseAddress.html"><span class="name">ParseAddress</span></a><span class="params">(<span name="address">address: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.UnaryExpression">UnaryExpression</span> with <span class="extype" name="org.apache.spark.sql.catalyst.expressions.ImplicitCastInputTypes">ImplicitCastInputTypes</span> with <span class="extype" name="org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback">CodegenFallback</span> with <a href="FoldableExpression.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.FoldableExpression">FoldableExpression</a> with <span class="extype" name="scala.Serializable">Serializable</span> with <span class="extype" name="scala.Product">Product</span></span>
       </span>
       
       
@@ -5273,6 +5317,22 @@ expressions much easier.
       </span>
       <span class="symbol">
         <a title="" href="InferredTypes$.html"><span class="name">InferredTypes</span></a>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.LibPostalUtils" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="LibPostalUtils"></a><a id="LibPostalUtils:LibPostalUtils"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/LibPostalUtils$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="LibPostalUtils$.html"><span class="name">LibPostalUtils</span></a>
       </span>
       
       
