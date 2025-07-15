@@ -22,6 +22,8 @@ from pyspark.sql import DataFrame as PySparkDataFrame
 from sedona.spark import StructuredAdapter
 from sedona.spark.core.enums import IndexType
 
+# Add this near the top of the file, after imports
+ALLOWED_PREDICATES = ["intersects", "contains"]
 
 class SpatialIndex:
     """
@@ -91,9 +93,9 @@ class SpatialIndex:
             return []
 
         # Validate predicate value
-        if predicate is not None and predicate not in ["intersects", "contains"]:
+        if predicate is not None and predicate not in ALLOWED_PREDICATES:
             raise ValueError(
-                f"Predicate must be either 'intersects' or 'contains', got '{predicate}'"
+                f"Predicate must be either {' or '.join([repr(p) for p in ALLOWED_PREDICATES])}, got '{predicate}'"
             )
 
         # Default to 'intersects' if not specified
