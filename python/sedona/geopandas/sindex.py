@@ -73,7 +73,7 @@ class SpatialIndex:
         geometry : Shapely geometry
             The geometry to query against the spatial index.
         predicate : str, optional
-            Spatial predicate to filter results (e.g., 'intersects', 'contains').
+            Spatial predicate to filter results. Must be either 'intersects' (default) or 'contains'.
         sort : bool, optional, default False
             Whether to sort the results.
 
@@ -90,6 +90,16 @@ class SpatialIndex:
         if self.is_empty:
             return []
 
+        # Validate predicate value
+        if predicate is not None and predicate not in ["intersects", "contains"]:
+            raise ValueError(
+                f"Predicate must be either 'intersects' or 'contains', got '{predicate}'"
+            )
+
+        # Default to 'intersects' if not specified
+        if predicate is None:
+            predicate = "intersects"
+
         if self._is_spark:
             # For Spark-based spatial index
             from sedona.spark.core.spatialOperator import RangeQuery
@@ -97,11 +107,11 @@ class SpatialIndex:
             # Execute the spatial range query
             if predicate == "contains":
                 result_rdd = RangeQuery.SpatialRangeQuery(
-                    self._indexed_rdd, geometry, True, True
-                )
-            else:  # Default to intersects
-                result_rdd = RangeQuery.SpatialRangeQuery(
                     self._indexed_rdd, geometry, False, True
+                )
+            else:  # intersects
+                result_rdd = RangeQuery.SpatialRangeQuery(
+                    self._indexed_rdd, geometry, True, True
                 )
 
             results = result_rdd.collect()
@@ -115,7 +125,7 @@ class SpatialIndex:
                 results = [
                     i for i in candidate_indices if geometry.contains(self.geometry[i])
                 ]
-            else:
+            else:  # intersects
                 # Default is intersects
                 results = self._index.query(geometry)
 
