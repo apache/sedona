@@ -47,7 +47,7 @@ class TestBase:
                 builder = builder.remote(SPARK_REMOTE).config(
                     "spark.sql.extensions",
                     "org.apache.sedona.sql.SedonaSqlExtensions",
-                )
+                ).config("spark.checkpoint.dir", mkdtemp())
 
                 # Connect is packaged with Spark 4+
                 if pyspark.__version__ < "4":
@@ -77,8 +77,6 @@ class TestBase:
 
             if not SPARK_REMOTE:
                 spark.sparkContext.setCheckpointDir(mkdtemp())
-            else:
-                spark.conf.set("spark.checkpoint.dir", mkdtemp())
 
             setattr(self, "__spark", spark)
         return getattr(self, "__spark")
