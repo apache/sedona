@@ -23,7 +23,7 @@ import org.apache.sedona.stats.Weighting.{addBinaryDistanceBandColumn, addWeight
 import org.apache.sedona.stats.clustering.DBSCAN.dbscan
 import org.apache.sedona.stats.hotspotDetection.GetisOrd.gLocal
 import org.apache.sedona.stats.outlierDetection.LocalOutlierFactor.localOutlierFactor
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.catalyst.expressions.{Attribute, Expression}
 import org.apache.spark.sql.functions.{col, struct}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
@@ -31,8 +31,16 @@ import org.apache.spark.sql.types._
 
 case class ST_DBSCAN(children: Seq[Expression]) extends DataframePhysicalFunction {
 
-  override def dataType: DataType = StructType(
-    Seq(StructField("isCore", BooleanType), StructField("cluster", LongType)))
+  lazy val conf = SedonaConf.fromActiveSession() // only access on driver
+
+  override def dataType: DataType = {
+    val clusterType = SparkSession.getActiveSession.get.conf
+      .get("spark.graphframes.useLabelsAsComponents", "true") match {
+      case "true" => StringType
+      case _ => LongType
+    }
+    StructType(Seq(StructField("isCore", BooleanType), StructField("cluster", clusterType)))
+  }
 
   override def inputTypes: Seq[AbstractDataType] =
     Seq(GeometryUDT, DoubleType, IntegerType, BooleanType)
@@ -50,7 +58,7 @@ case class ST_DBSCAN(children: Seq[Expression]) extends DataframePhysicalFunctio
       !dataframe.columns.contains("__cluster"),
       "__cluster is a  reserved name by the dbscan algorithm. Please rename the columns before calling the ST_DBSCAN function.")
 
-    dbscan(
+    val ret = dbscan(
       dataframe,
       getScalarValue[Double](1, "epsilon"),
       getScalarValue[Int](2, "minPts"),
@@ -61,6 +69,9 @@ case class ST_DBSCAN(children: Seq[Expression]) extends DataframePhysicalFunctio
       "__cluster")
       .withColumn(getResultName(resultAttrs), struct(col("__isCore"), col("__cluster")))
       .drop("__isCore", "__cluster")
+
+    ret
+
   }
 }
 

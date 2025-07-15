@@ -26,9 +26,6 @@ from sedona.spark.sql.st_functions import ST_Buffer
 from sedona.spark.stats import dbscan
 
 
-@pytest.mark.skipif(
-    pyspark.__version__ >= "4", reason="DBSCAN is not supported yet on Spark 4"
-)
 class TestDBScan(TestBase):
 
     @pytest.fixture
