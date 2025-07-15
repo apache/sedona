@@ -22,7 +22,7 @@ import pandas as pd
 import geopandas as gpd
 import sedona.geopandas as sgpd
 from sedona.geopandas import GeoSeries
-from tests.test_base import TestBase
+from tests.geopandas.test_geopandas_base import TestGeopandasBase
 from shapely import wkt
 from shapely.geometry import (
     Point,
@@ -38,7 +38,7 @@ from pandas.testing import assert_series_equal
 import pytest
 
 
-class TestGeoSeries(TestBase):
+class TestGeoSeries(TestGeopandasBase):
     def setup_method(self):
         self.geoseries = sgpd.GeoSeries(
             [
@@ -54,19 +54,6 @@ class TestGeoSeries(TestBase):
                 ),
             ]
         )
-
-    def check_sgpd_equals_gpd(self, actual: sgpd.GeoSeries, expected: gpd.GeoSeries):
-        assert isinstance(actual, sgpd.GeoSeries)
-        assert isinstance(expected, gpd.GeoSeries)
-        assert len(actual) == len(expected)
-        sgpd_result = actual.to_geopandas()
-        for a, e in zip(sgpd_result, expected):
-            if a is None or e is None:
-                assert a is None and e is None
-                continue
-            elif a.is_empty and e.is_empty:
-                continue
-            self.assert_geometry_almost_equal(a, e)
 
     def test_area(self):
         result = self.geoseries.area.to_pandas()
