@@ -131,6 +131,7 @@ class GeoSeries(GeoFrame, pspd.Series):
                 use_same_anchor = False
 
                 return shapely.wkb.dumps(x, **kwargs)
+                # return shapely.to_wkb(x, include_srid=True)
             elif isinstance(x, bytearray):
                 use_same_anchor = False
                 return bytes(x)
@@ -371,6 +372,10 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         curr_crs = self.crs
 
+        # If CRS is the same, do nothing
+        if curr_crs == crs:
+            return
+
         if not allow_override and curr_crs is not None and not curr_crs == crs:
             raise ValueError(
                 "The GeoSeries already has a CRS which is not equal to the passed "
@@ -536,7 +541,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         """
         pd_series = self._to_internal_pandas()
         try:
-            return gpd.GeoSeries(
+            geoseries = gpd.GeoSeries(
                 pd_series.map(
                     lambda wkb: (
                         shapely.wkb.loads(bytes(wkb)) if not pd.isna(wkb) else None
@@ -545,7 +550,18 @@ class GeoSeries(GeoFrame, pspd.Series):
                 crs=self.crs,
             )
         except TypeError:
-            return gpd.GeoSeries(pd_series, crs=self.crs)
+            geoseries = gpd.GeoSeries(pd_series, crs=self.crs)
+
+        first_shape = next(obj for obj in geoseries if obj is not None)
+        if first_shape:
+            srid = shapely.get_srid(first_shape)
+            if srid:
+                assert (
+                    not self.crs or self.crs.to_epsg() == srid
+                ), f"CRS mismatch: {self.crs} != {srid}"
+                geoseries.crs = srid
+
+        return geoseries
 
     def to_spark_pandas(self) -> pspd.Series:
         return pspd.Series(self._psdf._to_internal_pandas())

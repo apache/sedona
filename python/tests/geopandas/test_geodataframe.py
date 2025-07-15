@@ -47,7 +47,8 @@ class TestDataframe(TestGeopandasBase):
         ],
     )
     def test_constructor(self, obj):
-        sgpd_df = GeoDataFrame(obj)
+        with self.ps_allow_diff_frames():
+            sgpd_df = GeoDataFrame(obj)
         check_geodataframe(sgpd_df)
 
     def test_constructor_pandas_on_spark(self):
@@ -322,6 +323,55 @@ class TestDataframe(TestGeopandasBase):
 
         # Check that square buffer area is greater than original (1.0)
         assert areas[1] > 1.0
+
+    def test_to_parquet(self):
+        pass
+
+    def test_to_json(self):
+        import json
+
+        d = {"col1": ["name1", "name2"], "geometry": [Point(1, 2), Point(2, 1)]}
+
+        # Currently, adding the crs information later requires us to join across partitions
+        with self.ps_allow_diff_frames():
+            gdf = GeoDataFrame(d, crs="EPSG:3857")
+
+        result = gdf.to_json()
+
+        obj = json.loads(result)
+        assert obj["type"] == "FeatureCollection"
+        assert obj["features"][0]["geometry"]["type"] == "Point"
+        assert obj["features"][0]["geometry"]["coordinates"] == [1.0, 2.0]
+        assert obj["features"][1]["geometry"]["type"] == "Point"
+        assert obj["features"][1]["geometry"]["coordinates"] == [2.0, 1.0]
+        assert obj["crs"]["type"] == "name"
+        assert obj["crs"]["properties"]["name"] == "urn:ogc:def:crs:EPSG::3857"
+
+        expected = '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", \
+"properties": {"col1": "name1"}, "geometry": {"type": "Point", "coordinates": [1.0,\
+ 2.0]}}, {"id": "1", "type": "Feature", "properties": {"col1": "name2"}, "geometry"\
+: {"type": "Point", "coordinates": [2.0, 1.0]}}], "crs": {"type": "name", "properti\
+es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
+        assert result == expected, f"Expected {expected}, but got {result}"
+
+    def test_to_arrow(self):
+        import pyarrow as pa
+
+        data = {"col1": ["name1", "name2"], "geometry": [Point(1, 2), Point(2, 1)]}
+
+        with self.ps_allow_diff_frames():
+            gdf = GeoDataFrame(data, index=pd.Index([1, 2]))
+
+        arrow_table = gdf.to_arrow()
+
+        table = pa.table(arrow_table)
+
+        data = {"col1": ["name1", "name2"], "geometry": [Point(1, 2), Point(2, 1)]}
+        gpd_df = gpd.GeoDataFrame(data, index=pd.Index([1, 2]))
+
+        expected = pa.table(gpd_df.to_arrow())
+
+        assert table.equals(expected)
 
 
 # -----------------------------------------------------------------------------
