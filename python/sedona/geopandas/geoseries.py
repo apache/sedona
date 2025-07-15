@@ -2213,8 +2213,129 @@ class GeoSeries(GeoFrame, pspd.Series):
         """Alias for `notna` method. See `notna` for more detail."""
         return self.notna()
 
-    def fillna(self, value: Any) -> "GeoSeries":
-        raise NotImplementedError("GeoSeries.fillna() is not implemented yet.")
+    def fillna(
+        self, value=None, inplace: bool = False, limit=None, **kwargs
+    ) -> Union["GeoSeries", None]:
+        """
+        Fill NA values with geometry (or geometries).
+
+        Parameters
+        ----------
+        value : shapely geometry or GeoSeries, default None
+            If None is passed, NA values will be filled with GEOMETRYCOLLECTION EMPTY.
+            If a shapely geometry object is passed, it will be
+            used to fill all missing values. If a ``GeoSeries`` or ``GeometryArray``
+            are passed, missing values will be filled based on the corresponding index
+            locations. If pd.NA or np.nan are passed, values will be filled with
+            ``None`` (not GEOMETRYCOLLECTION EMPTY).
+        limit : int, default None
+            This is the maximum number of entries along the entire axis
+            where NaNs will be filled. Must be greater than 0 if not None.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
+        ...         None,
+        ...         Polygon([(0, 0), (-1, 1), (0, -1)]),
+        ...     ]
+        ... )
+        >>> s
+        0      POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1                                None
+        2    POLYGON ((0 0, -1 1, 0 -1, 0 0))
+        dtype: geometry
+
+        Filled with an empty polygon.
+
+        >>> s.fillna()
+        0      POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1            GEOMETRYCOLLECTION EMPTY
+        2    POLYGON ((0 0, -1 1, 0 -1, 0 0))
+        dtype: geometry
+
+        Filled with a specific polygon.
+
+        >>> s.fillna(Polygon([(0, 1), (2, 1), (1, 2)]))
+        0      POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1      POLYGON ((0 1, 2 1, 1 2, 0 1))
+        2    POLYGON ((0 0, -1 1, 0 -1, 0 0))
+        dtype: geometry
+
+        Filled with another GeoSeries.
+
+        >>> from shapely.geometry import Point
+        >>> s_fill = GeoSeries(
+        ...     [
+        ...         Point(0, 0),
+        ...         Point(1, 1),
+        ...         Point(2, 2),
+        ...     ]
+        ... )
+        >>> s.fillna(s_fill)
+        0      POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1                         POINT (1 1)
+        2    POLYGON ((0 0, -1 1, 0 -1, 0 0))
+        dtype: geometry
+
+        See Also
+        --------
+        GeoSeries.isna : detect missing values
+        """
+        from shapely.geometry.base import BaseGeometry
+        from geopandas.array import GeometryArray
+
+        # TODO: Implement limit https://github.com/apache/sedona/issues/2068
+        if limit:
+            raise NotImplementedError(
+                "GeoSeries.fillna() with limit is not implemented yet."
+            )
+
+        col = self.get_first_geometry_column()
+        if pd.isna(value) == True or isinstance(value, BaseGeometry):
+            if (
+                value is not None and pd.isna(value) == True
+            ):  # ie. value is np.nan or pd.NA:
+                value = "NULL"
+            else:
+                if value is None:
+                    from shapely.geometry import GeometryCollection
+
+                    value = GeometryCollection()
+
+                value = f"ST_GeomFromText('{value.wkt}')"
+
+            select = f"COALESCE(`{col}`, {value})"
+            result = self._query_geometry_column(select, col, "")
+        elif isinstance(value, (GeoSeries, GeometryArray, gpd.GeoSeries)):
+
+            if isinstance(value, (gpd.GeoSeries, GeometryArray)):
+                value = GeoSeries(value)
+
+            # Replace all None's with empty geometries
+            value = value.fillna(None)
+
+            # Coalesce: If the value in L is null, use the corresponding value in R for that row
+            select = f"COALESCE(`L`, `R`)"
+            result = self._row_wise_operation(
+                select, value, align=None, rename="fillna"
+            )
+        else:
+            raise ValueError(f"Invalid value type: {type(value)}")
+
+        if inplace:
+            self._update_anchor(_to_spark_pandas_df(result))
+            return None
+
+        return result
 
     def explode(self, ignore_index=False, index_parts=False) -> "GeoSeries":
         raise NotImplementedError("GeoSeries.explode() is not implemented yet.")

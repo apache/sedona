@@ -312,7 +312,29 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_fillna(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).fillna()
+            gpd_result = gpd.GeoSeries(geom).fillna()
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        data = [None, None, None, None, Point(0, 1)]
+        sgpd_result = GeoSeries(data).fillna()
+        gpd_result = gpd.GeoSeries(data).fillna()
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        fill_data = [Point(-1, -1), Point(-2, -2), Point(2, 3)]
+        sgpd_result = GeoSeries(data).fillna(GeoSeries(fill_data))
+        gpd_result = gpd.GeoSeries(data).fillna(gpd.GeoSeries(fill_data))
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # Ensure filling with np.nan or pd.NA returns None
+        # but filling None return empty geometry
+        import numpy as np
+
+        for fill_val in [np.nan, pd.NA, None]:
+            sgpd_result = GeoSeries(data).fillna(fill_val)
+            gpd_result = gpd.GeoSeries(data).fillna(fill_val)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_explode(self):
         pass
