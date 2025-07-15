@@ -17,51 +17,197 @@
 from pyspark.pandas.internal import InternalFrame
 from pyspark.pandas.series import first_series
 from pyspark.pandas.utils import scol_for
-from pyspark.sql.functions import expr
+from pyspark.sql.functions import expr, col, lit
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
 from sedona.geopandas import GeoDataFrame, GeoSeries
 from sedona.geopandas.geoseries import _to_geo_series
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 
 
-def _frame_join(left_df, right_df):
+def _frame_join(
+    left_df,
+    right_df,
+    how="inner",
+    predicate="intersects",
+    lsuffix="left",
+    rsuffix="right",
+    distance=None,
+    on_attribute=None,
+):
     """Join the GeoDataFrames at the DataFrame level.
 
     Parameters
     ----------
-    left_df : GeoDataFrame
-    right_df : GeoDataFrame
+    left_df : GeoDataFrame or GeoSeries
+        Left dataset to join
+    right_df : GeoDataFrame or GeoSeries
+        Right dataset to join
+    how : str, default 'inner'
+        Join type: 'inner', 'left', 'right'
+    predicate : str, default 'intersects'
+        Spatial predicate to use
+    lsuffix : str, default 'left'
+        Suffix for left overlapping columns
+    rsuffix : str, default 'right'
+        Suffix for right overlapping columns
+    distance : float, optional
+        Distance parameter for dwithin predicate
+    on_attribute : list, optional
+        Additional columns to join on
 
     Returns
     -------
-    GeoDataFrame
-        Joined GeoDataFrame.
-
-    TODO: Implement this function with more details and parameters.
+    GeoDataFrame or GeoSeries
+        Joined result
     """
+    # Predicate mapping
+    predicate_map = {
+        "intersects": "ST_Intersects",
+        "contains": "ST_Contains",
+        "within": "ST_Within",
+        "touches": "ST_Touches",
+        "crosses": "ST_Crosses",
+        "overlaps": "ST_Overlaps",
+        "dwithin": "ST_DWithin",
+    }
+
+    if predicate not in predicate_map:
+        raise ValueError(
+            f"Predicate '{predicate}' not supported. Available: {list(predicate_map.keys())}"
+        )
+
+    spatial_func = predicate_map[predicate]
+
     # Get the internal Spark DataFrames
     left_sdf = left_df._internal.spark_frame
     right_sdf = right_df._internal.spark_frame
 
-    # Convert WKB to geometry
-    left_geo_df = left_sdf.selectExpr("ST_GeomFromWKB(`0`) as l_geometry")
-    right_geo_df = right_sdf.selectExpr("ST_GeomFromWKB(`0`) as r_geometry")
+    # Handle geometry columns - check if they exist and get proper column names
+    left_geom_col = None
+    right_geom_col = None
 
-    # Perform Spatial Join using ST_Intersects
-    spatial_join_df = left_geo_df.alias("l").join(
-        right_geo_df.alias("r"), expr("ST_Intersects(l_geometry, r_geometry)")
-    )
+    # Find geometry columns in left dataframe
+    for field in left_sdf.schema.fields:
+        if field.dataType.typeName() in ("geometrytype", "binary"):
+            left_geom_col = field.name
+            break
 
-    # Use the provided code template to create an InternalFrame and return a GeoSeries
-    internal = InternalFrame(
-        spark_frame=spatial_join_df,
-        index_spark_columns=None,
-        column_labels=[left_df._col_label],
-        data_spark_columns=[scol_for(spatial_join_df, "l_geometry")],
-        data_fields=[left_df._internal.data_fields[0]],
-        column_label_names=left_df._internal.column_label_names,
-    )
-    return _to_geo_series(first_series(PandasOnSparkDataFrame(internal)))
+    # Find geometry columns in right dataframe
+    for field in right_sdf.schema.fields:
+        if field.dataType.typeName() in ("geometrytype", "binary"):
+            right_geom_col = field.name
+            break
+
+    if left_geom_col is None or right_geom_col is None:
+        raise ValueError("Both datasets must have geometry columns")
+
+    # Prepare geometry expressions for spatial join
+    if left_sdf.schema[left_geom_col].dataType.typeName() == "binary":
+        left_geom_expr = f"ST_GeomFromWKB(`{left_geom_col}`) as l_geometry"
+    else:
+        left_geom_expr = f"`{left_geom_col}` as l_geometry"
+
+    if right_sdf.schema[right_geom_col].dataType.typeName() == "binary":
+        right_geom_expr = f"ST_GeomFromWKB(`{right_geom_col}`) as r_geometry"
+    else:
+        right_geom_expr = f"`{right_geom_col}` as r_geometry"
+
+    # Select all columns with geometry
+    left_cols = [left_geom_expr] + [
+        f"`{field.name}` as l_{field.name}"
+        for field in left_sdf.schema.fields
+        if field.name != left_geom_col and not field.name.startswith("__")
+    ]
+    right_cols = [right_geom_expr] + [
+        f"`{field.name}` as r_{field.name}"
+        for field in right_sdf.schema.fields
+        if field.name != right_geom_col and not field.name.startswith("__")
+    ]
+
+    left_geo_df = left_sdf.selectExpr(*left_cols)
+    right_geo_df = right_sdf.selectExpr(*right_cols)
+
+    # Build spatial join condition
+    if predicate == "dwithin":
+        if distance is None:
+            raise ValueError("Distance parameter is required for 'dwithin' predicate")
+        spatial_condition = f"{spatial_func}(l_geometry, r_geometry, {distance})"
+    else:
+        spatial_condition = f"{spatial_func}(l_geometry, r_geometry)"
+
+    # Add attribute-based join condition if specified
+    join_condition = spatial_condition
+    if on_attribute:
+        for attr in on_attribute:
+            join_condition += f" AND l_{attr} = r_{attr}"
+
+    # Perform spatial join based on join type
+    if how == "inner":
+        spatial_join_df = left_geo_df.alias("l").join(
+            right_geo_df.alias("r"), expr(join_condition)
+        )
+    elif how == "left":
+        spatial_join_df = left_geo_df.alias("l").join(
+            right_geo_df.alias("r"), expr(join_condition), "left"
+        )
+    elif how == "right":
+        spatial_join_df = left_geo_df.alias("l").join(
+            right_geo_df.alias("r"), expr(join_condition), "right"
+        )
+    else:
+        raise ValueError(f"Join type '{how}' not supported")
+
+    # Handle column naming with suffixes
+    final_columns = []
+
+    # Add geometry column (always from left for geopandas compatibility)
+    final_columns.append("l_geometry as geometry")
+
+    # Add other columns with suffix handling
+    left_data_cols = [col for col in left_geo_df.columns if col != "l_geometry"]
+    right_data_cols = [col for col in right_geo_df.columns if col != "r_geometry"]
+
+    for col_name in left_data_cols:
+        base_name = col_name[2:]  # Remove "l_" prefix
+        right_col = f"r_{base_name}"
+
+        if right_col in right_data_cols:
+            # Column exists in both - apply suffixes
+            final_columns.append(f"{col_name} as {base_name}_{lsuffix}")
+        else:
+            # Column only in left
+            final_columns.append(f"{col_name} as {base_name}")
+
+    for col_name in right_data_cols:
+        base_name = col_name[2:]  # Remove "r_" prefix
+        left_col = f"l_{base_name}"
+
+        if left_col in left_data_cols:
+            # Column exists in both - apply suffixes
+            final_columns.append(f"{col_name} as {base_name}_{rsuffix}")
+        else:
+            # Column only in right
+            final_columns.append(f"{col_name} as {base_name}")
+
+    # Select final columns
+    result_df = spatial_join_df.selectExpr(*final_columns)
+
+    # Return appropriate type based on input
+    if isinstance(left_df, GeoSeries) and isinstance(right_df, GeoSeries):
+        # Return GeoSeries for GeoSeries inputs
+        internal = InternalFrame(
+            spark_frame=result_df,
+            index_spark_columns=None,
+            column_labels=[left_df._col_label],
+            data_spark_columns=[scol_for(result_df, "geometry")],
+            data_fields=[left_df._internal.data_fields[0]],
+            column_label_names=left_df._internal.column_label_names,
+        )
+        return _to_geo_series(first_series(PandasOnSparkDataFrame(internal)))
+    else:
+        # Return GeoDataFrame for GeoDataFrame inputs
+        return GeoDataFrame(result_df)
 
 
 def sjoin(
@@ -139,6 +285,12 @@ def sjoin(
     joined = _frame_join(
         left_df,
         right_df,
+        how=how,
+        predicate=predicate,
+        lsuffix=lsuffix,
+        rsuffix=rsuffix,
+        distance=distance,
+        on_attribute=on_attribute,
     )
 
     return joined
@@ -161,8 +313,8 @@ def _basic_checks(left_df, right_df, how, lsuffix, rsuffix, on_attribute=None):
 
     Parameters
     ------------
-    left_df : GeoDataFrame
-    right_df : GeoData Frame
+    left_df : GeoDataFrame or GeoSeries
+    right_df : GeoDataFrame or GeoSeries
     how : str, one of 'left', 'right', 'inner'
         join type
     lsuffix : str
@@ -172,12 +324,36 @@ def _basic_checks(left_df, right_df, how, lsuffix, rsuffix, on_attribute=None):
     on_attribute : list, default None
         list of column names to merge on along with geometry
     """
-    if not isinstance(left_df, GeoSeries):
-        raise ValueError(f"'left_df' should be GeoSeries, got {type(left_df)}")
+    if not isinstance(left_df, (GeoSeries, GeoDataFrame)):
+        raise ValueError(
+            f"'left_df' should be GeoSeries or GeoDataFrame, got {type(left_df)}"
+        )
 
-    if not isinstance(right_df, GeoSeries):
-        raise ValueError(f"'right_df' should be GeoSeries, got {type(right_df)}")
+    if not isinstance(right_df, (GeoSeries, GeoDataFrame)):
+        raise ValueError(
+            f"'right_df' should be GeoSeries or GeoDataFrame, got {type(right_df)}"
+        )
 
-    allowed_hows = ["inner"]
+    allowed_hows = ["inner", "left", "right"]
     if how not in allowed_hows:
         raise ValueError(f'`how` was "{how}" but is expected to be in {allowed_hows}')
+
+    # Check if on_attribute columns exist in both datasets
+    if on_attribute:
+        for attr in on_attribute:
+            if hasattr(left_df, "columns") and attr not in left_df.columns:
+                raise ValueError(f"Column '{attr}' not found in left dataset")
+            if hasattr(right_df, "columns") and attr not in right_df.columns:
+                raise ValueError(f"Column '{attr}' not found in right dataset")
+
+    # Check for reserved column names that would conflict
+    if lsuffix == rsuffix:
+        raise ValueError("lsuffix and rsuffix cannot be the same")
+
+    # Validate suffix format (should not contain special characters that would break SQL)
+    import re
+
+    if not re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*$", lsuffix):
+        raise ValueError(f"lsuffix '{lsuffix}' contains invalid characters")
+    if not re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*$", rsuffix):
+        raise ValueError(f"rsuffix '{rsuffix}' contains invalid characters")
