@@ -36,12 +36,6 @@ geometry column is present it will be used automatically. If two are present, th
 'geometry' will be used. If more than one are present and none are named 'geometry', the
 column name must be provided. The new column will be named 'cluster'.
 
-!!!Note
-In the 1.8.0 release and beyond, the `dbscan` function will return a string for the cluster id. This is due to the
-change in the underlying data type of the cluster id from a long to a string. This change is related to the use of
-DBSCAN 0.9.0, which has a change to its connected components API. The original behavior is available by setting
-`spark.graphframes.useLabelsAsComponents` to `false`.
-
 ### Parameters
 
 names in parentheses are python variable names

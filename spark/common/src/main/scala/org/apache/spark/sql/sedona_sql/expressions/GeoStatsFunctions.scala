@@ -23,7 +23,7 @@ import org.apache.sedona.stats.Weighting.{addBinaryDistanceBandColumn, addWeight
 import org.apache.sedona.stats.clustering.DBSCAN.dbscan
 import org.apache.sedona.stats.hotspotDetection.GetisOrd.gLocal
 import org.apache.sedona.stats.outlierDetection.LocalOutlierFactor.localOutlierFactor
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.catalyst.expressions.{Attribute, Expression}
 import org.apache.spark.sql.functions.{col, struct}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
@@ -33,14 +33,8 @@ case class ST_DBSCAN(children: Seq[Expression]) extends DataframePhysicalFunctio
 
   lazy val conf = SedonaConf.fromActiveSession() // only access on driver
 
-  override def dataType: DataType = {
-    val clusterType = SparkSession.getActiveSession.get.conf
-      .get("spark.graphframes.useLabelsAsComponents", "true") match {
-      case "true" => StringType
-      case _ => LongType
-    }
-    StructType(Seq(StructField("isCore", BooleanType), StructField("cluster", clusterType)))
-  }
+  override def dataType: DataType =
+    StructType(Seq(StructField("isCore", BooleanType), StructField("cluster", LongType)))
 
   override def inputTypes: Seq[AbstractDataType] =
     Seq(GeometryUDT, DoubleType, IntegerType, BooleanType)

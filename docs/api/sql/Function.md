@@ -1068,12 +1068,6 @@ Returns a struct containing the cluster ID and a boolean indicating if the recor
 - `minPoints` is the minimum number of neighbors a single record must have to form a cluster.
 - `useSpheroid` is whether to use ST_DistanceSpheroid or ST_Distance as the distance metric.
 
-!!!Note
-    In the 1.8.0 release and beyond, the `ST_DBSCAN` function will return a string for the cluster id. This is due to the
-    change in the underlying data type of the cluster id from a long to a string. This change is related to the use of
-    DBSCAN 0.9.0, which has a change to its connected components API. The original behavior is available by setting
-    `spark.graphframes.useLabelsAsComponents` to `false`.
-
 Format: `ST_DBSCAN(geom: Geometry, epsilon: Double, minPoints: Integer, useSpheroid: Boolean)`
 
 Since: `v1.7.1`
