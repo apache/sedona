@@ -155,9 +155,9 @@ class GeoSeries(GeoFrame, pspd.Series):
 
             # Can't to try-except here since the exception would be in spark, so we check the first valid index
             first_idx = data.first_valid_index()
-            if isinstance(
+            if first_idx is None or isinstance(
                 data[first_idx], (BaseGeometry, bytearray, bytes)
-            ) and not pd.isna(data[first_idx]):
+            ):
                 data = data.apply(try_geom_to_ewkb)
             else:
                 raise TypeError(
