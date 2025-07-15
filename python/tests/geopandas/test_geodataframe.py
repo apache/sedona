@@ -33,20 +33,6 @@ from packaging.version import parse as parse_version
 
 
 class TestDataframe(TestGeopandasBase):
-    # def setup_method(self):
-    #     N = 10
-    #     self.tempdir = tempfile.mkdtemp()
-    #     self.crs = "epsg:4326"
-    #     self.df = GeoDataFrame(
-    #         [
-    #             {"geometry": Point(x, y), "value1": x + y, "value2": x * y}
-    #             for x, y in zip(range(N), range(N))
-    #         ],
-    #         crs=self.crs,
-    #     )
-    #
-    # def teardown_method(self):
-    #     shutil.rmtree(self.tempdir)
     @pytest.mark.parametrize(
         "obj",
         [
