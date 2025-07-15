@@ -622,8 +622,7 @@
                         <spark.version>${spark.version}</spark.version>
                         <scala.version>${scala.version}</scala.version>
                         <log4j.version>${log4j.version}</log4j.version>
-                        <!--TODO is this the right value? what is this for?-->
-                        <graphframe.version>${graphframe.version}</graphframe.version>
+                        <graphframes.version>${graphframes.version}</graphframes.version>
                     </properties>
                 </configuration>
                 <executions>
