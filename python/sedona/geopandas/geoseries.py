@@ -543,7 +543,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             def try_wkb_to_geom(wkb):
                 if wkb:
                     try:
-                        return shapely.from_wkb(bytes(wkb))
+                        return shapely.wkb.loads(bytes(wkb))
                     except TypeError:
                         pass
 

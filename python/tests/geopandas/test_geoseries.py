@@ -142,8 +142,8 @@ class TestGeoSeries(TestBase):
         ps.set_option("compute.ops_on_diff_frames", True)
         s = sgpd.GeoSeries.from_wkb(wkbs)
         ps.reset_option("compute.ops_on_diff_frames")
+
         expected = gpd.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
-        print(s)
         self.check_sgpd_equals_gpd(s, expected)
 
     def test_from_wkt(self):
