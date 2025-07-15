@@ -1757,10 +1757,6 @@ class TestDataFrameAPI(TestBase):
         for future in futures:
             future.result()
 
-    @pytest.mark.skipif(
-        os.getenv("SPARK_REMOTE") is not None,
-        reason="Checkpoint dir is not available in Spark Connect",
-    )
     def test_dbscan(self):
         df = self.spark.createDataFrame([{"id": 1, "x": 2, "y": 3}]).withColumn(
             "geometry", f.expr("ST_Point(x, y)")
