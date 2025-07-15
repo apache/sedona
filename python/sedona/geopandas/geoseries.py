@@ -152,42 +152,29 @@ class GeoSeries(GeoFrame, pspd.Series):
                     "allow_override=True)' to overwrite CRS or "
                     "'GeoSeries.to_crs(crs)' to reproject geometries. "
                 )
-            # This is a temporary workaround since pyspark errors when creating a ps.Series from a ps.Series
-            # This is NOT a scalable solution since we call to_pandas() on the data and is a hacky solution
-            # but this should be resolved if/once https://github.com/apache/spark/pull/51300 is merged in.
-            # For now, we reset self._anchor = data to have keep the geometry information (e.g crs) that's lost in to_pandas()
-
-            try:
+            # Can't to try-except here since the exception would be in spark, so we check the first valid index
+            first_idx = data.first_valid_index()
+            if isinstance(data[first_idx], (BaseGeometry, bytearray, bytes)):
                 data = data.apply(try_geom_to_ewkb)
-            except Exception as e:
-                raise TypeError(f"Non-geometry column passed to GeoSeries: {e}")
+            else:
+                raise TypeError(
+                    f"Non-geometry column passed to GeoSeries: {data[first_idx]}"
+                )
 
-            if isinstance(data, pspd.Series):
-                index = data._col_label
-                data = pspd.DataFrame(data)
-
-            if not index:
-                index = data._internal.column_labels[0]
-
-            pd_data = data
-
-            # pd_data = data.to_pandas()
-
-            # try:
-            #     pd_data = pd_data.apply(try_geom_to_ewkb)
-            # except Exception as e:
-            #     raise TypeError(f"Non-geometry column passed to GeoSeries: {e}")
+            # Ideally, we'd like to just input the ps.Series into the ps.Series __init__ below,
+            # but pyspark.pandas won't support this until 4.1.0.
+            # For now, we manually implement the logic.
+            index = data._col_label if index is None else index
+            ps_df = pspd.DataFrame(data._anchor)
 
             super().__init__(
-                data=pd_data,
+                data=ps_df,
                 index=index,
                 dtype=dtype,
                 name=name,
                 copy=copy,
                 fastpath=fastpath,
             )
-
-            self._anchor = data
         else:
             if isinstance(data, pd.Series):
                 assert index is None
@@ -554,17 +541,13 @@ class GeoSeries(GeoFrame, pspd.Series):
                 if wkb:
                     try:
                         return shapely.from_wkb(bytes(wkb))
-                    except Exception as e:
-                        print(f"Error converting WKB to geometry: {e}\n{bytes(wkb)}")
+                    except TypeError:
+                        pass
 
                 return None
 
             return gpd.GeoSeries(
-                pd_series.map(
-                    # lambda wkb: shapely.wkb.loads(bytes(wkb)) if wkb else None
-                    # lambda wkb: shapely.from_wkb(bytes(wkb)) if wkb else None
-                    try_wkb_to_geom
-                ),
+                pd_series.map(try_wkb_to_geom),
                 crs=self.crs,
             )
         except TypeError:

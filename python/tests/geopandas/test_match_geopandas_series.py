@@ -245,20 +245,25 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_from_wkb(self):
+        ps.set_option("compute.ops_on_diff_frames", True)
         for _, geom in self.geoms:
             wkb = [g.wkb for g in geom]
             sgpd_result = GeoSeries.from_wkb(wkb)
             gpd_result = gpd.GeoSeries.from_wkb(wkb)
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+        ps.reset_option("compute.ops_on_diff_frames")
 
     def test_from_wkt(self):
+        ps.set_option("compute.ops_on_diff_frames", True)
         for _, geom in self.geoms:
             wkt = [g.wkt for g in geom]
             sgpd_result = GeoSeries.from_wkt(wkt)
             gpd_result = gpd.GeoSeries.from_wkt(wkt)
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+        ps.reset_option("compute.ops_on_diff_frames")
 
     def test_from_xy(self):
+        ps.set_option("compute.ops_on_diff_frames", True)
         tests = [
             [
                 [2.5, 0.5, 5.0, -2],  # x
@@ -278,6 +283,7 @@ class TestMatchGeopandasSeries(TestBase):
             gpd_result = gpd.GeoSeries.from_xy(x, y, z, crs=crs)
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
             assert sgpd_result.crs == gpd_result.crs
+        ps.reset_option("compute.ops_on_diff_frames")
 
     def test_from_shapely(self):
         pass

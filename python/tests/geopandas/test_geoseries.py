@@ -18,6 +18,7 @@
 import numpy as np
 import pytest
 import pandas as pd
+import pyspark.pandas as ps
 import geopandas as gpd
 import sedona.geopandas as sgpd
 from sedona.geopandas import GeoSeries
@@ -137,8 +138,11 @@ class TestGeoSeries(TestBase):
                 b"\x00\x08@\x00\x00\x00\x00\x00\x00\x08@"
             ),
         ]
+        ps.set_option("compute.ops_on_diff_frames", True)
         s = sgpd.GeoSeries.from_wkb(wkbs)
+        ps.reset_option("compute.ops_on_diff_frames")
         expected = gpd.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        print(s)
         self.check_sgpd_equals_gpd(s, expected)
 
     def test_from_wkt(self):
@@ -147,19 +151,25 @@ class TestGeoSeries(TestBase):
             "POINT (2 2)",
             "POINT (3 3)",
         ]
+        ps.set_option("compute.ops_on_diff_frames", True)
         s = sgpd.GeoSeries.from_wkt(wkts)
+        ps.reset_option("compute.ops_on_diff_frames")
         expected = gpd.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
         self.check_sgpd_equals_gpd(s, expected)
 
     def test_from_xy(self):
         x = [2.5, 5, -3.0]
         y = [0.5, 1, 1.5]
+        ps.set_option("compute.ops_on_diff_frames", True)
         s = sgpd.GeoSeries.from_xy(x, y, crs="EPSG:4326")
+        ps.reset_option("compute.ops_on_diff_frames")
         expected = gpd.GeoSeries([Point(2.5, 0.5), Point(5, 1), Point(-3, 1.5)])
         self.check_sgpd_equals_gpd(s, expected)
 
         z = [1, 2, 3]
+        ps.set_option("compute.ops_on_diff_frames", True)
         s = sgpd.GeoSeries.from_xy(x, y, z)
+        ps.reset_option("compute.ops_on_diff_frames")
         expected = gpd.GeoSeries(
             [Point(2.5, 0.5, 1), Point(5, 1, 2), Point(-3, 1.5, 3)]
         )
