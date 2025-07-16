@@ -2680,13 +2680,13 @@ class GeoSeries(GeoFrame, pspd.Series):
         --------
         >>> from shapely.geometry import Point, Polygon
         >>> s = GeoSeries(
-        >>>     [
-        >>>         Point(0, 0),
-        >>>         Polygon(),
-        >>>         Polygon([(0, 0), (1, 1), (1, 0)]),
-        >>>         None,
-        >>>     ]
-        >>> )
+        ...     [
+        ...         Point(0, 0),
+        ...         Polygon(),
+        ...         Polygon([(0, 0), (1, 1), (1, 0)]),
+        ...         None,
+        ...     ]
+        ... )
 
         >>> s.to_wkb()
         0    b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00...
