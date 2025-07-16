@@ -38,6 +38,7 @@ from sedona.geopandas._typing import Label
 from sedona.geopandas.base import GeoFrame
 from sedona.geopandas.geodataframe import GeoDataFrame
 from sedona.geopandas.sindex import SpatialIndex
+from packaging.version import parse as parse_version
 
 from pyspark.pandas.internal import (
     SPARK_DEFAULT_INDEX_NAME,  # __index_level_0__
@@ -553,7 +554,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             geoseries = gpd.GeoSeries(pd_series, crs=self.crs)
 
         first_shape = next((obj for obj in geoseries if obj is not None), None)
-        if first_shape:
+        if first_shape and parse_version(shapely.__version__) >= parse_version("2.0.0"):
             srid = shapely.get_srid(first_shape)
             if srid:
                 assert (
