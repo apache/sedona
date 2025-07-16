@@ -2737,7 +2737,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         .. _Arrow PyCapsule Protocol: https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html
 
-        .. versionadded:: 1.0
+        Note: Requires geopandas versions >= 1.0.0 to use with Sedona.
 
         Parameters
         ----------

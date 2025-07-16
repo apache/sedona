@@ -387,6 +387,9 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_to_arrow(self):
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            return
+
         import pyarrow as pa
 
         for _, geom in self.geoms:

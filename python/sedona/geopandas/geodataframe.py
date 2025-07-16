@@ -934,6 +934,9 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
         method). This object can then be consumed by your Arrow implementation
         of choice that supports this protocol.
         .. _Arrow PyCapsule Protocol: https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html
+
+        Note: Requires geopandas versions >= 1.0.0 to use with Sedona.
+
         Parameters
         ----------
         index : bool, default None
