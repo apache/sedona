@@ -693,6 +693,9 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                     self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_snap(self):
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            return
+
         num_passed = 0
         for i, (_, geom) in enumerate(self.geoms):
             for _, geom2 in self.geoms[i:]:
