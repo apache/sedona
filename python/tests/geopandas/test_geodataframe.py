@@ -19,6 +19,13 @@ import tempfile
 
 from shapely.geometry import (
     Point,
+    LineString,
+    Polygon,
+    GeometryCollection,
+    MultiPoint,
+    MultiLineString,
+    MultiPolygon,
+    LinearRing,
 )
 
 from sedona.geopandas import GeoDataFrame, GeoSeries
@@ -291,7 +298,6 @@ class TestDataframe(TestGeopandasBase):
 
     def test_buffer(self):
         # Create a GeoDataFrame with geometries to test buffer operation
-        from shapely.geometry import Polygon, Point
 
         # Create input geometries
         point = Point(0, 0)
@@ -326,6 +332,44 @@ class TestDataframe(TestGeopandasBase):
 
     def test_to_parquet(self):
         pass
+
+    def test_from_arrow(self):
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            return
+
+        import pyarrow as pa
+        import geoarrow.pyarrow as ga
+
+        table = pa.Table.from_arrays(
+            [
+                ga.as_geoarrow(
+                    [
+                        None,
+                        "POLYGON ((0 0, 1 1, 0 1, 0 0))",
+                        "LINESTRING (0 0, -1 1, 0 -1)",
+                    ]
+                ),
+                pa.array([1, 2, 3]),
+                pa.array(["a", "b", "c"]),
+            ],
+            names=["geometry", "id", "value"],
+        )
+
+        # TODO: optimize this away
+        with self.ps_allow_diff_frames():
+            sgpd_df = GeoDataFrame.from_arrow(table)
+        expected = gpd.GeoDataFrame(
+            {
+                "geometry": [
+                    None,
+                    Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+                    LineString([(0, 0), (-1, 1), (0, -1)]),
+                ],
+                "id": [1, 2, 3],
+                "value": ["a", "b", "c"],
+            }
+        )
+        self.check_sgpd_df_equals_gpd_df(sgpd_df, expected)
 
     def test_to_json(self):
         import json

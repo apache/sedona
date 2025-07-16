@@ -284,7 +284,21 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_from_arrow(self):
-        pass
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            return
+
+        import geoarrow.pyarrow as ga
+
+        for _, geom in self.geoms:
+            # ga doesn't support GeometryCollection: "Unrecognized GeoArrow extension name: 'geoarrow.geometrycollection'"
+            if self.contains_any_geom_collection(geom):
+                continue
+
+            wkt_geom = [g.wkt for g in geom if g is not None]
+            array = ga.as_geoarrow(wkt_geom)
+            sgpd_result = GeoSeries.from_arrow(array)
+            gpd_result = gpd.GeoSeries.from_arrow(array)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_to_file(self):
         pass

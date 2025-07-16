@@ -158,7 +158,28 @@ class TestGeoSeries(TestGeopandasBase):
         pass
 
     def test_from_arrow(self):
-        pass
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            return
+
+        import geoarrow.pyarrow as ga
+
+        array = ga.as_geoarrow(["POINT (1 1)", "POINT (2 2)", "POINT (3 3)", None])
+        result = sgpd.GeoSeries.from_arrow(array)
+        expected = gpd.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3), None])
+        self.check_sgpd_equals_gpd(result, expected)
+
+        array = ga.as_geoarrow(
+            [None, "POLYGON ((0 0, 1 1, 0 1, 0 0))", "LINESTRING (0 0, -1 1, 0 -1)"]
+        )
+        result = sgpd.GeoSeries.from_arrow(array)
+        expected = gpd.GeoSeries(
+            [
+                None,
+                Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+                LineString([(0, 0), (-1, 1), (0, -1)]),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
 
     def test_to_file(self):
         pass

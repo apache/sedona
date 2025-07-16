@@ -223,6 +223,37 @@ class TestMatchGeopandasDataFrame(TestGeopandasBase):
             gpd_result = gpd.GeoDataFrame(data, crs="EPSG:3857").to_json(**kwargs)
             assert sgpd_result == gpd_result
 
+    def test_from_arrow(self):
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            return
+
+        import geoarrow.pyarrow as ga
+        import pyarrow as pa
+
+        table = pa.Table.from_arrays(
+            [
+                ga.as_geoarrow(
+                    [
+                        None,
+                        "POLYGON ((0 0, 1 1, 0 1, 0 0))",
+                        "LINESTRING (0 0, -1 1, 0 -1)",
+                    ]
+                ),
+                pa.array([1, 2, 3]),
+                pa.array(["a", "b", "c"]),
+                pa.array([True, False, True]),
+                pa.array([None, None, None]),
+                pa.array(["POINT (1 1)", "POINT (2 2)", "POLYGON ()", None]),
+            ],
+            names=["geometry", "id", "value", "bools", "nulls", "geometry2"],
+        )
+
+        with self.ps_allow_diff_frames():
+            sgpd_df = GeoDataFrame.from_arrow(table)
+
+        gpd_df = gpd.GeoDataFrame.from_arrow(table)
+        self.check_sgpd_df_equals_gpd_df(sgpd_df, gpd_df)
+
     def test_to_arrow(self):
         if parse_version(gpd.__version__) < parse_version("1.0.0"):
             return

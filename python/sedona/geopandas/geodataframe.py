@@ -827,7 +827,71 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
     def from_arrow(
         cls, table, geometry: str | None = None, to_pandas_kwargs: dict | None = None
     ):
-        raise NotImplementedError("from_arrow() is not implemented yet.")
+        """
+        Construct a GeoDataFrame from a Arrow table object based on GeoArrow
+        extension types.
+
+        See https://geoarrow.org/ for details on the GeoArrow specification.
+
+        This functions accepts any tabular Arrow object implementing
+        the `Arrow PyCapsule Protocol`_ (i.e. having an ``__arrow_c_array__``
+        or ``__arrow_c_stream__`` method).
+
+        .. _Arrow PyCapsule Protocol: https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html
+
+        .. versionadded:: 1.0
+
+        Parameters
+        ----------
+        table : pyarrow.Table or Arrow-compatible table
+            Any tabular object implementing the Arrow PyCapsule Protocol
+            (i.e. has an ``__arrow_c_array__`` or ``__arrow_c_stream__``
+            method). This table should have at least one column with a
+            geoarrow geometry type.
+        geometry : str, default None
+            The name of the geometry column to set as the active geometry
+            column. If None, the first geometry column found will be used.
+        to_pandas_kwargs : dict, optional
+            Arguments passed to the `pa.Table.to_pandas` method for non-geometry
+            columns. This can be used to control the behavior of the conversion of the
+            non-geometry columns to a pandas DataFrame. For example, you can use this
+            to control the dtype conversion of the columns. By default, the `to_pandas`
+            method is called with no additional arguments.
+
+        Returns
+        -------
+        GeoDataFrame
+
+        See Also
+        --------
+        GeoDataFrame.to_arrow
+        GeoSeries.from_arrow
+
+        Examples
+        --------
+
+        >>> from sedona.geopandas import GeoDataFrame
+        >>> import geoarrow.pyarrow as ga
+        >>> import pyarrow as pa
+        >>> table = pa.Table.from_arrays([
+        ...     ga.as_geoarrow([None, "POLYGON ((0 0, 1 1, 0 1, 0 0))", "LINESTRING (0 0, -1 1, 0 -1)"]),
+        ...     pa.array([1, 2, 3]),
+        ...     pa.array(["a", "b", "c"]),
+        ... ], names=["geometry", "id", "value"])
+        >>> gdf = GeoDataFrame.from_arrow(table)
+        >>> gdf
+                                   geometry   id  value
+        0                              None    1      a
+        1    POLYGON ((0 0, 1 1, 0 1, 0 0))    2      b
+        2      LINESTRING (0 0, -1 1, 0 -1)    3      c
+        """
+        if to_pandas_kwargs is None:
+            to_pandas_kwargs = {}
+
+        gpd_df = gpd.GeoDataFrame.from_arrow(
+            table, geometry=geometry, **to_pandas_kwargs
+        )
+        return GeoDataFrame(gpd_df)
 
     def to_json(
         self,

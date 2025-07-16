@@ -2094,7 +2094,55 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @classmethod
     def from_arrow(cls, arr, **kwargs) -> "GeoSeries":
-        raise NotImplementedError("GeoSeries.from_arrow() is not implemented yet.")
+        """
+        Construct a GeoSeries from a Arrow array object with a GeoArrow
+        extension type.
+
+        See https://geoarrow.org/ for details on the GeoArrow specification.
+
+        This functions accepts any Arrow array object implementing
+        the `Arrow PyCapsule Protocol`_ (i.e. having an ``__arrow_c_array__``
+        method).
+
+        .. _Arrow PyCapsule Protocol: https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html
+
+        Note: Requires geopandas versions >= 1.0.0 to use with Sedona.
+
+        Parameters
+        ----------
+        arr : pyarrow.Array, Arrow array
+            Any array object implementing the Arrow PyCapsule Protocol
+            (i.e. has an ``__arrow_c_array__`` or ``__arrow_c_stream__``
+            method). The type of the array should be one of the
+            geoarrow geometry types.
+        **kwargs
+            Other parameters passed to the GeoSeries constructor.
+
+        Returns
+        -------
+        GeoSeries
+
+        See Also
+        --------
+        GeoSeries.to_arrow
+        GeoDataFrame.from_arrow
+
+        Examples
+        --------
+
+        >>> from sedona.geopandas import GeoSeries
+        >>> import geoarrow.pyarrow as ga
+        >>> array = ga.as_geoarrow([None, "POLYGON ((0 0, 1 1, 0 1, 0 0))", "LINESTRING (0 0, -1 1, 0 -1)"])
+        >>> geoseries = GeoSeries.from_arrow(array)
+        >>> geoseries
+        0                              None
+        1    POLYGON ((0 0, 1 1, 0 1, 0 0))
+        2      LINESTRING (0 0, -1 1, 0 -1)
+        dtype: geometry
+
+        """
+        gpd_series = gpd.GeoSeries.from_arrow(arr, **kwargs)
+        return GeoSeries(gpd_series)
 
     @classmethod
     def _create_from_select(
