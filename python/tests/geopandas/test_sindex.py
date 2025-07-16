@@ -114,7 +114,7 @@ class TestSpatialIndex(TestBase):
         query_point = Point(2.2, 2.2)
 
         # Execute query
-        result_indices = sindex.query(query_point, "contains")
+        result_indices = sindex.query(query_point, "intersects")
 
         # Verify results - should find at least one result (polygon containing the point)
         assert len(result_indices) > 0
@@ -128,7 +128,7 @@ class TestSpatialIndex(TestBase):
         box_results = sindex.query(query_box, predicate="contains")
 
         # Verify results - should find multiple polygons
-        assert len(box_results) > 1
+        assert len(box_results) == 1
 
         # Test with contains predicate
         # The query box fully contains polygon at index 2 (POLYGON((2 2, 3 2, 3 3, 2 3, 2 2)))
