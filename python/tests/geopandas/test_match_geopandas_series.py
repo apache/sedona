@@ -376,10 +376,20 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_to_wkb(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).to_wkb()
+            gpd_result = gpd.GeoSeries(geom).to_wkb()
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            sgpd_result = GeoSeries(geom).to_wkb(hex=True)
+            gpd_result = gpd.GeoSeries(geom).to_wkb(hex=True)
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_to_wkt(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).to_wkt()
+            gpd_result = gpd.GeoSeries(geom).to_wkt()
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_to_arrow(self):
         pass

@@ -2655,10 +2655,108 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("GeoSeries.to_json() is not implemented yet.")
 
     def to_wkb(self, hex: bool = False, **kwargs) -> pspd.Series:
-        raise NotImplementedError("GeoSeries.to_wkb() is not implemented yet.")
+        """
+        Convert GeoSeries geometries to WKB
+
+        Parameters
+        ----------
+        hex : bool
+            If true, export the WKB as a hexadecimal string.
+            The default is to return a binary bytes object.
+        kwargs
+            Additional keyword args will be passed to
+            :func:`shapely.to_wkb`.
+
+        Returns
+        -------
+        Series
+            WKB representations of the geometries
+
+        See also
+        --------
+        GeoSeries.to_wkt
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point, Polygon
+        >>> s = GeoSeries(
+        >>>     [
+        >>>         Point(0, 0),
+        >>>         Polygon(),
+        >>>         Polygon([(0, 0), (1, 1), (1, 0)]),
+        >>>         None,
+        >>>     ]
+        >>> )
+
+        >>> s.to_wkb()
+        0    b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00...
+        1              b'\x01\x03\x00\x00\x00\x00\x00\x00\x00'
+        2    b'\x01\x03\x00\x00\x00\x01\x00\x00\x00\x04\x00...
+        3                                                 None
+        dtype: object
+
+        >>> s.to_wkb(hex=True)
+        0           010100000000000000000000000000000000000000
+        1                                   010300000000000000
+        2    0103000000010000000400000000000000000000000000...
+        3                                                 None
+        dtype: object
+
+        """
+        col = self.get_first_geometry_column()
+        select = f"ST_AsBinary(`{col}`)"
+
+        if hex:
+            # this is using pyspark's hex function since Sedona doesn't support hex WKB conversion at the moment
+            # (it only supports hex EWKB)
+            select = f"hex({select})"
+
+        return self._query_geometry_column(
+            select,
+            cols=col,
+            rename="to_wkb",
+            returns_geom=False,
+        )
 
     def to_wkt(self, **kwargs) -> pspd.Series:
-        raise NotImplementedError("GeoSeries.to_wkt() is not implemented yet.")
+        """
+        Convert GeoSeries geometries to WKT
+
+        Parameters
+        ----------
+        kwargs
+            Keyword args will be passed to :func:`shapely.to_wkt`.
+
+        Returns
+        -------
+        Series
+            WKT representations of the geometries
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point
+        >>> s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        >>> s
+        0    POINT (1 1)
+        1    POINT (2 2)
+        2    POINT (3 3)
+        dtype: geometry
+
+        >>> s.to_wkt()
+        0    POINT (1 1)
+        1    POINT (2 2)
+        2    POINT (3 3)
+        dtype: object
+
+        See also
+        --------
+        GeoSeries.to_wkb
+        """
+        return self._process_geometry_column(
+            "ST_AsText",
+            rename="to_wkt",
+            returns_geom=False,
+        )
 
     def to_arrow(self, geometry_encoding="WKB", interleaved=True, include_z=None):
         raise NotImplementedError("GeoSeries.to_arrow() is not implemented yet.")
