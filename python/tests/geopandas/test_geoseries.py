@@ -36,6 +36,7 @@ from shapely.geometry import (
 )
 from pandas.testing import assert_series_equal
 import pytest
+from packaging.version import parse as parse_version
 
 
 class TestGeoSeries(TestGeopandasBase):
@@ -367,10 +368,6 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         pass
 
     def test_to_arrow(self):
-        # This is a rare occurrence that we need to import parse_version in this file so
-        # we'll just do it here. Most other functions won't rely on geopandas implementation.
-        from packaging.version import parse as parse_version
-
         if parse_version(gpd.__version__) < parse_version("1.0.0"):
             return
 

@@ -355,6 +355,9 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
         assert result == expected, f"Expected {expected}, but got {result}"
 
     def test_to_arrow(self):
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            return
+
         import pyarrow as pa
 
         data = {"col1": ["name1", "name2"], "geometry": [Point(1, 2), Point(2, 1)]}

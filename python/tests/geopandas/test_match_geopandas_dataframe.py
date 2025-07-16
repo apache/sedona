@@ -224,9 +224,11 @@ class TestMatchGeopandasDataFrame(TestGeopandasBase):
             assert sgpd_result == gpd_result
 
     def test_to_arrow(self):
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            return
+
         import pyarrow as pa
         import pandas as pd
-        import geopandas as gpd
 
         data = {
             "a": [1, 2, 3],
