@@ -619,7 +619,15 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_union_all(self):
-        pass
+        if parse_version(gpd.__version__) < parse_version("1.1.0"):
+            return
+
+        # Union all the valid geometries
+        # Neither our or geopandas' implementation supports invalid geometries
+        lst = [g for _, geom in self.geoms for g in geom if g.is_valid]
+        sgpd_result = GeoSeries(lst).union_all()
+        gpd_result = gpd.GeoSeries(lst).union_all()
+        self.check_geom_equals(sgpd_result, gpd_result)
 
     def test_intersects(self):
         for _, geom in self.geoms:
