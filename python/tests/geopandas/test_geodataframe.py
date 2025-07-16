@@ -26,6 +26,7 @@ from shapely.geometry import (
     MultiLineString,
     MultiPolygon,
     LinearRing,
+    box,
 )
 
 from sedona.geopandas import GeoDataFrame, GeoSeries
@@ -338,38 +339,42 @@ class TestDataframe(TestGeopandasBase):
             return
 
         import pyarrow as pa
-        import geoarrow.pyarrow as ga
 
-        table = pa.Table.from_arrays(
-            [
-                ga.as_geoarrow(
-                    [
-                        None,
-                        "POLYGON ((0 0, 1 1, 0 1, 0 0))",
-                        "LINESTRING (0 0, -1 1, 0 -1)",
-                    ]
-                ),
-                pa.array([1, 2, 3]),
-                pa.array(["a", "b", "c"]),
-            ],
-            names=["geometry", "id", "value"],
-        )
+        table = pa.table({"a": [0, 1, 2], "b": [0.1, 0.2, 0.3]})
+        with pytest.raises(ValueError, match="No geometry column found"):
+            GeoDataFrame.from_arrow(table)
 
-        # TODO: optimize this away
-        with self.ps_allow_diff_frames():
-            sgpd_df = GeoDataFrame.from_arrow(table)
-        expected = gpd.GeoDataFrame(
+        gdf = gpd.GeoDataFrame(
             {
+                "col": [1, 2, 3, 4],
                 "geometry": [
                     None,
-                    Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
-                    LineString([(0, 0), (-1, 1), (0, -1)]),
+                    box(0, 0, 10, 10),
+                    Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                    Point(1, 1),
                 ],
-                "id": [1, 2, 3],
-                "value": ["a", "b", "c"],
             }
         )
-        self.check_sgpd_df_equals_gpd_df(sgpd_df, expected)
+        # TODO: optimize this away
+        with self.ps_allow_diff_frames():
+            result = GeoDataFrame.from_arrow(gdf.to_arrow())
+
+        gdf = gpd.GeoDataFrame(
+            {
+                "col": ["a", "b", "c", "d"],
+                "geometry": [
+                    Point(1, 1),
+                    Polygon(),
+                    LineString([(0, 0), (1, 1)]),
+                    None,
+                ],
+            }
+        )
+        # TODO: optimize this away
+        with self.ps_allow_diff_frames():
+            result = GeoDataFrame.from_arrow(gdf.to_arrow())
+
+        self.check_sgpd_df_equals_gpd_df(result, gdf)
 
     def test_to_json(self):
         import json

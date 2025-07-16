@@ -227,32 +227,25 @@ class TestMatchGeopandasDataFrame(TestGeopandasBase):
         if parse_version(gpd.__version__) < parse_version("1.0.0"):
             return
 
-        import geoarrow.pyarrow as ga
-        import pyarrow as pa
-
-        table = pa.Table.from_arrays(
-            [
-                ga.as_geoarrow(
-                    [
-                        None,
-                        "POLYGON ((0 0, 1 1, 0 1, 0 0))",
-                        "LINESTRING (0 0, -1 1, 0 -1)",
-                    ]
-                ),
-                pa.array([1, 2, 3]),
-                pa.array(["a", "b", "c"]),
-                pa.array([True, False, True]),
-                pa.array([None, None, None]),
-                pa.array(["POINT (1 1)", "POINT (2 2)", "POLYGON ()", None]),
-            ],
-            names=["geometry", "id", "value", "bools", "nulls", "geometry2"],
+        gdf = gpd.GeoDataFrame(
+            {
+                "ints": [1, 2, 3, 4],
+                "strings": ["a", "b", "c", "d"],
+                "bools": [True, False, True, False],
+                "geometry": [
+                    None,
+                    LineString([(0, 0), (1, 1)]),
+                    Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                    Point(1, 1),
+                ],
+            }
         )
 
+        # TODO: optimize this away
         with self.ps_allow_diff_frames():
-            sgpd_df = GeoDataFrame.from_arrow(table)
-
-        gpd_df = gpd.GeoDataFrame.from_arrow(table)
-        self.check_sgpd_df_equals_gpd_df(sgpd_df, gpd_df)
+            sgpd_result = GeoDataFrame.from_arrow(gdf.to_arrow())
+        gpd_result = gpd.GeoDataFrame.from_arrow(gdf.to_arrow())
+        self.check_sgpd_df_equals_gpd_df(sgpd_result, gpd_result)
 
     def test_to_arrow(self):
         if parse_version(gpd.__version__) < parse_version("1.0.0"):

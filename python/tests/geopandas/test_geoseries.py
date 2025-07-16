@@ -161,25 +161,17 @@ class TestGeoSeries(TestGeopandasBase):
         if parse_version(gpd.__version__) < parse_version("1.0.0"):
             return
 
-        import geoarrow.pyarrow as ga
+        import pyarrow as pa
 
-        array = ga.as_geoarrow(["POINT (1 1)", "POINT (2 2)", "POINT (3 3)", None])
-        result = sgpd.GeoSeries.from_arrow(array)
-        expected = gpd.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3), None])
-        self.check_sgpd_equals_gpd(result, expected)
+        table = pa.table({"a": [0, 1, 2], "b": [0.1, 0.2, 0.3]})
+        with pytest.raises(ValueError, match="No GeoArrow geometry field found"):
+            GeoSeries.from_arrow(table["a"].chunk(0))
 
-        array = ga.as_geoarrow(
-            [None, "POLYGON ((0 0, 1 1, 0 1, 0 0))", "LINESTRING (0 0, -1 1, 0 -1)"]
+        gpd_series = gpd.GeoSeries(
+            [None, Point(1, 1), Polygon(), LineString([(0, 0), (1, 1)]), None]
         )
-        result = sgpd.GeoSeries.from_arrow(array)
-        expected = gpd.GeoSeries(
-            [
-                None,
-                Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
-                LineString([(0, 0), (-1, 1), (0, -1)]),
-            ]
-        )
-        self.check_sgpd_equals_gpd(result, expected)
+        result = sgpd.GeoSeries.from_arrow(gpd_series.to_arrow())
+        self.check_sgpd_equals_gpd(result, gpd_series)
 
     def test_to_file(self):
         pass
