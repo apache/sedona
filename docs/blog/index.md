@@ -3,6 +3,7 @@ hide:
 
   - navigation
 
+title: Apache Sedona Blog
 ---
 
 <!--
