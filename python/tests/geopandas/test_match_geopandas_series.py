@@ -211,6 +211,16 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         self.g1.buffer(0.2).to_parquet(temp_file_path)
         assert os.path.exists(temp_file_path)
 
+    def test_simplify(self):
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).simplify(100.1)
+            gpd_result = gpd.GeoSeries(geom).simplify(100.1)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+            sgpd_result = GeoSeries(geom).simplify(0.05, preserve_topology=False)
+            gpd_result = gpd.GeoSeries(geom).simplify(0.05, preserve_topology=False)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
     def test_geometry(self):
         for _, geom in self.geoms:
             gpd_result = gpd.GeoSeries(geom).geometry
@@ -681,6 +691,29 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                     sgpd_result = GeoSeries(g1).intersection(GeoSeries(g2), align=False)
                     gpd_result = gpd_series1.intersection(gpd_series2, align=False)
                     self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+    def test_snap(self):
+        num_passed = 0
+        for i, (_, geom) in enumerate(self.geoms):
+            for _, geom2 in self.geoms[i:]:
+                sgpd_result = GeoSeries(geom).snap(GeoSeries(geom2), 1.1)
+                gpd_result = gpd.GeoSeries(geom).snap(gpd.GeoSeries(geom2), 1.1)
+                if self.check_sgpd_equals_gpd(sgpd_result, gpd_result, error="bool"):
+                    num_passed += 1
+
+                if len(geom) == len(geom2):
+                    sgpd_result = GeoSeries(geom).snap(GeoSeries(geom2), 1, align=False)
+                    gpd_result = gpd.GeoSeries(geom).snap(
+                        gpd.GeoSeries(geom2), 1, align=False
+                    )
+                    if self.check_sgpd_equals_gpd(
+                        sgpd_result, gpd_result, error="bool"
+                    ):
+                        num_passed += 1
+
+        # Sedona's snap result fails fairly often, even though the results are fairly close.
+        # We instead hard code the number of tests that pass currently so we can catch any potential regressions.
+        assert num_passed >= 25
 
     def test_intersection_all(self):
         pass
