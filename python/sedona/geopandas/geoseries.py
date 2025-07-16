@@ -552,7 +552,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         except TypeError:
             geoseries = gpd.GeoSeries(pd_series, crs=self.crs)
 
-        first_shape = next(obj for obj in geoseries if obj is not None)
+        first_shape = next((obj for obj in geoseries if obj is not None), None)
         if first_shape:
             srid = shapely.get_srid(first_shape)
             if srid:
