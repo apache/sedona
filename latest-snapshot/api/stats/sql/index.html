@@ -3487,6 +3487,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#moran-i" class="md-nav__link">
+    <span class="md-ellipsis">
+      Moran I
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -4801,6 +4810,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#moran-i" class="md-nav__link">
+    <span class="md-ellipsis">
+      Moran I
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -4941,6 +4959,110 @@ column name must be provided. The new column will be named 'cluster'.</p>
 <li>useSpheroid (use_spheroid) - whether to use a cartesian or spheroidal distance calculation. Default is false</li>
 </ul>
 <p>In both cases the output is the input DataFrame with the weights column added to each row.</p>
+<h2 id="moran-i">Moran I<a class="headerlink" href="#moran-i" title="Permanent link">&para;</a></h2>
+<p>Moran I is the spatial autocorrelation algorithm, which is using spatial
+location and non-spatial attribute. When the value is close to the 1 it
+means that there is spatial correlation, when it is close to 0 then the
+correlation does not exist and data is randomly distributed. When the
+MoranI autocorrelation value is close to -1 it means that there is negative
+correlation. Negative correlation means that close values has dissimilar values.</p>
+<p>You can see spatial correlation values on the figure below</p>
+<ul>
+<li>on the left there is negative correlation (-1)</li>
+<li>in the middle correlation is positive (1)</li>
+<li>on the right the correlation is close to zero and data is random.</li>
+</ul>
+<p><img alt="moranI.png" src="../../../image/moranI.png" /></p>
+<p>Moran statistics can be used as the Scala/Java and Python functions.
+As the input function requires weight DataFrame. You can create the
+weight DataFrame using Apache Sedona weighting functions. You need
+to keep in mind that your input has to have id column that uniquely identifies
+the feature and value field. The required minimal schema for the MoranI Apache Sedona
+function is:</p>
+<div class="highlight"><pre><span></span><code> |-- id: integer (nullable = true)
+ |-- value: double (nullable = true)
+ |-- weights: array (nullable = false)
+ |    |-- element: struct (containsNull = false)
+ |    |    |-- neighbor: struct (nullable = false)
+ |    |    |    |-- id: integer (nullable = true)
+ |    |    |    |-- value: double (nullable = true)
+ |    |    |-- value: double (nullable = true)
+</code></pre></div>
+<p>You can manipulate the value column name and id using function parameters.</p>
+<p>To use the <a href="#adddistancebandcolumn">Apache Sedona weight functions</a> you need to pass the id column and value column to kept parameters.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Scala</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">weights</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Weighting</span><span class="p">.</span><span class="n">addDistanceBandColumn</span><span class="p">(</span>
+<span class="w">      </span><span class="n">positiveCorrelationFrame</span><span class="p">,</span>
+<span class="w">      </span><span class="mf">1.0</span><span class="p">,</span>
+<span class="w">      </span><span class="n">savedAttributes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Seq</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;value&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="kd">val</span><span class="w"> </span><span class="n">moranResult</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Moran</span><span class="p">.</span><span class="n">getGlobal</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span><span class="w"> </span><span class="n">idColumn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;id&quot;</span><span class="p">)</span>
+
+<span class="c1">// result fields</span>
+<span class="n">moranResult</span><span class="p">.</span><span class="n">getPNorm</span>
+<span class="n">moranResult</span><span class="p">.</span><span class="n">getI</span>
+<span class="n">moranResult</span><span class="p">.</span><span class="n">getZNorm</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.stats.autocorrelation.moran</span><span class="w"> </span><span class="kn">import</span> <span class="n">Moran</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.stats.weighting</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_binary_distance_band_column</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">add_binary_distance_band_column</span><span class="p">(</span>
+    <span class="n">df</span><span class="p">,</span>
+    <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">saved_attributes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+
+<span class="n">moran_i_result</span> <span class="o">=</span> <span class="n">Moran</span><span class="o">.</span><span class="n">get_global</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+<span class="c1">## result fields</span>
+<span class="n">moran_i_result</span><span class="o">.</span><span class="n">p_norm</span>
+<span class="n">moran_i_result</span><span class="o">.</span><span class="n">i</span>
+<span class="n">moran_i_result</span><span class="o">.</span><span class="n">z_norm</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>In the result you get the Z norm, P norm and Moran I value.</p>
+<p>The full signatures of the functions</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Scala</label><label for="__tabbed_2_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">getGlobal</span><span class="p">(</span>
+<span class="w">  </span><span class="n">dataframe</span><span class="p">:</span><span class="w"> </span><span class="nc">DataFrame</span><span class="p">,</span>
+<span class="w">  </span><span class="n">twoTailed</span><span class="p">:</span><span class="w"> </span><span class="nc">Boolean</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="n">idColumn</span><span class="p">:</span><span class="w"> </span><span class="nc">String</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">ID_COLUMN</span><span class="p">,</span>
+<span class="w">  </span><span class="n">valueColumnName</span><span class="p">:</span><span class="w"> </span><span class="nc">String</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">VALUE_COLUMN</span><span class="p">):</span><span class="w"> </span><span class="nc">MoranResult</span>
+
+<span class="c1">// java interface</span>
+<span class="n">public</span><span class="w"> </span><span class="n">interface</span><span class="w"> </span><span class="nc">MoranResult</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">public</span><span class="w"> </span><span class="n">double</span><span class="w"> </span><span class="n">getI</span><span class="p">();</span>
+<span class="w">    </span><span class="n">public</span><span class="w"> </span><span class="n">double</span><span class="w"> </span><span class="n">getPNorm</span><span class="p">();</span>
+<span class="w">    </span><span class="n">public</span><span class="w"> </span><span class="n">double</span><span class="w"> </span><span class="n">getZNorm</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_global</span><span class="p">(</span>
+    <span class="n">df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">two_tailed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">id_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span>
+    <span class="n">value_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;value&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MoranResult</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MoranResult</span><span class="p">:</span>
+    <span class="n">i</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">p_norm</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">z_norm</span><span class="p">:</span> <span class="nb">float</span>
+</code></pre></div>
+</div>
+</div>
+</div>
 
 
 
@@ -4961,7 +5083,7 @@ column name must be provided. The new column will be named 'cluster'.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="December 4, 2024 07:01:47 UTC">December 4, 2024 07:01:47</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="July 17, 2025 17:57:57 UTC">July 17, 2025 17:57:57</span>
   </span>
 
     

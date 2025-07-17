@@ -133,6 +133,22 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona">sedona</a></dd></dl></div>
+    </li><li name="org.apache.sedona.stats.autocorrelation" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="autocorrelation"></a><a id="autocorrelation:autocorrelation"></a>
+      <span class="permalink">
+      <a href="../../../../org/apache/sedona/stats/autocorrelation/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="autocorrelation/index.html"><span class="name">autocorrelation</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="org.apache.sedona.stats">stats</a></dd></dl></div>
     </li><li name="org.apache.sedona.stats.clustering" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clustering"></a><a id="clustering:clustering"></a>
       <span class="permalink">
@@ -389,6 +405,22 @@ neither is named 'geometry', the column name must be provided. The new column wi
   the name of the resulting column. Default is 'weights'.</p></dd><dt>returns</dt><dd class="cmt"><p>
   The input DataFrame with a weight column added containing neighbors and their weights added
   to each row.</p></dd></dl></div>
+    </li><li name="org.apache.sedona.stats.Weighting#addDistanceBandColumnPython" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="addDistanceBandColumnPython(dataframe:org.apache.spark.sql.DataFrame,threshold:Double,binary:Boolean,alpha:Double,includeZeroDistanceNeighbors:Boolean,includeSelf:Boolean,selfWeight:Double,geometry:String,useSpheroid:Boolean,savedAttributes:java.util.ArrayList[String],resultName:String):org.apache.spark.sql.DataFrame"></a><a id="addDistanceBandColumnPython(DataFrame,Double,Boolean,Double,Boolean,Boolean,Double,String,Boolean,ArrayList[String],String):DataFrame"></a>
+      <span class="permalink">
+      <a href="../../../../org/apache/sedona/stats/Weighting$.html#addDistanceBandColumnPython(dataframe:org.apache.spark.sql.DataFrame,threshold:Double,binary:Boolean,alpha:Double,includeZeroDistanceNeighbors:Boolean,includeSelf:Boolean,selfWeight:Double,geometry:String,useSpheroid:Boolean,savedAttributes:java.util.ArrayList[String],resultName:String):org.apache.spark.sql.DataFrame" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addDistanceBandColumnPython</span><span class="params">(<span name="dataframe">dataframe: <a href="../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>, <span name="threshold">threshold: <span class="extype" name="scala.Double">Double</span></span>, <span name="binary">binary: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>, <span name="alpha">alpha: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">-1.0</span></span>, <span name="includeZeroDistanceNeighbors">includeZeroDistanceNeighbors: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="includeSelf">includeSelf: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="selfWeight">selfWeight: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">1.0</span></span>, <span name="geometry">geometry: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="useSpheroid">useSpheroid: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="savedAttributes">savedAttributes: <span class="extype" name="java.util.ArrayList">ArrayList</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">null</span></span>, <span name="resultName">resultName: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;weights&quot;</span></span>)</span><span class="result">: <a href="../../spark/sql/index.html#DataFrame=org.apache.spark.sql.Dataset[org.apache.spark.sql.Row]" class="extmbr" name="org.apache.spark.sql.DataFrame">DataFrame</a></span>
+      </span>
+      
+      
     </li><li name="org.apache.sedona.stats.Weighting#addWeightedDistanceBandColumn" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="addWeightedDistanceBandColumn(dataframe:org.apache.spark.sql.DataFrame,threshold:Double,alpha:Double,includeZeroDistanceNeighbors:Boolean,includeSelf:Boolean,selfWeight:Double,geometry:String,useSpheroid:Boolean,savedAttributes:Seq[String],resultName:String):org.apache.spark.sql.DataFrame"></a><a id="addWeightedDistanceBandColumn(DataFrame,Double,Double,Boolean,Boolean,Double,String,Boolean,Seq[String],String):DataFrame"></a>
       <span class="permalink">
