@@ -364,9 +364,6 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         with self.ps_allow_diff_frames():
             result = s.to_json(drop_id=True)
             expected = '{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [1.0, 1.0]}, "bbox": [1.0, 1.0, 1.0, 1.0]}, {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [2.0, 2.0]}, "bbox": [2.0, 2.0, 2.0, 2.0]}, {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3.0, 3.0]}, "bbox": [3.0, 3.0, 3.0, 3.0]}], "bbox": [1.0, 1.0, 3.0, 3.0]}'
-            # print(s.to_geopandas().to_json(drop_id=True))
-            # raise
-            # expected = '{"type": "FeatureCollection", "features": [{"type": "Feature", "geometry": {"type": "Point", "coordinates": [1.0, 1.0]}, "properties": {}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [2.0, 2.0]}, "properties": {}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [3.0, 3.0]}, "properties": {}}]}'
             assert result == expected
 
         with self.ps_allow_diff_frames():
