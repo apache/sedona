@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.stats.autocorellation
+package org.apache.sedona.stats.autocorrelation
 
 import org.apache.sedona.spark.SedonaContext
 import org.apache.sedona.sql.TestBaseScala
