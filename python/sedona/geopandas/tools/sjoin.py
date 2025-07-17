@@ -14,6 +14,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import re
 from pyspark.pandas.internal import InternalFrame
 from pyspark.pandas.series import first_series
 from pyspark.pandas.utils import scol_for
@@ -23,6 +24,9 @@ from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 from sedona.geopandas import GeoDataFrame, GeoSeries
 from sedona.geopandas.geoseries import _to_geo_series
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
+
+# Pre-compiled regex pattern for suffix validation
+SUFFIX_PATTERN = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 
 def _frame_join(
@@ -351,9 +355,7 @@ def _basic_checks(left_df, right_df, how, lsuffix, rsuffix, on_attribute=None):
         raise ValueError("lsuffix and rsuffix cannot be the same")
 
     # Validate suffix format (should not contain special characters that would break SQL)
-    import re
-
-    if not re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*$", lsuffix):
+    if not SUFFIX_PATTERN.match(lsuffix):
         raise ValueError(f"lsuffix '{lsuffix}' contains invalid characters")
-    if not re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*$", rsuffix):
+    if not SUFFIX_PATTERN.match(rsuffix):
         raise ValueError(f"rsuffix '{rsuffix}' contains invalid characters")
