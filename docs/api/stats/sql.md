@@ -136,7 +136,7 @@ names in parentheses are python variable names
 
 In both cases the output is the input DataFrame with the weights column added to each row.
 
-# MoranI
+## Moran I
 
 Moran I is the spatial autocorrelation algorithm, which is using spatial
 location and non-spatial attribute. When the value is close to the 1 it
@@ -173,8 +173,7 @@ function is:
 
 You can manipulate the value column name and id using function parameters.
 
-To use the Apache Sedona weight functions you need to pass the
-id column and value column to kept parameters.
+To use the [Apache Sedona weight functions](#adddistancebandcolumn) you need to pass the id column and value column to kept parameters.
 
 === "Scala"
 
