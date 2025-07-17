@@ -288,10 +288,6 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             return
 
         for _, geom in self.geoms:
-            # ga doesn't support GeometryCollection: "Unrecognized GeoArrow extension name: 'geoarrow.geometrycollection'"
-            if self.contains_any_geom_collection(geom):
-                continue
-
             gpd_series = gpd.GeoSeries(geom)
             gpd_result = gpd.GeoSeries.from_arrow(gpd_series.to_arrow())
 
