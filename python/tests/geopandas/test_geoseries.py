@@ -36,6 +36,7 @@ from shapely.geometry import (
 )
 from pandas.testing import assert_series_equal
 import pytest
+from packaging.version import parse as parse_version
 
 
 class TestGeoSeries(TestGeopandasBase):
@@ -331,10 +332,73 @@ class TestGeoSeries(TestGeopandasBase):
         pass
 
     def test_to_wkb(self):
-        pass
+        if parse_version(shapely.__version__) < parse_version("2.0.0"):
+            return
+
+        data = [
+            Point(0, 0),
+            Polygon(),
+            Polygon([(0, 0), (1, 1), (1, 0)]),
+            None,
+        ]
+        result = sgpd.GeoSeries(data).to_wkb()
+        expected = pd.Series(
+            [
+                b"\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
+                b"\x01\x03\x00\x00\x00\x00\x00\x00\x00",
+                b"\x01\x03\x00\x00\x00\x01\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xf0?\x00\x00\x00\x00\x00\x00\xf0?\x00\x00\x00\x00\x00\x00\xf0?\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
+                None,
+            ]
+        )
+
+        self.check_pd_series_equal(result, expected)
+
+        result = sgpd.GeoSeries(data).to_wkb(hex=True)
+        expected = pd.Series(
+            [
+                "010100000000000000000000000000000000000000",
+                "010300000000000000",
+                "0103000000010000000400000000000000000000000000000000000000000000000000F03F000000000000F03F000000000000F03F000000000000000000000000000000000000000000000000",
+                None,
+            ]
+        )
+        self.check_pd_series_equal(result, expected)
 
     def test_to_wkt(self):
-        pass
+        s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        result = s.to_wkt()
+        expected = pd.Series(
+            [
+                "POINT (1 1)",
+                "POINT (2 2)",
+                "POINT (3 3)",
+            ]
+        )
+        self.check_pd_series_equal(result, expected)
+
+        s = GeoSeries(
+            [
+                Polygon(),
+                Point(1, 2),
+                LineString([(0, 0), (1, 1)]),
+                None,
+            ]
+        )
+        result = s.to_wkt()
+
+        # Old versions return empty GeometryCollection instead of empty Polygon
+        if parse_version(shapely.__version__) < parse_version("2.0.0"):
+            return
+
+        expected = pd.Series(
+            [
+                "POLYGON EMPTY",
+                "POINT (1 2)",
+                "LINESTRING (0 0, 1 1)",
+                None,
+            ]
+        )
+        self.check_pd_series_equal(result, expected)
 
     def test_to_arrow(self):
         pass
@@ -836,9 +900,8 @@ class TestGeoSeries(TestGeopandasBase):
 
         # Ensure the index is preserved when crs is set (previously an issue)
         expected_index = ps.Index(range(1, 6))
-        ps.set_option("compute.ops_on_diff_frames", True)
-        assert s2.index.equals(expected_index)
-        ps.reset_option("compute.ops_on_diff_frames")
+        with self.ps_allow_diff_frames():
+            assert s2.index.equals(expected_index)
 
         result = s.intersection(s2, align=True)
         expected = gpd.GeoSeries(
