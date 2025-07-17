@@ -42,8 +42,6 @@ from geopandas.geodataframe import crs_mismatch_error
 from geopandas.array import GeometryDtype
 from shapely.geometry.base import BaseGeometry
 
-from pyspark.pandas.internal import SPARK_DEFAULT_INDEX_NAME, NATURAL_ORDER_COLUMN_NAME
-
 register_extension_dtype(GeometryDtype)
 
 
@@ -238,78 +236,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 copy=copy,
             )
 
-        if geometry is None and isinstance(data, GeoDataFrame):
-            self._geometry_column_name = data._geometry_column_name
-            if crs is not None and data.crs != crs:
-                raise ValueError(crs_mismatch_error)
-
-        if (
-            geometry is None
-            and self.columns.nlevels == 1
-            and "geometry" in self.columns
-        ):
-            # Check for multiple columns with name "geometry". If there are,
-            # self["geometry"] is a gdf and constructor gets recursively recalled
-            # by pandas internals trying to access this
-            if (self.columns == "geometry").sum() > 1:
-                raise ValueError(
-                    "GeoDataFrame does not support multiple columns "
-                    "using the geometry column name 'geometry'."
-                )
-
-            # only if we have actual geometry values -> call set_geometry
-            if (
-                hasattr(self["geometry"], "crs")
-                and self["geometry"].crs
-                and crs
-                and not self["geometry"].crs == crs
-            ):
-                raise ValueError(crs_mismatch_error)
-            # If "geometry" is potentially coercible to geometry, we try and convert it
-            geom_dtype = self["geometry"].dtype
-            if (
-                geom_dtype == "geometry"  # noqa: PLR1714
-                or geom_dtype == "object"
-                # special case for geometry = [], has float dtype
-                or (len(self) == 0 and geom_dtype == "float")
-                # special case for geometry = [np.nan]
-                or ((not self.empty) and self["geometry"].isna().all())
-            ):
-                try:
-                    # TODO: this line causes combine_frames, so we should try to optimize it away later
-                    self["geometry"] = _ensure_geometry(self["geometry"], crs)
-                except TypeError as e:
-                    pass
-                else:
-                    # feed through to call set geometry below
-                    geometry = "geometry"
-
-        if geometry is not None:
-            if (
-                hasattr(geometry, "crs")
-                and geometry.crs
-                and crs
-                and not geometry.crs == crs
-            ):
-                raise ValueError(crs_mismatch_error)
-
-            if isinstance(geometry, pd.Series) and geometry.name not in (
-                "geometry",
-                None,
-            ):
-                # __init__ always creates geometry col named "geometry"
-                # rename as `set_geometry` respects the given series name
-                geometry = geometry.rename("geometry")
-
-            self.set_geometry(geometry, inplace=True, crs=crs)
-
-        if geometry is None and crs:
-            raise ValueError(
-                "Assigning CRS to a GeoDataFrame without a geometry column is not "
-                "supported. Supply geometry using the 'geometry=' keyword argument, "
-                "or by providing a DataFrame with column name 'geometry'",
-            )
-
+        # Set geometry column name
         if isinstance(data, (GeoDataFrame, gpd.GeoDataFrame)):
             self._geometry_column_name = data._geometry_column_name
             if crs is not None and data.crs != crs:

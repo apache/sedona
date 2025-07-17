@@ -355,9 +355,9 @@ class TestDataframe(TestGeopandasBase):
                 ],
             }
         )
-        # TODO: optimize this away
-        with self.ps_allow_diff_frames():
-            result = GeoDataFrame.from_arrow(gdf.to_arrow())
+
+        result = GeoDataFrame.from_arrow(gdf.to_arrow())
+        self.check_sgpd_df_equals_gpd_df(result, gdf)
 
         gdf = gpd.GeoDataFrame(
             {
@@ -370,9 +370,8 @@ class TestDataframe(TestGeopandasBase):
                 ],
             }
         )
-        # TODO: optimize this away
-        with self.ps_allow_diff_frames():
-            result = GeoDataFrame.from_arrow(gdf.to_arrow())
+
+        result = GeoDataFrame.from_arrow(gdf.to_arrow())
 
         self.check_sgpd_df_equals_gpd_df(result, gdf)
 
@@ -411,8 +410,7 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
 
         data = {"col1": ["name1", "name2"], "geometry": [Point(1, 2), Point(2, 1)]}
 
-        with self.ps_allow_diff_frames():
-            gdf = GeoDataFrame(data, index=pd.Index([1, 2]))
+        gdf = GeoDataFrame(data, index=pd.Index([1, 2]))
 
         result = pa.table(gdf.to_arrow(index=False))
 

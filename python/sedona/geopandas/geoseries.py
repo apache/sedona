@@ -252,6 +252,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         """
         from pyproj import CRS
 
+        if len(self) == 0:
+            return None
+
         tmp = self._process_geometry_column("ST_SRID", rename="crs", returns_geom=False)
         ps_series = tmp.take([0])
         srid = ps_series.iloc[0]

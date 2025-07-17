@@ -382,9 +382,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
     def test_to_json(self):
         for _, geom in self.geoms:
-            # TODO: optimize this away
-            with self.ps_allow_diff_frames():
-                sgpd_result = GeoSeries(geom).to_json()
+            sgpd_result = GeoSeries(geom).to_json()
             gpd_result = gpd.GeoSeries(geom).to_json()
             assert sgpd_result == gpd_result
 
@@ -416,9 +414,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         import pyarrow as pa
 
         for _, geom in self.geoms:
-            # TODO: optimize this away
-            with self.ps_allow_diff_frames():
-                sgpd_result = pa.array(GeoSeries(geom).to_arrow())
+            sgpd_result = pa.array(GeoSeries(geom).to_arrow())
             gpd_result = pa.array(gpd.GeoSeries(geom).to_arrow())
             assert sgpd_result == gpd_result
 
