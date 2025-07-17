@@ -23,7 +23,7 @@ import geopandas as gpd
 import pyspark.pandas as ps
 import pyspark
 from pandas.testing import assert_series_equal
-
+import shapely
 from shapely.geometry import (
     Point,
     Polygon,
@@ -36,11 +36,12 @@ from shapely.geometry import (
 )
 
 from sedona.geopandas import GeoSeries
-from tests.test_base import TestBase
+from tests.geopandas.test_geopandas_base import TestGeopandasBase
 import pyspark.pandas as ps
+from packaging.version import parse as parse_version
 
 
-class TestMatchGeopandasSeries(TestBase):
+class TestMatchGeopandasSeries(TestGeopandasBase):
     def setup_method(self):
         self.tempdir = tempfile.mkdtemp()
         self.t1 = Polygon([(0, 0), (1, 0), (1, 1)])
@@ -311,7 +312,29 @@ class TestMatchGeopandasSeries(TestBase):
         self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_fillna(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).fillna()
+            gpd_result = gpd.GeoSeries(geom).fillna()
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        data = [None, None, None, None, Point(0, 1)]
+        sgpd_result = GeoSeries(data).fillna()
+        gpd_result = gpd.GeoSeries(data).fillna()
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        fill_data = [Point(-1, -1), Point(-2, -2), Point(2, 3)]
+        sgpd_result = GeoSeries(data).fillna(GeoSeries(fill_data))
+        gpd_result = gpd.GeoSeries(data).fillna(gpd.GeoSeries(fill_data))
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # Ensure filling with np.nan or pd.NA returns None
+        # but filling None return empty geometry
+        import numpy as np
+
+        for fill_val in [np.nan, pd.NA, None]:
+            sgpd_result = GeoSeries(data).fillna(fill_val)
+            gpd_result = gpd.GeoSeries(data).fillna(fill_val)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_explode(self):
         pass
@@ -353,10 +376,25 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_to_wkb(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).to_wkb()
+            gpd_result = gpd.GeoSeries(geom).to_wkb()
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            sgpd_result = GeoSeries(geom).to_wkb(hex=True)
+            gpd_result = gpd.GeoSeries(geom).to_wkb(hex=True)
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_to_wkt(self):
-        pass
+        for _, geom in self.geoms:
+            ps_series = GeoSeries(geom).to_wkt()
+            pd_series = gpd.GeoSeries(geom).to_wkt()
+            # There are slight variations of valid wkt (e.g valid parentheses being optional),
+            # so we check that they can be interpreted as the same geometry rather than
+            # their strings being exactly equal.
+            sgpd_result = GeoSeries.from_wkt(ps_series)
+            gpd_result = gpd.GeoSeries.from_wkt(pd_series)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_to_arrow(self):
         pass
@@ -389,7 +427,7 @@ class TestMatchGeopandasSeries(TestBase):
 
     def test_is_valid_reason(self):
         # is_valid_reason was added in geopandas 1.0.0
-        if gpd.__version__ < "1.0.0":
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
             return
         data = [
             Polygon([(0, 0), (1, 1), (0, 1)]),
@@ -460,13 +498,39 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_get_geometry(self):
-        pass
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            return
+
+        for _, geom in self.geoms:
+            # test negative index, in-bounds index, and out of bounds index
+            for index in [-1, 0, len(geom) + 1]:
+                sgpd_result = GeoSeries(geom).get_geometry(index)
+                gpd_result = gpd.GeoSeries(geom).get_geometry(index)
+                self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        data = [GeometryCollection(), Polygon(), MultiPolygon()]
+
+        for idx in [-2, -1, 0, 1]:
+            sgpd_result = GeoSeries(data).get_geometry(idx)
+            gpd_result = gpd.GeoSeries(data).get_geometry(idx)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_boundary(self):
-        pass
+        for _, geom in self.geoms:
+            # Shapely < 2.0 doesn't support GeometryCollection for boundary operation
+            if shapely.__version__ < "2.0.0" and isinstance(
+                geom[0], GeometryCollection
+            ):
+                continue
+            sgpd_result = GeoSeries(geom).boundary
+            gpd_result = gpd.GeoSeries(geom).boundary
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_centroid(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).centroid
+            gpd_result = gpd.GeoSeries(geom).centroid
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_concave_hull(self):
         pass
@@ -481,7 +545,10 @@ class TestMatchGeopandasSeries(TestBase):
         pass
 
     def test_envelope(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).envelope
+            gpd_result = gpd.GeoSeries(geom).envelope
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_minimum_rotated_rectangle(self):
         pass
@@ -594,6 +661,20 @@ class TestMatchGeopandasSeries(TestBase):
             Polygon([(2, 0), (3, 0), (3, 3), (2, 3)]),
             Point(0, 0),
         ]
+
+        # Ensure resulting index behavior is correct for align=False (retain the left's index)
+        index1 = range(1, len(geometries) + 1)
+        index2 = range(len(geometries))
+        sgpd_result = GeoSeries(geometries, index1).intersection(
+            GeoSeries(geometries, index2), align=False
+        )
+
+        gpd_result = gpd.GeoSeries(geometries, index1).intersection(
+            gpd.GeoSeries(geometries, index2), align=False
+        )
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+        assert sgpd_result.index.to_pandas().equals(gpd_result.index)
+
         for g1 in geometries:
             for g2 in geometries:
                 sgpd_result = GeoSeries(g1).intersection(GeoSeries(g2))
@@ -638,38 +719,3 @@ class TestMatchGeopandasSeries(TestBase):
             sgpd_series = sgpd_series.set_crs(epsg=3857, allow_override=True)
             gpd_series = gpd_series.set_crs(epsg=3857, allow_override=True)
             assert sgpd_series.crs == gpd_series.crs
-
-    # -----------------------------------------------------------------------------
-    # # Utils
-    # -----------------------------------------------------------------------------
-
-    def check_sgpd_equals_spark_df(
-        self, actual: GeoSeries, expected: pyspark.sql.DataFrame
-    ):
-        assert isinstance(actual, GeoSeries)
-        assert isinstance(expected, pyspark.sql.DataFrame)
-        expected = expected.selectExpr("ST_AsText(expected) as expected")
-        sgpd_result = actual.to_geopandas()
-        expected = expected.toPandas()["expected"]
-        for a, e in zip(sgpd_result, expected):
-            self.assert_geometry_almost_equal(a, e)
-
-    def check_sgpd_equals_gpd(self, actual: GeoSeries, expected: gpd.GeoSeries):
-        assert isinstance(actual, GeoSeries)
-        assert isinstance(expected, gpd.GeoSeries)
-        sgpd_result = actual.to_geopandas()
-        for a, e in zip(sgpd_result, expected):
-            if a is None or e is None:
-                assert a is None and e is None
-                continue
-            # Sometimes sedona and geopandas both return empty geometries but of different types (e.g Point and Polygon)
-            elif a.is_empty and e.is_empty:
-                continue
-            self.assert_geometry_almost_equal(
-                a, e, tolerance=1e-2
-            )  # increased tolerance from 1e-6
-
-    def check_pd_series_equal(self, actual: ps.Series, expected: pd.Series):
-        assert isinstance(actual, ps.Series)
-        assert isinstance(expected, pd.Series)
-        assert_series_equal(actual.to_pandas(), expected)

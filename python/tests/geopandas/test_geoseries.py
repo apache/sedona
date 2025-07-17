@@ -15,13 +15,14 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import shapely
 import numpy as np
 import pytest
 import pandas as pd
 import geopandas as gpd
 import sedona.geopandas as sgpd
 from sedona.geopandas import GeoSeries
-from tests.test_base import TestBase
+from tests.geopandas.test_geopandas_base import TestGeopandasBase
 from shapely import wkt
 from shapely.geometry import (
     Point,
@@ -35,9 +36,10 @@ from shapely.geometry import (
 )
 from pandas.testing import assert_series_equal
 import pytest
+from packaging.version import parse as parse_version
 
 
-class TestGeoSeries(TestBase):
+class TestGeoSeries(TestGeopandasBase):
     def setup_method(self):
         self.geoseries = sgpd.GeoSeries(
             [
@@ -53,19 +55,6 @@ class TestGeoSeries(TestBase):
                 ),
             ]
         )
-
-    def check_sgpd_equals_gpd(self, actual: sgpd.GeoSeries, expected: gpd.GeoSeries):
-        assert isinstance(actual, sgpd.GeoSeries)
-        assert isinstance(expected, gpd.GeoSeries)
-        assert len(actual) == len(expected)
-        sgpd_result = actual.to_geopandas()
-        for a, e in zip(sgpd_result, expected):
-            if a is None or e is None:
-                assert a is None and e is None
-                continue
-            elif a.is_empty and e.is_empty:
-                continue
-            self.assert_geometry_almost_equal(a, e)
 
     def test_area(self):
         result = self.geoseries.area.to_pandas()
@@ -189,7 +178,66 @@ class TestGeoSeries(TestBase):
         assert_series_equal(result.to_pandas(), expected)
 
     def test_fillna(self):
-        pass
+        s = sgpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                None,
+                Polygon([(0, 0), (-1, 1), (0, -1)]),
+            ]
+        )
+        result = s.fillna()
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                GeometryCollection(),
+                Polygon([(0, 0), (-1, 1), (0, -1)]),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+        result = s.fillna(Polygon([(0, 1), (2, 1), (1, 2)]))
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                Polygon([(0, 1), (2, 1), (1, 2)]),
+                Polygon([(0, 0), (-1, 1), (0, -1)]),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        s_fill = sgpd.GeoSeries(
+            [
+                Point(0, 0),
+                Point(1, 1),
+                Point(2, 2),
+            ]
+        )
+        result = s.fillna(s_fill)
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                Point(1, 1),
+                Polygon([(0, 0), (-1, 1), (0, -1)]),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        data = [None, Point(0, 0), None]
+        # Ensure filling with np.nan or pd.NA returns None
+        import numpy as np
+
+        for fill_val in [np.nan, pd.NA]:
+            result = GeoSeries(data).fillna(fill_val)
+            expected = gpd.GeoSeries([None, Point(0, 0), None])
+            self.check_sgpd_equals_gpd(result, expected)
+
+        # Ensure filling with None is empty GeometryColleciton and not None
+        # Also check that inplace works
+        result = GeoSeries(data)
+        result.fillna(None, inplace=True)
+        expected = gpd.GeoSeries(
+            [GeometryCollection(), Point(0, 0), GeometryCollection()]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
 
     def test_explode(self):
         pass
@@ -284,10 +332,73 @@ class TestGeoSeries(TestBase):
         pass
 
     def test_to_wkb(self):
-        pass
+        if parse_version(shapely.__version__) < parse_version("2.0.0"):
+            return
+
+        data = [
+            Point(0, 0),
+            Polygon(),
+            Polygon([(0, 0), (1, 1), (1, 0)]),
+            None,
+        ]
+        result = sgpd.GeoSeries(data).to_wkb()
+        expected = pd.Series(
+            [
+                b"\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
+                b"\x01\x03\x00\x00\x00\x00\x00\x00\x00",
+                b"\x01\x03\x00\x00\x00\x01\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xf0?\x00\x00\x00\x00\x00\x00\xf0?\x00\x00\x00\x00\x00\x00\xf0?\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
+                None,
+            ]
+        )
+
+        self.check_pd_series_equal(result, expected)
+
+        result = sgpd.GeoSeries(data).to_wkb(hex=True)
+        expected = pd.Series(
+            [
+                "010100000000000000000000000000000000000000",
+                "010300000000000000",
+                "0103000000010000000400000000000000000000000000000000000000000000000000F03F000000000000F03F000000000000F03F000000000000000000000000000000000000000000000000",
+                None,
+            ]
+        )
+        self.check_pd_series_equal(result, expected)
 
     def test_to_wkt(self):
-        pass
+        s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        result = s.to_wkt()
+        expected = pd.Series(
+            [
+                "POINT (1 1)",
+                "POINT (2 2)",
+                "POINT (3 3)",
+            ]
+        )
+        self.check_pd_series_equal(result, expected)
+
+        s = GeoSeries(
+            [
+                Polygon(),
+                Point(1, 2),
+                LineString([(0, 0), (1, 1)]),
+                None,
+            ]
+        )
+        result = s.to_wkt()
+
+        # Old versions return empty GeometryCollection instead of empty Polygon
+        if parse_version(shapely.__version__) < parse_version("2.0.0"):
+            return
+
+        expected = pd.Series(
+            [
+                "POLYGON EMPTY",
+                "POINT (1 2)",
+                "LINESTRING (0 0, 1 1)",
+                None,
+            ]
+        )
+        self.check_pd_series_equal(result, expected)
 
     def test_to_arrow(self):
         pass
@@ -446,13 +557,87 @@ class TestGeoSeries(TestBase):
         pass
 
     def test_get_geometry(self):
-        pass
+        # Shapely 1 seems to have a bug where Polygon() is incorrectly interpreted as a GeometryCollection
+        if shapely.__version__ < "2.0.0":
+            return
+
+        from shapely.geometry import MultiPoint
+
+        s = GeoSeries(
+            [
+                Point(0, 0),
+                MultiPoint([(0, 0), (1, 1), (0, 1), (1, 0)]),
+                GeometryCollection(
+                    [MultiPoint([(0, 0), (1, 1), (0, 1), (1, 0)]), Point(0, 1)]
+                ),
+                Polygon(),
+                GeometryCollection(),
+            ]
+        )
+
+        result = s.get_geometry(0)
+        expected = gpd.GeoSeries(
+            [
+                Point(0, 0),
+                Point(0, 0),
+                MultiPoint([(0, 0), (1, 1), (0, 1), (1, 0)]),
+                Polygon(),
+                None,
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = s.get_geometry(1)
+        expected = gpd.GeoSeries([None, Point(1, 1), Point(0, 1), None, None])
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = s.get_geometry(-1)
+        expected = gpd.GeoSeries(
+            [Point(0, 0), Point(1, 0), Point(0, 1), Polygon(), None]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = s.get_geometry(2)
+        expected = gpd.GeoSeries([None, Point(0, 1), None, None, None])
+        self.check_sgpd_equals_gpd(result, expected)
 
     def test_boundary(self):
-        pass
+        s = sgpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                LineString([(0, 0), (1, 1), (1, 0)]),
+                Point(0, 0),
+                GeometryCollection([Point(0, 0)]),
+            ]
+        )
+        result = s.boundary
+        expected = gpd.GeoSeries(
+            [
+                LineString([(0, 0), (1, 1), (0, 1), (0, 0)]),
+                MultiPoint([(0, 0), (1, 0)]),
+                GeometryCollection([]),
+                None,
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
 
     def test_centroid(self):
-        pass
+        s = sgpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                LineString([(0, 0), (1, 1), (1, 0)]),
+                Point(0, 0),
+            ]
+        )
+        result = s.centroid
+        expected = gpd.GeoSeries(
+            [
+                Point(0.3333333333333333, 0.6666666666666666),
+                Point(0.7071067811865476, 0.5),
+                Point(0, 0),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
 
     def test_concave_hull(self):
         pass
@@ -467,7 +652,24 @@ class TestGeoSeries(TestBase):
         pass
 
     def test_envelope(self):
-        pass
+        s = sgpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                LineString([(0, 0), (1, 1), (1, 0)]),
+                MultiPoint([(0, 0), (1, 1)]),
+                Point(0, 0),
+            ]
+        )
+        result = s.envelope
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)]),
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)]),
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)]),
+                Point(0, 0),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
 
     def test_minimum_rotated_rectangle(self):
         pass
@@ -626,6 +828,8 @@ class TestGeoSeries(TestBase):
         expected = pd.Series([True, True, True, True])
 
     def test_intersection(self):
+        import pyspark.pandas as ps
+
         s = sgpd.GeoSeries(
             [
                 Polygon([(0, 0), (2, 2), (0, 2)]),
@@ -691,7 +895,14 @@ class TestGeoSeries(TestBase):
                 Point(0, 1),
             ],
             index=range(1, 6),
+            crs=4326,
         )
+
+        # Ensure the index is preserved when crs is set (previously an issue)
+        expected_index = ps.Index(range(1, 6))
+        with self.ps_allow_diff_frames():
+            assert s2.index.equals(expected_index)
+
         result = s.intersection(s2, align=True)
         expected = gpd.GeoSeries(
             [
@@ -705,7 +916,7 @@ class TestGeoSeries(TestBase):
         )
         self.check_sgpd_equals_gpd(result, expected)
 
-        result = s.intersection(s2, align=False)
+        result = s2.intersection(s, align=False)
         expected = gpd.GeoSeries(
             [
                 Polygon([(0, 0), (0, 1), (1, 1), (0, 0)]),
@@ -713,9 +924,13 @@ class TestGeoSeries(TestBase):
                 Point(1, 1),
                 Point(1, 1),
                 Point(0, 1),
-            ]
+            ],
+            index=range(1, 6),  # left's index
         )
         self.check_sgpd_equals_gpd(result, expected)
+
+        # Ensure result of align=False retains the left's index
+        assert result.index.to_pandas().equals(expected.index)
 
     def test_intersection_all(self):
         pass

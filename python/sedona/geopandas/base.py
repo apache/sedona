@@ -60,11 +60,6 @@ class GeoFrame(metaclass=ABCMeta):
     ) -> Union["GeoSeries", Scalar]:
         raise NotImplementedError("This method is not implemented yet.")
 
-    @property
-    @abstractmethod
-    def dtypes(self) -> Union[gpd.GeoSeries, pd.Series, Dtype]:
-        raise NotImplementedError("This method is not implemented yet.")
-
     @abstractmethod
     def to_geopandas(self) -> Union[gpd.GeoDataFrame, pd.Series]:
         raise NotImplementedError("This method is not implemented yet.")
