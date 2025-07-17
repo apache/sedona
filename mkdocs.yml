@@ -142,6 +142,7 @@ nav:
       - Contributor Guide:
           - Rules: community/rule.md
           - Develop: community/develop.md
+          - VSCode Development: community/vscode-development-guide.md 
       - Committer Guide:
           - Project Management Committee: community/contributor.md
           - Become a release manager: community/release-manager.md
