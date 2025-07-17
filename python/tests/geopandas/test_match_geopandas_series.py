@@ -786,6 +786,9 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                     self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_covers(self):
+        if parse_version(gpd.__version__) < parse_version("0.8.0"):
+            pytest.skip("geopandas < 0.8.0 does not support covered_by")
+
         for _, geom in self.geoms:
             for _, geom2 in self.geoms:
                 if geom == geom2 or self.contains_any_geom_collection(geom, geom2):
@@ -806,6 +809,9 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                     self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_covered_by(self):
+        if parse_version(gpd.__version__) < parse_version("0.8.0"):
+            pytest.skip("geopandas < 0.8.0 does not support covered_by")
+
         for _, geom in self.geoms:
             for _, geom2 in self.geoms:
                 if geom == geom2 or self.contains_any_geom_collection(geom, geom2):
