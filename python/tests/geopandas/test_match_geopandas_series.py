@@ -376,10 +376,25 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_to_wkb(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).to_wkb()
+            gpd_result = gpd.GeoSeries(geom).to_wkb()
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            sgpd_result = GeoSeries(geom).to_wkb(hex=True)
+            gpd_result = gpd.GeoSeries(geom).to_wkb(hex=True)
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_to_wkt(self):
-        pass
+        for _, geom in self.geoms:
+            ps_series = GeoSeries(geom).to_wkt()
+            pd_series = gpd.GeoSeries(geom).to_wkt()
+            # There are slight variations of valid wkt (e.g valid parentheses being optional),
+            # so we check that they can be interpreted as the same geometry rather than
+            # their strings being exactly equal.
+            sgpd_result = GeoSeries.from_wkt(ps_series)
+            gpd_result = gpd.GeoSeries.from_wkt(pd_series)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_to_arrow(self):
         pass
