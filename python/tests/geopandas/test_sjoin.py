@@ -254,7 +254,6 @@ class TestSpatialJoin(TestBase):
     def test_sjoin_performance_basic(self):
         """Basic performance test with slightly larger dataset"""
         # Create slightly larger test datasets
-        import numpy as np
 
         # Create a grid of points
         points = []
