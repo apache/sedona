@@ -88,9 +88,9 @@
 
 
         <graphframes.groupId>io.graphframes</graphframes.groupId>
-        <graphframes.version>0.9.0</graphframes.version>
-
         <graphframes.artifactId>graphframes-spark${spark.major.version}_${scala.compat.version}</graphframes.artifactId>
+        <!--There is no 3.4 version of GraphFrames, so we use 0.9.0-spark3.5-->
+        <graphframes.version>0.9.0-spark3.5</graphframes.version>
 
         <flink.version>1.19.0</flink.version>
         <slf4j.version>1.7.36</slf4j.version>
@@ -758,6 +758,8 @@
 
                 <scala.version>2.13.12</scala.version>
                 <scala.compat.version>2.13</scala.compat.version>
+                <graphframes.version>0.9.0-spark${spark.compat.version}</graphframes.version>
+
                 <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
                 <skip.deploy.common.modules>true</skip.deploy.common.modules>
             </properties>
