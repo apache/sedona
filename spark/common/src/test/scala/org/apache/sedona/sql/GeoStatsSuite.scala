@@ -29,6 +29,10 @@ import org.apache.spark.sql.sedona_sql.expressions.st_functions.{ST_DBSCAN, ST_L
 class GeoStatsSuite extends TestBaseScala {
   private val spark = sparkSession
 
+  override def sparkConfig = {
+    super.sparkConfig ++ Map("spark.sql.adaptive.enabled" -> "false")
+  }
+
   case class Record(id: Int, x: Double, y: Double)
 
   def getData: DataFrame = {

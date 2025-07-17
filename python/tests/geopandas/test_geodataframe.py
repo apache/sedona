@@ -22,30 +22,17 @@ from shapely.geometry import (
 )
 
 from sedona.geopandas import GeoDataFrame, GeoSeries
-from tests.test_base import TestBase
+from tests.geopandas.test_geopandas_base import TestGeopandasBase
 import pyspark.pandas as ps
 import pandas as pd
 import geopandas as gpd
 import sedona.geopandas as sgpd
 import pytest
-from pandas.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal, assert_series_equal
+from packaging.version import parse as parse_version
 
 
-class TestDataframe(TestBase):
-    # def setup_method(self):
-    #     N = 10
-    #     self.tempdir = tempfile.mkdtemp()
-    #     self.crs = "epsg:4326"
-    #     self.df = GeoDataFrame(
-    #         [
-    #             {"geometry": Point(x, y), "value1": x + y, "value2": x * y}
-    #             for x, y in zip(range(N), range(N))
-    #         ],
-    #         crs=self.crs,
-    #     )
-    #
-    # def teardown_method(self):
-    #     shutil.rmtree(self.tempdir)
+class TestDataframe(TestGeopandasBase):
     @pytest.mark.parametrize(
         "obj",
         [
@@ -171,6 +158,104 @@ class TestDataframe(TestBase):
         df = GeoDataFrame([Point(x, x) for x in range(3)], name="test_df")
         df_copy = df.copy()
         assert type(df_copy) is GeoDataFrame
+
+    def test_set_geometry(self):
+        points1 = [Point(x, x) for x in range(3)]
+        points2 = [Point(x + 5, x + 5) for x in range(3)]
+
+        data = {"geometry1": points1, "geometry2": points2, "attribute": [1, 2, 3]}
+        sgpd_df = sgpd.GeoDataFrame(data)
+
+        # No geometry column set yet
+        with pytest.raises(AttributeError):
+            _ = sgpd_df.geometry
+
+        # TODO: Try to optimize this with self.ps_allow_diff_frames() away
+        with self.ps_allow_diff_frames():
+            sgpd_df = sgpd_df.set_geometry("geometry1")
+
+        assert sgpd_df.geometry.name == "geometry1"
+
+        # TODO: Try to optimize this with self.ps_allow_diff_frames() away
+        with self.ps_allow_diff_frames():
+            sgpd_df.set_geometry("geometry2", inplace=True)
+        assert sgpd_df.geometry.name == "geometry2"
+
+        # Test the actual values of the geometry column
+        assert_series_equal(
+            sgpd_df.geometry.area.to_pandas(), sgpd_df["geometry2"].area.to_pandas()
+        )
+
+        # unknown column
+        with pytest.raises(ValueError):
+            sgpd_df.set_geometry("nonexistent-column")
+
+        geom = GeoSeries(
+            [Point(x, y) for x, y in zip(range(5), range(5))], name="geometry2"
+        )
+
+        # new crs - setting should default to GeoSeries' crs
+        gs = GeoSeries(geom, crs="epsg:3857")
+
+        with self.ps_allow_diff_frames():
+            new_df = sgpd_df.set_geometry(gs)
+
+        assert new_df.crs == "epsg:3857"
+
+        # explicit crs overrides self and dataframe
+        with self.ps_allow_diff_frames():
+            new_df = sgpd_df.set_geometry(gs, crs="epsg:26909")
+
+        assert new_df.crs == "epsg:26909"
+        assert new_df.geometry.crs == "epsg:26909"
+
+        # Series should use dataframe's crs
+        with self.ps_allow_diff_frames():
+            new_df = sgpd_df.set_geometry(geom.values)
+
+        assert new_df.crs == sgpd_df.crs
+        assert new_df.geometry.crs == sgpd_df.crs
+
+    def test_active_geometry_name(self):
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            return
+
+        points1 = [Point(x, x) for x in range(3)]
+        points2 = [Point(x + 5, x + 5) for x in range(3)]
+
+        data = {"geometry1": points1, "geometry2": points2, "attribute": [1, 2, 3]}
+        df = GeoDataFrame(data)
+
+        # TODO: Try to optimize this with self.ps_allow_diff_frames() away
+        with self.ps_allow_diff_frames():
+            df = df.set_geometry("geometry1")
+        assert df.geometry.name == df.active_geometry_name == "geometry1"
+
+        # TODO: Try to optimize this with self.ps_allow_diff_frames() away
+        with self.ps_allow_diff_frames():
+            df.set_geometry("geometry2", inplace=True)
+        assert df.geometry.name == df.active_geometry_name == "geometry2"
+
+    def test_rename_geometry(self):
+        points1 = [Point(x, x) for x in range(3)]
+        points2 = [Point(x + 5, x + 5) for x in range(3)]
+
+        data = {"geometry1": points1, "geometry2": points2, "attribute": [1, 2, 3]}
+        df = GeoDataFrame(data)
+
+        # TODO: Try to optimize all of these with self.ps_allow_diff_frames() calls away
+        with self.ps_allow_diff_frames():
+            df = df.set_geometry("geometry1")
+        assert df.geometry.name == "geometry1"
+
+        with self.ps_allow_diff_frames():
+            df = df.rename_geometry("geometry3")
+        assert df.geometry.name == "geometry3"
+
+        # test inplace rename
+        with self.ps_allow_diff_frames():
+            df.rename_geometry("geometry4", inplace=True)
+        assert df.geometry.name == "geometry4"
 
     def test_area(self):
         # Create a GeoDataFrame with polygons to test area calculation

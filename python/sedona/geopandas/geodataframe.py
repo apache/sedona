@@ -16,11 +16,16 @@
 # under the License.
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal, Callable, Union
+import typing
 
+import warnings
+import numpy as np
+import shapely
 import geopandas as gpd
 import pandas as pd
 import pyspark.pandas as pspd
+import sedona.geopandas as sgpd
 from pyspark.pandas import Series as PandasOnSparkSeries
 from pyspark.pandas._typing import Dtype
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
@@ -28,7 +33,14 @@ from pyspark.pandas.internal import InternalFrame
 
 from sedona.geopandas._typing import Label
 from sedona.geopandas.base import GeoFrame
-from sedona.geopandas.geoindex import GeoIndex
+from sedona.geopandas.sindex import SpatialIndex
+
+from pandas.api.extensions import register_extension_dtype
+from geopandas.geodataframe import crs_mismatch_error
+from geopandas.array import GeometryDtype
+from shapely.geometry.base import BaseGeometry
+
+register_extension_dtype(GeometryDtype)
 
 
 class GeoDataFrame(GeoFrame, pspd.DataFrame):
@@ -64,7 +76,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         1    2
         Name: value, dtype: int64
         """
-        from sedona.geopandas import GeoSeries
 
         # Handle column access by name
         if isinstance(key, str):
@@ -75,27 +86,15 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             if column_name not in self.columns:
                 raise KeyError(f"Column '{column_name}' does not exist")
 
-            # Get column data from spark_frame
-            spark_df = self._internal.spark_frame.select(column_name)
-            pandas_df = spark_df.toPandas()
+            # Here we are getting a ps.Series with the same underlying anchor (ps.Dataframe).
+            # This is important so we don't unnecessarily try to perform operations on different dataframes
+            ps_series = pspd.DataFrame.__getitem__(self, column_name)
 
-            # Check if this is a geometry column
-            field = next(
-                (f for f in self._internal.spark_frame.schema.fields if f.name == key),
-                None,
-            )
-
-            if field and (
-                field.dataType.typeName() == "geometrytype"
-                or field.dataType.typeName() == "binary"
-            ):
-                # Return as GeoSeries for geometry columns
-                return GeoSeries(pandas_df[column_name])
-            else:
-                # Return as regular pandas Series for non-geometry columns
-                from pyspark.pandas import Series
-
-                return Series(pandas_df[column_name])
+            try:
+                result = sgpd.GeoSeries(ps_series)
+                return result
+            except:
+                return ps_series
 
         # Handle list of column names
         elif isinstance(key, list) and all(isinstance(k, str) for k in key):
@@ -119,6 +118,8 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             selected_rows = pandas_df[key]
             return GeoDataFrame(selected_rows)
 
+    _geometry_column_name = None
+
     def __init__(
         self,
         data=None,
@@ -138,19 +139,65 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         from sedona.geopandas import GeoSeries
         from pyspark.sql import DataFrame as SparkDataFrame
 
-        if isinstance(data, (GeoDataFrame, GeoSeries)):
-            assert dtype is None
-            assert not copy
-            super().__init__(data, index=index, dtype=dtype, copy=copy)
-        elif isinstance(data, (PandasOnSparkSeries, PandasOnSparkDataFrame)):
-            assert columns is None
-            assert dtype is None
-            assert not copy
-            super().__init__(data, index=index, dtype=dtype)
+        # Simplified version of the function from GeoSeries.__init__()
+        def try_geom_to_ewkb(x) -> bytes:
+            if isinstance(x, BaseGeometry):
+                kwargs = {}
+                if crs:
+                    from pyproj import CRS
+
+                    srid = CRS.from_user_input(crs)
+                    kwargs["srid"] = srid.to_epsg()
+
+                return shapely.wkb.dumps(x, **kwargs)
+            elif isinstance(x, bytearray):
+                return bytes(x)
+            elif x is None or isinstance(x, bytes):
+                return x
+            else:
+                raise TypeError(f"expected geometry or bytes, got {type(x)}: {x}")
+
+        def safe_apply_to_each_column(
+            df: pd.DataFrame | pspd.DataFrame, func: Callable
+        ):
+            # try except won't work here for ps.DataFrame case, so we use first_valid_index() instead
+            for col in df.columns:
+                first_idx = df[col].first_valid_index()
+                if first_idx is not None and isinstance(
+                    df[col][first_idx], BaseGeometry
+                ):
+                    df[col] = df[col].apply(try_geom_to_ewkb)
+            return df
+
+        if isinstance(data, GeoDataFrame):
+            if data._safe_get_crs() is None:
+                data.crs = crs
+        elif isinstance(data, GeoSeries):
+            if data.crs is None:
+                data.crs = crs
+
+            # For each of these super().__init__() calls, we let pyspark decide which inputs are valid or not
+            # instead of calling e.g assert not dtype ourselves.
+            # This way, if Spark adds support later, than we inherit those changes naturally
+            super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
+        elif isinstance(data, PandasOnSparkDataFrame):
+
+            data = safe_apply_to_each_column(data, try_geom_to_ewkb)
+
+            super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
+        elif isinstance(data, PandasOnSparkSeries):
+
+            try:
+                data = GeoSeries(data)
+            except TypeError:
+                pass
+
+            super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
         elif isinstance(data, SparkDataFrame):
             assert columns is None
             assert dtype is None
             assert not copy
+
             if index is None:
                 internal = InternalFrame(spark_frame=data, index_spark_columns=None)
                 object.__setattr__(self, "_internal_frame", internal)
@@ -170,15 +217,12 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 )
             gdf = gpd.GeoDataFrame(df)
             # convert each geometry column to wkb type
-            import shapely
 
-            for col in gdf.columns:
-                # It's possible we get a list, dict, pd.Series, gpd.GeoSeries, etc of shapely.Geometry objects.
-                if len(gdf[col]) > 0 and isinstance(
-                    gdf[col].iloc[0], shapely.geometry.base.BaseGeometry
-                ):
-                    gdf[col] = gdf[col].apply(lambda geom: geom.wkb)
+            # It's possible we get a list, dict, pd.Series, gpd.GeoSeries, etc of shapely.Geometry objects.
+            gdf = safe_apply_to_each_column(gdf, try_geom_to_ewkb)
+
             pdf = pd.DataFrame(gdf)
+
             # initialize the parent class pyspark Dataframe with the pandas Series
             super().__init__(
                 data=pdf,
@@ -186,6 +230,315 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 dtype=dtype,
                 copy=copy,
             )
+
+        if isinstance(data, (GeoDataFrame, gpd.GeoDataFrame)):
+            self._geometry_column_name = data._geometry_column_name
+            if crs is not None and data.crs != crs:
+                raise ValueError(crs_mismatch_error)
+
+    def _get_geometry(self) -> sgpd.GeoSeries:
+        if self._geometry_column_name not in self:
+            if self._geometry_column_name is None:
+                msg = (
+                    "You are calling a geospatial method on the GeoDataFrame, "
+                    "but the active geometry column to use has not been set. "
+                )
+            else:
+                msg = (
+                    "You are calling a geospatial method on the GeoDataFrame, "
+                    f"but the active geometry column ('{self._geometry_column_name}') "
+                    "is not present. "
+                )
+            geo_cols = list(self.columns[self.dtypes == "geometry"])
+            if len(geo_cols) > 0:
+                msg += (
+                    f"\nThere are columns with geometry data type ({geo_cols}), and "
+                    "you can either set one as the active geometry with "
+                    'df.set_geometry("name") or access the column as a '
+                    'GeoSeries (df["name"]) and call the method directly on it.'
+                )
+            else:
+                msg += (
+                    "\nThere are no existing columns with geometry data type. You can "
+                    "add a geometry column as the active geometry column with "
+                    "df.set_geometry. "
+                )
+
+            raise AttributeError(msg)
+        return self[self._geometry_column_name]
+
+    def _set_geometry(self, col):
+        # This check is included in the original geopandas. Note that this prevents assigning a str to the property
+        # e.g. df.geometry = "geometry"
+        # However the user can still use specify a str in the public .set_geometry() method
+        # ie. df.geometry = "geometry1" errors, but df.set_geometry("geometry1") works
+        if not pd.api.types.is_list_like(col):
+            raise ValueError("Must use a list-like to set the geometry property")
+        self.set_geometry(col, inplace=True)
+
+    geometry = property(
+        fget=_get_geometry, fset=_set_geometry, doc="Geometry data for GeoDataFrame"
+    )
+
+    @typing.overload
+    def set_geometry(
+        self,
+        col,
+        drop: bool | None = ...,
+        inplace: Literal[True] = ...,
+        crs: Any | None = ...,
+    ) -> None: ...
+
+    @typing.overload
+    def set_geometry(
+        self,
+        col,
+        drop: bool | None = ...,
+        inplace: Literal[False] = ...,
+        crs: Any | None = ...,
+    ) -> GeoDataFrame: ...
+
+    def set_geometry(
+        self,
+        col,
+        drop: bool | None = None,
+        inplace: bool = False,
+        crs: Any | None = None,
+    ) -> GeoDataFrame | None:
+        """
+        Set the GeoDataFrame geometry using either an existing column or
+        the specified input. By default yields a new object.
+
+        The original geometry column is replaced with the input.
+
+        Parameters
+        ----------
+        col : column label or array-like
+            An existing column name or values to set as the new geometry column.
+            If values (array-like, (Geo)Series) are passed, then if they are named
+            (Series) the new geometry column will have the corresponding name,
+            otherwise the existing geometry column will be replaced. If there is
+            no existing geometry column, the new geometry column will use the
+            default name "geometry".
+        drop : boolean, default False
+            When specifying a named Series or an existing column name for `col`,
+            controls if the previous geometry column should be dropped from the
+            result. The default of False keeps both the old and new geometry column.
+
+            .. deprecated:: 1.0.0
+
+        inplace : boolean, default False
+            Modify the GeoDataFrame in place (do not create a new object)
+        crs : pyproj.CRS, optional
+            Coordinate system to use. The value can be anything accepted
+            by :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
+            such as an authority string (eg "EPSG:4326") or a WKT string.
+            If passed, overrides both DataFrame and col's crs.
+            Otherwise, tries to get crs from passed col values or DataFrame.
+
+        Examples
+        --------
+        >>> from sedona.geopandas import GeoDataFrame
+        >>> from shapely.geometry import Point
+        >>> d = {'col1': ['name1', 'name2'], 'geometry': [Point(1, 2), Point(2, 1)]}
+        >>> gdf = GeoDataFrame(d, crs="EPSG:4326")
+        >>> gdf
+            col1     geometry
+        0  name1  POINT (1 2)
+        1  name2  POINT (2 1)
+
+        Passing an array:
+
+        >>> df1 = gdf.set_geometry([Point(0,0), Point(1,1)])
+        >>> df1
+            col1     geometry
+        0  name1  POINT (0 0)
+        1  name2  POINT (1 1)
+
+        Using existing column:
+
+        >>> gdf["buffered"] = gdf.buffer(2)
+        >>> df2 = gdf.set_geometry("buffered")
+        >>> df2.geometry
+        0    POLYGON ((3 2, 2.99037 1.80397, 2.96157 1.6098...
+        1    POLYGON ((4 1, 3.99037 0.80397, 3.96157 0.6098...
+        Name: buffered, dtype: geometry
+
+        Returns
+        -------
+        GeoDataFrame
+
+        See also
+        --------
+        GeoDataFrame.rename_geometry : rename an active geometry column
+        """
+        # Most of the code here is taken from DataFrame.set_index()
+        if inplace:
+            frame = self
+        else:
+            frame = self.copy(deep=False)
+
+        geo_column_name = self._geometry_column_name
+
+        if geo_column_name is None:
+            geo_column_name = "geometry"
+
+        if isinstance(
+            col, (pspd.Series, pd.Series, list, np.ndarray, gpd.array.GeometryArray)
+        ):
+            if drop:
+                msg = (
+                    "The `drop` keyword argument is deprecated and has no effect when "
+                    "`col` is an array-like value. You should stop passing `drop` to "
+                    "`set_geometry` when this is the case."
+                )
+                warnings.warn(msg, category=FutureWarning, stacklevel=2)
+            if isinstance(col, (pspd.Series, pd.Series)) and col.name is not None:
+                geo_column_name = col.name
+
+            level = col
+
+            if not isinstance(level, pspd.Series):
+                level = pspd.Series(level)
+        elif hasattr(col, "ndim") and col.ndim > 1:
+            raise ValueError("Must pass array with one dimension only.")
+        else:  # should be a colname
+            try:
+                level = frame[col]
+            except KeyError:
+                raise ValueError(f"Unknown column {col}")
+            if isinstance(level, (sgpd.GeoDataFrame, gpd.GeoDataFrame)):
+                raise ValueError(
+                    "GeoDataFrame does not support setting the geometry column where "
+                    "the column name is shared by multiple columns."
+                )
+
+            given_colname_drop_msg = (
+                "The `drop` keyword argument is deprecated and in future the only "
+                "supported behaviour will match drop=False. To silence this "
+                "warning and adopt the future behaviour, stop providing "
+                "`drop` as a keyword to `set_geometry`. To replicate the "
+                "`drop=True` behaviour you should update "
+                "your code to\n`geo_col_name = gdf.active_geometry_name;"
+                " gdf.set_geometry(new_geo_col).drop("
+                "columns=geo_col_name).rename_geometry(geo_col_name)`."
+            )
+
+            if drop is False:  # specifically False, not falsy i.e. None
+                # User supplied False explicitly, but arg is deprecated
+                warnings.warn(
+                    given_colname_drop_msg,
+                    category=FutureWarning,
+                    stacklevel=2,
+                )
+            if drop:
+                raise NotImplementedError("Not implemented.")
+            else:
+                # if not dropping, set the active geometry name to the given col name
+                geo_column_name = col
+
+        if not crs:
+            crs = getattr(level, "crs", None)
+
+        # Check that we are using a listlike of geometries
+        level = _ensure_geometry(level, crs=crs)
+        # ensure_geometry only sets crs on level if it has crs==None
+
+        # This operation throws a warning to the user asking them to set pspd.set_option('compute.ops_on_diff_frames', True)
+        # to allow operations on different frames. We pass these warnings on to the user so they must manually set it themselves.
+        if level.crs != crs:
+            level.set_crs(crs, inplace=True, allow_override=True)
+
+        frame._geometry_column_name = geo_column_name
+        frame[geo_column_name] = level
+
+        if not inplace:
+            return frame
+
+    @typing.overload
+    def rename_geometry(
+        self,
+        col: str,
+        inplace: Literal[True] = ...,
+    ) -> None: ...
+
+    @typing.overload
+    def rename_geometry(
+        self,
+        col: str,
+        inplace: Literal[False] = ...,
+    ) -> GeoDataFrame: ...
+
+    def rename_geometry(self, col: str, inplace: bool = False) -> GeoDataFrame | None:
+        """
+        Renames the GeoDataFrame geometry column to
+        the specified name. By default yields a new object.
+
+        The original geometry column is replaced with the input.
+
+        Parameters
+        ----------
+        col : new geometry column label
+        inplace : boolean, default False
+            Modify the GeoDataFrame in place (without creating a new object)
+
+        Examples
+        --------
+        >>> from sedona.geopandas import GeoDataFrame
+        >>> from shapely.geometry import Point
+        >>> d = {'col1': ['name1', 'name2'], 'geometry': [Point(1, 2), Point(2, 1)]}
+        >>> df = GeoDataFrame(d, crs="EPSG:4326")
+        >>> df1 = df.rename_geometry('geom1')
+        >>> df1.geometry.name
+        'geom1'
+        >>> df.rename_geometry('geom1', inplace=True)
+        >>> df.geometry.name
+        'geom1'
+
+
+        See also
+        --------
+        GeoDataFrame.set_geometry : set the active geometry
+        """
+        geometry_col = self.geometry.name
+        if col in self.columns:
+            raise ValueError(f"Column named {col} already exists")
+        else:
+            if inplace:
+                self.rename(columns={geometry_col: col}, inplace=inplace)
+                self.set_geometry(col, inplace=inplace)
+                return None
+
+            # The same .rename().set_geometry() logic errors for this case, so we do it manually instead
+            ps_series = self._psser_for((geometry_col,)).rename(col)
+            sdf = self.copy()
+            sdf[col] = ps_series
+            sdf = sdf.set_geometry(col)
+            return sdf
+
+    @property
+    def active_geometry_name(self) -> Any:
+        """Return the name of the active geometry column
+
+        Returns a name if a GeoDataFrame has an active geometry column set,
+        otherwise returns None. The return type is usually a string, but may be
+        an integer, tuple or other hashable, depending on the contents of the
+        dataframe columns.
+
+        You can also access the active geometry column using the
+        ``.geometry`` property. You can set a GeoSeries to be an active geometry
+        using the :meth:`~GeoDataFrame.set_geometry` method.
+
+        Returns
+        -------
+        str or other index label supported by pandas
+            name of an active geometry column or None
+
+        See also
+        --------
+        GeoDataFrame.set_geometry : set the active geometry
+        """
+        return self._geometry_column_name
 
     def _process_geometry_columns(
         self, operation: str, rename_suffix: str = "", *args, **kwargs
@@ -236,11 +589,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         sdf = self._internal.spark_frame.selectExpr(*select_expressions)
         return GeoDataFrame(sdf)
 
-    @property
-    def dtypes(self) -> gpd.GeoSeries | pd.Series | Dtype:
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
     def to_geopandas(self) -> gpd.GeoDataFrame | pd.Series:
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
@@ -250,9 +598,19 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    def geoindex(self) -> GeoIndex:
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def sindex(self) -> SpatialIndex | None:
+        """
+        Returns a spatial index for the GeoDataFrame.
+        The spatial index allows for efficient spatial queries. If the spatial
+        index cannot be created (e.g., no geometry column is present), this
+        property will return None.
+        Returns:
+        - SpatialIndex: The spatial index for the GeoDataFrame.
+        - None: If the spatial index is not supported.
+        """
+        if "geometry" in self.columns:
+            return SpatialIndex(self._internal.spark_frame, column_name="geometry")
+        return None
 
     def copy(self, deep=False):
         """
@@ -281,7 +639,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 self._anchor.copy(), dtype=self.dtypes, index=self._col_label
             )
         else:
-            return self
+            return self  # GeoDataFrame(self._internal.spark_frame.copy())  "this parameter is not supported but just dummy parameter to match pandas."
 
     @property
     def area(self) -> GeoDataFrame:
@@ -310,15 +668,26 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         """
         return self._process_geometry_columns("ST_Area", rename_suffix="_area")
 
+    def _safe_get_crs(self):
+        """
+        Helper method for getting the crs of the GeoDataframe safely.
+        Returns None if no geometry column is set instead of raising an error.
+        """
+        try:
+            return self.geometry.crs
+        except AttributeError:
+            return None
+
     @property
     def crs(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        return self.geometry.crs
 
     @crs.setter
     def crs(self, value):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        # Avoid trying to access the geometry column (which might be missing) if crs is None
+        if value is None:
+            return
+        self.geometry.crs = value
 
     @property
     def geom_type(self):
@@ -656,3 +1025,27 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         """
         # Use the Spark DataFrame's write method to write to GeoParquet format
         self._internal.spark_frame.write.format("geoparquet").save(path, **kwargs)
+
+
+# -----------------------------------------------------------------------------
+# # Utils
+# -----------------------------------------------------------------------------
+
+
+def _ensure_geometry(data, crs: Any | None = None) -> sgpd.GeoSeries:
+    """
+    Ensure the data is of geometry dtype or converted to it.
+
+    If input is a (Geo)Series, output is a GeoSeries, otherwise output
+    is GeometryArray.
+
+    If the input is a GeometryDtype with a set CRS, `crs` is ignored.
+    """
+    if isinstance(data, sgpd.GeoSeries):
+        if data.crs is None and crs is not None:
+            # Avoids caching issues/crs sharing issues
+            data = data.copy()
+            data.crs = crs
+        return data
+    else:
+        return sgpd.GeoSeries(data, crs=crs)
