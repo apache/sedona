@@ -16,7 +16,6 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -62,11 +61,6 @@
             <version>${sedona.version}</version>
             <scope>${sedona.scope}</scope>
         </dependency>
-        <!--The following GeoTools dependencies use GNU Lesser General Public License and thus are excluded from the binary distribution-->
-        <!-- Users have to include them by themselves manually -->
-        <!-- See https://www.apache.org/legal/resolved.html#category-x -->
-        <!-- See https://github.com/geotools/geotools#license -->
-        <!--for CRS transformation-->
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-main</artifactId>
@@ -83,7 +77,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!--for CRS transformation-->
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-referencing</artifactId>
@@ -100,7 +93,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!--for CRS transformation-->
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-epsg-hsql</artifactId>
@@ -125,7 +117,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!--for GeoTiff Reader-->
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-geotiff</artifactId>
@@ -162,7 +153,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- for AWS S3a reader / writer -->
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-aws</artifactId>
@@ -248,14 +238,12 @@
                 </executions>
             </plugin>
             <plugin>
-                <!-- Build an executable JAR -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.3.0</version>
                 <configuration>
                     <archive>
                         <manifest>
-                            <!-- <addClasspath>true</addClasspath> -->
                             <mainClass>Main</mainClass>
                         </manifest>
                     </archive>
@@ -282,7 +270,6 @@
                         </goals>
                         <configuration>
                             <transformers>
-                                <!--  use transformer to handle merge of META-INF/services - see http://java.net/jira/browse/JERSEY-440?focusedCommentId=14822&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#action_14822 -->
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
                                 <transformer
@@ -303,7 +290,6 @@
                                 </transformer>
                             </transformers>
                             <filters>
-                                <!--  filter to address "Invalid signature file" issue - see http://stackoverflow.com/a/6743609/589215-->
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>

@@ -74,7 +74,7 @@ repos:
         files: \.md$
         args:
           - --comment-style
-          - '<!--|| -->'
+          - ''
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
@@ -284,4 +284,3 @@ repos:
         name: run oxipng
         description: check PNG files with oxipng
         args: ['--fix', '-o', '4', '--strip', 'safe', '--alpha']
-        args: ['-o', '4', '--strip', 'safe', '--alpha']
