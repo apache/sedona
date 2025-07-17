@@ -3614,7 +3614,17 @@ class GeoSeries(GeoFrame, pspd.Series):
         else:
             spark_df = default_session().createDataFrame(data, schema=schema)
 
+        if isinstance(data, pspd.Series):
+            spark_df = data._internal.spark_frame
+            assert len(schema) == 1
+            spark_df = spark_df.withColumnRenamed(
+                _get_first_column_name(data), schema[0].name
+            )
+        else:
+            spark_df = default_session().createDataFrame(data, schema=schema)
+
         spark_df = spark_df.selectExpr(select)
+
 
         internal = InternalFrame(
             spark_frame=spark_df,
