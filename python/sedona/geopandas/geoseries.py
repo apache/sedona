@@ -2731,6 +2731,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         """
         Convert GeoSeries geometries to WKT
 
+        Note: Using shapely < 1.0.0 may return different geometries for empty geometries.
+
         Parameters
         ----------
         kwargs

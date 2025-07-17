@@ -36,6 +36,7 @@ from shapely.geometry import (
 )
 from pandas.testing import assert_series_equal
 import pytest
+from packaging.version import parse as parse_version
 
 
 class TestGeoSeries(TestGeopandasBase):
@@ -331,6 +332,9 @@ class TestGeoSeries(TestGeopandasBase):
         pass
 
     def test_to_wkb(self):
+        if parse_version(shapely.__version__) < parse_version("2.0.0"):
+            return
+
         data = [
             Point(0, 0),
             Polygon(),
@@ -381,6 +385,11 @@ class TestGeoSeries(TestGeopandasBase):
             ]
         )
         result = s.to_wkt()
+
+        # Old versions return empty GeometryCollection instead of empty Polygon
+        if parse_version(shapely.__version__) < parse_version("2.0.0"):
+            return
+
         expected = pd.Series(
             [
                 "POLYGON EMPTY",
