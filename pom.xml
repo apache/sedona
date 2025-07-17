@@ -88,7 +88,7 @@
 
 
         <graphframes.groupId>io.graphframes</graphframes.groupId>
-        <graphframes.version>0.9.0-SNAPSHOT</graphframes.version>
+        <graphframes.version>0.9.0</graphframes.version>
 
         <graphframes.artifactId>graphframes-spark${spark.major.version}_${scala.compat.version}</graphframes.artifactId>
 
@@ -400,18 +400,6 @@
             <releases>
                 <enabled>true</enabled>
             </releases>
-        </repository>
-        <!-- TODO remove when graphframes 0.9.0 is released-->
-        <repository>
-            <name>Central Portal Snapshots</name>
-            <id>central-portal-snapshots</id>
-            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
         </repository>
         <repository>
             <id>osgeo</id>
