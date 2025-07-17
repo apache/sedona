@@ -132,7 +132,6 @@ class GeoSeries(GeoFrame, pspd.Series):
                 use_same_anchor = False
 
                 return shapely.wkb.dumps(x, **kwargs)
-                # return shapely.to_wkb(x, include_srid=True)
             elif isinstance(x, bytearray):
                 use_same_anchor = False
                 return bytes(x)
