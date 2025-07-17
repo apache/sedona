@@ -783,6 +783,41 @@ class TestGeoSeries(TestGeopandasBase):
     def test_union_all(self):
         pass
 
+    def test_crosses(self):
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (2, 2), (0, 2)]),
+                LineString([(0, 0), (2, 2)]),
+                LineString([(2, 0), (0, 2)]),
+                Point(0, 1),
+            ],
+        )
+        s2 = GeoSeries(
+            [
+                LineString([(1, 0), (1, 3)]),
+                LineString([(2, 0), (0, 2)]),
+                Point(1, 1),
+                Point(0, 1),
+            ],
+            index=range(1, 5),
+        )
+
+        line = LineString([(-1, 1), (3, 1)])
+        result = s.crosses(line)
+        expected = pd.Series([True, True, True, False])
+        assert_series_equal(result.to_pandas(), expected)
+
+        result = s.crosses(s2, align=True)
+        expected = pd.Series([False, True, False, False, False])
+        assert_series_equal(result.to_pandas(), expected)
+
+        result = s.crosses(s2, align=False)
+        expected = pd.Series([True, True, False, False])
+        assert_series_equal(result.to_pandas(), expected)
+
+    def test_disjoint(self):
+        pass
+
     def test_intersects(self):
         s = sgpd.GeoSeries(
             [
@@ -826,6 +861,208 @@ class TestGeoSeries(TestGeopandasBase):
 
         result = s.intersects(s2, align=False)
         expected = pd.Series([True, True, True, True])
+
+    def test_overlaps(self):
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (2, 2), (0, 2)]),
+                Polygon([(0, 0), (2, 2), (0, 2)]),
+                LineString([(0, 0), (2, 2)]),
+                MultiPoint([(0, 0), (0, 1)]),
+            ],
+        )
+        s2 = GeoSeries(
+            [
+                Polygon([(0, 0), (2, 0), (0, 2)]),
+                LineString([(0, 1), (1, 1)]),
+                LineString([(1, 1), (3, 3)]),
+                Point(0, 1),
+            ],
+            index=range(1, 5),
+        )
+
+        polygon = Polygon([(0, 0), (1, 0), (1, 1), (0, 1)])
+        result = s.overlaps(polygon)
+        expected = pd.Series([True, True, False, False])
+        assert_series_equal(result.to_pandas(), expected)
+
+        result = s.overlaps(s2, align=True)
+        expected = pd.Series([False, True, False, False, False])
+        assert_series_equal(result.to_pandas(), expected)
+
+        result = s.overlaps(s2, align=False)
+        expected = pd.Series([True, False, True, False])
+        assert_series_equal(result.to_pandas(), expected)
+
+    def test_touches(self):
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (2, 2), (0, 2)]),
+                Polygon([(0, 0), (2, 2), (0, 2)]),
+                LineString([(0, 0), (2, 2)]),
+                MultiPoint([(0, 0), (0, 1)]),
+            ],
+        )
+        s2 = GeoSeries(
+            [
+                Polygon([(0, 0), (-2, 0), (0, -2)]),
+                LineString([(0, 1), (1, 1)]),
+                LineString([(1, 1), (3, 0)]),
+                Point(0, 1),
+            ],
+            index=range(1, 5),
+        )
+        line = LineString([(0, 0), (-1, -2)])
+        result = s.touches(line)
+        expected = pd.Series([True, True, True, True])
+        assert_series_equal(result.to_pandas(), expected)
+
+        result = s.touches(s2, align=True)
+        expected = pd.Series([False, True, True, False, False])
+        assert_series_equal(result.to_pandas(), expected)
+
+        result = s.touches(s2, align=False)
+        expected = pd.Series([True, False, True, False])
+        assert_series_equal(result.to_pandas(), expected)
+
+    def test_within(self):
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (2, 2), (0, 2)]),
+                Polygon([(0, 0), (1, 2), (0, 2)]),
+                LineString([(0, 0), (0, 2)]),
+                Point(0, 1),
+            ],
+        )
+        s2 = GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                LineString([(0, 0), (0, 2)]),
+                LineString([(0, 0), (0, 1)]),
+                Point(0, 1),
+            ],
+            index=range(1, 5),
+        )
+
+        polygon = Polygon([(0, 0), (2, 2), (0, 2)])
+        result = s.within(polygon)
+        expected = pd.Series([True, True, False, False])
+        assert_series_equal(result.to_pandas(), expected)
+
+        result = s2.within(s, align=True)
+        expected = pd.Series([False, False, True, False, False])
+        assert_series_equal(result.to_pandas(), expected)
+
+        result = s2.within(s, align=False)
+        expected = pd.Series([True, False, True, True], index=range(1, 5))
+        assert_series_equal(result.to_pandas(), expected)
+
+        # Ensure we return False if either geometries are empty
+        s = GeoSeries([Point(), Point(), Polygon(), Point(0, 1)])
+        result = s.within(s2, align=False)
+        expected = pd.Series([False, False, False, True])
+        assert_series_equal(result.to_pandas(), expected)
+
+    def test_covers(self):
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+                Polygon([(0, 0), (2, 2), (0, 2)]),
+                LineString([(0, 0), (2, 2)]),
+                Point(0, 0),
+            ],
+        )
+        s2 = GeoSeries(
+            [
+                Polygon([(0.5, 0.5), (1.5, 0.5), (1.5, 1.5), (0.5, 1.5)]),
+                Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+                LineString([(1, 1), (1.5, 1.5)]),
+                Point(0, 0),
+            ],
+            index=range(1, 5),
+        )
+
+        poly = Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])
+        result = s.covers(poly)
+        expected = pd.Series([True, False, False, False])
+        assert_series_equal(result.to_pandas(), expected)
+
+        result = s.covers(s2, align=True)
+        expected = pd.Series([False, False, False, False, False])
+        assert_series_equal(result.to_pandas(), expected)
+
+        result = s.covers(s2, align=False)
+        expected = pd.Series([True, False, True, True])
+        assert_series_equal(result.to_pandas(), expected)
+
+        # Ensure we return False if either geometries are empty
+        s = GeoSeries([Point(), Point(), Polygon(), Point(0, 0)])
+        result = s.covers(s2, align=False)
+        expected = pd.Series([False, False, False, True])
+        assert_series_equal(result.to_pandas(), expected)
+
+    def test_covered_by(self):
+        s = GeoSeries(
+            [
+                Polygon([(0.5, 0.5), (1.5, 0.5), (1.5, 1.5), (0.5, 1.5)]),
+                Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+                LineString([(1, 1), (1.5, 1.5)]),
+                Point(0, 0),
+            ],
+        )
+        s2 = GeoSeries(
+            [
+                Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+                Polygon([(0, 0), (2, 2), (0, 2)]),
+                LineString([(0, 0), (2, 2)]),
+                Point(0, 0),
+            ],
+            index=range(1, 5),
+        )
+
+        poly = Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])
+        result = s.covered_by(poly)
+        expected = pd.Series([True, True, True, True])
+        assert_series_equal(result.to_pandas(), expected)
+
+        result = s.covered_by(s2, align=True)
+        expected = pd.Series([False, True, True, True, False])
+        assert_series_equal(result.to_pandas(), expected)
+
+        result = s.covered_by(s2, align=False)
+        expected = pd.Series([True, False, True, True])
+        assert_series_equal(result.to_pandas(), expected)
+
+    def test_distance(self):
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (1, 0), (1, 1)]),
+                Polygon([(0, 0), (-1, 0), (-1, 1)]),
+                LineString([(1, 1), (0, 0)]),
+                Point(0, 0),
+            ],
+        )
+        s2 = GeoSeries(
+            [
+                Polygon([(0.5, 0.5), (1.5, 0.5), (1.5, 1.5), (0.5, 1.5)]),
+                Point(3, 1),
+                LineString([(1, 0), (2, 0)]),
+                Point(0, 1),
+            ],
+            index=range(1, 5),
+        )
+        point = Point(-1, 0)
+        result = s.distance(point)
+        expected = pd.Series([1.0, 0.0, 1.0, 1.0])
+        assert_series_equal(result.to_pandas(), expected)
+
+        result = s.distance(s2, align=True)
+        expected = pd.Series([np.nan, 0.707107, 2.000000, 1.000000, np.nan])
+        assert_series_equal(result.to_pandas(), expected)
+
+        result = s.distance(s2, align=False)
+        expected = pd.Series([0.000000, 3.162278, 0.707107, 1.000000])
+        assert_series_equal(result.to_pandas(), expected)
 
     def test_intersection(self):
         import pyspark.pandas as ps
@@ -936,7 +1173,37 @@ class TestGeoSeries(TestGeopandasBase):
         pass
 
     def test_contains(self):
-        pass
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                LineString([(0, 0), (0, 2)]),
+                LineString([(0, 0), (0, 1)]),
+                Point(0, 1),
+            ],
+            index=range(0, 4),
+        )
+        s2 = GeoSeries(
+            [
+                Polygon([(0, 0), (2, 2), (0, 2)]),
+                Polygon([(0, 0), (1, 2), (0, 2)]),
+                LineString([(0, 0), (0, 2)]),
+                Point(0, 1),
+            ],
+            index=range(1, 5),
+        )
+
+        point = Point(0, 1)
+        result = s.contains(point)
+        expected = pd.Series([False, True, False, True])
+        assert_series_equal(result.to_pandas(), expected)
+
+        result = s2.contains(s, align=True)
+        expected = pd.Series([False, False, False, True, False])
+        assert_series_equal(result.to_pandas(), expected)
+
+        result = s2.contains(s, align=False)
+        expected = pd.Series([True, False, True, True], index=range(1, 5))
+        assert_series_equal(result.to_pandas(), expected)
 
     def test_contains_properly(self):
         pass
