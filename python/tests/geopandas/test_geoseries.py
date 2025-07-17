@@ -723,6 +723,12 @@ class TestGeoSeries(TestGeopandasBase):
         expected = Polygon([(0, 1), (0, 2), (2, 2), (2, 0), (1, 0), (0, 0), (0, 1)])
         self.check_geom_equals(result, expected)
 
+        # Empty GeoSeries
+        s = sgpd.GeoSeries([])
+        result = s.union_all()
+        expected = GeometryCollection()
+        self.check_geom_equals(result, expected)
+
     def test_intersects(self):
         s = sgpd.GeoSeries(
             [
