@@ -40,7 +40,7 @@ class Moran:
 
         _jvm = sedona._jvm
         moran_result = (
-            sedona._jvm.org.apache.sedona.stats.autocorelation.Moran.getGlobal(
+            sedona._jvm.org.apache.sedona.stats.autocorrelation.Moran.getGlobal(
                 df._jdf, two_tailed, id_column, value_column
             )
         )

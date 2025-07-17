@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.stats.autocorellation
+package org.apache.sedona.stats.autocorrelation
 
 import org.apache.sedona.sql.TestBaseScala
 import org.apache.sedona.stats.Weighting
-import org.apache.sedona.stats.autocorelation.Moran
+import org.apache.sedona.stats.autocorrelation.Moran
 import org.apache.spark.sql.functions.expr
 
 class MoranTest extends TestBaseScala with AutoCorrelationFixtures {

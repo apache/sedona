@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.stats.autocorelation
+package org.apache.sedona.stats.autocorrelation
 
 import org.apache.commons.math3.distribution.NormalDistribution
 import org.apache.sedona.stats.autocorrelation.MoranResult

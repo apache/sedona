@@ -65,7 +65,7 @@ class SedonaJvmLib(Enum):
     st_predicates = "org.apache.spark.sql.sedona_sql.expressions.st_predicates"
     st_aggregates = "org.apache.spark.sql.sedona_sql.expressions.st_aggregates"
     SedonaContext = "org.apache.sedona.spark.SedonaContext"
-    Moran = "org.apache.sedona.stats.autocorelation.Moran"
+    Moran = "org.apache.sedona.stats.autocorrelation.Moran"
 
     @classmethod
     def from_str(cls, geo_lib: str) -> "SedonaJvmLib":
