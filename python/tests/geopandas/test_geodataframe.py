@@ -19,6 +19,14 @@ import tempfile
 
 from shapely.geometry import (
     Point,
+    LineString,
+    Polygon,
+    GeometryCollection,
+    MultiPoint,
+    MultiLineString,
+    MultiPolygon,
+    LinearRing,
+    box,
 )
 
 from sedona.geopandas import GeoDataFrame, GeoSeries
@@ -47,7 +55,8 @@ class TestDataframe(TestGeopandasBase):
         ],
     )
     def test_constructor(self, obj):
-        sgpd_df = GeoDataFrame(obj)
+        with self.ps_allow_diff_frames():
+            sgpd_df = GeoDataFrame(obj)
         check_geodataframe(sgpd_df)
 
     def test_constructor_pandas_on_spark(self):
@@ -290,7 +299,6 @@ class TestDataframe(TestGeopandasBase):
 
     def test_buffer(self):
         # Create a GeoDataFrame with geometries to test buffer operation
-        from shapely.geometry import Polygon, Point
 
         # Create input geometries
         point = Point(0, 0)
@@ -322,6 +330,101 @@ class TestDataframe(TestGeopandasBase):
 
         # Check that square buffer area is greater than original (1.0)
         assert areas[1] > 1.0
+
+    def test_to_parquet(self):
+        pass
+
+    def test_from_arrow(self):
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            return
+
+        import pyarrow as pa
+
+        table = pa.table({"a": [0, 1, 2], "b": [0.1, 0.2, 0.3]})
+        with pytest.raises(ValueError, match="No geometry column found"):
+            GeoDataFrame.from_arrow(table)
+
+        gdf = gpd.GeoDataFrame(
+            {
+                "col": [1, 2, 3, 4],
+                "geometry": [
+                    None,
+                    box(0, 0, 10, 10),
+                    Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                    Point(1, 1),
+                ],
+            }
+        )
+
+        result = GeoDataFrame.from_arrow(gdf.to_arrow())
+        self.check_sgpd_df_equals_gpd_df(result, gdf)
+
+        gdf = gpd.GeoDataFrame(
+            {
+                "col": ["a", "b", "c", "d"],
+                "geometry": [
+                    Point(1, 1),
+                    Polygon(),
+                    LineString([(0, 0), (1, 1)]),
+                    None,
+                ],
+            }
+        )
+
+        result = GeoDataFrame.from_arrow(gdf.to_arrow())
+
+        self.check_sgpd_df_equals_gpd_df(result, gdf)
+
+    def test_to_json(self):
+        import json
+
+        d = {"col1": ["name1", "name2"], "geometry": [Point(1, 2), Point(2, 1)]}
+
+        # Currently, adding the crs information later requires us to join across partitions
+        with self.ps_allow_diff_frames():
+            gdf = GeoDataFrame(d, crs="EPSG:3857")
+
+        result = gdf.to_json()
+
+        obj = json.loads(result)
+        assert obj["type"] == "FeatureCollection"
+        assert obj["features"][0]["geometry"]["type"] == "Point"
+        assert obj["features"][0]["geometry"]["coordinates"] == [1.0, 2.0]
+        assert obj["features"][1]["geometry"]["type"] == "Point"
+        assert obj["features"][1]["geometry"]["coordinates"] == [2.0, 1.0]
+        assert obj["crs"]["type"] == "name"
+        assert obj["crs"]["properties"]["name"] == "urn:ogc:def:crs:EPSG::3857"
+
+        expected = '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", \
+"properties": {"col1": "name1"}, "geometry": {"type": "Point", "coordinates": [1.0,\
+ 2.0]}}, {"id": "1", "type": "Feature", "properties": {"col1": "name2"}, "geometry"\
+: {"type": "Point", "coordinates": [2.0, 1.0]}}], "crs": {"type": "name", "properti\
+es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
+        assert result == expected, f"Expected {expected}, but got {result}"
+
+    def test_to_arrow(self):
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            return
+
+        import pyarrow as pa
+
+        data = {"col1": ["name1", "name2"], "geometry": [Point(1, 2), Point(2, 1)]}
+
+        gdf = GeoDataFrame(data, index=pd.Index([1, 2]))
+
+        result = pa.table(gdf.to_arrow(index=False))
+
+        expected = pa.table(
+            {
+                "col1": ["name1", "name2"],
+                "geometry": [
+                    bytes.fromhex("0101000000000000000000F03F0000000000000040"),
+                    bytes.fromhex("01010000000000000000000040000000000000F03F"),
+                ],
+            }
+        )
+
+        assert result.equals(expected)
 
 
 # -----------------------------------------------------------------------------
