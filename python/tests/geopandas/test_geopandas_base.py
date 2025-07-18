@@ -24,6 +24,7 @@ import pyspark.pandas as ps
 from pandas.testing import assert_series_equal
 from contextlib import contextmanager
 from shapely.geometry import GeometryCollection
+from shapely.geometry.base import BaseGeometry
 
 
 class TestGeopandasBase(TestBase):
@@ -102,3 +103,9 @@ class TestGeopandasBase(TestBase):
         return any(isinstance(g, GeometryCollection) for g in geoms1) or any(
             isinstance(g, GeometryCollection) for g in geoms2
         )
+
+    @classmethod
+    def check_geom_equals(cls, actual: BaseGeometry, expected: BaseGeometry):
+        assert isinstance(actual, BaseGeometry)
+        assert isinstance(expected, BaseGeometry)
+        assert actual.equals(expected)

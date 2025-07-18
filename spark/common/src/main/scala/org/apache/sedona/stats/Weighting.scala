@@ -22,6 +22,7 @@ import org.apache.sedona.util.DfUtils.getGeometryColumnName
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.sedona_sql.expressions.st_functions.{ST_Distance, ST_DistanceSpheroid}
 import org.apache.spark.sql.{Column, DataFrame}
+import scala.collection.JavaConverters._
 
 object Weighting {
 
@@ -255,4 +256,34 @@ object Weighting {
     savedAttributes = savedAttributes,
     resultName = resultName)
 
+  def addDistanceBandColumnPython(
+      dataframe: DataFrame,
+      threshold: Double,
+      binary: Boolean = true,
+      alpha: Double = -1.0,
+      includeZeroDistanceNeighbors: Boolean = false,
+      includeSelf: Boolean = false,
+      selfWeight: Double = 1.0,
+      geometry: String = null,
+      useSpheroid: Boolean = false,
+      savedAttributes: java.util.ArrayList[String] = null,
+      resultName: String = "weights"): DataFrame = {
+
+    val savedAttributesScala =
+      if (savedAttributes != null) savedAttributes.asScala.toSeq
+      else null
+
+    addDistanceBandColumn(
+      dataframe,
+      threshold,
+      binary,
+      alpha,
+      includeZeroDistanceNeighbors,
+      includeSelf,
+      selfWeight,
+      geometry,
+      useSpheroid,
+      savedAttributesScala,
+      resultName)
+  }
 }
