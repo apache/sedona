@@ -23,6 +23,7 @@ import pandas as pd
 import pyspark.pandas as ps
 from pandas.testing import assert_series_equal
 from contextlib import contextmanager
+from shapely.geometry.base import BaseGeometry
 
 
 class TestGeopandasBase(TestBase):
@@ -96,3 +97,9 @@ class TestGeopandasBase(TestBase):
             yield
         finally:
             ps.reset_option("compute.ops_on_diff_frames")
+
+    @classmethod
+    def check_geom_equals(cls, actual: BaseGeometry, expected: BaseGeometry):
+        assert isinstance(actual, BaseGeometry)
+        assert isinstance(expected, BaseGeometry)
+        assert actual.equals(expected)

@@ -199,12 +199,12 @@ class GeoSeries(GeoFrame, pspd.Series):
                 )
 
             try:
-                pdf = s.apply(try_geom_to_ewkb)
+                pd_series = s.apply(try_geom_to_ewkb)
             except Exception as e:
                 raise TypeError(f"Non-geometry column passed to GeoSeries: {e}")
 
             # initialize the parent class pyspark Series with the pandas Series
-            super().__init__(data=pdf)
+            super().__init__(data=pd_series)
 
         # manually set it to binary type
         col = next(
@@ -250,6 +250,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.to_crs : re-project to another CRS
         """
         from pyproj import CRS
+
+        if len(self) == 0:
+            return None
 
         tmp = self._process_geometry_column("ST_SRID", rename="crs", returns_geom=False)
         ps_series = tmp.take([0])
@@ -395,7 +398,13 @@ class GeoSeries(GeoFrame, pspd.Series):
         return result
 
     def _process_geometry_column(
-        self, operation: str, rename: str, returns_geom: bool = True, *args, **kwargs
+        self,
+        operation: str,
+        rename: str,
+        returns_geom: bool = True,
+        is_aggr: bool = False,
+        *args,
+        **kwargs,
     ) -> Union["GeoSeries", pspd.Series]:
         """
         Helper method to process a single geometry column with a specified operation.
@@ -437,7 +446,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         sql_expr = f"{operation}(`{first_col}`{params})"
 
         return self._query_geometry_column(
-            sql_expr, first_col, rename, returns_geom=returns_geom
+            sql_expr, first_col, rename, returns_geom=returns_geom, is_aggr=is_aggr
         )
 
     def _query_geometry_column(
@@ -447,6 +456,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         rename: str,
         df: pyspark.sql.DataFrame = None,
         returns_geom: bool = True,
+        is_aggr: bool = False,
     ) -> Union["GeoSeries", pspd.Series]:
         """
         Helper method to query a single geometry column with a specified operation.
@@ -463,6 +473,8 @@ class GeoSeries(GeoFrame, pspd.Series):
             The dataframe to query. If not provided, the internal dataframe will be used.
         returns_geom : bool, default True
             If True, the geometry column will be converted back to EWKB format.
+        is_aggr : bool, default False
+            If True, the query is an aggregation query.
 
         Returns
         -------
@@ -499,14 +511,25 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         query = f"{query} as `{rename}`"
 
-        # We always select NATURAL_ORDER_COLUMN_NAME, to avoid having to regenerate it in the result
-        # We always select SPARK_DEFAULT_INDEX_NAME, to retain series index info
-        sdf = df.selectExpr(query, SPARK_DEFAULT_INDEX_NAME, NATURAL_ORDER_COLUMN_NAME)
+        exprs = [query]
+
+        index_spark_columns = []
+        index_fields = []
+        if not is_aggr:
+            # We always select NATURAL_ORDER_COLUMN_NAME, to avoid having to regenerate it in the result
+            # We always select SPARK_DEFAULT_INDEX_NAME, to retain series index info
+            exprs.append(SPARK_DEFAULT_INDEX_NAME)
+            exprs.append(NATURAL_ORDER_COLUMN_NAME)
+            index_spark_columns = [scol_for(df, SPARK_DEFAULT_INDEX_NAME)]
+            index_fields = [self._internal.index_fields[0]]
+        # else if is_aggr, we don't select the index columns
+
+        sdf = df.selectExpr(*exprs)
 
         internal = self._internal.copy(
             spark_frame=sdf,
-            index_fields=[self._internal.index_fields[0]],
-            index_spark_columns=[scol_for(sdf, SPARK_DEFAULT_INDEX_NAME)],
+            index_fields=index_fields,
+            index_spark_columns=index_spark_columns,
             data_spark_columns=[scol_for(sdf, rename)],
             data_fields=[self._internal.data_fields[0].copy(name=rename)],
             column_label_names=[(rename,)],
@@ -1319,9 +1342,58 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
-    def union_all(self, method="unary", grid_size=None):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    def union_all(self, method="unary", grid_size=None) -> BaseGeometry:
+        """Returns a geometry containing the union of all geometries in the
+        ``GeoSeries``.
+
+        Sedona does not support the method or grid_size argument, so the user does not need to manually
+        decide the algorithm being used.
+
+        Parameters
+        ----------
+        method : str (default ``"unary"``)
+            Not supported in Sedona.
+
+        grid_size : float, default None
+            Not supported in Sedona.
+
+        Examples
+        --------
+
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import box
+        >>> s = GeoSeries([box(0, 0, 1, 1), box(0, 0, 2, 2)])
+        >>> s
+        0    POLYGON ((1 0, 1 1, 0 1, 0 0, 1 0))
+        1    POLYGON ((2 0, 2 2, 0 2, 0 0, 2 0))
+        dtype: geometry
+
+        >>> s.union_all()
+        <POLYGON ((0 1, 0 2, 2 2, 2 0, 1 0, 0 0, 0 1))>
+        """
+        if grid_size is not None:
+            raise NotImplementedError("Sedona does not support the grid_size argument")
+        if method != "unary":
+            import warnings
+
+            warnings.warn(
+                f"Sedona does not support manually specifying different union methods. Ignoring non-default method argument of {method}"
+            )
+
+        if len(self) == 0:
+            # While it's not explicitly defined in geopandas docs, this is what geopandas returns for empty GeoSeries
+            # If it ever changes for some reason, we'll catch that with the test
+            from shapely.geometry import GeometryCollection
+
+            return GeometryCollection()
+
+        # returns_geom needs to be False here so we don't convert back to EWKB format.
+        tmp = self._process_geometry_column(
+            "ST_Union_Aggr", rename="union_all", is_aggr=True, returns_geom=False
+        )
+        ps_series = tmp.take([0])
+        geom = ps_series.iloc[0]
+        return geom
 
     def intersects(
         self, other: Union["GeoSeries", BaseGeometry], align: Union[bool, None] = None
