@@ -174,63 +174,25 @@ public class WKBWriter {
    * @throws IOException if an I/O error occurs
    */
   public void write(S2Geography geog, OutStream os) throws IOException {
-    int dim = geog.dimension(); //  0=point, 1=linestring, 2=polygon, -1=mixed/empty
-    int count = geog.numShapes(); //  1=single, >1=multi
-
-    String s =
-        "Cannot write geometry with dimension="
-            + dim
-            + " and shape count="
-            + count
-            + " (type: "
-            + geog.getClass().getName()
-            + ")";
-
-    // 1) Mixed or empty collection
-    if (dim == -1) {
-      if (geog instanceof GeographyCollection) {
-        writeGeographyCollection(
-            WKBConstants.wkbGeometryCollection, (GeographyCollection) geog, os);
-        return;
-      }
-      throw new IllegalArgumentException(s);
-    }
-
-    // 2) Dispatch on the real dimensions
-    switch (dim) {
-      case 0: // POINT or MULTI_POINT
-        if (count == 1) {
-          // exactly one point
-          writePoint(WKBConstants.wkbPoint, (SinglePointGeography) geog, os);
-        } else {
-          // more than one → treat as multipoint
-          writePoint(WKBConstants.wkbMultiPoint, (PointGeography) geog, os);
-        }
-        return;
-
-      case 1: // LINESTRING or MULTI_LINESTRING
-        if (count == 1) {
-          writePolyline(WKBConstants.wkbLineString, (SinglePolylineGeography) geog, os);
-        } else {
-          writePolyline(WKBConstants.wkbMultiLineString, (PolylineGeography) geog, os);
-        }
-        return;
-
-      case 2: // POLYGON or MULTI_POLYGON
-        if (count == 1) {
-          writePolygon(WKBConstants.wkbPolygon, (PolygonGeography) geog, os);
-        } else {
-          writeGeographyCollection(WKBConstants.wkbMultiPolygon, (MultiPolygonGeography) geog, os);
-        }
-        return;
-
-      default:
-        // Should never happen once dim ∈ {0,1,2,-1} is enforced
-        throw new IllegalArgumentException(s);
+    if (geog instanceof SinglePointGeography) {
+      writePoint(WKBConstants.wkbPoint, (SinglePointGeography) geog, os);
+    } else if (geog instanceof PointGeography) {
+      writeMultiPoint(WKBConstants.wkbMultiPoint, (PointGeography) geog, os);
+    } else if (geog instanceof SinglePolylineGeography) {
+      writePolyline(WKBConstants.wkbLineString, (SinglePolylineGeography) geog, os);
+    } else if (geog instanceof PolylineGeography) {
+      writeMultiPolyline(WKBConstants.wkbMultiLineString, (PolylineGeography) geog, os);
+    } else if (geog instanceof PolygonGeography) {
+      writePolygon(WKBConstants.wkbPolygon, (PolygonGeography) geog, os);
+    } else if (geog instanceof MultiPolygonGeography) {
+      writeMultiPolygon(WKBConstants.wkbMultiPolygon, (MultiPolygonGeography) geog, os);
+    } else if (geog instanceof GeographyCollection) {
+      writeGeographyCollection(WKBConstants.wkbGeometryCollection, (GeographyCollection) geog, os);
     }
   }
 
-  private void writePoint(int geometryType, PointGeography pt, OutStream os) throws IOException {
+  private void writePoint(int geometryType, SinglePointGeography pt, OutStream os)
+      throws IOException {
     writeByteOrder(os);
     writeGeometryType(geometryType, pt, os);
     if (pt.numShapes() == 0) {
@@ -239,9 +201,8 @@ public class WKBWriter {
       S2Point p = pt.getPoints().get(0);
       S2LatLng ll = new S2LatLng(p);
 
-      // round to 6 decimal places //TODO: 16 decimal
-      double lon = Math.rint(ll.lngDegrees() * 1e16) / 1e16;
-      double lat = Math.rint(ll.latDegrees() * 1e16) / 1e16;
+      double lon = ll.lngDegrees();
+      double lat = ll.latDegrees();
 
       ByteOrderValues.putDouble(lon, buf, byteOrder);
       os.write(buf, 8);
@@ -250,7 +211,40 @@ public class WKBWriter {
     }
   }
 
-  private void writePolyline(int geometryType, PolylineGeography polyline, OutStream os)
+  private void writeMultiPoint(int geometryType, PointGeography mp, OutStream os)
+      throws IOException {
+    // 1) write the outer MultiPoint header
+    writeByteOrder(os);
+    writeGeometryType(WKBConstants.wkbMultiPoint, mp, os);
+    writeInt(mp.numShapes(), os); // count = number of points
+
+    // 2) temporarily disable SRID on the nested shapes
+    boolean oldIncludeSRID = this.includeSRID;
+    this.includeSRID = false;
+
+    // 3) for each point, write a proper Point WKB
+    for (int i = 0; i < mp.numShapes(); i++) {
+      S2Point p = mp.getPoints().get(i);
+      S2LatLng ll = new S2LatLng(p);
+      double lon = ll.lngDegrees();
+      double lat = ll.latDegrees();
+
+      // nested Point header
+      writeByteOrder(os);
+      writeGeometryType(WKBConstants.wkbPoint, mp, os);
+
+      // coords
+      ByteOrderValues.putDouble(lon, buf, byteOrder);
+      os.write(buf, 8);
+      ByteOrderValues.putDouble(lat, buf, byteOrder);
+      os.write(buf, 8);
+    }
+
+    // 4) restore SRID flag
+    this.includeSRID = oldIncludeSRID;
+  }
+
+  private void writePolyline(int geometryType, SinglePolylineGeography polyline, OutStream os)
       throws IOException {
     writeByteOrder(os);
     writeGeometryType(geometryType, polyline, os);
@@ -261,8 +255,8 @@ public class WKBWriter {
       for (S2Point p : verts) {
         // round to 6 decimal places
         S2LatLng ll = new S2LatLng(p);
-        double lon = Math.rint(ll.lngDegrees() * 1e16) / 1e16;
-        double lat = Math.rint(ll.latDegrees() * 1e16) / 1e16;
+        double lon = ll.lngDegrees();
+        double lat = ll.latDegrees();
 
         ByteOrderValues.putDouble(lon, buf, byteOrder);
         os.write(buf, 8);
@@ -270,6 +264,48 @@ public class WKBWriter {
         os.write(buf, 8);
       }
     }
+  }
+
+  private void writeMultiPolyline(int geometryType, PolylineGeography polyline, OutStream os)
+      throws IOException {
+    // 1) Outer MultiLineString header
+    writeByteOrder(os);
+    writeGeometryType(WKBConstants.wkbMultiLineString, polyline, os);
+
+    List<S2Polyline> lines = polyline.getPolylines();
+    // 2) Write the number of LineStrings
+    writeInt(lines.size(), os);
+
+    // Temporarily disable SRID on nested shapes
+    boolean oldIncludeSRID = this.includeSRID;
+    this.includeSRID = false;
+
+    // 3) For each LineString:
+    for (S2Polyline s2line : lines) {
+      List<S2Point> verts = s2line.vertices();
+
+      // 3a) Nested LineString header
+      writeByteOrder(os);
+      writeGeometryType(WKBConstants.wkbLineString, polyline, os);
+
+      // 3b) Vertex count
+      writeInt(verts.size(), os);
+
+      // 3c) Coordinates
+      for (S2Point p : verts) {
+        S2LatLng ll = new S2LatLng(p);
+        double lon = ll.lngDegrees();
+        double lat = ll.latDegrees();
+
+        ByteOrderValues.putDouble(lon, buf, byteOrder);
+        os.write(buf, 8);
+        ByteOrderValues.putDouble(lat, buf, byteOrder);
+        os.write(buf, 8);
+      }
+    }
+
+    // 4) Restore SRID flag
+    this.includeSRID = oldIncludeSRID;
   }
 
   private void writePolygon(int geometryType, PolygonGeography poly, OutStream os)
@@ -284,15 +320,62 @@ public class WKBWriter {
       writeInt(n, os);
       for (int i = 0; i < n; i++) {
         S2LatLng ll = new S2LatLng(loop.vertex(i));
-        double lon = Math.rint(ll.lngDegrees() * 1e16) / 1e16;
-        double lat = Math.rint(ll.latDegrees() * 1e16) / 1e16;
+        double lon = ll.lngDegrees();
+        double lat = ll.latDegrees();
 
-        ByteOrderValues.putDouble(lat, buf, byteOrder);
-        os.write(buf, 8);
         ByteOrderValues.putDouble(lon, buf, byteOrder);
+        os.write(buf, 8);
+        ByteOrderValues.putDouble(lat, buf, byteOrder);
         os.write(buf, 8);
       }
     }
+  }
+
+  private void writeMultiPolygon(int geometryType, MultiPolygonGeography multiPoly, OutStream os)
+      throws IOException {
+    // 1) Outer MultiPolygon header
+    writeByteOrder(os);
+    writeGeometryType(WKBConstants.wkbMultiPolygon, multiPoly, os);
+
+    // 2) Number of polygons
+    List<S2Geography> polys = multiPoly.getFeatures(); // however you expose each sub-polygon
+    writeInt(polys.size(), os);
+
+    // 3) Disable SRID on nested shapes if you include SRID in the outer header
+    boolean oldIncludeSRID = this.includeSRID;
+    this.includeSRID = false;
+
+    // 4) For each polygon, write a full Polygon WKB
+    for (S2Geography pg : polys) {
+      // 4a) Nested Polygon header
+      writeByteOrder(os);
+      writeGeometryType(WKBConstants.wkbPolygon, pg, os);
+
+      // 4b) Number of rings
+      PolygonGeography s2poly = (PolygonGeography) pg;
+      List<S2Loop> loops = s2poly.polygon.getLoops();
+      writeInt(loops.size(), os);
+
+      // 4c) For each ring, write vertex count + coords
+      for (S2Loop loop : loops) {
+        int n = loop.numVertices();
+        writeInt(n, os);
+        for (int i = 0; i < n; i++) {
+          S2LatLng ll = new S2LatLng(loop.vertex(i));
+          double lon = ll.lngDegrees();
+          double lat = ll.latDegrees();
+
+          // X (lon) then Y (lat)—matches Point/LineString ordering
+          ByteOrderValues.putDouble(lon, buf, byteOrder);
+          os.write(buf, 8);
+          ByteOrderValues.putDouble(lat, buf, byteOrder);
+          os.write(buf, 8);
+        }
+      }
+    }
+
+    // 5) Restore SRID flag
+    this.includeSRID = oldIncludeSRID;
   }
 
   private void writeGeographyCollection(int geometryType, GeographyCollection gc, OutStream os)

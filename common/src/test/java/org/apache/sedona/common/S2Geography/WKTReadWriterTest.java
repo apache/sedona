@@ -28,10 +28,6 @@ public class WKTReadWriterTest {
 
   private final WKTReader reader = new WKTReader() {};
 
-  private String write(S2Geography geom) {
-    return new WKTWriter().write(geom);
-  }
-
   private String writeWithPrecision(S2Geography geom, PrecisionModel pm) {
     WKTWriter w = new WKTWriter();
     w.setPrecisionModel(pm);
@@ -116,5 +112,19 @@ public class WKTReadWriterTest {
             + ")";
     assertEquals(
         wkt, writeWithPrecision(reader.read(wkt), new PrecisionModel(PrecisionModel.FIXED)));
+  }
+
+  @Test
+  public void empty_roundTrip() throws ParseException {
+    String point = "POINT EMPTY";
+    assertEquals(
+        point, writeWithPrecision(reader.read(point), new PrecisionModel(PrecisionModel.FIXED)));
+    String line = "LINESTRING EMPTY";
+    assertEquals(
+        line, writeWithPrecision(reader.read(line), new PrecisionModel(PrecisionModel.FIXED)));
+    String polygon = "POLYGON EMPTY";
+    assertEquals(
+        polygon,
+        writeWithPrecision(reader.read(polygon), new PrecisionModel(PrecisionModel.FIXED)));
   }
 }

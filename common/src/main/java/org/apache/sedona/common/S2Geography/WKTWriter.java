@@ -39,61 +39,6 @@ public class WKTWriter {
     return WKTConstants.POINT + " ( " + format(p0) + " )";
   }
 
-  /**
-   * Generates the WKT for a <tt>LINESTRING</tt> specified by a {@link CoordinateSequence}.
-   *
-   * @param seq the sequence to write
-   * @return the WKT string
-   */
-  public static String toPolyline(CoordinateSequence seq) {
-    StringBuilder buf = new StringBuilder();
-    buf.append(WKTConstants.LINESTRING);
-    buf.append(" ");
-    if (seq.size() == 0) buf.append(WKTConstants.EMPTY);
-    else {
-      buf.append("(");
-      for (int i = 0; i < seq.size(); i++) {
-        if (i > 0) buf.append(", ");
-        buf.append(format(seq.getX(i), seq.getY(i)));
-      }
-      buf.append(")");
-    }
-    return buf.toString();
-  }
-
-  /**
-   * Generates the WKT for a <tt>LINESTRING</tt> specified by a {@link CoordinateSequence}.
-   *
-   * @param coord the sequence to write
-   * @return the WKT string
-   */
-  public static String toPolyline(Coordinate[] coord) {
-    StringBuilder buf = new StringBuilder();
-    buf.append(WKTConstants.LINESTRING);
-    buf.append(" ");
-    if (coord.length == 0) buf.append(WKTConstants.EMPTY);
-    else {
-      buf.append("(");
-      for (int i = 0; i < coord.length; i++) {
-        if (i > 0) buf.append(", ");
-        buf.append(format(coord[i]));
-      }
-      buf.append(")");
-    }
-    return buf.toString();
-  }
-
-  /**
-   * Generates the WKT for a <tt>LINESTRING</tt> specified by two {@link Coordinate}s.
-   *
-   * @param p0 the first coordinate
-   * @param p1 the second coordinate
-   * @return the WKT
-   */
-  public static String toPolyline(Coordinate p0, Coordinate p1) {
-    return WKTConstants.LINESTRING + " ( " + format(p0) + ", " + format(p1) + " )";
-  }
-
   public static String format(Coordinate p) {
     return format(p.x, p.y);
   }
@@ -294,32 +239,6 @@ public class WKTWriter {
   }
 
   /**
-   * Same as <code>write</code>, but with newlines and spaces to make the well-known text more
-   * readable.
-   *
-   * @param geometry a <code>Geometry</code> to process
-   * @return a &lt;Geometry Tagged Text&gt; string (see the OpenGIS Simple Features Specification),
-   *     with newlines and spaces
-   */
-  public String writeFormatted(S2Geography geometry) {
-    Writer sw = new StringWriter();
-    try {
-      writeFormatted(geometry, true, sw);
-    } catch (IOException ex) {
-      Assert.shouldNeverReachHere();
-    }
-    return sw.toString();
-  }
-  /**
-   * Same as <code>write</code>, but with newlines and spaces to make the well-known text more
-   * readable.
-   *
-   * @param geometry a <code>Geometry</code> to process
-   */
-  public void writeFormatted(S2Geography geometry, Writer writer) throws IOException {
-    writeFormatted(geometry, true, writer);
-  }
-  /**
    * Converts a <code>Geometry</code> to its Well-known Text representation.
    *
    * @param geometry a <code>Geometry</code> to process
@@ -506,39 +425,6 @@ public class WKTWriter {
         writer,
         formatter);
   }
-
-  /**
-   * Converts a <code>LinearRing</code> to &lt;LinearRing Tagged Text&gt; format, then appends it to
-   * the writer.
-   *
-   * @param linearRing the <code>LinearRing</code> to process
-   * @param useFormatting flag indicating that the output should be formatted
-   * @param level the indentation level
-   * @param writer the output writer to append to
-   * @param formatter the <code>DecimalFormatter</code> to use to convert from a precise coordinate
-   *     to an external coordinate
-   */
-  //  private void appendLoopTaggedText(
-  //      PolygonGeography linearRing,
-  //      EnumSet<Ordinate> outputOrdinates,
-  //      boolean useFormatting,
-  //      int level,
-  //      Writer writer,
-  //      OrdinateFormat formatter)
-  //      throws IOException {
-  //    writer.write(WKTConstants.LINEARRING);
-  //    writer.write(" ");
-  //    appendOrdinateText(outputOrdinates, writer);
-  //    appendSequenceText(
-  //        linearRing.getCoordinateSequence(),
-  //        outputOrdinates,
-  //        useFormatting,
-  //        level,
-  //        false,
-  //        writer,
-  //        formatter);
-  //  }
-
   /**
    * Converts a <code>Polygon</code> to &lt;Polygon Tagged Text&gt; format, then appends it to the
    * writer.

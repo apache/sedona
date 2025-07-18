@@ -37,9 +37,13 @@ public class MultiPolygonGeography extends GeographyCollection {
     }
   }
 
+  public List<S2Geography> getFeatures() {
+    return features;
+  }
+
   @Override
   public int dimension() {
-    // every child PolygonGeography is 2D
-    return 3;
+    // every child PolygonGeography
+    return 2;
   }
 }

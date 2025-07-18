@@ -643,7 +643,7 @@ public class WKTReader {
       throws IOException, ParseException {
     CoordinateSequence pts = getCoordinateSequence(tokenizer, ordinateFlags, 1, false);
     // If X and Y are NaN create a empty point
-    if (Double.isNaN(pts.getX(0)) || Double.isNaN(pts.getY(0))) {
+    if (pts.size() <= 0 || Double.isNaN(pts.getX(0)) || Double.isNaN(pts.getY(0))) {
       return new SinglePointGeography();
     }
     double lon = pts.getX(0);

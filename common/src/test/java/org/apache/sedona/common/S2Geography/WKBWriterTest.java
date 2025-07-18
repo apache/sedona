@@ -42,7 +42,7 @@ public class WKBWriterTest {
     WKBWriter writer = new WKBWriter(2, ByteOrderValues.LITTLE_ENDIAN);
     byte[] wkb = writer.write(inputGeo);
 
-    // 3) read it back with JTS WKBReader
+    // 3) read it back with WKBReader
     WKBReader reader = new WKBReader();
     PointGeography outputGeo = (PointGeography) reader.read(wkb);
 
@@ -83,5 +83,74 @@ public class WKBWriterTest {
       assertEquals(origLL.latDegrees(), decLL.latDegrees(), 1e-12);
       assertEquals(origLL.lngDegrees(), decLL.lngDegrees(), 1e-12);
     }
+  }
+
+  @Test
+  public void MultiPointTest() throws ParseException, IOException {
+    String wkt = "MULTIPOINT ((10 40), (40 30))";
+    WKTReader reader = new WKTReader();
+    S2Geography geo = reader.read(wkt);
+
+    WKBWriter writer = new WKBWriter(2, ByteOrderValues.LITTLE_ENDIAN);
+    byte[] wkb = writer.write(geo);
+    WKBReader readerWKB = new WKBReader();
+    S2Geography geoWKB = readerWKB.read(wkb);
+    assertEquals(0, TestHelper.compareTo(geo, geoWKB));
+  }
+
+  @Test
+  public void MultiPolylineTest() throws ParseException, IOException {
+    String wkt = "MULTILINESTRING((0 1,2 3),(4 5,6 7))";
+    WKTReader reader = new WKTReader();
+    S2Geography geo = reader.read(wkt);
+
+    WKBWriter writer = new WKBWriter(2, ByteOrderValues.LITTLE_ENDIAN);
+    byte[] wkb = writer.write(geo);
+    WKBReader readerWKB = new WKBReader();
+    S2Geography geoWKB = readerWKB.read(wkb);
+    assertEquals(0, TestHelper.compareTo(geo, geoWKB));
+  }
+
+  @Test
+  public void MultiPolygonTest() throws ParseException, IOException {
+    String wkt =
+        "MULTIPOLYGON(((0 0,0 10,10 10,10 0,0 0),(1 1,1 9,9 9,9 1,1 1)),((-9 0,-9 10,-1 10,-1 0,-9 0)))";
+    WKTReader reader = new WKTReader();
+    S2Geography geo = reader.read(wkt);
+
+    WKBWriter writer = new WKBWriter(2, ByteOrderValues.LITTLE_ENDIAN);
+    byte[] wkb = writer.write(geo);
+    WKBReader readerWKB = new WKBReader();
+    S2Geography geoWKB = readerWKB.read(wkb);
+    assertEquals(0, TestHelper.compareTo(geo, geoWKB));
+  }
+
+  @Test
+  public void CollectionTest() throws ParseException, IOException {
+    String wkt =
+        "GEOMETRYCOLLECTION(POINT(0 1),POINT(0 1),POINT(2 3),LINESTRING(2 3,4 5),LINESTRING(0 1,2 3),LINESTRING(4 5,6 7),POLYGON((0 0,0 10,10 10,10 0,0 0),(1 1,1 9,9 9,9 1,1 1)),POLYGON((0 0,0 10,10 10,10 0,0 0),(1 1,1 9,9 9,9 1,1 1)),POLYGON((-9 0,-9 10,-1 10,-1 0,-9 0)))";
+
+    WKTReader reader = new WKTReader();
+    S2Geography geo = reader.read(wkt);
+
+    WKBWriter writer = new WKBWriter(2, ByteOrderValues.LITTLE_ENDIAN);
+    byte[] wkb = writer.write(geo);
+    WKBReader readerWKB = new WKBReader();
+    S2Geography geoWKB = readerWKB.read(wkb);
+    assertEquals(0, TestHelper.compareTo(geo, geoWKB));
+  }
+
+  @Test
+  public void emptyTest() throws ParseException, IOException {
+    String wkt = "POINT EMPTY";
+
+    WKTReader reader = new WKTReader();
+    S2Geography geo = reader.read(wkt);
+
+    WKBWriter writer = new WKBWriter(2, ByteOrderValues.LITTLE_ENDIAN);
+    byte[] wkb = writer.write(geo);
+    WKBReader readerWKB = new WKBReader();
+    S2Geography geoWKB = readerWKB.read(wkb);
+    assertEquals(0, TestHelper.compareTo(geo, geoWKB));
   }
 }

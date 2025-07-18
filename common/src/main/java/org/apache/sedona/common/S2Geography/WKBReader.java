@@ -256,7 +256,7 @@ public class WKBReader {
       throws IOException, ParseException {
     CoordinateSequence pts = readCoordinateSequence(1, ordinateFlags);
     // If X and Y are NaN create a empty point
-    if (Double.isNaN(pts.getX(0)) || Double.isNaN(pts.getY(0))) {
+    if (pts.size() <= 0 || Double.isNaN(pts.getX(0)) || Double.isNaN(pts.getY(0))) {
       return new SinglePointGeography();
     }
     double lon = pts.getX(0);
@@ -442,7 +442,12 @@ public class WKBReader {
   private void readCoordinate() throws IOException, ParseException {
     for (int i = 0; i < inputDimension; i++) {
       if (i <= 1) {
-        ordValues[i] = precisionModel.makePrecise(dis.readDouble());
+        try {
+          double v = dis.readDouble();
+          ordValues[i] = precisionModel.makePrecise(v);
+        } catch (ParseException pe) {
+          return;
+        }
       } else {
         ordValues[i] = dis.readDouble();
       }
