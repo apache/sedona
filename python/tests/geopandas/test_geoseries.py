@@ -33,6 +33,7 @@ from shapely.geometry import (
     MultiLineString,
     MultiPolygon,
     LinearRing,
+    box,
 )
 from pandas.testing import assert_series_equal
 import pytest
@@ -781,7 +782,16 @@ class TestGeoSeries(TestGeopandasBase):
         pass
 
     def test_union_all(self):
-        pass
+        s = GeoSeries([box(0, 0, 1, 1), box(0, 0, 2, 2)])
+        result = s.union_all()
+        expected = Polygon([(0, 1), (0, 2), (2, 2), (2, 0), (1, 0), (0, 0), (0, 1)])
+        self.check_geom_equals(result, expected)
+
+        # Empty GeoSeries
+        s = sgpd.GeoSeries([])
+        result = s.union_all()
+        expected = GeometryCollection()
+        self.check_geom_equals(result, expected)
 
     def test_crosses(self):
         s = GeoSeries(
