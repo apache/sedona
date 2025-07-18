@@ -43,9 +43,201 @@ from shapely.geometry.base import BaseGeometry
 register_extension_dtype(GeometryDtype)
 
 
+# ============================================================================
+# IMPLEMENTATION STATUS TRACKING
+# ============================================================================
+
+IMPLEMENTATION_STATUS = {
+    "IMPLEMENTED": [
+        "area", "buffer", "crs", "geometry", "active_geometry_name", "sindex",
+        "set_geometry", "rename_geometry", "copy", "sjoin", "to_parquet",
+        "_get_geometry", "_set_geometry", "_process_geometry_columns", "_safe_get_crs"
+    ],
+    "NOT_IMPLEMENTED": [
+        "to_geopandas", "_to_geopandas", "geom_type", "type", "length", "is_valid",
+        "is_valid_reason", "is_empty", "is_simple", "is_ring", "is_ccw", "is_closed",
+        "has_z", "boundary", "centroid", "convex_hull", "envelope", "exterior",
+        "interiors", "unary_union", "count_coordinates", "count_geometries",
+        "count_interior_rings", "get_precision", "get_geometry", "concave_hull",
+        "delaunay_triangles", "voronoi_polygons", "minimum_rotated_rectangle",
+        "extract_unique_points", "offset_curve", "remove_repeated_points",
+        "set_precision", "representative_point", "minimum_bounding_circle",
+        "minimum_bounding_radius", "minimum_clearance", "normalize", "make_valid",
+        "reverse", "segmentize", "transform", "force_2d", "force_3d", "line_merge",
+        "union_all", "intersection_all", "contains", "contains_properly"
+    ],
+    "PARTIALLY_IMPLEMENTED": [
+        "set_geometry"  # Only drop=True case is not implemented
+    ]
+}
+
+IMPLEMENTATION_PRIORITY = {
+    "HIGH": [
+        "to_geopandas", "_to_geopandas", "contains", "contains_properly", "convex_hull",
+        "count_coordinates", "count_geometries", "is_ring", "is_closed", "make_valid"
+    ],
+    "MEDIUM": [
+        "force_2d", "force_3d", "transform", "segmentize", "line_merge",
+        "union_all", "intersection_all", "reverse", "normalize", "get_geometry"
+    ],
+    "LOW": [
+        "delaunay_triangles", "voronoi_polygons", "minimum_bounding_circle",
+        "representative_point", "extract_unique_points", "offset_curve",
+        "minimum_rotated_rectangle", "concave_hull"
+    ]
+}
+
+
+def _not_implemented_error(method_name: str, additional_info: str = "") -> str:
+    """
+    Generate a standardized NotImplementedError message for GeoDataFrame methods.
+    
+    Parameters
+    ----------
+    method_name : str
+        The name of the method that is not implemented.
+    additional_info : str, optional
+        Additional information about the method or workarounds.
+    
+    Returns
+    -------
+    str
+        Formatted error message.
+    """
+    base_message = (
+        f"GeoDataFrame.{method_name}() is not implemented yet.\n"
+        f"This method will be added in a future release."
+    )
+    
+    if additional_info:
+        base_message += f"\n\n{additional_info}"
+    
+    workaround = (
+        "\n\nTemporary workaround - use GeoPandas:\n"
+        "  gpd_df = sedona_gdf.to_geopandas()\n"
+        f"  result = gpd_df.{method_name}(...)\n"
+        "  # Note: This will collect all data to the driver."
+    )
+    
+    return base_message + workaround
+
+
 class GeoDataFrame(GeoFrame, pspd.DataFrame):
     """
-    A class representing a GeoDataFrame, inheriting from GeoFrame and pyspark.pandas.DataFrame.
+    A pandas-on-Spark DataFrame for geospatial data with geometry columns.
+    
+    GeoDataFrame extends pyspark.pandas.DataFrame to provide geospatial operations
+    using Apache Sedona's spatial functions. It maintains compatibility with
+    GeoPandas GeoDataFrame while operating on distributed datasets.
+    
+    Parameters
+    ----------
+    data : dict, array-like, DataFrame, or GeoDataFrame
+        Data to initialize the GeoDataFrame. Can be a dictionary, array-like structure,
+        pandas DataFrame, GeoPandas GeoDataFrame, or another GeoDataFrame.
+    geometry : str, array-like, or GeoSeries, optional
+        Column name, array of geometries, or GeoSeries to use as the active geometry.
+        If None, will look for existing geometry columns.
+    crs : pyproj.CRS, optional
+        Coordinate Reference System for the geometries.
+    columns : Index or array-like, optional
+        Column labels to use for the resulting frame.
+    index : Index or array-like, optional
+        Index to use for the resulting frame.
+    
+    Attributes
+    ----------
+    geometry : GeoSeries
+        The active geometry column.
+    crs : pyproj.CRS
+        The Coordinate Reference System (CRS) for the geometries.
+    active_geometry_name : str
+        Name of the active geometry column.
+    area : Series
+        Area of each geometry in CRS units.
+    sindex : SpatialIndex
+        Spatial index for the geometries.
+    
+    Methods
+    -------
+    buffer(distance)
+        Buffer geometries by specified distance.
+    sjoin(right, how='inner', predicate='intersects')
+        Spatial join with another GeoDataFrame.
+    set_geometry(col, drop=False, inplace=False)
+        Set the active geometry column.
+    rename_geometry(col, inplace=False)
+        Rename the active geometry column.
+    to_parquet(path, **kwargs)
+        Save to GeoParquet format.
+    copy(deep=False)
+        Make a copy of the GeoDataFrame.
+    
+    Examples
+    --------
+    >>> from shapely.geometry import Point, Polygon
+    >>> from sedona.geopandas import GeoDataFrame
+    >>> import pandas as pd
+    >>> 
+    >>> # Create from dictionary with geometry
+    >>> data = {
+    ...     'name': ['A', 'B', 'C'],
+    ...     'geometry': [Point(0, 0), Point(1, 1), Point(2, 2)]
+    ... }
+    >>> gdf = GeoDataFrame(data, crs='EPSG:4326')
+    >>> gdf
+         name   geometry
+    0       A   POINT (0 0)
+    1       B   POINT (1 1)
+    2       C   POINT (2 2)
+    >>> 
+    >>> # Spatial operations
+    >>> buffered = gdf.buffer(0.1)
+    >>> buffered.area
+    0    0.031416
+    1    0.031416
+    2    0.031416
+    dtype: float64
+    >>> 
+    >>> # Spatial joins
+    >>> polygons = GeoDataFrame({
+    ...     'region': ['Region1', 'Region2'],
+    ...     'geometry': [
+    ...         Polygon([(-1, -1), (1, -1), (1, 1), (-1, 1)]),
+    ...         Polygon([(0.5, 0.5), (2.5, 0.5), (2.5, 2.5), (0.5, 2.5)])
+    ...     ]
+    ... })
+    >>> result = gdf.sjoin(polygons, how='left', predicate='within')
+    >>> result['region']
+    0    Region1
+    1    Region2
+    2    Region2
+    dtype: object
+    
+    Notes
+    -----
+    This implementation differs from GeoPandas in several ways:
+    - Uses Spark for distributed processing
+    - Geometries are stored in WKB (Well-Known Binary) format internally
+    - Some methods may have different performance characteristics
+    - Not all GeoPandas methods are implemented yet (see IMPLEMENTATION_STATUS)
+    
+    Performance Considerations:
+    - Operations are distributed across Spark cluster
+    - Avoid converting to GeoPandas (.to_geopandas()) on large datasets
+    - Use .sample() for testing with large datasets
+    - Spatial joins are optimized for distributed processing
+    
+    Geometry Column Management:
+    - Supports multiple geometry columns
+    - One geometry column is designated as 'active' at a time
+    - Active geometry is used for spatial operations and plotting
+    - Use set_geometry() to change the active geometry column
+    
+    See Also
+    --------
+    geopandas.GeoDataFrame : The GeoPandas equivalent
+    sedona.geopandas.GeoSeries : Series with geometry data
     """
 
     def __getitem__(self, key: Any) -> Any:
@@ -119,6 +311,10 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             return GeoDataFrame(selected_rows)
 
     _geometry_column_name = None
+
+    # ============================================================================
+    # CONSTRUCTION AND INITIALIZATION
+    # ============================================================================
 
     def __init__(
         self,
@@ -235,6 +431,10 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             self._geometry_column_name = data._geometry_column_name
             if crs is not None and data.crs != crs:
                 raise ValueError(crs_mismatch_error)
+
+    # ============================================================================
+    # GEOMETRY COLUMN MANAGEMENT
+    # ============================================================================
 
     def _get_geometry(self) -> sgpd.GeoSeries:
         if self._geometry_column_name not in self:
@@ -432,7 +632,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                     stacklevel=2,
                 )
             if drop:
-                raise NotImplementedError("Not implemented.")
+                raise NotImplementedError(_not_implemented_error("set_geometry", "Setting geometry with drop=True parameter is not supported."))
             else:
                 # if not dropping, set the active geometry name to the given col name
                 geo_column_name = col
@@ -516,6 +716,10 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             sdf = sdf.set_geometry(col)
             return sdf
 
+    # ============================================================================
+    # PROPERTIES AND ATTRIBUTES
+    # ============================================================================
+
     @property
     def active_geometry_name(self) -> Any:
         """Return the name of the active geometry column
@@ -591,11 +795,11 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
     def to_geopandas(self) -> gpd.GeoDataFrame | pd.Series:
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(_not_implemented_error("to_geopandas", "Converts to GeoPandas GeoDataFrame by collecting all data to driver."))
 
     def _to_geopandas(self) -> gpd.GeoDataFrame | pd.Series:
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(_not_implemented_error("_to_geopandas", "Internal method for GeoPandas conversion without logging warnings."))
 
     @property
     def sindex(self) -> SpatialIndex | None:
@@ -692,22 +896,22 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
     @property
     def geom_type(self):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(_not_implemented_error("geom_type", "Returns the geometry type of each geometry (Point, LineString, Polygon, etc.)."))
 
     @property
     def type(self):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(_not_implemented_error("type", "Returns numeric geometry type codes."))
 
     @property
     def length(self):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(_not_implemented_error("length", "Returns the length/perimeter of each geometry."))
 
     @property
     def is_valid(self):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(_not_implemented_error("is_valid", "Tests if geometries are valid according to OGC standards."))
 
     def is_valid_reason(self):
         # Implementation of the abstract method
@@ -720,11 +924,11 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
     def count_coordinates(self):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(_not_implemented_error("count_coordinates", "Counts the number of coordinate tuples in each geometry."))
 
     def count_geometries(self):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(_not_implemented_error("count_geometries", "Counts the number of geometries in each multi-geometry or collection."))
 
     def count_interior_rings(self):
         # Implementation of the abstract method
@@ -888,11 +1092,15 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
     def contains(self, other, align=None):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(_not_implemented_error("contains", "Tests if geometries contain other geometries."))
 
     def contains_properly(self, other, align=None):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(_not_implemented_error("contains_properly", "Tests if geometries properly contain other geometries (no boundary contact)."))
+
+    # ============================================================================
+    # SPATIAL OPERATIONS
+    # ============================================================================
 
     def buffer(
         self,
@@ -1012,6 +1220,10 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             on_attribute=on_attribute,
             **kwargs,
         )
+
+    # ============================================================================
+    # I/O OPERATIONS
+    # ============================================================================
 
     def to_parquet(self, path, **kwargs):
         """
