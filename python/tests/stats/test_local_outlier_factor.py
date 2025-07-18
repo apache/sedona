@@ -26,8 +26,14 @@ from tests.test_base import TestBase
 from sedona.spark.sql.st_constructors import ST_MakePoint
 from sedona.spark.sql.st_functions import ST_X, ST_Y
 from sedona.spark.stats import local_outlier_factor
+import os
+import pyspark
 
 
+@pytest.mark.skipif(
+    os.getenv("SPARK_REMOTE") is not None and pyspark.__version__ < "4.0.0",
+    reason="DBSCAN requires checkpoint directory which is not available in Spark Connect mode before Spark 4.0.0",
+)
 class TestLOF(TestBase):
     def get_small_data(self) -> DataFrame:
         schema = StructType(

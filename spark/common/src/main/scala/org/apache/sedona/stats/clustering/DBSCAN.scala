@@ -109,7 +109,9 @@ object DBSCAN {
       .join(corePointsDF.alias("right"), col("left.dst") === col(s"right.id"))
       .select(col("left.src"), col(s"right.id").alias("dst"))
 
-    val connectedComponentsDF = GraphFrame(corePointsDF, coreEdgesDf).connectedComponents.run
+    val connectedComponentsDF = GraphFrame(corePointsDF, coreEdgesDf).connectedComponents
+      .setUseLabelsAsComponents(false)
+      .run
 
     val borderComponentsDF = borderPointsDF
       .select(struct("*").alias("leftContent"), explode(col("neighbors")).alias("neighbor"))
