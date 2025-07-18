@@ -853,6 +853,232 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
+    def dwithin(self, other, distance, align=None):
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        each aligned geometry that is within a set distance from ``other``.
+
+        The operation works on a 1-to-1 row-wise manner:
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The GeoSeries (elementwise) or geometric object to test for
+            equality.
+        distance : float, np.array, pd.Series
+            Distance(s) to test if each geometry is within. A scalar distance will be
+            applied to all geometries. An array or Series will be applied elementwise.
+            If np.array or pd.Series are used then it must have same length as the
+            GeoSeries.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices.
+            If False, the order of elements is preserved. None defaults to True.
+
+        Returns
+        -------
+        Series (bool)
+
+        Examples
+        --------
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
+        ...         LineString([(0, 0), (0, 2)]),
+        ...         LineString([(0, 0), (0, 1)]),
+        ...         Point(0, 1),
+        ...     ],
+        ...     index=range(0, 4),
+        ... )
+        >>> s2 = GeoSeries(
+        ...     [
+        ...         Polygon([(1, 0), (4, 2), (2, 2)]),
+        ...         Polygon([(2, 0), (3, 2), (2, 2)]),
+        ...         LineString([(2, 0), (2, 2)]),
+        ...         Point(1, 1),
+        ...     ],
+        ...     index=range(1, 5),
+        ... )
+
+        >>> s
+        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1             LINESTRING (0 0, 0 2)
+        2             LINESTRING (0 0, 0 1)
+        3                       POINT (0 1)
+        dtype: geometry
+
+        >>> s2
+        1    POLYGON ((1 0, 4 2, 2 2, 1 0))
+        2    POLYGON ((2 0, 3 2, 2 2, 2 0))
+        3             LINESTRING (2 0, 2 2)
+        4                       POINT (1 1)
+        dtype: geometry
+
+        We can check if each geometry of GeoSeries contains a single
+        geometry:
+
+        >>> point = Point(0, 1)
+        >>> s2.dwithin(point, 1.8)
+        1     True
+        2    False
+        3    False
+        4     True
+        dtype: bool
+
+        We can also check two GeoSeries against each other, row by row.
+        The GeoSeries above have different indices. We can either align both GeoSeries
+        based on index values and compare elements with the same index using
+        ``align=True`` or ignore index and compare elements based on their matching
+        order using ``align=False``:
+
+        >>> s.dwithin(s2, distance=1, align=True)
+        0    False
+        1     True
+        2    False
+        3    False
+        4    False
+        dtype: bool
+
+        >>> s.dwithin(s2, distance=1, align=False)
+        0     True
+        1    False
+        2    False
+        3     True
+        dtype: bool
+
+        Notes
+        -----
+        This method works in a row-wise manner. It does not check if an element
+        of one GeoSeries is within the set distance of *any* element of the other one.
+
+        See also
+        --------
+        GeoSeries.within
+        """
+
+        if not isinstance(distance, (float, int)):
+            raise NotImplementedError(
+                "Array-like distance for dwithin not implemented yet."
+            )
+
+        return self._row_wise_operation(
+            f"ST_DWithin(`L`, `R`, {distance})",
+            other,
+            align,
+            rename="dwithin",
+            returns_geom=False,
+            default_val="FALSE",
+        )
+
+    def difference(self, other, align=None) -> "GeoSeries":
+        """Returns a ``GeoSeries`` of the points in each aligned geometry that
+        are not in `other`.
+
+        The operation works on a 1-to-1 row-wise manner:
+
+        Unlike Geopandas, Sedona does not support this operation for GeometryCollections.
+
+        Parameters
+        ----------
+        other : Geoseries or geometric object
+            The Geoseries (elementwise) or geometric object to find the
+            difference to.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
+        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
+        ...         LineString([(0, 0), (2, 2)]),
+        ...         LineString([(2, 0), (0, 2)]),
+        ...         Point(0, 1),
+        ...     ],
+        ... )
+        >>> s2 = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
+        ...         LineString([(1, 0), (1, 3)]),
+        ...         LineString([(2, 0), (0, 2)]),
+        ...         Point(1, 1),
+        ...         Point(0, 1),
+        ...     ],
+        ...     index=range(1, 6),
+        ... )
+
+        >>> s
+        0    POLYGON ((0 0, 2 2, 0 2, 0 0))
+        1    POLYGON ((0 0, 2 2, 0 2, 0 0))
+        2             LINESTRING (0 0, 2 2)
+        3             LINESTRING (2 0, 0 2)
+        4                       POINT (0 1)
+        dtype: geometry
+
+        >>> s2
+        1    POLYGON ((0 0, 1 1, 0 1, 0 0))
+        2             LINESTRING (1 0, 1 3)
+        3             LINESTRING (2 0, 0 2)
+        4                       POINT (1 1)
+        5                       POINT (0 1)
+        dtype: geometry
+
+        We can do difference of each geometry and a single
+        shapely geometry:
+
+        >>> s.difference(Polygon([(0, 0), (1, 1), (0, 1)]))
+        0       POLYGON ((0 2, 2 2, 1 1, 0 1, 0 2))
+        1         POLYGON ((0 2, 2 2, 1 1, 0 1, 0 2))
+        2                       LINESTRING (1 1, 2 2)
+        3    MULTILINESTRING ((2 0, 1 1), (1 1, 0 2))
+        4                                 POINT EMPTY
+        dtype: geometry
+
+        We can also check two GeoSeries against each other, row by row.
+        The GeoSeries above have different indices. We can either align both GeoSeries
+        based on index values and compare elements with the same index using
+        ``align=True`` or ignore index and compare elements based on their matching
+        order using ``align=False``:
+
+        >>> s.difference(s2, align=True)
+        0                                        None
+        1         POLYGON ((0 2, 2 2, 1 1, 0 1, 0 2))
+        2    MULTILINESTRING ((0 0, 1 1), (1 1, 2 2))
+        3                            LINESTRING EMPTY
+        4                                 POINT (0 1)
+        5                                        None
+        dtype: geometry
+
+        >>> s.difference(s2, align=False)
+        0         POLYGON ((0 2, 2 2, 1 1, 0 1, 0 2))
+        1    POLYGON ((0 0, 0 2, 1 2, 2 2, 1 1, 0 0))
+        2    MULTILINESTRING ((0 0, 1 1), (1 1, 2 2))
+        3                       LINESTRING (2 0, 0 2)
+        4                                 POINT EMPTY
+        dtype: geometry
+
+        See Also
+        --------
+        GeoSeries.symmetric_difference
+        GeoSeries.union
+        GeoSeries.intersection
+        """
+        return self._row_wise_operation(
+            "ST_Difference(`L`, `R`)",
+            other,
+            align,
+            rename="difference",
+            returns_geom=True,
+        )
+
     @property
     def is_simple(self) -> pspd.Series:
         """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
@@ -2349,14 +2575,22 @@ class GeoSeries(GeoFrame, pspd.Series):
             NATURAL_ORDER_COLUMN_NAME if align is False else SPARK_DEFAULT_INDEX_NAME
         )
 
-        if isinstance(other, BaseGeometry):
-            other = GeoSeries([other] * len(self))
-
-        # e.g int input
         if not isinstance(other, pspd.Series):
-            other = pspd.Series([other] * len(self))
+            # generator instead of a in-memory list
+            data = [other for _ in range(len(self))]
 
-        assert isinstance(other, pspd.Series), f"Invalid type for other: {type(other)}"
+            # e.g int, Geom, etc
+            other = (
+                GeoSeries(data)
+                if isinstance(other, BaseGeometry)
+                else pspd.Series(data)
+            )
+
+            # To make sure the result is the same length, we set natural column as the index
+            # in case the index is not the default range index from 0.
+            # Alternatively, we could create 'other' using the same index as self,
+            # but that would require index=self.index.to_pandas() which is less scalable.
+            index_col = NATURAL_ORDER_COLUMN_NAME
 
         # This code assumes there is only one index (SPARK_DEFAULT_INDEX_NAME)
         # and would need to be updated if Sedona later supports multi-index
