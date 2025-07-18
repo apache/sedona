@@ -864,7 +864,6 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                 if geom == geom2 or self.contains_any_geom_collection(geom, geom2):
                     continue
 
-                print(geom, geom2)
                 sgpd_result = GeoSeries(geom).covers(GeoSeries(geom2), align=True)
                 gpd_result = gpd.GeoSeries(geom).covers(
                     gpd.GeoSeries(geom2), align=True
