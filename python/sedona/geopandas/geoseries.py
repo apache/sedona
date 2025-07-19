@@ -24,7 +24,6 @@ import pandas as pd
 import pyspark.pandas as pspd
 import pyspark
 from pyspark.pandas import Series as PandasOnSparkSeries
-from pyspark.pandas._typing import Dtype
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas.internal import InternalFrame
 from pyspark.pandas.series import first_series
@@ -81,13 +80,10 @@ IMPLEMENTATION_STATUS = {
         "boundary",
         "total_bounds",
         "estimate_utm_crs",
-        "fillna",
         "isna",
         "isnull",
         "notna",
         "notnull",
-        "from_wkb",
-        "from_wkt",
         "from_xy",
         "copy",
         "geom_type",
