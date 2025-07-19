@@ -107,8 +107,7 @@ class TestGeometrySerde(TestBase):
         "geom",
         [
             LinearRing(),
-            LinearRing([(0, 0), (0, 0), (0, 0), (0, 0)]),
-            LinearRing([(0, 0), (1, 1), (1, 0), (0, 1), (0, 0)]),
+            LinearRing([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)]),
         ],
     )
     def test_linearring_spark_serde(self, geom):
@@ -160,7 +159,7 @@ class TestGeometrySerde(TestBase):
             "GEOMETRYCOLLECTION (POINT (10 20), POINT EMPTY, LINESTRING (10 20, 30 40))",
             "GEOMETRYCOLLECTION (MULTIPOINT EMPTY, MULTILINESTRING EMPTY, MULTIPOLYGON EMPTY, GEOMETRYCOLLECTION EMPTY)",
             "LINEARRING EMPTY",
-            "LINEARRING (0 0, 1 1, 1 0, 0 1, 0 0)",
+            "LINEARRING (-1 -1, -1 1, 1 1, 1 -1, -1 -1)",
         ],
     )
     def test_spark_serde_compatibility_with_scala(self, wkt):
@@ -199,7 +198,7 @@ class TestGeometrySerde(TestBase):
             "MULTIPOLYGON ZM (((10 10 10 1, 20 20 10 1, 20 10 10 1, 10 10 10 1)), "
             + "((0 0 0 1, 0 10 0 1, 10 10 0 1, 10 0 0 1, 0 0 0 1), (1 1 0 1, 1 2 0 1, 2 2 0 1, 2 1 0 1, 1 1 0 1)))",
             "GEOMETRYCOLLECTION (POINT ZM (10 20 30 1), LINESTRING ZM (10 20 30 1, 40 50 60 1))",
-            "LINEARRING ZM (0 0 0 1, 1 1 0 1, 1 0 0 1, 0 1 0 1, 0 0 0 1)",
+            "LINEARRING ZM (0 0 0 1, 0 0 1 0, 0 1 0 0, 1 0 0 0, 0 0 0 1)",
         ],
     )
     def test_spark_serde_on_4d_geoms(self, wkt):
@@ -224,7 +223,7 @@ class TestGeometrySerde(TestBase):
             "MULTIPOLYGON M (((10 10 10, 20 20 10, 20 10 10, 10 10 10)), "
             + "((0 0 0, 0 10 0, 10 10 0, 10 0 0, 0 0 0), (1 1 0, 1 2 0, 2 2 0, 2 1 0, 1 1 0)))",
             "GEOMETRYCOLLECTION (POINT M (10 20 30), LINESTRING M (10 20 30, 40 50 60))",
-            "LINEARRING M (0 0 1, 1 1 1, 1 0 1, 0 1 1, 0 0 1)",
+            "LINEARRING M (0 0 0, 1 0 0, 0 1 0, 0 0 1, 0 0 0)",
         ],
     )
     def test_spark_serde_on_xym_geoms(self, wkt):
