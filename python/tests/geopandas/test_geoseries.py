@@ -526,6 +526,101 @@ class TestGeoSeries(TestGeopandasBase):
     def test_count_interior_rings(self):
         pass
 
+    def test_dwithin(self):
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                LineString([(0, 0), (0, 2)]),
+                LineString([(0, 0), (0, 1)]),
+                Point(0, 1),
+            ],
+            index=range(0, 4),
+        )
+        s2 = GeoSeries(
+            [
+                Polygon([(1, 0), (4, 2), (2, 2)]),
+                Polygon([(2, 0), (3, 2), (2, 2)]),
+                LineString([(2, 0), (2, 2)]),
+                Point(1, 1),
+            ],
+            index=range(1, 5),
+        )
+
+        result = s2.dwithin(Point(0, 1), 1.8)
+        expected = pd.Series([True, False, False, True], index=range(1, 5))
+        assert_series_equal(result.to_pandas(), expected)
+
+        result = s.dwithin(s2, distance=1, align=True)
+        expected = pd.Series([False, True, False, False, False])
+
+        result = s.dwithin(s2, distance=1, align=False)
+        expected = pd.Series([True, False, False, True])
+        assert_series_equal(result.to_pandas(), expected)
+
+    def test_difference(self):
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (2, 2), (0, 2)]),
+                Polygon([(0, 0), (2, 2), (0, 2)]),
+                LineString([(0, 0), (2, 2)]),
+                LineString([(2, 0), (0, 2)]),
+                Point(0, 1),
+            ],
+        )
+        s2 = GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                LineString([(1, 0), (1, 3)]),
+                LineString([(2, 0), (0, 2)]),
+                Point(1, 1),
+                Point(0, 1),
+            ],
+            index=range(1, 6),
+        )
+
+        result = s.difference(Polygon([(0, 0), (1, 1), (0, 1)]))
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 2), (2, 2), (1, 1), (0, 1), (0, 2)]),
+                Polygon([(0, 2), (2, 2), (1, 1), (0, 1), (0, 2)]),
+                LineString([(1, 1), (2, 2)]),
+                MultiLineString(
+                    [LineString([(2, 0), (1, 1)]), LineString([(1, 1), (0, 2)])]
+                ),
+                Point(),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = s.difference(s2, align=True)
+        expected = gpd.GeoSeries(
+            [
+                None,
+                Polygon([(0, 2), (2, 2), (1, 1), (0, 1), (0, 2)]),
+                MultiLineString(
+                    [LineString([(0, 0), (1, 1)]), LineString([(1, 1), (2, 2)])]
+                ),
+                LineString(),
+                Point(0, 1),
+                None,
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = s.difference(s2, align=False)
+        expected = gpd.GeoSeries(
+            [
+                None,
+                Polygon([(0, 2), (2, 2), (1, 1), (0, 1), (0, 2)]),
+                Polygon([(0, 0), (0, 2), (1, 2), (2, 2), (1, 1), (0, 0)]),
+                MultiLineString(
+                    [LineString([(0, 0), (1, 1)]), LineString([(1, 1), (2, 2)])]
+                ),
+                LineString([(2, 0), (0, 2)]),
+                Point(),
+            ]
+        )
+
     def test_is_simple(self):
         s = sgpd.GeoSeries(
             [
