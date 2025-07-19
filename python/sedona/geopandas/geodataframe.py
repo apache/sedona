@@ -348,8 +348,17 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
             try:
                 result = sgpd.GeoSeries(ps_series)
+                first_idx = ps_series.first_valid_index()
+                if first_idx is not None:
+                    geom = ps_series.iloc[int(first_idx)]
+                    srid = shapely.get_srid(geom)
+
+                    # Shapely objects stored in the ps.Series retain their srid
+                    # but the GeoSeries does not, so we manually re-set it here
+                    if srid > 0:
+                        result.set_crs(srid, inplace=True)
                 return result
-            except:
+            except TypeError:
                 return ps_series
 
         # Handle list of column names
@@ -399,36 +408,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         from sedona.geopandas import GeoSeries
         from pyspark.sql import DataFrame as SparkDataFrame
 
-        # Simplified version of the function from GeoSeries.__init__()
-        def try_geom_to_ewkb(x) -> bytes:
-            if isinstance(x, BaseGeometry):
-                kwargs = {}
-                if crs:
-                    from pyproj import CRS
-
-                    srid = CRS.from_user_input(crs)
-                    kwargs["srid"] = srid.to_epsg()
-
-                return shapely.wkb.dumps(x, **kwargs)
-            elif isinstance(x, bytearray):
-                return bytes(x)
-            elif x is None or isinstance(x, bytes):
-                return x
-            else:
-                raise TypeError(f"expected geometry or bytes, got {type(x)}: {x}")
-
-        def safe_apply_to_each_column(
-            df: pd.DataFrame | pspd.DataFrame, func: Callable
-        ):
-            # try except won't work here for ps.DataFrame case, so we use first_valid_index() instead
-            for col in df.columns:
-                first_idx = df[col].first_valid_index()
-                if first_idx is not None and isinstance(
-                    df[col][first_idx], BaseGeometry
-                ):
-                    df[col] = df[col].apply(try_geom_to_ewkb)
-            return df
-
         if isinstance(data, GeoDataFrame):
             if data._safe_get_crs() is None:
                 data.crs = crs
@@ -441,8 +420,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             # This way, if Spark adds support later, than we inherit those changes naturally
             super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
         elif isinstance(data, PandasOnSparkDataFrame):
-
-            data = safe_apply_to_each_column(data, try_geom_to_ewkb)
 
             super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
         elif isinstance(data, PandasOnSparkSeries):
@@ -475,17 +452,13 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                     dtype=dtype,
                     copy=copy,
                 )
-            gdf = gpd.GeoDataFrame(df)
-            # convert each geometry column to wkb type
 
-            # It's possible we get a list, dict, pd.Series, gpd.GeoSeries, etc of shapely.Geometry objects.
-            gdf = safe_apply_to_each_column(gdf, try_geom_to_ewkb)
+            # Spark complains if it's left as a geometry type
+            pd_df = df.astype(object)
 
-            pdf = pd.DataFrame(gdf)
-
-            # initialize the parent class pyspark Dataframe with the pandas Series
+            # initialize the parent class pyspark Dataframe with the pandas Dataframe
             super().__init__(
-                data=pdf,
+                data=pd_df,
                 index=index,
                 dtype=dtype,
                 copy=copy,
@@ -949,7 +922,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         0           1.0      1
         1           4.0      2
         """
-        return self._process_geometry_columns("ST_Area", rename_suffix="_area")
+        return self.geometry.area
 
     def _safe_get_crs(self):
         """
