@@ -30,6 +30,7 @@ from pyspark.pandas.internal import InternalFrame
 from pyspark.pandas.series import first_series
 from pyspark.pandas.utils import scol_for, log_advice
 from pyspark.sql.types import BinaryType
+from sedona.spark.sql.types import GeometryType
 
 import shapely
 from shapely.geometry.base import BaseGeometry
@@ -117,28 +118,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         self._anchor: GeoDataFrame
         self._col_label: Label
 
-        use_same_anchor = True
-
-        def try_geom_to_ewkb(x) -> bytes:
-            nonlocal use_same_anchor
-            if isinstance(x, BaseGeometry):
-                kwargs = {}
-                if crs:
-                    from pyproj import CRS
-
-                    srid = CRS.from_user_input(crs)
-                    kwargs["srid"] = srid.to_epsg()
-                use_same_anchor = False
-
-                return shapely.wkb.dumps(x, **kwargs)
-            elif isinstance(x, bytearray):
-                use_same_anchor = False
-                return bytes(x)
-            elif x is None or isinstance(x, bytes):
-                return x
-            else:
-                raise TypeError(f"expected geometry or bytes, got {type(x)}: {x}")
-
         if isinstance(
             data, (GeoDataFrame, GeoSeries, PandasOnSparkSeries, PandasOnSparkDataFrame)
         ):
@@ -157,29 +136,21 @@ class GeoSeries(GeoFrame, pspd.Series):
                     "allow_override=True)' to overwrite CRS or "
                     "'GeoSeries.to_crs(crs)' to reproject geometries. "
                 )
-            # This is a temporary workaround since pyspark errors when creating a ps.Series from a ps.Series
-            # This is NOT a scalable solution since we call to_pandas() on the data and is a hacky solution
-            # but this should be resolved if/once https://github.com/apache/spark/pull/51300 is merged in.
-            # For now, we reset self._anchor = data to have keep the geometry information (e.g crs) that's lost in to_pandas()
 
-            pd_data = data.to_pandas()
+            # PySpark Pandas' ps.Series.__init__() does not construction from a
+            # ps.Series input. For now, we manually implement the logic.
 
-            try:
-                pd_data = pd_data.apply(try_geom_to_ewkb)
-            except Exception as e:
-                raise TypeError(f"Non-geometry column passed to GeoSeries: {e}")
+            index = data._col_label if index is None else index
+            ps_df = pspd.DataFrame(data._anchor)
 
             super().__init__(
-                data=pd_data,
+                data=ps_df,
                 index=index,
                 dtype=dtype,
                 name=name,
                 copy=copy,
                 fastpath=fastpath,
             )
-
-            if use_same_anchor:
-                self._anchor = data
         else:
             if isinstance(data, pd.Series):
                 assert index is None
@@ -187,9 +158,9 @@ class GeoSeries(GeoFrame, pspd.Series):
                 assert name is None
                 assert not copy
                 assert not fastpath
-                s = data
+                pd_series = data
             else:
-                s = pd.Series(
+                pd_series = pd.Series(
                     data=data,
                     index=index,
                     dtype=dtype,
@@ -198,21 +169,21 @@ class GeoSeries(GeoFrame, pspd.Series):
                     fastpath=fastpath,
                 )
 
-            try:
-                pd_series = s.apply(try_geom_to_ewkb)
-            except Exception as e:
-                raise TypeError(f"Non-geometry column passed to GeoSeries: {e}")
-
             # initialize the parent class pyspark Series with the pandas Series
             super().__init__(data=pd_series)
 
-        # manually set it to binary type
+        # Ensure we're storing geometry types
         col = next(
             field.name
             for field in self._internal.spark_frame.schema.fields
             if field.name not in (NATURAL_ORDER_COLUMN_NAME, SPARK_DEFAULT_INDEX_NAME)
         )
-        self._internal.spark_frame.schema[col].dataType = BinaryType()
+        datatype = self._internal.spark_frame.schema[col].dataType
+        if datatype != GeometryType():
+            raise TypeError(
+                "Non geometry data passed to GeoSeries constructor, "
+                f"received data of dtype '{datatype.typeName()}'"
+            )
 
         if crs:
             self.set_crs(crs, inplace=True)
@@ -257,6 +228,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         tmp = self._process_geometry_column("ST_SRID", rename="crs", returns_geom=False)
         ps_series = tmp.take([0])
         srid = ps_series.iloc[0]
+
         # Sedona returns 0 if doesn't exist
         return CRS.from_user_input(srid) if srid != 0 and not pd.isna(srid) else None
 
@@ -505,10 +477,6 @@ class GeoSeries(GeoFrame, pspd.Series):
             # must have rename for multiple columns since we don't know which name to default to
             assert rename
 
-        # Convert back to EWKB format if the return type is a geometry
-        if returns_geom:
-            query = f"ST_AsEWKB({query})"
-
         query = f"{query} as `{rename}`"
 
         exprs = [query]
@@ -558,20 +526,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         Same as `to_geopandas()`, without issuing the advice log for internal usage.
         """
         pd_series = self._to_internal_pandas()
-        try:
-            return gpd.GeoSeries(
-                pd_series.map(
-                    lambda wkb: (
-                        shapely.wkb.loads(bytes(wkb)) if not pd.isna(wkb) else None
-                    )
-                ),
-                crs=self.crs,
-            )
-        except TypeError:
-            return gpd.GeoSeries(pd_series, crs=self.crs)
+        return gpd.GeoSeries(pd_series, crs=self.crs)
 
     def to_spark_pandas(self) -> pspd.Series:
-        return pspd.Series(self._psdf._to_internal_pandas())
+        return pspd.Series(pspd.DataFrame(self._psdf._internal))
 
     @property
     def geometry(self) -> "GeoSeries":
@@ -2164,7 +2122,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         if isinstance(data, list) and not isinstance(data[0], (tuple, list)):
             data = [(obj,) for obj in data]
 
-        select = f"ST_AsEWKB({select}) as geometry"
+        select = f"{select} as geometry"
 
         if isinstance(data, pspd.Series):
             spark_df = data._internal.spark_frame

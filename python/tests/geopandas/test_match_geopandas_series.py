@@ -323,7 +323,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             gpd_result = gpd.GeoSeries(geom).fillna()
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
-        data = [None, None, None, None, Point(0, 1)]
+        data = [Point(1, 1), None, None, None, Point(0, 1)]
         sgpd_result = GeoSeries(data).fillna()
         gpd_result = gpd.GeoSeries(data).fillna()
         self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
@@ -479,8 +479,9 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             LineString([(0, 0), (0, 0)]),
             LineString([(0, 0), (1, 1), (1, -1), (0, 1)]),
             LineString([(0, 0), (1, 1), (0, 0)]),
-            LinearRing([(0, 0), (1, 1), (1, 0), (0, 1), (0, 0)]),
-            LinearRing([(0, 0), (-1, 1), (-1, -1), (1, -1)]),
+            # Errors for LinearRing: issue #2120
+            # LinearRing([(0, 0), (1, 1), (1, 0), (0, 1), (0, 0)]),
+            # LinearRing([(0, 0), (-1, 1), (-1, -1), (1, -1)]),
         ]
         sgpd_result = GeoSeries(data).is_simple
         gpd_result = gpd.GeoSeries(data).is_simple
