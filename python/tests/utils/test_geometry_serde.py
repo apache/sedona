@@ -114,7 +114,9 @@ class TestGeometrySerde(TestBase):
         returned_geom = TestGeometrySerde.spark.createDataFrame(
             [(geom,)], StructType().add("geom", GeometryType())
         ).take(1)[0][0]
-        assert isinstance(returned_geom, LineString)
+        # Shapely < 2.0.0 returns an empty GeometryCollection instead
+        if not geom.is_empty:
+            assert isinstance(returned_geom, LineString)
         assert geom.equals(returned_geom)
 
     @pytest.mark.parametrize(
