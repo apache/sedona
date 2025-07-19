@@ -24,7 +24,7 @@ public class Accessors {
 
   public Accessors() {}
 
-  public boolean S2_isEmpty(S2Geography s2Geography) {
+  public static boolean S2_isEmpty(S2Geography s2Geography) {
     for (int i = 0; i < s2Geography.numShapes(); i++) {
       S2Shape shape = s2Geography.shape(i);
       if (!shape.isEmpty()) return false;
@@ -32,7 +32,7 @@ public class Accessors {
     return true;
   }
 
-  public boolean S2_isCollection(PolygonGeography polygonGeography) {
+  public static boolean S2_isCollection(PolygonGeography polygonGeography) {
     int numOuterLoops = 0;
     for (int i = 0; i < polygonGeography.polygon.numLoops(); i++) {
       S2Loop loop = polygonGeography.polygon.loop(i);
@@ -79,7 +79,7 @@ public class Accessors {
     }
   }
 
-  public int S2_dimension(S2Geography s2Geography) {
+  public static int S2_dimension(S2Geography s2Geography) {
     int dimension = s2Geography.dimension();
     if (dimension != -1) return dimension;
 
@@ -90,7 +90,7 @@ public class Accessors {
     return dimension;
   }
 
-  public int S2_numPoints(S2Geography s2Geography) {
+  public static int S2_numPoints(S2Geography s2Geography) {
     int numPoints = 0;
     for (int i = 0; i < s2Geography.numShapes(); i++) {
       S2Shape shape = s2Geography.shape(i);
