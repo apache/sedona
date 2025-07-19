@@ -20,6 +20,7 @@ import tempfile
 from shapely.geometry import (
     Point,
 )
+import shapely
 
 from sedona.geopandas import GeoDataFrame, GeoSeries
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
@@ -32,6 +33,10 @@ from pandas.testing import assert_frame_equal, assert_series_equal
 from packaging.version import parse as parse_version
 
 
+@pytest.mark.skipif(
+    parse_version(shapely.__version__) < parse_version("2.0.0"),
+    reason=f"Tests require shapely>=2.0.0, but found v{shapely.__version__}",
+)
 class TestDataframe(TestGeopandasBase):
     @pytest.mark.parametrize(
         "obj",
