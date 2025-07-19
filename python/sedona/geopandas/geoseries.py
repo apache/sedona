@@ -29,7 +29,7 @@ from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas.internal import InternalFrame
 from pyspark.pandas.series import first_series
 from pyspark.pandas.utils import scol_for, log_advice
-from pyspark.sql.types import BinaryType
+from pyspark.sql.types import BinaryType, NullType
 from sedona.spark.sql.types import GeometryType
 
 import shapely
@@ -179,7 +179,10 @@ class GeoSeries(GeoFrame, pspd.Series):
             if field.name not in (NATURAL_ORDER_COLUMN_NAME, SPARK_DEFAULT_INDEX_NAME)
         )
         datatype = self._internal.spark_frame.schema[col].dataType
-        if datatype != GeometryType():
+        # Empty lists input will lead to NullType(), so we convert to GeometryType()
+        if datatype == NullType():
+            self._internal.spark_frame.schema[col].dataType = GeometryType()
+        elif datatype != GeometryType():
             raise TypeError(
                 "Non geometry data passed to GeoSeries constructor, "
                 f"received data of dtype '{datatype.typeName()}'"

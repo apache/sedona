@@ -57,6 +57,10 @@ class TestGeoSeries(TestGeopandasBase):
             ]
         )
 
+    def test_empty_list(self):
+        s = sgpd.GeoSeries([])
+        assert s.count() == 0
+
     def test_area(self):
         result = self.geoseries.area.to_pandas()
         expected = pd.Series([0.0, 0.0, 5.23, 5.23])

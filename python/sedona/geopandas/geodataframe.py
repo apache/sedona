@@ -92,14 +92,17 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
             try:
                 result = sgpd.GeoSeries(ps_series)
-                srid = shapely.get_srid(ps_series[0])
+                first_idx = ps_series.first_valid_index()
+                if first_idx is not None:
+                    geom = ps_series.iloc[int(first_idx)]
+                    srid = shapely.get_srid(geom)
 
-                # Shapely objects stored in the ps.Series retain their srid
-                # but the GeoSeries does not, so we manually re-set it here
-                if srid > 0:
-                    result.set_crs(srid, inplace=True)
+                    # Shapely objects stored in the ps.Series retain their srid
+                    # but the GeoSeries does not, so we manually re-set it here
+                    if srid > 0:
+                        result.set_crs(srid, inplace=True)
                 return result
-            except:
+            except TypeError:
                 return ps_series
 
         # Handle list of column names
