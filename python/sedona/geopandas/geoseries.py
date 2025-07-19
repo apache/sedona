@@ -24,7 +24,6 @@ import pandas as pd
 import pyspark.pandas as pspd
 import pyspark
 from pyspark.pandas import Series as PandasOnSparkSeries
-from pyspark.pandas._typing import Dtype
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas.internal import InternalFrame
 from pyspark.pandas.series import first_series
@@ -45,9 +44,271 @@ from pyspark.pandas.internal import (
 )
 
 
+# ============================================================================
+# IMPLEMENTATION STATUS TRACKING
+# ============================================================================
+
+IMPLEMENTATION_STATUS = {
+    "IMPLEMENTED": [
+        "area",
+        "buffer",
+        "bounds",
+        "centroid",
+        "contains",
+        "crs",
+        "distance",
+        "envelope",
+        "geometry",
+        "intersection",
+        "intersects",
+        "is_empty",
+        "is_simple",
+        "is_valid",
+        "is_valid_reason",
+        "length",
+        "make_valid",
+        "set_crs",
+        "to_crs",
+        "to_geopandas",
+        "to_wkb",
+        "to_wkt",
+        "x",
+        "y",
+        "z",
+        "has_z",
+        "get_geometry",
+        "boundary",
+        "total_bounds",
+        "estimate_utm_crs",
+        "isna",
+        "isnull",
+        "notna",
+        "notnull",
+        "from_xy",
+        "copy",
+        "geom_type",
+        "sindex",
+    ],
+    "NOT_IMPLEMENTED": [
+        "clip",
+        "contains_properly",
+        "convex_hull",
+        "count_coordinates",
+        "count_geometries",
+        "count_interior_rings",
+        "explode",
+        "force_2d",
+        "force_3d",
+        "from_file",
+        "from_shapely",
+        "from_arrow",
+        "line_merge",
+        "reverse",
+        "segmentize",
+        "to_json",
+        "to_arrow",
+        "to_file",
+        "transform",
+        "unary_union",
+        "union_all",
+        "intersection_all",
+        "type",
+        "is_ring",
+        "is_ccw",
+        "is_closed",
+        "get_precision",
+        "concave_hull",
+        "delaunay_triangles",
+        "voronoi_polygons",
+        "minimum_rotated_rectangle",
+        "exterior",
+        "extract_unique_points",
+        "offset_curve",
+        "interiors",
+        "remove_repeated_points",
+        "set_precision",
+        "representative_point",
+        "minimum_bounding_circle",
+        "minimum_bounding_radius",
+        "minimum_clearance",
+        "normalize",
+        "m",
+    ],
+    "PARTIALLY_IMPLEMENTED": [
+        "fillna",  # Limited parameter support (no 'limit' parameter)
+        "from_wkb",
+        "from_wkt",  # Limited error handling options (only 'raise' supported)
+    ],
+}
+
+IMPLEMENTATION_PRIORITY = {
+    "HIGH": [
+        "contains",
+        "contains_properly",
+        "convex_hull",
+        "explode",
+        "clip",
+        "from_shapely",
+        "count_coordinates",
+        "count_geometries",
+        "is_ring",
+        "is_closed",
+        "reverse",
+    ],
+    "MEDIUM": [
+        "force_2d",
+        "force_3d",
+        "transform",
+        "segmentize",
+        "line_merge",
+        "unary_union",
+        "union_all",
+        "to_json",
+        "from_file",
+        "count_interior_rings",
+    ],
+    "LOW": [
+        "delaunay_triangles",
+        "voronoi_polygons",
+        "minimum_bounding_circle",
+        "representative_point",
+        "extract_unique_points",
+        "from_arrow",
+        "to_arrow",
+    ],
+}
+
+
+def _not_implemented_error(method_name: str, additional_info: str = "") -> str:
+    """
+    Generate a standardized NotImplementedError message.
+
+    Parameters
+    ----------
+    method_name : str
+        The name of the method that is not implemented.
+    additional_info : str, optional
+        Additional information about the method or workarounds.
+
+    Returns
+    -------
+    str
+        Formatted error message.
+    """
+    base_message = (
+        f"GeoSeries.{method_name}() is not implemented yet.\n"
+        f"This method will be added in a future release."
+    )
+
+    if additional_info:
+        base_message += f"\n\n{additional_info}"
+
+    workaround = (
+        "\n\nTemporary workaround - use GeoPandas:\n"
+        "  gpd_series = sedona_series.to_geopandas()\n"
+        f"  result = gpd_series.{method_name}(...)\n"
+        "  # Note: This will collect all data to the driver."
+    )
+
+    return base_message + workaround
+
+
 class GeoSeries(GeoFrame, pspd.Series):
     """
-    A class representing a GeoSeries, inheriting from GeoFrame and pyspark.pandas.DataFrame.
+    A pandas-on-Spark Series for geometric/spatial operations.
+
+    GeoSeries extends pyspark.pandas.Series to provide spatial operations
+    using Apache Sedona's spatial functions. It maintains compatibility
+    with GeoPandas GeoSeries while operating on distributed datasets.
+
+    Parameters
+    ----------
+    data : array-like, Iterable, dict, or scalar value
+        Contains the data for the GeoSeries. Can be geometries, WKB bytes,
+        or other GeoSeries/GeoDataFrame objects.
+    index : array-like or Index (1d), optional
+        Values must be hashable and have the same length as `data`.
+    crs : pyproj.CRS, optional
+        Coordinate Reference System for the geometries.
+    dtype : dtype, optional
+        Data type for the GeoSeries.
+    name : str, optional
+        Name of the GeoSeries.
+    copy : bool, default False
+        Whether to copy the input data.
+
+    Attributes
+    ----------
+    crs : pyproj.CRS
+        The Coordinate Reference System (CRS) for the geometries.
+    area : Series
+        Area of each geometry in CRS units.
+    length : Series
+        Length/perimeter of each geometry in CRS units.
+    bounds : DataFrame
+        Bounding box coordinates for each geometry.
+    geometry : GeoSeries
+        The geometry column (returns self).
+    sindex : SpatialIndex
+        Spatial index for the geometries.
+
+    Methods
+    -------
+    buffer(distance)
+        Buffer geometries by specified distance.
+    intersection(other)
+        Compute intersection with other geometries.
+    intersects(other)
+        Test if geometries intersect with other geometries.
+    to_geopandas()
+        Convert to GeoPandas GeoSeries.
+    to_crs(crs)
+        Transform geometries to a different CRS.
+    set_crs(crs)
+        Set the CRS without transforming geometries.
+
+    Examples
+    --------
+    >>> from shapely.geometry import Point, Polygon
+    >>> from sedona.geopandas import GeoSeries
+    >>>
+    >>> # Create from geometries
+    >>> s = GeoSeries([Point(0, 0), Point(1, 1)], crs='EPSG:4326')
+    >>> s
+    0    POINT (0 0)
+    1    POINT (1 1)
+    dtype: geometry
+    >>>
+    >>> # Spatial operations
+    >>> s.buffer(0.1).area
+    0    0.031416
+    1    0.031416
+    dtype: float64
+    >>>
+    >>> # CRS operations
+    >>> s_utm = s.to_crs('EPSG:32633')
+    >>> s_utm.crs
+    <Projected CRS: EPSG:32633>
+    Name: WGS 84 / UTM zone 33N
+    ...
+
+    Notes
+    -----
+    This implementation differs from GeoPandas in several ways:
+    - Uses Spark for distributed processing
+    - Geometries are stored in WKB (Well-Known Binary) format internally
+    - Some methods may have different performance characteristics
+    - Not all GeoPandas methods are implemented yet (see IMPLEMENTATION_STATUS)
+
+    Performance Considerations:
+    - Operations are distributed across Spark cluster
+    - Avoid calling .to_geopandas() on large datasets
+    - Use .sample() for testing with large datasets
+
+    See Also
+    --------
+    geopandas.GeoSeries : The GeoPandas equivalent
+    sedona.geopandas.GeoDataFrame : DataFrame with geometry column
     """
 
     def __getitem__(self, key: Any) -> Any:
@@ -216,6 +477,10 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         if crs:
             self.set_crs(crs, inplace=True)
+
+    # ============================================================================
+    # COORDINATE REFERENCE SYSTEM (CRS) OPERATIONS
+    # ============================================================================
 
     @property
     def crs(self) -> Union["CRS", None]:
@@ -397,6 +662,10 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         return result
 
+    # ============================================================================
+    # INTERNAL HELPER METHODS
+    # ============================================================================
+
     def _process_geometry_column(
         self,
         operation: str,
@@ -538,6 +807,10 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         return GeoSeries(ps_series) if returns_geom else ps_series
 
+    # ============================================================================
+    # CONVERSION AND SERIALIZATION METHODS
+    # ============================================================================
+
     def to_geopandas(self) -> gpd.GeoSeries:
         """
         Convert the GeoSeries to a geopandas GeoSeries.
@@ -572,6 +845,10 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     def to_spark_pandas(self) -> pspd.Series:
         return pspd.Series(self._psdf._to_internal_pandas())
+
+    # ============================================================================
+    # PROPERTIES AND ATTRIBUTES
+    # ============================================================================
 
     @property
     def geometry(self) -> "GeoSeries":
@@ -700,7 +977,9 @@ class GeoSeries(GeoFrame, pspd.Series):
     @property
     def type(self):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error("type", "Returns numeric geometry type codes.")
+        )
 
     @property
     def length(self) -> pspd.Series:
@@ -866,15 +1145,30 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     def count_coordinates(self):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "count_coordinates",
+                "Counts the number of coordinate tuples in each geometry.",
+            )
+        )
 
     def count_geometries(self):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "count_geometries",
+                "Counts the number of geometries in each multi-geometry or collection.",
+            )
+        )
 
     def count_interior_rings(self):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "count_interior_rings",
+                "Counts the number of interior rings (holes) in each polygon.",
+            )
+        )
 
     @property
     def is_simple(self) -> pspd.Series:
@@ -911,17 +1205,31 @@ class GeoSeries(GeoFrame, pspd.Series):
     @property
     def is_ring(self):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "is_ring", "Tests if LineString geometries are closed rings."
+            )
+        )
 
     @property
     def is_ccw(self):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "is_ccw",
+                "Tests if LinearRing geometries are oriented counter-clockwise.",
+            )
+        )
 
     @property
     def is_closed(self):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "is_closed",
+                "Tests if LineString geometries are closed (start equals end point).",
+            )
+        )
 
     @property
     def has_z(self) -> pspd.Series:
@@ -1144,7 +1452,11 @@ class GeoSeries(GeoFrame, pspd.Series):
     @property
     def convex_hull(self):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "convex_hull", "Computes the convex hull of each geometry."
+            )
+        )
 
     def delaunay_triangles(self, tolerance=0.0, only_edges=False):
         # Implementation of the abstract method
@@ -1338,6 +1650,10 @@ class GeoSeries(GeoFrame, pspd.Series):
     def line_merge(self, directed=False):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
+
+    # ============================================================================
+    # GEOMETRIC OPERATIONS
+    # ============================================================================
 
     @property
     def unary_union(self):
@@ -2469,6 +2785,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
+    # ============================================================================
+    # SPATIAL PREDICATES
+    # ============================================================================
+
     def contains(self, other, align=None) -> pspd.Series:
         """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
         each aligned geometry that contains `other`.
@@ -2590,7 +2910,12 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     def contains_properly(self, other, align=None):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "contains_properly",
+                "Tests if geometries properly contain other geometries (no boundary contact).",
+            )
+        )
 
     def buffer(
         self,
@@ -2797,11 +3122,20 @@ class GeoSeries(GeoFrame, pspd.Series):
     def m(self) -> pspd.Series:
         raise NotImplementedError("GeoSeries.m() is not implemented yet.")
 
+    # ============================================================================
+    # CONSTRUCTION METHODS
+    # ============================================================================
+
     @classmethod
     def from_file(
         cls, filename: Union[os.PathLike, typing.IO], **kwargs
     ) -> "GeoSeries":
-        raise NotImplementedError("GeoSeries.from_file() is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "from_file",
+                "Creates GeoSeries from geometry files (shapefile, GeoJSON, etc.).",
+            )
+        )
 
     @classmethod
     def from_wkb(
@@ -3052,7 +3386,11 @@ class GeoSeries(GeoFrame, pspd.Series):
     def from_shapely(
         cls, data, index=None, crs: Union[Any, None] = None, **kwargs
     ) -> "GeoSeries":
-        raise NotImplementedError("GeoSeries.from_shapely() is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "from_shapely", "Creates GeoSeries from Shapely geometry objects."
+            )
+        )
 
     @classmethod
     def from_arrow(cls, arr, **kwargs) -> "GeoSeries":
@@ -3108,6 +3446,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         **kwargs,
     ):
         raise NotImplementedError("GeoSeries.to_file() is not implemented yet.")
+
+    # ============================================================================
+    # DATA ACCESS AND MANIPULATION
+    # ============================================================================
 
     def isna(self) -> pspd.Series:
         """
@@ -3330,7 +3672,12 @@ class GeoSeries(GeoFrame, pspd.Series):
         return result
 
     def explode(self, ignore_index=False, index_parts=False) -> "GeoSeries":
-        raise NotImplementedError("GeoSeries.explode() is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "explode",
+                "Explodes multi-part geometries into separate single-part geometries.",
+            )
+        )
 
     def to_crs(
         self, crs: Union[Any, None] = None, epsg: Union[int, None] = None
@@ -3756,7 +4103,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("GeoSeries.to_arrow() is not implemented yet.")
 
     def clip(self, mask, keep_geom_type: bool = False, sort=False) -> "GeoSeries":
-        raise NotImplementedError("GeoSeries.clip() is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "clip", "Clips geometries to the bounds of a mask geometry."
+            )
+        )
 
     # -----------------------------------------------------------------------------
     # # Utils
