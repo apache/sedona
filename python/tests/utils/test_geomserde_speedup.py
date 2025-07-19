@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import shapely
 from shapely.geometry import (
     GeometryCollection,
     LineString,
@@ -134,6 +135,12 @@ class TestGeomSerdeSpeedup:
             ),
         ]
         self._test_serde_roundtrip(geometry_collections)
+
+    def test_srid_roundtrip(self):
+        point = wkt_loads("POINT (1 2)")
+        point = shapely.set_srid(point, 1000)
+        point2 = TestGeomSerdeSpeedup.serde_roundtrip(point)
+        assert shapely.get_srid(point2) == 1000
 
     @staticmethod
     def _test_serde_roundtrip(geoms):
