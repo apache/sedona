@@ -83,7 +83,7 @@ class TestGeoSeries(TestGeopandasBase):
 
         self.check_sgpd_equals_gpd(result, expected)
 
-        result = s.simplify(1, preserve_topology=False)
+        result = s.simplify(1.2, preserve_topology=False)
         expected = gpd.GeoSeries([Polygon(), LineString([(0, 0), (0, 20)])])
         self.check_sgpd_equals_gpd(result, expected)
 
