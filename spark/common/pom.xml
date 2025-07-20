@@ -185,8 +185,8 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>${graphframes.groupId}</groupId>
-            <artifactId>${graphframes.artifactId}</artifactId>
+            <groupId>io.graphframes</groupId>
+            <artifactId>graphframes-spark${spark.major.version}_${scala.compat.version}</artifactId>
             <version>${graphframes.version}</version>
         </dependency>
         <dependency>
