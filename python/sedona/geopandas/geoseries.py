@@ -24,12 +24,12 @@ import pandas as pd
 import pyspark.pandas as pspd
 import pyspark
 from pyspark.pandas import Series as PandasOnSparkSeries
-from pyspark.pandas._typing import Dtype
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas.internal import InternalFrame
 from pyspark.pandas.series import first_series
 from pyspark.pandas.utils import scol_for, log_advice
-from pyspark.sql.types import BinaryType
+from pyspark.sql.types import BinaryType, NullType
+from sedona.spark.sql.types import GeometryType
 
 import shapely
 from shapely.geometry.base import BaseGeometry
@@ -46,9 +46,271 @@ from pyspark.pandas.internal import (
 )
 
 
+# ============================================================================
+# IMPLEMENTATION STATUS TRACKING
+# ============================================================================
+
+IMPLEMENTATION_STATUS = {
+    "IMPLEMENTED": [
+        "area",
+        "buffer",
+        "bounds",
+        "centroid",
+        "contains",
+        "crs",
+        "distance",
+        "envelope",
+        "geometry",
+        "intersection",
+        "intersects",
+        "is_empty",
+        "is_simple",
+        "is_valid",
+        "is_valid_reason",
+        "length",
+        "make_valid",
+        "set_crs",
+        "to_crs",
+        "to_geopandas",
+        "to_wkb",
+        "to_wkt",
+        "x",
+        "y",
+        "z",
+        "has_z",
+        "get_geometry",
+        "boundary",
+        "total_bounds",
+        "estimate_utm_crs",
+        "isna",
+        "isnull",
+        "notna",
+        "notnull",
+        "from_xy",
+        "copy",
+        "geom_type",
+        "sindex",
+    ],
+    "NOT_IMPLEMENTED": [
+        "clip",
+        "contains_properly",
+        "convex_hull",
+        "count_coordinates",
+        "count_geometries",
+        "count_interior_rings",
+        "explode",
+        "force_2d",
+        "force_3d",
+        "from_file",
+        "from_shapely",
+        "from_arrow",
+        "line_merge",
+        "reverse",
+        "segmentize",
+        "to_json",
+        "to_arrow",
+        "to_file",
+        "transform",
+        "unary_union",
+        "union_all",
+        "intersection_all",
+        "type",
+        "is_ring",
+        "is_ccw",
+        "is_closed",
+        "get_precision",
+        "concave_hull",
+        "delaunay_triangles",
+        "voronoi_polygons",
+        "minimum_rotated_rectangle",
+        "exterior",
+        "extract_unique_points",
+        "offset_curve",
+        "interiors",
+        "remove_repeated_points",
+        "set_precision",
+        "representative_point",
+        "minimum_bounding_circle",
+        "minimum_bounding_radius",
+        "minimum_clearance",
+        "normalize",
+        "m",
+    ],
+    "PARTIALLY_IMPLEMENTED": [
+        "fillna",  # Limited parameter support (no 'limit' parameter)
+        "from_wkb",
+        "from_wkt",  # Limited error handling options (only 'raise' supported)
+    ],
+}
+
+IMPLEMENTATION_PRIORITY = {
+    "HIGH": [
+        "contains",
+        "contains_properly",
+        "convex_hull",
+        "explode",
+        "clip",
+        "from_shapely",
+        "count_coordinates",
+        "count_geometries",
+        "is_ring",
+        "is_closed",
+        "reverse",
+    ],
+    "MEDIUM": [
+        "force_2d",
+        "force_3d",
+        "transform",
+        "segmentize",
+        "line_merge",
+        "unary_union",
+        "union_all",
+        "to_json",
+        "from_file",
+        "count_interior_rings",
+    ],
+    "LOW": [
+        "delaunay_triangles",
+        "voronoi_polygons",
+        "minimum_bounding_circle",
+        "representative_point",
+        "extract_unique_points",
+        "from_arrow",
+        "to_arrow",
+    ],
+}
+
+
+def _not_implemented_error(method_name: str, additional_info: str = "") -> str:
+    """
+    Generate a standardized NotImplementedError message.
+
+    Parameters
+    ----------
+    method_name : str
+        The name of the method that is not implemented.
+    additional_info : str, optional
+        Additional information about the method or workarounds.
+
+    Returns
+    -------
+    str
+        Formatted error message.
+    """
+    base_message = (
+        f"GeoSeries.{method_name}() is not implemented yet.\n"
+        f"This method will be added in a future release."
+    )
+
+    if additional_info:
+        base_message += f"\n\n{additional_info}"
+
+    workaround = (
+        "\n\nTemporary workaround - use GeoPandas:\n"
+        "  gpd_series = sedona_series.to_geopandas()\n"
+        f"  result = gpd_series.{method_name}(...)\n"
+        "  # Note: This will collect all data to the driver."
+    )
+
+    return base_message + workaround
+
+
 class GeoSeries(GeoFrame, pspd.Series):
     """
-    A class representing a GeoSeries, inheriting from GeoFrame and pyspark.pandas.DataFrame.
+    A pandas-on-Spark Series for geometric/spatial operations.
+
+    GeoSeries extends pyspark.pandas.Series to provide spatial operations
+    using Apache Sedona's spatial functions. It maintains compatibility
+    with GeoPandas GeoSeries while operating on distributed datasets.
+
+    Parameters
+    ----------
+    data : array-like, Iterable, dict, or scalar value
+        Contains the data for the GeoSeries. Can be geometries, WKB bytes,
+        or other GeoSeries/GeoDataFrame objects.
+    index : array-like or Index (1d), optional
+        Values must be hashable and have the same length as `data`.
+    crs : pyproj.CRS, optional
+        Coordinate Reference System for the geometries.
+    dtype : dtype, optional
+        Data type for the GeoSeries.
+    name : str, optional
+        Name of the GeoSeries.
+    copy : bool, default False
+        Whether to copy the input data.
+
+    Attributes
+    ----------
+    crs : pyproj.CRS
+        The Coordinate Reference System (CRS) for the geometries.
+    area : Series
+        Area of each geometry in CRS units.
+    length : Series
+        Length/perimeter of each geometry in CRS units.
+    bounds : DataFrame
+        Bounding box coordinates for each geometry.
+    geometry : GeoSeries
+        The geometry column (returns self).
+    sindex : SpatialIndex
+        Spatial index for the geometries.
+
+    Methods
+    -------
+    buffer(distance)
+        Buffer geometries by specified distance.
+    intersection(other)
+        Compute intersection with other geometries.
+    intersects(other)
+        Test if geometries intersect with other geometries.
+    to_geopandas()
+        Convert to GeoPandas GeoSeries.
+    to_crs(crs)
+        Transform geometries to a different CRS.
+    set_crs(crs)
+        Set the CRS without transforming geometries.
+
+    Examples
+    --------
+    >>> from shapely.geometry import Point, Polygon
+    >>> from sedona.geopandas import GeoSeries
+    >>>
+    >>> # Create from geometries
+    >>> s = GeoSeries([Point(0, 0), Point(1, 1)], crs='EPSG:4326')
+    >>> s
+    0    POINT (0 0)
+    1    POINT (1 1)
+    dtype: geometry
+    >>>
+    >>> # Spatial operations
+    >>> s.buffer(0.1).area
+    0    0.031416
+    1    0.031416
+    dtype: float64
+    >>>
+    >>> # CRS operations
+    >>> s_utm = s.to_crs('EPSG:32633')
+    >>> s_utm.crs
+    <Projected CRS: EPSG:32633>
+    Name: WGS 84 / UTM zone 33N
+    ...
+
+    Notes
+    -----
+    This implementation differs from GeoPandas in several ways:
+    - Uses Spark for distributed processing
+    - Geometries are stored in WKB (Well-Known Binary) format internally
+    - Some methods may have different performance characteristics
+    - Not all GeoPandas methods are implemented yet (see IMPLEMENTATION_STATUS)
+
+    Performance Considerations:
+    - Operations are distributed across Spark cluster
+    - Avoid calling .to_geopandas() on large datasets
+    - Use .sample() for testing with large datasets
+
+    See Also
+    --------
+    geopandas.GeoSeries : The GeoPandas equivalent
+    sedona.geopandas.GeoDataFrame : DataFrame with geometry column
     """
 
     def __getitem__(self, key: Any) -> Any:
@@ -118,28 +380,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         self._anchor: GeoDataFrame
         self._col_label: Label
 
-        use_same_anchor = True
-
-        def try_geom_to_ewkb(x) -> bytes:
-            nonlocal use_same_anchor
-            if isinstance(x, BaseGeometry):
-                kwargs = {}
-                if crs:
-                    from pyproj import CRS
-
-                    srid = CRS.from_user_input(crs)
-                    kwargs["srid"] = srid.to_epsg()
-                use_same_anchor = False
-
-                return shapely.wkb.dumps(x, **kwargs)
-            elif isinstance(x, bytearray):
-                use_same_anchor = False
-                return bytes(x)
-            elif x is None or isinstance(x, bytes):
-                return x
-            else:
-                raise TypeError(f"expected geometry or bytes, got {type(x)}: {x}")
-
         if isinstance(
             data, (GeoDataFrame, GeoSeries, PandasOnSparkSeries, PandasOnSparkDataFrame)
         ):
@@ -158,29 +398,21 @@ class GeoSeries(GeoFrame, pspd.Series):
                     "allow_override=True)' to overwrite CRS or "
                     "'GeoSeries.to_crs(crs)' to reproject geometries. "
                 )
-            # This is a temporary workaround since pyspark errors when creating a ps.Series from a ps.Series
-            # This is NOT a scalable solution since we call to_pandas() on the data and is a hacky solution
-            # but this should be resolved if/once https://github.com/apache/spark/pull/51300 is merged in.
-            # For now, we reset self._anchor = data to have keep the geometry information (e.g crs) that's lost in to_pandas()
 
-            pd_data = data.to_pandas()
+            # PySpark Pandas' ps.Series.__init__() does not construction from a
+            # ps.Series input. For now, we manually implement the logic.
 
-            try:
-                pd_data = pd_data.apply(try_geom_to_ewkb)
-            except Exception as e:
-                raise TypeError(f"Non-geometry column passed to GeoSeries: {e}")
+            index = data._col_label if index is None else index
+            ps_df = pspd.DataFrame(data._anchor)
 
             super().__init__(
-                data=pd_data,
+                data=ps_df,
                 index=index,
                 dtype=dtype,
                 name=name,
                 copy=copy,
                 fastpath=fastpath,
             )
-
-            if use_same_anchor:
-                self._anchor = data
         else:
             if isinstance(data, pd.Series):
                 assert index is None
@@ -188,9 +420,9 @@ class GeoSeries(GeoFrame, pspd.Series):
                 assert name is None
                 assert not copy
                 assert not fastpath
-                s = data
+                pd_series = data
             else:
-                s = pd.Series(
+                pd_series = pd.Series(
                     data=data,
                     index=index,
                     dtype=dtype,
@@ -199,24 +431,31 @@ class GeoSeries(GeoFrame, pspd.Series):
                     fastpath=fastpath,
                 )
 
-            try:
-                pdf = s.apply(try_geom_to_ewkb)
-            except Exception as e:
-                raise TypeError(f"Non-geometry column passed to GeoSeries: {e}")
-
             # initialize the parent class pyspark Series with the pandas Series
-            super().__init__(data=pdf)
+            super().__init__(data=pd_series)
 
-        # manually set it to binary type
+        # Ensure we're storing geometry types
         col = next(
             field.name
             for field in self._internal.spark_frame.schema.fields
             if field.name not in (NATURAL_ORDER_COLUMN_NAME, SPARK_DEFAULT_INDEX_NAME)
         )
-        self._internal.spark_frame.schema[col].dataType = BinaryType()
+        datatype = self._internal.spark_frame.schema[col].dataType
+        # Empty lists input will lead to NullType(), so we convert to GeometryType()
+        if datatype == NullType():
+            self._internal.spark_frame.schema[col].dataType = GeometryType()
+        elif datatype != GeometryType():
+            raise TypeError(
+                "Non geometry data passed to GeoSeries constructor, "
+                f"received data of dtype '{datatype.typeName()}'"
+            )
 
         if crs:
             self.set_crs(crs, inplace=True)
+
+    # ============================================================================
+    # COORDINATE REFERENCE SYSTEM (CRS) OPERATIONS
+    # ============================================================================
 
     @property
     def crs(self) -> Union["CRS", None]:
@@ -258,6 +497,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         tmp = self._process_geometry_column("ST_SRID", rename="crs", returns_geom=False)
         ps_series = tmp.take([0])
         srid = ps_series.iloc[0]
+
         # Sedona returns 0 if doesn't exist
         return CRS.from_user_input(srid) if srid != 0 and not pd.isna(srid) else None
 
@@ -402,8 +642,18 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         return result
 
+    # ============================================================================
+    # INTERNAL HELPER METHODS
+    # ============================================================================
+
     def _process_geometry_column(
-        self, operation: str, rename: str, returns_geom: bool = True, *args, **kwargs
+        self,
+        operation: str,
+        rename: str,
+        returns_geom: bool = True,
+        is_aggr: bool = False,
+        *args,
+        **kwargs,
     ) -> Union["GeoSeries", pspd.Series]:
         """
         Helper method to process a single geometry column with a specified operation.
@@ -445,7 +695,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         sql_expr = f"{operation}(`{first_col}`{params})"
 
         return self._query_geometry_column(
-            sql_expr, first_col, rename, returns_geom=returns_geom
+            sql_expr, first_col, rename, returns_geom=returns_geom, is_aggr=is_aggr
         )
 
     def _query_geometry_column(
@@ -455,6 +705,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         rename: str,
         df: pyspark.sql.DataFrame = None,
         returns_geom: bool = True,
+        is_aggr: bool = False,
     ) -> Union["GeoSeries", pspd.Series]:
         """
         Helper method to query a single geometry column with a specified operation.
@@ -471,6 +722,8 @@ class GeoSeries(GeoFrame, pspd.Series):
             The dataframe to query. If not provided, the internal dataframe will be used.
         returns_geom : bool, default True
             If True, the geometry column will be converted back to EWKB format.
+        is_aggr : bool, default False
+            If True, the query is an aggregation query.
 
         Returns
         -------
@@ -501,20 +754,27 @@ class GeoSeries(GeoFrame, pspd.Series):
             # must have rename for multiple columns since we don't know which name to default to
             assert rename
 
-        # Convert back to EWKB format if the return type is a geometry
-        if returns_geom:
-            query = f"ST_AsEWKB({query})"
-
         query = f"{query} as `{rename}`"
 
-        # We always select NATURAL_ORDER_COLUMN_NAME, to avoid having to regenerate it in the result
-        # We always select SPARK_DEFAULT_INDEX_NAME, to retain series index info
-        sdf = df.selectExpr(query, SPARK_DEFAULT_INDEX_NAME, NATURAL_ORDER_COLUMN_NAME)
+        exprs = [query]
+
+        index_spark_columns = []
+        index_fields = []
+        if not is_aggr:
+            # We always select NATURAL_ORDER_COLUMN_NAME, to avoid having to regenerate it in the result
+            # We always select SPARK_DEFAULT_INDEX_NAME, to retain series index info
+            exprs.append(SPARK_DEFAULT_INDEX_NAME)
+            exprs.append(NATURAL_ORDER_COLUMN_NAME)
+            index_spark_columns = [scol_for(df, SPARK_DEFAULT_INDEX_NAME)]
+            index_fields = [self._internal.index_fields[0]]
+        # else if is_aggr, we don't select the index columns
+
+        sdf = df.selectExpr(*exprs)
 
         internal = self._internal.copy(
             spark_frame=sdf,
-            index_fields=[self._internal.index_fields[0]],
-            index_spark_columns=[scol_for(sdf, SPARK_DEFAULT_INDEX_NAME)],
+            index_fields=index_fields,
+            index_spark_columns=index_spark_columns,
             data_spark_columns=[scol_for(sdf, rename)],
             data_fields=[self._internal.data_fields[0].copy(name=rename)],
             column_label_names=[(rename,)],
@@ -522,6 +782,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         ps_series = first_series(PandasOnSparkDataFrame(internal))
 
         return GeoSeries(ps_series) if returns_geom else ps_series
+
+    # ============================================================================
+    # CONVERSION AND SERIALIZATION METHODS
+    # ============================================================================
 
     def to_geopandas(self) -> gpd.GeoSeries:
         """
@@ -543,31 +807,14 @@ class GeoSeries(GeoFrame, pspd.Series):
         Same as `to_geopandas()`, without issuing the advice log for internal usage.
         """
         pd_series = self._to_internal_pandas()
-        try:
-            geoseries = gpd.GeoSeries(
-                pd_series.map(
-                    lambda wkb: (
-                        shapely.wkb.loads(bytes(wkb)) if not pd.isna(wkb) else None
-                    )
-                ),
-                crs=self.crs,
-            )
-        except TypeError:
-            geoseries = gpd.GeoSeries(pd_series, crs=self.crs)
-
-        first_shape = next((obj for obj in geoseries if obj is not None), None)
-        if first_shape and parse_version(shapely.__version__) >= parse_version("2.0.0"):
-            srid = shapely.get_srid(first_shape)
-            if srid:
-                assert (
-                    not self.crs or self.crs.to_epsg() == srid
-                ), f"CRS mismatch: {self.crs} != {srid}"
-                geoseries.crs = srid
-
-        return geoseries
+        return gpd.GeoSeries(pd_series, crs=self.crs)
 
     def to_spark_pandas(self) -> pspd.Series:
-        return pspd.Series(self._psdf._to_internal_pandas())
+        return pspd.Series(pspd.DataFrame(self._psdf._internal))
+
+    # ============================================================================
+    # PROPERTIES AND ATTRIBUTES
+    # ============================================================================
 
     @property
     def geometry(self) -> "GeoSeries":
@@ -696,7 +943,9 @@ class GeoSeries(GeoFrame, pspd.Series):
     @property
     def type(self):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error("type", "Returns numeric geometry type codes.")
+        )
 
     @property
     def length(self) -> pspd.Series:
@@ -862,15 +1111,30 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     def count_coordinates(self):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "count_coordinates",
+                "Counts the number of coordinate tuples in each geometry.",
+            )
+        )
 
     def count_geometries(self):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "count_geometries",
+                "Counts the number of geometries in each multi-geometry or collection.",
+            )
+        )
 
     def count_interior_rings(self):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "count_interior_rings",
+                "Counts the number of interior rings (holes) in each polygon.",
+            )
+        )
 
     @property
     def is_simple(self) -> pspd.Series:
@@ -907,17 +1171,31 @@ class GeoSeries(GeoFrame, pspd.Series):
     @property
     def is_ring(self):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "is_ring", "Tests if LineString geometries are closed rings."
+            )
+        )
 
     @property
     def is_ccw(self):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "is_ccw",
+                "Tests if LinearRing geometries are oriented counter-clockwise.",
+            )
+        )
 
     @property
     def is_closed(self):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "is_closed",
+                "Tests if LineString geometries are closed (start equals end point).",
+            )
+        )
 
     @property
     def has_z(self) -> pspd.Series:
@@ -1048,6 +1326,8 @@ class GeoSeries(GeoFrame, pspd.Series):
             index,
             align=False,
             rename="get_geometry",
+            returns_geom=True,
+            default_val=None,
         )
 
     @property
@@ -1138,7 +1418,11 @@ class GeoSeries(GeoFrame, pspd.Series):
     @property
     def convex_hull(self):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "convex_hull", "Computes the convex hull of each geometry."
+            )
+        )
 
     def delaunay_triangles(self, tolerance=0.0, only_edges=False):
         # Implementation of the abstract method
@@ -1333,12 +1617,188 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
+    # ============================================================================
+    # GEOMETRIC OPERATIONS
+    # ============================================================================
+
     @property
     def unary_union(self):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
-    def union_all(self, method="unary", grid_size=None):
+    def union_all(self, method="unary", grid_size=None) -> BaseGeometry:
+        """Returns a geometry containing the union of all geometries in the
+        ``GeoSeries``.
+
+        Sedona does not support the method or grid_size argument, so the user does not need to manually
+        decide the algorithm being used.
+
+        Parameters
+        ----------
+        method : str (default ``"unary"``)
+            Not supported in Sedona.
+
+        grid_size : float, default None
+            Not supported in Sedona.
+
+        Examples
+        --------
+
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import box
+        >>> s = GeoSeries([box(0, 0, 1, 1), box(0, 0, 2, 2)])
+        >>> s
+        0    POLYGON ((1 0, 1 1, 0 1, 0 0, 1 0))
+        1    POLYGON ((2 0, 2 2, 0 2, 0 0, 2 0))
+        dtype: geometry
+
+        >>> s.union_all()
+        <POLYGON ((0 1, 0 2, 2 2, 2 0, 1 0, 0 0, 0 1))>
+        """
+        if grid_size is not None:
+            raise NotImplementedError("Sedona does not support the grid_size argument")
+        if method != "unary":
+            import warnings
+
+            warnings.warn(
+                f"Sedona does not support manually specifying different union methods. Ignoring non-default method argument of {method}"
+            )
+
+        if len(self) == 0:
+            # While it's not explicitly defined in geopandas docs, this is what geopandas returns for empty GeoSeries
+            # If it ever changes for some reason, we'll catch that with the test
+            from shapely.geometry import GeometryCollection
+
+            return GeometryCollection()
+
+        # returns_geom needs to be False here so we don't convert back to EWKB format.
+        tmp = self._process_geometry_column(
+            "ST_Union_Aggr", rename="union_all", is_aggr=True, returns_geom=False
+        )
+        ps_series = tmp.take([0])
+        geom = ps_series.iloc[0]
+        return geom
+
+    def crosses(self, other, align=None) -> pspd.Series:
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        each aligned geometry that cross `other`.
+
+        An object is said to cross `other` if its `interior` intersects the
+        `interior` of the other but does not contain it, and the dimension of
+        the intersection is less than the dimension of the one or the other.
+
+        Note: Unlike Geopandas, Sedona's implementation always return NULL when GeometryCollection is involved.
+
+        The operation works on a 1-to-1 row-wise manner.
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The GeoSeries (elementwise) or geometric object to test if is
+            crossed.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved.
+
+        Returns
+        -------
+        Series (bool)
+
+        Examples
+        --------
+
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
+        ...         LineString([(0, 0), (2, 2)]),
+        ...         LineString([(2, 0), (0, 2)]),
+        ...         Point(0, 1),
+        ...     ],
+        ... )
+        >>> s2 = GeoSeries(
+        ...     [
+        ...         LineString([(1, 0), (1, 3)]),
+        ...         LineString([(2, 0), (0, 2)]),
+        ...         Point(1, 1),
+        ...         Point(0, 1),
+        ...     ],
+        ...     index=range(1, 5),
+        ... )
+
+        >>> s
+        0    POLYGON ((0 0, 2 2, 0 2, 0 0))
+        1             LINESTRING (0 0, 2 2)
+        2             LINESTRING (2 0, 0 2)
+        3                       POINT (0 1)
+        dtype: geometry
+        >>> s2
+        1    LINESTRING (1 0, 1 3)
+        2    LINESTRING (2 0, 0 2)
+        3              POINT (1 1)
+        4              POINT (0 1)
+        dtype: geometry
+
+        We can check if each geometry of GeoSeries crosses a single
+        geometry:
+
+        >>> line = LineString([(-1, 1), (3, 1)])
+        >>> s.crosses(line)
+        0     True
+        1     True
+        2     True
+        3    False
+        dtype: bool
+
+        We can also check two GeoSeries against each other, row by row.
+        The GeoSeries above have different indices. We can either align both GeoSeries
+        based on index values and compare elements with the same index using
+        ``align=True`` or ignore index and compare elements based on their matching
+        order using ``align=False``:
+
+        >>> s.crosses(s2, align=True)
+        0    False
+        1     True
+        2    False
+        3    False
+        4    False
+        dtype: bool
+
+        >>> s.crosses(s2, align=False)
+        0     True
+        1     True
+        2    False
+        3    False
+        dtype: bool
+
+        Notice that a line does not cross a point that it contains.
+
+        Notes
+        -----
+        This method works in a row-wise manner. It does not check if an element
+        of one GeoSeries ``crosses`` *any* element of the other one.
+
+        See also
+        --------
+        GeoSeries.disjoint
+        GeoSeries.intersects
+
+        """
+        # Sedona does not support GeometryCollection (errors), so we return NULL for now to avoid error
+        select = """
+        CASE
+            WHEN GeometryType(`L`) == 'GEOMETRYCOLLECTION' OR GeometryType(`R`) == 'GEOMETRYCOLLECTION' THEN NULL
+            ELSE ST_Crosses(`L`, `R`)
+        END
+        """
+
+        result = self._row_wise_operation(
+            select, other, align, rename="crosses", default_val="FALSE"
+        )
+        return to_bool(result)
+
+    def disjoint(self, other, align=None):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
@@ -1447,21 +1907,667 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.intersection
         """
 
-        select = "ST_Intersects(`L`, `R`)"
+        result = self._row_wise_operation(
+            "ST_Intersects(`L`, `R`)",
+            other,
+            align,
+            rename="intersects",
+            default_val="FALSE",
+        )
+        return to_bool(result)
 
-        # ps.Series.fillna() call in to_bool, doesn't work for the output for
-        # intersects here for some reason. So we manually handle the nulls here.
-        select = f"""
-            CASE
-                WHEN `L` IS NULL OR `R` IS NULL THEN FALSE
-                ELSE {select}
-            END
+    def overlaps(self, other, align=None) -> pspd.Series:
+        """Returns True for all aligned geometries that overlap other, else False.
+
+        In the original Geopandas, Geometries overlap if they have more than one but not all
+        points in common, have the same dimension, and the intersection of the
+        interiors of the geometries has the same dimension as the geometries
+        themselves.
+
+        However, in Sedona, we return True in the case where the geometries points match.
+
+        Note: Sedona's behavior may also differ from Geopandas for GeometryCollections.
+
+        The operation works on a 1-to-1 row-wise manner.
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The GeoSeries (elementwise) or geometric object to test if
+            overlaps.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved.
+
+        Returns
+        -------
+        Series (bool)
+
+        Examples
+        --------
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, MultiPoint, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
+        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
+        ...         LineString([(0, 0), (2, 2)]),
+        ...         MultiPoint([(0, 0), (0, 1)]),
+        ...     ],
+        ... )
+        >>> s2 = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (2, 0), (0, 2)]),
+        ...         LineString([(0, 1), (1, 1)]),
+        ...         LineString([(1, 1), (3, 3)]),
+        ...         Point(0, 1),
+        ...     ],
+        ... )
+
+        We can check if each geometry of GeoSeries overlaps a single
+        geometry:
+
+        >>> polygon = Polygon([(0, 0), (1, 0), (1, 1), (0, 1)])
+        >>> s.overlaps(polygon)
+        0     True
+        1     True
+        2    False
+        3    False
+        dtype: bool
+
+        We can also check two GeoSeries against each other, row by row.
+        The GeoSeries above have different indices. We align both GeoSeries
+        based on index values and compare elements with the same index.
+
+        >>> s.overlaps(s2)
+        0    False
+        1     True
+        2    False
+        3    False
+        4    False
+        dtype: bool
+
+        >>> s.overlaps(s2, align=False)
+        0     True
+        1    False
+        2     True
+        3    False
+        dtype: bool
+
+        Notes
+        -----
+        This method works in a row-wise manner. It does not check if an element
+        of one GeoSeries ``overlaps`` *any* element of the other one.
+
+        See also
+        --------
+        GeoSeries.crosses
+        GeoSeries.intersects
+
+        """
+        # Note: We cannot efficiently match geopandas behavior because Sedona's ST_Overlaps returns True for equal geometries
+        # ST_Overlaps(`L`, `R`) AND ST_Equals(`L`, `R`) does not work because ST_Equals errors on invalid geometries
+
+        result = self._row_wise_operation(
+            "ST_Overlaps(`L`, `R`)",
+            other,
+            align,
+            rename="overlaps",
+            default_val="FALSE",
+        )
+        return to_bool(result)
+
+    def touches(self, other, align=None) -> pspd.Series:
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        each aligned geometry that touches `other`.
+
+        An object is said to touch `other` if it has at least one point in
+        common with `other` and its interior does not intersect with any part
+        of the other. Overlapping features therefore do not touch.
+
+        Note: Sedona's behavior may also differ from Geopandas for GeometryCollections.
+
+        The operation works on a 1-to-1 row-wise manner.
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The GeoSeries (elementwise) or geometric object to test if is
+            touched.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved.
+
+        Returns
+        -------
+        Series (bool)
+
+        Examples
+        --------
+        >>> from shapely.geometry import Polygon, LineString, MultiPoint, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
+        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
+        ...         LineString([(0, 0), (2, 2)]),
+        ...         MultiPoint([(0, 0), (0, 1)]),
+        ...     ],
+        ... )
+        >>> s2 = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (-2, 0), (0, -2)]),
+        ...         LineString([(0, 1), (1, 1)]),
+        ...         LineString([(1, 1), (3, 0)]),
+        ...         Point(0, 1),
+        ...     ],
+        ...     index=range(1, 5),
+        ... )
+
+        >>> s
+        0    POLYGON ((0 0, 2 2, 0 2, 0 0))
+        1    POLYGON ((0 0, 2 2, 0 2, 0 0))
+        2             LINESTRING (0 0, 2 2)
+        3         MULTIPOINT ((0 0), (0 1))
+        dtype: geometry
+
+        >>> s2
+        1    POLYGON ((0 0, -2 0, 0 -2, 0 0))
+        2               LINESTRING (0 1, 1 1)
+        3               LINESTRING (1 1, 3 0)
+        4                         POINT (0 1)
+        dtype: geometry
+
+        We can check if each geometry of GeoSeries touches a single
+        geometry:
+
+        >>> line = LineString([(0, 0), (-1, -2)])
+        >>> s.touches(line)
+        0    True
+        1    True
+        2    True
+        3    True
+        dtype: bool
+
+        We can also check two GeoSeries against each other, row by row.
+        The GeoSeries above have different indices. We can either align both GeoSeries
+        based on index values and compare elements with the same index using
+        ``align=True`` or ignore index and compare elements based on their matching
+        order using ``align=False``:
+
+        >>> s.touches(s2, align=True)
+        0    False
+        1     True
+        2     True
+        3    False
+        4    False
+        dtype: bool
+
+        >>> s.touches(s2, align=False)
+        0     True
+        1    False
+        2     True
+        3    False
+        dtype: bool
+
+        Notes
+        -----
+        This method works in a row-wise manner. It does not check if an element
+        of one GeoSeries ``touches`` *any* element of the other one.
+
+        See also
+        --------
+        GeoSeries.overlaps
+        GeoSeries.intersects
+
         """
 
         result = self._row_wise_operation(
-            select, other, align, rename="intersects", returns_geom=False
+            "ST_Touches(`L`, `R`)",
+            other,
+            align,
+            rename="touches",
+            default_val="FALSE",
         )
         return to_bool(result)
+
+    def within(self, other, align=None) -> pspd.Series:
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        each aligned geometry that is within `other`.
+
+        An object is said to be within `other` if at least one of its points is located
+        in the `interior` and no points are located in the `exterior` of the other.
+        If either object is empty, this operation returns ``False``.
+
+        This is the inverse of `contains` in the sense that the
+        expression ``a.within(b) == b.contains(a)`` always evaluates to
+        ``True``.
+
+        Note: Sedona's behavior may also differ from Geopandas for GeometryCollections and for geometries that are equal.
+
+        The operation works on a 1-to-1 row-wise manner.
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The GeoSeries (elementwise) or geometric object to test if each
+            geometry is within.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved.
+
+        Returns
+        -------
+        Series (bool)
+
+
+        Examples
+        --------
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
+        ...         Polygon([(0, 0), (1, 2), (0, 2)]),
+        ...         LineString([(0, 0), (0, 2)]),
+        ...         Point(0, 1),
+        ...     ],
+        ... )
+        >>> s2 = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
+        ...         LineString([(0, 0), (0, 2)]),
+        ...         LineString([(0, 0), (0, 1)]),
+        ...         Point(0, 1),
+        ...     ],
+        ...     index=range(1, 5),
+        ... )
+
+        >>> s
+        0    POLYGON ((0 0, 2 2, 0 2, 0 0))
+        1    POLYGON ((0 0, 1 2, 0 2, 0 0))
+        2             LINESTRING (0 0, 0 2)
+        3                       POINT (0 1)
+        dtype: geometry
+
+        >>> s2
+        1    POLYGON ((0 0, 1 1, 0 1, 0 0))
+        2             LINESTRING (0 0, 0 2)
+        3             LINESTRING (0 0, 0 1)
+        4                       POINT (0 1)
+        dtype: geometry
+
+        We can check if each geometry of GeoSeries is within a single
+        geometry:
+
+        >>> polygon = Polygon([(0, 0), (2, 2), (0, 2)])
+        >>> s.within(polygon)
+        0     True
+        1     True
+        2    False
+        3    False
+        dtype: bool
+
+        We can also check two GeoSeries against each other, row by row.
+        The GeoSeries above have different indices. We can either align both GeoSeries
+        based on index values and compare elements with the same index using
+        ``align=True`` or ignore index and compare elements based on their matching
+        order using ``align=False``:
+
+        >>> s2.within(s)
+        0    False
+        1    False
+        2     True
+        3    False
+        4    False
+        dtype: bool
+
+        >>> s2.within(s, align=False)
+        1     True
+        2    False
+        3     True
+        4     True
+        dtype: bool
+
+        Notes
+        -----
+        This method works in a row-wise manner. It does not check if an element
+        of one GeoSeries is ``within`` any element of the other one.
+
+        See also
+        --------
+        GeoSeries.contains
+        """
+        result = self._row_wise_operation(
+            "ST_Within(`L`, `R`)",
+            other,
+            align,
+            rename="within",
+            default_val="FALSE",
+        )
+        return to_bool(result)
+
+    def covers(self, other, align=None) -> pspd.Series:
+        """
+        Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        each aligned geometry that is entirely covering `other`.
+
+        An object A is said to cover another object B if no points of B lie
+        in the exterior of A.
+        If either object is empty, this operation returns ``False``.
+
+        Note: Sedona's implementation instead returns False for identical geometries.
+        Sedona's behavior may also differ from Geopandas for GeometryCollections.
+
+        The operation works on a 1-to-1 row-wise manner.
+
+        See
+        https://lin-ear-th-inking.blogspot.com/2007/06/subtleties-of-ogc-covers-spatial.html
+        for reference.
+
+        Parameters
+        ----------
+        other : Geoseries or geometric object
+            The Geoseries (elementwise) or geometric object to check is being covered.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved.
+
+        Returns
+        -------
+        Series (bool)
+
+        Examples
+        --------
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
+        ...         LineString([(0, 0), (2, 2)]),
+        ...         Point(0, 0),
+        ...     ],
+        ... )
+        >>> s2 = GeoSeries(
+        ...     [
+        ...         Polygon([(0.5, 0.5), (1.5, 0.5), (1.5, 1.5), (0.5, 1.5)]),
+        ...         Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+        ...         LineString([(1, 1), (1.5, 1.5)]),
+        ...         Point(0, 0),
+        ...     ],
+        ...     index=range(1, 5),
+        ... )
+
+        >>> s
+        0    POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))
+        1         POLYGON ((0 0, 2 2, 0 2, 0 0))
+        2                  LINESTRING (0 0, 2 2)
+        3                            POINT (0 0)
+        dtype: geometry
+
+        >>> s2
+        1    POLYGON ((0.5 0.5, 1.5 0.5, 1.5 1.5, 0.5 1.5, ...
+        2                  POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))
+        3                            LINESTRING (1 1, 1.5 1.5)
+        4                                          POINT (0 0)
+        dtype: geometry
+
+        We can check if each geometry of GeoSeries covers a single
+        geometry:
+
+        >>> poly = Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])
+        >>> s.covers(poly)
+        0     True
+        1    False
+        2    False
+        3    False
+        dtype: bool
+
+        We can also check two GeoSeries against each other, row by row.
+        The GeoSeries above have different indices. We can either align both GeoSeries
+        based on index values and compare elements with the same index using
+        ``align=True`` or ignore index and compare elements based on their matching
+        order using ``align=False``:
+
+        >>> s.covers(s2, align=True)
+        0    False
+        1    False
+        2    False
+        3    False
+        4    False
+        dtype: bool
+
+        >>> s.covers(s2, align=False)
+        0     True
+        1    False
+        2     True
+        3     True
+        dtype: bool
+
+        Notes
+        -----
+        This method works in a row-wise manner. It does not check if an element
+        of one GeoSeries ``covers`` any element of the other one.
+
+        See also
+        --------
+        GeoSeries.covered_by
+        GeoSeries.overlaps
+        """
+        result = self._row_wise_operation(
+            "ST_Covers(`L`, `R`)",
+            other,
+            align,
+            rename="covers",
+            default_val="FALSE",
+        )
+        return to_bool(result)
+
+    def covered_by(self, other, align=None) -> pspd.Series:
+        """
+        Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        each aligned geometry that is entirely covered by `other`.
+
+        An object A is said to cover another object B if no points of B lie
+        in the exterior of A.
+
+        Note: Sedona's implementation instead returns False for identical geometries.
+        Sedona's behavior may differ from Geopandas for GeometryCollections.
+
+        The operation works on a 1-to-1 row-wise manner.
+
+        See
+        https://lin-ear-th-inking.blogspot.com/2007/06/subtleties-of-ogc-covers-spatial.html
+        for reference.
+
+        Parameters
+        ----------
+        other : Geoseries or geometric object
+            The Geoseries (elementwise) or geometric object to check is being covered.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved.
+
+        Returns
+        -------
+        Series (bool)
+
+        Examples
+        --------
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0.5, 0.5), (1.5, 0.5), (1.5, 1.5), (0.5, 1.5)]),
+        ...         Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+        ...         LineString([(1, 1), (1.5, 1.5)]),
+        ...         Point(0, 0),
+        ...     ],
+        ... )
+        >>> s2 = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
+        ...         LineString([(0, 0), (2, 2)]),
+        ...         Point(0, 0),
+        ...     ],
+        ...     index=range(1, 5),
+        ... )
+
+        >>> s
+        0    POLYGON ((0.5 0.5, 1.5 0.5, 1.5 1.5, 0.5 1.5, ...
+        1                  POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))
+        2                            LINESTRING (1 1, 1.5 1.5)
+        3                                          POINT (0 0)
+        dtype: geometry
+        >>>
+
+        >>> s2
+        1    POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))
+        2         POLYGON ((0 0, 2 2, 0 2, 0 0))
+        3                  LINESTRING (0 0, 2 2)
+        4                            POINT (0 0)
+        dtype: geometry
+
+        We can check if each geometry of GeoSeries is covered by a single
+        geometry:
+
+        >>> poly = Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])
+        >>> s.covered_by(poly)
+        0    True
+        1    True
+        2    True
+        3    True
+        dtype: bool
+
+        We can also check two GeoSeries against each other, row by row.
+        The GeoSeries above have different indices. We can either align both GeoSeries
+        based on index values and compare elements with the same index using
+        ``align=True`` or ignore index and compare elements based on their matching
+        order using ``align=False``:
+
+        >>> s.covered_by(s2, align=True)
+        0    False
+        1     True
+        2     True
+        3     True
+        4    False
+        dtype: bool
+
+        >>> s.covered_by(s2, align=False)
+        0     True
+        1    False
+        2     True
+        3     True
+        dtype: bool
+
+        Notes
+        -----
+        This method works in a row-wise manner. It does not check if an element
+        of one GeoSeries is ``covered_by`` any element of the other one.
+
+        See also
+        --------
+        GeoSeries.covers
+        GeoSeries.overlaps
+        """
+        result = self._row_wise_operation(
+            "ST_CoveredBy(`L`, `R`)",
+            other,
+            align,
+            rename="covered_by",
+            default_val="FALSE",
+        )
+        return to_bool(result)
+
+    def distance(self, other, align=None) -> pspd.Series:
+        """Returns a ``Series`` containing the distance to aligned `other`.
+
+        The operation works on a 1-to-1 row-wise manner:
+
+        Parameters
+        ----------
+        other : Geoseries or geometric object
+            The Geoseries (elementwise) or geometric object to find the
+            distance to.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved.
+
+        Returns
+        -------
+        Series (float)
+
+        Examples
+        --------
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 0), (1, 1)]),
+        ...         Polygon([(0, 0), (-1, 0), (-1, 1)]),
+        ...         LineString([(1, 1), (0, 0)]),
+        ...         Point(0, 0),
+        ...     ],
+        ... )
+        >>> s2 = GeoSeries(
+        ...     [
+        ...         Polygon([(0.5, 0.5), (1.5, 0.5), (1.5, 1.5), (0.5, 1.5)]),
+        ...         Point(3, 1),
+        ...         LineString([(1, 0), (2, 0)]),
+        ...         Point(0, 1),
+        ...     ],
+        ...     index=range(1, 5),
+        ... )
+
+        >>> s
+        0      POLYGON ((0 0, 1 0, 1 1, 0 0))
+        1    POLYGON ((0 0, -1 0, -1 1, 0 0))
+        2               LINESTRING (1 1, 0 0)
+        3                         POINT (0 0)
+        dtype: geometry
+
+        >>> s2
+        1    POLYGON ((0.5 0.5, 1.5 0.5, 1.5 1.5, 0.5 1.5, ...
+        2                                          POINT (3 1)
+        3                                LINESTRING (1 0, 2 0)
+        4                                          POINT (0 1)
+        dtype: geometry
+
+        We can check the distance of each geometry of GeoSeries to a single
+        geometry:
+
+        >>> point = Point(-1, 0)
+        >>> s.distance(point)
+        0    1.0
+        1    0.0
+        2    1.0
+        3    1.0
+        dtype: float64
+
+        We can also check two GeoSeries against each other, row by row.
+        The GeoSeries above have different indices. We can either align both GeoSeries
+        based on index values and use elements with the same index using
+        ``align=True`` or ignore index and use elements based on their matching
+        order using ``align=False``:
+
+        >>> s.distance(s2, align=True)
+        0         NaN
+        1    0.707107
+        2    2.000000
+        3    1.000000
+        4         NaN
+        dtype: float64
+
+        >>> s.distance(s2, align=False)
+        0    0.000000
+        1    3.162278
+        2    0.707107
+        3    1.000000
+        dtype: float64
+        """
+
+        result = self._row_wise_operation(
+            "ST_Distance(`L`, `R`)", other, align, rename="distance", default_val="NULL"
+        )
+        return result
 
     def intersection(
         self, other: Union["GeoSeries", BaseGeometry], align: Union[bool, None] = None
@@ -1566,7 +2672,12 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.union
         """
         return self._row_wise_operation(
-            "ST_Intersection(`L`, `R`)", other, align, rename="intersection"
+            "ST_Intersection(`L`, `R`)",
+            other,
+            align,
+            rename="intersection",
+            returns_geom=True,
+            default_val="NULL",
         )
 
     def _row_wise_operation(
@@ -1575,11 +2686,15 @@ class GeoSeries(GeoFrame, pspd.Series):
         other: Any,
         align: Union[bool, None],
         rename: str,
-        returns_geom: bool = True,
+        returns_geom: bool = False,
+        default_val: Union[str, None] = None,
     ):
         """
         Helper function to perform a row-wise operation on two GeoSeries.
         The self column and other column are aliased to `L` and `R`, respectively.
+
+        default_val : str or None (default "FALSE")
+            The value to use if either L or R is null. If None, nulls are not handled.
         """
         from pyspark.sql.functions import col
 
@@ -1613,6 +2728,17 @@ class GeoSeries(GeoFrame, pspd.Series):
             col(index_col),
         )
         joined_df = df.join(other_df, on=index_col, how="outer")
+
+        if default_val is not None:
+            # ps.Series.fillna() doesn't always work for the output for some reason
+            # so we manually handle the nulls here.
+            select = f"""
+                CASE
+                    WHEN `L` IS NULL OR `R` IS NULL THEN {default_val}
+                    ELSE {select}
+                END
+            """
+
         return self._query_geometry_column(
             select,
             cols=["L", "R"],
@@ -1625,13 +2751,137 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
-    def contains(self, other, align=None):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+    # ============================================================================
+    # SPATIAL PREDICATES
+    # ============================================================================
+
+    def contains(self, other, align=None) -> pspd.Series:
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        each aligned geometry that contains `other`.
+
+        An object is said to contain `other` if at least one point of `other` lies in
+        the interior and no points of `other` lie in the exterior of the object.
+        (Therefore, any given polygon does not contain its own boundary - there is not
+        any point that lies in the interior.)
+        If either object is empty, this operation returns ``False``.
+
+        This is the inverse of `within` in the sense that the expression
+        ``a.contains(b) == b.within(a)`` always evaluates to ``True``.
+
+        Note: Sedona's implementation instead returns False for identical geometries.
+
+        The operation works on a 1-to-1 row-wise manner.
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The GeoSeries (elementwise) or geometric object to test if it
+            is contained.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved.
+
+        Returns
+        -------
+        Series (bool)
+
+        Examples
+        --------
+
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
+        ...         LineString([(0, 0), (0, 2)]),
+        ...         LineString([(0, 0), (0, 1)]),
+        ...         Point(0, 1),
+        ...     ],
+        ...     index=range(0, 4),
+        ... )
+        >>> s2 = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
+        ...         Polygon([(0, 0), (1, 2), (0, 2)]),
+        ...         LineString([(0, 0), (0, 2)]),
+        ...         Point(0, 1),
+        ...     ],
+        ...     index=range(1, 5),
+        ... )
+
+        >>> s
+        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1             LINESTRING (0 0, 0 2)
+        2             LINESTRING (0 0, 0 1)
+        3                       POINT (0 1)
+        dtype: geometry
+
+        >>> s2
+        1    POLYGON ((0 0, 2 2, 0 2, 0 0))
+        2    POLYGON ((0 0, 1 2, 0 2, 0 0))
+        3             LINESTRING (0 0, 0 2)
+        4                       POINT (0 1)
+        dtype: geometry
+
+        We can check if each geometry of GeoSeries contains a single
+        geometry:
+
+        >>> point = Point(0, 1)
+        >>> s.contains(point)
+        0    False
+        1     True
+        2    False
+        3     True
+        dtype: bool
+
+        We can also check two GeoSeries against each other, row by row.
+        The GeoSeries above have different indices. We can either align both GeoSeries
+        based on index values and compare elements with the same index using
+        ``align=True`` or ignore index and compare elements based on their matching
+        order using ``align=False``:
+
+        >>> s2.contains(s, align=True)
+        0    False
+        1    False
+        2    False
+        3     True
+        4    False
+        dtype: bool
+
+        >>> s2.contains(s, align=False)
+        1     True
+        2    False
+        3     True
+        4     True
+        dtype: bool
+
+        Notes
+        -----
+        This method works in a row-wise manner. It does not check if an element
+        of one GeoSeries ``contains`` any element of the other one.
+
+        See also
+        --------
+        GeoSeries.contains_properly
+        GeoSeries.within
+        """
+        result = self._row_wise_operation(
+            "ST_Contains(`L`, `R`)",
+            other,
+            align,
+            rename="contains",
+            default_val="FALSE",
+        )
+        return to_bool(result)
 
     def contains_properly(self, other, align=None):
         # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "contains_properly",
+                "Tests if geometries properly contain other geometries (no boundary contact).",
+            )
+        )
 
     def buffer(
         self,
@@ -1838,11 +3088,20 @@ class GeoSeries(GeoFrame, pspd.Series):
     def m(self) -> pspd.Series:
         raise NotImplementedError("GeoSeries.m() is not implemented yet.")
 
+    # ============================================================================
+    # CONSTRUCTION METHODS
+    # ============================================================================
+
     @classmethod
     def from_file(
         cls, filename: Union[os.PathLike, typing.IO], **kwargs
     ) -> "GeoSeries":
-        raise NotImplementedError("GeoSeries.from_file() is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "from_file",
+                "Creates GeoSeries from geometry files (shapefile, GeoJSON, etc.).",
+            )
+        )
 
     @classmethod
     def from_wkb(
@@ -2093,7 +3352,11 @@ class GeoSeries(GeoFrame, pspd.Series):
     def from_shapely(
         cls, data, index=None, crs: Union[Any, None] = None, **kwargs
     ) -> "GeoSeries":
-        raise NotImplementedError("GeoSeries.from_shapely() is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "from_shapely", "Creates GeoSeries from Shapely geometry objects."
+            )
+        )
 
     @classmethod
     def from_arrow(cls, arr, **kwargs) -> "GeoSeries":
@@ -2159,7 +3422,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         if isinstance(data, list) and not isinstance(data[0], (tuple, list)):
             data = [(obj,) for obj in data]
 
-        select = f"ST_AsEWKB({select}) as geometry"
+        select = f"{select} as geometry"
 
         if isinstance(data, pspd.Series):
             spark_df = data._internal.spark_frame
@@ -2197,6 +3460,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         **kwargs,
     ):
         raise NotImplementedError("GeoSeries.to_file() is not implemented yet.")
+
+    # ============================================================================
+    # DATA ACCESS AND MANIPULATION
+    # ============================================================================
 
     def isna(self) -> pspd.Series:
         """
@@ -2393,16 +3660,21 @@ class GeoSeries(GeoFrame, pspd.Series):
             result = self._query_geometry_column(select, col, "")
         elif isinstance(value, (GeoSeries, GeometryArray, gpd.GeoSeries)):
 
-            if isinstance(value, (gpd.GeoSeries, GeometryArray)):
+            if not isinstance(value, GeoSeries):
                 value = GeoSeries(value)
 
-            # Replace all None's with empty geometries
+            # Replace all None's with empty geometries (this is a recursive call)
             value = value.fillna(None)
 
             # Coalesce: If the value in L is null, use the corresponding value in R for that row
             select = f"COALESCE(`L`, `R`)"
             result = self._row_wise_operation(
-                select, value, align=None, rename="fillna"
+                select,
+                value,
+                align=None,
+                rename="fillna",
+                returns_geom=True,
+                default_val=None,
             )
         else:
             raise ValueError(f"Invalid value type: {type(value)}")
@@ -2414,7 +3686,12 @@ class GeoSeries(GeoFrame, pspd.Series):
         return result
 
     def explode(self, ignore_index=False, index_parts=False) -> "GeoSeries":
-        raise NotImplementedError("GeoSeries.explode() is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "explode",
+                "Explodes multi-part geometries into separate single-part geometries.",
+            )
+        )
 
     def to_crs(
         self, crs: Union[Any, None] = None, epsg: Union[int, None] = None
@@ -2961,7 +4238,11 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         )
 
     def clip(self, mask, keep_geom_type: bool = False, sort=False) -> "GeoSeries":
-        raise NotImplementedError("GeoSeries.clip() is not implemented yet.")
+        raise NotImplementedError(
+            _not_implemented_error(
+                "clip", "Clips geometries to the bounds of a mask geometry."
+            )
+        )
 
     # -----------------------------------------------------------------------------
     # # Utils

@@ -21,7 +21,7 @@ Getis, A., & Ord, J. K. (1992). The analysis of spatial association by use of di
 Geographical Analysis, 24(3), 189-206. https://doi.org/10.1111/j.1538-4632.1992.tb00261.x
 """
 
-from pyspark.sql import Column, DataFrame, SparkSession
+from pyspark.sql import DataFrame, SparkSession
 
 # todo change weights and x type to string
 
@@ -59,7 +59,7 @@ def g_local(
     sedona = SparkSession.getActiveSession()
 
     result_df = sedona._jvm.org.apache.sedona.stats.hotspotDetection.GetisOrd.gLocal(
-        dataframe, x, weights, permutations, star, island_weight
+        dataframe._jdf, x, weights, permutations, star, island_weight
     )
 
     return DataFrame(result_df, sedona)

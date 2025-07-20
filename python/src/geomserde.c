@@ -645,11 +645,9 @@ SedonaErrorCode sedona_serialize_geom(GEOSContextHandle_t handle,
                                    p_buf_size);
       break;
     case GEOS_LINESTRING:
+    case GEOS_LINEARRING:
       err = sedona_serialize_linestring(handle, geom, srid, &cs_info, p_buf,
                                         p_buf_size);
-      break;
-    case GEOS_LINEARRING:
-      err = SEDONA_UNSUPPORTED_GEOM_TYPE;
       break;
     case GEOS_POLYGON:
       err = sedona_serialize_polygon(handle, geom, srid, &cs_info, p_buf,
