@@ -24,6 +24,7 @@ from sedona.geopandas import GeoSeries, GeoDataFrame, sjoin
 from tests.test_base import TestBase
 from packaging.version import parse as parse_version
 
+
 @pytest.mark.skipif(
     parse_version(shapely.__version__) < parse_version("2.0.0"),
     reason=f"Tests require shapely>=2.0.0, but found v{shapely.__version__}",
