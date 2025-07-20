@@ -187,3 +187,128 @@ class TestStacReader(TestBase):
             # Optionally, you can load the file back and check its contents
             df_loaded = collection.spark.read.format("geoparquet").load(output_path)
             assert df_loaded.count() == 20, "Loaded GeoParquet file is empty"
+
+    def test_get_items_with_wkt_geometry(self) -> None:
+        """Test that WKT geometry strings are properly handled for spatial filtering."""
+        client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
+        collection = client.get_collection("aster-l1t")
+
+        # Test with WKT polygon geometry
+        wkt_polygon = "POLYGON((90 -73, 105 -73, 105 -69, 90 -69, 90 -73))"
+        items_with_wkt = list(collection.get_items(geometry=wkt_polygon))
+
+        # Both should return similar number of items (may not be exactly same due to geometry differences)
+        assert items_with_wkt is not None
+        assert len(items_with_wkt) > 0
+
+    def test_get_dataframe_with_shapely_geometry(self) -> None:
+        """Test that Shapely geometry objects are properly handled for spatial filtering."""
+        from shapely.geometry import Polygon
+
+        client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
+        collection = client.get_collection("aster-l1t")
+
+        # Test with Shapely polygon geometry
+        shapely_polygon = Polygon(
+            [(90, -73), (105, -73), (105, -69), (90, -69), (90, -73)]
+        )
+        df_with_shapely = collection.get_dataframe(geometry=shapely_polygon)
+
+        # Both should return similar number of items
+        assert df_with_shapely is not None
+        assert df_with_shapely.count() > 0
+
+    def test_get_items_with_geometry_list(self) -> None:
+        """Test that lists of geometry objects are properly handled."""
+        from shapely.geometry import Polygon
+
+        client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
+        collection = client.get_collection("aster-l1t")
+
+        # Test with list of geometries (both WKT and Shapely)
+        wkt_polygon = "POLYGON((90 -73, 105 -73, 105 -69, 90 -69, 90 -73))"
+        shapely_polygon = Polygon(
+            [(-100, -72), (-90, -72), (-90, -62), (-100, -62), (-100, -72)]
+        )
+        geometry_list = [wkt_polygon, shapely_polygon]
+
+        items_with_geom_list = list(collection.get_items(geometry=geometry_list))
+
+        # Should return items from both geometries
+        assert items_with_geom_list is not None
+        assert len(items_with_geom_list) > 0
+
+    def test_geometry_takes_precedence_over_bbox(self) -> None:
+        """Test that geometry parameter takes precedence over bbox when both are provided."""
+        from shapely.geometry import Polygon
+
+        client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
+        collection = client.get_collection("aster-l1t")
+
+        # Define different spatial extents
+        bbox = [-180.0, -90.0, 180.0, 90.0]  # World bbox
+        small_polygon = Polygon(
+            [(90, -73), (105, -73), (105, -69), (90, -69), (90, -73)]
+        )  # Small area
+
+        # When both are provided, geometry should take precedence
+        items_with_both = list(collection.get_items(bbox=bbox, geometry=small_polygon))
+        items_with_geom_only = list(collection.get_items(geometry=small_polygon))
+
+        # Results should be identical since geometry takes precedence
+        assert items_with_both is not None
+        assert items_with_geom_only is not None
+        assert len(items_with_both) == len(items_with_geom_only)
+        assert len(items_with_both) > 0
+
+    def test_get_dataframe_with_geometry_and_datetime(self) -> None:
+        """Test that geometry and datetime filters work together."""
+        from shapely.geometry import Polygon
+
+        client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
+        collection = client.get_collection("aster-l1t")
+
+        # Define spatial and temporal filters
+        polygon = Polygon([(90, -73), (105, -73), (105, -69), (90, -69), (90, -73)])
+        datetime_range = ["2006-12-01T00:00:00Z", "2006-12-27T03:00:00Z"]
+
+        df_with_both = collection.get_dataframe(
+            geometry=polygon, datetime=datetime_range
+        )
+        df_with_geom_only = collection.get_dataframe(geometry=polygon)
+
+        # Combined filter should return fewer or equal items than geometry-only filter
+        assert df_with_both is not None
+        assert df_with_geom_only is not None
+        assert df_with_both.count() <= df_with_geom_only.count()
+
+    def test_save_to_geoparquet_with_geometry(self) -> None:
+        """Test saving to GeoParquet with geometry parameter."""
+        from shapely.geometry import Polygon
+        import tempfile
+        import os
+
+        client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
+        collection = client.get_collection("aster-l1t")
+
+        # Create a temporary directory for the output path and clean it up after the test
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            output_path = f"{tmpdirname}/test_geometry_geoparquet_output"
+
+            # Define spatial and temporal extents
+            polygon = Polygon(
+                [(-180, -90), (180, -90), (180, 90), (-180, 90), (-180, -90)]
+            )
+            datetime_range = [["2006-01-01T00:00:00Z", "2007-01-01T00:00:00Z"]]
+
+            # Call the method to save the DataFrame to GeoParquet
+            collection.save_to_geoparquet(
+                output_path=output_path, geometry=polygon, datetime=datetime_range
+            )
+
+            # Check if the file was created
+            assert os.path.exists(output_path), "GeoParquet file was not created"
+
+            # Optionally, you can load the file back and check its contents
+            df_loaded = collection.spark.read.format("geoparquet").load(output_path)
+            assert df_loaded.count() > 0, "Loaded GeoParquet file is empty"
