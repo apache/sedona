@@ -141,10 +141,10 @@ class CollectionClient:
                     # Try to convert to string (fallback)
                     geom_wkt = str(geom)
                 geometry_conditions.append(
-                    f"st_intersects(ST_GeomFromText('{geom_wkt}'), geometry)"
+                    "st_intersects(ST_GeomFromText(?), geometry)"
                 )
             geometry_sql_condition = " OR ".join(geometry_conditions)
-            df = df.filter(geometry_sql_condition)
+            df = df.filter(geometry_sql_condition, [geom.wkt if hasattr(geom, "wkt") else str(geom) for geom in geometry])
         elif bbox:
             bbox_conditions = []
             for bbox_item in bbox:
