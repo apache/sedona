@@ -312,3 +312,41 @@ class TestStacReader(TestBase):
             # Optionally, you can load the file back and check its contents
             df_loaded = collection.spark.read.format("geoparquet").load(output_path)
             assert df_loaded.count() > 0, "Loaded GeoParquet file is empty"
+
+    def test_get_items_with_tuple_datetime(self) -> None:
+        """Test that tuples are properly handled as datetime input (same as lists)."""
+        client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
+        collection = client.get_collection("aster-l1t")
+
+        # Test with tuple instead of list
+        datetime_tuple = ("2006-12-01T00:00:00Z", "2006-12-27T02:00:00Z")
+        items_with_tuple = list(collection.get_items(datetime=datetime_tuple))
+
+        # Test with list for comparison
+        datetime_list = ["2006-12-01T00:00:00Z", "2006-12-27T02:00:00Z"]
+        items_with_list = list(collection.get_items(datetime=datetime_list))
+
+        # Both should return the same number of items
+        assert items_with_tuple is not None
+        assert items_with_list is not None
+        assert len(items_with_tuple) == len(items_with_list)
+        assert len(items_with_tuple) == 16
+
+    def test_get_dataframe_with_tuple_datetime(self) -> None:
+        """Test that tuples are properly handled as datetime input for dataframes."""
+        client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
+        collection = client.get_collection("aster-l1t")
+
+        # Test with tuple instead of list
+        datetime_tuple = ("2006-01-01T00:00:00Z", "2007-01-01T00:00:00Z")
+        df_with_tuple = collection.get_dataframe(datetime=datetime_tuple)
+
+        # Test with list for comparison
+        datetime_list = ["2006-01-01T00:00:00Z", "2007-01-01T00:00:00Z"]
+        df_with_list = collection.get_dataframe(datetime=datetime_list)
+
+        # Both should return the same count
+        assert df_with_tuple is not None
+        assert df_with_list is not None
+        assert df_with_tuple.count() == df_with_list.count()
+        assert df_with_tuple.count() > 0
