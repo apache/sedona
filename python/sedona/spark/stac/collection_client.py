@@ -366,8 +366,10 @@ class CollectionClient:
             if datetime:
                 if isinstance(datetime, (str, python_datetime.datetime)):
                     datetime = [self._expand_date(str(datetime))]
-                elif isinstance(datetime, list) and isinstance(datetime[0], str):
-                    datetime = [datetime]
+                elif isinstance(datetime, (list, tuple)) and isinstance(
+                    datetime[0], str
+                ):
+                    datetime = [list(datetime)]
             # Apply spatial and temporal filters
             df = self._apply_spatial_temporal_filters(df, bbox, datetime)
         # Limit the number of items if max_items is specified
