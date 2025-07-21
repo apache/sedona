@@ -699,9 +699,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         frame._geometry_column_name = geo_column_name
         frame[geo_column_name] = level
-        # Later try getting assign to work to overwrite the column
-        # new_frame = frame.assign(**{geo_column_name: level})
-        # frame._update_internal_frame(new_frame._internal)
 
         if not inplace:
             return frame
@@ -763,13 +760,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 self.rename(columns=mapper, inplace=True, errors="raise")
                 self.set_geometry(col, inplace=True)
                 return None
-
-            # Old code: Neither version is working
-            # The same .rename().set_geometry() logic errors for this case, so we do it manually instead
-            # ps_series = self._psser_for((geometry_col,)).rename(col)
-            # sdf = self.copy()
-            # ps_series = sdf._psser_for((geometry_col,)).rename(col)
-            # sdf[col] = ps_series
 
             df = self.copy()
             df.rename(columns=mapper, inplace=True, errors="raise")

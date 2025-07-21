@@ -773,7 +773,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         >>> index.size
         2
         """
-        geometry_column = self.get_first_geometry_column()
+        geometry_column = _get_series_col_name(self)
         if geometry_column is None:
             raise ValueError("No geometry column found in GeoSeries")
         return SpatialIndex(self._internal.spark_frame, column_name=geometry_column)
@@ -3674,7 +3674,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             spark_df = data._internal.spark_frame
             assert len(schema) == 1
             spark_df = spark_df.withColumnRenamed(
-                _get_first_column_name(data), schema[0].name
+                _get_series_col_name(data), schema[0].name
             )
         else:
             spark_df = default_session().createDataFrame(data, schema=schema)
@@ -4030,12 +4030,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         if old_crs.is_exact_same(crs):
             return self
 
-        # col = self.get_first_geometry_column()
-        # return self._query_geometry_column(
-        #     f"ST_Transform(`{col}`, 'EPSG:{old_crs.to_epsg()}', 'EPSG:{crs.to_epsg()}')",
-        #     col,
-        #     "",
-        # )
         spark_expr = stf.ST_Transform(
             self.spark.column,
             F.lit(f"EPSG:{old_crs.to_epsg()}"),
@@ -4074,26 +4068,16 @@ class GeoSeries(GeoFrame, pspd.Series):
         1  POLYGON ((0 0, 1 1, 1 0, 0 0))   0.0   0.0   1.0   1.0
         2           LINESTRING (0 1, 1 2)   0.0   1.0   1.0   2.0
         """
-        col = self.get_first_geometry_column()
-
         selects = [
-            f"ST_XMin(`{col}`) as minx",
-            f"ST_YMin(`{col}`) as miny",
-            f"ST_XMax(`{col}`) as maxx",
-            f"ST_YMax(`{col}`) as maxy",
+            stf.ST_XMin(self.spark.column).alias("minx"),
+            stf.ST_YMin(self.spark.column).alias("miny"),
+            stf.ST_XMax(self.spark.column).alias("maxx"),
+            stf.ST_YMax(self.spark.column).alias("maxy"),
         ]
 
         df = self._internal.spark_frame
 
-        data_type = df.schema[col].dataType
-
-        if isinstance(data_type, BinaryType):
-            selects = [
-                select.replace(f"`{col}`", f"ST_GeomFromWKB(`{col}`)")
-                for select in selects
-            ]
-
-        sdf = df.selectExpr(*selects)
+        sdf = df.select(*selects)
         internal = InternalFrame(
             spark_frame=sdf,
             index_spark_columns=None,
@@ -4378,10 +4362,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         self.rename(result.name, inplace=True)
         self._update_anchor(result._anchor)
 
-    # TODO: remove this method and call _get_series_col_name directly
-    def get_first_geometry_column(self) -> str:
-        return _get_series_col_name(self)
-
     def _make_series_of_val(self, value: Any):
         """
         A helper method to turn single objects into series (ps.Series or GeoSeries when possible)
@@ -4408,44 +4388,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
 
 def _get_series_col_name(ps_series: pspd.Series) -> str:
-    series_name = ps_series.name if ps_series.name else SPARK_DEFAULT_SERIES_NAME
-    spark_col_names = set(ps_series._internal.spark_frame.columns)
-    return series_name
-    if series_name in spark_col_names:
-        return series_name
-    # Combining different frames (e.g in the GeoDataFrame.setitem method adds these prefixes
-    # It's easier to check for them at read time than rename them at write time
-    # For GeoDataFrame.setitem, the left ("this") side if not overridden, so we always prefer the right ("that") side
-    # which is why it needs to come first in the if/elif/else sequence
-    elif f"__that_{series_name}" in spark_col_names:
-        return f"__that_{series_name}"
-    elif f"__this_{series_name}" in spark_col_names:
-        return f"__this_{series_name}"
-    else:
-        raise ValueError(
-            f"Series name {series_name} not found in spark_col_names {spark_col_names}"
-        )
-
-
-def _get_first_column_name(series: pspd.Series) -> str:
-    """
-    Get the first column name of a Series.
-
-    Parameters:
-    - series: The input Series.
-
-    Returns:
-    - str: The first column name of the Series.
-    """
-    return next(
-        field.name
-        for field in series._internal.spark_frame.schema.fields
-        if field.name not in (SPARK_DEFAULT_INDEX_NAME, NATURAL_ORDER_COLUMN_NAME)
-    )
-
-
-def _to_spark_pandas_df(ps_series: pspd.Series) -> pspd.DataFrame:
-    return pspd.DataFrame(ps_series._psdf._internal)
+    return ps_series.name if ps_series.name else SPARK_DEFAULT_SERIES_NAME
 
 
 def to_bool(ps_series: pspd.Series, default: bool = False) -> pspd.Series:
