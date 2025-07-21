@@ -29,7 +29,7 @@ import org.apache.spark.sql.sedona_sql.expressions.{InferredExpression, SerdeAwa
 import org.apache.spark.sql.types.{ArrayType, _}
 import org.locationtech.jts.geom.Geometry
 
-case class ST_Collect(inputExpressions: Seq[Expression])
+private[apache] case class ST_Collect(inputExpressions: Seq[Expression])
     extends Expression
     with SerdeAware
     with CodegenFallback {

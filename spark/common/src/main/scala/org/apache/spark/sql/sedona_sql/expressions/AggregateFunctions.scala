@@ -54,7 +54,7 @@ trait TraitSTAggregateExec {
   def finish(out: Geometry): Geometry = out
 }
 
-class ST_Union_Aggr(bufferSize: Int = 1000)
+private[apache] class ST_Union_Aggr(bufferSize: Int = 1000)
     extends Aggregator[Geometry, ListBuffer[Geometry], Geometry] {
 
   val serde = ExpressionEncoder[Geometry]()
@@ -98,7 +98,7 @@ class ST_Union_Aggr(bufferSize: Int = 1000)
 /**
  * Return the envelope boundary of the entire column
  */
-class ST_Envelope_Aggr
+private[apache] class ST_Envelope_Aggr
     extends Aggregator[Geometry, Geometry, Geometry]
     with TraitSTAggregateExec {
 
@@ -176,7 +176,7 @@ class ST_Envelope_Aggr
 /**
  * Return the polygon intersection of all Polygon in the given column
  */
-class ST_Intersection_Aggr
+private[apache] class ST_Intersection_Aggr
     extends Aggregator[Geometry, Geometry, Geometry]
     with TraitSTAggregateExec {
   def reduce(buffer: Geometry, input: Geometry): Geometry = {
