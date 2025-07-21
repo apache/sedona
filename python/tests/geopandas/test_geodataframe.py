@@ -19,6 +19,7 @@ import tempfile
 
 from shapely.geometry import (
     Point,
+    Polygon,
 )
 import shapely
 
@@ -53,7 +54,38 @@ class TestDataframe(TestGeopandasBase):
         sgpd_df = GeoDataFrame(obj)
         check_geodataframe(sgpd_df)
 
-    # These need to be separate to make sure Sedona's Geometry UDTs have been registered
+    @pytest.mark.parametrize(
+        "obj",
+        [
+            pd.DataFrame(
+                {
+                    "non-geom": [1, 2, 3],
+                    "geometry": [
+                        Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]) for _ in range(3)
+                    ],
+                }
+            ),
+            gpd.GeoDataFrame(
+                {
+                    "geom2": [Point(x, x) for x in range(3)],
+                    "non-geom": [4, 5, 6],
+                    "geometry": [
+                        Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]) for _ in range(3)
+                    ],
+                }
+            ),
+        ],
+    )
+    def test_complex_df(self, obj):
+        sgpd_df = GeoDataFrame(obj)
+        name = "geometry"
+        sgpd_df.set_geometry(name, inplace=True)
+        check_geodataframe(sgpd_df)
+        result = sgpd_df.area
+        expected = pd.Series([1.0, 1.0, 1.0], name=name)
+        self.check_pd_series_equal(result, expected)
+
+    # These need to be defined inside the function to ensure Sedona's Geometry UDTs have been registered
     def test_constructor_pandas_on_spark(self):
         for obj in [
             ps.DataFrame([Point(x, x) for x in range(3)]),

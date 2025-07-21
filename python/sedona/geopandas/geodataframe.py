@@ -445,9 +445,12 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 assert index is None
                 assert dtype is None
                 assert not copy
-                df = data
+                # Need to convert GeoDataFrame to pd.DataFrame for below cast to work
+                pd_df = (
+                    pd.DataFrame(data) if isinstance(data, gpd.GeoDataFrame) else data
+                )
             else:
-                df = pd.DataFrame(
+                pd_df = pd.DataFrame(
                     data=data,
                     index=index,
                     dtype=dtype,
@@ -455,7 +458,8 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 )
 
             # Spark complains if it's left as a geometry type
-            pd_df = df.astype(object)
+            geom_type_cols = pd_df.select_dtypes(include=["geometry"]).columns
+            pd_df[geom_type_cols] = pd_df[geom_type_cols].astype(object)
 
             # initialize the parent class pyspark Dataframe with the pandas Dataframe
             super().__init__(
