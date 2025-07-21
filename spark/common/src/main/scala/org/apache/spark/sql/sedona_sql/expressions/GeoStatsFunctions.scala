@@ -31,8 +31,6 @@ import org.apache.spark.sql.types._
 
 case class ST_DBSCAN(children: Seq[Expression]) extends DataframePhysicalFunction {
 
-  lazy val conf = SedonaConf.fromActiveSession() // only access on driver
-
   override def dataType: DataType =
     StructType(Seq(StructField("isCore", BooleanType), StructField("cluster", LongType)))
 
