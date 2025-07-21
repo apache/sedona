@@ -20,6 +20,7 @@ import numpy as np
 import pytest
 import pandas as pd
 import geopandas as gpd
+import pyspark.pandas as ps
 import sedona.geopandas as sgpd
 from sedona.geopandas import GeoSeries
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
@@ -64,6 +65,18 @@ class TestGeoSeries(TestGeopandasBase):
     def test_empty_list(self):
         s = sgpd.GeoSeries([])
         assert s.count() == 0
+
+    def test_non_geom_fails(self):
+        with pytest.raises(TypeError):
+            GeoSeries([0, 1, 2])
+        with pytest.raises(TypeError):
+            GeoSeries([0, 1, 2], crs="epsg:4326")
+        with pytest.raises(TypeError):
+            GeoSeries(["a", "b", "c"])
+        with pytest.raises(TypeError):
+            GeoSeries(pd.Series([0, 1, 2]), crs="epsg:4326")
+        with pytest.raises(TypeError):
+            GeoSeries(ps.Series([0, 1, 2]))
 
     def test_area(self):
         result = self.geoseries.area.to_pandas()

@@ -39,6 +39,7 @@ from pandas.api.extensions import register_extension_dtype
 from geopandas.geodataframe import crs_mismatch_error
 from geopandas.array import GeometryDtype
 from shapely.geometry.base import BaseGeometry
+from pyspark.pandas.internal import SPARK_DEFAULT_INDEX_NAME, NATURAL_ORDER_COLUMN_NAME
 
 register_extension_dtype(GeometryDtype)
 
@@ -344,7 +345,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
             # Here we are getting a ps.Series with the same underlying anchor (ps.Dataframe).
             # This is important so we don't unnecessarily try to perform operations on different dataframes
-            ps_series = pspd.DataFrame.__getitem__(self, column_name)
+            ps_series: pspd.Series = pspd.DataFrame.__getitem__(self, column_name)
 
             try:
                 result = sgpd.GeoSeries(ps_series)
@@ -630,13 +631,14 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                     "`set_geometry` when this is the case."
                 )
                 warnings.warn(msg, category=FutureWarning, stacklevel=2)
-            if isinstance(col, (pspd.Series, pd.Series)) and col.name is not None:
-                geo_column_name = col.name
-
-            level = col
-
-            if not isinstance(level, pspd.Series):
-                level = pspd.Series(level)
+            if isinstance(col, (pspd.Series, pd.Series)):
+                if col.name is not None:
+                    geo_column_name = col.name
+                    level = col
+                else:
+                    level = col.rename(geo_column_name)
+            else:
+                level = pspd.Series(col, name=geo_column_name)
         elif hasattr(col, "ndim") and col.ndim > 1:
             raise ValueError("Must pass array with one dimension only.")
         else:  # should be a colname
@@ -693,6 +695,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         frame._geometry_column_name = geo_column_name
         frame[geo_column_name] = level
+        # Later try getting assign to work to overwrite the column
+        # new_frame = frame.assign(**{geo_column_name: level})
+        # frame._update_internal_frame(new_frame._internal)
 
         if not inplace:
             return frame
@@ -746,17 +751,26 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         if col in self.columns:
             raise ValueError(f"Column named {col} already exists")
         else:
+            mapper = {col: col for col in list(self.columns)}
+            mapper[geometry_col] = col
+
+            # mapper = {geometry_col: col}
             if inplace:
-                self.rename(columns={geometry_col: col}, inplace=inplace)
-                self.set_geometry(col, inplace=inplace)
+                self.rename(columns=mapper, inplace=True, errors="raise")
+                self.set_geometry(col, inplace=True)
                 return None
 
+            # Old code: Neither version is working
             # The same .rename().set_geometry() logic errors for this case, so we do it manually instead
-            ps_series = self._psser_for((geometry_col,)).rename(col)
-            sdf = self.copy()
-            sdf[col] = ps_series
-            sdf = sdf.set_geometry(col)
-            return sdf
+            # ps_series = self._psser_for((geometry_col,)).rename(col)
+            # sdf = self.copy()
+            # ps_series = sdf._psser_for((geometry_col,)).rename(col)
+            # sdf[col] = ps_series
+
+            df = self.copy()
+            df.rename(columns=mapper, inplace=True, errors="raise")
+            df.set_geometry(col, inplace=True)
+            return df
 
     # ============================================================================
     # PROPERTIES AND ATTRIBUTES

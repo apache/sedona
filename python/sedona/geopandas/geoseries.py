@@ -42,6 +42,7 @@ from sedona.geopandas.sindex import SpatialIndex
 from pyspark.pandas.internal import (
     SPARK_DEFAULT_INDEX_NAME,  # __index_level_0__
     NATURAL_ORDER_COLUMN_NAME,
+    SPARK_DEFAULT_SERIES_NAME,  # '0'
 )
 
 
@@ -434,19 +435,13 @@ class GeoSeries(GeoFrame, pspd.Series):
             super().__init__(data=pd_series)
 
         # Ensure we're storing geometry types
-        col = next(
-            field.name
-            for field in self._internal.spark_frame.schema.fields
-            if field.name not in (NATURAL_ORDER_COLUMN_NAME, SPARK_DEFAULT_INDEX_NAME)
-        )
-        datatype = self._internal.spark_frame.schema[col].dataType
-        # Empty lists input will lead to NullType(), so we convert to GeometryType()
-        if datatype == NullType():
-            self._internal.spark_frame.schema[col].dataType = GeometryType()
-        elif datatype != GeometryType():
+        if (
+            self.spark.data_type != GeometryType()
+            and self.spark.data_type != NullType()
+        ):
             raise TypeError(
                 "Non geometry data passed to GeoSeries constructor, "
-                f"received data of dtype '{datatype.typeName()}'"
+                f"received data of dtype '{self.spark.data_type.typeName()}'"
             )
 
         if crs:
@@ -632,7 +627,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         result = self._query_geometry_column(select, col, rename="")
 
         if inplace:
-            self._update_anchor(_to_spark_pandas_df(result))
+            self._update_inplace(result)
             return None
 
         return result
@@ -712,7 +707,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         cols : List[str] or str
             The names of the columns to query.
         rename : str
-            The name of the resulting column.
+            The name of the resulting column. TODO: remove this parameter once everything is confirmed working
         df : pyspark.sql.DataFrame
             The dataframe to query. If not provided, the internal dataframe will be used.
         returns_geom : bool, default True
@@ -730,24 +725,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         df = self._internal.spark_frame if df is None else df
 
-        if isinstance(cols, str):
-            col = cols
-            data_type = df.schema[col].dataType
-            if isinstance(data_type, BinaryType):
-                query = query.replace(f"`{cols}`", f"ST_GeomFromWKB(`{cols}`)")
-
-            rename = col if not rename else rename
-
-        elif isinstance(cols, list):
-            for col in cols:
-                data_type = df.schema[col].dataType
-
-                if isinstance(data_type, BinaryType):
-                    # the backticks here are important so we don't match strings that happen to be the same as the column name
-                    query = query.replace(f"`{col}`", f"ST_GeomFromWKB(`{col}`)")
-
-            # must have rename for multiple columns since we don't know which name to default to
-            assert rename
+        rename = self.name if self.name else SPARK_DEFAULT_SERIES_NAME
 
         query = f"{query} as `{rename}`"
 
@@ -776,7 +754,12 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
         ps_series = first_series(PandasOnSparkDataFrame(internal))
 
-        return GeoSeries(ps_series) if returns_geom else ps_series
+        # Convert spark series default name to pandas series default name (None) if needed
+        series_name = None if rename == SPARK_DEFAULT_SERIES_NAME else rename
+        ps_series = ps_series.rename(series_name)
+
+        result = GeoSeries(ps_series) if returns_geom else ps_series
+        return result
 
     # ============================================================================
     # CONVERSION AND SERIALIZATION METHODS
@@ -2718,7 +2701,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             col(SPARK_DEFAULT_INDEX_NAME),
         )
         other_df = other._internal.spark_frame.select(
-            col(_get_first_column_name(other)).alias("R"),
+            col(_get_series_col_name(other)).alias("R"),
             # for the right side, we only need the column that we are joining on
             col(index_col),
         )
@@ -3590,6 +3573,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             )
 
         col = self.get_first_geometry_column()
+        rename = "fillna"
         if pd.isna(value) == True or isinstance(value, BaseGeometry):
             if (
                 value is not None and pd.isna(value) == True
@@ -3604,7 +3588,7 @@ class GeoSeries(GeoFrame, pspd.Series):
                 value = f"ST_GeomFromText('{value.wkt}')"
 
             select = f"COALESCE(`{col}`, {value})"
-            result = self._query_geometry_column(select, col, "")
+            result = self._query_geometry_column(select, col, rename, returns_geom=True)
         elif isinstance(value, (GeoSeries, GeometryArray, gpd.GeoSeries)):
 
             if not isinstance(value, GeoSeries):
@@ -3619,7 +3603,7 @@ class GeoSeries(GeoFrame, pspd.Series):
                 select,
                 value,
                 align=None,
-                rename="fillna",
+                rename=rename,
                 returns_geom=True,
                 default_val=None,
             )
@@ -3627,7 +3611,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             raise ValueError(f"Invalid value type: {type(value)}")
 
         if inplace:
-            self._update_anchor(_to_spark_pandas_df(result))
+            self._update_inplace(result)
             return None
 
         return result
@@ -4074,27 +4058,38 @@ class GeoSeries(GeoFrame, pspd.Series):
     # # Utils
     # -----------------------------------------------------------------------------
 
-    def get_first_geometry_column(self) -> str:
-        first_binary_or_geometry_col = next(
-            (
-                field.name
-                for field in self._internal.spark_frame.schema.fields
-                if isinstance(field.dataType, BinaryType)
-                or field.dataType.typeName() == "geometrytype"
-            ),
-            None,
-        )
-        if first_binary_or_geometry_col:
-            return first_binary_or_geometry_col
+    def _update_inplace(self, result: "GeoSeries"):
+        self.rename(result.name, inplace=True)
+        self._update_anchor(result._anchor)
 
-        raise ValueError(
-            "get_first_geometry_column: No geometry column found in the GeoSeries."
-        )
+    # TODO: remove this method and call _get_series_col_name directly
+    def get_first_geometry_column(self) -> str:
+        return _get_series_col_name(self)
 
 
 # -----------------------------------------------------------------------------
 # # Utils
 # -----------------------------------------------------------------------------
+
+
+def _get_series_col_name(ps_series: pspd.Series) -> str:
+    series_name = ps_series.name if ps_series.name else SPARK_DEFAULT_SERIES_NAME
+    spark_col_names = set(ps_series._internal.spark_frame.columns)
+
+    if series_name in spark_col_names:
+        return series_name
+    # Combining different frames (e.g in the GeoDataFrame.setitem method adds these prefixes
+    # It's easier to check for them at read time than rename them at write time
+    # For GeoDataFrame.setitem, the left ("this") side if not overridden, so we always prefer the right ("that") side
+    # which is why it needs to come first in the if/elif/else sequence
+    elif f"__that_{series_name}" in spark_col_names:
+        return f"__that_{series_name}"
+    elif f"__this_{series_name}" in spark_col_names:
+        return f"__this_{series_name}"
+    else:
+        raise ValueError(
+            f"Series name {series_name} not found in spark_col_names {spark_col_names}"
+        )
 
 
 def _get_first_column_name(series: pspd.Series) -> str:
