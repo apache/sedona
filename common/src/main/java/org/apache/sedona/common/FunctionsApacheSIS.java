@@ -85,16 +85,16 @@ public class FunctionsApacheSIS {
    * @param geometry the geometry to transform, or {@code null}.
    * @param sourceCRScode the source coordinate reference system code, or {@code null}.
    * @param targetCRScode the target coordinate reference system code, or {@code null}.
-   * @param lenient whether to be lenient in case of failure to find the operation.
    * @param aoi the area of interest to use for the transformation, or {@code null}.
+   * @param lenient whether to be lenient in case of failure to find the operation.
    * @return the transformed geometry, or the same geometry if it is already in target CRS.
    */
   public static Geometry transform(
       Geometry geometry,
       String sourceCRScode,
       String targetCRScode,
-      boolean lenient,
-      Geometry aoi) {
+      Geometry aoi,
+      boolean lenient) {
     GeographicBoundingBox bboxAOI = CachedAreaOfInterestFinder.findAOI(aoi, sourceCRScode);
     return transformToGivenTarget(geometry, sourceCRScode, targetCRScode, lenient, bboxAOI);
   }

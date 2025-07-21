@@ -4001,7 +4001,7 @@ public class FunctionsTest extends TestBase {
     Geometry aoi =
         GEOMETRY_FACTORY.createPolygon(
             coordArray(-122, 39, -107, 39, -107, 47, -122, 47, -122, 39));
-    geomActual = FunctionsApacheSIS.transform(geomInput, NAD27, NAD83, true, aoi);
+    geomActual = FunctionsApacheSIS.transform(geomInput, NAD27, NAD83, aoi, true);
     assertEquals(-110.0007450884, geomActual.getCoordinate().x, 1E-2);
     assertEquals(44.99994350267, geomActual.getCoordinate().y, 1E-2);
     assertEquals(nad83Srid, geomActual.getSRID());
