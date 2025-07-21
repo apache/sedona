@@ -44,9 +44,13 @@ class TestBase:
 
             builder = SedonaContext.builder().appName("SedonaSparkTest")
             if SPARK_REMOTE:
-                builder = builder.remote(SPARK_REMOTE).config(
-                    "spark.sql.extensions",
-                    "org.apache.sedona.sql.SedonaSqlExtensions",
+                builder = (
+                    builder.remote(SPARK_REMOTE)
+                    .config(
+                        "spark.sql.extensions",
+                        "org.apache.sedona.sql.SedonaSqlExtensions",
+                    )
+                    .config("spark.checkpoint.dir", mkdtemp())
                 )
 
                 # Connect is packaged with Spark 4+
