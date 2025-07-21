@@ -18,6 +18,7 @@
 import pytest
 import shutil
 import tempfile
+import shapely
 from shapely.geometry import (
     Point,
     Polygon,
@@ -36,6 +37,10 @@ from tests.geopandas.test_geopandas_base import TestGeopandasBase
 import pyspark.pandas as ps
 
 
+@pytest.mark.skipif(
+    parse_version(shapely.__version__) < parse_version("2.0.0"),
+    reason=f"Tests require shapely>=2.0.0, but found v{shapely.__version__}",
+)
 class TestMatchGeopandasDataFrame(TestGeopandasBase):
     def setup_method(self):
         self.tempdir = tempfile.mkdtemp()
