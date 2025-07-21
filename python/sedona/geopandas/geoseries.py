@@ -1211,13 +1211,16 @@ class GeoSeries(GeoFrame, pspd.Series):
                 "Array-like distance for dwithin not implemented yet."
             )
 
+        other_series, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
+        spark_expr = stp.ST_DWithin(F.col("L"), F.col("R"), F.lit(distance))
         return self._row_wise_operation(
-            f"ST_DWithin(`L`, `R`, {distance})",
-            other,
-            align,
-            rename="dwithin",
+            spark_expr,
+            other_series,
+            align=align,
             returns_geom=False,
-            default_val="FALSE",
+            default_val=False,
         )
 
     def difference(self, other, align=None) -> "GeoSeries":
@@ -1321,11 +1324,15 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.union
         GeoSeries.intersection
         """
+
+        other_series, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
+        spark_expr = stf.ST_Difference(F.col("L"), F.col("R"))
         return self._row_wise_operation(
-            "ST_Difference(`L`, `R`)",
-            other,
-            align,
-            rename="difference",
+            spark_expr,
+            other_series,
+            align=align,
             returns_geom=True,
         )
 
@@ -1527,12 +1534,15 @@ class GeoSeries(GeoFrame, pspd.Series):
             .otherwise(F.col("R")),
         )
 
-        other = self._make_series_of_val(index)
+        other, _ = self._make_series_of_val(index)
+
+        # align = False either way
+        align = False
 
         return self._row_wise_operation(
             spark_expr,
             other,
-            align=False,
+            align=align,
             returns_geom=True,
             default_val=None,
         )
@@ -2014,7 +2024,9 @@ class GeoSeries(GeoFrame, pspd.Series):
             ELSE ST_Crosses(`L`, `R`)
         END
         """
-        other_series = self._make_series_of_val(other)
+        other_series, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
         spark_expr = F.when(
             (stf.GeometryType(F.col("L")) == "GEOMETRYCOLLECTION")
             | (stf.GeometryType(F.col("R")) == "GEOMETRYCOLLECTION"),
@@ -2141,7 +2153,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.intersection
         """
 
-        other_series = self._make_series_of_val(other)
+        other_series, extended = self._make_series_of_val(other)
+        align = False if extended else align
 
         spark_expr = stp.ST_Intersects(F.col("L"), F.col("R"))
         result = self._row_wise_operation(
@@ -2244,7 +2257,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Note: We cannot efficiently match geopandas behavior because Sedona's ST_Overlaps returns True for equal geometries
         # ST_Overlaps(`L`, `R`) AND ST_Equals(`L`, `R`) does not work because ST_Equals errors on invalid geometries
 
-        other_series = self._make_series_of_val(other)
+        other_series, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
         spark_expr = stp.ST_Overlaps(F.col("L"), F.col("R"))
         result = self._row_wise_operation(
             spark_expr,
@@ -2358,7 +2373,9 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         """
 
-        other_series = self._make_series_of_val(other)
+        other_series, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
         spark_expr = stp.ST_Touches(F.col("L"), F.col("R"))
         result = self._row_wise_operation(
             spark_expr,
@@ -2475,7 +2492,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.contains
         """
 
-        other_series = self._make_series_of_val(other)
+        other_series, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
         spark_expr = stp.ST_Within(F.col("L"), F.col("R"))
         result = self._row_wise_operation(
             spark_expr,
@@ -2593,7 +2612,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.overlaps
         """
 
-        other_series = self._make_series_of_val(other)
+        other_series, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
         spark_expr = stp.ST_Covers(F.col("L"), F.col("R"))
         result = self._row_wise_operation(
             spark_expr,
@@ -2711,7 +2732,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.overlaps
         """
 
-        other_series = self._make_series_of_val(other)
+        other_series, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
         spark_expr = stp.ST_CoveredBy(F.col("L"), F.col("R"))
         result = self._row_wise_operation(
             spark_expr,
@@ -2808,7 +2831,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         dtype: float64
         """
 
-        other_series = self._make_series_of_val(other)
+        other_series, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
         spark_expr = stf.ST_Distance(F.col("L"), F.col("R"))
         result = self._row_wise_operation(
             spark_expr,
@@ -2921,7 +2946,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.union
         """
 
-        other_series = self._make_series_of_val(other)
+        other_series, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
         spark_expr = stf.ST_Intersection(F.col("L"), F.col("R"))
         result = self._row_wise_operation(
             spark_expr,
@@ -3002,7 +3029,7 @@ class GeoSeries(GeoFrame, pspd.Series):
     def _row_wise_operation(
         self,
         spark_col: PySparkColumn,
-        other: Any,
+        other: pspd.Series,
         align: Union[bool, None],
         returns_geom: bool = False,
         default_val: Any = None,
@@ -3010,6 +3037,15 @@ class GeoSeries(GeoFrame, pspd.Series):
         """
         Helper function to perform a row-wise operation on two GeoSeries.
         The self column and other column are aliased to `L` and `R`, respectively.
+
+        align : bool or None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved.
+            Note: align should also be set to False when 'other' a geoseries created from a single object
+            (e.g. GeoSeries([Point(0, 0) * len(self)])), so that we align based on natural ordering in case
+            the index is not the default range index from 0.
+            Alternatively, we could create 'other' using the same index as self,
+            but that would require index=self.index.to_pandas() which is less scalable.
 
         default_val : str or None (default "FALSE")
             The value to use if either L or R is null. If None, nulls are not handled.
@@ -3020,23 +3056,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         index_col = (
             NATURAL_ORDER_COLUMN_NAME if align is False else SPARK_DEFAULT_INDEX_NAME
         )
-
-        if not isinstance(other, pspd.Series):
-            # generator instead of a in-memory list
-            data = [other for _ in range(len(self))]
-
-            # e.g int, Geom, etc
-            other = (
-                GeoSeries(data)
-                if isinstance(other, BaseGeometry)
-                else pspd.Series(data)
-            )
-
-            # To make sure the result is the same length, we set natural column as the index
-            # in case the index is not the default range index from 0.
-            # Alternatively, we could create 'other' using the same index as self,
-            # but that would require index=self.index.to_pandas() which is less scalable.
-            index_col = NATURAL_ORDER_COLUMN_NAME
 
         # This code assumes there is only one index (SPARK_DEFAULT_INDEX_NAME)
         # and would need to be updated if Sedona later supports multi-index
@@ -3197,7 +3216,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.within
         """
 
-        other = self._make_series_of_val(other)
+        other, extended = self._make_series_of_val(other)
+        align = False if extended else align
 
         spark_col = stp.ST_Contains(F.col("L"), F.col("R"))
         result = self._row_wise_operation(
@@ -3945,7 +3965,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
                     value = GeometryCollection()
 
-            other = self._make_series_of_val(value)
+            other, _ = self._make_series_of_val(value)
 
         elif isinstance(value, (GeoSeries, GeometryArray, gpd.GeoSeries)):
 
@@ -3958,12 +3978,15 @@ class GeoSeries(GeoFrame, pspd.Series):
         else:
             raise ValueError(f"Invalid value type: {type(value)}")
 
+        # False either way
+        align = False
+
         # Coalesce: If the value in L is null, use the corresponding value in R for that row
         spark_expr = F.coalesce(F.col("L"), F.col("R"))
         result = self._row_wise_operation(
             spark_expr,
             other,
-            align=None,
+            align=align,
             returns_geom=True,
             default_val=None,
         )
@@ -4426,15 +4449,24 @@ class GeoSeries(GeoFrame, pspd.Series):
     def get_first_geometry_column(self) -> str:
         return _get_series_col_name(self)
 
-    def _make_series_of_val(self, value: Any) -> pspd.Series:
-        if isinstance(value, BaseGeometry):
-            return GeoSeries([value] * len(self))
-
-        # e.g int input
+    def _make_series_of_val(self, value: Any) -> tuple[pspd.Series, bool]:
+        """
+        A helper method to turn single objects into series (ps.Series or GeoSeries when possible)
+        Returns:
+            tuple[pspd.Series, bool]:
+                - The series of the value
+                - Whether returned value was a single object extended into a series (useful for row-wise 'align' parameter)
+        """
+        # generator instead of a in-memory list
         if not isinstance(value, pspd.Series):
-            return pspd.Series([value] * len(self))
+            lst = [value for _ in range(len(self))]
+            if isinstance(value, BaseGeometry):
+                return GeoSeries(lst), True
+            else:
+                # e.g int input
+                return pspd.Series(lst), True
         else:
-            return value
+            return value, False
 
 
 # -----------------------------------------------------------------------------
