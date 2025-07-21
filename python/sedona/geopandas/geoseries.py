@@ -4382,7 +4382,7 @@ class GeoSeries(GeoFrame, pspd.Series):
     def get_first_geometry_column(self) -> str:
         return _get_series_col_name(self)
 
-    def _make_series_of_val(self, value: Any) -> tuple[pspd.Series, bool]:
+    def _make_series_of_val(self, value: Any):
         """
         A helper method to turn single objects into series (ps.Series or GeoSeries when possible)
         Returns:
