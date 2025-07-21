@@ -126,5 +126,19 @@ public class WKTReadWriterTest {
     assertEquals(
         polygon,
         writeWithPrecision(reader.read(polygon), new PrecisionModel(PrecisionModel.FIXED)));
+    String multipoint = "MULTIPOINT EMPTY";
+    assertEquals(
+            multipoint, writeWithPrecision(reader.read(multipoint), new PrecisionModel(PrecisionModel.FIXED)));
+    String multiline = "MULTILINESTRING EMPTY";
+    assertEquals(
+            multiline, writeWithPrecision(reader.read(multiline), new PrecisionModel(PrecisionModel.FIXED)));
+    String multipolygon = "MULTIPOLYGON EMPTY";
+    assertEquals(
+            multipolygon,
+            writeWithPrecision(reader.read(multipolygon), new PrecisionModel(PrecisionModel.FIXED)));
+    String collection = "GEOMETRYCOLLECTION EMPTY";
+    assertEquals(
+            collection,
+            writeWithPrecision(reader.read(collection), new PrecisionModel(PrecisionModel.FIXED)));
   }
 }

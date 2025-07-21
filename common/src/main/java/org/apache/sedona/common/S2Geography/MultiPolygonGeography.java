@@ -19,6 +19,9 @@
 package org.apache.sedona.common.S2Geography;
 
 import com.google.common.geometry.S2Polygon;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,9 +36,12 @@ public class MultiPolygonGeography extends GeographyCollection {
             .map(PolygonGeography::new) // wrap each S2Polygon
             .collect(Collectors.toList())); // into a List<PolygonGeography>
     if (polygons.isEmpty()) {
-      throw new IllegalArgumentException("Must supply at least one polygon");
+      new MultiPolygonGeography();
     }
   }
+
+  public MultiPolygonGeography() {super(Collections.emptyList());}
+
 
   public List<S2Geography> getFeatures() {
     return features;

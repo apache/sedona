@@ -24,7 +24,6 @@ import static org.junit.Assert.assertTrue;
 
 import com.esotericsoftware.kryo.io.UnsafeInput;
 import com.google.common.geometry.*;
-import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
