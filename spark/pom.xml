@@ -38,6 +38,7 @@
 
     <modules>
         <module>common</module>
+        <module>iceberg</module>
         <module>spark-${spark.compat.version}</module>
     </modules>
 
