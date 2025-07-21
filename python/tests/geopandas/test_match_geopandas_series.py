@@ -478,6 +478,55 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
     def test_count_interior_rings(self):
         pass
 
+    def test_dwithin(self):
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            pytest.skip("geopandas < 1.0.0 does not support dwithin")
+
+        for i, (_, geom) in enumerate(self.geoms):
+            for _, geom2 in self.geoms[i:]:
+                sgpd_result = GeoSeries(geom).dwithin(GeoSeries(geom2), distance=1)
+                gpd_result = gpd.GeoSeries(geom).dwithin(
+                    gpd.GeoSeries(geom2), distance=1
+                )
+                self.check_pd_series_equal(sgpd_result, gpd_result)
+
+                if len(geom) == len(geom2):
+                    sgpd_result = GeoSeries(geom).dwithin(
+                        GeoSeries(geom2), distance=1, align=False
+                    )
+                    gpd_result = gpd.GeoSeries(geom).dwithin(
+                        gpd.GeoSeries(geom2), distance=1, align=False
+                    )
+                    self.check_pd_series_equal(sgpd_result, gpd_result)
+
+    def test_difference(self):
+        for i, (_, geom) in enumerate(self.geoms):
+            for _, geom2 in self.geoms[i:]:
+                # Sedona doesn't support difference for GeometryCollections
+                if isinstance(geom[0], GeometryCollection) or isinstance(
+                    geom2[0], GeometryCollection
+                ):
+                    continue
+                # Operation doesn't work on invalid geometries
+                if (
+                    not gpd.GeoSeries(geom).is_valid.all()
+                    or not gpd.GeoSeries(geom2).is_valid.all()
+                ):
+                    continue
+
+                sgpd_result = GeoSeries(geom).difference(GeoSeries(geom2))
+                gpd_result = gpd.GeoSeries(geom).difference(gpd.GeoSeries(geom2))
+                self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+                if len(geom) == len(geom2):
+                    sgpd_result = GeoSeries(geom).difference(
+                        GeoSeries(geom2), align=False
+                    )
+                    gpd_result = gpd.GeoSeries(geom).difference(
+                        gpd.GeoSeries(geom2), align=False
+                    )
+                    self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
     def test_is_simple(self):
         data = [
             LineString([(0, 0), (0, 0)]),
