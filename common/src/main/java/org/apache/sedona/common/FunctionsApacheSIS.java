@@ -20,11 +20,13 @@ package org.apache.sedona.common;
 
 import static org.apache.sis.referencing.IdentifiedObjects.lookupEPSG;
 
+import org.apache.sedona.common.utils.CachedAreaOfInterestFinder;
 import org.apache.sis.referencing.CRS;
 import org.apache.sis.referencing.crs.AbstractCRS;
 import org.apache.sis.referencing.cs.AxesConvention;
 import org.apache.sis.util.Classes;
 import org.locationtech.jts.geom.*;
+import org.opengis.metadata.extent.GeographicBoundingBox;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.CoordinateOperation;
@@ -46,7 +48,7 @@ public class FunctionsApacheSIS {
    * @return the transformed geometry, or the same geometry if it is already in target CRS.
    */
   public static Geometry transform(Geometry geometry, String targetCRS) {
-    return transformToGivenTarget(geometry, null, targetCRS, true);
+    return transformToGivenTarget(geometry, null, targetCRS, true, null);
   }
 
   /**
@@ -60,7 +62,7 @@ public class FunctionsApacheSIS {
    * @return the transformed geometry, or the same geometry if it is already in target CRS.
    */
   public static Geometry transform(Geometry geometry, String sourceCRS, String targetCRS) {
-    return transformToGivenTarget(geometry, sourceCRS, targetCRS, true);
+    return transformToGivenTarget(geometry, sourceCRS, targetCRS, true, null);
   }
 
   /**
@@ -74,11 +76,35 @@ public class FunctionsApacheSIS {
    */
   public static Geometry transform(
       Geometry geometry, String sourceCRScode, String targetCRScode, boolean lenient) {
-    return transformToGivenTarget(geometry, sourceCRScode, targetCRScode, lenient);
+    return transformToGivenTarget(geometry, sourceCRScode, targetCRScode, lenient, null);
+  }
+
+  /**
+   * Transforms the given geometry to the specified Coordinate Reference System (CRS). If the given
+   *
+   * @param geometry the geometry to transform, or {@code null}.
+   * @param sourceCRScode the source coordinate reference system code, or {@code null}.
+   * @param targetCRScode the target coordinate reference system code, or {@code null}.
+   * @param lenient whether to be lenient in case of failure to find the operation.
+   * @param aoi the area of interest to use for the transformation, or {@code null}.
+   * @return the transformed geometry, or the same geometry if it is already in target CRS.
+   */
+  public static Geometry transform(
+      Geometry geometry,
+      String sourceCRScode,
+      String targetCRScode,
+      boolean lenient,
+      Geometry aoi) {
+    GeographicBoundingBox bboxAOI = CachedAreaOfInterestFinder.findAOI(aoi, sourceCRScode);
+    return transformToGivenTarget(geometry, sourceCRScode, targetCRScode, lenient, bboxAOI);
   }
 
   public static Geometry transformToGivenTarget(
-      Geometry geometry, String sourceCRScode, String targetCRScode, boolean lenient) {
+      Geometry geometry,
+      String sourceCRScode,
+      String targetCRScode,
+      boolean lenient,
+      GeographicBoundingBox aoi) {
     if (sourceCRScode == null && geometry.getSRID() == 0) {
       throw new IllegalArgumentException(
           "Source CRS must be specified. No SRID found on geometry.");
@@ -98,7 +124,7 @@ public class FunctionsApacheSIS {
       throw new RuntimeException(
           String.format("Failed to parse CRS from code %s or %s", sourceCRScode, targetCRScode), e);
     }
-    return transformToGivenTarget(geometry, sourceCRS, targetCRS, lenient);
+    return transformToGivenTarget(geometry, sourceCRS, targetCRS, lenient, aoi);
   }
 
   /**
@@ -115,7 +141,8 @@ public class FunctionsApacheSIS {
       Geometry geometry,
       CoordinateReferenceSystem sourceCRS,
       CoordinateReferenceSystem targetCRS,
-      boolean lenient)
+      boolean lenient,
+      GeographicBoundingBox aoi)
       throws RuntimeException {
     if (geometry == null || targetCRS == null) {
       // nothing to do, return the geometry unchanged.
@@ -127,13 +154,9 @@ public class FunctionsApacheSIS {
       /* Force coordinates to Longitude/Latitude (X,Y) order for transformation. Doing this during
        * CRS parsing loses information about the CRS (including the EPSG code), but it is necessary
        * for the transformation.
-       *
-       * <p>Note: The area of interest is not currently used in the function. There are cases where
-       * it can improve accuracy.
        */
       CoordinateOperation operation =
-          CRS.findOperation(asLonLat(sourceCRS), asLonLat(targetCRS), null);
-
+          CRS.findOperation(asLonLat(sourceCRS), asLonLat(targetCRS), aoi);
       transform = operation.getMathTransform();
     } catch (FactoryException e) {
       throw new RuntimeException(
@@ -197,7 +220,7 @@ public class FunctionsApacheSIS {
     return crs;
   }
 
-  private static CoordinateReferenceSystem asLonLat(CoordinateReferenceSystem crs) {
+  public static CoordinateReferenceSystem asLonLat(CoordinateReferenceSystem crs) {
     if (crs == null) {
       return null;
     }

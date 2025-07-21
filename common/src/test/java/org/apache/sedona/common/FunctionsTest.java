@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import org.apache.sedona.common.sphere.Haversine;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.utils.*;
+import org.apache.sis.metadata.iso.extent.DefaultGeographicBoundingBox;
 import org.geotools.api.referencing.operation.TransformException;
 import org.junit.Test;
 import org.locationtech.jts.geom.*;
@@ -37,6 +38,7 @@ import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
+import org.opengis.metadata.extent.GeographicBoundingBox;
 
 public class FunctionsTest extends TestBase {
   public static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
@@ -3939,7 +3941,6 @@ public class FunctionsTest extends TestBase {
      * Apache SIS Common codes: WGS84 (EPSG:4326) WGS72 (EPSG:4322) NAD83 (EPSG:4269) NAD27
      * (EPSG:4267) ETRS89 (EPSG:4258) ED50 (EPSG:4230) GRS1980 (EPSG:4019) SPHERE (EPSG:4047)
      */
-    final String WGS84 = "EPSG:4326";
     final String NAD27 = "EPSG:4267";
     final String NAD83 = "EPSG:4269";
     final String ED50 = "EPSG:4230";
@@ -3990,6 +3991,17 @@ public class FunctionsTest extends TestBase {
     // The source CRS is not specified but the geometry has a valid SRID
     geomInput.setSRID(nad27Srid);
     geomActual = FunctionsApacheSIS.transform(geomInput, NAD83);
+    assertEquals(-110.0007450884, geomActual.getCoordinate().x, 1E-2);
+    assertEquals(44.99994350267, geomActual.getCoordinate().y, 1E-2);
+    assertEquals(nad83Srid, geomActual.getSRID());
+    assertEquals(nad83Srid, geomActual.getFactory().getSRID());
+
+    // Test with AOI
+    geomInput.setSRID(nad27Srid);
+    Geometry aoi =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(-122, 39, -107, 39, -107, 47, -122, 47, -122, 39));
+    geomActual = FunctionsApacheSIS.transform(geomInput, NAD27, NAD83, true, aoi);
     assertEquals(-110.0007450884, geomActual.getCoordinate().x, 1E-2);
     assertEquals(44.99994350267, geomActual.getCoordinate().y, 1E-2);
     assertEquals(nad83Srid, geomActual.getSRID());
@@ -4054,6 +4066,55 @@ public class FunctionsTest extends TestBase {
     for (var i = 0; i < tranGC.getNumGeometries(); i++) {
       assertEquals(4979, tranGC.getGeometryN(i).getSRID());
     }
+  }
+
+  @Test
+  public void testAOICache() {
+    final String WGS84 = "EPSG:4326";
+    final String WGS72 = "EPSG:4322";
+
+    Geometry aoi1 =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(-122, 39, -107, 39, -107, 47, -122, 47, -122, 39));
+    GeographicBoundingBox expected1 = new DefaultGeographicBoundingBox(-122, -107, 39, 47);
+    GeographicBoundingBox actual1 = CachedAreaOfInterestFinder.findAOI(aoi1, WGS84);
+    assertEquals(expected1.getNorthBoundLatitude(), actual1.getNorthBoundLatitude(), 0);
+    assertEquals(expected1.getSouthBoundLatitude(), actual1.getSouthBoundLatitude(), 0);
+    assertEquals(expected1.getWestBoundLongitude(), actual1.getWestBoundLongitude(), 0);
+    assertEquals(expected1.getEastBoundLongitude(), actual1.getEastBoundLongitude(), 0);
+
+    // Test with the same AOI again to ensure get back the same cached object
+    GeographicBoundingBox actual2 = CachedAreaOfInterestFinder.findAOI(aoi1, WGS84);
+    assertSame(actual1, actual2);
+
+    GeographicBoundingBox actual3 = CachedAreaOfInterestFinder.findAOI(aoi1, WGS72);
+    GeographicBoundingBox expected3 =
+        new DefaultGeographicBoundingBox(-121.9998461, -106.9998461, 39.0000333, 47.0000294);
+    // Since the AOI for the transform of the AOI will be null, we have a high tolerance for error.
+    assertEquals(expected3.getNorthBoundLatitude(), actual3.getNorthBoundLatitude(), 1E-2);
+    assertEquals(expected3.getSouthBoundLatitude(), actual3.getSouthBoundLatitude(), 1E-2);
+    assertEquals(expected3.getWestBoundLongitude(), actual3.getWestBoundLongitude(), 1E-2);
+    assertEquals(expected3.getEastBoundLongitude(), actual3.getEastBoundLongitude(), 1E-2);
+
+    // Check non-boxed AOI
+    Geometry aoiTriangle =
+        GEOMETRY_FACTORY.createPolygon(coordArray(-122, 39, -107, 47, -122, 48, -122, 39));
+    GeographicBoundingBox expected4 = new DefaultGeographicBoundingBox(-122, -107, 39, 48);
+    GeographicBoundingBox actual4 = CachedAreaOfInterestFinder.findAOI(aoiTriangle, WGS84);
+    assertEquals(expected4.getNorthBoundLatitude(), actual4.getNorthBoundLatitude(), 0);
+    assertEquals(expected4.getSouthBoundLatitude(), actual4.getSouthBoundLatitude(), 0);
+    assertEquals(expected4.getWestBoundLongitude(), actual4.getWestBoundLongitude(), 0);
+    assertEquals(expected4.getEastBoundLongitude(), actual4.getEastBoundLongitude(), 0);
+
+    // Check SRID on AOI
+    Geometry aoi5 = Functions.setSRID(aoi1, 4322);
+    GeographicBoundingBox expected5 =
+        new DefaultGeographicBoundingBox(-121.9998461, -106.9998461, 39.0000333, 47.0000294);
+    GeographicBoundingBox actual5 = CachedAreaOfInterestFinder.findAOI(aoi5, null);
+    assertEquals(expected5.getNorthBoundLatitude(), actual5.getNorthBoundLatitude(), 1E-2);
+    assertEquals(expected5.getSouthBoundLatitude(), actual5.getSouthBoundLatitude(), 1E-2);
+    assertEquals(expected5.getWestBoundLongitude(), actual5.getWestBoundLongitude(), 1E-2);
+    assertEquals(expected5.getEastBoundLongitude(), actual5.getEastBoundLongitude(), 1E-2);
   }
 
   @Test
@@ -4221,7 +4282,7 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
-  public void test() throws ParseException {
+  public void isValidTrajectory() throws ParseException {
     Geometry geom = Constructors.geomFromEWKT("MULTILINESTRING M ((0 0 1,0 1 2), (0 0 1,0 1 2))");
     boolean actual = Functions.isValidTrajectory(geom);
     assertFalse(actual);

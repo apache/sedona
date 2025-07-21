@@ -299,6 +299,7 @@ case class ST_Centroid(inputExpressions: Seq[Expression])
  */
 case class ST_Transform(inputExpressions: Seq[Expression])
     extends InferredExpression(
+      inferrableFunction5(FunctionsApacheSIS.transform),
       inferrableFunction4(FunctionsApacheSIS.transform),
       inferrableFunction3(FunctionsApacheSIS.transform),
       inferrableFunction2(FunctionsApacheSIS.transform)) {
