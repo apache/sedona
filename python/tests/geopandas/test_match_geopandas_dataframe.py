@@ -191,7 +191,11 @@ class TestMatchGeopandasDataFrame(TestGeopandasBase):
             {
                 "a": [1, 2, 3],
                 "b": ["4", "5", "6"],
-                "geometry": [None, GeometryCollection(Point()), Point(2, 1)],
+                "geometry": [
+                    LineString([(0, 0), (1, 1)]),
+                    GeometryCollection(Point()),
+                    Point(2, 1),
+                ],
             },
             {
                 "a": [1, 2, 3],
@@ -238,7 +242,7 @@ class TestMatchGeopandasDataFrame(TestGeopandasBase):
                 "strings": ["a", "b", "c", "d"],
                 "bools": [True, False, True, False],
                 "geometry": [
-                    None,
+                    Point(0, 1),
                     LineString([(0, 0), (1, 1)]),
                     Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
                     Point(1, 1),
