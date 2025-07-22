@@ -692,8 +692,6 @@ class GeoSeries(GeoFrame, pspd.Series):
             exprs.append(scol_for(df, SPARK_DEFAULT_INDEX_NAME))
             exprs.append(scol_for(df, NATURAL_ORDER_COLUMN_NAME))
 
-            # exprs.append(SPARK_DEFAULT_INDEX_NAME)
-            # exprs.append(NATURAL_ORDER_COLUMN_NAME)
             index_spark_columns = [scol_for(df, SPARK_DEFAULT_INDEX_NAME)]
             index_fields = [self._internal.index_fields[0]]
         # else if is_aggr, we don't select the index columns
