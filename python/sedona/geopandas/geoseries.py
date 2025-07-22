@@ -3030,9 +3030,17 @@ class GeoSeries(GeoFrame, pspd.Series):
         # in JTS and GEOs, respectively. The results often differ slightly, but these
         # must be differences inside of the engines themselves.
 
-        return self._row_wise_operation(
-            f"ST_Snap(`L`, `R`, {tolerance})", other, align, rename="snap"
+        other_series, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
+        spark_expr = stf.ST_Snap(F.col("L"), F.col("R"), tolerance)
+        result = self._row_wise_operation(
+            spark_expr,
+            other_series,
+            align,
+            returns_geom=True,
         )
+        return result
 
     def _row_wise_operation(
         self,
@@ -3343,12 +3351,12 @@ class GeoSeries(GeoFrame, pspd.Series):
         1              LINESTRING (0 0, 0 20)
         dtype: geometry
         """
-        col = self.get_first_geometry_column()
-        select = f"ST_Simplify(`{col}`, {tolerance})"
-        if preserve_topology:
-            select = f"ST_SimplifyPreserveTopology(`{col}`, {tolerance})"
 
-        return self._query_geometry_column(select, cols=[col], rename="simplify")
+        spark_expr = stf.ST_Simplify(self.spark.column, tolerance)
+        if preserve_topology:
+            spark_expr = stf.ST_SimplifyPreserveTopology(self.spark.column, tolerance)
+
+        return self._query_geometry_column(spark_expr)
 
     def to_parquet(self, path, **kwargs):
         """
