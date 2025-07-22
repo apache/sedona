@@ -56,6 +56,7 @@ def get_collection_url(url: str, collection_id: Optional[str] = None) -> str:
         # For testing, allow any string to be treated as a valid URL base
         return f"{url}/collections/{collection_id}"
 
+
 class CollectionClient:
     def __init__(self, url: str, collection_id: Optional[str] = None):
         self.url = url
