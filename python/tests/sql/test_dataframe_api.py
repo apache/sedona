@@ -1758,11 +1758,8 @@ class TestDataFrameAPI(TestBase):
             future.result()
 
     @pytest.mark.skipif(
-        os.getenv("SPARK_REMOTE") is not None,
-        reason="Checkpoint dir is not available in Spark Connect",
-    )
-    @pytest.mark.skipif(
-        pyspark.__version__ >= "4", reason="DBSCAN is not supported yet on Spark 4"
+        os.getenv("SPARK_REMOTE") is not None and pyspark.__version__ < "4.0.0",
+        reason="DBSCAN requires checkpoint directory which is not available in Spark Connect mode before Spark 4.0.0",
     )
     def test_dbscan(self):
         df = self.spark.createDataFrame([{"id": 1, "x": 2, "y": 3}]).withColumn(
@@ -1772,8 +1769,8 @@ class TestDataFrameAPI(TestBase):
         df.withColumn("dbscan", ST_DBSCAN("geometry", 1.0, 2, False)).collect()
 
     @pytest.mark.skipif(
-        os.getenv("SPARK_REMOTE") is not None,
-        reason="Checkpoint dir is not available in Spark Connect",
+        os.getenv("SPARK_REMOTE") is not None and pyspark.__version__ < "4.0.0",
+        reason="LOF requires checkpoint directory which is not available in Spark Connect mode before Spark 4.0.0",
     )
     def test_lof(self):
         df = self.spark.createDataFrame([{"id": 1, "x": 2, "y": 3}]).withColumn(

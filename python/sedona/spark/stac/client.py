@@ -14,12 +14,13 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from typing import Union, Optional, Iterator
+from typing import Union, Optional, Iterator, List
 
 from sedona.spark.stac.collection_client import CollectionClient
 
 import datetime as python_datetime
 from pystac import Item as PyStacItem
+from shapely.geometry.base import BaseGeometry
 
 from pyspark.sql import DataFrame
 
@@ -77,6 +78,9 @@ class Client:
         *ids: Union[str, list],
         collection_id: Optional[str] = None,
         bbox: Optional[list] = None,
+        geometry: Optional[
+            Union[str, BaseGeometry, List[Union[str, BaseGeometry]]]
+        ] = None,
         datetime: Optional[Union[str, python_datetime.datetime, list]] = None,
         max_items: Optional[int] = None,
         return_dataframe: bool = True,
@@ -94,6 +98,11 @@ class Client:
         - bbox (Optional[list]): A list of bounding boxes for filtering the items.
           Each bounding box is represented as a list of four float values: [min_lon, min_lat, max_lon, max_lat].
           Example: [[-180.0, -90.0, 180.0, 90.0]]  # This bounding box covers the entire world.
+
+        - geometry (Optional[Union[str, BaseGeometry, List[Union[str, BaseGeometry]]]]): Shapely geometry object(s) or WKT string(s) for spatial filtering.
+          Can be a single geometry, WKT string, or a list of geometries/WKT strings.
+          If both bbox and geometry are provided, geometry takes precedence.
+          Example: Polygon(...) or "POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))" or [Polygon(...), Polygon(...)]
 
         - datetime (Optional[Union[str, python_datetime.datetime, list]]): A single datetime, RFC 3339-compliant timestamp,
           or a list of date-time ranges for filtering the items. The datetime can be specified in various formats:
@@ -119,9 +128,17 @@ class Client:
             client = self.get_collection_from_catalog()
         if return_dataframe:
             return client.get_dataframe(
-                *ids, bbox=bbox, datetime=datetime, max_items=max_items
+                *ids,
+                bbox=bbox,
+                geometry=geometry,
+                datetime=datetime,
+                max_items=max_items,
             )
         else:
             return client.get_items(
-                *ids, bbox=bbox, datetime=datetime, max_items=max_items
+                *ids,
+                bbox=bbox,
+                geometry=geometry,
+                datetime=datetime,
+                max_items=max_items,
             )
