@@ -3790,7 +3790,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.isna : inverse of notna
         GeoSeries.is_empty : detect empty geometries
         """
-        spark_expr = F.isnotnull(self.spark.column)
+        # After Sedona's minimum spark version is 3.5.0, we can use F.isnotnull(self.spark.column) instead
+        spark_expr = ~F.isnull(self.spark.column)
         result = self._query_geometry_column(
             spark_expr,
             returns_geom=False,
