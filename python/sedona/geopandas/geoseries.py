@@ -3887,6 +3887,8 @@ class GeoSeries(GeoFrame, pspd.Series):
                 "GeoSeries.fillna() with limit is not implemented yet."
             )
 
+        align = True
+
         if pd.isna(value) == True or isinstance(value, BaseGeometry):
             if (
                 value is not None and pd.isna(value) == True
@@ -3898,7 +3900,8 @@ class GeoSeries(GeoFrame, pspd.Series):
 
                     value = GeometryCollection()
 
-            other, _ = self._make_series_of_val(value)
+            other, extended = self._make_series_of_val(value)
+            align = False if extended else align
 
         elif isinstance(value, (GeoSeries, GeometryArray, gpd.GeoSeries)):
 
@@ -3910,9 +3913,6 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         else:
             raise ValueError(f"Invalid value type: {type(value)}")
-
-        # False either way
-        align = False
 
         # Coalesce: If the value in L is null, use the corresponding value in R for that row
         spark_expr = F.coalesce(F.col("L"), F.col("R"))
