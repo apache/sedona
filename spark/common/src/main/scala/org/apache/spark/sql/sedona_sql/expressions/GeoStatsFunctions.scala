@@ -31,8 +31,8 @@ import org.apache.spark.sql.types._
 
 case class ST_DBSCAN(children: Seq[Expression]) extends DataframePhysicalFunction {
 
-  override def dataType: DataType = StructType(
-    Seq(StructField("isCore", BooleanType), StructField("cluster", LongType)))
+  override def dataType: DataType =
+    StructType(Seq(StructField("isCore", BooleanType), StructField("cluster", LongType)))
 
   override def inputTypes: Seq[AbstractDataType] =
     Seq(GeometryUDT, DoubleType, IntegerType, BooleanType)
@@ -50,7 +50,7 @@ case class ST_DBSCAN(children: Seq[Expression]) extends DataframePhysicalFunctio
       !dataframe.columns.contains("__cluster"),
       "__cluster is a  reserved name by the dbscan algorithm. Please rename the columns before calling the ST_DBSCAN function.")
 
-    dbscan(
+    val ret = dbscan(
       dataframe,
       getScalarValue[Double](1, "epsilon"),
       getScalarValue[Int](2, "minPts"),
@@ -61,6 +61,9 @@ case class ST_DBSCAN(children: Seq[Expression]) extends DataframePhysicalFunctio
       "__cluster")
       .withColumn(getResultName(resultAttrs), struct(col("__isCore"), col("__cluster")))
       .drop("__isCore", "__cluster")
+
+    ret
+
   }
 }
 

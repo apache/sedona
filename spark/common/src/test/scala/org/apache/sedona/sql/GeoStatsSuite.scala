@@ -24,6 +24,7 @@ import org.apache.sedona.stats.hotspotDetection.GetisOrd.gLocal
 import org.apache.sedona.stats.outlierDetection.LocalOutlierFactor.localOutlierFactor
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.{col, expr, lit}
+import org.apache.spark.sql.types.LongType
 import org.apache.spark.sql.sedona_sql.expressions.st_functions.{ST_DBSCAN, ST_LocalOutlierFactor}
 
 class GeoStatsSuite extends TestBaseScala {
@@ -34,6 +35,7 @@ class GeoStatsSuite extends TestBaseScala {
   }
 
   case class Record(id: Int, x: Double, y: Double)
+  case class StringIdRecord(id: String, x: Double, y: Double)
 
   def getData: DataFrame = {
     spark
@@ -51,48 +53,110 @@ class GeoStatsSuite extends TestBaseScala {
       .withColumn("geometry", expr("ST_Point(x, y)"))
   }
 
+  def getStringIdData: DataFrame = {
+    spark
+      .createDataFrame(
+        Seq( // added 'a' so they can't be cast to Int
+          StringIdRecord("10a", 1.0, 1.8),
+          StringIdRecord("11a", 1.0, 1.9),
+          StringIdRecord("12a", 1.0, 2.0),
+          StringIdRecord("13a", 1.0, 2.1),
+          StringIdRecord("14a", 2.0, 2.0),
+          StringIdRecord("15a", 3.0, 1.9),
+          StringIdRecord("16a", 3.0, 2.0),
+          StringIdRecord("17a", 3.0, 2.1),
+          StringIdRecord("18a", 3.0, 2.2)))
+      .withColumn("geometry", expr("ST_Point(x, y)"))
+  }
+
   it("test dbscan function") {
-    assume(spark.version.startsWith("3"), "DBSCAN doesn't work on Spark 4 yet")
-    dbscan(getData.withColumn("sql_results", expr("ST_DBSCAN(geometry, 1.0, 4, false)")), 1.0, 4)
-      .where("sql_results.cluster = cluster and sql_results.isCore = isCore")
-      .count() == getData.count()
+    val sqlDf = getData
+      .withColumn("sql_results", expr("ST_DBSCAN(geometry, 1.0, 4, false)"))
+      .select(
+        col("id"),
+        col("sql_results.cluster").as("cluster"),
+        col("sql_results.isCore").as("isCore"))
+
+    val functionDf = dbscan(getData, 1.0, 4).select(col("id"), col("cluster"), col("isCore"))
+
+    assert(sqlDf.join(functionDf, "id").count() == getData.count())
+  }
+
+  it("test dbscan function with string ids") {
+    val sqlDf = getStringIdData
+      .withColumn("sql_results", expr("ST_DBSCAN(geometry, 1.0, 4, false)"))
+      .select(
+        col("id"),
+        col("sql_results.cluster").as("cluster"),
+        col("sql_results.isCore").as("isCore"))
+
+    val functionDf =
+      dbscan(getStringIdData, 1.0, 4).select(col("id"), col("cluster"), col("isCore"))
+
+    assert(sqlDf.join(functionDf, "id").count() == getData.count())
   }
 
   it("test dbscan function df method") {
-    assume(spark.version.startsWith("3"), "DBSCAN doesn't work on Spark 4 yet")
-    dbscan(
-      getData.withColumn("sql_results", ST_DBSCAN(col("geometry"), lit(1.0), lit(4), lit(false))),
-      1.0,
-      4)
-      .where("sql_results.cluster = cluster and sql_results.isCore = isCore")
-      .count() == getData.count()
+    val sqlDf = getData
+      .withColumn("sql_results", ST_DBSCAN(col("geometry"), lit(1.0), lit(4), lit(false)))
+      .select(
+        col("id"),
+        col("sql_results.cluster").as("cluster"),
+        col("sql_results.isCore").as("isCore"))
+
+    val functionDf = dbscan(getData, 1.0, 4).select(col("id"), col("cluster"), col("isCore"))
+
+    assert(sqlDf.join(functionDf, "id").count() == getData.count())
   }
 
   it("test dbscan function with distance column") {
-    assume(spark.version.startsWith("3"), "DBSCAN doesn't work on Spark 4 yet")
-    dbscan(
-      getData.withColumn("sql_results", expr("ST_DBSCAN(geometry, 1.0, 4, true)")),
-      1.0,
-      4,
-      useSpheroid = true)
-      .where("sql_results.cluster = cluster and sql_results.isCore = isCore")
-      .count() == getData.count()
+    val sqlDf = getData
+      .withColumn("sql_results", expr("ST_DBSCAN(geometry, 1.0, 4, true)"))
+      .select(
+        col("id"),
+        col("sql_results.cluster").as("cluster"),
+        col("sql_results.isCore").as("isCore"))
+
+    val functionDf =
+      dbscan(getData, 1.0, 4, useSpheroid = true).select(col("id"), col("cluster"), col("isCore"))
+
+    assert(sqlDf.join(functionDf, "id").count() == getData.count())
   }
 
   it("test dbscan function with scalar subquery") {
-    assume(spark.version.startsWith("3"), "DBSCAN doesn't work on Spark 4 yet")
-    dbscan(
-      getData.withColumn(
+    val sqlDf = getData
+      .withColumn(
         "sql_results",
-        expr("ST_DBSCAN(geometry, (SELECT ARRAY(1.0, 2.0)[0]), 4, false)")),
-      1.0,
-      4)
-      .where("sql_results.cluster = cluster and sql_results.isCore = isCore")
-      .count() == getData.count()
+        expr("ST_DBSCAN(geometry, (SELECT ARRAY(1.0, 2.0)[0]), 4, false)"))
+      .select(
+        col("id"),
+        col("sql_results.cluster").as("cluster"),
+        col("sql_results.isCore").as("isCore"))
+
+    val functionDf = dbscan(getData, 1.0, 4).select(col("id"), col("cluster"), col("isCore"))
+
+    assert(sqlDf.join(functionDf, "id").count() == getData.count())
+  }
+
+  it("dbscan function should ignore spark.graphframes.useLabelsAsComponents = true") {
+
+    sparkSession.conf.set("spark.graphframes.useLabelsAsComponents", "true")
+
+    val sqlDf = getData
+      .withColumn("sql_results", expr("ST_DBSCAN(geometry, 1.0, 4, false)"))
+      .select(
+        col("id"),
+        col("sql_results.cluster").as("cluster"),
+        col("sql_results.isCore").as("isCore"))
+
+    val functionDf = dbscan(getData, 1.0, 4).select(col("id"), col("cluster"), col("isCore"))
+
+    assert(sqlDf.join(functionDf, "id").count() == getData.count())
+
+    assert(functionDf.schema("cluster").dataType == LongType)
   }
 
   it("test dbscan with geom literal") {
-    assume(spark.version.startsWith("3"), "DBSCAN doesn't work on Spark 4 yet")
     val error = intercept[IllegalArgumentException] {
       spark.sql("SELECT ST_DBSCAN(ST_GeomFromWKT('POINT(0.0 1.1)'), 1.0, 4, false)").collect()
     }
@@ -103,7 +167,6 @@ class GeoStatsSuite extends TestBaseScala {
   }
 
   it("test dbscan with minPts variable") {
-    assume(spark.version.startsWith("3"), "DBSCAN doesn't work on Spark 4 yet")
     val error = intercept[IllegalArgumentException] {
       getData
         .withColumn("result", ST_DBSCAN(col("geometry"), lit(1.0), col("id"), lit(false)))
@@ -118,31 +181,32 @@ class GeoStatsSuite extends TestBaseScala {
   }
 
   it("test lof") {
-    localOutlierFactor(
-      getData.withColumn("sql_result", expr("ST_LocalOutlierFactor(geometry, 4, false)")),
-      4)
-      .where("sql_result = lof")
-      .count() == getData.count()
+    assert(
+      localOutlierFactor(
+        getData.withColumn("sql_result", expr("ST_LocalOutlierFactor(geometry, 4, false)")),
+        4)
+        .where("abs(sql_result - lof) < .000000001")
+        .count() == getData.count())
   }
 
   it("test lof with dataframe method") {
-    localOutlierFactor(
-      getData.withColumn(
-        "sql_result",
-        ST_LocalOutlierFactor(col("geometry"), lit(4), lit(false))),
-      4)
-      .where("sql_result = lof")
-      .count() == getData.count()
+    assert(
+      localOutlierFactor(
+        getData
+          .withColumn("sql_result", ST_LocalOutlierFactor(col("geometry"), lit(4), lit(false))),
+        4)
+        .where("abs(sql_result - lof) < .000000001")
+        .count() == getData.count())
   }
 
   it("test geostats function in another function") {
-    getData
+    val result = getData
       .withColumn("sql_result", expr("SQRT(ST_LocalOutlierFactor(geometry, 4, false))"))
       .collect()
+    assert(result.length > 0)
   }
 
   it("test DBSCAN with a column named __isCore in input df") {
-    assume(spark.version.startsWith("3"), "DBSCAN doesn't work on Spark 4 yet")
     val exception = intercept[IllegalArgumentException] {
       getData
         .withColumn("__isCore", lit(1))
@@ -218,7 +282,6 @@ class GeoStatsSuite extends TestBaseScala {
   }
 
   it("test ST_Geostats with string column") {
-    assume(spark.version.startsWith("3"), "DBSCAN doesn't work on Spark 4 yet")
     getData
       .withColumn("someString", lit("test"))
       .withColumn("sql_results", expr("ST_DBSCAN(geometry, 1.0, 4, false)"))

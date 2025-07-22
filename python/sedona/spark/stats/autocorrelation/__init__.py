@@ -1,12 +1,3 @@
----
-hide:
-
-  - navigation
-
-title: Blog
----
-
-<!--
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -23,6 +14,3 @@ title: Blog
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
--->
-
-The official source for Apache Sedona news, technical insights, release updates, and best practices in large-scale spatial data management.

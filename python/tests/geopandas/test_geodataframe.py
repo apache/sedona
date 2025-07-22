@@ -19,7 +19,9 @@ import tempfile
 
 from shapely.geometry import (
     Point,
+    Polygon,
 )
+import shapely
 
 from sedona.geopandas import GeoDataFrame, GeoSeries
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
@@ -32,6 +34,10 @@ from pandas.testing import assert_frame_equal, assert_series_equal
 from packaging.version import parse as parse_version
 
 
+@pytest.mark.skipif(
+    parse_version(shapely.__version__) < parse_version("2.0.0"),
+    reason=f"Tests require shapely>=2.0.0, but found v{shapely.__version__}",
+)
 class TestDataframe(TestGeopandasBase):
     @pytest.mark.parametrize(
         "obj",
@@ -42,18 +48,50 @@ class TestDataframe(TestGeopandasBase):
             gpd.GeoDataFrame([Point(x, x) for x in range(3)]),
             pd.Series([Point(x, x) for x in range(3)]),
             gpd.GeoSeries([Point(x, x) for x in range(3)]),
-            GeoSeries([Point(x, x) for x in range(3)]),
-            GeoDataFrame([Point(x, x) for x in range(3)]),
         ],
     )
     def test_constructor(self, obj):
         sgpd_df = GeoDataFrame(obj)
         check_geodataframe(sgpd_df)
 
+    @pytest.mark.parametrize(
+        "obj",
+        [
+            pd.DataFrame(
+                {
+                    "non-geom": [1, 2, 3],
+                    "geometry": [
+                        Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]) for _ in range(3)
+                    ],
+                }
+            ),
+            gpd.GeoDataFrame(
+                {
+                    "geom2": [Point(x, x) for x in range(3)],
+                    "non-geom": [4, 5, 6],
+                    "geometry": [
+                        Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]) for _ in range(3)
+                    ],
+                }
+            ),
+        ],
+    )
+    def test_complex_df(self, obj):
+        sgpd_df = GeoDataFrame(obj)
+        name = "geometry"
+        sgpd_df.set_geometry(name, inplace=True)
+        check_geodataframe(sgpd_df)
+        result = sgpd_df.area
+        expected = pd.Series([1.0, 1.0, 1.0], name=name)
+        self.check_pd_series_equal(result, expected)
+
+    # These need to be defined inside the function to ensure Sedona's Geometry UDTs have been registered
     def test_constructor_pandas_on_spark(self):
         for obj in [
             ps.DataFrame([Point(x, x) for x in range(3)]),
             ps.Series([Point(x, x) for x in range(3)]),
+            GeoSeries([Point(x, x) for x in range(3)]),
+            GeoDataFrame([Point(x, x) for x in range(3)]),
         ]:
             sgpd_df = GeoDataFrame(obj)
             check_geodataframe(sgpd_df)
@@ -268,23 +306,15 @@ class TestDataframe(TestGeopandasBase):
         data = {"geometry1": [poly1, poly2], "id": [1, 2], "value": ["a", "b"]}
 
         df = GeoDataFrame(data)
+        df.set_geometry("geometry1", inplace=True)
 
-        # Calculate area
-        area_df = df.area
+        area_series = df.area
 
-        # Verify result is a GeoDataFrame
-        assert type(area_df) is GeoDataFrame
-
-        # Verify the geometry column was converted to area values
-        assert "geometry1_area" in area_df.columns
-
-        # Verify non-geometry columns were preserved
-        assert "id" in area_df.columns
-        assert "value" in area_df.columns
+        assert type(area_series) is ps.Series
 
         # Check the actual area values
-        area_values = area_df["geometry1_area"].to_list()
-        assert len(area_values) == 2
+        area_values = area_series.to_list()
+        assert len(area_series) == 2
         self.assert_almost_equal(area_values[0], 1.0)
         self.assert_almost_equal(area_values[1], 4.0)
 

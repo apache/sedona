@@ -221,8 +221,8 @@ SedonaErrorCode read_geom_buf_header(const char *buf, int buf_size,
   int geom_type_id = preamble >> 4;
   int coord_type = (preamble & 0x0F) >> 1;
   if ((preamble & 0x01) != 0) {
-    srid = (((unsigned int)buf[1]) << 16) | (((unsigned int)buf[2]) << 8) |
-           ((unsigned int)buf[3]);
+    srid = (((unsigned int)buf[1] & 0xFF) << 16) |
+           (((unsigned int)buf[2] & 0xFF) << 8) | ((unsigned int)buf[3] & 0xFF);
   }
   int num_coords = ((int *)buf)[1];
   if (geom_type_id < 0 || geom_type_id > GEOMETRYCOLLECTION) {
