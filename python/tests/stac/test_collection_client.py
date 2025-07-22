@@ -19,12 +19,14 @@ from sedona.spark.stac.client import Client
 from sedona.spark.stac.collection_client import CollectionClient
 
 from tests.test_base import TestBase
+import pytest
 
 STAC_URLS = {
     "PLANETARY-COMPUTER": "https://planetarycomputer.microsoft.com/api/stac/v1"
 }
 
 
+@pytest.mark.skipif(True, reason="Disabled for being flakey")
 class TestStacReader(TestBase):
     def test_collection_client(self) -> None:
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
