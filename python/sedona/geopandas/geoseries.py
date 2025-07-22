@@ -913,14 +913,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         dtype: float64
         """
 
-        """
-            CASE
-                WHEN GeometryType(`{col}`) IN ('LINESTRING', 'MULTILINESTRING') THEN ST_Length(`{col}`)
-                WHEN GeometryType(`{col}`) IN ('POLYGON', 'MULTIPOLYGON') THEN ST_Perimeter(`{col}`)
-                WHEN GeometryType(`{col}`) IN ('POINT', 'MULTIPOINT') THEN 0.0
-                WHEN GeometryType(`{col}`) IN ('GEOMETRYCOLLECTION') THEN ST_Length(`{col}`) + ST_Perimeter(`{col}`)
-        END"""
-
         spark_expr = (
             F.when(
                 stf.GeometryType(self.spark.column).isin(
@@ -1514,16 +1506,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         """
 
         # Sedona errors on negative indexes, so we use a case statement to handle it ourselves
-        """
-        ST_GeometryN(
-            `L`,
-            CASE
-                WHEN ST_NumGeometries(`L`) + `R` < 0 THEN NULL
-                WHEN `R` < 0 THEN ST_NumGeometries(`L`) + `R`
-                ELSE `R`
-            END
-        )
-        """
         spark_expr = stf.ST_GeometryN(
             F.col("L"),
             F.when(
@@ -1583,12 +1565,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         """
         # Geopandas and shapely return NULL for GeometryCollections, so we handle it separately
         # https://shapely.readthedocs.io/en/stable/reference/shapely.boundary.html
-        """
-            CASE
-                WHEN GeometryType(`{col}`) IN ('GEOMETRYCOLLECTION') THEN NULL
-                ELSE ST_Boundary(`{col}`)
-            END
-        """
         spark_expr = F.when(
             stf.GeometryType(self.spark.column).isin(["GEOMETRYCOLLECTION"]),
             None,
@@ -2018,12 +1994,6 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         """
         # Sedona does not support GeometryCollection (errors), so we return NULL for now to avoid error
-        """
-        CASE
-            WHEN GeometryType(`L`) == 'GEOMETRYCOLLECTION' OR GeometryType(`R`) == 'GEOMETRYCOLLECTION' THEN NULL
-            ELSE ST_Crosses(`L`, `R`)
-        END
-        """
         other_series, extended = self._make_series_of_val(other)
         align = False if extended else align
 
@@ -2039,9 +2009,6 @@ class GeoSeries(GeoFrame, pspd.Series):
             default_val=False,
         )
 
-        # result = self._row_wise_operation(
-        #     select, other, align, rename="crosses", default_val="FALSE"
-        # )
         return to_bool(result)
 
     def disjoint(self, other, align=None):
