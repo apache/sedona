@@ -4523,6 +4523,15 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         else:
             return value, False
 
+    def _to_geoframe(self, name=None):
+        if name is not None:
+            renamed = self.rename(name)
+        elif self._column_label is None:
+            renamed = self.rename("geometry")
+        else:
+            renamed = self
+        return GeoDataFrame(pspd.DataFrame(renamed._internal))
+
 
 # -----------------------------------------------------------------------------
 # # Utils
