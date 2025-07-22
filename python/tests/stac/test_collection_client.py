@@ -15,10 +15,11 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import collections.abc
+
+from pyspark.sql import DataFrame
 from sedona.spark.stac.client import Client
 from sedona.spark.stac.collection_client import CollectionClient
-from pyspark.sql import DataFrame
-import collections.abc
 
 from tests.test_base import TestBase
 
