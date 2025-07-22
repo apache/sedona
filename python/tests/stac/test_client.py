@@ -15,8 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from sedona.spark.stac.client import Client
 import collections.abc
+from sedona.spark.stac.client import Client
 from pyspark.sql import DataFrame
 
 from tests.test_base import TestBase
