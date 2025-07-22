@@ -480,6 +480,35 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             if crs is not None and data.crs != crs:
                 raise ValueError(crs_mismatch_error)
 
+        if geometry is None and "geometry" in self.columns:
+
+            if (self.columns == "geometry").sum() > 1:
+                raise ValueError(
+                    "GeoDataFrame does not support multiple columns "
+                    "using the geometry column name 'geometry'."
+                )
+
+            geometry: pspd.Series = self["geometry"]
+            if isinstance(geometry, sgpd.GeoSeries):
+                geom_crs = geometry.crs
+                if geom_crs is None:
+                    if crs is not None:
+                        geometry.set_crs(crs, inplace=True)
+                        self.set_geometry(geometry, inplace=True)
+                else:
+                    if crs is not None and geom_crs != crs:
+                        raise ValueError(crs_mismatch_error)
+
+            # No need to call set_geometry() here since it's already part of the df, just set the name
+            self._geometry_column_name = "geometry"
+
+        if geometry is None and crs:
+            raise ValueError(
+                "Assigning CRS to a GeoDataFrame without a geometry column is not "
+                "supported. Supply geometry using the 'geometry=' keyword argument, "
+                "or by providing a DataFrame with column name 'geometry'",
+            )
+
     # ============================================================================
     # GEOMETRY COLUMN MANAGEMENT
     # ============================================================================
