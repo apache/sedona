@@ -2,7 +2,10 @@
 hide:
 
   - navigation
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7412718665 (removing release notes from the side panel, centering homepage)
 title: Blog
 ---
 

@@ -49,7 +49,6 @@ nav:
           - Install Sedona Scala/Java: setup/flink/install-scala.md
       - Install with Snowflake:
           - Install Sedona SQL: setup/snowflake/install.md
-      - Release notes: setup/release-notes.md
       - Compile the code: setup/compile.md
   - Download: download.md
   - Programming Guides:
@@ -135,6 +134,7 @@ nav:
               - Aggregate Function (Snowflake): api/snowflake/vector-data/AggregateFunction.md
               - Predicate (Snowflake): api/snowflake/vector-data/Predicate.md
   - Blog: blog/index.md
+  - Changelog: setup/release-notes.md
   - Community:
       - Community: community/contact.md
       - Contributor Guide:
