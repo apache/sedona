@@ -493,12 +493,17 @@ class GeoSeries(GeoFrame, pspd.Series):
         if len(self) == 0:
             return None
 
-        tmp = self._process_geometry_column("ST_SRID", rename="crs", returns_geom=False)
-        ps_series = tmp.take([0])
-        srid = ps_series.iloc[0]
+        tmp_series: pspd.Series = self._process_geometry_column(
+            "ST_SRID", rename="crs", returns_geom=False
+        )
+
+        # All geometries should have the same srid
+        # so we just take the srid of the first non-null element
+        first_idx = tmp_series.first_valid_index()
+        srid = tmp_series[first_idx] if first_idx is not None else 0
 
         # Sedona returns 0 if doesn't exist
-        return CRS.from_user_input(srid) if srid != 0 and not pd.isna(srid) else None
+        return CRS.from_user_input(srid) if srid != 0 else None
 
     @crs.setter
     def crs(self, value: Union["CRS", None]):

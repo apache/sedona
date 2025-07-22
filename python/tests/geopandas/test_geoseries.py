@@ -1341,3 +1341,10 @@ class TestGeoSeries(TestGeopandasBase):
 
         geo_series = sgpd.GeoSeries(self.geoseries, crs=4326)
         assert geo_series.crs.to_epsg() == 4326
+
+        # This test errors due to a bug in pyspark.
+        # We can uncomment it once the fix is https://github.com/apache/spark/pull/51475 is merged
+        # It was tested locally by using the fixed version of pyspark
+        # # First element null
+        # geo_series = sgpd.GeoSeries([None, None, Point(1, 1)], crs=4326)
+        # assert geo_series.crs.to_epsg() == 4326
