@@ -440,6 +440,8 @@ class GeoSeries(GeoFrame, pspd.Series):
                     fastpath=fastpath,
                 )
 
+            pd_series = pd_series.astype(object)
+
             # initialize the parent class pyspark Series with the pandas Series
             super().__init__(data=pd_series)
 

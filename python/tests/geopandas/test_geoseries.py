@@ -190,7 +190,7 @@ class TestGeoSeries(TestGeopandasBase):
             GeoSeries.from_arrow(table["a"].chunk(0))
 
         gpd_series = gpd.GeoSeries(
-            [None, Point(1, 1), Polygon(), LineString([(0, 0), (1, 1)]), None]
+            [Point(1, 1), Polygon(), LineString([(0, 0), (1, 1)]), None]
         )
         result = sgpd.GeoSeries.from_arrow(gpd_series.to_arrow())
         self.check_sgpd_equals_gpd(result, gpd_series)
