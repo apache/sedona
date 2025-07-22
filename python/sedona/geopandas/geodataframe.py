@@ -790,7 +790,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             mapper = {col: col for col in list(self.columns)}
             mapper[geometry_col] = col
 
-            # mapper = {geometry_col: col}
             if inplace:
                 self.rename(columns=mapper, inplace=True, errors="raise")
                 self.set_geometry(col, inplace=True)
