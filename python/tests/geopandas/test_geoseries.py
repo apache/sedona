@@ -478,7 +478,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         ]
         expected = pa.array([bytes.fromhex(x) for x in expected], type=pa.binary())
 
-        assert result == expected
+        assert result.equals(expected)
 
     def test_clip(self):
         pass

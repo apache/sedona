@@ -377,7 +377,7 @@ class TestDataframe(TestGeopandasBase):
             {
                 "col": [1, 2, 3, 4],
                 "geometry": [
-                    None,
+                    LineString([(0, 0), (1, 1)]),
                     box(0, 0, 10, 10),
                     Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
                     Point(1, 1),
@@ -436,24 +436,32 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
             return
 
         import pyarrow as pa
+        from geopandas.testing import assert_geodataframe_equal
 
         data = {"col1": ["name1", "name2"], "geometry": [Point(1, 2), Point(2, 1)]}
 
-        gdf = GeoDataFrame(data, index=pd.Index([1, 2]))
+        # Ensure index is not preserved for index=False
+        sgpd_df = GeoDataFrame(data, index=pd.Index([1, 2]))
+        result = pa.table(sgpd_df.to_arrow(index=False))
 
-        result = pa.table(gdf.to_arrow(index=False))
+        expected = gpd.GeoDataFrame(data)
 
-        expected = pa.table(
-            {
-                "col1": ["name1", "name2"],
-                "geometry": [
-                    bytes.fromhex("0101000000000000000000F03F0000000000000040"),
-                    bytes.fromhex("01010000000000000000000040000000000000F03F"),
-                ],
-            }
-        )
+        # Ensure we can read it from using geopandas
+        gpd_df = gpd.GeoDataFrame.from_arrow(result)
+        assert_geodataframe_equal(gpd_df, expected)
 
-        assert result.equals(expected)
+        # Ensure we can read it using sedona geopandas
+        sgpd_df = GeoDataFrame.from_arrow(result)
+        self.check_sgpd_df_equals_gpd_df(sgpd_df, expected)
+
+        # Ensure index is preserved for index=True
+        sgpd_df = GeoDataFrame(data, index=pd.Index([1, 2]))
+        result = pa.table(sgpd_df.to_arrow(index=True))
+
+        expected = gpd.GeoDataFrame(data, pd.Index([1, 2]))
+
+        gpd_df = gpd.GeoDataFrame.from_arrow(result)
+        assert_geodataframe_equal(gpd_df, expected)
 
 
 # -----------------------------------------------------------------------------
