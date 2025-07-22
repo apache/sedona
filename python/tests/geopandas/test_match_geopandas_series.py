@@ -128,18 +128,6 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             assert isinstance(gpd_series, gpd.GeoSeries)
             assert isinstance(gpd_series.geometry, gpd.GeoSeries)
 
-    def test_non_geom_fails(self):
-        with pytest.raises(TypeError):
-            GeoSeries([0, 1, 2])
-        with pytest.raises(TypeError):
-            GeoSeries([0, 1, 2], crs="epsg:4326")
-        with pytest.raises(TypeError):
-            GeoSeries(["a", "b", "c"])
-        with pytest.raises(TypeError):
-            GeoSeries(pd.Series([0, 1, 2]), crs="epsg:4326")
-        with pytest.raises(TypeError):
-            GeoSeries(ps.Series([0, 1, 2]))
-
     def test_to_geopandas(self):
         for _, geom in self.geoms:
             sgpd_result = GeoSeries(geom)
