@@ -27,7 +27,7 @@ import org.apache.spark.sql.sedona_sql.expressions.implicits.InputExpressionEnha
 import org.apache.spark.sql.sedona_sql.expressions.raster.implicits.RasterInputExpressionEnhancer
 import org.apache.spark.sql.types.{AbstractDataType, BooleanType, DataType, DoubleType, IntegerType, StructField, StructType}
 
-case class RS_Metadata(inputExpressions: Seq[Expression])
+private[apache] case class RS_Metadata(inputExpressions: Seq[Expression])
     extends Expression
     with CodegenFallback
     with ExpectsInputTypes {
@@ -86,7 +86,7 @@ case class RS_Metadata(inputExpressions: Seq[Expression])
   override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT)
 }
 
-case class RS_SummaryStatsAll(inputExpressions: Seq[Expression])
+private[apache] case class RS_SummaryStatsAll(inputExpressions: Seq[Expression])
     extends Expression
     with CodegenFallback
     with ExpectsInputTypes {
@@ -150,7 +150,7 @@ case class RS_SummaryStatsAll(inputExpressions: Seq[Expression])
   }
 }
 
-case class RS_ZonalStatsAll(inputExpressions: Seq[Expression])
+private[apache] case class RS_ZonalStatsAll(inputExpressions: Seq[Expression])
     extends Expression
     with CodegenFallback
     with ExpectsInputTypes {
@@ -235,7 +235,7 @@ case class RS_ZonalStatsAll(inputExpressions: Seq[Expression])
   }
 }
 
-case class RS_GeoTransform(inputExpressions: Seq[Expression])
+private[apache] case class RS_GeoTransform(inputExpressions: Seq[Expression])
     extends Expression
     with CodegenFallback
     with ExpectsInputTypes {
