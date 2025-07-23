@@ -837,8 +837,11 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                         num_passed += 1
 
         # Sedona's snap result fails fairly often, even though the results are fairly close.
-        # We instead hard code the number of tests that pass currently so we can catch any potential regressions.
-        assert num_passed >= 25
+        # We use a minimum pass rate to ensure flexibility and catch potential regressions.
+        total_tests = sum(1 for i, (_, geom) in enumerate(self.geoms) for _, geom2 in self.geoms[i:])
+        min_pass_rate = 0.8  # Minimum pass rate (80%)
+        min_passed = int(total_tests * min_pass_rate)
+        assert num_passed >= min_passed, f"Expected at least {min_passed} tests to pass, but got {num_passed}."
 
     def test_intersection_all(self):
         pass
