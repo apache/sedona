@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.common.S2Geography;
 
+import static org.apache.sedona.common.S2Geography.Accessors.S2_isEmpty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -27,8 +28,11 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
+import org.locationtech.jts.io.ParseException;
 
 public class TestHelper {
+
+  private static final double EPS = 1e-6;
 
   public static void assertRoundTrip(S2Geography original, EncodeOptions opts) throws IOException {
     // 1) Encode to bytes
@@ -147,5 +151,119 @@ public class TestHelper {
         .append(String.format("%.0f %.0f", first.lng().degrees(), first.lat().degrees()));
     sb.append("))");
     return sb.toString();
+  }
+
+  public static void checkWKBGeography(String wkbHex, String expectedWKT) throws ParseException {
+    WKBReader wkbReader = new WKBReader();
+    byte[] wkb = WKBReader.hexToBytes(wkbHex);
+    S2Geography geoWKB = wkbReader.read(wkb);
+
+    WKTReader wktReader = new WKTReader();
+    S2Geography geoWKT = wktReader.read(expectedWKT);
+
+    boolean isEqual = compareTo(geoWKT, geoWKT) == 0;
+    if (!isEqual) {
+      System.out.println(geoWKB);
+      System.out.println(geoWKT);
+    }
+    assertTrue(isEqual);
+  }
+
+  public static int compareTo(S2Geography geo1, S2Geography geo2) {
+    int compare = geo1.kind.getKind() - geo2.kind.getKind();
+    if (compare != 0) {
+      return compare;
+    }
+
+    compare = Integer.compare(geo1.numShapes(), geo2.numShapes());
+    if (compare != 0) return compare;
+
+    if (geo1 instanceof SinglePointGeography && geo2 instanceof SinglePointGeography) {
+      if (S2_isEmpty(geo1) && S2_isEmpty(geo2)) return 0;
+      assertPointEquals(
+          ((SinglePointGeography) geo1).getPoints().get(0),
+          ((SinglePointGeography) geo2).getPoints().get(0));
+    } else if (geo1 instanceof PointGeography && geo2 instanceof PointGeography) {
+      if (S2_isEmpty(geo1) && S2_isEmpty(geo2)) return 0;
+      checkPointShape((PointGeography) geo1, (PointGeography) geo2);
+    } else if (geo1 instanceof SinglePolylineGeography && geo2 instanceof SinglePolylineGeography) {
+      if (S2_isEmpty(geo1) && S2_isEmpty(geo2)) return 0;
+      checkPolylineShape((PolylineGeography) geo1, (PolylineGeography) geo2);
+    } else if (geo1 instanceof PolylineGeography && geo2 instanceof PolylineGeography) {
+      if (S2_isEmpty(geo1) && S2_isEmpty(geo2)) return 0;
+      checkPolylineShape((PolylineGeography) geo1, (PolylineGeography) geo2);
+    } else if (geo1 instanceof PolygonGeography && geo2 instanceof PolygonGeography) {
+      if (S2_isEmpty(geo1) && S2_isEmpty(geo2)) return 0;
+      checkPolygonShape((PolygonGeography) geo1, (PolygonGeography) geo2);
+    } else if (geo1 instanceof MultiPolygonGeography && geo2 instanceof MultiPolygonGeography) {
+      if (S2_isEmpty(geo1) && S2_isEmpty(geo2)) return 0;
+      assertEquals(geo1.numShapes(), geo2.numShapes());
+      for (int i = 0; i < geo1.numShapes(); i++) {
+        PolygonGeography poly1 = (PolygonGeography) ((MultiPolygonGeography) geo1).features.get(i);
+        PolygonGeography poly2 = (PolygonGeography) ((MultiPolygonGeography) geo1).features.get(i);
+        checkPolygonShape(poly1, poly2);
+      }
+    } else if (geo1 instanceof GeographyCollection && geo2 instanceof GeographyCollection) {
+      if (S2_isEmpty(geo1) && S2_isEmpty(geo2)) return 0;
+      assertEquals(geo1.numShapes(), geo2.numShapes());
+      for (int i = 0; i < geo1.numShapes(); i++) {
+        S2Geography g1 = (S2Geography) ((GeographyCollection) geo1).features.get(i);
+        S2Geography g2 = (S2Geography) ((GeographyCollection) geo2).features.get(i);
+        compareTo(g1, g2);
+      }
+    }
+    return 0;
+  }
+
+  private static void checkPointShape(PointGeography point1, PointGeography point2) {
+    List<S2Point> pOrig = point1.getPoints();
+    List<S2Point> pDec = point2.getPoints();
+    assertEquals("Point count", pOrig.size(), pDec.size());
+    for (int i = 0; i < pOrig.size(); i++) {
+      assertPointEquals(pOrig.get(i), pDec.get(i));
+    }
+  }
+
+  private static void checkPolylineShape(PolylineGeography line1, PolylineGeography line2) {
+    assertEquals("Line count", line1.getPolylines().size(), line2.getPolylines().size());
+    List<S2Polyline> lineOrig = line1.getPolylines();
+    List<S2Polyline> lineDec = line2.getPolylines();
+    for (int i = 0; i < lineOrig.size(); i++) {
+      List<S2Point> point1 = lineOrig.get(i).vertices();
+      List<S2Point> point2 = lineDec.get(i).vertices();
+      assertEquals("Vertex count", point1.size(), point2.size());
+      for (int v = 0; v < point1.size(); v++) {
+        assertPointEquals(point1.get(v), point2.get(v));
+      }
+    }
+  }
+
+  private static void checkPolygonShape(PolygonGeography poly1, PolygonGeography poly2) {
+    // may have multiple rings
+    assertEquals("Ring count", poly1.polygon.numLoops(), poly2.polygon.numLoops());
+
+    for (int li = 0; li < poly1.polygon.numLoops(); li++) {
+      S2Loop loop1 = poly1.polygon.loop(li);
+      S2Loop loop2 = poly2.polygon.loop(li);
+
+      assertEquals(loop1.numVertices(), loop2.numVertices());
+      // number of vertices in this loop
+      assertEquals(
+          String.format("Vertex count in loop[%d]", li), loop1.numVertices(), loop2.numVertices());
+
+      // compare each vertex
+      for (int vi = 0; vi < loop1.numVertices(); vi++) {
+        S2Point v1 = loop1.vertex(vi);
+        S2Point v2 = loop2.vertex(vi);
+        assertPointEquals(v1, v2);
+      }
+    }
+  }
+
+  private static void assertPointEquals(S2Point p1, S2Point p2) {
+    S2LatLng ll1 = S2LatLng.fromPoint(p1);
+    S2LatLng ll2 = S2LatLng.fromPoint(p2);
+    assertEquals("Latitude", ll1.latDegrees(), ll2.latDegrees(), EPS);
+    assertEquals("Longitude", ll1.lngDegrees(), ll2.lngDegrees(), EPS);
   }
 }
