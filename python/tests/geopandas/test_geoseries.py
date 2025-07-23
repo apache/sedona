@@ -180,7 +180,20 @@ class TestGeoSeries(TestGeopandasBase):
         pass
 
     def test_from_arrow(self):
-        pass
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            return
+
+        import pyarrow as pa
+
+        table = pa.table({"a": [0, 1, 2], "b": [0.1, 0.2, 0.3]})
+        with pytest.raises(ValueError, match="No GeoArrow geometry field found"):
+            GeoSeries.from_arrow(table["a"].chunk(0))
+
+        gpd_series = gpd.GeoSeries(
+            [Point(1, 1), Polygon(), LineString([(0, 0), (1, 1)]), None]
+        )
+        result = sgpd.GeoSeries.from_arrow(gpd_series.to_arrow())
+        self.check_sgpd_equals_gpd(result, gpd_series)
 
     def test_to_file(self):
         pass
@@ -349,7 +362,34 @@ class TestGeoSeries(TestGeopandasBase):
             sgpd.GeoSeries([Polygon([(0, 90), (1, 90), (2, 90)])]).estimate_utm_crs()
 
     def test_to_json(self):
-        pass
+        s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+
+        # TODO: optimize this away
+        with self.ps_allow_diff_frames():
+            result = s.to_json()
+        expected = '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "pr\
+operties": {}, "geometry": {"type": "Point", "coordinates": [1.0, 1.0]}, "bbox": [1.0,\
+ 1.0, 1.0, 1.0]}, {"id": "1", "type": "Feature", "properties": {}, "geometry": {"type"\
+: "Point", "coordinates": [2.0, 2.0]}, "bbox": [2.0, 2.0, 2.0, 2.0]}, {"id": "2", "typ\
+e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3.0, 3.\
+0]}, "bbox": [3.0, 3.0, 3.0, 3.0]}], "bbox": [1.0, 1.0, 3.0, 3.0]}'
+
+        assert result == expected
+
+        with self.ps_allow_diff_frames():
+            result = s.to_json(show_bbox=True)
+            expected = '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [1.0, 1.0]}, "bbox": [1.0, 1.0, 1.0, 1.0]}, {"id": "1", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [2.0, 2.0]}, "bbox": [2.0, 2.0, 2.0, 2.0]}, {"id": "2", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3.0, 3.0]}, "bbox": [3.0, 3.0, 3.0, 3.0]}], "bbox": [1.0, 1.0, 3.0, 3.0]}'
+            assert result == expected
+
+        with self.ps_allow_diff_frames():
+            result = s.to_json(drop_id=True)
+            expected = '{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [1.0, 1.0]}, "bbox": [1.0, 1.0, 1.0, 1.0]}, {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [2.0, 2.0]}, "bbox": [2.0, 2.0, 2.0, 2.0]}, {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3.0, 3.0]}, "bbox": [3.0, 3.0, 3.0, 3.0]}], "bbox": [1.0, 1.0, 3.0, 3.0]}'
+            assert result == expected
+
+        with self.ps_allow_diff_frames():
+            result = s.set_crs("EPSG:3857").to_json(to_wgs84=True)
+            expected = '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [8.983152841195214e-06, 8.983152841195177e-06]}, "bbox": [8.983152841195214e-06, 8.983152841195177e-06, 8.983152841195214e-06, 8.983152841195177e-06]}, {"id": "1", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [1.7966305682390428e-05, 1.7966305682390134e-05]}, "bbox": [1.7966305682390428e-05, 1.7966305682390134e-05, 1.7966305682390428e-05, 1.7966305682390134e-05]}, {"id": "2", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [2.6949458523585642e-05, 2.694945852358465e-05]}, "bbox": [2.6949458523585642e-05, 2.694945852358465e-05, 2.6949458523585642e-05, 2.694945852358465e-05]}], "bbox": [8.983152841195214e-06, 8.983152841195177e-06, 2.6949458523585642e-05, 2.694945852358465e-05]}'
+            assert result == expected
 
     def test_to_wkb(self):
         if parse_version(shapely.__version__) < parse_version("2.0.0"):
@@ -421,7 +461,24 @@ class TestGeoSeries(TestGeopandasBase):
         self.check_pd_series_equal(result, expected)
 
     def test_to_arrow(self):
-        pass
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            return
+
+        import pyarrow as pa
+
+        gser = GeoSeries([Point(1, 2), Point(2, 1)])
+        # TODO: optimize this away
+        with self.ps_allow_diff_frames():
+            arrow_array = gser.to_arrow()
+        result = pa.array(arrow_array)
+
+        expected = [
+            "0101000000000000000000F03F0000000000000040",
+            "01010000000000000000000040000000000000F03F",
+        ]
+        expected = pa.array([bytes.fromhex(x) for x in expected], type=pa.binary())
+
+        assert result.equals(expected)
 
     def test_clip(self):
         pass
