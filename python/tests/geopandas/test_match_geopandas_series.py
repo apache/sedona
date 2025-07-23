@@ -351,14 +351,9 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_to_crs(self):
-        for geom in self.geoms[:3]:
-            sgpd_result = GeoSeries(geom, crs=4326)
-            gpd_result = gpd.GeoSeries(geom, crs=4326)
-            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
-
-        for geom in self.geoms[3:]:
-            sgpd_result = sgpd_result.to_crs(epsg=3857)
-            gpd_result = gpd_result.to_crs(epsg=3857)
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom, crs=4326).to_crs(epsg=3857)
+            gpd_result = gpd.GeoSeries(geom, crs=4326).to_crs(epsg=3857)
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_bounds(self):
