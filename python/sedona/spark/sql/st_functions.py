@@ -1703,7 +1703,9 @@ def ST_SetSRID(geometry: ColumnOrName, srid: Union[ColumnOrName, int]) -> Column
 
 @validate_argument_types
 def ST_Snap(
-    input: ColumnOrName, reference: ColumnOrName, tolerance: Union[ColumnOrName, float]
+    input: ColumnOrName,
+    reference: ColumnOrName,
+    tolerance: Union[ColumnOrName, float, int],
 ) -> Column:
     """Snaps input Geometry to reference Geometry controlled by distance tolerance.
 

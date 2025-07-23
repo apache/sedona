@@ -46,9 +46,13 @@ class TestGeopandasBase(TestBase):
 
     # TODO chore: rename to check_sgpd_series_equals_gpd_series and change the names in the geoseries tests
     @classmethod
-    def check_sgpd_equals_gpd(cls, actual: GeoSeries, expected: gpd.GeoSeries):
-        assert isinstance(actual, GeoSeries), "result is not a sgpd.GeoSeries"
-        assert isinstance(expected, gpd.GeoSeries), "expected is not a gpd.GeoSeries"
+    def check_sgpd_equals_gpd(
+        cls,
+        actual: GeoSeries,
+        expected: gpd.GeoSeries,
+    ):
+        assert isinstance(actual, GeoSeries)
+        assert isinstance(expected, gpd.GeoSeries)
         sgpd_result = actual.to_geopandas()
         assert len(sgpd_result) == len(expected), "results are of different lengths"
         for a, e in zip(sgpd_result, expected):

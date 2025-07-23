@@ -214,6 +214,18 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         self.g1.buffer(0.2).to_parquet(temp_file_path)
         assert os.path.exists(temp_file_path)
 
+    def test_simplify(self):
+        for geom in self.geoms:
+            if isinstance(geom[0], LinearRing):
+                continue
+            sgpd_result = GeoSeries(geom).simplify(100.1)
+            gpd_result = gpd.GeoSeries(geom).simplify(100.1)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+            sgpd_result = GeoSeries(geom).simplify(0.05, preserve_topology=False)
+            gpd_result = gpd.GeoSeries(geom).simplify(0.05, preserve_topology=False)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
     def test_geometry(self):
         for geom in self.geoms:
             gpd_result = gpd.GeoSeries(geom).geometry
@@ -793,6 +805,28 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                 )
                 gpd_result = gpd_series1.intersection(gpd_series2, align=False)
                 self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+    def test_snap(self):
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            return
+
+        # Sedona's snap result fails fairly often, even though the results are fairly close.
+        # (though in a way where increasing the buffer tolerance wouldn't help with)
+        # Instead of testing all self.pairs, we test a few specific cases that are known to succeed
+        # currently, just so we can catch regressions
+
+        tests = [
+            (self.linestrings, self.multipoints, 1.1, True),
+            (self.linestrings, self.multipoints, 1, False),
+            (self.linearrings, self.multilinestrings, 1, False),
+        ]
+
+        for geom, geom2, tol, align in tests:
+            sgpd_result = GeoSeries(geom).snap(GeoSeries(geom2), tol, align=align)
+            gpd_result = gpd.GeoSeries(geom).snap(
+                gpd.GeoSeries(geom2), tol, align=align
+            )
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_intersection_all(self):
         pass
