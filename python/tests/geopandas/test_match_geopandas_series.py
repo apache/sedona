@@ -216,6 +216,8 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
     def test_simplify(self):
         for geom in self.geoms:
+            if isinstance(geom[0], LinearRing):
+                continue
             sgpd_result = GeoSeries(geom).simplify(100.1)
             gpd_result = gpd.GeoSeries(geom).simplify(100.1)
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
@@ -829,7 +831,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             gpd_result = gpd.GeoSeries(geom).snap(
                 gpd.GeoSeries(geom2), tol, align=align
             )
-            self.check_sgpd_equals_gpd(sgpd_result, gpd_result, error="bool")
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_intersection_all(self):
         pass

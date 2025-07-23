@@ -47,13 +47,10 @@ class TestGeopandasBase(TestBase):
     # TODO chore: rename to check_sgpd_series_equals_gpd_series and change the names in the geoseries tests
     @classmethod
     def check_sgpd_equals_gpd(
-        cls, actual: GeoSeries, expected: gpd.GeoSeries, error="raise"
+        cls,
+        actual: GeoSeries,
+        expected: gpd.GeoSeries,
     ):
-        """
-        error can be "raise" (default) or "bool"
-        if error is "bool", the function will return True if the geometries are almost equal, False otherwise
-        if error is "raise", the function will raise an error if the geometries are not almost equal
-        """
         assert isinstance(actual, GeoSeries)
         assert isinstance(expected, gpd.GeoSeries)
         sgpd_result = actual.to_geopandas()
@@ -65,20 +62,9 @@ class TestGeopandasBase(TestBase):
             # Sometimes sedona and geopandas both return empty geometries but of different types (e.g Point and Polygon)
             elif a.is_empty and e.is_empty:
                 continue
-            try:
-                cls.assert_geometry_almost_equal(
-                    a, e, tolerance=1e-2
-                )  # increased tolerance from 1e-6
-            except ValueError as err:
-                if error == "raise":
-                    raise err
-                elif error == "bool":
-                    return False
-                else:
-                    raise ValueError(f"Invalid error type: {error}")
-
-        if error == "bool":
-            return True
+            cls.assert_geometry_almost_equal(
+                a, e, tolerance=1e-2
+            )  # increased tolerance from 1e-6
 
     @classmethod
     def check_sgpd_df_equals_gpd_df(
