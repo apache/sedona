@@ -19,7 +19,7 @@
 package org.apache.sedona.core.spatialOperator;
 
 import java.io.Serializable;
-import org.apache.sedona.common.FunctionsApacheSIS;
+import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.core.rangeJudgement.RangeFilter;
 import org.apache.sedona.core.rangeJudgement.RangeFilterUsingIndex;
 import org.apache.sedona.core.spatialRDD.SpatialRDD;
@@ -56,7 +56,7 @@ public class RangeQuery implements Serializable {
     if (spatialRDD.getCRStransformation()) {
       queryGeometry =
           (U)
-              FunctionsApacheSIS.transform(
+              FunctionsGeoTools.transform(
                   originalQueryGeometry,
                   spatialRDD.getSourceEpsgCode(),
                   spatialRDD.getTargetEpgsgCode());
