@@ -18,24 +18,23 @@
  */
 package org.apache.spark.sql.sedona_sql
 
-import scala.reflect.ClassTag
-
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{Column, DataFrame, SparkSession}
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{Expression, Literal}
-import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
 import org.apache.spark.sql.execution.aggregate.ScalaUDAF
-import org.apache.spark.sql.functions.lit
+import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
 import org.apache.spark.sql.types.StructType
+import org.apache.spark.sql.{Column, DataFrame, SparkSession}
 
-object DataFrameShims {
+import scala.reflect.ClassTag
 
-  private[sedona_sql] def wrapExpression[E <: Expression: ClassTag](args: Any*): Column = {
+private[sql] object DataFrameShims {
+
+  def wrapExpression[E <: Expression: ClassTag](args: Any*): Column = {
     wrapVarArgExpression[E](args)
   }
 
-  private[sedona_sql] def wrapVarArgExpression[E <: Expression: ClassTag](arg: Seq[Any]): Column = {
+  def wrapVarArgExpression[E <: Expression: ClassTag](arg: Seq[Any]): Column = {
     val runtimeClass = implicitly[ClassTag[E]].runtimeClass
     val exprArgs = arg.map(_ match {
       case c: Column => c.expr
@@ -49,7 +48,7 @@ object DataFrameShims {
     Column(expressionInstance)
   }
 
-  private[sedona_sql] def wrapAggregator[A <: UserDefinedAggregateFunction: ClassTag](arg: Any*): Column = {
+  def wrapAggregator[A <: UserDefinedAggregateFunction: ClassTag](arg: Any*): Column = {
     val runtimeClass = implicitly[ClassTag[A]].runtimeClass
     val exprArgs = arg.map(_ match {
       case c: Column => c.expr
@@ -65,7 +64,7 @@ object DataFrameShims {
     Column(scalaAggregator)
   }
 
-  private[sedona_sql] def createDataFrame(
+  def createDataFrame(
       sparkSession: SparkSession,
       rdd: RDD[InternalRow],
       schema: StructType): DataFrame = {

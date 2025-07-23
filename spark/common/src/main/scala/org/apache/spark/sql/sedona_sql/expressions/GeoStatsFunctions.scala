@@ -29,7 +29,8 @@ import org.apache.spark.sql.functions.{col, struct}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
 
-case class ST_DBSCAN(children: Seq[Expression]) extends DataframePhysicalFunction {
+private[apache] case class ST_DBSCAN(children: Seq[Expression])
+    extends DataframePhysicalFunction {
 
   override def dataType: DataType =
     StructType(Seq(StructField("isCore", BooleanType), StructField("cluster", LongType)))
@@ -67,7 +68,8 @@ case class ST_DBSCAN(children: Seq[Expression]) extends DataframePhysicalFunctio
   }
 }
 
-case class ST_LocalOutlierFactor(children: Seq[Expression]) extends DataframePhysicalFunction {
+private[apache] case class ST_LocalOutlierFactor(children: Seq[Expression])
+    extends DataframePhysicalFunction {
 
   override def dataType: DataType = DoubleType
 
@@ -90,7 +92,8 @@ case class ST_LocalOutlierFactor(children: Seq[Expression]) extends DataframePhy
   }
 }
 
-case class ST_GLocal(children: Seq[Expression]) extends DataframePhysicalFunction {
+private[apache] case class ST_GLocal(children: Seq[Expression])
+    extends DataframePhysicalFunction {
 
   override def dataType: DataType = StructType(
     Seq(
@@ -129,7 +132,7 @@ case class ST_GLocal(children: Seq[Expression]) extends DataframePhysicalFunctio
   }
 }
 
-case class ST_BinaryDistanceBandColumn(children: Seq[Expression])
+private[apache] case class ST_BinaryDistanceBandColumn(children: Seq[Expression])
     extends DataframePhysicalFunction {
   override def dataType: DataType = ArrayType(
     StructType(
@@ -162,7 +165,7 @@ case class ST_BinaryDistanceBandColumn(children: Seq[Expression])
   }
 }
 
-case class ST_WeightedDistanceBandColumn(children: Seq[Expression])
+private[apache] case class ST_WeightedDistanceBandColumn(children: Seq[Expression])
     extends DataframePhysicalFunction {
 
   override def dataType: DataType = ArrayType(

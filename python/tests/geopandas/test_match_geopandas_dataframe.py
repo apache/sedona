@@ -176,3 +176,120 @@ class TestMatchGeopandasDataFrame(TestGeopandasBase):
             sgpd_df = sgpd_df.rename_geometry("name1")
         gpd_df = gpd_df.rename_geometry("name2")
         assert sgpd_df.geometry.name != gpd_df.geometry.name
+
+    def test_to_json(self):
+        tests = [
+            {
+                "a": [1, 2, 3],
+                "b": ["4", "5", "6"],
+                "geometry": [
+                    Point(1, 2),
+                    Point(2, 1),
+                    Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                ],
+            },
+            {
+                "a": [1, 2, 3],
+                "b": ["4", "5", "6"],
+                "geometry": [
+                    LineString([(0, 0), (1, 1)]),
+                    GeometryCollection(Point()),
+                    Point(2, 1),
+                ],
+            },
+            {
+                "a": [1, 2, 3],
+                "b": ["4", "5", "6"],
+                "geometry": [Polygon(), Point(1, 2), None],
+            },
+        ]
+
+        for data in tests:
+            # TODO: Try to optimize this with self.ps_allow_diff_frames() away
+            with self.ps_allow_diff_frames():
+                sgpd_result = GeoDataFrame(data).to_json()
+            gpd_result = gpd.GeoDataFrame(data).to_json()
+            assert sgpd_result == gpd_result
+
+        # test different json args
+        data = {
+            "a": [1, 2, 3],
+            "b": [4, 5, 6],
+            "geometry": [Point(1, 2), Point(2, 1), LineString([(0, 0), (1, 1)])],
+        }
+        tests = [
+            {"na": "drop"},
+            {"na": "keep"},
+            {"show_bbox": True},
+            {"drop_id": True},
+            {"to_wgs84": True},
+            {"na": "drop", "show_bbox": True, "drop_id": True, "to_wgs84": True},
+        ]
+        for kwargs in tests:
+            # TODO: Try to optimize this with self.ps_allow_diff_frames() away
+            with self.ps_allow_diff_frames():
+                sgpd_result = GeoDataFrame(data, crs="EPSG:3857").to_json(**kwargs)
+            gpd_result = gpd.GeoDataFrame(data, crs="EPSG:3857").to_json(**kwargs)
+            assert sgpd_result == gpd_result
+
+    def test_from_arrow(self):
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            return
+
+        gdf = gpd.GeoDataFrame(
+            {
+                "ints": [1, 2, 3, 4],
+                "strings": ["a", "b", "c", "d"],
+                "bools": [True, False, True, False],
+                "geometry": [
+                    Point(0, 1),
+                    LineString([(0, 0), (1, 1)]),
+                    Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                    Point(1, 1),
+                ],
+            }
+        )
+
+        # TODO: optimize this away
+        with self.ps_allow_diff_frames():
+            sgpd_result = GeoDataFrame.from_arrow(gdf.to_arrow())
+        gpd_result = gpd.GeoDataFrame.from_arrow(gdf.to_arrow())
+        self.check_sgpd_df_equals_gpd_df(sgpd_result, gpd_result)
+
+    def test_to_arrow(self):
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            return
+
+        import pyarrow as pa
+        import pandas as pd
+
+        data = {
+            "a": [1, 2, 3],
+            "b": [4, 5, 6],
+            "geometry": [Point(1, 2), Point(2, 1), LineString([(0, 0), (1, 1)])],
+        }
+
+        # TODO: Try to optimize this with self.ps_allow_diff_frames() away
+        with self.ps_allow_diff_frames():
+            sgpd_result = pa.table(GeoDataFrame(data).to_arrow(index=False))
+        gpd_result = pa.table(gpd.GeoDataFrame(data).to_arrow(index=False))
+
+        assert sgpd_result.equals(gpd_result)
+
+        # TODO: Try to optimize this with self.ps_allow_diff_frames() away
+        with self.ps_allow_diff_frames():
+            sgpd_result = pa.table(
+                GeoDataFrame(
+                    data, index=pd.RangeIndex(start=0, stop=3, step=1)
+                ).to_arrow(index=True)
+            )
+        gpd_result = pa.table(
+            gpd.GeoDataFrame(
+                data, index=pd.RangeIndex(start=0, stop=3, step=1)
+            ).to_arrow(index=True)
+        )
+
+        assert sgpd_result.equals(gpd_result)
+
+        # Note: Results for not specifying index=True or index=False for to_arrow is expected to be different
+        # from geopandas. See the to_arrow docstring for more details.

@@ -24,7 +24,7 @@ import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.sql.sedona_sql.expressions.InferrableRasterTypes._
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 
-case class RS_SetValues(inputExpressions: Seq[Expression])
+private[apache] case class RS_SetValues(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction8(PixelFunctionEditors.setValues),
       inferrableFunction7(PixelFunctionEditors.setValues),
@@ -36,7 +36,7 @@ case class RS_SetValues(inputExpressions: Seq[Expression])
   }
 }
 
-case class RS_SetValue(inputExpressions: Seq[Expression])
+private[apache] case class RS_SetValue(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction5(PixelFunctionEditors.setValue),
       inferrableFunction4(PixelFunctionEditors.setValue)) {

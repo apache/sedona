@@ -19,6 +19,8 @@ from __future__ import annotations
 from typing import Any, Literal, Callable, Union
 import typing
 
+import os
+import shapely
 import warnings
 import numpy as np
 import shapely
@@ -412,6 +414,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         if isinstance(data, GeoDataFrame):
             if data._safe_get_crs() is None:
                 data.crs = crs
+
+            super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
+
         elif isinstance(data, GeoSeries):
             if data.crs is None:
                 data.crs = crs
@@ -469,10 +474,40 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 copy=copy,
             )
 
+        # Set geometry column name
         if isinstance(data, (GeoDataFrame, gpd.GeoDataFrame)):
             self._geometry_column_name = data._geometry_column_name
             if crs is not None and data.crs != crs:
                 raise ValueError(crs_mismatch_error)
+
+        if geometry is None and "geometry" in self.columns:
+
+            if (self.columns == "geometry").sum() > 1:
+                raise ValueError(
+                    "GeoDataFrame does not support multiple columns "
+                    "using the geometry column name 'geometry'."
+                )
+
+            geometry: pspd.Series = self["geometry"]
+            if isinstance(geometry, sgpd.GeoSeries):
+                geom_crs = geometry.crs
+                if geom_crs is None:
+                    if crs is not None:
+                        geometry.set_crs(crs, inplace=True)
+                        self.set_geometry(geometry, inplace=True)
+                else:
+                    if crs is not None and geom_crs != crs:
+                        raise ValueError(crs_mismatch_error)
+
+            # No need to call set_geometry() here since it's already part of the df, just set the name
+            self._geometry_column_name = "geometry"
+
+        if geometry is None and crs:
+            raise ValueError(
+                "Assigning CRS to a GeoDataFrame without a geometry column is not "
+                "supported. Supply geometry using the 'geometry=' keyword argument, "
+                "or by providing a DataFrame with column name 'geometry'",
+            )
 
     # ============================================================================
     # GEOMETRY COLUMN MANAGEMENT
@@ -842,23 +877,33 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         sdf = self._internal.spark_frame.selectExpr(*select_expressions)
         return GeoDataFrame(sdf)
 
-    def to_geopandas(self) -> gpd.GeoDataFrame | pd.Series:
-        # Implementation of the abstract method
-        raise NotImplementedError(
-            _not_implemented_error(
-                "to_geopandas",
-                "Converts to GeoPandas GeoDataFrame by collecting all data to driver.",
-            )
-        )
+    def to_geopandas(self) -> gpd.GeoDataFrame:
+        """
+        Note: Unlike in pandas and geopandas, Sedona will always return a general Index.
+        This differs from pandas and geopandas, which will return a RangeIndex by default.
 
-    def _to_geopandas(self) -> gpd.GeoDataFrame | pd.Series:
-        # Implementation of the abstract method
-        raise NotImplementedError(
-            _not_implemented_error(
-                "_to_geopandas",
-                "Internal method for GeoPandas conversion without logging warnings.",
-            )
+        e.g pd.Index([0, 1, 2]) instead of pd.RangeIndex(start=0, stop=3, step=1)
+        """
+        from pyspark.pandas.utils import log_advice
+
+        log_advice(
+            "`to_geopandas` loads all data into the driver's memory. "
+            "It should only be used if the resulting geopandas GeoSeries is expected to be small."
         )
+        return self._to_geopandas()
+
+    def _to_geopandas(self) -> gpd.GeoDataFrame:
+        pd_df = self._internal.to_pandas_frame
+
+        for col_name in pd_df.columns:
+            series: pspd.Series = self[col_name]
+            if isinstance(series, sgpd.GeoSeries):
+                # Use _to_geopandas instead of to_geopandas to avoid logging extra warnings
+                pd_df[col_name] = series._to_geopandas()
+            else:
+                pd_df[col_name] = series.to_pandas()
+
+        return gpd.GeoDataFrame(pd_df, geometry=self._geometry_column_name)
 
     @property
     def sindex(self) -> SpatialIndex | None:
@@ -952,8 +997,311 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             return
         self.geometry.crs = value
 
+    @classmethod
+    def from_dict(
+        cls,
+        data: dict,
+        geometry=None,
+        crs: Any | None = None,
+        **kwargs,
+    ) -> GeoDataFrame:
+        raise NotImplementedError("from_dict() is not implemented yet.")
+
+    @classmethod
+    def from_file(cls, filename: os.PathLike | typing.IO, **kwargs) -> GeoDataFrame:
+        raise NotImplementedError("from_file() is not implemented yet.")
+
+    @classmethod
+    def from_features(
+        cls, features, crs: Any | None = None, columns: Iterable[str] | None = None
+    ) -> GeoDataFrame:
+        raise NotImplementedError("from_features() is not implemented yet.")
+
+    @classmethod
+    def from_postgis(
+        cls,
+        sql: str | sqlalchemy.text,
+        con,
+        geom_col: str = "geom",
+        crs: Any | None = None,
+        index_col: str | list[str] | None = None,
+        coerce_float: bool = True,
+        parse_dates: list | dict | None = None,
+        params: list | tuple | dict | None = None,
+        chunksize: int | None = None,
+    ) -> GeoDataFrame:
+        raise NotImplementedError("from_postgis() is not implemented yet.")
+
+    @classmethod
+    def from_arrow(
+        cls, table, geometry: str | None = None, to_pandas_kwargs: dict | None = None
+    ):
+        """
+        Construct a GeoDataFrame from a Arrow table object based on GeoArrow
+        extension types.
+
+        See https://geoarrow.org/ for details on the GeoArrow specification.
+
+        This functions accepts any tabular Arrow object implementing
+        the `Arrow PyCapsule Protocol`_ (i.e. having an ``__arrow_c_array__``
+        or ``__arrow_c_stream__`` method).
+
+        .. _Arrow PyCapsule Protocol: https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html
+
+        .. versionadded:: 1.0
+
+        Parameters
+        ----------
+        table : pyarrow.Table or Arrow-compatible table
+            Any tabular object implementing the Arrow PyCapsule Protocol
+            (i.e. has an ``__arrow_c_array__`` or ``__arrow_c_stream__``
+            method). This table should have at least one column with a
+            geoarrow geometry type.
+        geometry : str, default None
+            The name of the geometry column to set as the active geometry
+            column. If None, the first geometry column found will be used.
+        to_pandas_kwargs : dict, optional
+            Arguments passed to the `pa.Table.to_pandas` method for non-geometry
+            columns. This can be used to control the behavior of the conversion of the
+            non-geometry columns to a pandas DataFrame. For example, you can use this
+            to control the dtype conversion of the columns. By default, the `to_pandas`
+            method is called with no additional arguments.
+
+        Returns
+        -------
+        GeoDataFrame
+
+        See Also
+        --------
+        GeoDataFrame.to_arrow
+        GeoSeries.from_arrow
+
+        Examples
+        --------
+
+        >>> from sedona.geopandas import GeoDataFrame
+        >>> import geoarrow.pyarrow as ga
+        >>> import pyarrow as pa
+        >>> table = pa.Table.from_arrays([
+        ...     ga.as_geoarrow([None, "POLYGON ((0 0, 1 1, 0 1, 0 0))", "LINESTRING (0 0, -1 1, 0 -1)"]),
+        ...     pa.array([1, 2, 3]),
+        ...     pa.array(["a", "b", "c"]),
+        ... ], names=["geometry", "id", "value"])
+        >>> gdf = GeoDataFrame.from_arrow(table)
+        >>> gdf
+                                   geometry   id  value
+        0                              None    1      a
+        1    POLYGON ((0 0, 1 1, 0 1, 0 0))    2      b
+        2      LINESTRING (0 0, -1 1, 0 -1)    3      c
+        """
+        if to_pandas_kwargs is None:
+            to_pandas_kwargs = {}
+
+        gpd_df = gpd.GeoDataFrame.from_arrow(
+            table, geometry=geometry, **to_pandas_kwargs
+        )
+        return GeoDataFrame(gpd_df)
+
+    def to_json(
+        self,
+        na: Literal["null", "drop", "keep"] = "null",
+        show_bbox: bool = False,
+        drop_id: bool = False,
+        to_wgs84: bool = False,
+        **kwargs,
+    ) -> str:
+        """
+        Returns a GeoJSON representation of the ``GeoDataFrame`` as a string.
+        Parameters
+        ----------
+        na : {'null', 'drop', 'keep'}, default 'null'
+            Indicates how to output missing (NaN) values in the GeoDataFrame.
+            See below.
+        show_bbox : bool, optional, default: False
+            Include bbox (bounds) in the geojson
+        drop_id : bool, default: False
+            Whether to retain the index of the GeoDataFrame as the id property
+            in the generated GeoJSON. Default is False, but may want True
+            if the index is just arbitrary row numbers.
+        to_wgs84: bool, optional, default: False
+            If the CRS is set on the active geometry column it is exported as
+            WGS84 (EPSG:4326) to meet the `2016 GeoJSON specification
+            <https://tools.ietf.org/html/rfc7946>`_.
+            Set to True to force re-projection and set to False to ignore CRS. False by
+            default.
+        Notes
+        -----
+        The remaining *kwargs* are passed to json.dumps().
+        Missing (NaN) values in the GeoDataFrame can be represented as follows:
+        - ``null``: output the missing entries as JSON null.
+        - ``drop``: remove the property from the feature. This applies to each
+          feature individually so that features may have different properties.
+        - ``keep``: output the missing entries as NaN.
+        If the GeoDataFrame has a defined CRS, its definition will be included
+        in the output unless it is equal to WGS84 (default GeoJSON CRS) or not
+        possible to represent in the URN OGC format, or unless ``to_wgs84=True``
+        is specified.
+        Examples
+        --------
+        >>> from sedona.geopandas import GeoDataFrame
+        >>> from shapely.geometry import Point
+        >>> d = {'col1': ['name1', 'name2'], 'geometry': [Point(1, 2), Point(2, 1)]}
+        >>> gdf = GeoDataFrame(d, crs="EPSG:3857")
+        >>> gdf
+            col1     geometry
+        0  name1  POINT (1 2)
+        1  name2  POINT (2 1)
+        >>> gdf.to_json()
+        '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", \
+"properties": {"col1": "name1"}, "geometry": {"type": "Point", "coordinates": [1.0,\
+ 2.0]}}, {"id": "1", "type": "Feature", "properties": {"col1": "name2"}, "geometry"\
+: {"type": "Point", "coordinates": [2.0, 1.0]}}], "crs": {"type": "name", "properti\
+es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
+        Alternatively, you can write GeoJSON to file:
+        >>> gdf.to_file(path, driver="GeoJSON")  # doctest: +SKIP
+        See also
+        --------
+        GeoDataFrame.to_file : write GeoDataFrame to file
+        """
+        # Because this function returns the geojson string in memory,
+        # we simply rely on geopandas's implementation.
+        # Additionally, spark doesn't seem to have a straight forward way to get the string
+        # without writing to a file first by using sdf.write.format("geojson").save(path, **kwargs)
+        # return self.to_geopandas().to_json(na, show_bbox, drop_id, to_wgs84, **kwargs)
+        # ST_AsGeoJSON() works only for one column
+        result = self.to_geopandas()
+        return result.to_json(na, show_bbox, drop_id, to_wgs84, **kwargs)
+
     @property
-    def geom_type(self):
+    def __geo_interface__(self) -> dict:
+        raise NotImplementedError("__geo_interface__() is not implemented yet.")
+
+    def iterfeatures(
+        self, na: str = "null", show_bbox: bool = False, drop_id: bool = False
+    ) -> typing.Generator[dict]:
+        raise NotImplementedError("iterfeatures() is not implemented yet.")
+
+    def to_geo_dict(
+        self, na: str | None = "null", show_bbox: bool = False, drop_id: bool = False
+    ) -> dict:
+        raise NotImplementedError("to_geo_dict() is not implemented yet.")
+
+    def to_wkb(self, hex: bool = False, **kwargs) -> pd.DataFrame:
+        raise NotImplementedError("to_wkb() is not implemented yet.")
+
+    def to_wkt(self, **kwargs) -> pd.DataFrame:
+        raise NotImplementedError("to_wkt() is not implemented yet.")
+
+    def to_arrow(
+        self,
+        *,
+        index: bool | None = None,
+        geometry_encoding="WKB",
+        interleaved: bool = True,
+        include_z: bool | None = None,
+    ):
+        """Encode a GeoDataFrame to GeoArrow format.
+        See https://geoarrow.org/ for details on the GeoArrow specification.
+        This function returns a generic Arrow data object implementing
+        the `Arrow PyCapsule Protocol`_ (i.e. having an ``__arrow_c_stream__``
+        method). This object can then be consumed by your Arrow implementation
+        of choice that supports this protocol.
+        .. _Arrow PyCapsule Protocol: https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html
+
+        Note: Requires geopandas versions >= 1.0.0 to use with Sedona.
+
+        Parameters
+        ----------
+        index : bool, default None
+            If ``True``, always include the dataframe's index(es) as columns
+            in the file output.
+            If ``False``, the index(es) will not be written to the file.
+            If ``None``, the index(ex) will be included as columns in the file
+            output except `RangeIndex` which is stored as metadata only.
+
+            Note: Unlike in geopandas, ``None`` will include the index in the column because Sedona always
+            converts `RangeIndex` into a general `Index`.
+
+        geometry_encoding : {'WKB', 'geoarrow' }, default 'WKB'
+            The GeoArrow encoding to use for the data conversion.
+        interleaved : bool, default True
+            Only relevant for 'geoarrow' encoding. If True, the geometries'
+            coordinates are interleaved in a single fixed size list array.
+            If False, the coordinates are stored as separate arrays in a
+            struct type.
+        include_z : bool, default None
+            Only relevant for 'geoarrow' encoding (for WKB, the dimensionality
+            of the individual geometries is preserved).
+            If False, return 2D geometries. If True, include the third dimension
+            in the output (if a geometry has no third dimension, the z-coordinates
+            will be NaN). By default, will infer the dimensionality from the
+            input geometries. Note that this inference can be unreliable with
+            empty geometries (for a guaranteed result, it is recommended to
+            specify the keyword).
+        Returns
+        -------
+        ArrowTable
+            A generic Arrow table object with geometry columns encoded to
+            GeoArrow.
+        Examples
+        --------
+        >>> from sedona.geopandas import GeoDataFrame
+        >>> from shapely.geometry import Point
+        >>> data = {'col1': ['name1', 'name2'], 'geometry': [Point(1, 2), Point(2, 1)]}
+        >>> gdf = GeoDataFrame(data)
+        >>> gdf
+            col1     geometry
+        0  name1  POINT (1 2)
+        1  name2  POINT (2 1)
+        >>> arrow_table = gdf.to_arrow(index=False)
+        >>> arrow_table
+        <geopandas.io._geoarrow.ArrowTable object at ...>
+        The returned data object needs to be consumed by a library implementing
+        the Arrow PyCapsule Protocol. For example, wrapping the data as a
+        pyarrow.Table (requires pyarrow >= 14.0):
+        >>> import pyarrow as pa
+        >>> table = pa.table(arrow_table)
+        >>> table
+        pyarrow.Table
+        col1: string
+        geometry: binary
+        ----
+        col1: [["name1","name2"]]
+        geometry: [[0101000000000000000000F03F0000000000000040,\
+01010000000000000000000040000000000000F03F]]
+        """
+        # Because this function returns the arrow table in memory, we simply rely on geopandas's implementation.
+        # This also returns a geopandas specific data type, which can be converted to an actual pyarrow table,
+        # so there is no direct Sedona equivalent. This way we also get all of the arguments implemented for free.
+        return self.to_geopandas().to_arrow(
+            index=index,
+            geometry_encoding=geometry_encoding,
+            interleaved=interleaved,
+            include_z=include_z,
+        )
+
+    def to_feather(
+        self,
+        path,
+        index: bool | None = None,
+        compression: str | None = None,
+        schema_version=None,
+        **kwargs,
+    ):
+        raise NotImplementedError("to_feather() is not implemented yet.")
+
+    def to_file(
+        self,
+        filename: str,
+        driver: str | None = None,
+        schema: dict | None = None,
+        index: bool | None = None,
+        **kwargs,
+    ):
+        raise NotImplementedError("to_file() is not implemented yet.")
+
+    @property
+    def geom_type(self) -> str:
         # Implementation of the abstract method
         raise NotImplementedError(
             _not_implemented_error(

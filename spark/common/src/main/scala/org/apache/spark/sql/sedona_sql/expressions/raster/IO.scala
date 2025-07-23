@@ -20,19 +20,12 @@ package org.apache.spark.sql.sedona_sql.expressions.raster
 
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
-import org.apache.spark.sql.catalyst.expressions.{Expression, ImplicitCastInputTypes, UnsafeArrayData}
+import org.apache.spark.sql.catalyst.expressions.{Expression, ImplicitCastInputTypes}
 import org.apache.spark.sql.catalyst.util.GenericArrayData
 import org.apache.spark.sql.sedona_sql.expressions.UserDataGenerator
 import org.apache.spark.sql.types._
-import org.apache.spark.unsafe.types.UTF8String
 
-import java.awt.Color
-import java.awt.image.BufferedImage
-import java.io.ByteArrayOutputStream
-import java.util.Base64
-import javax.imageio.ImageIO
-
-case class RS_Array(inputExpressions: Seq[Expression])
+private[apache] case class RS_Array(inputExpressions: Seq[Expression])
     extends Expression
     with ImplicitCastInputTypes
     with CodegenFallback

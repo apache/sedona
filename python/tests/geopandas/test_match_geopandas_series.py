@@ -292,7 +292,15 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_from_arrow(self):
-        pass
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            return
+
+        for _, geom in self.geoms:
+            gpd_series = gpd.GeoSeries(geom)
+            gpd_result = gpd.GeoSeries.from_arrow(gpd_series.to_arrow())
+
+            sgpd_result = GeoSeries.from_arrow(gpd_series.to_arrow())
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_to_file(self):
         pass
@@ -381,7 +389,10 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                 assert sgpd_result == gpd_result
 
     def test_to_json(self):
-        pass
+        for _, geom in self.geoms:
+            sgpd_result = GeoSeries(geom).to_json()
+            gpd_result = gpd.GeoSeries(geom).to_json()
+            assert sgpd_result == gpd_result
 
     def test_to_wkb(self):
         for _, geom in self.geoms:
@@ -405,7 +416,15 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_to_arrow(self):
-        pass
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            return
+
+        import pyarrow as pa
+
+        for _, geom in self.geoms:
+            sgpd_result = pa.array(GeoSeries(geom).to_arrow())
+            gpd_result = pa.array(gpd.GeoSeries(geom).to_arrow())
+            assert sgpd_result == gpd_result
 
     def test_clip(self):
         pass
