@@ -33,7 +33,7 @@ import org.apache.spark.sql.types.{AbstractDataType, ArrayType, DataType, Double
 
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 
-case class RS_Value(inputExpressions: Seq[Expression])
+private[apache] case class RS_Value(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction2(PixelFunctions.value),
       inferrableFunction3(PixelFunctions.value),
@@ -43,14 +43,14 @@ case class RS_Value(inputExpressions: Seq[Expression])
   }
 }
 
-case class RS_PixelAsPoint(inputExpressions: Seq[Expression])
+private[apache] case class RS_PixelAsPoint(inputExpressions: Seq[Expression])
     extends InferredExpression(PixelFunctions.getPixelAsPoint _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
-case class RS_PixelAsPoints(inputExpressions: Seq[Expression])
+private[apache] case class RS_PixelAsPoints(inputExpressions: Seq[Expression])
     extends Expression
     with CodegenFallback
     with ExpectsInputTypes {
@@ -91,14 +91,14 @@ case class RS_PixelAsPoints(inputExpressions: Seq[Expression])
   override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT, IntegerType)
 }
 
-case class RS_PixelAsPolygon(inputExpressions: Seq[Expression])
+private[apache] case class RS_PixelAsPolygon(inputExpressions: Seq[Expression])
     extends InferredExpression(PixelFunctions.getPixelAsPolygon _) {
   protected def withNewChildrenInternal(newChilren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChilren)
   }
 }
 
-case class RS_PixelAsPolygons(inputExpressions: Seq[Expression])
+private[apache] case class RS_PixelAsPolygons(inputExpressions: Seq[Expression])
     extends Expression
     with CodegenFallback
     with ExpectsInputTypes {
@@ -140,14 +140,14 @@ case class RS_PixelAsPolygons(inputExpressions: Seq[Expression])
   override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT, IntegerType)
 }
 
-case class RS_PixelAsCentroid(inputExpressions: Seq[Expression])
+private[apache] case class RS_PixelAsCentroid(inputExpressions: Seq[Expression])
     extends InferredExpression(PixelFunctions.getPixelAsCentroid _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
-case class RS_PixelAsCentroids(inputExpressions: Seq[Expression])
+private[apache] case class RS_PixelAsCentroids(inputExpressions: Seq[Expression])
     extends Expression
     with CodegenFallback
     with ExpectsInputTypes {
@@ -189,7 +189,7 @@ case class RS_PixelAsCentroids(inputExpressions: Seq[Expression])
   override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT, IntegerType)
 }
 
-case class RS_Values(inputExpressions: Seq[Expression])
+private[apache] case class RS_Values(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction2(PixelFunctions.values),
       inferrableFunction3(PixelFunctions.values),

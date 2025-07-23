@@ -78,7 +78,7 @@ abstract class ST_Predicate
  *
  * @param inputExpressions
  */
-case class ST_Contains(inputExpressions: Seq[Expression])
+private[apache] case class ST_Contains(inputExpressions: Seq[Expression])
     extends ST_Predicate
     with CodegenFallback {
 
@@ -96,7 +96,7 @@ case class ST_Contains(inputExpressions: Seq[Expression])
  *
  * @param inputExpressions
  */
-case class ST_Intersects(inputExpressions: Seq[Expression])
+private[apache] case class ST_Intersects(inputExpressions: Seq[Expression])
     extends ST_Predicate
     with CodegenFallback {
 
@@ -114,7 +114,7 @@ case class ST_Intersects(inputExpressions: Seq[Expression])
  *
  * @param inputExpressions
  */
-case class ST_Within(inputExpressions: Seq[Expression])
+private[apache] case class ST_Within(inputExpressions: Seq[Expression])
     extends ST_Predicate
     with CodegenFallback {
 
@@ -132,7 +132,7 @@ case class ST_Within(inputExpressions: Seq[Expression])
  *
  * @param inputExpressions
  */
-case class ST_Covers(inputExpressions: Seq[Expression])
+private[apache] case class ST_Covers(inputExpressions: Seq[Expression])
     extends ST_Predicate
     with CodegenFallback {
 
@@ -150,7 +150,7 @@ case class ST_Covers(inputExpressions: Seq[Expression])
  *
  * @param inputExpressions
  */
-case class ST_CoveredBy(inputExpressions: Seq[Expression])
+private[apache] case class ST_CoveredBy(inputExpressions: Seq[Expression])
     extends ST_Predicate
     with CodegenFallback {
 
@@ -168,7 +168,7 @@ case class ST_CoveredBy(inputExpressions: Seq[Expression])
  *
  * @param inputExpressions
  */
-case class ST_Crosses(inputExpressions: Seq[Expression])
+private[apache] case class ST_Crosses(inputExpressions: Seq[Expression])
     extends ST_Predicate
     with CodegenFallback {
 
@@ -186,7 +186,7 @@ case class ST_Crosses(inputExpressions: Seq[Expression])
  *
  * @param inputExpressions
  */
-case class ST_Overlaps(inputExpressions: Seq[Expression])
+private[apache] case class ST_Overlaps(inputExpressions: Seq[Expression])
     extends ST_Predicate
     with CodegenFallback {
 
@@ -204,7 +204,7 @@ case class ST_Overlaps(inputExpressions: Seq[Expression])
  *
  * @param inputExpressions
  */
-case class ST_Touches(inputExpressions: Seq[Expression])
+private[apache] case class ST_Touches(inputExpressions: Seq[Expression])
     extends ST_Predicate
     with CodegenFallback {
 
@@ -217,7 +217,7 @@ case class ST_Touches(inputExpressions: Seq[Expression])
   }
 }
 
-case class ST_Relate(inputExpressions: Seq[Expression])
+private[apache] case class ST_Relate(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction3(Predicates.relate),
       inferrableFunction2(Predicates.relate)) {
@@ -227,7 +227,7 @@ case class ST_Relate(inputExpressions: Seq[Expression])
   }
 }
 
-case class ST_RelateMatch(inputExpressions: Seq[Expression])
+private[apache] case class ST_RelateMatch(inputExpressions: Seq[Expression])
     extends InferredExpression(inferrableFunction2(Predicates.relateMatch)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -240,7 +240,7 @@ case class ST_RelateMatch(inputExpressions: Seq[Expression])
  *
  * @param inputExpressions
  */
-case class ST_Equals(inputExpressions: Seq[Expression])
+private[apache] case class ST_Equals(inputExpressions: Seq[Expression])
     extends ST_Predicate
     with CodegenFallback {
 
@@ -259,7 +259,7 @@ case class ST_Equals(inputExpressions: Seq[Expression])
  *
  * @param inputExpressions
  */
-case class ST_Disjoint(inputExpressions: Seq[Expression])
+private[apache] case class ST_Disjoint(inputExpressions: Seq[Expression])
     extends ST_Predicate
     with CodegenFallback {
 
@@ -277,7 +277,7 @@ case class ST_Disjoint(inputExpressions: Seq[Expression])
  *
  * @param inputExpressions
  */
-case class ST_OrderingEquals(inputExpressions: Seq[Expression])
+private[apache] case class ST_OrderingEquals(inputExpressions: Seq[Expression])
     extends ST_Predicate
     with CodegenFallback {
 
@@ -290,7 +290,7 @@ case class ST_OrderingEquals(inputExpressions: Seq[Expression])
   }
 }
 
-case class ST_DWithin(inputExpressions: Seq[Expression])
+private[apache] case class ST_DWithin(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction3(Predicates.dWithin),
       inferrableFunction4(Predicates.dWithin)) {
@@ -306,7 +306,7 @@ case class ST_DWithin(inputExpressions: Seq[Expression])
  *
  * @param inputExpressions
  */
-case class ST_KNN(inputExpressions: Seq[Expression])
+private[apache] case class ST_KNN(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction3(Predicates.knn),
       inferrableFunction4(Predicates.knn)) {

@@ -166,7 +166,8 @@ def _frame_join(
     final_columns = []
 
     # Add geometry column (always from left for geopandas compatibility)
-    final_columns.append("l_geometry as geometry")
+    # Currently, Sedona stores geometries in EWKB format
+    final_columns.append("ST_AsEWKB(l_geometry) as geometry")
 
     # Add other columns with suffix handling
     left_data_cols = [col for col in left_geo_df.columns if col != "l_geometry"]

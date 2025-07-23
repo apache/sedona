@@ -24,7 +24,7 @@ import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.sql.sedona_sql.expressions.InferrableRasterTypes._
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 
-case class RS_SetBandNoDataValue(inputExpressions: Seq[Expression])
+private[apache] case class RS_SetBandNoDataValue(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction4(RasterBandEditors.setBandNoDataValue),
       inferrableFunction3(RasterBandEditors.setBandNoDataValue),
@@ -34,7 +34,7 @@ case class RS_SetBandNoDataValue(inputExpressions: Seq[Expression])
   }
 }
 
-case class RS_AddBand(inputExpressions: Seq[Expression])
+private[apache] case class RS_AddBand(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction4(RasterBandEditors.addBand),
       inferrableFunction3(RasterBandEditors.addBand),
@@ -44,7 +44,7 @@ case class RS_AddBand(inputExpressions: Seq[Expression])
   }
 }
 
-case class RS_Union(inputExpressions: Seq[Expression])
+private[apache] case class RS_Union(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction2(RasterBandEditors.rasterUnion),
       inferrableFunction3(RasterBandEditors.rasterUnion),
@@ -57,7 +57,7 @@ case class RS_Union(inputExpressions: Seq[Expression])
   }
 }
 
-case class RS_Clip(inputExpressions: Seq[Expression])
+private[apache] case class RS_Clip(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction7(RasterBandEditors.clip),
       inferrableFunction6(RasterBandEditors.clip),

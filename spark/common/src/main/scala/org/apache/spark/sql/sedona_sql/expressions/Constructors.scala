@@ -38,7 +38,7 @@ import org.apache.spark.unsafe.types.UTF8String
  *   This function takes 2 parameters. The first parameter is the input geometry string, the
  *   second parameter is the delimiter. String format should be similar to CSV/TSV
  */
-case class ST_PointFromText(inputExpressions: Seq[Expression])
+private[apache] case class ST_PointFromText(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.pointFromText _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -51,7 +51,7 @@ case class ST_PointFromText(inputExpressions: Seq[Expression])
  *
  * @param inputExpressions
  */
-case class ST_PolygonFromText(inputExpressions: Seq[Expression])
+private[apache] case class ST_PolygonFromText(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.polygonFromText _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -64,7 +64,7 @@ case class ST_PolygonFromText(inputExpressions: Seq[Expression])
  *
  * @param inputExpressions
  */
-case class ST_LineFromText(inputExpressions: Seq[Expression])
+private[apache] case class ST_LineFromText(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.lineFromText _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -77,7 +77,7 @@ case class ST_LineFromText(inputExpressions: Seq[Expression])
  *
  * @param inputExpressions
  */
-case class ST_LineStringFromText(inputExpressions: Seq[Expression])
+private[apache] case class ST_LineStringFromText(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.lineStringFromText _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -90,7 +90,7 @@ case class ST_LineStringFromText(inputExpressions: Seq[Expression])
  * @param inputExpressions
  *   This function takes a geometry string and a srid. The string format must be WKT.
  */
-case class ST_GeomFromWKT(inputExpressions: Seq[Expression])
+private[apache] case class ST_GeomFromWKT(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.geomFromWKT _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -104,7 +104,7 @@ case class ST_GeomFromWKT(inputExpressions: Seq[Expression])
  * @param inputExpressions
  *   This function takes a geometry string and a srid. The string format must be WKT.
  */
-case class ST_GeogFromWKT(inputExpressions: Seq[Expression])
+private[apache] case class ST_GeogFromWKT(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.geogFromWKT _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -119,7 +119,7 @@ case class ST_GeogFromWKT(inputExpressions: Seq[Expression])
  *   This function takes a geometry string. The string format must be OGC Extended Well-Known text
  *   (EWKT) representation.
  */
-case class ST_GeomFromEWKT(inputExpressions: Seq[Expression])
+private[apache] case class ST_GeomFromEWKT(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.geomFromEWKT _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -133,7 +133,7 @@ case class ST_GeomFromEWKT(inputExpressions: Seq[Expression])
  * @param inputExpressions
  *   This function takes a geometry string and a srid. The string format must be WKT.
  */
-case class ST_GeometryFromText(inputExpressions: Seq[Expression])
+private[apache] case class ST_GeometryFromText(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.geomFromWKT _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -147,7 +147,7 @@ case class ST_GeometryFromText(inputExpressions: Seq[Expression])
  * @param inputExpressions
  *   This function takes a geometry string and a srid. The string format must be WKT.
  */
-case class ST_GeomFromText(inputExpressions: Seq[Expression])
+private[apache] case class ST_GeomFromText(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.geomFromWKT _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -162,7 +162,7 @@ case class ST_GeomFromText(inputExpressions: Seq[Expression])
  *   This function takes 1 parameter which is the utf-8 encoded geometry wkb string or the binary
  *   wkb array.
  */
-case class ST_GeomFromWKB(inputExpressions: Seq[Expression])
+private[apache] case class ST_GeomFromWKB(inputExpressions: Seq[Expression])
     extends Expression
     with FoldableExpression
     with ImplicitCastInputTypes
@@ -202,7 +202,7 @@ case class ST_GeomFromWKB(inputExpressions: Seq[Expression])
   }
 }
 
-case class ST_GeomFromEWKB(inputExpressions: Seq[Expression])
+private[apache] case class ST_GeomFromEWKB(inputExpressions: Seq[Expression])
     extends Expression
     with FoldableExpression
     with ImplicitCastInputTypes
@@ -242,7 +242,7 @@ case class ST_GeomFromEWKB(inputExpressions: Seq[Expression])
   }
 }
 
-case class ST_LineFromWKB(inputExpressions: Seq[Expression])
+private[apache] case class ST_LineFromWKB(inputExpressions: Seq[Expression])
     extends Expression
     with FoldableExpression
     with ImplicitCastInputTypes
@@ -299,7 +299,7 @@ case class ST_LineFromWKB(inputExpressions: Seq[Expression])
   }
 }
 
-case class ST_LinestringFromWKB(inputExpressions: Seq[Expression])
+private[apache] case class ST_LinestringFromWKB(inputExpressions: Seq[Expression])
     extends Expression
     with FoldableExpression
     with ImplicitCastInputTypes
@@ -356,7 +356,7 @@ case class ST_LinestringFromWKB(inputExpressions: Seq[Expression])
   }
 }
 
-case class ST_PointFromWKB(inputExpressions: Seq[Expression])
+private[apache] case class ST_PointFromWKB(inputExpressions: Seq[Expression])
     extends Expression
     with FoldableExpression
     with ImplicitCastInputTypes
@@ -420,7 +420,7 @@ case class ST_PointFromWKB(inputExpressions: Seq[Expression])
  *   This function takes 1 parameter which is the geometry string. The string format must be
  *   GeoJson.
  */
-case class ST_GeomFromGeoJSON(inputExpressions: Seq[Expression])
+private[apache] case class ST_GeomFromGeoJSON(inputExpressions: Seq[Expression])
     extends Expression
     with FoldableExpression
     with CodegenFallback
@@ -464,7 +464,7 @@ case class ST_GeomFromGeoJSON(inputExpressions: Seq[Expression])
  * @param inputExpressions
  *   This function takes 2 parameter which are point x, y.
  */
-case class ST_Point(inputExpressions: Seq[Expression])
+private[apache] case class ST_Point(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.point _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -478,7 +478,7 @@ case class ST_Point(inputExpressions: Seq[Expression])
  * @param inputExpressions
  *   This function takes 4 parameter which are point x, y, z and srid (default 0).
  */
-case class ST_PointZ(inputExpressions: Seq[Expression])
+private[apache] case class ST_PointZ(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.pointZ _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -492,7 +492,7 @@ case class ST_PointZ(inputExpressions: Seq[Expression])
  * @param inputExpressions
  *   This function takes 4 parameter which are point x, y, m and srid (default 0).
  */
-case class ST_PointM(inputExpressions: Seq[Expression])
+private[apache] case class ST_PointM(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.pointM _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -500,7 +500,7 @@ case class ST_PointM(inputExpressions: Seq[Expression])
   }
 }
 
-case class ST_PointZM(inputExpressions: Seq[Expression])
+private[apache] case class ST_PointZM(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.pointZM _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -508,7 +508,7 @@ case class ST_PointZM(inputExpressions: Seq[Expression])
   }
 }
 
-case class ST_MakePointM(inputExpressions: Seq[Expression])
+private[apache] case class ST_MakePointM(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.makePointM _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -516,7 +516,7 @@ case class ST_MakePointM(inputExpressions: Seq[Expression])
   }
 }
 
-case class ST_MakePoint(inputExpressions: Seq[Expression])
+private[apache] case class ST_MakePoint(inputExpressions: Seq[Expression])
     extends InferredExpression(nullTolerantInferrableFunction4(Constructors.makePoint)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -529,7 +529,7 @@ case class ST_MakePoint(inputExpressions: Seq[Expression])
  *
  * @param inputExpressions
  */
-case class ST_MakeEnvelope(inputExpressions: Seq[Expression])
+private[apache] case class ST_MakeEnvelope(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction5(Constructors.makeEnvelope),
       inferrableFunction4(Constructors.makeEnvelope)) {
@@ -544,7 +544,7 @@ case class ST_MakeEnvelope(inputExpressions: Seq[Expression])
  *
  * @param inputExpressions
  */
-case class ST_PolygonFromEnvelope(inputExpressions: Seq[Expression])
+private[apache] case class ST_PolygonFromEnvelope(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.polygonFromEnvelope _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -552,7 +552,7 @@ case class ST_PolygonFromEnvelope(inputExpressions: Seq[Expression])
   }
 }
 
-trait UserDataGenerator {
+private[apache] trait UserDataGenerator {
   def generateUserData(
       minInputLength: Integer,
       inputExpressions: Seq[Expression],
@@ -568,28 +568,28 @@ trait UserDataGenerator {
   }
 }
 
-case class ST_GeomFromGeoHash(inputExpressions: Seq[Expression])
+private[apache] case class ST_GeomFromGeoHash(inputExpressions: Seq[Expression])
     extends InferredExpression(InferrableFunction.allowRightNull(Constructors.geomFromGeoHash)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
-case class ST_PointFromGeoHash(inputExpressions: Seq[Expression])
+private[apache] case class ST_PointFromGeoHash(inputExpressions: Seq[Expression])
     extends InferredExpression(InferrableFunction.allowRightNull(Constructors.pointFromGeoHash)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
-case class ST_GeomFromGML(inputExpressions: Seq[Expression])
+private[apache] case class ST_GeomFromGML(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.geomFromGML _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
-case class ST_GeomFromKML(inputExpressions: Seq[Expression])
+private[apache] case class ST_GeomFromKML(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.geomFromKML _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -602,7 +602,7 @@ case class ST_GeomFromKML(inputExpressions: Seq[Expression])
  * @param inputExpressions
  *   This function takes a geometry string and a srid. The string format must be WKT.
  */
-case class ST_MPolyFromText(inputExpressions: Seq[Expression])
+private[apache] case class ST_MPolyFromText(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.mPolyFromText _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -615,7 +615,7 @@ case class ST_MPolyFromText(inputExpressions: Seq[Expression])
  * @param inputExpressions
  *   This function takes a geometry string and a srid. The string format must be WKT.
  */
-case class ST_MLineFromText(inputExpressions: Seq[Expression])
+private[apache] case class ST_MLineFromText(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.mLineFromText _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -623,7 +623,7 @@ case class ST_MLineFromText(inputExpressions: Seq[Expression])
   }
 }
 
-case class ST_MPointFromText(inputExpressions: Seq[Expression])
+private[apache] case class ST_MPointFromText(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.mPointFromText _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -631,7 +631,7 @@ case class ST_MPointFromText(inputExpressions: Seq[Expression])
   }
 }
 
-case class ST_GeomCollFromText(inputExpressions: Seq[Expression])
+private[apache] case class ST_GeomCollFromText(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.geomCollFromText _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {

@@ -29,10 +29,11 @@ import org.apache.spark.sql.functions.{col, struct}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
 
-case class ST_DBSCAN(children: Seq[Expression]) extends DataframePhysicalFunction {
+private[apache] case class ST_DBSCAN(children: Seq[Expression])
+    extends DataframePhysicalFunction {
 
-  override def dataType: DataType = StructType(
-    Seq(StructField("isCore", BooleanType), StructField("cluster", LongType)))
+  override def dataType: DataType =
+    StructType(Seq(StructField("isCore", BooleanType), StructField("cluster", LongType)))
 
   override def inputTypes: Seq[AbstractDataType] =
     Seq(GeometryUDT, DoubleType, IntegerType, BooleanType)
@@ -50,7 +51,7 @@ case class ST_DBSCAN(children: Seq[Expression]) extends DataframePhysicalFunctio
       !dataframe.columns.contains("__cluster"),
       "__cluster is a  reserved name by the dbscan algorithm. Please rename the columns before calling the ST_DBSCAN function.")
 
-    dbscan(
+    val ret = dbscan(
       dataframe,
       getScalarValue[Double](1, "epsilon"),
       getScalarValue[Int](2, "minPts"),
@@ -61,10 +62,14 @@ case class ST_DBSCAN(children: Seq[Expression]) extends DataframePhysicalFunctio
       "__cluster")
       .withColumn(getResultName(resultAttrs), struct(col("__isCore"), col("__cluster")))
       .drop("__isCore", "__cluster")
+
+    ret
+
   }
 }
 
-case class ST_LocalOutlierFactor(children: Seq[Expression]) extends DataframePhysicalFunction {
+private[apache] case class ST_LocalOutlierFactor(children: Seq[Expression])
+    extends DataframePhysicalFunction {
 
   override def dataType: DataType = DoubleType
 
@@ -87,7 +92,8 @@ case class ST_LocalOutlierFactor(children: Seq[Expression]) extends DataframePhy
   }
 }
 
-case class ST_GLocal(children: Seq[Expression]) extends DataframePhysicalFunction {
+private[apache] case class ST_GLocal(children: Seq[Expression])
+    extends DataframePhysicalFunction {
 
   override def dataType: DataType = StructType(
     Seq(
@@ -126,7 +132,7 @@ case class ST_GLocal(children: Seq[Expression]) extends DataframePhysicalFunctio
   }
 }
 
-case class ST_BinaryDistanceBandColumn(children: Seq[Expression])
+private[apache] case class ST_BinaryDistanceBandColumn(children: Seq[Expression])
     extends DataframePhysicalFunction {
   override def dataType: DataType = ArrayType(
     StructType(
@@ -159,7 +165,7 @@ case class ST_BinaryDistanceBandColumn(children: Seq[Expression])
   }
 }
 
-case class ST_WeightedDistanceBandColumn(children: Seq[Expression])
+private[apache] case class ST_WeightedDistanceBandColumn(children: Seq[Expression])
     extends DataframePhysicalFunction {
 
   override def dataType: DataType = ArrayType(
