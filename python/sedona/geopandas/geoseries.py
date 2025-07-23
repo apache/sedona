@@ -3359,9 +3359,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         dtype: geometry
         """
 
-        spark_expr = stf.ST_Simplify(self.spark.column, tolerance)
-        if preserve_topology:
-            spark_expr = stf.ST_SimplifyPreserveTopology(self.spark.column, tolerance)
+        spark_expr = (
+            stf.ST_SimplifyPreserveTopology(self.spark.column, tolerance)
+            if preserve_topology
+            else stf.ST_Simplify(self.spark.column, tolerance)
+        )
 
         return self._query_geometry_column(spark_expr)
 
