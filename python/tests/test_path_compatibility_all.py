@@ -18,39 +18,11 @@
 # The test file is to ensure compatibility with the path structure and imports with Apache Sedona < 1.8.0
 # We will drop this test file in the future when we remove path compatibility for Apache Sedona < 1.8.0
 
-from sedona.core.SpatialRDD import CircleRDD, PolygonRDD, PointRDD
-from sedona.core.enums import FileDataSplitter, GridType, IndexType
-from sedona.core.formatMapper.geo_json_reader import GeoJsonReader
-from sedona.core.formatMapper.shapefileParser.shape_file_reader import ShapefileReader
-from sedona.core.geom.circle import Circle
-from sedona.core.geom.envelope import Envelope
-from sedona.core.geom.geography import Geography
-from sedona.core.spatialOperator import JoinQuery
-from sedona.core.spatialOperator import JoinQueryRaw, KNNQuery, RangeQuery
-from sedona.sql import st_aggregates as sta
-from sedona.sql import st_constructors as stc
-from sedona.sql import st_functions as stf
-from sedona.sql import st_predicates as stp
-from sedona.sql.st_aggregates import ST_Union_Aggr
-from sedona.sql.st_constructors import ST_MakePoint
-from sedona.sql.st_functions import ST_X
-from sedona.sql.st_predicates import ST_Intersects
-from sedona.sql.types import GeographyType, GeometryType
-from sedona.stac.client import Client
-from sedona.stac.collection_client import CollectionClient
-from sedona.stats.clustering import dbscan
-from sedona.stats.hotspot_detection.getis_ord import g_local
-from sedona.stats.weighting import (
-    add_distance_band_column,
-    add_binary_distance_band_column,
-)
-from sedona.utils.adapter import Adapter
-from sedona.utils.geoarrow import create_spatial_dataframe
-from sedona.utils.spatial_rdd_parser import GeoData
+from sedona.spark import *
 from tests.test_base import TestBase
 
 
-class TestPathCompatibility(TestBase):
+class TestPathCompatibilityAll(TestBase):
 
     def test_spatial_rdd_imports(self):
         # Test CircleRDD, PolygonRDD and PointRDD imports
@@ -106,10 +78,6 @@ class TestPathCompatibility(TestBase):
 
     def test_sql_module_imports(self):
         # Test SQL module imports
-        assert sta is not None
-        assert stc is not None
-        assert stf is not None
-        assert stp is not None
         assert ST_MakePoint is not None
         assert ST_X is not None
         assert ST_Union_Aggr is not None
