@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.NullArgumentException;
 import org.apache.log4j.Logger;
-import org.apache.sedona.common.FunctionsApacheSIS;
+import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
@@ -141,9 +141,7 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
     this.rawSpatialRDD =
         this.rawSpatialRDD.map(
             (geom) ->
-                (T)
-                    FunctionsApacheSIS.transform(
-                        geom, sourceEpsgCRSCode, targetEpgsgCode, lenient));
+                (T) FunctionsGeoTools.transform(geom, sourceEpsgCRSCode, targetEpgsgCode, lenient));
     return true;
   }
 
