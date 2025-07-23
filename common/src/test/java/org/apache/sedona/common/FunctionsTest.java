@@ -41,6 +41,7 @@ import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
 import org.opengis.metadata.extent.GeographicBoundingBox;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 public class FunctionsTest extends TestBase {
   public static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
@@ -4164,6 +4165,39 @@ public class FunctionsTest extends TestBase {
     assertEquals(expected5.getSouthBoundLatitude(), actual5.getSouthBoundLatitude(), 1E-2);
     assertEquals(expected5.getWestBoundLongitude(), actual5.getWestBoundLongitude(), 1E-2);
     assertEquals(expected5.getEastBoundLongitude(), actual5.getEastBoundLongitude(), 1E-2);
+  }
+
+  @Test
+  public void crsToSRID() throws org.opengis.util.FactoryException {
+    String wkt =
+        "PROJCS[\"WGS 84 / Pseudo-Mercator\", "
+            + "  GEOGCS[\"WGS 84\", "
+            + "    DATUM[\"World Geodetic System 1984\", "
+            + "      SPHEROID[\"WGS 84\", 6378137.0, 298.257223563, AUTHORITY[\"EPSG\",\"7030\"]], "
+            + "      AUTHORITY[\"EPSG\",\"6326\"]], "
+            + "    PRIMEM[\"Greenwich\", 0.0, AUTHORITY[\"EPSG\",\"8901\"]], "
+            + "    UNIT[\"degree\", 0.017453292519943295], "
+            + "    AXIS[\"Geodetic longitude\", EAST], "
+            + "    AXIS[\"Geodetic latitude\", NORTH], "
+            + "    AUTHORITY[\"EPSG\",\"4326\"]], "
+            + "  PROJECTION[\"Popular Visualisation Pseudo Mercator\", AUTHORITY[\"EPSG\",\"1024\"]], "
+            + "  PARAMETER[\"semi_minor\", 6378137.0], "
+            + "  PARAMETER[\"latitude_of_origin\", 0.0], "
+            + "  PARAMETER[\"central_meridian\", 0.0], "
+            + "  PARAMETER[\"scale_factor\", 1.0], "
+            + "  PARAMETER[\"false_easting\", 0.0], "
+            + "  PARAMETER[\"false_northing\", 0.0], "
+            + "  UNIT[\"m\", 1.0], "
+            + "  AXIS[\"Easting\", EAST], "
+            + "  AXIS[\"Northing\", NORTH], "
+            + "  AUTHORITY[\"EPSG\",\"3857\"]]";
+    CoordinateReferenceSystem crsFromWKT = FunctionsApacheSIS.parseCRSString(wkt);
+    int srid = FunctionsApacheSIS.crsToSRID(crsFromWKT);
+    assertEquals(3857, srid);
+
+    CoordinateReferenceSystem crsFromCode = FunctionsApacheSIS.parseCRSString("EPSG:4322");
+    int sridFromCode = FunctionsApacheSIS.crsToSRID(crsFromCode);
+    assertEquals(4322, sridFromCode);
   }
 
   @Test

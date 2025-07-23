@@ -21,11 +21,14 @@ package org.apache.sedona.common;
 import static org.apache.sis.referencing.IdentifiedObjects.lookupEPSG;
 
 import org.apache.sedona.common.utils.CachedAreaOfInterestFinder;
+import org.apache.sis.metadata.iso.citation.Citations;
 import org.apache.sis.referencing.CRS;
+import org.apache.sis.referencing.IdentifiedObjects;
 import org.apache.sis.referencing.crs.AbstractCRS;
 import org.apache.sis.referencing.cs.AxesConvention;
 import org.apache.sis.util.Classes;
 import org.locationtech.jts.geom.*;
+import org.opengis.metadata.Identifier;
 import org.opengis.metadata.extent.GeographicBoundingBox;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -168,9 +171,13 @@ public class FunctionsApacheSIS {
 
     if (transform.isIdentity()) {
       try {
-        int srid = lookupEPSG(targetCRS);
+        int srid = crsToSRID(targetCRS);
         return Functions.setSRID(geometry, srid);
       } catch (FactoryException e) {
+        if (lenient) {
+          // If lenient, return the original geometry
+          return geometry;
+        }
         throw new RuntimeException(
             "Failed to find EPSG code during transform for CRS" + targetCRS.getName(), e);
       }
@@ -181,15 +188,12 @@ public class FunctionsApacheSIS {
 
       final var gct = new GeometryCoordinateTransform(transform, geometry.getFactory());
       targetGeometry = gct.transform(geometry);
-      Integer srid = lookupEPSG(targetCRS);
-      if (srid != null) {
-        targetGeometry = Functions.setSRID(targetGeometry, srid);
-      }
+      int srid = crsToSRID(targetCRS);
+      targetGeometry = Functions.setSRID(targetGeometry, srid);
       targetGeometry.setUserData(geometry.getUserData());
 
     } catch (TransformException e) {
       if (lenient) {
-        // If lenient, return the original geometry
         return geometry;
       }
       throw new RuntimeException(
@@ -198,6 +202,9 @@ public class FunctionsApacheSIS {
               sourceCRS.getName(), targetCRS.getName(), geometry),
           e);
     } catch (FactoryException e) {
+      if (lenient) {
+        return geometry;
+      }
       throw new RuntimeException(
           "Failed to find EPSG code during transform for CRS" + targetCRS, e);
     }
@@ -228,6 +235,30 @@ public class FunctionsApacheSIS {
       return null;
     }
     return AbstractCRS.castOrCopy(crs).forConvention(AxesConvention.RIGHT_HANDED);
+  }
+
+  public static int crsToSRID(CoordinateReferenceSystem crs) throws FactoryException {
+    Integer srid = null;
+    srid = lookupEPSG(crs);
+    if (srid == null) {
+      CoordinateReferenceSystem latLonCRS =
+          AbstractCRS.castOrCopy(crs).forConvention(AxesConvention.NORMALIZED);
+      srid = lookupEPSG(crs);
+      if (srid == null) {
+        Identifier epsgId = IdentifiedObjects.getIdentifier(crs, Citations.EPSG);
+        if (epsgId != null) {
+          try {
+            srid = Integer.parseInt(epsgId.getCode());
+          } catch (NumberFormatException e) {
+            throw new FactoryException("Invalid EPSG code: " + epsgId.getCode(), e);
+          }
+        } else {
+          throw new FactoryException("No EPSG code found for CRS: " + crs);
+        }
+      }
+    }
+
+    return srid != null ? srid : 0;
   }
 
   /**
