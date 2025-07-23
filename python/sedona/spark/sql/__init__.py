@@ -15,6 +15,9 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import inspect
+import sys
+
 # These allow use to access the __all__
 import sedona.spark.sql.st_aggregates as st_aggregates
 import sedona.spark.sql.st_constructors as st_constructors
