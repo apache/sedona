@@ -14,13 +14,14 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
 import warnings
+from sedona.spark.core.formatMapper.geo_json_reader import GeoJsonReader
 
 warnings.warn(
-    "The 'sedona' package structure has been reorganized. Please update your imports to use 'sedona.spark' prefix instead.",
+    "Importing from 'sedona.core.formatMapper.geo_json_reader' is deprecated. Please use 'sedona.spark.core.formatMapper.geo_json_reader' instead.",
     DeprecationWarning,
     stacklevel=2,
 )
-from .version import version
 
-__all__ = ["version"]
+__all__ = ["GeoJsonReader"]

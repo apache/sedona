@@ -14,13 +14,14 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
 import warnings
+from sedona.spark.stac.collection_client import CollectionClient
 
 warnings.warn(
-    "The 'sedona' package structure has been reorganized. Please update your imports to use 'sedona.spark' prefix instead.",
+    "Importing from 'sedona.stac.collection_client' is deprecated. Please use 'sedona.spark.stac.collection_client' instead.",
     DeprecationWarning,
     stacklevel=2,
 )
-from .version import version
 
-__all__ = ["version"]
+__all__ = ["CollectionClient"]

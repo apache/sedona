@@ -14,13 +14,15 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
 import warnings
+from sedona.spark.sql import st_aggregates as sta
+from sedona.spark.sql.st_aggregates import *
 
 warnings.warn(
-    "The 'sedona' package structure has been reorganized. Please update your imports to use 'sedona.spark' prefix instead.",
+    "Importing from 'sedona.sql.st_aggregates' is deprecated. Please use 'sedona.spark.sql.st_aggregates' instead.",
     DeprecationWarning,
     stacklevel=2,
 )
-from .version import version
 
-__all__ = ["version"]
+__all__ = sta.__all__
