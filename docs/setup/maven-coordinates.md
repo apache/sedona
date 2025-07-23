@@ -33,7 +33,7 @@ Please use the artifact with Spark major.minor version in the artifact name. For
 
 If you are using the Scala 2.13 builds of Spark, please use the corresponding packages for Scala 2.13, which are suffixed by `_2.13`.
 
-The optional GeoTools library is required if you want to use ShapefileReader or GeoTiff reader. This wrapper library is a re-distribution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
+The optional GeoTools library is required if you want to use CRS transformation, ShapefileReader or GeoTiff reader. This wrapper library is a re-distribution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
 
 The optional EPSG database is required if you want to use CRS transformation. This library is a re-distribution of EPSG official jars. The only purpose of this library is to bring EPSG jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
 
@@ -155,9 +155,13 @@ The optional EPSG database is required if you want to use CRS transformation. Th
 		</dependency>
 		```
 
-!!! abstract "Sedona with EPSG database"
+!!! abstract "Sedona with Apache SIS database"
 
-	=== "EPSG database 9.8.1+"
+The optional Apache SIS embedded EPSG database is required if you want to use CRS transformation with Area of Interest.
+
+Learn more about the terms of use here: [Apache SIS EPSG dataset](https://sis.apache.org/epsg.html).
+
+	=== "Apache SIS EPSG dataset"
 
 		```xml
 		<dependency>

@@ -181,7 +181,10 @@ public class FunctionsApacheSIS {
 
       final var gct = new GeometryCoordinateTransform(transform, geometry.getFactory());
       targetGeometry = gct.transform(geometry);
-      targetGeometry = Functions.setSRID(targetGeometry, lookupEPSG(targetCRS));
+      Integer srid = lookupEPSG(targetCRS);
+      if (srid != null) {
+        targetGeometry = Functions.setSRID(targetGeometry, srid);
+      }
       targetGeometry.setUserData(geometry.getUserData());
 
     } catch (TransformException e) {

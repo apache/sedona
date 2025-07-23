@@ -30,7 +30,9 @@ import org.apache.sedona.common.sphere.Haversine;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.utils.*;
 import org.apache.sis.metadata.iso.extent.DefaultGeographicBoundingBox;
+import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.operation.TransformException;
+import org.geotools.referencing.CRS;
 import org.junit.Test;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
@@ -3935,7 +3937,55 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
-  public void transform() throws org.opengis.util.FactoryException, TransformException {
+  public void transform() throws FactoryException, TransformException {
+    // The source and target CRS are the same
+    Point geomExpected = GEOMETRY_FACTORY.createPoint(new Coordinate(120, 60));
+    Geometry geomActual = FunctionsGeoTools.transform(geomExpected, "EPSG:4326", "EPSG:4326");
+    assertEquals(geomExpected.getCoordinate().x, geomActual.getCoordinate().x, FP_TOLERANCE);
+    assertEquals(geomExpected.getCoordinate().y, geomActual.getCoordinate().y, FP_TOLERANCE);
+    assertEquals(4326, geomActual.getSRID());
+    assertEquals(4326, geomActual.getFactory().getSRID());
+
+    // The source and target CRS are different
+    geomActual = FunctionsGeoTools.transform(geomExpected, "EPSG:4326", "EPSG:3857");
+    assertEquals(1.3358338895192828E7, geomActual.getCoordinate().x, FP_TOLERANCE);
+    assertEquals(8399737.889818355, geomActual.getCoordinate().y, FP_TOLERANCE);
+    assertEquals(3857, geomActual.getSRID());
+    assertEquals(3857, geomActual.getFactory().getSRID());
+
+    // The source CRS is not specified and the geometry has no SRID
+    Exception e =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> FunctionsGeoTools.transform(geomExpected, "EPSG:3857"));
+    assertEquals("Source CRS must be specified. No SRID found on geometry.", e.getMessage());
+
+    // The source CRS is an invalid SRID
+    e =
+        assertThrows(
+            FactoryException.class,
+            () -> FunctionsGeoTools.transform(geomExpected, "abcde", "EPSG:3857"));
+    assertTrue(e.getMessage().contains("First failed to read as a well-known CRS code"));
+
+    // The source CRS is a WKT CRS string
+    String crsWkt = CRS.decode("EPSG:4326", true).toWKT();
+    geomActual = FunctionsGeoTools.transform(geomExpected, crsWkt, "EPSG:3857");
+    assertEquals(1.3358338895192828E7, geomActual.getCoordinate().x, FP_TOLERANCE);
+    assertEquals(8399737.889818355, geomActual.getCoordinate().y, FP_TOLERANCE);
+    assertEquals(3857, geomActual.getSRID());
+    assertEquals(3857, geomActual.getFactory().getSRID());
+
+    // The source CRS is not specified but the geometry has a valid SRID
+    geomExpected.setSRID(4326);
+    geomActual = FunctionsGeoTools.transform(geomExpected, "EPSG:3857");
+    assertEquals(1.3358338895192828E7, geomActual.getCoordinate().x, FP_TOLERANCE);
+    assertEquals(8399737.889818355, geomActual.getCoordinate().y, FP_TOLERANCE);
+    assertEquals(3857, geomActual.getSRID());
+    assertEquals(3857, geomActual.getFactory().getSRID());
+  }
+
+  @Test
+  public void transformApacheSIS() throws org.opengis.util.FactoryException, TransformException {
     /**
      * Validating without SIS EPSG dataset. The following CRS codes are currently available as
      * Apache SIS Common codes: WGS84 (EPSG:4326) WGS72 (EPSG:4322) NAD83 (EPSG:4269) NAD27
@@ -3943,7 +3993,6 @@ public class FunctionsTest extends TestBase {
      */
     final String NAD27 = "EPSG:4267";
     final String NAD83 = "EPSG:4269";
-    final String ED50 = "EPSG:4230";
     final int nad27Srid = 4267;
     final int nad83Srid = 4269;
     // The source and target CRS are the same

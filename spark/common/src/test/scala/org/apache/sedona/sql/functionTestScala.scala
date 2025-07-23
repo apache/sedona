@@ -19,7 +19,7 @@
 package org.apache.sedona.sql
 
 import org.apache.commons.codec.binary.Hex
-import org.apache.sedona.common.FunctionsApacheSIS
+import org.apache.sedona.common.FunctionsGeoTools
 import org.apache.sedona.sql.implicits._
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.functions._
@@ -457,13 +457,12 @@ class functionTestScala
       val polygeom = reader.read(polygon)
 
       intercept[FactoryException] {
-        val d = FunctionsApacheSIS.transform(polygeom, epsgString, epsgFactoryErrorString)
+        val d = FunctionsGeoTools.transform(polygeom, epsgString, epsgFactoryErrorString)
       }
 
       intercept[FactoryException] {
-        val d2 = FunctionsApacheSIS.transform(polygeom, epsgString, epsgNoSuchAuthorityString)
+        val d2 = FunctionsGeoTools.transform(polygeom, epsgString, epsgNoSuchAuthorityString)
       }
-
     }
 
     it("Passed ST_Intersection - intersects but not contains") {

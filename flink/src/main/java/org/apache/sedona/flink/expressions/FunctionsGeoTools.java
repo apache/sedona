@@ -24,7 +24,7 @@ import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.operation.TransformException;
 import org.locationtech.jts.geom.Geometry;
 
-public class FunctionsApacheSIS {
+public class FunctionsGeoTools {
   public static class ST_Transform extends ScalarFunction {
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
     public Geometry eval(
@@ -32,7 +32,7 @@ public class FunctionsApacheSIS {
         @DataTypeHint("String") String targetCRS)
         throws FactoryException, TransformException {
       Geometry geom = (Geometry) o;
-      return org.apache.sedona.common.FunctionsApacheSIS.transform(geom, targetCRS);
+      return org.apache.sedona.common.FunctionsGeoTools.transform(geom, targetCRS);
     }
 
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
@@ -42,7 +42,7 @@ public class FunctionsApacheSIS {
         @DataTypeHint("String") String targetCRS)
         throws FactoryException, TransformException {
       Geometry geom = (Geometry) o;
-      return org.apache.sedona.common.FunctionsApacheSIS.transform(geom, sourceCRS, targetCRS);
+      return org.apache.sedona.common.FunctionsGeoTools.transform(geom, sourceCRS, targetCRS);
     }
 
     @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
@@ -53,8 +53,22 @@ public class FunctionsApacheSIS {
         @DataTypeHint("Boolean") Boolean lenient)
         throws FactoryException, TransformException {
       Geometry geom = (Geometry) o;
-      return org.apache.sedona.common.FunctionsApacheSIS.transform(
+      return org.apache.sedona.common.FunctionsGeoTools.transform(
           geom, sourceCRS, targetCRS, lenient);
+    }
+
+    @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class) Object o,
+        @DataTypeHint("String") String sourceCRS,
+        @DataTypeHint("String") String targetCRS,
+        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class) Object oA,
+        @DataTypeHint("Boolean") Boolean lenient)
+        throws FactoryException, TransformException {
+      Geometry geom = (Geometry) o;
+      Geometry aoi = (Geometry) oA;
+      return org.apache.sedona.common.FunctionsApacheSIS.transform(
+          geom, sourceCRS, targetCRS, aoi, lenient);
     }
   }
 }
