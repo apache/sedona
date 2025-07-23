@@ -69,9 +69,9 @@ class TestGeopandasBase(TestBase):
                 cls.assert_geometry_almost_equal(
                     a, e, tolerance=1e-2
                 )  # increased tolerance from 1e-6
-            except ValueError as error:
+            except ValueError as err:
                 if error == "raise":
-                    raise error
+                    raise err
                 elif error == "bool":
                     return False
                 else:
