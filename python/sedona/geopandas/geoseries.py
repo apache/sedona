@@ -4468,6 +4468,9 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         *kwargs* that will be passed to json.dumps().
 
+        Note: Unlike geopandas, Sedona's implementation will specify replace 'LinearRing'
+        with 'LineString' in the GeoJSON output.
+
         Returns
         -------
         JSON string
