@@ -18,6 +18,7 @@
 import os
 import tempfile
 import pytest
+import shapely
 import pandas as pd
 import geopandas as gpd
 import pyspark.pandas as ps
@@ -35,11 +36,15 @@ from shapely.geometry import (
     GeometryCollection,
     LinearRing,
 )
-
+from packaging.version import parse as parse_version
 
 TEST_DATA_DIR = os.path.join("..", "spark", "common", "src", "test", "resources")
 
 
+@pytest.mark.skipif(
+    parse_version(shapely.__version__) < parse_version("2.0.0"),
+    reason=f"Tests require shapely>=2.0.0, but found v{shapely.__version__}",
+)
 class TestIO(TestGeopandasBase):
     def setup_method(self):
         self.tempdir = tempfile.mkdtemp()

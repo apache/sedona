@@ -3530,7 +3530,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @classmethod
     def from_file(
-        cls, filename: str, format: str | None = None, **kwargs
+        cls, filename: str, format: Union[str, None] = None, **kwargs
     ) -> "GeoSeries":
         """
         Alternate constructor to create a ``GeoDataFrame`` from a file.
@@ -4684,9 +4684,9 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
     def to_file(
         self,
         path: str,
-        driver: str | None = None,
-        schema: dict | None = None,
-        index: bool | None = None,
+        driver: Union[str, None] = None,
+        schema: Union[dict, None] = None,
+        index: Union[bool, None] = None,
         **kwargs,
     ):
         """

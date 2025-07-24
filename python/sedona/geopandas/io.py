@@ -130,22 +130,21 @@ def _to_file(
         )
         spark_df = spark_df.drop(SPARK_DEFAULT_INDEX_NAME)
 
-    match spark_fmt:
-        case "geoparquet":
-            writer = spark_df.write.format("geoparquet")
-            print("writing", spark_df.columns)
+    if spark_fmt == "geoparquet":
+        writer = spark_df.write.format("geoparquet")
+        print("writing", spark_df.columns)
 
-            # if not saving index we sort by GeoHash to optimize reading
-            if not index and df.active_geometry_name:
-                from sedona.spark import ST_GeoHash
+        # if not saving index we sort by GeoHash to optimize reading
+        if not index and df.active_geometry_name:
+            from sedona.spark import ST_GeoHash
 
-                spark_df = spark_df.orderBy(ST_GeoHash(df.geometry.spark.column, 5))
+            spark_df = spark_df.orderBy(ST_GeoHash(df.geometry.spark.column, 5))
 
-        case "geojson":
-            writer = spark_df.write.format("geojson")
+    elif spark_fmt == "geojson":
+        writer = spark_df.write.format("geojson")
 
-        case _:
-            raise ValueError(f"Unsupported spark format: {spark_fmt}")
+    else:
+        raise ValueError(f"Unsupported spark format: {spark_fmt}")
 
     default_mode = "overwrite"
     mode = validate_mode(kwargs.pop("mode", default_mode))
@@ -153,7 +152,7 @@ def _to_file(
     writer.mode(mode).save(path, **kwargs)
 
 
-def read_file(filename: str, format: str | None = None, **kwargs):
+def read_file(filename: str, format: Union[str, None] = None, **kwargs):
     """
     Alternate constructor to create a ``GeoDataFrame`` from a file.
 
