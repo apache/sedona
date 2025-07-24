@@ -190,16 +190,18 @@ def read_file(filename: str, format: Union[str, None] = None, **kwargs):
             raise ValueError(
                 f"Inferring the format from the file extension is not supported for directories: {filename}"
             )
-        if filename.endswith(".shp"):
+        if filename.lower().endswith(".shp"):
             format = "shapefile"
-        elif filename.endswith(".json"):
+        elif filename.lower().endswith(".json"):
             format = "geojson"
-        elif filename.endswith(".parquet"):
+        elif filename.lower().endswith(".parquet"):
             format = "geoparquet"
-        elif filename.endswith(".gpkg"):
+        elif filename.lower().endswith(".gpkg"):
             format = "geopackage"
         else:
             raise ValueError(f"Unsupported file type: {filename}")
+    else:
+        format = format.lower()
 
     if format == "shapefile":
         sdf = spark.read.format("shapefile").load(filename)

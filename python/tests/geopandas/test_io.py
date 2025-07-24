@@ -57,14 +57,14 @@ class TestIO(TestGeopandasBase):
     @pytest.mark.parametrize(
         "read_func",
         [
-            GeoDataFrame.from_file,
-            read_file,
+            partial(GeoDataFrame.from_file, format="shapefile"),
+            partial(read_file, format="Shapefile"),
         ],
     )
     def test_read_shapefile(self, read_func):
         data_dir = os.path.join(tests_resource, "shapefiles/polygon")
 
-        df = read_func(data_dir, format="shapefile")
+        df = read_func(data_dir)
 
         assert df.count().item() == 10000
 
@@ -77,20 +77,20 @@ class TestIO(TestGeopandasBase):
 
         # Check inference and single file works
         data_file = os.path.join(data_dir, "map.shp")
-        df = read_func(data_file, format="shapefile")
+        df = read_func(data_file)
 
         assert df.count().item() == 10000
 
     @pytest.mark.parametrize(
         "read_func",
         [
-            GeoDataFrame.from_file,
-            read_file,
+            partial(GeoDataFrame.from_file, format="geojson"),
+            partial(read_file, format="GeoJSON"),
         ],
     )
     def test_read_geojson(self, read_func):
         datafile = os.path.join(TEST_DATA_DIR, "geojson/test1.json")
-        df = read_func(datafile, format="geojson")
+        df = read_func(datafile)
         assert (df.count() == 1).all()
 
         # Check that inference works
@@ -101,7 +101,7 @@ class TestIO(TestGeopandasBase):
         "read_func",
         [
             partial(GeoDataFrame.from_file, format="geoparquet"),
-            partial(read_file, format="geoparquet"),
+            partial(read_file, format="GeoParquet"),
         ],
     )
     def test_read_geoparquet(self, read_func):
@@ -118,8 +118,8 @@ class TestIO(TestGeopandasBase):
     @pytest.mark.parametrize(
         "read_func",
         [
-            GeoDataFrame.from_file,
-            read_file,
+            partial(GeoDataFrame.from_file, format="geopackage"),
+            partial(read_file, format="GeoPackage"),
         ],
     )
     def test_read_geopackage(self, read_func):
@@ -127,7 +127,7 @@ class TestIO(TestGeopandasBase):
 
         table_name = "GB_Hex_5km_GS_CompressibleGround_v8"
         expected_cnt = 4233
-        df = read_func(datafile, format="geopackage", table_name=table_name)
+        df = read_func(datafile, table_name=table_name)
         assert df["geom"].count() == expected_cnt
 
         # Ensure inference works

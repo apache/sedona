@@ -1486,7 +1486,7 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
         **kwargs,
     ) -> sgpd.GeoSeries:
         """
-        Returns a GeoDataFrame with all geometries buffered by the specified distance.
+        Returns a GeoSeries with all geometries buffered by the specified distance.
 
         Parameters
         ----------
@@ -1505,8 +1505,8 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
 
         Returns
         -------
-        GeoDataFrame
-            A new GeoDataFrame with buffered geometries.
+        GeoSeries
+            A new GeoSeries with buffered geometries.
 
         Examples
         --------
