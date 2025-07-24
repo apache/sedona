@@ -16,13 +16,12 @@
 # under the License.
 
 import warnings
-
-from sedona.spark.geoarrow.geoarrow import create_spatial_dataframe, dataframe_to_arrow
+from sedona.spark.core.geom.envelope import Envelope
 
 warnings.warn(
-    "The 'sedona.geoarrow' module is deprecated and will be removed in future versions. Please use 'sedona.spark.geoarrow' instead.",
+    "Importing from 'sedona.core.geom.envelope' is deprecated. Please use 'sedona.spark.core.geom.envelope' instead.",
     DeprecationWarning,
     stacklevel=2,
 )
 
-__all__ = ["create_spatial_dataframe", "dataframe_to_arrow"]
+__all__ = ["Envelope"]

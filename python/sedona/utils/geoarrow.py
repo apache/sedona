@@ -16,8 +16,7 @@
 # under the License.
 
 import warnings
-
-from sedona.spark.geoarrow.geoarrow import create_spatial_dataframe, dataframe_to_arrow
+from sedona.spark.geoarrow import create_spatial_dataframe, dataframe_to_arrow
 
 warnings.warn(
     "The 'sedona.geoarrow' module is deprecated and will be removed in future versions. Please use 'sedona.spark.geoarrow' instead.",

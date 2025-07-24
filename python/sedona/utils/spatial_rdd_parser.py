@@ -16,13 +16,12 @@
 # under the License.
 
 import warnings
-
-from sedona.spark.geoarrow.geoarrow import create_spatial_dataframe, dataframe_to_arrow
+from sedona.spark.utils.spatial_rdd_parser import GeoData
 
 warnings.warn(
-    "The 'sedona.geoarrow' module is deprecated and will be removed in future versions. Please use 'sedona.spark.geoarrow' instead.",
+    "Importing from 'sedona.utils.spatial_rdd_parser' is deprecated. Please use 'sedona.spark.utils.spatial_rdd_parser' instead.",
     DeprecationWarning,
     stacklevel=2,
 )
 
-__all__ = ["create_spatial_dataframe", "dataframe_to_arrow"]
+__all__ = ["GeoData"]

@@ -16,13 +16,13 @@
 # under the License.
 
 import warnings
-
-from sedona.spark.geoarrow.geoarrow import create_spatial_dataframe, dataframe_to_arrow
+from sedona.spark.sql import st_aggregates as sta
+from sedona.spark.sql.st_aggregates import *
 
 warnings.warn(
-    "The 'sedona.geoarrow' module is deprecated and will be removed in future versions. Please use 'sedona.spark.geoarrow' instead.",
+    "Importing from 'sedona.sql.st_aggregates' is deprecated. Please use 'sedona.spark.sql.st_aggregates' instead.",
     DeprecationWarning,
     stacklevel=2,
 )
 
-__all__ = ["create_spatial_dataframe", "dataframe_to_arrow"]
+__all__ = sta.__all__
