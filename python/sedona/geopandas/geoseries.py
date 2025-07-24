@@ -2934,6 +2934,122 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
         return result
 
+    def snap(self, other, tolerance, align=None) -> "GeoSeries":
+        """Snap the vertices and segments of the geometry to vertices of the reference.
+
+        Vertices and segments of the input geometry are snapped to vertices of the
+        reference geometry, returning a new geometry; the input geometries are not
+        modified. The result geometry is the input geometry with the vertices and
+        segments snapped. If no snapping occurs then the input geometry is returned
+        unchanged. The tolerance is used to control where snapping is performed.
+
+        Where possible, this operation tries to avoid creating invalid geometries;
+        however, it does not guarantee that output geometries will be valid. It is
+        the responsibility of the caller to check for and handle invalid geometries.
+
+        Because too much snapping can result in invalid geometries being created,
+        heuristics are used to determine the number and location of snapped
+        vertices that are likely safe to snap. These heuristics may omit
+        some potential snaps that are otherwise within the tolerance.
+
+        Note: Sedona's result may differ slightly from geopandas's snap() result
+        because of small differences between the underlying engines being used.
+
+        The operation works in a 1-to-1 row-wise manner:
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The Geoseries (elementwise) or geometric object to snap to.
+        tolerance : float or array like
+            Maximum distance between vertices that shall be snapped
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Point(0.5, 2.5),
+        ...         LineString([(0.1, 0.1), (0.49, 0.51), (1.01, 0.89)]),
+        ...         Polygon([(0, 0), (0, 10), (10, 10), (10, 0), (0, 0)]),
+        ...     ],
+        ... )
+        >>> s
+        0                               POINT (0.5 2.5)
+        1    LINESTRING (0.1 0.1, 0.49 0.51, 1.01 0.89)
+        2       POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))
+        dtype: geometry
+
+        >>> s2 = GeoSeries(
+        ...     [
+        ...         Point(0, 2),
+        ...         LineString([(0, 0), (0.5, 0.5), (1.0, 1.0)]),
+        ...         Point(8, 10),
+        ...     ],
+        ...     index=range(1, 4),
+        ... )
+        >>> s2
+        1                       POINT (0 2)
+        2    LINESTRING (0 0, 0.5 0.5, 1 1)
+        3                      POINT (8 10)
+        dtype: geometry
+
+        We can snap each geometry to a single shapely geometry:
+
+        >>> s.snap(Point(0, 2), tolerance=1)
+        0                                     POINT (0 2)
+        1      LINESTRING (0.1 0.1, 0.49 0.51, 1.01 0.89)
+        2    POLYGON ((0 0, 0 2, 0 10, 10 10, 10 0, 0 0))
+        dtype: geometry
+
+        We can also snap two GeoSeries to each other, row by row.
+        The GeoSeries above have different indices. We can either align both GeoSeries
+        based on index values and snap elements with the same index using
+        ``align=True`` or ignore index and snap elements based on their matching
+        order using ``align=False``:
+
+        >>> s.snap(s2, tolerance=1, align=True)
+        0                                                 None
+        1           LINESTRING (0.1 0.1, 0.49 0.51, 1.01 0.89)
+        2    POLYGON ((0.5 0.5, 1 1, 0 10, 10 10, 10 0, 0.5...
+        3                                                 None
+        dtype: geometry
+
+        >>> s.snap(s2, tolerance=1, align=False)
+        0                                      POINT (0 2)
+        1                   LINESTRING (0 0, 0.5 0.5, 1 1)
+        2    POLYGON ((0 0, 0 10, 8 10, 10 10, 10 0, 0 0))
+        dtype: geometry
+        """
+        if not isinstance(tolerance, (float, int)):
+            raise NotImplementedError(
+                "Array-like values for tolerance are not supported yet."
+            )
+
+        # Both sgpd and gpd implementations simply call the snap functions
+        # in JTS and GEOs, respectively. The results often differ slightly, but these
+        # must be differences inside of the engines themselves.
+
+        other_series, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
+        spark_expr = stf.ST_Snap(F.col("L"), F.col("R"), tolerance)
+        result = self._row_wise_operation(
+            spark_expr,
+            other_series,
+            align,
+            returns_geom=True,
+        )
+        return result
+
     def _row_wise_operation(
         self,
         spark_col: PySparkColumn,
@@ -3184,6 +3300,73 @@ class GeoSeries(GeoFrame, pspd.Series):
             spark_col,
             returns_geom=True,
         )
+
+    def simplify(self, tolerance=None, preserve_topology=True) -> "GeoSeries":
+        """Returns a ``GeoSeries`` containing a simplified representation of
+        each geometry.
+
+        The algorithm (Douglas-Peucker) recursively splits the original line
+        into smaller parts and connects these parts' endpoints
+        by a straight line. Then, it removes all points whose distance
+        to the straight line is smaller than `tolerance`. It does not
+        move any points and it always preserves endpoints of
+        the original line or polygon.
+        See https://shapely.readthedocs.io/en/latest/manual.html#object.simplify
+        for details
+
+        Simplifies individual geometries independently, without considering
+        the topology of a potential polygonal coverage. If you would like to treat
+        the ``GeoSeries`` as a coverage and simplify its edges, while preserving the
+        coverage topology, see :meth:`simplify_coverage`.
+
+        Parameters
+        ----------
+        tolerance : float
+            All parts of a simplified geometry will be no more than
+            `tolerance` distance from the original. It has the same units
+            as the coordinate reference system of the GeoSeries.
+            For example, using `tolerance=100` in a projected CRS with meters
+            as units means a distance of 100 meters in reality.
+        preserve_topology: bool (default True)
+            False uses a quicker algorithm, but may produce self-intersecting
+            or otherwise invalid geometries.
+
+        Notes
+        -----
+        Invalid geometric objects may result from simplification that does not
+        preserve topology and simplification may be sensitive to the order of
+        coordinates: two geometries differing only in order of coordinates may be
+        simplified differently.
+
+        See also
+        --------
+        simplify_coverage : simplify geometries using coverage simplification
+
+        Examples
+        --------
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Point, LineString
+        >>> s = GeoSeries(
+        ...     [Point(0, 0).buffer(1), LineString([(0, 0), (1, 10), (0, 20)])]
+        ... )
+        >>> s
+        0    POLYGON ((1 0, 0.99518 -0.09802, 0.98079 -0.19...
+        1                         LINESTRING (0 0, 1 10, 0 20)
+        dtype: geometry
+
+        >>> s.simplify(1)
+        0    POLYGON ((0 1, 0 -1, -1 0, 0 1))
+        1              LINESTRING (0 0, 0 20)
+        dtype: geometry
+        """
+
+        spark_expr = (
+            stf.ST_SimplifyPreserveTopology(self.spark.column, tolerance)
+            if preserve_topology
+            else stf.ST_Simplify(self.spark.column, tolerance)
+        )
+
+        return self._query_geometry_column(spark_expr)
 
     def sjoin(
         self,

@@ -96,6 +96,33 @@ class TestGeoSeries(TestGeopandasBase):
         assert result.count() > 0
         self.check_sgpd_equals_gpd(result, expected)
 
+    def test_simplify(self):
+        s = GeoSeries([Point(0, 0).buffer(1), LineString([(0, 0), (1, 10), (0, 20)])])
+
+        result = s.simplify(1)
+        expected = gpd.GeoSeries(
+            [Polygon([(0, 1), (0, -1), (-1, 0), (0, 1)]), LineString([(0, 0), (0, 20)])]
+        )
+
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = s.simplify(1.2, preserve_topology=False)
+        expected = gpd.GeoSeries([Polygon(), LineString([(0, 0), (0, 20)])])
+        self.check_sgpd_equals_gpd(result, expected)
+
+        s = GeoSeries([LineString([(0, 0), (1, 0.1), (2, 0)])])
+        result = s.simplify(0.2)
+        expected = gpd.GeoSeries([LineString([(0, 0), (2, 0)])])
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = s.simplify(0.2, preserve_topology=False)
+        expected = gpd.GeoSeries(
+            [
+                LineString([(0, 0), (2, 0)]),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
     def test_geometry(self):
         sgpd_geoseries = sgpd.GeoSeries([Point(0, 0), Point(1, 1)])
         assert isinstance(sgpd_geoseries.geometry, sgpd.GeoSeries)
@@ -1352,6 +1379,57 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         # Ensure result of align=False retains the left's index
         assert result.index.to_pandas().equals(expected.index)
+
+    def test_snap(self):
+        s = GeoSeries(
+            [
+                Point(0.5, 2.5),
+                LineString([(0.1, 0.1), (0.49, 0.51), (1.01, 0.89)]),
+                Polygon([(0, 0), (0, 10), (10, 10), (10, 0), (0, 0)]),
+            ],
+        )
+        s2 = GeoSeries(
+            [
+                Point(0, 2),
+                LineString([(0, 0), (0.5, 0.5), (1.0, 1.0)]),
+                Point(8, 10),
+            ],
+            index=range(1, 4),
+        )
+        result = s.snap(Point(0, 2), tolerance=1)
+        expected = gpd.GeoSeries(
+            [
+                Point(0, 2),
+                LineString([(0.1, 0.1), (0.49, 0.51), (1.01, 0.89)]),
+                Polygon([(0, 0), (0, 2), (0, 10), (10, 10), (10, 0), (0, 0)]),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Note: This test result slightly differs from the original geopandas's result,
+        # which doesn't include the Point(0, 0) in the Polygon below.
+        result = s.snap(s2, tolerance=1, align=True)
+        expected = gpd.GeoSeries(
+            [
+                None,
+                LineString([(0.1, 0.1), (0.49, 0.51), (1.01, 0.89)]),
+                Polygon(
+                    [(0, 0), (0.5, 0.5), (1, 1), (0, 10), (10, 10), (10, 0), (0, 0)]
+                ),
+                None,
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = s.snap(s2, tolerance=1, align=False)
+        expected = gpd.GeoSeries(
+            [
+                Point(0, 2),
+                LineString([(0, 0), (0.5, 0.5), (1, 1)]),
+                Polygon([(0, 0), (0, 10), (8, 10), (10, 10), (10, 0), (0, 0)]),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
 
     def test_intersection_all(self):
         pass

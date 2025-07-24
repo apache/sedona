@@ -131,9 +131,12 @@ class TestBase:
 
         if not actual_geom.equals_exact(expected_geom, tolerance=tolerance):
             # If the exact equals check fails, perform a buffer check with tolerance
-            if actual_geom.buffer(tolerance).contains(
-                expected_geom
-            ) and expected_geom.buffer(tolerance).contains(actual_geom):
+            if (
+                actual_geom.is_valid
+                and actual_geom.buffer(tolerance).contains(expected_geom)
+                and expected_geom.is_valid
+                and expected_geom.buffer(tolerance).contains(actual_geom)
+            ):
                 return
             else:
                 # fail the test with error message
