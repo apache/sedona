@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.snowflake.snowsql;
 
+import org.apache.sedona.common.FunctionsApacheSIS;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.operation.TransformException;
@@ -39,5 +40,14 @@ public class GeoToolsWrapper {
     } catch (FactoryException | TransformException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  public static Geometry transform(
+      Geometry geometry,
+      String sourceCRS,
+      String targetCRS,
+      Geometry areaOfInterest,
+      boolean lenient) {
+    return FunctionsApacheSIS.transform(geometry, sourceCRS, targetCRS, areaOfInterest, lenient);
   }
 }

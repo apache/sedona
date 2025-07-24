@@ -56,5 +56,19 @@ public class FunctionsGeoTools {
       return org.apache.sedona.common.FunctionsGeoTools.transform(
           geom, sourceCRS, targetCRS, lenient);
     }
+
+    @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class) Object o,
+        @DataTypeHint("String") String sourceCRS,
+        @DataTypeHint("String") String targetCRS,
+        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class) Object oA,
+        @DataTypeHint("Boolean") Boolean lenient)
+        throws FactoryException, TransformException {
+      Geometry geom = (Geometry) o;
+      Geometry aoi = (Geometry) oA;
+      return org.apache.sedona.common.FunctionsApacheSIS.transform(
+          geom, sourceCRS, targetCRS, aoi, lenient);
+    }
   }
 }

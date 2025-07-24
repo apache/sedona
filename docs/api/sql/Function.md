@@ -4501,7 +4501,15 @@ PROJCS["WGS 84 / Pseudo-Mercator",
 !!!note
     By default, ==ST_Transform== follows the `lenient` mode which tries to fix issues by itself. You can append a boolean value at the end to enable the `strict` mode. In `strict` mode, ==ST_Transform== will throw an error if it finds any issue.
 
+**Area Of Interest**
+
+A transform operation with more precision may be chosen if there is one available for the region specified in the area of interest.
+
 Format:
+
+```
+ST_Transform (A: Geometry, SourceCRS: String, TargetCRS: String, AreaOfInterest: Geometry, lenientMode: Boolean)
+```
 
 ```
 ST_Transform (A: Geometry, SourceCRS: String, TargetCRS: String, lenientMode: Boolean)
