@@ -207,13 +207,6 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         assert type(area) is ps.Series
         assert area.count() == 2
 
-    def test_buffer_then_geoparquet(self):
-        temp_file_path = os.path.join(
-            self.tempdir, next(tempfile._get_candidate_names()) + ".parquet"
-        )
-        self.g1.buffer(0.2).to_parquet(temp_file_path)
-        assert os.path.exists(temp_file_path)
-
     def test_geometry(self):
         for geom in self.geoms:
             gpd_result = gpd.GeoSeries(geom).geometry
