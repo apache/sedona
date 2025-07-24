@@ -132,7 +132,6 @@ def _to_file(
 
     if spark_fmt == "geoparquet":
         writer = spark_df.write.format("geoparquet")
-        print("writing", spark_df.columns)
 
         # if not saving index we sort by GeoHash to optimize reading
         if not index and df.active_geometry_name:
@@ -212,7 +211,7 @@ def read_file(filename: str, format: Union[str, None] = None, **kwargs):
             .load(filename)
             .select(
                 "geometry", f"properties.*"
-            )  # select all non-geometry columns (which areunder properties)
+            )  # select all non-geometry columns (which are under properties)
         )
         # geojson also has a 'type' field, but we ignore it
 
@@ -240,5 +239,4 @@ def read_file(filename: str, format: Union[str, None] = None, **kwargs):
         index_spark_columns = [scol_for(sdf, SPARK_DEFAULT_INDEX_NAME)]
 
     internal = InternalFrame(spark_frame=sdf, index_spark_columns=index_spark_columns)
-    print("sdf", sdf.columns)
     return GeoDataFrame(ps.DataFrame(internal))

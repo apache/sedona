@@ -326,13 +326,6 @@ class GeoSeries(GeoFrame, pspd.Series):
     def __getitem__(self, key: Any) -> Any:
         return pspd.Series.__getitem__(self, key)
 
-    def __repr__(self) -> str:
-        """
-        Return a string representation of the GeoSeries in WKT format.
-        """
-        gpd_series = self.to_geopandas()
-        return gpd_series.__repr__()
-
     def __init__(
         self,
         data=None,
@@ -4797,6 +4790,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         else:
             renamed = self
 
+        # to_spark() is important here to ensure that the spark column names are set to the pandas column ones
         return GeoDataFrame(pspd.DataFrame(renamed._internal).to_spark())
 
 

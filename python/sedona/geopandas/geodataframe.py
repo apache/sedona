@@ -353,8 +353,8 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             try:
                 result = sgpd.GeoSeries(ps_series)
                 not_null = ps_series[ps_series.notnull()]
-                first_geom = not_null.iloc[0]
-                if first_geom:
+                if len(not_null) > 0:
+                    first_geom = not_null.iloc[0]
                     srid = shapely.get_srid(first_geom)
 
                     # Shapely objects stored in the ps.Series retain their srid
@@ -508,9 +508,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
     # ============================================================================
     # GEOMETRY COLUMN MANAGEMENT
     # ============================================================================
-    def __repr__(self):
-        geoseries = self.to_geopandas()
-        return geoseries.__repr__()
 
     def _get_geometry(self) -> sgpd.GeoSeries:
         if self._geometry_column_name not in self:
@@ -826,55 +823,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         GeoDataFrame.set_geometry : set the active geometry
         """
         return self._geometry_column_name
-
-    def _process_geometry_columns(
-        self, operation: str, rename_suffix: str = "", *args, **kwargs
-    ) -> GeoDataFrame:
-        """
-        Helper method to process geometry columns with a specified operation.
-
-        Parameters
-        ----------
-        operation : str
-            The spatial operation to apply (e.g., 'ST_Area', 'ST_Buffer').
-        rename_suffix : str, default ""
-            Suffix to append to the resulting column name.
-        args : tuple
-            Positional arguments for the operation.
-        kwargs : dict
-            Keyword arguments for the operation.
-
-        Returns
-        -------
-        GeoDataFrame
-            A new GeoDataFrame with the operation applied to geometry columns.
-        """
-        select_expressions = []
-
-        for field in self._internal.spark_frame.schema.fields:
-            col_name = field.name
-
-            # Skip index and order columns
-            if col_name in ("__index_level_0__", "__natural_order__"):
-                continue
-
-            if field.dataType.typeName() in ("geometrytype", "binary"):
-                # Prepare arguments for the operation
-                positional_params = ", ".join([repr(v) for v in args])
-                keyword_params = ", ".join([repr(v) for v in kwargs.values()])
-                params = ", ".join(filter(None, [positional_params, keyword_params]))
-
-                if field.dataType.typeName() == "binary":
-                    expr = f"{operation}(ST_GeomFromWKB(`{col_name}`){', ' + params if params else ''}) as {col_name}{rename_suffix}"
-                else:
-                    expr = f"{operation}(`{col_name}`{', ' + params if params else ''}) as {col_name}{rename_suffix}"
-                select_expressions.append(expr)
-            else:
-                # Keep non-geometry columns as they are
-                select_expressions.append(f"`{col_name}`")
-
-        sdf = self._internal.spark_frame.selectExpr(*select_expressions)
-        return GeoDataFrame(sdf)
 
     def to_geopandas(self) -> gpd.GeoDataFrame:
         """
