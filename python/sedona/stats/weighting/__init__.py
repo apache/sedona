@@ -15,7 +15,10 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from sedona.spark.stats.weighting import add_binary_distance_band_column
+from sedona.spark.stats.weighting import (
+    add_distance_band_column,
+    add_binary_distance_band_column,
+)
 
 import warnings
 
@@ -24,3 +27,8 @@ warnings.warn(
     DeprecationWarning,
     stacklevel=2,
 )
+
+__all__ = [
+    "add_distance_band_column",
+    "add_binary_distance_band_column",
+]

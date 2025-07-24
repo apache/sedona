@@ -15,6 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from sedona.spark.geoarrow.geoarrow import create_spatial_dataframe
+from sedona.spark.geoarrow.geoarrow import create_spatial_dataframe, dataframe_to_arrow
 
-__all__ = ["create_spatial_dataframe"]
+__all__ = ["create_spatial_dataframe", "dataframe_to_arrow"]

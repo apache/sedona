@@ -21,8 +21,8 @@ default_stages: [pre-commit, pre-push]
 default_language_version:
   # force all unspecified Python hooks to run python3
   python: python3
-  # force all unspecified Node hooks to run Node.js v22.16.0 LTS
-  node: 22.16.0
+  # force all unspecified Node hooks to run Node.js v22.17.0 LTS
+  node: 22.17.0
 minimum_pre_commit_version: '3.2.0'
 repos:
   - repo: meta
@@ -39,7 +39,7 @@ repos:
         entry: prettier --write '**/*.js' '**/*.yaml' '**/*.yml'
         files: \.(js|ya?ml)$
         language: node
-        additional_dependencies: ['prettier@3.5.3']
+        additional_dependencies: ['prettier@3.6.2']
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
@@ -79,7 +79,7 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-        exclude: ^docs/index\.md$|^\.github/pull_request_template\.md$|\.github/issue_template\.md$
+        exclude: ^docs/index\.md$|^\.github/pull_request_template\.md$|\.github/issue_template\.md$|^docs/blog/.*\.md$
       - id: insert-license
         name: add license for all Makefile files
         files: ^Makefile$
@@ -155,7 +155,7 @@ repos:
         name: run black-jupyter
         description: format Python files and Jupyter Notebooks with black
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v20.1.5
+    rev: v20.1.7
     hooks:
       - id: clang-format
         name: run clang-format
@@ -163,7 +163,7 @@ repos:
         args: [--style=Google]
         types_or: [c]
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.8.3
+    rev: 1.8.6
     hooks:
       - id: bandit
         name: run bandit
@@ -179,7 +179,7 @@ repos:
         args: [--ignore-words=.github/linters/codespell.txt]
         exclude: ^docs/image|^spark/common/src/test/resources|^docs/usecases|^tools/maven/scalafmt|osmpbf/build|^docker/zeppelin
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.27.0
+    rev: v8.27.2
     hooks:
       - id: gitleaks
         name: run gitleaks
@@ -284,4 +284,4 @@ repos:
       - id: oxipng
         name: run oxipng
         description: check PNG files with oxipng
-        args: ['-o', '4', '--strip', 'safe', '--alpha']
+        args: ['--fix', '-o', '4', '--strip', 'safe', '--alpha']

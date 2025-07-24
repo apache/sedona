@@ -33,6 +33,26 @@ _call_st_function = partial(call_sedona_function, "st_functions")
 
 
 @validate_argument_types
+def ExpandAddress(address: ColumnOrName):  # noqa: N802
+    """Normalize an address string into its canonical forms.
+
+    :param address: The address string or column to normalize.
+    :return: An array of normalized address strings.
+    """
+    return _call_st_function("ExpandAddress", address)
+
+
+@validate_argument_types
+def ParseAddress(address: ColumnOrName):  # noqa: N802
+    """Parse an address string into its components (label/value pairs).
+
+    :param address: The address string or column to parse.
+    :return: An array of maps with label/value pairs for address components.
+    """
+    return _call_st_function("ParseAddress", address)
+
+
+@validate_argument_types
 def GeometryType(geometry: ColumnOrName):
     """Return the type of the geometry as a string.
     This function also indicates if the geometry is measured, by returning a string of the form 'POINTM'.
@@ -1683,7 +1703,9 @@ def ST_SetSRID(geometry: ColumnOrName, srid: Union[ColumnOrName, int]) -> Column
 
 @validate_argument_types
 def ST_Snap(
-    input: ColumnOrName, reference: ColumnOrName, tolerance: Union[ColumnOrName, float]
+    input: ColumnOrName,
+    reference: ColumnOrName,
+    tolerance: Union[ColumnOrName, float, int],
 ) -> Column:
     """Snaps input Geometry to reference Geometry controlled by distance tolerance.
 

@@ -46,6 +46,14 @@
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>it.geosolutions.jaiext.jiffle</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.janino</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -177,9 +185,9 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>graphframes</groupId>
-            <artifactId>graphframes</artifactId>
-            <version>${graphframe.version}-s_${scala.compat.version}</version>
+            <groupId>io.graphframes</groupId>
+            <artifactId>graphframes-spark${spark.major.version}_${scala.compat.version}</artifactId>
+            <version>${graphframes.version}</version>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
@@ -231,6 +239,17 @@
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.wherobots</groupId>
+            <artifactId>jpostal</artifactId>
+            <version>1.2.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-compress</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

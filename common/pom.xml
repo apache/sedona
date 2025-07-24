@@ -81,9 +81,12 @@
             <groupId>org.locationtech.spatial4j</groupId>
             <artifactId>spatial4j</artifactId>
         </dependency>
+        <!-- org.datasyslab:s2-geometry-library is a fork of com.google.geometry:s2-geometry-library-->
+        <!-- as implementation requirements of apache sedona issue link: -->
+        <!-- https://github.com/apache/sedona/issues/1996 -->
         <dependency>
-            <groupId>com.google.geometry</groupId>
-            <artifactId>s2-geometry</artifactId>
+            <groupId>org.datasyslab</groupId>
+            <artifactId>s2-geometry-library</artifactId>
         </dependency>
         <dependency>
             <groupId>com.uber</groupId>
@@ -108,6 +111,14 @@
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>cdm-core</artifactId>
+        </dependency>
+        <!-- For shading a janino package that works with Spark for jiffle. We don't add this to
+             dependencyManagement in parent pom.xml because we don't want to mess up with the
+             janino versions required by Spark. -->
+        <dependency>
+            <groupId>org.codehaus.janino</groupId>
+            <artifactId>janino</artifactId>
+            <version>${janino-version}</version>
         </dependency>
     </dependencies>
     <build>

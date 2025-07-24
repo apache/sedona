@@ -14,15 +14,3 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
-
-class GeoIndex:
-    """
-    A placeholder class for GeoIndex.
-    """
-
-    def __init__(self):
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def some_method(self):
-        raise NotImplementedError("This method is not implemented yet.")
