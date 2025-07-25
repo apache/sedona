@@ -22,7 +22,7 @@ import pandas as pd
 import geopandas as gpd
 import pyspark.pandas as ps
 import sedona.geopandas as sgpd
-from sedona.geopandas import GeoSeries
+from sedona.geopandas import GeoSeries, GeoDataFrame
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 from shapely import wkt
 from shapely.geometry import (
@@ -81,8 +81,11 @@ class TestGeoSeries(TestGeopandasBase):
     def test_area(self):
         result = self.geoseries.area.to_pandas()
         expected = pd.Series([0.0, 0.0, 5.23, 5.23])
-        assert result.count() > 0
         assert_series_equal(result, expected)
+
+        # Test that GeoDataFrame.area also works
+        df_result = self.geoseries.to_geoframe().area.to_pandas()
+        assert_series_equal(result, df_result)
 
     def test_buffer(self):
         result = self.geoseries.buffer(1)
@@ -988,6 +991,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         expected = Polygon([(0, 1), (0, 2), (2, 2), (2, 0), (1, 0), (0, 0), (0, 1)])
         self.check_geom_equals(result, expected)
 
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().union_all()
+        self.check_geom_equals(df_result, expected)
+
         # Empty GeoSeries
         s = sgpd.GeoSeries([])
         result = s.union_all()
@@ -1025,6 +1032,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = s.crosses(s2, align=False)
         expected = pd.Series([True, True, False, False])
         assert_series_equal(result.to_pandas(), expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().crosses(s2, align=False).to_pandas()
+        assert_series_equal(df_result, expected)
 
     def test_disjoint(self):
         pass

@@ -1489,10 +1489,6 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
-    def union_all(self, method="unary", grid_size=None):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
     def intersection_all(self):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
