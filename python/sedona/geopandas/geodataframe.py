@@ -542,7 +542,8 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                     "df.set_geometry. "
                 )
 
-            raise AttributeError(msg)
+            # We use don't raise AttributeError because that would be caught by pyspark's __getattr__ creating a misleading error message
+            raise ValueError(msg)
         return self[self._geometry_column_name]
 
     def _set_geometry(self, col):
