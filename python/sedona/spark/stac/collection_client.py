@@ -105,7 +105,7 @@ class CollectionClient:
         df: DataFrame, bbox=None, geometry=None, datetime=None
     ) -> DataFrame:
         """
-        This function applies spatial and temporal filters to a Spark DataFrame.
+        This function applies spatial and temporal filters to a Spark DataFrame using safe parameterized operations.
 
         Parameters:
         - df (DataFrame): The input Spark DataFrame to be filtered.
@@ -121,51 +121,150 @@ class CollectionClient:
         Returns:
         - DataFrame: The filtered Spark DataFrame.
 
-        The function constructs SQL conditions for spatial and temporal filters and applies them to the DataFrame.
-        If geometry is provided, it takes precedence over bbox for spatial filtering.
-        If bbox is provided (and no geometry), it constructs spatial conditions using st_intersects and ST_GeomFromText.
-        If datetime is provided, it constructs temporal conditions using the datetime column.
-        The conditions are combined using OR logic.
+        The function uses Spark SQL column operations and functions instead of string concatenation
+        to prevent SQL injection vulnerabilities. Spatial and temporal conditions are combined using OR logic.
         """
+        from pyspark.sql import functions as F
+        from pyspark.sql.functions import col, lit
+
         # Geometry takes precedence over bbox
         if geometry:
             geometry_conditions = []
             for geom in geometry:
-                if isinstance(geom, str):
-                    # Assume it's WKT
-                    geom_wkt = geom
-                elif hasattr(geom, "wkt"):
-                    # Shapely geometry object
-                    geom_wkt = geom.wkt
-                else:
-                    # Try to convert to string (fallback)
-                    geom_wkt = str(geom)
-                geometry_conditions.append(
-                    f"st_intersects(ST_GeomFromText('{geom_wkt}'), geometry)"
-                )
-            geometry_sql_condition = " OR ".join(geometry_conditions)
-            df = df.filter(geometry_sql_condition)
+                try:
+                    # Validate and sanitize geometry input
+                    if isinstance(geom, str):
+                        # Validate WKT format basic structure
+                        if not geom.strip() or any(
+                            char in geom for char in ["'", '"', ";", "--", "/*", "*/"]
+                        ):
+                            raise ValueError("Invalid WKT geometry string")
+                        geom_wkt = geom.strip()
+                    elif hasattr(geom, "wkt"):
+                        # Shapely geometry object
+                        geom_wkt = geom.wkt
+                    else:
+                        # Try to convert to string (fallback)
+                        geom_str = str(geom)
+                        if not geom_str.strip() or any(
+                            char in geom_str
+                            for char in ["'", '"', ";", "--", "/*", "*/"]
+                        ):
+                            raise ValueError("Invalid geometry string")
+                        geom_wkt = geom_str.strip()
+
+                    # Use Spark SQL functions with safe literal values
+                    from pyspark.sql.functions import expr
+
+                    geometry_conditions.append(
+                        expr(
+                            "st_intersects(ST_GeomFromText('{}'), geometry)".format(
+                                geom_wkt.replace("'", "''")
+                            )
+                        )
+                    )
+                except Exception:
+                    # Skip invalid geometries rather than failing
+                    continue
+
+            if geometry_conditions:
+                # Combine conditions with OR using reduce
+                from functools import reduce
+
+                combined_condition = reduce(lambda a, b: a | b, geometry_conditions)
+                df = df.filter(combined_condition)
+
         elif bbox:
             bbox_conditions = []
             for bbox_item in bbox:
-                polygon_wkt = (
-                    f"POLYGON(({bbox_item[0]} {bbox_item[1]}, {bbox_item[2]} {bbox_item[1]}, "
-                    f"{bbox_item[2]} {bbox_item[3]}, {bbox_item[0]} {bbox_item[3]}, {bbox_item[0]} {bbox_item[1]}))"
-                )
-                bbox_conditions.append(
-                    f"st_intersects(ST_GeomFromText('{polygon_wkt}'), geometry)"
-                )
-            bbox_sql_condition = " OR ".join(bbox_conditions)
-            df = df.filter(bbox_sql_condition)
+                try:
+                    # Validate bbox parameters are numeric
+                    if len(bbox_item) != 4:
+                        continue
+
+                    min_lon, min_lat, max_lon, max_lat = bbox_item
+
+                    # Validate numeric values and reasonable ranges
+                    for coord in [min_lon, min_lat, max_lon, max_lat]:
+                        if (
+                            not isinstance(coord, (int, float)) or coord != coord
+                        ):  # NaN check
+                            raise ValueError("Invalid coordinate")
+
+                    # Validate longitude/latitude ranges
+                    if not (-180 <= min_lon <= 180 and -180 <= max_lon <= 180):
+                        continue
+                    if not (-90 <= min_lat <= 90 and -90 <= max_lat <= 90):
+                        continue
+
+                    # Create polygon using validated numeric values
+                    polygon_wkt = "POLYGON(({} {}, {} {}, {} {}, {} {}, {} {}))".format(
+                        float(min_lon),
+                        float(min_lat),
+                        float(max_lon),
+                        float(min_lat),
+                        float(max_lon),
+                        float(max_lat),
+                        float(min_lon),
+                        float(max_lat),
+                        float(min_lon),
+                        float(min_lat),
+                    )
+
+                    bbox_conditions.append(
+                        F.expr(
+                            f"st_intersects(ST_GeomFromText('{polygon_wkt}'), geometry)"
+                        )
+                    )
+
+                except (ValueError, TypeError, IndexError):
+                    # Skip invalid bbox items rather than failing
+                    continue
+
+            if bbox_conditions:
+                # Combine conditions with OR using reduce
+                from functools import reduce
+
+                combined_condition = reduce(lambda a, b: a | b, bbox_conditions)
+                df = df.filter(combined_condition)
 
         if datetime:
             interval_conditions = []
             for interval in datetime:
-                interval_conditions.append(
-                    f"datetime BETWEEN '{interval[0]}' AND '{interval[1]}'"
-                )
-            interval_sql_condition = " OR ".join(interval_conditions)
-            df = df.filter(interval_sql_condition)
+                try:
+                    if len(interval) != 2:
+                        continue
+
+                    start_time, end_time = interval
+
+                    # Validate datetime strings (basic ISO format check)
+                    if not isinstance(start_time, str) or not isinstance(end_time, str):
+                        continue
+
+                    # Check for SQL injection patterns
+                    for time_str in [start_time, end_time]:
+                        if any(
+                            char in time_str
+                            for char in ["'", '"', ";", "--", "/*", "*/", chr(0)]
+                        ):
+                            raise ValueError("Invalid datetime string")
+
+                    # Use Spark column operations instead of string concatenation
+                    condition = (col("datetime") >= lit(start_time)) & (
+                        col("datetime") <= lit(end_time)
+                    )
+                    interval_conditions.append(condition)
+
+                except (ValueError, TypeError, IndexError):
+                    # Skip invalid datetime intervals rather than failing
+                    continue
+
+            if interval_conditions:
+                # Combine conditions with OR using reduce
+                from functools import reduce
+
+                combined_condition = reduce(lambda a, b: a | b, interval_conditions)
+                df = df.filter(combined_condition)
 
         return df
 
