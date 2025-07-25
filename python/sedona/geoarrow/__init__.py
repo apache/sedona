@@ -14,13 +14,15 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
 import warnings
-from sedona.spark.utils.serde import KryoSerializer, SedonaKryoRegistrator
+from sedona.spark.geoarrow import dataframe_to_arrow, create_spatial_dataframe
+from sedona.spark import geoarrow
 
 warnings.warn(
-    "The 'sedona.utils' package structure has been reorganized. Please update your imports to use 'sedona.spark.utils' prefix instead.",
+    "The 'sedona.geoarrow' module is deprecated and will be removed in future versions. Please use 'sedona.spark.geoarrow' instead.",
     DeprecationWarning,
     stacklevel=2,
 )
 
-__all__ = ["KryoSerializer", "SedonaKryoRegistrator"]
+__all__ = geoarrow.__all__
