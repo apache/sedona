@@ -35,7 +35,7 @@ from sedona.sql.st_aggregates import ST_Union_Aggr
 from sedona.sql.st_constructors import ST_MakePoint
 from sedona.sql.st_functions import ST_X
 from sedona.sql.st_predicates import ST_Intersects
-from sedona.sql.types import GeographyType, GeometryType
+from sedona.sql.types import GeographyType, GeometryType, RasterType
 from sedona.stac.client import Client
 from sedona.stac.collection_client import CollectionClient
 from sedona.stats.clustering import dbscan
@@ -74,6 +74,7 @@ class TestPathCompatibility(TestBase):
         # Test GeographyType and GeometryType imports
         assert GeographyType is not None
         assert GeometryType is not None
+        assert RasterType is not None
 
     def test_spatial_operators_imports(self):
         # Test JoinQuery, KNNQuery, RangeQuery imports
