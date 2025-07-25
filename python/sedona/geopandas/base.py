@@ -25,6 +25,7 @@ from typing import (
     Optional,
     Union,
 )
+from shapely.geometry.base import BaseGeometry
 
 import geopandas as gpd
 import pandas as pd
@@ -302,9 +303,144 @@ class GeoFrame(metaclass=ABCMeta):
     def unary_union(self):
         raise NotImplementedError("This method is not implemented yet.")
 
-    @abstractmethod
-    def union_all(self, method="unary", grid_size=None):
-        raise NotImplementedError("This method is not implemented yet.")
+    def union_all(self, method="unary", grid_size=None) -> BaseGeometry:
+        """Returns a geometry containing the union of all geometries in the
+        ``GeoSeries``.
+
+        Sedona does not support the method or grid_size argument, so the user does not need to manually
+        decide the algorithm being used.
+
+        Parameters
+        ----------
+        method : str (default ``"unary"``)
+            Not supported in Sedona.
+
+        grid_size : float, default None
+            Not supported in Sedona.
+
+        Examples
+        --------
+
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import box
+        >>> s = GeoSeries([box(0, 0, 1, 1), box(0, 0, 2, 2)])
+        >>> s
+        0    POLYGON ((1 0, 1 1, 0 1, 0 0, 1 0))
+        1    POLYGON ((2 0, 2 2, 0 2, 0 0, 2 0))
+        dtype: geometry
+
+        >>> s.union_all()
+        <POLYGON ((0 1, 0 2, 2 2, 2 0, 1 0, 0 0, 0 1))>
+        """
+        return _delegate_property("union_all", self, method, grid_size)
+
+    def crosses(self, other, align=None) -> ps.Series:
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        each aligned geometry that cross `other`.
+
+        An object is said to cross `other` if its `interior` intersects the
+        `interior` of the other but does not contain it, and the dimension of
+        the intersection is less than the dimension of the one or the other.
+
+        Note: Unlike Geopandas, Sedona's implementation always return NULL when GeometryCollection is involved.
+
+        The operation works on a 1-to-1 row-wise manner.
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The GeoSeries (elementwise) or geometric object to test if is
+            crossed.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved.
+
+        Returns
+        -------
+        Series (bool)
+
+        Examples
+        --------
+
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
+        ...         LineString([(0, 0), (2, 2)]),
+        ...         LineString([(2, 0), (0, 2)]),
+        ...         Point(0, 1),
+        ...     ],
+        ... )
+        >>> s2 = GeoSeries(
+        ...     [
+        ...         LineString([(1, 0), (1, 3)]),
+        ...         LineString([(2, 0), (0, 2)]),
+        ...         Point(1, 1),
+        ...         Point(0, 1),
+        ...     ],
+        ...     index=range(1, 5),
+        ... )
+
+        >>> s
+        0    POLYGON ((0 0, 2 2, 0 2, 0 0))
+        1             LINESTRING (0 0, 2 2)
+        2             LINESTRING (2 0, 0 2)
+        3                       POINT (0 1)
+        dtype: geometry
+        >>> s2
+        1    LINESTRING (1 0, 1 3)
+        2    LINESTRING (2 0, 0 2)
+        3              POINT (1 1)
+        4              POINT (0 1)
+        dtype: geometry
+
+        We can check if each geometry of GeoSeries crosses a single
+        geometry:
+
+        >>> line = LineString([(-1, 1), (3, 1)])
+        >>> s.crosses(line)
+        0     True
+        1     True
+        2     True
+        3    False
+        dtype: bool
+
+        We can also check two GeoSeries against each other, row by row.
+        The GeoSeries above have different indices. We can either align both GeoSeries
+        based on index values and compare elements with the same index using
+        ``align=True`` or ignore index and compare elements based on their matching
+        order using ``align=False``:
+
+        >>> s.crosses(s2, align=True)
+        0    False
+        1     True
+        2    False
+        3    False
+        4    False
+        dtype: bool
+
+        >>> s.crosses(s2, align=False)
+        0     True
+        1     True
+        2    False
+        3    False
+        dtype: bool
+
+        Notice that a line does not cross a point that it contains.
+
+        Notes
+        -----
+        This method works in a row-wise manner. It does not check if an element
+        of one GeoSeries ``crosses`` *any* element of the other one.
+
+        See also
+        --------
+        GeoSeries.disjoint
+        GeoSeries.intersects
+
+        """
+        return _delegate_property("crosses", self, other, align)
 
     @abstractmethod
     def intersection_all(self):
@@ -340,15 +476,19 @@ class GeoFrame(metaclass=ABCMeta):
         raise NotImplementedError("This method is not implemented yet.")
 
 
-def _delegate_property(op, this, *args):
+def _delegate_property(op, this, *args, **kwargs):
     # type: (str, GeoSeries) -> GeoSeries/Series
-    a_this = GeometryArray(this.geometry)  # .values
-    data = getattr(a_this, op, *args)
+    a_this = GeometryArray(this.geometry)
+    if args or kwargs:
+        data = getattr(a_this, op)(*args, **kwargs)
+    else:
+        data = getattr(a_this, op)
     if isinstance(data, GeometryArray):
         from .geoseries import GeoSeries
 
         return GeoSeries(data, index=this.index, crs=this.crs)
-    elif isinstance(data, ps.Series):
+
+    elif isinstance(data, (ps.Series, BaseGeometry)):
         return data
     else:
         raise NotImplementedError("Logical Error")
