@@ -27,6 +27,7 @@ from sedona.core.geom.envelope import Envelope
 from sedona.core.geom.geography import Geography
 from sedona.core.spatialOperator import JoinQuery
 from sedona.core.spatialOperator import JoinQueryRaw, KNNQuery, RangeQuery
+from sedona.geoarrow import dataframe_to_arrow, create_spatial_dataframe
 from sedona.sql import st_aggregates as sta
 from sedona.sql import st_constructors as stc
 from sedona.sql import st_functions as stf
@@ -45,10 +46,10 @@ from sedona.stats.weighting import (
     add_binary_distance_band_column,
 )
 from sedona.utils.adapter import Adapter
-from sedona.utils.geoarrow import create_spatial_dataframe
 from sedona.utils.spatial_rdd_parser import GeoData
 from tests.test_base import TestBase
 from sedona.raster_utils.SedonaUtils import SedonaUtils
+from sedona.raster.data_buffer import DataBuffer
 
 
 class TestPathCompatibility(TestBase):
@@ -120,12 +121,30 @@ class TestPathCompatibility(TestBase):
     def test_geoarrow_import(self):
         # Test create_spatial_dataframe import
         assert create_spatial_dataframe is not None
+        assert dataframe_to_arrow is not None
 
     def test_raster_utils_imports(self):
         # Test raster utils imports
         assert SedonaUtils is not None
 
+    def test_import_df_functions_from_sedona_sql(self):
+        # one from each module
+        from sedona.sql import ST_MakePoint, ST_Y, ST_Touches, ST_Envelope_Aggr
 
-def test_import_df_functions_from_sedona_sql():
-    # one from each module
-    from sedona.sql import ST_MakePoint, ST_Y, ST_Touches, ST_Envelope_Aggr
+    def test_geoarrow_imports(self):
+        from sedona.geoarrow import create_spatial_dataframe, dataframe_to_arrow
+
+    def test_sedona_util_imports(self):
+        from sedona.utils import KryoSerializer
+        from sedona.utils import SedonaKryoRegistrator
+
+    def test_maps_imports(self):
+        # Test Map imports
+        from sedona.maps import SedonaKepler, SedonaMapUtils, SedonaPyDeck
+
+    def test_raster_imports(self):
+
+        from sedona.raster import awt_raster
+        from sedona.raster.awt_raster import AWTRaster
+        from sedona.raster.data_buffer import DataBuffer
+        from sedona.raster.meta import SampleDimension
