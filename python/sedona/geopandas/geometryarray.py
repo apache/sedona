@@ -1543,39 +1543,6 @@ class GeometryArray(pspd.Series):
 
     @property
     def centroid(self) -> "GeometryArray":
-        """Returns a ``GeometryArray`` of points representing the centroid of each
-        geometry.
-
-        Note that centroid does not have to be on or within original geometry.
-
-        Examples
-        --------
-
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
-        ...         LineString([(0, 0), (1, 1), (1, 0)]),
-        ...         Point(0, 0),
-        ...     ]
-        ... )
-        >>> s
-        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
-        1        LINESTRING (0 0, 1 1, 1 0)
-        2                       POINT (0 0)
-        dtype: geometry
-
-        >>> s.centroid
-        0    POINT (0.33333 0.66667)
-        1        POINT (0.70711 0.5)
-        2                POINT (0 0)
-        dtype: geometry
-
-        See also
-        --------
-        GeometryArray.representative_point : point guaranteed to be within each geometry
-        """
         spark_expr = stf.ST_Centroid(self.spark.column)
         return self._query_geometry_column(
             spark_expr,
@@ -1804,34 +1771,6 @@ class GeometryArray(pspd.Series):
         raise NotImplementedError("This method is not implemented yet.")
 
     def union_all(self, method="unary", grid_size=None) -> BaseGeometry:
-        """Returns a geometry containing the union of all geometries in the
-        ``GeometryArray``.
-
-        Sedona does not support the method or grid_size argument, so the user does not need to manually
-        decide the algorithm being used.
-
-        Parameters
-        ----------
-        method : str (default ``"unary"``)
-            Not supported in Sedona.
-
-        grid_size : float, default None
-            Not supported in Sedona.
-
-        Examples
-        --------
-
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import box
-        >>> s = GeometryArray([box(0, 0, 1, 1), box(0, 0, 2, 2)])
-        >>> s
-        0    POLYGON ((1 0, 1 1, 0 1, 0 0, 1 0))
-        1    POLYGON ((2 0, 2 2, 0 2, 0 0, 2 0))
-        dtype: geometry
-
-        >>> s.union_all()
-        <POLYGON ((0 1, 0 2, 2 2, 2 0, 1 0, 0 0, 0 1))>
-        """
         if grid_size is not None:
             raise NotImplementedError("Sedona does not support the grid_size argument")
         if method != "unary":
@@ -1856,111 +1795,6 @@ class GeometryArray(pspd.Series):
         return geom
 
     def crosses(self, other, align=None) -> pspd.Series:
-        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
-        each aligned geometry that cross `other`.
-
-        An object is said to cross `other` if its `interior` intersects the
-        `interior` of the other but does not contain it, and the dimension of
-        the intersection is less than the dimension of the one or the other.
-
-        Note: Unlike Geopandas, Sedona's implementation always return NULL when GeometryCollection is involved.
-
-        The operation works on a 1-to-1 row-wise manner.
-
-        Parameters
-        ----------
-        other : GeometryArray or geometric object
-            The GeometryArray (elementwise) or geometric object to test if is
-            crossed.
-        align : bool | None (default None)
-            If True, automatically aligns GeometryArray based on their indices. None defaults to True.
-            If False, the order of elements is preserved.
-
-        Returns
-        -------
-        Series (bool)
-
-        Examples
-        --------
-
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
-        ...         LineString([(0, 0), (2, 2)]),
-        ...         LineString([(2, 0), (0, 2)]),
-        ...         Point(0, 1),
-        ...     ],
-        ... )
-        >>> s2 = GeometryArray(
-        ...     [
-        ...         LineString([(1, 0), (1, 3)]),
-        ...         LineString([(2, 0), (0, 2)]),
-        ...         Point(1, 1),
-        ...         Point(0, 1),
-        ...     ],
-        ...     index=range(1, 5),
-        ... )
-
-        >>> s
-        0    POLYGON ((0 0, 2 2, 0 2, 0 0))
-        1             LINESTRING (0 0, 2 2)
-        2             LINESTRING (2 0, 0 2)
-        3                       POINT (0 1)
-        dtype: geometry
-        >>> s2
-        1    LINESTRING (1 0, 1 3)
-        2    LINESTRING (2 0, 0 2)
-        3              POINT (1 1)
-        4              POINT (0 1)
-        dtype: geometry
-
-        We can check if each geometry of GeometryArray crosses a single
-        geometry:
-
-        >>> line = LineString([(-1, 1), (3, 1)])
-        >>> s.crosses(line)
-        0     True
-        1     True
-        2     True
-        3    False
-        dtype: bool
-
-        We can also check two GeometryArray against each other, row by row.
-        The GeometryArray above have different indices. We can either align both GeometryArray
-        based on index values and compare elements with the same index using
-        ``align=True`` or ignore index and compare elements based on their matching
-        order using ``align=False``:
-
-        >>> s.crosses(s2, align=True)
-        0    False
-        1     True
-        2    False
-        3    False
-        4    False
-        dtype: bool
-
-        >>> s.crosses(s2, align=False)
-        0     True
-        1     True
-        2    False
-        3    False
-        dtype: bool
-
-        Notice that a line does not cross a point that it contains.
-
-        Notes
-        -----
-        This method works in a row-wise manner. It does not check if an element
-        of one GeometryArray ``crosses`` *any* element of the other one.
-
-        See also
-        --------
-        GeometryArray.disjoint
-        GeometryArray.intersects
-
-        """
         # Sedona does not support GeometryCollection (errors), so we return NULL for now to avoid error
         other_series, extended = self._make_series_of_val(other)
         align = False if extended else align

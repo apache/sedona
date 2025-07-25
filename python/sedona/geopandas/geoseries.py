@@ -1563,47 +1563,6 @@ class GeoSeries(GeoFrame, pspd.Series):
             spark_expr,
         )
 
-    @property
-    def centroid(self) -> "GeoSeries":
-        """Returns a ``GeoSeries`` of points representing the centroid of each
-        geometry.
-
-        Note that centroid does not have to be on or within original geometry.
-
-        Examples
-        --------
-
-        >>> from sedona.geopandas import GeoSeries
-        >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = GeoSeries(
-        ...     [
-        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
-        ...         LineString([(0, 0), (1, 1), (1, 0)]),
-        ...         Point(0, 0),
-        ...     ]
-        ... )
-        >>> s
-        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
-        1        LINESTRING (0 0, 1 1, 1 0)
-        2                       POINT (0 0)
-        dtype: geometry
-
-        >>> s.centroid
-        0    POINT (0.33333 0.66667)
-        1        POINT (0.70711 0.5)
-        2                POINT (0 0)
-        dtype: geometry
-
-        See also
-        --------
-        GeoSeries.representative_point : point guaranteed to be within each geometry
-        """
-        spark_expr = stf.ST_Centroid(self.spark.column)
-        return self._query_geometry_column(
-            spark_expr,
-            returns_geom=True,
-        )
-
     def concave_hull(self, ratio=0.0, allow_holes=False):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
