@@ -163,8 +163,8 @@ class CollectionClient:
                             )
                         )
                     )
-                except Exception:
-                    # Skip invalid geometries rather than failing
+                except (ValueError, TypeError, AttributeError):
+                    # Skip invalid geometries rather than failing  # nosec B112
                     continue
 
             if geometry_conditions:
