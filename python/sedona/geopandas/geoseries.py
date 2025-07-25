@@ -2863,6 +2863,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         align: Union[bool, None],
         returns_geom: bool = False,
         default_val: Any = None,
+        keep_name: bool = False,
     ):
         """
         Helper function to perform a row-wise operation on two GeoSeries.
@@ -2925,6 +2926,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             spark_col,
             joined_df,
             returns_geom=returns_geom,
+            keep_name=keep_name,
         )
 
     def intersection_all(self):
@@ -3680,7 +3682,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         if isinstance(data, list) and not isinstance(data[0], (tuple, list)):
             data = [(obj,) for obj in data]
 
-        select = f"{select} as geometry"
+        name = kwargs.get("name", SPARK_DEFAULT_SERIES_NAME)
+
+        select = f"{select} as `{name}`"
 
         if isinstance(data, pspd.Series):
             spark_df = data._internal.spark_frame
@@ -3696,18 +3700,19 @@ class GeoSeries(GeoFrame, pspd.Series):
         internal = InternalFrame(
             spark_frame=spark_df,
             index_spark_columns=None,
-            column_labels=[("geometry",)],
-            data_spark_columns=[scol_for(spark_df, "geometry")],
-            data_fields=[
-                InternalField(np.dtype("object"), spark_df.schema["geometry"])
-            ],
-            column_label_names=[("geometry",)],
+            column_labels=[(name,)],
+            data_spark_columns=[scol_for(spark_df, name)],
+            data_fields=[InternalField(np.dtype("object"), spark_df.schema[name])],
+            column_label_names=[(name,)],
         )
+        ps_series = first_series(PandasOnSparkDataFrame(internal))
+
+        name = None if name == SPARK_DEFAULT_SERIES_NAME else name
+        ps_series.rename(name, inplace=True)
         return GeoSeries(
-            first_series(PandasOnSparkDataFrame(internal)),
+            ps_series,
             index,
             crs=crs,
-            name=kwargs.get("name", None),
         )
 
     def to_file(
@@ -3935,6 +3940,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             align=align,
             returns_geom=True,
             default_val=None,
+            keep_name=True,
         )
 
         if inplace:

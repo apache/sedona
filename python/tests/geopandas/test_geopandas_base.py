@@ -53,6 +53,7 @@ class TestGeopandasBase(TestBase):
     ):
         assert isinstance(actual, GeoSeries)
         assert isinstance(expected, gpd.GeoSeries)
+        assert actual.name == expected.name, "results are of different names"
         sgpd_result = actual.to_geopandas()
         assert len(sgpd_result) == len(expected), "results are of different lengths"
         for a, e in zip(sgpd_result, expected):

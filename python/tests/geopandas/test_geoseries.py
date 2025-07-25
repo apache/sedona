@@ -269,6 +269,7 @@ class TestGeoSeries(TestGeopandasBase):
         )
         self.check_sgpd_equals_gpd(result, expected)
 
+        # Check for GeoSeries fill value
         s_fill = sgpd.GeoSeries(
             [
                 Point(0, 0),
@@ -286,20 +287,21 @@ class TestGeoSeries(TestGeopandasBase):
         )
         self.check_sgpd_equals_gpd(result, expected)
 
-        data = [Point(0, 0), None]
         # Ensure filling with np.nan or pd.NA returns None
+        # Also check that the name is preserved for fillna
         import numpy as np
 
+        data = [Point(0, 0), None]
         for fill_val in [np.nan, pd.NA]:
-            result = GeoSeries(data).fillna(fill_val)
-            expected = gpd.GeoSeries([Point(0, 0), None])
+            result = GeoSeries(data, name="geometry").fillna(fill_val)
+            expected = gpd.GeoSeries(data, name="geometry")
             self.check_sgpd_equals_gpd(result, expected)
 
         # Ensure filling with None is empty GeometryColleciton and not None
         # Also check that inplace works
-        result = GeoSeries(data)
+        result = GeoSeries(data, name="geometry")
         result.fillna(None, inplace=True)
-        expected = gpd.GeoSeries([Point(0, 0), GeometryCollection()])
+        expected = gpd.GeoSeries([Point(0, 0), GeometryCollection()], name="geometry")
         self.check_sgpd_equals_gpd(result, expected)
 
     def test_explode(self):
@@ -1482,7 +1484,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         pass
 
     def test_set_crs(self):
-        geo_series = sgpd.GeoSeries(self.geoseries)
+        geo_series = sgpd.GeoSeries([Point(0, 0), Point(1, 1)], name="geometry")
         assert geo_series.crs == None
         geo_series = geo_series.set_crs(epsg=4326)
         assert geo_series.crs.to_epsg() == 4326
@@ -1495,8 +1497,14 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         geo_series = geo_series.set_crs(None, allow_override=True)
         assert geo_series.crs == None
 
+        # Check that the name is preserved for set_crs
+        geo_series.name = "geometry"
+
         geo_series.set_crs(4326, inplace=True)
         assert geo_series.crs.to_epsg() == 4326
+
+        # Check that the name is preserved for set_crs after inplace=True
+        geo_series.name = "geometry"
 
         geo_series = sgpd.GeoSeries(self.geoseries, crs=4326)
         assert geo_series.crs.to_epsg() == 4326
