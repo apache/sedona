@@ -701,9 +701,14 @@ class GeoSeries(GeoFrame, pspd.Series):
 
             index_spark_columns = [scol_for(df, SPARK_DEFAULT_INDEX_NAME)]
             index_fields = [self._internal.index_fields[0]]
+            sdf = df.select(
+                col_expr,
+                scol_for(df, SPARK_DEFAULT_INDEX_NAME),
+                scol_for(df, NATURAL_ORDER_COLUMN_NAME),
+            ).orderBy(SPARK_DEFAULT_INDEX_NAME)
         # else if is_aggr, we don't select the index columns
-
-        sdf = df.select(*exprs)
+        else:
+            sdf = df.select(*exprs)
 
         internal = self._internal.copy(
             spark_frame=sdf,
