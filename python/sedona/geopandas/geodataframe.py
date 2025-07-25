@@ -412,8 +412,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         from pyspark.sql import DataFrame as SparkDataFrame
 
         if isinstance(data, GeoDataFrame):
-            if data._safe_get_crs() is None:
-                data.crs = crs
+            data_crs = data._safe_get_crs()
+            if data_crs is not None:
+                data.crs = data_crs
 
             super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
 
@@ -542,8 +543,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                     "df.set_geometry. "
                 )
 
-            # We use don't raise AttributeError because that would be caught by pyspark's __getattr__ creating a misleading error message
-            raise ValueError(msg)
+            raise MissingGeometryColumnError(msg)
         return self[self._geometry_column_name]
 
     def _set_geometry(self, col):
@@ -958,7 +958,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         """
         try:
             return self.geometry.crs
-        except AttributeError:
+        except MissingGeometryColumnError:
             return None
 
     @property
@@ -1673,3 +1673,8 @@ def _ensure_geometry(data, crs: Any | None = None) -> sgpd.GeoSeries:
         return data
     else:
         return sgpd.GeoSeries(data, crs=crs)
+
+
+# We don't raise AttributeError because that would be caught by pyspark's __getattr__ creating a misleading error message
+class MissingGeometryColumnError(Exception):
+    pass
