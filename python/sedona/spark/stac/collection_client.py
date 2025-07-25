@@ -257,9 +257,9 @@ class CollectionClient:
             # Return an iterator of the items
             return iter(items)
         except Exception as e:
-            # Log the error and raise a RuntimeError
-            logging.error(f"Error getting items: {e}")
-            raise RuntimeError("Failed to get items") from e
+            # Log error type without exposing sensitive details
+            logging.error(f"Error getting items: {type(e).__name__}")
+            raise RuntimeError("Failed to get items") from None
 
     def get_dataframe(
         self,
@@ -303,8 +303,8 @@ class CollectionClient:
 
             return df
         except Exception as e:
-            logging.error(f"Error getting filtered dataframe: {e}")
-            raise RuntimeError("Failed to get filtered dataframe") from e
+            logging.error(f"Error getting filtered dataframe: {type(e).__name__}")
+            raise RuntimeError("Failed to get filtered dataframe") from None
 
     def save_to_geoparquet(
         self,
@@ -344,8 +344,8 @@ class CollectionClient:
             df_geoparquet.write.format("geoparquet").save(output_path)
             logging.info(f"DataFrame successfully saved to {output_path}")
         except Exception as e:
-            logging.error(f"Error saving DataFrame to GeoParquet: {e}")
-            raise RuntimeError("Failed to save DataFrame to GeoParquet") from e
+            logging.error(f"Error saving DataFrame to GeoParquet: {type(e).__name__}")
+            raise RuntimeError("Failed to save DataFrame to GeoParquet") from None
 
     @staticmethod
     def _convert_assets_schema(df: DataFrame) -> DataFrame:
