@@ -133,12 +133,6 @@ def _to_file(
     if spark_fmt == "geoparquet":
         writer = spark_df.write.format("geoparquet")
 
-        # if not saving index we sort by GeoHash to optimize reading
-        if not index and df.active_geometry_name:
-            from sedona.spark import ST_GeoHash
-
-            spark_df = spark_df.orderBy(ST_GeoHash(df.geometry.spark.column, 5))
-
     elif spark_fmt == "geojson":
         writer = spark_df.write.format("geojson")
 
