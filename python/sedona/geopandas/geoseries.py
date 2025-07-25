@@ -4301,7 +4301,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         --------
         GeoSeries.to_file : write GeoSeries to file
         """
-        return self._to_geoframe(name="geometry").to_json(
+        return self.to_geoframe(name="geometry").to_json(
             na="null", show_bbox=show_bbox, drop_id=drop_id, to_wgs84=to_wgs84, **kwargs
         )
 
@@ -4514,7 +4514,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         else:
             return value, False
 
-    def _to_geoframe(self, name=None):
+    def to_geoframe(self, name=None):
         from .geodataframe import GeoDataFrame
 
         if name is not None:

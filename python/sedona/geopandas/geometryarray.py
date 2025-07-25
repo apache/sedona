@@ -4455,7 +4455,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         --------
         GeometryArray.to_file : write GeometryArray to file
         """
-        return self._to_geoframe(name="geometry").to_json(
+        return self.to_geoframe(name="geometry").to_json(
             na="null", show_bbox=show_bbox, drop_id=drop_id, to_wgs84=to_wgs84, **kwargs
         )
 
@@ -4709,7 +4709,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         >>> gdf = GeoDataFrame({"geometry": [Point(0, 0)]}, index=["a", "b"])
         >>> gdf.to_file(gdf, driver="geoparquet")
         """
-        self._to_geoframe().to_file(path, driver, index=index, **kwargs)
+        self.to_geoframe().to_file(path, driver, index=index, **kwargs)
 
     def to_parquet(self, path, **kwargs):
         """
@@ -4720,7 +4720,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         - kwargs: Any
             Additional arguments to pass to the Sedona DataFrame output function.
         """
-        self._to_geoframe().to_file(path, driver="geoparquet", **kwargs)
+        self.to_geoframe().to_file(path, driver="geoparquet", **kwargs)
 
     # -----------------------------------------------------------------------------
     # # Utils
@@ -4749,7 +4749,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         else:
             return value, False
 
-    def _to_geoframe(self, name=None):
+    def to_geoframe(self, name=None):
         if name is not None:
             renamed = self.rename(name)
         elif self._column_label is None:

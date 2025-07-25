@@ -38,7 +38,7 @@ from pyspark.pandas._typing import (
 from pyspark.sql import Column
 
 from sedona.geopandas._typing import GeoFrameLike
-from geometryarray import GeometryArray
+from sedona.geopandas.geometryarray import GeometryArray
 
 bool_type = bool
 
