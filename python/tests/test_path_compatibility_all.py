@@ -87,3 +87,7 @@ class TestPathCompatibilityAll(TestBase):
     def test_geoarrow_import(self):
         # Test create_spatial_dataframe import
         assert create_spatial_dataframe is not None
+
+    def test_raster_utils_imports(self):
+        # Test raster utils imports
+        assert SedonaUtils is not None

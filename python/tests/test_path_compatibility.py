@@ -48,6 +48,7 @@ from sedona.utils.adapter import Adapter
 from sedona.utils.geoarrow import create_spatial_dataframe
 from sedona.utils.spatial_rdd_parser import GeoData
 from tests.test_base import TestBase
+from sedona.raster_utils.SedonaUtils import SedonaUtils
 
 
 class TestPathCompatibility(TestBase):
@@ -119,3 +120,12 @@ class TestPathCompatibility(TestBase):
     def test_geoarrow_import(self):
         # Test create_spatial_dataframe import
         assert create_spatial_dataframe is not None
+
+    def test_raster_utils_imports(self):
+        # Test raster utils imports
+        assert SedonaUtils is not None
+
+
+def test_import_df_functions_from_sedona_sql():
+    # one from each module
+    from sedona.sql import ST_MakePoint, ST_Y, ST_Touches, ST_Envelope_Aggr
