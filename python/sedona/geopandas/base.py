@@ -351,6 +351,4 @@ def _delegate_property(op, this, *args):
     elif isinstance(data, ps.Series):
         return data
     else:
-        # return ps.Series(data, index=this.index)
-        # return data
         raise NotImplementedError("Logical Error")
