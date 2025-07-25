@@ -21,3 +21,6 @@ from sedona.spark.utils.spatial_rdd_parser import GeoData
 
 def distance_sorting_functions(geo_data: GeoData, query_point: Point):
     return geo_data.geom.distance(query_point)
+
+def dummy_def():
+    pass
