@@ -491,6 +491,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             geometry: pspd.Series = self["geometry"]
             if isinstance(geometry, sgpd.GeoSeries):
                 geom_crs = geometry.crs
+                # geom_crs = self._safe_get_crs()
                 if geom_crs is None:
                     if crs is not None:
                         geometry.set_crs(crs, inplace=True)
@@ -926,7 +927,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         Parameters:
         - deep: bool, default False
-            If True, a deep copy of the data is made. Otherwise, a shallow copy is made.
+            This parameter is not supported but just dummy parameter to match pandas.
 
         Returns:
         - GeoDataFrame: A copy of this GeoDataFrame object.
@@ -948,33 +949,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             )
         else:
             return self  # GeoDataFrame(self._internal.spark_frame.copy())  "this parameter is not supported but just dummy parameter to match pandas."
-
-    @property
-    def area(self) -> GeoDataFrame:
-        """
-        Returns a GeoDataFrame containing the area of each geometry expressed in the units of the CRS.
-
-        Returns
-        -------
-        GeoDataFrame
-            A GeoDataFrame with the areas of the geometries.
-
-        Examples
-        --------
-        >>> from shapely.geometry import Polygon
-        >>> from sedona.geopandas import GeoDataFrame
-        >>>
-        >>> data = {
-        ...     'geometry': [Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])],
-        ...     'value': [1, 2]
-        ... }
-        >>> gdf = GeoDataFrame(data)
-        >>> gdf.area
-           geometry_area  value
-        0           1.0      1
-        1           4.0      2
-        """
-        return self.geometry.area
 
     def _safe_get_crs(self):
         """

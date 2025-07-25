@@ -28,6 +28,7 @@ from typing import (
 
 import geopandas as gpd
 import pandas as pd
+import pyspark.pandas as ps
 from pyspark.pandas._typing import (
     Axis,
     Dtype,
@@ -36,6 +37,7 @@ from pyspark.pandas._typing import (
 from pyspark.sql import Column
 
 from sedona.geopandas._typing import GeoFrameLike
+from geometryarray import GeometryArray
 
 bool_type = bool
 
@@ -78,10 +80,29 @@ class GeoFrame(metaclass=ABCMeta):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    @abstractmethod
-    def area(self):
-        raise NotImplementedError("This method is not implemented yet.")
+    def area(self) -> ps.Series:
+        """
+        Returns a Series containing the area of each geometry in the GeoSeries expressed in the units of the CRS.
 
+        Returns
+        -------
+        Series
+            A Series containing the area of each geometry.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Polygon
+        >>> from sedona.geopandas import GeoSeries
+
+        >>> gs = GeoSeries([Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])])
+        >>> gs.area
+        0    1.0
+        1    4.0
+        dtype: float64
+        """
+        return _delegate_property("area", self)
+
+    # We need to implement these crs functions in the subclasses to avoid infinite recursion
     @property
     @abstractmethod
     def crs(self):
@@ -317,3 +338,19 @@ class GeoFrame(metaclass=ABCMeta):
     @abstractmethod
     def sjoin(self, other, predicate="intersects", **kwargs):
         raise NotImplementedError("This method is not implemented yet.")
+
+
+def _delegate_property(op, this, *args):
+    # type: (str, GeoSeries) -> GeoSeries/Series
+    a_this = GeometryArray(this.geometry)  # .values
+    data = getattr(a_this, op, *args)
+    if isinstance(data, GeometryArray):
+        from .geoseries import GeoSeries
+
+        return GeoSeries(data, index=this.index, crs=this.crs)
+    elif isinstance(data, ps.Series):
+        return data
+    else:
+        # return ps.Series(data, index=this.index)
+        # return data
+        raise NotImplementedError("Logical Error")

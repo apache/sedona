@@ -44,7 +44,6 @@ from shapely.geometry.base import BaseGeometry
 
 from sedona.geopandas._typing import Label
 from sedona.geopandas.base import GeoFrame
-from sedona.geopandas.geodataframe import GeoDataFrame
 from sedona.geopandas.sindex import SpatialIndex
 from packaging.version import parse as parse_version
 
@@ -384,11 +383,15 @@ class GeoSeries(GeoFrame, pspd.Series):
         1    POINT (2 2)
         dtype: geometry
         """
+        # Import here to avoid circular import
+        from sedona.geopandas.geodataframe import GeoDataFrame
+
         assert data is not None
 
         self._anchor: GeoDataFrame
         self._col_label: Label
 
+        # This includes GeometryArray since it is a subclass of PandasOnSparkSeries
         if isinstance(
             data, (GeoDataFrame, GeoSeries, PandasOnSparkSeries, PandasOnSparkDataFrame)
         ):
@@ -818,35 +821,6 @@ class GeoSeries(GeoFrame, pspd.Series):
             )
         else:
             return self
-
-    @property
-    def area(self) -> pspd.Series:
-        """
-        Returns a Series containing the area of each geometry in the GeoSeries expressed in the units of the CRS.
-
-        Returns
-        -------
-        Series
-            A Series containing the area of each geometry.
-
-        Examples
-        --------
-        >>> from shapely.geometry import Polygon
-        >>> from sedona.geopandas import GeoSeries
-
-        >>> gs = GeoSeries([Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])])
-        >>> gs.area
-        0    1.0
-        1    4.0
-        dtype: float64
-        """
-
-        spark_col = stf.ST_Area(self.spark.column)
-
-        return self._query_geometry_column(
-            spark_col,
-            returns_geom=False,
-        )
 
     @property
     def geom_type(self) -> pspd.Series:
