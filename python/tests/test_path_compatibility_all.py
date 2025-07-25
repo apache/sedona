@@ -46,6 +46,7 @@ class TestPathCompatibilityAll(TestBase):
         # Test GeographyType and GeometryType imports
         assert GeographyType is not None
         assert GeometryType is not None
+        assert RasterType is not None
 
     def test_spatial_operators_imports(self):
         # Test JoinQuery, KNNQuery, RangeQuery imports

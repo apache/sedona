@@ -16,7 +16,7 @@
 # under the License.
 
 import warnings
-from sedona.spark.sql.types import GeographyType, GeometryType
+from sedona.spark.sql.types import GeographyType, GeometryType, RasterType
 
 warnings.warn(
     "Importing from 'sedona.sql.types' is deprecated. Please use 'sedona.spark.sql.types' instead.",
@@ -24,4 +24,4 @@ warnings.warn(
     stacklevel=2,
 )
 
-__all__ = ["GeographyType", "GeometryType"]
+__all__ = ["GeographyType", "GeometryType", "RasterType"]
