@@ -90,7 +90,7 @@ class TestDataframe(TestGeopandasBase):
         sgpd_df.set_geometry(name, inplace=True)
         check_geodataframe(sgpd_df)
         result = sgpd_df.area
-        expected = pd.Series([1.0, 1.0, 1.0], name=name)
+        expected = pd.Series([1.0, 1.0, 1.0])
         self.check_pd_series_equal(result, expected)
 
     # These need to be defined inside the function to ensure Sedona's Geometry UDTs have been registered

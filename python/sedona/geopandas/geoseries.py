@@ -646,7 +646,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         new_epsg = crs.to_epsg() if crs else 0
 
         spark_col = stf.ST_SetSRID(self.spark.column, new_epsg)
-        result = self._query_geometry_column(spark_col)
+        result = self._query_geometry_column(spark_col, keep_name=True)
 
         if inplace:
             self._update_inplace(result)
@@ -664,6 +664,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         df: pyspark.sql.DataFrame = None,
         returns_geom: bool = True,
         is_aggr: bool = False,
+        keep_name: bool = False,
     ) -> Union["GeoSeries", pspd.Series]:
         """
         Helper method to query a single geometry column with a specified operation.
@@ -688,6 +689,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         df = self._internal.spark_frame if df is None else df
 
         rename = SPARK_DEFAULT_SERIES_NAME
+
+        if keep_name and self.name:
+            rename = self.name
 
         col_expr = spark_col.alias(rename)
 
