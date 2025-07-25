@@ -687,7 +687,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         df = self._internal.spark_frame if df is None else df
 
-        rename = self.name if self.name else SPARK_DEFAULT_SERIES_NAME
+        rename = SPARK_DEFAULT_SERIES_NAME
 
         col_expr = spark_col.alias(rename)
 
