@@ -213,34 +213,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
     index : Index or array-like, optional
         Index to use for the resulting frame.
 
-    Attributes
-    ----------
-    geometry : GeoSeries
-        The active geometry column.
-    crs : pyproj.CRS
-        The Coordinate Reference System (CRS) for the geometries.
-    active_geometry_name : str
-        Name of the active geometry column.
-    area : Series
-        Area of each geometry in CRS units.
-    sindex : SpatialIndex
-        Spatial index for the geometries.
-
-    Methods
-    -------
-    buffer(distance)
-        Buffer geometries by specified distance.
-    sjoin(right, how='inner', predicate='intersects')
-        Spatial join with another GeoDataFrame.
-    set_geometry(col, drop=False, inplace=False)
-        Set the active geometry column.
-    rename_geometry(col, inplace=False)
-        Rename the active geometry column.
-    to_parquet(path, **kwargs)
-        Save to GeoParquet format.
-    copy(deep=False)
-        Make a copy of the GeoDataFrame.
-
     Examples
     --------
     >>> from shapely.geometry import Point, Polygon
