@@ -12,10 +12,18 @@ Subpackages
 Submodules
 ----------
 
+sedona.geopandas.geoseries module
+---------------------------------
+
+.. autoclass:: sedona.geopandas.GeoSeries
+   :members:
+   :undoc-members:
+   :inherited-members:
+
 sedona.geopandas.geodataframe module
 ------------------------------------
 
-.. automodule:: sedona.geopandas.geodataframe
+.. autoclass:: sedona.geopandas.GeoDataFrame
    :members:
    :undoc-members:
    :show-inheritance:
@@ -23,15 +31,7 @@ sedona.geopandas.geodataframe module
 sedona.geopandas.sindex module
 --------------------------------
 
-.. automodule:: sedona.geopandas.sindex
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-sedona.geopandas.geoseries module
----------------------------------
-
-.. automodule:: sedona.geopandas.geoseries
+.. autoclass:: sedona.geopandas.sindex
    :members:
    :undoc-members:
    :show-inheritance:
