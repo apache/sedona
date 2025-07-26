@@ -14,13 +14,6 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-import warnings
-from sedona.spark.utils.serde import KryoSerializer, SedonaKryoRegistrator
+from sedona.spark.maps.SedonaPyDeck import SedonaPyDeck
 
-warnings.warn(
-    "The 'sedona.utils' package structure has been reorganized. Please update your imports to use 'sedona.spark.utils' prefix instead.",
-    DeprecationWarning,
-    stacklevel=2,
-)
-
-__all__ = ["KryoSerializer", "SedonaKryoRegistrator"]
+__all__ = ["SedonaPyDeck"]
