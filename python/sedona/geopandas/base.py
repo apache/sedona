@@ -93,7 +93,7 @@ class GeoFrame(metaclass=ABCMeta):
         2
         """
         # We pass in self.geometry here to use the active geometry column for dataframe
-        return _delegate_property("sindex", self.geometry)
+        return _delegate_to_geometry_column("sindex", self.geometry)
 
     @abstractmethod
     def copy(self: GeoFrameLike) -> GeoFrameLike:
@@ -120,7 +120,7 @@ class GeoFrame(metaclass=ABCMeta):
         1    4.0
         dtype: float64
         """
-        return _delegate_property("area", self)
+        return _delegate_to_geometry_column("area", self)
 
     # We need to implement these crs functions in the subclasses to avoid infinite recursion
     @property
@@ -156,7 +156,7 @@ class GeoFrame(metaclass=ABCMeta):
         1    POINT
         dtype: object
         """
-        return _delegate_property("geom_type", self)
+        return _delegate_to_geometry_column("geom_type", self)
 
     @property
     @abstractmethod
@@ -190,7 +190,7 @@ class GeoFrame(metaclass=ABCMeta):
         3    4.828427
         dtype: float64
         """
-        return _delegate_property("length", self)
+        return _delegate_to_geometry_column("length", self)
 
     @property
     def is_valid(self):
@@ -231,7 +231,7 @@ class GeoFrame(metaclass=ABCMeta):
         --------
         GeoSeries.is_valid_reason : reason for invalidity
         """
-        return _delegate_property("is_valid", self)
+        return _delegate_to_geometry_column("is_valid", self)
 
     def is_valid_reason(self):
         """Returns a ``Series`` of strings with the reason for invalidity of
@@ -274,7 +274,7 @@ class GeoFrame(metaclass=ABCMeta):
         GeoSeries.is_valid : detect invalid geometries
         GeoSeries.make_valid : fix invalid geometries
         """
-        return _delegate_property("is_valid_reason", self)
+        return _delegate_to_geometry_column("is_valid_reason", self)
 
     @property
     def is_empty(self):
@@ -305,7 +305,7 @@ class GeoFrame(metaclass=ABCMeta):
         --------
         GeoSeries.isna : detect missing geometries
         """
-        return _delegate_property("is_empty", self)
+        return _delegate_to_geometry_column("is_empty", self)
 
     @abstractmethod
     def count_coordinates(self):
@@ -346,7 +346,7 @@ class GeoFrame(metaclass=ABCMeta):
         1     True
         dtype: bool
         """
-        return _delegate_property("is_simple", self)
+        return _delegate_to_geometry_column("is_simple", self)
 
     @property
     @abstractmethod
@@ -393,7 +393,7 @@ class GeoFrame(metaclass=ABCMeta):
         1     True
         dtype: bool
         """
-        return _delegate_property("has_z", self)
+        return _delegate_to_geometry_column("has_z", self)
 
     @abstractmethod
     def get_precision(self):
@@ -472,7 +472,7 @@ class GeoFrame(metaclass=ABCMeta):
         dtype: geometry
 
         """
-        return _delegate_property("get_geometry", self, index)
+        return _delegate_to_geometry_column("get_geometry", self, index)
 
     @property
     def boundary(self):
@@ -508,7 +508,7 @@ class GeoFrame(metaclass=ABCMeta):
         GeoSeries.exterior : outer boundary (without interior rings)
 
         """
-        return _delegate_property("boundary", self)
+        return _delegate_to_geometry_column("boundary", self)
 
     @property
     def centroid(self):
@@ -545,7 +545,7 @@ class GeoFrame(metaclass=ABCMeta):
         --------
         GeoSeries.representative_point : point guaranteed to be within each geometry
         """
-        return _delegate_property("centroid", self)
+        return _delegate_to_geometry_column("centroid", self)
 
     @abstractmethod
     def concave_hull(self, ratio=0.0, allow_holes=False):
@@ -604,7 +604,7 @@ class GeoFrame(metaclass=ABCMeta):
         --------
         GeoSeries.convex_hull : convex hull geometry
         """
-        return _delegate_property("envelope", self)
+        return _delegate_to_geometry_column("envelope", self)
 
     @abstractmethod
     def minimum_rotated_rectangle(self):
@@ -715,7 +715,7 @@ class GeoFrame(metaclass=ABCMeta):
         2                           LINESTRING (0 0, 1 1, 1 0)
         dtype: geometry
         """
-        return _delegate_property(
+        return _delegate_to_geometry_column(
             "make_valid", self, method=method, keep_collapsed=keep_collapsed
         )
 
@@ -777,7 +777,7 @@ class GeoFrame(metaclass=ABCMeta):
         >>> s.union_all()
         <POLYGON ((0 1, 0 2, 2 2, 2 0, 1 0, 0 0, 0 1))>
         """
-        return _delegate_property("union_all", self, method, grid_size)
+        return _delegate_to_geometry_column("union_all", self, method, grid_size)
 
     def crosses(self, other, align=None) -> ps.Series:
         """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
@@ -885,7 +885,7 @@ class GeoFrame(metaclass=ABCMeta):
         GeoSeries.intersects
 
         """
-        return _delegate_property("crosses", self, other, align)
+        return _delegate_to_geometry_column("crosses", self, other, align)
 
     def intersects(self, other, align=None):
         """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
@@ -989,7 +989,7 @@ class GeoFrame(metaclass=ABCMeta):
         GeoSeries.touches
         GeoSeries.intersection
         """
-        return _delegate_property("intersects", self, other, align)
+        return _delegate_to_geometry_column("intersects", self, other, align)
 
     def overlaps(self, other, align=None):
         """Returns True for all aligned geometries that overlap other, else False.
@@ -1080,7 +1080,7 @@ class GeoFrame(metaclass=ABCMeta):
         GeoSeries.intersects
 
         """
-        return _delegate_property("overlaps", self, other, align)
+        return _delegate_to_geometry_column("overlaps", self, other, align)
 
     def touches(self, other, align=None):
         """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
@@ -1185,7 +1185,7 @@ class GeoFrame(metaclass=ABCMeta):
         GeoSeries.intersects
 
         """
-        return _delegate_property("touches", self, other, align)
+        return _delegate_to_geometry_column("touches", self, other, align)
 
     def within(self, other, align=None):
         """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
@@ -1293,7 +1293,7 @@ class GeoFrame(metaclass=ABCMeta):
         --------
         GeoSeries.contains
         """
-        return _delegate_property("within", self, other, align)
+        return _delegate_to_geometry_column("within", self, other, align)
 
     def covers(self, other, align=None):
         """
@@ -1402,7 +1402,7 @@ class GeoFrame(metaclass=ABCMeta):
         GeoSeries.covered_by
         GeoSeries.overlaps
         """
-        return _delegate_property("covers", self, other, align)
+        return _delegate_to_geometry_column("covers", self, other, align)
 
     def covered_by(self, other, align=None):
         """
@@ -1511,7 +1511,7 @@ class GeoFrame(metaclass=ABCMeta):
         GeoSeries.covers
         GeoSeries.overlaps
         """
-        return _delegate_property("covered_by", self, other, align)
+        return _delegate_to_geometry_column("covered_by", self, other, align)
 
     def distance(self, other, align=None):
         """Returns a ``Series`` containing the distance to aligned `other`.
@@ -1599,7 +1599,7 @@ class GeoFrame(metaclass=ABCMeta):
         3    1.000000
         dtype: float64
         """
-        return _delegate_property("distance", self, other, align)
+        return _delegate_to_geometry_column("distance", self, other, align)
 
     def intersection(self, other, align=None):
         """Returns a ``GeoSeries`` of the intersection of points in each
@@ -1701,7 +1701,7 @@ class GeoFrame(metaclass=ABCMeta):
         GeoSeries.symmetric_difference
         GeoSeries.union
         """
-        return _delegate_property("intersection", self, other, align)
+        return _delegate_to_geometry_column("intersection", self, other, align)
 
     def snap(self, other, tolerance, align=None):
         """Snap the vertices and segments of the geometry to vertices of the reference.
@@ -1798,7 +1798,7 @@ class GeoFrame(metaclass=ABCMeta):
         2    POLYGON ((0 0, 0 10, 8 10, 10 10, 10 0, 0 0))
         dtype: geometry
         """
-        return _delegate_property("snap", self, other, tolerance, align)
+        return _delegate_to_geometry_column("snap", self, other, tolerance, align)
 
     @property
     def bounds(self) -> ps.DataFrame:
@@ -1829,7 +1829,7 @@ class GeoFrame(metaclass=ABCMeta):
         1  POLYGON ((0 0, 1 1, 1 0, 0 0))   0.0   0.0   1.0   1.0
         2           LINESTRING (0 1, 1 2)   0.0   1.0   1.0   2.0
         """
-        return _delegate_property("bounds", self)
+        return _delegate_to_geometry_column("bounds", self)
 
     @property
     def total_bounds(self):
@@ -1848,7 +1848,7 @@ class GeoFrame(metaclass=ABCMeta):
         >>> gdf.total_bounds
         array([ 0., -1.,  3.,  2.])
         """
-        return _delegate_property("total_bounds", self)
+        return _delegate_to_geometry_column("total_bounds", self)
 
     def dwithin(self, other, distance, align=None):
         """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
@@ -1952,7 +1952,7 @@ class GeoFrame(metaclass=ABCMeta):
         --------
         GeoSeries.within
         """
-        return _delegate_property("dwithin", self, other, distance, align)
+        return _delegate_to_geometry_column("dwithin", self, other, distance, align)
 
     def difference(self, other, align=None):
         """Returns a ``GeoSeries`` of the points in each aligned geometry that
@@ -2059,7 +2059,7 @@ class GeoFrame(metaclass=ABCMeta):
         --------
         GeoSeries.intersection
         """
-        return _delegate_property("difference", self, other, align)
+        return _delegate_to_geometry_column("difference", self, other, align)
 
     @abstractmethod
     def intersection_all(self):
@@ -2175,7 +2175,7 @@ class GeoFrame(metaclass=ABCMeta):
         GeoSeries.contains_properly
         GeoSeries.within
         """
-        return _delegate_property("contains", self, other, align)
+        return _delegate_to_geometry_column("contains", self, other, align)
 
     @abstractmethod
     def contains_properly(self, other, align=None):
@@ -2256,7 +2256,9 @@ class GeoFrame(metaclass=ABCMeta):
         1              LINESTRING (0 0, 0 20)
         dtype: geometry
         """
-        return _delegate_property("simplify", self, tolerance, preserve_topology)
+        return _delegate_to_geometry_column(
+            "simplify", self, tolerance, preserve_topology
+        )
 
     @abstractmethod
     def sjoin(self, other, predicate="intersects", **kwargs):
@@ -2264,6 +2266,23 @@ class GeoFrame(metaclass=ABCMeta):
 
 
 def _delegate_property(op, this, *args, **kwargs):
+    geom_column = this.geometry
+    if args or kwargs:
+        data = getattr(geom_column, op)(*args, **kwargs)
+    else:
+        data = getattr(geom_column, op)
+        # If it was a function instead of a property, call it
+        if callable(data):
+            data = data()
+
+    if kwargs.get("inplace", False):
+        this._update_inplace(geom_column)
+        return None
+
+    return data
+
+
+def _delegate_to_geometry_column(op, this, *args, **kwargs):
     """
     Delegate a call to the GeometryArray class, and then convert the result as a ps.Series or GeoSeries
 
