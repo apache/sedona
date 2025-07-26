@@ -1,9 +1,6 @@
 sedona.geopandas package
 ========================
 
-Subpackages
------------
-
 .. toctree::
    :maxdepth: 2
 
