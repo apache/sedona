@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -14,6 +14,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
 DRIVER_MEM=${DRIVER_MEM:-4g}
 EXECUTOR_MEM=${EXECUTOR_MEM:-4g}
@@ -88,5 +89,6 @@ service ssh start
 "${SPARK_HOME}"/sbin/start-all.sh
 
 "${ZEPPELIN_HOME}"/bin/zeppelin-daemon.sh start
+
 # Start jupyter lab
 exec jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token=
