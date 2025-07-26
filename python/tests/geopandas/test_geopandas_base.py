@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+from typing import Union
 from tests.test_base import TestBase
 from sedona.geopandas import GeoDataFrame, GeoSeries
 import pyspark.sql
@@ -25,6 +26,7 @@ from pandas.testing import assert_series_equal
 from contextlib import contextmanager
 from shapely.geometry import GeometryCollection
 from shapely.geometry.base import BaseGeometry
+from pandas.testing import assert_index_equal
 
 
 class TestGeopandasBase(TestBase):
@@ -67,6 +69,8 @@ class TestGeopandasBase(TestBase):
                 a, e, tolerance=1e-2
             )  # increased tolerance from 1e-6
 
+        assert_index_equal(actual.index.to_pandas(), expected.index)
+
     @classmethod
     def check_sgpd_df_equals_gpd_df(
         cls, actual: GeoDataFrame, expected: gpd.GeoDataFrame
@@ -99,6 +103,12 @@ class TestGeopandasBase(TestBase):
         assert isinstance(actual, ps.Series), "result series is not a ps.Series"
         assert isinstance(expected, pd.Series), "expected series is not a pd.Series"
         assert_series_equal(actual.to_pandas(), expected)
+
+    @classmethod
+    def check_index_equal(
+        cls, actual: Union[ps.DataFrame, ps.Series], expected: ps.Index
+    ):
+        assert_index_equal(actual.index, expected)
 
     @classmethod
     def contains_any_geom_collection(cls, geoms) -> bool:
