@@ -26,7 +26,7 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{Attribute, PythonUDF}
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.execution.SparkPlan
-import org.apache.spark.sql.execution.python.{ArrowPythonRunner, BatchIterator, EvalPythonExec, PythonSQLMetrics}
+import org.apache.spark.sql.execution.python.{ArrowPythonRunner, BatchIterator, EvalPythonExec, PythonSQLMetrics, SedonaArrowPythonRunner}
 import org.apache.spark.sql.types.StructType
 
 import scala.collection.JavaConverters.asScalaIteratorConverter
@@ -68,7 +68,7 @@ case class SedonaArrowEvalPythonExec(
 
     val batchIter = if (batchSize > 0) new BatchIterator(iter, batchSize) else Iterator(iter)
 
-    val columnarBatchIter = new ArrowPythonRunner(
+    val columnarBatchIter = new SedonaArrowPythonRunner(
       funcs,
       evalType - PythonEvalType.SEDONA_UDF_TYPE_CONSTANT,
       argOffsets,
