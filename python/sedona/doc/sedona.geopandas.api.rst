@@ -24,11 +24,3 @@ sedona.geopandas.sindex module
    :members:
    :undoc-members:
    :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: sedona.geopandas
-   :members:
-   :undoc-members:
-   :show-inheritance:
