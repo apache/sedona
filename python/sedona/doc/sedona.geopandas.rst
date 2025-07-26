@@ -44,14 +44,6 @@ sedona.geopandas.geoseries module
    :undoc-members:
    :show-inheritance:
 
-sedona.geopandas.internal module
---------------------------------
-
-.. automodule:: sedona.geopandas.internal
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 
