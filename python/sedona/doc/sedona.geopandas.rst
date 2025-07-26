@@ -12,14 +12,6 @@ Subpackages
 Submodules
 ----------
 
-sedona.geopandas.base module
-----------------------------
-
-.. automodule:: sedona.geopandas.base
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 sedona.geopandas.geodataframe module
 ------------------------------------
 
