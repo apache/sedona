@@ -462,36 +462,6 @@ class GeometryArray(pspd.Series):
 
     @property
     def crs(self) -> Union["CRS", None]:
-        """The Coordinate Reference System (CRS) as a ``pyproj.CRS`` object.
-
-        Returns None if the CRS is not set, and to set the value it
-        :getter: Returns a ``pyproj.CRS`` or None. When setting, the value
-        can be anything accepted by
-        :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
-        such as an authority string (eg "EPSG:4326") or a WKT string.
-
-        Note: This assumes all records in the GeometryArray are assumed to have the same CRS.
-
-        Examples
-        --------
-        >>> s.crs  # doctest: +SKIP
-        <Geographic 2D CRS: EPSG:4326>
-        Name: WGS 84
-        Axis Info [ellipsoidal]:
-        - Lat[north]: Geodetic latitude (degree)
-        - Lon[east]: Geodetic longitude (degree)
-        Area of Use:
-        - name: World
-        - bounds: (-180.0, -90.0, 180.0, 90.0)
-        Datum: World Geodetic System 1984
-        - Ellipsoid: WGS 84
-        - Prime Meridian: Greenwich
-
-        See Also
-        --------
-        GeometryArray.set_crs : assign CRS
-        GeometryArray.to_crs : re-project to another CRS
-        """
         from pyproj import CRS
 
         if len(self) == 0:
@@ -541,81 +511,6 @@ class GeometryArray(pspd.Series):
         inplace: bool = False,
         allow_override: bool = False,
     ) -> Union["GeometryArray", None]:
-        """
-        Set the Coordinate Reference System (CRS) of a ``GeometryArray``.
-
-        Pass ``None`` to remove CRS from the ``GeometryArray``.
-
-        Notes
-        -----
-        The underlying geometries are not transformed to this CRS. To
-        transform the geometries to a new CRS, use the ``to_crs`` method.
-
-        Parameters
-        ----------
-        crs : pyproj.CRS | None, optional
-            The value can be anything accepted
-            by :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
-            such as an authority string (eg "EPSG:4326") or a WKT string.
-        epsg : int, optional if `crs` is specified
-            EPSG code specifying the projection.
-        inplace : bool, default False
-            If True, the CRS of the GeometryArray will be changed in place
-            (while still returning the result) instead of making a copy of
-            the GeometryArray.
-        allow_override : bool, default False
-            If the GeometryArray already has a CRS, allow to replace the
-            existing CRS, even when both are not equal.
-
-        Returns
-        -------
-        GeometryArray
-
-        Examples
-        --------
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Point
-        >>> s = GeometryArray([Point(1, 1), Point(2, 2), Point(3, 3)])
-        >>> s
-        0    POINT (1 1)
-        1    POINT (2 2)
-        2    POINT (3 3)
-        dtype: geometry
-
-        Setting CRS to a GeometryArray without one:
-
-        >>> s.crs is None
-        True
-
-        >>> s = s.set_crs('epsg:3857')
-        >>> s.crs  # doctest: +SKIP
-        <Projected CRS: EPSG:3857>
-        Name: WGS 84 / Pseudo-Mercator
-        Axis Info [cartesian]:
-        - X[east]: Easting (metre)
-        - Y[north]: Northing (metre)
-        Area of Use:
-        - name: World - 85°S to 85°N
-        - bounds: (-180.0, -85.06, 180.0, 85.06)
-        Coordinate Operation:
-        - name: Popular Visualisation Pseudo-Mercator
-        - method: Popular Visualisation Pseudo Mercator
-        Datum: World Geodetic System 1984
-        - Ellipsoid: WGS 84
-        - Prime Meridian: Greenwich
-
-        Overriding existing CRS:
-
-        >>> s = s.set_crs(4326, allow_override=True)
-
-        Without ``allow_override=True``, ``set_crs`` returns an error if you try to
-        override CRS.
-
-        See Also
-        --------
-        GeometryArray.to_crs : re-project to another CRS
-
-        """
         from pyproj import CRS
 
         if crs is not None:
@@ -725,35 +620,6 @@ class GeometryArray(pspd.Series):
         return result
 
     # ============================================================================
-    # CONVERSION AND SERIALIZATION METHODS
-    # ============================================================================
-
-    def to_geopandas(self) -> gpd.GeoSeries:
-        """
-        Convert the GeometryArray to a geopandas GeometryArray.
-
-        Returns:
-        - geopandas.GeometryArray: A geopandas GeometryArray.
-        """
-        from pyspark.pandas.utils import log_advice
-
-        log_advice(
-            "`to_geopandas` loads all data into the driver's memory. "
-            "It should only be used if the resulting geopandas GeometryArray is expected to be small."
-        )
-        return self._to_geopandas()
-
-    def _to_geopandas(self) -> gpd.GeoSeries:
-        """
-        Same as `to_geopandas()`, without issuing the advice log for internal usage.
-        """
-        pd_series = self._to_internal_pandas()
-        return gpd.GeoSeries(pd_series, crs=self.crs)
-
-    def to_spark_pandas(self) -> pspd.Series:
-        return pspd.Series(pspd.DataFrame(self._psdf._internal))
-
-    # ============================================================================
     # PROPERTIES AND ATTRIBUTES
     # ============================================================================
 
@@ -763,25 +629,6 @@ class GeometryArray(pspd.Series):
 
     @property
     def sindex(self) -> SpatialIndex:
-        """
-        Returns a spatial index built from the geometries.
-
-        Returns
-        -------
-        SpatialIndex
-            The spatial index for this GeoDataFrame.
-
-        Examples
-        --------
-        >>> from shapely.geometry import Point
-        >>> from sedona.geopandas import GeoDataFrame
-        >>>
-        >>> gdf = GeoDataFrame([{"geometry": Point(1, 1), "value": 1},
-        ...                     {"geometry": Point(2, 2), "value": 2}])
-        >>> index = gdf.sindex
-        >>> index.size
-        2
-        """
         geometry_column = _get_series_col_name(self)
         if geometry_column is None:
             raise ValueError("No geometry column found in GeometryArray")
@@ -855,32 +702,6 @@ class GeometryArray(pspd.Series):
 
     @property
     def length(self) -> pspd.Series:
-        """
-        Returns a Series containing the length of each geometry in the GeometryArray.
-
-        In the case of a (Multi)Polygon it measures the length of its exterior (i.e. perimeter).
-
-        For a GeometryCollection it measures sums the values for each of the individual geometries.
-
-        Returns
-        -------
-        Series
-            A Series containing the length of each geometry.
-
-        Examples
-        --------
-        >>> from shapely.geometry import Polygon
-        >>> from sedona.geopandas import GeometryArray
-
-        >>> gs = GeometryArray([Point(0, 0), LineString([(0, 0), (1, 1)]), Polygon([(0, 0), (1, 0), (1, 1)]), GeometryCollection([Point(0, 0), LineString([(0, 0), (1, 1)]), Polygon([(0, 0), (1, 0), (1, 1)])])])
-        >>> gs.length
-        0    0.000000
-        1    1.414214
-        2    3.414214
-        3    4.828427
-        dtype: float64
-        """
-
         spark_expr = (
             F.when(
                 stf.GeometryType(self.spark.column).isin(
@@ -908,44 +729,6 @@ class GeometryArray(pspd.Series):
 
     @property
     def is_valid(self) -> pspd.Series:
-        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
-        geometries that are valid.
-
-        Examples
-        --------
-
-        An example with one invalid polygon (a bowtie geometry crossing itself)
-        and one missing geometry:
-
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Polygon
-        >>> s = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
-        ...         Polygon([(0,0), (1, 1), (1, 0), (0, 1)]),  # bowtie geometry
-        ...         Polygon([(0, 0), (2, 2), (2, 0)]),
-        ...         None
-        ...     ]
-        ... )
-        >>> s
-        0         POLYGON ((0 0, 1 1, 0 1, 0 0))
-        1    POLYGON ((0 0, 1 1, 1 0, 0 1, 0 0))
-        2         POLYGON ((0 0, 2 2, 2 0, 0 0))
-        3                                   None
-        dtype: geometry
-
-        >>> s.is_valid
-        0     True
-        1    False
-        2     True
-        3    False
-        dtype: bool
-
-        See also
-        --------
-        GeometryArray.is_valid_reason : reason for invalidity
-        """
-
         spark_col = stf.ST_IsValid(self.spark.column)
         result = self._query_geometry_column(
             spark_col,
@@ -954,46 +737,6 @@ class GeometryArray(pspd.Series):
         return _to_bool(result)
 
     def is_valid_reason(self) -> pspd.Series:
-        """Returns a ``Series`` of strings with the reason for invalidity of
-        each geometry.
-
-        Examples
-        --------
-
-        An example with one invalid polygon (a bowtie geometry crossing itself)
-        and one missing geometry:
-
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Polygon
-        >>> s = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
-        ...         Polygon([(0,0), (1, 1), (1, 0), (0, 1)]),  # bowtie geometry
-        ...         Polygon([(0, 0), (2, 2), (2, 0)]),
-        ...         Polygon([(0, 0), (2, 0), (1, 1), (2, 2), (0, 2), (1, 1), (0, 0)]),
-        ...         None
-        ...     ]
-        ... )
-        >>> s
-        0         POLYGON ((0 0, 1 1, 0 1, 0 0))
-        1    POLYGON ((0 0, 1 1, 1 0, 0 1, 0 0))
-        2         POLYGON ((0 0, 2 2, 2 0, 0 0))
-        3                                   None
-        dtype: geometry
-
-        >>> s.is_valid_reason()
-        0    Valid Geometry
-        1    Self-intersection at or near point (0.5, 0.5, NaN)
-        2    Valid Geometry
-        3    Ring Self-intersection at or near point (1.0, 1.0)
-        4    None
-        dtype: object
-
-        See also
-        --------
-        GeometryArray.is_valid : detect invalid geometries
-        GeometryArray.make_valid : fix invalid geometries
-        """
         spark_col = stf.ST_IsValidReason(self.spark.column)
         return self._query_geometry_column(
             spark_col,
@@ -1002,33 +745,6 @@ class GeometryArray(pspd.Series):
 
     @property
     def is_empty(self) -> pspd.Series:
-        """
-        Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
-        empty geometries.
-
-        Examples
-        --------
-        An example of a GeoDataFrame with one empty point, one point and one missing
-        value:
-
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Point
-        >>> geoseries = GeometryArray([Point(), Point(2, 1), None], crs="EPSG:4326")
-        >>> geoseries
-        0  POINT EMPTY
-        1  POINT (2 1)
-        2         None
-
-        >>> geoseries.is_empty
-        0     True
-        1    False
-        2    False
-        dtype: bool
-
-        See Also
-        --------
-        GeometryArray.isna : detect missing values
-        """
         spark_expr = stf.ST_IsEmpty(self.spark.column)
         result = self._query_geometry_column(
             spark_expr,
@@ -1064,108 +780,6 @@ class GeometryArray(pspd.Series):
         )
 
     def dwithin(self, other, distance, align=None):
-        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
-        each aligned geometry that is within a set distance from ``other``.
-
-        The operation works on a 1-to-1 row-wise manner:
-
-        Parameters
-        ----------
-        other : GeometryArray or geometric object
-            The GeometryArray (elementwise) or geometric object to test for
-            equality.
-        distance : float, np.array, pd.Series
-            Distance(s) to test if each geometry is within. A scalar distance will be
-            applied to all geometries. An array or Series will be applied elementwise.
-            If np.array or pd.Series are used then it must have same length as the
-            GeometryArray.
-        align : bool | None (default None)
-            If True, automatically aligns GeometryArray based on their indices.
-            If False, the order of elements is preserved. None defaults to True.
-
-        Returns
-        -------
-        Series (bool)
-
-        Examples
-        --------
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
-        ...         LineString([(0, 0), (0, 2)]),
-        ...         LineString([(0, 0), (0, 1)]),
-        ...         Point(0, 1),
-        ...     ],
-        ...     index=range(0, 4),
-        ... )
-        >>> s2 = GeometryArray(
-        ...     [
-        ...         Polygon([(1, 0), (4, 2), (2, 2)]),
-        ...         Polygon([(2, 0), (3, 2), (2, 2)]),
-        ...         LineString([(2, 0), (2, 2)]),
-        ...         Point(1, 1),
-        ...     ],
-        ...     index=range(1, 5),
-        ... )
-
-        >>> s
-        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
-        1             LINESTRING (0 0, 0 2)
-        2             LINESTRING (0 0, 0 1)
-        3                       POINT (0 1)
-        dtype: geometry
-
-        >>> s2
-        1    POLYGON ((1 0, 4 2, 2 2, 1 0))
-        2    POLYGON ((2 0, 3 2, 2 2, 2 0))
-        3             LINESTRING (2 0, 2 2)
-        4                       POINT (1 1)
-        dtype: geometry
-
-        We can check if each geometry of GeometryArray contains a single
-        geometry:
-
-        >>> point = Point(0, 1)
-        >>> s2.dwithin(point, 1.8)
-        1     True
-        2    False
-        3    False
-        4     True
-        dtype: bool
-
-        We can also check two GeometryArray against each other, row by row.
-        The GeometryArray above have different indices. We can either align both GeometryArray
-        based on index values and compare elements with the same index using
-        ``align=True`` or ignore index and compare elements based on their matching
-        order using ``align=False``:
-
-        >>> s.dwithin(s2, distance=1, align=True)
-        0    False
-        1     True
-        2    False
-        3    False
-        4    False
-        dtype: bool
-
-        >>> s.dwithin(s2, distance=1, align=False)
-        0     True
-        1    False
-        2    False
-        3     True
-        dtype: bool
-
-        Notes
-        -----
-        This method works in a row-wise manner. It does not check if an element
-        of one GeometryArray is within the set distance of *any* element of the other one.
-
-        See also
-        --------
-        GeometryArray.within
-        """
-
         if not isinstance(distance, (float, int)):
             raise NotImplementedError(
                 "Array-like distance for dwithin not implemented yet."
@@ -1184,107 +798,6 @@ class GeometryArray(pspd.Series):
         )
 
     def difference(self, other, align=None) -> "GeometryArray":
-        """Returns a ``GeometryArray`` of the points in each aligned geometry that
-        are not in `other`.
-
-        The operation works on a 1-to-1 row-wise manner:
-
-        Unlike Geopandas, Sedona does not support this operation for GeometryCollections.
-
-        Parameters
-        ----------
-        other : Geoseries or geometric object
-            The Geoseries (elementwise) or geometric object to find the
-            difference to.
-        align : bool | None (default None)
-            If True, automatically aligns GeometryArray based on their indices. None defaults to True.
-            If False, the order of elements is preserved.
-
-        Returns
-        -------
-        GeometryArray
-
-        Examples
-        --------
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
-        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
-        ...         LineString([(0, 0), (2, 2)]),
-        ...         LineString([(2, 0), (0, 2)]),
-        ...         Point(0, 1),
-        ...     ],
-        ... )
-        >>> s2 = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
-        ...         LineString([(1, 0), (1, 3)]),
-        ...         LineString([(2, 0), (0, 2)]),
-        ...         Point(1, 1),
-        ...         Point(0, 1),
-        ...     ],
-        ...     index=range(1, 6),
-        ... )
-
-        >>> s
-        0    POLYGON ((0 0, 2 2, 0 2, 0 0))
-        1    POLYGON ((0 0, 2 2, 0 2, 0 0))
-        2             LINESTRING (0 0, 2 2)
-        3             LINESTRING (2 0, 0 2)
-        4                       POINT (0 1)
-        dtype: geometry
-
-        >>> s2
-        1    POLYGON ((0 0, 1 1, 0 1, 0 0))
-        2             LINESTRING (1 0, 1 3)
-        3             LINESTRING (2 0, 0 2)
-        4                       POINT (1 1)
-        5                       POINT (0 1)
-        dtype: geometry
-
-        We can do difference of each geometry and a single
-        shapely geometry:
-
-        >>> s.difference(Polygon([(0, 0), (1, 1), (0, 1)]))
-        0       POLYGON ((0 2, 2 2, 1 1, 0 1, 0 2))
-        1         POLYGON ((0 2, 2 2, 1 1, 0 1, 0 2))
-        2                       LINESTRING (1 1, 2 2)
-        3    MULTILINESTRING ((2 0, 1 1), (1 1, 0 2))
-        4                                 POINT EMPTY
-        dtype: geometry
-
-        We can also check two GeometryArray against each other, row by row.
-        The GeometryArray above have different indices. We can either align both GeometryArray
-        based on index values and compare elements with the same index using
-        ``align=True`` or ignore index and compare elements based on their matching
-        order using ``align=False``:
-
-        >>> s.difference(s2, align=True)
-        0                                        None
-        1         POLYGON ((0 2, 2 2, 1 1, 0 1, 0 2))
-        2    MULTILINESTRING ((0 0, 1 1), (1 1, 2 2))
-        3                            LINESTRING EMPTY
-        4                                 POINT (0 1)
-        5                                        None
-        dtype: geometry
-
-        >>> s.difference(s2, align=False)
-        0         POLYGON ((0 2, 2 2, 1 1, 0 1, 0 2))
-        1    POLYGON ((0 0, 0 2, 1 2, 2 2, 1 1, 0 0))
-        2    MULTILINESTRING ((0 0, 1 1), (1 1, 2 2))
-        3                       LINESTRING (2 0, 0 2)
-        4                                 POINT EMPTY
-        dtype: geometry
-
-        See Also
-        --------
-        GeometryArray.symmetric_difference
-        GeometryArray.union
-        GeometryArray.intersection
-        """
-
         other_series, extended = self._make_series_of_val(other)
         align = False if extended else align
 
@@ -1298,31 +811,6 @@ class GeometryArray(pspd.Series):
 
     @property
     def is_simple(self) -> pspd.Series:
-        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
-        geometries that do not cross themselves.
-
-        This is meaningful only for `LineStrings` and `LinearRings`.
-
-        Examples
-        --------
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import LineString
-        >>> s = GeometryArray(
-        ...     [
-        ...         LineString([(0, 0), (1, 1), (1, -1), (0, 1)]),
-        ...         LineString([(0, 0), (1, 1), (1, -1)]),
-        ...     ]
-        ... )
-        >>> s
-        0    LINESTRING (0 0, 1 1, 1 -1, 0 1)
-        1         LINESTRING (0 0, 1 1, 1 -1)
-        dtype: geometry
-
-        >>> s.is_simple
-        0    False
-        1     True
-        dtype: bool
-        """
         spark_expr = stf.ST_IsSimple(self.spark.column)
         result = self._query_geometry_column(
             spark_expr,
@@ -1361,34 +849,6 @@ class GeometryArray(pspd.Series):
 
     @property
     def has_z(self) -> pspd.Series:
-        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
-        features that have a z-component.
-
-        Notes
-        -----
-        Every operation in GeoPandas is planar, i.e. the potential third
-        dimension is not taken into account.
-
-        Examples
-        --------
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Point
-        >>> s = GeometryArray(
-        ...     [
-        ...         Point(0, 1),
-        ...         Point(0, 1, 2),
-        ...     ]
-        ... )
-        >>> s
-        0        POINT (0 1)
-        1    POINT Z (0 1 2)
-        dtype: geometry
-
-        >>> s.has_z
-        0    False
-        1     True
-        dtype: bool
-        """
         spark_expr = stf.ST_HasZ(self.spark.column)
         return self._query_geometry_column(
             spark_expr,
@@ -1400,79 +860,6 @@ class GeometryArray(pspd.Series):
         raise NotImplementedError("This method is not implemented yet.")
 
     def get_geometry(self, index) -> "GeometryArray":
-        """Returns the n-th geometry from a collection of geometries (0-indexed).
-
-        If the index is non-negative, it returns the geometry at that index.
-        If the index is negative, it counts backward from the end of the collection (e.g., -1 returns the last geometry).
-        Returns None if the index is out of bounds.
-
-        Note: Simple geometries act as length-1 collections
-
-        Note: Using Shapely < 2.0, may lead to different results for empty simple geometries due to how
-        shapely interprets them.
-
-        Parameters
-        ----------
-        index : int or array_like
-            Position of a geometry to be retrieved within its collection
-
-        Returns
-        -------
-        GeometryArray
-
-        Notes
-        -----
-        Simple geometries act as collections of length 1. Any out-of-range index value
-        returns None.
-
-        Examples
-        --------
-        >>> from shapely.geometry import Point, MultiPoint, GeometryCollection
-        >>> s = geopandas.GeometryArray(
-        ...     [
-        ...         Point(0, 0),
-        ...         MultiPoint([(0, 0), (1, 1), (0, 1), (1, 0)]),
-        ...         GeometryCollection(
-        ...             [MultiPoint([(0, 0), (1, 1), (0, 1), (1, 0)]), Point(0, 1)]
-        ...         ),
-        ...         Polygon(),
-        ...         GeometryCollection(),
-        ...     ]
-        ... )
-        >>> s
-        0                                          POINT (0 0)
-        1              MULTIPOINT ((0 0), (1 1), (0 1), (1 0))
-        2    GEOMETRYCOLLECTION (MULTIPOINT ((0 0), (1 1), ...
-        3                                        POLYGON EMPTY
-        4                             GEOMETRYCOLLECTION EMPTY
-        dtype: geometry
-
-        >>> s.get_geometry(0)
-        0                                POINT (0 0)
-        1                                POINT (0 0)
-        2    MULTIPOINT ((0 0), (1 1), (0 1), (1 0))
-        3                              POLYGON EMPTY
-        4                                       None
-        dtype: geometry
-
-        >>> s.get_geometry(1)
-        0           None
-        1    POINT (1 1)
-        2    POINT (0 1)
-        3           None
-        4           None
-        dtype: geometry
-
-        >>> s.get_geometry(-1)
-        0    POINT (0 0)
-        1    POINT (1 0)
-        2    POINT (0 1)
-        3  POLYGON EMPTY
-        4           None
-        dtype: geometry
-
-        """
-
         # Sedona errors on negative indexes, so we use a case statement to handle it ourselves
         spark_expr = stf.ST_GeometryN(
             F.col("L"),
@@ -1499,38 +886,6 @@ class GeometryArray(pspd.Series):
 
     @property
     def boundary(self) -> "GeometryArray":
-        """Returns a ``GeometryArray`` of lower dimensional objects representing
-        each geometry's set-theoretic `boundary`.
-
-        Examples
-        --------
-
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
-        ...         LineString([(0, 0), (1, 1), (1, 0)]),
-        ...         Point(0, 0),
-        ...     ]
-        ... )
-        >>> s
-        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
-        1        LINESTRING (0 0, 1 1, 1 0)
-        2                       POINT (0 0)
-        dtype: geometry
-
-        >>> s.boundary
-        0    LINESTRING (0 0, 1 1, 0 1, 0 0)
-        1          MULTIPOINT ((0 0), (1 0))
-        2           GEOMETRYCOLLECTION EMPTY
-        dtype: geometry
-
-        See also
-        --------
-        GeometryArray.exterior : outer boundary (without interior rings)
-
-        """
         # Geopandas and shapely return NULL for GeometryCollections, so we handle it separately
         # https://shapely.readthedocs.io/en/stable/reference/shapely.boundary.html
         spark_expr = F.when(
@@ -1572,44 +927,6 @@ class GeometryArray(pspd.Series):
 
     @property
     def envelope(self) -> "GeometryArray":
-        """Returns a ``GeometryArray`` of geometries representing the envelope of
-        each geometry.
-
-        The envelope of a geometry is the bounding rectangle. That is, the
-        point or smallest rectangular polygon (with sides parallel to the
-        coordinate axes) that contains the geometry.
-
-        Examples
-        --------
-
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Polygon, LineString, Point, MultiPoint
-        >>> s = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
-        ...         LineString([(0, 0), (1, 1), (1, 0)]),
-        ...         MultiPoint([(0, 0), (1, 1)]),
-        ...         Point(0, 0),
-        ...     ]
-        ... )
-        >>> s
-        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
-        1        LINESTRING (0 0, 1 1, 1 0)
-        2         MULTIPOINT ((0 0), (1 1))
-        3                       POINT (0 0)
-        dtype: geometry
-
-        >>> s.envelope
-        0    POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))
-        1    POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))
-        2    POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))
-        3                            POINT (0 0)
-        dtype: geometry
-
-        See also
-        --------
-        GeometryArray.convex_hull : convex hull geometry
-        """
         spark_expr = stf.ST_Envelope(self.spark.column)
         return self._query_geometry_column(
             spark_expr,
@@ -1667,65 +984,6 @@ class GeometryArray(pspd.Series):
         raise NotImplementedError("This method is not implemented yet.")
 
     def make_valid(self, *, method="linework", keep_collapsed=True) -> "GeometryArray":
-        """Repairs invalid geometries.
-
-        Returns a ``GeometryArray`` with valid geometries.
-
-        If the input geometry is already valid, then it will be preserved.
-        In many cases, in order to create a valid geometry, the input
-        geometry must be split into multiple parts or multiple geometries.
-        If the geometry must be split into multiple parts of the same type
-        to be made valid, then a multi-part geometry will be returned
-        (e.g. a MultiPolygon).
-        If the geometry must be split into multiple parts of different types
-        to be made valid, then a GeometryCollection will be returned.
-
-        In Sedona, only the 'structure' method is available:
-
-        * the 'structure' algorithm tries to reason from the structure of the
-          input to find the 'correct' repair: exterior rings bound area,
-          interior holes exclude area. It first makes all rings valid, then
-          shells are merged and holes are subtracted from the shells to
-          generate valid result. It assumes that holes and shells are correctly
-          categorized in the input geometry.
-
-        Parameters
-        ----------
-        method : {'linework', 'structure'}, default 'linework'
-            Algorithm to use when repairing geometry. Sedona Geopandas only supports the 'structure' method.
-            The default method is "linework" to match compatibility with Geopandas, but it must be explicitly set to
-            'structure' to use the Sedona implementation.
-
-        keep_collapsed : bool, default True
-            For the 'structure' method, True will keep components that have
-            collapsed into a lower dimensionality. For example, a ring
-            collapsing to a line, or a line collapsing to a point.
-
-        Examples
-        --------
-
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import MultiPolygon, Polygon, LineString, Point
-        >>> s = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (0, 2), (1, 1), (2, 2), (2, 0), (1, 1), (0, 0)]),
-        ...         Polygon([(0, 2), (0, 1), (2, 0), (0, 0), (0, 2)]),
-        ...         LineString([(0, 0), (1, 1), (1, 0)]),
-        ...     ],
-        ... )
-        >>> s
-        0    POLYGON ((0 0, 0 2, 1 1, 2 2, 2 0, 1 1, 0 0))
-        1              POLYGON ((0 2, 0 1, 2 0, 0 0, 0 2))
-        2                       LINESTRING (0 0, 1 1, 1 0)
-        dtype: geometry
-
-        >>> s.make_valid()
-        0    MULTIPOLYGON (((1 1, 0 0, 0 2, 1 1)), ((2 0, 1...
-        1                       POLYGON ((0 1, 2 0, 0 0, 0 1))
-        2                           LINESTRING (0 0, 1 1, 1 0)
-        dtype: geometry
-        """
-
         if method != "structure":
             raise ValueError(
                 "Sedona only supports the 'structure' method for make_valid"
@@ -1822,108 +1080,6 @@ class GeometryArray(pspd.Series):
         other: Union["GeometryArray", BaseGeometry],
         align: Union[bool, None] = None,
     ) -> pspd.Series:
-        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
-        each aligned geometry that intersects `other`.
-
-        An object is said to intersect `other` if its `boundary` and `interior`
-        intersects in any way with those of the other.
-
-        The operation works on a 1-to-1 row-wise manner.
-
-        Parameters
-        ----------
-        other : GeometryArray or geometric object
-            The GeometryArray (elementwise) or geometric object to test if is
-            intersected.
-        align : bool | None (default None)
-            If True, automatically aligns GeometryArray based on their indices. None defaults to True.
-            If False, the order of elements is preserved.
-
-        Returns
-        -------
-        Series (bool)
-
-        Examples
-        --------
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
-        ...         LineString([(0, 0), (2, 2)]),
-        ...         LineString([(2, 0), (0, 2)]),
-        ...         Point(0, 1),
-        ...     ],
-        ... )
-        >>> s2 = GeometryArray(
-        ...     [
-        ...         LineString([(1, 0), (1, 3)]),
-        ...         LineString([(2, 0), (0, 2)]),
-        ...         Point(1, 1),
-        ...         Point(0, 1),
-        ...     ],
-        ...     index=range(1, 5),
-        ... )
-
-        >>> s
-        0    POLYGON ((0 0, 2 2, 0 2, 0 0))
-        1             LINESTRING (0 0, 2 2)
-        2             LINESTRING (2 0, 0 2)
-        3                       POINT (0 1)
-        dtype: geometry
-
-        >>> s2
-        1    LINESTRING (1 0, 1 3)
-        2    LINESTRING (2 0, 0 2)
-        3              POINT (1 1)
-        4              POINT (0 1)
-        dtype: geometry
-
-        We can check if each geometry of GeometryArray crosses a single
-        geometry:
-
-        >>> line = LineString([(-1, 1), (3, 1)])
-        >>> s.intersects(line)
-        0    True
-        1    True
-        2    True
-        3    True
-        dtype: bool
-
-        We can also check two GeometryArray against each other, row by row.
-        The GeometryArray above have different indices. We can either align both GeometryArray
-        based on index values and compare elements with the same index using
-        ``align=True`` or ignore index and compare elements based on their matching
-        order using ``align=False``:
-
-        >>> s.intersects(s2, align=True)
-        0    False
-        1     True
-        2     True
-        3    False
-        4    False
-        dtype: bool
-
-        >>> s.intersects(s2, align=False)
-        0    True
-        1    True
-        2    True
-        3    True
-        dtype: bool
-
-        Notes
-        -----
-        This method works in a row-wise manner. It does not check if an element
-        of one GeometryArray ``crosses`` *any* element of the other one.
-
-        See also
-        --------
-        GeometryArray.disjoint
-        GeometryArray.crosses
-        GeometryArray.touches
-        GeometryArray.intersection
-        """
-
         other_series, extended = self._make_series_of_val(other)
         align = False if extended else align
 
@@ -1937,94 +1093,6 @@ class GeometryArray(pspd.Series):
         return _to_bool(result)
 
     def overlaps(self, other, align=None) -> pspd.Series:
-        """Returns True for all aligned geometries that overlap other, else False.
-
-        In the original Geopandas, Geometries overlap if they have more than one but not all
-        points in common, have the same dimension, and the intersection of the
-        interiors of the geometries has the same dimension as the geometries
-        themselves.
-
-        However, in Sedona, we return True in the case where the geometries points match.
-
-        Note: Sedona's behavior may also differ from Geopandas for GeometryCollections.
-
-        The operation works on a 1-to-1 row-wise manner.
-
-        Parameters
-        ----------
-        other : GeometryArray or geometric object
-            The GeometryArray (elementwise) or geometric object to test if
-            overlaps.
-        align : bool | None (default None)
-            If True, automatically aligns GeometryArray based on their indices. None defaults to True.
-            If False, the order of elements is preserved.
-
-        Returns
-        -------
-        Series (bool)
-
-        Examples
-        --------
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Polygon, LineString, MultiPoint, Point
-        >>> s = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
-        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
-        ...         LineString([(0, 0), (2, 2)]),
-        ...         MultiPoint([(0, 0), (0, 1)]),
-        ...     ],
-        ... )
-        >>> s2 = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (2, 0), (0, 2)]),
-        ...         LineString([(0, 1), (1, 1)]),
-        ...         LineString([(1, 1), (3, 3)]),
-        ...         Point(0, 1),
-        ...     ],
-        ... )
-
-        We can check if each geometry of GeometryArray overlaps a single
-        geometry:
-
-        >>> polygon = Polygon([(0, 0), (1, 0), (1, 1), (0, 1)])
-        >>> s.overlaps(polygon)
-        0     True
-        1     True
-        2    False
-        3    False
-        dtype: bool
-
-        We can also check two GeometryArray against each other, row by row.
-        The GeometryArray above have different indices. We align both GeometryArray
-        based on index values and compare elements with the same index.
-
-        >>> s.overlaps(s2)
-        0    False
-        1     True
-        2    False
-        3    False
-        4    False
-        dtype: bool
-
-        >>> s.overlaps(s2, align=False)
-        0     True
-        1    False
-        2     True
-        3    False
-        dtype: bool
-
-        Notes
-        -----
-        This method works in a row-wise manner. It does not check if an element
-        of one GeometryArray ``overlaps`` *any* element of the other one.
-
-        See also
-        --------
-        GeometryArray.crosses
-        GeometryArray.intersects
-
-        """
         # Note: We cannot efficiently match geopandas behavior because Sedona's ST_Overlaps returns True for equal geometries
         # ST_Overlaps(`L`, `R`) AND ST_Equals(`L`, `R`) does not work because ST_Equals errors on invalid geometries
 
@@ -2041,109 +1109,6 @@ class GeometryArray(pspd.Series):
         return _to_bool(result)
 
     def touches(self, other, align=None) -> pspd.Series:
-        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
-        each aligned geometry that touches `other`.
-
-        An object is said to touch `other` if it has at least one point in
-        common with `other` and its interior does not intersect with any part
-        of the other. Overlapping features therefore do not touch.
-
-        Note: Sedona's behavior may also differ from Geopandas for GeometryCollections.
-
-        The operation works on a 1-to-1 row-wise manner.
-
-        Parameters
-        ----------
-        other : GeometryArray or geometric object
-            The GeometryArray (elementwise) or geometric object to test if is
-            touched.
-        align : bool | None (default None)
-            If True, automatically aligns GeometryArray based on their indices. None defaults to True.
-            If False, the order of elements is preserved.
-
-        Returns
-        -------
-        Series (bool)
-
-        Examples
-        --------
-        >>> from shapely.geometry import Polygon, LineString, MultiPoint, Point
-        >>> s = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
-        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
-        ...         LineString([(0, 0), (2, 2)]),
-        ...         MultiPoint([(0, 0), (0, 1)]),
-        ...     ],
-        ... )
-        >>> s2 = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (-2, 0), (0, -2)]),
-        ...         LineString([(0, 1), (1, 1)]),
-        ...         LineString([(1, 1), (3, 0)]),
-        ...         Point(0, 1),
-        ...     ],
-        ...     index=range(1, 5),
-        ... )
-
-        >>> s
-        0    POLYGON ((0 0, 2 2, 0 2, 0 0))
-        1    POLYGON ((0 0, 2 2, 0 2, 0 0))
-        2             LINESTRING (0 0, 2 2)
-        3         MULTIPOINT ((0 0), (0 1))
-        dtype: geometry
-
-        >>> s2
-        1    POLYGON ((0 0, -2 0, 0 -2, 0 0))
-        2               LINESTRING (0 1, 1 1)
-        3               LINESTRING (1 1, 3 0)
-        4                         POINT (0 1)
-        dtype: geometry
-
-        We can check if each geometry of GeometryArray touches a single
-        geometry:
-
-        >>> line = LineString([(0, 0), (-1, -2)])
-        >>> s.touches(line)
-        0    True
-        1    True
-        2    True
-        3    True
-        dtype: bool
-
-        We can also check two GeometryArray against each other, row by row.
-        The GeometryArray above have different indices. We can either align both GeometryArray
-        based on index values and compare elements with the same index using
-        ``align=True`` or ignore index and compare elements based on their matching
-        order using ``align=False``:
-
-        >>> s.touches(s2, align=True)
-        0    False
-        1     True
-        2     True
-        3    False
-        4    False
-        dtype: bool
-
-        >>> s.touches(s2, align=False)
-        0     True
-        1    False
-        2     True
-        3    False
-        dtype: bool
-
-        Notes
-        -----
-        This method works in a row-wise manner. It does not check if an element
-        of one GeometryArray ``touches`` *any* element of the other one.
-
-        See also
-        --------
-        GeometryArray.overlaps
-        GeometryArray.intersects
-
-        """
-
         other_series, extended = self._make_series_of_val(other)
         align = False if extended else align
 
@@ -2157,112 +1122,6 @@ class GeometryArray(pspd.Series):
         return _to_bool(result)
 
     def within(self, other, align=None) -> pspd.Series:
-        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
-        each aligned geometry that is within `other`.
-
-        An object is said to be within `other` if at least one of its points is located
-        in the `interior` and no points are located in the `exterior` of the other.
-        If either object is empty, this operation returns ``False``.
-
-        This is the inverse of `contains` in the sense that the
-        expression ``a.within(b) == b.contains(a)`` always evaluates to
-        ``True``.
-
-        Note: Sedona's behavior may also differ from Geopandas for GeometryCollections and for geometries that are equal.
-
-        The operation works on a 1-to-1 row-wise manner.
-
-        Parameters
-        ----------
-        other : GeometryArray or geometric object
-            The GeometryArray (elementwise) or geometric object to test if each
-            geometry is within.
-        align : bool | None (default None)
-            If True, automatically aligns GeometryArray based on their indices. None defaults to True.
-            If False, the order of elements is preserved.
-
-        Returns
-        -------
-        Series (bool)
-
-
-        Examples
-        --------
-        >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
-        ...         Polygon([(0, 0), (1, 2), (0, 2)]),
-        ...         LineString([(0, 0), (0, 2)]),
-        ...         Point(0, 1),
-        ...     ],
-        ... )
-        >>> s2 = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
-        ...         LineString([(0, 0), (0, 2)]),
-        ...         LineString([(0, 0), (0, 1)]),
-        ...         Point(0, 1),
-        ...     ],
-        ...     index=range(1, 5),
-        ... )
-
-        >>> s
-        0    POLYGON ((0 0, 2 2, 0 2, 0 0))
-        1    POLYGON ((0 0, 1 2, 0 2, 0 0))
-        2             LINESTRING (0 0, 0 2)
-        3                       POINT (0 1)
-        dtype: geometry
-
-        >>> s2
-        1    POLYGON ((0 0, 1 1, 0 1, 0 0))
-        2             LINESTRING (0 0, 0 2)
-        3             LINESTRING (0 0, 0 1)
-        4                       POINT (0 1)
-        dtype: geometry
-
-        We can check if each geometry of GeometryArray is within a single
-        geometry:
-
-        >>> polygon = Polygon([(0, 0), (2, 2), (0, 2)])
-        >>> s.within(polygon)
-        0     True
-        1     True
-        2    False
-        3    False
-        dtype: bool
-
-        We can also check two GeometryArray against each other, row by row.
-        The GeometryArray above have different indices. We can either align both GeometryArray
-        based on index values and compare elements with the same index using
-        ``align=True`` or ignore index and compare elements based on their matching
-        order using ``align=False``:
-
-        >>> s2.within(s)
-        0    False
-        1    False
-        2     True
-        3    False
-        4    False
-        dtype: bool
-
-        >>> s2.within(s, align=False)
-        1     True
-        2    False
-        3     True
-        4     True
-        dtype: bool
-
-        Notes
-        -----
-        This method works in a row-wise manner. It does not check if an element
-        of one GeometryArray is ``within`` any element of the other one.
-
-        See also
-        --------
-        GeometryArray.contains
-        """
-
         other_series, extended = self._make_series_of_val(other)
         align = False if extended else align
 
@@ -2276,113 +1135,6 @@ class GeometryArray(pspd.Series):
         return _to_bool(result)
 
     def covers(self, other, align=None) -> pspd.Series:
-        """
-        Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
-        each aligned geometry that is entirely covering `other`.
-
-        An object A is said to cover another object B if no points of B lie
-        in the exterior of A.
-        If either object is empty, this operation returns ``False``.
-
-        Note: Sedona's implementation instead returns False for identical geometries.
-        Sedona's behavior may also differ from Geopandas for GeometryCollections.
-
-        The operation works on a 1-to-1 row-wise manner.
-
-        See
-        https://lin-ear-th-inking.blogspot.com/2007/06/subtleties-of-ogc-covers-spatial.html
-        for reference.
-
-        Parameters
-        ----------
-        other : Geoseries or geometric object
-            The Geoseries (elementwise) or geometric object to check is being covered.
-        align : bool | None (default None)
-            If True, automatically aligns GeometryArray based on their indices. None defaults to True.
-            If False, the order of elements is preserved.
-
-        Returns
-        -------
-        Series (bool)
-
-        Examples
-        --------
-        >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
-        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
-        ...         LineString([(0, 0), (2, 2)]),
-        ...         Point(0, 0),
-        ...     ],
-        ... )
-        >>> s2 = GeometryArray(
-        ...     [
-        ...         Polygon([(0.5, 0.5), (1.5, 0.5), (1.5, 1.5), (0.5, 1.5)]),
-        ...         Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
-        ...         LineString([(1, 1), (1.5, 1.5)]),
-        ...         Point(0, 0),
-        ...     ],
-        ...     index=range(1, 5),
-        ... )
-
-        >>> s
-        0    POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))
-        1         POLYGON ((0 0, 2 2, 0 2, 0 0))
-        2                  LINESTRING (0 0, 2 2)
-        3                            POINT (0 0)
-        dtype: geometry
-
-        >>> s2
-        1    POLYGON ((0.5 0.5, 1.5 0.5, 1.5 1.5, 0.5 1.5, ...
-        2                  POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))
-        3                            LINESTRING (1 1, 1.5 1.5)
-        4                                          POINT (0 0)
-        dtype: geometry
-
-        We can check if each geometry of GeometryArray covers a single
-        geometry:
-
-        >>> poly = Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])
-        >>> s.covers(poly)
-        0     True
-        1    False
-        2    False
-        3    False
-        dtype: bool
-
-        We can also check two GeometryArray against each other, row by row.
-        The GeometryArray above have different indices. We can either align both GeometryArray
-        based on index values and compare elements with the same index using
-        ``align=True`` or ignore index and compare elements based on their matching
-        order using ``align=False``:
-
-        >>> s.covers(s2, align=True)
-        0    False
-        1    False
-        2    False
-        3    False
-        4    False
-        dtype: bool
-
-        >>> s.covers(s2, align=False)
-        0     True
-        1    False
-        2     True
-        3     True
-        dtype: bool
-
-        Notes
-        -----
-        This method works in a row-wise manner. It does not check if an element
-        of one GeometryArray ``covers`` any element of the other one.
-
-        See also
-        --------
-        GeometryArray.covered_by
-        GeometryArray.overlaps
-        """
-
         other_series, extended = self._make_series_of_val(other)
         align = False if extended else align
 
@@ -2396,113 +1148,6 @@ class GeometryArray(pspd.Series):
         return _to_bool(result)
 
     def covered_by(self, other, align=None) -> pspd.Series:
-        """
-        Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
-        each aligned geometry that is entirely covered by `other`.
-
-        An object A is said to cover another object B if no points of B lie
-        in the exterior of A.
-
-        Note: Sedona's implementation instead returns False for identical geometries.
-        Sedona's behavior may differ from Geopandas for GeometryCollections.
-
-        The operation works on a 1-to-1 row-wise manner.
-
-        See
-        https://lin-ear-th-inking.blogspot.com/2007/06/subtleties-of-ogc-covers-spatial.html
-        for reference.
-
-        Parameters
-        ----------
-        other : Geoseries or geometric object
-            The Geoseries (elementwise) or geometric object to check is being covered.
-        align : bool | None (default None)
-            If True, automatically aligns GeometryArray based on their indices. None defaults to True.
-            If False, the order of elements is preserved.
-
-        Returns
-        -------
-        Series (bool)
-
-        Examples
-        --------
-        >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = GeometryArray(
-        ...     [
-        ...         Polygon([(0.5, 0.5), (1.5, 0.5), (1.5, 1.5), (0.5, 1.5)]),
-        ...         Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
-        ...         LineString([(1, 1), (1.5, 1.5)]),
-        ...         Point(0, 0),
-        ...     ],
-        ... )
-        >>> s2 = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
-        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
-        ...         LineString([(0, 0), (2, 2)]),
-        ...         Point(0, 0),
-        ...     ],
-        ...     index=range(1, 5),
-        ... )
-
-        >>> s
-        0    POLYGON ((0.5 0.5, 1.5 0.5, 1.5 1.5, 0.5 1.5, ...
-        1                  POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))
-        2                            LINESTRING (1 1, 1.5 1.5)
-        3                                          POINT (0 0)
-        dtype: geometry
-        >>>
-
-        >>> s2
-        1    POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))
-        2         POLYGON ((0 0, 2 2, 0 2, 0 0))
-        3                  LINESTRING (0 0, 2 2)
-        4                            POINT (0 0)
-        dtype: geometry
-
-        We can check if each geometry of GeometryArray is covered by a single
-        geometry:
-
-        >>> poly = Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])
-        >>> s.covered_by(poly)
-        0    True
-        1    True
-        2    True
-        3    True
-        dtype: bool
-
-        We can also check two GeometryArray against each other, row by row.
-        The GeometryArray above have different indices. We can either align both GeometryArray
-        based on index values and compare elements with the same index using
-        ``align=True`` or ignore index and compare elements based on their matching
-        order using ``align=False``:
-
-        >>> s.covered_by(s2, align=True)
-        0    False
-        1     True
-        2     True
-        3     True
-        4    False
-        dtype: bool
-
-        >>> s.covered_by(s2, align=False)
-        0     True
-        1    False
-        2     True
-        3     True
-        dtype: bool
-
-        Notes
-        -----
-        This method works in a row-wise manner. It does not check if an element
-        of one GeometryArray is ``covered_by`` any element of the other one.
-
-        See also
-        --------
-        GeometryArray.covers
-        GeometryArray.overlaps
-        """
-
         other_series, extended = self._make_series_of_val(other)
         align = False if extended else align
 
@@ -2516,92 +1161,6 @@ class GeometryArray(pspd.Series):
         return _to_bool(result)
 
     def distance(self, other, align=None) -> pspd.Series:
-        """Returns a ``Series`` containing the distance to aligned `other`.
-
-        The operation works on a 1-to-1 row-wise manner:
-
-        Parameters
-        ----------
-        other : Geoseries or geometric object
-            The Geoseries (elementwise) or geometric object to find the
-            distance to.
-        align : bool | None (default None)
-            If True, automatically aligns GeometryArray based on their indices. None defaults to True.
-            If False, the order of elements is preserved.
-
-        Returns
-        -------
-        Series (float)
-
-        Examples
-        --------
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (1, 0), (1, 1)]),
-        ...         Polygon([(0, 0), (-1, 0), (-1, 1)]),
-        ...         LineString([(1, 1), (0, 0)]),
-        ...         Point(0, 0),
-        ...     ],
-        ... )
-        >>> s2 = GeometryArray(
-        ...     [
-        ...         Polygon([(0.5, 0.5), (1.5, 0.5), (1.5, 1.5), (0.5, 1.5)]),
-        ...         Point(3, 1),
-        ...         LineString([(1, 0), (2, 0)]),
-        ...         Point(0, 1),
-        ...     ],
-        ...     index=range(1, 5),
-        ... )
-
-        >>> s
-        0      POLYGON ((0 0, 1 0, 1 1, 0 0))
-        1    POLYGON ((0 0, -1 0, -1 1, 0 0))
-        2               LINESTRING (1 1, 0 0)
-        3                         POINT (0 0)
-        dtype: geometry
-
-        >>> s2
-        1    POLYGON ((0.5 0.5, 1.5 0.5, 1.5 1.5, 0.5 1.5, ...
-        2                                          POINT (3 1)
-        3                                LINESTRING (1 0, 2 0)
-        4                                          POINT (0 1)
-        dtype: geometry
-
-        We can check the distance of each geometry of GeometryArray to a single
-        geometry:
-
-        >>> point = Point(-1, 0)
-        >>> s.distance(point)
-        0    1.0
-        1    0.0
-        2    1.0
-        3    1.0
-        dtype: float64
-
-        We can also check two GeometryArray against each other, row by row.
-        The GeometryArray above have different indices. We can either align both GeometryArray
-        based on index values and use elements with the same index using
-        ``align=True`` or ignore index and use elements based on their matching
-        order using ``align=False``:
-
-        >>> s.distance(s2, align=True)
-        0         NaN
-        1    0.707107
-        2    2.000000
-        3    1.000000
-        4         NaN
-        dtype: float64
-
-        >>> s.distance(s2, align=False)
-        0    0.000000
-        1    3.162278
-        2    0.707107
-        3    1.000000
-        dtype: float64
-        """
-
         other_series, extended = self._make_series_of_val(other)
         align = False if extended else align
 
@@ -2619,106 +1178,6 @@ class GeometryArray(pspd.Series):
         other: Union["GeometryArray", BaseGeometry],
         align: Union[bool, None] = None,
     ) -> "GeometryArray":
-        """Returns a ``GeometryArray`` of the intersection of points in each
-        aligned geometry with `other`.
-
-        The operation works on a 1-to-1 row-wise manner.
-
-        Parameters
-        ----------
-        other : Geoseries or geometric object
-            The Geoseries (elementwise) or geometric object to find the
-            intersection with.
-        align : bool | None (default None)
-            If True, automatically aligns GeometryArray based on their indices. None defaults to True.
-            If False, the order of elements is preserved.
-
-        Returns
-        -------
-        GeometryArray
-
-        Examples
-        --------
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
-        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
-        ...         LineString([(0, 0), (2, 2)]),
-        ...         LineString([(2, 0), (0, 2)]),
-        ...         Point(0, 1),
-        ...     ],
-        ... )
-        >>> s2 = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
-        ...         LineString([(1, 0), (1, 3)]),
-        ...         LineString([(2, 0), (0, 2)]),
-        ...         Point(1, 1),
-        ...         Point(0, 1),
-        ...     ],
-        ...     index=range(1, 6),
-        ... )
-
-        >>> s
-        0    POLYGON ((0 0, 2 2, 0 2, 0 0))
-        1    POLYGON ((0 0, 2 2, 0 2, 0 0))
-        2             LINESTRING (0 0, 2 2)
-        3             LINESTRING (2 0, 0 2)
-        4                       POINT (0 1)
-        dtype: geometry
-
-        >>> s2
-        1    POLYGON ((0 0, 1 1, 0 1, 0 0))
-        2             LINESTRING (1 0, 1 3)
-        3             LINESTRING (2 0, 0 2)
-        4                       POINT (1 1)
-        5                       POINT (0 1)
-        dtype: geometry
-
-        We can also do intersection of each geometry and a single
-        shapely geometry:
-
-        >>> s.intersection(Polygon([(0, 0), (1, 1), (0, 1)]))
-        0    POLYGON ((0 0, 0 1, 1 1, 0 0))
-        1    POLYGON ((0 0, 0 1, 1 1, 0 0))
-        2             LINESTRING (0 0, 1 1)
-        3                       POINT (1 1)
-        4                       POINT (0 1)
-        dtype: geometry
-
-        We can also check two GeometryArray against each other, row by row.
-        The GeometryArray above have different indices. We can either align both GeometryArray
-        based on index values and compare elements with the same index using
-        ``align=True`` or ignore index and compare elements based on their matching
-        order using ``align=False``:
-
-        >>> s.intersection(s2, align=True)
-        0                              None
-        1    POLYGON ((0 0, 0 1, 1 1, 0 0))
-        2                       POINT (1 1)
-        3             LINESTRING (2 0, 0 2)
-        4                       POINT EMPTY
-        5                              None
-        dtype: geometry
-
-        >>> s.intersection(s2, align=False)
-        0    POLYGON ((0 0, 0 1, 1 1, 0 0))
-        1             LINESTRING (1 1, 1 2)
-        2                       POINT (1 1)
-        3                       POINT (1 1)
-        4                       POINT (0 1)
-        dtype: geometry
-
-
-        See Also
-        --------
-        GeometryArray.difference
-        GeometryArray.symmetric_difference
-        GeometryArray.union
-        """
-
         other_series, extended = self._make_series_of_val(other)
         align = False if extended else align
 
@@ -2733,100 +1192,6 @@ class GeometryArray(pspd.Series):
         return result
 
     def snap(self, other, tolerance, align=None) -> "GeometryArray":
-        """Snap the vertices and segments of the geometry to vertices of the reference.
-
-        Vertices and segments of the input geometry are snapped to vertices of the
-        reference geometry, returning a new geometry; the input geometries are not
-        modified. The result geometry is the input geometry with the vertices and
-        segments snapped. If no snapping occurs then the input geometry is returned
-        unchanged. The tolerance is used to control where snapping is performed.
-
-        Where possible, this operation tries to avoid creating invalid geometries;
-        however, it does not guarantee that output geometries will be valid. It is
-        the responsibility of the caller to check for and handle invalid geometries.
-
-        Because too much snapping can result in invalid geometries being created,
-        heuristics are used to determine the number and location of snapped
-        vertices that are likely safe to snap. These heuristics may omit
-        some potential snaps that are otherwise within the tolerance.
-
-        Note: Sedona's result may differ slightly from geopandas's snap() result
-        because of small differences between the underlying engines being used.
-
-        The operation works in a 1-to-1 row-wise manner:
-
-        Parameters
-        ----------
-        other : GeometryArray or geometric object
-            The Geoseries (elementwise) or geometric object to snap to.
-        tolerance : float or array like
-            Maximum distance between vertices that shall be snapped
-        align : bool | None (default None)
-            If True, automatically aligns GeometryArray based on their indices. None defaults to True.
-            If False, the order of elements is preserved.
-
-        Returns
-        -------
-        GeometryArray
-
-        Examples
-        --------
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely import Polygon, LineString, Point
-        >>> s = GeometryArray(
-        ...     [
-        ...         Point(0.5, 2.5),
-        ...         LineString([(0.1, 0.1), (0.49, 0.51), (1.01, 0.89)]),
-        ...         Polygon([(0, 0), (0, 10), (10, 10), (10, 0), (0, 0)]),
-        ...     ],
-        ... )
-        >>> s
-        0                               POINT (0.5 2.5)
-        1    LINESTRING (0.1 0.1, 0.49 0.51, 1.01 0.89)
-        2       POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))
-        dtype: geometry
-
-        >>> s2 = GeometryArray(
-        ...     [
-        ...         Point(0, 2),
-        ...         LineString([(0, 0), (0.5, 0.5), (1.0, 1.0)]),
-        ...         Point(8, 10),
-        ...     ],
-        ...     index=range(1, 4),
-        ... )
-        >>> s2
-        1                       POINT (0 2)
-        2    LINESTRING (0 0, 0.5 0.5, 1 1)
-        3                      POINT (8 10)
-        dtype: geometry
-
-        We can snap each geometry to a single shapely geometry:
-
-        >>> s.snap(Point(0, 2), tolerance=1)
-        0                                     POINT (0 2)
-        1      LINESTRING (0.1 0.1, 0.49 0.51, 1.01 0.89)
-        2    POLYGON ((0 0, 0 2, 0 10, 10 10, 10 0, 0 0))
-        dtype: geometry
-
-        We can also snap two GeometryArray to each other, row by row.
-        The GeometryArray above have different indices. We can either align both GeometryArray
-        based on index values and snap elements with the same index using
-        ``align=True`` or ignore index and snap elements based on their matching
-        order using ``align=False``:
-
-        >>> s.snap(s2, tolerance=1, align=True)
-        0                                                 None
-        1           LINESTRING (0.1 0.1, 0.49 0.51, 1.01 0.89)
-        2    POLYGON ((0.5 0.5, 1 1, 0 10, 10 10, 10 0, 0.5...
-        3                                                 None
-        dtype: geometry
-
-        >>> s.snap(s2, tolerance=1, align=False)
-        0                                      POINT (0 2)
-        1                   LINESTRING (0 0, 0.5 0.5, 1 1)
-        2    POLYGON ((0 0, 0 10, 8 10, 10 10, 10 0, 0 0))
-        dtype: geometry
-        """
         if not isinstance(tolerance, (float, int)):
             raise NotImplementedError(
                 "Array-like values for tolerance are not supported yet."
@@ -2923,116 +1288,6 @@ class GeometryArray(pspd.Series):
     # ============================================================================
 
     def contains(self, other, align=None) -> pspd.Series:
-        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
-        each aligned geometry that contains `other`.
-
-        An object is said to contain `other` if at least one point of `other` lies in
-        the interior and no points of `other` lie in the exterior of the object.
-        (Therefore, any given polygon does not contain its own boundary - there is not
-        any point that lies in the interior.)
-        If either object is empty, this operation returns ``False``.
-
-        This is the inverse of `within` in the sense that the expression
-        ``a.contains(b) == b.within(a)`` always evaluates to ``True``.
-
-        Note: Sedona's implementation instead returns False for identical geometries.
-
-        The operation works on a 1-to-1 row-wise manner.
-
-        Parameters
-        ----------
-        other : GeometryArray or geometric object
-            The GeometryArray (elementwise) or geometric object to test if it
-            is contained.
-        align : bool | None (default None)
-            If True, automatically aligns GeometryArray based on their indices. None defaults to True.
-            If False, the order of elements is preserved.
-
-        Returns
-        -------
-        Series (bool)
-
-        Examples
-        --------
-
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
-        ...         LineString([(0, 0), (0, 2)]),
-        ...         LineString([(0, 0), (0, 1)]),
-        ...         Point(0, 1),
-        ...     ],
-        ...     index=range(0, 4),
-        ... )
-        >>> s2 = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
-        ...         Polygon([(0, 0), (1, 2), (0, 2)]),
-        ...         LineString([(0, 0), (0, 2)]),
-        ...         Point(0, 1),
-        ...     ],
-        ...     index=range(1, 5),
-        ... )
-
-        >>> s
-        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
-        1             LINESTRING (0 0, 0 2)
-        2             LINESTRING (0 0, 0 1)
-        3                       POINT (0 1)
-        dtype: geometry
-
-        >>> s2
-        1    POLYGON ((0 0, 2 2, 0 2, 0 0))
-        2    POLYGON ((0 0, 1 2, 0 2, 0 0))
-        3             LINESTRING (0 0, 0 2)
-        4                       POINT (0 1)
-        dtype: geometry
-
-        We can check if each geometry of GeometryArray contains a single
-        geometry:
-
-        >>> point = Point(0, 1)
-        >>> s.contains(point)
-        0    False
-        1     True
-        2    False
-        3     True
-        dtype: bool
-
-        We can also check two GeometryArray against each other, row by row.
-        The GeometryArray above have different indices. We can either align both GeometryArray
-        based on index values and compare elements with the same index using
-        ``align=True`` or ignore index and compare elements based on their matching
-        order using ``align=False``:
-
-        >>> s2.contains(s, align=True)
-        0    False
-        1    False
-        2    False
-        3     True
-        4    False
-        dtype: bool
-
-        >>> s2.contains(s, align=False)
-        1     True
-        2    False
-        3     True
-        4     True
-        dtype: bool
-
-        Notes
-        -----
-        This method works in a row-wise manner. It does not check if an element
-        of one GeometryArray ``contains`` any element of the other one.
-
-        See also
-        --------
-        GeometryArray.contains_properly
-        GeometryArray.within
-        """
-
         other, extended = self._make_series_of_val(other)
         align = False if extended else align
 
@@ -3095,64 +1350,6 @@ class GeometryArray(pspd.Series):
         )
 
     def simplify(self, tolerance=None, preserve_topology=True) -> "GeometryArray":
-        """Returns a ``GeometryArray`` containing a simplified representation of
-        each geometry.
-
-        The algorithm (Douglas-Peucker) recursively splits the original line
-        into smaller parts and connects these parts' endpoints
-        by a straight line. Then, it removes all points whose distance
-        to the straight line is smaller than `tolerance`. It does not
-        move any points and it always preserves endpoints of
-        the original line or polygon.
-        See https://shapely.readthedocs.io/en/latest/manual.html#object.simplify
-        for details
-
-        Simplifies individual geometries independently, without considering
-        the topology of a potential polygonal coverage. If you would like to treat
-        the ``GeometryArray`` as a coverage and simplify its edges, while preserving the
-        coverage topology, see :meth:`simplify_coverage`.
-
-        Parameters
-        ----------
-        tolerance : float
-            All parts of a simplified geometry will be no more than
-            `tolerance` distance from the original. It has the same units
-            as the coordinate reference system of the GeometryArray.
-            For example, using `tolerance=100` in a projected CRS with meters
-            as units means a distance of 100 meters in reality.
-        preserve_topology: bool (default True)
-            False uses a quicker algorithm, but may produce self-intersecting
-            or otherwise invalid geometries.
-
-        Notes
-        -----
-        Invalid geometric objects may result from simplification that does not
-        preserve topology and simplification may be sensitive to the order of
-        coordinates: two geometries differing only in order of coordinates may be
-        simplified differently.
-
-        See also
-        --------
-        simplify_coverage : simplify geometries using coverage simplification
-
-        Examples
-        --------
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Point, LineString
-        >>> s = GeometryArray(
-        ...     [Point(0, 0).buffer(1), LineString([(0, 0), (1, 10), (0, 20)])]
-        ... )
-        >>> s
-        0    POLYGON ((1 0, 0.99518 -0.09802, 0.98079 -0.19...
-        1                         LINESTRING (0 0, 1 10, 0 20)
-        dtype: geometry
-
-        >>> s.simplify(1)
-        0    POLYGON ((0 1, 0 -1, -1 0, 0 1))
-        1              LINESTRING (0 0, 0 20)
-        dtype: geometry
-        """
-
         spark_expr = (
             stf.ST_SimplifyPreserveTopology(self.spark.column, tolerance)
             if preserve_topology
@@ -3161,84 +1358,12 @@ class GeometryArray(pspd.Series):
 
         return self._query_geometry_column(spark_expr)
 
-    def sjoin(
-        self,
-        other,
-        how="inner",
-        predicate="intersects",
-        lsuffix="left",
-        rsuffix="right",
-        distance=None,
-        on_attribute=None,
-        **kwargs,
-    ):
-        """
-        Perform a spatial join between two GeometryArray.
-        Parameters:
-        - other: GeometryArray
-        - how: str, default 'inner'
-            The type of join to perform.
-        - predicate: str, default 'intersects'
-            The spatial predicate to use for the join.
-        - lsuffix: str, default 'left'
-            Suffix to apply to the left GeometryArray' column names.
-        - rsuffix: str, default 'right'
-            Suffix to apply to the right GeometryArray' column names.
-        - distance: float, optional
-            The distance threshold for the join.
-        - on_attribute: str, optional
-            The attribute to join on.
-        - kwargs: Any
-            Additional arguments to pass to the join function.
-        Returns:
-        - GeometryArray
-        """
-        from sedona.geopandas import sjoin
-
-        # Implementation of the abstract method
-        return sjoin(
-            self,
-            other,
-            how,
-            predicate,
-            lsuffix,
-            rsuffix,
-            distance,
-            on_attribute,
-            **kwargs,
-        )
-
     @property
     def geometry(self) -> "GeometryArray":
         return self
 
     @property
     def x(self) -> pspd.Series:
-        """Return the x location of point geometries in a GeometryArray
-
-        Returns
-        -------
-        pandas.Series
-
-        Examples
-        --------
-
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Point
-        >>> s = GeometryArray([Point(1, 1), Point(2, 2), Point(3, 3)])
-        >>> s.x
-        0    1.0
-        1    2.0
-        2    3.0
-        dtype: float64
-
-        See Also
-        --------
-
-        GeometryArray.y
-        GeometryArray.z
-
-        """
         spark_col = stf.ST_X(self.spark.column)
         return self._query_geometry_column(
             spark_col,
@@ -3247,32 +1372,6 @@ class GeometryArray(pspd.Series):
 
     @property
     def y(self) -> pspd.Series:
-        """Return the y location of point geometries in a GeometryArray
-
-        Returns
-        -------
-        pandas.Series
-
-        Examples
-        --------
-
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Point
-        >>> s = GeometryArray([Point(1, 1), Point(2, 2), Point(3, 3)])
-        >>> s.y
-        0    1.0
-        1    2.0
-        2    3.0
-        dtype: float64
-
-        See Also
-        --------
-
-        GeometryArray.x
-        GeometryArray.z
-        GeometryArray.m
-
-        """
         spark_col = stf.ST_Y(self.spark.column)
         return self._query_geometry_column(
             spark_col,
@@ -3281,32 +1380,6 @@ class GeometryArray(pspd.Series):
 
     @property
     def z(self) -> pspd.Series:
-        """Return the z location of point geometries in a GeometryArray
-
-        Returns
-        -------
-        pandas.Series
-
-        Examples
-        --------
-
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Point
-        >>> s = GeometryArray([Point(1, 1, 1), Point(2, 2, 2), Point(3, 3, 3)])
-        >>> s.z
-        0    1.0
-        1    2.0
-        2    3.0
-        dtype: float64
-
-        See Also
-        --------
-
-        GeometryArray.x
-        GeometryArray.y
-        GeometryArray.m
-
-        """
         spark_col = stf.ST_Z(self.spark.column)
         return self._query_geometry_column(
             spark_col,
@@ -3351,80 +1424,6 @@ class GeometryArray(pspd.Series):
     def fillna(
         self, value=None, inplace: bool = False, limit=None, **kwargs
     ) -> Union["GeometryArray", None]:
-        """
-        Fill NA values with geometry (or geometries).
-
-        Parameters
-        ----------
-        value : shapely geometry or GeometryArray, default None
-            If None is passed, NA values will be filled with GEOMETRYCOLLECTION EMPTY.
-            If a shapely geometry object is passed, it will be
-            used to fill all missing values. If a ``GeometryArray`` or ``GeometryArray``
-            are passed, missing values will be filled based on the corresponding index
-            locations. If pd.NA or np.nan are passed, values will be filled with
-            ``None`` (not GEOMETRYCOLLECTION EMPTY).
-        limit : int, default None
-            This is the maximum number of entries along the entire axis
-            where NaNs will be filled. Must be greater than 0 if not None.
-
-        Returns
-        -------
-        GeometryArray
-
-        Examples
-        --------
-
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Polygon
-        >>> s = GeometryArray(
-        ...     [
-        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
-        ...         None,
-        ...         Polygon([(0, 0), (-1, 1), (0, -1)]),
-        ...     ]
-        ... )
-        >>> s
-        0      POLYGON ((0 0, 1 1, 0 1, 0 0))
-        1                                None
-        2    POLYGON ((0 0, -1 1, 0 -1, 0 0))
-        dtype: geometry
-
-        Filled with an empty polygon.
-
-        >>> s.fillna()
-        0      POLYGON ((0 0, 1 1, 0 1, 0 0))
-        1            GEOMETRYCOLLECTION EMPTY
-        2    POLYGON ((0 0, -1 1, 0 -1, 0 0))
-        dtype: geometry
-
-        Filled with a specific polygon.
-
-        >>> s.fillna(Polygon([(0, 1), (2, 1), (1, 2)]))
-        0      POLYGON ((0 0, 1 1, 0 1, 0 0))
-        1      POLYGON ((0 1, 2 1, 1 2, 0 1))
-        2    POLYGON ((0 0, -1 1, 0 -1, 0 0))
-        dtype: geometry
-
-        Filled with another GeometryArray.
-
-        >>> from shapely.geometry import Point
-        >>> s_fill = GeometryArray(
-        ...     [
-        ...         Point(0, 0),
-        ...         Point(1, 1),
-        ...         Point(2, 2),
-        ...     ]
-        ... )
-        >>> s.fillna(s_fill)
-        0      POLYGON ((0 0, 1 1, 0 1, 0 0))
-        1                         POINT (1 1)
-        2    POLYGON ((0 0, -1 1, 0 -1, 0 0))
-        dtype: geometry
-
-        See Also
-        --------
-        GeometryArray.isna : detect missing values
-        """
         from shapely.geometry.base import BaseGeometry
         from geopandas.array import GeometryArray as gpd_GeometryArray
 
@@ -3492,73 +1491,6 @@ class GeometryArray(pspd.Series):
     def to_crs(
         self, crs: Union[Any, None] = None, epsg: Union[int, None] = None
     ) -> "GeometryArray":
-        """Returns a ``GeometryArray`` with all geometries transformed to a new
-        coordinate reference system.
-
-        Transform all geometries in a GeometryArray to a different coordinate
-        reference system.  The ``crs`` attribute on the current GeometryArray must
-        be set.  Either ``crs`` or ``epsg`` may be specified for output.
-
-        This method will transform all points in all objects.  It has no notion
-        of projecting entire geometries.  All segments joining points are
-        assumed to be lines in the current projection, not geodesics.  Objects
-        crossing the dateline (or other projection boundary) will have
-        undesirable behavior.
-
-        Parameters
-        ----------
-        crs : pyproj.CRS, optional if `epsg` is specified
-            The value can be anything accepted
-            by :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
-            such as an authority string (eg "EPSG:4326") or a WKT string.
-        epsg : int, optional if `crs` is specified
-            EPSG code specifying output projection.
-
-        Returns
-        -------
-        GeometryArray
-
-        Examples
-        --------
-        >>> from shapely.geometry import Point
-        >>> from sedona.geopandas import GeometryArray
-        >>> geoseries = GeometryArray([Point(1, 1), Point(2, 2), Point(3, 3)], crs=4326)
-        >>> geoseries.crs
-        <Geographic 2D CRS: EPSG:4326>
-        Name: WGS 84
-        Axis Info [ellipsoidal]:
-        - Lat[north]: Geodetic latitude (degree)
-        - Lon[east]: Geodetic longitude (degree)
-        Area of Use:
-        - name: World
-        - bounds: (-180.0, -90.0, 180.0, 90.0)
-        Datum: World Geodetic System 1984
-        - Ellipsoid: WGS 84
-        - Prime Meridian: Greenwich
-
-        >>> geoseries = geoseries.to_crs(3857)
-        >>> print(geoseries)
-        0    POINT (111319.491 111325.143)
-        1    POINT (222638.982 222684.209)
-        2    POINT (333958.472 334111.171)
-        dtype: geometry
-        >>> geoseries.crs
-        <Projected CRS: EPSG:3857>
-        Name: WGS 84 / Pseudo-Mercator
-        Axis Info [cartesian]:
-        - X[east]: Easting (metre)
-        - Y[north]: Northing (metre)
-        Area of Use:
-        - name: World - 85°S to 85°N
-        - bounds: (-180.0, -85.06, 180.0, 85.06)
-        Coordinate Operation:
-        - name: Popular Visualisation Pseudo-Mercator
-        - method: Popular Visualisation Pseudo Mercator
-        Datum: World Geodetic System 1984
-        - Ellipsoid: WGS 84
-        - Prime Meridian: Greenwich
-
-        """
 
         from pyproj import CRS
 
@@ -3592,33 +1524,6 @@ class GeometryArray(pspd.Series):
 
     @property
     def bounds(self) -> pspd.DataFrame:
-        """Returns a ``DataFrame`` with columns ``minx``, ``miny``, ``maxx``,
-        ``maxy`` values containing the bounds for each geometry.
-
-        See ``GeometryArray.total_bounds`` for the limits of the entire series.
-
-        Examples
-        --------
-        >>> from shapely.geometry import Point, Polygon, LineString
-        >>> d = {'geometry': [Point(2, 1), Polygon([(0, 0), (1, 1), (1, 0)]),
-        ... LineString([(0, 1), (1, 2)])]}
-        >>> gdf = geopandas.GeoDataFrame(d, crs="EPSG:4326")
-        >>> gdf.bounds
-           minx  miny  maxx  maxy
-        0   2.0   1.0   2.0   1.0
-        1   0.0   0.0   1.0   1.0
-        2   0.0   1.0   1.0   2.0
-
-        You can assign the bounds to the ``GeoDataFrame`` as:
-
-        >>> import pandas as pd
-        >>> gdf = pd.concat([gdf, gdf.bounds], axis=1)
-        >>> gdf
-                                geometry  minx  miny  maxx  maxy
-        0                     POINT (2 1)   2.0   1.0   2.0   1.0
-        1  POLYGON ((0 0, 1 1, 1 0, 0 0))   0.0   0.0   1.0   1.0
-        2           LINESTRING (0 1, 1 2)   0.0   1.0   1.0   2.0
-        """
         selects = [
             stf.ST_XMin(self.spark.column).alias("minx"),
             stf.ST_YMin(self.spark.column).alias("miny"),
@@ -3645,21 +1550,6 @@ class GeometryArray(pspd.Series):
 
     @property
     def total_bounds(self):
-        """Returns a tuple containing ``minx``, ``miny``, ``maxx``, ``maxy``
-        values for the bounds of the series as a whole.
-
-        See ``GeometryArray.bounds`` for the bounds of the geometries contained in
-        the series.
-
-        Examples
-        --------
-        >>> from shapely.geometry import Point, Polygon, LineString
-        >>> d = {'geometry': [Point(3, -1), Polygon([(0, 0), (1, 1), (1, 0)]),
-        ... LineString([(0, 1), (1, 2)])]}
-        >>> gdf = geopandas.GeoDataFrame(d, crs="EPSG:4326")
-        >>> gdf.total_bounds
-        array([ 0., -1.,  3.,  2.])
-        """
         import numpy as np
         import warnings
         from pyspark.sql import functions as F
@@ -3693,43 +1583,6 @@ class GeometryArray(pspd.Series):
             )
 
     def estimate_utm_crs(self, datum_name: str = "WGS 84") -> "CRS":
-        """Returns the estimated UTM CRS based on the bounds of the dataset.
-
-        .. versionadded:: 0.9
-
-        .. note:: Requires pyproj 3+
-
-        Parameters
-        ----------
-        datum_name : str, optional
-            The name of the datum to use in the query. Default is WGS 84.
-
-        Returns
-        -------
-        pyproj.CRS
-
-        Examples
-        --------
-        >>> import geodatasets
-        >>> df = geopandas.read_file(
-        ...     geodatasets.get_path("geoda.chicago_commpop")
-        ... )
-        >>> df.geometry.values.estimate_utm_crs()  # doctest: +SKIP
-        <Derived Projected CRS: EPSG:32616>
-        Name: WGS 84 / UTM zone 16N
-        Axis Info [cartesian]:
-        - E[east]: Easting (metre)
-        - N[north]: Northing (metre)
-        Area of Use:
-        - name: Between 90°W and 84°W, northern hemisphere between equator and 84°N,...
-        - bounds: (-90.0, 0.0, -84.0, 84.0)
-        Coordinate Operation:
-        - name: UTM zone 16N
-        - method: Transverse Mercator
-        Datum: World Geodetic System 1984 ensemble
-        - Ellipsoid: WGS 84
-        - Prime Meridian: Greenwich
-        """
         import numpy as np
         from pyproj import CRS
         from pyproj.aoi import AreaOfInterest
@@ -3787,54 +1640,6 @@ class GeometryArray(pspd.Series):
             raise RuntimeError("Unable to determine UTM CRS")
 
     def to_wkb(self, hex: bool = False, **kwargs) -> pspd.Series:
-        """
-        Convert GeometryArray geometries to WKB
-
-        Parameters
-        ----------
-        hex : bool
-            If true, export the WKB as a hexadecimal string.
-            The default is to return a binary bytes object.
-        kwargs
-            Additional keyword args will be passed to
-            :func:`shapely.to_wkb`.
-
-        Returns
-        -------
-        Series
-            WKB representations of the geometries
-
-        See also
-        --------
-        GeometryArray.to_wkt
-
-        Examples
-        --------
-        >>> from shapely.geometry import Point, Polygon
-        >>> s = GeometryArray(
-        ...     [
-        ...         Point(0, 0),
-        ...         Polygon(),
-        ...         Polygon([(0, 0), (1, 1), (1, 0)]),
-        ...         None,
-        ...     ]
-        ... )
-
-        >>> s.to_wkb()
-        0    b'\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00...
-        1              b'\x01\x03\x00\x00\x00\x00\x00\x00\x00'
-        2    b'\x01\x03\x00\x00\x00\x01\x00\x00\x00\x04\x00...
-        3                                                 None
-        dtype: object
-
-        >>> s.to_wkb(hex=True)
-        0           010100000000000000000000000000000000000000
-        1                                   010300000000000000
-        2    0103000000010000000400000000000000000000000000...
-        3                                                 None
-        dtype: object
-
-        """
         spark_expr = stf.ST_AsBinary(self.spark.column)
 
         if hex:
@@ -3845,41 +1650,6 @@ class GeometryArray(pspd.Series):
         )
 
     def to_wkt(self, **kwargs) -> pspd.Series:
-        """
-        Convert GeometryArray geometries to WKT
-
-        Note: Using shapely < 1.0.0 may return different geometries for empty geometries.
-
-        Parameters
-        ----------
-        kwargs
-            Keyword args will be passed to :func:`shapely.to_wkt`.
-
-        Returns
-        -------
-        Series
-            WKT representations of the geometries
-
-        Examples
-        --------
-        >>> from shapely.geometry import Point
-        >>> s = GeometryArray([Point(1, 1), Point(2, 2), Point(3, 3)])
-        >>> s
-        0    POINT (1 1)
-        1    POINT (2 2)
-        2    POINT (3 3)
-        dtype: geometry
-
-        >>> s.to_wkt()
-        0    POINT (1 1)
-        1    POINT (2 2)
-        2    POINT (3 3)
-        dtype: object
-
-        See also
-        --------
-        GeometryArray.to_wkb
-        """
         spark_expr = stf.ST_AsText(self.spark.column)
         return self._query_geometry_column(
             spark_expr,
@@ -3919,17 +1689,6 @@ class GeometryArray(pspd.Series):
                 return pspd.Series(lst), True
         else:
             return value, False
-
-    def to_geoframe(self, name=None):
-        if name is not None:
-            renamed = self.rename(name)
-        elif self._column_label is None:
-            renamed = self.rename("geometry")
-        else:
-            renamed = self
-
-        # to_spark() is important here to ensure that the spark column names are set to the pandas column ones
-        return GeoDataFrame(pspd.DataFrame(renamed._internal).to_spark())
 
 
 # -----------------------------------------------------------------------------
