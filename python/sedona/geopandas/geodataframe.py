@@ -32,6 +32,7 @@ from pyspark.pandas import Series as PandasOnSparkSeries
 from pyspark.pandas._typing import Dtype
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas.internal import InternalFrame
+from pyspark.pandas.utils import log_advice
 
 from sedona.geopandas._typing import Label
 from sedona.geopandas.base import GeoFrame
@@ -351,10 +352,10 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
             try:
                 result = sgpd.GeoSeries(ps_series)
-                first_idx = ps_series.first_valid_index()
-                if first_idx is not None:
-                    geom = ps_series.iloc[int(first_idx)]
-                    srid = shapely.get_srid(geom)
+                not_null = ps_series[ps_series.notnull()]
+                if len(not_null) > 0:
+                    first_geom = not_null.iloc[0]
+                    srid = shapely.get_srid(first_geom)
 
                     # Shapely objects stored in the ps.Series retain their srid
                     # but the GeoSeries does not, so we manually re-set it here
@@ -425,7 +426,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             # instead of calling e.g assert not dtype ourselves.
             # This way, if Spark adds support later, than we inherit those changes naturally
             super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
-        elif isinstance(data, PandasOnSparkDataFrame):
+        elif isinstance(data, (PandasOnSparkDataFrame, SparkDataFrame)):
 
             super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
         elif isinstance(data, PandasOnSparkSeries):
@@ -436,14 +437,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 pass
 
             super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
-        elif isinstance(data, SparkDataFrame):
-            assert columns is None
-            assert dtype is None
-            assert not copy
-
-            if index is None:
-                internal = InternalFrame(spark_frame=data, index_spark_columns=None)
-                object.__setattr__(self, "_internal_frame", internal)
         else:
             # below are not distributed dataframe types
             if isinstance(data, pd.DataFrame):
@@ -479,6 +472,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             self._geometry_column_name = data._geometry_column_name
             if crs is not None and data.crs != crs:
                 raise ValueError(crs_mismatch_error)
+
+        if geometry:
+            self.set_geometry(geometry, inplace=True)
 
         if geometry is None and "geometry" in self.columns:
 
@@ -828,55 +824,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         """
         return self._geometry_column_name
 
-    def _process_geometry_columns(
-        self, operation: str, rename_suffix: str = "", *args, **kwargs
-    ) -> GeoDataFrame:
-        """
-        Helper method to process geometry columns with a specified operation.
-
-        Parameters
-        ----------
-        operation : str
-            The spatial operation to apply (e.g., 'ST_Area', 'ST_Buffer').
-        rename_suffix : str, default ""
-            Suffix to append to the resulting column name.
-        args : tuple
-            Positional arguments for the operation.
-        kwargs : dict
-            Keyword arguments for the operation.
-
-        Returns
-        -------
-        GeoDataFrame
-            A new GeoDataFrame with the operation applied to geometry columns.
-        """
-        select_expressions = []
-
-        for field in self._internal.spark_frame.schema.fields:
-            col_name = field.name
-
-            # Skip index and order columns
-            if col_name in ("__index_level_0__", "__natural_order__"):
-                continue
-
-            if field.dataType.typeName() in ("geometrytype", "binary"):
-                # Prepare arguments for the operation
-                positional_params = ", ".join([repr(v) for v in args])
-                keyword_params = ", ".join([repr(v) for v in kwargs.values()])
-                params = ", ".join(filter(None, [positional_params, keyword_params]))
-
-                if field.dataType.typeName() == "binary":
-                    expr = f"{operation}(ST_GeomFromWKB(`{col_name}`){', ' + params if params else ''}) as {col_name}{rename_suffix}"
-                else:
-                    expr = f"{operation}(`{col_name}`{', ' + params if params else ''}) as {col_name}{rename_suffix}"
-                select_expressions.append(expr)
-            else:
-                # Keep non-geometry columns as they are
-                select_expressions.append(f"`{col_name}`")
-
-        sdf = self._internal.spark_frame.selectExpr(*select_expressions)
-        return GeoDataFrame(sdf)
-
     def to_geopandas(self) -> gpd.GeoDataFrame:
         """
         Note: Unlike in pandas and geopandas, Sedona will always return a general Index.
@@ -884,7 +831,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         e.g pd.Index([0, 1, 2]) instead of pd.RangeIndex(start=0, stop=3, step=1)
         """
-        from pyspark.pandas.utils import log_advice
 
         log_advice(
             "`to_geopandas` loads all data into the driver's memory. "
@@ -1006,10 +952,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         **kwargs,
     ) -> GeoDataFrame:
         raise NotImplementedError("from_dict() is not implemented yet.")
-
-    @classmethod
-    def from_file(cls, filename: os.PathLike | typing.IO, **kwargs) -> GeoDataFrame:
-        raise NotImplementedError("from_file() is not implemented yet.")
 
     @classmethod
     def from_features(
@@ -1290,16 +1232,6 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
     ):
         raise NotImplementedError("to_feather() is not implemented yet.")
 
-    def to_file(
-        self,
-        filename: str,
-        driver: str | None = None,
-        schema: dict | None = None,
-        index: bool | None = None,
-        **kwargs,
-    ):
-        raise NotImplementedError("to_file() is not implemented yet.")
-
     @property
     def geom_type(self) -> str:
         # Implementation of the abstract method
@@ -1552,9 +1484,9 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
         mitre_limit=5.0,
         single_sided=False,
         **kwargs,
-    ) -> GeoDataFrame:
+    ) -> sgpd.GeoSeries:
         """
-        Returns a GeoDataFrame with all geometries buffered by the specified distance.
+        Returns a GeoSeries with all geometries buffered by the specified distance.
 
         Parameters
         ----------
@@ -1573,8 +1505,8 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
 
         Returns
         -------
-        GeoDataFrame
-            A new GeoDataFrame with buffered geometries.
+        GeoSeries
+            A new GeoSeries with buffered geometries.
 
         Examples
         --------
@@ -1588,8 +1520,14 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
         >>> gdf = GeoDataFrame(data)
         >>> buffered = gdf.buffer(0.5)
         """
-        return self._process_geometry_columns(
-            "ST_Buffer", rename_suffix="_buffered", distance=distance
+        return self.geometry.buffer(
+            distance,
+            resolution=16,
+            cap_style="round",
+            join_style="round",
+            mitre_limit=5.0,
+            single_sided=False,
+            **kwargs,
         )
 
     def sjoin(
@@ -1666,18 +1604,117 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
     # I/O OPERATIONS
     # ============================================================================
 
+    @classmethod
+    def from_file(
+        cls, filename: str, format: str | None = None, **kwargs
+    ) -> GeoDataFrame:
+        """
+        Alternate constructor to create a ``GeoDataFrame`` from a file.
+
+        Parameters
+        ----------
+        filename : str
+            File path or file handle to read from. If the path is a directory,
+            Sedona will read all files in the directory into a dataframe.
+        format : str, default None
+            The format of the file to read. If None, Sedona will infer the format
+            from the file extension. Note, inferring the format from the file extension
+            is not supported for directories.
+            Options:
+                - "shapefile"
+                - "geojson"
+                - "geopackage"
+                - "geoparquet"
+
+        table_name : str, default None
+            The name of the table to read from a geopackage file. Required if format is geopackage.
+
+        See also
+        --------
+        GeoDataFrame.to_file : write GeoDataFrame to file
+        """
+        return sgpd.io.read_file(filename, format, **kwargs)
+
+    def to_file(
+        self,
+        path: str,
+        driver: str | None = None,
+        schema: dict | None = None,
+        index: bool | None = None,
+        **kwargs,
+    ):
+        """
+        Write the ``GeoDataFrame`` to a file.
+
+        Parameters
+        ----------
+        path : string
+            File path or file handle to write to.
+        driver : string, default None
+            The format driver used to write the file.
+            If not specified, it attempts to infer it from the file extension.
+            If no extension is specified, Sedona will error.
+            Options:
+                - "geojson"
+                - "geopackage"
+                - "geoparquet"
+        schema : dict, default None
+            Not applicable to Sedona's implementation
+        index : bool, default None
+            If True, write index into one or more columns (for MultiIndex).
+            Default None writes the index into one or more columns only if
+            the index is named, is a MultiIndex, or has a non-integer data
+            type. If False, no index is written.
+        mode : string, default 'w'
+            The write mode, 'w' to overwrite the existing file and 'a' to append.
+            'overwrite' and 'append' are equivalent to 'w' and 'a' respectively.
+        crs : pyproj.CRS, default None
+            If specified, the CRS is passed to Fiona to
+            better control how the file is written. If None, GeoPandas
+            will determine the crs based on crs df attribute.
+            The value can be anything accepted
+            by :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
+            such as an authority string (eg "EPSG:4326") or a WKT string.
+        engine : str
+            Not applicable to Sedona's implementation
+        metadata : dict[str, str], default None
+            Optional metadata to be stored in the file. Keys and values must be
+            strings. Supported only for "GPKG" driver. Not supported by Sedona
+        **kwargs :
+            Keyword args to be passed to the engine, and can be used to write
+            to multi-layer data, store data within archives (zip files), etc.
+            In case of the "pyogrio" engine, the keyword arguments are passed to
+            `pyogrio.write_dataframe`. In case of the "fiona" engine, the keyword
+            arguments are passed to fiona.open`. For more information on possible
+            keywords, type: ``import pyogrio; help(pyogrio.write_dataframe)``.
+
+        Examples
+        --------
+
+        >>> gdf = GeoDataFrame({"geometry": [Point(0, 0), LineString([(0, 0), (1, 1)])], "int": [1, 2]}
+        >>> gdf.to_file(filepath, format="geoparquet")
+
+        With selected drivers you can also append to a file with `mode="a"`:
+
+        >>> gdf.to_file(gdf, driver="geojson", mode="a")
+
+        When the index is of non-integer dtype, index=None (default) is treated as True, writing the index to the file.
+
+        >>> gdf = GeoDataFrame({"geometry": [Point(0, 0)]}, index=["a", "b"])
+        >>> gdf.to_file(gdf, driver="geoparquet")
+        """
+        sgpd.io._to_file(self, path, driver, index, **kwargs)
+
     def to_parquet(self, path, **kwargs):
         """
         Write the GeoSeries to a GeoParquet file.
-
         Parameters:
         - path: str
             The file path where the GeoParquet file will be written.
         - kwargs: Any
             Additional arguments to pass to the Sedona DataFrame output function.
         """
-        # Use the Spark DataFrame's write method to write to GeoParquet format
-        self._internal.spark_frame.write.format("geoparquet").save(path, **kwargs)
+        self.to_file(path, driver="geoparquet", **kwargs)
 
 
 # -----------------------------------------------------------------------------

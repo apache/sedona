@@ -20,6 +20,7 @@ import typing
 from typing import Any, Union, Literal, List
 
 import geopandas as gpd
+import sedona.geopandas as sgpd
 import pandas as pd
 import pyspark.pandas as pspd
 import pyspark
@@ -324,13 +325,6 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     def __getitem__(self, key: Any) -> Any:
         return pspd.Series.__getitem__(self, key)
-
-    def __repr__(self) -> str:
-        """
-        Return a string representation of the GeoSeries in WKT format.
-        """
-        gpd_series = self.to_geopandas()
-        return gpd_series.__repr__()
 
     def __init__(
         self,
@@ -3372,22 +3366,6 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         return self._query_geometry_column(spark_expr)
 
-    def to_parquet(self, path, **kwargs):
-        """
-        Write the GeoSeries to a GeoParquet file.
-
-        Parameters:
-        - path: str
-            The file path where the GeoParquet file will be written.
-        - kwargs: Any
-            Additional arguments to pass to the Sedona DataFrame output function.
-        """
-
-        result = self._query_geometry_column(self.spark.column)
-
-        # Use the Spark DataFrame's write method to write to GeoParquet format
-        result._internal.spark_frame.write.format("geoparquet").save(path, **kwargs)
-
     def sjoin(
         self,
         other,
@@ -3550,14 +3528,35 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @classmethod
     def from_file(
-        cls, filename: Union[os.PathLike, typing.IO], **kwargs
+        cls, filename: str, format: Union[str, None] = None, **kwargs
     ) -> "GeoSeries":
-        raise NotImplementedError(
-            _not_implemented_error(
-                "from_file",
-                "Creates GeoSeries from geometry files (shapefile, GeoJSON, etc.).",
-            )
-        )
+        """
+        Alternate constructor to create a ``GeoDataFrame`` from a file.
+
+        Parameters
+        ----------
+        filename : str
+            File path or file handle to read from. If the path is a directory,
+            Sedona will read all files in the directory into a dataframe.
+        format : str, default None
+            The format of the file to read. If None, Sedona will infer the format
+            from the file extension. Note, inferring the format from the file extension
+            is not supported for directories.
+            Options:
+                - "shapefile"
+                - "geojson"
+                - "geopackage"
+                - "geoparquet"
+
+        table_name : str, default None
+            The name of the table to read from a geopackage file. Required if format is geopackage.
+
+        See also
+        --------
+        GeoDataFrame.to_file : write GeoDataFrame to file
+        """
+        df = sgpd.io.read_file(filename, format, **kwargs)
+        return GeoSeries(df.geometry, crs=df.crs)
 
     @classmethod
     def from_wkb(
@@ -3907,15 +3906,6 @@ class GeoSeries(GeoFrame, pspd.Series):
             crs=crs,
             name=kwargs.get("name", None),
         )
-
-    def to_file(
-        self,
-        filename: Union[os.PathLike, typing.IO],
-        driver: Union[str, None] = None,
-        index: Union[bool, None] = None,
-        **kwargs,
-    ):
-        raise NotImplementedError("GeoSeries.to_file() is not implemented yet.")
 
     # ============================================================================
     # DATA ACCESS AND MANIPULATION
@@ -4689,6 +4679,87 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             )
         )
 
+    def to_file(
+        self,
+        path: str,
+        driver: Union[str, None] = None,
+        schema: Union[dict, None] = None,
+        index: Union[bool, None] = None,
+        **kwargs,
+    ):
+        """
+        Write the ``GeoSeries`` to a file.
+
+        Parameters
+        ----------
+        path : string
+            File path or file handle to write to.
+        driver : string, default None
+            The format driver used to write the file.
+            If not specified, it attempts to infer it from the file extension.
+            If no extension is specified, Sedona will error.
+            Options:
+                - "geojson"
+                - "geopackage"
+                - "geoparquet"
+        schema : dict, default None
+            Not applicable to Sedona's implementation
+        index : bool, default None
+            If True, write index into one or more columns (for MultiIndex).
+            Default None writes the index into one or more columns only if
+            the index is named, is a MultiIndex, or has a non-integer data
+            type. If False, no index is written.
+        mode : string, default 'w'
+            The write mode, 'w' to overwrite the existing file and 'a' to append.
+            'overwrite' and 'append' are equivalent to 'w' and 'a' respectively.
+        crs : pyproj.CRS, default None
+            If specified, the CRS is passed to Fiona to
+            better control how the file is written. If None, GeoPandas
+            will determine the crs based on crs df attribute.
+            The value can be anything accepted
+            by :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
+            such as an authority string (eg "EPSG:4326") or a WKT string.
+        engine : str
+            Not applicable to Sedona's implementation
+        metadata : dict[str, str], default None
+            Optional metadata to be stored in the file. Keys and values must be
+            strings. Supported only for "GPKG" driver. Not supported by Sedona
+        **kwargs :
+            Keyword args to be passed to the engine, and can be used to write
+            to multi-layer data, store data within archives (zip files), etc.
+            In case of the "pyogrio" engine, the keyword arguments are passed to
+            `pyogrio.write_dataframe`. In case of the "fiona" engine, the keyword
+            arguments are passed to fiona.open`. For more information on possible
+            keywords, type: ``import pyogrio; help(pyogrio.write_dataframe)``.
+
+        Examples
+        --------
+
+        >>> gdf = GeoDataFrame({"geometry": [Point(0, 0), LineString([(0, 0), (1, 1)])], "int": [1, 2]}
+        >>> gdf.to_file(filepath, format="geoparquet")
+
+        With selected drivers you can also append to a file with `mode="a"`:
+
+        >>> gdf.to_file(gdf, driver="geojson", mode="a")
+
+        When the index is of non-integer dtype, index=None (default) is treated as True, writing the index to the file.
+
+        >>> gdf = GeoDataFrame({"geometry": [Point(0, 0)]}, index=["a", "b"])
+        >>> gdf.to_file(gdf, driver="geoparquet")
+        """
+        self._to_geoframe().to_file(path, driver, index=index, **kwargs)
+
+    def to_parquet(self, path, **kwargs):
+        """
+        Write the GeoSeries to a GeoParquet file.
+        Parameters:
+        - path: str
+            The file path where the GeoParquet file will be written.
+        - kwargs: Any
+            Additional arguments to pass to the Sedona DataFrame output function.
+        """
+        self._to_geoframe().to_file(path, driver="geoparquet", **kwargs)
+
     # -----------------------------------------------------------------------------
     # # Utils
     # -----------------------------------------------------------------------------
@@ -4723,7 +4794,9 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             renamed = self.rename("geometry")
         else:
             renamed = self
-        return GeoDataFrame(pspd.DataFrame(renamed._internal))
+
+        # to_spark() is important here to ensure that the spark column names are set to the pandas column ones
+        return GeoDataFrame(pspd.DataFrame(renamed._internal).to_spark())
 
 
 # -----------------------------------------------------------------------------
