@@ -995,72 +995,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
-    def _row_wise_operation(
-        self,
-        spark_col: PySparkColumn,
-        other: pspd.Series,
-        align: Union[bool, None],
-        returns_geom: bool = False,
-        default_val: Any = None,
-        keep_name: bool = False,
-    ):
-        """
-        Helper function to perform a row-wise operation on two GeoSeries.
-        The self column and other column are aliased to `L` and `R`, respectively.
-
-        align : bool or None (default None)
-            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
-            If False, the order of elements is preserved.
-            Note: align should also be set to False when 'other' a geoseries created from a single object
-            (e.g. GeoSeries([Point(0, 0) * len(self)])), so that we align based on natural ordering in case
-            the index is not the default range index from 0.
-            Alternatively, we could create 'other' using the same index as self,
-            but that would require index=self.index.to_pandas() which is less scalable.
-
-        default_val : str or None (default "FALSE")
-            The value to use if either L or R is null. If None, nulls are not handled.
-        """
-        from pyspark.sql.functions import col
-
-        # Note: this is specifically False. None is valid since it defaults to True similar to geopandas
-        index_col = (
-            NATURAL_ORDER_COLUMN_NAME if align is False else SPARK_DEFAULT_INDEX_NAME
-        )
-
-        # This code assumes there is only one index (SPARK_DEFAULT_INDEX_NAME)
-        # and would need to be updated if Sedona later supports multi-index
-
-        df = self._internal.spark_frame.select(
-            self.spark.column.alias("L"),
-            # For the left side:
-            # - We always select NATURAL_ORDER_COLUMN_NAME, to avoid having to regenerate it in the result
-            # - We always select SPARK_DEFAULT_INDEX_NAME, to retain series index info
-            col(NATURAL_ORDER_COLUMN_NAME),
-            col(SPARK_DEFAULT_INDEX_NAME),
-        )
-        other_df = other._internal.spark_frame.select(
-            other.spark.column.alias("R"),
-            # for the right side, we only need the column that we are joining on
-            col(index_col),
-        )
-
-        joined_df = df.join(other_df, on=index_col, how="outer")
-
-        if default_val is not None:
-            # ps.Series.fillna() doesn't always work for the output for some reason
-            # so we manually handle the nulls here.
-            spark_col = F.when(
-                F.col("L").isNull() | F.col("R").isNull(),
-                default_val,
-            ).otherwise(spark_col)
-
-        return self._query_geometry_column(
-            spark_col,
-            joined_df,
-            returns_geom=returns_geom,
-            keep_name=keep_name,
-        )
-
     def intersection_all(self):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
@@ -1068,130 +1002,6 @@ class GeoSeries(GeoFrame, pspd.Series):
     # ============================================================================
     # SPATIAL PREDICATES
     # ============================================================================
-
-    def contains(self, other, align=None) -> pspd.Series:
-        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
-        each aligned geometry that contains `other`.
-
-        An object is said to contain `other` if at least one point of `other` lies in
-        the interior and no points of `other` lie in the exterior of the object.
-        (Therefore, any given polygon does not contain its own boundary - there is not
-        any point that lies in the interior.)
-        If either object is empty, this operation returns ``False``.
-
-        This is the inverse of `within` in the sense that the expression
-        ``a.contains(b) == b.within(a)`` always evaluates to ``True``.
-
-        Note: Sedona's implementation instead returns False for identical geometries.
-
-        The operation works on a 1-to-1 row-wise manner.
-
-        Parameters
-        ----------
-        other : GeoSeries or geometric object
-            The GeoSeries (elementwise) or geometric object to test if it
-            is contained.
-        align : bool | None (default None)
-            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
-            If False, the order of elements is preserved.
-
-        Returns
-        -------
-        Series (bool)
-
-        Examples
-        --------
-
-        >>> from sedona.geopandas import GeoSeries
-        >>> from shapely.geometry import Polygon, LineString, Point
-        >>> s = GeoSeries(
-        ...     [
-        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
-        ...         LineString([(0, 0), (0, 2)]),
-        ...         LineString([(0, 0), (0, 1)]),
-        ...         Point(0, 1),
-        ...     ],
-        ...     index=range(0, 4),
-        ... )
-        >>> s2 = GeoSeries(
-        ...     [
-        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
-        ...         Polygon([(0, 0), (1, 2), (0, 2)]),
-        ...         LineString([(0, 0), (0, 2)]),
-        ...         Point(0, 1),
-        ...     ],
-        ...     index=range(1, 5),
-        ... )
-
-        >>> s
-        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
-        1             LINESTRING (0 0, 0 2)
-        2             LINESTRING (0 0, 0 1)
-        3                       POINT (0 1)
-        dtype: geometry
-
-        >>> s2
-        1    POLYGON ((0 0, 2 2, 0 2, 0 0))
-        2    POLYGON ((0 0, 1 2, 0 2, 0 0))
-        3             LINESTRING (0 0, 0 2)
-        4                       POINT (0 1)
-        dtype: geometry
-
-        We can check if each geometry of GeoSeries contains a single
-        geometry:
-
-        >>> point = Point(0, 1)
-        >>> s.contains(point)
-        0    False
-        1     True
-        2    False
-        3     True
-        dtype: bool
-
-        We can also check two GeoSeries against each other, row by row.
-        The GeoSeries above have different indices. We can either align both GeoSeries
-        based on index values and compare elements with the same index using
-        ``align=True`` or ignore index and compare elements based on their matching
-        order using ``align=False``:
-
-        >>> s2.contains(s, align=True)
-        0    False
-        1    False
-        2    False
-        3     True
-        4    False
-        dtype: bool
-
-        >>> s2.contains(s, align=False)
-        1     True
-        2    False
-        3     True
-        4     True
-        dtype: bool
-
-        Notes
-        -----
-        This method works in a row-wise manner. It does not check if an element
-        of one GeoSeries ``contains`` any element of the other one.
-
-        See also
-        --------
-        GeoSeries.contains_properly
-        GeoSeries.within
-        """
-
-        other, extended = self._make_series_of_val(other)
-        align = False if extended else align
-
-        spark_col = stp.ST_Contains(F.col("L"), F.col("R"))
-        result = self._row_wise_operation(
-            spark_col,
-            other,
-            align,
-            returns_geom=False,
-            default_val=False,
-        )
-        return to_bool(result)
 
     def contains_properly(self, other, align=None):
         # Implementation of the abstract method
@@ -1947,6 +1757,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         """Alias for `notna` method. See `notna` for more detail."""
         return self.notna()
 
+    # At the time of this writing, fillna is not a method for GeoDataFrame in geopandas, so
+    # we only implement it for GeoSeries.
     def fillna(
         self, value=None, inplace: bool = False, limit=None, **kwargs
     ) -> Union["GeoSeries", None]:
@@ -2024,58 +1836,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         --------
         GeoSeries.isna : detect missing values
         """
-        from shapely.geometry.base import BaseGeometry
-        from geopandas.array import GeometryArray
+        from sedona.geopandas.base import _delegate_property
 
-        # TODO: Implement limit https://github.com/apache/sedona/issues/2068
-        if limit:
-            raise NotImplementedError(
-                "GeoSeries.fillna() with limit is not implemented yet."
-            )
-
-        align = True
-
-        if pd.isna(value) == True or isinstance(value, BaseGeometry):
-            if (
-                value is not None and pd.isna(value) == True
-            ):  # ie. value is np.nan or pd.NA:
-                value = None
-            else:
-                if value is None:
-                    from shapely.geometry import GeometryCollection
-
-                    value = GeometryCollection()
-
-            other, extended = self._make_series_of_val(value)
-            align = False if extended else align
-
-        elif isinstance(value, (GeoSeries, GeometryArray, gpd.GeoSeries)):
-
-            if not isinstance(value, GeoSeries):
-                value = GeoSeries(value)
-
-            # Replace all None's with empty geometries (this is a recursive call)
-            other = value.fillna(None)
-
-        else:
-            raise ValueError(f"Invalid value type: {type(value)}")
-
-        # Coalesce: If the value in L is null, use the corresponding value in R for that row
-        spark_expr = F.coalesce(F.col("L"), F.col("R"))
-        result = self._row_wise_operation(
-            spark_expr,
-            other,
-            align=align,
-            returns_geom=True,
-            default_val=None,
-            keep_name=True,
+        return _delegate_property(
+            "fillna", self, value, inplace=inplace, limit=limit, **kwargs
         )
-
-        if inplace:
-            self._update_inplace(result)
-            return None
-
-        return result
 
     def explode(self, ignore_index=False, index_parts=False) -> "GeoSeries":
         raise NotImplementedError(

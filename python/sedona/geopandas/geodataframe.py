@@ -1360,14 +1360,6 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
-    def contains(self, other, align=None):
-        # Implementation of the abstract method
-        raise NotImplementedError(
-            _not_implemented_error(
-                "contains", "Tests if geometries contain other geometries."
-            )
-        )
-
     def contains_properly(self, other, align=None):
         # Implementation of the abstract method
         raise NotImplementedError(

@@ -3878,7 +3878,7 @@ class GeometryArray(pspd.Series):
         GeometryArray.isna : detect missing values
         """
         from shapely.geometry.base import BaseGeometry
-        from geopandas.array import GeometryArray
+        from geopandas.array import GeometryArray as gpd_GeometryArray
 
         # TODO: Implement limit https://github.com/apache/sedona/issues/2068
         if limit:
@@ -3887,6 +3887,9 @@ class GeometryArray(pspd.Series):
             )
 
         align = True
+
+        if isinstance(value, sgpd.GeoSeries):
+            value = GeometryArray(value)
 
         if pd.isna(value) == True or isinstance(value, BaseGeometry):
             if (
@@ -3902,7 +3905,7 @@ class GeometryArray(pspd.Series):
             other, extended = self._make_series_of_val(value)
             align = False if extended else align
 
-        elif isinstance(value, (GeometryArray, gpd.GeoSeries)):
+        elif isinstance(value, (GeometryArray, gpd_GeometryArray, gpd.GeoSeries)):
 
             if not isinstance(value, GeometryArray):
                 value = GeometryArray(value)
