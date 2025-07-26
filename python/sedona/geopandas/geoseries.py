@@ -766,32 +766,6 @@ class GeoSeries(GeoFrame, pspd.Series):
     def geometry(self) -> "GeoSeries":
         return self
 
-    @property
-    def sindex(self) -> SpatialIndex:
-        """
-        Returns a spatial index built from the geometries.
-
-        Returns
-        -------
-        SpatialIndex
-            The spatial index for this GeoDataFrame.
-
-        Examples
-        --------
-        >>> from shapely.geometry import Point
-        >>> from sedona.geopandas import GeoDataFrame
-        >>>
-        >>> gdf = GeoDataFrame([{"geometry": Point(1, 1), "value": 1},
-        ...                     {"geometry": Point(2, 2), "value": 2}])
-        >>> index = gdf.sindex
-        >>> index.size
-        2
-        """
-        geometry_column = _get_series_col_name(self)
-        if geometry_column is None:
-            raise ValueError("No geometry column found in GeoSeries")
-        return SpatialIndex(self._internal.spark_frame, column_name=geometry_column)
-
     def copy(self, deep=False):
         """
         Make a copy of this GeoSeries object.
@@ -1046,10 +1020,16 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries
             A GeoSeries of buffered geometries.
         """
-        spark_col = stf.ST_Buffer(self.spark.column, distance)
-        return self._query_geometry_column(
-            spark_col,
-            returns_geom=True,
+        return _delegate_property(
+            "buffer",
+            self,
+            distance,
+            resolution,
+            cap_style,
+            join_style,
+            mitre_limit,
+            single_sided,
+            **kwargs,
         )
 
     def sjoin(

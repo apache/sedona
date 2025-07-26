@@ -99,6 +99,10 @@ class TestGeoSeries(TestGeopandasBase):
         assert result.count() > 0
         self.check_sgpd_equals_gpd(result, expected)
 
+        # Check that GeoDataFrame works too
+        df_result = self.geoseries.to_geoframe().buffer(1)
+        self.check_sgpd_equals_gpd(df_result, expected)
+
     def test_simplify(self):
         s = GeoSeries([Point(0, 0).buffer(1), LineString([(0, 0), (1, 10), (0, 20)])])
 
@@ -126,6 +130,7 @@ class TestGeoSeries(TestGeopandasBase):
         )
         self.check_sgpd_equals_gpd(result, expected)
 
+        # Check that GeoDataFrame works too
         df_result = s.to_geoframe().simplify(0.2, preserve_topology=False)
         self.check_sgpd_equals_gpd(df_result, expected)
 

@@ -56,11 +56,17 @@ class TestSpatialIndex(TestBase):
             ]
         )
 
-    def test_sindex_property_exists(self):
+    def test_geoseries_sindex_property_exists(self):
         """Test that the sindex property exists on GeoSeries."""
         assert hasattr(self.points, "sindex")
         assert hasattr(self.polygons, "sindex")
         assert hasattr(self.lines, "sindex")
+
+    def test_geodataframe_sindex_property_exists(self):
+        """Test that the sindex property exists on GeoDataFrame."""
+        assert hasattr(self.points.to_geoframe(), "sindex")
+        assert hasattr(self.polygons.to_geoframe(), "sindex")
+        assert hasattr(self.lines.to_geoframe(), "sindex")
 
     def test_query_with_point(self):
         """Test querying the spatial index with a point geometry."""

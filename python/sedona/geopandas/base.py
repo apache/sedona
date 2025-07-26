@@ -72,9 +72,28 @@ class GeoFrame(metaclass=ABCMeta):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    @abstractmethod
     def sindex(self) -> "SpatialIndex":
-        raise NotImplementedError("This method is not implemented yet.")
+        """
+        Returns a spatial index built from the geometries.
+
+        Returns
+        -------
+        SpatialIndex
+            The spatial index for this GeoDataFrame.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point
+        >>> from sedona.geopandas import GeoDataFrame
+        >>>
+        >>> gdf = GeoDataFrame([{"geometry": Point(1, 1), "value": 1},
+        ...                     {"geometry": Point(2, 2), "value": 2}])
+        >>> index = gdf.sindex
+        >>> index.size
+        2
+        """
+        # We pass in self.geometry here to use the active geometry column for dataframe
+        return _delegate_property("sindex", self.geometry)
 
     @abstractmethod
     def copy(self: GeoFrameLike) -> GeoFrameLike:
@@ -1786,7 +1805,7 @@ class GeoFrame(metaclass=ABCMeta):
         """Returns a ``DataFrame`` with columns ``minx``, ``miny``, ``maxx``,
         ``maxy`` values containing the bounds for each geometry.
 
-        See ``GeometryArray.total_bounds`` for the limits of the entire series.
+        See ``GeoSeries.total_bounds`` for the limits of the entire series.
 
         Examples
         --------
@@ -1817,7 +1836,7 @@ class GeoFrame(metaclass=ABCMeta):
         """Returns a tuple containing ``minx``, ``miny``, ``maxx``, ``maxy``
         values for the bounds of the series as a whole.
 
-        See ``GeometryArray.bounds`` for the bounds of the geometries contained in
+        See ``GeoSeries.bounds`` for the bounds of the geometries contained in
         the series.
 
         Examples
@@ -2246,7 +2265,7 @@ class GeoFrame(metaclass=ABCMeta):
 
 def _delegate_property(op, this, *args, **kwargs):
     """
-    Delegate a call to the GeometryArray class.
+    Delegate a call to the GeometryArray class, and then convert the result as a ps.Series or GeoSeries
 
     inplace: bool must be specified as kwarg to work correctly.
     """
