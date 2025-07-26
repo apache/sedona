@@ -1277,11 +1277,6 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
-    @property
-    def envelope(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
     def minimum_rotated_rectangle(self):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
@@ -1329,10 +1324,6 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
         raise NotImplementedError("This method is not implemented yet.")
 
     def normalize(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def make_valid(self):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 

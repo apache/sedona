@@ -2906,13 +2906,6 @@ class GeometryArray(pspd.Series):
                 F.col("L").isNull() | F.col("R").isNull(),
                 default_val,
             ).otherwise(spark_col)
-            # The above is equivalent to the following:
-            f"""
-                CASE
-                    WHEN `L` IS NULL OR `R` IS NULL THEN {default_val}
-                    ELSE {spark_col}
-                END
-            """
 
         return self._query_geometry_column(
             spark_col,
