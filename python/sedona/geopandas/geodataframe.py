@@ -1237,11 +1237,6 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    def is_simple(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
     def is_ring(self):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
@@ -1256,21 +1251,7 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 
-    @property
-    def has_z(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
     def get_precision(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def get_geometry(self, index):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def boundary(self):
         # Implementation of the abstract method
         raise NotImplementedError("This method is not implemented yet.")
 

@@ -678,6 +678,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         expected = pd.Series([True, False, False, True])
         assert_series_equal(result.to_pandas(), expected)
 
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().dwithin(s2, distance=1, align=False).to_pandas()
+        assert_series_equal(df_result, expected)
+
     def test_difference(self):
         s = GeoSeries(
             [
@@ -731,7 +735,6 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = s.difference(s2, align=False)
         expected = gpd.GeoSeries(
             [
-                None,
                 Polygon([(0, 2), (2, 2), (1, 1), (0, 1), (0, 2)]),
                 Polygon([(0, 0), (0, 2), (1, 2), (2, 2), (1, 1), (0, 0)]),
                 MultiLineString(
@@ -741,6 +744,12 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
                 Point(),
             ]
         )
+
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().difference(s2, align=False)
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_is_simple(self):
         s = sgpd.GeoSeries(
@@ -756,6 +765,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         expected = pd.Series([False, True])
         # Removed LinearRing cases: False, True]
         assert_series_equal(result.to_pandas(), expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().is_simple.to_pandas()
+        assert_series_equal(df_result, expected)
 
     def test_is_ring(self):
         pass
@@ -778,6 +791,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = s.has_z
         expected = pd.Series([False, True, True, False])
         assert_series_equal(result.to_pandas(), expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().has_z.to_pandas()
+        assert_series_equal(df_result, expected)
 
     def test_get_precision(self):
         pass
@@ -827,6 +844,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         expected = gpd.GeoSeries([None, Point(0, 1), None, None, None])
         self.check_sgpd_equals_gpd(result, expected)
 
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().get_geometry(2)
+        self.check_sgpd_equals_gpd(df_result, expected)
+
     def test_boundary(self):
         s = sgpd.GeoSeries(
             [
@@ -846,6 +867,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             ]
         )
         self.check_sgpd_equals_gpd(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().boundary
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_centroid(self):
         s = sgpd.GeoSeries(

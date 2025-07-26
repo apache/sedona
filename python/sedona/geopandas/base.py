@@ -301,9 +301,33 @@ class GeoFrame(metaclass=ABCMeta):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    @abstractmethod
     def is_simple(self):
-        raise NotImplementedError("This method is not implemented yet.")
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        geometries that do not cross themselves.
+
+        This is meaningful only for `LineStrings` and `LinearRings`.
+
+        Examples
+        --------
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import LineString
+        >>> s = GeoSeries(
+        ...     [
+        ...         LineString([(0, 0), (1, 1), (1, -1), (0, 1)]),
+        ...         LineString([(0, 0), (1, 1), (1, -1)]),
+        ...     ]
+        ... )
+        >>> s
+        0    LINESTRING (0 0, 1 1, 1 -1, 0 1)
+        1         LINESTRING (0 0, 1 1, 1 -1)
+        dtype: geometry
+
+        >>> s.is_simple
+        0    False
+        1     True
+        dtype: bool
+        """
+        return _delegate_property("is_simple", self)
 
     @property
     @abstractmethod
@@ -321,22 +345,151 @@ class GeoFrame(metaclass=ABCMeta):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    @abstractmethod
     def has_z(self):
-        raise NotImplementedError("This method is not implemented yet.")
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        features that have a z-component.
+
+        Notes
+        -----
+        Every operation in GeoPandas is planar, i.e. the potential third
+        dimension is not taken into account.
+
+        Examples
+        --------
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Point(0, 1),
+        ...         Point(0, 1, 2),
+        ...     ]
+        ... )
+        >>> s
+        0        POINT (0 1)
+        1    POINT Z (0 1 2)
+        dtype: geometry
+
+        >>> s.has_z
+        0    False
+        1     True
+        dtype: bool
+        """
+        return _delegate_property("has_z", self)
 
     @abstractmethod
     def get_precision(self):
         raise NotImplementedError("This method is not implemented yet.")
 
-    @abstractmethod
     def get_geometry(self, index):
-        raise NotImplementedError("This method is not implemented yet.")
+        """Returns the n-th geometry from a collection of geometries (0-indexed).
+
+        If the index is non-negative, it returns the geometry at that index.
+        If the index is negative, it counts backward from the end of the collection (e.g., -1 returns the last geometry).
+        Returns None if the index is out of bounds.
+
+        Note: Simple geometries act as length-1 collections
+
+        Note: Using Shapely < 2.0, may lead to different results for empty simple geometries due to how
+        shapely interprets them.
+
+        Parameters
+        ----------
+        index : int or array_like
+            Position of a geometry to be retrieved within its collection
+
+        Returns
+        -------
+        GeoSeries
+
+        Notes
+        -----
+        Simple geometries act as collections of length 1. Any out-of-range index value
+        returns None.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point, MultiPoint, GeometryCollection
+        >>> s = geopandas.GeoSeries(
+        ...     [
+        ...         Point(0, 0),
+        ...         MultiPoint([(0, 0), (1, 1), (0, 1), (1, 0)]),
+        ...         GeometryCollection(
+        ...             [MultiPoint([(0, 0), (1, 1), (0, 1), (1, 0)]), Point(0, 1)]
+        ...         ),
+        ...         Polygon(),
+        ...         GeometryCollection(),
+        ...     ]
+        ... )
+        >>> s
+        0                                          POINT (0 0)
+        1              MULTIPOINT ((0 0), (1 1), (0 1), (1 0))
+        2    GEOMETRYCOLLECTION (MULTIPOINT ((0 0), (1 1), ...
+        3                                        POLYGON EMPTY
+        4                             GEOMETRYCOLLECTION EMPTY
+        dtype: geometry
+
+        >>> s.get_geometry(0)
+        0                                POINT (0 0)
+        1                                POINT (0 0)
+        2    MULTIPOINT ((0 0), (1 1), (0 1), (1 0))
+        3                              POLYGON EMPTY
+        4                                       None
+        dtype: geometry
+
+        >>> s.get_geometry(1)
+        0           None
+        1    POINT (1 1)
+        2    POINT (0 1)
+        3           None
+        4           None
+        dtype: geometry
+
+        >>> s.get_geometry(-1)
+        0    POINT (0 0)
+        1    POINT (1 0)
+        2    POINT (0 1)
+        3  POLYGON EMPTY
+        4           None
+        dtype: geometry
+
+        """
+        return _delegate_property("get_geometry", self, index)
 
     @property
-    @abstractmethod
     def boundary(self):
-        raise NotImplementedError("This method is not implemented yet.")
+        """Returns a ``GeoSeries`` of lower dimensional objects representing
+        each geometry's set-theoretic `boundary`.
+
+        Examples
+        --------
+
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
+        ...         LineString([(0, 0), (1, 1), (1, 0)]),
+        ...         Point(0, 0),
+        ...     ]
+        ... )
+        >>> s
+        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1        LINESTRING (0 0, 1 1, 1 0)
+        2                       POINT (0 0)
+        dtype: geometry
+
+        >>> s.boundary
+        0    LINESTRING (0 0, 1 1, 0 1, 0 0)
+        1          MULTIPOINT ((0 0), (1 0))
+        2           GEOMETRYCOLLECTION EMPTY
+        dtype: geometry
+
+        See also
+        --------
+        GeoSeries.exterior : outer boundary (without interior rings)
+
+        """
+        return _delegate_property("boundary", self)
 
     @property
     def centroid(self):
@@ -618,6 +771,217 @@ class GeoFrame(metaclass=ABCMeta):
 
         """
         return _delegate_property("crosses", self, other, align)
+
+    def dwithin(self, other, distance, align=None):
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        each aligned geometry that is within a set distance from ``other``.
+
+        The operation works on a 1-to-1 row-wise manner:
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The GeoSeries (elementwise) or geometric object to test for
+            equality.
+        distance : float, np.array, pd.Series
+            Distance(s) to test if each geometry is within. A scalar distance will be
+            applied to all geometries. An array or Series will be applied elementwise.
+            If np.array or pd.Series are used then it must have same length as the
+            GeoSeries.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices.
+            If False, the order of elements is preserved. None defaults to True.
+
+        Returns
+        -------
+        Series (bool)
+
+        Examples
+        --------
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
+        ...         LineString([(0, 0), (0, 2)]),
+        ...         LineString([(0, 0), (0, 1)]),
+        ...         Point(0, 1),
+        ...     ],
+        ...     index=range(0, 4),
+        ... )
+        >>> s2 = GeoSeries(
+        ...     [
+        ...         Polygon([(1, 0), (4, 2), (2, 2)]),
+        ...         Polygon([(2, 0), (3, 2), (2, 2)]),
+        ...         LineString([(2, 0), (2, 2)]),
+        ...         Point(1, 1),
+        ...     ],
+        ...     index=range(1, 5),
+        ... )
+
+        >>> s
+        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1             LINESTRING (0 0, 0 2)
+        2             LINESTRING (0 0, 0 1)
+        3                       POINT (0 1)
+        dtype: geometry
+
+        >>> s2
+        1    POLYGON ((1 0, 4 2, 2 2, 1 0))
+        2    POLYGON ((2 0, 3 2, 2 2, 2 0))
+        3             LINESTRING (2 0, 2 2)
+        4                       POINT (1 1)
+        dtype: geometry
+
+        We can check if each geometry of GeoSeries contains a single
+        geometry:
+
+        >>> point = Point(0, 1)
+        >>> s2.dwithin(point, 1.8)
+        1     True
+        2    False
+        3    False
+        4     True
+        dtype: bool
+
+        We can also check two GeoSeries against each other, row by row.
+        The GeoSeries above have different indices. We can either align both GeoSeries
+        based on index values and compare elements with the same index using
+        ``align=True`` or ignore index and compare elements based on their matching
+        order using ``align=False``:
+
+        >>> s.dwithin(s2, distance=1, align=True)
+        0    False
+        1     True
+        2    False
+        3    False
+        4    False
+        dtype: bool
+
+        >>> s.dwithin(s2, distance=1, align=False)
+        0     True
+        1    False
+        2    False
+        3     True
+        dtype: bool
+
+        Notes
+        -----
+        This method works in a row-wise manner. It does not check if an element
+        of one GeoSeries is within the set distance of *any* element of the other one.
+
+        See also
+        --------
+        GeoSeries.within
+        """
+        return _delegate_property("dwithin", self, other, distance, align)
+
+    def difference(self, other, align=None):
+        """Returns a ``GeoSeries`` of the points in each aligned geometry that
+        are not in `other`.
+
+        The operation works on a 1-to-1 row-wise manner:
+
+        Unlike Geopandas, Sedona does not support this operation for GeometryCollections.
+
+        Parameters
+        ----------
+        other : Geoseries or geometric object
+            The Geoseries (elementwise) or geometric object to find the
+            difference to.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
+        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
+        ...         LineString([(0, 0), (2, 2)]),
+        ...         LineString([(2, 0), (0, 2)]),
+        ...         Point(0, 1),
+        ...     ],
+        ... )
+        >>> s2 = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
+        ...         LineString([(1, 0), (1, 3)]),
+        ...         LineString([(2, 0), (0, 2)]),
+        ...         Point(1, 1),
+        ...         Point(0, 1),
+        ...     ],
+        ...     index=range(1, 6),
+        ... )
+
+        >>> s
+        0    POLYGON ((0 0, 2 2, 0 2, 0 0))
+        1    POLYGON ((0 0, 2 2, 0 2, 0 0))
+        2             LINESTRING (0 0, 2 2)
+        3             LINESTRING (2 0, 0 2)
+        4                       POINT (0 1)
+        dtype: geometry
+
+        >>> s2
+        1    POLYGON ((0 0, 1 1, 0 1, 0 0))
+        2             LINESTRING (1 0, 1 3)
+        3             LINESTRING (2 0, 0 2)
+        4                       POINT (1 1)
+        5                       POINT (0 1)
+        dtype: geometry
+
+        We can check if each geometry of GeoSeries contains a single
+        geometry:
+
+        >>> point = Point(0, 1)
+        >>> s2.difference(point)
+        1    POLYGON ((0 0, 1 1, 0 1, 0 0))
+        2             LINESTRING (1 0, 1 3)
+        3             LINESTRING (2 0, 0 2)
+        4                       POINT (1 1)
+        5           GEOMETRYCOLLECTION EMPTY
+        dtype: geometry
+
+        We can also check two GeoSeries against each other, row by row.
+        The GeoSeries above have different indices. We can either align both GeoSeries
+        based on index values and compare elements with the same index using
+        ``align=True`` or ignore index and compare elements based on their matching
+        order using ``align=False``:
+
+        >>> s.difference(s2, align=True)
+        0    POLYGON ((0 0, 2 2, 0 2, 0 0))
+        1    POLYGON ((0 0, 2 2, 0 2, 0 0))
+        2             LINESTRING (0 0, 2 2)
+        3             LINESTRING (2 0, 0 2)
+        4                       POINT (0 1)
+        5                       POINT (0 1)
+        dtype: geometry
+
+        >>> s.difference(s2, align=False)
+        0    POLYGON ((0 0, 2 2, 0 2, 0 0))
+        1    POLYGON ((0 0, 2 2, 0 2, 0 0))
+        2           GEOMETRYCOLLECTION EMPTY
+        3             LINESTRING (2 0, 0 2)
+        4           GEOMETRYCOLLECTION EMPTY
+        dtype: geometry
+
+        Notes
+        -----
+        This method works in a row-wise manner. It does not check if an element
+        of one GeoSeries is different from *any* element of the other one.
+
+        See also
+        --------
+        GeoSeries.intersection
+        """
+        return _delegate_property("difference", self, other, align)
 
     @abstractmethod
     def intersection_all(self):
