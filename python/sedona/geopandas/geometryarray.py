@@ -3322,38 +3322,6 @@ class GeometryArray(pspd.Series):
     # ============================================================================
 
     @classmethod
-    def from_file(
-        cls, filename: str, format: Union[str, None] = None, **kwargs
-    ) -> "GeometryArray":
-        """
-        Alternate constructor to create a ``GeoDataFrame`` from a file.
-
-        Parameters
-        ----------
-        filename : str
-            File path or file handle to read from. If the path is a directory,
-            Sedona will read all files in the directory into a dataframe.
-        format : str, default None
-            The format of the file to read. If None, Sedona will infer the format
-            from the file extension. Note, inferring the format from the file extension
-            is not supported for directories.
-            Options:
-                - "shapefile"
-                - "geojson"
-                - "geopackage"
-                - "geoparquet"
-
-        table_name : str, default None
-            The name of the table to read from a geopackage file. Required if format is geopackage.
-
-        See also
-        --------
-        GeoDataFrame.to_file : write GeoDataFrame to file
-        """
-        df = sgpd.io.read_file(filename, format, **kwargs)
-        return GeometryArray(df.geometry, crs=df.crs)
-
-    @classmethod
     def from_wkb(
         cls,
         data,
@@ -3607,58 +3575,6 @@ class GeometryArray(pspd.Series):
                 "from_shapely", "Creates GeometryArray from Shapely geometry objects."
             )
         )
-
-    @classmethod
-    def from_arrow(cls, arr, **kwargs) -> "GeometryArray":
-        """
-        Construct a GeometryArray from a Arrow array object with a GeoArrow
-        extension type.
-
-        See https://geoarrow.org/ for details on the GeoArrow specification.
-
-        This functions accepts any Arrow array object implementing
-        the `Arrow PyCapsule Protocol`_ (i.e. having an ``__arrow_c_array__``
-        method).
-
-        .. _Arrow PyCapsule Protocol: https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html
-
-        Note: Requires geopandas versions >= 1.0.0 to use with Sedona.
-
-        Parameters
-        ----------
-        arr : pyarrow.Array, Arrow array
-            Any array object implementing the Arrow PyCapsule Protocol
-            (i.e. has an ``__arrow_c_array__`` or ``__arrow_c_stream__``
-            method). The type of the array should be one of the
-            geoarrow geometry types.
-        **kwargs
-            Other parameters passed to the GeometryArray constructor.
-
-        Returns
-        -------
-        GeometryArray
-
-        See Also
-        --------
-        GeometryArray.to_arrow
-        GeoDataFrame.from_arrow
-
-        Examples
-        --------
-
-        >>> from sedona.geopandas import GeometryArray
-        >>> import geoarrow.pyarrow as ga
-        >>> array = ga.as_geoarrow([None, "POLYGON ((0 0, 1 1, 0 1, 0 0))", "LINESTRING (0 0, -1 1, 0 -1)"])
-        >>> geoseries = GeometryArray.from_arrow(array)
-        >>> geoseries
-        0                              None
-        1    POLYGON ((0 0, 1 1, 0 1, 0 0))
-        2      LINESTRING (0 0, -1 1, 0 -1)
-        dtype: geometry
-
-        """
-        gpd_series = gpd.GeoSeries.from_arrow(arr, **kwargs)
-        return GeometryArray(gpd_series)
 
     @classmethod
     def _create_from_select(
@@ -4238,67 +4154,6 @@ class GeometryArray(pspd.Series):
         except IndexError:
             raise RuntimeError("Unable to determine UTM CRS")
 
-    def to_json(
-        self,
-        show_bbox: bool = True,
-        drop_id: bool = False,
-        to_wgs84: bool = False,
-        **kwargs,
-    ) -> str:
-        """
-        Returns a GeoJSON string representation of the GeometryArray.
-
-        Parameters
-        ----------
-        show_bbox : bool, optional, default: True
-            Include bbox (bounds) in the geojson
-        drop_id : bool, default: False
-            Whether to retain the index of the GeometryArray as the id property
-            in the generated GeoJSON. Default is False, but may want True
-            if the index is just arbitrary row numbers.
-        to_wgs84: bool, optional, default: False
-            If the CRS is set on the active geometry column it is exported as
-            WGS84 (EPSG:4326) to meet the `2016 GeoJSON specification
-            <https://tools.ietf.org/html/rfc7946>`_.
-            Set to True to force re-projection and set to False to ignore CRS. False by
-            default.
-
-        *kwargs* that will be passed to json.dumps().
-
-        Note: Unlike geopandas, Sedona's implementation will replace 'LinearRing'
-        with 'LineString' in the GeoJSON output.
-
-        Returns
-        -------
-        JSON string
-
-        Examples
-        --------
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Point
-        >>> s = GeometryArray([Point(1, 1), Point(2, 2), Point(3, 3)])
-        >>> s
-        0    POINT (1 1)
-        1    POINT (2 2)
-        2    POINT (3 3)
-        dtype: geometry
-
-        >>> s.to_json()
-        '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "pr\
-operties": {}, "geometry": {"type": "Point", "coordinates": [1.0, 1.0]}, "bbox": [1.0,\
- 1.0, 1.0, 1.0]}, {"id": "1", "type": "Feature", "properties": {}, "geometry": {"type"\
-: "Point", "coordinates": [2.0, 2.0]}, "bbox": [2.0, 2.0, 2.0, 2.0]}, {"id": "2", "typ\
-e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3.0, 3.\
-0]}, "bbox": [3.0, 3.0, 3.0, 3.0]}], "bbox": [1.0, 1.0, 3.0, 3.0]}'
-
-        See Also
-        --------
-        GeometryArray.to_file : write GeometryArray to file
-        """
-        return self.to_geoframe(name="geometry").to_json(
-            na="null", show_bbox=show_bbox, drop_id=drop_id, to_wgs84=to_wgs84, **kwargs
-        )
-
     def to_wkb(self, hex: bool = False, **kwargs) -> pspd.Series:
         """
         Convert GeometryArray geometries to WKB
@@ -4399,168 +4254,12 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             returns_geom=False,
         )
 
-    def to_arrow(self, geometry_encoding="WKB", interleaved=True, include_z=None):
-        """Encode a GeometryArray to GeoArrow format.
-
-        See https://geoarrow.org/ for details on the GeoArrow specification.
-
-        This functions returns a generic Arrow array object implementing
-        the `Arrow PyCapsule Protocol`_ (i.e. having an ``__arrow_c_array__``
-        method). This object can then be consumed by your Arrow implementation
-        of choice that supports this protocol.
-
-        .. _Arrow PyCapsule Protocol: https://arrow.apache.org/docs/format/CDataInterface/PyCapsuleInterface.html
-
-        Note: Requires geopandas versions >= 1.0.0 to use with Sedona.
-
-        Parameters
-        ----------
-        geometry_encoding : {'WKB', 'geoarrow' }, default 'WKB'
-            The GeoArrow encoding to use for the data conversion.
-        interleaved : bool, default True
-            Only relevant for 'geoarrow' encoding. If True, the geometries'
-            coordinates are interleaved in a single fixed size list array.
-            If False, the coordinates are stored as separate arrays in a
-            struct type.
-        include_z : bool, default None
-            Only relevant for 'geoarrow' encoding (for WKB, the dimensionality
-            of the individual geometries is preserved).
-            If False, return 2D geometries. If True, include the third dimension
-            in the output (if a geometry has no third dimension, the z-coordinates
-            will be NaN). By default, will infer the dimensionality from the
-            input geometries. Note that this inference can be unreliable with
-            empty geometries (for a guaranteed result, it is recommended to
-            specify the keyword).
-
-        Returns
-        -------
-        GeoArrowArray
-            A generic Arrow array object with geometry data encoded to GeoArrow.
-
-        Examples
-        --------
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Point
-        >>> gser = GeometryArray([Point(1, 2), Point(2, 1)])
-        >>> gser
-        0    POINT (1 2)
-        1    POINT (2 1)
-        dtype: geometry
-
-        >>> arrow_array = gser.to_arrow()
-        >>> arrow_array
-        <geopandas.io._geoarrow.GeoArrowArray object at ...>
-
-        The returned array object needs to be consumed by a library implementing
-        the Arrow PyCapsule Protocol. For example, wrapping the data as a
-        pyarrow.Array (requires pyarrow >= 14.0):
-
-        >>> import pyarrow as pa
-        >>> array = pa.array(arrow_array)
-        >>> array
-        <pyarrow.lib.BinaryArray object at ...>
-        [
-          0101000000000000000000F03F0000000000000040,
-          01010000000000000000000040000000000000F03F
-        ]
-
-        """
-        # Because this function returns the arrow array in memory, we simply rely on geopandas's implementation.
-        # This also returns a geopandas specific data type, which can be converted to an actual pyarrow array,
-        # so there is no direct Sedona equivalent. This way we also get all of the arguments implemented for free.
-        return self.to_geopandas().to_arrow(
-            geometry_encoding=geometry_encoding,
-            interleaved=interleaved,
-            include_z=include_z,
-        )
-
     def clip(self, mask, keep_geom_type: bool = False, sort=False) -> "GeometryArray":
         raise NotImplementedError(
             _not_implemented_error(
                 "clip", "Clips geometries to the bounds of a mask geometry."
             )
         )
-
-    def to_file(
-        self,
-        path: str,
-        driver: Union[str, None] = None,
-        schema: Union[dict, None] = None,
-        index: Union[bool, None] = None,
-        **kwargs,
-    ):
-        """
-        Write the ``GeometryArray`` to a file.
-
-        Parameters
-        ----------
-        path : string
-            File path or file handle to write to.
-        driver : string, default None
-            The format driver used to write the file.
-            If not specified, it attempts to infer it from the file extension.
-            If no extension is specified, Sedona will error.
-            Options:
-                - "geojson"
-                - "geopackage"
-                - "geoparquet"
-        schema : dict, default None
-            Not applicable to Sedona's implementation
-        index : bool, default None
-            If True, write index into one or more columns (for MultiIndex).
-            Default None writes the index into one or more columns only if
-            the index is named, is a MultiIndex, or has a non-integer data
-            type. If False, no index is written.
-        mode : string, default 'w'
-            The write mode, 'w' to overwrite the existing file and 'a' to append.
-            'overwrite' and 'append' are equivalent to 'w' and 'a' respectively.
-        crs : pyproj.CRS, default None
-            If specified, the CRS is passed to Fiona to
-            better control how the file is written. If None, GeoPandas
-            will determine the crs based on crs df attribute.
-            The value can be anything accepted
-            by :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
-            such as an authority string (eg "EPSG:4326") or a WKT string.
-        engine : str
-            Not applicable to Sedona's implementation
-        metadata : dict[str, str], default None
-            Optional metadata to be stored in the file. Keys and values must be
-            strings. Supported only for "GPKG" driver. Not supported by Sedona
-        **kwargs :
-            Keyword args to be passed to the engine, and can be used to write
-            to multi-layer data, store data within archives (zip files), etc.
-            In case of the "pyogrio" engine, the keyword arguments are passed to
-            `pyogrio.write_dataframe`. In case of the "fiona" engine, the keyword
-            arguments are passed to fiona.open`. For more information on possible
-            keywords, type: ``import pyogrio; help(pyogrio.write_dataframe)``.
-
-        Examples
-        --------
-
-        >>> gdf = GeoDataFrame({"geometry": [Point(0, 0), LineString([(0, 0), (1, 1)])], "int": [1, 2]}
-        >>> gdf.to_file(filepath, format="geoparquet")
-
-        With selected drivers you can also append to a file with `mode="a"`:
-
-        >>> gdf.to_file(gdf, driver="geojson", mode="a")
-
-        When the index is of non-integer dtype, index=None (default) is treated as True, writing the index to the file.
-
-        >>> gdf = GeoDataFrame({"geometry": [Point(0, 0)]}, index=["a", "b"])
-        >>> gdf.to_file(gdf, driver="geoparquet")
-        """
-        self.to_geoframe().to_file(path, driver, index=index, **kwargs)
-
-    def to_parquet(self, path, **kwargs):
-        """
-        Write the GeometryArray to a GeoParquet file.
-        Parameters:
-        - path: str
-            The file path where the GeoParquet file will be written.
-        - kwargs: Any
-            Additional arguments to pass to the Sedona DataFrame output function.
-        """
-        self.to_geoframe().to_file(path, driver="geoparquet", **kwargs)
 
     # -----------------------------------------------------------------------------
     # # Utils

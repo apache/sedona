@@ -2017,14 +2017,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         dtype: object
 
         """
-        spark_expr = stf.ST_AsBinary(self.spark.column)
-
-        if hex:
-            spark_expr = F.hex(spark_expr)
-        return self._query_geometry_column(
-            spark_expr,
-            returns_geom=False,
-        )
+        return _delegate_property("to_wkb", self, hex=hex, **kwargs)
 
     def to_wkt(self, **kwargs) -> pspd.Series:
         """
@@ -2062,11 +2055,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         --------
         GeoSeries.to_wkb
         """
-        spark_expr = stf.ST_AsText(self.spark.column)
-        return self._query_geometry_column(
-            spark_expr,
-            returns_geom=False,
-        )
+        return _delegate_property("to_wkt", self, **kwargs)
 
     def to_arrow(self, geometry_encoding="WKB", interleaved=True, include_z=None):
         """Encode a GeoSeries to GeoArrow format.
