@@ -44,7 +44,7 @@ import shapely
 from shapely.geometry.base import BaseGeometry
 
 from sedona.geopandas._typing import Label
-from sedona.geopandas.base import GeoFrame
+from sedona.geopandas.base import GeoFrame, _delegate_property
 from sedona.geopandas.sindex import SpatialIndex
 from packaging.version import parse as parse_version
 
@@ -1051,73 +1051,6 @@ class GeoSeries(GeoFrame, pspd.Series):
             returns_geom=True,
         )
 
-    def simplify(self, tolerance=None, preserve_topology=True) -> "GeoSeries":
-        """Returns a ``GeoSeries`` containing a simplified representation of
-        each geometry.
-
-        The algorithm (Douglas-Peucker) recursively splits the original line
-        into smaller parts and connects these parts' endpoints
-        by a straight line. Then, it removes all points whose distance
-        to the straight line is smaller than `tolerance`. It does not
-        move any points and it always preserves endpoints of
-        the original line or polygon.
-        See https://shapely.readthedocs.io/en/latest/manual.html#object.simplify
-        for details
-
-        Simplifies individual geometries independently, without considering
-        the topology of a potential polygonal coverage. If you would like to treat
-        the ``GeoSeries`` as a coverage and simplify its edges, while preserving the
-        coverage topology, see :meth:`simplify_coverage`.
-
-        Parameters
-        ----------
-        tolerance : float
-            All parts of a simplified geometry will be no more than
-            `tolerance` distance from the original. It has the same units
-            as the coordinate reference system of the GeoSeries.
-            For example, using `tolerance=100` in a projected CRS with meters
-            as units means a distance of 100 meters in reality.
-        preserve_topology: bool (default True)
-            False uses a quicker algorithm, but may produce self-intersecting
-            or otherwise invalid geometries.
-
-        Notes
-        -----
-        Invalid geometric objects may result from simplification that does not
-        preserve topology and simplification may be sensitive to the order of
-        coordinates: two geometries differing only in order of coordinates may be
-        simplified differently.
-
-        See also
-        --------
-        simplify_coverage : simplify geometries using coverage simplification
-
-        Examples
-        --------
-        >>> from sedona.geopandas import GeoSeries
-        >>> from shapely.geometry import Point, LineString
-        >>> s = GeoSeries(
-        ...     [Point(0, 0).buffer(1), LineString([(0, 0), (1, 10), (0, 20)])]
-        ... )
-        >>> s
-        0    POLYGON ((1 0, 0.99518 -0.09802, 0.98079 -0.19...
-        1                         LINESTRING (0 0, 1 10, 0 20)
-        dtype: geometry
-
-        >>> s.simplify(1)
-        0    POLYGON ((0 1, 0 -1, -1 0, 0 1))
-        1              LINESTRING (0 0, 0 20)
-        dtype: geometry
-        """
-
-        spark_expr = (
-            stf.ST_SimplifyPreserveTopology(self.spark.column, tolerance)
-            if preserve_topology
-            else stf.ST_Simplify(self.spark.column, tolerance)
-        )
-
-        return self._query_geometry_column(spark_expr)
-
     def sjoin(
         self,
         other,
@@ -1196,11 +1129,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.z
 
         """
-        spark_col = stf.ST_X(self.spark.column)
-        return self._query_geometry_column(
-            spark_col,
-            returns_geom=False,
-        )
+        return _delegate_property("x", self)
 
     @property
     def y(self) -> pspd.Series:
@@ -1230,11 +1159,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.m
 
         """
-        spark_col = stf.ST_Y(self.spark.column)
-        return self._query_geometry_column(
-            spark_col,
-            returns_geom=False,
-        )
+        return _delegate_property("y", self)
 
     @property
     def z(self) -> pspd.Series:
@@ -1264,11 +1189,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.m
 
         """
-        spark_col = stf.ST_Z(self.spark.column)
-        return self._query_geometry_column(
-            spark_col,
-            returns_geom=False,
-        )
+        return _delegate_property("z", self)
 
     @property
     def m(self) -> pspd.Series:
@@ -1836,7 +1757,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         --------
         GeoSeries.isna : detect missing values
         """
-        from sedona.geopandas.base import _delegate_property
 
         return _delegate_property(
             "fillna", self, value, inplace=inplace, limit=limit, **kwargs
@@ -1951,114 +1871,8 @@ class GeoSeries(GeoFrame, pspd.Series):
             spark_expr,
         )
 
-    @property
-    def bounds(self) -> pspd.DataFrame:
-        """Returns a ``DataFrame`` with columns ``minx``, ``miny``, ``maxx``,
-        ``maxy`` values containing the bounds for each geometry.
-
-        See ``GeoSeries.total_bounds`` for the limits of the entire series.
-
-        Examples
-        --------
-        >>> from shapely.geometry import Point, Polygon, LineString
-        >>> d = {'geometry': [Point(2, 1), Polygon([(0, 0), (1, 1), (1, 0)]),
-        ... LineString([(0, 1), (1, 2)])]}
-        >>> gdf = geopandas.GeoDataFrame(d, crs="EPSG:4326")
-        >>> gdf.bounds
-           minx  miny  maxx  maxy
-        0   2.0   1.0   2.0   1.0
-        1   0.0   0.0   1.0   1.0
-        2   0.0   1.0   1.0   2.0
-
-        You can assign the bounds to the ``GeoDataFrame`` as:
-
-        >>> import pandas as pd
-        >>> gdf = pd.concat([gdf, gdf.bounds], axis=1)
-        >>> gdf
-                                geometry  minx  miny  maxx  maxy
-        0                     POINT (2 1)   2.0   1.0   2.0   1.0
-        1  POLYGON ((0 0, 1 1, 1 0, 0 0))   0.0   0.0   1.0   1.0
-        2           LINESTRING (0 1, 1 2)   0.0   1.0   1.0   2.0
-        """
-        selects = [
-            stf.ST_XMin(self.spark.column).alias("minx"),
-            stf.ST_YMin(self.spark.column).alias("miny"),
-            stf.ST_XMax(self.spark.column).alias("maxx"),
-            stf.ST_YMax(self.spark.column).alias("maxy"),
-        ]
-
-        df = self._internal.spark_frame
-
-        sdf = df.select(*selects)
-        internal = InternalFrame(
-            spark_frame=sdf,
-            index_spark_columns=None,
-            column_labels=[("minx",), ("miny",), ("maxx",), ("maxy",)],
-            data_spark_columns=[
-                scol_for(sdf, "minx"),
-                scol_for(sdf, "miny"),
-                scol_for(sdf, "maxx"),
-                scol_for(sdf, "maxy"),
-            ],
-            column_label_names=None,
-        )
-        return pspd.DataFrame(internal)
-
-    @property
-    def total_bounds(self):
-        """Returns a tuple containing ``minx``, ``miny``, ``maxx``, ``maxy``
-        values for the bounds of the series as a whole.
-
-        See ``GeoSeries.bounds`` for the bounds of the geometries contained in
-        the series.
-
-        Examples
-        --------
-        >>> from shapely.geometry import Point, Polygon, LineString
-        >>> d = {'geometry': [Point(3, -1), Polygon([(0, 0), (1, 1), (1, 0)]),
-        ... LineString([(0, 1), (1, 2)])]}
-        >>> gdf = geopandas.GeoDataFrame(d, crs="EPSG:4326")
-        >>> gdf.total_bounds
-        array([ 0., -1.,  3.,  2.])
-        """
-        import numpy as np
-        import warnings
-        from pyspark.sql import functions as F
-
-        if len(self) == 0:
-            # numpy 'min' cannot handle empty arrays
-            # TODO with numpy >= 1.15, the 'initial' argument can be used
-            return np.array([np.nan, np.nan, np.nan, np.nan])
-        ps_df = self.bounds
-        with warnings.catch_warnings():
-            # if all rows are empty geometry / none, nan is expected
-            warnings.filterwarnings(
-                "ignore", r"All-NaN slice encountered", RuntimeWarning
-            )
-            total_bounds_df = ps_df.agg(
-                {
-                    "minx": ["min"],
-                    "miny": ["min"],
-                    "maxx": ["max"],
-                    "maxy": ["max"],
-                }
-            )
-
-            return np.array(
-                (
-                    np.nanmin(total_bounds_df["minx"]["min"]),  # minx
-                    np.nanmin(total_bounds_df["miny"]["min"]),  # miny
-                    np.nanmax(total_bounds_df["maxx"]["max"]),  # maxx
-                    np.nanmax(total_bounds_df["maxy"]["max"]),  # maxy
-                )
-            )
-
     def estimate_utm_crs(self, datum_name: str = "WGS 84") -> "CRS":
         """Returns the estimated UTM CRS based on the bounds of the dataset.
-
-        .. versionadded:: 0.9
-
-        .. note:: Requires pyproj 3+
 
         Parameters
         ----------
@@ -2091,61 +1905,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         - Ellipsoid: WGS 84
         - Prime Meridian: Greenwich
         """
-        import numpy as np
-        from pyproj import CRS
-        from pyproj.aoi import AreaOfInterest
-        from pyproj.database import query_utm_crs_info
-
-        # This implementation replicates the implementation in geopandas's implementation exactly.
-        # https://github.com/geopandas/geopandas/blob/main/geopandas/array.py
-        # The only difference is that we use Sedona's total_bounds property which is more efficient and scalable
-        # than the geopandas implementation. The rest of the implementation always executes on 4 points (minx, miny, maxx, maxy),
-        # so the numpy and pyproj implementations are reasonable.
-
-        if not self.crs:
-            raise RuntimeError("crs must be set to estimate UTM CRS.")
-
-        minx, miny, maxx, maxy = self.total_bounds
-        if self.crs.is_geographic:
-            x_center = np.mean([minx, maxx])
-            y_center = np.mean([miny, maxy])
-        # ensure using geographic coordinates
-        else:
-            from pyproj import Transformer
-            from functools import lru_cache
-
-            TransformerFromCRS = lru_cache(Transformer.from_crs)
-
-            transformer = TransformerFromCRS(self.crs, "EPSG:4326", always_xy=True)
-            minx, miny, maxx, maxy = transformer.transform_bounds(
-                minx, miny, maxx, maxy
-            )
-            y_center = np.mean([miny, maxy])
-            # crossed the antimeridian
-            if minx > maxx:
-                # shift maxx from [-180,180] to [0,360]
-                # so both numbers are positive for center calculation
-                # Example: -175 to 185
-                maxx += 360
-                x_center = np.mean([minx, maxx])
-                # shift back to [-180,180]
-                x_center = ((x_center + 180) % 360) - 180
-            else:
-                x_center = np.mean([minx, maxx])
-
-        utm_crs_list = query_utm_crs_info(
-            datum_name=datum_name,
-            area_of_interest=AreaOfInterest(
-                west_lon_degree=x_center,
-                south_lat_degree=y_center,
-                east_lon_degree=x_center,
-                north_lat_degree=y_center,
-            ),
-        )
-        try:
-            return CRS.from_epsg(utm_crs_list[0].code)
-        except IndexError:
-            raise RuntimeError("Unable to determine UTM CRS")
+        return _delegate_property("estimate_utm_crs", self, datum_name)
 
     def to_json(
         self,

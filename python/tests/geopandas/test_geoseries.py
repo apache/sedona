@@ -126,6 +126,9 @@ class TestGeoSeries(TestGeopandasBase):
         )
         self.check_sgpd_equals_gpd(result, expected)
 
+        df_result = s.to_geoframe().simplify(0.2, preserve_topology=False)
+        self.check_sgpd_equals_gpd(df_result, expected)
+
     def test_geometry(self):
         sgpd_geoseries = sgpd.GeoSeries([Point(0, 0), Point(1, 1)])
         assert isinstance(sgpd_geoseries.geometry, sgpd.GeoSeries)
@@ -344,6 +347,9 @@ class TestGeoSeries(TestGeopandasBase):
         )
         pd.testing.assert_frame_equal(result.to_pandas(), expected)
 
+        df_result = geoseries.to_geoframe().bounds
+        pd.testing.assert_frame_equal(df_result.to_pandas(), expected)
+
     def test_total_bounds(self):
         d = [
             Point(3, -1),
@@ -355,6 +361,9 @@ class TestGeoSeries(TestGeopandasBase):
         result = geoseries.total_bounds
         expected = np.array([0.0, -1.0, 3.0, 2.0])
         np.testing.assert_array_equal(result, expected)
+
+        df_result = geoseries.to_geoframe().total_bounds
+        np.testing.assert_array_equal(df_result, expected)
 
     # These tests were taken directly from the TestEstimateUtmCrs class in the geopandas test suite
     # https://github.com/geopandas/geopandas/blob/main/geopandas/tests/test_array.py

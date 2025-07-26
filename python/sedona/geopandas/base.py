@@ -1781,6 +1781,56 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_property("snap", self, other, tolerance, align)
 
+    @property
+    def bounds(self) -> ps.DataFrame:
+        """Returns a ``DataFrame`` with columns ``minx``, ``miny``, ``maxx``,
+        ``maxy`` values containing the bounds for each geometry.
+
+        See ``GeometryArray.total_bounds`` for the limits of the entire series.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point, Polygon, LineString
+        >>> d = {'geometry': [Point(2, 1), Polygon([(0, 0), (1, 1), (1, 0)]),
+        ... LineString([(0, 1), (1, 2)])]}
+        >>> gdf = geopandas.GeoDataFrame(d, crs="EPSG:4326")
+        >>> gdf.bounds
+           minx  miny  maxx  maxy
+        0   2.0   1.0   2.0   1.0
+        1   0.0   0.0   1.0   1.0
+        2   0.0   1.0   1.0   2.0
+
+        You can assign the bounds to the ``GeoDataFrame`` as:
+
+        >>> import pandas as pd
+        >>> gdf = pd.concat([gdf, gdf.bounds], axis=1)
+        >>> gdf
+                                geometry  minx  miny  maxx  maxy
+        0                     POINT (2 1)   2.0   1.0   2.0   1.0
+        1  POLYGON ((0 0, 1 1, 1 0, 0 0))   0.0   0.0   1.0   1.0
+        2           LINESTRING (0 1, 1 2)   0.0   1.0   1.0   2.0
+        """
+        return _delegate_property("bounds", self)
+
+    @property
+    def total_bounds(self):
+        """Returns a tuple containing ``minx``, ``miny``, ``maxx``, ``maxy``
+        values for the bounds of the series as a whole.
+
+        See ``GeometryArray.bounds`` for the bounds of the geometries contained in
+        the series.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point, Polygon, LineString
+        >>> d = {'geometry': [Point(3, -1), Polygon([(0, 0), (1, 1), (1, 0)]),
+        ... LineString([(0, 1), (1, 2)])]}
+        >>> gdf = geopandas.GeoDataFrame(d, crs="EPSG:4326")
+        >>> gdf.total_bounds
+        array([ 0., -1.,  3.,  2.])
+        """
+        return _delegate_property("total_bounds", self)
+
     def dwithin(self, other, distance, align=None):
         """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
         each aligned geometry that is within a set distance from ``other``.
@@ -2128,6 +2178,66 @@ class GeoFrame(metaclass=ABCMeta):
         **kwargs,
     ):
         raise NotImplementedError("This method is not implemented yet.")
+
+    def simplify(self, tolerance=None, preserve_topology=True):
+        """Returns a ``GeoSeries`` containing a simplified representation of
+        each geometry.
+
+        The algorithm (Douglas-Peucker) recursively splits the original line
+        into smaller parts and connects these parts' endpoints
+        by a straight line. Then, it removes all points whose distance
+        to the straight line is smaller than `tolerance`. It does not
+        move any points and it always preserves endpoints of
+        the original line or polygon.
+        See https://shapely.readthedocs.io/en/latest/manual.html#object.simplify
+        for details
+
+        Simplifies individual geometries independently, without considering
+        the topology of a potential polygonal coverage. If you would like to treat
+        the ``GeoSeries`` as a coverage and simplify its edges, while preserving the
+        coverage topology, see :meth:`simplify_coverage`.
+
+        Parameters
+        ----------
+        tolerance : float
+            All parts of a simplified geometry will be no more than
+            `tolerance` distance from the original. It has the same units
+            as the coordinate reference system of the GeoSeries.
+            For example, using `tolerance=100` in a projected CRS with meters
+            as units means a distance of 100 meters in reality.
+        preserve_topology: bool (default True)
+            False uses a quicker algorithm, but may produce self-intersecting
+            or otherwise invalid geometries.
+
+        Notes
+        -----
+        Invalid geometric objects may result from simplification that does not
+        preserve topology and simplification may be sensitive to the order of
+        coordinates: two geometries differing only in order of coordinates may be
+        simplified differently.
+
+        See also
+        --------
+        simplify_coverage : simplify geometries using coverage simplification
+
+        Examples
+        --------
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Point, LineString
+        >>> s = GeoSeries(
+        ...     [Point(0, 0).buffer(1), LineString([(0, 0), (1, 10), (0, 20)])]
+        ... )
+        >>> s
+        0    POLYGON ((1 0, 0.99518 -0.09802, 0.98079 -0.19...
+        1                         LINESTRING (0 0, 1 10, 0 20)
+        dtype: geometry
+
+        >>> s.simplify(1)
+        0    POLYGON ((0 1, 0 -1, -1 0, 0 1))
+        1              LINESTRING (0 0, 0 20)
+        dtype: geometry
+        """
+        return _delegate_property("simplify", self, tolerance, preserve_topology)
 
     @abstractmethod
     def sjoin(self, other, predicate="intersects", **kwargs):
