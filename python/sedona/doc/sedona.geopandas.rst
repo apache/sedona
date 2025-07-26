@@ -28,10 +28,10 @@ sedona.geopandas.geodataframe module
    :undoc-members:
    :show-inheritance:
 
-sedona.geopandas.geoindex module
+sedona.geopandas.sindex module
 --------------------------------
 
-.. automodule:: sedona.geopandas.geoindex
+.. automodule:: sedona.geopandas.sindex
    :members:
    :undoc-members:
    :show-inheritance:
