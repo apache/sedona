@@ -46,6 +46,7 @@ from shapely.geometry.base import BaseGeometry
 from sedona.geopandas._typing import Label
 from sedona.geopandas.base import GeoFrame, _delegate_property
 from sedona.geopandas.sindex import SpatialIndex
+from sedona.geopandas.geometryarray import _get_series_col_name
 from packaging.version import parse as parse_version
 
 from pyspark.pandas.internal import (
@@ -1621,12 +1622,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.notna : inverse of isna
         GeoSeries.is_empty : detect empty geometries
         """
-        spark_expr = F.isnull(self.spark.column)
-        result = self._query_geometry_column(
-            spark_expr,
-            returns_geom=False,
-        )
-        return to_bool(result)
+        return _delegate_property("isna", self)
 
     def isnull(self) -> pspd.Series:
         """Alias for `isna` method. See `isna` for more detail."""
@@ -1666,13 +1662,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.isna : inverse of notna
         GeoSeries.is_empty : detect empty geometries
         """
-        # After Sedona's minimum spark version is 3.5.0, we can use F.isnotnull(self.spark.column) instead
-        spark_expr = ~F.isnull(self.spark.column)
-        result = self._query_geometry_column(
-            spark_expr,
-            returns_geom=False,
-        )
-        return to_bool(result)
+        return _delegate_property("notna", self)
 
     def notnull(self) -> pspd.Series:
         """Alias for `notna` method. See `notna` for more detail."""
@@ -2270,36 +2260,3 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         # to_spark() is important here to ensure that the spark column names are set to the pandas column ones
         return GeoDataFrame(pspd.DataFrame(renamed._internal).to_spark())
-
-
-# -----------------------------------------------------------------------------
-# # Utils
-# -----------------------------------------------------------------------------
-
-
-def _get_series_col_name(ps_series: pspd.Series) -> str:
-    return ps_series.name if ps_series.name else SPARK_DEFAULT_SERIES_NAME
-
-
-def to_bool(ps_series: pspd.Series, default: bool = False) -> pspd.Series:
-    """
-    Cast a ps.Series to bool type if it's not one, converting None values to the default value.
-    """
-    if ps_series.dtype.name != "bool":
-        # fill None values with the default value
-        ps_series.fillna(default, inplace=True)
-
-    return ps_series
-
-
-def _to_geo_series(df: PandasOnSparkSeries) -> GeoSeries:
-    """
-    Get the first Series from the DataFrame.
-
-    Parameters:
-    - df: The input DataFrame.
-
-    Returns:
-    - GeoSeries: The first Series from the DataFrame.
-    """
-    return GeoSeries(data=df)

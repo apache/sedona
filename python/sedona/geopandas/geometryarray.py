@@ -951,7 +951,7 @@ class GeometryArray(pspd.Series):
             spark_col,
             returns_geom=False,
         )
-        return to_bool(result)
+        return _to_bool(result)
 
     def is_valid_reason(self) -> pspd.Series:
         """Returns a ``Series`` of strings with the reason for invalidity of
@@ -1034,7 +1034,7 @@ class GeometryArray(pspd.Series):
             spark_expr,
             returns_geom=False,
         )
-        return to_bool(result)
+        return _to_bool(result)
 
     def count_coordinates(self):
         # Implementation of the abstract method
@@ -1328,7 +1328,7 @@ class GeometryArray(pspd.Series):
             spark_expr,
             returns_geom=False,
         )
-        return to_bool(result)
+        return _to_bool(result)
 
     @property
     def is_ring(self):
@@ -1811,7 +1811,7 @@ class GeometryArray(pspd.Series):
             default_val=False,
         )
 
-        return to_bool(result)
+        return _to_bool(result)
 
     def disjoint(self, other, align=None):
         # Implementation of the abstract method
@@ -1934,7 +1934,7 @@ class GeometryArray(pspd.Series):
             align,
             default_val=False,
         )
-        return to_bool(result)
+        return _to_bool(result)
 
     def overlaps(self, other, align=None) -> pspd.Series:
         """Returns True for all aligned geometries that overlap other, else False.
@@ -2038,7 +2038,7 @@ class GeometryArray(pspd.Series):
             align,
             default_val=False,
         )
-        return to_bool(result)
+        return _to_bool(result)
 
     def touches(self, other, align=None) -> pspd.Series:
         """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
@@ -2154,7 +2154,7 @@ class GeometryArray(pspd.Series):
             align,
             default_val=False,
         )
-        return to_bool(result)
+        return _to_bool(result)
 
     def within(self, other, align=None) -> pspd.Series:
         """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
@@ -2273,7 +2273,7 @@ class GeometryArray(pspd.Series):
             align,
             default_val=False,
         )
-        return to_bool(result)
+        return _to_bool(result)
 
     def covers(self, other, align=None) -> pspd.Series:
         """
@@ -2393,7 +2393,7 @@ class GeometryArray(pspd.Series):
             align,
             default_val=False,
         )
-        return to_bool(result)
+        return _to_bool(result)
 
     def covered_by(self, other, align=None) -> pspd.Series:
         """
@@ -2513,7 +2513,7 @@ class GeometryArray(pspd.Series):
             align,
             default_val=False,
         )
-        return to_bool(result)
+        return _to_bool(result)
 
     def distance(self, other, align=None) -> pspd.Series:
         """Returns a ``Series`` containing the distance to aligned `other`.
@@ -3044,7 +3044,7 @@ class GeometryArray(pspd.Series):
             returns_geom=False,
             default_val=False,
         )
-        return to_bool(result)
+        return _to_bool(result)
 
     def contains_properly(self, other, align=None):
         # Implementation of the abstract method
@@ -3332,95 +3332,21 @@ class GeometryArray(pspd.Series):
     # ============================================================================
 
     def isna(self) -> pspd.Series:
-        """
-        Detect missing values.
-
-        Returns
-        -------
-        A boolean Series of the same size as the GeometryArray,
-        True where a value is NA.
-
-        Examples
-        --------
-
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Polygon
-        >>> s = GeometryArray(
-        ...     [Polygon([(0, 0), (1, 1), (0, 1)]), None, Polygon([])]
-        ... )
-        >>> s
-        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
-        1                              None
-        2                     POLYGON EMPTY
-        dtype: geometry
-
-        >>> s.isna()
-        0    False
-        1     True
-        2    False
-        dtype: bool
-
-        See Also
-        --------
-        GeometryArray.notna : inverse of isna
-        GeometryArray.is_empty : detect empty geometries
-        """
         spark_expr = F.isnull(self.spark.column)
         result = self._query_geometry_column(
             spark_expr,
             returns_geom=False,
         )
-        return to_bool(result)
-
-    def isnull(self) -> pspd.Series:
-        """Alias for `isna` method. See `isna` for more detail."""
-        return self.isna()
+        return _to_bool(result)
 
     def notna(self) -> pspd.Series:
-        """
-        Detect non-missing values.
-
-        Returns
-        -------
-        A boolean pandas Series of the same size as the GeometryArray,
-        False where a value is NA.
-
-        Examples
-        --------
-
-        >>> from sedona.geopandas import GeometryArray
-        >>> from shapely.geometry import Polygon
-        >>> s = GeometryArray(
-        ...     [Polygon([(0, 0), (1, 1), (0, 1)]), None, Polygon([])]
-        ... )
-        >>> s
-        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
-        1                              None
-        2                     POLYGON EMPTY
-        dtype: geometry
-
-        >>> s.notna()
-        0     True
-        1    False
-        2     True
-        dtype: bool
-
-        See Also
-        --------
-        GeometryArray.isna : inverse of notna
-        GeometryArray.is_empty : detect empty geometries
-        """
         # After Sedona's minimum spark version is 3.5.0, we can use F.isnotnull(self.spark.column) instead
         spark_expr = ~F.isnull(self.spark.column)
         result = self._query_geometry_column(
             spark_expr,
             returns_geom=False,
         )
-        return to_bool(result)
-
-    def notnull(self) -> pspd.Series:
-        """Alias for `notna` method. See `notna` for more detail."""
-        return self.notna()
+        return _to_bool(result)
 
     def fillna(
         self, value=None, inplace: bool = False, limit=None, **kwargs
@@ -4015,7 +3941,7 @@ def _get_series_col_name(ps_series: pspd.Series) -> str:
     return ps_series.name if ps_series.name else SPARK_DEFAULT_SERIES_NAME
 
 
-def to_bool(ps_series: pspd.Series, default: bool = False) -> pspd.Series:
+def _to_bool(ps_series: pspd.Series, default: bool = False) -> pspd.Series:
     """
     Cast a ps.Series to bool type if it's not one, converting None values to the default value.
     """
@@ -4024,16 +3950,3 @@ def to_bool(ps_series: pspd.Series, default: bool = False) -> pspd.Series:
         ps_series.fillna(default, inplace=True)
 
     return ps_series
-
-
-def _to_geo_series(df: PandasOnSparkSeries) -> GeometryArray:
-    """
-    Get the first Series from the DataFrame.
-
-    Parameters:
-    - df: The input DataFrame.
-
-    Returns:
-    - GeometryArray: The first Series from the DataFrame.
-    """
-    return GeometryArray(data=df)
