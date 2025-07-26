@@ -827,48 +827,6 @@ class GeoSeries(GeoFrame, pspd.Series):
             return self
 
     @property
-    def geom_type(self) -> pspd.Series:
-        """
-        Returns a series of strings specifying the geometry type of each geometry of each object.
-
-        Note: Unlike Geopandas, Sedona returns LineString instead of LinearRing.
-
-        Returns
-        -------
-        Series
-            A Series containing the geometry type of each geometry.
-
-        Examples
-        --------
-        >>> from shapely.geometry import Polygon, Point
-        >>> from sedona.geopandas import GeoSeries
-
-        >>> gs = GeoSeries([Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), Point(0, 0)])
-        >>> gs.geom_type
-        0    POLYGON
-        1    POINT
-        dtype: object
-        """
-        spark_col = stf.GeometryType(self.spark.column)
-        result = self._query_geometry_column(
-            spark_col,
-            returns_geom=False,
-        )
-
-        # Sedona returns the string in all caps unlike Geopandas
-        sgpd_to_gpg_name_map = {
-            "POINT": "Point",
-            "LINESTRING": "LineString",
-            "POLYGON": "Polygon",
-            "MULTIPOINT": "MultiPoint",
-            "MULTILINESTRING": "MultiLineString",
-            "MULTIPOLYGON": "MultiPolygon",
-            "GEOMETRYCOLLECTION": "GeometryCollection",
-        }
-        result = result.map(lambda x: sgpd_to_gpg_name_map.get(x, x))
-        return result
-
-    @property
     def type(self):
         # Implementation of the abstract method
         raise NotImplementedError(

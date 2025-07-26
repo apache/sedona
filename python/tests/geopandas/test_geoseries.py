@@ -551,6 +551,9 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         )
         assert_series_equal(result.to_pandas(), expected)
 
+        df_result = geoseries.to_geoframe().geom_type
+        assert_series_equal(df_result.to_pandas(), expected)
+
     def test_type(self):
         pass
 

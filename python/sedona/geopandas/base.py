@@ -115,9 +115,29 @@ class GeoFrame(metaclass=ABCMeta):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    @abstractmethod
     def geom_type(self):
-        raise NotImplementedError("This method is not implemented yet.")
+        """
+        Returns a series of strings specifying the geometry type of each geometry of each object.
+
+        Note: Unlike Geopandas, Sedona returns LineString instead of LinearRing.
+
+        Returns
+        -------
+        Series
+            A Series containing the geometry type of each geometry.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Polygon, Point
+        >>> from sedona.geopandas import GeoSeries
+
+        >>> gs = GeoSeries([Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), Point(0, 0)])
+        >>> gs.geom_type
+        0    POLYGON
+        1    POINT
+        dtype: object
+        """
+        return _delegate_property("geom_type", self)
 
     @property
     @abstractmethod
