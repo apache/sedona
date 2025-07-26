@@ -19,9 +19,10 @@
 package org.apache.spark.sql.udf
 
 import org.apache.sedona.sql.UDF
-import org.apache.spark.TestUtils
+import org.apache.spark.{SparkEnv, TestUtils}
 import org.apache.spark.api.python._
 import org.apache.spark.broadcast.Broadcast
+import org.apache.spark.internal.config.Python.{PYTHON_DAEMON_MODULE, PYTHON_USE_DAEMON, PYTHON_WORKER_MODULE}
 import org.apache.spark.sql.execution.python.UserDefinedPythonFunction
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.util.Utils
@@ -70,10 +71,11 @@ object ScalarUDF {
     finally Utils.deleteRecursively(path)
   }
 
+  val additionalModule = "spark/spark-3.5/src/test/scala/org/apache/spark/sql/udf"
+
   val pandasFunc: Array[Byte] = {
     var binaryPandasFunc: Array[Byte] = null
     withTempPath { path =>
-      println(path)
       Process(
         Seq(
           pythonExec,
@@ -85,6 +87,17 @@ object ScalarUDF {
             |from pyspark.serializers import CloudPickleSerializer
             |from sedona.utils import geometry_serde
             |from shapely import box
+            |import logging
+            |logging.basicConfig(level=logging.INFO)
+            |logger = logging.getLogger(__name__)
+            |logger.info("Loading Sedona Python UDF")
+            |import os
+            |logger.info(os.getcwd())
+            |import sys
+            |import sys
+            |print("boring stuff")
+            |sys.path.append('$additionalModule')
+            |logger.info(sys.path)
             |f = open('$path', 'wb');
             |def w(x):
             |    def apply_function(w):
@@ -104,7 +117,9 @@ object ScalarUDF {
   }
 
   private val workerEnv = new java.util.HashMap[String, String]()
-  workerEnv.put("PYTHONPATH", s"$pysparkPythonPath:$pythonPath")
+    workerEnv.put("PYTHONPATH", s"$pysparkPythonPath:$pythonPath")
+    SparkEnv.get.conf.set(PYTHON_WORKER_MODULE, "sedonaworker.worker")
+    SparkEnv.get.conf.set(PYTHON_USE_DAEMON, false)
 
   val geoPandasScalaFunction: UserDefinedPythonFunction = UserDefinedPythonFunction(
     name = "geospatial_udf",
