@@ -78,6 +78,23 @@ class TestGeoSeries(TestGeopandasBase):
         with pytest.raises(TypeError):
             GeoSeries(ps.Series([0, 1, 2]))
 
+    @pytest.mark.parametrize(
+        "obj",
+        [
+            [Point(x, x) for x in range(3)],
+            pd.Series([Point(x, x) for x in range(3)]),
+            gpd.GeoSeries([Point(x, x) for x in range(3)]),
+        ],
+    )
+    def test_constructor(self, obj):
+        sgpd_series = sgpd.GeoSeries(obj)
+        assert isinstance(sgpd_series, sgpd.GeoSeries)
+
+    def test_constructor_pandas_on_spark(self):
+        obj = ps.Series([Point(x, x) for x in range(3)])
+        sgpd_series = GeoSeries(obj)
+        assert isinstance(sgpd_series, sgpd.GeoSeries)
+
     def test_area(self):
         result = self.geoseries.area.to_pandas()
         expected = pd.Series([0.0, 0.0, 5.23, 5.23])
@@ -527,8 +544,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
                     ]
                 ),
                 GeometryCollection([Point(0, 0), LineString([(0, 0), (1, 1)])]),
-                # Errors for LinearRing: issue #2120
-                # LinearRing([(0, 0), (1, 1), (1, 0), (0, 1), (0, 0)]),
+                LinearRing([(0, 0), (1, 1), (1, 0), (0, 1), (0, 0)]),
             ]
         )
         result = geoseries.geom_type
@@ -541,7 +557,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
                 "Polygon",
                 "MultiPolygon",
                 "GeometryCollection",
-                # "LineString",  # Note: Sedona returns LineString instead of LinearRing
+                "LineString",  # Note: Sedona returns LineString instead of LinearRing
             ]
         )
         assert_series_equal(result.to_pandas(), expected)
@@ -723,14 +739,12 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             [
                 LineString([(0, 0), (1, 1), (1, -1), (0, 1)]),
                 LineString([(0, 0), (1, 1), (1, -1)]),
-                # Errors for LinearRing: issue #2120
-                # LinearRing([(0, 0), (1, 1), (1, -1), (0, 1)]),
-                # LinearRing([(0, 0), (-1, 1), (-1, -1), (1, -1)]),
+                LinearRing([(0, 0), (1, 1), (1, -1), (0, 1)]),
+                LinearRing([(0, 0), (-1, 1), (-1, -1), (1, -1)]),
             ]
         )
         result = s.is_simple
-        expected = pd.Series([False, True])
-        # Removed LinearRing cases: False, True]
+        expected = pd.Series([False, True, False, True])
         assert_series_equal(result.to_pandas(), expected)
 
     def test_is_ring(self):
