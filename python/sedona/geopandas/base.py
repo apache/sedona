@@ -145,23 +145,148 @@ class GeoFrame(metaclass=ABCMeta):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    @abstractmethod
     def length(self):
-        raise NotImplementedError("This method is not implemented yet.")
+        """
+        Returns a Series containing the length of each geometry in the GeoSeries.
+
+        In the case of a (Multi)Polygon it measures the length of its exterior (i.e. perimeter).
+
+        For a GeometryCollection it measures sums the values for each of the individual geometries.
+
+        Returns
+        -------
+        Series
+            A Series containing the length of each geometry.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Polygon
+        >>> from sedona.geopandas import GeoSeries
+
+        >>> gs = GeoSeries([Point(0, 0), LineString([(0, 0), (1, 1)]), Polygon([(0, 0), (1, 0), (1, 1)]), GeometryCollection([Point(0, 0), LineString([(0, 0), (1, 1)]), Polygon([(0, 0), (1, 0), (1, 1)])])])
+        >>> gs.length
+        0    0.000000
+        1    1.414214
+        2    3.414214
+        3    4.828427
+        dtype: float64
+        """
+        return _delegate_property("length", self)
 
     @property
-    @abstractmethod
     def is_valid(self):
-        raise NotImplementedError("This method is not implemented yet.")
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        geometries that are valid.
 
-    @abstractmethod
+        Examples
+        --------
+
+        An example with one invalid polygon (a bowtie geometry crossing itself)
+        and one missing geometry:
+
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
+        ...         Polygon([(0,0), (1, 1), (1, 0), (0, 1)]),  # bowtie geometry
+        ...         Polygon([(0, 0), (2, 2), (2, 0)]),
+        ...         None
+        ...     ]
+        ... )
+        >>> s
+        0         POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1    POLYGON ((0 0, 1 1, 1 0, 0 1, 0 0))
+        2         POLYGON ((0 0, 2 2, 2 0, 0 0))
+        3                                   None
+        dtype: geometry
+
+        >>> s.is_valid
+        0     True
+        1    False
+        2     True
+        3    False
+        dtype: bool
+
+        See also
+        --------
+        GeoSeries.is_valid_reason : reason for invalidity
+        """
+        return _delegate_property("is_valid", self)
+
     def is_valid_reason(self):
-        raise NotImplementedError("This method is not implemented yet.")
+        """Returns a ``Series`` of strings with the reason for invalidity of
+        each geometry.
+
+        Examples
+        --------
+
+        An example with one invalid polygon (a bowtie geometry crossing itself)
+        and one missing geometry:
+
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
+        ...         Polygon([(0,0), (1, 1), (1, 0), (0, 1)]),  # bowtie geometry
+        ...         Polygon([(0, 0), (2, 2), (2, 0)]),
+        ...         Polygon([(0, 0), (2, 0), (1, 1), (2, 2), (0, 2), (1, 1), (0, 0)]),
+        ...         None
+        ...     ]
+        ... )
+        >>> s
+        0         POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1    POLYGON ((0 0, 1 1, 1 0, 0 1, 0 0))
+        2         POLYGON ((0 0, 2 2, 2 0, 0 0))
+        3                                   None
+        dtype: geometry
+
+        >>> s.is_valid_reason()
+        0    Valid Geometry
+        1    Self-intersection at or near point (0.5, 0.5, NaN)
+        2    Valid Geometry
+        3    Ring Self-intersection at or near point (1.0, 1.0)
+        4    None
+        dtype: object
+
+        See also
+        --------
+        GeoSeries.is_valid : detect invalid geometries
+        GeoSeries.make_valid : fix invalid geometries
+        """
+        return _delegate_property("is_valid_reason", self)
 
     @property
-    @abstractmethod
     def is_empty(self):
-        raise NotImplementedError("This method is not implemented yet.")
+        """
+        Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        empty geometries.
+
+        Examples
+        --------
+        An example of a GeoDataFrame with one empty point, one point and one missing
+        value:
+
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Point
+        >>> geoseries = GeoSeries([Point(), Point(2, 1), None], crs="EPSG:4326")
+        >>> geoseries
+        0  POINT EMPTY
+        1  POINT (2 1)
+        2         None
+
+        >>> geoseries.is_empty
+        0     True
+        1    False
+        2    False
+        dtype: bool
+
+        See Also
+        --------
+        GeoSeries.isna : detect missing geometries
+        """
+        return _delegate_property("is_empty", self)
 
     @abstractmethod
     def count_coordinates(self):
@@ -534,12 +659,13 @@ def _delegate_property(op, this, *args, **kwargs):
         data = getattr(a_this, op)(*args, **kwargs)
     else:
         data = getattr(a_this, op)
+        # If it was a function instead of a property, call it
+        if callable(data):
+            data = data()
 
     if isinstance(data, GeometryArray):
         from .geoseries import GeoSeries
 
         return GeoSeries(data)
-    elif isinstance(data, (ps.Series, BaseGeometry)):
-        return data
     else:
-        raise NotImplementedError("Logical Error")
+        return data

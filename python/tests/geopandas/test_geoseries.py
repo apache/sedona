@@ -576,6 +576,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         expected = pd.Series([0.000000, 1.414214, 3.414214, 4.828427])
         assert_series_equal(result, expected)
 
+        # Check that GeoDataFrame works too
+        df_result = geoseries.to_geoframe().length.to_pandas()
+        assert_series_equal(df_result, expected)
+
     def test_is_valid(self):
         geoseries = sgpd.GeoSeries(
             [
@@ -588,6 +592,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = geoseries.is_valid
         expected = pd.Series([True, False, True, False])
         assert_series_equal(result.to_pandas(), expected)
+
+        # Check that GeoDataFrame works too
+        df_result = geoseries.to_geoframe().is_valid.to_pandas()
+        assert_series_equal(df_result, expected)
 
     def test_is_valid_reason(self):
         s = sgpd.GeoSeries(
@@ -613,6 +621,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         )
         assert_series_equal(result, expected)
 
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().is_valid_reason().to_pandas()
+        assert_series_equal(df_result, expected)
+
     def test_is_empty(self):
         geoseries = sgpd.GeoSeries(
             [Point(), Point(2, 1), Polygon([(0, 0), (1, 1), (0, 1)]), None],
@@ -621,6 +633,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = geoseries.is_empty
         expected = pd.Series([True, False, False, False])
         assert_series_equal(result.to_pandas(), expected)
+
+        # Check that GeoDataFrame works too
+        df_result = geoseries.to_geoframe().is_empty.to_pandas()
+        assert_series_equal(df_result, expected)
 
     def test_count_coordinates(self):
         pass

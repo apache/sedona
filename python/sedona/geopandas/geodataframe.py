@@ -1208,48 +1208,11 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
         raise NotImplementedError("to_feather() is not implemented yet.")
 
     @property
-    def geom_type(self) -> str:
-        # Implementation of the abstract method
-        raise NotImplementedError(
-            _not_implemented_error(
-                "geom_type",
-                "Returns the geometry type of each geometry (Point, LineString, Polygon, etc.).",
-            )
-        )
-
-    @property
     def type(self):
         # Implementation of the abstract method
         raise NotImplementedError(
             _not_implemented_error("type", "Returns numeric geometry type codes.")
         )
-
-    @property
-    def length(self):
-        # Implementation of the abstract method
-        raise NotImplementedError(
-            _not_implemented_error(
-                "length", "Returns the length/perimeter of each geometry."
-            )
-        )
-
-    @property
-    def is_valid(self):
-        # Implementation of the abstract method
-        raise NotImplementedError(
-            _not_implemented_error(
-                "is_valid", "Tests if geometries are valid according to OGC standards."
-            )
-        )
-
-    def is_valid_reason(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def is_empty(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
 
     def count_coordinates(self):
         # Implementation of the abstract method
