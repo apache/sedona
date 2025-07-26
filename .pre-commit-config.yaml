@@ -53,6 +53,15 @@ repos:
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
       - id: insert-license
+        name: add license for all Shell script files
+        files: \.sh$
+        args:
+          - --comment-style
+          - '|#|'
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
+      - id: insert-license
         name: add license for all .h files
         files: \.h$
         args:
