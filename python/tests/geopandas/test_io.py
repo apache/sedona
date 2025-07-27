@@ -232,6 +232,9 @@ class TestIO(TestGeopandasBase):
         read_result = GeoSeries.from_file(temp_file_path, format=format)
         read_result = read_result.to_geopandas()
 
+        # In Geopandas, the name of the series is always read in to be "geometry"
+        sgpd_ser.name = "geometry"
+
         # Since index=True, the contents should be in the same order as the original GeoSeries
         self.check_sgpd_equals_gpd(sgpd_ser, read_result)
 
