@@ -488,7 +488,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             geometry: pspd.Series = self["geometry"]
             if isinstance(geometry, sgpd.GeoSeries):
                 geom_crs = geometry.crs
-                # geom_crs = self._safe_get_crs()
                 if geom_crs is None:
                     if crs is not None:
                         geometry.set_crs(crs, inplace=True)
@@ -874,7 +873,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         Parameters:
         - deep: bool, default False
-            This parameter is not supported but just dummy parameter to match pandas.
+            This parameter is not supported but just a dummy parameter to match pandas.
 
         Returns:
         - GeoDataFrame: A copy of this GeoDataFrame object.
