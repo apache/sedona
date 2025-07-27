@@ -1761,7 +1761,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         schema = StructType([StructField("data", BinaryType(), True)])
         return cls._create_from_select(
-            f"ST_GeomFromWKB(`data`)",
+            stc.ST_GeomFromWKB(F.col("data")),
             data,
             schema,
             index,
@@ -1841,7 +1841,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         schema = StructType([StructField("data", StringType(), True)])
         return cls._create_from_select(
-            f"ST_GeomFromText(`data`)",
+            stc.ST_GeomFromText(F.col("data")),
             data,
             schema,
             index,
@@ -1908,11 +1908,11 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         if z:
             data = list(zip(x, y, z))
-            select = f"ST_PointZ(`x`, `y`, `z`)"
+            select = stc.ST_PointZ(F.col("x"), F.col("y"), F.col("z"))
             schema.add(StructField("z", DoubleType(), True))
         else:
             data = list(zip(x, y))
-            select = f"ST_Point(`x`, `y`)"
+            select = stc.ST_Point(F.col("x"), F.col("y"))
 
         geoseries = cls._create_from_select(
             select,
@@ -1994,7 +1994,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @classmethod
     def _create_from_select(
-        cls, select: str, data, schema, index, crs, **kwargs
+        cls, spark_col: PySparkColumn, data, schema, index, crs, **kwargs
     ) -> "GeoSeries":
 
         from pyspark.pandas.utils import default_session
@@ -2005,7 +2005,6 @@ class GeoSeries(GeoFrame, pspd.Series):
             data = [(obj,) for obj in data]
 
         name = kwargs.get("name", SPARK_DEFAULT_SERIES_NAME)
-        select = f"{select} as `{name}`"
 
         if isinstance(data, pspd.Series):
             spark_df = data._internal.spark_frame
@@ -2016,7 +2015,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         else:
             spark_df = default_session().createDataFrame(data, schema=schema)
 
-        spark_df = spark_df.selectExpr(select)
+        spark_df = spark_df.select(spark_col.alias(name))
 
         internal = InternalFrame(
             spark_frame=spark_df,
