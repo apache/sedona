@@ -71,6 +71,15 @@ repos:
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
       - id: insert-license
+        name: add license for all Shell files
+        files: \.sh$
+        args:
+          - --comment-style
+          - '|#|'
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
+      - id: insert-license
         name: add license for all Markdown files
         files: \.md$
         args:
@@ -155,7 +164,7 @@ repos:
         name: run black-jupyter
         description: format Python files and Jupyter Notebooks with black
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v20.1.7
+    rev: v20.1.8
     hooks:
       - id: clang-format
         name: run clang-format
@@ -179,7 +188,7 @@ repos:
         args: [--ignore-words=.github/linters/codespell.txt]
         exclude: ^docs/image|^spark/common/src/test/resources|^docs/usecases|^tools/maven/scalafmt|osmpbf/build|^docker/zeppelin
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.27.2
+    rev: v8.28.0
     hooks:
       - id: gitleaks
         name: run gitleaks
