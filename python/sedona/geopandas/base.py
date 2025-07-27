@@ -38,7 +38,6 @@ from pyspark.pandas._typing import (
 from pyspark.sql import Column
 
 from sedona.geopandas._typing import GeoFrameLike
-from sedona.geopandas.geometryarray import GeometryArray
 
 bool_type = bool
 
@@ -2265,7 +2264,7 @@ class GeoFrame(metaclass=ABCMeta):
         raise NotImplementedError("This method is not implemented yet.")
 
 
-def _delegate_property(op, this, *args, **kwargs):
+def _delegate_to_geometry_column(op, this, *args, **kwargs):
     geom_column = this.geometry
     if args or kwargs:
         data = getattr(geom_column, op)(*args, **kwargs)
@@ -2280,30 +2279,3 @@ def _delegate_property(op, this, *args, **kwargs):
         return None
 
     return data
-
-
-def _delegate_to_geometry_column(op, this, *args, **kwargs):
-    """
-    Delegate a call to the GeometryArray class, and then convert the result as a ps.Series or GeoSeries
-
-    inplace: bool must be specified as kwarg to work correctly.
-    """
-    a_this = GeometryArray(this.geometry)
-    if args or kwargs:
-        data = getattr(a_this, op)(*args, **kwargs)
-    else:
-        data = getattr(a_this, op)
-        # If it was a function instead of a property, call it
-        if callable(data):
-            data = data()
-
-    if kwargs.get("inplace", False):
-        this._update_inplace(a_this)
-        return None
-
-    if isinstance(data, GeometryArray):
-        from .geoseries import GeoSeries
-
-        return GeoSeries(data)
-    else:
-        return data

@@ -1624,9 +1624,6 @@ def _ensure_geometry(data, crs: Any | None = None) -> sgpd.GeoSeries:
     """
     Ensure the data is of geometry dtype or converted to it.
 
-    If input is a (Geo)Series, output is a GeoSeries, otherwise output
-    is GeometryArray.
-
     If the input is a GeometryDtype with a set CRS, `crs` is ignored.
     """
     if isinstance(data, sgpd.GeoSeries):

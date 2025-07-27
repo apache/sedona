@@ -2142,8 +2142,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         value : shapely geometry or GeoSeries, default None
             If None is passed, NA values will be filled with GEOMETRYCOLLECTION EMPTY.
             If a shapely geometry object is passed, it will be
-            used to fill all missing values. If a ``GeoSeries`` or ``GeometryArray``
-            are passed, missing values will be filled based on the corresponding index
+            used to fill all missing values. If a ``GeoSeries``
+            is passed, missing values will be filled based on the corresponding index
             locations. If pd.NA or np.nan are passed, values will be filled with
             ``None`` (not GEOMETRYCOLLECTION EMPTY).
         limit : int, default None
@@ -2209,7 +2209,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.isna : detect missing values
         """
         from shapely.geometry.base import BaseGeometry
-        from geopandas.array import GeometryArray
 
         # TODO: Implement limit https://github.com/apache/sedona/issues/2068
         if limit:
@@ -2233,7 +2232,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             other, extended = self._make_series_of_val(value)
             align = False if extended else align
 
-        elif isinstance(value, (GeoSeries, GeometryArray, gpd.GeoSeries)):
+        elif isinstance(value, (GeoSeries, gpd.GeoSeries)):
 
             if not isinstance(value, GeoSeries):
                 value = GeoSeries(value)
