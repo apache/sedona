@@ -90,7 +90,7 @@ class TestDataframe(TestGeopandasBase):
         sgpd_df.set_geometry(name, inplace=True)
         check_geodataframe(sgpd_df)
         result = sgpd_df.area
-        expected = pd.Series([1.0, 1.0, 1.0], name=name)
+        expected = pd.Series([1.0, 1.0, 1.0])
         self.check_pd_series_equal(result, expected)
 
     # These need to be defined inside the function to ensure Sedona's Geometry UDTs have been registered
@@ -206,6 +206,8 @@ class TestDataframe(TestGeopandasBase):
         assert type(df_copy) is GeoDataFrame
 
     def test_set_geometry(self):
+        from sedona.geopandas.geodataframe import MissingGeometryColumnError
+
         points1 = [Point(x, x) for x in range(3)]
         points2 = [Point(x + 5, x + 5) for x in range(3)]
 
@@ -213,7 +215,7 @@ class TestDataframe(TestGeopandasBase):
         sgpd_df = sgpd.GeoDataFrame(data)
 
         # No geometry column set yet
-        with pytest.raises(AttributeError):
+        with pytest.raises(MissingGeometryColumnError):
             _ = sgpd_df.geometry
 
         # TODO: Try to optimize this with self.ps_allow_diff_frames() away

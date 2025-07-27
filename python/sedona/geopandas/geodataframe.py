@@ -413,8 +413,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         from pyspark.sql import DataFrame as SparkDataFrame
 
         if isinstance(data, GeoDataFrame):
-            if data._safe_get_crs() is None:
-                data.crs = crs
+            data_crs = data._safe_get_crs()
+            if data_crs is not None:
+                data.crs = data_crs
 
             super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
 
@@ -537,7 +538,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                     "df.set_geometry. "
                 )
 
-            raise AttributeError(msg)
+            raise MissingGeometryColumnError(msg)
         return self[self._geometry_column_name]
 
     def _set_geometry(self, col):
@@ -872,7 +873,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         Parameters:
         - deep: bool, default False
-            If True, a deep copy of the data is made. Otherwise, a shallow copy is made.
+            This parameter is not supported but just a dummy parameter to match pandas.
 
         Returns:
         - GeoDataFrame: A copy of this GeoDataFrame object.
@@ -895,33 +896,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         else:
             return self  # GeoDataFrame(self._internal.spark_frame.copy())  "this parameter is not supported but just dummy parameter to match pandas."
 
-    @property
-    def area(self) -> GeoDataFrame:
-        """
-        Returns a GeoDataFrame containing the area of each geometry expressed in the units of the CRS.
-
-        Returns
-        -------
-        GeoDataFrame
-            A GeoDataFrame with the areas of the geometries.
-
-        Examples
-        --------
-        >>> from shapely.geometry import Polygon
-        >>> from sedona.geopandas import GeoDataFrame
-        >>>
-        >>> data = {
-        ...     'geometry': [Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])],
-        ...     'value': [1, 2]
-        ... }
-        >>> gdf = GeoDataFrame(data)
-        >>> gdf.area
-           geometry_area  value
-        0           1.0      1
-        1           4.0      2
-        """
-        return self.geometry.area
-
     def _safe_get_crs(self):
         """
         Helper method for getting the crs of the GeoDataframe safely.
@@ -929,7 +903,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         """
         try:
             return self.geometry.crs
-        except AttributeError:
+        except MissingGeometryColumnError:
             return None
 
     @property
@@ -1233,302 +1207,15 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
         raise NotImplementedError("to_feather() is not implemented yet.")
 
     @property
-    def geom_type(self) -> str:
-        # Implementation of the abstract method
-        raise NotImplementedError(
-            _not_implemented_error(
-                "geom_type",
-                "Returns the geometry type of each geometry (Point, LineString, Polygon, etc.).",
-            )
-        )
-
-    @property
     def type(self):
         # Implementation of the abstract method
         raise NotImplementedError(
             _not_implemented_error("type", "Returns numeric geometry type codes.")
         )
 
-    @property
-    def length(self):
-        # Implementation of the abstract method
-        raise NotImplementedError(
-            _not_implemented_error(
-                "length", "Returns the length/perimeter of each geometry."
-            )
-        )
-
-    @property
-    def is_valid(self):
-        # Implementation of the abstract method
-        raise NotImplementedError(
-            _not_implemented_error(
-                "is_valid", "Tests if geometries are valid according to OGC standards."
-            )
-        )
-
-    def is_valid_reason(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def is_empty(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def count_coordinates(self):
-        # Implementation of the abstract method
-        raise NotImplementedError(
-            _not_implemented_error(
-                "count_coordinates",
-                "Counts the number of coordinate tuples in each geometry.",
-            )
-        )
-
-    def count_geometries(self):
-        # Implementation of the abstract method
-        raise NotImplementedError(
-            _not_implemented_error(
-                "count_geometries",
-                "Counts the number of geometries in each multi-geometry or collection.",
-            )
-        )
-
-    def count_interior_rings(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def is_simple(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def is_ring(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def is_ccw(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def is_closed(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def has_z(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def get_precision(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def get_geometry(self, index):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def boundary(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def centroid(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def concave_hull(self, ratio=0.0, allow_holes=False):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def convex_hull(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def delaunay_triangles(self, tolerance=0.0, only_edges=False):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def voronoi_polygons(self, tolerance=0.0, extend_to=None, only_edges=False):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def envelope(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def minimum_rotated_rectangle(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def exterior(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def extract_unique_points(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def offset_curve(self, distance, quad_segs=8, join_style="round", mitre_limit=5.0):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def interiors(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def remove_repeated_points(self, tolerance=0.0):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def set_precision(self, grid_size, mode="valid_output"):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def representative_point(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def minimum_bounding_circle(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def minimum_bounding_radius(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def minimum_clearance(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def normalize(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def make_valid(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def reverse(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def segmentize(self, max_segment_length):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def transform(self, transformation, include_z=False):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def force_2d(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def force_3d(self, z=0):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def line_merge(self, directed=False):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def unary_union(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def union_all(self, method="unary", grid_size=None):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def intersection_all(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def contains(self, other, align=None):
-        # Implementation of the abstract method
-        raise NotImplementedError(
-            _not_implemented_error(
-                "contains", "Tests if geometries contain other geometries."
-            )
-        )
-
-    def contains_properly(self, other, align=None):
-        # Implementation of the abstract method
-        raise NotImplementedError(
-            _not_implemented_error(
-                "contains_properly",
-                "Tests if geometries properly contain other geometries (no boundary contact).",
-            )
-        )
-
     # ============================================================================
     # SPATIAL OPERATIONS
     # ============================================================================
-
-    def buffer(
-        self,
-        distance,
-        resolution=16,
-        cap_style="round",
-        join_style="round",
-        mitre_limit=5.0,
-        single_sided=False,
-        **kwargs,
-    ) -> sgpd.GeoSeries:
-        """
-        Returns a GeoSeries with all geometries buffered by the specified distance.
-
-        Parameters
-        ----------
-        distance : float
-            The distance to buffer by. Negative distances will create inward buffers.
-        resolution : int, default 16
-            The number of segments used to approximate curves.
-        cap_style : str, default "round"
-            The style of the buffer cap. One of 'round', 'flat', 'square'.
-        join_style : str, default "round"
-            The style of the buffer join. One of 'round', 'mitre', 'bevel'.
-        mitre_limit : float, default 5.0
-            The mitre limit ratio for joins when join_style='mitre'.
-        single_sided : bool, default False
-            Whether to create a single-sided buffer.
-
-        Returns
-        -------
-        GeoSeries
-            A new GeoSeries with buffered geometries.
-
-        Examples
-        --------
-        >>> from shapely.geometry import Point
-        >>> from sedona.geopandas import GeoDataFrame
-        >>>
-        >>> data = {
-        ...     'geometry': [Point(0, 0), Point(1, 1)],
-        ...     'value': [1, 2]
-        ... }
-        >>> gdf = GeoDataFrame(data)
-        >>> buffered = gdf.buffer(0.5)
-        """
-        return self.geometry.buffer(
-            distance,
-            resolution=16,
-            cap_style="round",
-            join_style="round",
-            mitre_limit=5.0,
-            single_sided=False,
-            **kwargs,
-        )
 
     def sjoin(
         self,
@@ -1726,9 +1413,6 @@ def _ensure_geometry(data, crs: Any | None = None) -> sgpd.GeoSeries:
     """
     Ensure the data is of geometry dtype or converted to it.
 
-    If input is a (Geo)Series, output is a GeoSeries, otherwise output
-    is GeometryArray.
-
     If the input is a GeometryDtype with a set CRS, `crs` is ignored.
     """
     if isinstance(data, sgpd.GeoSeries):
@@ -1739,3 +1423,8 @@ def _ensure_geometry(data, crs: Any | None = None) -> sgpd.GeoSeries:
         return data
     else:
         return sgpd.GeoSeries(data, crs=crs)
+
+
+# We don't raise AttributeError because that would be caught by pyspark's __getattr__ creating a misleading error message
+class MissingGeometryColumnError(Exception):
+    pass

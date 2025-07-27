@@ -15,15 +15,22 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import pytest
 import numpy as np
+import shapely
 from pyspark.sql.functions import expr
 from shapely.geometry import Point, Polygon, LineString
 
 from tests.test_base import TestBase
 from sedona.geopandas import GeoSeries
 from sedona.geopandas.sindex import SpatialIndex
+from packaging.version import parse as parse_version
 
 
+@pytest.mark.skipif(
+    parse_version(shapely.__version__) < parse_version("2.0.0"),
+    reason=f"Tests require shapely>=2.0.0, but found v{shapely.__version__}",
+)
 class TestSpatialIndex(TestBase):
     """Tests for the spatial index functionality in GeoSeries."""
 
@@ -56,11 +63,17 @@ class TestSpatialIndex(TestBase):
             ]
         )
 
-    def test_sindex_property_exists(self):
+    def test_geoseries_sindex_property_exists(self):
         """Test that the sindex property exists on GeoSeries."""
         assert hasattr(self.points, "sindex")
         assert hasattr(self.polygons, "sindex")
         assert hasattr(self.lines, "sindex")
+
+    def test_geodataframe_sindex_property_exists(self):
+        """Test that the sindex property exists on GeoDataFrame."""
+        assert hasattr(self.points.to_geoframe(), "sindex")
+        assert hasattr(self.polygons.to_geoframe(), "sindex")
+        assert hasattr(self.lines.to_geoframe(), "sindex")
 
     def test_query_with_point(self):
         """Test querying the spatial index with a point geometry."""
