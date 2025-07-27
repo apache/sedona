@@ -249,36 +249,6 @@ class GeoSeries(GeoFrame, pspd.Series):
     copy : bool, default False
         Whether to copy the input data.
 
-    Attributes
-    ----------
-    crs : pyproj.CRS
-        The Coordinate Reference System (CRS) for the geometries.
-    area : Series
-        Area of each geometry in CRS units.
-    length : Series
-        Length/perimeter of each geometry in CRS units.
-    bounds : DataFrame
-        Bounding box coordinates for each geometry.
-    geometry : GeoSeries
-        The geometry column (returns self).
-    sindex : SpatialIndex
-        Spatial index for the geometries.
-
-    Methods
-    -------
-    buffer(distance)
-        Buffer geometries by specified distance.
-    intersection(other)
-        Compute intersection with other geometries.
-    intersects(other)
-        Test if geometries intersect with other geometries.
-    to_geopandas()
-        Convert to GeoPandas GeoSeries.
-    to_crs(crs)
-        Transform geometries to a different CRS.
-    set_crs(crs)
-        Set the CRS without transforming geometries.
-
     Examples
     --------
     >>> from shapely.geometry import Point, Polygon
