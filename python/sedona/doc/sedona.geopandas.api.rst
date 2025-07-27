@@ -1,10 +1,11 @@
 sedona.geopandas package
 ========================
 
+.. Option: inherited-members: Series
+   Document all methods from the parent base 'GeoFrame' class, but ignore the methods in 'Series' class
 .. autoclass:: sedona.geopandas.GeoSeries
    :members:
    :undoc-members:
-   .. Document all methods from the parent base 'GeoFrame' class, but ignore the methods in 'Series' class
 
    :inherited-members: Series
 
