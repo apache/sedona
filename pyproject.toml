@@ -16,7 +16,7 @@
 # under the License.
 
 [tool.bandit]
-skips = ["B101", "B403", "B405", "B608"]
+skips = ["B101"]
 
 [tool.codespell]
 ignore-words = '.github/linters/codespell.txt'
