@@ -1344,12 +1344,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             metadata : dict[str, str], default None
                 Optional metadata to be stored in the file. Keys and values must be
                 strings. Supported only for "GPKG" driver. Not supported by Sedona
-            Keyword args to be passed to the engine, and can be used to write
-            to multi-layer data, store data within archives (zip files), etc.
-            In case of the "pyogrio" engine, the keyword arguments are passed to
-            `pyogrio.write_dataframe`. In case of the "fiona" engine, the keyword
-            arguments are passed to fiona.open`. For more information on possible
-            keywords, type: ``import pyogrio; help(pyogrio.write_dataframe)``.
 
         Examples
         --------
