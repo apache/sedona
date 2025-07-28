@@ -18,13 +18,20 @@
  */
 package org.apache.sedona.common.S2Geography;
 
+import static org.apache.sedona.common.spider.Generator.GEOMETRY_FACTORY;
+
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.UnsafeInput;
 import com.esotericsoftware.kryo.io.UnsafeOutput;
 import com.google.common.geometry.*;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateSequence;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 
 public class PolygonGeography extends S2Geography {
   private static final Logger logger = Logger.getLogger(PolygonGeography.class.getName());
@@ -98,5 +105,62 @@ public class PolygonGeography extends S2Geography {
     geo = new PolygonGeography(poly);
 
     return geo;
+  }
+
+  public CoordinateSequence getCoordinateSequence() {
+    // Count total vertices across all loops
+    int total = 0;
+    for (int li = 0; li < polygon.numLoops(); li++) {
+      S2Loop loop = polygon.loop(li);
+      total += loop.numVertices();
+    }
+    // Build array of Coordinates
+    Coordinate[] coords = new Coordinate[total];
+    int idx = 0;
+    for (int li = 0; li < polygon.numLoops(); li++) {
+      S2Loop loop = polygon.loop(li);
+      int nv = loop.numVertices();
+      for (int vi = 0; vi < nv; vi++, idx++) {
+        S2Point p = loop.vertex(vi);
+        coords[idx] = new Coordinate(p.getX(), p.getY(), p.getZ());
+      }
+    }
+    return new CoordinateArraySequence(coords);
+  }
+
+  public LinearRing getExteriorRing() {
+    if (polygon.numLoops() == 0) return GEOMETRY_FACTORY.createLinearRing(new Coordinate[0]);
+    S2Loop loop = polygon.loop(0);
+    Coordinate[] coords = new Coordinate[loop.numVertices() + 1];
+    for (int i = 0; i < loop.numVertices(); i++) {
+      S2Point pt = loop.vertex(i);
+      S2LatLng ll = new S2LatLng(pt);
+      double lat = ll.latDegrees();
+      double lon = ll.lngDegrees();
+      Coordinate c = new Coordinate(lon, lat);
+      coords[i] = c;
+    }
+    coords[coords.length - 1] = coords[0];
+    return GEOMETRY_FACTORY.createLinearRing(coords);
+  }
+
+  /** Returns all interior loops as JTS LineStrings. */
+  public List<LinearRing> getLoops() {
+    List<LinearRing> loops = new ArrayList<>();
+    for (int li = 1; li < polygon.numLoops(); li++) {
+      S2Loop loop = polygon.loop(li);
+      Coordinate[] coords = new Coordinate[loop.numVertices() + 1];
+      for (int idx = 0; idx < loop.numVertices(); idx++) {
+        S2Point pt = loop.vertex(idx);
+        S2LatLng ll = new S2LatLng(pt);
+        double lat = ll.latDegrees();
+        double lon = ll.lngDegrees();
+        Coordinate c = new Coordinate(lon, lat);
+        coords[idx] = c;
+      }
+      coords[coords.length - 1] = coords[0];
+      loops.add(GEOMETRY_FACTORY.createLinearRing(coords));
+    }
+    return loops;
   }
 }

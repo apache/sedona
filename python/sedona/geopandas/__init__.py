@@ -24,3 +24,5 @@ from sedona.geopandas.geoseries import GeoSeries
 from sedona.geopandas.geodataframe import GeoDataFrame
 
 from sedona.geopandas.tools import sjoin
+
+from sedona.geopandas.io import read_file

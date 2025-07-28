@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+from typing import Union
 from tests.test_base import TestBase
 from sedona.geopandas import GeoDataFrame, GeoSeries
 import pyspark.sql
@@ -23,6 +24,9 @@ import pandas as pd
 import pyspark.pandas as ps
 from pandas.testing import assert_series_equal
 from contextlib import contextmanager
+from shapely.geometry import GeometryCollection
+from shapely.geometry.base import BaseGeometry
+from pandas.testing import assert_index_equal
 
 
 class TestGeopandasBase(TestBase):
@@ -44,10 +48,16 @@ class TestGeopandasBase(TestBase):
 
     # TODO chore: rename to check_sgpd_series_equals_gpd_series and change the names in the geoseries tests
     @classmethod
-    def check_sgpd_equals_gpd(cls, actual: GeoSeries, expected: gpd.GeoSeries):
+    def check_sgpd_equals_gpd(
+        cls,
+        actual: GeoSeries,
+        expected: gpd.GeoSeries,
+    ):
         assert isinstance(actual, GeoSeries)
         assert isinstance(expected, gpd.GeoSeries)
+        assert actual.name == expected.name, "results are of different names"
         sgpd_result = actual.to_geopandas()
+        assert len(sgpd_result) == len(expected), "results are of different lengths"
         for a, e in zip(sgpd_result, expected):
             if a is None or e is None:
                 assert a is None and e is None
@@ -59,30 +69,50 @@ class TestGeopandasBase(TestBase):
                 a, e, tolerance=1e-2
             )  # increased tolerance from 1e-6
 
+        assert_index_equal(actual.index.to_pandas(), expected.index)
+
     @classmethod
     def check_sgpd_df_equals_gpd_df(
         cls, actual: GeoDataFrame, expected: gpd.GeoDataFrame
     ):
-        assert isinstance(actual, GeoDataFrame)
-        assert isinstance(expected, gpd.GeoDataFrame)
+        assert isinstance(actual, GeoDataFrame), "result is not a sgpd.GeoDataFrame"
+        assert isinstance(
+            expected, gpd.GeoDataFrame
+        ), "expected is not a gpd.GeoDataFrame"
         assert len(actual.columns) == len(expected.columns)
         for col_name in actual.keys():
             actual_series, expected_series = actual[col_name], expected[col_name]
             if isinstance(actual_series, GeoSeries):
-                assert isinstance(actual_series, GeoSeries)
+                assert isinstance(
+                    actual_series, GeoSeries
+                ), f"result[{col_name}] series is not a sgpd.GeoSeries"
                 # original geopandas does not guarantee a GeoSeries will be returned, so convert it here
                 expected_series = gpd.GeoSeries(expected_series)
                 cls.check_sgpd_equals_gpd(actual_series, expected_series)
             else:
-                assert isinstance(actual_series, ps.Series)
-                assert isinstance(expected_series, pd.Series)
+                assert isinstance(
+                    actual_series, ps.Series
+                ), f"result[{col_name}] series is not a ps.Series"
+                assert isinstance(
+                    expected_series, pd.Series
+                ), f"expected[{col_name}] series is not a pd.Series"
                 cls.check_pd_series_equal(actual_series, expected_series)
 
     @classmethod
     def check_pd_series_equal(cls, actual: ps.Series, expected: pd.Series):
-        assert isinstance(actual, ps.Series)
-        assert isinstance(expected, pd.Series)
+        assert isinstance(actual, ps.Series), "result series is not a ps.Series"
+        assert isinstance(expected, pd.Series), "expected series is not a pd.Series"
         assert_series_equal(actual.to_pandas(), expected)
+
+    @classmethod
+    def check_index_equal(
+        cls, actual: Union[ps.DataFrame, ps.Series], expected: ps.Index
+    ):
+        assert_index_equal(actual.index, expected)
+
+    @classmethod
+    def contains_any_geom_collection(cls, geoms) -> bool:
+        return any(isinstance(g, GeometryCollection) for g in geoms)
 
     @contextmanager
     def ps_allow_diff_frames(self):
@@ -96,3 +126,14 @@ class TestGeopandasBase(TestBase):
             yield
         finally:
             ps.reset_option("compute.ops_on_diff_frames")
+
+    def contains_any_geom_collection(self, geoms1, geoms2) -> bool:
+        return any(isinstance(g, GeometryCollection) for g in geoms1) or any(
+            isinstance(g, GeometryCollection) for g in geoms2
+        )
+
+    @classmethod
+    def check_geom_equals(cls, actual: BaseGeometry, expected: BaseGeometry):
+        assert isinstance(actual, BaseGeometry)
+        assert isinstance(expected, BaseGeometry)
+        assert actual.equals(expected)

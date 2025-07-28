@@ -44,9 +44,13 @@ class TestBase:
 
             builder = SedonaContext.builder().appName("SedonaSparkTest")
             if SPARK_REMOTE:
-                builder = builder.remote(SPARK_REMOTE).config(
-                    "spark.sql.extensions",
-                    "org.apache.sedona.sql.SedonaSqlExtensions",
+                builder = (
+                    builder.remote(SPARK_REMOTE)
+                    .config(
+                        "spark.sql.extensions",
+                        "org.apache.sedona.sql.SedonaSqlExtensions",
+                    )
+                    .config("spark.checkpoint.dir", mkdtemp())
                 )
 
                 # Connect is packaged with Spark 4+
@@ -127,9 +131,12 @@ class TestBase:
 
         if not actual_geom.equals_exact(expected_geom, tolerance=tolerance):
             # If the exact equals check fails, perform a buffer check with tolerance
-            if actual_geom.buffer(tolerance).contains(
-                expected_geom
-            ) and expected_geom.buffer(tolerance).contains(actual_geom):
+            if (
+                actual_geom.is_valid
+                and actual_geom.buffer(tolerance).contains(expected_geom)
+                and expected_geom.is_valid
+                and expected_geom.buffer(tolerance).contains(actual_geom)
+            ):
                 return
             else:
                 # fail the test with error message

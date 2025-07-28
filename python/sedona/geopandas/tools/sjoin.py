@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 import re
+import pyspark.pandas as ps
 from pyspark.pandas.internal import InternalFrame
 from pyspark.pandas.series import first_series
 from pyspark.pandas.utils import scol_for
@@ -22,8 +23,6 @@ from pyspark.sql.functions import expr, col, lit
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
 from sedona.geopandas import GeoDataFrame, GeoSeries
-from sedona.geopandas.geoseries import _to_geo_series
-from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 
 # Pre-compiled regex pattern for suffix validation
 SUFFIX_PATTERN = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
@@ -166,7 +165,8 @@ def _frame_join(
     final_columns = []
 
     # Add geometry column (always from left for geopandas compatibility)
-    final_columns.append("l_geometry as geometry")
+    # Currently, Sedona stores geometries in EWKB format
+    final_columns.append("ST_AsEWKB(l_geometry) as geometry")
 
     # Add other columns with suffix handling
     left_data_cols = [col for col in left_geo_df.columns if col != "l_geometry"]
@@ -208,7 +208,7 @@ def _frame_join(
             data_fields=[left_df._internal.data_fields[0]],
             column_label_names=left_df._internal.column_label_names,
         )
-        return _to_geo_series(first_series(PandasOnSparkDataFrame(internal)))
+        return _to_geo_series(first_series(ps.DataFrame(internal)))
     else:
         # Return GeoDataFrame for GeoDataFrame inputs
         return GeoDataFrame(result_df)
@@ -359,3 +359,16 @@ def _basic_checks(left_df, right_df, how, lsuffix, rsuffix, on_attribute=None):
         raise ValueError(f"lsuffix '{lsuffix}' contains invalid characters")
     if not SUFFIX_PATTERN.match(rsuffix):
         raise ValueError(f"rsuffix '{rsuffix}' contains invalid characters")
+
+
+def _to_geo_series(df: ps.Series) -> GeoSeries:
+    """
+    Get the first Series from the DataFrame.
+
+    Parameters:
+    - df: The input DataFrame.
+
+    Returns:
+    - GeoSeries: The first Series from the DataFrame.
+    """
+    return GeoSeries(data=df)

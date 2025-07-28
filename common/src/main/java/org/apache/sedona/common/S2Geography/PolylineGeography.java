@@ -28,6 +28,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateSequence;
+import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 
 /** A Geography representing zero or more polylines using S2Polyline. */
 public class PolylineGeography extends S2Geography {
@@ -140,5 +143,31 @@ public class PolylineGeography extends S2Geography {
       geo.polylines.add(pl);
     }
     return geo;
+  }
+
+  public CoordinateSequence getCoordinateSequence() {
+    // 1) Count total vertices across all polylines
+    int totalVerts = 0;
+    for (S2Polyline pl : polylines) {
+      totalVerts += pl.numVertices();
+    }
+
+    // 2) Build a flat array of JTS Coordinates
+    Coordinate[] coords = new Coordinate[totalVerts];
+    int idx = 0;
+    for (S2Polyline pl : polylines) {
+      int n = pl.numVertices();
+      for (int i = 0; i < n; i++, idx++) {
+        S2Point pt = pl.vertex(i);
+        S2LatLng ll = new S2LatLng(pt);
+        double lat = ll.latDegrees();
+        double lon = ll.lngDegrees();
+        Coordinate c = new Coordinate(lon, lat);
+        coords[idx] = c;
+      }
+    }
+
+    // 3) Wrap in a CoordinateArraySequence
+    return new CoordinateArraySequence(coords);
   }
 }

@@ -15,20 +15,22 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import inspect
+import sys
+
 # These allow use to access the __all__
 import sedona.spark.sql.st_aggregates as st_aggregates
 import sedona.spark.sql.st_constructors as st_constructors
 import sedona.spark.sql.st_functions as st_functions
 import sedona.spark.sql.st_predicates as st_predicates
+from sedona.spark.sql.functions import sedona_vectorized_udf
 
 # These bring the contents of the modules into this module
 from sedona.spark.sql.st_aggregates import *
 from sedona.spark.sql.st_constructors import *
 from sedona.spark.sql.st_functions import *
 from sedona.spark.sql.st_predicates import *
-import inspect
-import sys
-
+from sedona.spark.sql.types import GeometryType, GeographyType, RasterType
 
 __all__ = (
     [

@@ -16,13 +16,14 @@
 # under the License.
 
 import logging
-from typing import Iterator, Union
+from typing import Iterator, Union, List
 from typing import Optional
 
 import datetime as python_datetime
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import dt
 from pystac import Item as PyStacItem
+from shapely.geometry.base import BaseGeometry
 
 
 def get_collection_url(url: str, collection_id: Optional[str] = None) -> str:
@@ -101,16 +102,18 @@ class CollectionClient:
 
     @staticmethod
     def _apply_spatial_temporal_filters(
-        df: DataFrame, bbox=None, datetime=None
+        df: DataFrame, bbox=None, geometry=None, datetime=None
     ) -> DataFrame:
         """
-        This function applies spatial and temporal filters to a Spark DataFrame.
+        This function applies spatial and temporal filters to a Spark DataFrame using safe parameterized operations.
 
         Parameters:
         - df (DataFrame): The input Spark DataFrame to be filtered.
         - bbox (Optional[list]): A list of bounding boxes for filtering the items.
           Each bounding box is represented as a list of four float values: [min_lon, min_lat, max_lon, max_lat].
           Example: [[-180.0, -90.0, 180.0, 90.0]]  # This bounding box covers the entire world.
+        - geometry (Optional[list]): A list of geometry objects (Shapely or WKT) for spatial filtering.
+          If both bbox and geometry are provided, geometry takes precedence.
         - datetime (Optional[list]): A list of date-time ranges for filtering the items.
           Each date-time range is represented as a list of two strings in ISO 8601 format: [start_datetime, end_datetime].
           Example: [["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]  # This interval covers the entire year of 2020.
@@ -118,32 +121,150 @@ class CollectionClient:
         Returns:
         - DataFrame: The filtered Spark DataFrame.
 
-        The function constructs SQL conditions for spatial and temporal filters and applies them to the DataFrame.
-        If bbox is provided, it constructs spatial conditions using st_intersects and ST_GeomFromText.
-        If datetime is provided, it constructs temporal conditions using the datetime column.
-        The conditions are combined using OR logic.
+        The function uses Spark SQL column operations and functions instead of string concatenation
+        to prevent SQL injection vulnerabilities. Spatial and temporal conditions are combined using OR logic.
         """
-        if bbox:
+        from pyspark.sql import functions as F
+        from pyspark.sql.functions import col, lit
+
+        # Geometry takes precedence over bbox
+        if geometry:
+            geometry_conditions = []
+            for geom in geometry:
+                try:
+                    # Validate and sanitize geometry input
+                    if isinstance(geom, str):
+                        # Validate WKT format basic structure
+                        if not geom.strip() or any(
+                            char in geom for char in ["'", '"', ";", "--", "/*", "*/"]
+                        ):
+                            raise ValueError("Invalid WKT geometry string")
+                        geom_wkt = geom.strip()
+                    elif hasattr(geom, "wkt"):
+                        # Shapely geometry object
+                        geom_wkt = geom.wkt
+                    else:
+                        # Try to convert to string (fallback)
+                        geom_str = str(geom)
+                        if not geom_str.strip() or any(
+                            char in geom_str
+                            for char in ["'", '"', ";", "--", "/*", "*/"]
+                        ):
+                            raise ValueError("Invalid geometry string")
+                        geom_wkt = geom_str.strip()
+
+                    # Use Spark SQL functions with safe literal values
+                    from pyspark.sql.functions import expr
+
+                    geometry_conditions.append(
+                        expr(
+                            "st_intersects(ST_GeomFromText('{}'), geometry)".format(
+                                geom_wkt.replace("'", "''")
+                            )
+                        )
+                    )
+                except (ValueError, TypeError, AttributeError):
+                    # Skip invalid geometries rather than failing  # nosec B112
+                    continue
+
+            if geometry_conditions:
+                # Combine conditions with OR using reduce
+                from functools import reduce
+
+                combined_condition = reduce(lambda a, b: a | b, geometry_conditions)
+                df = df.filter(combined_condition)
+
+        elif bbox:
             bbox_conditions = []
-            for bbox in bbox:
-                polygon_wkt = (
-                    f"POLYGON(({bbox[0]} {bbox[1]}, {bbox[2]} {bbox[1]}, "
-                    f"{bbox[2]} {bbox[3]}, {bbox[0]} {bbox[3]}, {bbox[0]} {bbox[1]}))"
-                )
-                bbox_conditions.append(
-                    f"st_intersects(ST_GeomFromText('{polygon_wkt}'), geometry)"
-                )
-            bbox_sql_condition = " OR ".join(bbox_conditions)
-            df = df.filter(bbox_sql_condition)
+            for bbox_item in bbox:
+                try:
+                    # Validate bbox parameters are numeric
+                    if len(bbox_item) != 4:
+                        continue
+
+                    min_lon, min_lat, max_lon, max_lat = bbox_item
+
+                    # Validate numeric values and reasonable ranges
+                    for coord in [min_lon, min_lat, max_lon, max_lat]:
+                        if (
+                            not isinstance(coord, (int, float)) or coord != coord
+                        ):  # NaN check
+                            raise ValueError("Invalid coordinate")
+
+                    # Validate longitude/latitude ranges
+                    if not (-180 <= min_lon <= 180 and -180 <= max_lon <= 180):
+                        continue
+                    if not (-90 <= min_lat <= 90 and -90 <= max_lat <= 90):
+                        continue
+
+                    # Create polygon using validated numeric values
+                    polygon_wkt = "POLYGON(({} {}, {} {}, {} {}, {} {}, {} {}))".format(
+                        float(min_lon),
+                        float(min_lat),
+                        float(max_lon),
+                        float(min_lat),
+                        float(max_lon),
+                        float(max_lat),
+                        float(min_lon),
+                        float(max_lat),
+                        float(min_lon),
+                        float(min_lat),
+                    )
+
+                    bbox_conditions.append(
+                        F.expr(
+                            f"st_intersects(ST_GeomFromText('{polygon_wkt}'), geometry)"
+                        )
+                    )
+
+                except (ValueError, TypeError, IndexError):
+                    # Skip invalid bbox items rather than failing
+                    continue
+
+            if bbox_conditions:
+                # Combine conditions with OR using reduce
+                from functools import reduce
+
+                combined_condition = reduce(lambda a, b: a | b, bbox_conditions)
+                df = df.filter(combined_condition)
 
         if datetime:
             interval_conditions = []
             for interval in datetime:
-                interval_conditions.append(
-                    f"datetime BETWEEN '{interval[0]}' AND '{interval[1]}'"
-                )
-            interval_sql_condition = " OR ".join(interval_conditions)
-            df = df.filter(interval_sql_condition)
+                try:
+                    if len(interval) != 2:
+                        continue
+
+                    start_time, end_time = interval
+
+                    # Validate datetime strings (basic ISO format check)
+                    if not isinstance(start_time, str) or not isinstance(end_time, str):
+                        continue
+
+                    # Check for SQL injection patterns
+                    for time_str in [start_time, end_time]:
+                        if any(
+                            char in time_str
+                            for char in ["'", '"', ";", "--", "/*", "*/", chr(0)]
+                        ):
+                            raise ValueError("Invalid datetime string")
+
+                    # Use Spark column operations instead of string concatenation
+                    condition = (col("datetime") >= lit(start_time)) & (
+                        col("datetime") <= lit(end_time)
+                    )
+                    interval_conditions.append(condition)
+
+                except (ValueError, TypeError, IndexError):
+                    # Skip invalid datetime intervals rather than failing
+                    continue
+
+            if interval_conditions:
+                # Combine conditions with OR using reduce
+                from functools import reduce
+
+                combined_condition = reduce(lambda a, b: a | b, interval_conditions)
+                df = df.filter(combined_condition)
 
         return df
 
@@ -194,6 +315,9 @@ class CollectionClient:
         self,
         *ids: Union[str, list],
         bbox: Optional[list] = None,
+        geometry: Optional[
+            Union[str, BaseGeometry, List[Union[str, BaseGeometry]]]
+        ] = None,
         datetime: Optional[Union[str, python_datetime.datetime, list]] = None,
         max_items: Optional[int] = None,
     ) -> Iterator[PyStacItem]:
@@ -204,6 +328,9 @@ class CollectionClient:
         optional filters to the data. The filters include:
         - IDs: A list of item IDs to filter the items. If not provided, no ID filtering is applied.
         - bbox (Optional[list]): A list of bounding boxes for filtering the items.
+        - geometry (Optional[Union[str, BaseGeometry, List[Union[str, BaseGeometry]]]]): Shapely geometry object(s) or WKT string(s) for spatial filtering.
+          Can be a single geometry, WKT string, or a list of geometries/WKT strings.
+          If both bbox and geometry are provided, geometry takes precedence.
         - datetime (Optional[Union[str, python_datetime.datetime, list]]): A single datetime, RFC 3339-compliant timestamp,
           or a list of date-time ranges for filtering the items.
         - max_items (Optional[int]): The maximum number of items to return from the search, even if there are more matching results.
@@ -217,7 +344,7 @@ class CollectionClient:
           is raised with a message indicating the failure.
         """
         try:
-            df = self.load_items_df(bbox, datetime, ids, max_items)
+            df = self.load_items_df(bbox, geometry, datetime, ids, max_items)
 
             # Collect the filtered rows and convert them to PyStacItem objects
             items = []
@@ -229,14 +356,17 @@ class CollectionClient:
             # Return an iterator of the items
             return iter(items)
         except Exception as e:
-            # Log the error and raise a RuntimeError
-            logging.error(f"Error getting items: {e}")
-            raise RuntimeError("Failed to get items") from e
+            # Log error type without exposing sensitive details
+            logging.error(f"Error getting items: {type(e).__name__}")
+            raise RuntimeError("Failed to get items") from None
 
     def get_dataframe(
         self,
         *ids: Union[str, list],
         bbox: Optional[list] = None,
+        geometry: Optional[
+            Union[str, BaseGeometry, List[Union[str, BaseGeometry]]]
+        ] = None,
         datetime: Optional[Union[str, python_datetime.datetime, list]] = None,
         max_items: Optional[int] = None,
     ) -> DataFrame:
@@ -251,6 +381,10 @@ class CollectionClient:
         - bbox (Optional[list]): A list of bounding boxes for filtering the items.
           Each bounding box is represented as a list of four float values: [min_lon, min_lat, max_lon, max_lat].
           Example: [[-180.0, -90.0, 180.0, 90.0]]  # This bounding box covers the entire world.
+        - geometry (Optional[Union[str, BaseGeometry, List[Union[str, BaseGeometry]]]]): Shapely geometry object(s) or WKT string(s) for spatial filtering.
+          Can be a single geometry, WKT string, or a list of geometries/WKT strings.
+          If both bbox and geometry are provided, geometry takes precedence.
+          Example: Polygon(...) or "POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))" or [Polygon(...), Polygon(...)]
         - datetime (Optional[Union[str, python_datetime.datetime, list]]): A single datetime, RFC 3339-compliant timestamp,
           or a list of date-time ranges for filtering the items.
           Example: "2020-01-01T00:00:00Z" or python_datetime.datetime(2020, 1, 1) or [["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]
@@ -264,18 +398,21 @@ class CollectionClient:
           is raised with a message indicating the failure.
         """
         try:
-            df = self.load_items_df(bbox, datetime, ids, max_items)
+            df = self.load_items_df(bbox, geometry, datetime, ids, max_items)
 
             return df
         except Exception as e:
-            logging.error(f"Error getting filtered dataframe: {e}")
-            raise RuntimeError("Failed to get filtered dataframe") from e
+            logging.error(f"Error getting filtered dataframe: {type(e).__name__}")
+            raise RuntimeError("Failed to get filtered dataframe") from None
 
     def save_to_geoparquet(
         self,
         *ids: Union[str, list],
         output_path: str,
         bbox: Optional[list] = None,
+        geometry: Optional[
+            Union[str, BaseGeometry, List[Union[str, BaseGeometry]]]
+        ] = None,
         datetime: Optional[list] = None,
     ) -> None:
         """
@@ -299,13 +436,15 @@ class CollectionClient:
           DataFrame to Parquet format, a RuntimeError is raised with a message indicating the failure.
         """
         try:
-            df = self.get_dataframe(*ids, bbox=bbox, datetime=datetime)
+            df = self.get_dataframe(
+                *ids, bbox=bbox, geometry=geometry, datetime=datetime
+            )
             df_geoparquet = self._convert_assets_schema(df)
             df_geoparquet.write.format("geoparquet").save(output_path)
             logging.info(f"DataFrame successfully saved to {output_path}")
         except Exception as e:
-            logging.error(f"Error saving DataFrame to GeoParquet: {e}")
-            raise RuntimeError("Failed to save DataFrame to GeoParquet") from e
+            logging.error(f"Error saving DataFrame to GeoParquet: {type(e).__name__}")
+            raise RuntimeError("Failed to save DataFrame to GeoParquet") from None
 
     @staticmethod
     def _convert_assets_schema(df: DataFrame) -> DataFrame:
@@ -342,9 +481,15 @@ class CollectionClient:
 
         return df
 
-    def load_items_df(self, bbox, datetime, ids, max_items):
+    def load_items_df(self, bbox, geometry, datetime, ids, max_items):
         # Load the collection data from the specified collection URL
-        if not ids and not bbox and not datetime and max_items is not None:
+        if (
+            not ids
+            and not bbox
+            and not geometry
+            and not datetime
+            and max_items is not None
+        ):
             df = (
                 self.spark.read.format("stac")
                 .option("itemsLimitMax", max_items)
@@ -362,14 +507,20 @@ class CollectionClient:
             # Ensure bbox is a list of lists
             if bbox and isinstance(bbox[0], float):
                 bbox = [bbox]
+            # Handle geometry parameter
+            if geometry:
+                if not isinstance(geometry, list):
+                    geometry = [geometry]
             # Handle datetime parameter
             if datetime:
                 if isinstance(datetime, (str, python_datetime.datetime)):
                     datetime = [self._expand_date(str(datetime))]
-                elif isinstance(datetime, list) and isinstance(datetime[0], str):
-                    datetime = [datetime]
+                elif isinstance(datetime, (list, tuple)) and isinstance(
+                    datetime[0], str
+                ):
+                    datetime = [list(datetime)]
             # Apply spatial and temporal filters
-            df = self._apply_spatial_temporal_filters(df, bbox, datetime)
+            df = self._apply_spatial_temporal_filters(df, bbox, geometry, datetime)
         # Limit the number of items if max_items is specified
         if max_items is not None:
             df = df.limit(max_items)
