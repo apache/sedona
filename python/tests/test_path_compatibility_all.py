@@ -19,9 +19,7 @@
 # We will drop this test file in the future when we remove path compatibility for Apache Sedona < 1.8.0
 
 from sedona.spark import *
-from sedona.spark.maps.SedonaMapUtils import SedonaMapUtils
 from tests.test_base import TestBase
-from sedona.geoarrow import *
 
 
 class TestPathCompatibilityAll(TestBase):
@@ -73,6 +71,8 @@ class TestPathCompatibilityAll(TestBase):
         # Test utility imports
         assert Adapter is not None
         assert GeoData is not None
+        assert KryoSerializer is not None
+        assert SedonaKryoRegistrator is not None
 
     def test_format_mapper_imports(self):
         # Test GeoJsonReader and ShapefileReader imports
@@ -99,12 +99,7 @@ class TestPathCompatibilityAll(TestBase):
         assert create_spatial_dataframe is not None
         assert dataframe_to_arrow is not None
 
-    def test_util_imports(self):
-        assert KryoSerializer is not None
-        assert SedonaKryoRegistrator is not None
-
     def test_maps_imports(self):
         # Test Map imports
         assert SedonaKepler is not None
-        assert SedonaMapUtils is not None
         assert SedonaPyDeck is not None
