@@ -19,6 +19,4 @@
 from sedona.spark.sql import *
 from sedona.spark import sql
 
-print("xxxxxxxxxxxx")
-print(sql.__all__)
 __all__ = sql.__all__
