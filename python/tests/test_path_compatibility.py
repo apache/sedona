@@ -50,8 +50,7 @@ from tests.test_base import TestBase
 from sedona.raster_utils.SedonaUtils import SedonaUtils
 from sedona.sql import ST_MakePoint, ST_Y, ST_Touches, ST_Envelope_Aggr
 from sedona.geoarrow import create_spatial_dataframe, dataframe_to_arrow
-from sedona.utils import KryoSerializer
-from sedona.utils import SedonaKryoRegistrator
+from sedona.utils import KryoSerializer, SedonaKryoRegistrator
 from sedona.maps import SedonaKepler, SedonaPyDeck
 
 from sedona.raster import awt_raster
