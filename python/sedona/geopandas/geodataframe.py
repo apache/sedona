@@ -843,16 +843,19 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         """
         Make a copy of this GeoDataFrame object.
 
-        Parameters:
-        - deep: bool, default False
+        Parameters
+        ----------
+        deep : bool, default False
             This parameter is not supported but just a dummy parameter to match pandas.
 
-        Returns:
-        - GeoDataFrame: A copy of this GeoDataFrame object.
+        Returns
+        -------
+        GeoDataFrame
+            A copy of this GeoDataFrame object.
 
-        Examples:
+        Examples
+        --------
         >>> from shapely.geometry import Point
-        >>> import geopandas as gpd
         >>> from sedona.geopandas import GeoDataFrame
 
         >>> gdf = GeoDataFrame([{"geometry": Point(1, 1), "value1": 2, "value2": 3}])
@@ -1000,53 +1003,49 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
     ) -> str:
         """
         Returns a GeoJSON representation of the ``GeoDataFrame`` as a string.
+
         Parameters
         ----------
         na : {'null', 'drop', 'keep'}, default 'null'
-            Indicates how to output missing (NaN) values in the GeoDataFrame.
-            See below.
-        show_bbox : bool, optional, default: False
-            Include bbox (bounds) in the geojson
-        drop_id : bool, default: False
-            Whether to retain the index of the GeoDataFrame as the id property
-            in the generated GeoJSON. Default is False, but may want True
-            if the index is just arbitrary row numbers.
-        to_wgs84: bool, optional, default: False
-            If the CRS is set on the active geometry column it is exported as
-            WGS84 (EPSG:4326) to meet the `2016 GeoJSON specification
-            <https://tools.ietf.org/html/rfc7946>`_.
-            Set to True to force re-projection and set to False to ignore CRS. False by
-            default.
-        Notes
-        -----
-        The remaining *kwargs* are passed to json.dumps().
-        Missing (NaN) values in the GeoDataFrame can be represented as follows:
-        - ``null``: output the missing entries as JSON null.
-        - ``drop``: remove the property from the feature. This applies to each
-          feature individually so that features may have different properties.
-        - ``keep``: output the missing entries as NaN.
-        If the GeoDataFrame has a defined CRS, its definition will be included
-        in the output unless it is equal to WGS84 (default GeoJSON CRS) or not
-        possible to represent in the URN OGC format, or unless ``to_wgs84=True``
-        is specified.
+            Dictates how to represent missing (NaN) values in the output.
+            - ``null``: Outputs missing entries as JSON `null`.
+            - ``drop``: Removes the entire property from a feature if its
+            value is missing.
+            - ``keep``: Outputs missing entries as ``NaN``.
+        show_bbox : bool, default False
+            If True, the `bbox` (bounds) of the geometries is included in the
+            output.
+        drop_id : bool, default False
+            If True, the GeoDataFrame index is not written to the 'id' field
+            of each GeoJSON Feature.
+        to_wgs84 : bool, default False
+            If True, all geometries are transformed to WGS84 (EPSG:4326) to
+            meet the `2016 GeoJSON specification
+            <https://tools.ietf.org/html/rfc7946>`_. When False, the current
+            CRS is exported if it's set.
+        **kwargs
+            Additional keyword arguments passed to `json.dumps()`.
+
+        Returns
+        -------
+        str
+            A GeoJSON representation of the GeoDataFrame.
+
+        See Also
+        --------
+        GeoDataFrame.to_file : Write a ``GeoDataFrame`` to a file, which can be
+                            used for GeoJSON format.
+
         Examples
         --------
         >>> from sedona.geopandas import GeoDataFrame
         >>> from shapely.geometry import Point
         >>> d = {'col1': ['name1', 'name2'], 'geometry': [Point(1, 2), Point(2, 1)]}
         >>> gdf = GeoDataFrame(d, crs="EPSG:3857")
-        >>> gdf
-            col1     geometry
-        0  name1  POINT (1 2)
-        1  name2  POINT (2 1)
         >>> gdf.to_json()
-        '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", \
-"properties": {"col1": "name1"}, "geometry": {"type": "Point", "coordinates": [1.0,\
- 2.0]}}, {"id": "1", "type": "Feature", "properties": {"col1": "name2"}, "geometry"\
-: {"type": "Point", "coordinates": [2.0, 1.0]}}], "crs": {"type": "name", "properti\
-es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
-        Alternatively, you can write GeoJSON to file:
-        >>> gdf.to_file(path, driver="GeoJSON")  # doctest: +SKIP
+        '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "properties": {"col1": "name1"}, "geometry": {"type": "Point", "coordinates": [1.0, 2.0]}}, {"id": "1", "type": "Feature", "properties": {"col1": "name2"}, "geometry": {"type": "Point", "coordinates": [2.0, 1.0]}}], "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
+
+
         See also
         --------
         GeoDataFrame.to_file : write GeoDataFrame to file
@@ -1224,6 +1223,8 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
         on_attribute : str, list or tuple, optional
             Column name(s) to join on as an additional join restriction.
             These must be found in both DataFrames.
+        **kwargs
+            Additional keyword arguments passed to the spatial join function.
 
         Returns
         -------
@@ -1267,30 +1268,32 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
     def from_file(
         cls, filename: str, format: str | None = None, **kwargs
     ) -> GeoDataFrame:
-        """
-        Alternate constructor to create a ``GeoDataFrame`` from a file.
+        """Alternate constructor to create a ``GeoDataFrame`` from a file.
 
         Parameters
         ----------
         filename : str
             File path or file handle to read from. If the path is a directory,
-            Sedona will read all files in the directory into a dataframe.
-        format : str, default None
-            The format of the file to read. If None, Sedona will infer the format
-            from the file extension. Note, inferring the format from the file extension
-            is not supported for directories.
-            Options:
-                - "shapefile"
-                - "geojson"
-                - "geopackage"
-                - "geoparquet"
+            Sedona will read all files in that directory.
+        format : str, optional
+            The format of the file to read, by default None. If None, Sedona
+            infers the format from the file extension. Note that format
+            inference is not supported for directories. Available formats are
+            "shapefile", "geojson", "geopackage", and "geoparquet".
+        table_name : str, optional
+            The name of the table to read from a GeoPackage file, by default
+            None. This is required if ``format`` is "geopackage".
+        **kwargs
+            Additional keyword arguments passed to the file reader.
 
-        table_name : str, default None
-            The name of the table to read from a geopackage file. Required if format is geopackage.
+        Returns
+        -------
+        GeoDataFrame
+            A new GeoDataFrame created from the file.
 
-        See also
+        See Also
         --------
-        GeoDataFrame.to_file : write GeoDataFrame to file
+        GeoDataFrame.to_file : Write a ``GeoDataFrame`` to a file.
         """
         return sgpd.io.read_file(filename, format, **kwargs)
 
@@ -1307,9 +1310,9 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
 
         Parameters
         ----------
-        path : string
+        path : str
             File path or file handle to write to.
-        driver : string, default None
+        driver : str, default None
             The format driver used to write the file.
             If not specified, it attempts to infer it from the file extension.
             If no extension is specified, Sedona will error.
@@ -1324,22 +1327,23 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
             Default None writes the index into one or more columns only if
             the index is named, is a MultiIndex, or has a non-integer data
             type. If False, no index is written.
-        mode : string, default 'w'
-            The write mode, 'w' to overwrite the existing file and 'a' to append.
-            'overwrite' and 'append' are equivalent to 'w' and 'a' respectively.
-        crs : pyproj.CRS, default None
-            If specified, the CRS is passed to Fiona to
-            better control how the file is written. If None, GeoPandas
-            will determine the crs based on crs df attribute.
-            The value can be anything accepted
-            by :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
-            such as an authority string (eg "EPSG:4326") or a WKT string.
-        engine : str
-            Not applicable to Sedona's implementation
-        metadata : dict[str, str], default None
-            Optional metadata to be stored in the file. Keys and values must be
-            strings. Supported only for "GPKG" driver. Not supported by Sedona
-        **kwargs :
+        **kwargs
+            Additional keyword arguments:
+            mode : str, default 'w'
+                The write mode, 'w' to overwrite the existing file and 'a' to append.
+                'overwrite' and 'append' are equivalent to 'w' and 'a' respectively.
+            crs : pyproj.CRS, default None
+                If specified, the CRS is passed to Fiona to
+                better control how the file is written. If None, GeoPandas
+                will determine the crs based on crs df attribute.
+                The value can be anything accepted
+                by :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
+                such as an authority string (eg "EPSG:4326") or a WKT string.
+            engine : str
+                Not applicable to Sedona's implementation
+            metadata : dict[str, str], default None
+                Optional metadata to be stored in the file. Keys and values must be
+                strings. Supported only for "GPKG" driver. Not supported by Sedona
             Keyword args to be passed to the engine, and can be used to write
             to multi-layer data, store data within archives (zip files), etc.
             In case of the "pyogrio" engine, the keyword arguments are passed to
@@ -1349,9 +1353,11 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
 
         Examples
         --------
+        >>> from shapely.geometry import Point, LineString
+        >>> from sedona.geopandas import GeoDataFrame
 
-        >>> gdf = GeoDataFrame({"geometry": [Point(0, 0), LineString([(0, 0), (1, 1)])], "int": [1, 2]}
-        >>> gdf.to_file(filepath, format="geoparquet")
+        >>> gdf = GeoDataFrame({"geometry": [Point(0, 0), LineString([(0, 0), (1, 1)])], "int": [1, 2]})
+        >>> gdf.to_file(filepath, driver="geoparquet")
 
         With selected drivers you can also append to a file with `mode="a"`:
 
@@ -1366,12 +1372,21 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
 
     def to_parquet(self, path, **kwargs):
         """
-        Write the GeoSeries to a GeoParquet file.
-        Parameters:
-        - path: str
+        Write the GeoDataFrame to a GeoParquet file.
+
+        Parameters
+        ----------
+        path : str
             The file path where the GeoParquet file will be written.
-        - kwargs: Any
+        **kwargs
             Additional arguments to pass to the Sedona DataFrame output function.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point
+        >>> from sedona.geopandas import GeoDataFrame
+        >>> gdf = GeoDataFrame({"geometry": [Point(0, 0), Point(1, 1)], "value": [1, 2]})
+        >>> gdf.to_parquet("output.parquet")
         """
         self.to_file(path, driver="geoparquet", **kwargs)
 
