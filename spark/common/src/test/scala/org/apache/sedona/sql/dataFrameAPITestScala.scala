@@ -1354,6 +1354,27 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResults(1) == expectedResult(1))
     }
 
+    it("Passed ST_Segmentize") {
+      var baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING EMPTY') AS geom")
+      var df = baseDf.select(ST_Segmentize("geom", 0.5))
+      var actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      var expectedResult = "LINESTRING EMPTY"
+      assert(actualResult == expectedResult)
+
+      baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('MULTILINESTRING((0 0, 0 1, 0 9),(1 10, 1 18))') AS geom")
+      df = baseDf.select(ST_Segmentize("geom", 5))
+      actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      expectedResult = "MULTILINESTRING ((0 0, 0 1, 0 5, 0 9), (1 10, 1 14, 1 18))"
+      assert(actualResult == expectedResult)
+
+      baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((0 0, 0 8, 30 0, 0 0))') AS geom")
+      df = baseDf.select(ST_Segmentize("geom", 10))
+      actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      expectedResult = "POLYGON ((0 0, 0 8, 7.5 6, 15 4, 22.5 2, 30 0, 20 0, 10 0, 0 0))"
+      assert(actualResult == expectedResult)
+    }
+
     it("Passed ST_NumGeometries") {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('MULTIPOINT ((0 0), (1 1))') AS geom")
       val df = baseDf.select(ST_NumGeometries("geom"))

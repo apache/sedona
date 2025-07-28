@@ -1796,6 +1796,19 @@ def ST_SubDivideExplode(
 
 
 @validate_argument_types
+def ST_Segmentize(
+    geometry: ColumnOrName, maxSegmentLength: Union[ColumnOrName, float]
+) -> Column:
+    """Returns a modified geometry/geography having no segment longer than max_segment_length. Length is computed in 2D. Segments are always split into equal-length subsegments.
+
+    :param geometry: Geometry column to segmentize.
+    :param maxSegmentLength: Maximum segment length
+    :return: Column
+    """
+    return _call_st_function("ST_Segmentize", (geometry, maxSegmentLength))
+
+
+@validate_argument_types
 def ST_Simplify(
     geometry: ColumnOrName, distance_tolerance: ColumnOrNameOrNumber
 ) -> Column:
