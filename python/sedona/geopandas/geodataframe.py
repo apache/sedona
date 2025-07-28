@@ -1210,8 +1210,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             The type of join:
             * 'left': use keys from left_df; retain only left_df geometry column
             * 'right': use keys from right_df; retain only right_df geometry column
-            * 'inner': use intersection of keys from both dfs; retain only
-              left_df geometry column
+            * 'inner': use intersection of keys from both dfs; retain only left_df geometry column
         predicate : str, default 'intersects'
             Binary predicate. Valid values: 'intersects', 'contains', 'within', 'dwithin'
         lsuffix : str, default 'left'
@@ -1235,7 +1234,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         --------
         >>> from shapely.geometry import Point, Polygon
         >>> from sedona.geopandas import GeoDataFrame
-        >>>
+
         >>> polygons = GeoDataFrame({
         ...     'geometry': [Polygon([(0, 0), (0, 1), (1, 1), (1, 0)])],
         ...     'value': [1]
@@ -1312,55 +1311,64 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         ----------
         path : str
             File path or file handle to write to.
+
         driver : str, default None
             The format driver used to write the file.
             If not specified, it attempts to infer it from the file extension.
             If no extension is specified, Sedona will error.
-            Options:
-                - "geojson"
-                - "geopackage"
-                - "geoparquet"
+
+            Options: "geojson", "geopackage", "geoparquet"
+
         schema : dict, default None
-            Not applicable to Sedona's implementation
+            Not applicable to Sedona's implementation.
+
         index : bool, default None
             If True, write index into one or more columns (for MultiIndex).
             Default None writes the index into one or more columns only if
             the index is named, is a MultiIndex, or has a non-integer data
             type. If False, no index is written.
+
         **kwargs
             Additional keyword arguments:
+
             mode : str, default 'w'
                 The write mode, 'w' to overwrite the existing file and 'a' to append.
                 'overwrite' and 'append' are equivalent to 'w' and 'a' respectively.
+
             crs : pyproj.CRS, default None
-                If specified, the CRS is passed to Fiona to
-                better control how the file is written. If None, GeoPandas
-                will determine the crs based on crs df attribute.
-                The value can be anything accepted
-                by :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
-                such as an authority string (eg "EPSG:4326") or a WKT string.
+                If specified, the CRS is passed to Fiona to better control how the file is written.
+                If None, GeoPandas will determine the CRS based on the ``crs`` attribute.
+                The value can be anything accepted by
+                :meth:`pyproj.CRS.from_user_input <pyproj.crs.CRS.from_user_input>`,
+                such as an authority string (e.g., "EPSG:4326") or a WKT string.
+
             engine : str
-                Not applicable to Sedona's implementation
+                Not applicable to Sedona's implementation.
+
             metadata : dict[str, str], default None
                 Optional metadata to be stored in the file. Keys and values must be
-                strings. Supported only for "GPKG" driver. Not supported by Sedona
+                strings. Supported only for "GPKG" driver. Not supported by Sedona.
 
         Examples
         --------
         >>> from shapely.geometry import Point, LineString
         >>> from sedona.geopandas import GeoDataFrame
 
-        >>> gdf = GeoDataFrame({"geometry": [Point(0, 0), LineString([(0, 0), (1, 1)])], "int": [1, 2]})
+        >>> gdf = GeoDataFrame({
+        ...     "geometry": [Point(0, 0), LineString([(0, 0), (1, 1)])],
+        ...     "int": [1, 2]
+        ... })
         >>> gdf.to_file(filepath, driver="geoparquet")
 
-        With selected drivers you can also append to a file with `mode="a"`:
+        With selected drivers you can also append to a file with ``mode="a"``:
 
-        >>> gdf.to_file(gdf, driver="geojson", mode="a")
+        >>> gdf.to_file(filepath, driver="geojson", mode="a")
 
-        When the index is of non-integer dtype, index=None (default) is treated as True, writing the index to the file.
+        When the index is of non-integer dtype, ``index=None`` (default) is treated as True,
+        writing the index to the file.
 
         >>> gdf = GeoDataFrame({"geometry": [Point(0, 0)]}, index=["a", "b"])
-        >>> gdf.to_file(gdf, driver="geoparquet")
+        >>> gdf.to_file(filepath, driver="geoparquet")
         """
         sgpd.io._to_file(self, path, driver, index, **kwargs)
 
