@@ -549,7 +549,7 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
             new FlatMapFunction<Iterator<T>, String>() {
               @Override
               public Iterator<String> call(Iterator<T> iterator) throws Exception {
-                WKBWriter writer = new WKBWriter(3, true);
+                WKBWriter writer = GeomUtils.createWKBWriter(3, true);
                 ArrayList<String> wkbs = new ArrayList<>();
 
                 while (iterator.hasNext()) {
