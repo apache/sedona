@@ -16,16 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.common.S2Geography;
+package org.apache.sedona.core.s2geographyRDD;
 
-import com.google.common.geometry.S2Point;
+import java.io.Serializable;
+import org.apache.log4j.Logger;
+import org.apache.sedona.common.S2Geography.S2Geography;
 
-public class SinglePointGeography extends PointGeography {
-  public SinglePointGeography(S2Point p) {
-    super(GeographyKind.SINGLEPOINT, p);
-  }
+public class S2GeographyRDD<T extends S2Geography> implements Serializable {
 
-  public SinglePointGeography() {
-    super();
-  }
+  /** The Constant logger. */
+  static final Logger logger = Logger.getLogger(S2GeographyRDD.class);
+
+  /** The total number of records. */
+  public long approximateTotalCount = -1;
 }

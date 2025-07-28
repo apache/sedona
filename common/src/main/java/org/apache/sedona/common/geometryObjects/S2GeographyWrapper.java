@@ -16,16 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.common.S2Geography;
+package org.apache.sedona.common.geometryObjects;
 
-import com.google.common.geometry.S2Point;
+import org.apache.sedona.common.S2Geography.S2Geography;
+import org.locationtech.jts.geom.PrecisionModel;
 
-public class SinglePointGeography extends PointGeography {
-  public SinglePointGeography(S2Point p) {
-    super(GeographyKind.SINGLEPOINT, p);
+public abstract class S2GeographyWrapper extends S2Geography {
+  private final S2GeographyWrapper geography;
+
+  public S2GeographyWrapper(S2GeographyWrapper geography) {
+    super(GeographyKind.fromKind(geography.getKind()));
+    this.geography = geography;
   }
 
-  public SinglePointGeography() {
-    super();
+  public S2GeographyWrapper getGeography() {
+    return this.geography;
+  }
+
+  @Override
+  public String toString() {
+    return geography.toText(new PrecisionModel());
   }
 }

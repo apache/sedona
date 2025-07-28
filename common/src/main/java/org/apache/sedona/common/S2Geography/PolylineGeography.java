@@ -53,6 +53,12 @@ public class PolylineGeography extends S2Geography {
     this.polylines.add(polyline);
   }
 
+  public PolylineGeography(GeographyKind kind, S2Polyline polyline) {
+    super(kind);
+    this.polylines = new ArrayList<>();
+    this.polylines.add(polyline);
+  }
+
   public PolylineGeography(List<S2Polyline> polylines) {
     super(GeographyKind.POLYLINE);
     this.polylines = new ArrayList<>(polylines);
@@ -137,6 +143,9 @@ public class PolylineGeography extends S2Geography {
     // 5) Read the number of polylines (4-byte)
     int count = in.readInt();
 
+    if (tag.getKind() == GeographyKind.SINGLEPOLYLINE) {
+      return new SinglePolylineGeography(S2Polyline.decode(in));
+    }
     // 6) For each polyline, read its block and let S2Polyline.decode(InputStream) do the rest
     for (int i = 0; i < count; i++) {
       S2Polyline pl = S2Polyline.decode(in);

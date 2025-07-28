@@ -18,14 +18,24 @@
  */
 package org.apache.sedona.common.S2Geography;
 
-import com.google.common.geometry.S2Point;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import org.locationtech.jts.geom.*;
 
-public class SinglePointGeography extends PointGeography {
-  public SinglePointGeography(S2Point p) {
-    super(GeographyKind.SINGLEPOINT, p);
+public class S2GeographySerializer {
+  private static final Coordinate NULL_COORDINATE = new Coordinate(Double.NaN, Double.NaN);
+  private static final PrecisionModel PRECISION_MODEL = new PrecisionModel();
+
+  public static byte[] serialize(S2Geography geography) throws IOException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    geography.encodeTagged(baos, new EncodeOptions());
+    return baos.toByteArray();
   }
 
-  public SinglePointGeography() {
-    super();
+  public static S2Geography deserialize(byte[] buffer) throws IOException {
+    ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
+    // WKBReader reader = new WKBReader();
+    return S2Geography.decodeTagged(bais);
   }
 }

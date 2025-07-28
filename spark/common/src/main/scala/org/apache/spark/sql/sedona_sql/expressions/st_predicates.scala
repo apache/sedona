@@ -27,6 +27,9 @@ object st_predicates {
   def ST_Contains(a: Column, b: Column): Column = wrapExpression[ST_Contains](a, b)
   def ST_Contains(a: String, b: String): Column = wrapExpression[ST_Contains](a, b)
 
+  def ST_S2Contains(a: Column, b: Column): Column = wrapExpression[ST_S2Contains](a, b)
+  def ST_S2Contains(a: String, b: String): Column = wrapExpression[ST_S2Contains](a, b)
+
   def ST_Crosses(a: Column, b: Column): Column = wrapExpression[ST_Crosses](a, b)
   def ST_Crosses(a: String, b: String): Column = wrapExpression[ST_Crosses](a, b)
 
@@ -36,8 +39,19 @@ object st_predicates {
   def ST_Equals(a: Column, b: Column): Column = wrapExpression[ST_Equals](a, b)
   def ST_Equals(a: String, b: String): Column = wrapExpression[ST_Equals](a, b)
 
+  def ST_S2Equals(a: Column, b: Column): Column = wrapExpression[ST_S2Equals](a, b)
+  def ST_S2Equals(a: String, b: String): Column = wrapExpression[ST_S2Equals](a, b)
+
   def ST_Intersects(a: Column, b: Column): Column = wrapExpression[ST_Intersects](a, b)
   def ST_Intersects(a: String, b: String): Column = wrapExpression[ST_Intersects](a, b)
+
+  def ST_S2Intersects(a: Column, b: Column): Column = wrapExpression[ST_S2Intersects](a, b)
+  def ST_S2Intersects(a: String, b: String): Column = wrapExpression[ST_S2Intersects](a, b)
+
+  def ST_S2IntersectsBox(a: Column, b: Column, c: Double): Column =
+    wrapExpression[ST_S2IntersectsBox](a, b, c)
+  def ST_S2IntersectsBox(a: String, b: String, c: Double): Column =
+    wrapExpression[ST_S2IntersectsBox](a, b, c)
 
   def ST_OrderingEquals(a: Column, b: Column): Column = wrapExpression[ST_OrderingEquals](a, b)
   def ST_OrderingEquals(a: String, b: String): Column = wrapExpression[ST_OrderingEquals](a, b)

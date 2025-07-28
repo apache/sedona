@@ -46,7 +46,7 @@ public class PointGeography extends S2Geography {
   }
 
   /** Constructs especially for CELL_CENTER */
-  private PointGeography(GeographyKind kind, S2Point point) {
+  public PointGeography(GeographyKind kind, S2Point point) {
     super(kind); // can be POINT or CELL_CENTER
     points.add(point);
   }
@@ -239,6 +239,9 @@ public class PointGeography extends S2Geography {
       pts = S2Point.Shape.FAST_CODER.decode(bytes, cursor);
     }
 
+    if (tag.getKind() == GeographyKind.SINGLEPOINT) {
+      return new SinglePointGeography(pts.get(0));
+    }
     geo.points.addAll(pts);
     return geo;
   }

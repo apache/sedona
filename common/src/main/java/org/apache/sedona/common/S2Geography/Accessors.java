@@ -19,6 +19,7 @@
 package org.apache.sedona.common.S2Geography;
 
 import com.google.common.geometry.*;
+import java.util.List;
 
 public class Accessors {
 
@@ -263,5 +264,18 @@ public class Accessors {
         throw new IllegalArgumentException(
             "Unsupported geography type for validation: " + geog.getClass().getName());
     }
+  }
+
+  public S2LatLngRect getEnvelope(List<S2Geography> geographies) {
+    S2LatLngRect result = S2LatLngRect.empty();
+
+    for (S2Geography geog : geographies) {
+      if (geog != null && geog.numShapes() > 0) {
+        S2LatLngRect rect = geog.region().getRectBound();
+        result = result.union(rect);
+      }
+    }
+
+    return result;
   }
 }

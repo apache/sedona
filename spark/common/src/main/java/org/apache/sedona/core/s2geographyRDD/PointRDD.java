@@ -16,16 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.common.S2Geography;
+package org.apache.sedona.core.s2geographyRDD;
 
-import com.google.common.geometry.S2Point;
+import org.apache.sedona.common.S2Geography.PointGeography;
 
-public class SinglePointGeography extends PointGeography {
-  public SinglePointGeography(S2Point p) {
-    super(GeographyKind.SINGLEPOINT, p);
-  }
+public class PointRDD extends S2GeographyRDD<PointGeography> {
 
-  public SinglePointGeography() {
-    super();
-  }
+  /** Instantiates a new point RDD. */
+  public PointRDD() {}
+  // public PointRDD(JavaRDD<PointGeography> rawS2geographyRDD)
+  // {this.setRawS2geographyRDD(rawS2geographyRDD);}
+
 }
