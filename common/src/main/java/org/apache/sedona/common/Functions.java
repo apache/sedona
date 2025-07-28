@@ -317,6 +317,7 @@ public class Functions {
 
     BufferParameters bufferParameters = new BufferParameters();
     String[] listParams = params.split(" ");
+    boolean endCapSpecified = false;
 
     for (String param : listParams) {
       String[] singleParam = param.split("=");
@@ -354,6 +355,7 @@ public class Functions {
                   "%s is not a valid option. Accepted options are %s.",
                   singleParam[1], Arrays.toString(endcapOptions)));
         }
+        endCapSpecified = true;
       }
       // Set join style
       else if (singleParam[0].equalsIgnoreCase(listBufferParameters[2])) {
@@ -386,12 +388,16 @@ public class Functions {
       // Set side to add buffer
       else if (singleParam[0].equalsIgnoreCase(listBufferParameters[5])) {
         if (singleParam[1].equalsIgnoreCase(sideOptions[0])) {
-          // It defaults to square end cap style when side is specified
-          bufferParameters.setEndCapStyle(BufferParameters.CAP_SQUARE);
+          // Default value is 'both'
           continue;
         } else if (singleParam[1].equalsIgnoreCase(sideOptions[1])
             || singleParam[1].equalsIgnoreCase(sideOptions[2])) {
           bufferParameters.setSingleSided(true);
+
+          // Specifying 'left' or 'right' defaults to square end cap style when side is specified
+          if (!endCapSpecified) {
+            bufferParameters.setEndCapStyle(BufferParameters.CAP_SQUARE);
+          }
         } else {
           throw new IllegalArgumentException(
               String.format(
