@@ -335,7 +335,7 @@ def ST_Boundary(geometry: ColumnOrName) -> Column:
 def ST_Buffer(
     geometry: ColumnOrName,
     buffer: ColumnOrNameOrNumber,
-    useSpheroid: Optional[Union[ColumnOrName, bool]] = None,
+    useSpheroid: Optional[Union[ColumnOrName, bool]] = False,
     parameters: Optional[Union[ColumnOrName, str]] = None,
 ) -> Column:
     """Calculate a geometry that represents all points whose distance from the

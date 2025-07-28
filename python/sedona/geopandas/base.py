@@ -2136,6 +2136,43 @@ class GeoFrame(metaclass=ABCMeta):
         single_sided=False,
         **kwargs,
     ):
+        """
+        Returns a GeoSeries with all geometries buffered by the specified distance.
+
+        Parameters
+        ----------
+        distance : float
+            The distance to buffer by. Negative distances will create inward buffers.
+        resolution : int, default 16
+            The resolution of the buffer around each vertex. Specifies the number of
+            linear segments in a quarter circle in the approximation of circular arcs.
+        cap_style : str, default "round"
+            The style of the buffer cap. One of 'round', 'flat', 'square'.
+        join_style : str, default "round"
+            The style of the buffer join. One of 'round', 'mitre', 'bevel'.
+        mitre_limit : float, default 5.0
+            The mitre limit ratio for joins when join_style='mitre'.
+        single_sided : bool, default False
+            Whether to create a single-sided buffer. In Sedona, True will default to left-sided buffer.
+            However, 'right' may be specified to use a right-sided buffer.
+
+        Returns
+        -------
+        GeoSeries
+            A new GeoSeries with buffered geometries.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point
+        >>> from sedona.geopandas import GeoDataFrame
+        >>>
+        >>> data = {
+        ...     'geometry': [Point(0, 0), Point(1, 1)],
+        ...     'value': [1, 2]
+        ... }
+        >>> gdf = GeoDataFrame(data)
+        >>> buffered = gdf.buffer(0.5)
+        """
         return _delegate_to_geometry_column(
             "buffer",
             self,

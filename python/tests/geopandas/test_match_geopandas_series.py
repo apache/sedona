@@ -189,17 +189,41 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_buffer(self):
-        buffer = self.g1.buffer(0.2)
-        assert buffer is not None
-        assert type(buffer) is GeoSeries
-        assert buffer.count() == 2
-
         for geom in self.geoms:
             dist = 0.2
             sgpd_result = GeoSeries(geom).buffer(dist)
             gpd_result = gpd.GeoSeries(geom).buffer(dist)
 
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # Check that the parameters work properly
+        sgpd_result = GeoSeries(self.linestrings).buffer(
+            0.2, resolution=20, cap_style="flat", join_style="bevel"
+        )
+        gpd_result = gpd.GeoSeries(self.linestrings).buffer(
+            0.2, resolution=20, cap_style="flat", join_style="bevel"
+        )
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        sgpd_result = GeoSeries(self.linestrings).buffer(0.2, single_sided=True)
+        gpd_result = gpd.GeoSeries(self.linestrings).buffer(0.2, single_sided=True)
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        sgpd_result = GeoSeries(self.linestrings).buffer(
+            0.2, join_style="mitre", mitre_limit=10.0
+        )
+        gpd_result = gpd.GeoSeries(self.linestrings).buffer(
+            0.2, join_style="mitre", mitre_limit=10.0
+        )
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        sgpd_result = GeoSeries(self.linestrings).buffer(
+            0.2, single_sided=True, cap_style="round"
+        )
+        gpd_result = gpd.GeoSeries(self.linestrings).buffer(
+            0.2, single_sided=True, cap_style="round"
+        )
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_buffer_then_area(self):
         area = self.g1.buffer(0.2).area

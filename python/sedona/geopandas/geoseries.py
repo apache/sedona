@@ -1470,7 +1470,28 @@ class GeoSeries(GeoFrame, pspd.Series):
         single_sided=False,
         **kwargs,
     ) -> "GeoSeries":
-        spark_col = stf.ST_Buffer(self.spark.column, distance)
+        if single_sided:
+            # Reverse the following logic in common/src/main/java/org/apache/sedona/common/Functions.java buffer() to avoid negating the distance
+            #   if (bufferParameters.isSingleSided()
+            #       && (params.toLowerCase().contains("left") && radius < 0
+            #           || params.toLowerCase().contains("right") && radius > 0)) {
+            #     radius = -radius;
+            #   }
+            side = "left" if distance >= 0 else "right"
+        else:
+            side = "both"
+        assert side in [
+            "left",
+            "right",
+            "both",
+        ], "singled-sided must be one of 'left', 'right', or 'both', True, or False"
+
+        parameters = F.lit(
+            f"quad_segs={resolution} endcap={cap_style} join={join_style} mitre_limit={mitre_limit} side={side}"
+        )
+        spark_col = stf.ST_Buffer(
+            self.spark.column, distance, useSpheroid=False, parameters=parameters
+        )
         return self._query_geometry_column(
             spark_col,
             returns_geom=True,
