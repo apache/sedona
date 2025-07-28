@@ -2814,7 +2814,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         >>> import os
         >>> gs = GeoSeries([Point(1, 1), Point(2, 2)])
         >>> file_path = os.path.join(tempfile.gettempdir(), "my_geodata.parquet")
-        >>> gs.to_geoparquet(file_path)
+        >>> gs.to_parquet(file_path)
         """
         self.to_geoframe().to_file(path, driver="geoparquet", **kwargs)
 
