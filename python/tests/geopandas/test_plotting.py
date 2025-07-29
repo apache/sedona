@@ -23,13 +23,17 @@ import warnings
 
 import numpy as np
 import pandas as pd
-import pytest
 
+import pytest
 import shapely
+import geopandas as gpd
 from packaging.version import parse as parse_version
 
 if parse_version(shapely.__version__) < parse_version("2.0.0"):
     pytest.skip(f"Tests require shapely>=2.0.0", allow_module_level=True)
+
+if parse_version(gpd.__version__) < parse_version("1.0.0"):
+    pytest.skip(f"Tests require geopandas>=1.0.0", allow_module_level=True)
 
 from shapely.affinity import rotate
 from shapely.geometry import (
