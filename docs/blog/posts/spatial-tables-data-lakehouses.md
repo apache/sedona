@@ -79,7 +79,7 @@ The Lakehouse Architecture offers several advantages:
 * Lakehouses are interoperable with proprietary tools like BigQuery, Redshift, or Esri.
 * Lakehouses leverage the cost-efficiency of cloud object storage (similar to data lakes) for data storage.
 * Lakehouses are highly compatible with existing compute engines.
-    * You can use one engine for ingestion, another for ETL, and a third for Machine Learning.
+  * You can use one engine for ingestion, another for ETL, and a third for Machine Learning.
 
 ## Lakehouses & spatial data
 
@@ -170,7 +170,6 @@ However, by ensuring that each step is completed successfully and atomically, th
 
 If an update to `sales_territories` were to fail, the `stores` table (from its preceding successful transaction) would
 remain consistent, and the `sales_territories` table would roll back its own failed changes, preventing corruption within that table.
-
 
 Now, let's see how Lakehouses differ from Data Lakes.
 
@@ -328,7 +327,7 @@ with another table loaded from GeoParquet, an extension of the open source Apach
 
 !!!tip "Best Practice: Co-location can optimize spatial tables in Lakehouses"
     Consider the following co-location tips to optimize your spatial data queries:
-        * To speed up your Lakehouse queries, you can co-locate similar data in the same files and eliminate excessively small files.
+        *To speed up your Lakehouse queries, you can co-locate similar data in the same files and eliminate excessively small files.
         * Use Apache Iceberg to store the tabular and spatial tables in the same catalog.
 
 Let's look at the following GeoParquet table. This table is the Overture Maps Foundation buildings dataset.
