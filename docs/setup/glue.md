@@ -50,7 +50,7 @@ package. How you do this varies slightly between the notebook and the script job
 Add the following cell magics before starting your sparkContext or glueContext. The first points to the jars,
 and the second installs the Sedona Python package directly from pip.
 
-```python
+```text
 # Sedona Config
 %extra_jars https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.3_2.12/{{ sedona.current_version }}/sedona-spark-shaded-3.3_2.12-{{ sedona.current_version }}.jar, https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/{{ sedona.current_geotools }}/geotools-wrapper-{{ sedona.current_geotools }}.jar
 %additional_python_modules apache-sedona=={{ sedona.current_version }}
@@ -58,17 +58,18 @@ and the second installs the Sedona Python package directly from pip.
 
 If you are using the example notebook from glue, the first cell should now look like this:
 
+```text
+  %idle_timeout 2880
+  %glue_version 4.0
+  %worker_type G.1X
+  %number_of_workers 5
+
+  # Sedona Config
+  %extra_jars https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.3_2.12/{{ sedona.current_version }}/sedona-spark-shaded-3.3_2.12-{{ sedona.current_version }}.jar, https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/{{ sedona.current_geotools }}/geotools-wrapper-{{ sedona.current_geotools }}.jar
+  %additional_python_modules apache-sedona=={{ sedona.current_version }}
+```
+
 ```python
-%idle_timeout 2880
-%glue_version 4.0
-%worker_type G.1X
-%number_of_workers 5
-
-# Sedona Config
-%extra_jars https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.3_2.12/{{ sedona.current_version }}/sedona-spark-shaded-3.3_2.12-{{ sedona.current_version }}.jar, https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/{{ sedona.current_geotools }}/geotools-wrapper-{{ sedona.current_geotools }}.jar
-%additional_python_modules apache-sedona=={{ sedona.current_version }}
-
-
 import sys
 from awsglue.transforms import *
 from awsglue.utils import getResolvedOptions
