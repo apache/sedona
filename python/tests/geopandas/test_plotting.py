@@ -15,6 +15,9 @@
 # specific language governing permissions and limitations
 # under the License.
 
+# This file is copied from geopandas/tests/test_plotting.py
+# and was modified to skip the tests that require data files.
+
 import itertools
 import warnings
 
@@ -45,9 +48,12 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 try:  # skipif and importorskip do not work for decorators
-    from matplotlib.testing.decorators import check_figures_equal, image_comparison
+    # Skip these tests in Sedona repo since data is not included in this repo
+    raise ImportError
+    # Original code
+    # from matplotlib.testing.decorators import check_figures_equal, image_comparison
 
-    MPL_DECORATORS = True
+    # MPL_DECORATORS = True
 except ImportError:
     MPL_DECORATORS = False
 
@@ -1216,6 +1222,7 @@ def _setup_class_geographic_aspect(naturalearth_lowres, request):
     request.cls.exp = 1 / np.cos(y_coord * np.pi / 180)
 
 
+@pytest.mark.skip(reason="Data not included in Sedona repo")
 @pytest.mark.usefixtures("_setup_class_geographic_aspect")
 @pytest.mark.skipif(not compat.HAS_PYPROJ, reason="pyproj not available")
 class TestGeographicAspect:
