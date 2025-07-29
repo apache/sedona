@@ -54,6 +54,15 @@ autodoc_mock_imports = [
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
+# Suppress specific warnings
+suppress_warnings = [
+    # Suppress warnings about mocked objects (these are intentionally mocked)
+    "autodoc.mocked_object",
+    # Suppress warnings about multiple targets for cross-references
+    # This is expected due to shapely1/shapely2 compatibility layer
+    "ref.python",
+]
+
 autodoc_default_options = {
     "members": True,
     "undoc-members": True,
