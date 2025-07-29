@@ -23,6 +23,13 @@ import warnings
 
 import numpy as np
 import pandas as pd
+import pytest
+
+import shapely
+from packaging.version import parse as parse_version
+
+if parse_version(shapely.__version__) < parse_version("2.0.0"):
+    pytest.skip(f"Tests require shapely>=2.0.0", allow_module_level=True)
 
 from shapely.affinity import rotate
 from shapely.geometry import (
@@ -42,8 +49,6 @@ HAS_PYPROJ = True
 
 from geopandas import GeoDataFrame, GeoSeries, read_file
 from geopandas.plotting import GeoplotAccessor
-
-import pytest
 
 matplotlib = pytest.importorskip("matplotlib")
 matplotlib.use("Agg")
