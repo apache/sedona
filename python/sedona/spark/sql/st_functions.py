@@ -2339,16 +2339,16 @@ def ST_Angle(
 ) -> Column:
     """
     Returns the computed angle between vectors formed by given geometries in radian. Range of result is between 0 and 2 * pi.
-    
+
     3 Variants:
-    
+
     - Angle(Point1, Point2, Point3, Point4)
         Computes angle formed by vectors formed by Point1-Point2 and Point3-Point4
     - Angle(Point1, Point2, Point3)
         Computes angle formed by angle Point1-Point2-Point3
     - Angle(Line1, Line2)
         Computes angle between vectors formed by S1-E1 and S2-E2, where S and E are start and endpoints.
-    
+
     :param g1: Point or Line
     :param g2: Point or Line
     :param g3: Point or None

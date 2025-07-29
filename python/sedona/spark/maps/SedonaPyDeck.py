@@ -48,7 +48,7 @@ class SedonaPyDeck:
     ):
         """
         Create a pydeck map with a choropleth layer added
-        
+
         :param df: SedonaDataFrame to plot on the choropleth map.
         :param fill_color: color scheme to fill the map with.
             If no color scheme is given, a default color scheme is created using the 'plot_col' column as the quantizing column

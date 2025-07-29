@@ -21,7 +21,7 @@ Apache Sedona™ is a cluster computing system for processing large-scale spatia
 This documentation covers the Python API for Apache Sedona, providing comprehensive guides and references for:
 
 - **Spatial RDDs**: Distributed spatial data structures
-- **Spatial DataFrames**: Spark DataFrame integration with spatial operations  
+- **Spatial DataFrames**: Spark DataFrame integration with spatial operations
 - **Spatial Functions**: Built-in spatial analysis and processing functions
 - **Visualization**: Map creation and spatial data visualization tools
 - **GeoPandas Integration**: Seamless integration with the GeoPandas ecosystem
