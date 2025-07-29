@@ -59,7 +59,7 @@ public class WKBReaderTest {
     S2Geography geo = reader.read(wkb);
 
     // Kind should be POINT
-    Assert.assertEquals(S2Geography.GeographyKind.POINT, geo.kind);
+    Assert.assertEquals(S2Geography.GeographyKind.SINGLEPOINT, geo.kind);
 
     // Extract the S2Point
     S2Point p = geo.shape(0).chain(0).get(0);
@@ -126,7 +126,7 @@ public class WKBReaderTest {
     S2Geography geo = reader.read(wkb);
 
     // Expect a POLYLINE geometry
-    Assert.assertEquals(S2Geography.GeographyKind.POLYLINE, geo.kind);
+    Assert.assertEquals(S2Geography.GeographyKind.SINGLEPOLYLINE, geo.kind);
 
     // Extract the two S2Points
     List<S2Point> pts = geo.shape(0).chain(0);
