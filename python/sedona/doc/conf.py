@@ -76,9 +76,28 @@ html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 html_title = f"{project} Documentation"
 
+# Custom CSS to match Apache Sedona branding
+html_css_files = [
+    "custom.css",
+]
+
 html_theme_options = {
     "collapse_navigation": False,
     "navigation_depth": 4,
-    "style_external_links": True,
+    "style_external_links": False,
     "titles_only": False,
+    "logo_only": False,
+    "prev_next_buttons_location": "bottom",
+    "vcs_pageview_mode": "",
+    # Custom colors to match Sedona theme
+    "style_nav_header_background": "#ff5722",
+}
+
+# Apache Sedona Branding
+html_logo = None  # We'll use CSS for logo styling
+html_favicon = None
+
+# Additional context for templates
+html_context = {
+    "display_github": False,
 }
