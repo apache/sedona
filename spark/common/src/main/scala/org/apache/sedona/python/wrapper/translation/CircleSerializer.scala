@@ -19,14 +19,14 @@
 package org.apache.sedona.python.wrapper.translation
 
 import org.apache.sedona.common.geometryObjects.Circle
+import org.apache.sedona.common.utils.GeomUtils
 import org.apache.sedona.python.wrapper.utils.implicits.{DoubleImplicit, GeometryEnhancer, IntImplicit}
-import org.locationtech.jts.io.WKBWriter
 
 case class CircleSerializer(geometry: Circle) {
   private val isCircle = Array(1.toByte)
 
   def serialize: Array[Byte] = {
-    val wkbWriter = new WKBWriter(2, 2)
+    val wkbWriter = GeomUtils.createWKBWriter(2)
     val serializedGeom = wkbWriter.write(geometry.getCenterGeometry)
     val userDataBinary = geometry.userDataToUtf8ByteArray
     val userDataLengthArray = userDataBinary.length.toByteArray()

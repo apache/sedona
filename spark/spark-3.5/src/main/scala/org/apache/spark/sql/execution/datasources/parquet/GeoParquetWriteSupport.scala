@@ -41,7 +41,6 @@ import org.json4s.{DefaultFormats, Extraction, JValue}
 import org.json4s.jackson.compactJson
 import org.json4s.jackson.JsonMethods.parse
 import org.locationtech.jts.geom.Geometry
-import org.locationtech.jts.io.WKBWriter
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -341,7 +340,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
         (row: SpecializedGetters, ordinal: Int) => {
           val serializedGeometry = row.getBinary(ordinal)
           val geom = GeometryUDT.deserialize(serializedGeometry)
-          val wkbWriter = new WKBWriter(GeomUtils.getDimension(geom))
+          val wkbWriter = GeomUtils.createWKBWriter(GeomUtils.getDimension(geom))
           recordConsumer.addBinary(Binary.fromReusedByteArray(wkbWriter.write(geom)))
           if (geometryColumnInfo != null) {
             geometryColumnInfo.update(geom)
