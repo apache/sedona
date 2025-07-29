@@ -120,7 +120,12 @@ on the `sales_territories` table.
 Similarly, updates to the `sales_performance` table (e.g., adjusting sales targets linked to the `territory_id`)
 would be performed as an atomic transaction on that specific table.
 
-TODO: Describe diagram
+Follow the data's journey with this diagram:
+
+* We start with a broad `SALES_TERRITORY`, drawn as a polygon, which contains one or more individual `STORES`.
+* Each store, pinned as a point on the map, then generates its own stream of `SALES_PERFORMANCE` data.
+
+In effect, this diagram connects the geographic boundaries to the business results.
 
 ```mermaid
 erDiagram
@@ -166,8 +171,6 @@ However, by ensuring that each step is completed successfully and atomically, th
 If an update to `sales_territories` were to fail, the `stores` table (from its preceding successful transaction) would
 remain consistent, and the `sales_territories` table would roll back its own failed changes, preventing corruption within that table.
 
-Developers could implement application logic or an orchestration layer (like Apache Airflow) separately in order to manage
-the overall consistency across tables, potentially by handling compensating transactions if a later step fails.
 
 Now, let's see how Lakehouses differ from Data Lakes.
 
@@ -221,8 +224,6 @@ open-source table format used primarily with Data Lakehouses.
 The following code sample demonstrates how to create and populate an Apache Iceberg table within a Lakehouse.
 
 In this sample (simplified for explanatory purposes), we'll create a `customers` table with `id` and `first_name` columns:
-
-TODO: what variable imports are needed
 
 ```py
 CREATE TABLE local.db.customers (id string, first_name string)
@@ -304,7 +305,7 @@ in the `customers` table with the spatial data in the `customer_purchases` table
 customers = sedona.table("local.db.customers")
 purchases = sedona.table("local.db.customer_purchases")
 
-joined = customers.join(purchases, "id") TODO more descriptive variable name
+joined = customers.join(purchases, "id")
 joined.show()
 
 
@@ -326,61 +327,40 @@ For example, with Apache Sedona, you can join one table loaded from Shapefiles
 with another table loaded from GeoParquet, an extension of the open source Apache Parquet file format.
 
 !!!tip "Best Practice: Co-location can optimize spatial tables in Lakehouses"
-
-    Consider the following co-location tips to optimize your spatial data queries: TODO
+    Consider the following co-location tips to optimize your spatial data queries:
         * To speed up your Lakehouse queries, you can co-locate similar data in the same files and eliminate excessively small files.
-        * Use Apache Iceberg to store the tabular and spatial tables in the same catalog. TODO
+        * Use Apache Iceberg to store the tabular and spatial tables in the same catalog.
 
 Let's look at the following GeoParquet table. This table is the Overture Maps Foundation buildings dataset.
 
 ```py
-(
-    sedona
-    .table()
-    .withColumn("geometry", ST_GeomFromWKB(col("geometry")))
-    .select("id", "geometry", "num_floors", "roof_color")
-    .createOrReplaceTempView("my_fun_view")
-)
-```
-
-```py
-import pyspark.sql.functions as sql_funcs
+from pyspark.sql.functions import col, expr
 
 # Assume 'sedona' is a configured SparkSession
 
-# Define the Overture Maps source path (condensed)
-overture_release = "2025-03-19.0" # Define the specific release date
-# Construct the full S3 path directly
+# Define the Overture Maps source path
+overture_release = "2025-03-19.0"
 overture_s3_path = f"s3://overturemaps-us-west-2/release/{overture_release}/theme=buildings/type=building"
 
 print(f"Reading Overture buildings data from: {overture_s3_path}")
 
-try:
-    # Read the GeoParquet data directly from S3
-    buildings_df_raw = sedona.read.parquet(overture_s3_path)
+# Read the GeoParquet data directly from S3
+buildings_df_raw = sedona.read.parquet(overture_s3_path)
 
-    # Select ID, convert WKB geometry, and extract height from properties
-    buildings_df = (
-        buildings_df_raw
-        .withColumn("geometry", sql_funcs.expr("ST_GeomFromWKB(geometry)"))
-        .withColumn("height", sql_funcs.col("properties.height").cast("double"))
-        .select("id", "geometry", "height")
-        .filter(sql_funcs.col("geometry").isNotNull())
-    )
+# Select ID, convert WKB geometry, and extract height from properties
+buildings_df = (
+    buildings_df_raw
+    .withColumn("geometry", expr("ST_GeomFromWKB(geometry)"))
+    .withColumn("height", col("properties.height").cast("double"))
+    .select("id", "geometry", "height")
+    .filter(col("geometry").isNotNull())
+)
 
-    # Create a temporary view for querying the source data
-    source_view_name = "ov_buildings_source_view"
-    buildings_df.createOrReplaceTempView(source_view_name)
+# Create a temporary view for querying the source data
+source_view_name = "ov_buildings_source_view"
+buildings_df.createOrReplaceTempView(source_view_name)
 
-    # Confirmation message
-    print(f"Created temporary view '{source_view_name}'")
-
-except Exception as e:
-    # Keep the more detailed error reporting
-    print(f"ERROR: Could not read or process data from {overture_s3_path}")
-    print(f"Error details: {e}")
-    print("Please check the path, release date, network access, and cloud credentials/permissions.")
-    raise # Re-raise the exception to stop execution if needed
+print(f"Created temporary view '{source_view_name}'")
 ```
 
 Let's run a filtering query on this GeoParquet dataset:
@@ -390,7 +370,6 @@ Let's run a filtering query on this GeoParquet dataset:
 spot = "POLYGON((-82.258759 29.129371, -82.180481 29.136569, -82.202454 29.173747, -82.258759 29.129371))"
 
 # Construct the SQL query using the temporary view name
-# Select relevant columns for the result
 sql_query_source = f"""
 SELECT id, height
 FROM {source_view_name}
@@ -399,103 +378,64 @@ WHERE ST_Contains(ST_GeomFromWKT('{spot}'), geometry)
 
 print(f"Running spatial query on source data view '{source_view_name}'...")
 
-try:
-    # Execute the query and get the count
-    source_results_df = sedona.sql(sql_query_source)
-    source_count = source_results_df.count()
-    print(f"Query on source GeoParquet data returned {source_count} results.")
-    # You can show some results if desired:
-    # source_results_df.show(10)
-
-    # IMPORTANT: Performance claims are removed
-    # Actual performance depends heavily on many factors.
-
-except Exception as e:
-    print(f"ERROR: Failed to run query on source view '{source_view_name}'.")
-    print(f"Error details: {e}")
-    source_count = -1 # Indicate failure
+# Execute the query and get the count
+source_results_df = sedona.sql(sql_query_source)
+source_count = source_results_df.count()
+print(f"Query on source GeoParquet data returned {source_count} results.")
 ```
 
 Let's convert this dataset to Iceberg:
 
 ```py
-# Assume 'sedona', 'buildings_df', 'source_count', 'overture_release',
+# Assume 'sedona', 'buildings_df', 'overture_release',
 # and 'iceberg_db_name' (e.g., 'blog_db') exist from previous sections
 
-# Define the full Iceberg table name using the database configured in setup
+# Define the full Iceberg table name
 iceberg_table_full_name = f"{iceberg_db_name}.overture_buildings_{overture_release.replace('-', '_').replace('.', '_')}"
 
 print(f"Preparing Iceberg conversion for: {iceberg_table_full_name}")
 
-iceberg_write_successful = False # Initialize status flag
-# Check if source data is available before proceeding
-if 'buildings_df' in locals() and source_count != -1:
-    # Define minimal Iceberg table DDL string
-    # Using format-version 2 for broad compatibility
-    sql_create_iceberg = f"""
-    CREATE TABLE IF NOT EXISTS {iceberg_table_full_name} (id STRING, geometry GEOMETRY, height DOUBLE)
-    USING iceberg PARTITIONED BY (bucket(16, id)) TBLPROPERTIES('format-version'='2');
-    """
-    try:
-        # Create the Iceberg table structure
-        sedona.sql(sql_create_iceberg)
+# Define minimal Iceberg table DDL string
+sql_create_iceberg = f"""
+CREATE TABLE IF NOT EXISTS {iceberg_table_full_name} (id STRING, geometry GEOMETRY, height DOUBLE)
+USING iceberg PARTITIONED BY (bucket(16, id)) TBLPROPERTIES('format-version'='2');
+"""
+# Create the Iceberg table structure
+sedona.sql(sql_create_iceberg)
 
-        # Write the DataFrame (from Section 1) to the Iceberg table, overwriting if exists
-        (buildings_df
-            .select("id", "geometry", "height") # Ensure correct columns
-            .write
-            .format("iceberg")
-            .mode("overwrite")
-            .saveAsTable(iceberg_table_full_name)
-        )
-        print(f"Successfully wrote data to Iceberg table: {iceberg_table_full_name}")
-        iceberg_write_successful = True # Update status on success
-
-    except Exception as e:
-        print(f"ERROR during Iceberg create/write for {iceberg_table_full_name}: {e}")
-        # iceberg_write_successful remains False
-else:
-    print("Skipping Iceberg conversion: Source data unavailable or prior errors.")
-    # iceberg_write_successful remains False
-
-# The 'iceberg_write_successful' flag indicates if the next step can proceed
+# Write the DataFrame to the Iceberg table, overwriting if it exists
+(buildings_df
+    .select("id", "geometry", "height")
+    .write
+    .format("iceberg")
+    .mode("overwrite")
+    .saveAsTable(iceberg_table_full_name)
+)
+print(f"Successfully wrote data to Iceberg table: {iceberg_table_full_name}")
 ```
 
 Now, let's rerun the same query on the Iceberg table:
 
 ```py
-# Check if Iceberg write was successful before querying
-if iceberg_write_successful:
+# Use the same polygon WKT as before
+# spot = "POLYGON(...)" is already defined
 
-    # Use the same polygon WKT as before
-    # spot = "POLYGON(...)" # Already defined in Section 2
+# Construct the SQL query using the full Iceberg table name
+sql_query_iceberg = f"""
+SELECT id, height
+FROM {iceberg_table_full_name}
+WHERE ST_Contains(ST_GeomFromWKT('{spot}'), geometry)
+"""
 
-    # Construct the SQL query using the full Iceberg table name
-    sql_query_iceberg = f"""
-    SELECT id, height
-    FROM {iceberg_table_full_name}
-    WHERE ST_Contains(ST_GeomFromWKT('{spot}'), geometry)
-    """
+print(f"Running spatial query on Iceberg table '{iceberg_table_full_name}'...")
 
-    print(f"Running spatial query on Iceberg table '{iceberg_table_full_name}'...")
+# Execute the query and get the count
+iceberg_results_df = sedona.sql(sql_query_iceberg)
+iceberg_count = iceberg_results_df.count()
+print(f"Query on Iceberg table returned {iceberg_count} results.")
 
-    try:
-        # Execute the query and get the count
-        iceberg_results_df = sedona.sql(sql_query_iceberg)
-        iceberg_count = iceberg_results_df.count()
-        print(f"Query on Iceberg table returned {iceberg_count} results.")
-        # iceberg_results_df.show(10)
-
-        # Compare counts if desired
-        if source_count >= 0:
-             print(f"(Count comparison: Source View={source_count}, Iceberg Table={iceberg_count})")
-
-    except Exception as e:
-        print(f"ERROR: Failed to run query on Iceberg table '{iceberg_table_full_name}'.")
-        print(f"Error details: {e}")
-else:
-    print("Skipping query on Iceberg table due to issues in previous steps.")
-
+# Compare counts if desired
+print(f"(Count comparison: Source View={source_count}, Iceberg Table={iceberg_count})")
 ```
 
 ## Spatial tables in Data lakes
@@ -505,18 +445,18 @@ Let's compare these Iceberg Lakehouse tables with spatial tables built with data
 ### Lack of Atomicity
 
 ```py
+import os
+import shutil
+
 # --- Define path for the traditional data lake "table" ---
 data_lake_path = "/tmp/datalake_buildings_table"
 print(f"Using traditional data lake path: {data_lake_path}")
 
-# Function to safely clean up directory
+# Function to clean up the directory
 def cleanup_path(path):
     if os.path.exists(path):
-        try:
-            shutil.rmtree(path)
-            print(f"Cleaned up directory: {path}")
-        except OSError as e:
-            print(f"Error cleaning up {path}: {e}")
+        shutil.rmtree(path)
+        print(f"Cleaned up directory: {path}")
 
 cleanup_path(data_lake_path) # Start clean
 ```
@@ -530,41 +470,39 @@ or overwrites might involve explicit state preparation (like clearing target dir
 Writing the code for basic read operations often involves a similar level of effort, whether you are targeting raw data lake files or tables within a data lakehouse.
 
 ```py
+from pyspark.sql.functions import expr
+import time
+
 # Write the initial data to the data lake path to simulate its existence
-try:
-    print("Simulating initial data presence in data lake path...")
-    (buildings_df
-     # Convert geometry to WKB for standard Parquet storage
-     .withColumn("geometry_wkb", sql_funcs.expr("ST_AsWKB(geometry)"))
-     .select("id", "height", "geometry_wkb")
-     .write.format("parquet").save(data_lake_path)
-     )
-    print(f"Initial data written to {data_lake_path}")
+print("Simulating initial data presence in data lake path...")
+(buildings_df
+    # Convert geometry to WKB for standard Parquet storage
+    .withColumn("geometry_wkb", expr("ST_AsWKB(geometry)"))
+    .select("id", "height", "geometry_wkb")
+    .write.format("parquet").save(data_lake_path)
+)
+print(f"Initial data written to {data_lake_path}")
 
-    # Create a temporary view on this data lake path
-    source_dl_view_name = "buildings_datalake_source_view"
-    (sedona.read.parquet(data_lake_path)
-      .withColumn("geometry", sql_funcs.expr("ST_GeomFromWKB(geometry_wkb)"))
-      .createOrReplaceTempView(source_dl_view_name)
-    )
-    print(f"Created view '{source_dl_view_name}' on data lake path.")
+# Create a temporary view on this data lake path
+source_dl_view_name = "buildings_datalake_source_view"
+(sedona.read.parquet(data_lake_path)
+    .withColumn("geometry", expr("ST_GeomFromWKB(geometry_wkb)"))
+    .createOrReplaceTempView(source_dl_view_name)
+)
+print(f"Created view '{source_dl_view_name}' on data lake path.")
 
-    # Run the same spatial filter query
-    spot_wkt = "POLYGON((-82.258759 29.129371, -82.180481 29.136569, -82.202454 29.173747, -82.258759 29.129371))"
-    sql_query_source = f"""
-    SELECT id, height
-    FROM {source_dl_view_name}
-    WHERE ST_Contains(ST_GeomFromWKT('{spot_wkt}'), geometry)
-    """
-    print(f"Running spatial query on '{source_dl_view_name}'...")
-    start_time = time.time()
-    source_dl_count = sedona.sql(sql_query_source).count()
-    end_time = time.time()
-    print(f"Query on data lake view returned {source_dl_count} results (took {end_time - start_time:.2f}s).")
-
-except Exception as e:
-    print(f"Error during initial read/query setup for data lake: {e}")
-    raise
+# Run the same spatial filter query
+spot_wkt = "POLYGON((-82.258759 29.129371, -82.180481 29.136569, -82.202454 29.173747, -82.258759 29.129371))"
+sql_query_source = f"""
+SELECT id, height
+FROM {source_dl_view_name}
+WHERE ST_Contains(ST_GeomFromWKT('{spot_wkt}'), geometry)
+"""
+print(f"Running spatial query on '{source_dl_view_name}'...")
+start_time = time.time()
+source_dl_count = sedona.sql(sql_query_source).count()
+end_time = time.time()
+print(f"Query on data lake view returned {source_dl_count} results (took {end_time - start_time:.2f}s).")
 ```
 
 ### Updating the dataset
@@ -580,83 +518,71 @@ critical lack of atomicity in the overwrite step, which risks data corruption
 or loss if the write operation fails partway through.
 
 ```py
+from pyspark.sql.functions import expr
+import time
+
 print(f"Simulating an UPDATE on the data lake table (via Read-Modify-Rewrite)...")
 print(f"Goal: Add 'is_in_spot' column to data in {data_lake_path}")
 
-try:
-    # Read the *entire* dataset again
-    print("Reading entire dataset for modification...")
-    current_data_df = (
-        sedona.read.parquet(data_lake_path)
-        .withColumn("geometry", sql_funcs.expr("ST_GeomFromWKB(geometry_wkb)"))
-    )
-    read_count = current_data_df.cache().count() # Cache for potential reuse & count
-    print(f"Read {read_count} records.")
+# Read the *entire* dataset again
+print("Reading entire dataset for modification...")
+current_data_df = (
+    sedona.read.parquet(data_lake_path)
+    .withColumn("geometry", expr("ST_GeomFromWKB(geometry_wkb)"))
+)
+read_count = current_data_df.cache().count() # Cache for potential reuse & count
+print(f"Read {read_count} records.")
 
-    # Add the new column
-    print("Adding 'is_in_spot' column...")
-    modified_data_df = current_data_df.withColumn(
-        "is_in_spot",
-        sql_funcs.expr(f"ST_Contains(ST_GeomFromWKT('{spot_wkt}'), geometry)")
-    )
-    print(f"Rewriting ENTIRE dataset ({read_count} records) with new column back to {data_lake_path}...")
-    start_time_write = time.time()
-    (modified_data_df
-     .withColumn("geometry_wkb", sql_funcs.expr("ST_AsWKB(geometry)"))
-# Convert back for storage
-     .select("id", "height", "geometry_wkb", "is_in_spot")
-     .write.format("parquet").mode("overwrite").save(data_lake_path)
-    )
-    end_time_write = time.time()
-    print(f"Data lake overwrite complete (took {end_time_write - start_time_write:.2f}s).")
-    current_data_df.unpersist()
-    print("DISADVANTAGE 1 (Inefficiency): Update required full read & full rewrite.")
-    print("DISADVANTAGE 2 (No Atomicity): If the overwrite failed, data is lost/corrupted.")
-
-except Exception as e:
-    print(f"ERROR during data lake update (Read-Modify-Rewrite): {e}")
-    print(f"The directory {data_lake_path} is likely in an INCORRECT/CORRUPTED state!")
-    data_lake_update_failed = True
+# Add the new column
+print("Adding 'is_in_spot' column...")
+modified_data_df = current_data_df.withColumn(
+    "is_in_spot",
+    expr(f"ST_Contains(ST_GeomFromWKT('{spot_wkt}'), geometry)")
+)
+print(f"Rewriting ENTIRE dataset ({read_count} records) with new column back to {data_lake_path}...")
+start_time_write = time.time()
+(modified_data_df
+    .withColumn("geometry_wkb", expr("ST_AsWKB(geometry)")) # Convert back for storage
+    .select("id", "height", "geometry_wkb", "is_in_spot")
+    .write.format("parquet").mode("overwrite").save(data_lake_path)
+)
+end_time_write = time.time()
+print(f"Data lake overwrite complete (took {end_time_write - start_time_write:.2f}s).")
+current_data_df.unpersist()
+print("DISADVANTAGE 1 (Inefficiency): Update required full read & full rewrite.")
+print("DISADVANTAGE 2 (No Atomicity): If the overwrite failed, data is lost/corrupted.")
 ```
 
 ### Querying "updated" table
 
-This final step demonstrates querying the data lake path after the simulated
-update (the burdensome overwrite). Since the raw directory of files doesn't
-maintain a consistent, managed table state like Iceberg, querying the results
-requires re-reading the potentially modified Parquet files, re-applying
-transformations (like parsing the WKB geometry), and creating a new temporary
-view. The original spatial filter query is then executed against this newly
-created view. This entire process, necessary to access the latest state, is
-contingent on the success of the previous non-atomic overwrite operation and
-contrasts with the simpler, direct query against an already updated and
-consistent Iceberg table.
+This final step demonstrates querying the data lake path after the simulated update. Because individual Parquet files are immutable, any
+"update" operation is actually a burdensome full partition overwrite. To access the latest data, the entire process must be repeated:
+re-reading the newly created Parquet files, re-applying transformations (like parsing the WKB geometry), and creating a new temporary view.
+
+The original spatial filter query is then executed against this new view. This complex, non-atomic operation, necessitated by the immutable
+nature of the raw files, contrasts with the simple, direct query against an already updated and consistent Iceberg table.
 
 ```py
+from pyspark.sql.functions import expr
+import time
+
 print(f"Running spatial query on the overwritten data lake path '{data_lake_path}'...")
 
-if not 'data_lake_update_failed' in locals() or not data_lake_update_failed:
-    try:
-        final_dl_view_name = "buildings_datalake_final_view"
-        (sedona.read.parquet(data_lake_path)
-          .withColumn("geometry", sql_funcs.expr("ST_GeomFromWKB(geometry_wkb)"))
-          .createOrReplaceTempView(final_dl_view_name)
-         )
+final_dl_view_name = "buildings_datalake_final_view"
+(sedona.read.parquet(data_lake_path)
+    .withColumn("geometry", expr("ST_GeomFromWKB(geometry_wkb)"))
+    .createOrReplaceTempView(final_dl_view_name)
+)
 
-        sql_query_final = f"""
-        SELECT id, height, is_in_spot -- Can now select the new column
-        FROM {final_dl_view_name}
-        WHERE ST_Contains(ST_GeomFromWKT('{spot_wkt}'), geometry)
-        """
-        start_time_final = time.time()
-        final_dl_count = sedona.sql(sql_query_final).count()
-        end_time_final = time.time()
-        print(f"Query on final data lake view returned {final_dl_count} results (took {end_time_final - start_time_final:.2f}s).")
-
-    except Exception as e:
-        print(f"ERROR running query on final data lake data: {e}")
-else:
-    print("Skipping final query due to failure during update.")
+sql_query_final = f"""
+SELECT id, height, is_in_spot -- Can now select the new column
+FROM {final_dl_view_name}
+WHERE ST_Contains(ST_GeomFromWKT('{spot_wkt}'), geometry)
+"""
+start_time_final = time.time()
+final_dl_count = sedona.sql(sql_query_final).count()
+end_time_final = time.time()
+print(f"Query on final data lake view returned {final_dl_count} results (took {end_time_final - start_time_final:.2f}s).")
 ```
 
 ## Conclusion
