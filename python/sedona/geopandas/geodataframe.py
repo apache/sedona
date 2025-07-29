@@ -1184,6 +1184,137 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             _not_implemented_error("type", "Returns numeric geometry type codes.")
         )
 
+    def plot(self, *args, **kwargs):
+        """
+        Plot a GeoDataFrame.
+
+        Generate a plot of a GeoDataFrame with matplotlib.  If a
+        column is specified, the plot coloring will be based on values
+        in that column.
+
+        Note: This method is not scalable and requires collecting all data to the driver.
+
+        Parameters
+        ----------
+        column : str, np.array, pd.Series, pd.Index (default None)
+            The name of the dataframe column, np.array, pd.Series, or pd.Index
+            to be plotted. If np.array, pd.Series, or pd.Index are used then it
+            must have same length as dataframe. Values are used to color the plot.
+            Ignored if `color` is also set.
+        kind: str
+            The kind of plots to produce. The default is to create a map ("geo").
+            Other supported kinds of plots from pandas:
+
+            - 'line' : line plot
+            - 'bar' : vertical bar plot
+            - 'barh' : horizontal bar plot
+            - 'hist' : histogram
+            - 'box' : BoxPlot
+            - 'kde' : Kernel Density Estimation plot
+            - 'density' : same as 'kde'
+            - 'area' : area plot
+            - 'pie' : pie plot
+            - 'scatter' : scatter plot
+            - 'hexbin' : hexbin plot.
+        cmap : str (default None)
+            The name of a colormap recognized by matplotlib.
+        color : str, np.array, pd.Series (default None)
+            If specified, all objects will be colored uniformly.
+        ax : matplotlib.pyplot.Artist (default None)
+            axes on which to draw the plot
+        cax : matplotlib.pyplot Artist (default None)
+            axes on which to draw the legend in case of color map.
+        categorical : bool (default False)
+            If False, cmap will reflect numerical values of the
+            column being plotted.  For non-numerical columns, this
+            will be set to True.
+        legend : bool (default False)
+            Plot a legend. Ignored if no `column` is given, or if `color` is given.
+        scheme : str (default None)
+            Name of a choropleth classification scheme (requires mapclassify).
+            A mapclassify.MapClassifier object will be used
+            under the hood. Supported are all schemes provided by mapclassify (e.g.
+            'BoxPlot', 'EqualInterval', 'FisherJenks', 'FisherJenksSampled',
+            'HeadTailBreaks', 'JenksCaspall', 'JenksCaspallForced',
+            'JenksCaspallSampled', 'MaxP', 'MaximumBreaks',
+            'NaturalBreaks', 'Quantiles', 'Percentiles', 'StdMean',
+            'UserDefined'). Arguments can be passed in classification_kwds.
+        k : int (default 5)
+            Number of classes (ignored if scheme is None)
+        vmin : None or float (default None)
+            Minimum value of cmap. If None, the minimum data value
+            in the column to be plotted is used.
+        vmax : None or float (default None)
+            Maximum value of cmap. If None, the maximum data value
+            in the column to be plotted is used.
+        markersize : str or float or sequence (default None)
+            Only applies to point geometries within a frame.
+            If a str, will use the values in the column of the frame specified
+            by markersize to set the size of markers. Otherwise can be a value
+            to apply to all points, or a sequence of the same length as the
+            number of points.
+        figsize : tuple of integers (default None)
+            Size of the resulting matplotlib.figure.Figure. If the argument
+            axes is given explicitly, figsize is ignored.
+        legend_kwds : dict (default None)
+            Keyword arguments to pass to :func:`matplotlib.pyplot.legend` or
+            :func:`matplotlib.pyplot.colorbar`.
+            Additional accepted keywords when `scheme` is specified:
+
+            fmt : string
+                A formatting specification for the bin edges of the classes in the
+                legend. For example, to have no decimals: ``{"fmt": "{:.0f}"}``.
+            labels : list-like
+                A list of legend labels to override the auto-generated labels.
+                Needs to have the same number of elements as the number of
+                classes (`k`).
+            interval : boolean (default False)
+                An option to control brackets from mapclassify legend.
+                If True, open/closed interval brackets are shown in the legend.
+        categories : list-like
+            Ordered list-like object of categories to be used for categorical plot.
+        classification_kwds : dict (default None)
+            Keyword arguments to pass to mapclassify
+        missing_kwds : dict (default None)
+            Keyword arguments specifying color options (as style_kwds)
+            to be passed on to geometries with missing values in addition to
+            or overwriting other style kwds. If None, geometries with missing
+            values are not plotted.
+        aspect : 'auto', 'equal', None or float (default 'auto')
+            Set aspect of axis. If 'auto', the default aspect for map plots is 'equal'; if
+            however data are not projected (coordinates are long/lat), the aspect is by
+            default set to 1/cos(df_y * pi/180) with df_y the y coordinate of the middle of
+            the GeoDataFrame (the mean of the y range of bounding box) so that a long/lat
+            square appears square in the middle of the plot. This implies an
+            Equirectangular projection. If None, the aspect of `ax` won't be changed. It can
+            also be set manually (float) as the ratio of y-unit to x-unit.
+        autolim : bool (default True)
+            Update axes data limits to contain the new geometries.
+        **style_kwds : dict
+            Style options to be passed on to the actual plot function, such
+            as ``edgecolor``, ``facecolor``, ``linewidth``, ``markersize``,
+            ``alpha``.
+
+        Returns
+        -------
+        ax : matplotlib axes instance
+
+        Examples
+        --------
+        >>> import geodatasets
+        >>> df = geopandas.read_file(geodatasets.get_path("nybb"))
+        >>> df.head()  # doctest: +SKIP
+        BoroCode  ...                                           geometry
+        0         5  ...  MULTIPOLYGON (((970217.022 145643.332, 970227....
+        1         4  ...  MULTIPOLYGON (((1029606.077 156073.814, 102957...
+        2         3  ...  MULTIPOLYGON (((1021176.479 151374.797, 102100...
+        3         1  ...  MULTIPOLYGON (((981219.056 188655.316, 980940....
+        4         2  ...  MULTIPOLYGON (((1012821.806 229228.265, 101278...
+
+        >>> df.plot("BoroName", cmap="Set1")  # doctest: +SKIP
+        """
+        return self.to_geopandas().plot(*args, **kwargs)
+
     # ============================================================================
     # SPATIAL OPERATIONS
     # ============================================================================

@@ -1466,6 +1466,56 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         return self._query_geometry_column(spark_expr)
 
+    def plot(self, *args, **kwargs):
+        """
+        Plot a GeoSeries.
+
+        Generate a plot of a GeoSeries geometry with matplotlib.
+
+        Note: This method is not scalable and requires collecting all data to the driver.
+
+        Parameters
+        ----------
+        s : Series
+            The GeoSeries to be plotted. Currently Polygon,
+            MultiPolygon, LineString, MultiLineString, Point and MultiPoint
+            geometries can be plotted.
+        cmap : str (default None)
+            The name of a colormap recognized by matplotlib. Any
+            colormap will work, but categorical colormaps are
+            generally recommended. Examples of useful discrete
+            colormaps include:
+
+                tab10, tab20, Accent, Dark2, Paired, Pastel1, Set1, Set2
+
+        color : str, np.array, pd.Series, List (default None)
+            If specified, all objects will be colored uniformly.
+        ax : matplotlib.pyplot.Artist (default None)
+            axes on which to draw the plot
+        figsize : pair of floats (default None)
+            Size of the resulting matplotlib.figure.Figure. If the argument
+            ax is given explicitly, figsize is ignored.
+        aspect : 'auto', 'equal', None or float (default 'auto')
+            Set aspect of axis. If 'auto', the default aspect for map plots is 'equal'; if
+            however data are not projected (coordinates are long/lat), the aspect is by
+            default set to 1/cos(s_y * pi/180) with s_y the y coordinate of the middle of
+            the GeoSeries (the mean of the y range of bounding box) so that a long/lat
+            square appears square in the middle of the plot. This implies an
+            Equirectangular projection. If None, the aspect of `ax` won't be changed. It can
+            also be set manually (float) as the ratio of y-unit to x-unit.
+        autolim : bool (default True)
+            Update axes data limits to contain the new geometries.
+        **style_kwds : dict
+            Color options to be passed on to the actual plot function, such
+            as ``edgecolor``, ``facecolor``, ``linewidth``, ``markersize``,
+            ``alpha``.
+
+        Returns
+        -------
+        ax : matplotlib axes instance
+        """
+        return self.to_geopandas().plot(*args, **kwargs)
+
     def sjoin(
         self,
         other,
