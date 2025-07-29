@@ -282,4 +282,7 @@ def read_parquet(
     ...     "data.parquet",
     ... )  # doctest: +SKIP
     """
+    if kwargs:
+        warnings.warn(f"The given arguments are not supported in Sedona: {kwargs}")
+
     return read_file(path, format="geoparquet", **kwargs)
