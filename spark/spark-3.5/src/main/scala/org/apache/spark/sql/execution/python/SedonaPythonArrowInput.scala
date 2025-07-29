@@ -84,9 +84,9 @@ private[python] trait SedonaPythonArrowInput[IN] { self: SedonaBasePythonRunner[
       }
 
       protected override def writeIteratorToStream(dataOut: DataOutputStream): Unit = {
-        val arrowSchema = ArrowUtils.toArrowSchema(
+        val arrowSchema = SedonaArrowUtils.toArrowSchema(
           schema, timeZoneId, errorOnDuplicatedFieldNames, largeVarTypes)
-        val allocator = ArrowUtils.rootAllocator.newChildAllocator(
+        val allocator = SedonaArrowUtils.rootAllocator.newChildAllocator(
           s"stdout writer for $pythonExec", 0, Long.MaxValue)
         val root = VectorSchemaRoot.create(arrowSchema, allocator)
 
