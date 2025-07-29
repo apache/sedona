@@ -33,15 +33,15 @@ def get_collection_url(url: str, collection_id: Optional[str] = None) -> str:
     If the collection ID is provided and the URL starts with 'http' or 'https', the collection ID
     is appended to the URL. Otherwise, an exception is raised.
 
-    Parameters:
-    - url (str): The base URL of the STAC collection.
-    - collection_id (Optional[str]): The optional collection ID to append to the URL.
+    Args:
+        url (str): The base URL of the STAC collection.
+        collection_id (Optional[str]): The optional collection ID to append to the URL.
 
     Returns:
-    - str: The constructed collection URL.
+        str: The constructed collection URL.
 
     Raises:
-    - ValueError: If the URL does not start with 'http' or 'https' and a collection ID is provided.
+        ValueError: If the URL does not start with 'http' or 'https' and a collection ID is provided.
     """
     if not collection_id:
         return url
@@ -68,11 +68,11 @@ class CollectionClient:
         This method ensures that certain attributes are nested under the 'properties' key
         in the item dictionary. If the 'properties' key does not exist, it is initialized.
 
-        Parameters:
-        - item_dict (dict): The dictionary representation of a STAC item.
+        Args:
+            item_dict (dict): The dictionary representation of a STAC item.
 
         Returns:
-        - dict: The updated item dictionary with specified attributes moved to 'properties'.
+            dict: The updated item dictionary with specified attributes moved to 'properties'.
         """
         # List of attributes to move to 'properties'
         attributes_to_move = [
@@ -107,19 +107,19 @@ class CollectionClient:
         """
         This function applies spatial and temporal filters to a Spark DataFrame using safe parameterized operations.
 
-        Parameters:
-        - df (DataFrame): The input Spark DataFrame to be filtered.
-        - bbox (Optional[list]): A list of bounding boxes for filtering the items.
-          Each bounding box is represented as a list of four float values: [min_lon, min_lat, max_lon, max_lat].
-          Example: [[-180.0, -90.0, 180.0, 90.0]]  # This bounding box covers the entire world.
-        - geometry (Optional[list]): A list of geometry objects (Shapely or WKT) for spatial filtering.
-          If both bbox and geometry are provided, geometry takes precedence.
-        - datetime (Optional[list]): A list of date-time ranges for filtering the items.
-          Each date-time range is represented as a list of two strings in ISO 8601 format: [start_datetime, end_datetime].
-          Example: [["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]  # This interval covers the entire year of 2020.
+        Args:
+            df (DataFrame): The input Spark DataFrame to be filtered.
+            bbox (Optional[list]): A list of bounding boxes for filtering the items.
+                Each bounding box is represented as a list of four float values: [min_lon, min_lat, max_lon, max_lat].
+                Example: [[-180.0, -90.0, 180.0, 90.0]]  # This bounding box covers the entire world.
+            geometry (Optional[list]): A list of geometry objects (Shapely or WKT) for spatial filtering.
+                If both bbox and geometry are provided, geometry takes precedence.
+            datetime (Optional[list]): A list of date-time ranges for filtering the items.
+                Each date-time range is represented as a list of two strings in ISO 8601 format: [start_datetime, end_datetime].
+                Example: [["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]  # This interval covers the entire year of 2020.
 
         Returns:
-        - DataFrame: The filtered Spark DataFrame.
+            DataFrame: The filtered Spark DataFrame.
 
         The function uses Spark SQL column operations and functions instead of string concatenation
         to prevent SQL injection vulnerabilities. Spatial and temporal conditions are combined using OR logic.
@@ -281,14 +281,14 @@ class CollectionClient:
 
         It then expands the date string to cover the entire time period for that date.
 
-        Parameters:
-        - date_str (str): The date string to expand.
+        Args:
+            date_str (str): The date string to expand.
 
         Returns:
-        - list: A list containing the start and end datetime strings in ISO 8601 format.
+            list: A list containing the start and end datetime strings in ISO 8601 format.
 
         Raises:
-        - ValueError: If the date string format is invalid.
+            ValueError: If the date string format is invalid.
 
         Examples:
         - "2017" expands to ["2017-01-01T00:00:00Z", "2017-12-31T23:59:59Z"]
@@ -451,11 +451,11 @@ class CollectionClient:
         The expected input schema of the loaded dataframe (df) can be found here:
         https://sedona.apache.org/latest-snapshot/api/sql/Stac/#usage
 
-        Parameters:
-        - df (DataFrame): The input DataFrame with an assets column.
+        Args:
+            df (DataFrame): The input DataFrame with an assets column.
 
         Returns:
-        - DataFrame: The DataFrame with a consistent schema for the assets column.
+            DataFrame: The DataFrame with a consistent schema for the assets column.
         """
         from pyspark.sql.functions import col, explode, struct
 

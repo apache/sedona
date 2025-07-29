@@ -60,7 +60,7 @@ class Client:
         This method fetches the root catalog from the STAC API, providing access to all collections and items.
 
         Returns:
-        - dict: The root catalog of the STAC API.
+            dict: The root catalog of the STAC API.
         """
         # Implement logic to fetch and return the root catalog
         return CollectionClient(self.url, None)
