@@ -37,7 +37,11 @@ from shapely.geometry import (
     box,
 )
 
-import geopandas._compat as compat
+import shapely
+
+GEOS_GE_390 = shapely.geos_version >= (3, 9, 0)
+HAS_PYPROJ = True
+
 from geopandas import GeoDataFrame, GeoSeries, read_file
 from geopandas.plotting import GeoplotAccessor
 
@@ -1224,7 +1228,7 @@ def _setup_class_geographic_aspect(naturalearth_lowres, request):
 
 @pytest.mark.skip(reason="Data not included in Sedona repo")
 @pytest.mark.usefixtures("_setup_class_geographic_aspect")
-@pytest.mark.skipif(not compat.HAS_PYPROJ, reason="pyproj not available")
+@pytest.mark.skipif(not HAS_PYPROJ, reason="pyproj not available")
 class TestGeographicAspect:
     def test_auto(self):
         ax = self.north.geometry.plot()
@@ -1992,7 +1996,7 @@ def test_polygon_patch():
     patch = _PolygonPatch(polygon)
     assert isinstance(patch, PathPatch)
     path = patch.get_path()
-    if compat.GEOS_GE_390:
+    if GEOS_GE_390:
         assert len(path.vertices) == len(path.codes) == 195
     else:
         assert len(path.vertices) == len(path.codes) == 198
