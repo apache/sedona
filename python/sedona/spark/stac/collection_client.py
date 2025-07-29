@@ -325,23 +325,20 @@ class CollectionClient:
         Returns an iterator of items. Each item has the supplied item ID and/or optional spatial and temporal extents.
 
         This method loads the collection data from the specified collection URL and applies
-        optional filters to the data. The filters include:
-        - IDs: A list of item IDs to filter the items. If not provided, no ID filtering is applied.
-        - bbox (Optional[list]): A list of bounding boxes for filtering the items.
-        - geometry (Optional[Union[str, BaseGeometry, List[Union[str, BaseGeometry]]]]): Shapely geometry object(s) or WKT string(s) for spatial filtering.
-          Can be a single geometry, WKT string, or a list of geometries/WKT strings.
-          If both bbox and geometry are provided, geometry takes precedence.
-        - datetime (Optional[Union[str, python_datetime.datetime, list]]): A single datetime, RFC 3339-compliant timestamp,
-          or a list of date-time ranges for filtering the items.
-        - max_items (Optional[int]): The maximum number of items to return from the search, even if there are more matching results.
+        optional filters to the data.
 
-        Returns:
-        - Iterator[PyStacItem]: An iterator of PyStacItem objects that match the specified filters.
-          If no filters are provided, the iterator contains all items in the collection.
-
-        Raises:
-        - RuntimeError: If there is an error loading the data or applying the filters, a RuntimeError
-          is raised with a message indicating the failure.
+        :param ids: A list of item IDs to filter the items. If not provided, no ID filtering is applied.
+        :param bbox: A list of bounding boxes for filtering the items.
+        :param geometry: Shapely geometry object(s) or WKT string(s) for spatial filtering.
+            Can be a single geometry, WKT string, or a list of geometries/WKT strings.
+            If both bbox and geometry are provided, geometry takes precedence.
+        :param datetime: A single datetime, RFC 3339-compliant timestamp,
+            or a list of date-time ranges for filtering the items.
+        :param max_items: The maximum number of items to return from the search, even if there are more matching results.
+        :return: An iterator of PyStacItem objects that match the specified filters.
+            If no filters are provided, the iterator contains all items in the collection.
+        :raises RuntimeError: If there is an error loading the data or applying the filters, a RuntimeError
+            is raised with a message indicating the failure.
         """
         try:
             df = self.load_items_df(bbox, geometry, datetime, ids, max_items)
@@ -377,25 +374,23 @@ class CollectionClient:
         optional spatial and temporal filters to the data. The spatial filter is applied using
         a bounding box, and the temporal filter is applied using a date-time range.
 
-        Parameters:
-        - bbox (Optional[list]): A list of bounding boxes for filtering the items.
-          Each bounding box is represented as a list of four float values: [min_lon, min_lat, max_lon, max_lat].
-          Example: [[-180.0, -90.0, 180.0, 90.0]]  # This bounding box covers the entire world.
-        - geometry (Optional[Union[str, BaseGeometry, List[Union[str, BaseGeometry]]]]): Shapely geometry object(s) or WKT string(s) for spatial filtering.
-          Can be a single geometry, WKT string, or a list of geometries/WKT strings.
-          If both bbox and geometry are provided, geometry takes precedence.
-          Example: Polygon(...) or "POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))" or [Polygon(...), Polygon(...)]
-        - datetime (Optional[Union[str, python_datetime.datetime, list]]): A single datetime, RFC 3339-compliant timestamp,
-          or a list of date-time ranges for filtering the items.
-          Example: "2020-01-01T00:00:00Z" or python_datetime.datetime(2020, 1, 1) or [["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]
-
-        Returns:
-        - DataFrame: A Spark DataFrame containing the filtered items. If no filters are provided,
-          the DataFrame contains all items in the collection.
-
-        Raises:
-        - RuntimeError: If there is an error loading the data or applying the filters, a RuntimeError
-          is raised with a message indicating the failure.
+        :param ids: A variable number of item IDs to filter the items.
+            Example: "item_id1" or ["item_id1", "item_id2"]
+        :param bbox: A list of bounding boxes for filtering the items.
+            Each bounding box is represented as a list of four float values: [min_lon, min_lat, max_lon, max_lat].
+            Example: [[-180.0, -90.0, 180.0, 90.0]]  # This bounding box covers the entire world.
+        :param geometry: Shapely geometry object(s) or WKT string(s) for spatial filtering.
+            Can be a single geometry, WKT string, or a list of geometries/WKT strings.
+            If both bbox and geometry are provided, geometry takes precedence.
+            Example: Polygon(...) or "POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))" or [Polygon(...), Polygon(...)]
+        :param datetime: A single datetime, RFC 3339-compliant timestamp,
+            or a list of date-time ranges for filtering the items.
+            Example: "2020-01-01T00:00:00Z" or python_datetime.datetime(2020, 1, 1) or [["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]
+        :param max_items: The maximum number of items to return from the search.
+        :return: A Spark DataFrame containing the filtered items. If no filters are provided,
+            the DataFrame contains all items in the collection.
+        :raises RuntimeError: If there is an error loading the data or applying the filters, a RuntimeError
+            is raised with a message indicating the failure.
         """
         try:
             df = self.load_items_df(bbox, geometry, datetime, ids, max_items)
@@ -422,18 +417,17 @@ class CollectionClient:
         optional spatial and temporal filters to the data. The filtered data is then saved
         to the specified output path in Parquet format.
 
-        Parameters:
-        - output_path (str): The path where the Parquet file will be saved.
-        - spatial_extent (Optional[SpatialExtent]): A spatial extent object that defines the
-          bounding box for filtering the items. If not provided, no spatial filtering is applied.
-        - temporal_extent (Optional[TemporalExtent]): A temporal extent object that defines the
-          date-time range for filtering the items. If not provided, no temporal filtering is applied.
-          To match a single datetime, you can set the start and end datetime to the same value in the datetime.
-          Here is an example:  [["2020-01-01T00:00:00Z", "2020-01-01T00:00:00Z"]]
-
-        Raises:
-        - RuntimeError: If there is an error loading the data, applying the filters, or saving the
-          DataFrame to Parquet format, a RuntimeError is raised with a message indicating the failure.
+        :param ids: A list of item IDs to filter the items. If not provided, no ID filtering is applied.
+        :param output_path: The path where the Parquet file will be saved.
+        :param bbox: A bounding box for filtering the items. If not provided, no spatial filtering is applied.
+        :param geometry: Shapely geometry object(s) or WKT string(s) for spatial filtering.
+            If both bbox and geometry are provided, geometry takes precedence.
+        :param datetime: A temporal extent that defines the
+            date-time range for filtering the items. If not provided, no temporal filtering is applied.
+            To match a single datetime, you can set the start and end datetime to the same value in the datetime.
+            Example: [["2020-01-01T00:00:00Z", "2020-01-01T00:00:00Z"]]
+        :raises RuntimeError: If there is an error loading the data, applying the filters, or saving the
+            DataFrame to Parquet format, a RuntimeError is raised with a message indicating the failure.
         """
         try:
             df = self.get_dataframe(

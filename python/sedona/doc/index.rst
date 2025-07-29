@@ -17,6 +17,7 @@ The following documentation covers the available Python packages in Sedona, incl
    :maxdepth: 2
    :caption: Contents:
 
+   modules
    sedona.flink
    sedona.geopandas
    sedona.spark

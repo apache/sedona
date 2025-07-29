@@ -1,19 +1,6 @@
 sedona package
 ==============
 
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 4
-
-   sedona.flink
-   sedona.geopandas
-   sedona.spark
-   sedona.stac
-   sedona.stats
-   sedona.utils
-
 Submodules
 ----------
 

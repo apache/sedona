@@ -39,6 +39,18 @@ extensions = [
     "sphinx_rtd_theme",  # Read the Docs theme
 ]
 
+# Mock imports to handle NumPy 2.0 compatibility issues with PySpark and missing dependencies
+autodoc_mock_imports = [
+    "pyspark.pandas",
+    "pyspark.pandas.indexes",
+    "pyspark.pandas.indexes.base",
+    "pyspark.pandas.series",
+    "pyspark.pandas.strings",
+    "pystac",
+    "sedona.spark.raster.raster_serde",
+    "sedona.spark.raster.sedona_raster",
+]
+
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
