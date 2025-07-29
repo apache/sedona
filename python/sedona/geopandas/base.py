@@ -674,7 +674,45 @@ class GeoFrame(metaclass=ABCMeta):
         raise NotImplementedError("This method is not implemented yet.")
 
     def segmentize(self, max_segment_length):
-        raise NotImplementedError("This method is not implemented yet.")
+        """Returns a ``GeoSeries`` with vertices added to line segments based on
+        maximum segment length.
+
+        Additional vertices will be added to every line segment in an input geometry so
+        that segments are no longer than the provided maximum segment length. New
+        vertices will evenly subdivide each segment. Only linear components of input
+        geometries are densified; other geometries are returned unmodified.
+
+        Parameters
+        ----------
+        max_segment_length : float | array-like
+            Additional vertices will be added so that all line segments are no longer
+            than this value. Must be greater than 0.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString
+        >>> s = GeoSeries(
+        ...     [
+        ...         LineString([(0, 0), (0, 10)]),
+        ...         Polygon([(0, 0), (10, 0), (10, 10), (0, 10), (0, 0)]),
+        ...     ],
+        ... )
+        >>> s
+        0                     LINESTRING (0 0, 0 10)
+        1    POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))
+        dtype: geometry
+
+        >>> s.segmentize(max_segment_length=5)
+        0                          LINESTRING (0 0, 0 5, 0 10)
+        1    POLYGON ((0 0, 5 0, 10 0, 10 5, 10 10, 5 10, 0...
+        dtype: geometry
+        """
+        return _delegate_to_geometry_column("segmentize", self, max_segment_length)
 
     def transform(self, transformation, include_z=False):
         raise NotImplementedError("This method is not implemented yet.")

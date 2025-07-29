@@ -1034,7 +1034,35 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         pass
 
     def test_segmentize(self):
-        pass
+        s = GeoSeries(
+            [
+                LineString([(0, 0), (0, 10)]),
+                Polygon([(0, 0), (10, 0), (10, 10), (0, 10), (0, 0)]),
+            ],
+        )
+        result = s.segmentize(5)
+        expected = gpd.GeoSeries(
+            [
+                LineString([(0, 0), (0, 5), (0, 10)]),
+                Polygon(
+                    [
+                        (0, 0),
+                        (5, 0),
+                        (10, 0),
+                        (10, 5),
+                        (10, 10),
+                        (5, 10),
+                        (0, 10),
+                        (0, 5),
+                        (0, 0),
+                    ]
+                ),
+            ],
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        df_result = s.to_geoframe().segmentize(5)
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_transform(self):
         pass

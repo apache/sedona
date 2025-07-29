@@ -691,7 +691,10 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_segmentize(self):
-        pass
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).segmentize(2.5)
+            gpd_result = gpd.GeoSeries(geom).segmentize(2.5)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_transform(self):
         pass
