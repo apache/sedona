@@ -1545,6 +1545,14 @@ class TestPredicateJoin(TestBase):
         # Then
         assert subdivided.count() == 16
 
+    def test_segmentize(self):
+        baseDf = self.spark.sql(
+            "SELECT ST_GeomFromWKT('POLYGON ((0 0, 0 8, 7.5 6, 15 4, 22.5 2, 30 0, 20 0, 10 0, 0 0))') AS poly"
+        )
+        actual = baseDf.selectExpr("ST_AsText(ST_Segmentize(poly, 10))").first()[0]
+        expected = "POLYGON ((0 0, 0 8, 7.5 6, 15 4, 22.5 2, 30 0, 20 0, 10 0, 0 0))"
+        assert expected == actual
+
     def test_st_has_z(self):
         baseDf = self.spark.sql(
             "SELECT ST_GeomFromWKT('POLYGON Z ((30 10 5, 40 40 10, 20 40 15, 10 20 20, 30 10 5))') as poly"

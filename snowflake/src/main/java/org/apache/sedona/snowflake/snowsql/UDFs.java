@@ -1068,6 +1068,12 @@ public class UDFs {
         Functions.subDivide(GeometrySerde.deserialize(geometry), maxVertices));
   }
 
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "maxSegmentLength"})
+  public static byte[] ST_Segmentize(byte[] geometry, double maxSegmentLength) {
+    return GeometrySerde.serialize(
+        Functions.segmentize(GeometrySerde.deserialize(geometry), maxSegmentLength));
+  }
+
   @UDFAnnotations.ParamMeta(argNames = {"leftGeom", "rightGeom"})
   public static byte[] ST_SymDifference(byte[] leftGeom, byte[] rightGeom) {
     return GeometrySerde.serialize(

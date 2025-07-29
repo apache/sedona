@@ -1248,6 +1248,15 @@ public class UDFsV2 {
   }
 
   @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "maxSegmentLength"},
+      argTypes = {"Geometry", "double"},
+      returnTypes = "Geometry")
+  public static String ST_Segmentize(String geometry, double maxSegmentLength) {
+    return GeometrySerde.serGeoJson(
+        Functions.segmentize(GeometrySerde.deserGeoJson(geometry), maxSegmentLength));
+  }
+
+  @UDFAnnotations.ParamMeta(
       argNames = {"leftGeom", "rightGeom"},
       argTypes = {"Geometry", "Geometry"},
       returnTypes = "Geometry")

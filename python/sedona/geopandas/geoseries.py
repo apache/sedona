@@ -1127,8 +1127,16 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("This method is not implemented yet.")
 
     def segmentize(self, max_segment_length):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
+        other_series, extended = self._make_series_of_val(max_segment_length)
+        align = False if extended else align
+
+        spark_expr = stf.ST_Segmentize(F.col("L"), F.col("R"))
+        return self._row_wise_operation(
+            spark_expr,
+            other_series,
+            align=align,
+            returns_geom=True,
+        )
 
     def transform(self, transformation, include_z=False):
         # Implementation of the abstract method

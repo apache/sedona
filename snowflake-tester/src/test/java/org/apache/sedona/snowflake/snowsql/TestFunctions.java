@@ -1011,6 +1011,15 @@ public class TestFunctions extends TestBase {
   }
 
   @Test
+  public void test_ST_Segmentize() {
+    registerUDF("ST_Segmentize", byte[].class, double.class);
+    verifySqlSingleRes(
+        "select sedona.ST_AsText(sedona.ST_Segmentize(sedona.ST_GeomFromText('POLYGON((0 0, 0 8, 30 0, 0 0))'), 10)",
+        "POLYGON ((0 0, 0 8, 7.5 6, 15 4, 22.5 2, 30 0, 20 0, 10 0, 0 0))");
+    )
+  }
+
+  @Test
   public void test_ST_SymDifference() {
     registerUDF("ST_SymDifference", byte[].class, byte[].class);
     verifySqlSingleRes(
