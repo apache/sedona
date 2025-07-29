@@ -1484,7 +1484,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             "left",
             "right",
             "both",
-        ], "singled-sided must be one of 'left', 'right', or 'both', True, or False"
+        ], "single-sided must be one of 'left', 'right', or 'both', True, or False"
 
         parameters = F.lit(
             f"quad_segs={resolution} endcap={cap_style} join={join_style} mitre_limit={mitre_limit} side={side}"
