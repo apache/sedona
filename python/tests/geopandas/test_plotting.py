@@ -37,9 +37,7 @@ from shapely.geometry import (
     box,
 )
 
-import shapely
-
-GEOS_GE_390 = shapely.geos_version >= (3, 9, 0)
+GEOS_GE_390 = True
 HAS_PYPROJ = True
 
 from geopandas import GeoDataFrame, GeoSeries, read_file
