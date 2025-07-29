@@ -1222,8 +1222,7 @@ Decorator signature looks as follows:
 ```python
 def sedona_vectorized_udf(
     udf_type: SedonaUDFType = SedonaUDFType.SHAPELY_SCALAR, return_type: DataType
-):
-    ...
+): ...
 ```
 
 where udf_type is the type of the UDF function, currently supported are:

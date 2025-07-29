@@ -237,8 +237,7 @@ The full signatures of the functions
         two_tailed: bool = True,
         id_column: str = "id",
         value_column: str = "value",
-    ) -> MoranResult:
-        ...
+    ) -> MoranResult: ...
 
 
     @dataclass

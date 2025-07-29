@@ -66,8 +66,9 @@ To leverage Arrow optimization and speed up the conversion, you can use the `cre
 that takes a SparkSession and GeoDataFrame as parameters and returns a Sedona DataFrame.
 
 ```python
-def create_spatial_dataframe(spark: SparkSession, gdf: gpd.GeoDataFrame) -> DataFrame:
-    ...
+def create_spatial_dataframe(
+    spark: SparkSession, gdf: gpd.GeoDataFrame
+) -> DataFrame: ...
 ```
 
 - spark: SparkSession

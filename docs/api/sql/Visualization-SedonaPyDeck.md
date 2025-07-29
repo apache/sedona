@@ -51,8 +51,7 @@ def create_geometry_map(
     map_provider=None,
     api_keys=None,
     stroked=True,
-):
-    ...
+): ...
 ```
 
 The parameter `fill_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column, and is used to color polygons or point geometries in the map
@@ -79,8 +78,7 @@ def create_choropleth_map(
     api_keys=None,
     elevation_col=0,
     stroked=True,
-):
-    ...
+): ...
 ```
 
 The parameter `fill_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column.
@@ -119,8 +117,7 @@ def create_scatterplot_map(
     map_style=None,
     map_provider=None,
     api_keys=None,
-):
-    ...
+): ...
 ```
 
 The parameter `fill_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column.
@@ -148,8 +145,7 @@ def create_heatmap(
     map_style=None,
     map_provider=None,
     api_keys=None,
-):
-    ...
+): ...
 ```
 
 The parameter `color_range` can be optionally given a list of RGB values, SedonaPyDeck by default uses `6-class YlOrRd` as color_range.
