@@ -90,7 +90,7 @@ class TestDataframe(TestGeopandasBase):
         sgpd_df.set_geometry(name, inplace=True)
         check_geodataframe(sgpd_df)
         result = sgpd_df.area
-        expected = pd.Series([1.0, 1.0, 1.0], name=name)
+        expected = pd.Series([1.0, 1.0, 1.0])
         self.check_pd_series_equal(result, expected)
 
     # These need to be defined inside the function to ensure Sedona's Geometry UDTs have been registered
@@ -206,6 +206,8 @@ class TestDataframe(TestGeopandasBase):
         assert type(df_copy) is GeoDataFrame
 
     def test_set_geometry(self):
+        from sedona.geopandas.geodataframe import MissingGeometryColumnError
+
         points1 = [Point(x, x) for x in range(3)]
         points2 = [Point(x + 5, x + 5) for x in range(3)]
 
@@ -213,7 +215,7 @@ class TestDataframe(TestGeopandasBase):
         sgpd_df = sgpd.GeoDataFrame(data)
 
         # No geometry column set yet
-        with pytest.raises(AttributeError):
+        with pytest.raises(MissingGeometryColumnError):
             _ = sgpd_df.geometry
 
         # TODO: Try to optimize this with self.ps_allow_diff_frames() away
@@ -327,38 +329,21 @@ class TestDataframe(TestGeopandasBase):
         self.assert_almost_equal(area_values[1], 4.0)
 
     def test_buffer(self):
-        # Create a GeoDataFrame with geometries to test buffer operation
-
-        # Create input geometries
         point = Point(0, 0)
         square = Polygon([(0, 0), (1, 0), (1, 1), (0, 1)])
 
-        data = {"geometry1": [point, square], "id": [1, 2], "value": ["a", "b"]}
+        data = {"geometry": [point, square], "id": [1, 2], "value": ["a", "b"]}
         df = GeoDataFrame(data)
 
-        # Apply buffer with distance 0.5
-        buffer_df = df.buffer(0.5)
+        result = df.buffer(0.5)
 
-        # Verify result is a GeoDataFrame
-        assert type(buffer_df) is GeoDataFrame
-
-        # Verify the original columns are preserved
-        assert "geometry1_buffered" in buffer_df.columns
-        assert "id" in buffer_df.columns
-        assert "value" in buffer_df.columns
-
-        # Convert to pandas to extract individual geometries
-        pandas_df = buffer_df._internal.spark_frame.select(
-            "geometry1_buffered"
-        ).toPandas()
-
+        assert type(result) is GeoSeries
         # Calculate areas to verify buffer was applied correctly
         # Point buffer with radius 0.5 should have area approximately π * 0.5² ≈ 0.785
         # Square buffer with radius 0.5 should expand the 1x1 square to 2x2 square with rounded corners
-        areas = [geom.area for geom in pandas_df["geometry1_buffered"]]
 
         # Check that square buffer area is greater than original (1.0)
-        assert areas[1] > 1.0
+        assert result.area[1] > 1.0
 
     def test_to_parquet(self):
         pass

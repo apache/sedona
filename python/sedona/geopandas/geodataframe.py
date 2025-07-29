@@ -32,6 +32,7 @@ from pyspark.pandas import Series as PandasOnSparkSeries
 from pyspark.pandas._typing import Dtype
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas.internal import InternalFrame
+from pyspark.pandas.utils import log_advice
 
 from sedona.geopandas._typing import Label
 from sedona.geopandas.base import GeoFrame
@@ -212,34 +213,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
     index : Index or array-like, optional
         Index to use for the resulting frame.
 
-    Attributes
-    ----------
-    geometry : GeoSeries
-        The active geometry column.
-    crs : pyproj.CRS
-        The Coordinate Reference System (CRS) for the geometries.
-    active_geometry_name : str
-        Name of the active geometry column.
-    area : Series
-        Area of each geometry in CRS units.
-    sindex : SpatialIndex
-        Spatial index for the geometries.
-
-    Methods
-    -------
-    buffer(distance)
-        Buffer geometries by specified distance.
-    sjoin(right, how='inner', predicate='intersects')
-        Spatial join with another GeoDataFrame.
-    set_geometry(col, drop=False, inplace=False)
-        Set the active geometry column.
-    rename_geometry(col, inplace=False)
-        Rename the active geometry column.
-    to_parquet(path, **kwargs)
-        Save to GeoParquet format.
-    copy(deep=False)
-        Make a copy of the GeoDataFrame.
-
     Examples
     --------
     >>> from shapely.geometry import Point, Polygon
@@ -351,10 +324,10 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
             try:
                 result = sgpd.GeoSeries(ps_series)
-                first_idx = ps_series.first_valid_index()
-                if first_idx is not None:
-                    geom = ps_series.iloc[int(first_idx)]
-                    srid = shapely.get_srid(geom)
+                not_null = ps_series[ps_series.notnull()]
+                if len(not_null) > 0:
+                    first_geom = not_null.iloc[0]
+                    srid = shapely.get_srid(first_geom)
 
                     # Shapely objects stored in the ps.Series retain their srid
                     # but the GeoSeries does not, so we manually re-set it here
@@ -412,8 +385,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         from pyspark.sql import DataFrame as SparkDataFrame
 
         if isinstance(data, GeoDataFrame):
-            if data._safe_get_crs() is None:
-                data.crs = crs
+            data_crs = data._safe_get_crs()
+            if data_crs is not None:
+                data.crs = data_crs
 
             super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
 
@@ -425,7 +399,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             # instead of calling e.g assert not dtype ourselves.
             # This way, if Spark adds support later, than we inherit those changes naturally
             super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
-        elif isinstance(data, PandasOnSparkDataFrame):
+        elif isinstance(data, (PandasOnSparkDataFrame, SparkDataFrame)):
 
             super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
         elif isinstance(data, PandasOnSparkSeries):
@@ -436,14 +410,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 pass
 
             super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
-        elif isinstance(data, SparkDataFrame):
-            assert columns is None
-            assert dtype is None
-            assert not copy
-
-            if index is None:
-                internal = InternalFrame(spark_frame=data, index_spark_columns=None)
-                object.__setattr__(self, "_internal_frame", internal)
         else:
             # below are not distributed dataframe types
             if isinstance(data, pd.DataFrame):
@@ -479,6 +445,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             self._geometry_column_name = data._geometry_column_name
             if crs is not None and data.crs != crs:
                 raise ValueError(crs_mismatch_error)
+
+        if geometry:
+            self.set_geometry(geometry, inplace=True)
 
         if geometry is None and "geometry" in self.columns:
 
@@ -541,7 +510,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                     "df.set_geometry. "
                 )
 
-            raise AttributeError(msg)
+            raise MissingGeometryColumnError(msg)
         return self[self._geometry_column_name]
 
     def _set_geometry(self, col):
@@ -828,55 +797,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         """
         return self._geometry_column_name
 
-    def _process_geometry_columns(
-        self, operation: str, rename_suffix: str = "", *args, **kwargs
-    ) -> GeoDataFrame:
-        """
-        Helper method to process geometry columns with a specified operation.
-
-        Parameters
-        ----------
-        operation : str
-            The spatial operation to apply (e.g., 'ST_Area', 'ST_Buffer').
-        rename_suffix : str, default ""
-            Suffix to append to the resulting column name.
-        args : tuple
-            Positional arguments for the operation.
-        kwargs : dict
-            Keyword arguments for the operation.
-
-        Returns
-        -------
-        GeoDataFrame
-            A new GeoDataFrame with the operation applied to geometry columns.
-        """
-        select_expressions = []
-
-        for field in self._internal.spark_frame.schema.fields:
-            col_name = field.name
-
-            # Skip index and order columns
-            if col_name in ("__index_level_0__", "__natural_order__"):
-                continue
-
-            if field.dataType.typeName() in ("geometrytype", "binary"):
-                # Prepare arguments for the operation
-                positional_params = ", ".join([repr(v) for v in args])
-                keyword_params = ", ".join([repr(v) for v in kwargs.values()])
-                params = ", ".join(filter(None, [positional_params, keyword_params]))
-
-                if field.dataType.typeName() == "binary":
-                    expr = f"{operation}(ST_GeomFromWKB(`{col_name}`){', ' + params if params else ''}) as {col_name}{rename_suffix}"
-                else:
-                    expr = f"{operation}(`{col_name}`{', ' + params if params else ''}) as {col_name}{rename_suffix}"
-                select_expressions.append(expr)
-            else:
-                # Keep non-geometry columns as they are
-                select_expressions.append(f"`{col_name}`")
-
-        sdf = self._internal.spark_frame.selectExpr(*select_expressions)
-        return GeoDataFrame(sdf)
-
     def to_geopandas(self) -> gpd.GeoDataFrame:
         """
         Note: Unlike in pandas and geopandas, Sedona will always return a general Index.
@@ -884,7 +804,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         e.g pd.Index([0, 1, 2]) instead of pd.RangeIndex(start=0, stop=3, step=1)
         """
-        from pyspark.pandas.utils import log_advice
 
         log_advice(
             "`to_geopandas` loads all data into the driver's memory. "
@@ -924,16 +843,19 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         """
         Make a copy of this GeoDataFrame object.
 
-        Parameters:
-        - deep: bool, default False
-            If True, a deep copy of the data is made. Otherwise, a shallow copy is made.
+        Parameters
+        ----------
+        deep : bool, default False
+            This parameter is not supported but just a dummy parameter to match pandas.
 
-        Returns:
-        - GeoDataFrame: A copy of this GeoDataFrame object.
+        Returns
+        -------
+        GeoDataFrame
+            A copy of this GeoDataFrame object.
 
-        Examples:
+        Examples
+        --------
         >>> from shapely.geometry import Point
-        >>> import geopandas as gpd
         >>> from sedona.geopandas import GeoDataFrame
 
         >>> gdf = GeoDataFrame([{"geometry": Point(1, 1), "value1": 2, "value2": 3}])
@@ -949,33 +871,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         else:
             return self  # GeoDataFrame(self._internal.spark_frame.copy())  "this parameter is not supported but just dummy parameter to match pandas."
 
-    @property
-    def area(self) -> GeoDataFrame:
-        """
-        Returns a GeoDataFrame containing the area of each geometry expressed in the units of the CRS.
-
-        Returns
-        -------
-        GeoDataFrame
-            A GeoDataFrame with the areas of the geometries.
-
-        Examples
-        --------
-        >>> from shapely.geometry import Polygon
-        >>> from sedona.geopandas import GeoDataFrame
-        >>>
-        >>> data = {
-        ...     'geometry': [Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])],
-        ...     'value': [1, 2]
-        ... }
-        >>> gdf = GeoDataFrame(data)
-        >>> gdf.area
-           geometry_area  value
-        0           1.0      1
-        1           4.0      2
-        """
-        return self.geometry.area
-
     def _safe_get_crs(self):
         """
         Helper method for getting the crs of the GeoDataframe safely.
@@ -983,7 +878,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         """
         try:
             return self.geometry.crs
-        except AttributeError:
+        except MissingGeometryColumnError:
             return None
 
     @property
@@ -1006,10 +901,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         **kwargs,
     ) -> GeoDataFrame:
         raise NotImplementedError("from_dict() is not implemented yet.")
-
-    @classmethod
-    def from_file(cls, filename: os.PathLike | typing.IO, **kwargs) -> GeoDataFrame:
-        raise NotImplementedError("from_file() is not implemented yet.")
 
     @classmethod
     def from_features(
@@ -1112,53 +1003,49 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
     ) -> str:
         """
         Returns a GeoJSON representation of the ``GeoDataFrame`` as a string.
+
         Parameters
         ----------
         na : {'null', 'drop', 'keep'}, default 'null'
-            Indicates how to output missing (NaN) values in the GeoDataFrame.
-            See below.
-        show_bbox : bool, optional, default: False
-            Include bbox (bounds) in the geojson
-        drop_id : bool, default: False
-            Whether to retain the index of the GeoDataFrame as the id property
-            in the generated GeoJSON. Default is False, but may want True
-            if the index is just arbitrary row numbers.
-        to_wgs84: bool, optional, default: False
-            If the CRS is set on the active geometry column it is exported as
-            WGS84 (EPSG:4326) to meet the `2016 GeoJSON specification
-            <https://tools.ietf.org/html/rfc7946>`_.
-            Set to True to force re-projection and set to False to ignore CRS. False by
-            default.
-        Notes
-        -----
-        The remaining *kwargs* are passed to json.dumps().
-        Missing (NaN) values in the GeoDataFrame can be represented as follows:
-        - ``null``: output the missing entries as JSON null.
-        - ``drop``: remove the property from the feature. This applies to each
-          feature individually so that features may have different properties.
-        - ``keep``: output the missing entries as NaN.
-        If the GeoDataFrame has a defined CRS, its definition will be included
-        in the output unless it is equal to WGS84 (default GeoJSON CRS) or not
-        possible to represent in the URN OGC format, or unless ``to_wgs84=True``
-        is specified.
+            Dictates how to represent missing (NaN) values in the output.
+            - ``null``: Outputs missing entries as JSON `null`.
+            - ``drop``: Removes the entire property from a feature if its
+            value is missing.
+            - ``keep``: Outputs missing entries as ``NaN``.
+        show_bbox : bool, default False
+            If True, the `bbox` (bounds) of the geometries is included in the
+            output.
+        drop_id : bool, default False
+            If True, the GeoDataFrame index is not written to the 'id' field
+            of each GeoJSON Feature.
+        to_wgs84 : bool, default False
+            If True, all geometries are transformed to WGS84 (EPSG:4326) to
+            meet the `2016 GeoJSON specification
+            <https://tools.ietf.org/html/rfc7946>`_. When False, the current
+            CRS is exported if it's set.
+        **kwargs
+            Additional keyword arguments passed to `json.dumps()`.
+
+        Returns
+        -------
+        str
+            A GeoJSON representation of the GeoDataFrame.
+
+        See Also
+        --------
+        GeoDataFrame.to_file : Write a ``GeoDataFrame`` to a file, which can be
+                            used for GeoJSON format.
+
         Examples
         --------
         >>> from sedona.geopandas import GeoDataFrame
         >>> from shapely.geometry import Point
         >>> d = {'col1': ['name1', 'name2'], 'geometry': [Point(1, 2), Point(2, 1)]}
         >>> gdf = GeoDataFrame(d, crs="EPSG:3857")
-        >>> gdf
-            col1     geometry
-        0  name1  POINT (1 2)
-        1  name2  POINT (2 1)
         >>> gdf.to_json()
-        '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", \
-"properties": {"col1": "name1"}, "geometry": {"type": "Point", "coordinates": [1.0,\
- 2.0]}}, {"id": "1", "type": "Feature", "properties": {"col1": "name2"}, "geometry"\
-: {"type": "Point", "coordinates": [2.0, 1.0]}}], "crs": {"type": "name", "properti\
-es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
-        Alternatively, you can write GeoJSON to file:
-        >>> gdf.to_file(path, driver="GeoJSON")  # doctest: +SKIP
+        '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "properties": {"col1": "name1"}, "geometry": {"type": "Point", "coordinates": [1.0, 2.0]}}, {"id": "1", "type": "Feature", "properties": {"col1": "name2"}, "geometry": {"type": "Point", "coordinates": [2.0, 1.0]}}], "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
+
+
         See also
         --------
         GeoDataFrame.to_file : write GeoDataFrame to file
@@ -1290,26 +1177,6 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
     ):
         raise NotImplementedError("to_feather() is not implemented yet.")
 
-    def to_file(
-        self,
-        filename: str,
-        driver: str | None = None,
-        schema: dict | None = None,
-        index: bool | None = None,
-        **kwargs,
-    ):
-        raise NotImplementedError("to_file() is not implemented yet.")
-
-    @property
-    def geom_type(self) -> str:
-        # Implementation of the abstract method
-        raise NotImplementedError(
-            _not_implemented_error(
-                "geom_type",
-                "Returns the geometry type of each geometry (Point, LineString, Polygon, etc.).",
-            )
-        )
-
     @property
     def type(self):
         # Implementation of the abstract method
@@ -1317,280 +1184,9 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
             _not_implemented_error("type", "Returns numeric geometry type codes.")
         )
 
-    @property
-    def length(self):
-        # Implementation of the abstract method
-        raise NotImplementedError(
-            _not_implemented_error(
-                "length", "Returns the length/perimeter of each geometry."
-            )
-        )
-
-    @property
-    def is_valid(self):
-        # Implementation of the abstract method
-        raise NotImplementedError(
-            _not_implemented_error(
-                "is_valid", "Tests if geometries are valid according to OGC standards."
-            )
-        )
-
-    def is_valid_reason(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def is_empty(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def count_coordinates(self):
-        # Implementation of the abstract method
-        raise NotImplementedError(
-            _not_implemented_error(
-                "count_coordinates",
-                "Counts the number of coordinate tuples in each geometry.",
-            )
-        )
-
-    def count_geometries(self):
-        # Implementation of the abstract method
-        raise NotImplementedError(
-            _not_implemented_error(
-                "count_geometries",
-                "Counts the number of geometries in each multi-geometry or collection.",
-            )
-        )
-
-    def count_interior_rings(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def is_simple(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def is_ring(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def is_ccw(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def is_closed(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def has_z(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def get_precision(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def get_geometry(self, index):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def boundary(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def centroid(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def concave_hull(self, ratio=0.0, allow_holes=False):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def convex_hull(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def delaunay_triangles(self, tolerance=0.0, only_edges=False):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def voronoi_polygons(self, tolerance=0.0, extend_to=None, only_edges=False):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def envelope(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def minimum_rotated_rectangle(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def exterior(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def extract_unique_points(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def offset_curve(self, distance, quad_segs=8, join_style="round", mitre_limit=5.0):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def interiors(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def remove_repeated_points(self, tolerance=0.0):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def set_precision(self, grid_size, mode="valid_output"):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def representative_point(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def minimum_bounding_circle(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def minimum_bounding_radius(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def minimum_clearance(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def normalize(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def make_valid(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def reverse(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def segmentize(self, max_segment_length):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def transform(self, transformation, include_z=False):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def force_2d(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def force_3d(self, z=0):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def line_merge(self, directed=False):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    @property
-    def unary_union(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def union_all(self, method="unary", grid_size=None):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def intersection_all(self):
-        # Implementation of the abstract method
-        raise NotImplementedError("This method is not implemented yet.")
-
-    def contains(self, other, align=None):
-        # Implementation of the abstract method
-        raise NotImplementedError(
-            _not_implemented_error(
-                "contains", "Tests if geometries contain other geometries."
-            )
-        )
-
-    def contains_properly(self, other, align=None):
-        # Implementation of the abstract method
-        raise NotImplementedError(
-            _not_implemented_error(
-                "contains_properly",
-                "Tests if geometries properly contain other geometries (no boundary contact).",
-            )
-        )
-
     # ============================================================================
     # SPATIAL OPERATIONS
     # ============================================================================
-
-    def buffer(
-        self,
-        distance,
-        resolution=16,
-        cap_style="round",
-        join_style="round",
-        mitre_limit=5.0,
-        single_sided=False,
-        **kwargs,
-    ) -> GeoDataFrame:
-        """
-        Returns a GeoDataFrame with all geometries buffered by the specified distance.
-
-        Parameters
-        ----------
-        distance : float
-            The distance to buffer by. Negative distances will create inward buffers.
-        resolution : int, default 16
-            The number of segments used to approximate curves.
-        cap_style : str, default "round"
-            The style of the buffer cap. One of 'round', 'flat', 'square'.
-        join_style : str, default "round"
-            The style of the buffer join. One of 'round', 'mitre', 'bevel'.
-        mitre_limit : float, default 5.0
-            The mitre limit ratio for joins when join_style='mitre'.
-        single_sided : bool, default False
-            Whether to create a single-sided buffer.
-
-        Returns
-        -------
-        GeoDataFrame
-            A new GeoDataFrame with buffered geometries.
-
-        Examples
-        --------
-        >>> from shapely.geometry import Point
-        >>> from sedona.geopandas import GeoDataFrame
-        >>>
-        >>> data = {
-        ...     'geometry': [Point(0, 0), Point(1, 1)],
-        ...     'value': [1, 2]
-        ... }
-        >>> gdf = GeoDataFrame(data)
-        >>> buffered = gdf.buffer(0.5)
-        """
-        return self._process_geometry_columns(
-            "ST_Buffer", rename_suffix="_buffered", distance=distance
-        )
 
     def sjoin(
         self,
@@ -1614,8 +1210,7 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
             The type of join:
             * 'left': use keys from left_df; retain only left_df geometry column
             * 'right': use keys from right_df; retain only right_df geometry column
-            * 'inner': use intersection of keys from both dfs; retain only
-              left_df geometry column
+            * 'inner': use intersection of keys from both dfs; retain only left_df geometry column
         predicate : str, default 'intersects'
             Binary predicate. Valid values: 'intersects', 'contains', 'within', 'dwithin'
         lsuffix : str, default 'left'
@@ -1627,6 +1222,8 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
         on_attribute : str, list or tuple, optional
             Column name(s) to join on as an additional join restriction.
             These must be found in both DataFrames.
+        **kwargs
+            Additional keyword arguments passed to the spatial join function.
 
         Returns
         -------
@@ -1637,7 +1234,7 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
         --------
         >>> from shapely.geometry import Point, Polygon
         >>> from sedona.geopandas import GeoDataFrame
-        >>>
+
         >>> polygons = GeoDataFrame({
         ...     'geometry': [Polygon([(0, 0), (0, 1), (1, 1), (1, 0)])],
         ...     'value': [1]
@@ -1666,18 +1263,134 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
     # I/O OPERATIONS
     # ============================================================================
 
+    @classmethod
+    def from_file(
+        cls, filename: str, format: str | None = None, **kwargs
+    ) -> GeoDataFrame:
+        """Alternate constructor to create a ``GeoDataFrame`` from a file.
+
+        Parameters
+        ----------
+        filename : str
+            File path or file handle to read from. If the path is a directory,
+            Sedona will read all files in that directory.
+        format : str, optional
+            The format of the file to read, by default None. If None, Sedona
+            infers the format from the file extension. Note that format
+            inference is not supported for directories. Available formats are
+            "shapefile", "geojson", "geopackage", and "geoparquet".
+        table_name : str, optional
+            The name of the table to read from a GeoPackage file, by default
+            None. This is required if ``format`` is "geopackage".
+        **kwargs
+            Additional keyword arguments passed to the file reader.
+
+        Returns
+        -------
+        GeoDataFrame
+            A new GeoDataFrame created from the file.
+
+        See Also
+        --------
+        GeoDataFrame.to_file : Write a ``GeoDataFrame`` to a file.
+        """
+        return sgpd.io.read_file(filename, format, **kwargs)
+
+    def to_file(
+        self,
+        path: str,
+        driver: str | None = None,
+        schema: dict | None = None,
+        index: bool | None = None,
+        **kwargs,
+    ):
+        """
+        Write the ``GeoDataFrame`` to a file.
+
+        Parameters
+        ----------
+        path : str
+            File path or file handle to write to.
+
+        driver : str, default None
+            The format driver used to write the file.
+            If not specified, it attempts to infer it from the file extension.
+            If no extension is specified, Sedona will error.
+
+            Options: "geojson", "geopackage", "geoparquet"
+
+        schema : dict, default None
+            Not applicable to Sedona's implementation.
+
+        index : bool, default None
+            If True, write index into one or more columns (for MultiIndex).
+            Default None writes the index into one or more columns only if
+            the index is named, is a MultiIndex, or has a non-integer data
+            type. If False, no index is written.
+
+        **kwargs
+            Additional keyword arguments:
+
+            mode : str, default 'w'
+                The write mode, 'w' to overwrite the existing file and 'a' to append.
+                'overwrite' and 'append' are equivalent to 'w' and 'a' respectively.
+
+            crs : pyproj.CRS, default None
+                If specified, the CRS is passed to Fiona to better control how the file is written.
+                If None, GeoPandas will determine the CRS based on the ``crs`` attribute.
+                The value can be anything accepted by
+                :meth:`pyproj.CRS.from_user_input <pyproj.crs.CRS.from_user_input>`,
+                such as an authority string (e.g., "EPSG:4326") or a WKT string.
+
+            engine : str
+                Not applicable to Sedona's implementation.
+
+            metadata : dict[str, str], default None
+                Optional metadata to be stored in the file. Keys and values must be
+                strings. Supported only for "GPKG" driver. Not supported by Sedona.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point, LineString
+        >>> from sedona.geopandas import GeoDataFrame
+
+        >>> gdf = GeoDataFrame({
+        ...     "geometry": [Point(0, 0), LineString([(0, 0), (1, 1)])],
+        ...     "int": [1, 2]
+        ... })
+        >>> gdf.to_file(filepath, driver="geoparquet")
+
+        With selected drivers you can also append to a file with ``mode="a"``:
+
+        >>> gdf.to_file(filepath, driver="geojson", mode="a")
+
+        When the index is of non-integer dtype, ``index=None`` (default) is treated as True,
+        writing the index to the file.
+
+        >>> gdf = GeoDataFrame({"geometry": [Point(0, 0)]}, index=["a", "b"])
+        >>> gdf.to_file(filepath, driver="geoparquet")
+        """
+        sgpd.io._to_file(self, path, driver, index, **kwargs)
+
     def to_parquet(self, path, **kwargs):
         """
-        Write the GeoSeries to a GeoParquet file.
+        Write the GeoDataFrame to a GeoParquet file.
 
-        Parameters:
-        - path: str
+        Parameters
+        ----------
+        path : str
             The file path where the GeoParquet file will be written.
-        - kwargs: Any
+        **kwargs
             Additional arguments to pass to the Sedona DataFrame output function.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point
+        >>> from sedona.geopandas import GeoDataFrame
+        >>> gdf = GeoDataFrame({"geometry": [Point(0, 0), Point(1, 1)], "value": [1, 2]})
+        >>> gdf.to_parquet("output.parquet")
         """
-        # Use the Spark DataFrame's write method to write to GeoParquet format
-        self._internal.spark_frame.write.format("geoparquet").save(path, **kwargs)
+        self.to_file(path, driver="geoparquet", **kwargs)
 
 
 # -----------------------------------------------------------------------------
@@ -1689,9 +1402,6 @@ def _ensure_geometry(data, crs: Any | None = None) -> sgpd.GeoSeries:
     """
     Ensure the data is of geometry dtype or converted to it.
 
-    If input is a (Geo)Series, output is a GeoSeries, otherwise output
-    is GeometryArray.
-
     If the input is a GeometryDtype with a set CRS, `crs` is ignored.
     """
     if isinstance(data, sgpd.GeoSeries):
@@ -1702,3 +1412,8 @@ def _ensure_geometry(data, crs: Any | None = None) -> sgpd.GeoSeries:
         return data
     else:
         return sgpd.GeoSeries(data, crs=crs)
+
+
+# We don't raise AttributeError because that would be caught by pyspark's __getattr__ creating a misleading error message
+class MissingGeometryColumnError(Exception):
+    pass

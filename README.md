@@ -35,6 +35,8 @@
 * [Docker image](#docker-image)
 * [Building Sedona](#building-sedona)
 * [Documentation](#documentation)
+* [Star History](#star-history)
+* [Contributors](#contributors)
 * [Powered by](#powered-by)
 
 ## Join the community
@@ -43,7 +45,7 @@ Everyone is welcome to join our community events. We have a community office hou
 
 Please join our Discord community!
 
-[![Apache Sedona Community Discord Server](https://dcbadge.vercel.app/api/server/9A3k5dEBsY)](https://discord.gg/9A3k5dEBsY)
+[![Discord](https://dcbadge.limes.pink/api/server/https://discord.gg/9A3k5dEBsY)](https://discord.gg/9A3k5dEBsY)
 
 * [Apache Sedona@LinkedIn](https://www.linkedin.com/company/apache-sedona)
 * [Apache Sedona@X](https://X.com/ApacheSedona)
@@ -185,6 +187,14 @@ We provide a Docker image for Apache Sedona with Python JupyterLab and a single-
 * [Working with Spatial R in Sedona](https://sedona.apache.org/latest-snapshot/api/rdocs/)
 
 Please visit [Apache Sedona website](http://sedona.apache.org/) for detailed information
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=apache/sedona&type=Date)](https://www.star-history.com/#apache/sedona&Date)
+
+## Contributors
+
+[![Apache Sedona GitHub Contributors](https://contrib.rocks/image?repo=apache/sedona&anon=1&max=1000)](https://github.com/apache/sedona/graphs/contributors)
 
 ## Powered by
 

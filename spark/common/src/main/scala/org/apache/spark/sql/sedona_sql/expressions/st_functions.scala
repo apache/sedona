@@ -652,6 +652,11 @@ object st_functions {
   def ST_SubDivideExplode(geometry: String, maxVertices: Int): Column =
     wrapExpression[ST_SubDivideExplode](geometry, maxVertices)
 
+  def ST_Segmentize(geometry: Column, maxSegmentLength: Column): Column =
+    wrapExpression[ST_Segmentize](geometry, maxSegmentLength)
+  def ST_Segmentize(geometry: String, maxSegmentLength: Double): Column =
+    wrapExpression[ST_Segmentize](geometry, maxSegmentLength)
+
   def ST_SimplifyPreserveTopology(geometry: Column, distanceTolerance: Column): Column =
     wrapExpression[ST_SimplifyPreserveTopology](geometry, distanceTolerance)
   def ST_SimplifyPreserveTopology(geometry: String, distanceTolerance: Double): Column =

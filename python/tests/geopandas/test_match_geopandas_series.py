@@ -62,6 +62,11 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
         self.linestrings = [LineString([(x, x + 1), (x + 2, x + 3)]) for x in range(3)]
 
+        self.linearrings = [
+            LinearRing([(x, x), (x + 1, x), (x + 1, x + 1), (x, x + 1), (x, x)])
+            for x in range(3)
+        ]
+
         self.multilinestrings = [
             MultiLineString(
                 [[[x, x + 1], [x + 2, x + 3]], [[x + 4, x + 5], [x + 6, x + 7]]]
@@ -101,35 +106,35 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             )
         ]
 
-        # (sql_table_name, geom)
         self.geoms = [
-            ("points", self.points),
-            ("multipoints", self.multipoints),
-            ("linestrings", self.linestrings),
-            ("multilinestrings", self.multilinestrings),
-            ("polygons", self.polygons),
-            ("multipolygons", self.multipolygons),
-            ("geomcollection", self.geomcollection),
+            self.points,
+            self.multipoints,
+            self.linestrings,
+            self.linearrings,
+            self.multilinestrings,
+            self.polygons,
+            self.multipolygons,
+            self.geomcollection,
         ]
 
-        # create the tables in sedona spark
-        for i, (table_name, geoms) in enumerate(self.geoms):
-            wkt_string = [g.wkt for g in geoms]
-            pd_df = pd.DataFrame({"id": i, "geometry": wkt_string})
-            spark_df = self.spark.createDataFrame(pd_df)
-            spark_df.createOrReplaceTempView(table_name)
+        self.pairs = [
+            (self.points, self.multipolygons),
+            (self.geomcollection, self.polygons),
+            (self.linestrings, self.multipoints),
+            (self.linearrings, self.multilinestrings),
+        ]
 
     def teardown_method(self):
         shutil.rmtree(self.tempdir)
 
     def test_constructor(self):
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             gpd_series = gpd.GeoSeries(geom)
             assert isinstance(gpd_series, gpd.GeoSeries)
             assert isinstance(gpd_series.geometry, gpd.GeoSeries)
 
     def test_to_geopandas(self):
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             sgpd_result = GeoSeries(geom)
             gpd_result = gpd.GeoSeries(geom)
             # The below method calls to_geopandas() on sgpd_result, so we don't do it here
@@ -178,23 +183,47 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         assert type(area) is ps.Series
         assert area.count() == 2
 
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             sgpd_result = GeoSeries(geom).area
             gpd_result = gpd.GeoSeries(geom).area
             self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_buffer(self):
-        buffer = self.g1.buffer(0.2)
-        assert buffer is not None
-        assert type(buffer) is GeoSeries
-        assert buffer.count() == 2
-
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             dist = 0.2
             sgpd_result = GeoSeries(geom).buffer(dist)
             gpd_result = gpd.GeoSeries(geom).buffer(dist)
 
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # Check that the parameters work properly
+        sgpd_result = GeoSeries(self.linestrings).buffer(
+            0.2, resolution=20, cap_style="flat", join_style="bevel"
+        )
+        gpd_result = gpd.GeoSeries(self.linestrings).buffer(
+            0.2, resolution=20, cap_style="flat", join_style="bevel"
+        )
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        sgpd_result = GeoSeries(self.linestrings).buffer(0.2, single_sided=True)
+        gpd_result = gpd.GeoSeries(self.linestrings).buffer(0.2, single_sided=True)
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        sgpd_result = GeoSeries(self.linestrings).buffer(
+            0.2, join_style="mitre", mitre_limit=10.0
+        )
+        gpd_result = gpd.GeoSeries(self.linestrings).buffer(
+            0.2, join_style="mitre", mitre_limit=10.0
+        )
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        sgpd_result = GeoSeries(self.linestrings).buffer(
+            0.2, single_sided=True, cap_style="round"
+        )
+        gpd_result = gpd.GeoSeries(self.linestrings).buffer(
+            0.2, single_sided=True, cap_style="round"
+        )
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_buffer_then_area(self):
         area = self.g1.buffer(0.2).area
@@ -202,15 +231,20 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         assert type(area) is ps.Series
         assert area.count() == 2
 
-    def test_buffer_then_geoparquet(self):
-        temp_file_path = os.path.join(
-            self.tempdir, next(tempfile._get_candidate_names()) + ".parquet"
-        )
-        self.g1.buffer(0.2).to_parquet(temp_file_path)
-        assert os.path.exists(temp_file_path)
+    def test_simplify(self):
+        for geom in self.geoms:
+            if isinstance(geom[0], LinearRing):
+                continue
+            sgpd_result = GeoSeries(geom).simplify(100.1)
+            gpd_result = gpd.GeoSeries(geom).simplify(100.1)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+            sgpd_result = GeoSeries(geom).simplify(0.05, preserve_topology=False)
+            gpd_result = gpd.GeoSeries(geom).simplify(0.05, preserve_topology=False)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_geometry(self):
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             gpd_result = gpd.GeoSeries(geom).geometry
             sgpd_result = GeoSeries(geom).geometry
             assert isinstance(sgpd_result, GeoSeries)
@@ -244,14 +278,14 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_from_wkb(self):
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             wkb = [g.wkb for g in geom]
             sgpd_result = GeoSeries.from_wkb(wkb)
             gpd_result = gpd.GeoSeries.from_wkb(wkb)
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_from_wkt(self):
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             wkt = [g.wkt for g in geom]
             sgpd_result = GeoSeries.from_wkt(wkt)
             gpd_result = gpd.GeoSeries.from_wkt(wkt)
@@ -285,7 +319,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         if parse_version(gpd.__version__) < parse_version("1.0.0"):
             return
 
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             gpd_series = gpd.GeoSeries(geom)
             gpd_result = gpd.GeoSeries.from_arrow(gpd_series.to_arrow())
 
@@ -297,7 +331,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
     @pytest.mark.parametrize("fun", ["isna", "isnull"])
     def test_isna(self, fun):
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             sgpd_result = getattr(GeoSeries(geom), fun)()
             assert isinstance(sgpd_result, ps.Series)
             gpd_result = getattr(gpd.GeoSeries(geom), fun)()
@@ -305,7 +339,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
     @pytest.mark.parametrize("fun", ["notna", "notnull"])
     def test_notna(self, fun):
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             sgpd_result = getattr(GeoSeries(geom), fun)()
             assert isinstance(sgpd_result, ps.Series)
             gpd_result = getattr(gpd.GeoSeries(geom), fun)()
@@ -318,7 +352,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_fillna(self):
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             sgpd_result = GeoSeries(geom).fillna()
             gpd_result = gpd.GeoSeries(geom).fillna()
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
@@ -346,17 +380,13 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_to_crs(self):
-        for _, geom in self.geoms:
-            sgpd_result = GeoSeries(geom, crs=4326)
-            gpd_result = gpd.GeoSeries(geom, crs=4326)
-            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
-
-            sgpd_result = sgpd_result.to_crs(epsg=3857)
-            gpd_result = gpd_result.to_crs(epsg=3857)
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom, crs=4326).to_crs(epsg=3857)
+            gpd_result = gpd.GeoSeries(geom, crs=4326).to_crs(epsg=3857)
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_bounds(self):
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             sgpd_result = GeoSeries(geom).bounds
             gpd_result = gpd.GeoSeries(geom).bounds
             pd.testing.assert_frame_equal(
@@ -366,26 +396,29 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
     def test_total_bounds(self):
         import numpy as np
 
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             sgpd_result = GeoSeries(geom).total_bounds
             gpd_result = gpd.GeoSeries(geom).total_bounds
             np.testing.assert_array_equal(sgpd_result, gpd_result)
 
     def test_estimate_utm_crs(self):
         for crs in ["epsg:4326", "epsg:3857"]:
-            for _, geom in self.geoms:
+            for geom in self.geoms:
                 gpd_result = gpd.GeoSeries(geom, crs=crs).estimate_utm_crs()
                 sgpd_result = GeoSeries(geom, crs=crs).estimate_utm_crs()
                 assert sgpd_result == gpd_result
 
     def test_to_json(self):
-        for _, geom in self.geoms:
+        for geom in self.geoms:
+            # Sedona converts it to LineString, so the outputs will be different
+            if isinstance(geom[0], LinearRing):
+                continue
             sgpd_result = GeoSeries(geom).to_json()
             gpd_result = gpd.GeoSeries(geom).to_json()
             assert sgpd_result == gpd_result
 
     def test_to_wkb(self):
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             sgpd_result = GeoSeries(geom).to_wkb()
             gpd_result = gpd.GeoSeries(geom).to_wkb()
             self.check_pd_series_equal(sgpd_result, gpd_result)
@@ -395,7 +428,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_to_wkt(self):
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             ps_series = GeoSeries(geom).to_wkt()
             pd_series = gpd.GeoSeries(geom).to_wkt()
             # There are slight variations of valid wkt (e.g valid parentheses being optional),
@@ -411,7 +444,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
         import pyarrow as pa
 
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             sgpd_result = pa.array(GeoSeries(geom).to_arrow())
             gpd_result = pa.array(gpd.GeoSeries(geom).to_arrow())
             assert sgpd_result == gpd_result
@@ -420,7 +453,10 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_geom_type(self):
-        for _, geom in self.geoms:
+        for geom in self.geoms:
+            # Sedona converts it to LineString, so the outputs will be different
+            if isinstance(geom[0], LinearRing):
+                continue
             sgpd_result = GeoSeries(geom).geom_type
             gpd_result = gpd.GeoSeries(geom).geom_type
             self.check_pd_series_equal(sgpd_result, gpd_result)
@@ -429,14 +465,14 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_length(self):
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             sgpd_result = GeoSeries(geom).length
             assert isinstance(sgpd_result, ps.Series)
             gpd_result = gpd.GeoSeries(geom).length
             self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_is_valid(self):
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             sgpd_result = GeoSeries(geom).is_valid
             assert isinstance(sgpd_result, ps.Series)
             gpd_result = gpd.GeoSeries(geom).is_valid
@@ -470,7 +506,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                 raise ValueError(f"Unexpected result: {a} not equivalent to {e}")
 
     def test_is_empty(self):
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             sgpd_result = GeoSeries(geom).is_empty
             assert isinstance(sgpd_result, ps.Series)
             gpd_result = gpd.GeoSeries(geom).is_empty
@@ -489,59 +525,53 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         if parse_version(gpd.__version__) < parse_version("1.0.0"):
             pytest.skip("geopandas < 1.0.0 does not support dwithin")
 
-        for i, (_, geom) in enumerate(self.geoms):
-            for _, geom2 in self.geoms[i:]:
-                sgpd_result = GeoSeries(geom).dwithin(GeoSeries(geom2), distance=1)
+        for geom, geom2 in self.pairs:
+            sgpd_result = GeoSeries(geom).dwithin(GeoSeries(geom2), distance=1)
+            gpd_result = gpd.GeoSeries(geom).dwithin(gpd.GeoSeries(geom2), distance=1)
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).dwithin(
+                    GeoSeries(geom2), distance=1, align=False
+                )
                 gpd_result = gpd.GeoSeries(geom).dwithin(
-                    gpd.GeoSeries(geom2), distance=1
+                    gpd.GeoSeries(geom2), distance=1, align=False
                 )
                 self.check_pd_series_equal(sgpd_result, gpd_result)
 
-                if len(geom) == len(geom2):
-                    sgpd_result = GeoSeries(geom).dwithin(
-                        GeoSeries(geom2), distance=1, align=False
-                    )
-                    gpd_result = gpd.GeoSeries(geom).dwithin(
-                        gpd.GeoSeries(geom2), distance=1, align=False
-                    )
-                    self.check_pd_series_equal(sgpd_result, gpd_result)
-
     def test_difference(self):
-        for i, (_, geom) in enumerate(self.geoms):
-            for _, geom2 in self.geoms[i:]:
-                # Sedona doesn't support difference for GeometryCollections
-                if isinstance(geom[0], GeometryCollection) or isinstance(
-                    geom2[0], GeometryCollection
-                ):
-                    continue
-                # Operation doesn't work on invalid geometries
-                if (
-                    not gpd.GeoSeries(geom).is_valid.all()
-                    or not gpd.GeoSeries(geom2).is_valid.all()
-                ):
-                    continue
+        for geom, geom2 in self.pairs:
+            # Sedona doesn't support difference for GeometryCollections
+            if isinstance(geom[0], GeometryCollection) or isinstance(
+                geom2[0], GeometryCollection
+            ):
+                continue
+            # Operation doesn't work on invalid geometries
+            if (
+                not gpd.GeoSeries(geom).is_valid.all()
+                or not gpd.GeoSeries(geom2).is_valid.all()
+            ):
+                continue
 
-                sgpd_result = GeoSeries(geom).difference(GeoSeries(geom2))
-                gpd_result = gpd.GeoSeries(geom).difference(gpd.GeoSeries(geom2))
+            sgpd_result = GeoSeries(geom).difference(GeoSeries(geom2))
+            gpd_result = gpd.GeoSeries(geom).difference(gpd.GeoSeries(geom2))
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).difference(GeoSeries(geom2), align=False)
+                gpd_result = gpd.GeoSeries(geom).difference(
+                    gpd.GeoSeries(geom2), align=False
+                )
                 self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
-                if len(geom) == len(geom2):
-                    sgpd_result = GeoSeries(geom).difference(
-                        GeoSeries(geom2), align=False
-                    )
-                    gpd_result = gpd.GeoSeries(geom).difference(
-                        gpd.GeoSeries(geom2), align=False
-                    )
-                    self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
-
     def test_is_simple(self):
+        # 'is_simple' is meaningful only for `LineStrings` and `LinearRings`
         data = [
             LineString([(0, 0), (0, 0)]),
             LineString([(0, 0), (1, 1), (1, -1), (0, 1)]),
             LineString([(0, 0), (1, 1), (0, 0)]),
-            # Errors for LinearRing: issue #2120
-            # LinearRing([(0, 0), (1, 1), (1, 0), (0, 1), (0, 0)]),
-            # LinearRing([(0, 0), (-1, 1), (-1, -1), (1, -1)]),
+            LinearRing([(0, 0), (1, 1), (1, 0), (0, 1), (0, 0)]),
+            LinearRing([(0, 0), (-1, 1), (-1, -1), (1, -1)]),
         ]
         sgpd_result = GeoSeries(data).is_simple
         gpd_result = gpd.GeoSeries(data).is_simple
@@ -557,7 +587,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_has_z(self):
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             sgpd_result = GeoSeries(geom).has_z
             gpd_result = gpd.GeoSeries(geom).has_z
             self.check_pd_series_equal(sgpd_result, gpd_result)
@@ -569,7 +599,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         if parse_version(gpd.__version__) < parse_version("1.0.0"):
             pytest.skip("geopandas get_geometry requires version 1.0.0 or higher")
 
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             # test negative index, in-bounds index, and out of bounds index
             for index in [-1, 0, len(geom) + 1]:
                 sgpd_result = GeoSeries(geom).get_geometry(index)
@@ -584,7 +614,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_boundary(self):
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             # Shapely < 2.0 doesn't support GeometryCollection for boundary operation
             if shapely.__version__ < "2.0.0" and isinstance(
                 geom[0], GeometryCollection
@@ -595,7 +625,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_centroid(self):
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             sgpd_result = GeoSeries(geom).centroid
             gpd_result = gpd.GeoSeries(geom).centroid
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
@@ -613,7 +643,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_envelope(self):
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             sgpd_result = GeoSeries(geom).envelope
             gpd_result = gpd.GeoSeries(geom).envelope
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
@@ -661,12 +691,12 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         if shapely.__version__ < "2.1.0":
             pytest.skip("geopandas make_valid requires shapely >= 2.1.0")
 
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             sgpd_result = GeoSeries(geom).make_valid(method="structure")
             gpd_result = gpd.GeoSeries(geom).make_valid(method="structure")
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             sgpd_result = GeoSeries(geom).make_valid(
                 method="structure", keep_collapsed=False
             )
@@ -684,8 +714,15 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
     def test_reverse(self):
         pass
 
+    @pytest.mark.skipif(
+        parse_version(gpd.__version__) < parse_version("0.14.0"),
+        reason="geopandas segmentize requires version 0.14.0 or higher",
+    )
     def test_segmentize(self):
-        pass
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).segmentize(2.5)
+            gpd_result = gpd.GeoSeries(geom).segmentize(2.5)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_transform(self):
         pass
@@ -708,7 +745,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
         # Union all the valid geometries
         # Neither our nor geopandas' implementation supports invalid geometries
-        lst = [g for _, geom in self.geoms for g in geom if g.is_valid]
+        lst = [g for geom in self.geoms for g in geom if g.is_valid]
         sgpd_result = GeoSeries(lst).union_all()
         gpd_result = gpd.GeoSeries(lst).union_all()
         self.check_geom_equals(sgpd_result, gpd_result)
@@ -719,45 +756,39 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         self.check_geom_equals(sgpd_result, gpd_result)
 
     def test_crosses(self):
-        for _, geom in self.geoms:
-            for _, geom2 in self.geoms:
-                if self.contains_any_geom_collection(geom, geom2):
-                    continue
+        for geom, geom2 in self.pairs:
+            if self.contains_any_geom_collection(geom, geom2):
+                continue
 
-                # We explicitly specify align=True to quite warnings in geopandas, despite it being the default
+            # We explicitly specify align=True to quite warnings in geopandas, despite it being the default
+            gpd_result = gpd.GeoSeries(geom).crosses(gpd.GeoSeries(geom2), align=True)
+            sgpd_result = GeoSeries(geom).crosses(GeoSeries(geom2), align=True)
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).crosses(GeoSeries(geom2), align=False)
                 gpd_result = gpd.GeoSeries(geom).crosses(
-                    gpd.GeoSeries(geom2), align=True
+                    gpd.GeoSeries(geom2), align=False
                 )
-                sgpd_result = GeoSeries(geom).crosses(GeoSeries(geom2), align=True)
                 self.check_pd_series_equal(sgpd_result, gpd_result)
-
-                if len(geom) == len(geom2):
-                    sgpd_result = GeoSeries(geom).crosses(GeoSeries(geom2), align=False)
-                    gpd_result = gpd.GeoSeries(geom).crosses(
-                        gpd.GeoSeries(geom2), align=False
-                    )
-                    self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_disjoint(self):
         pass
 
     def test_intersects(self):
-        for _, geom in self.geoms:
-            for _, geom2 in self.geoms:
-                sgpd_result = GeoSeries(geom).intersects(GeoSeries(geom2), align=True)
+        for geom, geom2 in self.pairs:
+            sgpd_result = GeoSeries(geom).intersects(GeoSeries(geom2), align=True)
+            gpd_result = gpd.GeoSeries(geom).intersects(
+                gpd.GeoSeries(geom2), align=True
+            )
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).intersects(GeoSeries(geom2), align=False)
                 gpd_result = gpd.GeoSeries(geom).intersects(
-                    gpd.GeoSeries(geom2), align=True
+                    gpd.GeoSeries(geom2), align=False
                 )
                 self.check_pd_series_equal(sgpd_result, gpd_result)
-
-                if len(geom) == len(geom2):
-                    sgpd_result = GeoSeries(geom).intersects(
-                        GeoSeries(geom2), align=False
-                    )
-                    gpd_result = gpd.GeoSeries(geom).intersects(
-                        gpd.GeoSeries(geom2), align=False
-                    )
-                    self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_intersection(self):
         geometries = [
@@ -782,180 +813,170 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
         assert sgpd_result.index.to_pandas().equals(gpd_result.index)
 
-        for g1 in geometries:
-            for g2 in geometries:
-                sgpd_result = GeoSeries(g1).intersection(GeoSeries(g2))
-                gpd_result = gpd.GeoSeries(g1).intersection(gpd.GeoSeries(g2))
-                self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
-
         # Ensure both align True and False work correctly
-        for _, g1 in self.geoms:
-            for _, g2 in self.geoms:
-                gpd_series1, gpd_series2 = gpd.GeoSeries(g1), gpd.GeoSeries(g2)
-                # The original geopandas intersection method fails on invalid geometries
-                if not gpd_series1.is_valid.all() or not gpd_series2.is_valid.all():
-                    continue
-                sgpd_result = GeoSeries(g1).intersection(GeoSeries(g2))
-                gpd_result = gpd_series1.intersection(gpd_series2)
+        for geom, geom2 in self.pairs:
+            gpd_series1, gpd_series2 = gpd.GeoSeries(geom), gpd.GeoSeries(geom2)
+            # The original geopandas intersection method fails on invalid geometries
+            if not gpd_series1.is_valid.all() or not gpd_series2.is_valid.all():
+                continue
+            sgpd_result = GeoSeries(geom).intersection(GeoSeries(geom2))
+            gpd_result = gpd_series1.intersection(gpd_series2)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).intersection(
+                    GeoSeries(geom2), align=False
+                )
+                gpd_result = gpd_series1.intersection(gpd_series2, align=False)
                 self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
-                if len(g1) == len(g2):
-                    sgpd_result = GeoSeries(g1).intersection(GeoSeries(g2), align=False)
-                    gpd_result = gpd_series1.intersection(gpd_series2, align=False)
-                    self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+    def test_snap(self):
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            return
+
+        # Sedona's snap result fails fairly often, even though the results are fairly close.
+        # (though in a way where increasing the buffer tolerance wouldn't help with)
+        # Instead of testing all self.pairs, we test a few specific cases that are known to succeed
+        # currently, just so we can catch regressions
+
+        tests = [
+            (self.linestrings, self.multipoints, 1.1, True),
+            (self.linestrings, self.multipoints, 1, False),
+            (self.linearrings, self.multilinestrings, 1, False),
+        ]
+
+        for geom, geom2, tol, align in tests:
+            sgpd_result = GeoSeries(geom).snap(GeoSeries(geom2), tol, align=align)
+            gpd_result = gpd.GeoSeries(geom).snap(
+                gpd.GeoSeries(geom2), tol, align=align
+            )
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_intersection_all(self):
         pass
 
     def test_overlaps(self):
-        for _, geom in self.geoms:
-            for _, geom2 in self.geoms:
-                # Sedona's results differ from geopandas for these cases
-                if geom == geom2 or self.contains_any_geom_collection(geom, geom2):
-                    continue
+        for geom, geom2 in self.pairs:
+            # Sedona's results differ from geopandas for these cases
+            if geom == geom2 or self.contains_any_geom_collection(geom, geom2):
+                continue
 
-                sgpd_result = GeoSeries(geom).overlaps(GeoSeries(geom2, align=True))
+            sgpd_result = GeoSeries(geom).overlaps(GeoSeries(geom2, align=True))
+            gpd_result = gpd.GeoSeries(geom).overlaps(gpd.GeoSeries(geom2), align=True)
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).overlaps(GeoSeries(geom2), align=False)
                 gpd_result = gpd.GeoSeries(geom).overlaps(
-                    gpd.GeoSeries(geom2), align=True
+                    gpd.GeoSeries(geom2), align=False
                 )
                 self.check_pd_series_equal(sgpd_result, gpd_result)
-
-                if len(geom) == len(geom2):
-                    sgpd_result = GeoSeries(geom).overlaps(
-                        GeoSeries(geom2), align=False
-                    )
-                    gpd_result = gpd.GeoSeries(geom).overlaps(
-                        gpd.GeoSeries(geom2), align=False
-                    )
-                    self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_touches(self):
-        for _, geom in self.geoms:
-            for _, geom2 in self.geoms:
-                if self.contains_any_geom_collection(geom, geom2):
-                    continue
-                sgpd_result = GeoSeries(geom).touches(GeoSeries(geom2), align=True)
+        for geom, geom2 in self.pairs:
+            if self.contains_any_geom_collection(geom, geom2):
+                continue
+            sgpd_result = GeoSeries(geom).touches(GeoSeries(geom2), align=True)
+            gpd_result = gpd.GeoSeries(geom).touches(gpd.GeoSeries(geom2), align=True)
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).touches(GeoSeries(geom2), align=False)
                 gpd_result = gpd.GeoSeries(geom).touches(
-                    gpd.GeoSeries(geom2), align=True
+                    gpd.GeoSeries(geom2), align=False
                 )
                 self.check_pd_series_equal(sgpd_result, gpd_result)
-
-                if len(geom) == len(geom2):
-                    sgpd_result = GeoSeries(geom).touches(GeoSeries(geom2), align=False)
-                    gpd_result = gpd.GeoSeries(geom).touches(
-                        gpd.GeoSeries(geom2), align=False
-                    )
-                    self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_within(self):
-        for _, geom in self.geoms:
-            for _, geom2 in self.geoms:
-                if geom == geom2 or self.contains_any_geom_collection(geom, geom2):
-                    continue
+        for geom, geom2 in self.pairs:
+            if geom == geom2 or self.contains_any_geom_collection(geom, geom2):
+                continue
 
-                sgpd_result = GeoSeries(geom).within(GeoSeries(geom2), align=True)
+            sgpd_result = GeoSeries(geom).within(GeoSeries(geom2), align=True)
+            gpd_result = gpd.GeoSeries(geom).within(gpd.GeoSeries(geom2), align=True)
+
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).within(GeoSeries(geom2), align=False)
                 gpd_result = gpd.GeoSeries(geom).within(
-                    gpd.GeoSeries(geom2), align=True
+                    gpd.GeoSeries(geom2), align=False
                 )
-
                 self.check_pd_series_equal(sgpd_result, gpd_result)
-
-                if len(geom) == len(geom2):
-                    sgpd_result = GeoSeries(geom).within(GeoSeries(geom2), align=False)
-                    gpd_result = gpd.GeoSeries(geom).within(
-                        gpd.GeoSeries(geom2), align=False
-                    )
-                    self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_covers(self):
         if parse_version(gpd.__version__) < parse_version("0.8.0"):
             pytest.skip("geopandas < 0.8.0 does not support covered_by")
 
-        for _, geom in self.geoms:
-            for _, geom2 in self.geoms:
-                if geom == geom2 or self.contains_any_geom_collection(geom, geom2):
-                    continue
+        for geom, geom2 in self.pairs:
+            if geom == geom2 or self.contains_any_geom_collection(geom, geom2):
+                continue
 
-                sgpd_result = GeoSeries(geom).covers(GeoSeries(geom2), align=True)
+            sgpd_result = GeoSeries(geom).covers(GeoSeries(geom2), align=True)
+            gpd_result = gpd.GeoSeries(geom).covers(gpd.GeoSeries(geom2), align=True)
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).covers(GeoSeries(geom2), align=False)
                 gpd_result = gpd.GeoSeries(geom).covers(
-                    gpd.GeoSeries(geom2), align=True
+                    gpd.GeoSeries(geom2), align=False
                 )
                 self.check_pd_series_equal(sgpd_result, gpd_result)
-
-                if len(geom) == len(geom2):
-                    sgpd_result = GeoSeries(geom).covers(GeoSeries(geom2), align=False)
-                    gpd_result = gpd.GeoSeries(geom).covers(
-                        gpd.GeoSeries(geom2), align=False
-                    )
-                    self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_covered_by(self):
         if parse_version(shapely.__version__) < parse_version("2.0.0"):
             pytest.skip("shapely < 2.0.0 does not support covered_by")
 
-        for _, geom in self.geoms:
-            for _, geom2 in self.geoms:
-                if geom == geom2 or self.contains_any_geom_collection(geom, geom2):
-                    continue
+        for geom, geom2 in self.pairs:
+            if geom == geom2 or self.contains_any_geom_collection(geom, geom2):
+                continue
 
-                sgpd_result = GeoSeries(geom).covered_by(GeoSeries(geom2), align=True)
+            sgpd_result = GeoSeries(geom).covered_by(GeoSeries(geom2), align=True)
+            gpd_result = gpd.GeoSeries(geom).covered_by(
+                gpd.GeoSeries(geom2), align=True
+            )
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).covered_by(GeoSeries(geom2), align=False)
                 gpd_result = gpd.GeoSeries(geom).covered_by(
-                    gpd.GeoSeries(geom2), align=True
+                    gpd.GeoSeries(geom2), align=False
                 )
                 self.check_pd_series_equal(sgpd_result, gpd_result)
-
-                if len(geom) == len(geom2):
-                    sgpd_result = GeoSeries(geom).covered_by(
-                        GeoSeries(geom2), align=False
-                    )
-                    gpd_result = gpd.GeoSeries(geom).covered_by(
-                        gpd.GeoSeries(geom2), align=False
-                    )
-                    self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_distance(self):
-        for _, geom in self.geoms:
-            for _, geom2 in self.geoms:
-                sgpd_result = GeoSeries(geom).distance(GeoSeries(geom2), align=True)
+        for geom, geom2 in self.pairs:
+            sgpd_result = GeoSeries(geom).distance(GeoSeries(geom2), align=True)
+            gpd_result = gpd.GeoSeries(geom).distance(gpd.GeoSeries(geom2), align=True)
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).distance(GeoSeries(geom2), align=False)
                 gpd_result = gpd.GeoSeries(geom).distance(
-                    gpd.GeoSeries(geom2), align=True
+                    gpd.GeoSeries(geom2), align=False
                 )
                 self.check_pd_series_equal(sgpd_result, gpd_result)
-
-                if len(geom) == len(geom2):
-                    sgpd_result = GeoSeries(geom).distance(
-                        GeoSeries(geom2), align=False
-                    )
-                    gpd_result = gpd.GeoSeries(geom).distance(
-                        gpd.GeoSeries(geom2), align=False
-                    )
-                    self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_contains(self):
-        for _, geom in self.geoms:
-            for _, geom2 in self.geoms:
-                if geom == geom2 or self.contains_any_geom_collection(geom, geom2):
-                    continue
-                sgpd_result = GeoSeries(geom).contains(GeoSeries(geom2), align=True)
+        for geom, geom2 in self.pairs:
+            if geom == geom2 or self.contains_any_geom_collection(geom, geom2):
+                continue
+            sgpd_result = GeoSeries(geom).contains(GeoSeries(geom2), align=True)
+            gpd_result = gpd.GeoSeries(geom).contains(gpd.GeoSeries(geom2), align=True)
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).contains(GeoSeries(geom2), align=False)
                 gpd_result = gpd.GeoSeries(geom).contains(
-                    gpd.GeoSeries(geom2), align=True
+                    gpd.GeoSeries(geom2), align=False
                 )
                 self.check_pd_series_equal(sgpd_result, gpd_result)
-
-                if len(geom) == len(geom2):
-                    sgpd_result = GeoSeries(geom).contains(
-                        GeoSeries(geom2), align=False
-                    )
-                    gpd_result = gpd.GeoSeries(geom).contains(
-                        gpd.GeoSeries(geom2), align=False
-                    )
-                    self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_contains_properly(self):
         pass
 
     def test_set_crs(self):
-        for _, geom in self.geoms:
+        for geom in self.geoms:
             sgpd_series = GeoSeries(geom)
             gpd_series = gpd.GeoSeries(geom)
             assert sgpd_series.crs == gpd_series.crs

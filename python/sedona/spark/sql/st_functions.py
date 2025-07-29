@@ -335,7 +335,7 @@ def ST_Boundary(geometry: ColumnOrName) -> Column:
 def ST_Buffer(
     geometry: ColumnOrName,
     buffer: ColumnOrNameOrNumber,
-    useSpheroid: Optional[Union[ColumnOrName, bool]] = None,
+    useSpheroid: Optional[Union[ColumnOrName, bool]] = False,
     parameters: Optional[Union[ColumnOrName, str]] = None,
 ) -> Column:
     """Calculate a geometry that represents all points whose distance from the
@@ -1703,7 +1703,9 @@ def ST_SetSRID(geometry: ColumnOrName, srid: Union[ColumnOrName, int]) -> Column
 
 @validate_argument_types
 def ST_Snap(
-    input: ColumnOrName, reference: ColumnOrName, tolerance: Union[ColumnOrName, float]
+    input: ColumnOrName,
+    reference: ColumnOrName,
+    tolerance: Union[ColumnOrName, float, int],
 ) -> Column:
     """Snaps input Geometry to reference Geometry controlled by distance tolerance.
 
@@ -1791,6 +1793,19 @@ def ST_SubDivideExplode(
     :rtype: Column
     """
     return _call_st_function("ST_SubDivideExplode", (geometry, max_vertices))
+
+
+@validate_argument_types
+def ST_Segmentize(
+    geometry: ColumnOrName, maxSegmentLength: Union[ColumnOrName, float]
+) -> Column:
+    """Returns a modified geometry/geography having no segment longer than max_segment_length. Length is computed in 2D. Segments are always split into equal-length subsegments.
+
+    :param geometry: Geometry column to segmentize.
+    :param maxSegmentLength: Maximum segment length
+    :return: Column
+    """
+    return _call_st_function("ST_Segmentize", (geometry, maxSegmentLength))
 
 
 @validate_argument_types

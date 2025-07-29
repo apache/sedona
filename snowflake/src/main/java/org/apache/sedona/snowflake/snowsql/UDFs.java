@@ -31,7 +31,6 @@ import org.apache.sedona.snowflake.snowsql.annotations.UDFAnnotations;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.WKBWriter;
 import org.xml.sax.SAXException;
 
 /**
@@ -1069,6 +1068,12 @@ public class UDFs {
         Functions.subDivide(GeometrySerde.deserialize(geometry), maxVertices));
   }
 
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "maxSegmentLength"})
+  public static byte[] ST_Segmentize(byte[] geometry, double maxSegmentLength) {
+    return GeometrySerde.serialize(
+        Functions.segmentize(GeometrySerde.deserialize(geometry), maxSegmentLength));
+  }
+
   @UDFAnnotations.ParamMeta(argNames = {"leftGeom", "rightGeom"})
   public static byte[] ST_SymDifference(byte[] leftGeom, byte[] rightGeom) {
     return GeometrySerde.serialize(
@@ -1229,34 +1234,22 @@ public class UDFs {
 
   @UDFAnnotations.ParamMeta(argNames = {"geom", "zValue"})
   public static byte[] ST_Force3D(byte[] geom, double zValue) {
-    WKBWriter writer = new WKBWriter(3);
-    return GeometrySerde.serialize(
-        Functions.force3D(
-            GeometrySerde.deserialize(writer.write(GeometrySerde.deserialize(geom))), zValue));
+    return GeometrySerde.serialize(Functions.force3D(GeometrySerde.deserialize(geom), zValue));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geom"})
   public static byte[] ST_Force3D(byte[] geom) {
-    WKBWriter writer = new WKBWriter(3);
-    return GeometrySerde.serialize(
-        Functions.force3D(
-            GeometrySerde.deserialize(writer.write(GeometrySerde.deserialize(geom)))));
+    return GeometrySerde.serialize(Functions.force3D(GeometrySerde.deserialize(geom)));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geom", "zValue"})
   public static byte[] ST_Force3DZ(byte[] geom, double zValue) {
-    WKBWriter writer = new WKBWriter(3);
-    return GeometrySerde.serialize(
-        Functions.force3D(
-            GeometrySerde.deserialize(writer.write(GeometrySerde.deserialize(geom))), zValue));
+    return GeometrySerde.serialize(Functions.force3D(GeometrySerde.deserialize(geom), zValue));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geom"})
   public static byte[] ST_Force3DZ(byte[] geom) {
-    WKBWriter writer = new WKBWriter(3);
-    return GeometrySerde.serialize(
-        Functions.force3D(
-            GeometrySerde.deserialize(writer.write(GeometrySerde.deserialize(geom)))));
+    return GeometrySerde.serialize(Functions.force3D(GeometrySerde.deserialize(geom)));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geom"})

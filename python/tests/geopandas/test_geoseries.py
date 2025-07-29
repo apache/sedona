@@ -22,7 +22,7 @@ import pandas as pd
 import geopandas as gpd
 import pyspark.pandas as ps
 import sedona.geopandas as sgpd
-from sedona.geopandas import GeoSeries
+from sedona.geopandas import GeoSeries, GeoDataFrame
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 from shapely import wkt
 from shapely.geometry import (
@@ -78,23 +78,84 @@ class TestGeoSeries(TestGeopandasBase):
         with pytest.raises(TypeError):
             GeoSeries(ps.Series([0, 1, 2]))
 
+    @pytest.mark.parametrize(
+        "obj",
+        [
+            [Point(x, x) for x in range(3)],
+            pd.Series([Point(x, x) for x in range(3)]),
+            gpd.GeoSeries([Point(x, x) for x in range(3)]),
+        ],
+    )
+    def test_constructor(self, obj):
+        sgpd_series = sgpd.GeoSeries(obj)
+        assert isinstance(sgpd_series, sgpd.GeoSeries)
+
+    def test_constructor_pandas_on_spark(self):
+        obj = ps.Series([Point(x, x) for x in range(3)])
+        sgpd_series = GeoSeries(obj)
+        assert isinstance(sgpd_series, sgpd.GeoSeries)
+
     def test_area(self):
         result = self.geoseries.area.to_pandas()
         expected = pd.Series([0.0, 0.0, 5.23, 5.23])
-        assert result.count() > 0
         assert_series_equal(result, expected)
 
+        # Test that GeoDataFrame.area also works
+        df_result = self.geoseries.to_geoframe().area.to_pandas()
+        assert_series_equal(result, df_result)
+
     def test_buffer(self):
-        result = self.geoseries.buffer(1)
+
+        s = GeoSeries(
+            [
+                Point(0, 0),
+                LineString([(1, -1), (1, 0), (2, 0), (2, 1)]),
+                Polygon([(3, -1), (4, 0), (3, 1)]),
+            ]
+        )
+        result = s.buffer(0.2)
         expected = [
-            "POLYGON ((3.300000000000000 -1.000000000000000, 3.280785280403230 -1.195090322016128, 3.223879532511287 -1.382683432365090, 3.131469612302545 -1.555570233019602, 3.007106781186547 -1.707106781186547, 2.855570233019602 -1.831469612302545, 2.682683432365089 -1.923879532511287, 2.495090322016128 -1.980785280403230, 2.300000000000000 -2.000000000000000, 2.104909677983872 -1.980785280403230, 1.917316567634910 -1.923879532511287, 1.744429766980398 -1.831469612302545, 1.592893218813452 -1.707106781186547, 1.468530387697454 -1.555570233019602, 1.376120467488713 -1.382683432365090, 1.319214719596769 -1.195090322016129, 1.300000000000000 -1.000000000000000, 1.319214719596769 -0.804909677983872, 1.376120467488713 -0.617316567634910, 1.468530387697454 -0.444429766980398, 1.592893218813452 -0.292893218813453, 1.744429766980398 -0.168530387697455, 1.917316567634910 -0.076120467488713, 2.104909677983871 -0.019214719596770, 2.300000000000000 0.000000000000000, 2.495090322016128 -0.019214719596770, 2.682683432365090 -0.076120467488713, 2.855570233019602 -0.168530387697455, 3.007106781186547 -0.292893218813452, 3.131469612302545 -0.444429766980398, 3.223879532511286 -0.617316567634910, 3.280785280403230 -0.804909677983871, 3.300000000000000 -1.000000000000000))",
-            "POLYGON ((0.986393923832144 -3.164398987305357, 0.935367989801224 -3.353676015097457, 0.848396388482656 -3.529361471973156, 0.728821389740875 -3.684703864350261, 0.581238193719096 -3.813733471206735, 0.411318339874827 -3.911491757111723, 0.225591752899151 -3.974221925961374, 0.031195801372873 -3.999513292546280, -0.164398987305357 -3.986393923832144, -0.353676015097457 -3.935367989801224, -0.529361471973156 -3.848396388482656, -0.684703864350260 -3.728821389740875, -0.813733471206735 -3.581238193719097, -0.911491757111723 -3.411318339874827, -0.974221925961374 -3.225591752899151, -0.999513292546279 -3.031195801372874, -0.986393923832144 -2.835601012694643, -0.486393923832144 0.164398987305357, -0.435367989801224 0.353676015097458, -0.348396388482656 0.529361471973156, -0.228821389740875 0.684703864350260, -0.081238193719096 0.813733471206735, 0.088681660125173 0.911491757111723, 0.274408247100849 0.974221925961374, 0.468804198627127 0.999513292546279, 0.664398987305357 0.986393923832144, 0.853676015097457 0.935367989801224, 1.029361471973156 0.848396388482656, 1.184703864350260 0.728821389740875, 1.313733471206735 0.581238193719096, 1.411491757111723 0.411318339874827, 1.474221925961374 0.225591752899151, 1.499513292546280 0.031195801372873, 1.486393923832144 -0.164398987305357, 0.986393923832144 -3.164398987305357))",
-            "POLYGON ((-0.260059926604056 -1.672672793996312, -0.403493516968407 -1.802608257932399, -0.569270104475049 -1.902480890158382, -0.751180291696993 -1.968549819451744, -0.942410374326119 -1.998340340272165, -1.135797558140999 -1.990736606370705, -1.324098251632999 -1.946023426395157, -1.500259385009482 -1.865875595977814, -1.657682592935656 -1.753295165887471, -1.790471365675451 -1.612498995956065, -1.893651911234561 -1.448760806607280, -1.963359455800552 -1.268213644171327, -1.996983004332570 -1.077620158927971, -1.993263139087243 -0.884119300439822, -1.293263139087243 5.115880699560178, -1.252729137381052 5.303820984767603, -1.176977926029782 5.480530662139786, -1.068809614934931 5.639477736894415, -0.932222597700009 5.774786800970082, -0.772265752785876 5.881456214877171, -0.594851813959648 5.955542991081357, -0.406538808715662 5.994308544787506, -0.214287643700274 5.996319924510972, -0.025204797887634 5.961502780493132, 0.153720365261017 5.891144113007211, 0.315873956515097 5.787844698964485, 0.455262040354176 5.655422955350244, 0.566732198133767 5.498773793134933, 0.646163984953356 5.323687679062990, 1.946163984953356 1.523687679062990, 1.993263731568509 1.315875621036525, 1.995265095723606 1.102802318781350, 1.952077207005038 0.894142203137658, 1.865660978573300 0.699369327572194, 1.739940073395944 0.527327206003688, -0.260059926604056 -1.672672793996312))",
-            "POLYGON ((-0.844303230213814 -1.983056850984667, -0.942410374326119 -1.998340340272165, -1.135797558140999 -1.990736606370705, -1.324098251632999 -1.946023426395157, -1.500259385009482 -1.865875595977814, -1.657682592935656 -1.753295165887471, -1.790471365675451 -1.612498995956065, -1.893651911234561 -1.448760806607280, -1.963359455800552 -1.268213644171327, -1.996983004332570 -1.077620158927971, -1.993263139087243 -0.884119300439822, -1.293263139087243 5.115880699560178, -1.252729137381052 5.303820984767603, -1.176977926029782 5.480530662139786, -1.068809614934931 5.639477736894415, -0.932222597700009 5.774786800970082, -0.772265752785876 5.881456214877171, -0.594851813959648 5.955542991081357, -0.406538808715662 5.994308544787506, -0.214287643700274 5.996319924510972, -0.025204797887634 5.961502780493132, 0.153720365261017 5.891144113007211, 0.315873956515097 5.787844698964485, 0.455262040354176 5.655422955350244, 0.566732198133767 5.498773793134933, 0.646163984953356 5.323687679062990, 1.946163984953356 1.523687679062990, 1.993263731568509 1.315875621036525, 1.995265095723606 1.102802318781350, 1.952077207005038 0.894142203137658, 1.865660978573300 0.699369327572194, 1.739940073395944 0.527327206003688, 1.471895863976614 0.232478575642425, 1.474221925961374 0.225591752899151, 1.499513292546280 0.031195801372873, 1.486393923832144 -0.164398987305357, 1.426669391220515 -0.522746182975131, 1.468530387697454 -0.444429766980398, 1.592893218813452 -0.292893218813453, 1.744429766980398 -0.168530387697455, 1.917316567634910 -0.076120467488713, 2.104909677983871 -0.019214719596770, 2.300000000000000 0.000000000000000, 2.495090322016128 -0.019214719596770, 2.682683432365090 -0.076120467488713, 2.855570233019602 -0.168530387697455, 3.007106781186547 -0.292893218813452, 3.131469612302545 -0.444429766980398, 3.223879532511286 -0.617316567634910, 3.280785280403230 -0.804909677983871, 3.300000000000000 -1.000000000000000, 3.280785280403230 -1.195090322016128, 3.223879532511287 -1.382683432365090, 3.131469612302545 -1.555570233019602, 3.007106781186547 -1.707106781186547, 2.855570233019602 -1.831469612302545, 2.682683432365089 -1.923879532511287, 2.495090322016128 -1.980785280403230, 2.300000000000000 -2.000000000000000, 2.104909677983872 -1.980785280403230, 1.917316567634910 -1.923879532511287, 1.744429766980398 -1.831469612302545, 1.592893218813452 -1.707106781186547, 1.468530387697454 -1.555570233019602, 1.376120467488713 -1.382683432365090, 1.319214719596769 -1.195090322016129, 1.317505079406277 -1.177732053860557, 0.986393923832144 -3.164398987305357, 0.935367989801224 -3.353676015097457, 0.848396388482656 -3.529361471973156, 0.728821389740875 -3.684703864350261, 0.581238193719096 -3.813733471206735, 0.411318339874827 -3.911491757111723, 0.225591752899151 -3.974221925961374, 0.031195801372873 -3.999513292546280, -0.164398987305357 -3.986393923832144, -0.353676015097457 -3.935367989801224, -0.529361471973156 -3.848396388482656, -0.684703864350260 -3.728821389740875, -0.813733471206735 -3.581238193719097, -0.911491757111723 -3.411318339874827, -0.974221925961374 -3.225591752899151, -0.999513292546279 -3.031195801372874, -0.986393923832144 -2.835601012694643, -0.844303230213814 -1.983056850984667))",
+            "POLYGON ((0.2 0, 0.1990369453344394 -0.0196034280659121, 0.1961570560806461 -0.0390180644032256, 0.1913880671464418 -0.0580569354508925, 0.1847759065022574 -0.076536686473018, 0.176384252869671 -0.0942793473651995, 0.1662939224605091 -0.1111140466039204, 0.1546020906725474 -0.1268786568327291, 0.1414213562373095 -0.1414213562373095, 0.1268786568327291 -0.1546020906725474, 0.1111140466039205 -0.1662939224605091, 0.0942793473651996 -0.176384252869671, 0.076536686473018 -0.1847759065022574, 0.0580569354508925 -0.1913880671464418, 0.0390180644032257 -0.1961570560806461, 0.0196034280659122 -0.1990369453344394, 0 -0.2, -0.0196034280659121 -0.1990369453344394, -0.0390180644032256 -0.1961570560806461, -0.0580569354508924 -0.1913880671464418, -0.076536686473018 -0.1847759065022574, -0.0942793473651996 -0.176384252869671, -0.1111140466039204 -0.1662939224605091, -0.1268786568327291 -0.1546020906725474, -0.1414213562373095 -0.1414213562373095, -0.1546020906725474 -0.1268786568327291, -0.1662939224605091 -0.1111140466039204, -0.176384252869671 -0.0942793473651996, -0.1847759065022574 -0.076536686473018, -0.1913880671464418 -0.0580569354508925, -0.1961570560806461 -0.0390180644032257, -0.1990369453344394 -0.0196034280659122, -0.2 0, -0.1990369453344394 0.0196034280659121, -0.1961570560806461 0.0390180644032257, -0.1913880671464418 0.0580569354508924, -0.1847759065022574 0.0765366864730179, -0.176384252869671 0.0942793473651995, -0.1662939224605091 0.1111140466039204, -0.1546020906725474 0.1268786568327291, -0.1414213562373095 0.1414213562373095, -0.1268786568327292 0.1546020906725474, -0.1111140466039204 0.1662939224605091, -0.0942793473651996 0.176384252869671, -0.0765366864730181 0.1847759065022573, -0.0580569354508925 0.1913880671464418, -0.0390180644032257 0.1961570560806461, -0.0196034280659121 0.1990369453344394, 0 0.2, 0.019603428065912 0.1990369453344394, 0.0390180644032257 0.1961570560806461, 0.0580569354508924 0.1913880671464418, 0.076536686473018 0.1847759065022573, 0.0942793473651995 0.176384252869671, 0.1111140466039204 0.1662939224605091, 0.1268786568327291 0.1546020906725474, 0.1414213562373095 0.1414213562373095, 0.1546020906725474 0.1268786568327292, 0.1662939224605091 0.1111140466039204, 0.176384252869671 0.0942793473651996, 0.1847759065022573 0.0765366864730181, 0.1913880671464418 0.0580569354508925, 0.1961570560806461 0.0390180644032258, 0.1990369453344394 0.0196034280659121, 0.2 0))",
+            "POLYGON ((0.8 0, 0.8009630546655606 0.0196034280659122, 0.803842943919354 0.0390180644032257, 0.8086119328535583 0.0580569354508925, 0.8152240934977426 0.076536686473018, 0.823615747130329 0.0942793473651996, 0.8337060775394909 0.1111140466039204, 0.8453979093274526 0.1268786568327291, 0.8585786437626906 0.1414213562373095, 0.8731213431672709 0.1546020906725474, 0.8888859533960796 0.1662939224605091, 0.9057206526348005 0.176384252869671, 0.9234633135269821 0.1847759065022574, 0.9419430645491076 0.1913880671464418, 0.9609819355967744 0.1961570560806461, 0.9803965719340879 0.1990369453344394, 1 0.2, 1.8 0.2, 1.8 1, 1.8009630546655606 1.019603428065912, 1.803842943919354 1.0390180644032256, 1.8086119328535581 1.0580569354508924, 1.8152240934977426 1.076536686473018, 1.823615747130329 1.0942793473651995, 1.8337060775394909 1.1111140466039204, 1.8453979093274526 1.1268786568327291, 1.8585786437626906 1.1414213562373094, 1.8731213431672709 1.1546020906725474, 1.8888859533960796 1.1662939224605091, 1.9057206526348005 1.176384252869671, 1.923463313526982 1.1847759065022574, 1.9419430645491076 1.1913880671464419, 1.9609819355967744 1.196157056080646, 1.980396571934088 1.1990369453344394, 2 1.2, 2.019603428065912 1.1990369453344394, 2.039018064403226 1.196157056080646, 2.0580569354508924 1.1913880671464419, 2.076536686473018 1.1847759065022574, 2.0942793473651995 1.176384252869671, 2.1111140466039204 1.1662939224605091, 2.126878656832729 1.1546020906725474, 2.1414213562373097 1.1414213562373094, 2.1546020906725474 1.1268786568327291, 2.166293922460509 1.1111140466039204, 2.176384252869671 1.0942793473651995, 2.1847759065022574 1.076536686473018, 2.1913880671464416 1.0580569354508924, 2.1961570560806463 1.0390180644032256, 2.1990369453344396 1.019603428065912, 2.2 1, 2.2 0, 2.1990369453344396 -0.0196034280659121, 2.1961570560806463 -0.0390180644032256, 2.1913880671464416 -0.0580569354508925, 2.1847759065022574 -0.076536686473018, 2.176384252869671 -0.0942793473651995, 2.166293922460509 -0.1111140466039204, 2.1546020906725474 -0.1268786568327291, 2.1414213562373097 -0.1414213562373095, 2.126878656832729 -0.1546020906725474, 2.1111140466039204 -0.1662939224605091, 2.0942793473651995 -0.176384252869671, 2.076536686473018 -0.1847759065022574, 2.0580569354508924 -0.1913880671464418, 2.039018064403226 -0.1961570560806461, 2.019603428065912 -0.1990369453344394, 2 -0.2, 1.2 -0.2, 1.2 -1, 1.1990369453344394 -1.019603428065912, 1.196157056080646 -1.0390180644032256, 1.1913880671464419 -1.0580569354508924, 1.1847759065022574 -1.076536686473018, 1.176384252869671 -1.0942793473651995, 1.1662939224605091 -1.1111140466039204, 1.1546020906725474 -1.1268786568327291, 1.1414213562373094 -1.1414213562373094, 1.1268786568327291 -1.1546020906725474, 1.1111140466039204 -1.1662939224605091, 1.0942793473651995 -1.176384252869671, 1.076536686473018 -1.1847759065022574, 1.0580569354508924 -1.1913880671464419, 1.0390180644032256 -1.196157056080646, 1.019603428065912 -1.1990369453344394, 1 -1.2, 0.9803965719340879 -1.1990369453344394, 0.9609819355967744 -1.196157056080646, 0.9419430645491076 -1.1913880671464419, 0.9234633135269821 -1.1847759065022574, 0.9057206526348005 -1.176384252869671, 0.8888859533960796 -1.1662939224605091, 0.8731213431672709 -1.1546020906725474, 0.8585786437626906 -1.1414213562373094, 0.8453979093274526 -1.1268786568327291, 0.8337060775394909 -1.1111140466039204, 0.823615747130329 -1.0942793473651995, 0.8152240934977426 -1.076536686473018, 0.8086119328535583 -1.0580569354508924, 0.803842943919354 -1.0390180644032256, 0.8009630546655606 -1.019603428065912, 0.8 -1, 0.8 0))",
+            "POLYGON ((2.8 -1, 2.8 1, 2.8009630546655604 1.019603428065912, 2.8038429439193537 1.0390180644032256, 2.8086119328535584 1.0580569354508924, 2.8152240934977426 1.076536686473018, 2.823615747130329 1.0942793473651995, 2.833706077539491 1.1111140466039204, 2.8453979093274526 1.1268786568327291, 2.8585786437626903 1.1414213562373094, 2.873121343167271 1.1546020906725474, 2.8888859533960796 1.1662939224605091, 2.9057206526348005 1.176384252869671, 2.923463313526982 1.1847759065022574, 2.9419430645491076 1.1913880671464419, 2.9609819355967746 1.196157056080646, 2.980396571934088 1.1990369453344394, 3 1.2, 3.019603428065912 1.1990369453344394, 3.039018064403226 1.196157056080646, 3.0580569354508924 1.1913880671464416, 3.076536686473018 1.1847759065022574, 3.0942793473651995 1.176384252869671, 3.1111140466039204 1.166293922460509, 3.126878656832729 1.1546020906725474, 3.1414213562373097 1.1414213562373094, 4.141421356237309 0.1414213562373095, 4.154602090672547 0.1268786568327292, 4.166293922460509 0.1111140466039206, 4.176384252869671 0.0942793473651996, 4.184775906502257 0.0765366864730181, 4.191388067146442 0.0580569354508926, 4.196157056080646 0.0390180644032257, 4.19903694533444 0.0196034280659121, 4.2 0, 4.19903694533444 -0.0196034280659121, 4.196157056080646 -0.0390180644032257, 4.191388067146442 -0.0580569354508926, 4.184775906502257 -0.076536686473018, 4.176384252869671 -0.0942793473651996, 4.166293922460509 -0.1111140466039206, 4.154602090672547 -0.1268786568327292, 4.141421356237309 -0.1414213562373095, 3.1414213562373097 -1.1414213562373094, 3.126878656832729 -1.1546020906725474, 3.1111140466039204 -1.166293922460509, 3.0942793473652 -1.1763842528696709, 3.076536686473018 -1.1847759065022574, 3.0580569354508924 -1.1913880671464416, 3.039018064403226 -1.196157056080646, 3.019603428065912 -1.1990369453344394, 3 -1.2, 2.980396571934088 -1.1990369453344394, 2.9609819355967746 -1.196157056080646, 2.9419430645491076 -1.1913880671464419, 2.923463313526982 -1.1847759065022574, 2.9057206526348005 -1.176384252869671, 2.8888859533960796 -1.1662939224605091, 2.873121343167271 -1.1546020906725474, 2.8585786437626908 -1.1414213562373097, 2.8453979093274526 -1.1268786568327291, 2.833706077539491 -1.1111140466039204, 2.823615747130329 -1.0942793473651995, 2.8152240934977426 -1.076536686473018, 2.8086119328535584 -1.0580569354508924, 2.8038429439193537 -1.0390180644032256, 2.8009630546655604 -1.019603428065912, 2.8 -1))",
         ]
         expected = gpd.GeoSeries([wkt.loads(wkt_str) for wkt_str in expected])
-        assert result.count() > 0
         self.check_sgpd_equals_gpd(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().buffer(0.2)
+        self.check_sgpd_equals_gpd(df_result, expected)
+
+    def test_simplify(self):
+        s = GeoSeries([Point(0, 0).buffer(1), LineString([(0, 0), (1, 10), (0, 20)])])
+
+        result = s.simplify(1)
+        expected = gpd.GeoSeries(
+            [Polygon([(0, 1), (0, -1), (-1, 0), (0, 1)]), LineString([(0, 0), (0, 20)])]
+        )
+
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = s.simplify(1.2, preserve_topology=False)
+        expected = gpd.GeoSeries([Polygon(), LineString([(0, 0), (0, 20)])])
+        self.check_sgpd_equals_gpd(result, expected)
+
+        s = GeoSeries([LineString([(0, 0), (1, 0.1), (2, 0)])])
+        result = s.simplify(0.2)
+        expected = gpd.GeoSeries([LineString([(0, 0), (2, 0)])])
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = s.simplify(0.2, preserve_topology=False)
+        expected = gpd.GeoSeries(
+            [
+                LineString([(0, 0), (2, 0)]),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().simplify(0.2, preserve_topology=False)
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_geometry(self):
         sgpd_geoseries = sgpd.GeoSeries([Point(0, 0), Point(1, 1)])
@@ -239,6 +300,7 @@ class TestGeoSeries(TestGeopandasBase):
         )
         self.check_sgpd_equals_gpd(result, expected)
 
+        # Check for GeoSeries fill value
         s_fill = sgpd.GeoSeries(
             [
                 Point(0, 0),
@@ -256,20 +318,21 @@ class TestGeoSeries(TestGeopandasBase):
         )
         self.check_sgpd_equals_gpd(result, expected)
 
-        data = [Point(0, 0), None]
         # Ensure filling with np.nan or pd.NA returns None
+        # Also check that the name is preserved for fillna
         import numpy as np
 
+        data = [Point(0, 0), None]
         for fill_val in [np.nan, pd.NA]:
-            result = GeoSeries(data).fillna(fill_val)
-            expected = gpd.GeoSeries([Point(0, 0), None])
+            result = GeoSeries(data, name="geometry").fillna(fill_val)
+            expected = gpd.GeoSeries(data, name="geometry")
             self.check_sgpd_equals_gpd(result, expected)
 
         # Ensure filling with None is empty GeometryColleciton and not None
         # Also check that inplace works
-        result = GeoSeries(data)
+        result = GeoSeries(data, name="geometry")
         result.fillna(None, inplace=True)
-        expected = gpd.GeoSeries([Point(0, 0), GeometryCollection()])
+        expected = gpd.GeoSeries([Point(0, 0), GeometryCollection()], name="geometry")
         self.check_sgpd_equals_gpd(result, expected)
 
     def test_explode(self):
@@ -312,6 +375,9 @@ class TestGeoSeries(TestGeopandasBase):
         )
         pd.testing.assert_frame_equal(result.to_pandas(), expected)
 
+        df_result = geoseries.to_geoframe().bounds
+        pd.testing.assert_frame_equal(df_result.to_pandas(), expected)
+
     def test_total_bounds(self):
         d = [
             Point(3, -1),
@@ -323,6 +389,9 @@ class TestGeoSeries(TestGeopandasBase):
         result = geoseries.total_bounds
         expected = np.array([0.0, -1.0, 3.0, 2.0])
         np.testing.assert_array_equal(result, expected)
+
+        df_result = geoseries.to_geoframe().total_bounds
+        np.testing.assert_array_equal(df_result, expected)
 
     # These tests were taken directly from the TestEstimateUtmCrs class in the geopandas test suite
     # https://github.com/geopandas/geopandas/blob/main/geopandas/tests/test_array.py
@@ -500,8 +569,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
                     ]
                 ),
                 GeometryCollection([Point(0, 0), LineString([(0, 0), (1, 1)])]),
-                # Errors for LinearRing: issue #2120
-                # LinearRing([(0, 0), (1, 1), (1, 0), (0, 1), (0, 0)]),
+                LinearRing([(0, 0), (1, 1), (1, 0), (0, 1), (0, 0)]),
             ]
         )
         result = geoseries.geom_type
@@ -514,10 +582,13 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
                 "Polygon",
                 "MultiPolygon",
                 "GeometryCollection",
-                # "LineString",  # Note: Sedona returns LineString instead of LinearRing
+                "LineString",  # Note: Sedona returns LineString instead of LinearRing
             ]
         )
         assert_series_equal(result.to_pandas(), expected)
+
+        df_result = geoseries.to_geoframe().geom_type
+        assert_series_equal(df_result.to_pandas(), expected)
 
     def test_type(self):
         pass
@@ -541,6 +612,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         expected = pd.Series([0.000000, 1.414214, 3.414214, 4.828427])
         assert_series_equal(result, expected)
 
+        # Check that GeoDataFrame works too
+        df_result = geoseries.to_geoframe().length.to_pandas()
+        assert_series_equal(df_result, expected)
+
     def test_is_valid(self):
         geoseries = sgpd.GeoSeries(
             [
@@ -553,6 +628,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = geoseries.is_valid
         expected = pd.Series([True, False, True, False])
         assert_series_equal(result.to_pandas(), expected)
+
+        # Check that GeoDataFrame works too
+        df_result = geoseries.to_geoframe().is_valid.to_pandas()
+        assert_series_equal(df_result, expected)
 
     def test_is_valid_reason(self):
         s = sgpd.GeoSeries(
@@ -578,6 +657,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         )
         assert_series_equal(result, expected)
 
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().is_valid_reason().to_pandas()
+        assert_series_equal(df_result, expected)
+
     def test_is_empty(self):
         geoseries = sgpd.GeoSeries(
             [Point(), Point(2, 1), Polygon([(0, 0), (1, 1), (0, 1)]), None],
@@ -586,6 +669,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = geoseries.is_empty
         expected = pd.Series([True, False, False, False])
         assert_series_equal(result.to_pandas(), expected)
+
+        # Check that GeoDataFrame works too
+        df_result = geoseries.to_geoframe().is_empty.to_pandas()
+        assert_series_equal(df_result, expected)
 
     def test_count_coordinates(self):
         pass
@@ -626,6 +713,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = s.dwithin(s2, distance=1, align=False)
         expected = pd.Series([True, False, False, True])
         assert_series_equal(result.to_pandas(), expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().dwithin(s2, distance=1, align=False).to_pandas()
+        assert_series_equal(df_result, expected)
 
     def test_difference(self):
         s = GeoSeries(
@@ -680,7 +771,6 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = s.difference(s2, align=False)
         expected = gpd.GeoSeries(
             [
-                None,
                 Polygon([(0, 2), (2, 2), (1, 1), (0, 1), (0, 2)]),
                 Polygon([(0, 0), (0, 2), (1, 2), (2, 2), (1, 1), (0, 0)]),
                 MultiLineString(
@@ -691,20 +781,28 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             ]
         )
 
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().difference(s2, align=False)
+        self.check_sgpd_equals_gpd(df_result, expected)
+
     def test_is_simple(self):
         s = sgpd.GeoSeries(
             [
                 LineString([(0, 0), (1, 1), (1, -1), (0, 1)]),
                 LineString([(0, 0), (1, 1), (1, -1)]),
-                # Errors for LinearRing: issue #2120
-                # LinearRing([(0, 0), (1, 1), (1, -1), (0, 1)]),
-                # LinearRing([(0, 0), (-1, 1), (-1, -1), (1, -1)]),
+                LinearRing([(0, 0), (1, 1), (1, -1), (0, 1)]),
+                LinearRing([(0, 0), (-1, 1), (-1, -1), (1, -1)]),
             ]
         )
         result = s.is_simple
-        expected = pd.Series([False, True])
-        # Removed LinearRing cases: False, True]
+        expected = pd.Series([False, True, False, True])
         assert_series_equal(result.to_pandas(), expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().is_simple.to_pandas()
+        assert_series_equal(df_result, expected)
 
     def test_is_ring(self):
         pass
@@ -727,6 +825,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = s.has_z
         expected = pd.Series([False, True, True, False])
         assert_series_equal(result.to_pandas(), expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().has_z.to_pandas()
+        assert_series_equal(df_result, expected)
 
     def test_get_precision(self):
         pass
@@ -776,6 +878,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         expected = gpd.GeoSeries([None, Point(0, 1), None, None, None])
         self.check_sgpd_equals_gpd(result, expected)
 
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().get_geometry(2)
+        self.check_sgpd_equals_gpd(df_result, expected)
+
     def test_boundary(self):
         s = sgpd.GeoSeries(
             [
@@ -795,6 +901,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             ]
         )
         self.check_sgpd_equals_gpd(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().boundary
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_centroid(self):
         s = sgpd.GeoSeries(
@@ -845,6 +955,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             ]
         )
         self.check_sgpd_equals_gpd(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().envelope
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_minimum_rotated_rectangle(self):
         pass
@@ -922,23 +1036,53 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         )
         self.check_sgpd_equals_gpd(result, expected)
 
-        result = GeoSeries(
-            [Polygon([(0, 0), (1, 1), (1, 2), (1, 1), (0, 0)])]
-        ).make_valid(method="structure", keep_collapsed=True)
+        s = GeoSeries([Polygon([(0, 0), (1, 1), (1, 2), (1, 1), (0, 0)])])
+
+        result = s.make_valid(method="structure", keep_collapsed=True)
         expected = gpd.GeoSeries([LineString([(0, 0), (1, 1), (1, 2), (1, 1), (0, 0)])])
         self.check_sgpd_equals_gpd(result, expected)
 
-        result = GeoSeries(
-            [Polygon([(0, 0), (1, 1), (1, 2), (1, 1), (0, 0)])]
-        ).make_valid(method="structure", keep_collapsed=False)
+        result = s.make_valid(method="structure", keep_collapsed=False)
         expected = gpd.GeoSeries([Polygon()])
         self.check_sgpd_equals_gpd(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().make_valid(method="structure", keep_collapsed=False)
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_reverse(self):
         pass
 
     def test_segmentize(self):
-        pass
+        s = GeoSeries(
+            [
+                LineString([(0, 0), (0, 10)]),
+                Polygon([(0, 0), (10, 0), (10, 10), (0, 10), (0, 0)]),
+            ],
+        )
+        result = s.segmentize(5)
+        expected = gpd.GeoSeries(
+            [
+                LineString([(0, 0), (0, 5), (0, 10)]),
+                Polygon(
+                    [
+                        (0, 0),
+                        (5, 0),
+                        (10, 0),
+                        (10, 5),
+                        (10, 10),
+                        (5, 10),
+                        (0, 10),
+                        (0, 5),
+                        (0, 0),
+                    ]
+                ),
+            ],
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        df_result = s.to_geoframe().segmentize(5)
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_transform(self):
         pass
@@ -960,6 +1104,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = s.union_all()
         expected = Polygon([(0, 1), (0, 2), (2, 2), (2, 0), (1, 0), (0, 0), (0, 1)])
         self.check_geom_equals(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().union_all()
+        self.check_geom_equals(df_result, expected)
 
         # Empty GeoSeries
         s = sgpd.GeoSeries([])
@@ -998,6 +1146,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = s.crosses(s2, align=False)
         expected = pd.Series([True, True, False, False])
         assert_series_equal(result.to_pandas(), expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().crosses(s2, align=False).to_pandas()
+        assert_series_equal(df_result, expected)
 
     def test_disjoint(self):
         pass
@@ -1046,6 +1198,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = s.intersects(s2, align=False)
         expected = pd.Series([True, True, True, True])
 
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().intersects(s2, align=False).to_pandas()
+        assert_series_equal(df_result, expected)
+
     def test_overlaps(self):
         s = GeoSeries(
             [
@@ -1078,6 +1234,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         expected = pd.Series([True, False, True, False])
         assert_series_equal(result.to_pandas(), expected)
 
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().overlaps(s2, align=False)
+        assert_series_equal(df_result.to_pandas(), expected)
+
     def test_touches(self):
         s = GeoSeries(
             [
@@ -1108,6 +1268,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = s.touches(s2, align=False)
         expected = pd.Series([True, False, True, False])
         assert_series_equal(result.to_pandas(), expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().touches(s2, align=False)
+        assert_series_equal(df_result.to_pandas(), expected)
 
     def test_within(self):
         s = GeoSeries(
@@ -1147,6 +1311,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         expected = pd.Series([False, False, False, True])
         assert_series_equal(result.to_pandas(), expected)
 
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().within(s2, align=False)
+        assert_series_equal(df_result.to_pandas(), expected)
+
     def test_covers(self):
         s = GeoSeries(
             [
@@ -1185,6 +1353,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         expected = pd.Series([False, False, False, True])
         assert_series_equal(result.to_pandas(), expected)
 
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().covers(s2, align=False)
+        assert_series_equal(df_result.to_pandas(), expected)
+
     def test_covered_by(self):
         s = GeoSeries(
             [
@@ -1217,6 +1389,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         expected = pd.Series([True, False, True, True])
         assert_series_equal(result.to_pandas(), expected)
 
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().covered_by(s2, align=False)
+        assert_series_equal(df_result.to_pandas(), expected)
+
     def test_distance(self):
         s = GeoSeries(
             [
@@ -1247,6 +1423,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = s.distance(s2, align=False)
         expected = pd.Series([0.000000, 3.162278, 0.707107, 1.000000])
         assert_series_equal(result.to_pandas(), expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().distance(s2, align=False)
+        assert_series_equal(df_result.to_pandas(), expected)
 
     def test_intersection(self):
         import pyspark.pandas as ps
@@ -1337,6 +1517,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         )
         self.check_sgpd_equals_gpd(result, expected)
 
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().intersection(s2, align=True)
+        self.check_sgpd_equals_gpd(df_result, expected)
+
         result = s2.intersection(s, align=False)
         expected = gpd.GeoSeries(
             [
@@ -1352,6 +1536,61 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         # Ensure result of align=False retains the left's index
         assert result.index.to_pandas().equals(expected.index)
+
+    def test_snap(self):
+        s = GeoSeries(
+            [
+                Point(0.5, 2.5),
+                LineString([(0.1, 0.1), (0.49, 0.51), (1.01, 0.89)]),
+                Polygon([(0, 0), (0, 10), (10, 10), (10, 0), (0, 0)]),
+            ],
+        )
+        s2 = GeoSeries(
+            [
+                Point(0, 2),
+                LineString([(0, 0), (0.5, 0.5), (1.0, 1.0)]),
+                Point(8, 10),
+            ],
+            index=range(1, 4),
+        )
+        result = s.snap(Point(0, 2), tolerance=1)
+        expected = gpd.GeoSeries(
+            [
+                Point(0, 2),
+                LineString([(0.1, 0.1), (0.49, 0.51), (1.01, 0.89)]),
+                Polygon([(0, 0), (0, 2), (0, 10), (10, 10), (10, 0), (0, 0)]),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Note: This test result slightly differs from the original geopandas's result,
+        # which doesn't include the Point(0, 0) in the Polygon below.
+        result = s.snap(s2, tolerance=1, align=True)
+        expected = gpd.GeoSeries(
+            [
+                None,
+                LineString([(0.1, 0.1), (0.49, 0.51), (1.01, 0.89)]),
+                Polygon(
+                    [(0, 0), (0.5, 0.5), (1, 1), (0, 10), (10, 10), (10, 0), (0, 0)]
+                ),
+                None,
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = s.snap(s2, tolerance=1, align=False)
+        expected = gpd.GeoSeries(
+            [
+                Point(0, 2),
+                LineString([(0, 0), (0.5, 0.5), (1, 1)]),
+                Polygon([(0, 0), (0, 10), (8, 10), (10, 10), (10, 0), (0, 0)]),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().snap(s2, tolerance=1, align=False)
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_intersection_all(self):
         pass
@@ -1393,7 +1632,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         pass
 
     def test_set_crs(self):
-        geo_series = sgpd.GeoSeries(self.geoseries)
+        geo_series = sgpd.GeoSeries([Point(0, 0), Point(1, 1)], name="geometry")
         assert geo_series.crs == None
         geo_series = geo_series.set_crs(epsg=4326)
         assert geo_series.crs.to_epsg() == 4326
@@ -1406,8 +1645,14 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         geo_series = geo_series.set_crs(None, allow_override=True)
         assert geo_series.crs == None
 
+        # Check that the name is preserved for set_crs
+        geo_series.name = "geometry"
+
         geo_series.set_crs(4326, inplace=True)
         assert geo_series.crs.to_epsg() == 4326
+
+        # Check that the name is preserved for set_crs after inplace=True
+        geo_series.name = "geometry"
 
         geo_series = sgpd.GeoSeries(self.geoseries, crs=4326)
         assert geo_series.crs.to_epsg() == 4326

@@ -1940,6 +1940,16 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testSegmentize() {
+    Table table =
+        tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON((0 0, 0 8, 30 0, 0 0))') AS geom");
+    table = table.select(call(Functions.ST_Segmentize.class.getSimpleName(), $("geom"), 10));
+    Geometry result = (Geometry) first(table).getField(0);
+    assertEquals(
+        "POLYGON ((0 0, 0 8, 7.5 6, 15 4, 22.5 2, 30 0, 20 0, 10 0, 0 0))", result.toString());
+  }
+
+  @Test
   public void testSymDifference() {
     Table table =
         tableEnv.sqlQuery(
