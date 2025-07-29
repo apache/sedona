@@ -4021,6 +4021,41 @@ Output:
 POLYGON ((-2 -2, -2 1, 2.5 1, 2.5 -2, -2 -2))
 ```
 
+## ST_Segmentize
+
+Introduction: Returns a modified geometry having no segment longer than the given max_segment_length.
+
+The length calculation is performed in 2D. When a segment is longer than the specified maximum length, it is split into multiple, equal-length subsegments.
+
+Format: `ST_Segmentize(geom: Geometry, max_segment_length: Double)`
+
+Since: v1.8.0
+
+SQL Example
+Long segments are split evenly into subsegments no longer than the specified length. Shorter segments are not modified.
+
+```sql
+SELECT ST_AsText(ST_Segmentize(ST_GeomFromText('MULTILINESTRING((0 0, 0 1, 0 9),(1 10, 1 18))'), 5));
+```
+
+Output:
+
+```
+MULTILINESTRING((0 0,0 1,0 5,0 9),(1 10,1 14,1 18))
+```
+
+SQL Example
+
+```sql
+SELECT ST_AsText(ST_Segmentize(ST_GeomFromText('POLYGON((0 0, 0 8, 30 0, 0 0))'), 10));
+```
+
+Output:
+
+```
+POLYGON((0 0,0 8,7.5 6,15 4,22.5 2,30 0,20 0,10 0,0 0))
+```
+
 ## ST_SetPoint
 
 Introduction: Replace Nth point of linestring with given point. Index is 0-based. Negative index are counted backwards, e.g., -1 is last point.
@@ -4425,41 +4460,6 @@ Result:
 |LINESTRING(85 85, 100 100)   |
 |LINESTRING(100 100, 120 120) |
 +-----------------------------+
-```
-
-## ST_Segmentize
-
-Introduction: Returns a modified geometry having no segment longer than the given max_segment_length.
-
-The length calculation is performed in 2D. When a segment is longer than the specified maximum length, it is split into multiple, equal-length subsegments.
-
-Format: `ST_Segmentize(geom: Geometry, max_segment_length: Double)`
-
-Since: v1.8.0
-
-SQL Example
-Long segments are split evenly into subsegments no longer than the specified length. Shorter segments are not modified.
-
-```sql
-SELECT ST_AsText(ST_Segmentize(ST_GeomFromText('MULTILINESTRING((0 0, 0 1, 0 9),(1 10, 1 18))'), 5));
-```
-
-Output:
-
-```
-MULTILINESTRING((0 0,0 1,0 5,0 9),(1 10,1 14,1 18))
-```
-
-SQL Example
-
-```sql
-SELECT ST_AsText(ST_Segmentize(ST_GeomFromText('POLYGON((0 0, 0 8, 30 0, 0 0))'), 10));
-```
-
-Output:
-
-```
-POLYGON((0 0,0 8,7.5 6,15 4,22.5 2,30 0,20 0,10 0,0 0))
 ```
 
 ## ST_SymDifference
