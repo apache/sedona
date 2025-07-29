@@ -98,7 +98,7 @@ class Client:
             - "YYYY-mm" expands to ["YYYY-mm-01T00:00:00Z", "YYYY-mm-<last_day>T23:59:59Z"]
             - "YYYY-mm-dd" expands to ["YYYY-mm-ddT00:00:00Z", "YYYY-mm-ddT23:59:59Z"]
             - "YYYY-mm-ddTHH:MM:SSZ" remains as ["YYYY-mm-ddTHH:MM:SSZ", "YYYY-mm-ddTHH:MM:SSZ"]
-            - A list of date-time ranges can be provided for multiple intervals.
+        - A list of date-time ranges can be provided for multiple intervals.
 
             Example: "2020-01-01T00:00:00Z" or python_datetime.datetime(2020, 1, 1) or [["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]
         :param max_items: The maximum number of items to return from the search, even if there are more matching results.
