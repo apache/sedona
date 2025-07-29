@@ -79,11 +79,7 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-<<<<<<< HEAD
         exclude: ^docs/index\.md$|^\.github/pull_request_template\.md$|\.github/issue_template\.md$|^docs/blog/.*\.md$
-=======
-        exclude: ^docs/index\.md$|^\.github/pull_request_template\.md$|\.github/issue_template\.md$|^docs/blog/posts/.*\.md$
->>>>>>> 787baef7a3 (DOCS pre-commit changes)
       - id: insert-license
         name: add license for all Makefile files
         files: ^Makefile$
