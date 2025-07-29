@@ -95,6 +95,10 @@ class TestGeoSeries(TestGeopandasBase):
         sgpd_series = GeoSeries(obj)
         assert isinstance(sgpd_series, sgpd.GeoSeries)
 
+    def test_plot(self):
+        # Just make sure it doesn't error
+        self.geoseries.plot()
+
     def test_area(self):
         result = self.geoseries.area.to_pandas()
         expected = pd.Series([0.0, 0.0, 5.23, 5.23])

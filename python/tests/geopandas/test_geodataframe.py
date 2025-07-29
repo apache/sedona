@@ -45,7 +45,7 @@ from packaging.version import parse as parse_version
     parse_version(shapely.__version__) < parse_version("2.0.0"),
     reason=f"Tests require shapely>=2.0.0, but found v{shapely.__version__}",
 )
-class TestDataframe(TestGeopandasBase):
+class TestGeoDataFrame(TestGeopandasBase):
     @pytest.mark.parametrize(
         "obj",
         [
@@ -125,6 +125,21 @@ class TestDataframe(TestGeopandasBase):
             pd_df = obj.to_pandas()
         sgpd_df = sgpd.GeoDataFrame(obj)
         assert_frame_equal(pd_df, sgpd_df.to_pandas())
+
+    def test_plot(self):
+        # Just make sure it doesn't error
+        df = GeoDataFrame(
+            {
+                "value1": ["a", "b", "c"],
+                "geometry": [
+                    Point(0, 0),
+                    Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                    LineString([(0, 0), (1, 1)]),
+                ],
+                "value2": [1, 2, 3],
+            }
+        )
+        df.plot()
 
     def test_psdf(self):
         # this is to make sure the spark session works with pandas on spark api
