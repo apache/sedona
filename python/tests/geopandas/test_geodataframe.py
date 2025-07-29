@@ -329,31 +329,21 @@ class TestDataframe(TestGeopandasBase):
         self.assert_almost_equal(area_values[1], 4.0)
 
     def test_buffer(self):
-        # Create a GeoDataFrame with geometries to test buffer operation
-
-        # Create input geometries
         point = Point(0, 0)
         square = Polygon([(0, 0), (1, 0), (1, 1), (0, 1)])
 
-        data = {"geometry1": [point, square], "id": [1, 2], "value": ["a", "b"]}
-        df = GeoDataFrame(data, geometry="geometry1")
+        data = {"geometry": [point, square], "id": [1, 2], "value": ["a", "b"]}
+        df = GeoDataFrame(data)
 
-        # Apply buffer with distance 0.5
         result = df.buffer(0.5)
 
-        # Verify result is a GeoDataFrame
         assert type(result) is GeoSeries
-
-        # Convert to pandas to extract individual geometries
-        pd_series = result.to_pandas()
-
         # Calculate areas to verify buffer was applied correctly
         # Point buffer with radius 0.5 should have area approximately π * 0.5² ≈ 0.785
         # Square buffer with radius 0.5 should expand the 1x1 square to 2x2 square with rounded corners
-        areas = [geom.area for geom in pd_series]
 
         # Check that square buffer area is greater than original (1.0)
-        assert areas[1] > 1.0
+        assert result.area[1] > 1.0
 
     def test_to_parquet(self):
         pass
