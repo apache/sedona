@@ -15,8 +15,14 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# These allow use to access the __all__
-from sedona.spark.sql import *
-from sedona.spark import sql
+import warnings
+from sedona.spark.geoarrow import dataframe_to_arrow, create_spatial_dataframe
+from sedona.spark import geoarrow
 
-__all__ = sql.__all__
+warnings.warn(
+    "The 'sedona.geoarrow' module is deprecated and will be removed in future versions. Please use 'sedona.spark.geoarrow' instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
+__all__ = geoarrow.__all__

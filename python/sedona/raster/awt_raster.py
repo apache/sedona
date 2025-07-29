@@ -15,8 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# These allow use to access the __all__
-from sedona.spark.sql import *
-from sedona.spark import sql
+from sedona.spark.raster.awt_raster import AWTRaster
 
-__all__ = sql.__all__
+__all__ = ["AWTRaster"]

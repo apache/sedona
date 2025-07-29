@@ -14,9 +14,10 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import warnings
 
-# These allow use to access the __all__
-from sedona.spark.sql import *
-from sedona.spark import sql
-
-__all__ = sql.__all__
+warnings.warn(
+    "The 'sedona.raster' package structure has been reorganized. Please update your imports to use 'sedona.spark.raster' prefix instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)

@@ -15,8 +15,18 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# These allow use to access the __all__
-from sedona.spark.sql import *
-from sedona.spark import sql
+from sedona.spark.raster.sample_model import (
+    SampleModel,
+    ComponentSampleModel,
+    PixelInterleavedSampleModel,
+    SinglePixelPackedSampleModel,
+    MultiPixelPackedSampleModel,
+)
 
-__all__ = sql.__all__
+__all__ = [
+    "SampleModel",
+    "ComponentSampleModel",
+    "PixelInterleavedSampleModel",
+    "SinglePixelPackedSampleModel",
+    "MultiPixelPackedSampleModel",
+]

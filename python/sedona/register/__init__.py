@@ -15,8 +15,13 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# These allow use to access the __all__
-from sedona.spark.sql import *
-from sedona.spark import sql
+from sedona.spark.register.geo_registrator import SedonaRegistrator
+import warnings
 
-__all__ = sql.__all__
+warnings.warn(
+    "Importing from 'sedona.register' is deprecated. Please use 'sedona.spark.register.geo_registrator' instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
+__all__ = ["SedonaRegistrator"]
