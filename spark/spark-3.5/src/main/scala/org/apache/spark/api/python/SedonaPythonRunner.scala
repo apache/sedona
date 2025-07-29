@@ -19,6 +19,8 @@ package org.apache.spark.api.python
 
 import org.apache.spark._
 import org.apache.spark.SedonaSparkEnv
+import org.apache.spark.api.python.PythonRDD.writeUTF
+import org.apache.spark.input.PortableDataStream
 import org.apache.spark.internal.Logging
 import org.apache.spark.internal.config.Python._
 import org.apache.spark.internal.config.{BUFFER_SIZE, EXECUTOR_CORES}
@@ -749,7 +751,7 @@ private[spark] class PythonRunner(
       }
 
       protected override def writeIteratorToStream(dataOut: DataOutputStream): Unit = {
-        PythonRDD.writeIteratorToStream(inputIterator, dataOut)
+        GeoArrowWriter.writeIteratorToStream(inputIterator, dataOut)
         dataOut.writeInt(SpecialLengths.END_OF_DATA_SECTION)
       }
     }
@@ -808,4 +810,32 @@ private[spark] object BarrierTaskContextMessageProtocol {
   val ALL_GATHER_FUNCTION = 2
   val BARRIER_RESULT_SUCCESS = "success"
   val ERROR_UNRECOGNIZED_FUNCTION = "Not recognized function call from python side."
+}
+
+object GeoArrowWriter extends Logging {
+  def writeIteratorToStream[T](iter: Iterator[T], dataOut: DataOutputStream): Unit = {
+
+    def write(obj: Any): Unit = obj match {
+      case null =>
+        dataOut.writeInt(SpecialLengths.NULL)
+      case arr: Array[Byte] =>
+        logError("some random array")
+        dataOut.writeInt(arr.length)
+        dataOut.write(arr)
+      case str: String =>
+        logError("some random string")
+        writeUTF(str, dataOut)
+      case stream: PortableDataStream =>
+        logError("some random stream")
+        write(stream.toArray())
+      case (key, value) =>
+        logError("some random key value")
+        write(key)
+        write(value)
+      case other =>
+        throw new SparkException("Unexpected element type " + other.getClass)
+    }
+
+    iter.foreach(write)
+  }
 }

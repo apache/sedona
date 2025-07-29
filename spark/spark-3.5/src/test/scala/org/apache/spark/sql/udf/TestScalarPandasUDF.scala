@@ -25,6 +25,7 @@ import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.internal.config.Python.{PYTHON_DAEMON_MODULE, PYTHON_USE_DAEMON, PYTHON_WORKER_MODULE}
 import org.apache.spark.sql.execution.python.UserDefinedPythonFunction
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.types.FloatType
 import org.apache.spark.util.Utils
 
 import java.io.File
@@ -82,31 +83,21 @@ object ScalarUDF {
           "-c",
           f"""
             |from pyspark.sql.types import IntegerType
+            |from pyspark.sql.types import DoubleType
+            |from pyspark.sql.types import FloatType
             |from shapely.geometry import Point
             |from sedona.sql.types import GeometryType
             |from pyspark.serializers import CloudPickleSerializer
-            |from sedona.utils import geometry_serde
             |from shapely import box
             |import logging
             |logging.basicConfig(level=logging.INFO)
             |logger = logging.getLogger(__name__)
             |logger.info("Loading Sedona Python UDF")
             |import os
-            |logger.info(os.getcwd())
-            |import sys
-            |import sys
-            |print("boring stuff")
-            |sys.path.append('$additionalModule')
-            |logger.info(sys.path)
             |f = open('$path', 'wb');
-            |def w(x):
-            |    def apply_function(w):
-            |        geom, offset = geometry_serde.deserialize(w)
-            |        bounds = geom.buffer(1).bounds
-            |        x = box(*bounds)
-            |        return geometry_serde.serialize(x)
-            |    return x.apply(apply_function)
-            |f.write(CloudPickleSerializer().dumps((w, GeometryType())))
+            |def apply_geopandas(x):
+            |    return x.area
+            |f.write(CloudPickleSerializer().dumps((apply_geopandas, FloatType())))
             |""".stripMargin),
         None,
         "PYTHONPATH" -> s"$pysparkPythonPath:$pythonPath").!!
@@ -131,7 +122,7 @@ object ScalarUDF {
       pythonVer = pythonVer,
       broadcastVars = List.empty[Broadcast[PythonBroadcast]].asJava,
       accumulator = null),
-    dataType = GeometryUDT,
+    dataType = FloatType,
     pythonEvalType = UDF.PythonEvalType.SQL_SCALAR_SEDONA_UDF,
     udfDeterministic = true)
 }
