@@ -1,6 +1,6 @@
 ---
 date:
-  created: 2025-04-30
+  created: 2025-7-26
 authors:
 
   - matt_powers
@@ -8,8 +8,6 @@ authors:
 title: Geospatial Data on Iceberg - The Lakehouse Advantage
 ---
 
-<<<<<<< HEAD
-=======
 <!--
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -29,31 +27,11 @@ title: Geospatial Data on Iceberg - The Lakehouse Advantage
  under the License.
  -->
 
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 14074d417b ([DOCS] putting metadata at top)
-# Geospatial Data on Iceberg: The Lakehouse Advantage
-
-This post delves into the benefits of Lakehouse architecture for spatial tables
-and differentiate its approach from standard data warehouses and data lakes.
-=======
 This post discusses the benefits of Lakehouse architecture for spatial
 tables, comparing the Lakehouse approach to standard data warehouses and data lakes.
->>>>>>> 3128e022f4 (blog refinements)
-=======
-TODO: Rework intro
-
-This post discusses the benefits of Lakehouse architecture for spatial
-tables, comparing the Lakehouse approach to that of data warehouses and data lakes.
->>>>>>> bad3190a21 (formatting fixes)
 
 While spatial data requires different types of metadata and optimizations,
 it _doesn't_ require entirely different file formats.
-
-#### Key Points
-
-* Geospatial Data has native support in Apache Parquet and Apache Iceberg.
-* TODO
 
 Recent advancements, specifically the addition of native support for geometry/geography types to
 Apache Parquet and the Apache Iceberg V3 specification, enable the spatial data community
@@ -319,12 +297,8 @@ and `Polygon` geometries for purchases tied to an approximate region.
 
 ## Joining tables containing spatial and non-spatial data
 
-<<<<<<< HEAD
-Let's discuss how to join the customers and customer_purchases tables.
-=======
 Let's discuss how to use Sedona to join the non-spatial data
 in the `customers` table with the spatial data in the `customer_purchases` table.
->>>>>>> bad3190a21 (formatting fixes)
 
 ```py
 customers = sedona.table("local.db.customers")
@@ -601,8 +575,7 @@ filter. The required process involves reading the entire existing dataset, apply
 the modification to all records in memory, and then rewriting the whole modified
 dataset back to storage, overwriting the original.
 
-This highlights key data
-lake disadvantages: the inefficiency of the full read/rewrite cycle, and the
+This highlights key data lake disadvantages: the inefficiency of the full read/rewrite cycle, and the
 critical lack of atomicity in the overwrite step, which risks data corruption
 or loss if the write operation fails partway through.
 
