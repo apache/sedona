@@ -40,6 +40,19 @@ repos:
         files: \.(js|ya?ml)$
         language: node
         additional_dependencies: ['prettier@3.6.2']
+      - id: maven-spotless-apply
+        name: maven spotless apply
+        description: automatically formats Java and Scala code using mvn spotless:apply.
+        entry: mvn spotless:apply
+        language: system # Indicates that the 'entry' command should be run directly as a system command.
+        types: [java, scala] # Specifies that this hook should run on Java and Scala files.
+        pass_filenames:
+          false # Crucial: tells pre-commit NOT to pass filenames as arguments to 'mvn spotless:apply'.
+          # Spotless typically scans the whole project based on its configuration.
+        always_run:
+          true # Ensures this hook runs even if no Java files are changed.
+          # This is useful for spotless:apply which might affect files not staged.
+        stages: [pre-commit] # Specifies that this hook runs during the 'commit' stage.
       - id: check-zip-file-is-not-committed
         name: check no zip files are committed
         description: Zip files are not allowed in the repository
