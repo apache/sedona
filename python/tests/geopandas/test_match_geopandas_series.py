@@ -690,6 +690,10 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
     def test_reverse(self):
         pass
 
+    @pytest.mark.skipif(
+        parse_version(gpd.__version__) < parse_version("0.14.0"),
+        reason="geopandas segmentize requires version 0.14.0 or higher",
+    )
     def test_segmentize(self):
         for geom in self.geoms:
             sgpd_result = GeoSeries(geom).segmentize(2.5)
