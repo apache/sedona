@@ -227,9 +227,6 @@ def sjoin(
 ):
     """Spatial join of two GeoDataFrames.
 
-    See the User Guide page :doc:`../../user_guide/mergingdata` for details.
-
-
     Parameters
     ----------
     left_df, right_df : GeoDataFrames

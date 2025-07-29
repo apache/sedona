@@ -47,18 +47,19 @@ class GeoFrame(metaclass=ABCMeta):
     A base class for both GeoDataFrame and GeoSeries.
     """
 
-    def _reduce_for_geostat_function(
-        self,
-        sfun: Callable[["GeoSeries"], Column],
-        name: str,
-        axis: Optional[Axis] = None,
-        numeric_only: bool = True,
-        skipna: bool = True,
-        **kwargs: Any,
-    ) -> Union["GeoSeries", Scalar]:
-        raise NotImplementedError("This method is not implemented yet.")
+    # def _reduce_for_geostat_function(
+    #     self,
+    #     sfun: Callable[["GeoSeries"], Column],
+    #     name: str,
+    #     axis: Optional[Axis] = None,
+    #     numeric_only: bool = True,
+    #     skipna: bool = True,
+    #     **kwargs: Any,
+    # ) -> Union["GeoSeries", Scalar]:
+    #     raise NotImplementedError("This method is not implemented yet.")
 
     @property
+    @abstractmethod
     def sindex(self) -> "SpatialIndex":
         """
         Returns a spatial index built from the geometries.
@@ -82,6 +83,7 @@ class GeoFrame(metaclass=ABCMeta):
         # We pass in self.geometry here to use the active geometry column for dataframe
         return _delegate_to_geometry_column("sindex", self.geometry)
 
+    @abstractmethod
     def copy(self: GeoFrameLike) -> GeoFrameLike:
         raise NotImplementedError("This method is not implemented yet.")
 
@@ -134,6 +136,7 @@ class GeoFrame(metaclass=ABCMeta):
         return _delegate_to_geometry_column("geom_type", self)
 
     @property
+    @abstractmethod
     def type(self):
         raise NotImplementedError("This method is not implemented yet.")
 
@@ -281,14 +284,14 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("is_empty", self)
 
-    def count_coordinates(self):
-        raise NotImplementedError("This method is not implemented yet.")
+    # def count_coordinates(self):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    def count_geometries(self):
-        raise NotImplementedError("This method is not implemented yet.")
+    # def count_geometries(self):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    def count_interior_rings(self):
-        raise NotImplementedError("This method is not implemented yet.")
+    # def count_interior_rings(self):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
     @property
     def is_simple(self):
@@ -319,17 +322,17 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("is_simple", self)
 
-    @property
-    def is_ring(self):
-        raise NotImplementedError("This method is not implemented yet.")
+    # @property
+    # def is_ring(self):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    @property
-    def is_ccw(self):
-        raise NotImplementedError("This method is not implemented yet.")
+    # @property
+    # def is_ccw(self):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    @property
-    def is_closed(self):
-        raise NotImplementedError("This method is not implemented yet.")
+    # @property
+    # def is_closed(self):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
     @property
     def has_z(self):
@@ -363,8 +366,8 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("has_z", self)
 
-    def get_precision(self):
-        raise NotImplementedError("This method is not implemented yet.")
+    # def get_precision(self):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
     def get_geometry(self, index):
         """Returns the n-th geometry from a collection of geometries (0-indexed).
@@ -514,18 +517,18 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("centroid", self)
 
-    def concave_hull(self, ratio=0.0, allow_holes=False):
-        raise NotImplementedError("This method is not implemented yet.")
+    # def concave_hull(self, ratio=0.0, allow_holes=False):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    @property
-    def convex_hull(self):
-        raise NotImplementedError("This method is not implemented yet.")
+    # @property
+    # def convex_hull(self):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    def delaunay_triangles(self, tolerance=0.0, only_edges=False):
-        raise NotImplementedError("This method is not implemented yet.")
+    # def delaunay_triangles(self, tolerance=0.0, only_edges=False):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    def voronoi_polygons(self, tolerance=0.0, extend_to=None, only_edges=False):
-        raise NotImplementedError("This method is not implemented yet.")
+    # def voronoi_polygons(self, tolerance=0.0, extend_to=None, only_edges=False):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
     @property
     def envelope(self):
@@ -569,43 +572,43 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("envelope", self)
 
-    def minimum_rotated_rectangle(self):
-        raise NotImplementedError("This method is not implemented yet.")
+    # def minimum_rotated_rectangle(self):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    @property
-    def exterior(self):
-        raise NotImplementedError("This method is not implemented yet.")
+    # @property
+    # def exterior(self):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    def extract_unique_points(self):
-        raise NotImplementedError("This method is not implemented yet.")
+    # def extract_unique_points(self):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    def offset_curve(self, distance, quad_segs=8, join_style="round", mitre_limit=5.0):
-        raise NotImplementedError("This method is not implemented yet.")
+    # def offset_curve(self, distance, quad_segs=8, join_style="round", mitre_limit=5.0):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    @property
-    def interiors(self):
-        raise NotImplementedError("This method is not implemented yet.")
+    # @property
+    # def interiors(self):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    def remove_repeated_points(self, tolerance=0.0):
-        raise NotImplementedError("This method is not implemented yet.")
+    # def remove_repeated_points(self, tolerance=0.0):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    def set_precision(self, grid_size, mode="valid_output"):
-        raise NotImplementedError("This method is not implemented yet.")
+    # def set_precision(self, grid_size, mode="valid_output"):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    def representative_point(self):
-        raise NotImplementedError("This method is not implemented yet.")
+    # def representative_point(self):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    def minimum_bounding_circle(self):
-        raise NotImplementedError("This method is not implemented yet.")
+    # def minimum_bounding_circle(self):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    def minimum_bounding_radius(self):
-        raise NotImplementedError("This method is not implemented yet.")
+    # def minimum_bounding_radius(self):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    def minimum_clearance(self):
-        raise NotImplementedError("This method is not implemented yet.")
+    # def minimum_clearance(self):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    def normalize(self):
-        raise NotImplementedError("This method is not implemented yet.")
+    # def normalize(self):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
     def make_valid(self, *, method="linework", keep_collapsed=True):
         """Repairs invalid geometries.
@@ -670,27 +673,27 @@ class GeoFrame(metaclass=ABCMeta):
             "make_valid", self, method=method, keep_collapsed=keep_collapsed
         )
 
-    def reverse(self):
-        raise NotImplementedError("This method is not implemented yet.")
+    # def reverse(self):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    def segmentize(self, max_segment_length):
-        raise NotImplementedError("This method is not implemented yet.")
+    # def segmentize(self, max_segment_length):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    def transform(self, transformation, include_z=False):
-        raise NotImplementedError("This method is not implemented yet.")
+    # def transform(self, transformation, include_z=False):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    def force_2d(self):
-        raise NotImplementedError("This method is not implemented yet.")
+    # def force_2d(self):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    def force_3d(self, z=0):
-        raise NotImplementedError("This method is not implemented yet.")
+    # def force_3d(self, z=0):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    def line_merge(self, directed=False):
-        raise NotImplementedError("This method is not implemented yet.")
+    # def line_merge(self, directed=False):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
-    @property
-    def unary_union(self):
-        raise NotImplementedError("This method is not implemented yet.")
+    # @property
+    # def unary_union(self):
+    #     raise NotImplementedError("This method is not implemented yet.")
 
     def union_all(self, method="unary", grid_size=None) -> BaseGeometry:
         """Returns a geometry containing the union of all geometries in the
