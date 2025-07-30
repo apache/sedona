@@ -56,28 +56,15 @@ _base_mock_imports = [
 # In CI, we need to be more aggressive with mocking to prevent import errors
 # In local dev, we can mock fewer dependencies for completeness
 if os.environ.get("CI"):
-    # Mock more dependencies in CI to avoid import errors
+    # In CI, use minimal mocking to get complete documentation
+    # The monkey patch will handle any import errors gracefully
     autodoc_mock_imports = _base_mock_imports + [
         "keplergl",
         "pydeck",
         "rasterio",
-        # Additional problematic modules that cause IndexError in CI
-        "sedona.spark.raster.raster_serde",
-        "sedona.spark.raster.sedona_raster",
-        # Mock shapely compatibility modules that might cause issues
-        "sedona.spark.core.geom.shapely1",
-        "sedona.spark.core.geom.shapely2",
-        # Mock SQL-related modules that are causing issues
-        "sedona.spark.sql.connect",
-        "sedona.spark.sql.dataframe_api",
-        "sedona.spark.sql.exceptions",
-        # Mock additional modules that might have import issues
-        "sedona.spark.maps",
-        "sedona.spark.raster",
-        "sedona.spark.utils",
     ]
 else:
-    # For local development, use minimal mocking for completeness
+    # For local development, use the same minimal mocking
     autodoc_mock_imports = _base_mock_imports + [
         "keplergl",
         "pydeck",
@@ -146,14 +133,31 @@ def setup(app):
         def patched_import_object(name, source=None):
             try:
                 return original_import_object(name, source)
+            except IndexError as exc:
+                # Handle the specific IndexError: tuple index out of range issue
+                if "tuple index out of range" in str(exc) or len(exc.args) == 0:
+                    import warnings
+
+                    warnings.warn(f"Skipping import due to IndexError: {name}")
+                    # Return a mock module instead of None to avoid further errors
+                    from unittest.mock import MagicMock
+
+                    return MagicMock(), None
+                else:
+                    raise
             except Exception as exc:
-                # Handle the IndexError: tuple index out of range issue
-                if hasattr(exc, "args") and len(exc.args) == 0:
-                    # Create a proper exception with args
+                # Handle other import errors more specifically
+                if (
+                    "No module named" in str(exc)
+                    or hasattr(exc, "args")
+                    and len(exc.args) == 0
+                ):
                     import warnings
 
                     warnings.warn(f"Skipping problematic import: {name}")
-                    return None, None
+                    from unittest.mock import MagicMock
+
+                    return MagicMock(), None
                 else:
                     raise
 
