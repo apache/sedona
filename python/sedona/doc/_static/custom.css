@@ -300,7 +300,7 @@ a:hover {
     background: var(--sedona-primary) !important;
 }
 
-.wy-side-nav-search .wy-dropdown > a, 
+.wy-side-nav-search .wy-dropdown > a,
 .wy-side-nav-search > a {
     color: var(--sedona-white) !important;
     font-weight: 500 !important;

@@ -55,7 +55,7 @@ _base_mock_imports = [
 
 # In CI, we want fewer mocks to ensure completeness
 # In local dev, we can mock more for convenience
-if os.environ.get('CI'):
+if os.environ.get("CI"):
     autodoc_mock_imports = _base_mock_imports
 else:
     # For local development, mock optional dependencies too
@@ -79,7 +79,7 @@ suppress_warnings = [
 
 # Make Sphinx fail on warnings in CI environment
 # This ensures documentation completeness
-if os.environ.get('CI'):
+if os.environ.get("CI"):
     # Treat warnings as errors in CI
     warning_is_error = True
     # Be strict about references
