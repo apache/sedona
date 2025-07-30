@@ -39,8 +39,29 @@ extensions = [
     "sphinx_rtd_theme",  # Read the Docs theme
 ]
 
+# Mock imports to handle NumPy 2.0 compatibility issues with PySpark and missing dependencies
+autodoc_mock_imports = [
+    "pyspark.pandas",
+    "pyspark.pandas.indexes",
+    "pyspark.pandas.indexes.base",
+    "pyspark.pandas.series",
+    "pyspark.pandas.strings",
+    "pystac",
+    "sedona.spark.raster.raster_serde",
+    "sedona.spark.raster.sedona_raster",
+]
+
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+
+# Suppress specific warnings
+suppress_warnings = [
+    # Suppress warnings about mocked objects (these are intentionally mocked)
+    "autodoc.mocked_object",
+    # Suppress warnings about multiple targets for cross-references
+    # This is expected due to shapely1/shapely2 compatibility layer
+    "ref.python",
+]
 
 autodoc_default_options = {
     "members": True,
@@ -55,9 +76,28 @@ html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 html_title = f"{project} Documentation"
 
+# Custom CSS to match Apache Sedona branding
+html_css_files = [
+    "custom.css",
+]
+
 html_theme_options = {
     "collapse_navigation": False,
     "navigation_depth": 4,
-    "style_external_links": True,
+    "style_external_links": False,
     "titles_only": False,
+    "logo_only": False,
+    "prev_next_buttons_location": "bottom",
+    "vcs_pageview_mode": "",
+    # Custom colors to match Sedona theme
+    "style_nav_header_background": "#ff5722",
+}
+
+# Apache Sedona Branding
+html_logo = None  # We'll use CSS for logo styling
+html_favicon = None
+
+# Additional context for templates
+html_context = {
+    "display_github": False,
 }
