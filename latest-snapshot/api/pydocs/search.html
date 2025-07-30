@@ -1,0 +1,308 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search &mdash; Apache Sedona Python Documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=64ca1896" />
+
+  
+    
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=908dc885"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="#" />
+     
+    <!-- Google Fonts for Apache Sedona styling -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Additional meta tags for better rendering -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1565c0">
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #ff5722" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Apache Sedona Python
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="#" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">sedona</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sedona.html">sedona package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.html#module-sedona.exceptions">sedona.exceptions module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.html#sedona.exceptions.InvalidParametersException"><code class="docutils literal notranslate"><span class="pre">InvalidParametersException</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.html#module-sedona.version">sedona.version module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.html#module-sedona">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sedona.flink.html">sedona.flink package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sedona.flink.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.flink.html#module-sedona.flink.context">sedona.flink.context module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.flink.html#sedona.flink.context.SedonaContext"><code class="docutils literal notranslate"><span class="pre">SedonaContext</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.flink.html#sedona.flink.context.SedonaContext.create"><code class="docutils literal notranslate"><span class="pre">SedonaContext.create()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.flink.html#module-sedona.flink">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sedona.geopandas.html">sedona.geopandas package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sedona.geopandas.api.html">sedona.geopandas package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.geopandas.tools.html">sedona.geopandas.tools package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sedona.spark.html">sedona.spark package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.html">sedona.spark.core package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.html#sedona-spark-core-utils-module">sedona.spark.core.utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.geoarrow.html">sedona.spark.geoarrow package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geoarrow.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geoarrow.html#sedona-spark-geoarrow-geoarrow-module">sedona.spark.geoarrow.geoarrow module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geoarrow.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.maps.html">sedona.spark.maps package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.maps.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.maps.html#sedona-spark-maps-sedonakepler-module">sedona.spark.maps.SedonaKepler module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.maps.html#sedona-spark-maps-sedonamaputils-module">sedona.spark.maps.SedonaMapUtils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.maps.html#sedona-spark-maps-sedonapydeck-module">sedona.spark.maps.SedonaPyDeck module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.maps.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.raster.html">sedona.spark.raster package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#sedona-spark-raster-awt-raster-module">sedona.spark.raster.awt_raster module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#sedona-spark-raster-data-buffer-module">sedona.spark.raster.data_buffer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#sedona-spark-raster-meta-module">sedona.spark.raster.meta module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#sedona-spark-raster-raster-serde-module">sedona.spark.raster.raster_serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#sedona-spark-raster-sample-model-module">sedona.spark.raster.sample_model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#sedona-spark-raster-sedona-raster-module">sedona.spark.raster.sedona_raster module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.raster_utils.html">sedona.spark.raster_utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster_utils.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster_utils.html#sedona-spark-raster-utils-sedonautils-module">sedona.spark.raster_utils.SedonaUtils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster_utils.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.register.html">sedona.spark.register package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.register.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.register.html#sedona-spark-register-geo-registrator-module">sedona.spark.register.geo_registrator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.register.html#sedona-spark-register-java-libs-module">sedona.spark.register.java_libs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.register.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.sql.html">sedona.spark.sql package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#sedona-spark-sql-connect-module">sedona.spark.sql.connect module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#sedona-spark-sql-dataframe-api-module">sedona.spark.sql.dataframe_api module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#sedona-spark-sql-exceptions-module">sedona.spark.sql.exceptions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#sedona-spark-sql-functions-module">sedona.spark.sql.functions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#sedona-spark-sql-st-aggregates-module">sedona.spark.sql.st_aggregates module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#sedona-spark-sql-st-constructors-module">sedona.spark.sql.st_constructors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#sedona-spark-sql-st-functions-module">sedona.spark.sql.st_functions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#sedona-spark-sql-st-predicates-module">sedona.spark.sql.st_predicates module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#sedona-spark-sql-types-module">sedona.spark.sql.types module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.stac.html">sedona.spark.stac package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stac.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stac.html#sedona-spark-stac-client-module">sedona.spark.stac.client module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stac.html#sedona-spark-stac-collection-client-module">sedona.spark.stac.collection_client module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stac.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.stats.html">sedona.spark.stats package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stats.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stats.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stats.html#sedona-spark-stats-weighting-module">sedona.spark.stats.weighting module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stats.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.utils.html">sedona.spark.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#sedona-spark-utils-abstract-parser-module">sedona.spark.utils.abstract_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#sedona-spark-utils-adapter-module">sedona.spark.utils.adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#sedona-spark-utils-binary-parser-module">sedona.spark.utils.binary_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#sedona-spark-utils-decorators-module">sedona.spark.utils.decorators module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#sedona-spark-utils-geometry-adapter-module">sedona.spark.utils.geometry_adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#sedona-spark-utils-geometry-serde-module">sedona.spark.utils.geometry_serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#sedona-spark-utils-geometry-serde-general-module">sedona.spark.utils.geometry_serde_general module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#sedona-spark-utils-jvm-module">sedona.spark.utils.jvm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#sedona-spark-utils-meta-module">sedona.spark.utils.meta module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#sedona-spark-utils-prep-module">sedona.spark.utils.prep module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#sedona-spark-utils-serde-module">sedona.spark.utils.serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#sedona-spark-utils-spatial-rdd-parser-module">sedona.spark.utils.spatial_rdd_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#sedona-spark-utils-structured-adapter-module">sedona.spark.utils.structured_adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#sedona-spark-utils-types-module">sedona.spark.utils.types module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.html#sedona-spark-sedonacontext-module">sedona.spark.SedonaContext module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sedona.stac.html">sedona.stac package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sedona.stac.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sedona.stats.html">sedona.stats package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sedona.stats.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.stats.clustering.html">sedona.stats.clustering package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.stats.clustering.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.stats.clustering.html#module-sedona.stats.clustering">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.stats.hotspot_detection.html">sedona.stats.hotspot_detection package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.stats.hotspot_detection.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.stats.hotspot_detection.html#module-sedona.stats.hotspot_detection">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.stats.outlier_detection.html">sedona.stats.outlier_detection package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.stats.outlier_detection.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.stats.outlier_detection.html#module-sedona.stats.outlier_detection">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.stats.weighting.html">sedona.stats.weighting package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.stats.weighting.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.stats.html#module-sedona.stats">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sedona.utils.html">sedona.utils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sedona.utils.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.utils.geoarrow.html">sedona.utils.geoarrow package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.utils.geoarrow.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.utils.structured_adapter.html">sedona.utils.structured_adapter package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.utils.structured_adapter.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.utils.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #ff5722" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Apache Sedona Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Search</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    <div class="sedona-content-wrapper">
+        
+           <div itemprop="articleBody">
+             
+  <noscript>
+  <div id="fallback" class="admonition warning">
+    <p class="last">
+      Please activate JavaScript to enable the search functionality.
+    </p>
+  </div>
+  </noscript>
+
+  
+  <div id="search-results">
+  
+  </div>
+
+           </div>
+          </div>
+    </div>
+
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Apache Software Foundation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+  <script>
+    jQuery(function() { Search.loadIndex("searchindex.js"); });
+  </script>
+  
+  <script id="searchindexloader"></script>
+   
+
+
+</body>
+</html>
