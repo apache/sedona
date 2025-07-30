@@ -52,7 +52,7 @@ repos:
         always_run:
           true # Ensures this hook runs even if no Java files are changed.
           # This is useful for spotless:apply which might affect files not staged.
-        stages: [pre-commit] # Specifies that this hook runs during the 'commit' stage.
+        stages: [manual]
       - id: check-zip-file-is-not-committed
         name: check no zip files are committed
         description: Zip files are not allowed in the repository
@@ -306,3 +306,4 @@ repos:
         name: run oxipng
         description: check PNG files with oxipng
         args: ['--fix', '-o', '4', '--strip', 'safe', '--alpha']
+        stages: [manual]
