@@ -83,6 +83,8 @@ if os.environ.get("CI"):
         "**/sedona.spark.raster.rst",
         "sedona.spark.register.rst",
         "**/sedona.spark.register.rst",
+        "sedona.spark.sql.rst",
+        "**/sedona.spark.sql.rst",
     ])
 
 # Suppress specific warnings
