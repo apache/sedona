@@ -43,12 +43,6 @@ extensions = [
 # Mock imports to handle NumPy 2.0 compatibility issues with PySpark and missing dependencies
 # These are needed even in CI because of NumPy 2.0 incompatibility in PySpark
 _base_mock_imports = [
-    "pyspark.pandas",
-    "pyspark.pandas.indexes",
-    "pyspark.pandas.indexes.base",
-    "pyspark.pandas.series",
-    "pyspark.pandas.strings",
-    "pystac",
     "sedona.spark.raster.raster_serde",
     "sedona.spark.raster.sedona_raster",
 ]
@@ -62,18 +56,6 @@ autodoc_mock_imports = _base_mock_imports + [
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
-
-# # Exclude problematic modules that cause IndexError
-# exclude_patterns.extend([
-#     "sedona.spark.sql.rst",
-#     "**/sedona.spark.sql.rst",
-#     "sedona.spark.raster_utils.rst",
-#     "**/sedona.spark.raster_utils.rst",
-#     "sedona.spark.raster.rst",
-#     "**/sedona.spark.raster.rst",
-#     "sedona.spark.register.rst",
-#     "**/sedona.spark.register.rst",
-# ])
 
 # Suppress specific warnings
 suppress_warnings = [
@@ -122,43 +104,44 @@ def setup(app):
     """Configure Sphinx app with error handling."""
     app.connect("autodoc-skip-member", skip_member)
 
-    # Monkey patch to handle IndexError
-    import sphinx.ext.autodoc.importer
-
-    original_import_object = sphinx.ext.autodoc.importer.import_object
-
-    def patched_import_object(name, source=None):
-        try:
-            return original_import_object(name, source)
-        except IndexError as exc:
-            # Handle the specific IndexError: tuple index out of range issue
-            if "tuple index out of range" in str(exc) or len(exc.args) == 0:
-                import warnings
-
-                warnings.warn(f"Skipping import due to IndexError: {name}")
-                # Return a mock module instead of None to avoid further errors
-                from unittest.mock import MagicMock
-
-                return MagicMock(), None
-            else:
-                raise
-        except Exception as exc:
-            # Handle other import errors more specifically
-            if (
-                "No module named" in str(exc)
-                or hasattr(exc, "args")
-                and len(exc.args) == 0
-            ):
-                import warnings
-
-                warnings.warn(f"Skipping problematic import: {name}")
-                from unittest.mock import MagicMock
-
-                return MagicMock(), None
-            else:
-                raise
-
-    sphinx.ext.autodoc.importer.import_object = patched_import_object
+    # Monkey patch to handle IndexError - commented out for testing
+    # Uncomment if you encounter IndexError: tuple index out of range
+    # import sphinx.ext.autodoc.importer
+    #
+    # original_import_object = sphinx.ext.autodoc.importer.import_object
+    #
+    # def patched_import_object(name, source=None):
+    #     try:
+    #         return original_import_object(name, source)
+    #     except IndexError as exc:
+    #         # Handle the specific IndexError: tuple index out of range issue
+    #         if "tuple index out of range" in str(exc) or len(exc.args) == 0:
+    #             import warnings
+    #
+    #             warnings.warn(f"Skipping import due to IndexError: {name}")
+    #             # Return a mock module instead of None to avoid further errors
+    #             from unittest.mock import MagicMock
+    #
+    #             return MagicMock(), None
+    #         else:
+    #             raise
+    #     except Exception as exc:
+    #         # Handle other import errors more specifically
+    #         if (
+    #             "No module named" in str(exc)
+    #             or hasattr(exc, "args")
+    #             and len(exc.args) == 0
+    #         ):
+    #             import warnings
+    #
+    #             warnings.warn(f"Skipping problematic import: {name}")
+    #             from unittest.mock import MagicMock
+    #
+    #             return MagicMock(), None
+    #         else:
+    #             raise
+    #
+    # sphinx.ext.autodoc.importer.import_object = patched_import_object
 
 
 # Intersphinx mapping to external documentation
