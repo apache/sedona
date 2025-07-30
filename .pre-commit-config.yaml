@@ -64,6 +64,11 @@ repos:
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
+      - id: chmod
+        name: set file permissions
+        args: ['644']
+        files: \.md$
+        stages: [manual]
       - id: insert-license
         name: add license for all .c files
         files: \.c$
