@@ -1,10 +1,10 @@
-sedona.stats.weighting package
+sedona.core.SpatialRDD package
 ==============================
 
 Module contents
 ---------------
 
-.. automodule:: sedona.stats.weighting
+.. automodule:: sedona.core.SpatialRDD
    :members:
    :show-inheritance:
    :undoc-members:

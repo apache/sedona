@@ -36,11 +36,13 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",  # For Google-style or NumPy-style docstrings
     "sphinx.ext.viewcode",  # Adds links to source code
+    "sphinx.ext.intersphinx",  # Link to other projects' documentation
     "sphinx_rtd_theme",  # Read the Docs theme
 ]
 
 # Mock imports to handle NumPy 2.0 compatibility issues with PySpark and missing dependencies
-autodoc_mock_imports = [
+# These are needed even in CI because of NumPy 2.0 incompatibility in PySpark
+_base_mock_imports = [
     "pyspark.pandas",
     "pyspark.pandas.indexes",
     "pyspark.pandas.indexes.base",
@@ -50,6 +52,18 @@ autodoc_mock_imports = [
     "sedona.spark.raster.raster_serde",
     "sedona.spark.raster.sedona_raster",
 ]
+
+# In CI, we want fewer mocks to ensure completeness
+# In local dev, we can mock more for convenience
+if os.environ.get('CI'):
+    autodoc_mock_imports = _base_mock_imports
+else:
+    # For local development, mock optional dependencies too
+    autodoc_mock_imports = _base_mock_imports + [
+        "keplergl",
+        "pydeck",
+        "rasterio",
+    ]
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
@@ -63,6 +77,15 @@ suppress_warnings = [
     "ref.python",
 ]
 
+# Make Sphinx fail on warnings in CI environment
+# This ensures documentation completeness
+if os.environ.get('CI'):
+    # Treat warnings as errors in CI
+    warning_is_error = True
+    # Be strict about references
+    nitpicky = True
+    # Note: We keep some mocks even in CI due to PySpark/NumPy 2.0 issues
+
 autodoc_default_options = {
     "members": True,
     "undoc-members": True,
@@ -70,6 +93,33 @@ autodoc_default_options = {
     "special-members": "__init__",
     "show-inheritance": True,
 }
+
+# Intersphinx mapping to external documentation
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "numpy": ("https://numpy.org/doc/stable", None),
+    "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
+    "shapely": ("https://shapely.readthedocs.io/en/stable", None),
+    "geopandas": ("https://geopandas.org/en/stable", None),
+    "pyspark": ("https://spark.apache.org/docs/latest/api/python", None),
+}
+
+# Type aliases for common PySpark types that might not resolve properly
+autodoc_type_aliases = {
+    "DataFrame": "pyspark.sql.DataFrame",
+    "SparkSession": "pyspark.sql.SparkSession",
+    "StructType": "pyspark.sql.types.StructType",
+    "StructField": "pyspark.sql.types.StructField",
+}
+
+# Suppress warnings for known unresolvable references
+nitpick_ignore = [
+    ("py:class", "pyspark.sql.dataframe.DataFrame"),
+    ("py:class", "pyspark.sql.session.SparkSession"),
+    ("py:class", "pyspark.sql.types.StructType"),
+    ("py:class", "pyspark.sql.types.StructField"),
+    ("py:class", "pyspark.rdd.RDD"),
+]
 
 # -- Options for HTML output -------------------------------------------------
 html_theme = "sphinx_rtd_theme"

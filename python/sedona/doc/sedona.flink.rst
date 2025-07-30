@@ -9,13 +9,13 @@ sedona.flink.context module
 
 .. automodule:: sedona.flink.context
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: sedona.flink
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

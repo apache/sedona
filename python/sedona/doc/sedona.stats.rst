@@ -17,5 +17,5 @@ Module contents
 
 .. automodule:: sedona.stats
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

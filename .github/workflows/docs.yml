@@ -67,15 +67,25 @@ jobs:
           working-directory: './R'
       - run: Rscript -e 'pkgdown::build_site(pkg = "./R", preview = FALSE, override = list(destination = "../docs/api/rdocs"))'
       - name: Install Python documentation dependencies
-        run: pip install sphinx sphinx_rtd_theme
+        run: |
+          pip install sphinx sphinx_rtd_theme
+          # Install sedona with all optional dependencies for complete documentation
+          cd python
+          pip install -e ".[all]"
+          cd ..
       - name: Build Python API documentation with Sphinx
+        env:
+          CI: true
         run: |
           cd python/sedona/doc
+          pip list
           make clean
           make html
           cd ../../..
           mkdir -p docs/api/pydocs
           cp -r python/sedona/doc/_build/html/* docs/api/pydocs/
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
       - run: git config --global user.name = "GitHub Action"
       - run: git config --global user.email = "test@abc.com"
       - run: mkdocs build
