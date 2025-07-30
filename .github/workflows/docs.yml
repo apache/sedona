@@ -84,8 +84,6 @@ jobs:
           cd ../../..
           mkdir -p docs/api/pydocs
           cp -r python/sedona/doc/_build/html/* docs/api/pydocs/
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
       - run: git config --global user.name = "GitHub Action"
       - run: git config --global user.email = "test@abc.com"
       - run: mkdocs build
