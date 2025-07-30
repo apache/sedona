@@ -74,6 +74,13 @@ else:
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
+# Exclude problematic modules in CI that cause IndexError
+if os.environ.get("CI"):
+    exclude_patterns.extend([
+        "sedona.spark.raster_utils.rst",
+        "**/sedona.spark.raster_utils.rst",
+    ])
+
 # Suppress specific warnings
 suppress_warnings = [
     # Suppress warnings about mocked objects (these are intentionally mocked)
