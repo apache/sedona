@@ -79,6 +79,10 @@ if os.environ.get("CI"):
     exclude_patterns.extend([
         "sedona.spark.raster_utils.rst",
         "**/sedona.spark.raster_utils.rst",
+        "sedona.spark.raster.rst",
+        "**/sedona.spark.raster.rst",
+        "sedona.spark.register.rst",
+        "**/sedona.spark.register.rst",
     ])
 
 # Suppress specific warnings
