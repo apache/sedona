@@ -1,6 +1,9 @@
 sedona.utils package
 ====================
 
+.. deprecated:: 1.7.0
+   The ``sedona.utils`` package is deprecated. Please use ``sedona.spark.utils`` instead.
+
 Subpackages
 -----------
 
