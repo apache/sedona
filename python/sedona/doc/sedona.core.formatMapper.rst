@@ -1,6 +1,9 @@
 sedona.core.formatMapper package
 ================================
 
+.. deprecated:: 1.7.0
+   The ``sedona.core.formatMapper`` package is deprecated. Please use ``sedona.spark.core.formatMapper`` instead.
+
 Subpackages
 -----------
 

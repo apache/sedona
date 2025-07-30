@@ -1,6 +1,9 @@
 sedona.core package
 ===================
 
+.. deprecated:: 1.7.0
+   The ``sedona.core`` package is deprecated. Please use ``sedona.spark.core`` instead.
+
 Subpackages
 -----------
 

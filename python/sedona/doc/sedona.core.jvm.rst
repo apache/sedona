@@ -1,6 +1,9 @@
 sedona.core.jvm package
 =======================
 
+.. deprecated:: 1.7.0
+   The ``sedona.core.jvm`` package is deprecated. Please use ``sedona.spark.core.jvm`` instead.
+
 Submodules
 ----------
 

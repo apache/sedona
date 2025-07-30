@@ -1,6 +1,9 @@
 sedona.core.geom package
 ========================
 
+.. deprecated:: 1.7.0
+   The ``sedona.core.geom`` package is deprecated. Please use ``sedona.spark.core.geom`` instead.
+
 Submodules
 ----------
 

@@ -163,6 +163,7 @@ def read_file(filename: str, format: Union[str, None] = None, **kwargs):
             - "geojson"
             - "geopackage"
             - "geoparquet"
+            
     table_name : str, default None
         The name of the table to read from a geopackage file. Required if format is geopackage.
 
