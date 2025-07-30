@@ -45,7 +45,7 @@ distinct versions ideal for historical analysis and auditing how geometries or a
 * **Time travel:** Versioning lets you query spatial data (including boundaries and specific locations) exactly as
 that data existed at a specific time in the past, crucial for historical spatial analysis.
 * **Schema enforcement:** Lakehouses enforce schemas to ensure spatial data consistency by guaranteeing correct
-geometry types and attribute formats, which improve data quality and query reliability.
+geometry types and attribute formats, improving data quality and query reliability.
 * **Database optimizations:** Techniques like geographic partitioning, data skipping using
 bounding boxes, and columnar storage can accelerate spatial queries and improve storage efficiency within Lakehouses.
 
@@ -54,7 +54,8 @@ bounding boxes, and columnar storage can accelerate spatial queries and improve 
 Lakehouse architectures use open table formats like Apache Iceberg, Delta Lake, or Hudi to manage data
 stored on underlying platforms like cloud object storage (for example Amazon S3 or Google Cloud Storage).
 
-Lakehouse Tables are governed by a catalog. These catalogs don't store files since files are kept in cloud object storage.
+Tables in a lakehouse are governed by a catalog. The catalog doesn't store the data files
+themselves; those remain in cloud object storage.
 Rather, catalogs maintain records of related metadata information, like names of available
 databases/tables, table schemas, versioning information needed for features like time travel.
 
@@ -73,24 +74,23 @@ data science, machine learning, and other complex analyses.
 
 The Lakehouse Architecture offers several advantages:
 
-* Data is stored in open formats, letting any engine can query it, avoiding vendor lock-in.
+* Data is stored in open formats, letting any compatible engine query it, avoiding vendor lock-in.
 * Lakehouses support all the features familiar to data warehouses, like reliable transactions, Data Manipulation Language (DML) operations, and RBAC.
 * Lakehouses are performant enough for low-latency applications like BI dashboards.
 * Lakehouses are interoperable with proprietary tools like BigQuery, Redshift, or Esri.
 * Lakehouses leverage the cost-efficiency of cloud object storage (similar to data lakes) for data storage.
-* Lakehouses are highly compatible with existing compute engines.
-  * You can use one engine for ingestion, another for ETL, and a third for Machine Learning.
+* Lakehouses' compatibility with multiple compute engines allows you to use one engine for ingestion, another for ETL, and a third for Machine Learning.
 
-## Lakehouses & spatial data
+## Lakehouses and spatial data
 
-Earlier, we mentioned 2 important features of Lakehouses: Single-table transactions and RBAC.
-Let's discuss how these 2 features can be beneficial for working with spatial data.
+Earlier, we mentioned two important features of Lakehouses: Single-table transactions and RBAC.
+Let's discuss how these two features can be beneficial for working with spatial data.
 
 ### An example of single-table transactions
 
 Imagine a retail company is closing a store in New Jersey.
 
-Let's assume that this company maintains 3 different tables:
+Let's assume that this company maintains three different tables:
 
 1. `stores`(containing point geometry)
 1. `sales_territories` (containing polygon geometry)
@@ -163,7 +163,7 @@ For example, the `stores` table won't be left in a partially updated state.
 To ensure data consistency across all three tables (`stores`, `sales_territories`, and `sales_performance`) for the entire
 business operation of closing a store, these individual atomic operations on each table would typically be executed in sequence.
 
-Single-table transactions don't automatically "package" these three distinct table updates into a single overarching transaction,
+Single-table transactions don't automatically "package" these three distinct table updates into a single overarching transaction, as
 that would require multi-table transaction capabilities.
 
 However, by ensuring that each step is completed successfully and atomically, the overall process is far more reliable.
@@ -173,7 +173,7 @@ remain consistent, and the `sales_territories` table would roll back its own fai
 
 Now, let's see how Lakehouses differ from Data Lakes.
 
-## Lakehouses vs. Data Lakes
+## Lakehouses versus data lakes
 
 In contrast to Data Lakehouses, Data Lakes store data in files without a metadata layer, so they don't guarantee reliable transactions.
 
@@ -196,7 +196,7 @@ The Lakehouse metadata layer is relatively small, effectively making storage cos
 of a Data Lake. However, because Lakehouses allow for better query performance, you can generally expect
 lower compute costs compared to Data Lakes.
 
-## Lakehouses vs. Data Warehouses
+## Lakehouses versus data warehouses
 
 A Data Warehouse is an analytics system typically powered by a proprietary engine with similarly proprietary file formats.
 
@@ -208,11 +208,11 @@ Still, data warehouses generally exhibit the following limitations:
 * Pricing models frequently package storage and compute, which
 could require users to pay for more compute even if they only need more storage.
 * Storing data in proprietary file formats limits compatibility with other engines.
-* Querying data stored in open file formats _can_ result in slower performance compared
-  to proprietary formats due to being built specifically for a specific compute engine.
+* Querying data stored in open file formats _can_ result in slower performance compared to querying its
+  native proprietary format, which is optimized for its specific compute engine.
 * Performance can suffer in shared compute environments when resource-intensive queries from one user impact others.
 
-Many modern enterprises prefer the Lakehouse architecture because Data Lakehouses
+Many modern enterprises prefer the Lakehouse architecture because lakehouses
 are vendor-neutral, low-cost, and compatible with different compute engines.
 
 In the next section, we'll discuss how to create an Apache Iceberg table, an
@@ -257,7 +257,7 @@ sedona.table("local.db.customers").show()
 ```
 
 As you can see, creating a table with tabular data is straightforward.
-Now, let's see how to make a table with spatial data in Apache Iceberg.
+Now, let's see how to create a table with spatial data in Apache Iceberg.
 
 ## Creating spatial columns in Apache Iceberg v3
 
@@ -319,7 +319,7 @@ joined.show()
 
 Now, we can see the customer information and the location of their purchases all in one table.
 
-You can join tables with Sedona, regardless of that table's underlying file
+You can join tables with Sedona, regardless of the tables' underlying file
 format, because Sedona has so many built-in file readers.
 
 For example, with Apache Sedona, you can join one table loaded from Shapefiles
@@ -327,7 +327,7 @@ with another table loaded from GeoParquet, an extension of the open source Apach
 
 !!!tip "Best Practice: Co-location can optimize spatial tables in Lakehouses"
     Consider the following co-location tips to optimize your spatial data queries:
-        *To speed up your Lakehouse queries, you can co-locate similar data in the same files and eliminate excessively small files.
+        * To speed up your Lakehouse queries, store similar data in the same files and eliminate excessively small files.
         * Use Apache Iceberg to store the tabular and spatial tables in the same catalog.
 
 Let's look at the following GeoParquet table. This table is the Overture Maps Foundation buildings dataset.
@@ -437,11 +437,11 @@ print(f"Query on Iceberg table returned {iceberg_count} results.")
 print(f"(Count comparison: Source View={source_count}, Iceberg Table={iceberg_count})")
 ```
 
-## Spatial tables in Data lakes
+## Spatial tables in data lakes
 
 Let's compare these Iceberg Lakehouse tables with spatial tables built with data lakes.
 
-### Lack of Atomicity
+### Lack of atomicity
 
 ```py
 import os
@@ -587,7 +587,7 @@ print(f"Query on final data lake view returned {final_dl_count} results (took {e
 ## Conclusion
 
 Lakehouse architecture offers many advantages for the data community, and
-with the native support native for `geometry` and `geography` (GEO) data types
+with native support for `geometry` and `geography` (GEO) data types
 in Iceberg, the spatial community can now take advantage of these benefits.
 This marks a fundamental shift from simply storing spatial data _within_
 generic types (like binary WKB or string WKT).
