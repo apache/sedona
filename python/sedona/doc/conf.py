@@ -63,17 +63,17 @@ autodoc_mock_imports = _base_mock_imports + [
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
-# Exclude problematic modules that cause IndexError
-exclude_patterns.extend([
-    "sedona.spark.sql.rst",
-    "**/sedona.spark.sql.rst",
-    "sedona.spark.raster_utils.rst",
-    "**/sedona.spark.raster_utils.rst",
-    "sedona.spark.raster.rst",
-    "**/sedona.spark.raster.rst",
-    "sedona.spark.register.rst",
-    "**/sedona.spark.register.rst",
-])
+# # Exclude problematic modules that cause IndexError
+# exclude_patterns.extend([
+#     "sedona.spark.sql.rst",
+#     "**/sedona.spark.sql.rst",
+#     "sedona.spark.raster_utils.rst",
+#     "**/sedona.spark.raster_utils.rst",
+#     "sedona.spark.raster.rst",
+#     "**/sedona.spark.raster.rst",
+#     "sedona.spark.register.rst",
+#     "**/sedona.spark.register.rst",
+# ])
 
 # Suppress specific warnings
 suppress_warnings = [
