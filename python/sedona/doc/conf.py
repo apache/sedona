@@ -53,33 +53,27 @@ _base_mock_imports = [
     "sedona.spark.raster.sedona_raster",
 ]
 
-# In CI, we need to be more aggressive with mocking to prevent import errors
-# In local dev, we can mock fewer dependencies for completeness
-if os.environ.get("CI"):
-    # In CI, use minimal mocking to get complete documentation
-    # The monkey patch will handle any import errors gracefully
-    autodoc_mock_imports = _base_mock_imports + [
-        "keplergl",
-        "pydeck",
-        "rasterio",
-    ]
-else:
-    # For local development, use the same minimal mocking
-    autodoc_mock_imports = _base_mock_imports + [
-        "keplergl",
-        "pydeck",
-        "rasterio",
-    ]
+# Use the same mocking for both CI and local development
+autodoc_mock_imports = _base_mock_imports + [
+    "keplergl",
+    "pydeck",
+    "rasterio",
+]
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
-# Exclude problematic modules in CI that cause IndexError
-if os.environ.get("CI"):
-    exclude_patterns.extend([
-        "sedona.spark.sql.rst",
-        "**/sedona.spark.sql.rst",
-    ])
+# Exclude problematic modules that cause IndexError
+exclude_patterns.extend([
+    "sedona.spark.sql.rst",
+    "**/sedona.spark.sql.rst",
+    "sedona.spark.raster_utils.rst",
+    "**/sedona.spark.raster_utils.rst",
+    "sedona.spark.raster.rst",
+    "**/sedona.spark.raster.rst",
+    "sedona.spark.register.rst",
+    "**/sedona.spark.register.rst",
+])
 
 # Suppress specific warnings
 suppress_warnings = [
@@ -95,14 +89,10 @@ suppress_warnings = [
     "autodoc",
 ]
 
-# Make Sphinx fail on warnings in CI environment, but handle errors gracefully
-# This ensures documentation completeness while avoiding build failures
-if os.environ.get("CI"):
-    # Don't treat warnings as errors to avoid IndexError issues
-    warning_is_error = False
-    # Be less strict about references to avoid import errors
-    nitpicky = False
-    # Note: We keep some mocks even in CI due to PySpark/NumPy 2.0 issues
+# Don't treat warnings as errors to avoid IndexError issues
+warning_is_error = False
+# Be less strict about references to avoid import errors
+nitpicky = False
 
 autodoc_default_options = {
     "members": True,
@@ -120,12 +110,11 @@ autodoc_preserve_defaults = True
 
 # Add error handling for problematic imports in CI
 def skip_member(app, what, name, obj, skip, options):
-    """Skip problematic members that cause IndexError in CI."""
-    if os.environ.get("CI"):
-        # Skip members that are known to cause import issues
-        problematic_patterns = ["raster_serde", "sedona_raster", "shapely1", "shapely2"]
-        if any(pattern in name for pattern in problematic_patterns):
-            return True
+    """Skip problematic members that cause IndexError."""
+    # Skip members that are known to cause import issues
+    problematic_patterns = ["raster_serde", "sedona_raster", "shapely1", "shapely2"]
+    if any(pattern in name for pattern in problematic_patterns):
+        return True
     return skip
 
 
@@ -133,44 +122,43 @@ def setup(app):
     """Configure Sphinx app with error handling."""
     app.connect("autodoc-skip-member", skip_member)
 
-    # Monkey patch to handle IndexError in CI
-    if os.environ.get("CI"):
-        import sphinx.ext.autodoc.importer
+    # Monkey patch to handle IndexError
+    import sphinx.ext.autodoc.importer
 
-        original_import_object = sphinx.ext.autodoc.importer.import_object
+    original_import_object = sphinx.ext.autodoc.importer.import_object
 
-        def patched_import_object(name, source=None):
-            try:
-                return original_import_object(name, source)
-            except IndexError as exc:
-                # Handle the specific IndexError: tuple index out of range issue
-                if "tuple index out of range" in str(exc) or len(exc.args) == 0:
-                    import warnings
+    def patched_import_object(name, source=None):
+        try:
+            return original_import_object(name, source)
+        except IndexError as exc:
+            # Handle the specific IndexError: tuple index out of range issue
+            if "tuple index out of range" in str(exc) or len(exc.args) == 0:
+                import warnings
 
-                    warnings.warn(f"Skipping import due to IndexError: {name}")
-                    # Return a mock module instead of None to avoid further errors
-                    from unittest.mock import MagicMock
+                warnings.warn(f"Skipping import due to IndexError: {name}")
+                # Return a mock module instead of None to avoid further errors
+                from unittest.mock import MagicMock
 
-                    return MagicMock(), None
-                else:
-                    raise
-            except Exception as exc:
-                # Handle other import errors more specifically
-                if (
-                    "No module named" in str(exc)
-                    or hasattr(exc, "args")
-                    and len(exc.args) == 0
-                ):
-                    import warnings
+                return MagicMock(), None
+            else:
+                raise
+        except Exception as exc:
+            # Handle other import errors more specifically
+            if (
+                "No module named" in str(exc)
+                or hasattr(exc, "args")
+                and len(exc.args) == 0
+            ):
+                import warnings
 
-                    warnings.warn(f"Skipping problematic import: {name}")
-                    from unittest.mock import MagicMock
+                warnings.warn(f"Skipping problematic import: {name}")
+                from unittest.mock import MagicMock
 
-                    return MagicMock(), None
-                else:
-                    raise
+                return MagicMock(), None
+            else:
+                raise
 
-        sphinx.ext.autodoc.importer.import_object = patched_import_object
+    sphinx.ext.autodoc.importer.import_object = patched_import_object
 
 
 # Intersphinx mapping to external documentation
