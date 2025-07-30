@@ -327,8 +327,10 @@ with another table loaded from GeoParquet, an extension of the open source Apach
 
 !!!tip "Best Practice: Co-location can optimize spatial tables in Lakehouses"
     Consider the following co-location tips to optimize your spatial data queries:
-        * To speed up your Lakehouse queries, store similar data in the same files and eliminate excessively small files.
-        * Use Apache Iceberg to store the tabular and spatial tables in the same catalog.
+    <ul>
+      <li>To speed up your Lakehouse queries, store similar data in the same files and eliminate excessively small files.</li>
+      <li>Use Apache Iceberg to store the tabular and spatial tables in the same catalog.</li>
+    </ul>
 
 Let's look at the following GeoParquet table. This table is the Overture Maps Foundation buildings dataset.
 
