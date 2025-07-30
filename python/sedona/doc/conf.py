@@ -88,6 +88,8 @@ suppress_warnings = [
     # Suppress warnings about multiple targets for cross-references
     # This is expected due to shapely1/shapely2 compatibility layer
     "ref.python",
+    # Suppress docstring formatting warnings
+    "docutils",
     # Suppress autodoc import errors that may occur in CI
     "autodoc.import_object",
     "autodoc",
