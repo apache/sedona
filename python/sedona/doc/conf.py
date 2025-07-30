@@ -43,6 +43,12 @@ extensions = [
 # Mock imports to handle NumPy 2.0 compatibility issues with PySpark and missing dependencies
 # These are needed even in CI because of NumPy 2.0 incompatibility in PySpark
 _base_mock_imports = [
+    "pyspark.pandas",
+    "pyspark.pandas.indexes",
+    "pyspark.pandas.indexes.base",
+    "pyspark.pandas.series",
+    "pyspark.pandas.strings",
+    "pystac",
     "sedona.spark.raster.raster_serde",
     "sedona.spark.raster.sedona_raster",
 ]
