@@ -236,3 +236,53 @@ def read_file(filename: str, format: Union[str, None] = None, **kwargs):
 
     internal = InternalFrame(spark_frame=sdf, index_spark_columns=index_spark_columns)
     return GeoDataFrame(ps.DataFrame(internal))
+
+
+def read_parquet(
+    path,
+    columns=None,
+    storage_options=None,
+    bbox=None,
+    to_pandas_kwargs=None,
+    **kwargs,
+):
+    """
+    Load a Parquet object from the file path, returning a GeoDataFrame.
+
+    * if no geometry columns are read, this will raise a ``ValueError`` - you
+      should use the pandas `read_parquet` method instead.
+
+    If 'crs' key is not present in the GeoParquet metadata associated with the
+    Parquet object, it will default to "OGC:CRS84" according to the specification.
+
+    Parameters
+    ----------
+    path : str, path object
+    columns : list-like of strings, default=None
+        Not currently supported in Sedona
+    storage_options : dict, optional
+        Not currently supported in Sedona
+    bbox : tuple, optional
+        Not currently supported in Sedona
+    to_pandas_kwargs : dict, optional
+        Not currently supported in Sedona
+
+    Returns
+    -------
+    GeoDataFrame
+
+    Examples
+    --------
+    from sedona.geopandas import read_parquet
+    >>> df = read_parquet("data.parquet")  # doctest: +SKIP
+
+    Specifying columns to read:
+
+    >>> df = read_parquet(
+    ...     "data.parquet",
+    ... )  # doctest: +SKIP
+    """
+    if kwargs:
+        warnings.warn(f"The given arguments are not supported in Sedona: {kwargs}")
+
+    return read_file(path, format="geoparquet", **kwargs)

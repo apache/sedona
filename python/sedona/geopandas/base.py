@@ -2288,8 +2288,14 @@ class GeoFrame(metaclass=ABCMeta):
             "simplify", self, tolerance, preserve_topology
         )
 
-    def sjoin(self, other, predicate="intersects", **kwargs):
-        raise NotImplementedError("This method is not implemented yet.")
+    @abstractmethod
+    def to_geopandas(self) -> Union[gpd.GeoSeries, gpd.GeoDataFrame]: ...
+
+    @abstractmethod
+    def plot(self, *args, **kwargs): ...
+
+    @abstractmethod
+    def sjoin(self, other, predicate="intersects", **kwargs): ...
 
 
 def _delegate_to_geometry_column(op, this, *args, **kwargs):

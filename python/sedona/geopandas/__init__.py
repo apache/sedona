@@ -25,4 +25,4 @@ from sedona.geopandas.geodataframe import GeoDataFrame
 
 from sedona.geopandas.tools import sjoin
 
-from sedona.geopandas.io import read_file
+from sedona.geopandas.io import read_file, read_parquet
