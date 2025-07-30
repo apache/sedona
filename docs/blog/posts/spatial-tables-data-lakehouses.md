@@ -135,7 +135,7 @@ erDiagram
     SALES_TERRITORIES {
         int territory_id PK "Primary Key"
         varchar territory_name "Name of the sales territory"
-        polygon geometry "Polygon geometry defining the territory boundary"
+        polygon geometry "Polygon geometry defining<br>the territory boundary"
     }
 
     STORES {
@@ -143,17 +143,17 @@ erDiagram
         varchar store_name "Name of the store"
         varchar address "Store's address"
         varchar city "City"
-        varchar state "State (e.g., NJ for New Jersey)"
-        point geometry "Point geometry for store location"
-        int territory_id FK "Foreign Key referencing sales_territories.territory_id"
+        varchar state "State<br>(e.g., NJ for New Jersey)"
+        point geometry "Point geometry<br>for store location"
+        int territory_id FK "Foreign Key referencing<br>sales_territories.territory_id"
     }
 
     SALES_PERFORMANCE {
         int performance_id PK "Primary Key"
-        int store_id FK "Foreign Key referencing stores.store_id"
+        int store_id FK "Foreign Key referencing<br>stores.store_id"
         date sale_date "Date of sales data"
         decimal sales_amount "Sales figures"
-        varchar other_details "Other non-geometric performance data"
+        varchar other_details "Other non-geometric<br>performance data"
     }
 ```
 
@@ -267,8 +267,12 @@ in tables without any special data accommodations.
 Let's create a `customer_purchases` table with a `purchase_location` column that contains
 the `Point` Geometry of the different store locations:
 
-```py
-CREATE TABLE local.db.customer_purchases (id string, price double, geometry geometry)
+```sql
+CREATE TABLE local.db.customer_purchases (
+  id string,
+  price double,
+  geometry geometry
+)
 USING iceberg
 TBLPROPERTIES('format-version'='3');
 ```
@@ -276,6 +280,7 @@ TBLPROPERTIES('format-version'='3');
 Now, let's append the location data to the table:
 
 ```py
+# A list of coordinates defining a polygon
 coords = [
     (-88.110352, 24.006326),
     (-77.080078, 24.006326),
@@ -283,13 +288,22 @@ coords = [
     (-88.110352, 31.503629),
     (-88.110352, 24.006326)
 ]
-df = sedona.createDataFrame([
-    ("a", 10.99, Polygon(coords)),
-    ("b", 3.5, Point(1, 2)),
-    ("c", 1.95, Point(3, 4)),
-], ["id", "price", "geometry"])
 
-df.write.format("iceberg").mode("append").saveAsTable("local.db.customer_purchases")
+# Create a SedonaDataFrame with sample data
+df = sedona.createDataFrame(
+    [
+        ("a", 10.99, Polygon(coords)),
+        ("b", 3.5, Point(1, 2)),
+        ("c", 1.95, Point(3, 4)),
+    ],
+    ["id", "price", "geometry"]
+)
+
+# Write the DataFrame to an Iceberg table
+df.write \
+  .format("iceberg") \
+  .mode("append") \
+  .saveAsTable("local.db.customer_purchases")
 ```
 
 The spatial table uses `Point` geometries for exact purchase locations
@@ -341,7 +355,10 @@ from pyspark.sql.functions import col, expr
 
 # Define the Overture Maps source path
 overture_release = "2025-03-19.0"
-overture_s3_path = f"s3://overturemaps-us-west-2/release/{overture_release}/theme=buildings/type=building"
+overture_s3_path = (
+    f"s3://overturemaps-us-west-2/release/"
+    f"{overture_release}/theme=buildings/type=building"
+)
 
 print(f"Reading Overture buildings data from: {overture_s3_path}")
 
@@ -368,50 +385,73 @@ Let's run a filtering query on this GeoParquet dataset:
 
 ```py
 # Define the area of interest polygon (WKT format)
-spot = "POLYGON((-82.258759 29.129371, -82.180481 29.136569, -82.202454 29.173747, -82.258759 29.129371))"
+spot = (
+    "POLYGON((-82.258759 29.129371, -82.180481 29.136569, "
+    "-82.202454 29.173747, -82.258759 29.129371))"
+)
 
 # Construct the SQL query using the temporary view name
 sql_query_source = f"""
 SELECT id, height
 FROM {source_view_name}
-WHERE ST_Contains(ST_GeomFromWKT('{spot}'), geometry)
+WHERE ST_Contains(
+    ST_GeomFromWKT('{spot}'),
+    geometry
+)
 """
 
-print(f"Running spatial query on source data view '{source_view_name}'...")
+print(
+    f"Running spatial query on source data view '{source_view_name}'..."
+)
 
 # Execute the query and get the count
 source_results_df = sedona.sql(sql_query_source)
 source_count = source_results_df.count()
-print(f"Query on source GeoParquet data returned {source_count} results.")
+
+print(
+    f"Query on source GeoParquet data returned {source_count} results."
+)
 ```
 
 Let's convert this dataset to Iceberg:
 
 ```py
 # Assume 'sedona', 'buildings_df', 'overture_release',
-# and 'iceberg_db_name' (e.g., 'blog_db') exist from previous sections
+# and 'iceberg_db_name' exist from previous sections.
 
-# Define the full Iceberg table name
-iceberg_table_full_name = f"{iceberg_db_name}.overture_buildings_{overture_release.replace('-', '_').replace('.', '_')}"
+# Format the release version string to be used in the table name
+release_suffix = overture_release.replace('-', '_').replace('.', '_')
+iceberg_table_full_name = (
+    f"{iceberg_db_name}.overture_buildings_{release_suffix}"
+)
 
 print(f"Preparing Iceberg conversion for: {iceberg_table_full_name}")
 
-# Define minimal Iceberg table DDL string
+# Define Iceberg table DDL, breaking the long line for readability
 sql_create_iceberg = f"""
-CREATE TABLE IF NOT EXISTS {iceberg_table_full_name} (id STRING, geometry GEOMETRY, height DOUBLE)
-USING iceberg PARTITIONED BY (bucket(16, id)) TBLPROPERTIES('format-version'='2');
+CREATE TABLE IF NOT EXISTS {iceberg_table_full_name} (
+    id STRING,
+    geometry GEOMETRY,
+    height DOUBLE
+)
+USING iceberg
+PARTITIONED BY (bucket(16, id))
+TBLPROPERTIES('format-version'='2');
 """
-# Create the Iceberg table structure
+
+# Create the empty Iceberg table structure
 sedona.sql(sql_create_iceberg)
 
-# Write the DataFrame to the Iceberg table, overwriting if it exists
-(buildings_df
+# Write the DataFrame to the Iceberg table
+(
+    buildings_df
     .select("id", "geometry", "height")
     .write
     .format("iceberg")
     .mode("overwrite")
     .saveAsTable(iceberg_table_full_name)
 )
+
 print(f"Successfully wrote data to Iceberg table: {iceberg_table_full_name}")
 ```
 
@@ -425,18 +465,27 @@ Now, let's rerun the same query on the Iceberg table:
 sql_query_iceberg = f"""
 SELECT id, height
 FROM {iceberg_table_full_name}
-WHERE ST_Contains(ST_GeomFromWKT('{spot}'), geometry)
+WHERE ST_Contains(
+    ST_GeomFromWKT('{spot}'),
+    geometry
+)
 """
 
-print(f"Running spatial query on Iceberg table '{iceberg_table_full_name}'...")
+print(
+    f"Running spatial query on Iceberg table '{iceberg_table_full_name}'..."
+)
 
 # Execute the query and get the count
 iceberg_results_df = sedona.sql(sql_query_iceberg)
 iceberg_count = iceberg_results_df.count()
+
 print(f"Query on Iceberg table returned {iceberg_count} results.")
 
 # Compare counts if desired
-print(f"(Count comparison: Source View={source_count}, Iceberg Table={iceberg_count})")
+print(
+    f"(Count comparison: Source View={source_count}, "
+    f"Iceberg Table={iceberg_count})"
+)
 ```
 
 ## Spatial tables in data lakes
@@ -476,34 +525,51 @@ import time
 
 # Write the initial data to the data lake path to simulate its existence
 print("Simulating initial data presence in data lake path...")
-(buildings_df
+(
+    buildings_df
     # Convert geometry to WKB for standard Parquet storage
     .withColumn("geometry_wkb", expr("ST_AsWKB(geometry)"))
     .select("id", "height", "geometry_wkb")
-    .write.format("parquet").save(data_lake_path)
+    .write
+    .format("parquet")
+    .save(data_lake_path)
 )
 print(f"Initial data written to {data_lake_path}")
 
 # Create a temporary view on this data lake path
 source_dl_view_name = "buildings_datalake_source_view"
-(sedona.read.parquet(data_lake_path)
+(
+    sedona.read
+    .parquet(data_lake_path)
     .withColumn("geometry", expr("ST_GeomFromWKB(geometry_wkb)"))
     .createOrReplaceTempView(source_dl_view_name)
 )
 print(f"Created view '{source_dl_view_name}' on data lake path.")
 
 # Run the same spatial filter query
-spot_wkt = "POLYGON((-82.258759 29.129371, -82.180481 29.136569, -82.202454 29.173747, -82.258759 29.129371))"
+spot_wkt = (
+    "POLYGON((-82.258759 29.129371, -82.180481 29.136569, "
+    "-82.202454 29.173747, -82.258759 29.129371))"
+)
+
 sql_query_source = f"""
 SELECT id, height
 FROM {source_dl_view_name}
-WHERE ST_Contains(ST_GeomFromWKT('{spot_wkt}'), geometry)
+WHERE ST_Contains(
+    ST_GeomFromWKT('{spot_wkt}'),
+    geometry
+)
 """
+
 print(f"Running spatial query on '{source_dl_view_name}'...")
 start_time = time.time()
 source_dl_count = sedona.sql(sql_query_source).count()
 end_time = time.time()
-print(f"Query on data lake view returned {source_dl_count} results (took {end_time - start_time:.2f}s).")
+
+print(
+    f"Query on data lake view returned {source_dl_count} results "
+    f"(took {end_time - start_time:.2f}s)."
+)
 ```
 
 ### Updating the dataset
@@ -522,7 +588,10 @@ or loss if the write operation fails partway through.
 from pyspark.sql.functions import expr
 import time
 
-print(f"Simulating an UPDATE on the data lake table (via Read-Modify-Rewrite)...")
+print(
+    "Simulating an UPDATE on the data lake table "
+    "(via Read-Modify-Rewrite)..."
+)
 print(f"Goal: Add 'is_in_spot' column to data in {data_lake_path}")
 
 # Read the *entire* dataset again
@@ -531,7 +600,9 @@ current_data_df = (
     sedona.read.parquet(data_lake_path)
     .withColumn("geometry", expr("ST_GeomFromWKB(geometry_wkb)"))
 )
-read_count = current_data_df.cache().count() # Cache for potential reuse & count
+
+# Cache for potential reuse & count
+read_count = current_data_df.cache().count()
 print(f"Read {read_count} records.")
 
 # Add the new column
@@ -540,18 +611,18 @@ modified_data_df = current_data_df.withColumn(
     "is_in_spot",
     expr(f"ST_Contains(ST_GeomFromWKT('{spot_wkt}'), geometry)")
 )
-print(f"Rewriting ENTIRE dataset ({read_count} records) with new column back to {data_lake_path}...")
-start_time_write = time.time()
-(modified_data_df
-    .withColumn("geometry_wkb", expr("ST_AsWKB(geometry)")) # Convert back for storage
-    .select("id", "height", "geometry_wkb", "is_in_spot")
-    .write.format("parquet").mode("overwrite").save(data_lake_path)
+
+print(
+    f"Rewriting ENTIRE dataset ({read_count} records) "
+    f"with new column back to {data_lake_path}..."
 )
-end_time_write = time.time()
-print(f"Data lake overwrite complete (took {end_time_write - start_time_write:.2f}s).")
-current_data_df.unpersist()
-print("DISADVANTAGE 1 (Inefficiency): Update required full read & full rewrite.")
-print("DISADVANTAGE 2 (No Atomicity): If the overwrite failed, data is lost/corrupted.")
+start_time_write = time.time()
+
+(
+    modified_data_df
+    # Convert back to WKB for standard Parquet storage
+    .withColumn("geometry_wkb", expr("ST_AsWKB(geometry)"))
+    .select("id", "height", "geometry_wkb", "is_in
 ```
 
 ### Querying "updated" table
@@ -567,23 +638,38 @@ nature of the raw files, contrasts with the simple, direct query against an alre
 from pyspark.sql.functions import expr
 import time
 
-print(f"Running spatial query on the overwritten data lake path '{data_lake_path}'...")
+print(
+    "Running spatial query on the overwritten data lake path "
+    f"'{data_lake_path}'..."
+)
 
 final_dl_view_name = "buildings_datalake_final_view"
-(sedona.read.parquet(data_lake_path)
+(
+    sedona.read.parquet(data_lake_path)
     .withColumn("geometry", expr("ST_GeomFromWKB(geometry_wkb)"))
     .createOrReplaceTempView(final_dl_view_name)
 )
 
 sql_query_final = f"""
-SELECT id, height, is_in_spot -- Can now select the new column
+SELECT
+    id,
+    height,
+    is_in_spot -- Can now select the new column
 FROM {final_dl_view_name}
-WHERE ST_Contains(ST_GeomFromWKT('{spot_wkt}'), geometry)
+WHERE ST_Contains(
+    ST_GeomFromWKT('{spot_wkt}'),
+    geometry
+)
 """
+
 start_time_final = time.time()
 final_dl_count = sedona.sql(sql_query_final).count()
 end_time_final = time.time()
-print(f"Query on final data lake view returned {final_dl_count} results (took {end_time_final - start_time_final:.2f}s).")
+
+print(
+    f"Query on final data lake view returned {final_dl_count} results "
+    f"(took {end_time_final - start_time_final:.2f}s)."
+)
 ```
 
 ## Conclusion
