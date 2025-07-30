@@ -77,12 +77,6 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # Exclude problematic modules in CI that cause IndexError
 if os.environ.get("CI"):
     exclude_patterns.extend([
-        "sedona.spark.raster_utils.rst",
-        "**/sedona.spark.raster_utils.rst",
-        "sedona.spark.raster.rst",
-        "**/sedona.spark.raster.rst",
-        "sedona.spark.register.rst",
-        "**/sedona.spark.register.rst",
         "sedona.spark.sql.rst",
         "**/sedona.spark.sql.rst",
     ])
