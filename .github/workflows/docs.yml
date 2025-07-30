@@ -66,6 +66,14 @@ jobs:
             any::pkgdown
           working-directory: './R'
       - run: Rscript -e 'pkgdown::build_site(pkg = "./R", preview = FALSE, override = list(destination = "../docs/api/rdocs"))'
+      - name: Build Python API documentation with Sphinx
+        run: |
+          cd python/sedona/doc
+          make clean
+          make html
+          cd ../../..
+          mkdir -p docs/api/pydocs
+          cp -r python/sedona/doc/_build/html/* docs/api/pydocs/
       - run: git config --global user.name = "GitHub Action"
       - run: git config --global user.email = "test@abc.com"
       - run: mkdocs build
