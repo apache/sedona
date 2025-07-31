@@ -64,6 +64,12 @@ public class WKTReader {
     this.precisionModel = geometryFactory.getPrecisionModel();
   }
 
+  public WKTReader(GeometryFactory geometryFactory) {
+    this.geometryFactory = geometryFactory;
+    this.csFactory = geometryFactory.getCoordinateSequenceFactory();
+    this.precisionModel = geometryFactory.getPrecisionModel();
+  }
+
   /**
    * Sets a flag indicating, that coordinates may have 3 ordinate values even though no Z or M
    * ordinate indicator is present. The default value is {@link #ALLOW_OLD_JTS_COORDINATE_SYNTAX}.

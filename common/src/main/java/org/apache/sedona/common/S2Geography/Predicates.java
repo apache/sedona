@@ -24,23 +24,23 @@ import java.util.*;
 
 public class Predicates {
 
-  public boolean S2_intersects(
+  public static boolean S2_intersects(
       ShapeIndexGeography geo1, ShapeIndexGeography geo2, S2BooleanOperation.Options options) {
     return S2BooleanOperation.intersects(geo1.shapeIndex, geo2.shapeIndex, options);
   }
 
-  public boolean S2_equals(
+  public static boolean S2_equals(
       ShapeIndexGeography geo1, ShapeIndexGeography geo2, S2BooleanOperation.Options options) {
     return S2BooleanOperation.equals(geo1.shapeIndex, geo2.shapeIndex, options);
   }
 
-  public boolean S2_contains(
+  public static boolean S2_contains(
       ShapeIndexGeography geo1, ShapeIndexGeography geo2, S2BooleanOperation.Options options) {
     if (new Accessors().S2_isEmpty(geo2)) return false;
     return S2BooleanOperation.contains(geo1.shapeIndex, geo2.shapeIndex, options);
   }
 
-  public boolean S2_intersectsBox(
+  public static boolean S2_intersectsBox(
       ShapeIndexGeography geo1,
       S2LatLngRect rect,
       S2BooleanOperation.Options options,

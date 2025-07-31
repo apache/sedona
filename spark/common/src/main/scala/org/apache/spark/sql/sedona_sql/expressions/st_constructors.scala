@@ -154,6 +154,9 @@ object st_constructors {
   def ST_PointFromWKB(wkb: Column): Column = wrapExpression[ST_PointFromWKB](wkb)
   def ST_PointFromWKB(wkb: String): Column = wrapExpression[ST_PointFromWKB](wkb)
 
+  def ST_S2PointFromWKB(wkb: Column): Column = wrapExpression[ST_S2PointFromWKB](wkb)
+  def ST_S2PointFromWKB(wkb: String): Column = wrapExpression[ST_S2PointFromWKB](wkb)
+
   def ST_PointFromWKB(wkb: Column, srid: Column): Column =
     wrapExpression[ST_PointFromWKB](wkb, srid)
   def ST_PointFromWKB(wkb: String, srid: Int): Column = wrapExpression[ST_PointFromWKB](wkb, srid)
@@ -171,6 +174,9 @@ object st_constructors {
     wrapExpression[ST_LinestringFromWKB](wkb, srid)
   def ST_LinestringFromWKB(wkb: String, srid: Int): Column =
     wrapExpression[ST_LinestringFromWKB](wkb, srid)
+
+  def ST_S2LinestringFromWKB(wkb: Column): Column = wrapExpression[ST_S2LinestringFromWKB](wkb)
+  def ST_S2LinestringFromWKB(wkb: String): Column = wrapExpression[ST_S2LinestringFromWKB](wkb)
 
   def ST_MakePointM(x: Column, y: Column, m: Column): Column =
     wrapExpression[ST_MakePointM](x, y, m)
@@ -201,6 +207,10 @@ object st_constructors {
     wrapExpression[ST_PointFromText](coords, delimiter)
   def ST_PointFromText(coords: String, delimiter: String): Column =
     wrapExpression[ST_PointFromText](coords, delimiter)
+  def ST_S2PointFromText(coords: Column): Column =
+    wrapExpression[ST_S2PointFromText](coords)
+  def ST_S2PointFromText(coords: String): Column =
+    wrapExpression[ST_S2PointFromText](coords)
 
   def ST_MakeEnvelope(minX: Column, minY: Column, maxX: Column, maxY: Column): Column =
     wrapExpression[ST_MakeEnvelope](minX, minY, maxX, maxY)
@@ -237,8 +247,15 @@ object st_constructors {
   def ST_PolygonFromText(coords: String, delimiter: String): Column =
     wrapExpression[ST_PolygonFromText](coords, delimiter)
 
+  def ST_S2PolygonFromText(coords: Column): Column =
+    wrapExpression[ST_S2PolygonFromText](coords)
+  def ST_S2PolygonFromText(coords: String): Column =
+    wrapExpression[ST_S2PolygonFromText](coords)
+
   def ST_MPolyFromText(wkt: Column): Column = wrapExpression[ST_MPolyFromText](wkt, 0)
   def ST_MPolyFromText(wkt: String): Column = wrapExpression[ST_MPolyFromText](wkt, 0)
+  def ST_S2MPolyFromText(wkt: Column): Column = wrapExpression[ST_S2MPolyFromText](wkt, 0)
+  def ST_S2MPolyFromText(wkt: String): Column = wrapExpression[ST_S2MPolyFromText](wkt, 0)
 
   def ST_MPolyFromText(wkt: Column, srid: Column): Column =
     wrapExpression[ST_MPolyFromText](wkt, srid)
@@ -247,6 +264,8 @@ object st_constructors {
 
   def ST_MLineFromText(wkt: Column): Column = wrapExpression[ST_MLineFromText](wkt, 0)
   def ST_MLineFromText(wkt: String): Column = wrapExpression[ST_MLineFromText](wkt, 0)
+  def ST_S2MLineFromText(wkt: Column): Column = wrapExpression[ST_S2MLineFromText](wkt, 0)
+  def ST_S2MLineFromText(wkt: String): Column = wrapExpression[ST_S2MLineFromText](wkt, 0)
 
   def ST_MLineFromText(wkt: Column, srid: Column): Column =
     wrapExpression[ST_MLineFromText](wkt, srid)
@@ -261,10 +280,17 @@ object st_constructors {
   def ST_GeomCollFromText(wkt: String, srid: Int): Column =
     wrapExpression[ST_GeomCollFromText](wkt, srid)
 
+  def ST_S2GeogCollFromText(wkt: Column, srid: Column): Column =
+    wrapExpression[ST_S2GeogCollFromText](wkt, srid)
+  def ST_S2GeogCollFromText(wkt: String, srid: Int): Column =
+    wrapExpression[ST_S2GeogCollFromText](wkt, srid)
+
   def ST_MPointFromText(wkt: Column): Column = wrapExpression[ST_MPointFromText](wkt, 0)
   def ST_MPointFromText(wkt: String): Column = wrapExpression[ST_MPointFromText](wkt, 0)
   def ST_MPointFromText(wkt: Column, srid: Column): Column =
     wrapExpression[ST_MPointFromText](wkt, srid)
   def ST_MPointFromText(wkt: String, srid: Int): Column =
     wrapExpression[ST_MPointFromText](wkt, srid)
+  def ST_S2MPointFromText(wkt: Column): Column = wrapExpression[ST_S2MPointFromText](wkt, 0)
+  def ST_S2MPointFromText(wkt: String): Column = wrapExpression[ST_S2MPointFromText](wkt, 0)
 }

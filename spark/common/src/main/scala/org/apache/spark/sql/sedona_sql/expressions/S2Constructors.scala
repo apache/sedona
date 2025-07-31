@@ -18,14 +18,14 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
-import org.apache.sedona.common.{Constructors, Functions, S2Constructors}
+import org.apache.sedona.common.S2Geography.S2Geography
+import org.apache.sedona.common.S2Constructors
 import org.apache.sedona.common.enums.FileDataSplitter
-import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{Expression, ImplicitCastInputTypes}
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.sql.sedona_sql.expressions.implicits.GeometryEnhancer
+import org.apache.spark.sql.sedona_sql.UDT.{GeographyUDT}
+import org.apache.spark.sql.sedona_sql.expressions.implicits.{S2GeographyEnhancer}
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
@@ -38,8 +38,8 @@ import org.apache.spark.unsafe.types.UTF8String
  *   This function takes 2 parameters. The first parameter is the input geometry string, the
  *   second parameter is the delimiter. String format should be similar to CSV/TSV
  */
-private[apache] case class ST_PointFromText(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.pointFromText _) {
+case class ST_S2PointFromText(inputExpressions: Seq[Expression])
+    extends InferredExpression(S2Constructors.pointFromText _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
@@ -51,8 +51,8 @@ private[apache] case class ST_PointFromText(inputExpressions: Seq[Expression])
  *
  * @param inputExpressions
  */
-private[apache] case class ST_PolygonFromText(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.polygonFromText _) {
+case class ST_S2PolygonFromText(inputExpressions: Seq[Expression])
+    extends InferredExpression(S2Constructors.polygonFromText _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
@@ -64,8 +64,8 @@ private[apache] case class ST_PolygonFromText(inputExpressions: Seq[Expression])
  *
  * @param inputExpressions
  */
-private[apache] case class ST_LineFromText(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.lineFromText _) {
+case class ST_S2LineFromText(inputExpressions: Seq[Expression])
+    extends InferredExpression(S2Constructors.lineFromText _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
@@ -77,8 +77,8 @@ private[apache] case class ST_LineFromText(inputExpressions: Seq[Expression])
  *
  * @param inputExpressions
  */
-private[apache] case class ST_LineStringFromText(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.lineStringFromText _) {
+case class ST_S2LinestringFromText(inputExpressions: Seq[Expression])
+    extends InferredExpression(S2Constructors.lineStringFromText _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
@@ -90,21 +90,7 @@ private[apache] case class ST_LineStringFromText(inputExpressions: Seq[Expressio
  * @param inputExpressions
  *   This function takes a geometry string and a srid. The string format must be WKT.
  */
-private[apache] case class ST_GeomFromWKT(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.geomFromWKT _) {
-
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-}
-
-/**
- * Return a Geography from a WKT string
- *
- * @param inputExpressions
- *   This function takes a geometry string and a srid. The string format must be WKT.
- */
-private[apache] case class ST_GeogFromWKT(inputExpressions: Seq[Expression])
+case class ST_S2GeogFromWKT(inputExpressions: Seq[Expression])
     extends InferredExpression(S2Constructors.geogFromWKT _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -119,8 +105,8 @@ private[apache] case class ST_GeogFromWKT(inputExpressions: Seq[Expression])
  *   This function takes a geometry string. The string format must be OGC Extended Well-Known text
  *   (EWKT) representation.
  */
-private[apache] case class ST_GeomFromEWKT(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.geomFromEWKT _) {
+case class ST_S2GeogFromEWKT(inputExpressions: Seq[Expression])
+    extends InferredExpression(S2Constructors.geogFromEWKT _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -133,8 +119,8 @@ private[apache] case class ST_GeomFromEWKT(inputExpressions: Seq[Expression])
  * @param inputExpressions
  *   This function takes a geometry string and a srid. The string format must be WKT.
  */
-private[apache] case class ST_GeometryFromText(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.geomFromWKT _) {
+case class ST_S2GeometryFromText(inputExpressions: Seq[Expression])
+    extends InferredExpression(S2Constructors.geogFromWKT _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -147,8 +133,8 @@ private[apache] case class ST_GeometryFromText(inputExpressions: Seq[Expression]
  * @param inputExpressions
  *   This function takes a geometry string and a srid. The string format must be WKT.
  */
-private[apache] case class ST_GeomFromText(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.geomFromWKT _) {
+case class ST_S2GeogFromText(inputExpressions: Seq[Expression])
+    extends InferredExpression(S2Constructors.geogFromWKT _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -162,7 +148,7 @@ private[apache] case class ST_GeomFromText(inputExpressions: Seq[Expression])
  *   This function takes 1 parameter which is the utf-8 encoded geometry wkb string or the binary
  *   wkb array.
  */
-private[apache] case class ST_GeomFromWKB(inputExpressions: Seq[Expression])
+case class ST_S2GeogFromWKB(inputExpressions: Seq[Expression])
     extends Expression
     with FoldableExpression
     with ImplicitCastInputTypes
@@ -179,10 +165,12 @@ private[apache] case class ST_GeomFromWKB(inputExpressions: Seq[Expression])
       arg match {
         case geomString: UTF8String =>
           // Parse UTF-8 encoded wkb string
-          Constructors.geomFromText(geomString.toString, FileDataSplitter.WKB).toGenericArrayData
+          S2Constructors
+            .geogFromText(geomString.toString, FileDataSplitter.WKB)
+            .toGenericArrayData
         case wkb: Array[Byte] =>
           // convert raw wkb byte array to geometry
-          Constructors.geomFromWKB(wkb).toGenericArrayData
+          S2Constructors.geogFromWKB(wkb).toGenericArrayData
         case null => null
       }
     } catch {
@@ -191,7 +179,7 @@ private[apache] case class ST_GeomFromWKB(inputExpressions: Seq[Expression])
     }
   }
 
-  override def dataType: DataType = GeometryUDT
+  override def dataType: DataType = GeographyUDT
 
   override def inputTypes: Seq[AbstractDataType] = Seq(TypeCollection(StringType, BinaryType))
 
@@ -202,7 +190,7 @@ private[apache] case class ST_GeomFromWKB(inputExpressions: Seq[Expression])
   }
 }
 
-private[apache] case class ST_GeomFromEWKB(inputExpressions: Seq[Expression])
+case class ST_S2GeogFromEWKB(inputExpressions: Seq[Expression])
     extends Expression
     with FoldableExpression
     with ImplicitCastInputTypes
@@ -219,10 +207,12 @@ private[apache] case class ST_GeomFromEWKB(inputExpressions: Seq[Expression])
       arg match {
         case geomString: UTF8String =>
           // Parse UTF-8 encoded wkb string
-          Constructors.geomFromText(geomString.toString, FileDataSplitter.WKB).toGenericArrayData
+          S2Constructors
+            .geogFromText(geomString.toString, FileDataSplitter.WKB)
+            .toGenericArrayData
         case wkb: Array[Byte] =>
           // convert raw wkb byte array to geometry
-          Constructors.geomFromWKB(wkb).toGenericArrayData
+          S2Constructors.geogFromWKB(wkb).toGenericArrayData
         case null => null
       }
     } catch {
@@ -231,7 +221,7 @@ private[apache] case class ST_GeomFromEWKB(inputExpressions: Seq[Expression])
     }
   }
 
-  override def dataType: DataType = GeometryUDT
+  override def dataType: DataType = GeographyUDT
 
   override def inputTypes: Seq[AbstractDataType] = Seq(TypeCollection(StringType, BinaryType))
 
@@ -242,7 +232,65 @@ private[apache] case class ST_GeomFromEWKB(inputExpressions: Seq[Expression])
   }
 }
 
-private[apache] case class ST_LineFromWKB(inputExpressions: Seq[Expression])
+case class ST_S2LineFromWKB(inputExpressions: Seq[Expression])
+    extends Expression
+    with FoldableExpression
+    with ImplicitCastInputTypes
+    with CodegenFallback
+    with UserDataGenerator {
+
+  // Validate the number of input expressions (1 or 2)
+  assert(inputExpressions.length >= 1 && inputExpressions.length <= 2)
+
+  override def nullable: Boolean = true
+
+  override def eval(inputRow: InternalRow): Any = {
+    val wkb = inputExpressions.head.eval(inputRow)
+    val srid =
+      if (inputExpressions.length > 1) inputExpressions(1).eval(inputRow).asInstanceOf[Int]
+      else -1
+    try {
+      wkb match {
+        case geomString: UTF8String =>
+          // Parse UTF-8 encoded WKB string
+          val geom = S2Constructors.lineStringFromText(geomString.toString, "wkb")
+          val kind = S2Geography.GeographyKind.fromKind(geom.getKind)
+          if (kind == (S2Geography.GeographyKind.POLYLINE) || kind == S2Geography.GeographyKind.SINGLEPOLYLINE) {
+            // (if (srid != -1) Functions.setSRID(geom, srid) else geom).toGenericArrayData
+            geom.toGenericArrayData
+          } else {
+            null
+          }
+
+        case wkbArray: Array[Byte] =>
+          // Convert raw WKB byte array to geometry
+          S2Constructors.lineFromWKB(wkbArray, srid).toGenericArrayData
+
+        case _ => null
+      }
+    } catch {
+      case e: Exception =>
+        InferredExpression.throwExpressionInferenceException(
+          getClass.getSimpleName,
+          Seq(wkb, srid),
+          e)
+    }
+  }
+
+  override def dataType: DataType = GeographyUDT
+
+  override def inputTypes: Seq[AbstractDataType] =
+    if (inputExpressions.length == 1) Seq(TypeCollection(StringType, BinaryType))
+    else Seq(TypeCollection(StringType, BinaryType), IntegerType)
+
+  override def children: Seq[Expression] = inputExpressions
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): ST_S2LineFromWKB = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+case class ST_S2LinestringFromWKB(inputExpressions: Seq[Expression])
     extends Expression
     with FoldableExpression
     with ImplicitCastInputTypes
@@ -264,16 +312,18 @@ private[apache] case class ST_LineFromWKB(inputExpressions: Seq[Expression])
       wkb match {
         case geomString: UTF8String =>
           // Parse UTF-8 encoded WKB string
-          val geom = Constructors.lineStringFromText(geomString.toString, "wkb")
-          if (geom.getGeometryType == "LineString") {
-            (if (srid != -1) Functions.setSRID(geom, srid) else geom).toGenericArrayData
+          val geom = S2Constructors.lineStringFromText(geomString.toString, "wkb")
+          val kind = S2Geography.GeographyKind.fromKind(geom.getKind)
+          if (kind == S2Geography.GeographyKind.POLYLINE || kind == S2Geography.GeographyKind.SINGLEPOLYLINE) {
+            // (if (srid != -1) Functions.setSRID(geom, srid) else geom).toGenericArrayData
+            geom.toGenericArrayData
           } else {
             null
           }
 
         case wkbArray: Array[Byte] =>
           // Convert raw WKB byte array to geometry
-          Constructors.lineFromWKB(wkbArray, srid).toGenericArrayData
+          S2Constructors.lineFromWKB(wkbArray, srid).toGenericArrayData
 
         case _ => null
       }
@@ -286,7 +336,7 @@ private[apache] case class ST_LineFromWKB(inputExpressions: Seq[Expression])
     }
   }
 
-  override def dataType: DataType = GeometryUDT
+  override def dataType: DataType = GeographyUDT
 
   override def inputTypes: Seq[AbstractDataType] =
     if (inputExpressions.length == 1) Seq(TypeCollection(StringType, BinaryType))
@@ -294,12 +344,12 @@ private[apache] case class ST_LineFromWKB(inputExpressions: Seq[Expression])
 
   override def children: Seq[Expression] = inputExpressions
 
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): ST_LineFromWKB = {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
-private[apache] case class ST_LinestringFromWKB(inputExpressions: Seq[Expression])
+case class ST_S2PointFromWKB(inputExpressions: Seq[Expression])
     extends Expression
     with FoldableExpression
     with ImplicitCastInputTypes
@@ -321,17 +371,17 @@ private[apache] case class ST_LinestringFromWKB(inputExpressions: Seq[Expression
       wkb match {
         case geomString: UTF8String =>
           // Parse UTF-8 encoded WKB string
-          val geom = Constructors.lineStringFromText(geomString.toString, "wkb")
-          if (geom.getGeometryType == "LineString") {
-            (if (srid != -1) Functions.setSRID(geom, srid) else geom).toGenericArrayData
+          val geom = S2Constructors.pointFromText(geomString.toString, "wkb")
+          val kind = S2Geography.GeographyKind.fromKind(geom.getKind)
+          if (kind == S2Geography.GeographyKind.POINT || kind == S2Geography.GeographyKind.SINGLEPOINT) {
+            // (if (srid != -1) Functions.setSRID(geom, srid) else geom).toGenericArrayData
+            geom.toGenericArrayData
           } else {
             null
           }
-
         case wkbArray: Array[Byte] =>
           // Convert raw WKB byte array to geometry
-          Constructors.lineFromWKB(wkbArray, srid).toGenericArrayData
-
+          S2Constructors.pointFromWKB(wkbArray, srid).toGenericArrayData
         case _ => null
       }
     } catch {
@@ -343,7 +393,7 @@ private[apache] case class ST_LinestringFromWKB(inputExpressions: Seq[Expression
     }
   }
 
-  override def dataType: DataType = GeometryUDT
+  override def dataType: DataType = GeographyUDT
 
   override def inputTypes: Seq[AbstractDataType] =
     if (inputExpressions.length == 1) Seq(TypeCollection(StringType, BinaryType))
@@ -351,246 +401,20 @@ private[apache] case class ST_LinestringFromWKB(inputExpressions: Seq[Expression
 
   override def children: Seq[Expression] = inputExpressions
 
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-}
-
-private[apache] case class ST_PointFromWKB(inputExpressions: Seq[Expression])
-    extends Expression
-    with FoldableExpression
-    with ImplicitCastInputTypes
-    with CodegenFallback
-    with UserDataGenerator {
-
-  // Validate the number of input expressions (1 or 2)
-  assert(inputExpressions.length >= 1 && inputExpressions.length <= 2)
-
-  override def nullable: Boolean = true
-
-  override def eval(inputRow: InternalRow): Any = {
-    val wkb = inputExpressions.head.eval(inputRow)
-    val srid =
-      if (inputExpressions.length > 1) inputExpressions(1).eval(inputRow).asInstanceOf[Int]
-      else -1
-
-    try {
-      wkb match {
-        case geomString: UTF8String =>
-          // Parse UTF-8 encoded WKB string
-          val geom = Constructors.pointFromText(geomString.toString, "wkb")
-          if (geom.getGeometryType == "Point") {
-            (if (srid != -1) Functions.setSRID(geom, srid) else geom).toGenericArrayData
-          } else {
-            null
-          }
-
-        case wkbArray: Array[Byte] =>
-          // Convert raw WKB byte array to geometry
-          Constructors.pointFromWKB(wkbArray, srid).toGenericArrayData
-
-        case _ => null
-      }
-    } catch {
-      case e: Exception =>
-        InferredExpression.throwExpressionInferenceException(
-          getClass.getSimpleName,
-          Seq(wkb, srid),
-          e)
-    }
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def inputTypes: Seq[AbstractDataType] =
-    if (inputExpressions.length == 1) Seq(TypeCollection(StringType, BinaryType))
-    else Seq(TypeCollection(StringType, BinaryType), IntegerType)
-
-  override def children: Seq[Expression] = inputExpressions
-
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): ST_PointFromWKB = {
+  protected def withNewChildrenInternal(
+      newChildren: IndexedSeq[Expression]): ST_S2PointFromWKB = {
     copy(inputExpressions = newChildren)
   }
 }
 
 /**
- * Return a Geometry from a GeoJSON string
+ * Return a Geometry from a WKT string
  *
  * @param inputExpressions
- *   This function takes 1 parameter which is the geometry string. The string format must be
- *   GeoJson.
+ *   This function takes a geometry string and a srid. The string format must be WKT.
  */
-private[apache] case class ST_GeomFromGeoJSON(inputExpressions: Seq[Expression])
-    extends Expression
-    with FoldableExpression
-    with CodegenFallback
-    with UserDataGenerator {
-  // This is an expression which takes one input expressions
-  val minInputLength = 1
-  assert(inputExpressions.length >= minInputLength)
-
-  override def nullable: Boolean = false
-
-  override def eval(inputRow: InternalRow): Any = {
-    val geomString = inputExpressions.head.eval(inputRow).asInstanceOf[UTF8String].toString
-    try {
-      val geometry = Constructors.geomFromText(geomString, FileDataSplitter.GEOJSON)
-      // If the user specify a bunch of attributes to go with each geometry, we need to store all of them in this geometry
-      if (inputExpressions.length > 1) {
-        geometry.setUserData(generateUserData(minInputLength, inputExpressions, inputRow))
-      }
-      GeometrySerializer.serialize(geometry)
-    } catch {
-      case e: Exception =>
-        InferredExpression.throwExpressionInferenceException(
-          getClass.getSimpleName,
-          Seq(geomString),
-          e)
-    }
-  }
-
-  override def dataType: DataType = GeometryUDT
-
-  override def children: Seq[Expression] = inputExpressions
-
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-}
-
-/**
- * Return a Point from X and Y
- *
- * @param inputExpressions
- *   This function takes 2 parameter which are point x, y.
- */
-private[apache] case class ST_Point(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.point _) {
-
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-}
-
-/**
- * Return a Point from X, Y, Z and srid
- *
- * @param inputExpressions
- *   This function takes 4 parameter which are point x, y, z and srid (default 0).
- */
-private[apache] case class ST_PointZ(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.pointZ _) {
-
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-}
-
-/**
- * Return a Point from X, Y, M and srid
- *
- * @param inputExpressions
- *   This function takes 4 parameter which are point x, y, m and srid (default 0).
- */
-private[apache] case class ST_PointM(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.pointM _) {
-
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-}
-
-private[apache] case class ST_PointZM(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.pointZM _) {
-
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-}
-
-private[apache] case class ST_MakePointM(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.makePointM _) {
-
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-}
-
-private[apache] case class ST_MakePoint(inputExpressions: Seq[Expression])
-    extends InferredExpression(nullTolerantInferrableFunction4(Constructors.makePoint)) {
-
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-}
-
-/**
- * Return a polygon given minX,minY,maxX,maxY and optional SRID
- *
- * @param inputExpressions
- */
-private[apache] case class ST_MakeEnvelope(inputExpressions: Seq[Expression])
-    extends InferredExpression(
-      inferrableFunction5(Constructors.makeEnvelope),
-      inferrableFunction4(Constructors.makeEnvelope)) {
-
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-}
-
-/**
- * Return a polygon given minX,minY,maxX,maxY
- *
- * @param inputExpressions
- */
-private[apache] case class ST_PolygonFromEnvelope(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.polygonFromEnvelope _) {
-
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-}
-
-private[apache] trait UserDataGenerator {
-  def generateUserData(
-      minInputLength: Integer,
-      inputExpressions: Seq[Expression],
-      inputRow: InternalRow): String = {
-    var userData =
-      inputExpressions(minInputLength).eval(inputRow).asInstanceOf[UTF8String].toString
-
-    for (i <- minInputLength + 1 until inputExpressions.length) {
-      userData =
-        userData + "\t" + inputExpressions(i).eval(inputRow).asInstanceOf[UTF8String].toString
-    }
-    userData
-  }
-}
-
-private[apache] case class ST_GeomFromGeoHash(inputExpressions: Seq[Expression])
-    extends InferredExpression(InferrableFunction.allowRightNull(Constructors.geomFromGeoHash)) {
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-}
-
-private[apache] case class ST_PointFromGeoHash(inputExpressions: Seq[Expression])
-    extends InferredExpression(InferrableFunction.allowRightNull(Constructors.pointFromGeoHash)) {
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-}
-
-private[apache] case class ST_GeomFromGML(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.geomFromGML _) {
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-}
-
-private[apache] case class ST_GeomFromKML(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.geomFromKML _) {
+case class ST_S2MPolyFromText(inputExpressions: Seq[Expression])
+    extends InferredExpression(S2Constructors.mPolyFromText _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
@@ -602,37 +426,24 @@ private[apache] case class ST_GeomFromKML(inputExpressions: Seq[Expression])
  * @param inputExpressions
  *   This function takes a geometry string and a srid. The string format must be WKT.
  */
-private[apache] case class ST_MPolyFromText(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.mPolyFromText _) {
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-}
-
-/**
- * Return a Geometry from a WKT string
- *
- * @param inputExpressions
- *   This function takes a geometry string and a srid. The string format must be WKT.
- */
-private[apache] case class ST_MLineFromText(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.mLineFromText _) {
+case class ST_S2MLineFromText(inputExpressions: Seq[Expression])
+    extends InferredExpression(S2Constructors.mLineFromText _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
-private[apache] case class ST_MPointFromText(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.mPointFromText _) {
+case class ST_S2MPointFromText(inputExpressions: Seq[Expression])
+    extends InferredExpression(S2Constructors.mPointFromText _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
-private[apache] case class ST_GeomCollFromText(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.geomCollFromText _) {
+case class ST_S2GeogCollFromText(inputExpressions: Seq[Expression])
+    extends InferredExpression(S2Constructors.geogCollFromText _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

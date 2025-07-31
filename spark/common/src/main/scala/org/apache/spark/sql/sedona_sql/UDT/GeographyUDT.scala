@@ -18,26 +18,26 @@
  */
 package org.apache.spark.sql.sedona_sql.UDT
 
-import org.apache.sedona.common.geometrySerde.GeometrySerializer;
+import org.apache.sedona.common.geometrySerde.GeometrySerializer
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.types._
 import org.json4s.JsonDSL._
 import org.json4s.JsonAST.JValue
-import org.apache.sedona.common.geometryObjects.Geography;
+import org.apache.sedona.common.S2Geography.{S2Geography, S2GeographySerializer}
 
-class GeographyUDT extends UserDefinedType[Geography] {
+class GeographyUDT extends UserDefinedType[S2Geography] {
   override def sqlType: DataType = BinaryType
 
   override def pyUDT: String = "sedona.spark.sql.types.GeographyType"
 
-  override def userClass: Class[Geography] = classOf[Geography]
+  override def userClass: Class[S2Geography] = classOf[S2Geography]
 
-  override def serialize(obj: Geography): Array[Byte] =
-    GeometrySerializer.serialize(obj.getGeometry)
+  override def serialize(obj: S2Geography): Array[Byte] =
+    S2GeographySerializer.serialize(obj)
 
-  override def deserialize(datum: Any): Geography = {
+  override def deserialize(datum: Any): S2Geography = {
     datum match {
-      case value: Array[Byte] => new Geography(GeometrySerializer.deserialize(value))
+      case value: Array[Byte] => S2GeographySerializer.deserialize(value)
     }
   }
 

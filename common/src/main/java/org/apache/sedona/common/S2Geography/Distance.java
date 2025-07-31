@@ -24,7 +24,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public class Distance {
 
-  public double S2_distance(ShapeIndexGeography geo1, ShapeIndexGeography geo2) {
+  public static double S2_distance(ShapeIndexGeography geo1, ShapeIndexGeography geo2) {
     S2ShapeIndex index1 = geo1.shapeIndex;
     S2ShapeIndex index2 = geo2.shapeIndex;
 
@@ -46,7 +46,7 @@ public class Distance {
     return chordAngle.toAngle().radians();
   }
 
-  public double S2_maxDistance(ShapeIndexGeography geo1, ShapeIndexGeography geo2) {
+  public static double S2_maxDistance(ShapeIndexGeography geo1, ShapeIndexGeography geo2) {
     S2ShapeIndex index1 = geo1.shapeIndex;
     S2ShapeIndex index2 = geo2.shapeIndex;
 
@@ -67,7 +67,7 @@ public class Distance {
     return chordAngle.toAngle().radians();
   }
 
-  public S2Point S2_closestPoint(ShapeIndexGeography geo1, ShapeIndexGeography geo2)
+  public static S2Point S2_closestPoint(ShapeIndexGeography geo1, ShapeIndexGeography geo2)
       throws Exception {
     return S2_minimumClearanceLineBetween(geo1, geo2).getLeft();
   }
@@ -75,7 +75,7 @@ public class Distance {
   // returns the shortest possible line between x and y
   // This method finds the two points—one on each geometry—that lie at the minimal great-circle
   // (angular) distance, and returns them as a pair.
-  public Pair<S2Point, S2Point> S2_minimumClearanceLineBetween(
+  public static Pair<S2Point, S2Point> S2_minimumClearanceLineBetween(
       ShapeIndexGeography geo1, ShapeIndexGeography geo2) throws Exception {
 
     S2ShapeIndex index1 = geo1.shapeIndex;

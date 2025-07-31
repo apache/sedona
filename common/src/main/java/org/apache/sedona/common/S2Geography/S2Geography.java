@@ -24,6 +24,7 @@ import com.google.common.geometry.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +57,10 @@ public abstract class S2Geography {
     GEOGRAPHY_COLLECTION(4),
     SHAPE_INDEX(5),
     ENCODED_SHAPE_INDEX(6),
-    CELL_CENTER(7);
+    CELL_CENTER(7),
+    SINGLEPOINT(8),
+    SINGLEPOLYLINE(9),
+    MultiPOLYGON(10);
 
     private final int kind;
 
@@ -80,6 +84,11 @@ public abstract class S2Geography {
       throw new IllegalArgumentException("Unknown GeographyKind: " + kind);
     }
   }
+
+  public int getKind() {
+    return this.kind.getKind();
+  }
+
   /**
    * @return 0, 1, or 2 if all Shape()s that are returned will have the same dimension (i.e., they
    *     are all points, all lines, or all polygons).
@@ -140,6 +149,21 @@ public abstract class S2Geography {
     region.getCellUnionBound(cellIds);
   }
 
+  @Override
+  public String toString() {
+    return this.toText(new PrecisionModel());
+  }
+
+  public String toString(PrecisionModel precisionModel) {
+    return this.toText(precisionModel);
+  }
+
+  public String toText(PrecisionModel precisionModel) {
+    WKTWriter writer = new WKTWriter();
+    writer.setPrecisionModel(precisionModel);
+    return writer.write(this);
+  }
+
   // ─── Encoding / decoding machinery ────────────────────────────────────────────
   /**
    * Serialize this geography to an encoder. This does not include any encapsulating information
@@ -189,7 +213,7 @@ public abstract class S2Geography {
     out.flush();
   }
 
-  public S2Geography decodeTagged(InputStream is) throws IOException {
+  public static S2Geography decodeTagged(InputStream is) throws IOException {
     // wrap ONCE
     UnsafeInput kryoIn = new UnsafeInput(is, BUFFER_SIZE);
     EncodeTag topTag = EncodeTag.decode(kryoIn);
@@ -202,8 +226,10 @@ public abstract class S2Geography {
     switch (tag.getKind()) {
       case CELL_CENTER:
       case POINT:
+      case SINGLEPOINT:
         return PointGeography.decode(in, tag);
       case POLYLINE:
+      case SINGLEPOLYLINE:
         return PolylineGeography.decode(in, tag);
       case POLYGON:
         return PolygonGeography.decode(in, tag);
