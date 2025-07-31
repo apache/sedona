@@ -1553,59 +1553,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         """
         return self.to_geopandas().plot(*args, **kwargs)
 
-    def sjoin(
-        self,
-        other,
-        how="inner",
-        predicate="intersects",
-        lsuffix="left",
-        rsuffix="right",
-        distance=None,
-        on_attribute=None,
-        **kwargs,
-    ):
-        """Perform a spatial join between two GeoSeries.
-
-        Parameters
-        ----------
-        other : GeoSeries
-            The GeoSeries to join with.
-        how : str, default 'inner'
-            The type of join to perform.
-        predicate : str, default 'intersects'
-            The spatial predicate to use for the join.
-        lsuffix : str, default 'left'
-            Suffix to apply to the left GeoSeries' column names.
-        rsuffix : str, default 'right'
-            Suffix to apply to the right GeoSeries' column names.
-        distance : float, optional
-            The distance threshold for the join.
-        on_attribute : str, optional
-            The attribute to join on.
-        **kwargs
-            Additional arguments to pass to the join function.
-
-        Returns
-        -------
-        GeoSeries
-            A new GeoSeries containing the result of the spatial join.
-
-        """
-        from sedona.geopandas import sjoin
-
-        # Implementation of the abstract method
-        return sjoin(
-            self,
-            other,
-            how,
-            predicate,
-            lsuffix,
-            rsuffix,
-            distance,
-            on_attribute,
-            **kwargs,
-        )
-
     @property
     def geometry(self) -> "GeoSeries":
         return self
