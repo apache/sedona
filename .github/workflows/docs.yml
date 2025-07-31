@@ -51,7 +51,7 @@ jobs:
         run: mvn generate-sources scala:doc -pl !common,!snowflake,!flink && mkdir -p docs/api/scaladoc/spark && cp -r spark/common/target/site/scaladocs/* docs/api/scaladoc/spark
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.x
+          python-version: '3.11'
       - run: pip install -r requirements-docs.txt
       - run: sudo apt update
       - uses: r-lib/actions/setup-r@v2.11.3
@@ -67,8 +67,20 @@ jobs:
           working-directory: './R'
       - run: Rscript -e 'pkgdown::build_site(pkg = "./R", preview = FALSE, override = list(destination = "../docs/api/rdocs"))'
       - name: Install Python documentation dependencies
-        run: pip install sphinx sphinx_rtd_theme
+        run: |
+          # Get Spark version from pom.xml
+          SPARK_VERSION=$(mvn help:evaluate -Dexpression=spark.version -q -DforceStdout)
+
+          # Install Sphinx and dependencies with the correct PySpark version
+          pip install sphinx sphinx_rtd_theme pyspark==$SPARK_VERSION
+
+          # Install sedona with all optional dependencies for complete documentation
+          cd python
+          pip install -e ".[all]"
+          cd ..
       - name: Build Python API documentation with Sphinx
+        env:
+          CI: true
         run: |
           cd python/sedona/doc
           make clean

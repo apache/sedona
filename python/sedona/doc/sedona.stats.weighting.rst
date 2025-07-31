@@ -6,5 +6,5 @@ Module contents
 
 .. automodule:: sedona.stats.weighting
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
