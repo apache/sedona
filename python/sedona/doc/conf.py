@@ -72,9 +72,8 @@ suppress_warnings = [
     "ref.python",
     # Suppress docstring formatting warnings
     "docutils",
-    # Suppress autodoc import errors that may occur in CI
+    # Suppress specific autodoc import errors that occur due to IndexError
     "autodoc.import_object",
-    "autodoc",
 ]
 
 # Don't treat warnings as errors to avoid IndexError issues

@@ -1,7 +1,7 @@
 sedona.core.enums package
 =========================
 
-.. deprecated:: 1.7.0
+.. deprecated:: 1.8.0
    The ``sedona.core.enums`` package is deprecated. Please use ``sedona.spark.core.enums`` instead.
 
 Module contents

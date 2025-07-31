@@ -1,7 +1,7 @@
 sedona.raster\_utils package
 ============================
 
-.. deprecated:: 1.7.0
+.. deprecated:: 1.8.0
    The ``sedona.raster_utils`` package is deprecated. Please use ``sedona.spark.raster_utils`` instead.
 
 Submodules

@@ -1,7 +1,7 @@
 sedona.stac package
 ===================
 
-.. deprecated:: 1.7.0
+.. deprecated:: 1.8.0
    The ``sedona.stac`` package is deprecated. Please use ``sedona.spark.stac`` instead.
 
 Submodules
