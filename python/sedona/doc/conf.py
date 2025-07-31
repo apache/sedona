@@ -97,7 +97,35 @@ autodoc_preserve_defaults = True
 
 # Add error handling for problematic imports in CI
 def skip_member(app, what, name, obj, skip, options):
-    """Skip problematic members that cause IndexError."""
+    """Skip problematic members that cause IndexError during documentation build.
+
+    This is a Sphinx autodoc-skip-member event handler that filters out members
+    known to cause import issues during documentation generation.
+
+    Parameters
+    ----------
+    app : sphinx.application.Sphinx
+        The Sphinx application instance.
+    what : str
+        The type of the object being documented. Can be one of:
+        'module', 'class', 'exception', 'function', 'method', 'attribute'.
+    name : str
+        The fully qualified name of the object being documented.
+    obj : Any
+        The actual Python object being documented. May be None if the object
+        couldn't be imported.
+    skip : bool
+        Whether the member was already marked to be skipped by previous handlers
+        or Sphinx's default behavior.
+    options : dict
+        The autodoc options for this object (e.g., :members:, :undoc-members:).
+
+    Returns
+    -------
+    bool
+        True if the member should be skipped, False if it should be documented.
+        If skip is already True, this function preserves that decision.
+    """
     # Skip members that are known to cause import issues
     problematic_patterns = ["raster_serde", "sedona_raster", "shapely1", "shapely2"]
     if any(pattern in name for pattern in problematic_patterns):
