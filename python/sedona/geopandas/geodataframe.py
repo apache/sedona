@@ -390,8 +390,10 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         else:
             # below are not distributed dataframe types
             if isinstance(data, gpd.GeoDataFrame):
-                # Geopandas stores crs as metadata instead of inside of the shapely objects so we must save it and set it manually later
+                # We can use GeoDataFrame.active_geometry_name once we drop support for geopandas < 1.0.0
+                # Below is the equivalent, since active_geometry_name simply calls _geometry_column_name
                 if data._geometry_column_name:
+                    # Geopandas stores crs as metadata instead of inside of the shapely objects so we must save it and set it manually later
                     if not crs:
                         crs = data.crs
                     if not geometry:
