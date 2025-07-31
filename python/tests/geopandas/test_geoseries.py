@@ -1660,9 +1660,9 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         assert geo_series.crs.to_epsg() == 4326
 
         with pytest.raises(ValueError):
-            geo_series.set_crs(4328)
+            geo_series.set_crs(4328, allow_override=False)
         with pytest.raises(ValueError):
-            geo_series.crs = None
+            geo_series.set_crs(None, allow_override=False)
 
         geo_series = geo_series.set_crs(None, allow_override=True)
         assert geo_series.crs == None
