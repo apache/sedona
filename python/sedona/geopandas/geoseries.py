@@ -603,9 +603,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         elif epsg is not None:
             crs = CRS.from_epsg(epsg)
 
-        # We don't check crs validity to keep the operation lazy.
-        # Calling self.crs will make this operation eager, causing wait time.
-        # In Sedona, it's recommended to keep this lazy for performance reasons.
+        # The below block for the not allow_override case is eager due to the self.crs call
+        # This hurts performance and user experience, hence the default being set to True in Sedona
         if not allow_override:
             curr_crs = self.crs
 
