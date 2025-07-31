@@ -105,16 +105,8 @@ def _frame_join(
     if left_geom_col is None or right_geom_col is None:
         raise ValueError("Both datasets must have geometry columns")
 
-    # Prepare geometry expressions for spatial join
-    if left_sdf.schema[left_geom_col].dataType.typeName() == "binary":
-        left_geom_expr = f"ST_GeomFromWKB(`{left_geom_col}`) as l_geometry"
-    else:
-        left_geom_expr = f"`{left_geom_col}` as l_geometry"
-
-    if right_sdf.schema[right_geom_col].dataType.typeName() == "binary":
-        right_geom_expr = f"ST_GeomFromWKB(`{right_geom_col}`) as r_geometry"
-    else:
-        right_geom_expr = f"`{right_geom_col}` as r_geometry"
+    left_geom_expr = f"`{left_geom_col}` as l_geometry"
+    right_geom_expr = f"`{right_geom_col}` as r_geometry"
 
     # Select all columns with geometry
     left_cols = [left_geom_expr] + [
@@ -165,8 +157,7 @@ def _frame_join(
     final_columns = []
 
     # Add geometry column (always from left for geopandas compatibility)
-    # Currently, Sedona stores geometries in EWKB format
-    final_columns.append("ST_AsEWKB(l_geometry) as geometry")
+    final_columns.append("l_geometry as geometry")
 
     # Add other columns with suffix handling
     left_data_cols = [col for col in left_geo_df.columns if col != "l_geometry"]
