@@ -24,6 +24,7 @@ import org.apache.sedona.sql.implicits._
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Row}
+import org.geotools.api.referencing.FactoryException
 import org.geotools.referencing.CRS
 import org.junit.Assert.{assertEquals, assertFalse, assertTrue}
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
@@ -31,7 +32,6 @@ import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory, Polygon
 import org.locationtech.jts.io.WKTWriter
 import org.locationtech.jts.linearref.LengthIndexedLine
 import org.locationtech.jts.operation.distance3d.Distance3DOp
-import org.geotools.api.referencing.FactoryException
 import org.scalatest.{GivenWhenThen, Matchers}
 import org.xml.sax.InputSource
 
@@ -463,7 +463,6 @@ class functionTestScala
       intercept[FactoryException] {
         val d2 = FunctionsGeoTools.transform(polygeom, epsgString, epsgNoSuchAuthorityString)
       }
-
     }
 
     it("Passed ST_Intersection - intersects but not contains") {

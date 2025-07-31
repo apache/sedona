@@ -586,6 +586,18 @@ public class FunctionTest extends TestBase {
                 false));
     String result_SRC_TGT_lenient = first(transformedTable_SRC_TGT_lenient).getField(0).toString();
     assertEquals("POINT (-13134586.718698347 3764623.3541299687)", result_SRC_TGT_lenient);
+
+    Table transformedTable_SRC_TGT_AOI =
+        pointTable.select(
+            call(
+                FunctionsGeoTools.ST_Transform.class.getSimpleName(),
+                $(pointColNames[0]),
+                SRC_WKT,
+                TGT_WKT,
+                $(pointColNames[0]),
+                false));
+    String result_SRC_TGT_AOI = first(transformedTable_SRC_TGT_AOI).getField(0).toString();
+    assertEquals("POINT (-13134586.718698347 3764623.35412997)", result_SRC_TGT_AOI);
   }
 
   @Test
