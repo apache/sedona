@@ -62,6 +62,16 @@ class TestGeoDataFrame(TestGeopandasBase):
             sgpd_df = GeoDataFrame(obj)
         check_geodataframe(sgpd_df)
 
+    def test_construct_from_geopandas(self):
+        gpd_df = gpd.GeoDataFrame(
+            {"geometry1": [Point(0, 0)]}, geometry="geometry1", crs="EPSG:3857"
+        )
+        with self.ps_allow_diff_frames():
+            sgpd_df = GeoDataFrame(gpd_df)
+        assert sgpd_df.crs == "EPSG:3857"
+        assert sgpd_df.geometry.crs == "EPSG:3857"
+        assert sgpd_df.geometry.name == "geometry1"
+
     @pytest.mark.parametrize(
         "obj",
         [
@@ -125,6 +135,57 @@ class TestGeoDataFrame(TestGeopandasBase):
             pd_df = obj.to_pandas()
         sgpd_df = sgpd.GeoDataFrame(obj)
         assert_frame_equal(pd_df, sgpd_df.to_pandas())
+
+    def test_to_geopandas(self):
+        from geopandas.testing import assert_geodataframe_equal
+
+        data = {"geometry": [Point(x, x) for x in range(3)], "id": [1, 2, 3]}
+        index = [1, 2, 3]
+        crs = "EPSG:3857"
+        # TODO: try to optimize this away
+        with self.ps_allow_diff_frames():
+            result = GeoDataFrame(data, index=index, crs=crs).to_geopandas()
+        gpd_df = gpd.GeoDataFrame(data, index=index, crs=crs)
+        assert_geodataframe_equal(result, gpd_df)
+
+    def test_to_spark_pandas(self):
+        data = {"geometry": [Point(x, x) for x in range(3)], "id": [1, 2, 3]}
+        index = [1, 2, 3]
+        result = GeoDataFrame(data, index=index).to_spark_pandas()
+        ps_df = ps.DataFrame(data, index=index)
+        assert_frame_equal(result.to_pandas(), ps_df.to_pandas())
+
+    def test_getitem(self):
+        geoms = [Point(x, x) for x in range(3)]
+        ids = [1, 2, 3]
+        values = ["a", "b", "c"]
+        crs = "EPSG:3857"
+
+        with self.ps_allow_diff_frames():
+            df = GeoDataFrame({"geometry": geoms, "id": ids, "value": values}, crs=crs)
+
+        # get a single non-geometry series
+        result = df["id"]
+        expected = pd.Series(ids, name="id")
+        self.check_pd_series_equal(result, expected)
+
+        # get a single geometry series
+        result = df["geometry"]
+        expected = gpd.GeoSeries(geoms, name="geometry", crs=crs)
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # get multiple columns
+        result = df[["id", "value"]]
+        # no crs because no geometry column
+        expected = gpd.GeoDataFrame({"id": ids, "value": values})
+        self.check_sgpd_df_equals_gpd_df(result, expected)
+
+        # get numerical slice
+        result = df[:2]
+        expected = gpd.GeoDataFrame(
+            {"geometry": geoms[:2], "id": ids[:2], "value": values[:2]}, crs=crs
+        )
+        self.check_sgpd_df_equals_gpd_df(result, expected)
 
     def test_plot(self):
         # Just make sure it doesn't error
@@ -278,6 +339,21 @@ class TestGeoDataFrame(TestGeopandasBase):
 
         assert new_df.crs == sgpd_df.crs
         assert new_df.geometry.crs == sgpd_df.crs
+
+    def test_set_geometry_crs(self):
+        df = GeoDataFrame({"geometry1": [Point(0, 0)]})
+        with self.ps_allow_diff_frames():
+            df.set_geometry("geometry1", crs="EPSG:3857", inplace=True)
+        assert df.crs == "EPSG:3857"
+        assert df.geometry.crs == "EPSG:3857"
+
+        with self.ps_allow_diff_frames():
+            df = GeoDataFrame(
+                {"geometry1": [Point(0, 0)]}, geometry="geometry1", crs="EPSG:3857"
+            )
+
+        assert df.crs == "EPSG:3857"
+        assert df.geometry.crs == "EPSG:3857"
 
     def test_active_geometry_name(self):
         if parse_version(gpd.__version__) < parse_version("1.0.0"):

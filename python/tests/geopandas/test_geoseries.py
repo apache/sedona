@@ -95,6 +95,24 @@ class TestGeoSeries(TestGeopandasBase):
         sgpd_series = GeoSeries(obj)
         assert isinstance(sgpd_series, sgpd.GeoSeries)
 
+    def test_to_geopandas(self):
+        from geopandas.testing import assert_geoseries_equal
+
+        data = [Point(x, x) for x in range(3)]
+        index = [1, 2, 3]
+        crs = "EPSG:3857"
+        result = GeoSeries(data, index=index, crs=crs).to_geopandas()
+        gpd_df = gpd.GeoSeries(data, index=index, crs=crs)
+        assert_geoseries_equal(result, gpd_df)
+
+    def test_to_spark_pandas(self):
+        data = [Point(x, x) for x in range(3)]
+        index = [1, 2, 3]
+        crs = "EPSG:3857"
+        result = GeoSeries(data, index=index, crs=crs).to_spark_pandas()
+        ps_df = ps.Series(data, index=index)
+        assert_series_equal(result.to_pandas(), ps_df.to_pandas())
+
     def test_plot(self):
         # Just make sure it doesn't error
         self.geoseries.plot()
