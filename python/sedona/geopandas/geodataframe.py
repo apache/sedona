@@ -309,55 +309,22 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         Name: value, dtype: int64
         """
 
-        # Handle column access by name
-        if isinstance(key, str):
-            # Access column directly from the spark DataFrame
-            column_name = key
+        # Here we are getting a ps.Series with the same underlying anchor (ps.Dataframe).
+        # This is important so we don't unnecessarily try to perform operations on different dataframes
+        item = pspd.DataFrame.__getitem__(self, key)
 
-            # Check if column exists
-            if column_name not in self.columns:
-                raise KeyError(f"Column '{column_name}' does not exist")
-
-            # Here we are getting a ps.Series with the same underlying anchor (ps.Dataframe).
-            # This is important so we don't unnecessarily try to perform operations on different dataframes
-            ps_series: pspd.Series = pspd.DataFrame.__getitem__(self, column_name)
-
+        if isinstance(item, pspd.DataFrame):
+            # don't specify crs=self.crs here because it might not include the geometry column
+            # if it does include the geometry column, we don't need to set crs anyways
+            return GeoDataFrame(item)
+        elif isinstance(item, pspd.Series):
+            ps_series: pspd.Series = item
             try:
-                result = sgpd.GeoSeries(ps_series)
-                not_null = ps_series[ps_series.notnull()]
-                if len(not_null) > 0:
-                    first_geom = not_null.iloc[0]
-                    srid = shapely.get_srid(first_geom)
-
-                    # Shapely objects stored in the ps.Series retain their srid
-                    # but the GeoSeries does not, so we manually re-set it here
-                    if srid > 0:
-                        result.set_crs(srid, inplace=True)
-                return result
+                return sgpd.GeoSeries(ps_series)
             except TypeError:
                 return ps_series
-
-        # Handle list of column names
-        elif isinstance(key, list) and all(isinstance(k, str) for k in key):
-            # Check if all columns exist
-            missing_cols = [k for k in key if k not in self.columns]
-            if missing_cols:
-                raise KeyError(f"Columns {missing_cols} do not exist")
-
-            # Select columns from the spark DataFrame
-            spark_df = self._internal.spark_frame.select(*key)
-            pandas_df = spark_df.toPandas()
-
-            # Return as GeoDataFrame
-            return GeoDataFrame(pandas_df)
-
-        # Handle row selection via slice or boolean indexing
         else:
-            # For now, convert to pandas first for row-based operations
-            # This could be optimized later for better performance
-            pandas_df = self._internal.spark_frame.toPandas()
-            selected_rows = pandas_df[key]
-            return GeoDataFrame(selected_rows)
+            raise Exception(f"Logical Error: Unexpected type: {type(item)}")
 
     _geometry_column_name = None
 
@@ -384,49 +351,45 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         from sedona.geopandas import GeoSeries
         from pyspark.sql import DataFrame as SparkDataFrame
 
-        if isinstance(data, GeoDataFrame):
-            data_crs = data._safe_get_crs()
-            if data_crs is not None:
-                data.crs = data_crs
-
-            super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
-
-        elif isinstance(data, GeoSeries):
-            if data.crs is None:
+        if isinstance(data, (GeoDataFrame, GeoSeries)):
+            if crs:
                 data.crs = crs
 
             # For each of these super().__init__() calls, we let pyspark decide which inputs are valid or not
             # instead of calling e.g assert not dtype ourselves.
             # This way, if Spark adds support later, than we inherit those changes naturally
             super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
+
         elif isinstance(data, (PandasOnSparkDataFrame, SparkDataFrame)):
 
             super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
         elif isinstance(data, PandasOnSparkSeries):
 
             try:
-                data = GeoSeries(data)
+                data = GeoSeries(data, crs=crs)
             except TypeError:
                 pass
 
             super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
         else:
             # below are not distributed dataframe types
-            if isinstance(data, pd.DataFrame):
-                assert index is None
-                assert dtype is None
-                assert not copy
-                # Need to convert GeoDataFrame to pd.DataFrame for below cast to work
-                pd_df = (
-                    pd.DataFrame(data) if isinstance(data, gpd.GeoDataFrame) else data
-                )
-            else:
-                pd_df = pd.DataFrame(
-                    data=data,
-                    index=index,
-                    dtype=dtype,
-                    copy=copy,
-                )
+            if isinstance(data, gpd.GeoDataFrame):
+                # We can use GeoDataFrame.active_geometry_name once we drop support for geopandas < 1.0.0
+                # Below is the equivalent, since active_geometry_name simply calls _geometry_column_name
+                if data._geometry_column_name:
+                    # Geopandas stores crs as metadata instead of inside of the shapely objects so we must save it and set it manually later
+                    if not crs:
+                        crs = data.crs
+                    if not geometry:
+                        geometry = data.geometry.name
+
+            pd_df = pd.DataFrame(
+                data,
+                index=index,
+                columns=columns,
+                dtype=dtype,
+                copy=copy,
+            )
 
             # Spark complains if it's left as a geometry type
             geom_type_cols = pd_df.select_dtypes(include=["geometry"]).columns
@@ -447,7 +410,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 raise ValueError(crs_mismatch_error)
 
         if geometry:
-            self.set_geometry(geometry, inplace=True)
+            self.set_geometry(geometry, inplace=True, crs=crs)
 
         if geometry is None and "geometry" in self.columns:
 
@@ -462,8 +425,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 geom_crs = geometry.crs
                 if geom_crs is None:
                     if crs is not None:
-                        geometry.set_crs(crs, inplace=True)
-                        self.set_geometry(geometry, inplace=True)
+                        self.set_geometry(geometry, inplace=True, crs=crs)
                 else:
                     if crs is not None and geom_crs != crs:
                         raise ValueError(crs_mismatch_error)
@@ -625,6 +587,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             frame = self.copy(deep=False)
 
         geo_column_name = self._geometry_column_name
+        new_series = False
 
         if geo_column_name is None:
             geo_column_name = "geometry"
@@ -647,6 +610,12 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                     level = col.rename(geo_column_name)
             else:
                 level = pspd.Series(col, name=geo_column_name)
+
+            if not isinstance(level, sgpd.GeoSeries):
+                # Set the crs later, so we can allow_override=True
+                level = sgpd.GeoSeries(level)
+
+            new_series = True
         elif hasattr(col, "ndim") and col.ndim > 1:
             raise ValueError("Must pass array with one dimension only.")
         else:  # should be a colname
@@ -689,20 +658,15 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 # if not dropping, set the active geometry name to the given col name
                 geo_column_name = col
 
-        if not crs:
-            crs = getattr(level, "crs", None)
-
-        # Check that we are using a listlike of geometries
-        level = _ensure_geometry(level, crs=crs)
-        # ensure_geometry only sets crs on level if it has crs==None
-
         # This operation throws a warning to the user asking them to set pspd.set_option('compute.ops_on_diff_frames', True)
         # to allow operations on different frames. We pass these warnings on to the user so they must manually set it themselves.
-        if level.crs != crs:
+        if crs:
             level.set_crs(crs, inplace=True, allow_override=True)
+            new_series = True
 
         frame._geometry_column_name = geo_column_name
-        frame[geo_column_name] = level
+        if new_series:
+            frame[geo_column_name] = level
 
         if not inplace:
             return frame
@@ -824,6 +788,12 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         return gpd.GeoDataFrame(pd_df, geometry=self._geometry_column_name)
 
+    def to_spark_pandas(self) -> pspd.DataFrame:
+        """
+        Convert the GeoDataFrame to a Spark Pandas DataFrame.
+        """
+        return pspd.DataFrame(self._internal)
+
     @property
     def sindex(self) -> SpatialIndex | None:
         """
@@ -887,10 +857,184 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
     @crs.setter
     def crs(self, value):
-        # Avoid trying to access the geometry column (which might be missing) if crs is None
-        if value is None:
-            return
-        self.geometry.crs = value
+        # Since pyspark dataframes are immutable, we can't modify in place, so we create the new geoseries and replace it
+        self.geometry = self.geometry.set_crs(value)
+
+    def set_crs(self, crs, inplace=False, allow_override=True):
+        """
+        Set the Coordinate Reference System (CRS) of the ``GeoDataFrame``.
+
+        If there are multiple geometry columns within the GeoDataFrame, only
+        the CRS of the active geometry column is set.
+
+        Pass ``None`` to remove CRS from the active geometry column.
+
+        Notes
+        -----
+        The underlying geometries are not transformed to this CRS. To
+        transform the geometries to a new CRS, use the ``to_crs`` method.
+
+        Parameters
+        ----------
+        crs : pyproj.CRS | None, optional
+            The value can be anything accepted
+            by :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
+            such as an authority string (eg "EPSG:4326") or a WKT string.
+        epsg : int, optional
+            EPSG code specifying the projection.
+        inplace : bool, default False
+            If True, the CRS of the GeoDataFrame will be changed in place
+            (while still returning the result) instead of making a copy of
+            the GeoDataFrame.
+        allow_override : bool, default True
+            If the GeoDataFrame already has a CRS, allow to replace the
+            existing CRS, even when both are not equal. In Sedona, setting this to True
+            will lead to eager evaluation instead of lazy evaluation. Unlike Geopandas,
+            True is the default value in Sedona for performance reasons.
+
+        Examples
+        --------
+        >>> from sedona.geopandas import GeoDataFrame
+        >>> from shapely.geometry import Point
+        >>> d = {'col1': ['name1', 'name2'], 'geometry': [Point(1, 2), Point(2, 1)]}
+        >>> gdf = GeoDataFrame(d)
+        >>> gdf
+            col1     geometry
+        0  name1  POINT (1 2)
+        1  name2  POINT (2 1)
+
+        Setting CRS to a GeoDataFrame without one:
+
+        >>> gdf.crs is None
+        True
+
+        >>> gdf = gdf.set_crs('epsg:3857')
+        >>> gdf.crs  # doctest: +SKIP
+        <Projected CRS: EPSG:3857>
+        Name: WGS 84 / Pseudo-Mercator
+        Axis Info [cartesian]:
+        - X[east]: Easting (metre)
+        - Y[north]: Northing (metre)
+        Area of Use:
+        - name: World - 85°S to 85°N
+        - bounds: (-180.0, -85.06, 180.0, 85.06)
+        Coordinate Operation:
+        - name: Popular Visualisation Pseudo-Mercator
+        - method: Popular Visualisation Pseudo Mercator
+        Datum: World Geodetic System 1984
+        - Ellipsoid: WGS 84
+        - Prime Meridian: Greenwich
+
+        Overriding existing CRS:
+
+        >>> gdf = gdf.set_crs(4326, allow_override=True)
+
+        Without ``allow_override=True``, ``set_crs`` returns an error if you try to
+        override CRS.
+
+        See Also
+        --------
+        GeoDataFrame.to_crs : re-project to another CRS
+        """
+        # Since pyspark dataframes are immutable, we can't modify in place, so we create the new geoseries and replace it
+        new_geometry = self.geometry.set_crs(crs, allow_override=allow_override)
+        if inplace:
+            self.geometry = new_geometry
+        else:
+            df = self.copy()
+            df.geometry = new_geometry
+            return df
+
+    def to_crs(
+        self,
+        crs: Any | None = None,
+        epsg: int | None = None,
+        inplace: bool = False,
+    ) -> GeoDataFrame | None:
+        """Transform geometries to a new coordinate reference system.
+
+        Transform all geometries in an active geometry column to a different coordinate
+        reference system.  The ``crs`` attribute on the current GeoSeries must
+        be set.  Either ``crs`` or ``epsg`` may be specified for output.
+
+        This method will transform all points in all objects. It has no notion
+        of projecting entire geometries.  All segments joining points are
+        assumed to be lines in the current projection, not geodesics. Objects
+        crossing the dateline (or other projection boundary) will have
+        undesirable behavior.
+
+        Parameters
+        ----------
+        crs : pyproj.CRS, optional if `epsg` is specified
+            The value can be anything accepted by
+            :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
+            such as an authority string (eg "EPSG:4326") or a WKT string.
+        epsg : int, optional if `crs` is specified
+            EPSG code specifying output projection.
+        inplace : bool, optional, default: False
+            Whether to return a new GeoDataFrame or do the transformation in
+            place.
+
+        Returns
+        -------
+        GeoDataFrame
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point
+        >>> d = {'col1': ['name1', 'name2'], 'geometry': [Point(1, 2), Point(2, 1)]}
+        >>> gdf = geopandas.GeoDataFrame(d, crs=4326)
+        >>> gdf
+            col1     geometry
+        0  name1  POINT (1 2)
+        1  name2  POINT (2 1)
+        >>> gdf.crs  # doctest: +SKIP
+        <Geographic 2D CRS: EPSG:4326>
+        Name: WGS 84
+        Axis Info [ellipsoidal]:
+        - Lat[north]: Geodetic latitude (degree)
+        - Lon[east]: Geodetic longitude (degree)
+        Area of Use:
+        - name: World
+        - bounds: (-180.0, -90.0, 180.0, 90.0)
+        Datum: World Geodetic System 1984
+        - Ellipsoid: WGS 84
+        - Prime Meridian: Greenwich
+
+        >>> gdf = gdf.to_crs(3857)
+        >>> gdf
+            col1                       geometry
+        0  name1  POINT (111319.491 222684.209)
+        1  name2  POINT (222638.982 111325.143)
+        >>> gdf.crs  # doctest: +SKIP
+        <Projected CRS: EPSG:3857>
+        Name: WGS 84 / Pseudo-Mercator
+        Axis Info [cartesian]:
+        - X[east]: Easting (metre)
+        - Y[north]: Northing (metre)
+        Area of Use:
+        - name: World - 85°S to 85°N
+        - bounds: (-180.0, -85.06, 180.0, 85.06)
+        Coordinate Operation:
+        - name: Popular Visualisation Pseudo-Mercator
+        - method: Popular Visualisation Pseudo Mercator
+        Datum: World Geodetic System 1984
+        - Ellipsoid: WGS 84
+        - Prime Meridian: Greenwich
+
+        See Also
+        --------
+        GeoDataFrame.set_crs : assign CRS without re-projection
+        """
+        new_geometry = self.geometry.to_crs(crs=crs, epsg=epsg)
+        if inplace:
+            df = self
+            df.geometry = new_geometry
+            return None
+        else:
+            df = self.copy()
+            df.geometry = new_geometry
+            return df
 
     @classmethod
     def from_dict(

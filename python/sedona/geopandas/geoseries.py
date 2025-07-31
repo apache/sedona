@@ -15,10 +15,10 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import os
 import typing
 from typing import Any, Union, Literal, List
 
+import numpy as np
 import geopandas as gpd
 import sedona.geopandas as sgpd
 import pandas as pd
@@ -28,8 +28,8 @@ from pyspark.pandas import Series as PandasOnSparkSeries
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas.internal import InternalFrame
 from pyspark.pandas.series import first_series
-from pyspark.pandas.utils import scol_for, log_advice
-from pyspark.sql.types import BinaryType, NullType
+from pyspark.pandas.utils import scol_for
+from pyspark.sql.types import NullType
 from sedona.spark.sql.types import GeometryType
 
 from sedona.spark.sql import st_aggregates as sta
@@ -361,16 +361,18 @@ class GeoSeries(GeoFrame, pspd.Series):
             assert not copy
             assert not fastpath
 
-            data_crs = None
-            if hasattr(data, "crs"):
-                data_crs = data.crs
-            if data_crs is not None and crs is not None and data_crs != crs:
-                raise ValueError(
-                    "CRS mismatch between CRS of the passed geometries "
-                    "and 'crs'. Use 'GeoSeries.set_crs(crs, "
-                    "allow_override=True)' to overwrite CRS or "
-                    "'GeoSeries.to_crs(crs)' to reproject geometries. "
-                )
+            # We don't check crs validity to keep the operation lazy.
+            # Keep the original code for now
+            # data_crs = None
+            # if hasattr(data, "crs"):
+            #     data_crs = data.crs
+            # if data_crs is not None and crs is not None and data_crs != crs:
+            #     raise ValueError(
+            #         "CRS mismatch between CRS of the passed geometries "
+            #         "and 'crs'. Use 'GeoSeries.set_crs(crs, "
+            #         "allow_override=True)' to overwrite CRS or "
+            #         "'GeoSeries.to_crs(crs)' to reproject geometries. "
+            #     )
 
             # PySpark Pandas' ps.Series.__init__() does not construction from a
             # ps.Series input. For now, we manually implement the logic.
@@ -463,23 +465,36 @@ class GeoSeries(GeoFrame, pspd.Series):
         if len(self) == 0:
             return None
 
-        spark_col = stf.ST_SRID(self.spark.column)
+        if parse_version(pyspark.__version__) >= parse_version("3.5.0"):
+            spark_col = stf.ST_SRID(F.first_value(self.spark.column, ignoreNulls=True))
+            # Set this to avoid error complaining that we don't have a groupby column
+            is_aggr = True
+        else:
+            spark_col = stf.ST_SRID(self.spark.column)
+            is_aggr = False
+
         tmp_series = self._query_geometry_column(
             spark_col,
             returns_geom=False,
+            is_aggr=is_aggr,
         )
 
         # All geometries should have the same srid
         # so we just take the srid of the first non-null element
-        first_idx = tmp_series.first_valid_index()
-        srid = tmp_series[first_idx] if first_idx is not None else 0
+
+        if parse_version(pyspark.__version__) >= parse_version("3.5.0"):
+            srid = tmp_series.item()
+            # Turn np.nan to 0 to avoid error
+            srid = 0 if np.isnan(srid) else srid
+        else:
+            first_idx = tmp_series.first_valid_index()
+            srid = tmp_series[first_idx] if first_idx is not None else 0
 
         # Sedona returns 0 if doesn't exist
         return CRS.from_user_input(srid) if srid != 0 else None
 
     @crs.setter
     def crs(self, value: Union["CRS", None]):
-        # Implementation of the abstract method
         self.set_crs(value, inplace=True)
 
     @typing.overload
@@ -505,7 +520,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         crs: Union[Any, None] = None,
         epsg: Union[int, None] = None,
         inplace: bool = False,
-        allow_override: bool = False,
+        allow_override: bool = True,
     ) -> Union["GeoSeries", None]:
         """
         Set the Coordinate Reference System (CRS) of a ``GeoSeries``.
@@ -529,9 +544,11 @@ class GeoSeries(GeoFrame, pspd.Series):
             If True, the CRS of the GeoSeries will be changed in place
             (while still returning the result) instead of making a copy of
             the GeoSeries.
-        allow_override : bool, default False
+        allow_override : bool, default True
             If the GeoSeries already has a CRS, allow to replace the
-            existing CRS, even when both are not equal.
+            existing CRS, even when both are not equal. In Sedona, setting this to True
+            will lead to eager evaluation instead of lazy evaluation. Unlike Geopandas,
+            True is the default value in Sedona for performance reasons.
 
         Returns
         -------
@@ -589,19 +606,18 @@ class GeoSeries(GeoFrame, pspd.Series):
         elif epsg is not None:
             crs = CRS.from_epsg(epsg)
 
-        curr_crs = self.crs
+        # The below block for the not allow_override case is eager due to the self.crs call
+        # This hurts performance and user experience, hence the default being set to True in Sedona
+        if not allow_override:
+            curr_crs = self.crs
 
-        # If CRS is the same, do nothing
-        if curr_crs == crs:
-            return
-
-        if not allow_override and curr_crs is not None and not curr_crs == crs:
-            raise ValueError(
-                "The GeoSeries already has a CRS which is not equal to the passed "
-                "CRS. Specify 'allow_override=True' to allow replacing the existing "
-                "CRS without doing any transformation. If you actually want to "
-                "transform the geometries, use 'GeoSeries.to_crs' instead."
-            )
+            if curr_crs is not None and not curr_crs == crs:
+                raise ValueError(
+                    "The GeoSeries already has a CRS which is not equal to the passed "
+                    "CRS. Specify 'allow_override=True' to allow replacing the existing "
+                    "CRS without doing any transformation. If you actually want to "
+                    "transform the geometries, use 'GeoSeries.to_crs' instead."
+                )
 
         # 0 indicates no srid in sedona
         new_epsg = crs.to_epsg() if crs else 0
