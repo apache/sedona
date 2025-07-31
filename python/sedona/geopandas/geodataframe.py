@@ -860,7 +860,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         # Since pyspark dataframes are immutable, we can't modify in place, so we create the new geoseries and replace it
         self.geometry = self.geometry.set_crs(value)
 
-    def set_crs(self, crs, inplace=False, allow_override=False):
+    def set_crs(self, crs, inplace=False, allow_override=True):
         """
         Set the Coordinate Reference System (CRS) of the ``GeoDataFrame``.
 
@@ -888,7 +888,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             the GeoDataFrame.
         allow_override : bool, default False
             If the the GeoDataFrame already has a CRS, allow to replace the
-            existing CRS, even when both are not equal.
+            existing CRS, even when both are not equal. In Sedona, setting this to True
+            will lead to eager evaluation instead of lazy evaluation. Unlike Geopandas,
+            True is the default value in Sedona for performance reasons.
 
         Examples
         --------
