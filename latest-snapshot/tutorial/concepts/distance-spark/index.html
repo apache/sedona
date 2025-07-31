@@ -4792,17 +4792,17 @@
 <p>Suppose you have four points and would like to compute the distance between <code>point_a</code> and <code>point_b</code> and the distance between <code>point_c</code> and <code>point_d</code>.</p>
 <p><img alt="distance between points" src="../../../image/tutorial/concepts/distance1.png" /></p>
 <p>Let’s create a DataFrame with these points.</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">([</span>
-    <span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">Point</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)),</span>
-    <span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">Point</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span>
-<span class="p">],</span> <span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">])</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">Point</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)),</span>
+        <span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">Point</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span>
+    <span class="p">],</span>
+    <span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">],</span>
+<span class="p">)</span>
 </code></pre></div>
 <p>The <code>start</code> and <code>end</code> columns both have the <code>geometry</code> type.</p>
 <p>Now use the <code>ST_Distance</code> function to compute the distance between the points.</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span>
-    <span class="s2">&quot;distance&quot;</span><span class="p">,</span>
-    <span class="n">ST_Distance</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;start&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;end&quot;</span><span class="p">))</span>
-<span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;distance&quot;</span><span class="p">,</span> <span class="n">ST_Distance</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;start&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;end&quot;</span><span class="p">)))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>Here are the results:</p>
 <div class="highlight"><pre><span></span><code>+-----------+-----------+-----------------+
@@ -4828,8 +4828,7 @@
 </code></pre></div>
 <p>Let’s compute the distance between these points now:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span>
-    <span class="s2">&quot;st_distance_sphere&quot;</span><span class="p">,</span>
-    <span class="n">ST_DistanceSphere</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;place1&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;place2&quot;</span><span class="p">))</span>
+    <span class="s2">&quot;st_distance_sphere&quot;</span><span class="p">,</span> <span class="n">ST_DistanceSphere</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;place1&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;place2&quot;</span><span class="p">))</span>
 <span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>Here are the results:</p>
@@ -4845,8 +4844,7 @@
 <h2 id="compute-distance-between-points-with-a-spheroid-with-spark-and-sedona">Compute distance between points with a spheroid with Spark and Sedona<a class="headerlink" href="#compute-distance-between-points-with-a-spheroid-with-spark-and-sedona" title="Permanent link">&para;</a></h2>
 <p>Let’s use the same DataFrame from the previous section, but compute the distance using a spheroid model of the world.</p>
 <div class="highlight"><pre><span></span><code><span class="n">res</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span>
-    <span class="s2">&quot;st_distance_spheroid&quot;</span><span class="p">,</span>
-    <span class="n">ST_DistanceSpheroid</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;place1&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;place2&quot;</span><span class="p">))</span>
+    <span class="s2">&quot;st_distance_spheroid&quot;</span><span class="p">,</span> <span class="n">ST_DistanceSpheroid</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;place1&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;place2&quot;</span><span class="p">))</span>
 <span class="p">)</span>
 <span class="n">res</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;place1_name&quot;</span><span class="p">,</span> <span class="s2">&quot;place2_name&quot;</span><span class="p">,</span> <span class="s2">&quot;st_distance_spheroid&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
@@ -4864,10 +4862,7 @@
 <p><img alt="distance between objects" src="../../../image/tutorial/concepts/distance2.png" /></p>
 <p>The distance between two polygons is the minimum Euclidean distance between any two points.</p>
 <p>Let’s compute the distance:</p>
-<div class="highlight"><pre><span></span><code><span class="n">res</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span>
-    <span class="s2">&quot;distance&quot;</span><span class="p">,</span>
-    <span class="n">ST_Distance</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;geom1&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;geom2&quot;</span><span class="p">))</span>
-<span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">res</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;distance&quot;</span><span class="p">,</span> <span class="n">ST_Distance</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;geom1&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;geom2&quot;</span><span class="p">)))</span>
 </code></pre></div>
 <p>Now, take a look at the results:</p>
 <div class="highlight"><pre><span></span><code>+---+---+--------+
@@ -4883,17 +4878,16 @@
 <p>Let’s create the DataFrame:</p>
 <div class="highlight"><pre><span></span><code><span class="n">empire_state_ground</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="o">-</span><span class="mf">73.9857</span><span class="p">,</span> <span class="mf">40.7484</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 <span class="n">empire_state_top</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="o">-</span><span class="mf">73.9857</span><span class="p">,</span> <span class="mf">40.7484</span><span class="p">,</span> <span class="mi">380</span><span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">([</span>
-    <span class="p">(</span><span class="n">empire_state_ground</span><span class="p">,</span> <span class="n">empire_state_top</span><span class="p">),</span>
-<span class="p">],</span> <span class="p">[</span><span class="s2">&quot;point_a&quot;</span><span class="p">,</span> <span class="s2">&quot;point_b&quot;</span><span class="p">])</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">(</span><span class="n">empire_state_ground</span><span class="p">,</span> <span class="n">empire_state_top</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="p">[</span><span class="s2">&quot;point_a&quot;</span><span class="p">,</span> <span class="s2">&quot;point_b&quot;</span><span class="p">],</span>
+<span class="p">)</span>
 </code></pre></div>
 <p>Now compute the distance and the 3D distance between the points:</p>
-<div class="highlight"><pre><span></span><code><span class="n">res</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span>
-    <span class="s2">&quot;distance&quot;</span><span class="p">,</span>
-    <span class="n">ST_Distance</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;point_a&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;point_b&quot;</span><span class="p">))</span>
-<span class="p">)</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span>
-    <span class="s2">&quot;3d_distance&quot;</span><span class="p">,</span>
-    <span class="n">ST_3DDistance</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;point_a&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;point_b&quot;</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><span class="n">res</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;distance&quot;</span><span class="p">,</span> <span class="n">ST_Distance</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;point_a&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;point_b&quot;</span><span class="p">)))</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span>
+    <span class="s2">&quot;3d_distance&quot;</span><span class="p">,</span> <span class="n">ST_3DDistance</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;point_a&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;point_b&quot;</span><span class="p">))</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>Take a look at the results:</p>
@@ -4911,15 +4905,17 @@
 <div class="highlight"><pre><span></span><code><span class="n">a</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">([(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)])</span>
 <span class="n">b</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">([(</span><span class="mf">1.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mf">1.1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)])</span>
 <span class="n">c</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">([(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)])</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">([</span>
-    <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">),</span>
-    <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">),</span>
-<span class="p">],</span> <span class="p">[</span><span class="s2">&quot;geometry1&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry1_id&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry2&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry2_id&quot;</span><span class="p">])</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="p">[</span><span class="s2">&quot;geometry1&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry1_id&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry2&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry2_id&quot;</span><span class="p">],</span>
+<span class="p">)</span>
 </code></pre></div>
 <p>Compute the Frechet distance:</p>
 <div class="highlight"><pre><span></span><code><span class="n">res</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span>
-    <span class="s2">&quot;frechet_distance&quot;</span><span class="p">,</span>
-    <span class="n">ST_FrechetDistance</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;geometry1&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;geometry2&quot;</span><span class="p">))</span>
+    <span class="s2">&quot;frechet_distance&quot;</span><span class="p">,</span> <span class="n">ST_FrechetDistance</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;geometry1&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;geometry2&quot;</span><span class="p">))</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>Now view the results:</p>
@@ -4938,10 +4934,7 @@
 <p>Suppose you have the following geometric objects:</p>
 <p><img alt="distance geometric objects" src="../../../image/tutorial/concepts/distance5.png" /></p>
 <p>Here’s how to compute the max distance between some of these geometries.  Run the computations:</p>
-<div class="highlight"><pre><span></span><code><span class="n">res</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span>
-    <span class="s2">&quot;max_distance&quot;</span><span class="p">,</span>
-    <span class="n">ST_MaxDistance</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;geom1&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;geom2&quot;</span><span class="p">))</span>
-<span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">res</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;max_distance&quot;</span><span class="p">,</span> <span class="n">ST_MaxDistance</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;geom1&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;geom2&quot;</span><span class="p">)))</span>
 </code></pre></div>
 <p>Now view the results:</p>
 <div class="highlight"><pre><span></span><code>res.select(&quot;id1&quot;, &quot;id2&quot;, &quot;max_distance&quot;).show(truncate=False)
@@ -4977,7 +4970,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="June 11, 2025 09:52:40 UTC">June 11, 2025 09:52:40</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="July 31, 2025 18:13:18 UTC">July 31, 2025 18:13:18</span>
   </span>
 
     

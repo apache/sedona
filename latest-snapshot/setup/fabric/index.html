@@ -4850,10 +4850,10 @@ https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.5.1-28.2/geotoo
 <p>In the notebook page, select the <code>ApacheSedona</code> environment you created before.</p>
 <p><img alt="Start the notebook with the Sedona environment and install the jars" src="../../image/fabric/fabric-9.png" /></p>
 <p>In the notebook, you can install the jars by running the following code. Please replace the <code>jars</code> with the download links of the 2 jars from the previous step.</p>
-<div class="highlight"><pre><span></span><code><span class="o">%%</span><span class="n">configure</span> <span class="o">-</span><span class="n">f</span>
-<span class="p">{</span>
-    <span class="s2">&quot;jars&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.5.1-28.2/geotools-wrapper-1.5.1-28.2.jar&quot;</span><span class="p">,</span> <span class="s2">&quot;https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.4_2.12/1.5.1/sedona-spark-shaded-3.4_2.12-1.5.1.jar&quot;</span><span class="p">]</span>
-<span class="p">}</span>
+<div class="highlight"><pre><span></span><code>%%configure -f
+{
+    &quot;jars&quot;: [&quot;https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.5.1-28.2/geotools-wrapper-1.5.1-28.2.jar&quot;, &quot;https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.4_2.12/1.5.1/sedona-spark-shaded-3.4_2.12-1.5.1.jar&quot;]
+}
 </code></pre></div>
 <h2 id="step-9-verify-the-installation">Step 9: Verify the installation<a class="headerlink" href="#step-9-verify-the-installation" title="Permanent link">&para;</a></h2>
 <p>You can verify the installation by running the following code in the notebook.</p>
@@ -4878,12 +4878,12 @@ abfss://9e9d4196-870a-4901-8fa5-e24841492ab8@onelake.dfs.fabric.microsoft.com/e1
 <p><img alt="Sedona notebook tab Lakehouses data source" src="../../image/fabric/fabric-7.png" /></p>
 <p><img alt="From Files upload the jars and then copy their ABFS paths" src="../../image/fabric/fabric-8.png" /></p>
 <p>If you use this option, the config files in your notebook should be</p>
-<div class="highlight"><pre><span></span><code><span class="o">%%</span><span class="n">configure</span> <span class="o">-</span><span class="n">f</span>
-<span class="p">{</span>
-    <span class="s2">&quot;conf&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;spark.jars&quot;</span><span class="p">:</span> <span class="s2">&quot;abfss://XXX/Files/sedona-spark-shaded-3.4_2.12-1.5.1.jar,abfss://XXX/Files/geotools-wrapper-1.5.1-28.2.jar&quot;</span><span class="p">,</span>
-    <span class="p">}</span>
-<span class="p">}</span>
+<div class="highlight"><pre><span></span><code>%%configure -f
+{
+    &quot;conf&quot;: {
+        &quot;spark.jars&quot;: &quot;abfss://XXX/Files/sedona-spark-shaded-3.4_2.12-1.5.1.jar,abfss://XXX/Files/geotools-wrapper-1.5.1-28.2.jar&quot;,
+    }
+}
 </code></pre></div>
 
 
@@ -4905,7 +4905,7 @@ abfss://9e9d4196-870a-4901-8fa5-e24841492ab8@onelake.dfs.fabric.microsoft.com/e1
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="December 4, 2024 07:01:47 UTC">December 4, 2024 07:01:47</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="July 31, 2025 18:13:18 UTC">July 31, 2025 18:13:18</span>
   </span>
 
     

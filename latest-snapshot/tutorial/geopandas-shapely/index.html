@@ -4891,16 +4891,13 @@
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
-<span class="n">config</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span><span class="o">.</span>\
-      <span class="n">getOrCreate</span><span class="p">()</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 
 <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="s2">&quot;gis_osm_pois_free_1.shp&quot;</span><span class="p">)</span>
 
-<span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
-  <span class="n">gdf</span>
-<span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span><span class="n">gdf</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>This query will show the following outputs:</p>
 <div class="highlight"><pre><span></span><code>+---------+----+-----------+--------------------+--------------------+
@@ -4916,7 +4913,9 @@
 </code></pre></div>
 <p>To leverage Arrow optimization and speed up the conversion, you can use the <code>create_spatial_dataframe</code>
 that takes a SparkSession and GeoDataFrame as parameters and returns a Sedona DataFrame.</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_spatial_dataframe</span><span class="p">(</span><span class="n">spark</span><span class="p">:</span> <span class="n">SparkSession</span><span class="p">,</span> <span class="n">gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_spatial_dataframe</span><span class="p">(</span>
+    <span class="n">spark</span><span class="p">:</span> <span class="n">SparkSession</span><span class="p">,</span> <span class="n">gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span> <span class="o">...</span>
 </code></pre></div>
 <ul>
 <li>spark: SparkSession</li>
@@ -4933,22 +4932,17 @@ that takes a SparkSession and GeoDataFrame as parameters and returns a Sedona Da
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
-<span class="n">config</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span><span class="o">.</span>
-    <span class="n">getOrCreate</span><span class="p">()</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 
-<span class="n">counties</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span>\
-    <span class="n">read</span><span class="o">.</span>\
-    <span class="n">option</span><span class="p">(</span><span class="s2">&quot;delimiter&quot;</span><span class="p">,</span> <span class="s2">&quot;|&quot;</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">option</span><span class="p">(</span><span class="s2">&quot;header&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">csv</span><span class="p">(</span><span class="s2">&quot;counties.csv&quot;</span><span class="p">)</span>
+<span class="n">counties</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;delimiter&quot;</span><span class="p">,</span> <span class="s2">&quot;|&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;header&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">csv</span><span class="p">(</span><span class="s2">&quot;counties.csv&quot;</span><span class="p">)</span>
+<span class="p">)</span>
 
 <span class="n">counties</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;county&quot;</span><span class="p">)</span>
 
-<span class="n">counties_geom</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span>
-    <span class="s2">&quot;SELECT *, st_geomFromWKT(geom) as geometry from county&quot;</span>
-<span class="p">)</span>
+<span class="n">counties_geom</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT *, st_geomFromWKT(geom) as geometry from county&quot;</span><span class="p">)</span>
 
 <span class="n">df</span> <span class="o">=</span> <span class="n">counties_geom</span><span class="o">.</span><span class="n">toPandas</span><span class="p">()</span>
 <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span>
@@ -4957,9 +4951,9 @@ that takes a SparkSession and GeoDataFrame as parameters and returns a Sedona Da
     <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
     <span class="n">column</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">,</span>
     <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;YlOrBr&#39;</span><span class="p">,</span>
-    <span class="n">scheme</span><span class="o">=</span><span class="s1">&#39;quantiles&#39;</span><span class="p">,</span>
-    <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;lightgray&#39;</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;YlOrBr&quot;</span><span class="p">,</span>
+    <span class="n">scheme</span><span class="o">=</span><span class="s2">&quot;quantiles&quot;</span><span class="p">,</span>
+    <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;lightgray&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>
 <p><br>
@@ -4972,8 +4966,7 @@ significantly faster for large results (requires geopandas &gt;= 1.0).</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataframe_to_arrow</span>
 
-<span class="n">config</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span><span class="o">.</span>
-    <span class="n">getOrCreate</span><span class="p">()</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 
@@ -5033,7 +5026,7 @@ significantly faster for large results (requires geopandas &gt;= 1.0).</p>
 <span class="n">schema</span> <span class="o">=</span> <span class="n">StructType</span><span class="p">(</span>
     <span class="p">[</span>
         <span class="n">StructField</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">IntegerType</span><span class="p">(),</span> <span class="kc">False</span><span class="p">),</span>
-        <span class="n">StructField</span><span class="p">(</span><span class="s2">&quot;geom&quot;</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">(),</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">StructField</span><span class="p">(</span><span class="s2">&quot;geom&quot;</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">(),</span> <span class="kc">False</span><span class="p">),</span>
     <span class="p">]</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -5041,17 +5034,10 @@ significantly faster for large results (requires geopandas &gt;= 1.0).</p>
 <h3 id="point-example">Point example<a class="headerlink" href="#point-example" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span>
 
-<span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">Point</span><span class="p">(</span><span class="mf">21.0</span><span class="p">,</span> <span class="mf">52.0</span><span class="p">)],</span>
-    <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">Point</span><span class="p">(</span><span class="mf">23.0</span><span class="p">,</span> <span class="mf">42.0</span><span class="p">)],</span>
-    <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">Point</span><span class="p">(</span><span class="mf">26.0</span><span class="p">,</span> <span class="mf">32.0</span><span class="p">)]</span>
-<span class="p">]</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="n">Point</span><span class="p">(</span><span class="mf">21.0</span><span class="p">,</span> <span class="mf">52.0</span><span class="p">)],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">Point</span><span class="p">(</span><span class="mf">23.0</span><span class="p">,</span> <span class="mf">42.0</span><span class="p">)],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">Point</span><span class="p">(</span><span class="mf">26.0</span><span class="p">,</span> <span class="mf">32.0</span><span class="p">)]]</span>
 
 
-<span class="n">gdf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">,</span>
-    <span class="n">schema</span>
-<span class="p">)</span>
+<span class="n">gdf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
 
 <span class="n">gdf</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
@@ -5072,14 +5058,9 @@ significantly faster for large results (requires geopandas &gt;= 1.0).</p>
 <h3 id="multipoint-example">MultiPoint example<a class="headerlink" href="#multipoint-example" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiPoint</span>
 
-<span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">MultiPoint</span><span class="p">([[</span><span class="mf">19.511463</span><span class="p">,</span> <span class="mf">51.765158</span><span class="p">],</span> <span class="p">[</span><span class="mf">19.446408</span><span class="p">,</span> <span class="mf">51.779752</span><span class="p">]])]</span>
-<span class="p">]</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="n">MultiPoint</span><span class="p">([[</span><span class="mf">19.511463</span><span class="p">,</span> <span class="mf">51.765158</span><span class="p">],</span> <span class="p">[</span><span class="mf">19.446408</span><span class="p">,</span> <span class="mf">51.779752</span><span class="p">]])]]</span>
 
-<span class="n">gdf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">,</span>
-    <span class="n">schema</span>
-<span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+<span class="n">gdf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>+---+---------------------------------------------------------+
 |id |geom                                                     |
@@ -5092,14 +5073,9 @@ significantly faster for large results (requires geopandas &gt;= 1.0).</p>
 
 <span class="n">line</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">40</span><span class="p">),</span> <span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span> <span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> <span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">10</span><span class="p">)]</span>
 
-<span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">LineString</span><span class="p">(</span><span class="n">line</span><span class="p">)]</span>
-<span class="p">]</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="n">LineString</span><span class="p">(</span><span class="n">line</span><span class="p">)]]</span>
 
-<span class="n">gdf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">,</span>
-    <span class="n">schema</span>
-<span class="p">)</span>
+<span class="n">gdf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
 
 <span class="n">gdf</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
@@ -5115,14 +5091,9 @@ significantly faster for large results (requires geopandas &gt;= 1.0).</p>
 <span class="n">line1</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">40</span><span class="p">)]</span>
 <span class="n">line2</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">40</span><span class="p">),</span> <span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span> <span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> <span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">10</span><span class="p">)]</span>
 
-<span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">MultiLineString</span><span class="p">([</span><span class="n">line1</span><span class="p">,</span> <span class="n">line2</span><span class="p">])]</span>
-<span class="p">]</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="n">MultiLineString</span><span class="p">([</span><span class="n">line1</span><span class="p">,</span> <span class="n">line2</span><span class="p">])]]</span>
 
-<span class="n">gdf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">,</span>
-    <span class="n">schema</span>
-<span class="p">)</span>
+<span class="n">gdf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
 
 <span class="n">gdf</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
@@ -5137,22 +5108,17 @@ significantly faster for large results (requires geopandas &gt;= 1.0).</p>
 
 <span class="n">polygon</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span>
     <span class="p">[</span>
-         <span class="p">[</span><span class="mf">19.51121</span><span class="p">,</span> <span class="mf">51.76426</span><span class="p">],</span>
-         <span class="p">[</span><span class="mf">19.51056</span><span class="p">,</span> <span class="mf">51.76583</span><span class="p">],</span>
-         <span class="p">[</span><span class="mf">19.51216</span><span class="p">,</span> <span class="mf">51.76599</span><span class="p">],</span>
-         <span class="p">[</span><span class="mf">19.51280</span><span class="p">,</span> <span class="mf">51.76448</span><span class="p">],</span>
-         <span class="p">[</span><span class="mf">19.51121</span><span class="p">,</span> <span class="mf">51.76426</span><span class="p">]</span>
+        <span class="p">[</span><span class="mf">19.51121</span><span class="p">,</span> <span class="mf">51.76426</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">19.51056</span><span class="p">,</span> <span class="mf">51.76583</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">19.51216</span><span class="p">,</span> <span class="mf">51.76599</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">19.51280</span><span class="p">,</span> <span class="mf">51.76448</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">19.51121</span><span class="p">,</span> <span class="mf">51.76426</span><span class="p">],</span>
     <span class="p">]</span>
 <span class="p">)</span>
 
-<span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">polygon</span><span class="p">]</span>
-<span class="p">]</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="n">polygon</span><span class="p">]]</span>
 
-<span class="n">gdf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">,</span>
-    <span class="n">schema</span>
-<span class="p">)</span>
+<span class="n">gdf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
 
 <span class="n">gdf</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
@@ -5170,19 +5136,11 @@ significantly faster for large results (requires geopandas &gt;= 1.0).</p>
 
 <span class="n">exterior_p2</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span>
 
-<span class="n">polygons</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="n">Polygon</span><span class="p">(</span><span class="n">exterior_p1</span><span class="p">,</span> <span class="p">[</span><span class="n">interior_p1</span><span class="p">]),</span>
-    <span class="n">Polygon</span><span class="p">(</span><span class="n">exterior_p2</span><span class="p">)</span>
-<span class="p">]</span>
+<span class="n">polygons</span> <span class="o">=</span> <span class="p">[</span><span class="n">Polygon</span><span class="p">(</span><span class="n">exterior_p1</span><span class="p">,</span> <span class="p">[</span><span class="n">interior_p1</span><span class="p">]),</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">exterior_p2</span><span class="p">)]</span>
 
-<span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">MultiPolygon</span><span class="p">(</span><span class="n">polygons</span><span class="p">)]</span>
-<span class="p">]</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="n">MultiPolygon</span><span class="p">(</span><span class="n">polygons</span><span class="p">)]]</span>
 
-<span class="n">gdf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">,</span>
-    <span class="n">schema</span>
-<span class="p">)</span>
+<span class="n">gdf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
 
 <span class="n">gdf</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
@@ -5203,17 +5161,12 @@ significantly faster for large results (requires geopandas &gt;= 1.0).</p>
     <span class="n">Polygon</span><span class="p">(</span><span class="n">exterior_p1</span><span class="p">,</span> <span class="p">[</span><span class="n">interior_p1</span><span class="p">]),</span>
     <span class="n">Polygon</span><span class="p">(</span><span class="n">exterior_p2</span><span class="p">),</span>
     <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-    <span class="n">LineString</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)])</span>
+    <span class="n">LineString</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]),</span>
 <span class="p">]</span>
 
-<span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">GeometryCollection</span><span class="p">(</span><span class="n">geoms</span><span class="p">)]</span>
-<span class="p">]</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="n">GeometryCollection</span><span class="p">(</span><span class="n">geoms</span><span class="p">)]]</span>
 
-<span class="n">gdf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">,</span>
-    <span class="n">schema</span>
-<span class="p">)</span>
+<span class="n">gdf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
 
 <span class="n">gdf</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
@@ -5243,7 +5196,7 @@ significantly faster for large results (requires geopandas &gt;= 1.0).</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="May 3, 2025 19:30:21 UTC">May 3, 2025 19:30:21</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="July 31, 2025 18:13:18 UTC">July 31, 2025 18:13:18</span>
   </span>
 
     

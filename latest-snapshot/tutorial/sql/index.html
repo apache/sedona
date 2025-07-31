@@ -5668,10 +5668,16 @@ POLYGON (..., ...)  Lancaster County
 <div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Python</label><label for="__tabbed_6_2">Scala</label><label for="__tabbed_6_3">Java</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geojson&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;multiLine&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;PATH/TO/MYFILE.json&quot;</span><span class="p">)</span>
- <span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;explode(features) as features&quot;</span><span class="p">)</span> <span class="c1"># Explode the envelope to get one feature per row.</span>
- <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;features.*&quot;</span><span class="p">)</span> <span class="c1"># Unpack the features struct.</span>
- <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;prop0&quot;</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">expr</span><span class="p">(</span><span class="s2">&quot;properties[&#39;prop0&#39;]&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;properties&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geojson&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;multiLine&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;PATH/TO/MYFILE.json&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;explode(features) as features&quot;</span><span class="p">)</span>  <span class="c1"># Explode the envelope</span>
+    <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;features.*&quot;</span><span class="p">)</span>  <span class="c1"># Unpack the features struct</span>
+    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;prop0&quot;</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">expr</span><span class="p">(</span><span class="s2">&quot;properties[&#39;prop0&#39;]&quot;</span><span class="p">))</span>
+    <span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;properties&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span>
+<span class="p">)</span>
 
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="n">df</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
@@ -6153,7 +6159,7 @@ only showing top 5 rows
 <h4 id="creating-a-choropleth-map-using-sedonapydeck">Creating a Choropleth map using SedonaPyDeck<a class="headerlink" href="#creating-a-choropleth-map-using-sedonapydeck" title="Permanent link">&para;</a></h4>
 <p>SedonaPyDeck exposes a <code>create_choropleth_map</code> API which can be used to visualize a choropleth map out of the passed SedonaDataFrame containing polygons with an observation:</p>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">create_choropleth_map</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">groupedresult</span><span class="p">,</span> <span class="n">plot_col</span><span class="o">=</span><span class="s1">&#39;AirportCount&#39;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">create_choropleth_map</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">groupedresult</span><span class="p">,</span> <span class="n">plot_col</span><span class="o">=</span><span class="s2">&quot;AirportCount&quot;</span><span class="p">)</span>
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -6165,7 +6171,7 @@ can also be found in the example notebook available <a href="https://github.com/
 <h4 id="creating-a-geometry-map-using-sedonapydeck">Creating a Geometry map using SedonaPyDeck<a class="headerlink" href="#creating-a-geometry-map-using-sedonapydeck" title="Permanent link">&para;</a></h4>
 <p>SedonaPyDeck exposes a create_geometry_map API which can be used to visualize a passed SedonaDataFrame containing any type of geometries:</p>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">create_geometry_map</span><span class="p">(</span><span class="n">df_building</span><span class="p">,</span> <span class="n">elevation_col</span><span class="o">=</span><span class="s1">&#39;height&#39;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">create_geometry_map</span><span class="p">(</span><span class="n">df_building</span><span class="p">,</span> <span class="n">elevation_col</span><span class="o">=</span><span class="s2">&quot;height&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p><img alt="Creating a Geometry map using SedonaPyDeck" src="../../image/buildings.gif" /></p>
 <div class="admonition tip">
@@ -6458,7 +6464,9 @@ like Point from shapely or geopandas GeoSeries, when you use GEO_SERIES vectori
 That's how Sedona infers the type and knows if the data should be cast.</p>
 </div>
 <p>Decorator signature looks as follows:</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">sedona_vectorized_udf</span><span class="p">(</span><span class="n">udf_type</span><span class="p">:</span> <span class="n">SedonaUDFType</span> <span class="o">=</span> <span class="n">SedonaUDFType</span><span class="o">.</span><span class="n">SHAPELY_SCALAR</span><span class="p">,</span> <span class="n">return_type</span><span class="p">:</span> <span class="n">DataType</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">sedona_vectorized_udf</span><span class="p">(</span>
+    <span class="n">udf_type</span><span class="p">:</span> <span class="n">SedonaUDFType</span> <span class="o">=</span> <span class="n">SedonaUDFType</span><span class="o">.</span><span class="n">SHAPELY_SCALAR</span><span class="p">,</span> <span class="n">return_type</span><span class="p">:</span> <span class="n">DataType</span>
+<span class="p">):</span> <span class="o">...</span>
 </code></pre></div>
 <p>where udf_type is the type of the UDF function, currently supported are:</p>
 <ul>
@@ -6471,6 +6479,7 @@ a given geometry.</p>
 <h3 id="shapely-scalar-udf">Shapely scalar UDF<a class="headerlink" href="#shapely-scalar-udf" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">shapely.geometry.base</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">b</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">sedona_vectorized_udf</span>
+
 
 <span class="nd">@sedona_vectorized_udf</span><span class="p">(</span><span class="n">return_type</span><span class="o">=</span><span class="n">GeometryType</span><span class="p">())</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">vectorized_buffer</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">BaseGeometry</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">b</span><span class="o">.</span><span class="n">BaseGeometry</span><span class="p">:</span>
@@ -6646,7 +6655,7 @@ desired.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="May 5, 2025 21:58:43 UTC">May 5, 2025 21:58:43</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="July 31, 2025 18:13:18 UTC">July 31, 2025 18:13:18</span>
   </span>
 
     
