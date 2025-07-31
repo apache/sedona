@@ -886,8 +886,8 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             If True, the CRS of the GeoDataFrame will be changed in place
             (while still returning the result) instead of making a copy of
             the GeoDataFrame.
-        allow_override : bool, default False
-            If the the GeoDataFrame already has a CRS, allow to replace the
+        allow_override : bool, default True
+            If the GeoDataFrame already has a CRS, allow to replace the
             existing CRS, even when both are not equal. In Sedona, setting this to True
             will lead to eager evaluation instead of lazy evaluation. Unlike Geopandas,
             True is the default value in Sedona for performance reasons.
