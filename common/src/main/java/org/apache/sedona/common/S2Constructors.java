@@ -145,7 +145,8 @@ public class S2Constructors {
   }
 
   public static S2Geography pointFromText(String geomString, String geomFormat) {
-    return geogFromText(geomString, geomFormat, S2Geography.GeographyKind.SINGLEPOINT);
+    return geogFromText(
+        geomString, geomFormat, S2Geography.GeographyKind.POINT); // todo: change to Singlepoint
   }
 
   public static S2Geography polygonFromText(String geomString, String geomFormat) {
@@ -153,7 +154,10 @@ public class S2Constructors {
   }
 
   public static S2Geography lineStringFromText(String geomString, String geomFormat) {
-    return geogFromText(geomString, geomFormat, S2Geography.GeographyKind.SINGLEPOLYLINE);
+    return geogFromText(
+        geomString,
+        geomFormat,
+        S2Geography.GeographyKind.POLYLINE); // todo: change to singlePolyline
   }
 
   public static S2Geography lineFromText(String geomString) {
