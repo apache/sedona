@@ -18,6 +18,7 @@
 import typing
 from typing import Any, Union, Literal, List
 
+import numpy as np
 import geopandas as gpd
 import sedona.geopandas as sgpd
 import pandas as pd
@@ -483,6 +484,8 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         if parse_version(pyspark.__version__) >= parse_version("3.5.0"):
             srid = tmp_series.item()
+            # Turn np.nan to 0 to avoid error
+            srid = 0 if np.isnan(srid) else srid
         else:
             first_idx = tmp_series.first_valid_index()
             srid = tmp_series[first_idx] if first_idx is not None else 0
