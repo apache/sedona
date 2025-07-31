@@ -301,6 +301,30 @@ class TestGeoDataFrame(TestGeopandasBase):
         assert isinstance(sgpd_df, GeoDataFrame)
         assert sgpd_df.crs.to_epsg() == 4326
 
+    def test_to_crs(self):
+        from pyproj import CRS
+
+        with self.ps_allow_diff_frames():
+            gdf = sgpd.GeoDataFrame(
+                {"geometry": [Point(1, 1), Point(2, 2), Point(3, 3)]}, crs=4326
+            )
+        assert isinstance(gdf.crs, CRS) and gdf.crs.to_epsg() == 4326
+
+        with self.ps_allow_diff_frames():
+            result = gdf.to_crs(3857)
+        assert isinstance(result.crs, CRS) and result.crs.to_epsg() == 3857
+
+        expected = gpd.GeoSeries(
+            [
+                Point(111319.49079327356, 111325.14286638486),
+                Point(222638.98158654712, 222684.20850554455),
+                Point(333958.4723798207, 334111.1714019597),
+            ],
+            name="geometry",
+            crs=3857,
+        )
+        self.check_sgpd_equals_gpd(result.geometry, expected)
+
     def test_set_geometry(self):
         from sedona.geopandas.geodataframe import MissingGeometryColumnError
 
