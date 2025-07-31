@@ -91,16 +91,15 @@ def _frame_join(
     right_geom_col = None
 
     # Find geometry columns in left dataframe
-    for field in left_sdf.schema.fields:
-        if field.dataType.typeName() in ("geometrytype", "binary"):
-            left_geom_col = field.name
-            break
+    left_geom_col = left_df.active_geometry_name
 
     # Find geometry columns in right dataframe
-    for field in right_sdf.schema.fields:
-        if field.dataType.typeName() in ("geometrytype", "binary"):
-            right_geom_col = field.name
-            break
+    right_geom_col = right_df.active_geometry_name
+
+    if not left_geom_col:
+        raise ValueError("Left dataframe geometry column not set")
+    if not right_geom_col:
+        raise ValueError("Right dataframe geometry column not set")
 
     if left_geom_col is None or right_geom_col is None:
         raise ValueError("Both datasets must have geometry columns")
