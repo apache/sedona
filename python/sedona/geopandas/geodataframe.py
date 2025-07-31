@@ -309,19 +309,16 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         Name: value, dtype: int64
         """
 
-        # Handle column access by name
-        if isinstance(key, str):
-            # Access column directly from the spark DataFrame
-            column_name = key
+        # Here we are getting a ps.Series with the same underlying anchor (ps.Dataframe).
+        # This is important so we don't unnecessarily try to perform operations on different dataframes
+        item = pspd.DataFrame.__getitem__(self, key)
 
-            # Check if column exists
-            if column_name not in self.columns:
-                raise KeyError(f"Column '{column_name}' does not exist")
-
-            # Here we are getting a ps.Series with the same underlying anchor (ps.Dataframe).
-            # This is important so we don't unnecessarily try to perform operations on different dataframes
-            ps_series: pspd.Series = pspd.DataFrame.__getitem__(self, column_name)
-
+        if isinstance(item, pspd.DataFrame):
+            # don't specify crs=self.crs here because it might not include the geometry column
+            # if it does include the geometry column, we don't need to set crs anyways
+            return GeoDataFrame(item)
+        elif isinstance(item, pspd.Series):
+            ps_series: pspd.Series = item
             try:
                 result = sgpd.GeoSeries(ps_series)
                 not_null = ps_series[ps_series.notnull()]
@@ -336,28 +333,8 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 return result
             except TypeError:
                 return ps_series
-
-        # Handle list of column names
-        elif isinstance(key, list) and all(isinstance(k, str) for k in key):
-            # Check if all columns exist
-            missing_cols = [k for k in key if k not in self.columns]
-            if missing_cols:
-                raise KeyError(f"Columns {missing_cols} do not exist")
-
-            # Select columns from the spark DataFrame
-            spark_df = self._internal.spark_frame.select(*key)
-            pandas_df = spark_df.toPandas()
-
-            # Return as GeoDataFrame
-            return GeoDataFrame(pandas_df)
-
-        # Handle row selection via slice or boolean indexing
         else:
-            # For now, convert to pandas first for row-based operations
-            # This could be optimized later for better performance
-            pandas_df = self._internal.spark_frame.toPandas()
-            selected_rows = pandas_df[key]
-            return GeoDataFrame(selected_rows)
+            raise Exception(f"Logical Error: Unexpected type: {type(item)}")
 
     _geometry_column_name = None
 
@@ -405,28 +382,28 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         elif isinstance(data, PandasOnSparkSeries):
 
             try:
-                data = GeoSeries(data)
+                data = GeoSeries(data, crs=crs)
             except TypeError:
                 pass
 
             super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
         else:
             # below are not distributed dataframe types
-            if isinstance(data, pd.DataFrame):
-                assert index is None
-                assert dtype is None
-                assert not copy
-                # Need to convert GeoDataFrame to pd.DataFrame for below cast to work
-                pd_df = (
-                    pd.DataFrame(data) if isinstance(data, gpd.GeoDataFrame) else data
-                )
-            else:
-                pd_df = pd.DataFrame(
-                    data=data,
-                    index=index,
-                    dtype=dtype,
-                    copy=copy,
-                )
+            if isinstance(data, gpd.GeoDataFrame):
+                # Geopandas stores crs as metadata instead of inside of the shapely objects so we must save it and set it manually later
+                if data._geometry_column_name:
+                    if not crs:
+                        crs = data.crs
+                    if not geometry:
+                        geometry = data.geometry.name
+
+            pd_df = pd.DataFrame(
+                data,
+                index=index,
+                columns=columns,
+                dtype=dtype,
+                copy=copy,
+            )
 
             # Spark complains if it's left as a geometry type
             geom_type_cols = pd_df.select_dtypes(include=["geometry"]).columns
@@ -447,7 +424,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 raise ValueError(crs_mismatch_error)
 
         if geometry:
-            self.set_geometry(geometry, inplace=True)
+            self.set_geometry(geometry, inplace=True, crs=crs)
 
         if geometry is None and "geometry" in self.columns:
 
@@ -462,8 +439,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 geom_crs = geometry.crs
                 if geom_crs is None:
                     if crs is not None:
-                        geometry.set_crs(crs, inplace=True)
-                        self.set_geometry(geometry, inplace=True)
+                        self.set_geometry(geometry, inplace=True, crs=crs)
                 else:
                     if crs is not None and geom_crs != crs:
                         raise ValueError(crs_mismatch_error)
@@ -625,6 +601,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             frame = self.copy(deep=False)
 
         geo_column_name = self._geometry_column_name
+        new_series = False
 
         if geo_column_name is None:
             geo_column_name = "geometry"
@@ -647,6 +624,12 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                     level = col.rename(geo_column_name)
             else:
                 level = pspd.Series(col, name=geo_column_name)
+
+            if not isinstance(level, sgpd.GeoSeries):
+                # Set the crs later, so we can allow_override=True
+                level = sgpd.GeoSeries(level)
+
+            new_series = True
         elif hasattr(col, "ndim") and col.ndim > 1:
             raise ValueError("Must pass array with one dimension only.")
         else:  # should be a colname
@@ -692,17 +675,15 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         if not crs:
             crs = getattr(level, "crs", None)
 
-        # Check that we are using a listlike of geometries
-        level = _ensure_geometry(level, crs=crs)
-        # ensure_geometry only sets crs on level if it has crs==None
-
         # This operation throws a warning to the user asking them to set pspd.set_option('compute.ops_on_diff_frames', True)
         # to allow operations on different frames. We pass these warnings on to the user so they must manually set it themselves.
         if level.crs != crs:
             level.set_crs(crs, inplace=True, allow_override=True)
+            new_series = True
 
         frame._geometry_column_name = geo_column_name
-        frame[geo_column_name] = level
+        if new_series:
+            frame[geo_column_name] = level
 
         if not inplace:
             return frame
@@ -823,6 +804,12 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 pd_df[col_name] = series.to_pandas()
 
         return gpd.GeoDataFrame(pd_df, geometry=self._geometry_column_name)
+
+    def to_spark_pandas(self) -> pspd.DataFrame:
+        """
+        Convert the GeoDataFrame to a Spark Pandas DataFrame.
+        """
+        return pspd.DataFrame(self._internal)
 
     @property
     def sindex(self) -> SpatialIndex | None:
