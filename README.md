@@ -26,18 +26,27 @@
 | Apache Sedona              | 225k/month | [![PyPI - Downloads](https://img.shields.io/pypi/dm/apache-sedona)](https://pepy.tech/project/apache-sedona) [![Downloads](https://static.pepy.tech/personalized-badge/apache-sedona?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=total%20downloads)](https://pepy.tech/project/apache-sedona) | [![Anaconda-Server Badge](https://anaconda.org/conda-forge/apache-sedona/badges/downloads.svg)](https://anaconda.org/conda-forge/apache-sedona) | [![CRAN monthly downloads](https://cranlogs.r-pkg.org/badges/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona) [![Total CRAN downloads](https://cranlogs.r-pkg.org/badges/grand-total/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona) | [![Docker pulls](https://img.shields.io/docker/pulls/apache/sedona?color=brightgreen)](https://hub.docker.com/r/apache/sedona) |
 | Archived GeoSpark releases | 10k/month  | [![PyPI - Downloads](https://img.shields.io/pypi/dm/geospark)](https://pepy.tech/project/geospark)[![Downloads](https://static.pepy.tech/personalized-badge/geospark?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=total%20downloads)](https://pepy.tech/project/geospark)                      |                                                                                                                                                 |                                                                                                                                                                                                                                                                                                             |                                                                                                                                |
 
-* [Join the community](#join-the-community)
-* [What is Apache Sedona?](#what-is-apache-sedona)
-  * [Features](#features)
-* [When to use Sedona?](#when-to-use-sedona)
-  * [Use Cases](#use-cases)
-  * [Code Example](#code-example)
-* [Docker image](#docker-image)
-* [Building Sedona](#building-sedona)
-* [Documentation](#documentation)
-* [Star History](#star-history)
-* [Contributors](#contributors)
-* [Powered by](#powered-by)
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+- [Join the community](#join-the-community)
+- [What is Apache Sedona?](#what-is-apache-sedona)
+  - [Features](#features)
+- [When to use Sedona?](#when-to-use-sedona)
+  - [Use Cases:](#use-cases)
+  - [Code Example:](#code-example)
+    - [Load NYC taxi trips and taxi zones data from CSV Files Stored on AWS S3](#load-nyc-taxi-trips-and-taxi-zones-data-from-csv-files-stored-on-aws-s3)
+    - [Spatial SQL query to only return Taxi trips in Manhattan](#spatial-sql-query-to-only-return-taxi-trips-in-manhattan)
+    - [Spatial Join between Taxi Dataframe and Zone Dataframe to Find taxis in each zone](#spatial-join-between-taxi-dataframe-and-zone-dataframe-to-find-taxis-in-each-zone)
+    - [Show a map of the loaded Spatial Dataframes using GeoPandas](#show-a-map-of-the-loaded-spatial-dataframes-using-geopandas)
+- [Docker image](#docker-image)
+- [Building Sedona](#building-sedona)
+- [Documentation](#documentation)
+- [Star History](#star-history)
+- [Contributors](#contributors)
+- [Powered by](#powered-by)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Join the community
 
