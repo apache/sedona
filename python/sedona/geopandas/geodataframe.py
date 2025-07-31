@@ -320,17 +320,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         elif isinstance(item, pspd.Series):
             ps_series: pspd.Series = item
             try:
-                result = sgpd.GeoSeries(ps_series)
-                not_null = ps_series[ps_series.notnull()]
-                if len(not_null) > 0:
-                    first_geom = not_null.iloc[0]
-                    srid = shapely.get_srid(first_geom)
-
-                    # Shapely objects stored in the ps.Series retain their srid
-                    # but the GeoSeries does not, so we manually re-set it here
-                    if srid > 0:
-                        result.set_crs(srid, inplace=True)
-                return result
+                return sgpd.GeoSeries(ps_series)
             except TypeError:
                 return ps_series
         else:
@@ -361,21 +351,15 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         from sedona.geopandas import GeoSeries
         from pyspark.sql import DataFrame as SparkDataFrame
 
-        if isinstance(data, GeoDataFrame):
-            data_crs = data._safe_get_crs()
-            if data_crs is not None:
-                data.crs = data_crs
-
-            super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
-
-        elif isinstance(data, GeoSeries):
-            if data.crs is None:
+        if isinstance(data, (GeoDataFrame, GeoSeries)):
+            if crs:
                 data.crs = crs
 
             # For each of these super().__init__() calls, we let pyspark decide which inputs are valid or not
             # instead of calling e.g assert not dtype ourselves.
             # This way, if Spark adds support later, than we inherit those changes naturally
             super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
+
         elif isinstance(data, (PandasOnSparkDataFrame, SparkDataFrame)):
 
             super().__init__(data, index=index, columns=columns, dtype=dtype, copy=copy)
@@ -674,12 +658,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 # if not dropping, set the active geometry name to the given col name
                 geo_column_name = col
 
-        if not crs:
-            crs = getattr(level, "crs", None)
-
         # This operation throws a warning to the user asking them to set pspd.set_option('compute.ops_on_diff_frames', True)
         # to allow operations on different frames. We pass these warnings on to the user so they must manually set it themselves.
-        if level.crs != crs:
+        if crs:
             level.set_crs(crs, inplace=True, allow_override=True)
             new_series = True
 
