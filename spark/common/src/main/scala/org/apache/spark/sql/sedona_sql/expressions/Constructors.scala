@@ -18,7 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
-import org.apache.sedona.common.{Constructors, Functions}
+import org.apache.sedona.common.{Constructors, Functions, S2Constructors}
 import org.apache.sedona.common.enums.FileDataSplitter
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
@@ -105,7 +105,7 @@ private[apache] case class ST_GeomFromWKT(inputExpressions: Seq[Expression])
  *   This function takes a geometry string and a srid. The string format must be WKT.
  */
 private[apache] case class ST_GeogFromWKT(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.geogFromWKT _) {
+    extends InferredExpression(S2Constructors.geogFromWKT _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
