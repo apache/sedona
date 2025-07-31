@@ -479,7 +479,6 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @crs.setter
     def crs(self, value: Union["CRS", None]):
-        # Implementation of the abstract method
         self.set_crs(value, inplace=True)
 
     @typing.overload

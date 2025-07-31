@@ -281,6 +281,26 @@ class TestGeoDataFrame(TestGeopandasBase):
         df_copy = df.copy()
         assert type(df_copy) is GeoDataFrame
 
+    def test_set_crs(self):
+        sgpd_df = sgpd.GeoDataFrame({"geometry": [Point(0, 0), Point(1, 1)]})
+        with self.ps_allow_diff_frames():
+            sgpd_df.crs = 4326
+        assert sgpd_df.crs.to_epsg() == 4326
+
+        with self.ps_allow_diff_frames():
+            sgpd_df.set_crs(3857, inplace=True, allow_override=True)
+        assert sgpd_df.crs.to_epsg() == 3857
+
+        with self.ps_allow_diff_frames():
+            sgpd_df = sgpd_df.set_crs(None, allow_override=True)
+        assert isinstance(sgpd_df, GeoDataFrame)
+        assert sgpd_df.crs is None
+
+        with self.ps_allow_diff_frames():
+            sgpd_df = sgpd_df.set_crs(4326, allow_override=True)
+        assert isinstance(sgpd_df, GeoDataFrame)
+        assert sgpd_df.crs.to_epsg() == 4326
+
     def test_set_geometry(self):
         from sedona.geopandas.geodataframe import MissingGeometryColumnError
 

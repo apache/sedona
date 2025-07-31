@@ -876,10 +876,91 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
     @crs.setter
     def crs(self, value):
-        # Avoid trying to access the geometry column (which might be missing) if crs is None
-        if value is None:
-            return
-        self.geometry.crs = value
+        # Since pyspark dataframes are immutable, we can't modify in place, so we create the new geoseries and replace it
+        self.geometry = self.geometry.set_crs(value)
+
+    def set_crs(self, crs, inplace=False, allow_override=False):
+        """
+        Set the Coordinate Reference System (CRS) of the ``GeoDataFrame``.
+
+        If there are multiple geometry columns within the GeoDataFrame, only
+        the CRS of the active geometry column is set.
+
+        Pass ``None`` to remove CRS from the active geometry column.
+
+        Notes
+        -----
+        The underlying geometries are not transformed to this CRS. To
+        transform the geometries to a new CRS, use the ``to_crs`` method.
+
+        Parameters
+        ----------
+        crs : pyproj.CRS | None, optional
+            The value can be anything accepted
+            by :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
+            such as an authority string (eg "EPSG:4326") or a WKT string.
+        epsg : int, optional
+            EPSG code specifying the projection.
+        inplace : bool, default False
+            If True, the CRS of the GeoDataFrame will be changed in place
+            (while still returning the result) instead of making a copy of
+            the GeoDataFrame.
+        allow_override : bool, default False
+            If the the GeoDataFrame already has a CRS, allow to replace the
+            existing CRS, even when both are not equal.
+
+        Examples
+        --------
+        >>> from sedona.geopandas import GeoDataFrame
+        >>> from shapely.geometry import Point
+        >>> d = {'col1': ['name1', 'name2'], 'geometry': [Point(1, 2), Point(2, 1)]}
+        >>> gdf = GeoDataFrame(d)
+        >>> gdf
+            col1     geometry
+        0  name1  POINT (1 2)
+        1  name2  POINT (2 1)
+
+        Setting CRS to a GeoDataFrame without one:
+
+        >>> gdf.crs is None
+        True
+
+        >>> gdf = gdf.set_crs('epsg:3857')
+        >>> gdf.crs  # doctest: +SKIP
+        <Projected CRS: EPSG:3857>
+        Name: WGS 84 / Pseudo-Mercator
+        Axis Info [cartesian]:
+        - X[east]: Easting (metre)
+        - Y[north]: Northing (metre)
+        Area of Use:
+        - name: World - 85°S to 85°N
+        - bounds: (-180.0, -85.06, 180.0, 85.06)
+        Coordinate Operation:
+        - name: Popular Visualisation Pseudo-Mercator
+        - method: Popular Visualisation Pseudo Mercator
+        Datum: World Geodetic System 1984
+        - Ellipsoid: WGS 84
+        - Prime Meridian: Greenwich
+
+        Overriding existing CRS:
+
+        >>> gdf = gdf.set_crs(4326, allow_override=True)
+
+        Without ``allow_override=True``, ``set_crs`` returns an error if you try to
+        override CRS.
+
+        See Also
+        --------
+        GeoDataFrame.to_crs : re-project to another CRS
+        """
+        # Since pyspark dataframes are immutable, we can't modify in place, so we create the new geoseries and replace it
+        new_geometry = self.geometry.set_crs(crs, allow_override=allow_override)
+        if inplace:
+            self.geometry = new_geometry
+        else:
+            df = self.copy()
+            df.geometry = new_geometry
+            return df
 
     @classmethod
     def from_dict(
