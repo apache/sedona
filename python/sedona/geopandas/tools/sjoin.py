@@ -316,15 +316,11 @@ def _basic_checks(left_df, right_df, how, lsuffix, rsuffix, on_attribute=None):
     on_attribute : list, default None
         list of column names to merge on along with geometry
     """
-    if not isinstance(left_df, (GeoSeries, GeoDataFrame)):
-        raise ValueError(
-            f"'left_df' should be GeoSeries or GeoDataFrame, got {type(left_df)}"
-        )
+    if not isinstance(left_df, GeoDataFrame):
+        raise ValueError(f"'left_df' should be GeoDataFrame, got {type(left_df)}")
 
-    if not isinstance(right_df, (GeoSeries, GeoDataFrame)):
-        raise ValueError(
-            f"'right_df' should be GeoSeries or GeoDataFrame, got {type(right_df)}"
-        )
+    if not isinstance(right_df, GeoDataFrame):
+        raise ValueError(f"'right_df' should be GeoDataFrame, got {type(right_df)}")
 
     allowed_hows = ["inner", "left", "right"]
     if how not in allowed_hows:

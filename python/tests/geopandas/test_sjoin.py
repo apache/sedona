@@ -41,12 +41,6 @@ class TestSpatialJoin(TestBase):
         self.point2 = Point(1.5, 1.5)
         self.line1 = LineString([(0, 0), (1, 1)])
 
-        # GeoSeries for testing
-        self.g1 = GeoSeries([self.t1, self.t2])
-        self.g2 = GeoSeries([self.sq, self.t1])
-        self.g3 = GeoSeries([self.t1, self.t2], crs="epsg:4326")
-        self.g4 = GeoSeries([self.t2, self.t1])
-
         # GeoDataFrames for testing
         self.gdf1 = GeoDataFrame(
             {"geometry": [self.t1, self.t2], "id": [1, 2], "name": ["poly1", "poly2"]}
@@ -77,24 +71,6 @@ class TestSpatialJoin(TestBase):
 
     def teardown_method(self):
         shutil.rmtree(self.tempdir)
-
-    def test_sjoin_method1(self):
-        """Test basic sjoin functionality with GeoSeries"""
-        left = self.g1
-        right = self.g2
-        joined = sjoin(left, right)
-        assert joined is not None
-        assert type(joined) is GeoSeries
-        assert joined.count() == 4
-
-    def test_sjoin_method2(self):
-        """Test GeoSeries.sjoin method"""
-        left = self.g1
-        right = self.g2
-        joined = left.sjoin(right)
-        assert joined is not None
-        assert type(joined) is GeoSeries
-        assert joined.count() == 4
 
     def test_sjoin_geodataframe_basic(self):
         """Test basic sjoin with GeoDataFrame"""
