@@ -26,13 +26,13 @@ sedona.spark.SedonaContext module
 
 .. automodule:: sedona.spark.SedonaContext
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: sedona.spark
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
