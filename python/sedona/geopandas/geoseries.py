@@ -464,16 +464,28 @@ class GeoSeries(GeoFrame, pspd.Series):
         if len(self) == 0:
             return None
 
-        spark_col = stf.ST_SRID(self.spark.column)
+        if parse_version(pyspark.__version__) >= parse_version("3.5.0"):
+            spark_col = stf.ST_SRID(F.first_value(self.spark.column, ignoreNulls=True))
+            # Set this to avoid error complaining that we don't have a groupby column
+            is_aggr = True
+        else:
+            spark_col = stf.ST_SRID(self.spark.column)
+            is_aggr = False
+
         tmp_series = self._query_geometry_column(
             spark_col,
             returns_geom=False,
+            is_aggr=is_aggr,
         )
 
         # All geometries should have the same srid
         # so we just take the srid of the first non-null element
-        first_idx = tmp_series.first_valid_index()
-        srid = tmp_series[first_idx] if first_idx is not None else 0
+
+        if parse_version(pyspark.__version__) >= parse_version("3.5.0"):
+            srid = tmp_series.item()
+        else:
+            first_idx = tmp_series.first_valid_index()
+            srid = tmp_series[first_idx] if first_idx is not None else 0
 
         # Sedona returns 0 if doesn't exist
         return CRS.from_user_input(srid) if srid != 0 else None
