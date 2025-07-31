@@ -142,11 +142,14 @@ You can also use the SQL API as follows:
 Here’s how to create a Sedona DataFrame with a geometry column
 
 ```python
-df = sedona.createDataFrame([
-    ('a', 'POLYGON((1.0 1.0,1.0 3.0,2.0 3.0,2.0 1.0,1.0 1.0))'),
-    ('b', 'LINESTRING(4.0 1.0,4.0 2.0,6.0 4.0)'),
-    ('c', 'POINT(9.0 2.0)'),
-], ["id", "geometry"])
+df = sedona.createDataFrame(
+    [
+        ("a", "POLYGON((1.0 1.0,1.0 3.0,2.0 3.0,2.0 1.0,1.0 1.0))"),
+        ("b", "LINESTRING(4.0 1.0,4.0 2.0,6.0 4.0)"),
+        ("c", "POINT(9.0 2.0)"),
+    ],
+    ["id", "geometry"],
+)
 df = df.withColumn("geometry", expr("ST_GeomFromWKT(geometry)"))
 ```
 
