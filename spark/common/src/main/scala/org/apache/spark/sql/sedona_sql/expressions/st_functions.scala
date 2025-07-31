@@ -103,6 +103,9 @@ object st_functions {
   def ST_AsText(geometry: Column): Column = wrapExpression[ST_AsText](geometry)
   def ST_AsText(geometry: String): Column = wrapExpression[ST_AsText](geometry)
 
+  def ST_AsTextGeog(geometry: Column): Column = wrapExpression[ST_AsTextGeog](geometry)
+  def ST_AsTextGeog(geometry: String): Column = wrapExpression[ST_AsTextGeog](geometry)
+
   def ST_Azimuth(pointA: Column, pointB: Column): Column =
     wrapExpression[ST_Azimuth](pointA, pointB)
   def ST_Azimuth(pointA: String, pointB: String): Column =
@@ -183,6 +186,20 @@ object st_functions {
 
   def ST_Distance(a: Column, b: Column): Column = wrapExpression[ST_Distance](a, b)
   def ST_Distance(a: String, b: String): Column = wrapExpression[ST_Distance](a, b)
+
+  def ST_S2Distance(a: Column, b: Column): Column = wrapExpression[ST_S2Distance](a, b)
+  def ST_S2Distance(a: String, b: String): Column = wrapExpression[ST_S2Distance](a, b)
+
+  def ST_S2MaxDistance(a: Column, b: Column): Column = wrapExpression[ST_S2MaxDistance](a, b)
+  def ST_S2MaxDistance(a: String, b: String): Column = wrapExpression[ST_S2MaxDistance](a, b)
+
+  def ST_S2CloestsPoint(a: Column, b: Column): Column = wrapExpression[ST_S2CloestsPoint](a, b)
+  def ST_S2CloestsPoint(a: String, b: String): Column = wrapExpression[ST_S2CloestsPoint](a, b)
+
+  def ST_S2MinimumClearanceLineBetween(a: Column, b: Column): Column =
+    wrapExpression[ST_S2MinimumClearanceLineBetween](a, b)
+  def ST_S2MinimumClearanceLineBetween(a: String, b: String): Column =
+    wrapExpression[ST_S2MinimumClearanceLineBetween](a, b)
 
   def ST_Dump(geometry: Column): Column = wrapExpression[ST_Dump](geometry)
   def ST_Dump(geometry: String): Column = wrapExpression[ST_Dump](geometry)
