@@ -142,15 +142,6 @@ def chain(f, g):
     """chain two functions together"""
     return lambda *a: g(f(*a))
 
-
-# def wrap_udf(f, return_type):
-#     if return_type.needConversion():
-#         toInternal = return_type.toInternal
-#         return lambda *a: toInternal(f(*a))
-#     else:
-#         return lambda *a: f(*a)
-
-
 def wrap_scalar_pandas_udf(f, return_type):
     arrow_return_type = to_arrow_type(return_type)
 
@@ -255,83 +246,8 @@ def read_udfs(pickleSer, infile, eval_type):
     ndarray_as_list = eval_type == PythonEvalType.SQL_ARROW_BATCHED_UDF
     # Arrow-optimized Python UDF uses explicit Arrow cast for type coercion
     arrow_cast = eval_type == PythonEvalType.SQL_ARROW_BATCHED_UDF
-    ser = SedonaArrowStreamPandasUDFSerializer(
-        timezone,
-        safecheck,
-        assign_cols_by_name(runner_conf),
-        df_for_struct,
-        struct_in_pandas,
-        ndarray_as_list,
-        arrow_cast,
-    )
 
     num_udfs = read_int(infile)
-
-    is_scalar_iter = eval_type == PythonEvalType.SQL_SCALAR_PANDAS_ITER_UDF
-    is_map_pandas_iter = eval_type == PythonEvalType.SQL_MAP_PANDAS_ITER_UDF
-    is_map_arrow_iter = eval_type == PythonEvalType.SQL_MAP_ARROW_ITER_UDF
-
-    if is_scalar_iter or is_map_pandas_iter or is_map_arrow_iter:
-        if is_scalar_iter:
-            assert num_udfs == 1, "One SCALAR_ITER UDF expected here."
-        if is_map_pandas_iter:
-            assert num_udfs == 1, "One MAP_PANDAS_ITER UDF expected here."
-        if is_map_arrow_iter:
-            assert num_udfs == 1, "One MAP_ARROW_ITER UDF expected here."
-
-        arg_offsets, udf = read_single_udf(pickleSer, infile, eval_type, runner_conf, udf_index=0)
-
-        def func(_, iterator):
-            num_input_rows = 0
-
-            def map_batch(batch):
-                nonlocal num_input_rows
-
-                udf_args = [batch[offset] for offset in arg_offsets]
-                num_input_rows += len(udf_args[0])
-                if len(udf_args) == 1:
-                    return udf_args[0]
-                else:
-                    return tuple(udf_args)
-
-            iterator = map(map_batch, iterator)
-            result_iter = udf(iterator)
-
-            num_output_rows = 0
-            for result_batch, result_type in result_iter:
-                num_output_rows += len(result_batch)
-                # This assert is for Scalar Iterator UDF to fail fast.
-                # The length of the entire input can only be explicitly known
-                # by consuming the input iterator in user side. Therefore,
-                # it's very unlikely the output length is higher than
-                # input length.
-                assert (
-                        is_map_pandas_iter or is_map_arrow_iter or num_output_rows <= num_input_rows
-                ), "Pandas SCALAR_ITER UDF outputted more rows than input rows."
-                yield (result_batch, result_type)
-
-            if is_scalar_iter:
-                try:
-                    next(iterator)
-                except StopIteration:
-                    pass
-                else:
-                    raise PySparkRuntimeError(
-                        error_class="STOP_ITERATION_OCCURRED_FROM_SCALAR_ITER_PANDAS_UDF",
-                        message_parameters={},
-                    )
-
-                if num_output_rows != num_input_rows:
-                    raise PySparkRuntimeError(
-                        error_class="RESULT_LENGTH_MISMATCH_FOR_SCALAR_ITER_PANDAS_UDF",
-                        message_parameters={
-                            "output_length": str(num_output_rows),
-                            "input_length": str(num_input_rows),
-                        },
-                    )
-
-        # profiling is not supported for UDF
-        return func, None, ser, ser
 
     udfs = []
     for i in range(num_udfs):
@@ -348,6 +264,16 @@ def read_udfs(pickleSer, infile, eval_type):
 
     def func(_, it):
         return map(mapper, it)
+
+    ser = SedonaArrowStreamPandasUDFSerializer(
+        timezone,
+        safecheck,
+        assign_cols_by_name(runner_conf),
+        df_for_struct,
+        struct_in_pandas,
+        ndarray_as_list,
+        arrow_cast,
+    )
 
     # profiling is not supported for UDF
     return func, None, ser, ser
