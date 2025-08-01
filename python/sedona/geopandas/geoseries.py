@@ -488,7 +488,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             srid = 0 if np.isnan(srid) else srid
         else:
             first_idx = tmp_series.first_valid_index()
-            srid = tmp_series[first_idx] if first_idx is not None else 0
+            srid = tmp_series[first_idx] if not pd.isna(first_idx) else 0
 
         # Sedona returns 0 if doesn't exist
         return CRS.from_user_input(srid) if srid != 0 else None
