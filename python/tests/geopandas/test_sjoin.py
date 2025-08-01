@@ -18,10 +18,12 @@ import shutil
 import tempfile
 import pytest
 import shapely
+import pandas as pd
+import geopandas as gpd
 
 from shapely.geometry import Polygon, Point, LineString
-from sedona.geopandas import GeoSeries, GeoDataFrame, sjoin
-from tests.test_base import TestBase
+from sedona.geopandas import GeoDataFrame, sjoin
+from tests.geopandas.test_geopandas_base import TestGeopandasBase
 from packaging.version import parse as parse_version
 
 
@@ -29,7 +31,7 @@ from packaging.version import parse as parse_version
     parse_version(shapely.__version__) < parse_version("2.0.0"),
     reason=f"Tests require shapely>=2.0.0, but found v{shapely.__version__}",
 )
-class TestSpatialJoin(TestBase):
+class TestSpatialJoin(TestGeopandasBase):
     def setup_method(self):
         self.tempdir = tempfile.mkdtemp()
 
@@ -86,9 +88,26 @@ class TestSpatialJoin(TestBase):
     def test_sjoin_geodataframe_method(self):
         """Test GeoDataFrame.sjoin method"""
         joined = self.gdf1.sjoin(self.gdf2)
-        assert joined is not None
-        assert type(joined) is GeoDataFrame
-        assert "geometry" in joined.columns
+        expected = gpd.GeoDataFrame(
+            {
+                "geometry": [
+                    Polygon([(0, 0), (1, 0), (1, 1), (0, 0)]),
+                    Polygon([(0, 0), (1, 0), (1, 1), (0, 0)]),
+                    Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+                    Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+                ],
+                "id_left": [1, 1, 2, 2],
+                "name": ["poly1", "poly1", "poly2", "poly2"],
+                "index_right": [0, 1, 0, 1],
+                "id_right": [3, 4, 3, 4],
+                "category": ["square", "triangle", "square", "triangle"],
+            },
+            index=pd.Index([0, 0, 1, 1]),
+        )
+        self.check_sgpd_df_equals_gpd_df(joined, expected)
+
+        gpd_joined = self.gdf1.to_geopandas().sjoin(self.gdf2.to_geopandas())
+        self.check_sgpd_df_equals_gpd_df(joined, gpd_joined)
 
     def test_sjoin_predicates(self):
         """Test different spatial predicates"""
@@ -104,8 +123,10 @@ class TestSpatialJoin(TestBase):
         for predicate in predicates:
             try:
                 joined = sjoin(self.gdf1, self.gdf2, predicate=predicate)
-                assert joined is not None
-                assert type(joined) is GeoDataFrame
+                gpd_joined = self.gdf1.to_geopandas().sjoin(
+                    self.gdf2.to_geopandas(), predicate=predicate
+                )
+                self.check_sgpd_df_equals_gpd_df(joined, gpd_joined)
             except Exception as e:
                 # Some predicates might not return results for our test data
                 # but the function should not raise errors for valid predicates

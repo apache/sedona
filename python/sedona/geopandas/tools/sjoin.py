@@ -16,11 +16,9 @@
 # under the License.
 import re
 import pyspark.pandas as ps
-from pyspark.pandas.internal import InternalFrame
-from pyspark.pandas.series import first_series
+from pyspark.pandas.internal import SPARK_DEFAULT_INDEX_NAME, InternalFrame
 from pyspark.pandas.utils import scol_for
-from pyspark.sql.functions import expr, col, lit
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType
+from pyspark.sql.functions import expr
 
 from sedona.geopandas import GeoDataFrame, GeoSeries
 
@@ -29,8 +27,8 @@ SUFFIX_PATTERN = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 
 def _frame_join(
-    left_df,
-    right_df,
+    left_df: GeoDataFrame,
+    right_df: GeoDataFrame,
     how="inner",
     predicate="intersects",
     lsuffix="left",
@@ -42,9 +40,9 @@ def _frame_join(
 
     Parameters
     ----------
-    left_df : GeoDataFrame or GeoSeries
+    left_df : GeoDataFrame
         Left dataset to join
-    right_df : GeoDataFrame or GeoSeries
+    right_df : GeoDataFrame
         Right dataset to join
     how : str, default 'inner'
         Join type: 'inner', 'left', 'right'
@@ -119,8 +117,12 @@ def _frame_join(
         if field.name != right_geom_col and not field.name.startswith("__")
     ]
 
-    left_geo_df = left_sdf.selectExpr(*left_cols)
-    right_geo_df = right_sdf.selectExpr(*right_cols)
+    left_geo_df = left_sdf.selectExpr(
+        *left_cols, f"`{SPARK_DEFAULT_INDEX_NAME}` as index_left"
+    )
+    right_geo_df = right_sdf.selectExpr(
+        *right_cols, f"`{SPARK_DEFAULT_INDEX_NAME}` as index_right"
+    )
 
     # Build spatial join condition
     if predicate == "dwithin":
@@ -152,6 +154,9 @@ def _frame_join(
     else:
         raise ValueError(f"Join type '{how}' not supported")
 
+    # Pick which index to use for the resulting df's index based on 'how'
+    index_col = "index_left" if how in ("inner", "left") else "index_right"
+
     # Handle column naming with suffixes
     final_columns = []
 
@@ -159,8 +164,17 @@ def _frame_join(
     final_columns.append("l_geometry as geometry")
 
     # Add other columns with suffix handling
-    left_data_cols = [col for col in left_geo_df.columns if col != "l_geometry"]
-    right_data_cols = [col for col in right_geo_df.columns if col != "r_geometry"]
+    left_data_cols = [
+        col for col in left_geo_df.columns if col not in ["l_geometry", "index_left"]
+    ]
+    right_data_cols = [
+        col for col in right_geo_df.columns if col not in ["r_geometry", "index_right"]
+    ]
+
+    final_columns.append(f"{index_col} as {SPARK_DEFAULT_INDEX_NAME}")
+
+    if index_col != "index_left":
+        final_columns.append("index_left")
 
     for col_name in left_data_cols:
         base_name = col_name[2:]  # Remove "l_" prefix
@@ -172,6 +186,9 @@ def _frame_join(
         else:
             # Column only in left
             final_columns.append(f"{col_name} as {base_name}")
+
+    if index_col != "index_right":
+        final_columns.append("index_right")
 
     for col_name in right_data_cols:
         base_name = col_name[2:]  # Remove "r_" prefix
@@ -185,23 +202,22 @@ def _frame_join(
             final_columns.append(f"{col_name} as {base_name}")
 
     # Select final columns
-    result_df = spatial_join_df.selectExpr(*final_columns)
+    result_df = spatial_join_df.selectExpr(*final_columns).orderBy(
+        SPARK_DEFAULT_INDEX_NAME
+    )
 
-    # Return appropriate type based on input
-    if isinstance(left_df, GeoSeries) and isinstance(right_df, GeoSeries):
-        # Return GeoSeries for GeoSeries inputs
-        internal = InternalFrame(
-            spark_frame=result_df,
-            index_spark_columns=None,
-            column_labels=[left_df._col_label],
-            data_spark_columns=[scol_for(result_df, "geometry")],
-            data_fields=[left_df._internal.data_fields[0]],
-            column_label_names=left_df._internal.column_label_names,
-        )
-        return _to_geo_series(first_series(ps.DataFrame(internal)))
-    else:
-        # Return GeoDataFrame for GeoDataFrame inputs
-        return GeoDataFrame(result_df)
+    data_spark_columns = [
+        scol_for(result_df, col)
+        for col in result_df.columns
+        if col != SPARK_DEFAULT_INDEX_NAME
+    ]
+
+    internal = InternalFrame(
+        spark_frame=result_df,
+        index_spark_columns=[scol_for(result_df, SPARK_DEFAULT_INDEX_NAME)],
+        data_spark_columns=data_spark_columns,
+    )
+    return GeoDataFrame(ps.DataFrame(internal))
 
 
 def sjoin(
