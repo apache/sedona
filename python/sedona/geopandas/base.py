@@ -47,41 +47,69 @@ class GeoFrame(metaclass=ABCMeta):
     A base class for both GeoDataFrame and GeoSeries.
     """
 
-    # def _reduce_for_geostat_function(
-    #     self,
-    #     sfun: Callable[["GeoSeries"], Column],
-    #     name: str,
-    #     axis: Optional[Axis] = None,
-    #     numeric_only: bool = True,
-    #     skipna: bool = True,
-    #     **kwargs: Any,
-    # ) -> Union["GeoSeries", Scalar]:
-    #     raise NotImplementedError("This method is not implemented yet.")
-
     @property
-    @abstractmethod
     def sindex(self) -> "SpatialIndex":
         """
-        Returns a spatial index built from the geometries.
+        Returns a spatial index for the GeoSeries.
+
+        Note that the spatial index may not be fully
+        initialized until the first use.
+
+        Currently, sindex is not retained when calling this method from a GeoDataFrame.
+        You can workaround this by first extracting the active geometry column as a GeoSeries,
+        and calling this method.
 
         Returns
         -------
         SpatialIndex
-            The spatial index for this GeoDataFrame.
+            The spatial index.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point, box
+        >>> from sedona.geopandas import GeoSeries
+        >>>
+        >>> s = GeoSeries([Point(x, x) for x in range(5)])
+        >>> s.sindex.query(box(1, 1, 3, 3))
+        [Point(1, 1), Point(2, 2), Point(3, 3)]
+        >>> s.has_sindex
+        True
+        """
+        return _delegate_to_geometry_column("sindex", self)
+
+    @property
+    def has_sindex(self):
+        """Check the existence of the spatial index without generating it.
+
+        Use the `.sindex` attribute on a GeoDataFrame or GeoSeries
+        to generate a spatial index if it does not yet exist,
+        which may take considerable time based on the underlying index
+        implementation.
+
+        Note that the underlying spatial index may not be fully
+        initialized until the first use.
+
+        Currently, sindex is not retained when calling this method from a GeoDataFrame.
+        You can workaround this by first extracting the active geometry column as a GeoSeries,
+        and calling this method.
 
         Examples
         --------
         >>> from shapely.geometry import Point
-        >>> from sedona.geopandas import GeoDataFrame
-        >>>
-        >>> gdf = GeoDataFrame([{"geometry": Point(1, 1), "value": 1},
-        ...                     {"geometry": Point(2, 2), "value": 2}])
-        >>> index = gdf.sindex
-        >>> index.size
-        2
+        >>> s = GeoSeries([Point(x, x) for x in range(5)])
+        >>> s.has_sindex
+        False
+        >>> index = s.sindex
+        >>> gdf.has_sindex
+        True
+
+        Returns
+        -------
+        bool
+            `True` if the spatial index has been generated or
+            `False` if not.
         """
-        # We pass in self.geometry here to use the active geometry column for dataframe
-        return _delegate_to_geometry_column("sindex", self.geometry)
+        return _delegate_to_geometry_column("has_sindex", self)
 
     @abstractmethod
     def copy(self: GeoFrameLike) -> GeoFrameLike:
@@ -2300,6 +2328,7 @@ class GeoFrame(metaclass=ABCMeta):
 
 def _delegate_to_geometry_column(op, this, *args, **kwargs):
     geom_column = this.geometry
+    inplace = kwargs.pop("inplace", False)
     if args or kwargs:
         data = getattr(geom_column, op)(*args, **kwargs)
     else:
@@ -2308,7 +2337,8 @@ def _delegate_to_geometry_column(op, this, *args, **kwargs):
         if callable(data):
             data = data()
 
-    if kwargs.get("inplace", False):
+    if inplace:
+        # This assumes this is a GeoSeries
         this._update_inplace(geom_column)
         return None
 

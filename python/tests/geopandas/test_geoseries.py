@@ -113,6 +113,48 @@ class TestGeoSeries(TestGeopandasBase):
         ps_df = ps.Series(data, index=index)
         assert_series_equal(result.to_pandas(), ps_df.to_pandas())
 
+    def test_sindex(self):
+        s = GeoSeries([Point(x, x) for x in range(5)])
+        assert not s.has_sindex
+
+        result = s.sindex.query(box(1, 1, 3, 3))
+        expected = [Point(1, 1), Point(2, 2), Point(3, 3)]
+        assert result == expected
+        assert s.has_sindex
+
+        result = s.sindex.query(box(1, 1, 3, 3), predicate="contains")
+        expected = [Point(1, 1), Point(2, 2), Point(3, 3)]
+        assert result == expected
+        assert s.has_sindex
+
+        # Check that it works with a GeoDataFrame
+        gdf = s.to_geoframe()
+        result = gdf.sindex.query(box(1, 1, 3, 3), predicate="contains")
+        assert result == expected
+
+        # This is challenging to support due to gdf.__setitem__ casting GeoSeries into pspd.Series
+        # assert gdf.has_sindex
+
+    def test_invalidate_sindex(self):
+        geoseries = GeoSeries([Point(0, 0), None, Point(2, 2)])
+
+        line = LineString([(1, 1), (3, 3)])
+        result1 = geoseries.sindex.query(line)
+        assert len(result1) == 1
+        assert geoseries.has_sindex
+
+        # Fill the None element with a new geometry that intersects with the line
+        # This should invalidate the sindex
+        geoseries.fillna(Point(1, 1), inplace=True)
+        assert not geoseries.has_sindex
+
+        result = geoseries.sindex.query(line)
+        assert len(result) == 2
+
+        # For set_crs, no need to invalidate the sindex
+        geoseries.set_crs(4326, inplace=True)
+        assert geoseries.has_sindex
+
     def test_plot(self):
         # Just make sure it doesn't error
         self.geoseries.plot()

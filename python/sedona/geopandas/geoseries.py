@@ -352,6 +352,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         self._anchor: GeoDataFrame
         self._col_label: Label
+        self._sindex: SpatialIndex = None
 
         if isinstance(
             data, (GeoDataFrame, GeoSeries, PandasOnSparkSeries, PandasOnSparkDataFrame)
@@ -626,7 +627,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         result = self._query_geometry_column(spark_col, keep_name=True)
 
         if inplace:
-            self._update_inplace(result)
+            self._update_inplace(result, invalidate_sindex=False)
             return None
 
         return result
@@ -750,29 +751,18 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def sindex(self) -> SpatialIndex:
-        """
-        Returns a spatial index built from the geometries.
-
-        Returns
-        -------
-        SpatialIndex
-            The spatial index for this GeoDataFrame.
-
-        Examples
-        --------
-        >>> from shapely.geometry import Point
-        >>> from sedona.geopandas import GeoDataFrame
-        >>>
-        >>> gdf = GeoDataFrame([{"geometry": Point(1, 1), "value": 1},
-        ...                     {"geometry": Point(2, 2), "value": 2}])
-        >>> index = gdf.sindex
-        >>> index.size
-        2
-        """
         geometry_column = _get_series_col_name(self)
         if geometry_column is None:
             raise ValueError("No geometry column found in GeoSeries")
-        return SpatialIndex(self._internal.spark_frame, column_name=geometry_column)
+        if self._sindex is None:
+            self._sindex = SpatialIndex(
+                self._internal.spark_frame, column_name=geometry_column
+            )
+        return self._sindex
+
+    @property
+    def has_sindex(self):
+        return self._sindex is not None
 
     def copy(self, deep=False):
         """Make a copy of this GeoSeries object.
@@ -2917,9 +2907,11 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
     # # Utils
     # -----------------------------------------------------------------------------
 
-    def _update_inplace(self, result: "GeoSeries"):
+    def _update_inplace(self, result: "GeoSeries", invalidate_sindex: bool = True):
         self.rename(result.name, inplace=True)
         self._update_anchor(result._anchor)
+        if invalidate_sindex:
+            self._sindex = None
 
     def _make_series_of_val(self, value: Any):
         """
