@@ -23,7 +23,7 @@ Every volunteer project obtains its strength from the people involved in it. We 
 
 You can participate in the community as follows:
 
-* Use our project and provide a feedback.
+* Use our project and provide feedback.
 * Provide us with the use-cases.
 * Report bugs and submit patches.
 * Contribute code and documentation.
