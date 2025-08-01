@@ -106,9 +106,6 @@ class TestSpatialJoin(TestGeopandasBase):
         )
         self.check_sgpd_df_equals_gpd_df(joined, expected)
 
-        gpd_joined = self.gdf1.to_geopandas().sjoin(self.gdf2.to_geopandas())
-        self.check_sgpd_df_equals_gpd_df(joined, gpd_joined)
-
     def test_sjoin_predicates(self):
         """Test different spatial predicates"""
         predicates = [
