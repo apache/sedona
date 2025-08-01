@@ -195,8 +195,8 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
       useSpheroid: Boolean = false): GeoParquetSpatialFilter = {
     val queryWindow: Geometry = if (useSpheroid) {
       // Spheroidal buffer
-      // Increase buffer distance by 2% to account for false negatives with Spheroidal Buffer calculations
-      val distanceLit = Literal(distance * 1.02)
+      // Increase buffer distance by 3% to account for false negatives with Spheroidal Buffer calculations
+      val distanceLit = Literal(distance * 1.03)
       val spheroidLit = Literal(true)
       val geomLit = Literal.create(GeometrySerializer.serialize(geom), new GeometryUDT())
 
