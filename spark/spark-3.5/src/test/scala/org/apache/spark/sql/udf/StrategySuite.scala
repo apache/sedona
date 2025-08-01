@@ -20,8 +20,8 @@ package org.apache.spark.sql.udf
 
 import org.apache.sedona.spark.SedonaContext
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.udf.ScalarUDF.geoPandasScalaFunction
+import org.apache.spark.sql.functions.{col, expr}
+import org.apache.spark.sql.udf.ScalarUDF.{geometryToGeometryFunction, geometryToNonGeometryFunction, geopandasGeometryToGeometryFunction, nonGeometryToGeometryFunction}
 import org.locationtech.jts.io.WKTReader
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
@@ -45,16 +45,15 @@ class StrategySuite extends AnyFunSuite with Matchers {
 
   test("sedona geospatial UDF") {
     spark.sql("select 1").show()
-    val currentTime = System.currentTimeMillis()
-
     val df = spark.read.format("parquet")
       .load("/Users/pawelkocinski/Desktop/projects/sedona-book/apache-sedona-book/book/chapter10/data/buildings/partitioned")
-      .select(geoPandasScalaFunction(col("geometry")).alias("area"))
-      .selectExpr("sum(area) as total_area")
+      .select(
+        geometryToNonGeometryFunction(col("geometry")),
+        geometryToGeometryFunction(col("geometry")),
+        nonGeometryToGeometryFunction(expr("ST_AsText(geometry)")),
+      )
 
     df.show()
-    val processingTime = System.currentTimeMillis() - currentTime
-    println(s"Processing time: $processingTime ms")
 
 //    val df = Seq(
 //      (1, "value", wktReader.read("POINT(21 52)")),

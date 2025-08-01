@@ -1,14 +1,9 @@
-import logging
-
-import pandas as pd
 from pyspark.sql.pandas.serializers import ArrowStreamPandasSerializer, ArrowStreamSerializer
 from pyspark.errors import PySparkTypeError, PySparkValueError
 import struct
 from pyspark.sql.pandas.types import (
     from_arrow_type,
-    to_arrow_type,
     _create_converter_from_pandas,
-    _create_converter_to_pandas,
 )
 
 def write_int(value, stream):
@@ -53,7 +48,18 @@ class SedonaArrowStreamPandasUDFSerializer(ArrowStreamPandasSerializer):
         batches = super(ArrowStreamPandasSerializer, self).load_stream(stream)
         import pyarrow as pa
         for batch in batches:
-            yield [ga.to_geopandas(c) for c in pa.Table.from_batches([batch]).itercolumns()]
+            table = pa.Table.from_batches([batch])
+            data = []
+
+            for c in table.itercolumns():
+                meta = table.schema.field(c._name).metadata
+                if meta and meta[b"ARROW:extension:name"] == b'geoarrow.wkb':
+                    data.append(ga.to_geopandas(c))
+                    continue
+
+                data.append(self.arrow_to_pandas(c))
+
+            yield data
 
     def _create_batch(self, series):
         """
@@ -72,7 +78,8 @@ class SedonaArrowStreamPandasUDFSerializer(ArrowStreamPandasSerializer):
             Arrow RecordBatch
         """
         import pyarrow as pa
-
+        import geopandas as gpd
+        from shapely.geometry.base import BaseGeometry
         # Make input conform to [(series1, type1), (series2, type2), ...]
         if not isinstance(series, (list, tuple)) or (
                 len(series) == 2 and isinstance(series[1], pa.DataType)
@@ -82,8 +89,13 @@ class SedonaArrowStreamPandasUDFSerializer(ArrowStreamPandasSerializer):
 
         arrs = []
         for s, t in series:
-            arrs.append(self._create_array(s, t, arrow_cast=self._arrow_cast))
+            # TODO here we should look into the return type
+            first_element = s.iloc[0]
+            if isinstance(first_element, BaseGeometry):
+                arrs.append(self._create_array(gpd.GeoSeries(s), t, arrow_cast=self._arrow_cast))
+                continue
 
+            arrs.append(self._create_array(s, t, arrow_cast=self._arrow_cast))
         return pa.RecordBatch.from_arrays(arrs, ["_%d" % i for i in range(len(arrs))])
 
     def _create_array(self, series, arrow_type, spark_type=None, arrow_cast=False):
