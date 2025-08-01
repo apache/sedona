@@ -423,9 +423,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             geometry: pspd.Series = self["geometry"]
             if isinstance(geometry, sgpd.GeoSeries):
                 if crs is not None:
-                    self.set_geometry(
-                        geometry, inplace=True, crs=crs, allow_override=False
-                    )
+                    self.set_geometry(geometry, inplace=True, crs=crs)
 
             # No need to call set_geometry() here since it's already part of the df, just set the name
             self._geometry_column_name = "geometry"
