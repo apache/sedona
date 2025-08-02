@@ -18,19 +18,14 @@
 """
 Worker that receives input from Piped RDD.
 """
-import logging
 import os
 import sys
 import time
-from inspect import currentframe, getframeinfo, getfullargspec
+from inspect import currentframe, getframeinfo
 import importlib
-import json
-from io import BufferedRWPair
-from typing import Any, Iterable, Iterator
 
 from sedonaworker.serializer import SedonaArrowStreamPandasUDFSerializer
 
-# 'resource' is a Unix specific module.
 has_resource_module = True
 try:
     import resource
@@ -57,64 +52,16 @@ from pyspark.serializers import (
     SpecialLengths,
     UTF8Deserializer,
     CPickleSerializer,
-    BatchedSerializer,
 )
-from pyspark.sql.pandas.serializers import (
-    ArrowStreamPandasUDFSerializer, ArrowStreamSerializer
-)
+
 from pyspark.sql.pandas.types import to_arrow_type
-from pyspark.sql.types import BinaryType, StringType, StructType, _parse_datatype_json_string
+from pyspark.sql.types import StructType
 from pyspark.util import fail_on_stopiteration, try_simplify_traceback
 from pyspark import shuffle
 from pyspark.errors import PySparkRuntimeError, PySparkTypeError
 
 pickleSer = CPickleSerializer()
 utf8_deserializer = UTF8Deserializer()
-
-
-class SedonaArrowStreamUDFSerializer(ArrowStreamSerializer):
-    """
-    Same as :class:`ArrowStreamSerializer` but it flattens the struct to Arrow record batch
-    for applying each function with the raw record arrow batch. See also `DataFrame.mapInArrow`.
-    """
-
-    def load_stream(self, stream):
-        """
-        Flatten the struct into Arrow's record batches.
-        """
-        import pyarrow as pa
-
-        batches = super(SedonaArrowStreamUDFSerializer, self).load_stream(stream)
-        for batch in batches:
-            struct = batch.column(0)
-            yield [pa.RecordBatch.from_arrays(struct.flatten(), schema=pa.schema(struct.type))]
-
-    def dump_stream(self, iterator, stream):
-        """
-        Override because Pandas UDFs require a START_ARROW_STREAM before the Arrow stream is sent.
-        This should be sent after creating the first record batch so in case of an error, it can
-        be sent back to the JVM before the Arrow stream starts.
-        """
-        import pyarrow as pa
-
-        def wrap_and_init_stream():
-            should_write_start_length = True
-            for batch, _ in iterator:
-                assert isinstance(batch, pa.RecordBatch)
-
-                # Wrap the root struct
-                struct = pa.StructArray.from_arrays(
-                    batch.columns, fields=pa.struct(list(batch.schema))
-                )
-                batch = pa.RecordBatch.from_arrays([struct], ["_0"])
-
-                # Write the first record batch with initialization.
-                if should_write_start_length:
-                    write_int(SpecialLengths.START_ARROW_STREAM, stream)
-                    should_write_start_length = False
-                yield batch
-
-        return super(SedonaArrowStreamUDFSerializer, self).dump_stream(wrap_and_init_stream(), stream)
 
 
 def report_times(outfile, boot, init, finish):
@@ -185,19 +132,11 @@ def read_single_udf(pickleSer, infile, eval_type, runner_conf, udf_index):
         else:
             chained_func = chain(chained_func, f)
 
-    if eval_type in (
-            PythonEvalType.SQL_SCALAR_PANDAS_ITER_UDF,
-            PythonEvalType.SQL_ARROW_BATCHED_UDF,
-    ):
-        func = chained_func
-    else:
-        # make sure StopIteration's raised in the user code are not ignored
-        # when they are processed in a for loop, raise them as RuntimeError's instead
-        func = fail_on_stopiteration(chained_func)
+    func = fail_on_stopiteration(chained_func)
 
     # the last returnType will be the return type of UDF
     if eval_type == PythonEvalType.SQL_SCALAR_PANDAS_UDF:
-        return arg_offsets, wrap_scalar_pandas_udf(func, return_type)
+        return arg_offsets, wrap_scalar_pandas_udf(func, return_type), return_type
     else:
         raise ValueError("Unknown eval type: {}".format(eval_type))
 
@@ -214,6 +153,8 @@ def assign_cols_by_name(runner_conf):
 
 
 def read_udfs(pickleSer, infile, eval_type):
+    from sedona.sql.types import GeometryType
+    import geopandas as gpd
     runner_conf = {}
 
     # Load conf used for pandas_udf evaluation
@@ -223,29 +164,11 @@ def read_udfs(pickleSer, infile, eval_type):
         v = utf8_deserializer.loads(infile)
         runner_conf[k] = v
 
-    # state_object_schema = None
-    # if eval_type == PythonEvalType.SQL_GROUPED_MAP_PANDAS_UDF_WITH_STATE:
-    #     state_object_schema = StructType.fromJson(json.loads(utf8_deserializer.loads(infile)))
-
-    # NOTE: if timezone is set here, that implies respectSessionTimeZone is True
     timezone = runner_conf.get("spark.sql.session.timeZone", None)
     safecheck = (
             runner_conf.get("spark.sql.execution.pandas.convertToArrowArraySafely", "false").lower()
             == "true"
     )
-
-    df_for_struct = (
-            eval_type == PythonEvalType.SQL_SCALAR_PANDAS_UDF
-            or eval_type == PythonEvalType.SQL_SCALAR_PANDAS_ITER_UDF
-            or eval_type == PythonEvalType.SQL_MAP_PANDAS_ITER_UDF
-    )
-    # Arrow-optimized Python UDF takes a struct type argument as a Row
-    struct_in_pandas = (
-        "row" if eval_type == PythonEvalType.SQL_ARROW_BATCHED_UDF else "dict"
-    )
-    ndarray_as_list = eval_type == PythonEvalType.SQL_ARROW_BATCHED_UDF
-    # Arrow-optimized Python UDF uses explicit Arrow cast for type coercion
-    arrow_cast = eval_type == PythonEvalType.SQL_ARROW_BATCHED_UDF
 
     num_udfs = read_int(infile)
 
@@ -254,13 +177,24 @@ def read_udfs(pickleSer, infile, eval_type):
         udfs.append(read_single_udf(pickleSer, infile, eval_type, runner_conf, udf_index=i))
 
     def mapper(a):
-        result = tuple(f(*[a[o] for o in arg_offsets]) for (arg_offsets, f) in udfs)
-        # In the special case of a single UDF this will return a single result rather
-        # than a tuple of results; this is the format that the JVM side expects.
-        if len(result) == 1:
-            return result[0]
+        results = []
+
+        for (arg_offsets, f, return_type) in udfs:
+            result = f(*[a[o] for o in arg_offsets])
+            if isinstance(return_type, GeometryType):
+                results.append((
+                    gpd.GeoSeries(result[0]),
+                    result[1],
+                ))
+
+                continue
+
+            results.append(result)
+
+        if len(results) == 1:
+            return results[0]
         else:
-            return result
+            return results
 
     def func(_, it):
         return map(mapper, it)
@@ -269,10 +203,6 @@ def read_udfs(pickleSer, infile, eval_type):
         timezone,
         safecheck,
         assign_cols_by_name(runner_conf),
-        df_for_struct,
-        struct_in_pandas,
-        ndarray_as_list,
-        arrow_cast,
     )
 
     # profiling is not supported for UDF
@@ -493,11 +423,6 @@ if __name__ == "__main__":
     java_port = int(os.environ["PYTHON_WORKER_FACTORY_PORT"])
     auth_secret = os.environ["PYTHON_WORKER_FACTORY_SECRET"]
     (sock_file, _) = local_connect_and_auth(java_port, auth_secret)
-    # TODO: Remove the following two lines and use `Process.pid()` when we drop JDK 8.
     write_int(os.getpid(), sock_file)
     sock_file.flush()
     main(sock_file, sock_file)
-
-
-class GeoArrowLoader:
-    pass
