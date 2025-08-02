@@ -99,9 +99,6 @@ def _frame_join(
     if not right_geom_col:
         raise ValueError("Right dataframe geometry column not set")
 
-    if left_geom_col is None or right_geom_col is None:
-        raise ValueError("Both datasets must have geometry columns")
-
     left_geom_expr = f"`{left_geom_col}` as l_geometry"
     right_geom_expr = f"`{right_geom_col}` as r_geometry"
 
