@@ -2948,8 +2948,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         else:
             renamed = self
 
-        # to_spark() is important here to ensure that the spark column names are set to the pandas column ones
-        return GeoDataFrame(pspd.DataFrame(renamed._internal).to_spark())
+        return GeoDataFrame(pspd.DataFrame(renamed._internal))
 
 
 # -----------------------------------------------------------------------------
