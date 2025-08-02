@@ -465,30 +465,21 @@ class GeoSeries(GeoFrame, pspd.Series):
         if len(self) == 0:
             return None
 
-        if parse_version(pyspark.__version__) >= parse_version("3.5.0"):
-            spark_col = stf.ST_SRID(F.first_value(self.spark.column, ignoreNulls=True))
-            # Set this to avoid error complaining that we don't have a groupby column
-            is_aggr = True
-        else:
-            spark_col = stf.ST_SRID(self.spark.column)
-            is_aggr = False
+        # F.first is non-deterministic, but it doesn't matter because all non-null values should be the same
+        spark_col = stf.ST_SRID(F.first(self.spark.column, ignorenulls=True))
 
+        # Set this to avoid error complaining that we don't have a groupby column
         tmp_series = self._query_geometry_column(
             spark_col,
             returns_geom=False,
-            is_aggr=is_aggr,
+            is_aggr=True,
         )
 
         # All geometries should have the same srid
         # so we just take the srid of the first non-null element
-
-        if parse_version(pyspark.__version__) >= parse_version("3.5.0"):
-            srid = tmp_series.item()
-            # Turn np.nan to 0 to avoid error
-            srid = 0 if np.isnan(srid) else srid
-        else:
-            first_idx = tmp_series.first_valid_index()
-            srid = tmp_series[first_idx] if not pd.isna(first_idx) else 0
+        srid = tmp_series.item()
+        # Turn np.nan to 0 to avoid error
+        srid = 0 if np.isnan(srid) else srid
 
         # Sedona returns 0 if doesn't exist
         return CRS.from_user_input(srid) if srid != 0 else None
