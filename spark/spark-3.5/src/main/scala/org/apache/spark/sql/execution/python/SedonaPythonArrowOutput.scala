@@ -93,7 +93,8 @@ private[python] trait SedonaPythonArrowOutput[OUT <: AnyRef] { self: SedonaBaseP
               val bytesReadEnd = reader.bytesRead()
               pythonMetrics("pythonNumRowsReceived") += rowCount
               pythonMetrics("pythonDataReceived") += bytesReadEnd - bytesReadStart
-              deserializeColumnarBatch(batch, schema)
+              val result = deserializeColumnarBatch(batch, schema)
+              result
             } else {
               reader.close(false)
               allocator.close()

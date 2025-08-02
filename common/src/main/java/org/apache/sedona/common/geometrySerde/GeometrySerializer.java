@@ -63,6 +63,29 @@ public class GeometrySerializer {
 //    return buffer.toByteArray();
   }
 
+  public static byte[] serializeLegacy(Geometry geometry) {
+    GeometryBuffer buffer;
+    if (geometry instanceof Point) {
+      buffer = serializePoint((Point) geometry);
+    } else if (geometry instanceof MultiPoint) {
+      buffer = serializeMultiPoint((MultiPoint) geometry);
+    } else if (geometry instanceof LineString) {
+      buffer = serializeLineString((LineString) geometry);
+    } else if (geometry instanceof MultiLineString) {
+      buffer = serializeMultiLineString((MultiLineString) geometry);
+    } else if (geometry instanceof Polygon) {
+      buffer = serializePolygon((Polygon) geometry);
+    } else if (geometry instanceof MultiPolygon) {
+      buffer = serializeMultiPolygon((MultiPolygon) geometry);
+    } else if (geometry instanceof GeometryCollection) {
+      buffer = serializeGeometryCollection((GeometryCollection) geometry);
+    } else {
+      throw new UnsupportedOperationException(
+          "Geometry type is not supported: " + geometry.getClass().getSimpleName());
+    }
+    return buffer.toByteArray();
+  }
+
   public static Geometry deserialize(byte[] bytes) {
     WKBReader reader = new WKBReader();
     try {
@@ -72,6 +95,11 @@ public class GeometrySerializer {
     }
 //    GeometryBuffer buffer = GeometryBufferFactory.wrap(bytes);
 //    return deserialize(buffer);
+  }
+
+  public static Geometry deserializeLegacy(byte[] bytes) {
+    GeometryBuffer buffer = GeometryBufferFactory.wrap(bytes);
+    return deserialize(buffer);
   }
 
   public static Geometry deserialize(GeometryBuffer buffer) {
