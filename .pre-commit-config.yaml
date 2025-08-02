@@ -31,6 +31,12 @@ repos:
         name: run identity check
       - id: check-hooks-apply
         name: run check hooks apply
+  - repo: https://github.com/thlorenz/doctoc.git
+    rev: v2.2.0
+    hooks:
+      - id: doctoc
+        name: Add TOC for Markdown and RST files
+        files: ^README\.md$
   - repo: local
     hooks:
       - id: prettier
@@ -40,9 +46,43 @@ repos:
         files: \.(js|ya?ml)$
         language: node
         additional_dependencies: ['prettier@3.6.2']
+      - id: maven-spotless-apply
+        name: maven spotless apply
+        description: automatically formats Java and Scala code using mvn spotless:apply.
+        entry: mvn spotless:apply
+        language: system # Indicates that the 'entry' command should be run directly as a system command.
+        types: [java, scala] # Specifies that this hook should run on Java and Scala files.
+        pass_filenames:
+          false # Crucial: tells pre-commit NOT to pass filenames as arguments to 'mvn spotless:apply'.
+          # Spotless typically scans the whole project based on its configuration.
+        always_run:
+          true # Ensures this hook runs even if no Java files are changed.
+          # This is useful for spotless:apply which might affect files not staged.
+        stages: [pre-commit] # Specifies that this hook runs during the 'commit' stage.
+      - id: check-zip-file-is-not-committed
+        name: check no zip files are committed
+        description: Zip files are not allowed in the repository
+        language: fail
+        entry: |
+          Zip files are not allowed in the repository as they are hard to
+          track and have security implications. Please remove the zip file from the repository.
+        files: (?i)\.zip$
+      - id: check-makefiles-tabs
+        name: check Makefiles files for tabs
+        entry: ./scripts/pre-commit/check_makefiles_for_tabs.sh # Path to your script
+        language: system
+        files: '(?i)makefile$'
+        pass_filenames: true # <-- Crucial change: pass filenames to the script
+        types: [file] # Ensure only regular files are passed, not directories
+        stages: [manual]
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
+      - id: chmod
+        name: set file permissions
+        args: ['644']
+        files: \.md$
+        stages: [manual]
       - id: insert-license
         name: add license for all .c files
         files: \.c$
@@ -285,3 +325,8 @@ repos:
         name: run oxipng
         description: check PNG files with oxipng
         args: ['--fix', '-o', '4', '--strip', 'safe', '--alpha']
+  - repo: https://github.com/adamchainz/blacken-docs
+    rev: 1.19.1
+    hooks:
+      - id: blacken-docs
+        additional_dependencies: [black==25.1.0]

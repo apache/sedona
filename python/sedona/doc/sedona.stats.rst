@@ -1,6 +1,9 @@
 sedona.stats package
 ====================
 
+.. deprecated:: 1.8.0
+   The ``sedona.stats`` package is deprecated. Please use ``sedona.spark.stats`` instead.
+
 Subpackages
 -----------
 
@@ -17,5 +20,5 @@ Module contents
 
 .. automodule:: sedona.stats
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

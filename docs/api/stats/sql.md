@@ -198,11 +198,7 @@ To use the [Apache Sedona weight functions](#adddistancebandcolumn) you need to 
     from sedona.spark.stats.autocorrelation.moran import Moran
     from sedona.spark.stats.weighting import add_binary_distance_band_column
 
-    result = add_binary_distance_band_column(
-        df,
-        1.0,
-        saved_attributes=["id", "value"]
-    )
+    result = add_binary_distance_band_column(df, 1.0, saved_attributes=["id", "value"])
 
     moran_i_result = Moran.get_global(result)
 
@@ -241,7 +237,8 @@ The full signatures of the functions
         two_tailed: bool = True,
         id_column: str = "id",
         value_column: str = "value",
-    ) -> MoranResult
+    ) -> MoranResult: ...
+
 
     @dataclass
     class MoranResult:

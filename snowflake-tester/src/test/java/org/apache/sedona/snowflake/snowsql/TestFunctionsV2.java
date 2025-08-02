@@ -957,6 +957,14 @@ public class TestFunctionsV2 extends TestBase {
   }
 
   @Test
+  public void test_ST_Segmentize() {
+    registerUDFV2("ST_Segmentize", String.class, double.class);
+    verifySqlSingleRes(
+        "select ST_AsText(sedona.ST_Segmentize(ST_GeometryFromWKT('POLYGON((0 0, 0 8, 30 0, 0 0))'), 10))",
+        "POLYGON((0 0,0 8,7.5 6,15 4,22.5 2,30 0,20 0,10 0,0 0))");
+  }
+
+  @Test
   public void test_ST_SymDifference() {
     registerUDFV2("ST_SymDifference", String.class, String.class);
     verifySqlSingleRes(

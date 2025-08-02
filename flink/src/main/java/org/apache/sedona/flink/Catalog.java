@@ -186,6 +186,7 @@ public class Catalog {
       new Functions.ST_SimplifyPolygonHull(),
       new Functions.ST_Split(),
       new Functions.ST_Subdivide(),
+      new Functions.ST_Segmentize(),
       new Functions.ST_SymDifference(),
       new Functions.ST_S2CellIDs(),
       new Functions.ST_Snap(),

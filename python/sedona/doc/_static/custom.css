@@ -1,0 +1,386 @@
+/* Apache Sedona Custom Theme Styling */
+
+/* Color Variables */
+:root {
+    --sedona-primary: #ff5722;
+    --sedona-primary-dark: #d84315;
+    --sedona-accent: #000000;
+    --sedona-accent-dark: #333333;
+    --sedona-secondary: #e0e0e0;
+    --sedona-text: #333333;
+    --sedona-light-gray: #263238;
+    --sedona-white: #ffffff;
+    --sedona-dark: #263238;
+}
+
+/* Global Styling */
+body {
+    font-family: 'Roboto', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif !important;
+    color: var(--sedona-text) !important;
+}
+
+/* Header Styling */
+.wy-nav-top {
+    background: var(--sedona-primary) !important;
+    color: var(--sedona-white) !important;
+}
+
+.wy-nav-top a {
+    color: var(--sedona-white) !important;
+    font-weight: 500;
+}
+
+/* Sidebar Styling */
+.wy-nav-side {
+    background: var(--sedona-dark) !important;
+    width: 280px !important;
+}
+
+.wy-menu-vertical {
+    background: var(--sedona-dark) !important;
+}
+
+.wy-menu-vertical a {
+    background: transparent !important;
+    color: #ffffff !important;
+    border-bottom: none !important;
+    padding: 8px 24px !important;
+    transition: all 0.2s ease !important;
+}
+
+.wy-menu-vertical a:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: var(--sedona-white) !important;
+}
+
+.wy-menu-vertical .current > a {
+    background: var(--sedona-primary) !important;
+    color: var(--sedona-white) !important;
+    border-right: 3px solid var(--sedona-accent) !important;
+}
+
+.wy-menu-vertical .toctree-l1 > a {
+    font-weight: 500 !important;
+    color: #ffffff !important;
+}
+
+.wy-menu-vertical .toctree-l2 > a {
+    padding-left: 40px !important;
+    background: rgba(0, 0, 0, 0.4) !important;
+    color: #ffffff !important;
+}
+
+.wy-menu-vertical .toctree-l2 > a:hover {
+    background: rgba(0, 0, 0, 0.6) !important;
+    color: #ffffff !important;
+}
+
+.wy-menu-vertical .toctree-l2.current > a {
+    background: var(--sedona-primary) !important;
+    color: var(--sedona-white) !important;
+}
+
+.wy-menu-vertical .toctree-l3 > a {
+    padding-left: 56px !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    color: #ffffff !important;
+}
+
+.wy-menu-vertical .toctree-l3 > a:hover {
+    background: rgba(0, 0, 0, 0.7) !important;
+    color: #ffffff !important;
+}
+
+.wy-menu-vertical .toctree-l3.current > a {
+    background: var(--sedona-primary) !important;
+    color: var(--sedona-white) !important;
+}
+
+/* Fix for deeper navigation levels (l4, l5, etc.) */
+.wy-menu-vertical .toctree-l4 > a,
+.wy-menu-vertical .toctree-l5 > a,
+.wy-menu-vertical .toctree-l6 > a {
+    padding-left: 72px !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    color: #ffffff !important;
+}
+
+.wy-menu-vertical .toctree-l4 > a:hover,
+.wy-menu-vertical .toctree-l5 > a:hover,
+.wy-menu-vertical .toctree-l6 > a:hover {
+    background: rgba(0, 0, 0, 0.8) !important;
+    color: #ffffff !important;
+}
+
+.wy-menu-vertical .toctree-l4.current > a,
+.wy-menu-vertical .toctree-l5.current > a,
+.wy-menu-vertical .toctree-l6.current > a {
+    background: var(--sedona-primary) !important;
+    color: var(--sedona-white) !important;
+}
+
+/* Fix for any remaining navigation items that might have poor contrast */
+.wy-menu-vertical li a {
+    color: #ffffff !important;
+}
+
+.wy-menu-vertical li a:hover {
+    color: #ffffff !important;
+}
+
+/* Hide Contents: caption in left navigation bar */
+.wy-menu-vertical .caption,
+.wy-menu-vertical .toctree-wrapper .caption {
+    display: none !important;
+}
+
+/* Main Content Area */
+.wy-nav-content-wrap {
+    margin-left: 280px !important;
+    background: var(--sedona-white) !important;
+}
+
+.wy-nav-content {
+    background: var(--sedona-white) !important;
+    padding: 20px !important;
+}
+
+.document {
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--sedona-primary-dark) !important;
+    font-weight: 500 !important;
+    margin-top: 2rem !important;
+    margin-bottom: 1rem !important;
+}
+
+h1 {
+    font-size: 2.5rem !important;
+    border-bottom: 2px solid var(--sedona-secondary) !important;
+    padding-bottom: 0.5rem !important;
+}
+
+h2 {
+    font-size: 2rem !important;
+    border-bottom: 1px solid var(--sedona-secondary) !important;
+    padding-bottom: 0.3rem !important;
+}
+
+h3 {
+    font-size: 1.5rem !important;
+}
+
+/* Code Blocks */
+.highlight {
+    background: var(--sedona-dark) !important;
+    border: 1px solid var(--sedona-accent-dark) !important;
+    border-radius: 4px !important;
+    margin: 1rem 0 !important;
+}
+
+.highlight pre {
+    background: transparent !important;
+    border: none !important;
+    padding: 16px !important;
+    color: var(--sedona-white) !important;
+}
+
+code {
+    background: var(--sedona-dark) !important;
+    color: var(--sedona-white) !important;
+    padding: 2px 4px !important;
+    border-radius: 3px !important;
+    font-family: 'Roboto Mono', 'Consolas', 'Monaco', monospace !important;
+}
+
+/* Tables */
+.wy-table-responsive table td,
+.wy-table-responsive table th {
+    white-space: normal !important;
+    background: var(--sedona-white) !important;
+    border: 1px solid var(--sedona-secondary) !important;
+}
+
+.wy-table-responsive table th {
+    background: var(--sedona-dark) !important;
+    color: var(--sedona-white) !important;
+    font-weight: 500 !important;
+}
+
+/* Admonitions */
+.admonition {
+    border-left: 4px solid var(--sedona-primary) !important;
+    background: rgba(255, 87, 34, 0.05) !important;
+    border-radius: 0 4px 4px 0 !important;
+    margin: 1rem 0 !important;
+}
+
+.admonition-title {
+    background: rgba(255, 87, 34, 0.1) !important;
+    color: var(--sedona-primary-dark) !important;
+    font-weight: 500 !important;
+}
+
+/* Links */
+a {
+    color: var(--sedona-accent) !important;
+    text-decoration: none !important;
+}
+
+a:hover {
+    color: var(--sedona-accent-dark) !important;
+    text-decoration: underline !important;
+}
+
+/* Navigation Breadcrumbs */
+.wy-breadcrumbs {
+    background: transparent !important;
+    padding: 0 !important;
+    margin-bottom: 24px !important;
+}
+
+.wy-breadcrumbs li {
+    color: #666 !important;
+}
+
+.wy-breadcrumbs li a {
+    color: var(--sedona-accent) !important;
+}
+
+/* Footer */
+.rst-footer-buttons {
+    margin-top: 2rem !important;
+    padding-top: 2rem !important;
+    border-top: 1px solid var(--sedona-secondary) !important;
+}
+
+/* Mobile Responsiveness */
+@media screen and (max-width: 768px) {
+    .wy-nav-side {
+        width: 280px !important;
+    }
+
+    .wy-nav-content-wrap {
+        margin-left: 0 !important;
+    }
+}
+
+/* Hero Section Styling */
+.sedona-hero {
+    background: linear-gradient(135deg, var(--sedona-primary) 0%, var(--sedona-primary-dark) 100%) !important;
+    color: var(--sedona-white) !important;
+    padding: 3rem 2rem !important;
+    margin: -20px -20px 2rem -20px !important;
+    border-radius: 0 0 8px 8px !important;
+    text-align: center !important;
+}
+
+.sedona-hero h1 {
+    color: var(--sedona-white) !important;
+    font-size: 3rem !important;
+    font-weight: 300 !important;
+    margin: 0 0 1rem 0 !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem !important;
+    opacity: 0.9 !important;
+    margin: 0 !important;
+    font-weight: 300 !important;
+}
+
+/* Custom Apache Sedona Branding */
+.wy-side-nav-search {
+    background: var(--sedona-primary) !important;
+}
+
+.wy-side-nav-search .wy-dropdown > a,
+.wy-side-nav-search > a {
+    color: var(--sedona-white) !important;
+    font-weight: 500 !important;
+}
+
+.wy-side-nav-search input[type=text] {
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: var(--sedona-white) !important;
+}
+
+.wy-side-nav-search input[type=text]:focus {
+    border-color: var(--sedona-accent) !important;
+    background: var(--sedona-white) !important;
+    color: var(--sedona-text) !important;
+}
+
+/* Add Sedona Logo Styling */
+.wy-side-nav-search .wy-dropdown > a:before {
+    content: "🌍 ";
+    margin-right: 8px;
+}
+
+/* Improve content spacing */
+.document .section {
+    margin-bottom: 2rem;
+}
+
+/* Style for Python API documentation */
+.py.class, .py.method, .py.function {
+    border-left: 3px solid var(--sedona-accent);
+    padding-left: 12px;
+    margin: 1rem 0;
+}
+
+.py.class > dt, .py.method > dt, .py.function > dt {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border-radius: 4px;
+    padding: 8px 12px;
+}
+
+/* Version notice styling */
+.version {
+    background: var(--sedona-dark);
+    color: var(--sedona-white);
+    border: 1px solid var(--sedona-accent-dark);
+    border-radius: 4px;
+    padding: 12px;
+    margin: 1rem 0;
+}
+
+/* Toctree caption styling - make Contents: white for better contrast (main content only) */
+.document .toctree-wrapper .caption,
+.rst-content .document .toctree-wrapper .caption {
+    color: var(--sedona-white) !important;
+    font-weight: 500 !important;
+    background: var(--sedona-primary) !important;
+    padding: 8px 16px !important;
+    margin: 0 -16px 16px -16px !important;
+    border-radius: 4px !important;
+}
+
+/* Enhanced button styling */
+.btn, .rst-content .btn {
+    background: var(--sedona-accent) !important;
+    border-color: var(--sedona-accent) !important;
+    color: var(--sedona-white) !important;
+}
+
+.btn:hover, .rst-content .btn:hover {
+    background: var(--sedona-accent-dark) !important;
+    border-color: var(--sedona-accent-dark) !important;
+}
+
+/* Navigation prev/next buttons */
+.rst-footer-buttons .btn-neutral {
+    background: var(--sedona-primary) !important;
+    color: var(--sedona-white) !important;
+}
+
+.rst-footer-buttons .btn-neutral:hover {
+    background: var(--sedona-primary-dark) !important;
+}

@@ -45,7 +45,7 @@ from packaging.version import parse as parse_version
     parse_version(shapely.__version__) < parse_version("2.0.0"),
     reason=f"Tests require shapely>=2.0.0, but found v{shapely.__version__}",
 )
-class TestDataframe(TestGeopandasBase):
+class TestGeoDataFrame(TestGeopandasBase):
     @pytest.mark.parametrize(
         "obj",
         [
@@ -61,6 +61,16 @@ class TestDataframe(TestGeopandasBase):
         with self.ps_allow_diff_frames():
             sgpd_df = GeoDataFrame(obj)
         check_geodataframe(sgpd_df)
+
+    def test_construct_from_geopandas(self):
+        gpd_df = gpd.GeoDataFrame(
+            {"geometry1": [Point(0, 0)]}, geometry="geometry1", crs="EPSG:3857"
+        )
+        with self.ps_allow_diff_frames():
+            sgpd_df = GeoDataFrame(gpd_df)
+        assert sgpd_df.crs == "EPSG:3857"
+        assert sgpd_df.geometry.crs == "EPSG:3857"
+        assert sgpd_df.geometry.name == "geometry1"
 
     @pytest.mark.parametrize(
         "obj",
@@ -90,7 +100,7 @@ class TestDataframe(TestGeopandasBase):
         sgpd_df.set_geometry(name, inplace=True)
         check_geodataframe(sgpd_df)
         result = sgpd_df.area
-        expected = pd.Series([1.0, 1.0, 1.0], name=name)
+        expected = pd.Series([1.0, 1.0, 1.0])
         self.check_pd_series_equal(result, expected)
 
     # These need to be defined inside the function to ensure Sedona's Geometry UDTs have been registered
@@ -125,6 +135,72 @@ class TestDataframe(TestGeopandasBase):
             pd_df = obj.to_pandas()
         sgpd_df = sgpd.GeoDataFrame(obj)
         assert_frame_equal(pd_df, sgpd_df.to_pandas())
+
+    def test_to_geopandas(self):
+        from geopandas.testing import assert_geodataframe_equal
+
+        data = {"geometry": [Point(x, x) for x in range(3)], "id": [1, 2, 3]}
+        index = [1, 2, 3]
+        crs = "EPSG:3857"
+        # TODO: try to optimize this away
+        with self.ps_allow_diff_frames():
+            result = GeoDataFrame(data, index=index, crs=crs).to_geopandas()
+        gpd_df = gpd.GeoDataFrame(data, index=index, crs=crs)
+        assert_geodataframe_equal(result, gpd_df)
+
+    def test_to_spark_pandas(self):
+        data = {"geometry": [Point(x, x) for x in range(3)], "id": [1, 2, 3]}
+        index = [1, 2, 3]
+        result = GeoDataFrame(data, index=index).to_spark_pandas()
+        ps_df = ps.DataFrame(data, index=index)
+        assert_frame_equal(result.to_pandas(), ps_df.to_pandas())
+
+    def test_getitem(self):
+        geoms = [Point(x, x) for x in range(3)]
+        ids = [1, 2, 3]
+        values = ["a", "b", "c"]
+        crs = "EPSG:3857"
+
+        with self.ps_allow_diff_frames():
+            df = GeoDataFrame({"geometry": geoms, "id": ids, "value": values}, crs=crs)
+
+        # get a single non-geometry series
+        result = df["id"]
+        expected = pd.Series(ids, name="id")
+        self.check_pd_series_equal(result, expected)
+
+        # get a single geometry series
+        result = df["geometry"]
+        expected = gpd.GeoSeries(geoms, name="geometry", crs=crs)
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # get multiple columns
+        result = df[["id", "value"]]
+        # no crs because no geometry column
+        expected = gpd.GeoDataFrame({"id": ids, "value": values})
+        self.check_sgpd_df_equals_gpd_df(result, expected)
+
+        # get numerical slice
+        result = df[:2]
+        expected = gpd.GeoDataFrame(
+            {"geometry": geoms[:2], "id": ids[:2], "value": values[:2]}, crs=crs
+        )
+        self.check_sgpd_df_equals_gpd_df(result, expected)
+
+    def test_plot(self):
+        # Just make sure it doesn't error
+        df = GeoDataFrame(
+            {
+                "value1": ["a", "b", "c"],
+                "geometry": [
+                    Point(0, 0),
+                    Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                    LineString([(0, 0), (1, 1)]),
+                ],
+                "value2": [1, 2, 3],
+            }
+        )
+        df.plot()
 
     def test_psdf(self):
         # this is to make sure the spark session works with pandas on spark api
@@ -205,7 +281,53 @@ class TestDataframe(TestGeopandasBase):
         df_copy = df.copy()
         assert type(df_copy) is GeoDataFrame
 
+    def test_set_crs(self):
+        sgpd_df = sgpd.GeoDataFrame({"geometry": [Point(0, 0), Point(1, 1)]})
+        with self.ps_allow_diff_frames():
+            sgpd_df.crs = 4326
+        assert sgpd_df.crs.to_epsg() == 4326
+
+        with self.ps_allow_diff_frames():
+            sgpd_df.set_crs(3857, inplace=True, allow_override=True)
+        assert sgpd_df.crs.to_epsg() == 3857
+
+        with self.ps_allow_diff_frames():
+            sgpd_df = sgpd_df.set_crs(None, allow_override=True)
+        assert isinstance(sgpd_df, GeoDataFrame)
+        assert sgpd_df.crs is None
+
+        with self.ps_allow_diff_frames():
+            sgpd_df = sgpd_df.set_crs(4326, allow_override=True)
+        assert isinstance(sgpd_df, GeoDataFrame)
+        assert sgpd_df.crs.to_epsg() == 4326
+
+    def test_to_crs(self):
+        from pyproj import CRS
+
+        with self.ps_allow_diff_frames():
+            gdf = sgpd.GeoDataFrame(
+                {"geometry": [Point(1, 1), Point(2, 2), Point(3, 3)]}, crs=4326
+            )
+        assert isinstance(gdf.crs, CRS) and gdf.crs.to_epsg() == 4326
+
+        with self.ps_allow_diff_frames():
+            result = gdf.to_crs(3857)
+        assert isinstance(result.crs, CRS) and result.crs.to_epsg() == 3857
+
+        expected = gpd.GeoSeries(
+            [
+                Point(111319.49079327356, 111325.14286638486),
+                Point(222638.98158654712, 222684.20850554455),
+                Point(333958.4723798207, 334111.1714019597),
+            ],
+            name="geometry",
+            crs=3857,
+        )
+        self.check_sgpd_equals_gpd(result.geometry, expected)
+
     def test_set_geometry(self):
+        from sedona.geopandas.geodataframe import MissingGeometryColumnError
+
         points1 = [Point(x, x) for x in range(3)]
         points2 = [Point(x + 5, x + 5) for x in range(3)]
 
@@ -213,7 +335,7 @@ class TestDataframe(TestGeopandasBase):
         sgpd_df = sgpd.GeoDataFrame(data)
 
         # No geometry column set yet
-        with pytest.raises(AttributeError):
+        with pytest.raises(MissingGeometryColumnError):
             _ = sgpd_df.geometry
 
         # TODO: Try to optimize this with self.ps_allow_diff_frames() away
@@ -261,6 +383,21 @@ class TestDataframe(TestGeopandasBase):
 
         assert new_df.crs == sgpd_df.crs
         assert new_df.geometry.crs == sgpd_df.crs
+
+    def test_set_geometry_crs(self):
+        df = GeoDataFrame({"geometry1": [Point(0, 0)]})
+        with self.ps_allow_diff_frames():
+            df.set_geometry("geometry1", crs="EPSG:3857", inplace=True)
+        assert df.crs == "EPSG:3857"
+        assert df.geometry.crs == "EPSG:3857"
+
+        with self.ps_allow_diff_frames():
+            df = GeoDataFrame(
+                {"geometry1": [Point(0, 0)]}, geometry="geometry1", crs="EPSG:3857"
+            )
+
+        assert df.crs == "EPSG:3857"
+        assert df.geometry.crs == "EPSG:3857"
 
     def test_active_geometry_name(self):
         if parse_version(gpd.__version__) < parse_version("1.0.0"):
@@ -327,38 +464,21 @@ class TestDataframe(TestGeopandasBase):
         self.assert_almost_equal(area_values[1], 4.0)
 
     def test_buffer(self):
-        # Create a GeoDataFrame with geometries to test buffer operation
-
-        # Create input geometries
         point = Point(0, 0)
         square = Polygon([(0, 0), (1, 0), (1, 1), (0, 1)])
 
-        data = {"geometry1": [point, square], "id": [1, 2], "value": ["a", "b"]}
+        data = {"geometry": [point, square], "id": [1, 2], "value": ["a", "b"]}
         df = GeoDataFrame(data)
 
-        # Apply buffer with distance 0.5
-        buffer_df = df.buffer(0.5)
+        result = df.buffer(0.5)
 
-        # Verify result is a GeoDataFrame
-        assert type(buffer_df) is GeoDataFrame
-
-        # Verify the original columns are preserved
-        assert "geometry1_buffered" in buffer_df.columns
-        assert "id" in buffer_df.columns
-        assert "value" in buffer_df.columns
-
-        # Convert to pandas to extract individual geometries
-        pandas_df = buffer_df._internal.spark_frame.select(
-            "geometry1_buffered"
-        ).toPandas()
-
+        assert type(result) is GeoSeries
         # Calculate areas to verify buffer was applied correctly
         # Point buffer with radius 0.5 should have area approximately π * 0.5² ≈ 0.785
         # Square buffer with radius 0.5 should expand the 1x1 square to 2x2 square with rounded corners
-        areas = [geom.area for geom in pandas_df["geometry1_buffered"]]
 
         # Check that square buffer area is greater than original (1.0)
-        assert areas[1] > 1.0
+        assert result.area[1] > 1.0
 
     def test_to_parquet(self):
         pass

@@ -2014,6 +2014,15 @@ class functionTestScala
       "POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))") shouldBe None
   }
 
+  it("should pass ST_Segmentize") {
+    val actual = sparkSession
+      .sql("SELECT ST_AsText(ST_Segmentize(ST_GeomFromWKT('POLYGON ((0 0, 0 8, 7.5 6, 15 4, 22.5 2, 30 0, 20 0, 10 0, 0 0))'), 10))")
+      .first()
+      .get(0)
+    val expected = "POLYGON ((0 0, 0 8, 7.5 6, 15 4, 22.5 2, 30 0, 20 0, 10 0, 0 0))"
+    assertEquals(expected, actual)
+  }
+
   it("should handle subdivision on huge amount of data") {
     Given("dataframe with 100 huge polygons")
     val expectedCount = 55880
@@ -2752,6 +2761,8 @@ class functionTestScala
     assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_SubDivideExplode(null, 0)")
     assert(functionDf.count() == 0)
+    functionDf = sparkSession.sql("select ST_Segmentize(null, 0)")
+    assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_MakePolygon(null)")
     assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_GeoHash(null, 1)")

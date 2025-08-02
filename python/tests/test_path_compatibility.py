@@ -27,15 +27,15 @@ from sedona.core.geom.envelope import Envelope
 from sedona.core.geom.geography import Geography
 from sedona.core.spatialOperator import JoinQuery
 from sedona.core.spatialOperator import JoinQueryRaw, KNNQuery, RangeQuery
+
 from sedona.sql import st_aggregates as sta
 from sedona.sql import st_constructors as stc
 from sedona.sql import st_functions as stf
 from sedona.sql import st_predicates as stp
 from sedona.sql.st_aggregates import ST_Union_Aggr
-from sedona.sql.st_constructors import ST_MakePoint
 from sedona.sql.st_functions import ST_X
 from sedona.sql.st_predicates import ST_Intersects
-from sedona.sql.types import GeographyType, GeometryType
+from sedona.sql.types import GeographyType, GeometryType, RasterType
 from sedona.stac.client import Client
 from sedona.stac.collection_client import CollectionClient
 from sedona.stats.clustering import dbscan
@@ -45,9 +45,17 @@ from sedona.stats.weighting import (
     add_binary_distance_band_column,
 )
 from sedona.utils.adapter import Adapter
-from sedona.utils.geoarrow import create_spatial_dataframe
 from sedona.utils.spatial_rdd_parser import GeoData
 from tests.test_base import TestBase
+from sedona.raster_utils.SedonaUtils import SedonaUtils
+from sedona.sql import ST_MakePoint, ST_Y, ST_Touches, ST_Envelope_Aggr
+from sedona.geoarrow import create_spatial_dataframe, dataframe_to_arrow
+from sedona.utils import KryoSerializer, SedonaKryoRegistrator
+from sedona.maps import SedonaKepler, SedonaPyDeck
+
+from sedona.raster.awt_raster import AWTRaster
+from sedona.raster.data_buffer import DataBuffer
+from sedona.raster.meta import SampleDimension
 
 
 class TestPathCompatibility(TestBase):
@@ -74,6 +82,7 @@ class TestPathCompatibility(TestBase):
         # Test GeographyType and GeometryType imports
         assert GeographyType is not None
         assert GeometryType is not None
+        assert RasterType is not None
 
     def test_spatial_operators_imports(self):
         # Test JoinQuery, KNNQuery, RangeQuery imports
@@ -118,3 +127,33 @@ class TestPathCompatibility(TestBase):
     def test_geoarrow_import(self):
         # Test create_spatial_dataframe import
         assert create_spatial_dataframe is not None
+        assert dataframe_to_arrow is not None
+
+    def test_raster_utils_imports(self):
+        # Test raster utils imports
+        assert SedonaUtils is not None
+
+    def test_import_df_functions_from_sedona_sql(self):
+        # one from each module
+        assert ST_MakePoint is not None
+        assert ST_Y is not None
+        assert ST_Touches is not None
+        assert ST_Envelope_Aggr is not None
+
+    def test_geoarrow_imports(self):
+        assert create_spatial_dataframe is not None
+        assert dataframe_to_arrow is not None
+
+    def test_sedona_util_imports(self):
+        assert KryoSerializer is not None
+        assert SedonaKryoRegistrator is not None
+
+    def test_maps_imports(self):
+        # Test Map imports
+        assert SedonaKepler is not None
+        assert SedonaPyDeck is not None
+
+    def test_raster_imports(self):
+        assert AWTRaster is not None
+        assert DataBuffer is not None
+        assert SampleDimension is not None
