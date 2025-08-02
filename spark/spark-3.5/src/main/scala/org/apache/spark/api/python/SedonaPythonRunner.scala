@@ -19,8 +19,6 @@ package org.apache.spark.api.python
 
 import org.apache.spark._
 import org.apache.spark.SedonaSparkEnv
-import org.apache.spark.api.python.PythonRDD.writeUTF
-import org.apache.spark.input.PortableDataStream
 import org.apache.spark.internal.Logging
 import org.apache.spark.internal.config.Python._
 import org.apache.spark.internal.config.{BUFFER_SIZE, EXECUTOR_CORES}
@@ -33,7 +31,6 @@ import java.net._
 import java.nio.charset.StandardCharsets
 import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.{Path, Files => JavaFiles}
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
@@ -710,132 +707,5 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
         }
       }
     }
-  }
-}
-
-private[spark] object PythonRunner {
-
-  // already running worker monitor threads for worker and task attempts ID pairs
-  val runningMonitorThreads = ConcurrentHashMap.newKeySet[(Socket, Long)]()
-
-  private var printPythonInfo: AtomicBoolean = new AtomicBoolean(true)
-
-  def apply(func: PythonFunction, jobArtifactUUID: Option[String]): PythonRunner = {
-    if (printPythonInfo.compareAndSet(true, false)) {
-      PythonUtils.logPythonInfo(func.pythonExec)
-    }
-    new PythonRunner(Seq(ChainedPythonFunctions(Seq(func))), jobArtifactUUID)
-  }
-}
-
-/**
- * A helper class to run Python mapPartition in Spark.
- */
-private[spark] class PythonRunner(
-                                   funcs: Seq[ChainedPythonFunctions], jobArtifactUUID: Option[String])
-  extends BasePythonRunner[Array[Byte], Array[Byte]](
-    funcs, PythonEvalType.NON_UDF, Array(Array(0)), jobArtifactUUID) {
-
-  protected override def newWriterThread(
-                                          env: SparkEnv,
-                                          worker: Socket,
-                                          inputIterator: Iterator[Array[Byte]],
-                                          partitionIndex: Int,
-                                          context: TaskContext): WriterThread = {
-    new WriterThread(env, worker, inputIterator, partitionIndex, context) {
-
-      protected override def writeCommand(dataOut: DataOutputStream): Unit = {
-        val command = funcs.head.funcs.head.command
-        dataOut.writeInt(command.length)
-        dataOut.write(command.toArray)
-      }
-
-      protected override def writeIteratorToStream(dataOut: DataOutputStream): Unit = {
-        GeoArrowWriter.writeIteratorToStream(inputIterator, dataOut)
-        dataOut.writeInt(SpecialLengths.END_OF_DATA_SECTION)
-      }
-    }
-  }
-
-  protected override def newReaderIterator(
-                                            stream: DataInputStream,
-                                            writerThread: WriterThread,
-                                            startTime: Long,
-                                            env: SparkEnv,
-                                            worker: Socket,
-                                            pid: Option[Int],
-                                            releasedOrClosed: AtomicBoolean,
-                                            context: TaskContext): Iterator[Array[Byte]] = {
-    new ReaderIterator(
-      stream, writerThread, startTime, env, worker, pid, releasedOrClosed, context) {
-
-      protected override def read(): Array[Byte] = {
-        if (writerThread.exception.isDefined) {
-          throw writerThread.exception.get
-        }
-        try {
-          stream.readInt() match {
-            case length if length > 0 =>
-              val obj = new Array[Byte](length)
-              stream.readFully(obj)
-              obj
-            case 0 => Array.emptyByteArray
-            case SpecialLengths.TIMING_DATA =>
-              handleTimingData()
-              read()
-            case SpecialLengths.PYTHON_EXCEPTION_THROWN =>
-              throw handlePythonException()
-            case SpecialLengths.END_OF_DATA_SECTION =>
-              handleEndOfDataSection()
-              null
-          }
-        } catch handleException
-      }
-    }
-  }
-}
-
-private[spark] object SpecialLengths {
-  val END_OF_DATA_SECTION = -1
-  val PYTHON_EXCEPTION_THROWN = -2
-  val TIMING_DATA = -3
-  val END_OF_STREAM = -4
-  val NULL = -5
-  val START_ARROW_STREAM = -6
-  val END_OF_MICRO_BATCH = -7
-}
-
-private[spark] object BarrierTaskContextMessageProtocol {
-  val BARRIER_FUNCTION = 1
-  val ALL_GATHER_FUNCTION = 2
-  val BARRIER_RESULT_SUCCESS = "success"
-  val ERROR_UNRECOGNIZED_FUNCTION = "Not recognized function call from python side."
-}
-
-object GeoArrowWriter extends Logging {
-  def writeIteratorToStream[T](iter: Iterator[T], dataOut: DataOutputStream): Unit = {
-
-    def write(obj: Any): Unit = obj match {
-      case null =>
-        dataOut.writeInt(SpecialLengths.NULL)
-      case arr: Array[Byte] =>
-        logError("some random array")
-        dataOut.writeInt(arr.length)
-        dataOut.write(arr)
-      case str: String =>
-        logError("some random string")
-        writeUTF(str, dataOut)
-      case stream: PortableDataStream =>
-        logError("some random stream")
-        write(stream.toArray())
-      case (key, value) =>
-        logError("some random key value")
-        write(key)
-        write(value)
-      case other =>
-        throw new SparkException("Unexpected element type " + other.getClass)
-    }
-
-    iter.foreach(write)
   }
 }

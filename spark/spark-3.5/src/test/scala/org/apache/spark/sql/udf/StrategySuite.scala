@@ -44,13 +44,14 @@ class StrategySuite extends AnyFunSuite with Matchers {
   import spark.implicits._
 
   test("sedona geospatial UDF") {
-    spark.sql("select 1").show()
+//    spark.sql("select 1").show()
     val df = spark.read.format("parquet")
       .load("/Users/pawelkocinski/Desktop/projects/sedona-book/apache-sedona-book/book/chapter10/data/buildings/partitioned")
       .select(
         geometryToNonGeometryFunction(col("geometry")),
         geometryToGeometryFunction(col("geometry")),
         nonGeometryToGeometryFunction(expr("ST_AsText(geometry)")),
+        col("geohash")
       )
 
     df.show()
