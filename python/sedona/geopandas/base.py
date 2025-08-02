@@ -100,7 +100,7 @@ class GeoFrame(metaclass=ABCMeta):
         >>> s.has_sindex
         False
         >>> index = s.sindex
-        >>> gdf.has_sindex
+        >>> s.has_sindex
         True
 
         Returns
