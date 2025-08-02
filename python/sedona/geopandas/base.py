@@ -2294,9 +2294,6 @@ class GeoFrame(metaclass=ABCMeta):
     @abstractmethod
     def plot(self, *args, **kwargs): ...
 
-    @abstractmethod
-    def sjoin(self, other, predicate="intersects", **kwargs): ...
-
 
 def _delegate_to_geometry_column(op, this, *args, **kwargs):
     geom_column = this.geometry
