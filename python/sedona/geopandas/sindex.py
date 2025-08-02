@@ -117,8 +117,10 @@ class SpatialIndex:
                     self._indexed_rdd, geometry, True, True
                 )
 
-            results = result_rdd.collect()
-            return results
+            geo_data_list = result_rdd.collect()
+            # No need to keep the userData field, so convert it directly to a list of geometries
+            geoms_list = [row.geom for row in geo_data_list]
+            return geoms_list
         else:
             # For local spatial index based on Shapely STRtree
             if predicate == "contains":

@@ -29,20 +29,15 @@ import pandas as pd
 import pyspark.pandas as pspd
 import sedona.geopandas as sgpd
 from pyspark.pandas import Series as PandasOnSparkSeries
-from pyspark.pandas._typing import Dtype
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
-from pyspark.pandas.internal import InternalFrame
 from pyspark.pandas.utils import log_advice
 
 from sedona.geopandas._typing import Label
 from sedona.geopandas.base import GeoFrame
-from sedona.geopandas.sindex import SpatialIndex
 
 from pandas.api.extensions import register_extension_dtype
 from geopandas.geodataframe import crs_mismatch_error
 from geopandas.array import GeometryDtype
-from shapely.geometry.base import BaseGeometry
-from pyspark.pandas.internal import SPARK_DEFAULT_INDEX_NAME, NATURAL_ORDER_COLUMN_NAME
 
 register_extension_dtype(GeometryDtype)
 
@@ -666,6 +661,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         frame._geometry_column_name = geo_column_name
         if new_series:
+            # Note: This casts GeoSeries back into pspd.Series, so we lose any metadata that's not serialized
             frame[geo_column_name] = level
 
         if not inplace:
@@ -793,21 +789,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         Convert the GeoDataFrame to a Spark Pandas DataFrame.
         """
         return pspd.DataFrame(self._internal)
-
-    @property
-    def sindex(self) -> SpatialIndex | None:
-        """
-        Returns a spatial index for the GeoDataFrame.
-        The spatial index allows for efficient spatial queries. If the spatial
-        index cannot be created (e.g., no geometry column is present), this
-        property will return None.
-        Returns:
-        - SpatialIndex: The spatial index for the GeoDataFrame.
-        - None: If the spatial index is not supported.
-        """
-        if "geometry" in self.columns:
-            return SpatialIndex(self._internal.spark_frame, column_name="geometry")
-        return None
 
     def copy(self, deep=False):
         """
