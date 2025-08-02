@@ -142,17 +142,26 @@ class TestSpatialJoin(TestGeopandasBase):
 
     def test_sjoin_column_suffixes(self):
         """Test column suffix handling"""
-        joined = sjoin(self.gdf1, self.gdf2, lsuffix="_left", rsuffix="_right")
-        assert joined is not None
-        assert type(joined) is GeoDataFrame
+        joined = sjoin(self.gdf1, self.gdf2, lsuffix="L", rsuffix="R")
+        expected = ["geometry", "id_L", "name", "index_R", "id_R", "category"]
+        assert list(joined.columns) == expected
 
-        # Check that suffixes are applied to overlapping columns
-        columns = joined.columns
-        if "id_left" in columns and "id_right" in columns:
-            # Both datasets have 'id' column, so suffixes should be applied
-            assert "id_left" in columns
-            assert "id_right" in columns
-            assert "id" not in columns  # Original column should not exist
+        # Specify only one side
+        joined = sjoin(self.gdf1, self.gdf2, lsuffix="L")
+        expected = ["geometry", "id_L", "name", "index_right", "id_right", "category"]
+        assert list(joined.columns) == expected
+
+        # Use mixed suffixes
+        joined = sjoin(self.gdf1, self.gdf2, lsuffix="LEFT", rsuffix="random")
+        expected = [
+            "geometry",
+            "id_LEFT",
+            "name",
+            "index_random",
+            "id_random",
+            "category",
+        ]
+        assert list(joined.columns) == expected
 
     def test_sjoin_dwithin_distance(self):
         """Test dwithin predicate with distance parameter"""

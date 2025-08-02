@@ -115,10 +115,10 @@ def _frame_join(
     ]
 
     left_geo_df = left_sdf.selectExpr(
-        *left_cols, f"`{SPARK_DEFAULT_INDEX_NAME}` as index_left"
+        *left_cols, f"`{SPARK_DEFAULT_INDEX_NAME}` as index_{lsuffix}"
     )
     right_geo_df = right_sdf.selectExpr(
-        *right_cols, f"`{SPARK_DEFAULT_INDEX_NAME}` as index_right"
+        *right_cols, f"`{SPARK_DEFAULT_INDEX_NAME}` as index_{rsuffix}"
     )
 
     # Build spatial join condition
@@ -152,7 +152,7 @@ def _frame_join(
         raise ValueError(f"Join type '{how}' not supported")
 
     # Pick which index to use for the resulting df's index based on 'how'
-    index_col = "index_left" if how in ("inner", "left") else "index_right"
+    index_col = f"index_{lsuffix}" if how in ("inner", "left") else f"index_{rsuffix}"
 
     # Handle column naming with suffixes
     final_columns = []
@@ -162,16 +162,20 @@ def _frame_join(
 
     # Add other columns with suffix handling
     left_data_cols = [
-        col for col in left_geo_df.columns if col not in ["l_geometry", "index_left"]
+        col
+        for col in left_geo_df.columns
+        if col not in ["l_geometry", f"index_{lsuffix}"]
     ]
     right_data_cols = [
-        col for col in right_geo_df.columns if col not in ["r_geometry", "index_right"]
+        col
+        for col in right_geo_df.columns
+        if col not in ["r_geometry", f"index_{rsuffix}"]
     ]
 
     final_columns.append(f"{index_col} as {SPARK_DEFAULT_INDEX_NAME}")
 
-    if index_col != "index_left":
-        final_columns.append("index_left")
+    if index_col != f"index_{lsuffix}":
+        final_columns.append(f"index_{lsuffix}")
 
     for col_name in left_data_cols:
         base_name = col_name[2:]  # Remove "l_" prefix
@@ -184,8 +188,8 @@ def _frame_join(
             # Column only in left
             final_columns.append(f"{col_name} as {base_name}")
 
-    if index_col != "index_right":
-        final_columns.append("index_right")
+    if index_col != f"index_{rsuffix}":
+        final_columns.append(f"index_{rsuffix}")
 
     for col_name in right_data_cols:
         base_name = col_name[2:]  # Remove "r_" prefix
@@ -218,8 +222,8 @@ def _frame_join(
 
 
 def sjoin(
-    left_df,
-    right_df,
+    left_df: GeoDataFrame,
+    right_df: GeoDataFrame,
     how="inner",
     predicate="intersects",
     lsuffix="left",
@@ -227,7 +231,7 @@ def sjoin(
     distance=None,
     on_attribute=None,
     **kwargs,
-):
+) -> GeoDataFrame:
     """Spatial join of two GeoDataFrames.
 
     Parameters
@@ -260,6 +264,11 @@ def sjoin(
         of the spatial predicate. These must be found in both DataFrames.
         If set, observations are joined only if the predicate applies
         and values in specified columns match.
+
+    Returns
+    -------
+    GeoDataFrame
+        The joined GeoDataFrame.
 
     Examples
     --------
