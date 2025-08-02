@@ -20,6 +20,7 @@ package org.apache.spark.sql.sedona_sql.optimization
 
 import org.apache.sedona.common.geometryObjects.Circle
 import org.apache.sedona.core.spatialOperator.SpatialPredicate
+import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.expressions.And
 import org.apache.spark.sql.catalyst.expressions.Expression
@@ -44,17 +45,7 @@ import org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilte
 import org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter.LeafFilter
 import org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter.OrFilter
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.sql.sedona_sql.expressions.ST_Contains
-import org.apache.spark.sql.sedona_sql.expressions.ST_CoveredBy
-import org.apache.spark.sql.sedona_sql.expressions.ST_Covers
-import org.apache.spark.sql.sedona_sql.expressions.ST_Crosses
-import org.apache.spark.sql.sedona_sql.expressions.ST_Distance
-import org.apache.spark.sql.sedona_sql.expressions.ST_Equals
-import org.apache.spark.sql.sedona_sql.expressions.ST_Intersects
-import org.apache.spark.sql.sedona_sql.expressions.ST_OrderingEquals
-import org.apache.spark.sql.sedona_sql.expressions.ST_Overlaps
-import org.apache.spark.sql.sedona_sql.expressions.ST_Touches
-import org.apache.spark.sql.sedona_sql.expressions.ST_Within
+import org.apache.spark.sql.sedona_sql.expressions.{ST_AsEWKT, ST_Buffer, ST_Contains, ST_CoveredBy, ST_Covers, ST_Crosses, ST_DWithin, ST_Distance, ST_DistanceSpheroid, ST_Equals, ST_Intersects, ST_OrderingEquals, ST_Overlaps, ST_Touches, ST_Within}
 import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils.splitConjunctivePredicates
 import org.apache.spark.sql.types.DoubleType
 import org.locationtech.jts.geom.Geometry
@@ -161,17 +152,66 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
         for ((name, value) <- resolveNameAndLiteral(distArgs, pushableColumn))
           yield distanceFilter(name, GeometryUDT.deserialize(value), d.asInstanceOf[Double])
 
+      case LessThan(ST_DistanceSpheroid(distArgs), Literal(d, DoubleType)) =>
+        for ((name, value) <- resolveNameAndLiteral(distArgs, pushableColumn))
+          yield distanceFilter(
+            name,
+            GeometryUDT.deserialize(value),
+            d.asInstanceOf[Double],
+            useSpheroid = true)
+
+      case LessThanOrEqual(ST_DistanceSpheroid(distArgs), Literal(d, DoubleType)) =>
+        for ((name, value) <- resolveNameAndLiteral(distArgs, pushableColumn))
+          yield distanceFilter(
+            name,
+            GeometryUDT.deserialize(value),
+            d.asInstanceOf[Double],
+            useSpheroid = true)
+
+      case ST_DWithin(args) if args.length == 3 || args.length == 4 =>
+        val distanceLit = args(2)
+        val useSpheroid = if (args.length == 4) {
+          args(3) match {
+            case Literal(flag: Boolean, _) => flag
+            case _ => false
+          }
+        } else false
+
+        distanceLit match {
+          case Literal(distance: Double, DoubleType) =>
+            resolveNameAndLiteral(args.take(2), pushableColumn).map { case (name, value) =>
+              distanceFilter(name, GeometryUDT.deserialize(value), distance, useSpheroid)
+            }
+          case _ => None
+        }
       case _ => None
     }
   }
 
-  private def distanceFilter(name: String, geom: Geometry, distance: Double) = {
-    val queryWindow = geom match {
-      case point: Point => new Circle(point, distance)
-      case _ =>
-        val envelope = geom.getEnvelopeInternal
-        envelope.expandBy(distance)
-        geom.getFactory.toGeometry(envelope)
+  private def distanceFilter(
+      name: String,
+      geom: Geometry,
+      distance: Double,
+      useSpheroid: Boolean = false): GeoParquetSpatialFilter = {
+    val queryWindow: Geometry = if (useSpheroid) {
+      // Spheroidal buffer
+      // Increase buffer distance by 3% to account for false negatives with Spheroidal Buffer calculations
+      val distanceLit = Literal(distance * 1.03)
+      val spheroidLit = Literal(true)
+      val geomLit = Literal.create(GeometrySerializer.serialize(geom), new GeometryUDT())
+
+      val bufferGeometry = {
+        val bufferExpr = ST_Buffer(
+          scala.collection.immutable.Seq(geomLit, distanceLit, spheroidLit))
+        val wkb = bufferExpr.eval().asInstanceOf[Array[Byte]]
+        GeometrySerializer.deserialize(wkb)
+      }
+      bufferGeometry
+    } else {
+      // Euclidean distance
+      val envelope = geom.getEnvelopeInternal
+      envelope.expandBy(distance)
+      geom.getFactory.toGeometry(envelope)
     }
     LeafFilter(unquote(name), SpatialPredicate.INTERSECTS, queryWindow)
   }
