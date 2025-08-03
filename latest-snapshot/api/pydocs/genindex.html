@@ -121,6 +121,7 @@
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.base.GeoFrame.envelope"><code class="docutils literal notranslate"><span class="pre">GeoFrame.envelope</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.base.GeoFrame.geom_type"><code class="docutils literal notranslate"><span class="pre">GeoFrame.geom_type</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.base.GeoFrame.get_geometry"><code class="docutils literal notranslate"><span class="pre">GeoFrame.get_geometry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.base.GeoFrame.has_sindex"><code class="docutils literal notranslate"><span class="pre">GeoFrame.has_sindex</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.base.GeoFrame.has_z"><code class="docutils literal notranslate"><span class="pre">GeoFrame.has_z</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.base.GeoFrame.intersection"><code class="docutils literal notranslate"><span class="pre">GeoFrame.intersection()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.base.GeoFrame.intersection_all"><code class="docutils literal notranslate"><span class="pre">GeoFrame.intersection_all()</span></code></a></li>
@@ -166,7 +167,6 @@
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.geodataframe.GeoDataFrame.rename_geometry"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.rename_geometry()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.geodataframe.GeoDataFrame.set_crs"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.set_crs()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.geodataframe.GeoDataFrame.set_geometry"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.set_geometry()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.geodataframe.GeoDataFrame.sindex"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.sindex</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.geodataframe.GeoDataFrame.sjoin"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.sjoin()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.geodataframe.GeoDataFrame.to_arrow"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_arrow()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.geodataframe.GeoDataFrame.to_crs"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_crs()</span></code></a></li>
@@ -229,6 +229,7 @@
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.geometry"><code class="docutils literal notranslate"><span class="pre">GeoSeries.geometry</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.get_geometry"><code class="docutils literal notranslate"><span class="pre">GeoSeries.get_geometry()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.get_precision"><code class="docutils literal notranslate"><span class="pre">GeoSeries.get_precision()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.has_sindex"><code class="docutils literal notranslate"><span class="pre">GeoSeries.has_sindex</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.has_z"><code class="docutils literal notranslate"><span class="pre">GeoSeries.has_z</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.interiors"><code class="docutils literal notranslate"><span class="pre">GeoSeries.interiors</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.intersection"><code class="docutils literal notranslate"><span class="pre">GeoSeries.intersection()</span></code></a></li>
@@ -1614,6 +1615,16 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="sedona.spark.core.html#sedona.spark.core.utils.ImportedJvmLib.has_library">has_library() (sedona.spark.core.utils.ImportedJvmLib class method)</a>
 </li>
+      <li><a href="sedona.geopandas.html#sedona.geopandas.base.GeoFrame.has_sindex">has_sindex (sedona.geopandas.base.GeoFrame property)</a>
+
+      <ul>
+        <li><a href="sedona.geopandas.api.html#sedona.geopandas.GeoSeries.has_sindex">(sedona.geopandas.GeoSeries property)</a>
+</li>
+        <li><a href="sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.has_sindex">(sedona.geopandas.geoseries.GeoSeries property)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="sedona.geopandas.html#sedona.geopandas.base.GeoFrame.has_z">has_z (sedona.geopandas.base.GeoFrame property)</a>
 
       <ul>
@@ -1622,8 +1633,6 @@
         <li><a href="sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.has_z">(sedona.geopandas.geoseries.GeoSeries property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="sedona.spark.raster.html#sedona.spark.raster.awt_raster.AWTRaster.height">height (sedona.spark.raster.awt_raster.AWTRaster attribute)</a>
 
       <ul>
@@ -4134,10 +4143,6 @@
       <li><a href="sedona.geopandas.html#sedona.geopandas.base.GeoFrame.sindex">sindex (sedona.geopandas.base.GeoFrame property)</a>
 
       <ul>
-        <li><a href="sedona.geopandas.api.html#sedona.geopandas.GeoDataFrame.sindex">(sedona.geopandas.GeoDataFrame property)</a>
-</li>
-        <li><a href="sedona.geopandas.html#sedona.geopandas.geodataframe.GeoDataFrame.sindex">(sedona.geopandas.geodataframe.GeoDataFrame property)</a>
-</li>
         <li><a href="sedona.geopandas.api.html#sedona.geopandas.GeoSeries.sindex">(sedona.geopandas.GeoSeries property)</a>
 </li>
         <li><a href="sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.sindex">(sedona.geopandas.geoseries.GeoSeries property)</a>
@@ -4215,10 +4220,10 @@
 </li>
       <li><a href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.spatialPartitionedRDD">spatialPartitionedRDD (sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD property)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialPartitioner">SpatialPartitioner (class in sedona.spark.core.SpatialRDD.spatial_rdd)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.spatialPartitioning">spatialPartitioning() (sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD method)</a>
 </li>
       <li><a href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.spatialPartitioningWithoutDuplicates">spatialPartitioningWithoutDuplicates() (sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD method)</a>

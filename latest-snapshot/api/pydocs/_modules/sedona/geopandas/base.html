@@ -121,6 +121,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.base.GeoFrame.envelope"><code class="docutils literal notranslate"><span class="pre">GeoFrame.envelope</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.base.GeoFrame.geom_type"><code class="docutils literal notranslate"><span class="pre">GeoFrame.geom_type</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.base.GeoFrame.get_geometry"><code class="docutils literal notranslate"><span class="pre">GeoFrame.get_geometry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.base.GeoFrame.has_sindex"><code class="docutils literal notranslate"><span class="pre">GeoFrame.has_sindex</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.base.GeoFrame.has_z"><code class="docutils literal notranslate"><span class="pre">GeoFrame.has_z</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.base.GeoFrame.intersection"><code class="docutils literal notranslate"><span class="pre">GeoFrame.intersection()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.base.GeoFrame.intersection_all"><code class="docutils literal notranslate"><span class="pre">GeoFrame.intersection_all()</span></code></a></li>
@@ -166,7 +167,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geodataframe.GeoDataFrame.rename_geometry"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.rename_geometry()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geodataframe.GeoDataFrame.set_crs"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.set_crs()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geodataframe.GeoDataFrame.set_geometry"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.set_geometry()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geodataframe.GeoDataFrame.sindex"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.sindex</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geodataframe.GeoDataFrame.sjoin"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.sjoin()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geodataframe.GeoDataFrame.to_arrow"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_arrow()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geodataframe.GeoDataFrame.to_crs"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_crs()</span></code></a></li>
@@ -229,6 +229,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.geometry"><code class="docutils literal notranslate"><span class="pre">GeoSeries.geometry</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.get_geometry"><code class="docutils literal notranslate"><span class="pre">GeoSeries.get_geometry()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.get_precision"><code class="docutils literal notranslate"><span class="pre">GeoSeries.get_precision()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.has_sindex"><code class="docutils literal notranslate"><span class="pre">GeoSeries.has_sindex</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.has_z"><code class="docutils literal notranslate"><span class="pre">GeoSeries.has_z</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.interiors"><code class="docutils literal notranslate"><span class="pre">GeoSeries.interiors</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.intersection"><code class="docutils literal notranslate"><span class="pre">GeoSeries.intersection()</span></code></a></li>
@@ -551,41 +552,69 @@
 <span class="sd">    A base class for both GeoDataFrame and GeoSeries.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># def _reduce_for_geostat_function(</span>
-    <span class="c1">#     self,</span>
-    <span class="c1">#     sfun: Callable[[&quot;GeoSeries&quot;], Column],</span>
-    <span class="c1">#     name: str,</span>
-    <span class="c1">#     axis: Optional[Axis] = None,</span>
-    <span class="c1">#     numeric_only: bool = True,</span>
-    <span class="c1">#     skipna: bool = True,</span>
-    <span class="c1">#     **kwargs: Any,</span>
-    <span class="c1"># ) -&gt; Union[&quot;GeoSeries&quot;, Scalar]:</span>
-    <span class="c1">#     raise NotImplementedError(&quot;This method is not implemented yet.&quot;)</span>
-
     <span class="nd">@property</span>
-    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">sindex</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;SpatialIndex&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns a spatial index built from the geometries.</span>
+<span class="sd">        Returns a spatial index for the GeoSeries.</span>
+
+<span class="sd">        Note that the spatial index may not be fully</span>
+<span class="sd">        initialized until the first use.</span>
+
+<span class="sd">        Currently, sindex is not retained when calling this method from a GeoDataFrame.</span>
+<span class="sd">        You can workaround this by first extracting the active geometry column as a GeoSeries,</span>
+<span class="sd">        and calling this method.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        SpatialIndex</span>
-<span class="sd">            The spatial index for this GeoDataFrame.</span>
+<span class="sd">            The spatial index.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from shapely.geometry import Point, box</span>
+<span class="sd">        &gt;&gt;&gt; from sedona.geopandas import GeoSeries</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; s = GeoSeries([Point(x, x) for x in range(5)])</span>
+<span class="sd">        &gt;&gt;&gt; s.sindex.query(box(1, 1, 3, 3))</span>
+<span class="sd">        [Point(1, 1), Point(2, 2), Point(3, 3)]</span>
+<span class="sd">        &gt;&gt;&gt; s.has_sindex</span>
+<span class="sd">        True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">_delegate_to_geometry_column</span><span class="p">(</span><span class="s2">&quot;sindex&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">has_sindex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check the existence of the spatial index without generating it.</span>
+
+<span class="sd">        Use the `.sindex` attribute on a GeoDataFrame or GeoSeries</span>
+<span class="sd">        to generate a spatial index if it does not yet exist,</span>
+<span class="sd">        which may take considerable time based on the underlying index</span>
+<span class="sd">        implementation.</span>
+
+<span class="sd">        Note that the underlying spatial index may not be fully</span>
+<span class="sd">        initialized until the first use.</span>
+
+<span class="sd">        Currently, sindex is not retained when calling this method from a GeoDataFrame.</span>
+<span class="sd">        You can workaround this by first extracting the active geometry column as a GeoSeries,</span>
+<span class="sd">        and calling this method.</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
 <span class="sd">        &gt;&gt;&gt; from shapely.geometry import Point</span>
-<span class="sd">        &gt;&gt;&gt; from sedona.geopandas import GeoDataFrame</span>
-<span class="sd">        &gt;&gt;&gt;</span>
-<span class="sd">        &gt;&gt;&gt; gdf = GeoDataFrame([{&quot;geometry&quot;: Point(1, 1), &quot;value&quot;: 1},</span>
-<span class="sd">        ...                     {&quot;geometry&quot;: Point(2, 2), &quot;value&quot;: 2}])</span>
-<span class="sd">        &gt;&gt;&gt; index = gdf.sindex</span>
-<span class="sd">        &gt;&gt;&gt; index.size</span>
-<span class="sd">        2</span>
+<span class="sd">        &gt;&gt;&gt; s = GeoSeries([Point(x, x) for x in range(5)])</span>
+<span class="sd">        &gt;&gt;&gt; s.has_sindex</span>
+<span class="sd">        False</span>
+<span class="sd">        &gt;&gt;&gt; index = s.sindex</span>
+<span class="sd">        &gt;&gt;&gt; s.has_sindex</span>
+<span class="sd">        True</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            `True` if the spatial index has been generated or</span>
+<span class="sd">            `False` if not.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># We pass in self.geometry here to use the active geometry column for dataframe</span>
-        <span class="k">return</span> <span class="n">_delegate_to_geometry_column</span><span class="p">(</span><span class="s2">&quot;sindex&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_delegate_to_geometry_column</span><span class="p">(</span><span class="s2">&quot;has_sindex&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
 <div class="viewcode-block" id="GeoFrame.copy">
 <a class="viewcode-back" href="../../../sedona.geopandas.html#sedona.geopandas.base.GeoFrame.copy">[docs]</a>
@@ -2886,6 +2915,7 @@
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_delegate_to_geometry_column</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">this</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="n">geom_column</span> <span class="o">=</span> <span class="n">this</span><span class="o">.</span><span class="n">geometry</span>
+    <span class="n">inplace</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;inplace&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">args</span> <span class="ow">or</span> <span class="n">kwargs</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">geom_column</span><span class="p">,</span> <span class="n">op</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -2894,7 +2924,8 @@
         <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;inplace&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">inplace</span><span class="p">:</span>
+        <span class="c1"># This assumes this is a GeoSeries</span>
         <span class="n">this</span><span class="o">.</span><span class="n">_update_inplace</span><span class="p">(</span><span class="n">geom_column</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
 

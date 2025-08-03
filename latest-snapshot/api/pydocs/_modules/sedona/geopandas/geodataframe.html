@@ -121,6 +121,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.base.GeoFrame.envelope"><code class="docutils literal notranslate"><span class="pre">GeoFrame.envelope</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.base.GeoFrame.geom_type"><code class="docutils literal notranslate"><span class="pre">GeoFrame.geom_type</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.base.GeoFrame.get_geometry"><code class="docutils literal notranslate"><span class="pre">GeoFrame.get_geometry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.base.GeoFrame.has_sindex"><code class="docutils literal notranslate"><span class="pre">GeoFrame.has_sindex</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.base.GeoFrame.has_z"><code class="docutils literal notranslate"><span class="pre">GeoFrame.has_z</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.base.GeoFrame.intersection"><code class="docutils literal notranslate"><span class="pre">GeoFrame.intersection()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.base.GeoFrame.intersection_all"><code class="docutils literal notranslate"><span class="pre">GeoFrame.intersection_all()</span></code></a></li>
@@ -166,7 +167,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geodataframe.GeoDataFrame.rename_geometry"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.rename_geometry()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geodataframe.GeoDataFrame.set_crs"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.set_crs()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geodataframe.GeoDataFrame.set_geometry"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.set_geometry()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geodataframe.GeoDataFrame.sindex"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.sindex</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geodataframe.GeoDataFrame.sjoin"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.sjoin()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geodataframe.GeoDataFrame.to_arrow"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_arrow()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geodataframe.GeoDataFrame.to_crs"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_crs()</span></code></a></li>
@@ -229,6 +229,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.geometry"><code class="docutils literal notranslate"><span class="pre">GeoSeries.geometry</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.get_geometry"><code class="docutils literal notranslate"><span class="pre">GeoSeries.get_geometry()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.get_precision"><code class="docutils literal notranslate"><span class="pre">GeoSeries.get_precision()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.has_sindex"><code class="docutils literal notranslate"><span class="pre">GeoSeries.has_sindex</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.has_z"><code class="docutils literal notranslate"><span class="pre">GeoSeries.has_z</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.interiors"><code class="docutils literal notranslate"><span class="pre">GeoSeries.interiors</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.intersection"><code class="docutils literal notranslate"><span class="pre">GeoSeries.intersection()</span></code></a></li>
@@ -531,20 +532,15 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">pyspark.pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pspd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sedona.geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sgpd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Series</span> <span class="k">as</span> <span class="n">PandasOnSparkSeries</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dtype</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span> <span class="k">as</span> <span class="n">PandasOnSparkDataFrame</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.internal</span><span class="w"> </span><span class="kn">import</span> <span class="n">InternalFrame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_advice</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.geopandas._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Label</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.geopandas.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoFrame</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.geopandas.sindex</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpatialIndex</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pandas.api.extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_extension_dtype</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">geopandas.geodataframe</span><span class="w"> </span><span class="kn">import</span> <span class="n">crs_mismatch_error</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">geopandas.array</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryDtype</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseGeometry</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.internal</span><span class="w"> </span><span class="kn">import</span> <span class="n">SPARK_DEFAULT_INDEX_NAME</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span>
 
 <span class="n">register_extension_dtype</span><span class="p">(</span><span class="n">GeometryDtype</span><span class="p">)</span>
 
@@ -1175,6 +1171,7 @@
 
         <span class="n">frame</span><span class="o">.</span><span class="n">_geometry_column_name</span> <span class="o">=</span> <span class="n">geo_column_name</span>
         <span class="k">if</span> <span class="n">new_series</span><span class="p">:</span>
+            <span class="c1"># Note: This casts GeoSeries back into pspd.Series, so we lose any metadata that&#39;s not serialized</span>
             <span class="n">frame</span><span class="p">[</span><span class="n">geo_column_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">level</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">inplace</span><span class="p">:</span>
@@ -1312,21 +1309,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="p">)</span></div>
 
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">sindex</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SpatialIndex</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns a spatial index for the GeoDataFrame.</span>
-<span class="sd">        The spatial index allows for efficient spatial queries. If the spatial</span>
-<span class="sd">        index cannot be created (e.g., no geometry column is present), this</span>
-<span class="sd">        property will return None.</span>
-<span class="sd">        Returns:</span>
-<span class="sd">        - SpatialIndex: The spatial index for the GeoDataFrame.</span>
-<span class="sd">        - None: If the spatial index is not supported.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="s2">&quot;geometry&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">SpatialIndex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="p">,</span> <span class="n">column_name</span><span class="o">=</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="GeoDataFrame.copy">
 <a class="viewcode-back" href="../../../sedona.geopandas.api.html#sedona.geopandas.geodataframe.GeoDataFrame.copy">[docs]</a>
