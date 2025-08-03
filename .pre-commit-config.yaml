@@ -50,15 +50,13 @@ repos:
         name: maven spotless apply
         description: automatically formats Java and Scala code using mvn spotless:apply.
         entry: mvn spotless:apply
-        language: system # Indicates that the 'entry' command should be run directly as a system command.
-        types: [java, scala] # Specifies that this hook should run on Java and Scala files.
-        pass_filenames:
-          false # Crucial: tells pre-commit NOT to pass filenames as arguments to 'mvn spotless:apply'.
-          # Spotless typically scans the whole project based on its configuration.
-        always_run:
-          true # Ensures this hook runs even if no Java files are changed.
-          # This is useful for spotless:apply which might affect files not staged.
-        stages: [pre-commit] # Specifies that this hook runs during the 'commit' stage.
+        language: system  # Indicates that the 'entry' command should be run directly as a system command.
+        types: [java, scala]  # Specifies that this hook should run on Java and Scala files.
+        pass_filenames: false  # Crucial: tells pre-commit NOT to pass filenames as arguments to 'mvn spotless:apply'.
+                             # Spotless typically scans the whole project based on its configuration.
+        always_run: true  # Ensures this hook runs even if no Java files are changed.
+                         # This is useful for spotless:apply which might affect files not staged.
+        stages: [pre-commit]  # Specifies that this hook runs during the 'commit' stage.
       - id: checkstyle
         name: run checkstyle
         description: check Java code style with Checkstyle
@@ -78,11 +76,11 @@ repos:
         files: (?i)\.zip$
       - id: check-makefiles-tabs
         name: check Makefiles files for tabs
-        entry: ./scripts/pre-commit/check_makefiles_for_tabs.sh # Path to your script
+        entry: ./scripts/pre-commit/check_makefiles_for_tabs.sh  # Path to your script
         language: system
         files: '(?i)makefile$'
-        pass_filenames: true # <-- Crucial change: pass filenames to the script
-        types: [file] # Ensure only regular files are passed, not directories
+        pass_filenames: true  # <-- Crucial change: pass filenames to the script
+        types: [file]  # Ensure only regular files are passed, not directories
         stages: [manual]
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
