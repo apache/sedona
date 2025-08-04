@@ -30,12 +30,12 @@ from shapely.geometry import (
 )
 import shapely
 
-from sedona.geopandas import GeoDataFrame, GeoSeries
+from sedona.spark.geopandas import GeoDataFrame, GeoSeries
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 import pyspark.pandas as ps
 import pandas as pd
 import geopandas as gpd
-import sedona.geopandas as sgpd
+import sedona.spark.geopandas as sgpd
 import pytest
 from pandas.testing import assert_frame_equal, assert_series_equal
 from packaging.version import parse as parse_version
@@ -326,7 +326,7 @@ class TestGeoDataFrame(TestGeopandasBase):
         self.check_sgpd_equals_gpd(result.geometry, expected)
 
     def test_set_geometry(self):
-        from sedona.geopandas.geodataframe import MissingGeometryColumnError
+        from sedona.spark.geopandas.geodataframe import MissingGeometryColumnError
 
         points1 = [Point(x, x) for x in range(3)]
         points2 = [Point(x + 5, x + 5) for x in range(3)]

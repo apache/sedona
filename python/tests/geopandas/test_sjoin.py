@@ -22,7 +22,7 @@ import pandas as pd
 import geopandas as gpd
 
 from shapely.geometry import Polygon, Point, LineString
-from sedona.geopandas import GeoDataFrame, sjoin
+from sedona.spark.geopandas import GeoDataFrame, sjoin
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 from packaging.version import parse as parse_version
 

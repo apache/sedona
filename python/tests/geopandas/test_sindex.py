@@ -22,8 +22,8 @@ from pyspark.sql.functions import expr
 from shapely.geometry import Point, Polygon, LineString
 
 from tests.test_base import TestBase
-from sedona.geopandas import GeoSeries
-from sedona.geopandas.sindex import SpatialIndex
+from sedona.spark.geopandas import GeoSeries
+from sedona.spark.geopandas.sindex import SpatialIndex
 from packaging.version import parse as parse_version
 
 

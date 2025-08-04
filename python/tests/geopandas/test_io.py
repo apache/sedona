@@ -23,7 +23,7 @@ import pandas as pd
 import geopandas as gpd
 import pyspark.pandas as ps
 from functools import partial
-from sedona.geopandas import GeoDataFrame, GeoSeries, read_file, read_parquet
+from sedona.spark.geopandas import GeoDataFrame, GeoSeries, read_file, read_parquet
 from tests import tests_resource
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 from shapely.geometry import (

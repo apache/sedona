@@ -35,7 +35,7 @@ from shapely.geometry import (
     LinearRing,
 )
 
-from sedona.geopandas import GeoSeries
+from sedona.spark.geopandas import GeoSeries
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 import pyspark.pandas as ps
 from packaging.version import parse as parse_version

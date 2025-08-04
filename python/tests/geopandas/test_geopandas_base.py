@@ -17,7 +17,7 @@
 
 from typing import Union
 from tests.test_base import TestBase
-from sedona.geopandas import GeoDataFrame, GeoSeries
+from sedona.spark.geopandas import GeoDataFrame, GeoSeries
 import pyspark.sql
 import geopandas as gpd
 import pandas as pd
