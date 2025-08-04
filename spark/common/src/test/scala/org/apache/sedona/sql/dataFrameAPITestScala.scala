@@ -224,20 +224,20 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult.getSRID == 4326)
     }
 
-    it("passed st_geogfromwkt") {
-      val df = sparkSession.sql("SELECT 'POINT(0.0 1.0)' AS wkt").select(ST_GeogFromWKT("wkt"))
-      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geography].toString
-      val expectedResult = "POINT (0 1)"
-      assert(actualResult == expectedResult)
-    }
-
-    it("passed st_geogfromwkt with srid") {
-      val df =
-        sparkSession.sql("SELECT 'POINT(0.0 1.0)' AS wkt").select(ST_GeogFromWKT("wkt", 4326))
-      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geography]
-      assert(actualResult.toString == "POINT (0 1)")
-      assert(actualResult.getGeometry.getSRID == 4326)
-    }
+//    it("passed st_geogfromwkt") {
+//      val df = sparkSession.sql("SELECT 'POINT(0.0 1.0)' AS wkt").select(ST_GeogFromWKT("wkt"))
+//      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geography].toString
+//      val expectedResult = "POINT (0 1)"
+//      assert(actualResult == expectedResult)
+//    }
+//
+//    it("passed st_geogfromwkt with srid") {
+//      val df =
+//        sparkSession.sql("SELECT 'POINT(0.0 1.0)' AS wkt").select(ST_GeogFromWKT("wkt", 4326))
+//      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geography]
+//      assert(actualResult.toString == "POINT (0 1)")
+//      assert(actualResult.getGeometry.getSRID == 4326)
+//    }
 
     it("passed st_geomfromewkt") {
       val df = sparkSession

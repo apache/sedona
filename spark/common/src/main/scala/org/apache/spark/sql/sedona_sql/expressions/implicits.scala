@@ -18,6 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
+import org.apache.sedona.common.S2Geography.{S2Geography, GeographySerializer}
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
@@ -68,6 +69,36 @@ object implicits {
         case _ =>
           inputExpression.eval(input).asInstanceOf[Array[Byte]] match {
             case binary: Array[Byte] => new Geography(GeometrySerializer.deserialize(binary))
+            case _ => null
+          }
+      }
+    }
+
+    def toS2Geography(input: InternalRow): S2Geography = {
+      inputExpression match {
+        case serdeAware: SerdeAware =>
+          serdeAware.evalWithoutSerialization(input).asInstanceOf[S2Geography]
+        case _ =>
+          inputExpression.eval(input).asInstanceOf[Array[Byte]] match {
+            case binary: Array[Byte] => GeographySerializer.deserialize(binary)
+            case _ => null
+          }
+      }
+    }
+
+    def toS2GeographyArray(input: InternalRow): Array[S2Geography] = {
+      inputExpression match {
+        case aware: SerdeAware =>
+          aware.evalWithoutSerialization(input).asInstanceOf[Array[S2Geography]]
+        case _ =>
+          inputExpression.eval(input).asInstanceOf[ArrayData] match {
+            case arrayData: ArrayData =>
+              val length = arrayData.numElements()
+              val geographyies = new Array[S2Geography](length)
+              for (i <- 0 until length) {
+                geographyies(i) = arrayData.getBinary(i).toS2Geography
+              }
+              geographyies
             case _ => null
           }
       }
@@ -142,6 +173,11 @@ object implicits {
         case _ => null
       }
     }
+    def toS2Geography: S2Geography =
+      arrayData match {
+        case binary: Array[Byte] => GeographySerializer.deserialize(binary)
+        case _ => null
+      }
   }
 
   implicit class GeometryEnhancer(geom: Geometry) {
@@ -155,8 +191,9 @@ object implicits {
     def isNonEmpty: Boolean = geom != null && !geom.isEmpty
   }
 
-  implicit class GeographyEnhancer(geog: Geography) {
+  implicit class S2GeographyEnhancer(geog: S2Geography) {
 
-    def toGenericArrayData: Array[Byte] = GeometrySerializer.serialize(geog.getGeometry)
+    def toGenericArrayData: Array[Byte] = GeographySerializer.serialize(geog)
   }
+
 }

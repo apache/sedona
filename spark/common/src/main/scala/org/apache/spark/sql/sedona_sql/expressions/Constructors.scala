@@ -104,13 +104,13 @@ private[apache] case class ST_GeomFromWKT(inputExpressions: Seq[Expression])
  * @param inputExpressions
  *   This function takes a geometry string and a srid. The string format must be WKT.
  */
-private[apache] case class ST_GeogFromWKT(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.geogFromWKT _) {
-
-  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
-    copy(inputExpressions = newChildren)
-  }
-}
+//private[apache] case class ST_GeogFromWKT(inputExpressions: Seq[Expression])
+//    extends InferredExpression(Constructors.geogFromWKT _) {
+//
+//  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+//    copy(inputExpressions = newChildren)
+//  }
+//}
 
 /**
  * Return a Geometry from a OGC Extended WKT string

@@ -16,19 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.UDT
+package org.apache.sedona.common.S2Geography;
 
-import org.apache.sedona.common.S2Geography.S2Geography
-import org.apache.spark.sql.types.UDTRegistration
-import org.locationtech.jts.geom.Geometry
-import org.apache.sedona.common.geometryObjects.Geography
-import org.locationtech.jts.index.SpatialIndex
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
-object UdtRegistratorWrapper {
+public class GeographySerializer {
+  public static byte[] serialize(S2Geography geography) throws IOException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    geography.encodeTagged(baos, new EncodeOptions());
+    return baos.toByteArray();
+  }
 
-  def registerAll(): Unit = {
-    UDTRegistration.register(classOf[Geometry].getName, classOf[GeometryUDT].getName)
-    UDTRegistration.register(classOf[S2Geography].getName, classOf[GeographyUDT].getName)
-    UDTRegistration.register(classOf[SpatialIndex].getName, classOf[IndexUDT].getName)
+  public static S2Geography deserialize(byte[] buffer) throws IOException {
+    ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
+    return S2Geography.decodeTagged(bais);
   }
 }

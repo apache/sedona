@@ -18,12 +18,14 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
+import com.google.common.geometry.S2Point
 import org.apache.commons.lang3.StringUtils
+import org.apache.sedona.common.S2Geography.S2Geography
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{Expression, ImplicitCastInputTypes}
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.util.ArrayData
-import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, GeographyUDT}
+import org.apache.spark.sql.sedona_sql.UDT.{GeographyUDT, GeometryUDT}
 import org.apache.spark.sql.types.{AbstractDataType, BinaryType, BooleanType, DataType, DataTypes, DoubleType, IntegerType, LongType, StringType}
 import org.apache.spark.unsafe.types.UTF8String
 import org.locationtech.jts.geom.Geometry
@@ -34,7 +36,6 @@ import scala.collection.mutable.ArrayBuffer
 import scala.reflect.runtime.universe.TypeTag
 import scala.reflect.runtime.universe.Type
 import scala.reflect.runtime.universe.typeOf
-import org.apache.sedona.common.geometryObjects.Geography
 
 /**
  * Custom exception to include the input row and the original exception message.
@@ -162,10 +163,14 @@ object InferrableType {
     new InferrableType[Geometry] {}
   implicit val geometryArrayInstance: InferrableType[Array[Geometry]] =
     new InferrableType[Array[Geometry]] {}
-  implicit val geographyInstance: InferrableType[Geography] =
-    new InferrableType[Geography] {}
-  implicit val geographyArrayInstance: InferrableType[Array[Geography]] =
-    new InferrableType[Array[Geography]] {}
+  implicit val s2geographyInstance: InferrableType[S2Geography] =
+    new InferrableType[S2Geography]
+  implicit val s2geographyArrayInstance: InferrableType[Array[S2Geography]] =
+    new InferrableType[Array[S2Geography]]
+  implicit val s2point: InferrableType[S2Point] =
+    new InferrableType[S2Point]
+  implicit val s2pointArrayInstance: InferrableType[Array[S2Point]] =
+    new InferrableType[Array[S2Point]]
   implicit val javaDoubleInstance: InferrableType[java.lang.Double] =
     new InferrableType[java.lang.Double] {}
   implicit val javaIntegerInstance: InferrableType[java.lang.Integer] =
@@ -206,10 +211,12 @@ object InferredTypes {
   def buildArgumentExtractor(t: Type): Expression => InternalRow => Any = {
     if (t =:= typeOf[Geometry]) { expr => input =>
       expr.toGeometry(input)
-    } else if (t =:= typeOf[Geography]) { expr => input =>
-      expr.toGeography(input)
     } else if (t =:= typeOf[Array[Geometry]]) { expr => input =>
       expr.toGeometryArray(input)
+    } else if (t =:= typeOf[S2Geography]) { expr => input =>
+      expr.toS2Geography(input)
+    } else if (t =:= typeOf[Array[S2Geography]]) { expr => input =>
+      expr.toS2GeographyArray(input)
     } else if (InferredRasterExpression.isRasterType(t)) {
       InferredRasterExpression.rasterExtractor
     } else if (t =:= typeOf[Array[Double]]) { expr => input =>
@@ -238,9 +245,9 @@ object InferredTypes {
       } else {
         null
       }
-    } else if (t =:= typeOf[Geography]) { output =>
+    } else if (t =:= typeOf[S2Geography]) { output =>
       if (output != null) {
-        output.asInstanceOf[Geography].toGenericArrayData
+        output.asInstanceOf[S2Geography].toGenericArrayData
       } else {
         null
       }
@@ -273,14 +280,13 @@ object InferredTypes {
         } else {
           null
         }
-    } else if (t =:= typeOf[Array[Geography]] || t =:= typeOf[java.util.List[Geography]]) {
+    } else if (t =:= typeOf[Array[S2Geography]] || t =:= typeOf[java.util.List[S2Geography]]) {
       output =>
         if (output != null) {
-          ArrayData.toArrayData(output.asInstanceOf[Array[Geography]].map(_.toGenericArrayData))
+          ArrayData.toArrayData(output.asInstanceOf[Array[S2Geography]].map(_.toGenericArrayData))
         } else {
           null
         }
-
     } else if (InferredRasterExpression.isRasterArrayType(t)) {
       InferredRasterExpression.rasterArraySerializer
     } else if (t =:= typeOf[Option[Boolean]]) { output =>
@@ -299,9 +305,9 @@ object InferredTypes {
       GeometryUDT
     } else if (t =:= typeOf[Array[Geometry]] || t =:= typeOf[java.util.List[Geometry]]) {
       DataTypes.createArrayType(GeometryUDT)
-    } else if (t =:= typeOf[Geography]) {
+    } else if (t =:= typeOf[S2Geography]) {
       GeographyUDT
-    } else if (t =:= typeOf[Array[Geography]] || t =:= typeOf[java.util.List[Geography]]) {
+    } else if (t =:= typeOf[Array[S2Geography]] || t =:= typeOf[java.util.List[S2Geography]]) {
       DataTypes.createArrayType(GeographyUDT)
     } else if (InferredRasterExpression.isRasterType(t)) {
       InferredRasterExpression.rasterUDT
