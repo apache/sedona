@@ -2012,7 +2012,7 @@
 <span class="sd">            Alternatively, we could create &#39;other&#39; using the same index as self,</span>
 <span class="sd">            but that would require index=self.index.to_pandas() which is less scalable.</span>
 
-<span class="sd">        default_val : str or None (default &quot;FALSE&quot;)</span>
+<span class="sd">        default_val : Any (default None)</span>
 <span class="sd">            The value to use if either L or R is null. If None, nulls are not handled.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">col</span>
@@ -2025,7 +2025,21 @@
         <span class="c1"># This code assumes there is only one index (SPARK_DEFAULT_INDEX_NAME)</span>
         <span class="c1"># and would need to be updated if Sedona later supports multi-index</span>
 
-        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+        <span class="n">sdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span>
+        <span class="n">other_sdf</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span>
+
+        <span class="k">if</span> <span class="n">index_col</span> <span class="o">==</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">:</span>
+            <span class="c1"># NATURAL_ORDER_COLUMN_NAME is not deterministic or sequential, so we instead replace it with a</span>
+            <span class="c1"># new column of row_numbers to perform the alignment. This mimics the following code.</span>
+            <span class="c1"># sdf.withColumn(index_col, F.row_number().over(Window.orderBy(NATURAL_ORDER_COLUMN_NAME)))</span>
+            <span class="n">sdf</span> <span class="o">=</span> <span class="n">sdf</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">index_col</span><span class="p">)</span>
+            <span class="n">other_sdf</span> <span class="o">=</span> <span class="n">other_sdf</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">index_col</span><span class="p">)</span>
+            <span class="n">sdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">attach_distributed_sequence_column</span><span class="p">(</span><span class="n">sdf</span><span class="p">,</span> <span class="n">index_col</span><span class="p">)</span>
+            <span class="n">other_sdf</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">attach_distributed_sequence_column</span><span class="p">(</span>
+                <span class="n">other_sdf</span><span class="p">,</span> <span class="n">index_col</span>
+            <span class="p">)</span>
+
+        <span class="n">sdf</span> <span class="o">=</span> <span class="n">sdf</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">),</span>
             <span class="c1"># For the left side:</span>
             <span class="c1"># - We always select NATURAL_ORDER_COLUMN_NAME, to avoid having to regenerate it in the result</span>
@@ -2033,13 +2047,13 @@
             <span class="n">col</span><span class="p">(</span><span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">),</span>
             <span class="n">col</span><span class="p">(</span><span class="n">SPARK_DEFAULT_INDEX_NAME</span><span class="p">),</span>
         <span class="p">)</span>
-        <span class="n">other_df</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+        <span class="n">other_sdf</span> <span class="o">=</span> <span class="n">other_sdf</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
             <span class="n">other</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">),</span>
             <span class="c1"># for the right side, we only need the column that we are joining on</span>
             <span class="n">col</span><span class="p">(</span><span class="n">index_col</span><span class="p">),</span>
         <span class="p">)</span>
 
-        <span class="n">joined_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">other_df</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">index_col</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;outer&quot;</span><span class="p">)</span>
+        <span class="n">joined_df</span> <span class="o">=</span> <span class="n">sdf</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">other_sdf</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">index_col</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;outer&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">default_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># ps.Series.fillna() doesn&#39;t always work for the output for some reason</span>
@@ -3666,8 +3680,12 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">renamed</span> <span class="o">=</span> <span class="bp">self</span>
 
-        <span class="c1"># to_spark() is important here to ensure that the spark column names are set to the pandas column ones</span>
-        <span class="k">return</span> <span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">renamed</span><span class="o">.</span><span class="n">_internal</span><span class="p">)</span><span class="o">.</span><span class="n">to_spark</span><span class="p">())</span></div>
+        <span class="n">index_col</span> <span class="o">=</span> <span class="n">SPARK_DEFAULT_INDEX_NAME</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">GeoDataFrame</span><span class="p">(</span>
+            <span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">renamed</span><span class="o">.</span><span class="n">_internal</span><span class="p">)</span><span class="o">.</span><span class="n">to_spark</span><span class="p">(</span><span class="n">index_col</span><span class="p">)</span><span class="o">.</span><span class="n">pandas_api</span><span class="p">(</span><span class="n">index_col</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">return</span> <span class="n">result</span></div>
 </div>
 
 
