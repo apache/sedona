@@ -1372,7 +1372,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             Alternatively, we could create 'other' using the same index as self,
             but that would require index=self.index.to_pandas() which is less scalable.
 
-        default_val : str or None (default "FALSE")
+        default_val : Any (default None)
             The value to use if either L or R is null. If None, nulls are not handled.
         """
         from pyspark.sql.functions import col
@@ -1385,7 +1385,21 @@ class GeoSeries(GeoFrame, pspd.Series):
         # This code assumes there is only one index (SPARK_DEFAULT_INDEX_NAME)
         # and would need to be updated if Sedona later supports multi-index
 
-        df = self._internal.spark_frame.select(
+        sdf = self._internal.spark_frame
+        other_sdf = other._internal.spark_frame
+
+        if index_col == NATURAL_ORDER_COLUMN_NAME:
+            # NATURAL_ORDER_COLUMN_NAME is not deterministic or sequential, so we instead replace it with a
+            # new column of row_numbers to perform the alignment. This mimics the following code.
+            # sdf.withColumn(index_col, F.row_number().over(Window.orderBy(NATURAL_ORDER_COLUMN_NAME)))
+            sdf = sdf.drop(index_col)
+            other_sdf = other_sdf.drop(index_col)
+            sdf = self._internal.attach_distributed_sequence_column(sdf, index_col)
+            other_sdf = other._internal.attach_distributed_sequence_column(
+                other_sdf, index_col
+            )
+
+        sdf = sdf.select(
             self.spark.column.alias("L"),
             # For the left side:
             # - We always select NATURAL_ORDER_COLUMN_NAME, to avoid having to regenerate it in the result
@@ -1393,13 +1407,13 @@ class GeoSeries(GeoFrame, pspd.Series):
             col(NATURAL_ORDER_COLUMN_NAME),
             col(SPARK_DEFAULT_INDEX_NAME),
         )
-        other_df = other._internal.spark_frame.select(
+        other_sdf = other_sdf.select(
             other.spark.column.alias("R"),
             # for the right side, we only need the column that we are joining on
             col(index_col),
         )
 
-        joined_df = df.join(other_df, on=index_col, how="outer")
+        joined_df = sdf.join(other_sdf, on=index_col, how="outer")
 
         if default_val is not None:
             # ps.Series.fillna() doesn't always work for the output for some reason
@@ -2940,8 +2954,12 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         else:
             renamed = self
 
-        # to_spark() is important here to ensure that the spark column names are set to the pandas column ones
-        return GeoDataFrame(pspd.DataFrame(renamed._internal).to_spark())
+        index_col = SPARK_DEFAULT_INDEX_NAME
+        result = GeoDataFrame(
+            pspd.DataFrame(renamed._internal).to_spark(index_col).pandas_api(index_col)
+        )
+        result.index.name = self.index.name
+        return result
 
 
 # -----------------------------------------------------------------------------

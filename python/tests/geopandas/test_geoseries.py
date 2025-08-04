@@ -1493,8 +1493,6 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         assert_series_equal(df_result.to_pandas(), expected)
 
     def test_intersection(self):
-        import pyspark.pandas as ps
-
         s = sgpd.GeoSeries(
             [
                 Polygon([(0, 0), (2, 2), (0, 2)]),
@@ -1601,6 +1599,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         # Ensure result of align=False retains the left's index
         assert result.index.to_pandas().equals(expected.index)
 
+        # Check that GeoDataFrame works too
+        df_result = s2.to_geoframe().intersection(s, align=False)
+        self.check_sgpd_equals_gpd(df_result, expected)
+
     def test_snap(self):
         s = GeoSeries(
             [
@@ -1691,6 +1693,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = s2.contains(s, align=False)
         expected = pd.Series([True, False, True, True], index=range(1, 5))
         assert_series_equal(result.to_pandas(), expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s2.to_geoframe().contains(s, align=False)
+        assert_series_equal(df_result.to_pandas(), expected)
 
     def test_contains_properly(self):
         pass
