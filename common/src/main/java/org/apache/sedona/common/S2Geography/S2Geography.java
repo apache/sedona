@@ -83,6 +83,11 @@ public abstract class S2Geography {
       throw new IllegalArgumentException("Unknown GeographyKind: " + kind);
     }
   }
+
+  public int getKind() {
+    return this.kind.getKind();
+  }
+
   /**
    * @return 0, 1, or 2 if all Shape()s that are returned will have the same dimension (i.e., they
    *     are all points, all lines, or all polygons).
@@ -207,7 +212,7 @@ public abstract class S2Geography {
     out.flush();
   }
 
-  public S2Geography decodeTagged(InputStream is) throws IOException {
+  public static S2Geography decodeTagged(InputStream is) throws IOException {
     // wrap ONCE
     UnsafeInput kryoIn = new UnsafeInput(is, BUFFER_SIZE);
     EncodeTag topTag = EncodeTag.decode(kryoIn);
