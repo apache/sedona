@@ -466,30 +466,21 @@ class GeoSeries(GeoFrame, pspd.Series):
         if len(self) == 0:
             return None
 
-        if parse_version(pyspark.__version__) >= parse_version("3.5.0"):
-            spark_col = stf.ST_SRID(F.first_value(self.spark.column, ignoreNulls=True))
-            # Set this to avoid error complaining that we don't have a groupby column
-            is_aggr = True
-        else:
-            spark_col = stf.ST_SRID(self.spark.column)
-            is_aggr = False
+        # F.first is non-deterministic, but it doesn't matter because all non-null values should be the same
+        spark_col = stf.ST_SRID(F.first(self.spark.column, ignorenulls=True))
 
+        # Set this to avoid error complaining that we don't have a groupby column
         tmp_series = self._query_geometry_column(
             spark_col,
             returns_geom=False,
-            is_aggr=is_aggr,
+            is_aggr=True,
         )
 
         # All geometries should have the same srid
         # so we just take the srid of the first non-null element
-
-        if parse_version(pyspark.__version__) >= parse_version("3.5.0"):
-            srid = tmp_series.item()
-            # Turn np.nan to 0 to avoid error
-            srid = 0 if np.isnan(srid) else srid
-        else:
-            first_idx = tmp_series.first_valid_index()
-            srid = tmp_series[first_idx] if first_idx is not None else 0
+        srid = tmp_series.item()
+        # Turn np.nan to 0 to avoid error
+        srid = 0 if np.isnan(srid) else srid
 
         # Sedona returns 0 if doesn't exist
         return CRS.from_user_input(srid) if srid != 0 else None
@@ -1556,59 +1547,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         ax : matplotlib axes instance
         """
         return self.to_geopandas().plot(*args, **kwargs)
-
-    def sjoin(
-        self,
-        other,
-        how="inner",
-        predicate="intersects",
-        lsuffix="left",
-        rsuffix="right",
-        distance=None,
-        on_attribute=None,
-        **kwargs,
-    ):
-        """Perform a spatial join between two GeoSeries.
-
-        Parameters
-        ----------
-        other : GeoSeries
-            The GeoSeries to join with.
-        how : str, default 'inner'
-            The type of join to perform.
-        predicate : str, default 'intersects'
-            The spatial predicate to use for the join.
-        lsuffix : str, default 'left'
-            Suffix to apply to the left GeoSeries' column names.
-        rsuffix : str, default 'right'
-            Suffix to apply to the right GeoSeries' column names.
-        distance : float, optional
-            The distance threshold for the join.
-        on_attribute : str, optional
-            The attribute to join on.
-        **kwargs
-            Additional arguments to pass to the join function.
-
-        Returns
-        -------
-        GeoSeries
-            A new GeoSeries containing the result of the spatial join.
-
-        """
-        from sedona.geopandas import sjoin
-
-        # Implementation of the abstract method
-        return sjoin(
-            self,
-            other,
-            how,
-            predicate,
-            lsuffix,
-            rsuffix,
-            distance,
-            on_attribute,
-            **kwargs,
-        )
 
     @property
     def geometry(self) -> "GeoSeries":

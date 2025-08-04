@@ -16,11 +16,9 @@
 # under the License.
 import re
 import pyspark.pandas as ps
-from pyspark.pandas.internal import InternalFrame
-from pyspark.pandas.series import first_series
+from pyspark.pandas.internal import SPARK_DEFAULT_INDEX_NAME, InternalFrame
 from pyspark.pandas.utils import scol_for
-from pyspark.sql.functions import expr, col, lit
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType
+from pyspark.sql.functions import expr
 
 from sedona.geopandas import GeoDataFrame, GeoSeries
 
@@ -29,8 +27,8 @@ SUFFIX_PATTERN = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 
 def _frame_join(
-    left_df,
-    right_df,
+    left_df: GeoDataFrame,
+    right_df: GeoDataFrame,
     how="inner",
     predicate="intersects",
     lsuffix="left",
@@ -42,9 +40,9 @@ def _frame_join(
 
     Parameters
     ----------
-    left_df : GeoDataFrame or GeoSeries
+    left_df : GeoDataFrame
         Left dataset to join
-    right_df : GeoDataFrame or GeoSeries
+    right_df : GeoDataFrame
         Right dataset to join
     how : str, default 'inner'
         Join type: 'inner', 'left', 'right'
@@ -58,6 +56,8 @@ def _frame_join(
         Distance parameter for dwithin predicate
     on_attribute : list, optional
         Additional columns to join on
+
+    Note: Unlike GeoPandas, Sedona does not preserve key order for performance reasons. Consider using .sort_index() after the join, if you need to preserve the order.
 
     Returns
     -------
@@ -91,30 +91,18 @@ def _frame_join(
     right_geom_col = None
 
     # Find geometry columns in left dataframe
-    for field in left_sdf.schema.fields:
-        if field.dataType.typeName() in ("geometrytype", "binary"):
-            left_geom_col = field.name
-            break
+    left_geom_col = left_df.active_geometry_name
 
     # Find geometry columns in right dataframe
-    for field in right_sdf.schema.fields:
-        if field.dataType.typeName() in ("geometrytype", "binary"):
-            right_geom_col = field.name
-            break
+    right_geom_col = right_df.active_geometry_name
 
-    if left_geom_col is None or right_geom_col is None:
-        raise ValueError("Both datasets must have geometry columns")
+    if not left_geom_col:
+        raise ValueError("Left dataframe geometry column not set")
+    if not right_geom_col:
+        raise ValueError("Right dataframe geometry column not set")
 
-    # Prepare geometry expressions for spatial join
-    if left_sdf.schema[left_geom_col].dataType.typeName() == "binary":
-        left_geom_expr = f"ST_GeomFromWKB(`{left_geom_col}`) as l_geometry"
-    else:
-        left_geom_expr = f"`{left_geom_col}` as l_geometry"
-
-    if right_sdf.schema[right_geom_col].dataType.typeName() == "binary":
-        right_geom_expr = f"ST_GeomFromWKB(`{right_geom_col}`) as r_geometry"
-    else:
-        right_geom_expr = f"`{right_geom_col}` as r_geometry"
+    left_geom_expr = f"`{left_geom_col}` as l_geometry"
+    right_geom_expr = f"`{right_geom_col}` as r_geometry"
 
     # Select all columns with geometry
     left_cols = [left_geom_expr] + [
@@ -128,8 +116,12 @@ def _frame_join(
         if field.name != right_geom_col and not field.name.startswith("__")
     ]
 
-    left_geo_df = left_sdf.selectExpr(*left_cols)
-    right_geo_df = right_sdf.selectExpr(*right_cols)
+    left_geo_df = left_sdf.selectExpr(
+        *left_cols, f"`{SPARK_DEFAULT_INDEX_NAME}` as index_{lsuffix}"
+    )
+    right_geo_df = right_sdf.selectExpr(
+        *right_cols, f"`{SPARK_DEFAULT_INDEX_NAME}` as index_{rsuffix}"
+    )
 
     # Build spatial join condition
     if predicate == "dwithin":
@@ -161,16 +153,31 @@ def _frame_join(
     else:
         raise ValueError(f"Join type '{how}' not supported")
 
+    # Pick which index to use for the resulting df's index based on 'how'
+    index_col = f"index_{lsuffix}" if how in ("inner", "left") else f"index_{rsuffix}"
+
     # Handle column naming with suffixes
     final_columns = []
 
     # Add geometry column (always from left for geopandas compatibility)
-    # Currently, Sedona stores geometries in EWKB format
-    final_columns.append("ST_AsEWKB(l_geometry) as geometry")
+    final_columns.append("l_geometry as geometry")
 
     # Add other columns with suffix handling
-    left_data_cols = [col for col in left_geo_df.columns if col != "l_geometry"]
-    right_data_cols = [col for col in right_geo_df.columns if col != "r_geometry"]
+    left_data_cols = [
+        col
+        for col in left_geo_df.columns
+        if col not in ["l_geometry", f"index_{lsuffix}"]
+    ]
+    right_data_cols = [
+        col
+        for col in right_geo_df.columns
+        if col not in ["r_geometry", f"index_{rsuffix}"]
+    ]
+
+    final_columns.append(f"{index_col} as {SPARK_DEFAULT_INDEX_NAME}")
+
+    if index_col != f"index_{lsuffix}":
+        final_columns.append(f"index_{lsuffix}")
 
     for col_name in left_data_cols:
         base_name = col_name[2:]  # Remove "l_" prefix
@@ -182,6 +189,9 @@ def _frame_join(
         else:
             # Column only in left
             final_columns.append(f"{col_name} as {base_name}")
+
+    if index_col != f"index_{rsuffix}":
+        final_columns.append(f"index_{rsuffix}")
 
     for col_name in right_data_cols:
         base_name = col_name[2:]  # Remove "r_" prefix
@@ -196,27 +206,25 @@ def _frame_join(
 
     # Select final columns
     result_df = spatial_join_df.selectExpr(*final_columns)
+    # Note, we do not .orderBy(SPARK_DEFAULT_INDEX_NAME) to avoid a performance hit
 
-    # Return appropriate type based on input
-    if isinstance(left_df, GeoSeries) and isinstance(right_df, GeoSeries):
-        # Return GeoSeries for GeoSeries inputs
-        internal = InternalFrame(
-            spark_frame=result_df,
-            index_spark_columns=None,
-            column_labels=[left_df._col_label],
-            data_spark_columns=[scol_for(result_df, "geometry")],
-            data_fields=[left_df._internal.data_fields[0]],
-            column_label_names=left_df._internal.column_label_names,
-        )
-        return _to_geo_series(first_series(ps.DataFrame(internal)))
-    else:
-        # Return GeoDataFrame for GeoDataFrame inputs
-        return GeoDataFrame(result_df)
+    data_spark_columns = [
+        scol_for(result_df, col)
+        for col in result_df.columns
+        if col != SPARK_DEFAULT_INDEX_NAME
+    ]
+
+    internal = InternalFrame(
+        spark_frame=result_df,
+        index_spark_columns=[scol_for(result_df, SPARK_DEFAULT_INDEX_NAME)],
+        data_spark_columns=data_spark_columns,
+    )
+    return GeoDataFrame(ps.DataFrame(internal))
 
 
 def sjoin(
-    left_df,
-    right_df,
+    left_df: GeoDataFrame,
+    right_df: GeoDataFrame,
     how="inner",
     predicate="intersects",
     lsuffix="left",
@@ -224,7 +232,7 @@ def sjoin(
     distance=None,
     on_attribute=None,
     **kwargs,
-):
+) -> GeoDataFrame:
     """Spatial join of two GeoDataFrames.
 
     Parameters
@@ -257,6 +265,11 @@ def sjoin(
         of the spatial predicate. These must be found in both DataFrames.
         If set, observations are joined only if the predicate applies
         and values in specified columns match.
+
+    Returns
+    -------
+    GeoDataFrame
+        The joined GeoDataFrame.
 
     Examples
     --------
@@ -325,15 +338,11 @@ def _basic_checks(left_df, right_df, how, lsuffix, rsuffix, on_attribute=None):
     on_attribute : list, default None
         list of column names to merge on along with geometry
     """
-    if not isinstance(left_df, (GeoSeries, GeoDataFrame)):
-        raise ValueError(
-            f"'left_df' should be GeoSeries or GeoDataFrame, got {type(left_df)}"
-        )
+    if not isinstance(left_df, GeoDataFrame):
+        raise ValueError(f"'left_df' should be GeoDataFrame, got {type(left_df)}")
 
-    if not isinstance(right_df, (GeoSeries, GeoDataFrame)):
-        raise ValueError(
-            f"'right_df' should be GeoSeries or GeoDataFrame, got {type(right_df)}"
-        )
+    if not isinstance(right_df, GeoDataFrame):
+        raise ValueError(f"'right_df' should be GeoDataFrame, got {type(right_df)}")
 
     allowed_hows = ["inner", "left", "right"]
     if how not in allowed_hows:
