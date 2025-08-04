@@ -104,6 +104,8 @@ class TestSpatialJoin(TestGeopandasBase):
             },
             index=pd.Index([0, 0, 1, 1]),
         )
+        # Sedona's join does not preserve key order, so we sort by index for testing exact results
+        joined.sort_index(inplace=True)
         self.check_sgpd_df_equals_gpd_df(joined, expected)
 
     def test_sjoin_predicates(self):

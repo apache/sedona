@@ -57,6 +57,8 @@ def _frame_join(
     on_attribute : list, optional
         Additional columns to join on
 
+    Note: Unlike GeoPandas, Sedona does not preserve key order for performance reasons. Consider using .sort_index() after the join, if you need to preserve the order.
+
     Returns
     -------
     GeoDataFrame or GeoSeries
@@ -203,9 +205,8 @@ def _frame_join(
             final_columns.append(f"{col_name} as {base_name}")
 
     # Select final columns
-    result_df = spatial_join_df.selectExpr(*final_columns).orderBy(
-        SPARK_DEFAULT_INDEX_NAME
-    )
+    result_df = spatial_join_df.selectExpr(*final_columns)
+    # Note, we do not .orderBy(SPARK_DEFAULT_INDEX_NAME) to avoid a performance hit
 
     data_spark_columns = [
         scol_for(result_df, col)
