@@ -42,7 +42,7 @@ object Catalog extends AbstractCatalog {
     function[ST_GeomFromText](0),
     function[ST_GeometryFromText](0),
     function[ST_LineFromText](),
-    function[ST_GeogFromWKT](0),
+    // function[ST_GeogFromWKT](0),
     function[ST_GeomFromWKT](0),
     function[ST_GeomFromEWKT](),
     function[ST_GeomFromWKB](),
@@ -344,7 +344,11 @@ object Catalog extends AbstractCatalog {
     function[ST_LocalOutlierFactor](),
     function[ST_GLocal](),
     function[ST_BinaryDistanceBandColumn](),
-    function[ST_WeightedDistanceBandColumn]())
+    function[ST_WeightedDistanceBandColumn]()
+//    function[ST_S2PointFromWKB](),
+//    function[ST_S2LinestringFromWKB](),
+//    function[ST_S2GeogFromWKB]()
+  )
 
   val aggregateExpressions: Seq[Aggregator[Geometry, _, _]] =
     Seq(new ST_Envelope_Aggr, new ST_Intersection_Aggr, new ST_Union_Aggr())
