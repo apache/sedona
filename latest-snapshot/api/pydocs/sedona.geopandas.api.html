@@ -138,7 +138,6 @@
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.base.GeoFrame.segmentize"><code class="docutils literal notranslate"><span class="pre">GeoFrame.segmentize()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.base.GeoFrame.simplify"><code class="docutils literal notranslate"><span class="pre">GeoFrame.simplify()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.base.GeoFrame.sindex"><code class="docutils literal notranslate"><span class="pre">GeoFrame.sindex</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.base.GeoFrame.sjoin"><code class="docutils literal notranslate"><span class="pre">GeoFrame.sjoin()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.base.GeoFrame.snap"><code class="docutils literal notranslate"><span class="pre">GeoFrame.snap()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.base.GeoFrame.to_geopandas"><code class="docutils literal notranslate"><span class="pre">GeoFrame.to_geopandas()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.base.GeoFrame.to_parquet"><code class="docutils literal notranslate"><span class="pre">GeoFrame.to_parquet()</span></code></a></li>
@@ -267,7 +266,6 @@
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.set_precision"><code class="docutils literal notranslate"><span class="pre">GeoSeries.set_precision()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.simplify"><code class="docutils literal notranslate"><span class="pre">GeoSeries.simplify()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.sindex"><code class="docutils literal notranslate"><span class="pre">GeoSeries.sindex</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.sjoin"><code class="docutils literal notranslate"><span class="pre">GeoSeries.sjoin()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.snap"><code class="docutils literal notranslate"><span class="pre">GeoSeries.snap()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.to_arrow"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_arrow()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.to_crs"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_crs()</span></code></a></li>
@@ -3177,32 +3175,6 @@ and calling this method.</p>
 <span class="go">True</span>
 </pre></div>
 </div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="sedona.geopandas.GeoSeries.sjoin">
-<span class="sig-name descname"><span class="pre">sjoin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">how</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'inner'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'intersects'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lsuffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'left'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsuffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'right'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_attribute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/geopandas/geoseries.html#GeoSeries.sjoin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.geopandas.GeoSeries.sjoin" title="Link to this definition"></a></dt>
-<dd><p>Perform a spatial join between two GeoSeries.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>other</strong> (<a class="reference internal" href="#sedona.geopandas.GeoSeries" title="sedona.geopandas.GeoSeries"><em>GeoSeries</em></a>) – The GeoSeries to join with.</p></li>
-<li><p><strong>how</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>default 'inner'</em>) – The type of join to perform.</p></li>
-<li><p><strong>predicate</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>default 'intersects'</em>) – The spatial predicate to use for the join.</p></li>
-<li><p><strong>lsuffix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>default 'left'</em>) – Suffix to apply to the left GeoSeries’ column names.</p></li>
-<li><p><strong>rsuffix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>default 'right'</em>) – Suffix to apply to the right GeoSeries’ column names.</p></li>
-<li><p><strong>distance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – The distance threshold for the join.</p></li>
-<li><p><strong>on_attribute</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – The attribute to join on.</p></li>
-<li><p><strong>**kwargs</strong> – Additional arguments to pass to the join function.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A new GeoSeries containing the result of the spatial join.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#sedona.geopandas.GeoSeries" title="sedona.geopandas.GeoSeries">GeoSeries</a></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">

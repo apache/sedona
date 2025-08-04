@@ -137,7 +137,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.base.GeoFrame.segmentize"><code class="docutils literal notranslate"><span class="pre">GeoFrame.segmentize()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.base.GeoFrame.simplify"><code class="docutils literal notranslate"><span class="pre">GeoFrame.simplify()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.base.GeoFrame.sindex"><code class="docutils literal notranslate"><span class="pre">GeoFrame.sindex</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.base.GeoFrame.sjoin"><code class="docutils literal notranslate"><span class="pre">GeoFrame.sjoin()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.base.GeoFrame.snap"><code class="docutils literal notranslate"><span class="pre">GeoFrame.snap()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.base.GeoFrame.to_geopandas"><code class="docutils literal notranslate"><span class="pre">GeoFrame.to_geopandas()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.base.GeoFrame.to_parquet"><code class="docutils literal notranslate"><span class="pre">GeoFrame.to_parquet()</span></code></a></li>
@@ -266,7 +265,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.set_precision"><code class="docutils literal notranslate"><span class="pre">GeoSeries.set_precision()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.simplify"><code class="docutils literal notranslate"><span class="pre">GeoSeries.simplify()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.sindex"><code class="docutils literal notranslate"><span class="pre">GeoSeries.sindex</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.sjoin"><code class="docutils literal notranslate"><span class="pre">GeoSeries.sjoin()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.snap"><code class="docutils literal notranslate"><span class="pre">GeoSeries.snap()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.to_arrow"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_arrow()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../sedona.geopandas.html#sedona.geopandas.geoseries.GeoSeries.to_crs"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_crs()</span></code></a></li>
@@ -924,13 +922,8 @@
 
             <span class="n">geometry</span><span class="p">:</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">sgpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">):</span>
-                <span class="n">geom_crs</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">crs</span>
-                <span class="k">if</span> <span class="n">geom_crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">geom_crs</span> <span class="o">!=</span> <span class="n">crs</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">crs_mismatch_error</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
 
             <span class="c1"># No need to call set_geometry() here since it&#39;s already part of the df, just set the name</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_column_name</span> <span class="o">=</span> <span class="s2">&quot;geometry&quot;</span>
