@@ -32,6 +32,6 @@ public class GeographySerializer {
 
   public static Geography deserialize(byte[] buffer) throws IOException {
     ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-    return (Geography) S2Geography.decodeTagged(bais);
+    return new Geography(S2Geography.decodeTagged(bais));
   }
 }

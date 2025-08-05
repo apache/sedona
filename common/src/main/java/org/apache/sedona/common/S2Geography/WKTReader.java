@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
+import org.apache.sedona.common.geometryObjects.Geography;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.impl.CoordinateArraySequenceFactory;
 import org.locationtech.jts.io.Ordinate;
@@ -60,6 +61,12 @@ public class WKTReader {
 
   public WKTReader() {
     this.geometryFactory = new GeometryFactory();
+    this.csFactory = geometryFactory.getCoordinateSequenceFactory();
+    this.precisionModel = geometryFactory.getPrecisionModel();
+  }
+
+  public WKTReader(GeometryFactory geometryFactory) {
+    this.geometryFactory = geometryFactory;
     this.csFactory = geometryFactory.getCoordinateSequenceFactory();
     this.precisionModel = geometryFactory.getPrecisionModel();
   }
@@ -104,7 +111,7 @@ public class WKTReader {
    * @return a <code>Geometry</code> specified by <code>wellKnownText</code>
    * @throws ParseException if a parsing problem occurs
    */
-  public S2Geography read(String wellKnownText) throws ParseException {
+  public Geography read(String wellKnownText) throws ParseException {
     StringReader reader = new StringReader(wellKnownText);
     try {
       return read(reader);
@@ -121,10 +128,10 @@ public class WKTReader {
    * @return a <code>Geometry</code> read from <code>reader</code>
    * @throws ParseException if a parsing problem occurs
    */
-  public S2Geography read(Reader reader) throws ParseException {
+  public Geography read(Reader reader) throws ParseException {
     StreamTokenizer tokenizer = createTokenizer(reader);
     try {
-      return readGeometryTaggedText(tokenizer);
+      return new Geography(readGeometryTaggedText(tokenizer));
     } catch (IOException e) {
       throw new ParseException(e.toString());
     }

@@ -23,6 +23,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.List;
+import org.apache.sedona.common.geometryObjects.Geography;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.*;
 
@@ -156,7 +157,7 @@ public class WKBWriter {
    * @param geog the geometry to write
    * @return the byte array containing the WKB
    */
-  public byte[] write(S2Geography geog) {
+  public byte[] write(Geography geog) {
     try {
       byteArrayOS.reset();
       write(geog, byteArrayOutStream);
@@ -167,13 +168,14 @@ public class WKBWriter {
   }
 
   /**
-   * Writes a {@link S2Geography} to an {@link OutStream}.
+   * Writes a {@link Geography} to an {@link OutStream}.
    *
-   * @param geog the geometry to write
+   * @param geogIn the geography to write
    * @param os the out stream to write to
    * @throws IOException if an I/O error occurs
    */
-  public void write(S2Geography geog, OutStream os) throws IOException {
+  public void write(Geography geogIn, OutStream os) throws IOException {
+    S2Geography geog = geogIn.getDelegate();
     if (geog instanceof SinglePointGeography) {
       writePoint(WKBConstants.wkbPoint, (SinglePointGeography) geog, os);
     } else if (geog instanceof PointGeography) {
@@ -386,7 +388,7 @@ public class WKBWriter {
     boolean originalIncludeSRID = this.includeSRID;
     this.includeSRID = false;
     for (int i = 0; i < gc.numShapes(); i++) {
-      write(gc.getFeatures().get(i), os);
+      write(new Geography(gc.getFeatures().get(i)), os);
     }
     this.includeSRID = originalIncludeSRID;
   }

@@ -24,6 +24,7 @@ import com.google.common.geometry.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.sedona.common.geometryObjects.Geography;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -160,7 +161,7 @@ public abstract class S2Geography {
   public String toText(PrecisionModel precisionModel) {
     WKTWriter writer = new WKTWriter();
     writer.setPrecisionModel(precisionModel);
-    return writer.write(this);
+    return writer.write((Geography) this);
   }
 
   // ─── Encoding / decoding machinery ────────────────────────────────────────────
@@ -241,5 +242,5 @@ public abstract class S2Geography {
     }
   }
 
-  protected abstract void encode(UnsafeOutput os, EncodeOptions opts) throws IOException;
+  public abstract void encode(UnsafeOutput os, EncodeOptions opts) throws IOException;
 }

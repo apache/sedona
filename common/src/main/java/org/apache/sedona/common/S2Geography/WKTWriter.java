@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.EnumSet;
+import org.apache.sedona.common.geometryObjects.Geography;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.Ordinate;
 import org.locationtech.jts.io.OrdinateFormat;
@@ -92,7 +93,7 @@ public class WKTWriter {
   }
 
   /**
-   * Creates a writer that writes {@link Geometry}s with the given output dimension (2 to 4). The
+   * Creates a writer that writes {@link Geography}s with the given output dimension (2 to 4). The
    * output follows the following rules:
    *
    * <ul>
@@ -214,14 +215,14 @@ public class WKTWriter {
   /**
    * Converts a <code>Geometry</code> to its Well-known Text representation.
    *
-   * @param geometry a <code>Geometry</code> to process
+   * @param geography a <code>Geometry</code> to process
    * @return a &lt;Geometry Tagged Text&gt; string (see the OpenGIS Simple Features Specification)
    */
-  public String write(S2Geography geometry) {
+  public String write(Geography geography) {
     Writer sw = new StringWriter();
 
     try {
-      writeFormatted(geometry, false, sw);
+      writeFormatted(geography, false, sw);
     } catch (IOException ex) {
       Assert.shouldNeverReachHere();
     }
@@ -229,25 +230,25 @@ public class WKTWriter {
   }
 
   /**
-   * Converts a <code>Geometry</code> to its Well-known Text representation.
+   * Converts a <code>geography</code> to its Well-known Text representation.
    *
-   * @param geometry a <code>Geometry</code> to process
+   * @param geography a <code>geography</code> to process
    */
-  public void write(S2Geography geometry, Writer writer) throws IOException {
+  public void write(Geography geography, Writer writer) throws IOException {
     // write the geometry
-    writeFormatted(geometry, isFormatted, writer);
+    writeFormatted(geography, isFormatted, writer);
   }
 
   /**
-   * Converts a <code>Geometry</code> to its Well-known Text representation.
+   * Converts a <code>geography</code> to its Well-known Text representation.
    *
-   * @param geometry a <code>Geometry</code> to process
+   * @param geography a <code>geography</code> to process
    */
-  private void writeFormatted(S2Geography geometry, boolean useFormatting, Writer writer)
+  private void writeFormatted(Geography geography, boolean useFormatting, Writer writer)
       throws IOException {
-    OrdinateFormat formatter = getFormatter(geometry);
+    OrdinateFormat formatter = getFormatter(geography);
     // append the WKT
-    appendGeometryTaggedText(geometry, useFormatting, writer, formatter);
+    appendGeometryTaggedText(geography, useFormatting, writer, formatter);
   }
 
   private OrdinateFormat getFormatter(S2Geography geometry) {
@@ -264,24 +265,24 @@ public class WKTWriter {
    * Converts a <code>Geometry</code> to &lt;Geometry Tagged Text&gt; format, then appends it to the
    * writer.
    *
-   * @param geometry the <code>Geometry</code> to process
+   * @param geography the <code>Geometry</code> to process
    * @param useFormatting flag indicating that the output should be formatted
    * @param writer the output writer to append to
    * @param formatter the <code>DecimalFormatter</code> to use to convert from a precise coordinate
    *     to an external coordinate
    */
   private void appendGeometryTaggedText(
-      S2Geography geometry, boolean useFormatting, Writer writer, OrdinateFormat formatter)
+      Geography geography, boolean useFormatting, Writer writer, OrdinateFormat formatter)
       throws IOException {
     EnumSet<Ordinate> seq = getOutputOrdinates();
     // Append the WKT
-    appendGeometryTaggedText(geometry, seq, useFormatting, 0, writer, formatter);
+    appendGeometryTaggedText(geography, seq, useFormatting, 0, writer, formatter);
   }
   /**
    * Converts a <code>Geometry</code> to &lt;Geometry Tagged Text&gt; format, then appends it to the
    * writer.
    *
-   * @param geometry the <code>Geometry</code> to process
+   * @param geography the <code>Geometry</code> to process
    * @param useFormatting flag indicating that the output should be formatted
    * @param level the indentation level
    * @param writer the output writer to append to
@@ -289,7 +290,7 @@ public class WKTWriter {
    *     to an external coordinate
    */
   private void appendGeometryTaggedText(
-      S2Geography geometry,
+      Geography geography,
       EnumSet<Ordinate> outputOrdinates,
       boolean useFormatting,
       int level,
@@ -299,68 +300,54 @@ public class WKTWriter {
     // indent before writing
     indent(useFormatting, level, writer);
 
+    S2Geography geog = geography.getDelegate();
     // ——— Handle Points ———
-    if (geometry instanceof SinglePointGeography) {
+    if (geog instanceof SinglePointGeography) {
       appendPointTaggedText(
-          (SinglePointGeography) geometry,
-          outputOrdinates,
-          useFormatting,
-          level,
-          writer,
-          formatter);
+          (SinglePointGeography) geog, outputOrdinates, useFormatting, level, writer, formatter);
       return;
     }
 
-    if (geometry instanceof PointGeography) {
+    if (geog instanceof PointGeography) {
       appendMultiPointTaggedText(
-          (PointGeography) geometry, outputOrdinates, useFormatting, level, writer, formatter);
+          (PointGeography) geog, outputOrdinates, useFormatting, level, writer, formatter);
       return;
     }
 
     // ——— Handle LineStrings ———
-    if (geometry instanceof SinglePolylineGeography) {
+    if (geog instanceof SinglePolylineGeography) {
       appendPolylineTaggedText(
-          (SinglePolylineGeography) geometry,
-          outputOrdinates,
-          useFormatting,
-          level,
-          writer,
-          formatter);
+          (SinglePolylineGeography) geog, outputOrdinates, useFormatting, level, writer, formatter);
       return;
     }
 
-    if (geometry instanceof PolylineGeography) {
+    if (geog instanceof PolylineGeography) {
       appendMultiLineStringTaggedText(
-          (PolylineGeography) geometry, outputOrdinates, useFormatting, level, writer, formatter);
+          (PolylineGeography) geog, outputOrdinates, useFormatting, level, writer, formatter);
       return;
     }
 
     // ——— Handle Polygons ———
-    if (geometry instanceof PolygonGeography) {
+    if (geog instanceof PolygonGeography) {
       appendPolygonTaggedText(
-          (PolygonGeography) geometry, outputOrdinates, useFormatting, level, writer, formatter);
+          (PolygonGeography) geog, outputOrdinates, useFormatting, level, writer, formatter);
       return;
     }
 
-    if (geometry instanceof MultiPolygonGeography) {
+    if (geog instanceof MultiPolygonGeography) {
       appendMultiPolygonTaggedText(
-          (MultiPolygonGeography) geometry,
-          outputOrdinates,
-          useFormatting,
-          level,
-          writer,
-          formatter);
+          (MultiPolygonGeography) geog, outputOrdinates, useFormatting, level, writer, formatter);
       return;
     }
 
     // ——— Handle Collections ———
-    if (geometry instanceof GeographyCollection) {
+    if (geog instanceof GeographyCollection) {
       appendGeometryCollectionTaggedText(
-          (GeographyCollection) geometry, outputOrdinates, useFormatting, level, writer, formatter);
+          (GeographyCollection) geog, outputOrdinates, useFormatting, level, writer, formatter);
       return;
     }
 
-    Assert.shouldNeverReachHere("Unsupported Geometry implementation: " + geometry.getClass());
+    Assert.shouldNeverReachHere("Unsupported Geometry implementation: " + geog.getClass());
   }
 
   /**
@@ -860,7 +847,7 @@ public class WKTWriter {
           level2 = level + 1;
         }
         appendGeometryTaggedText(
-            geometryCollection.getFeatures().get(i),
+            new Geography(geometryCollection.getFeatures().get(i)),
             outputOrdinates,
             useFormatting,
             level2,
