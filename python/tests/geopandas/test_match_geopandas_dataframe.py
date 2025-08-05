@@ -31,7 +31,7 @@ from shapely.geometry import (
 )
 
 from packaging.version import parse as parse_version
-from sedona.geopandas import GeoDataFrame, GeoSeries
+from sedona.spark.geopandas import GeoDataFrame, GeoSeries
 import geopandas as gpd
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 import pyspark.pandas as ps

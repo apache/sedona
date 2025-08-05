@@ -20,9 +20,9 @@
     geopandas API on Sedona
 """
 
-from sedona.geopandas.geoseries import GeoSeries
-from sedona.geopandas.geodataframe import GeoDataFrame
+from sedona.spark.geopandas.geoseries import GeoSeries
+from sedona.spark.geopandas.geodataframe import GeoDataFrame
 
-from sedona.geopandas.tools import sjoin
+from sedona.spark.geopandas.tools import sjoin
 
-from sedona.geopandas.io import read_file, read_parquet
+from sedona.spark.geopandas.io import read_file, read_parquet

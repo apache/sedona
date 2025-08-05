@@ -20,7 +20,7 @@ from pyspark.pandas.internal import SPARK_DEFAULT_INDEX_NAME, InternalFrame
 from pyspark.pandas.utils import scol_for
 from pyspark.sql.functions import expr
 
-from sedona.geopandas import GeoDataFrame, GeoSeries
+from sedona.spark.geopandas import GeoDataFrame, GeoSeries
 
 # Pre-compiled regex pattern for suffix validation
 SUFFIX_PATTERN = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
