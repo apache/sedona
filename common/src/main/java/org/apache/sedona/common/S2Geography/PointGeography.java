@@ -51,7 +51,7 @@ public class PointGeography extends S2Geography {
     if (kind != GeographyKind.POINT
         && kind != GeographyKind.SINGLEPOINT
         && kind != GeographyKind.CELL_CENTER) {
-      throw new IllegalArgumentException("Invalid GeographyKind for PolylineGeography: " + kind);
+      throw new IllegalArgumentException("Invalid GeographyKind for PointGeography: " + kind);
     }
     points.add(point);
   }
