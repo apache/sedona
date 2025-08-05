@@ -28,7 +28,7 @@ object UdtRegistratorWrapper {
 
   def registerAll(): Unit = {
     UDTRegistration.register(classOf[Geometry].getName, classOf[GeometryUDT].getName)
-    UDTRegistration.register(classOf[S2Geography].getName, classOf[GeographyUDT].getName)
+    UDTRegistration.register(classOf[Geography].getName, classOf[GeographyUDT].getName)
     UDTRegistration.register(classOf[SpatialIndex].getName, classOf[IndexUDT].getName)
   }
 }
