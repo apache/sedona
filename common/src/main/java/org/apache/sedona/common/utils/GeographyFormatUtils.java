@@ -18,18 +18,21 @@
  */
 package org.apache.sedona.common.utils;
 
+import com.google.common.geometry.S2Point;
+import com.google.common.geometry.S2Polyline;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.*;
 import org.apache.sedona.common.S2Geography.*;
 import org.apache.sedona.common.enums.FileDataSplitter;
+import org.apache.sedona.common.geometryObjects.Geography;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.io.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GeographyFormatUtils<T extends S2Geography> implements Serializable {
+public class GeographyFormatUtils<T extends Geography> implements Serializable {
   static final Logger logger = LoggerFactory.getLogger(GeographyFormatUtils.class);
   /** The start offset. */
   protected final int startOffset;
@@ -43,7 +46,7 @@ public class GeographyFormatUtils<T extends S2Geography> implements Serializable
   /** Non-spatial attributes in each input row will be concatenated to a tab separated string */
   protected String otherAttributes = "";
 
-  protected S2Geography.GeographyKind geographyKind = null;
+  protected Geography.GeographyKind geographyKind = null;
   /** The factory. */
   protected transient GeometryFactory factory = new GeometryFactory();
 
@@ -68,7 +71,7 @@ public class GeographyFormatUtils<T extends S2Geography> implements Serializable
       int endOffset,
       FileDataSplitter splitter,
       boolean carryInputData,
-      S2Geography.GeographyKind geographyKind) {
+      Geography.GeographyKind geographyKind) {
     this.startOffset = startOffset;
     this.endOffset = endOffset;
     this.splitter = splitter;
@@ -112,44 +115,44 @@ public class GeographyFormatUtils<T extends S2Geography> implements Serializable
     wktReader = new WKTReader();
   }
 
-  private void handleNonSpatialDataToGeometry(
-      S2Geography geometry, List<String> splittedGeometryData) {
-    LinkedList<String> splittedGeometryDataList = new LinkedList<String>(splittedGeometryData);
+  private void handleNonSpatialDataToGeography(
+      Geography geography, List<String> splittedGeographyData) {
+    LinkedList<String> splittedGeographyDataList = new LinkedList<String>(splittedGeographyData);
     if (carryInputData) {
       if (this.splitter != FileDataSplitter.GEOJSON) {
         // remove spatial data position
-        splittedGeometryDataList.remove(this.startOffset);
+        splittedGeographyDataList.remove(this.startOffset);
       }
     }
   }
 
-  public S2Geography readWkt(String line) throws ParseException {
+  public Geography readWkt(String line) throws ParseException {
     final String[] columns = line.split(splitter.getDelimiter());
-    S2Geography geography = null;
+    Geography geography = null;
 
     try {
-      geography = wktReader.read(columns[this.startOffset]);
+      geography = (Geography) wktReader.read(columns[this.startOffset]);
     } catch (Exception e) {
       logger.error("[Sedona] " + e.getMessage());
     }
     if (geography == null) {
       return null;
     }
-    handleNonSpatialDataToGeometry(geography, Arrays.asList(columns));
+    handleNonSpatialDataToGeography(geography, Arrays.asList(columns));
     return geography;
   }
 
-  public S2Geography readWkb(String line) throws ParseException {
+  public Geography readWkb(String line) throws ParseException {
     final String[] columns = line.split(splitter.getDelimiter());
     final byte[] aux = WKBReader.hexToBytes(columns[this.startOffset]);
     // For some unknown reasons, the wkb reader cannot be used in transient variable like the wkt
     // reader.
     WKBReader wkbReader = new WKBReader();
-    return wkbReader.read(aux);
+    return (Geography) wkbReader.read(aux);
   }
 
-  public S2Geography readGeography(String line) throws ParseException {
-    S2Geography geography = null;
+  public Geography readGeography(String line) throws ParseException {
+    Geography geography = null;
     try {
       switch (this.splitter) {
         case WKT:
@@ -176,41 +179,52 @@ public class GeographyFormatUtils<T extends S2Geography> implements Serializable
     return geography;
   }
 
-  public <T extends S2Geography> void addMultiGeography(
-      GeographyCollection multiGeography, List<T> result) {
+  public void addMultiGeography(
+      GeographyCollection multiGeography, List<? super Geography> result) {
+    if (multiGeography == null) return;
     for (int i = 0; i < multiGeography.getFeatures().size(); i++) {
-      T geography = (T) multiGeography.getFeatures().get(i);
-      result.add(geography);
+      addGeography((Geography) multiGeography.getFeatures().get(i), result);
     }
   }
 
-  public <T extends S2Geography> void addMultiPoint(PointGeography pointGeography, List<T> result) {
-    for (int i = 0; i < pointGeography.getPoints().size(); i++) {
-      T geography = (T) new SinglePointGeography(pointGeography.getPoints().get(i));
-      result.add(geography);
+  // 2) Break a PointGeography into its single points
+  public void addMultiPoint(PointGeography multi, List<? super SinglePointGeography> result) {
+    if (multi == null) return;
+    for (S2Point pt : multi.getPoints()) {
+      result.add(new SinglePointGeography(pt));
     }
   }
 
-  public <T extends S2Geography> void addMultiPolyline(
-      PolylineGeography polylineGeography, List<T> result) {
-    for (int i = 0; i < polylineGeography.getPolylines().size(); i++) {
-      T geography = (T) new SinglePolylineGeography(polylineGeography.getPolylines().get(i));
-      result.add(geography);
+  // 3) Break a PolylineGeography into its single polylines
+  public void addMultiPolyline(
+      PolylineGeography multi, List<? super SinglePolylineGeography> result) {
+    if (multi == null) return;
+    for (S2Polyline line : multi.getPolylines()) {
+      result.add(new SinglePolylineGeography(line));
     }
   }
 
-  protected void addGeography(S2Geography geography, List<T> result) {
+  protected void addGeography(Geography geography, List<? super Geography> result) {
     if (geography == null) {
       return;
     }
-    if (geography instanceof PointGeography) {
-      addMultiPoint((PointGeography) geography, result);
-    } else if (geography instanceof PolylineGeography) {
-      addMultiPolyline((PolylineGeography) geography, result);
-    } else if (geography instanceof MultiPolygonGeography) {
-      addMultiGeography((MultiPolygonGeography) geography, result);
+    S2Geography geog = geography.getDelegate();
+
+    if (geog instanceof PointGeography && !(geog instanceof SinglePointGeography)) {
+      addMultiPoint((PointGeography) geog, (List<? super SinglePointGeography>) result);
+
+    } else if (geog instanceof PolylineGeography && !(geog instanceof SinglePolylineGeography)) {
+      addMultiPolyline((PolylineGeography) geog, (List<? super SinglePolylineGeography>) result);
+
+    } else if (geog instanceof MultiPolygonGeography) {
+      addMultiGeography((MultiPolygonGeography) geog, result);
+
+    } else if (geog instanceof GeographyCollection) {
+      addMultiGeography((GeographyCollection) geog, result);
+
     } else {
-      result.add((T) geography);
+      // already a “single” Geography of some kind
+      result.add((Geography) geog);
     }
   }
 }

@@ -26,41 +26,52 @@ import org.apache.sedona.common.S2Geography.EncodeOptions;
 import org.apache.sedona.common.S2Geography.S2Geography;
 
 public class Geography extends S2Geography {
-  private final Geography geography;
+  // Hold the underlying S2Geography directly, not another Geography
+  private final S2Geography delegate;
 
-  public Geography(S2Geography geography) {
-    super(GeographyKind.fromKind(geography.getKind()));
-    this.geography = (Geography) geography;
+  public Geography(S2Geography delegate) {
+    // Initialize super with the correct kind
+    super(GeographyKind.fromKind(delegate.getKind()));
+    this.delegate = delegate;
   }
 
-  public Geography getGeographhy() {
-    return this.geography;
+  /** Return the wrapped S2Geography. */
+  public Geography getGeography() {
+    return (Geography) delegate;
+  }
+
+  public S2Geography getDelegate() {
+    return delegate;
   }
 
   @Override
   public int dimension() {
-    return this.geography.dimension();
+    return delegate.dimension();
   }
 
   @Override
   public int numShapes() {
-    return this.geography.numShapes();
+    return delegate.numShapes();
   }
 
   @Override
   public S2Shape shape(int id) {
-    return this.geography.shape(id);
+    return delegate.shape(id);
   }
 
   @Override
   public S2Region region() {
-    return this.geography.region();
-  }
-
-  public String toString() {
-    return this.geography.toString();
+    return delegate.region();
   }
 
   @Override
-  protected void encode(UnsafeOutput os, EncodeOptions opts) throws IOException {}
+  public String toString() {
+    return delegate.toString();
+  }
+
+  @Override
+  protected void encode(UnsafeOutput os, EncodeOptions opts) throws IOException {
+    // Delegate encoding to the wrapped object
+    delegate.encodeTagged(os, opts);
+  }
 }

@@ -69,7 +69,7 @@ public class GeometrySerde extends Serializer implements Serializable {
     } else if (object instanceof Geography) {
       writeType(out, Type.GEOGRAPHY);
       try {
-        writeGeography(out, ((Geography) object).getGeographhy());
+        writeGeography(out, ((Geography) object).getGeography());
       } catch (IOException e) {
         throw new RuntimeException(e);
       }

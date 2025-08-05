@@ -785,7 +785,7 @@ public class Functions {
   }
 
   public static String asEWKT(Geography geography) {
-    return asEWKT(geography.getGeographhy());
+    return asEWKT(geography.getGeography());
   }
 
   public static String asWKT(Geometry geometry) {
@@ -797,7 +797,7 @@ public class Functions {
   }
 
   public static byte[] asEWKB(Geography geography) {
-    return asEWKB(geography.getGeographhy());
+    return asEWKB(geography.getGeography());
   }
 
   public static String asHexEWKB(Geometry geom, String endian) {
