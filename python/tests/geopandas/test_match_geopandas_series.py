@@ -578,7 +578,11 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_is_ring(self):
-        pass
+        # is_ring is only menaingful for linestrings so we use self.linestrings instead of self.geoms
+        for geom in self.linestrings:
+            sgpd_result = GeoSeries(geom).is_ring
+            gpd_result = gpd.GeoSeries(geom).is_ring
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_is_ccw(self):
         pass

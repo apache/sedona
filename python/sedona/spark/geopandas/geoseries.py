@@ -944,12 +944,12 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def is_ring(self):
-        # Implementation of the abstract method
-        raise NotImplementedError(
-            _not_implemented_error(
-                "is_ring", "Tests if LineString geometries are closed rings."
-            )
+        spark_expr = stf.ST_IsRing(self.spark.column)
+        result = self._query_geometry_column(
+            spark_expr,
+            returns_geom=False,
         )
+        return _to_bool(result)
 
     @property
     def is_ccw(self):

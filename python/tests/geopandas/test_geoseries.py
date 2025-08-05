@@ -869,7 +869,16 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         assert_series_equal(df_result, expected)
 
     def test_is_ring(self):
-        pass
+        s = GeoSeries(
+            [
+                LineString([(0, 0), (1, 1), (1, -1)]),
+                LineString([(0, 0), (1, 1), (1, -1), (0, 0)]),
+                LinearRing([(0, 0), (1, 1), (1, -1)]),
+            ]
+        )
+        result = s.is_ring
+        expected = pd.Series([False, True, True])
+        self.check_pd_series_equal(result, expected)
 
     def test_is_ccw(self):
         pass
