@@ -46,8 +46,13 @@ public class PointGeography extends S2Geography {
   }
 
   /** Constructs especially for CELL_CENTER */
-  private PointGeography(GeographyKind kind, S2Point point) {
+  PointGeography(GeographyKind kind, S2Point point) {
     super(kind); // can be POINT or CELL_CENTER
+    if (kind != GeographyKind.POINT
+        && kind != GeographyKind.SINGLEPOINT
+        && kind != GeographyKind.CELL_CENTER) {
+      throw new IllegalArgumentException("Invalid GeographyKind for PointGeography: " + kind);
+    }
     points.add(point);
   }
 
@@ -237,6 +242,10 @@ public class PointGeography extends S2Geography {
       pts = S2Point.Shape.COMPACT_CODER.decode(bytes, cursor);
     } else {
       pts = S2Point.Shape.FAST_CODER.decode(bytes, cursor);
+    }
+
+    if (tag.getKind() == GeographyKind.SINGLEPOINT) {
+      return new SinglePointGeography(pts.get(0));
     }
 
     geo.points.addAll(pts);
