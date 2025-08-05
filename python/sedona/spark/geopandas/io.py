@@ -19,7 +19,7 @@ import os
 from typing import Union
 import warnings
 import pyspark.pandas as ps
-from sedona.geopandas import GeoDataFrame
+from sedona.spark.geopandas import GeoDataFrame
 from pyspark.pandas.utils import default_session, scol_for
 from pyspark.pandas.internal import SPARK_DEFAULT_INDEX_NAME, NATURAL_ORDER_COLUMN_NAME
 from pyspark.pandas.frame import InternalFrame
@@ -269,7 +269,7 @@ def read_parquet(
 
     Examples
     --------
-    from sedona.geopandas import read_parquet
+    from sedona.spark.geopandas import read_parquet
     >>> df = read_parquet("data.parquet")  # doctest: +SKIP
 
     Specifying columns to read:

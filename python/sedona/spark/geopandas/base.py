@@ -37,7 +37,7 @@ from pyspark.pandas._typing import (
 )
 from pyspark.sql import Column
 
-from sedona.geopandas._typing import GeoFrameLike
+from sedona.spark.geopandas._typing import GeoFrameLike
 
 bool_type = bool
 
@@ -67,7 +67,7 @@ class GeoFrame(metaclass=ABCMeta):
         Examples
         --------
         >>> from shapely.geometry import Point, box
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>>
         >>> s = GeoSeries([Point(x, x) for x in range(5)])
         >>> s.sindex.query(box(1, 1, 3, 3))
@@ -128,7 +128,7 @@ class GeoFrame(metaclass=ABCMeta):
         Examples
         --------
         >>> from shapely.geometry import Polygon
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
 
         >>> gs = GeoSeries([Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])])
         >>> gs.area
@@ -153,7 +153,7 @@ class GeoFrame(metaclass=ABCMeta):
         Examples
         --------
         >>> from shapely.geometry import Polygon, Point
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
 
         >>> gs = GeoSeries([Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), Point(0, 0)])
         >>> gs.geom_type
@@ -185,7 +185,7 @@ class GeoFrame(metaclass=ABCMeta):
         Examples
         --------
         >>> from shapely.geometry import Polygon
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
 
         >>> gs = GeoSeries([Point(0, 0), LineString([(0, 0), (1, 1)]), Polygon([(0, 0), (1, 0), (1, 1)]), GeometryCollection([Point(0, 0), LineString([(0, 0), (1, 1)]), Polygon([(0, 0), (1, 0), (1, 1)])])])
         >>> gs.length
@@ -208,7 +208,7 @@ class GeoFrame(metaclass=ABCMeta):
         An example with one invalid polygon (a bowtie geometry crossing itself)
         and one missing geometry:
 
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon
         >>> s = GeoSeries(
         ...     [
@@ -248,7 +248,7 @@ class GeoFrame(metaclass=ABCMeta):
         An example with one invalid polygon (a bowtie geometry crossing itself)
         and one missing geometry:
 
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon
         >>> s = GeoSeries(
         ...     [
@@ -292,7 +292,7 @@ class GeoFrame(metaclass=ABCMeta):
         An example of a GeoDataFrame with one empty point, one point and one missing
         value:
 
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Point
         >>> geoseries = GeoSeries([Point(), Point(2, 1), None], crs="EPSG:4326")
         >>> geoseries
@@ -330,7 +330,7 @@ class GeoFrame(metaclass=ABCMeta):
 
         Examples
         --------
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import LineString
         >>> s = GeoSeries(
         ...     [
@@ -374,7 +374,7 @@ class GeoFrame(metaclass=ABCMeta):
 
         Examples
         --------
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Point
         >>> s = GeoSeries(
         ...     [
@@ -480,7 +480,7 @@ class GeoFrame(metaclass=ABCMeta):
         Examples
         --------
 
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, Point
         >>> s = GeoSeries(
         ...     [
@@ -518,7 +518,7 @@ class GeoFrame(metaclass=ABCMeta):
         Examples
         --------
 
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, Point
         >>> s = GeoSeries(
         ...     [
@@ -570,7 +570,7 @@ class GeoFrame(metaclass=ABCMeta):
         Examples
         --------
 
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, Point, MultiPoint
         >>> s = GeoSeries(
         ...     [
@@ -676,7 +676,7 @@ class GeoFrame(metaclass=ABCMeta):
         Examples
         --------
 
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import MultiPolygon, Polygon, LineString, Point
         >>> s = GeoSeries(
         ...     [
@@ -725,7 +725,7 @@ class GeoFrame(metaclass=ABCMeta):
 
         Examples
         --------
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString
         >>> s = GeoSeries(
         ...     [
@@ -779,7 +779,7 @@ class GeoFrame(metaclass=ABCMeta):
         Examples
         --------
 
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import box
         >>> s = GeoSeries([box(0, 0, 1, 1), box(0, 0, 2, 2)])
         >>> s
@@ -820,7 +820,7 @@ class GeoFrame(metaclass=ABCMeta):
         Examples
         --------
 
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, Point
         >>> s = GeoSeries(
         ...     [
@@ -924,7 +924,7 @@ class GeoFrame(metaclass=ABCMeta):
 
         Examples
         --------
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, Point
         >>> s = GeoSeries(
         ...     [
@@ -1033,7 +1033,7 @@ class GeoFrame(metaclass=ABCMeta):
 
         Examples
         --------
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, MultiPoint, Point
         >>> s = GeoSeries(
         ...     [
@@ -1546,7 +1546,7 @@ class GeoFrame(metaclass=ABCMeta):
 
         Examples
         --------
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, Point
         >>> s = GeoSeries(
         ...     [
@@ -1635,7 +1635,7 @@ class GeoFrame(metaclass=ABCMeta):
 
         Examples
         --------
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, Point
         >>> s = GeoSeries(
         ...     [
@@ -1755,7 +1755,7 @@ class GeoFrame(metaclass=ABCMeta):
 
         Examples
         --------
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely import Polygon, LineString, Point
         >>> s = GeoSeries(
         ...     [
@@ -1889,7 +1889,7 @@ class GeoFrame(metaclass=ABCMeta):
 
         Examples
         --------
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, Point
         >>> s = GeoSeries(
         ...     [
@@ -1990,7 +1990,7 @@ class GeoFrame(metaclass=ABCMeta):
 
         Examples
         --------
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, Point
         >>> s = GeoSeries(
         ...     [
@@ -2110,7 +2110,7 @@ class GeoFrame(metaclass=ABCMeta):
         Examples
         --------
 
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon, LineString, Point
         >>> s = GeoSeries(
         ...     [
@@ -2233,7 +2233,7 @@ class GeoFrame(metaclass=ABCMeta):
         Examples
         --------
         >>> from shapely.geometry import Point
-        >>> from sedona.geopandas import GeoDataFrame
+        >>> from sedona.spark.geopandas import GeoDataFrame
         >>>
         >>> data = {
         ...     'geometry': [Point(0, 0), Point(1, 1)],
@@ -2297,7 +2297,7 @@ class GeoFrame(metaclass=ABCMeta):
 
         Examples
         --------
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Point, LineString
         >>> s = GeoSeries(
         ...     [Point(0, 0).buffer(1), LineString([(0, 0), (1, 10), (0, 20)])]

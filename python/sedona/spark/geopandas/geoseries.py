@@ -20,7 +20,7 @@ from typing import Any, Union, Literal, List
 
 import numpy as np
 import geopandas as gpd
-import sedona.geopandas as sgpd
+import sedona.spark.geopandas as sgpd
 import pandas as pd
 import pyspark.pandas as pspd
 import pyspark
@@ -43,10 +43,10 @@ from pyspark.sql import functions as F
 import shapely
 from shapely.geometry.base import BaseGeometry
 
-from sedona.geopandas._typing import Label
-from sedona.geopandas.base import GeoFrame
-from sedona.geopandas.geodataframe import GeoDataFrame
-from sedona.geopandas.sindex import SpatialIndex
+from sedona.spark.geopandas._typing import Label
+from sedona.spark.geopandas.base import GeoFrame
+from sedona.spark.geopandas.geodataframe import GeoDataFrame
+from sedona.spark.geopandas.sindex import SpatialIndex
 from packaging.version import parse as parse_version
 
 from pyspark.pandas.internal import (
@@ -252,7 +252,7 @@ class GeoSeries(GeoFrame, pspd.Series):
     Examples
     --------
     >>> from shapely.geometry import Point, Polygon
-    >>> from sedona.geopandas import GeoSeries
+    >>> from sedona.spark.geopandas import GeoSeries
     >>>
     >>> # Create from geometries
     >>> s = GeoSeries([Point(0, 0), Point(1, 1)], crs='EPSG:4326')
@@ -290,7 +290,7 @@ class GeoSeries(GeoFrame, pspd.Series):
     See Also
     --------
     geopandas.GeoSeries : The GeoPandas equivalent
-    sedona.geopandas.GeoDataFrame : DataFrame with geometry column
+    sedona.spark.geopandas.GeoDataFrame : DataFrame with geometry column
     """
 
     def __getitem__(self, key: Any) -> Any:
@@ -322,7 +322,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples:
         >>> from shapely.geometry import Point
         >>> import geopandas as gpd
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
 
         # Example 1: Initialize with GeoDataFrame
         >>> gdf = gpd.GeoDataFrame({'geometry': [Point(1, 1), Point(2, 2)]})
@@ -548,7 +548,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Point
         >>> s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
         >>> s
@@ -772,7 +772,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
         >>> from shapely.geometry import Point
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> gs = GeoSeries([Point(1, 1), Point(2, 2)])
         >>> gs_copy = gs.copy()
         >>> print(gs_copy)
@@ -1564,7 +1564,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
 
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Point
         >>> s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
         >>> s.x
@@ -1598,7 +1598,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
 
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Point
         >>> s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
         >>> s.y
@@ -1633,7 +1633,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
 
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Point
         >>> s = GeoSeries([Point(1, 1, 1), Point(2, 2, 2), Point(3, 3, 3)])
         >>> s.z
@@ -1830,7 +1830,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
 
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> wkts = [
         ... 'POINT (1 1)',
         ... 'POINT (2 2)',
@@ -1989,7 +1989,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
 
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> import geoarrow.pyarrow as ga
         >>> array = ga.as_geoarrow([None, "POLYGON ((0 0, 1 1, 0 1, 0 0))", "LINESTRING (0 0, -1 1, 0 -1)"])
         >>> geoseries = GeoSeries.from_arrow(array)
@@ -2058,7 +2058,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
 
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon
         >>> s = GeoSeries(
         ...     [Polygon([(0, 0), (1, 1), (0, 1)]), None, Polygon([])]
@@ -2105,7 +2105,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
 
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon
         >>> s = GeoSeries(
         ...     [Polygon([(0, 0), (1, 1), (0, 1)]), None, Polygon([])]
@@ -2167,7 +2167,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
 
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Polygon
         >>> s = GeoSeries(
         ...     [
@@ -2310,7 +2310,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         Examples
         --------
         >>> from shapely.geometry import Point
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> geoseries = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)], crs=4326)
         >>> geoseries.crs
         <Geographic 2D CRS: EPSG:4326>
@@ -2566,7 +2566,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Point
         >>> s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
         >>> s
@@ -2731,7 +2731,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         Examples
         --------
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> from shapely.geometry import Point
         >>> gser = GeoSeries([Point(1, 2), Point(2, 1)])
         >>> gser
@@ -2808,7 +2808,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         Examples
         --------
         >>> from shapely.geometry import Point, LineString
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> # Note: Examples write to temporary files for demonstration
         >>> import tempfile
         >>> import os
@@ -2846,7 +2846,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         Examples
         --------
         >>> from shapely.geometry import Point
-        >>> from sedona.geopandas import GeoSeries
+        >>> from sedona.spark.geopandas import GeoSeries
         >>> import tempfile
         >>> import os
         >>> gs = GeoSeries([Point(1, 1), Point(2, 2)])

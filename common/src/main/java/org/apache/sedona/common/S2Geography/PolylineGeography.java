@@ -60,6 +60,9 @@ public class PolylineGeography extends S2Geography {
 
   public PolylineGeography(GeographyKind kind, S2Polyline polyline) {
     super(kind);
+    if (kind != GeographyKind.POLYLINE && kind != GeographyKind.SINGLEPOLYLINE) {
+      throw new IllegalArgumentException("Invalid GeographyKind for PolylineGeography: " + kind);
+    }
     this.polylines = new ArrayList<>();
     this.polylines.add(polyline);
   }
