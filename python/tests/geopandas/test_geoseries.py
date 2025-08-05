@@ -880,6 +880,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         expected = pd.Series([False, True, True])
         self.check_pd_series_equal(result, expected)
 
+        # Check that GeoDataFrame works too
+        result = s.to_geoframe().is_ring
+        self.check_pd_series_equal(result, expected)
+
     def test_is_ccw(self):
         pass
 
