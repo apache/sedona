@@ -15,57 +15,216 @@
 # specific language governing permissions and limitations
 # under the License.
 
-PYTHON := $(shell command -v python || command -v python3 || echo python)
-PIP := $(PYTHON) -m pip
-MKDOCS := mkdocs
-MIKE := mike
+SHELL := /bin/bash
 
-.PHONY: check checkinstall checkupdate install docsinstall docsbuild clean test
+# --- Project Configuration ---
+PROJECT_NAME := apache-sedona
+VENV_DIR := .venv
+REQUIREMENTS_DEV := requirements-dev.txt
+REQUIREMENTS_DOCS := requirements-docs.txt
+PYTHON_ANIMATION_SCRIPT = .github/workflows/scripts/sedona_animation.py
 
-check:
-	@echo "Running pre-commit checks..."
-	@if ! command -v pre-commit >/dev/null 2>&1; then \
-		echo "Error: pre-commit is not installed. Run 'make checkinstall' first."; \
-		exit 1; \
-	fi
-	pre-commit run --all-files
+# --- Directories ---
+DIST_DIR := dist
+BUILD_DIR := build
+DOCS_BUILD_DIR := site
+PYCACHE_DIR := __pycache__
+MYPY_CACHE_DIR := .mypy_cache
+PYTEST_CACHE_DIR := .pytest_cache
 
-checkinstall:
-	@echo "Installing pre-commit..."
-	@if ! command -v pre-commit >/dev/null 2>&1; then \
-		$(PIP) install pre-commit; \
-	fi
-	pre-commit install
+# --- Python & Virtual Environment Commands ---
+PYTHON := $(shell command -v python3 || command -v python)
+VENV_PYTHON := $(VENV_DIR)/bin/python
+PIP := $(VENV_PYTHON) -m pip
+MKDOCS_CMD := $(VENV_PYTHON) -m mkdocs
+MIKE_CMD := $(VENV_PYTHON) -m mike
+PRE_COMMIT_CMD := $(VENV_PYTHON) -m pre_commit # Explicit pre-commit command
+
+# --- Docker Configuration ---
+DOCKER_IMAGE_NAME := mkdocs-sedona
+DOCKER_CONTAINER_NAME := sedona-docs-server
+DOCKER_FILE_DOCS := docker/docs/Dockerfile
+
+# --- PHONY Targets ---
+.PHONY: all help \
+       venv deactivate \
+       install install-dev install-docs \
+       check checkinstall checkupdate \
+       docsbuild docsserve docsdeploy \
+       test \
+       clean distclean \
+       docker-docs-build docker-docs-run docker-docs-stop \
+       logo play_sedona_animation
+
+# --- Default Target ---
+all: install-dev docsbuild
+
+# --- Help Target ---
+help:
+	@printf "Makefile for $(PROJECT_NAME)\n"
+	@printf "\n"
+	@printf "Usage:\n"
+	@printf "  make <target>\n"
+	@printf "\n"
+	@printf "General:\n"
+	@printf "  all               : Installs development dependencies and builds documentation (default).\n"
+	@printf "  help              : Show this help message.\n"
+	@printf "\n"
+	@printf "Virtual Environment:\n"
+	@printf "  venv              : Create and prepare a Python virtual environment.\n"
+	@printf "  deactivate        : Informational target about deactivating the virtual environment.\n"
+	@printf "\n"
+	@printf "Installation:\n"
+	@printf "  install           : Installs core project dependencies (currently aliases install-dev).\n"
+	@printf "  install-dev       : Installs development dependencies from $(REQUIREMENTS_DEV).\n"
+	@printf "  install-docs      : Installs documentation dependencies from $(REQUIREMENTS_DOCS).\n"
+	@printf "\n"
+	@printf "Pre-Commit Checks:\n"
+	@printf "  check             : Run pre-commit checks on all files.\n"
+	@printf "  checkinstall      : Install pre-commit and set up hooks.\n"
+	@printf "  checkupdate       : Update pre-commit hooks.\n"
+	@printf "\n"
+	@printf "Documentation:\n"
+	@printf "  docsbuild         : Build the static documentation.\n"
+	@printf "  docsserve         : Serve the documentation locally (usually http://127.0.0.1:8000).\n"
+	@printf "  docsdeploy        : Build and deploy documentation versions using mike.\n"
+	@printf "\n"
+	@printf "Testing:\n"
+	@printf "  test              : Run project tests (Placeholder - implement your test command here).\n"
+	@printf "\n"
+	@printf "Cleanup:\n"
+	@printf "  clean             : Remove generated build artifacts and caches.\n"
+	@printf "  distclean         : Remove all generated files, including virtual environment.\n"
+	@printf "\n"
+	@printf "Docker for Documentation:\n"
+	@printf "  docker-docs-build : Build the Docker image for documentation.\n"
+	@printf "  docker-docs-run   : Run the documentation server in a Docker container.\n"
+	@printf "  docker-docs-stop  : Stop the running documentation Docker container.\n"
+	@printf "\n"
+	@printf "Fun:\n"
+	@printf "  logo              : Display an animated Apache Sedona logo in the terminal.\n"
+	@printf "  play_sedona_animation : Alias for logo.\n"
+
+# --- Virtual Environment Management ---
+venv:
+	@printf "Setting up Python virtual environment at $(VENV_DIR)...\n"
+	@$(SHELL) -c "\
+	if [ ! -d \"$(VENV_DIR)\" ]; then \
+	   $(PYTHON) -m venv $(VENV_DIR); \
+	   echo \"Virtual environment created.\"; \
+	else \
+	   echo \"Virtual environment already exists.\"; \
+	fi && \
+	echo \"Ensuring pip, setuptools, and wheel are up-to-date in the venv...\"; \
+	$(PIP) install --upgrade pip setuptools wheel"
+	@printf "Virtual environment ready.\n"
+
+deactivate:
+	@printf "To deactivate the virtual environment, run 'deactivate' in your shell.\n"
+	@printf "This target is for informational purposes only and does not deactivate it directly.\n"
+
+# --- Installation Targets ---
+install: install-dev
+	@printf "Placeholder for core project dependencies if they differ from dev. Currently aliases install-dev.\n"
+
+install-dev: venv
+	@printf "Installing development dependencies from $(REQUIREMENTS_DEV)...\n"
+	@$(SHELL) -c "\
+	if [ -f \"$(REQUIREMENTS_DEV)\" ]; then \
+	   $(PIP) install -r $(REQUIREMENTS_DEV); \
+	   echo \"Development dependencies installed.\"; \
+	else \
+	   echo \"Error: $(REQUIREMENTS_DEV) not found. Skipping development dependency installation.\" >&2; \
+	   exit 1; \
+	fi"
+
+install-docs: venv
+	@printf "Installing documentation dependencies from $(REQUIREMENTS_DOCS)...\n"
+	@$(SHELL) -c "\
+	if [ -f \"$(REQUIREMENTS_DOCS)\" ]; then \
+	   $(PIP) install -r $(REQUIREMENTS_DOCS); \
+	   echo \"Documentation dependencies installed.\"; \
+	else \
+	   echo \"Error: $(REQUIREMENTS_DOCS) not found. Skipping documentation dependency installation.\" >&2; \
+	   exit 1; \
+	fi"
+
+# --- Pre-Commit Checks ---
+checkinstall: venv
+	@printf "Ensuring pre-commit is installed and hooks are set up...\n"
+	@$(SHELL) -c "\
+	if ! $(PRE_COMMIT_CMD) --version >/dev/null 2>&1; then \
+	   echo \"Installing pre-commit...\"; \
+	   $(PIP) install pre-commit; \
+	fi && \
+	$(PRE_COMMIT_CMD) install"
+	@printf "Pre-commit installed and hooks are set.\n"
+
+check: checkinstall
+	@printf "Running pre-commit checks on all files...\n"
+	@$(PRE_COMMIT_CMD) run --all-files
+	@printf "Pre-commit checks completed.\n"
 
 checkupdate: checkinstall
-	@echo "Updating pre-commit hooks..."
-	pre-commit autoupdate
+	@printf "Updating pre-commit hooks...\n"
+	@$(PRE_COMMIT_CMD) autoupdate
+	@printf "Pre-commit hooks updated.\n"
 
-install:
-	@echo "Installing dependencies..."
-	@if [ -f requirements-dev.txt ]; then \
-		$(PIP) install -r requirements-dev.txt; \
-	else \
-		echo "Error: requirements-dev.txt not found."; \
-		exit 1; \
-	fi
+# --- Documentation Targets ---
+docsbuild: install-docs
+	@printf "Building documentation into $(DOCS_BUILD_DIR)...\n"
+	@$(MKDOCS_CMD) build --clean
+	@printf "Documentation build complete.\n"
 
-docsinstall:
-	@echo "Installing documentation dependencies..."
-	$(PIP) install -r requirements-docs.txt
+docsserve: install-docs
+	@printf "Serving documentation locally (Press Ctrl+C to stop)...\n"
+	@$(MKDOCS_CMD) serve
 
-docsbuild: docsinstall
-	@echo "Building documentation..."
-	$(MKDOCS) build
-	$(MIKE) deploy --update-aliases latest-snapshot -b website -p
-	$(MIKE) serve
+docsdeploy: install-docs
+	@printf "Deploying documentation versions with Mike...\n"
+	@$(MIKE_CMD) deploy --update-aliases latest-snapshot -b website -p
+	@printf "Documentation deployed.\n"
 
+# --- Testing Target ---
+test: install-dev
+	@printf "Running project tests... (TODO: Implement your test command here, e.g., pytest)\n"
+	@# Example: $(VENV_PYTHON) -m pytest
+	@printf "Tests completed.\n"
+
+# --- Cleanup Targets ---
 clean:
-	@echo "Cleaning up generated files... (TODO)"
-	rm -rf __pycache__
-	rm -rf .mypy_cache
-	rm -rf .pytest_cache
+	@printf "Cleaning up generated files and caches...\n"
+	@rm -rf $(PYCACHE_DIR) $(MYPY_CACHE_DIR) $(PYTEST_CACHE_DIR)
+	@rm -rf $(BUILD_DIR) $(DIST_DIR)
+	@rm -rf $(DOCS_BUILD_DIR)
+	@printf "Cleanup complete.\n"
 
-run-docs:
-	docker build -f docker/docs/Dockerfile -t mkdocs-sedona .
-	docker run --rm -it -p 8000:8000 -v ${PWD}:/docs mkdocs-sedona
+distclean: clean
+	@printf "Performing a deep clean: removing virtual environment and all generated files.\n"
+	@rm -rf $(VENV_DIR)
+	@printf "Deep clean complete.\n"
+
+# --- Docker for Documentation ---
+docker-docs-build:
+	@printf "Building Docker image '$(DOCKER_IMAGE_NAME)' for documentation...\n"
+	@docker build -f $(DOCKER_FILE_DOCS) -t $(DOCKER_IMAGE_NAME) .
+	@printf "Docker image built.\n"
+
+docker-docs-run: docker-docs-build
+	@printf "Running documentation server in Docker container '$(DOCKER_CONTAINER_NAME)' on port 8000...\n"
+	@printf "Access at http://localhost:8000\n"
+	@docker run --rm -it -p 8000:8000 --name $(DOCKER_CONTAINER_NAME) -v "${PWD}:/docs" $(DOCKER_IMAGE_NAME) $(MKDOCS_CMD) serve --dev-addr 0.0.0.0:8000
+
+docker-docs-stop:
+	@printf "Stopping Docker container '$(DOCKER_CONTAINER_NAME)'...\n"
+	@docker stop $(DOCKER_CONTAINER_NAME) >/dev/null 2>&1 || true
+	@printf "Docker container stopped (if it was running).\n"
+
+# --- Fun Targets ---
+logo: play_sedona_animation
+
+play_sedona_animation:
+	@printf "Starting Apache Sedona terminal animation...\n"
+	@printf "Press Ctrl+C to stop.\n"
+	$(PYTHON) $(PYTHON_ANIMATION_SCRIPT)
+	@printf "Animation finished.\n"
