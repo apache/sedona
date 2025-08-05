@@ -207,7 +207,7 @@ public abstract class S2Geography {
     out.flush();
   }
 
-  public S2Geography decodeTagged(InputStream is) throws IOException {
+  public static S2Geography decodeTagged(InputStream is) throws IOException {
     // wrap ONCE
     UnsafeInput kryoIn = new UnsafeInput(is, BUFFER_SIZE);
     EncodeTag topTag = EncodeTag.decode(kryoIn);

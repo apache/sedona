@@ -48,6 +48,11 @@ public class PointGeography extends S2Geography {
   /** Constructs especially for CELL_CENTER */
   PointGeography(GeographyKind kind, S2Point point) {
     super(kind); // can be POINT or CELL_CENTER
+    if (kind != GeographyKind.POINT
+        && kind != GeographyKind.SINGLEPOINT
+        && kind != GeographyKind.CELL_CENTER) {
+      throw new IllegalArgumentException("Invalid GeographyKind for PolylineGeography: " + kind);
+    }
     points.add(point);
   }
 
