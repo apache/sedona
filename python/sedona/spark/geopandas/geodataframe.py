@@ -27,13 +27,13 @@ import shapely
 import geopandas as gpd
 import pandas as pd
 import pyspark.pandas as pspd
-import sedona.geopandas as sgpd
+import sedona.spark.geopandas as sgpd
 from pyspark.pandas import Series as PandasOnSparkSeries
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas.utils import log_advice
 
-from sedona.geopandas._typing import Label
-from sedona.geopandas.base import GeoFrame
+from sedona.spark.geopandas._typing import Label
+from sedona.spark.geopandas.base import GeoFrame
 
 from pandas.api.extensions import register_extension_dtype
 from geopandas.geodataframe import crs_mismatch_error
@@ -211,7 +211,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
     Examples
     --------
     >>> from shapely.geometry import Point, Polygon
-    >>> from sedona.geopandas import GeoDataFrame
+    >>> from sedona.spark.geopandas import GeoDataFrame
     >>> import pandas as pd
     >>>
     >>> # Create from dictionary with geometry
@@ -272,7 +272,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
     See Also
     --------
     geopandas.GeoDataFrame : The GeoPandas equivalent
-    sedona.geopandas.GeoSeries : Series with geometry data
+    sedona.spark.geopandas.GeoSeries : Series with geometry data
     """
 
     def __getitem__(self, key: Any) -> Any:
@@ -294,7 +294,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         Examples
         --------
         >>> from shapely.geometry import Point
-        >>> from sedona.geopandas import GeoDataFrame
+        >>> from sedona.spark.geopandas import GeoDataFrame
         >>>
         >>> data = {'geometry': [Point(0, 0), Point(1, 1)], 'value': [1, 2]}
         >>> gdf = GeoDataFrame(data)
@@ -343,7 +343,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         self._anchor: GeoDataFrame
         self._col_label: Label
 
-        from sedona.geopandas import GeoSeries
+        from sedona.spark.geopandas import GeoSeries
         from pyspark.sql import DataFrame as SparkDataFrame
 
         if isinstance(data, (GeoDataFrame, GeoSeries)):
@@ -536,7 +536,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         Examples
         --------
-        >>> from sedona.geopandas import GeoDataFrame
+        >>> from sedona.spark.geopandas import GeoDataFrame
         >>> from shapely.geometry import Point
         >>> d = {'col1': ['name1', 'name2'], 'geometry': [Point(1, 2), Point(2, 1)]}
         >>> gdf = GeoDataFrame(d, crs="EPSG:4326")
@@ -691,7 +691,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         Examples
         --------
-        >>> from sedona.geopandas import GeoDataFrame
+        >>> from sedona.spark.geopandas import GeoDataFrame
         >>> from shapely.geometry import Point
         >>> d = {'col1': ['name1', 'name2'], 'geometry': [Point(1, 2), Point(2, 1)]}
         >>> df = GeoDataFrame(d, crs="EPSG:4326")
@@ -802,7 +802,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         Examples
         --------
         >>> from shapely.geometry import Point
-        >>> from sedona.geopandas import GeoDataFrame
+        >>> from sedona.spark.geopandas import GeoDataFrame
 
         >>> gdf = GeoDataFrame([{"geometry": Point(1, 1), "value1": 2, "value2": 3}])
         >>> gdf_copy = gdf.copy()
@@ -870,7 +870,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         Examples
         --------
-        >>> from sedona.geopandas import GeoDataFrame
+        >>> from sedona.spark.geopandas import GeoDataFrame
         >>> from shapely.geometry import Point
         >>> d = {'col1': ['name1', 'name2'], 'geometry': [Point(1, 2), Point(2, 1)]}
         >>> gdf = GeoDataFrame(d)
@@ -1090,7 +1090,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         Examples
         --------
 
-        >>> from sedona.geopandas import GeoDataFrame
+        >>> from sedona.spark.geopandas import GeoDataFrame
         >>> import geoarrow.pyarrow as ga
         >>> import pyarrow as pa
         >>> table = pa.Table.from_arrays([
@@ -1158,7 +1158,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         Examples
         --------
-        >>> from sedona.geopandas import GeoDataFrame
+        >>> from sedona.spark.geopandas import GeoDataFrame
         >>> from shapely.geometry import Point
         >>> d = {'col1': ['name1', 'name2'], 'geometry': [Point(1, 2), Point(2, 1)]}
         >>> gdf = GeoDataFrame(d, crs="EPSG:3857")
@@ -1252,7 +1252,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             GeoArrow.
         Examples
         --------
-        >>> from sedona.geopandas import GeoDataFrame
+        >>> from sedona.spark.geopandas import GeoDataFrame
         >>> from shapely.geometry import Point
         >>> data = {'col1': ['name1', 'name2'], 'geometry': [Point(1, 2), Point(2, 1)]}
         >>> gdf = GeoDataFrame(data)
@@ -1484,7 +1484,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         Examples
         --------
         >>> from shapely.geometry import Point, Polygon
-        >>> from sedona.geopandas import GeoDataFrame
+        >>> from sedona.spark.geopandas import GeoDataFrame
 
         >>> polygons = GeoDataFrame({
         ...     'geometry': [Polygon([(0, 0), (0, 1), (1, 1), (1, 0)])],
@@ -1496,7 +1496,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         ... })
         >>> joined = points.sjoin(polygons)
         """
-        from sedona.geopandas.tools.sjoin import sjoin as sjoin_tool
+        from sedona.spark.geopandas.tools.sjoin import sjoin as sjoin_tool
 
         return sjoin_tool(
             self,
@@ -1603,7 +1603,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         Examples
         --------
         >>> from shapely.geometry import Point, LineString
-        >>> from sedona.geopandas import GeoDataFrame
+        >>> from sedona.spark.geopandas import GeoDataFrame
 
         >>> gdf = GeoDataFrame({
         ...     "geometry": [Point(0, 0), LineString([(0, 0), (1, 1)])],
@@ -1637,7 +1637,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         Examples
         --------
         >>> from shapely.geometry import Point
-        >>> from sedona.geopandas import GeoDataFrame
+        >>> from sedona.spark.geopandas import GeoDataFrame
         >>> gdf = GeoDataFrame({"geometry": [Point(0, 0), Point(1, 1)], "value": [1, 2]})
         >>> gdf.to_parquet("output.parquet")
         """
