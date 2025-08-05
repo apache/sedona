@@ -91,11 +91,11 @@ object st_constructors {
   def ST_GeomFromEWKT(wkt: Column): Column = wrapExpression[ST_GeomFromEWKT](wkt)
   def ST_GeomFromEWKT(wkt: String): Column = wrapExpression[ST_GeomFromEWKT](wkt)
 
-  def ST_GeogFromWKT(wkt: Column): Column = wrapExpression[ST_GeogFromWKT](wkt, 0)
-  def ST_GeogFromWKT(wkt: String): Column = wrapExpression[ST_GeogFromWKT](wkt, 0)
-  def ST_GeogFromWKT(wkt: Column, srid: Column): Column =
-    wrapExpression[ST_GeogFromWKT](wkt, srid)
-  def ST_GeogFromWKT(wkt: String, srid: Int): Column = wrapExpression[ST_GeogFromWKT](wkt, srid)
+//  def ST_GeogFromWKT(wkt: Column): Column = wrapExpression[ST_GeogFromWKT](wkt, 0)
+//  def ST_GeogFromWKT(wkt: String): Column = wrapExpression[ST_GeogFromWKT](wkt, 0)
+//  def ST_GeogFromWKT(wkt: Column, srid: Column): Column =
+//    wrapExpression[ST_GeogFromWKT](wkt, srid)
+//  def ST_GeogFromWKT(wkt: String, srid: Int): Column = wrapExpression[ST_GeogFromWKT](wkt, srid)
 
   def ST_LineFromText(wkt: Column): Column = wrapExpression[ST_LineFromText](wkt)
   def ST_LineFromText(wkt: String): Column = wrapExpression[ST_LineFromText](wkt)
@@ -267,4 +267,11 @@ object st_constructors {
     wrapExpression[ST_MPointFromText](wkt, srid)
   def ST_MPointFromText(wkt: String, srid: Int): Column =
     wrapExpression[ST_MPointFromText](wkt, srid)
+
+  def ST_S2PointFromWKB(wkb: Column): Column = wrapExpression[ST_S2PointFromWKB](wkb)
+  def ST_S2PointFromWKB(wkb: String): Column = wrapExpression[ST_S2PointFromWKB](wkb)
+
+  def ST_S2LinestringFromWKB(wkb: Column): Column = wrapExpression[ST_S2LinestringFromWKB](wkb)
+  def ST_S2LinestringFromWKB(wkb: String): Column = wrapExpression[ST_S2LinestringFromWKB](wkb)
+
 }
