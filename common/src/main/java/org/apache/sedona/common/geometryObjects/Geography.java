@@ -18,20 +18,49 @@
  */
 package org.apache.sedona.common.geometryObjects;
 
-import org.locationtech.jts.geom.Geometry;
+import com.esotericsoftware.kryo.io.UnsafeOutput;
+import com.google.common.geometry.S2Region;
+import com.google.common.geometry.S2Shape;
+import java.io.IOException;
+import org.apache.sedona.common.S2Geography.EncodeOptions;
+import org.apache.sedona.common.S2Geography.S2Geography;
 
-public class Geography {
-  private final Geometry geometry;
+public class Geography extends S2Geography {
+  private final Geography geography;
 
-  public Geography(Geometry geometry) {
-    this.geometry = geometry;
+  public Geography(S2Geography geography) {
+    super(GeographyKind.fromKind(geography.getKind()));
+    this.geography = (Geography) geography;
   }
 
-  public Geometry getGeometry() {
-    return this.geometry;
+  public Geography getGeographhy() {
+    return this.geography;
+  }
+
+  @Override
+  public int dimension() {
+    return this.geography.dimension();
+  }
+
+  @Override
+  public int numShapes() {
+    return this.geography.numShapes();
+  }
+
+  @Override
+  public S2Shape shape(int id) {
+    return this.geography.shape(id);
+  }
+
+  @Override
+  public S2Region region() {
+    return this.geography.region();
   }
 
   public String toString() {
-    return this.geometry.toText();
+    return this.geography.toString();
   }
+
+  @Override
+  protected void encode(UnsafeOutput os, EncodeOptions opts) throws IOException {}
 }

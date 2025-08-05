@@ -22,7 +22,6 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.common.enums.GeometryType;
-import org.apache.sedona.common.geometryObjects.Geography;
 import org.apache.sedona.common.utils.FormatUtils;
 import org.apache.sedona.common.utils.GeoHashDecoder;
 import org.locationtech.jts.geom.*;
@@ -45,9 +44,9 @@ public class Constructors {
     return new WKTReader(geometryFactory).read(wkt);
   }
 
-  public static Geography geogFromWKT(String wkt, int srid) throws ParseException {
-    return new Geography(geomFromWKT(wkt, srid));
-  }
+  //  public static Geography geogFromWKT(String wkt, int srid) throws ParseException {
+  //    return new Geography(geogFromWKT(wkt, srid));
+  //  }
 
   public static Geometry geomFromEWKT(String ewkt) throws ParseException {
     if (ewkt == null) {

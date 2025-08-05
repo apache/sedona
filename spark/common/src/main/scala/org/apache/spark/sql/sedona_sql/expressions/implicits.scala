@@ -68,35 +68,23 @@ object implicits {
           serdeAware.evalWithoutSerialization(input).asInstanceOf[Geography]
         case _ =>
           inputExpression.eval(input).asInstanceOf[Array[Byte]] match {
-            case binary: Array[Byte] => new Geography(GeometrySerializer.deserialize(binary))
+            case binary: Array[Byte] => new Geography(GeographySerializer.deserialize(binary))
             case _ => null
           }
       }
     }
 
-    def toS2Geography(input: InternalRow): S2Geography = {
-      inputExpression match {
-        case serdeAware: SerdeAware =>
-          serdeAware.evalWithoutSerialization(input).asInstanceOf[S2Geography]
-        case _ =>
-          inputExpression.eval(input).asInstanceOf[Array[Byte]] match {
-            case binary: Array[Byte] => GeographySerializer.deserialize(binary)
-            case _ => null
-          }
-      }
-    }
-
-    def toS2GeographyArray(input: InternalRow): Array[S2Geography] = {
+    def toGeographyArray(input: InternalRow): Array[Geography] = {
       inputExpression match {
         case aware: SerdeAware =>
-          aware.evalWithoutSerialization(input).asInstanceOf[Array[S2Geography]]
+          aware.evalWithoutSerialization(input).asInstanceOf[Array[Geography]]
         case _ =>
           inputExpression.eval(input).asInstanceOf[ArrayData] match {
             case arrayData: ArrayData =>
               val length = arrayData.numElements()
-              val geographyies = new Array[S2Geography](length)
+              val geographyies = new Array[Geography](length)
               for (i <- 0 until length) {
-                geographyies(i) = arrayData.getBinary(i).toS2Geography
+                geographyies(i) = arrayData.getBinary(i).toGeography
               }
               geographyies
             case _ => null
@@ -173,7 +161,7 @@ object implicits {
         case _ => null
       }
     }
-    def toS2Geography: S2Geography =
+    def toGeography: Geography =
       arrayData match {
         case binary: Array[Byte] => GeographySerializer.deserialize(binary)
         case _ => null
@@ -191,7 +179,7 @@ object implicits {
     def isNonEmpty: Boolean = geom != null && !geom.isEmpty
   }
 
-  implicit class S2GeographyEnhancer(geog: S2Geography) {
+  implicit class GeographyEnhancer(geog: Geography) {
 
     def toGenericArrayData: Array[Byte] = GeographySerializer.serialize(geog)
   }

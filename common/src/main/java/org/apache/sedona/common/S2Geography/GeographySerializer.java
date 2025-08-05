@@ -21,16 +21,17 @@ package org.apache.sedona.common.S2Geography;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import org.apache.sedona.common.geometryObjects.Geography;
 
 public class GeographySerializer {
-  public static byte[] serialize(S2Geography geography) throws IOException {
+  public static byte[] serialize(Geography geography) throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     geography.encodeTagged(baos, new EncodeOptions());
     return baos.toByteArray();
   }
 
-  public static S2Geography deserialize(byte[] buffer) throws IOException {
+  public static Geography deserialize(byte[] buffer) throws IOException {
     ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-    return S2Geography.decodeTagged(bais);
+    return (Geography) S2Geography.decodeTagged(bais);
   }
 }
