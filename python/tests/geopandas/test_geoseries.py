@@ -1520,6 +1520,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             [(-0.5, -0.5), (-0.5, 2.5), (2.5, 2.5), (2.5, -0.5), (-0.5, -0.5)]
         )
         result = s.intersection(geom)
+        result.sort_index(inplace=True)
         expected = gpd.GeoSeries(
             [
                 Polygon([(0, 0), (2, 2), (0, 2)]),
@@ -1541,6 +1542,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             ],
         )
         result = s.intersection(s2)
+        result.sort_index(inplace=True)
         expected = gpd.GeoSeries(
             [
                 Polygon([(0, 0), (0, 1), (1, 1), (0, 0)]),
@@ -1580,6 +1582,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             assert s2.index.equals(expected_index)
 
         result = s.intersection(s2, align=True)
+        result.sort_index(inplace=True)
         expected = gpd.GeoSeries(
             [
                 None,
@@ -1594,9 +1597,11 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         # Check that GeoDataFrame works too
         df_result = s.to_geoframe().intersection(s2, align=True)
+        df_result.sort_index(inplace=True)
         self.check_sgpd_equals_gpd(df_result, expected)
 
         result = s2.intersection(s, align=False)
+        result.sort_index(inplace=True)
         expected = gpd.GeoSeries(
             [
                 Polygon([(0, 0), (0, 1), (1, 1), (0, 0)]),
@@ -1614,6 +1619,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         # Check that GeoDataFrame works too
         df_result = s2.to_geoframe().intersection(s, align=False)
+        df_result.sort_index(inplace=True)
         self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_snap(self):
