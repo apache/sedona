@@ -20,7 +20,7 @@
 # from shapely.wkt import loads as wkt_loads
 # from sedona.spark.core.geom.geography import Geography
 # from sedona.spark.sql.types import GeographyType
-# from tests.test_base import TestBase
+from tests.test_base import TestBase
 
 
 class TestGeography(TestBase):
