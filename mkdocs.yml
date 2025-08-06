@@ -92,10 +92,16 @@ nav:
           - SQL:
               - Quick start: api/sql/Overview.md
               - Vector data:
-                  - Constructor: api/sql/Constructor.md
-                  - Function: api/sql/Function.md
-                  - Predicate: api/sql/Predicate.md
-                  - Aggregate function: api/sql/AggregateFunction.md
+                  - Geometry type:
+                      - Constructor: api/sql/Constructor.md
+                      - Function: api/sql/Function.md
+                      - Predicate: api/sql/Predicate.md
+                      - Aggregate function: api/sql/AggregateFunction.md
+                  - Geography type:
+                      - Constructor: api/sql/geography/Constructor.md
+                      - Function: api/sql/geography/Function.md
+                      - Predicate: api/sql/geography/Predicate.md
+                      - Aggregate function: api/sql/geography/AggregateFunction.md
                   - DataFrame Style functions: api/sql/DataFrameAPI.md
                   - Query optimization: api/sql/Optimizer.md
                   - Nearest-Neighbour searching: api/sql/NearestNeighbourSearching.md
