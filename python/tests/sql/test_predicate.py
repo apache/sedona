@@ -174,7 +174,7 @@ class TestPredicate(TestBase):
 
         string = "100.01,200.01,100.5,200.01,100.5,200.5,100.01,200.5,100.01,200.01"
         equal_df = self.spark.sql(
-            f"select * from polygonDf where ST_Equals(polygonDf.polygonshape, ST_LineStringFromText('{string}', ',')) "
+            f"select * from polygonDf where ST_Equals(polygonDf.polygonshape, ST_LineStringFromText('{string}', ',')) "  # nosec B608
         )
         equal_df.show()
 
@@ -198,7 +198,7 @@ class TestPredicate(TestBase):
         string = "100.01,200.01,100.5,200.01,100.5,200.5,100.01,200.5,100.01,200.01"
 
         equal_df = self.spark.sql(
-            f"select * from polygonDf where ST_Equals(polygonDf.polygonshape, ST_PolygonFromText('{string}', ',')) "
+            f"select * from polygonDf where ST_Equals(polygonDf.polygonshape, ST_PolygonFromText('{string}', ',')) "  # nosec B608
         )
         equal_df.show()
 
