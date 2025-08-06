@@ -61,45 +61,41 @@ public class GeogConstructors {
   }
 
   public static Geography geogFromText(
-          String geogString,
-          String geogFormat,
-          S2Geography.GeographyKind geographyKind
-  ) throws ParseException {
+      String geogString, String geogFormat, S2Geography.GeographyKind geographyKind)
+      throws ParseException {
     FileDataSplitter splitter = FileDataSplitter.getFileDataSplitter(geogFormat);
     if (splitter == FileDataSplitter.WKB) {
       byte[] bytes = WKBReader.hexToBytes(geogString);
       return geogFromWKB(bytes);
     } else {
       throw new UnsupportedOperationException(
-              "Only hex-encoded WKB format is supported for text input"
-      );
+          "Only hex-encoded WKB format is supported for text input");
     }
   }
 
-  public static Geography geogFromText(
-          String geogString,
-          FileDataSplitter fileDataSplitter
-  ) throws ParseException {
+  public static Geography geogFromText(String geogString, FileDataSplitter fileDataSplitter)
+      throws ParseException {
     if (fileDataSplitter == FileDataSplitter.WKB) {
       byte[] bytes = WKBReader.hexToBytes(geogString);
       return geogFromWKB(bytes);
     } else {
       throw new UnsupportedOperationException(
-              "Only hex-encoded WKB format is supported for text input"
-      );
+          "Only hex-encoded WKB format is supported for text input");
     }
   }
 
-  public static Geography pointFromText(String geogString, String geogFormat) throws ParseException {
+  public static Geography pointFromText(String geogString, String geogFormat)
+      throws ParseException {
     return geogFromText(geogString, geogFormat, S2Geography.GeographyKind.SINGLEPOINT);
   }
 
-  public static Geography polygonFromText(String geogString, String geogFormat) throws ParseException {
+  public static Geography polygonFromText(String geogString, String geogFormat)
+      throws ParseException {
     return geogFromText(geogString, geogFormat, S2Geography.GeographyKind.POLYGON);
   }
 
-  public static Geography lineStringFromText(String geogString, String geogFormat) throws ParseException {
+  public static Geography lineStringFromText(String geogString, String geogFormat)
+      throws ParseException {
     return geogFromText(geogString, geogFormat, Geography.GeographyKind.SINGLEPOLYLINE);
   }
-
 }
