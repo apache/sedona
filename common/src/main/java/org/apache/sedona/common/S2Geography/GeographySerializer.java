@@ -25,13 +25,13 @@ import org.apache.sedona.common.geometryObjects.Geography;
 
 public class GeographySerializer {
   public static byte[] serialize(Geography geography) throws IOException {
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    geography.encodeTagged(baos, new EncodeOptions());
-    return baos.toByteArray();
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    geography.encodeTagged(outputStream, new EncodeOptions());
+    return outputStream.toByteArray();
   }
 
   public static Geography deserialize(byte[] buffer) throws IOException {
-    ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
-    return (Geography) S2Geography.decodeTagged(bais);
+    ByteArrayInputStream inputStream = new ByteArrayInputStream(buffer);
+    return new Geography(S2Geography.decodeTagged(inputStream));
   }
 }
