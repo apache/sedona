@@ -70,8 +70,8 @@ public class Geography extends S2Geography {
   }
 
   @Override
-  protected void encode(UnsafeOutput os, EncodeOptions opts) throws IOException {
+  public void encode(UnsafeOutput os, EncodeOptions opts) throws IOException {
     // Delegate encoding to the wrapped object
-    delegate.encodeTagged(os, opts);
+    delegate.encode(os, opts);
   }
 }

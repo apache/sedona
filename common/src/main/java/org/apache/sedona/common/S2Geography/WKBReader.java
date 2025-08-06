@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import org.apache.sedona.common.geometryObjects.Geography;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.*;
 
@@ -110,7 +111,7 @@ public class WKBReader {
    * @return the geometry read
    * @throws ParseException if the WKB is ill-formed
    */
-  public S2Geography read(byte[] bytes) throws ParseException {
+  public Geography read(byte[] bytes) throws ParseException {
     try {
       // Use a very high limit to avoid malformed input OOM
       return read(new ByteArrayInStream(bytes), Integer.MAX_VALUE);
@@ -127,12 +128,12 @@ public class WKBReader {
    * @throws IOException if the underlying stream creates an error
    * @throws ParseException if the WKB is ill-formed
    */
-  public S2Geography read(InStream is) throws IOException, ParseException {
+  public Geography read(InStream is) throws IOException, ParseException {
     // can't tell size of InStream, but MAX_VALUE should be safe
     return read(is, Integer.MAX_VALUE);
   }
 
-  private S2Geography read(InStream is, int maxCoordNum) throws IOException, ParseException {
+  private Geography read(InStream is, int maxCoordNum) throws IOException, ParseException {
     /**
      * This puts an upper bound on the allowed value in coordNum fields. It avoids OOM exceptions
      * due to malformed input.
@@ -151,7 +152,7 @@ public class WKBReader {
     return num;
   }
 
-  private S2Geography readGeometry(int SRID) throws IOException, ParseException {
+  private Geography readGeometry(int SRID) throws IOException, ParseException {
 
     // determine byte order
     byte byteOrderWKB = dis.readByte();
@@ -238,7 +239,7 @@ public class WKBReader {
         throw new ParseException("Unknown WKB type " + geometryType);
     }
     setSRID(geog, SRID);
-    return geog;
+    return new Geography(geog);
   }
 
   /**
@@ -361,7 +362,7 @@ public class WKBReader {
     int numGeom = readNumField(FIELD_NUMELEMS);
     List<S2Point> pts = new ArrayList<>(numGeom);
     for (int i = 0; i < numGeom; i++) {
-      S2Geography point = readGeometry(SRID);
+      S2Geography point = readGeometry(SRID).getDelegate();
       if (!(point instanceof PointGeography)) {
         throw new ParseException(INVALID_GEOM_TYPE_MSG + "MultiPoint");
       }
@@ -374,7 +375,7 @@ public class WKBReader {
     int numGeom = readNumField(FIELD_NUMELEMS);
     List<S2Polyline> polylines = new ArrayList<>(numGeom);
     for (int i = 0; i < numGeom; i++) {
-      S2Geography polyline = readGeometry(SRID);
+      S2Geography polyline = readGeometry(SRID).getDelegate();
       if (!(polyline instanceof PolylineGeography)) {
         throw new ParseException(INVALID_GEOM_TYPE_MSG + "MultiPolyline");
       }
@@ -387,7 +388,7 @@ public class WKBReader {
     int numGeom = readNumField(FIELD_NUMELEMS);
     List<S2Polygon> polygons = new ArrayList<>(numGeom);
     for (int i = 0; i < numGeom; i++) {
-      S2Geography geom = readGeometry(SRID);
+      S2Geography geom = readGeometry(SRID).getDelegate();
       polygons.add(((PolygonGeography) geom).polygon);
     }
     return new MultiPolygonGeography(polygons);
@@ -397,7 +398,7 @@ public class WKBReader {
     int numGeom = readNumField(FIELD_NUMELEMS);
     S2Geography[] geoms = new S2Geography[numGeom];
     for (int i = 0; i < numGeom; i++) {
-      geoms[i] = readGeometry(SRID);
+      geoms[i] = readGeometry(SRID).getDelegate();
     }
     return new GeographyCollection(List.of(geoms));
   }

@@ -148,7 +148,7 @@ public class PointGeography extends S2Geography {
   }
 
   @Override
-  protected void encode(UnsafeOutput out, EncodeOptions opts) throws IOException {
+  public void encode(UnsafeOutput out, EncodeOptions opts) throws IOException {
     // now the *payload* must go into its own buffer:
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     Output tmpOut = new Output(baos);

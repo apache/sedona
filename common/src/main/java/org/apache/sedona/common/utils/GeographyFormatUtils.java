@@ -148,7 +148,8 @@ public class GeographyFormatUtils<T extends Geography> implements Serializable {
     // For some unknown reasons, the wkb reader cannot be used in transient variable like the wkt
     // reader.
     WKBReader wkbReader = new WKBReader();
-    return (Geography) wkbReader.read(aux);
+    S2Geography rawGeography = wkbReader.read(aux);
+    return new Geography(rawGeography);
   }
 
   public Geography readGeography(String line) throws ParseException {

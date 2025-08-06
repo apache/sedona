@@ -80,7 +80,7 @@ public class EncodedShapeIndexGeography extends S2Geography {
   }
 
   @Override
-  protected void encode(UnsafeOutput os, EncodeOptions opts) throws IOException {
+  public void encode(UnsafeOutput os, EncodeOptions opts) throws IOException {
     throw new IOException("Encode() not implemented for EncodedShapeIndexGeography()");
   }
   // decode
