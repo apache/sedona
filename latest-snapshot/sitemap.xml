@@ -157,6 +157,22 @@
          <lastmod>2025-08-06</lastmod>
     </url>
     <url>
+         <loc>https://sedona.apache.org/latest/api/sql/geography/AggregateFunction/</loc>
+         <lastmod>2025-08-06</lastmod>
+    </url>
+    <url>
+         <loc>https://sedona.apache.org/latest/api/sql/geography/Constructor/</loc>
+         <lastmod>2025-08-06</lastmod>
+    </url>
+    <url>
+         <loc>https://sedona.apache.org/latest/api/sql/geography/Function/</loc>
+         <lastmod>2025-08-06</lastmod>
+    </url>
+    <url>
+         <loc>https://sedona.apache.org/latest/api/sql/geography/Predicate/</loc>
+         <lastmod>2025-08-06</lastmod>
+    </url>
+    <url>
          <loc>https://sedona.apache.org/latest/api/stats/sql/</loc>
          <lastmod>2025-08-06</lastmod>
     </url>
