@@ -38,7 +38,9 @@ public class Haversine {
    * @param geom2 The second geometry. Each coordinate is in lon/lat order
    * @return
    */
-  public static double distance(Geometry geom1, Geometry geom2, double AVG_EARTH_RADIUS) {
+  public static final double AVG_EARTH_RADIUS = 6371008.0;
+
+  public static double distance(Geometry geom1, Geometry geom2, double avg_earth_radius) {
     Coordinate coordinate1 =
         geom1.getGeometryType().equals("Point")
             ? geom1.getCoordinate()
@@ -61,13 +63,13 @@ public class Haversine {
                 * sin(lngDistance / 2)
                 * sin(lngDistance / 2);
     double c = 2 * atan2(sqrt(a), sqrt(1 - a));
-    return AVG_EARTH_RADIUS * c * 1.0;
+    return avg_earth_radius * c * 1.0;
   }
 
   // Calculate the distance between two points on the earth using the "haversine" formula.
   // The radius of the earth is 6371.0 km
   public static double distance(Geometry geom1, Geometry geom2) {
-    return distance(geom1, geom2, 6371008.0);
+    return distance(geom1, geom2, AVG_EARTH_RADIUS);
   }
 
   /**

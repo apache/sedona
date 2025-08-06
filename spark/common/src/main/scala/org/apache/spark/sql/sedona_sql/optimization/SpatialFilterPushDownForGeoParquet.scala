@@ -18,7 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.optimization
 
-import org.apache.sedona.common.geometryObjects.Circle
+import org.apache.sedona.common.sphere.Haversine
 import org.apache.sedona.core.spatialOperator.SpatialPredicate
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.SparkSession
@@ -45,7 +45,7 @@ import org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilte
 import org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter.LeafFilter
 import org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter.OrFilter
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.sql.sedona_sql.expressions.{ST_AsEWKT, ST_Buffer, ST_Contains, ST_CoveredBy, ST_Covers, ST_Crosses, ST_DWithin, ST_Distance, ST_DistanceSpheroid, ST_Equals, ST_Intersects, ST_OrderingEquals, ST_Overlaps, ST_Touches, ST_Within}
+import org.apache.spark.sql.sedona_sql.expressions.{ST_AsEWKT, ST_Buffer, ST_Contains, ST_CoveredBy, ST_Covers, ST_Crosses, ST_DWithin, ST_Distance, ST_DistanceSphere, ST_DistanceSpheroid, ST_Equals, ST_Intersects, ST_OrderingEquals, ST_Overlaps, ST_Touches, ST_Within}
 import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils.splitConjunctivePredicates
 import org.apache.spark.sql.types.DoubleType
 import org.locationtech.jts.geom.Geometry
@@ -158,7 +158,7 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
             name,
             GeometryUDT.deserialize(value),
             d.asInstanceOf[Double],
-            useSpheroid = true)
+            distanceType = "spheroid")
 
       case LessThanOrEqual(ST_DistanceSpheroid(distArgs), Literal(d, DoubleType)) =>
         for ((name, value) <- resolveNameAndLiteral(distArgs, pushableColumn))
@@ -166,21 +166,47 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
             name,
             GeometryUDT.deserialize(value),
             d.asInstanceOf[Double],
-            useSpheroid = true)
+            distanceType = "spheroid")
+
+      case LessThan(ST_DistanceSphere(distArgs), Literal(d, DoubleType)) =>
+        val radiusOpt = distArgs.lift(2).collect {
+          case Literal(customRadius: Double, DoubleType) => customRadius
+        }
+
+        resolveNameAndLiteral(distArgs.take(2), pushableColumn).map { case (name, value) =>
+          distanceFilter(
+            name,
+            GeometryUDT.deserialize(value),
+            d.asInstanceOf[Double],
+            distanceType = "sphere",
+            sphereRadiusOverride = radiusOpt)
+        }
+
+      case LessThanOrEqual(ST_DistanceSphere(distArgs), Literal(d, DoubleType)) =>
+        val radiusOpt = distArgs.lift(2).collect {
+          case Literal(customRadius: Double, DoubleType) => customRadius
+        }
+
+        resolveNameAndLiteral(distArgs.take(2), pushableColumn).map { case (name, value) =>
+          distanceFilter(
+            name,
+            GeometryUDT.deserialize(value),
+            d.asInstanceOf[Double],
+            distanceType = "sphere",
+            sphereRadiusOverride = radiusOpt)
+        }
 
       case ST_DWithin(args) if args.length == 3 || args.length == 4 =>
         val distanceLit = args(2)
-        val useSpheroid = if (args.length == 4) {
-          args(3) match {
-            case Literal(flag: Boolean, _) => flag
-            case _ => false
-          }
-        } else false
+        val distanceType = args.lift(3) match {
+          case Some(Literal(flag: Boolean, _)) => if (flag) "spheroid" else "planar"
+          case _ => "planar"
+        }
 
         distanceLit match {
           case Literal(distance: Double, DoubleType) =>
             resolveNameAndLiteral(args.take(2), pushableColumn).map { case (name, value) =>
-              distanceFilter(name, GeometryUDT.deserialize(value), distance, useSpheroid)
+              distanceFilter(name, GeometryUDT.deserialize(value), distance, distanceType)
             }
           case _ => None
         }
@@ -192,26 +218,36 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
       name: String,
       geom: Geometry,
       distance: Double,
-      useSpheroid: Boolean = false): GeoParquetSpatialFilter = {
-    val queryWindow: Geometry = if (useSpheroid) {
-      // Spheroidal buffer
-      // Increase buffer distance by 3% to account for false negatives with Spheroidal Buffer calculations
-      val distanceLit = Literal(distance * 1.03)
-      val spheroidLit = Literal(true)
-      val geomLit = Literal.create(GeometrySerializer.serialize(geom), new GeometryUDT())
+      distanceType: String = "planar",
+      sphereRadiusOverride: Option[Double] = None): GeoParquetSpatialFilter = {
+    val queryWindow: Geometry = distanceType match {
+      case "spheroid" =>
+        // Spheroidal buffer
+        // Increase buffer distance by 3% to account for false negatives with Spheroidal Buffer calculations
+        val distanceLit = Literal(distance * 1.03)
+        val spheroidLit = Literal(true)
+        val geomLit = Literal.create(GeometrySerializer.serialize(geom), new GeometryUDT())
 
-      val bufferGeometry = {
-        val bufferExpr = ST_Buffer(
-          scala.collection.immutable.Seq(geomLit, distanceLit, spheroidLit))
-        val wkb = bufferExpr.eval().asInstanceOf[Array[Byte]]
-        GeometrySerializer.deserialize(wkb)
-      }
-      bufferGeometry
-    } else {
-      // Euclidean distance
-      val envelope = geom.getEnvelopeInternal
-      envelope.expandBy(distance)
-      geom.getFactory.toGeometry(envelope)
+        val bufferGeometry = {
+          val bufferExpr = ST_Buffer(
+            scala.collection.immutable.Seq(geomLit, distanceLit, spheroidLit))
+          val wkb = bufferExpr.eval().asInstanceOf[Array[Byte]]
+          GeometrySerializer.deserialize(wkb)
+        }
+        bufferGeometry
+
+      case "sphere" =>
+        // The Haversine expandEnvelope already conservatively expands envelope by 10% to avoid false negatives
+        val radius = sphereRadiusOverride.getOrElse(Haversine.AVG_EARTH_RADIUS)
+        val expandedEnvelope =
+          Haversine.expandEnvelope(geom.getEnvelopeInternal, distance, radius)
+        geom.getFactory.toGeometry(expandedEnvelope)
+
+      case _ =>
+        // Euclidean distance
+        val envelope = geom.getEnvelopeInternal
+        envelope.expandBy(distance)
+        geom.getFactory.toGeometry(envelope)
     }
     LeafFilter(unquote(name), SpatialPredicate.INTERSECTS, queryWindow)
   }
