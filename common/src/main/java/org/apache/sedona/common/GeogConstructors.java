@@ -23,7 +23,6 @@ import org.apache.sedona.common.S2Geography.SinglePointGeography;
 import org.apache.sedona.common.S2Geography.WKBReader;
 import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.common.geometryObjects.Geography;
-import org.apache.sedona.common.utils.GeographyFormatUtils;
 import org.locationtech.jts.io.ParseException;
 
 public class GeogConstructors {
@@ -62,36 +61,45 @@ public class GeogConstructors {
   }
 
   public static Geography geogFromText(
-      String geogString, String geogFormat, S2Geography.GeographyKind geographyKind) {
-    FileDataSplitter fileDataSplitter = FileDataSplitter.getFileDataSplitter(geogFormat);
-    GeographyFormatUtils<Geography> formatMapper =
-        new GeographyFormatUtils<>(fileDataSplitter, false, geographyKind);
-    try {
-      return formatMapper.readGeography(geogString);
-    } catch (ParseException e) {
-      throw new RuntimeException(e);
+          String geogString,
+          String geogFormat,
+          S2Geography.GeographyKind geographyKind
+  ) throws ParseException {
+    FileDataSplitter splitter = FileDataSplitter.getFileDataSplitter(geogFormat);
+    if (splitter == FileDataSplitter.WKB) {
+      byte[] bytes = WKBReader.hexToBytes(geogString);
+      return geogFromWKB(bytes);
+    } else {
+      throw new UnsupportedOperationException(
+              "Only hex-encoded WKB format is supported for text input"
+      );
     }
   }
 
-  public static Geography pointFromText(String geogString, String geogFormat) {
+  public static Geography geogFromText(
+          String geogString,
+          FileDataSplitter fileDataSplitter
+  ) throws ParseException {
+    if (fileDataSplitter == FileDataSplitter.WKB) {
+      byte[] bytes = WKBReader.hexToBytes(geogString);
+      return geogFromWKB(bytes);
+    } else {
+      throw new UnsupportedOperationException(
+              "Only hex-encoded WKB format is supported for text input"
+      );
+    }
+  }
+
+  public static Geography pointFromText(String geogString, String geogFormat) throws ParseException {
     return geogFromText(geogString, geogFormat, S2Geography.GeographyKind.SINGLEPOINT);
   }
 
-  public static Geography polygonFromText(String geogString, String geogFormat) {
+  public static Geography polygonFromText(String geogString, String geogFormat) throws ParseException {
     return geogFromText(geogString, geogFormat, S2Geography.GeographyKind.POLYGON);
   }
 
-  public static Geography lineStringFromText(String geogString, String geogFormat) {
+  public static Geography lineStringFromText(String geogString, String geogFormat) throws ParseException {
     return geogFromText(geogString, geogFormat, Geography.GeographyKind.SINGLEPOLYLINE);
   }
 
-  public static Geography geogFromText(String geogString, FileDataSplitter fileDataSplitter) {
-    GeographyFormatUtils<Geography> formatMapper =
-        new GeographyFormatUtils<>(fileDataSplitter, false);
-    try {
-      return formatMapper.readWkb(geogString);
-    } catch (ParseException e) {
-      throw new RuntimeException(e);
-    }
-  }
 }

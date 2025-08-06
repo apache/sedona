@@ -269,7 +269,7 @@ class constructorTestScala extends TestBaseScala {
 //      val row = sparkSession.sql(s"SELECT ST_GeogFromWKT('$wkt') AS geog").first()
 //      val geog = row.get(0)
 //      assert(geog.isInstanceOf[Geography])
-//      assert(geog.asInstanceOf[Geography].getGeographhy.toText == wkt)
+//      assert(geog.asInstanceOf[Geography].getGeography.toText == wkt)
 //    }
 
     it("Passed ST_LineFromText") {

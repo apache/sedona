@@ -36,8 +36,8 @@ public class Geography extends S2Geography {
   }
 
   /** Return the wrapped S2Geography. */
-  public Geography getGeography() {
-    return (Geography) delegate;
+  public S2Geography getGeography() {
+    return delegate;
   }
 
   public S2Geography getDelegate() {
