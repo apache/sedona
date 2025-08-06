@@ -19,7 +19,7 @@
 
 # Geopandas on Sedona
 
-This folder contains the source code for the GeoPandas component of Apache Sedona. This README.md will outline a few important considerations to consider when contributing changes to this component as a developer. Again **this README.md is targeted towards contributors**, the official documentation is more tailored towards users.
+This folder contains the source code for the GeoPandas component of Apache Sedona. This README.md will outline a few important considerations when contributing changes to this component as a developer. Again **this README.md is targeted towards contributors**, the official documentation is more tailored towards users.
 
 **General Approach**: This component is built on top of the PySpark Pandas API. The `GeoDataFrame` and `GeoSeries` classes both inherit from pyspark pandas' `ps.DataFrame` and `ps.Series` classes, respectively. When possible, it is generally preferred to leverage pyspark pandas' implementation of a function and extending it from there (i.e. find a way to leverage `super()` rather than copying over parts of logic). The code structure resembles the structure of the [Geopandas repo](https://github.com/geopandas/geopandas).
 
