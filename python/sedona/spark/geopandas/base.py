@@ -1652,6 +1652,9 @@ class GeoFrame(metaclass=ABCMeta):
 
         The operation works on a 1-to-1 row-wise manner.
 
+        Note: Unlike most functions, intersection may return the unordered with respect to the index.
+        If this is important to you, you may call ``sort_index()`` on the result.
+
         Parameters
         ----------
         other : Geoseries or geometric object
