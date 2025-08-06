@@ -29,14 +29,30 @@ This guide outlines a few important considerations when contributing changes to 
 
 **Explain Query Plans**: Because these dataframe abstractions are built on Spark, we can retrieve the query plan for an operation for a Dataframe by using the `.spark.explain()` method.
 
+Example:
+
 ```python
-df.spark.explain()
+geoseries = GeoSeries([Polygon([(0, 0), (1, 0), (1, 1), (0, 0)])])
+# (Currently PySpark pandas Series does not have the spark.explain() method, so a workaround is to convert it to a dataframe first)
+print(geoseries.area.to_frame().spark.explain(extended=True))
 ```
 
-(Currently PySpark pandas Series does not have the spark.explain() method, so a workaround is to convert it to a dataframe first)
+```
+== Parsed Logical Plan ==
+Project [__index_level_0__#19L, 0#27 AS None#31]
++- Project [ **org.apache.spark.sql.sedona_sql.expressions.ST_Area**   AS 0#27, __index_level_0__#19L, __natural_order__#23L]
+   +- Project [__index_level_0__#19L, 0#20, monotonically_increasing_id() AS __natural_order__#23L]
+      +- LogicalRDD [__index_level_0__#19L, 0#20], false
 
-```python
-series.to_frame().spark.explain()
+== Analyzed Logical Plan ==
+...
+
+== Optimized Logical Plan ==
+...
+
+== Physical Plan ==
+Project [__index_level_0__#19L,  **org.apache.spark.sql.sedona_sql.expressions.ST_Area**   AS None#31]
++- *(1) Scan ExistingRDD[__index_level_0__#19L,0#20]
 ```
 
 **Conventions**: The conventional shorthand for the Sedona Geopandas package is `sgpd`. Notice it's the same as the geopandas shorthand (`gpd`), except prefixed with an 's'. The conventional short hands for adjacent packages are shown below also.
