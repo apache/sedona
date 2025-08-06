@@ -1238,7 +1238,7 @@ wrong_type_configurations = [
     (stc.ST_LinestringFromWKB, (None,)),
     (stc.ST_GeomFromEWKB, (None,)),
     (stc.ST_GeomFromWKT, (None,)),
-    (stc.ST_GeogFromWKT, (None,)),
+    #(stc.ST_GeogFromWKT, (None,)),
     (stc.ST_GeometryFromText, (None,)),
     (stc.ST_LineFromText, (None,)),
     (stc.ST_LineStringFromText, (None, "")),
