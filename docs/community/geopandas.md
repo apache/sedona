@@ -36,7 +36,7 @@ import pyspark.pandas as ps
 import sedona.spark.geopandas as sgpd
 ```
 
-**Conversion Methods**: Sedona's Implementation of Geopandas, provides useful methods to convert to and from other dataframes using the following methods. These apply to both `GeoDataFrame` and `GeoSeries`:
+**Conversion Methods**: Sedona's Implementation of Geopandas provides useful methods to convert to and from other dataframes using the following methods. These apply to both `GeoDataFrame` and `GeoSeries`:
 
 - `to_geopandas()`: Sedona Geo(DataFrame/Series) to Geopandas
 - `to_geoframe()`: Sedona GeoSeries to Sedona GeoDataFrame
@@ -44,7 +44,7 @@ import sedona.spark.geopandas as sgpd
 - `to_spark()` (inherited): Sedona GeoDataFrame to Spark DataFrame
 - `to_frame()` (inherited): Sedona GeoSeries to PySpark Pandas DataFrame
 
-**GeoSeries functions**: Most geometry manipulation operations in Geopandas are considered GeoSeries functions. However, we can call them from a `GeoDataFrame` object as well to execute on it's active geometry column. We implement the functions in the `GeoSeries` class. However in `base.py`, we add a `_delegate_to_geometry_column()` call to allow the `GeoDataFrame` to also execute the function on it's active geometry column. We also specify the docstring for the function here instead of `GeoSeries`, so that both `GeoDataFrame` and `GeoSeries` will inherit the shared docstring (avoiding duplicated docstrings).
+**GeoSeries functions**: Most geometry manipulation operations in Geopandas are considered GeoSeries functions. However, we can call them from a `GeoDataFrame` object as well to execute on its active geometry column. We implement the functions in the `GeoSeries` class. However in `base.py`, we add a `_delegate_to_geometry_column()` call to allow the `GeoDataFrame` to also execute the function on its active geometry column. We also specify the docstring for the function here instead of `GeoSeries`, so that both `GeoDataFrame` and `GeoSeries` will inherit the shared docstring (avoiding duplicated docstrings).
 
 **Explain Query Plans**: Because these dataframe abstractions are built on Spark, we can retrieve the query plan for an operation for a Dataframe by using the `.spark.explain()` method.
 
