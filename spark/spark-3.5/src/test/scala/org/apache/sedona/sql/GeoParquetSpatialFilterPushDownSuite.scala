@@ -229,6 +229,41 @@ class GeoParquetSpatialFilterPushDownSuite extends TestBaseScala with TableDrive
           s"ST_DistanceSpheroid(geom, ST_GeomFromText('LINESTRING (17 17, 18 18)')) $op 500000",
           Seq(1))
       }
+
+      it(s"Push down ST_DistanceSphere $op d") {
+        testFilter(s"ST_DistanceSphere(geom, ST_GeomFromText('POINT (0 0)')) $op 100", Seq.empty)
+        testFilter(s"ST_DistanceSphere(geom, ST_GeomFromText('POINT (0 0)')) $op 500", Seq.empty)
+        testFilter(
+          s"ST_DistanceSphere(geom, ST_GeomFromText('POINT (3 4)')) $op 808691.391",
+          Seq(0, 1))
+        testFilter(
+          s"ST_DistanceSphere(geom, ST_GeomFromText('POINT (0 0)')) $op 7100000",
+          Seq(0, 1, 2, 3))
+        testFilter(
+          s"ST_DistanceSphere(geom, ST_GeomFromText('POINT (-5 -5)')) $op 500000",
+          Seq(2))
+        testFilter(
+          s"ST_DistanceSphere(geom, ST_GeomFromText('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))')) $op 2",
+          Seq.empty)
+        testFilter(
+          s"ST_DistanceSphere(geom, ST_GeomFromText('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))')) $op 500000",
+          Seq(0, 1, 2, 3))
+        testFilter(
+          s"ST_DistanceSphere(geom, ST_GeomFromText('LINESTRING (17 17, 18 18)')) $op 500000",
+          Seq(1))
+        testFilter(
+          s"ST_DistanceSphere(geom, ST_GeomFromText('POINT (3 4)'), 5000000) $op 808691.391",
+          Seq(0, 1, 2, 3))
+        testFilter(
+          s"ST_DistanceSphere(geom, ST_GeomFromText('POINT (-5 -5)'), 5000000) $op 400000",
+          Seq(2))
+        testFilter(
+          s"ST_DistanceSphere(geom, ST_GeomFromText('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))'), 7000000) $op 500000",
+          Seq(0, 1, 2, 3))
+        testFilter(
+          s"ST_DistanceSphere(geom, ST_GeomFromText('LINESTRING (17 17, 18 18)'), 6000000) $op 500000",
+          Seq(1))
+      }
     }
 
     it("Push down And(filters...)") {
