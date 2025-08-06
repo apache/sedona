@@ -20,6 +20,7 @@ package org.apache.sedona.sql
 
 import org.apache.sedona.common.S2Geography.S2Geography
 import org.locationtech.jts.geom.PrecisionModel
+import org.xml.sax.InputSource
 
 class GeogConstructorsTest extends TestBaseScala {
 
@@ -79,12 +80,15 @@ class GeogConstructorsTest extends TestBaseScala {
   }
 
   it("Passed ST_S2GeogFromWKB") {
+    val url = getClass.getResource("/county_small_wkb.tsv")
+    require(url != null, "Test resource not found on classpath!")
+    val path = url.toURI.getPath
     // UTF-8 encoded WKB String
     val polygonWkbDf = sparkSession.read
       .format("csv")
       .option("delimiter", "\t")
       .option("header", "false")
-      .load("spark/common/src/test/resources/county_small_wkb.tsv")
+      .load(path)
     polygonWkbDf.createOrReplaceTempView("polygontable")
     val polygonDf =
       sparkSession.sql("select ST_GeomFromWKB(polygontable._c0) as countyshape from polygontable")
