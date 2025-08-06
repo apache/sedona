@@ -350,9 +350,41 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("is_simple", self)
 
-    # @property
-    # def is_ring(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    @property
+    def is_ring(self):
+        """Return a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        features that are closed.
+
+        When constructing a LinearRing, the sequence of coordinates may be
+        explicitly closed by passing identical values in the first and last indices.
+        Otherwise, the sequence will be implicitly closed by copying the first tuple
+        to the last index.
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import LineString, LinearRing
+        >>> s = GeoSeries(
+        ...     [
+        ...         LineString([(0, 0), (1, 1), (1, -1)]),
+        ...         LineString([(0, 0), (1, 1), (1, -1), (0, 0)]),
+        ...         LinearRing([(0, 0), (1, 1), (1, -1)]),
+        ...     ]
+        ... )
+        >>> s
+        0         LINESTRING (0 0, 1 1, 1 -1)
+        1    LINESTRING (0 0, 1 1, 1 -1, 0 0)
+        2    LINEARRING (0 0, 1 1, 1 -1, 0 0)
+        dtype: geometry
+
+        >>> s.is_ring
+        0    False
+        1     True
+        2     True
+        dtype: bool
+
+        """
+        return _delegate_to_geometry_column("is_ring", self)
 
     # @property
     # def is_ccw(self):

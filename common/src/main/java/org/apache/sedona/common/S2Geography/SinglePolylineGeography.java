@@ -22,7 +22,7 @@ import com.google.common.geometry.S2Polyline;
 
 public class SinglePolylineGeography extends PolylineGeography {
   public SinglePolylineGeography(S2Polyline p) {
-    super(p);
+    super(GeographyKind.SINGLEPOLYLINE, p);
   }
 
   public SinglePolylineGeography() {
