@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.sql.geography
 
-import org.apache.sedona.common.S2Geography.{Geography, S2Geography}
+import org.apache.sedona.common.S2Geography.Geography
 import org.apache.sedona.sql.TestBaseScala
 import org.locationtech.jts.geom.PrecisionModel
 
