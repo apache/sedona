@@ -214,7 +214,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">GeographyUDT</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.types.UserDefinedType">UserDefinedType</span>[<span class="extype" name="org.apache.sedona.common.geometryObjects.Geography">Geography</span>]</span>
+        <span class="name">GeographyUDT</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.types.UserDefinedType">UserDefinedType</span>[<span class="extype" name="org.apache.sedona.common.S2Geography.Geography">Geography</span>]</span>
       </span>
       </h4>
 
@@ -223,7 +223,7 @@
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><span class="extype" name="org.apache.spark.sql.types.UserDefinedType">UserDefinedType</span>[<span class="extype" name="org.apache.sedona.common.geometryObjects.Geography">Geography</span>], <span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="org.apache.spark.sql.types.DataType">DataType</span>, <span class="extype" name="org.apache.spark.sql.types.AbstractDataType">AbstractDataType</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="org.apache.spark.sql.types.UserDefinedType">UserDefinedType</span>[<span class="extype" name="org.apache.sedona.common.S2Geography.Geography">Geography</span>], <span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="org.apache.spark.sql.types.DataType">DataType</span>, <span class="extype" name="org.apache.spark.sql.types.AbstractDataType">AbstractDataType</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block">
             <span class="toggle">
               Known Subclasses
@@ -423,9 +423,9 @@
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>UserDefinedType → DataType</dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.UDT.GeographyUDT#deserialize" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="deserialize(datum:Any):org.apache.sedona.common.geometryObjects.Geography"></a><a id="deserialize(Any):Geography"></a>
+      <a id="deserialize(datum:Any):org.apache.sedona.common.S2Geography.Geography"></a><a id="deserialize(Any):Geography"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/UDT/GeographyUDT.html#deserialize(datum:Any):org.apache.sedona.common.geometryObjects.Geography" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/UDT/GeographyUDT.html#deserialize(datum:Any):org.apache.sedona.common.S2Geography.Geography" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -434,7 +434,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">deserialize</span><span class="params">(<span name="datum">datum: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="org.apache.sedona.common.geometryObjects.Geography">Geography</span></span>
+        <span class="name">deserialize</span><span class="params">(<span name="datum">datum: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="org.apache.sedona.common.S2Geography.Geography">Geography</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.UDT.GeographyUDT">GeographyUDT</a> → UserDefinedType</dd></dl></div>
@@ -630,9 +630,9 @@
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.UDT.GeographyUDT">GeographyUDT</a> → UserDefinedType</dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.UDT.GeographyUDT#serialize" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="serialize(obj:org.apache.sedona.common.geometryObjects.Geography):Array[Byte]"></a><a id="serialize(Geography):Array[Byte]"></a>
+      <a id="serialize(obj:org.apache.sedona.common.S2Geography.Geography):Array[Byte]"></a><a id="serialize(Geography):Array[Byte]"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/UDT/GeographyUDT.html#serialize(obj:org.apache.sedona.common.geometryObjects.Geography):Array[Byte]" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/UDT/GeographyUDT.html#serialize(obj:org.apache.sedona.common.S2Geography.Geography):Array[Byte]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -641,7 +641,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">serialize</span><span class="params">(<span name="obj">obj: <span class="extype" name="org.apache.sedona.common.geometryObjects.Geography">Geography</span></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>
+        <span class="name">serialize</span><span class="params">(<span name="obj">obj: <span class="extype" name="org.apache.sedona.common.S2Geography.Geography">Geography</span></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.UDT.GeographyUDT">GeographyUDT</a> → UserDefinedType</dd></dl></div>
@@ -758,9 +758,9 @@
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DataType</dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.UDT.GeographyUDT#userClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="userClass:Class[org.apache.sedona.common.geometryObjects.Geography]"></a><a id="userClass:Class[Geography]"></a>
+      <a id="userClass:Class[org.apache.sedona.common.S2Geography.Geography]"></a><a id="userClass:Class[Geography]"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/UDT/GeographyUDT.html#userClass:Class[org.apache.sedona.common.geometryObjects.Geography]" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/UDT/GeographyUDT.html#userClass:Class[org.apache.sedona.common.S2Geography.Geography]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -769,7 +769,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">userClass</span><span class="result">: <span class="extype" name="scala.Predef.Class">Class</span>[<span class="extype" name="org.apache.sedona.common.geometryObjects.Geography">Geography</span>]</span>
+        <span class="name">userClass</span><span class="result">: <span class="extype" name="scala.Predef.Class">Class</span>[<span class="extype" name="org.apache.sedona.common.S2Geography.Geography">Geography</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.UDT.GeographyUDT">GeographyUDT</a> → UserDefinedType</dd></dl></div>
@@ -879,7 +879,7 @@
 
         <div id="inheritedMembers">
         <div class="parent" name="org.apache.spark.sql.types.UserDefinedType">
-              <h3>Inherited from <span class="extype" name="org.apache.spark.sql.types.UserDefinedType">UserDefinedType</span>[<span class="extype" name="org.apache.sedona.common.geometryObjects.Geography">Geography</span>]</h3>
+              <h3>Inherited from <span class="extype" name="org.apache.spark.sql.types.UserDefinedType">UserDefinedType</span>[<span class="extype" name="org.apache.sedona.common.S2Geography.Geography">Geography</span>]</h3>
             </div><div class="parent" name="scala.Serializable">
               <h3>Inherited from <span class="extype" name="scala.Serializable">Serializable</span></h3>
             </div><div class="parent" name="java.io.Serializable">
