@@ -19,15 +19,15 @@
 
 ## ST_GeogFromWKT
 
-Introduction: Construct a Geometry from WKT. If SRID is not set, it defaults to 0 (unknown).
+Introduction: Construct a Geography from WKT. If SRID is not set, it defaults to 0 (unknown).
 
 Format:
 
-`ST_GeomFromWKT (Wkt: String)`
+`ST_GeogFromWKT (Wkt: String)`
 
-`ST_GeomFromWKT (Wkt: String, srid: Integer)`
+`ST_GeogFromWKT (Wkt: String, srid: Integer)`
 
-Since: `v1.8.1`
+Since: `v1.8.0`
 
 SQL Example
 
@@ -51,7 +51,7 @@ Format:
 
 `ST_GeogFromText (Wkt: String, srid: Integer)`
 
-Since: `v1.8.1`
+Since: `v1.8.0`
 
 SQL Example
 
@@ -65,9 +65,33 @@ Output:
 LINESTRING (1 2, 3 4, 5 6)
 ```
 
+## ST_GeogCollFromText
+
+Introduction: Constructs a GeographyCollection from the WKT with the given SRID. If SRID is not provided then it defaults to 0. It returns `null` if the WKT is not a `GEOMETRYCOLLECTION`.
+
+Format:
+
+`ST_GeogCollFromText (Wkt: String)`
+
+`ST_GeogCollFromText (Wkt: String, srid: Integer)`
+
+Since: `v1.8.0`
+
+SQL Example:
+
+```sql
+SELECT ST_GeogCollFromText('GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((35 15, 45 15, 40 25, 35 15), (30 10, 40 20, 30 20, 30 10)))')
+```
+
+Output:
+
+```
+GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((35 15, 45 15, 40 25, 35 15), (30 10, 40 20, 30 20, 30 10)))
+```
+
 ## ST_GeogFromWKB
 
-Introduction: Construct a Geometry from WKB string or Binary. This function also supports EWKB format.
+Introduction: Construct a Geography from WKB string or Binary.
 
 Format:
 
@@ -87,4 +111,5 @@ SELECT ST_GeogFromWKB([1, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, -124, -42, 0, -64,
 Output:
 
 ```
-LINESTRING (-2.1047439575195317 -0.35482788085937506, -1.4960645437240603 -0.6676061153411864)```
+LINESTRING (-2.1 -0.4, -1.5 -0.7)
+```
