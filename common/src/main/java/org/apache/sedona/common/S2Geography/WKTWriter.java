@@ -250,14 +250,20 @@ public class WKTWriter {
     appendGeometryTaggedText(geography, useFormatting, writer, formatter);
   }
 
-  private OrdinateFormat getFormatter(Geography geometry) {
-    // if present use the cached formatter
-    if (ordinateFormat != null) return ordinateFormat;
+  private OrdinateFormat getFormatter(Geography geography) {
+    // 1) If we’ve already created an OrdinateFormat, reuse it
+    if (this.ordinateFormat != null) {
+      return this.ordinateFormat;
+    }
 
-    // no precision model was specified, so use the geometry's
-    PrecisionModel pm = new PrecisionModel(); // geometry.getPrecisionModel();
-    OrdinateFormat formatter = createFormatter(pm);
-    return formatter;
+    PrecisionModel pm;
+    if (this.precisionModel != null) {
+      pm = this.precisionModel;
+    } else {
+      pm = new PrecisionModel();
+    }
+    this.ordinateFormat = createFormatter(pm);
+    return this.ordinateFormat;
   }
 
   /**

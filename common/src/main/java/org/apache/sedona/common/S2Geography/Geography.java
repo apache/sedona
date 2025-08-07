@@ -157,7 +157,7 @@ public abstract class Geography {
 
   @Override
   public String toString() {
-    return this.toText(new PrecisionModel());
+    return this.toText(new PrecisionModel(PrecisionModel.FIXED));
   }
 
   public String toString(PrecisionModel precisionModel) {

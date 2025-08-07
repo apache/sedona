@@ -20,6 +20,7 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.spark.sql.Column
 import org.apache.spark.sql.sedona_sql.DataFrameShims._
+import org.apache.spark.sql.sedona_sql.expressions.geography.ST_GeogFromWKT
 
 object st_constructors {
   def ST_GeomFromGeoHash(geohash: Column, precision: Column): Column =
@@ -89,11 +90,11 @@ object st_constructors {
   def ST_GeomFromEWKT(wkt: Column): Column = wrapExpression[ST_GeomFromEWKT](wkt)
   def ST_GeomFromEWKT(wkt: String): Column = wrapExpression[ST_GeomFromEWKT](wkt)
 
-//  def ST_GeogFromWKT(wkt: Column): Column = wrapExpression[ST_GeogFromWKT](wkt, 0)
-//  def ST_GeogFromWKT(wkt: String): Column = wrapExpression[ST_GeogFromWKT](wkt, 0)
-//  def ST_GeogFromWKT(wkt: Column, srid: Column): Column =
-//    wrapExpression[ST_GeogFromWKT](wkt, srid)
-//  def ST_GeogFromWKT(wkt: String, srid: Int): Column = wrapExpression[ST_GeogFromWKT](wkt, srid)
+  def ST_GeogFromWKT(wkt: Column): Column = wrapExpression[ST_GeogFromWKT](wkt, 0)
+  def ST_GeogFromWKT(wkt: String): Column = wrapExpression[ST_GeogFromWKT](wkt, 0)
+  def ST_GeogFromWKT(wkt: Column, srid: Column): Column =
+    wrapExpression[ST_GeogFromWKT](wkt, srid)
+  def ST_GeogFromWKT(wkt: String, srid: Int): Column = wrapExpression[ST_GeogFromWKT](wkt, srid)
 
   def ST_LineFromText(wkt: Column): Column = wrapExpression[ST_LineFromText](wkt)
   def ST_LineFromText(wkt: String): Column = wrapExpression[ST_LineFromText](wkt)

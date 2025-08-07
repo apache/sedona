@@ -30,11 +30,12 @@ class ConstructorsTest extends TestBaseScala {
   it("Passed ST_GeogFromWKT") {
     val wkt = "LINESTRING (1 2, 3 4, 5 6)"
     val row = sparkSession.sql(s"SELECT ST_GeogFromWKT('$wkt', 4326) AS geog").first()
+    // Write output with precisionModel
+    val geoStr = row.get(0).asInstanceOf[Geography].toString()
     val geog = row.get(0).asInstanceOf[Geography]
     assert(geog.getSRID == 4326)
-    // TODO: fix the precision model issue
-//    assert(geog.isInstanceOf[Geography])
-//    assert(geog.asInstanceOf[Geography] == wkt)
+    assert(geog.isInstanceOf[Geography])
+    assert(geoStr == wkt)
   }
 
 //  it("Passed ST_S2PointFromWKB") {
