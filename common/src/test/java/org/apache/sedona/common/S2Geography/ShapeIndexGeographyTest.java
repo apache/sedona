@@ -55,10 +55,10 @@ public class ShapeIndexGeographyTest {
 
     byte[] data = baos.toByteArray();
     ByteArrayInputStream in = new ByteArrayInputStream(data);
-    S2Geography roundtrip = geog.decodeTagged(in);
+    Geography roundtrip = geog.decodeTagged(in);
 
     // 6) Verify the kind and count
-    assertEquals(S2Geography.GeographyKind.ENCODED_SHAPE_INDEX, roundtrip.kind);
+    assertEquals(Geography.GeographyKind.ENCODED_SHAPE_INDEX, roundtrip.kind);
     assertEquals(3, roundtrip.numShapes());
 
     // 6) Cast back to shape-index geography

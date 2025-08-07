@@ -18,7 +18,6 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
-import org.apache.sedona.common.geometryObjects.Geography
 import org.apache.sedona.common.{Functions, FunctionsGeoTools}
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
 import org.apache.sedona.common.utils.{InscribedCircle, ValidDetail}

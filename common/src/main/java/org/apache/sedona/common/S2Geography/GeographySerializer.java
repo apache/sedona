@@ -21,7 +21,6 @@ package org.apache.sedona.common.S2Geography;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import org.apache.sedona.common.geometryObjects.Geography;
 
 public class GeographySerializer {
   public static byte[] serialize(Geography geography) throws IOException {
@@ -32,6 +31,6 @@ public class GeographySerializer {
 
   public static Geography deserialize(byte[] buffer) throws IOException {
     ByteArrayInputStream inputStream = new ByteArrayInputStream(buffer);
-    return new Geography(S2Geography.decodeTagged(inputStream));
+    return Geography.decodeTagged(inputStream);
   }
 }

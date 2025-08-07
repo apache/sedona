@@ -18,24 +18,21 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
-import com.google.common.geometry.S2Point
 import org.apache.commons.lang3.StringUtils
-import org.apache.sedona.common.geometryObjects.Geography
+import org.apache.sedona.common.S2Geography.Geography
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{Expression, ImplicitCastInputTypes}
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
+import org.apache.spark.sql.catalyst.expressions.{Expression, ImplicitCastInputTypes}
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.sql.sedona_sql.UDT.{GeographyUDT, GeometryUDT}
-import org.apache.spark.sql.types.{AbstractDataType, BinaryType, BooleanType, DataType, DataTypes, DoubleType, IntegerType, LongType, StringType}
+import org.apache.spark.sql.sedona_sql.expressions.implicits._
+import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
 import org.locationtech.jts.geom.Geometry
-import org.apache.spark.sql.sedona_sql.expressions.implicits._
 
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 import scala.collection.mutable.ArrayBuffer
-import scala.reflect.runtime.universe.TypeTag
-import scala.reflect.runtime.universe.Type
-import scala.reflect.runtime.universe.typeOf
+import scala.reflect.runtime.universe.{Type, TypeTag, typeOf}
 
 /**
  * Custom exception to include the input row and the original exception message.
@@ -163,14 +160,10 @@ object InferrableType {
     new InferrableType[Geometry] {}
   implicit val geometryArrayInstance: InferrableType[Array[Geometry]] =
     new InferrableType[Array[Geometry]] {}
-  implicit val s2geographyInstance: InferrableType[Geography] =
-    new InferrableType[Geography]
-  implicit val s2geographyArrayInstance: InferrableType[Array[Geography]] =
-    new InferrableType[Array[Geography]]
-  implicit val s2point: InferrableType[S2Point] =
-    new InferrableType[S2Point]
-  implicit val s2pointArrayInstance: InferrableType[Array[S2Point]] =
-    new InferrableType[Array[S2Point]]
+  implicit val geographyInstance: InferrableType[Geography] =
+    new InferrableType[Geography] {}
+  implicit val geographyArrayInstance: InferrableType[Array[Geography]] =
+    new InferrableType[Array[Geography]] {}
   implicit val javaDoubleInstance: InferrableType[java.lang.Double] =
     new InferrableType[java.lang.Double] {}
   implicit val javaIntegerInstance: InferrableType[java.lang.Integer] =
@@ -205,6 +198,8 @@ object InferrableType {
     new InferrableType[java.util.List[java.lang.Double]] {}
   implicit val javaGeomListInstance: InferrableType[java.util.List[Geometry]] =
     new InferrableType[java.util.List[Geometry]] {}
+  implicit val javaGeogListInstance: InferrableType[java.util.List[Geography]] =
+    new InferrableType[java.util.List[Geography]] {}
 }
 
 object InferredTypes {
@@ -232,6 +227,8 @@ object InferredTypes {
       }
     } else if (t =:= typeOf[java.util.List[Geometry]]) { expr => input =>
       expr.toGeometryList(input)
+    } else if (t =:= typeOf[java.util.List[Geography]]) { expr => input =>
+      expr.toGeographyList(input)
     } else if (t =:= typeOf[java.util.List[java.lang.Double]]) { expr => input =>
       expr.toDoubleList(input)
     } else { expr => input =>

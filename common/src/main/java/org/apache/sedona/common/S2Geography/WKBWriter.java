@@ -23,7 +23,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.List;
-import org.apache.sedona.common.geometryObjects.Geography;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.*;
 
@@ -152,7 +151,7 @@ public class WKBWriter {
   }
 
   /**
-   * Writes a {@link S2Geography} into a byte array.
+   * Writes a {@link org.apache.sedona.common.S2Geography.Geography} into a byte array.
    *
    * @param geog the geometry to write
    * @return the byte array containing the WKB
@@ -175,7 +174,7 @@ public class WKBWriter {
    * @throws IOException if an I/O error occurs
    */
   public void write(Geography geogIn, OutStream os) throws IOException {
-    S2Geography geog = geogIn.getDelegate();
+    org.apache.sedona.common.S2Geography.Geography geog = geogIn;
     if (geog instanceof SinglePointGeography) {
       writePoint(WKBConstants.wkbPoint, (SinglePointGeography) geog, os);
     } else if (geog instanceof PointGeography) {
@@ -340,7 +339,8 @@ public class WKBWriter {
     writeGeometryType(WKBConstants.wkbMultiPolygon, multiPoly, os);
 
     // 2) Number of polygons
-    List<S2Geography> polys = multiPoly.getFeatures(); // however you expose each sub-polygon
+    List<org.apache.sedona.common.S2Geography.Geography> polys =
+        multiPoly.getFeatures(); // however you expose each sub-polygon
     writeInt(polys.size(), os);
 
     // 3) Disable SRID on nested shapes if you include SRID in the outer header
@@ -348,7 +348,7 @@ public class WKBWriter {
     this.includeSRID = false;
 
     // 4) For each polygon, write a full Polygon WKB
-    for (S2Geography pg : polys) {
+    for (org.apache.sedona.common.S2Geography.Geography pg : polys) {
       // 4a) Nested Polygon header
       writeByteOrder(os);
       writeGeometryType(WKBConstants.wkbPolygon, pg, os);
@@ -388,7 +388,7 @@ public class WKBWriter {
     boolean originalIncludeSRID = this.includeSRID;
     this.includeSRID = false;
     for (int i = 0; i < gc.numShapes(); i++) {
-      write(new Geography(gc.getFeatures().get(i)), os);
+      write(gc.getFeatures().get(i), os);
     }
     this.includeSRID = originalIncludeSRID;
   }
@@ -399,7 +399,9 @@ public class WKBWriter {
     os.write(buf, 1);
   }
 
-  private void writeGeometryType(int geometryType, S2Geography g, OutStream os) throws IOException {
+  private void writeGeometryType(
+      int geometryType, org.apache.sedona.common.S2Geography.Geography g, OutStream os)
+      throws IOException {
     int ordinals = 0;
     if (outputOrdinates.contains(Ordinate.Z)) {
       ordinals = ordinals | 0x80000000;

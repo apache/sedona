@@ -32,8 +32,8 @@ public class DistanceTest {
   @Test
   public void pointDistance() throws Exception {
     // 1) Build two points
-    S2Geography pt1 = new PointGeography(S2LatLng.fromDegrees(0, 0).toPoint());
-    S2Geography pt2 = new PointGeography(S2LatLng.fromDegrees(90, 0).toPoint());
+    Geography pt1 = new PointGeography(S2LatLng.fromDegrees(0, 0).toPoint());
+    Geography pt2 = new PointGeography(S2LatLng.fromDegrees(90, 0).toPoint());
     ShapeIndexGeography geo1 = new ShapeIndexGeography(pt1);
     ShapeIndexGeography geo2 = new ShapeIndexGeography(pt2);
 
@@ -45,8 +45,8 @@ public class DistanceTest {
   @Test
   public void furtestDistance() throws Exception {
     // 1) Build two points
-    S2Geography pt1 = new PointGeography(S2LatLng.fromDegrees(0, 0).toPoint());
-    S2Geography pt2 = new PointGeography(S2LatLng.fromDegrees(90, 0).toPoint());
+    Geography pt1 = new PointGeography(S2LatLng.fromDegrees(0, 0).toPoint());
+    Geography pt2 = new PointGeography(S2LatLng.fromDegrees(90, 0).toPoint());
     ShapeIndexGeography geo1 = new ShapeIndexGeography(pt1);
     ShapeIndexGeography geo2 = new ShapeIndexGeography(pt2);
 

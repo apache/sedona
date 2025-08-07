@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.EnumSet;
-import org.apache.sedona.common.geometryObjects.Geography;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.Ordinate;
 import org.locationtech.jts.io.OrdinateFormat;
@@ -251,7 +250,7 @@ public class WKTWriter {
     appendGeometryTaggedText(geography, useFormatting, writer, formatter);
   }
 
-  private OrdinateFormat getFormatter(S2Geography geometry) {
+  private OrdinateFormat getFormatter(Geography geometry) {
     // if present use the cached formatter
     if (ordinateFormat != null) return ordinateFormat;
 
@@ -300,54 +299,73 @@ public class WKTWriter {
     // indent before writing
     indent(useFormatting, level, writer);
 
-    S2Geography geog = geography.getDelegate();
     // ——— Handle Points ———
-    if (geog instanceof SinglePointGeography) {
+    if (geography instanceof SinglePointGeography) {
       appendPointTaggedText(
-          (SinglePointGeography) geog, outputOrdinates, useFormatting, level, writer, formatter);
+          (SinglePointGeography) geography,
+          outputOrdinates,
+          useFormatting,
+          level,
+          writer,
+          formatter);
       return;
     }
 
-    if (geog instanceof PointGeography) {
+    if (geography instanceof PointGeography) {
       appendMultiPointTaggedText(
-          (PointGeography) geog, outputOrdinates, useFormatting, level, writer, formatter);
+          (PointGeography) geography, outputOrdinates, useFormatting, level, writer, formatter);
       return;
     }
 
     // ——— Handle LineStrings ———
-    if (geog instanceof SinglePolylineGeography) {
+    if (geography instanceof SinglePolylineGeography) {
       appendPolylineTaggedText(
-          (SinglePolylineGeography) geog, outputOrdinates, useFormatting, level, writer, formatter);
+          (SinglePolylineGeography) geography,
+          outputOrdinates,
+          useFormatting,
+          level,
+          writer,
+          formatter);
       return;
     }
 
-    if (geog instanceof PolylineGeography) {
+    if (geography instanceof PolylineGeography) {
       appendMultiLineStringTaggedText(
-          (PolylineGeography) geog, outputOrdinates, useFormatting, level, writer, formatter);
+          (PolylineGeography) geography, outputOrdinates, useFormatting, level, writer, formatter);
       return;
     }
 
     // ——— Handle Polygons ———
-    if (geog instanceof PolygonGeography) {
+    if (geography instanceof PolygonGeography) {
       appendPolygonTaggedText(
-          (PolygonGeography) geog, outputOrdinates, useFormatting, level, writer, formatter);
+          (PolygonGeography) geography, outputOrdinates, useFormatting, level, writer, formatter);
       return;
     }
 
-    if (geog instanceof MultiPolygonGeography) {
+    if (geography instanceof MultiPolygonGeography) {
       appendMultiPolygonTaggedText(
-          (MultiPolygonGeography) geog, outputOrdinates, useFormatting, level, writer, formatter);
+          (MultiPolygonGeography) geography,
+          outputOrdinates,
+          useFormatting,
+          level,
+          writer,
+          formatter);
       return;
     }
 
     // ——— Handle Collections ———
-    if (geog instanceof GeographyCollection) {
+    if (geography instanceof GeographyCollection) {
       appendGeometryCollectionTaggedText(
-          (GeographyCollection) geog, outputOrdinates, useFormatting, level, writer, formatter);
+          (GeographyCollection) geography,
+          outputOrdinates,
+          useFormatting,
+          level,
+          writer,
+          formatter);
       return;
     }
 
-    Assert.shouldNeverReachHere("Unsupported Geometry implementation: " + geog.getClass());
+    Assert.shouldNeverReachHere("Unsupported Geometry implementation: " + geography.getClass());
   }
 
   /**
@@ -847,7 +865,7 @@ public class WKTWriter {
           level2 = level + 1;
         }
         appendGeometryTaggedText(
-            new Geography(geometryCollection.getFeatures().get(i)),
+            geometryCollection.getFeatures().get(i),
             outputOrdinates,
             useFormatting,
             level2,

@@ -56,10 +56,10 @@ public class WKBReaderTest {
         };
 
     WKBReader reader = new WKBReader();
-    S2Geography geo = reader.read(wkb);
+    Geography geo = reader.read(wkb);
 
     // Kind should be POINT
-    Assert.assertEquals(S2Geography.GeographyKind.SINGLEPOINT, geo.kind);
+    Assert.assertEquals(Geography.GeographyKind.SINGLEPOINT, geo.kind);
 
     // Extract the S2Point
     S2Point p = geo.shape(0).chain(0).get(0);
@@ -123,10 +123,10 @@ public class WKBReaderTest {
         };
 
     WKBReader reader = new WKBReader();
-    S2Geography geo = reader.read(wkb);
+    Geography geo = reader.read(wkb);
 
     // Expect a POLYLINE geometry
-    Assert.assertEquals(S2Geography.GeographyKind.SINGLEPOLYLINE, geo.kind);
+    Assert.assertEquals(Geography.GeographyKind.SINGLEPOLYLINE, geo.kind);
 
     // Extract the two S2Points
     List<S2Point> pts = geo.shape(0).chain(0);
@@ -321,10 +321,10 @@ public class WKBReaderTest {
         };
 
     WKBReader reader = new WKBReader();
-    S2Geography geo = reader.read(wkb);
+    Geography geo = reader.read(wkb);
 
     // Expect a POLYGON geometry
-    Assert.assertEquals(S2Geography.GeographyKind.POLYGON, geo.kind);
+    Assert.assertEquals(Geography.GeographyKind.POLYGON, geo.kind);
 
     // Outer ring: 4 points
     List<S2Point> outer = geo.shape(0).chain(0);

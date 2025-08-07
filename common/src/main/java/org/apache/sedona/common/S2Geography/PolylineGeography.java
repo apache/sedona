@@ -33,7 +33,7 @@ import org.locationtech.jts.geom.CoordinateSequence;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 
 /** A Geography representing zero or more polylines using S2Polyline. */
-public class PolylineGeography extends S2Geography {
+public class PolylineGeography extends Geography {
   private static final Logger logger = Logger.getLogger(PolylineGeography.class.getName());
 
   public final List<S2Polyline> polylines;

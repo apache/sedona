@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import org.apache.sedona.common.geometryObjects.Geography;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.*;
 
@@ -105,7 +104,8 @@ public class WKBReader {
   }
 
   /**
-   * Reads a single {@link S2Geography} in WKB format from a byte array.
+   * Reads a single {@link org.apache.sedona.common.S2Geography.Geography} in WKB format from a byte
+   * array.
    *
    * @param bytes the byte array to read from
    * @return the geometry read
@@ -121,7 +121,8 @@ public class WKBReader {
   }
 
   /**
-   * Reads a {@link S2Geography} in binary WKB format from an {@link InStream}.
+   * Reads a {@link org.apache.sedona.common.S2Geography.Geography} in binary WKB format from an
+   * {@link InStream}.
    *
    * @param is the stream to read from
    * @return the Geometry read
@@ -212,7 +213,7 @@ public class WKBReader {
     if (ordValues == null || ordValues.length < inputDimension)
       ordValues = new double[inputDimension];
 
-    S2Geography geog = null;
+    org.apache.sedona.common.S2Geography.Geography geog = null;
     switch (geometryType) {
       case WKBConstants.wkbPoint:
         geog = readPoint(ordinateFlags);
@@ -239,7 +240,7 @@ public class WKBReader {
         throw new ParseException("Unknown WKB type " + geometryType);
     }
     setSRID(geog, SRID);
-    return new Geography(geog);
+    return geog;
   }
 
   /**
@@ -248,7 +249,8 @@ public class WKBReader {
    * @param g the geometry to update
    * @return the geometry with an updated SRID value, if required
    */
-  private S2Geography setSRID(S2Geography g, int SRID) {
+  private org.apache.sedona.common.S2Geography.Geography setSRID(
+      org.apache.sedona.common.S2Geography.Geography g, int SRID) {
     if (SRID != 0) g.setSRID(SRID);
     return g;
   }
@@ -362,7 +364,7 @@ public class WKBReader {
     int numGeom = readNumField(FIELD_NUMELEMS);
     List<S2Point> pts = new ArrayList<>(numGeom);
     for (int i = 0; i < numGeom; i++) {
-      S2Geography point = readGeometry(SRID).getDelegate();
+      org.apache.sedona.common.S2Geography.Geography point = readGeometry(SRID);
       if (!(point instanceof PointGeography)) {
         throw new ParseException(INVALID_GEOM_TYPE_MSG + "MultiPoint");
       }
@@ -375,7 +377,7 @@ public class WKBReader {
     int numGeom = readNumField(FIELD_NUMELEMS);
     List<S2Polyline> polylines = new ArrayList<>(numGeom);
     for (int i = 0; i < numGeom; i++) {
-      S2Geography polyline = readGeometry(SRID).getDelegate();
+      org.apache.sedona.common.S2Geography.Geography polyline = readGeometry(SRID);
       if (!(polyline instanceof PolylineGeography)) {
         throw new ParseException(INVALID_GEOM_TYPE_MSG + "MultiPolyline");
       }
@@ -388,7 +390,7 @@ public class WKBReader {
     int numGeom = readNumField(FIELD_NUMELEMS);
     List<S2Polygon> polygons = new ArrayList<>(numGeom);
     for (int i = 0; i < numGeom; i++) {
-      S2Geography geom = readGeometry(SRID).getDelegate();
+      org.apache.sedona.common.S2Geography.Geography geom = readGeometry(SRID);
       polygons.add(((PolygonGeography) geom).polygon);
     }
     return new MultiPolygonGeography(polygons);
@@ -396,9 +398,10 @@ public class WKBReader {
 
   private GeographyCollection readGeographyCollection(int SRID) throws IOException, ParseException {
     int numGeom = readNumField(FIELD_NUMELEMS);
-    S2Geography[] geoms = new S2Geography[numGeom];
+    org.apache.sedona.common.S2Geography.Geography[] geoms =
+        new org.apache.sedona.common.S2Geography.Geography[numGeom];
     for (int i = 0; i < numGeom; i++) {
-      geoms[i] = readGeometry(SRID).getDelegate();
+      geoms[i] = readGeometry(SRID);
     }
     return new GeographyCollection(List.of(geoms));
   }

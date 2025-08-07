@@ -16,18 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.UDT
+package org.apache.sedona.common.geography;
 
-import org.apache.sedona.common.S2Geography.Geography
-import org.apache.spark.sql.types.UDTRegistration
-import org.locationtech.jts.geom.Geometry
-import org.locationtech.jts.index.SpatialIndex
+import org.apache.sedona.common.S2Geography.Geography;
+import org.apache.sedona.common.S2Geography.WKBReader;
+import org.apache.sedona.common.S2Geography.WKTReader;
+import org.locationtech.jts.io.ParseException;
 
-object UdtRegistratorWrapper {
+public class Constructors {
 
-  def registerAll(): Unit = {
-    UDTRegistration.register(classOf[Geometry].getName, classOf[GeometryUDT].getName)
-    UDTRegistration.register(classOf[Geography].getName, classOf[GeographyUDT].getName)
-    UDTRegistration.register(classOf[SpatialIndex].getName, classOf[IndexUDT].getName)
+  public static Geography geogFromWKB(byte[] wkb) throws ParseException {
+    return new WKBReader().read(wkb);
+  }
+
+  public static Geography geogFromWKB(byte[] wkb, int SRID) throws ParseException {
+    Geography geog = geogFromWKB(wkb);
+    geog.setSRID(SRID);
+    return geog;
+  }
+
+  public static Geography geogFromWKT(String wkt, int srid) throws ParseException {
+    Geography geog = new WKTReader().read(wkt);
+    geog.setSRID(srid);
+    return geog;
   }
 }

@@ -18,9 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
-import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.Column
-
 import org.apache.spark.sql.sedona_sql.DataFrameShims._
 
 object st_constructors {
@@ -267,11 +265,4 @@ object st_constructors {
     wrapExpression[ST_MPointFromText](wkt, srid)
   def ST_MPointFromText(wkt: String, srid: Int): Column =
     wrapExpression[ST_MPointFromText](wkt, srid)
-
-  def ST_S2PointFromWKB(wkb: Column): Column = wrapExpression[ST_S2PointFromWKB](wkb)
-  def ST_S2PointFromWKB(wkb: String): Column = wrapExpression[ST_S2PointFromWKB](wkb)
-
-  def ST_S2LinestringFromWKB(wkb: Column): Column = wrapExpression[ST_S2LinestringFromWKB](wkb)
-  def ST_S2LinestringFromWKB(wkb: String): Column = wrapExpression[ST_S2LinestringFromWKB](wkb)
-
 }

@@ -18,14 +18,13 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
-import org.apache.sedona.common.S2Geography.{S2Geography, GeographySerializer}
+import org.apache.sedona.common.S2Geography.{Geography, GeographySerializer}
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.catalyst.util.ArrayData
 import org.apache.spark.unsafe.types.UTF8String
 import org.locationtech.jts.geom.{Geometry, GeometryFactory, Point}
-import org.apache.sedona.common.geometryObjects.Geography
 
 object implicits {
 
@@ -68,7 +67,7 @@ object implicits {
           serdeAware.evalWithoutSerialization(input).asInstanceOf[Geography]
         case _ =>
           inputExpression.eval(input).asInstanceOf[Array[Byte]] match {
-            case binary: Array[Byte] => new Geography(GeographySerializer.deserialize(binary))
+            case binary: Array[Byte] => GeographySerializer.deserialize(binary)
             case _ => null
           }
       }
@@ -123,6 +122,24 @@ object implicits {
                 geometries.add(arrayData.getBinary(i).toGeometry)
               }
               geometries.asInstanceOf[java.util.List[Geometry]]
+            case _ => null
+          }
+      }
+    }
+
+    def toGeographyList(input: InternalRow): java.util.List[Geography] = {
+      inputExpression match {
+        case aware: SerdeAware =>
+          aware.evalWithoutSerialization(input).asInstanceOf[java.util.List[Geography]]
+        case _ =>
+          inputExpression.eval(input).asInstanceOf[ArrayData] match {
+            case arrayData: ArrayData =>
+              val length = arrayData.numElements()
+              val geometries = new java.util.ArrayList[Geography]()
+              for (i <- 0 until length) {
+                geometries.add(arrayData.getBinary(i).toGeography)
+              }
+              geometries.asInstanceOf[java.util.List[Geography]]
             case _ => null
           }
       }
