@@ -22,7 +22,7 @@ import org.apache.spark.sql.expressions.Aggregator
 import org.apache.spark.sql.sedona_sql.expressions.collect.ST_Collect
 import org.apache.spark.sql.sedona_sql.expressions.raster._
 import org.apache.spark.sql.sedona_sql.expressions._
-import org.apache.spark.sql.sedona_sql.expressions.geography.ST_GeogFromWKT
+import org.apache.spark.sql.sedona_sql.expressions.geography.{ST_GeogCollFromText, ST_GeogFromText, ST_GeogFromWKB, ST_GeogFromWKT}
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.operation.buffer.BufferParameters
 
@@ -44,6 +44,8 @@ object Catalog extends AbstractCatalog {
     function[ST_GeometryFromText](0),
     function[ST_LineFromText](),
     function[ST_GeogFromWKT](0),
+    function[ST_GeogFromText](0),
+    function[ST_GeogFromWKB](0),
     function[ST_GeomFromWKT](0),
     function[ST_GeomFromEWKT](),
     function[ST_GeomFromWKB](),
@@ -209,6 +211,7 @@ object Catalog extends AbstractCatalog {
     function[ST_MPolyFromText](0),
     function[ST_MLineFromText](0),
     function[ST_GeomCollFromText](0),
+    function[ST_GeogCollFromText](0),
     function[ST_Split](),
     function[ST_S2CellIDs](),
     function[ST_S2ToGeom](),

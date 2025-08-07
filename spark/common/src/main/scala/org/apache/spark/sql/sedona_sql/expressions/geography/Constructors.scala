@@ -36,3 +36,46 @@ private[apache] case class ST_GeogFromWKT(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+/**
+ * Return a Geography from a WKT string
+ *
+ * @param inputExpressions
+ *   This function takes a geometry string and a srid. The string format must be WKT.
+ */
+private[apache] case class ST_GeogFromText(inputExpressions: Seq[Expression])
+    extends InferredExpression(Constructors.geogFromWKT _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Return a Geography Collection from a WKT string
+ *
+ * @param inputExpressions
+ *   This function takes a geometry string and a srid. The string format must be WKT.
+ */
+private[apache] case class ST_GeogCollFromText(inputExpressions: Seq[Expression])
+    extends InferredExpression(Constructors.geogCollFromText _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Return a Geography from a WKB string
+ *
+ * @param inputExpressions
+ *   This function takes a geometry string and a srid. The string format must be WKB binary array
+ *   / string.
+ */
+private[apache] case class ST_GeogFromWKB(inputExpressions: Seq[Expression])
+    extends InferredExpression(Constructors.geogFromWKB(_: Array[Byte], _: Int)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}

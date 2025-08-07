@@ -40,4 +40,11 @@ public class Constructors {
     geog.setSRID(srid);
     return geog;
   }
+
+  public static Geography geogCollFromText(String wkt, int srid) throws ParseException {
+    if (wkt == null || !wkt.startsWith("GEOMETRYCOLLECTION")) {
+      return null;
+    }
+    return geogFromWKT(wkt, srid);
+  }
 }
