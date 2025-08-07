@@ -29,10 +29,10 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /** A Geography wrapping zero or more Geography objects, representing a GEOMETRYCOLLECTION. */
-public class GeographyCollection extends S2Geography {
+public class GeographyCollection extends Geography {
   private static final Logger logger = Logger.getLogger(GeographyCollection.class.getName());
 
-  public final List<S2Geography> features;
+  public final List<Geography> features;
   public final List<Integer> numShapesList;
   public int totalShapes;
 
@@ -45,7 +45,7 @@ public class GeographyCollection extends S2Geography {
   }
 
   /** Wraps existing Geography features. */
-  public GeographyCollection(List<S2Geography> features) {
+  public GeographyCollection(List<Geography> features) {
     super(GeographyKind.GEOGRAPHY_COLLECTION);
     this.features = new ArrayList<>(features);
     this.numShapesList = new ArrayList<>();
@@ -81,14 +81,14 @@ public class GeographyCollection extends S2Geography {
   @Override
   public S2Region region() {
     Collection<S2Region> regs = new ArrayList<>();
-    for (S2Geography geo : features) {
+    for (Geography geo : features) {
       regs.add(geo.region());
     }
     return new S2RegionUnion(regs);
   }
 
   /** Returns an immutable copy of the features list. */
-  public List<S2Geography> getFeatures() {
+  public List<Geography> getFeatures() {
     return ImmutableList.copyOf(features);
   }
 
@@ -99,7 +99,7 @@ public class GeographyCollection extends S2Geography {
     EncodeOptions childOptions = new EncodeOptions(opts);
     childOptions.setIncludeCovering(false);
     out.writeInt(features.size());
-    for (S2Geography feature : features) {
+    for (Geography feature : features) {
       feature.encodeTagged(out, opts);
     }
     out.flush();
@@ -128,7 +128,7 @@ public class GeographyCollection extends S2Geography {
     for (int i = 0; i < n; i++) {
       tag = EncodeTag.decode(in);
       // avoid creating new stream, directly call S2Geography.decode
-      S2Geography feature = S2Geography.decode(in, tag);
+      Geography feature = Geography.decode(in, tag);
       geo.features.add(feature);
     }
     geo.countShapes();
@@ -138,7 +138,7 @@ public class GeographyCollection extends S2Geography {
   private void countShapes() {
     numShapesList.clear();
     totalShapes = 0;
-    for (S2Geography geo : features) {
+    for (Geography geo : features) {
       int n = geo.numShapes();
       numShapesList.add(n);
       totalShapes += n;

@@ -1,0 +1,76 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.sedona.sql.geography
+
+import org.apache.sedona.common.S2Geography.Geography
+import org.apache.sedona.sql.TestBaseScala
+import org.locationtech.jts.geom.PrecisionModel
+
+class ConstructorsTest extends TestBaseScala {
+
+  import sparkSession.implicits._
+  val precisionModel: PrecisionModel = new PrecisionModel(PrecisionModel.FIXED);
+
+  it("Passed ST_GeogFromWKT") {
+    val wkt = "LINESTRING (1 2, 3 4, 5 6)"
+    val row = sparkSession.sql(s"SELECT ST_GeogFromWKT('$wkt', 4326) AS geog").first()
+    // Write output with precisionModel
+    val geoStr = row.get(0).asInstanceOf[Geography].toString()
+    val geog = row.get(0).asInstanceOf[Geography]
+    assert(geog.getSRID == 4326)
+    assert(geog.isInstanceOf[Geography])
+    assert(geoStr == wkt)
+  }
+
+  it("Passed ST_GeogFromText") {
+    val wkt = "LINESTRING (1 2, 3 4, 5 6)"
+    val row = sparkSession.sql(s"SELECT ST_GeogFromText('$wkt', 4326) AS geog").first()
+    // Write output with precisionModel
+    val geoStr = row.get(0).asInstanceOf[Geography].toString()
+    val geog = row.get(0).asInstanceOf[Geography]
+    assert(geog.getSRID == 4326)
+    assert(geog.isInstanceOf[Geography])
+    assert(geoStr == wkt)
+  }
+
+  it("Passed ST_GeogFromWKT no SRID") {
+    val wkt = "LINESTRING (1 2, 3 4, 5 6)"
+    val row = sparkSession.sql(s"SELECT ST_GeogFromWKT('$wkt') AS geog").first()
+    // Write output with precisionModel
+    val geoStr = row.get(0).asInstanceOf[Geography].toString()
+    val geog = row.get(0).asInstanceOf[Geography]
+    assert(geog.getSRID == 0)
+    assert(geog.isInstanceOf[Geography])
+    assert(geoStr == wkt)
+  }
+
+  it("Passed ST_GeogCollFromText") {
+    val baseDf = sparkSession.sql(
+      "SELECT 'GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((35 15, 45 15, 40 25, 35 15), (30 10, 40 20, 30 20, 30 10)))' as geom, 4326 as srid")
+    var actual = baseDf
+      .selectExpr("ST_GeogCollFromText(geom)")
+      .first()
+      .get(0)
+      .asInstanceOf[Geography]
+      .toString()
+    val expected =
+      "GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((35 15, 45 15, 40 25, 35 15), (30 10, 40 20, 30 20, 30 10)))"
+    assert(expected.equals(actual))
+  }
+}

@@ -16,22 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.common.geometryObjects;
+package org.apache.sedona.common.S2Geography;
 
-import org.locationtech.jts.geom.Geometry;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
-public class Geography {
-  private final Geometry geometry;
-
-  public Geography(Geometry geometry) {
-    this.geometry = geometry;
+public class GeographySerializer {
+  public static byte[] serialize(Geography geography) throws IOException {
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    geography.encodeTagged(outputStream, new EncodeOptions());
+    return outputStream.toByteArray();
   }
 
-  public Geometry getGeometry() {
-    return this.geometry;
-  }
-
-  public String toString() {
-    return this.geometry.toText();
+  public static Geography deserialize(byte[] buffer) throws IOException {
+    ByteArrayInputStream inputStream = new ByteArrayInputStream(buffer);
+    return Geography.decodeTagged(inputStream);
   }
 }

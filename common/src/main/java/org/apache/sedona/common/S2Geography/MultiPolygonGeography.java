@@ -42,7 +42,7 @@ public class MultiPolygonGeography extends GeographyCollection {
     super(Collections.emptyList());
   }
 
-  public List<S2Geography> getFeatures() {
+  public List<Geography> getFeatures() {
     return features;
   }
 
