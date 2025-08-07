@@ -33,7 +33,7 @@ import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PointGeography extends S2Geography {
+public class PointGeography extends Geography {
   private static final Logger logger = LoggerFactory.getLogger(PointGeography.class.getName());
 
   private static final int BUFFER_SIZE = 4 * 1024;
@@ -139,6 +139,7 @@ public class PointGeography extends S2Geography {
         tag.setCoveringSize((byte) 1);
         tag.encode(out);
         out.writeLong(cid.id());
+        out.writeInt(getSRID()); // write the SRID
         out.flush();
         return;
       }
@@ -171,7 +172,6 @@ public class PointGeography extends S2Geography {
     // use writeInt(len, false) so it's exactly 4 bytes
     out.writeInt(payload.length, /* optimizePositive= */ false);
     out.writeBytes(payload);
-
     out.flush();
   }
 

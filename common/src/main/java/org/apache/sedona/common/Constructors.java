@@ -44,10 +44,6 @@ public class Constructors {
     return new WKTReader(geometryFactory).read(wkt);
   }
 
-  //  public static Geography geogFromWKT(String wkt, int srid) throws ParseException {
-  //    return new Geography(geogFromWKT(wkt, srid));
-  //  }
-
   public static Geometry geomFromEWKT(String ewkt) throws ParseException {
     if (ewkt == null) {
       return null;

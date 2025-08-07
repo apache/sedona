@@ -25,9 +25,9 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import java.io.IOException;
 import java.io.Serializable;
+import org.apache.sedona.common.S2Geography.Geography;
 import org.apache.sedona.common.S2Geography.GeographySerializer;
 import org.apache.sedona.common.geometryObjects.Circle;
-import org.apache.sedona.common.geometryObjects.Geography;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -69,7 +69,7 @@ public class GeometrySerde extends Serializer implements Serializable {
     } else if (object instanceof Geography) {
       writeType(out, Type.GEOGRAPHY);
       try {
-        writeGeography(out, (Geography) ((Geography) object).getGeography());
+        writeGeography(out, (Geography) object);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
@@ -137,7 +137,7 @@ public class GeometrySerde extends Serializer implements Serializable {
       case GEOGRAPHY:
         {
           try {
-            return new Geography(readGeography(input));
+            return readGeography(input);
           } catch (IOException e) {
             throw new RuntimeException(e);
           }

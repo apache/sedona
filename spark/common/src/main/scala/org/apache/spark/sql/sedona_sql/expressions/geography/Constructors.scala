@@ -16,18 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.UDT
+package org.apache.spark.sql.sedona_sql.expressions.geography
 
-import org.apache.sedona.common.S2Geography.Geography
-import org.apache.spark.sql.types.UDTRegistration
-import org.locationtech.jts.geom.Geometry
-import org.locationtech.jts.index.SpatialIndex
+import org.apache.sedona.common.geography.Constructors
+import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
+import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 
-object UdtRegistratorWrapper {
+/**
+ * Return a Geography from a WKT string
+ *
+ * @param inputExpressions
+ *   This function takes a geometry string and a srid. The string format must be WKT.
+ */
+private[apache] case class ST_GeogFromWKT(inputExpressions: Seq[Expression])
+    extends InferredExpression(Constructors.geogFromWKT _) {
 
-  def registerAll(): Unit = {
-    UDTRegistration.register(classOf[Geometry].getName, classOf[GeometryUDT].getName)
-    UDTRegistration.register(classOf[Geography].getName, classOf[GeographyUDT].getName)
-    UDTRegistration.register(classOf[SpatialIndex].getName, classOf[IndexUDT].getName)
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
   }
 }

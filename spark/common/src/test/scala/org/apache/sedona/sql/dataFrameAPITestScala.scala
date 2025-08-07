@@ -19,16 +19,15 @@
 package org.apache.sedona.sql
 
 import org.apache.commons.codec.binary.Hex
-import org.apache.sedona.common.geometryObjects.Geography
 import org.apache.spark.sql.Row
-import org.apache.spark.sql.functions.{col, element_at, expr, lit, radians}
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpressionException
 import org.apache.spark.sql.sedona_sql.expressions.st_aggregates._
 import org.apache.spark.sql.sedona_sql.expressions.st_constructors._
 import org.apache.spark.sql.sedona_sql.expressions.st_functions._
 import org.apache.spark.sql.sedona_sql.expressions.st_predicates._
 import org.junit.Assert.{assertEquals, assertFalse, assertTrue}
-import org.locationtech.jts.geom.{Geometry, Point, Polygon}
+import org.locationtech.jts.geom.{Geometry, Polygon}
 import org.locationtech.jts.io.WKTWriter
 import org.locationtech.jts.operation.buffer.BufferParameters
 

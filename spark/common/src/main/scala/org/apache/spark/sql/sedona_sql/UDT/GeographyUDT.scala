@@ -21,8 +21,7 @@ package org.apache.spark.sql.sedona_sql.UDT
 import org.apache.spark.sql.types._
 import org.json4s.JsonDSL._
 import org.json4s.JsonAST.JValue
-import org.apache.sedona.common.S2Geography.{GeographySerializer, S2Geography}
-import org.apache.sedona.common.geometryObjects.Geography
+import org.apache.sedona.common.S2Geography.{GeographySerializer, Geography}
 
 class GeographyUDT extends UserDefinedType[Geography] {
   override def sqlType: DataType = BinaryType

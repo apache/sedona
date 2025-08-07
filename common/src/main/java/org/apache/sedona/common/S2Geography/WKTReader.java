@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
-import org.apache.sedona.common.geometryObjects.Geography;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.impl.CoordinateArraySequenceFactory;
 import org.locationtech.jts.io.Ordinate;
@@ -121,7 +120,8 @@ public class WKTReader {
   }
 
   /**
-   * Reads a Well-Known Text representation of a {@link S2Geography} from a {@link Reader}.
+   * Reads a Well-Known Text representation of a {@link
+   * org.apache.sedona.common.S2Geography.Geography} from a {@link Reader}.
    *
    * @param reader a Reader which will return a &lt;Geometry Tagged Text&gt; string (see the OpenGIS
    *     Simple Features Specification)
@@ -131,7 +131,7 @@ public class WKTReader {
   public Geography read(Reader reader) throws ParseException {
     StreamTokenizer tokenizer = createTokenizer(reader);
     try {
-      return new Geography(readGeometryTaggedText(tokenizer));
+      return readGeometryTaggedText(tokenizer);
     } catch (IOException e) {
       throw new ParseException(e.toString());
     }
@@ -560,8 +560,8 @@ public class WKTReader {
    * @throws IOException if an I/O error occurs
    * @param tokenizer tokenizer over a stream of text in Well-known Text
    */
-  private S2Geography readGeometryTaggedText(StreamTokenizer tokenizer)
-      throws IOException, ParseException {
+  private org.apache.sedona.common.S2Geography.Geography readGeometryTaggedText(
+      StreamTokenizer tokenizer) throws IOException, ParseException {
     String type;
 
     EnumSet<Ordinate> ordinateFlags = EnumSet.of(Ordinate.X, Ordinate.Y);
@@ -577,7 +577,7 @@ public class WKTReader {
     return readGeometryTaggedText(tokenizer, type, ordinateFlags);
   }
 
-  private S2Geography readGeometryTaggedText(
+  private org.apache.sedona.common.S2Geography.Geography readGeometryTaggedText(
       StreamTokenizer tokenizer, String type, EnumSet<Ordinate> ordinateFlags)
       throws IOException, ParseException {
 
@@ -925,9 +925,10 @@ public class WKTReader {
     if (nextToken.equals(WKTConstants.EMPTY)) {
       return new GeographyCollection();
     }
-    List<S2Geography> geometries = new ArrayList<S2Geography>();
+    List<org.apache.sedona.common.S2Geography.Geography> geometries =
+        new ArrayList<org.apache.sedona.common.S2Geography.Geography>();
     do {
-      S2Geography geometry = readGeometryTaggedText(tokenizer);
+      org.apache.sedona.common.S2Geography.Geography geometry = readGeometryTaggedText(tokenizer);
       geometries.add(geometry);
       nextToken = getNextCloserOrComma(tokenizer);
     } while (nextToken.equals(COMMA));

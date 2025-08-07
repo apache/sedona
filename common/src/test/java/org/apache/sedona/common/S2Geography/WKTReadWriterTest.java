@@ -20,7 +20,6 @@ package org.apache.sedona.common.S2Geography;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.sedona.common.geometryObjects.Geography;
 import org.junit.Test;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;

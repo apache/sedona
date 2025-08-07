@@ -24,7 +24,6 @@ import com.google.common.geometry.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.sedona.common.geometryObjects.Geography;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,21 +32,28 @@ import org.slf4j.LoggerFactory;
  * An abstract class represent S2Geography. Has 6 subtypes of geography: POINT, POLYLINE, POLYGON,
  * GEOGRAPHY_COLLECTION, SHAPE_INDEX, ENCODED_SHAPE_INDEX.
  */
-public abstract class S2Geography {
-  private static final Logger logger = LoggerFactory.getLogger(S2Geography.class.getName());
+public abstract class Geography {
+  private static final Logger logger = LoggerFactory.getLogger(Geography.class.getName());
 
   private static final int BUFFER_SIZE = 4 * 1024;
 
   protected final GeographyKind kind;
 
-  protected S2Geography(GeographyKind kind) {
+  private int srid = 0;
+
+  protected Geography(GeographyKind kind) {
     this.kind = kind;
   }
 
-  public void setSRID(int srid) {}
+  public void setSRID(int srid) {
+    if (srid < 0) {
+      throw new IllegalArgumentException("SRID must be non-negative, got: " + srid);
+    }
+    this.srid = srid;
+  }
 
   public int getSRID() {
-    return -1;
+    return srid;
   }
 
   public enum GeographyKind {
@@ -161,7 +167,7 @@ public abstract class S2Geography {
   public String toText(PrecisionModel precisionModel) {
     WKTWriter writer = new WKTWriter();
     writer.setPrecisionModel(precisionModel);
-    return writer.write((Geography) this);
+    return writer.write(this);
   }
 
   // ─── Encoding / decoding machinery ────────────────────────────────────────────
@@ -185,6 +191,7 @@ public abstract class S2Geography {
       tag.setFlags((byte) (tag.getFlags() | EncodeTag.FLAG_EMPTY));
       tag.setCoveringSize((byte) 0);
       tag.encode(out);
+      out.writeInt(getSRID()); // write the SRID
       out.flush();
       return;
     }
@@ -210,36 +217,45 @@ public abstract class S2Geography {
 
     // 3) Write the geography
     this.encode(out, opts);
+    out.writeInt(getSRID()); // write the SRID
     out.flush();
   }
 
-  public static S2Geography decodeTagged(InputStream is) throws IOException {
+  public static Geography decodeTagged(InputStream is) throws IOException {
     // wrap ONCE
     UnsafeInput kryoIn = new UnsafeInput(is, BUFFER_SIZE);
     EncodeTag topTag = EncodeTag.decode(kryoIn);
     // 1) decode the tag
-    return S2Geography.decode(kryoIn, topTag);
+    return Geography.decode(kryoIn, topTag);
   }
 
-  public static S2Geography decode(UnsafeInput in, EncodeTag tag) throws IOException {
+  public static Geography decode(UnsafeInput in, EncodeTag tag) throws IOException {
     // 2) dispatch to subclass's decode method according to tag.kind
+    Geography geo;
     switch (tag.getKind()) {
       case CELL_CENTER:
       case POINT:
       case SINGLEPOINT:
-        return PointGeography.decode(in, tag);
+        geo = PointGeography.decode(in, tag);
+        break;
       case POLYLINE:
       case SINGLEPOLYLINE:
-        return PolylineGeography.decode(in, tag);
+        geo = PolylineGeography.decode(in, tag);
+        break;
       case POLYGON:
-        return PolygonGeography.decode(in, tag);
+        geo = PolygonGeography.decode(in, tag);
+        break;
       case GEOGRAPHY_COLLECTION:
-        return GeographyCollection.decode(in, tag);
+        geo = GeographyCollection.decode(in, tag);
+        break;
       case SHAPE_INDEX:
-        return EncodedShapeIndexGeography.decode(in, tag);
+        geo = EncodedShapeIndexGeography.decode(in, tag);
+        break;
       default:
         throw new IOException("Unsupported GeographyKind for decoding: " + tag.getKind());
     }
+    geo.setSRID(in.readInt()); // read the SRID
+    return geo;
   }
 
   public abstract void encode(UnsafeOutput os, EncodeOptions opts) throws IOException;

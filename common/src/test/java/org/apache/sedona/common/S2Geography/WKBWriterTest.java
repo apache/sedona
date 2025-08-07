@@ -26,7 +26,6 @@ import com.google.common.geometry.S2Polyline;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.sedona.common.geometryObjects.Geography;
 import org.junit.Test;
 import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.ParseException;
@@ -37,7 +36,7 @@ public class WKBWriterTest {
   public void PointGeographyToHexTest() throws IOException, ParseException {
     // 1) create an S2Point at (lat=10, lon=30)
     S2Point s2Pt = S2LatLng.fromDegrees(10.0, 30.0).toPoint();
-    Geography inputGeo = new Geography(new SinglePointGeography(s2Pt));
+    Geography inputGeo = new SinglePointGeography(s2Pt);
 
     // 2) write it to 2D little‐endian WKB
     WKBWriter writer = new WKBWriter(2, ByteOrderValues.LITTLE_ENDIAN);
@@ -45,7 +44,7 @@ public class WKBWriterTest {
 
     // 3) read it back with WKBReader
     WKBReader reader = new WKBReader();
-    PointGeography outputGeo = (PointGeography) reader.read(wkb).getDelegate();
+    PointGeography outputGeo = (PointGeography) reader.read(wkb);
 
     // 4) extract the decoded S2Point + verify lat/lng round‐trip exactly
     S2Point decoded = outputGeo.points.get(0);
@@ -61,7 +60,7 @@ public class WKBWriterTest {
     List<S2Point> pts =
         List.of(
             S2LatLng.fromDegrees(10.0, 30.0).toPoint(), S2LatLng.fromDegrees(42.0, 12.0).toPoint());
-    Geography inputLine = new Geography(new SinglePolylineGeography(new S2Polyline(pts)));
+    Geography inputLine = new SinglePolylineGeography(new S2Polyline(pts));
 
     // 2) write it to 2D little‐endian WKB
     WKBWriter writer = new WKBWriter(2, ByteOrderValues.LITTLE_ENDIAN);
@@ -69,7 +68,7 @@ public class WKBWriterTest {
 
     // 3) read it back
     WKBReader reader = new WKBReader();
-    PolylineGeography outputLine = (PolylineGeography) reader.read(wkb).getDelegate();
+    PolylineGeography outputLine = (PolylineGeography) reader.read(wkb);
 
     // 4) verify point‐by‐point round‐trip
     List<S2Polyline> polylines = outputLine.getPolylines();
