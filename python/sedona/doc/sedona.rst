@@ -10,7 +10,6 @@ Subpackages
    sedona.core
    sedona.flink
    sedona.geoarrow
-   sedona.geopandas
    sedona.maps
    sedona.raster
    sedona.raster_utils
