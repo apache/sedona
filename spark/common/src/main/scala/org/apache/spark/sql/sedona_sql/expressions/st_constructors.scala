@@ -20,7 +20,7 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.spark.sql.Column
 import org.apache.spark.sql.sedona_sql.DataFrameShims._
-import org.apache.spark.sql.sedona_sql.expressions.geography.{ST_GeogCollFromText, ST_GeogFromText, ST_GeogFromWKB, ST_GeogFromWKT}
+import org.apache.spark.sql.sedona_sql.expressions.geography.{ST_GeogCollFromText, ST_GeogFromText, ST_GeogFromWKB, ST_GeogFromWKT, ST_ToGeography, ST_TryToGeography}
 
 object st_constructors {
   def ST_GeomFromGeoHash(geohash: Column, precision: Column): Column =
@@ -285,4 +285,11 @@ object st_constructors {
     wrapExpression[ST_MPointFromText](wkt, srid)
   def ST_MPointFromText(wkt: String, srid: Int): Column =
     wrapExpression[ST_MPointFromText](wkt, srid)
+
+  def ST_ToGeography(str: Column): Column = wrapExpression[ST_ToGeography](str)
+  def ST_ToGeography(str: String): Column = wrapExpression[ST_ToGeography](str)
+
+  def ST_TryToGeography(str: Column): Column = wrapExpression[ST_TryToGeography](str)
+  def ST_TryToGeography(str: String): Column = wrapExpression[ST_TryToGeography](str)
+
 }
