@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /** A Geography wrapping zero or more Geography objects, representing a GEOMETRYCOLLECTION. */
 public class GeographyCollection extends Geography {
@@ -42,6 +43,19 @@ public class GeographyCollection extends Geography {
     this.features = new ArrayList<>();
     this.numShapesList = new ArrayList<>();
     this.totalShapes = 0;
+  }
+
+  public GeographyCollection(GeographyKind kind,  List<S2Polygon> polygons) {
+    super(kind); // can be MULTIPOLYGON
+    if (kind != GeographyKind.MULTIPOLYGON) {
+      throw new IllegalArgumentException("Invalid GeographyKind, only allow Multipolygon as in geographyCollection: " + kind);
+    }
+    this.features = polygons.stream()
+            .map(PolygonGeography::new) // wrap each S2Polygon
+            .collect(Collectors.toList());
+    this.numShapesList = new ArrayList<>();
+    this.totalShapes = 0;
+    countShapes();
   }
 
   /** Wraps existing Geography features. */

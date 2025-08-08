@@ -28,11 +28,8 @@ public class MultiPolygonGeography extends GeographyCollection {
    * Wrap each raw S2Polygon in a PolygonGeography, then hand it off to GeographyCollection to do
    * the rest (including serialization).
    */
-  public MultiPolygonGeography(List<S2Polygon> polygons) {
-    super(
-        polygons.stream()
-            .map(PolygonGeography::new) // wrap each S2Polygon
-            .collect(Collectors.toList())); // into a List<PolygonGeography>
+  public MultiPolygonGeography(GeographyKind kind, List<S2Polygon> polygons) {
+    super(kind,polygons);
     if (polygons.isEmpty()) {
       new MultiPolygonGeography();
     }

@@ -897,7 +897,7 @@ public class WKTReader {
       throws IOException, ParseException {
     String nextToken = getNextEmptyOrOpener(tokenizer);
     if (nextToken.equals(WKTConstants.EMPTY)) {
-      return new MultiPolygonGeography(new ArrayList<>());
+      return new MultiPolygonGeography(Geography.GeographyKind.MULTIPOLYGON, new ArrayList<>());
     }
     List<S2Polygon> polygons = new ArrayList<S2Polygon>();
     do {
@@ -905,7 +905,7 @@ public class WKTReader {
       polygons.add(polygon.polygon);
       nextToken = getNextCloserOrComma(tokenizer);
     } while (nextToken.equals(COMMA));
-    return new MultiPolygonGeography(polygons);
+    return new MultiPolygonGeography(Geography.GeographyKind.MULTIPOLYGON, polygons);
   }
 
   /**
