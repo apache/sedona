@@ -21,8 +21,8 @@ package org.apache.sedona.sql.UDF
 import org.apache.spark.sql.expressions.Aggregator
 import org.apache.spark.sql.sedona_sql.expressions.collect.ST_Collect
 import org.apache.spark.sql.sedona_sql.expressions.raster._
-import org.apache.spark.sql.sedona_sql.expressions.{_}
-import org.apache.spark.sql.sedona_sql.expressions.geography.{ST_GeogCollFromText, ST_GeogFromText, ST_GeogFromWKB, ST_GeogFromWKT, ST_S2LineFromText, ST_S2LineFromWKB, ST_S2LinestringFromText, ST_S2MLineFromText, ST_S2MPointFromText, ST_S2MPolyFromText, ST_S2PointFromText, ST_S2PointFromWKB, ST_S2PolygonFromText}
+import org.apache.spark.sql.sedona_sql.expressions._
+import org.apache.spark.sql.sedona_sql.expressions.geography.{ST_GeogCollFromText, ST_GeogFromText, ST_GeogFromWKB, ST_GeogFromWKT, ST_S2LineFromText, ST_S2LineFromWKB, ST_S2LinestringFromText, ST_S2MLineFromText, ST_S2MPointFromText, ST_S2MPolyFromText, ST_S2PointFromText, ST_S2PointFromWKB, ST_S2PolygonFromText, ST_ToGeography, ST_TryToGeography}
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.operation.buffer.BufferParameters
 
@@ -357,7 +357,9 @@ object Catalog extends AbstractCatalog {
     function[ST_S2MLineFromText](0),
     function[ST_S2MPolyFromText](0),
     function[ST_S2PointFromWKB](),
-    function[ST_S2LineFromWKB]())
+    function[ST_S2LineFromWKB](),
+    function[ST_ToGeography](),
+    function[ST_TryToGeography]())
 
   val aggregateExpressions: Seq[Aggregator[Geometry, _, _]] =
     Seq(new ST_Envelope_Aggr, new ST_Intersection_Aggr, new ST_Union_Aggr())

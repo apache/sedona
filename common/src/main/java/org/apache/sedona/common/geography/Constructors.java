@@ -142,4 +142,38 @@ public class Constructors {
     }
     return null;
   }
+
+  public static Geography toGeography(String geogString) throws ParseException {
+    if (geogString == null || geogString.trim().isEmpty()) {
+      return null;
+    }
+    String trimmedGeog = geogString.trim();
+    // todo: Check for EWKT, EWKB format (e.g., "SRID=4326;...")
+    // Check for standard WKT format (e.g., "POINT...")
+    if (Character.isLetter(trimmedGeog.charAt(0))) {
+      try {
+        return geogFromWKT(trimmedGeog, 0);
+      } catch (Exception e) {
+        throw new ParseException("Failed to parse WKT string. Reason: " + e.getMessage());
+      }
+    }
+    // Check for WKB hex format
+    if (trimmedGeog.matches("^[0-9a-fA-F]+$")) {
+      try {
+        return geogFromWKB(trimmedGeog, 0); // Default SRID
+      } catch (Exception e) {
+        throw new ParseException("Failed to parse WKB (Hex) string. Reason: " + e.getMessage());
+      }
+    }
+    throw new ParseException("Unsupported or invalid geography format provided.");
+  }
+
+  public static Geography tryToGeography(String geogString) {
+    try {
+      return toGeography(geogString);
+    } catch (Exception e) {
+      // swallowing all parsing/runtime errors and returning null
+      return null;
+    }
+  }
 }

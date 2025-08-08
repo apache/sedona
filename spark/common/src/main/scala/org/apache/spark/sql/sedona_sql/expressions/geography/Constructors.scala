@@ -66,11 +66,10 @@ private[apache] case class ST_GeogCollFromText(inputExpressions: Seq[Expression]
 }
 
 /**
- * Return a Geography from a WKB string
+ * Return a Geography from a WKB string / array of bytes
  *
  * @param inputExpressions
- *   This function takes a geometry string and a srid. The string format must be WKB binary array
- *   / string.
+ *   This function takes a geography string or WKB binary array
  */
 private[apache] case class ST_GeogFromWKB(inputExpressions: Seq[Expression])
     extends InferredExpression(
@@ -88,8 +87,7 @@ private[apache] case class ST_GeogFromWKB(inputExpressions: Seq[Expression])
  * Return a PointGeography from a WKT string
  *
  * @param inputExpressions
- *   This function takes a geometry string and a srid. The string format must be WKB binary array
- *   / string.
+ *   This function takes a geography string and a srid.
  */
 case class ST_S2PointFromText(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.pointFromText _) {
@@ -102,8 +100,7 @@ case class ST_S2PointFromText(inputExpressions: Seq[Expression])
  * Return a PointGeography from a WKT string
  *
  * @param inputExpressions
- *   This function takes a geometry string and a srid. The string format must be WKB binary array
- *   / string.
+ *   This function takes a geography string and a srid.
  */
 case class ST_S2MPointFromText(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.mPointFromText _) {
@@ -113,11 +110,10 @@ case class ST_S2MPointFromText(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return a PointGeography from a WKT string
+ * Return a PolygonGeography from a WKT string
  *
  * @param inputExpressions
- *   This function takes a geometry string and a srid. The string format must be WKB binary array
- *   / string.
+ *   This function takes a geography string and a srid.
  */
 case class ST_S2PolygonFromText(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.polygonFromText _) {
@@ -127,11 +123,10 @@ case class ST_S2PolygonFromText(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return a PointGeography from a WKT string
+ * Return a MultiPolygonGeography from a WKT string
  *
  * @param inputExpressions
- *   This function takes a geometry string and a srid. The string format must be WKB binary array
- *   / string.
+ *   This function takes a geography string and a srid.
  */
 case class ST_S2MPolyFromText(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.mPolyFromText _) {
@@ -141,11 +136,10 @@ case class ST_S2MPolyFromText(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return a PointGeography from a WKT string
+ * Return a SinglePolylineGeography from a WKT string
  *
  * @param inputExpressions
- *   This function takes a geometry string and a srid. The string format must be WKB binary array
- *   / string.
+ *   This function takes a geography string and a srid.
  */
 case class ST_S2LineFromText(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.lineFromText _) {
@@ -155,11 +149,10 @@ case class ST_S2LineFromText(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return a PointGeography from a WKT string
+ * Return a PolylineGeography from a WKT string
  *
  * @param inputExpressions
- *   This function takes a geometry string and a srid. The string format must be WKB binary array
- *   / string.
+ *   This function takes a geography string and a srid.
  */
 case class ST_S2MLineFromText(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.mLineFromText _) {
@@ -169,11 +162,10 @@ case class ST_S2MLineFromText(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return a PointGeography from a WKT string
+ * Return a SinglePolylineGeography from a WKT string
  *
  * @param inputExpressions
- *   This function takes a geometry string and a srid. The string format must be WKB binary array
- *   / string.
+ *   This function takes a geography string and a srid.
  */
 case class ST_S2LinestringFromText(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.lineStringFromText _) {
@@ -183,11 +175,10 @@ case class ST_S2LinestringFromText(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return a PointGeography from a WKT string
+ * Return a PointGeography from a WKB string or binary array
  *
  * @param inputExpressions
- *   This function takes a geometry string and a srid. The string format must be WKB binary array
- *   / string.
+ *   This function takes a geography string or WKB binary array
  */
 case class ST_S2LineFromWKB(inputExpressions: Seq[Expression])
     extends InferredExpression(
@@ -201,11 +192,10 @@ case class ST_S2LineFromWKB(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return a PointGeography from a WKT string
+ * Return a SinglePointGeography from a WKB string
  *
  * @param inputExpressions
- *   This function takes a geometry string and a srid. The string format must be WKB binary array
- *   / string.
+ *   This function takes a geography string or WKB binary array
  */
 case class ST_S2PointFromWKB(inputExpressions: Seq[Expression])
     extends InferredExpression(
@@ -213,6 +203,33 @@ case class ST_S2PointFromWKB(inputExpressions: Seq[Expression])
       Constructors.pointFromWKB(_: String, _: Int),
       Constructors.pointFromWKB(_: Array[Byte]),
       Constructors.pointFromWKB(_: String)) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Return a Geography from an input string, can be WKT or WKB
+ *
+ * @param inputExpressions
+ *   This function takes a geography string
+ */
+
+case class ST_ToGeography(inputExpressions: Seq[Expression])
+    extends InferredExpression(Constructors.toGeography _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Return a Geography from an input string, can be WKT or WKB
+ *
+ * @param inputExpressions
+ *   This function takes a geography string
+ */
+case class ST_TryToGeography(inputExpressions: Seq[Expression])
+    extends InferredExpression(Constructors.tryToGeography _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

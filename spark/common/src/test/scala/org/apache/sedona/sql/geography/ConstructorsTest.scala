@@ -152,4 +152,21 @@ class ConstructorsTest extends TestBaseScala {
     assert(expected.equals(actual))
   }
 
+  it("Passed ST_ToGeography") {
+    val geog = "MULTIPOINT ((10 10), (20 20), (30 30))"
+
+    // Escape into a SQL string literal
+    val df = sparkSession
+      .sql(s"SELECT ST_ToGeography('$geog') AS geog_col")
+
+    val actual = df
+      .first()
+      .get(0)
+      .asInstanceOf[Geography]
+      .toString()
+
+    val expected = "MULTIPOINT ((10 10), (20 20), (30 30))"
+    assert(expected.equals(actual))
+  }
+
 }
