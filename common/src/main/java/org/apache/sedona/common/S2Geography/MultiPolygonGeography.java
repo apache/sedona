@@ -21,7 +21,6 @@ package org.apache.sedona.common.S2Geography;
 import com.google.common.geometry.S2Polygon;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MultiPolygonGeography extends GeographyCollection {
   /**
@@ -29,7 +28,7 @@ public class MultiPolygonGeography extends GeographyCollection {
    * the rest (including serialization).
    */
   public MultiPolygonGeography(GeographyKind kind, List<S2Polygon> polygons) {
-    super(kind,polygons);
+    super(kind, polygons);
     if (polygons.isEmpty()) {
       new MultiPolygonGeography();
     }

@@ -45,12 +45,14 @@ public class GeographyCollection extends Geography {
     this.totalShapes = 0;
   }
 
-  public GeographyCollection(GeographyKind kind,  List<S2Polygon> polygons) {
+  public GeographyCollection(GeographyKind kind, List<S2Polygon> polygons) {
     super(kind); // can be MULTIPOLYGON
     if (kind != GeographyKind.MULTIPOLYGON) {
-      throw new IllegalArgumentException("Invalid GeographyKind, only allow Multipolygon as in geographyCollection: " + kind);
+      throw new IllegalArgumentException(
+          "Invalid GeographyKind, only allow Multipolygon as in geographyCollection: " + kind);
     }
-    this.features = polygons.stream()
+    this.features =
+        polygons.stream()
             .map(PolygonGeography::new) // wrap each S2Polygon
             .collect(Collectors.toList());
     this.numShapesList = new ArrayList<>();
