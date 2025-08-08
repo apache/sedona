@@ -9,6 +9,7 @@ Subpackages
 
    sedona.spark.core
    sedona.spark.geoarrow
+   sedona.spark.geopandas
    sedona.spark.maps
    sedona.spark.raster
    sedona.spark.raster_utils
