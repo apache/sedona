@@ -23,7 +23,7 @@ from sedona.spark.stats.weighting import (
 import warnings
 
 warnings.warn(
-    "The 'sedona.stats.weighting' module is deprecated and will be removed in future versions. Please use 'sedona.spark.stats' instead.",
+    "Importing from 'sedona.stats.weighting' is deprecated. Please use 'sedona.spark.stats.weighting' instead.",
     DeprecationWarning,
     stacklevel=2,
 )

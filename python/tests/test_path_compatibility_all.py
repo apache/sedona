@@ -93,6 +93,13 @@ class TestPathCompatibilityAll(TestBase):
         # Test raster utils imports
         assert SedonaUtils is not None
 
+    def test_import_df_functions_from_sedona_sql(self):
+        # one from each module
+        assert ST_MakePoint is not None
+        assert ST_Y is not None
+        assert ST_Touches is not None
+        assert ST_Envelope_Aggr is not None
+
     def test_geoarrow_imports(self):
         assert create_spatial_dataframe is not None
         assert dataframe_to_arrow is not None
