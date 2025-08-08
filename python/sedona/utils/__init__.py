@@ -15,12 +15,24 @@
 # specific language governing permissions and limitations
 # under the License.
 import warnings
-from sedona.spark.utils.serde import KryoSerializer, SedonaKryoRegistrator
+from sedona.spark import utils
+
+
+def __getattr__(name):
+    if hasattr(utils, name):
+        warnings.warn(
+            f"Importing '{name}' from 'sedona.utils' is deprecated. Please use 'sedona.spark.utils.{name}' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return getattr(utils, name)
+    raise AttributeError(f"module 'sedona.utils' has no attribute '{name}'")
+
 
 warnings.warn(
-    "The 'sedona.utils' package structure has been reorganized. Please update your imports to use 'sedona.spark.utils' prefix instead.",
+    "Importing from 'sedona.utils' is deprecated. Please use 'sedona.spark.utils' instead.",
     DeprecationWarning,
     stacklevel=2,
 )
 
-__all__ = ["KryoSerializer", "SedonaKryoRegistrator"]
+__all__ = utils.__all__

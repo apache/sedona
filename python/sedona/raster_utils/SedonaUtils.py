@@ -14,7 +14,13 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
+import warnings
 from sedona.spark.raster_utils.SedonaUtils import SedonaUtils
+
+warnings.warn(
+    "Importing from 'sedona.raster_utils.SedonaUtils' is deprecated. Please use 'sedona.spark.raster_utils.SedonaUtils' instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 __all__ = ["SedonaUtils"]

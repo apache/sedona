@@ -46,6 +46,7 @@ from sedona.stats.weighting import (
 )
 from sedona.utils.adapter import Adapter
 from sedona.utils.spatial_rdd_parser import GeoData
+from sedona.utils.structured_adapter import StructuredAdapter
 from tests.test_base import TestBase
 from sedona.raster_utils.SedonaUtils import SedonaUtils
 from sedona.sql import ST_MakePoint, ST_Y, ST_Touches, ST_Envelope_Aggr
@@ -107,6 +108,7 @@ class TestPathCompatibility(TestBase):
         # Test utility imports
         assert Adapter is not None
         assert GeoData is not None
+        assert StructuredAdapter is not None
 
     def test_format_mapper_imports(self):
         # Test GeoJsonReader and ShapefileReader imports
