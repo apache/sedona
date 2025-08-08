@@ -229,7 +229,6 @@ repos:
     hooks:
       - id: rst-backticks
         name: detect common mistake of using single backticks when writing rst
-        exclude: ^python/sedona/doc/index\.rst$
       - id: rst-directive-colons
         name: detect mistake of rst directive not ending with double colon or space before the double colon
       - id: rst-inline-touching-normal
