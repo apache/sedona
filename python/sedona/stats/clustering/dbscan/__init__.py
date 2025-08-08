@@ -20,7 +20,7 @@ from sedona.spark.stats.clustering.dbscan import dbscan
 import warnings
 
 warnings.warn(
-    "Importing from 'sedona.stats.clustering.dbscan' is deprecated and will be removed in future versions. Please use 'sedona.spark.stats.clustering' instead.",
+    "Importing from 'sedona.stats.clustering.dbscan' is deprecated and will be removed in future versions. Please use 'sedona.spark.stats.clustering.dbscan' instead.",
     DeprecationWarning,
     stacklevel=2,
 )
