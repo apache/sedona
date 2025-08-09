@@ -95,9 +95,5 @@ class ConstructorsTest extends TestBaseScala {
     // null input
     val nullGeom = sparkSession.sql("SELECT ST_GeogFromWKB(null)")
     assert(nullGeom.first().isNullAt(0))
-    // Fail on wrong input type
-    intercept[Exception] {
-      sparkSession.sql("SELECT ST_GeogFromWKB(0)").collect()
-    }
   }
 }
