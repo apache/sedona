@@ -67,8 +67,7 @@ public abstract class Geography {
     CELL_CENTER(7),
     SINGLEPOINT(8),
     SINGLEPOLYLINE(9),
-    MULTIPOLYGON(10),
-    ;
+    MULTIPOLYGON(10);
 
     private final int kind;
 

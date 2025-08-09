@@ -366,7 +366,7 @@ public class WKBReaderTest {
         "MULTIPOLYGON(((0 0,0 10,10 10,10 0,0 0),(1 1,1 9,9 9,9 1,1 1)),((-9 0,-9 10,-1 10,-1 0,-9 0)))";
     WKBReader reader = new WKBReader();
     Geography geo = reader.read(WKBReader.hexToBytes(hexStr));
-    // Expect a POLYGON geometry
+    // Expect a MULTIPOLYGON geometry
     Assert.assertEquals(Geography.GeographyKind.MULTIPOLYGON, geo.kind);
 
     TestHelper.checkWKBGeography(hexStr, multiPolygonWkt);
