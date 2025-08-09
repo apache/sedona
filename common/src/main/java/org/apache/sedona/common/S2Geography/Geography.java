@@ -66,7 +66,8 @@ public abstract class Geography {
     ENCODED_SHAPE_INDEX(6),
     CELL_CENTER(7),
     SINGLEPOINT(8),
-    SINGLEPOLYLINE(9);
+    SINGLEPOLYLINE(9),
+    MULTIPOLYGON(10);
 
     private final int kind;
 
@@ -243,6 +244,7 @@ public abstract class Geography {
         geo = PolylineGeography.decode(in, tag);
         break;
       case POLYGON:
+      case MULTIPOLYGON:
         geo = PolygonGeography.decode(in, tag);
         break;
       case GEOGRAPHY_COLLECTION:

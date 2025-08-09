@@ -393,7 +393,7 @@ public class WKBReader {
       org.apache.sedona.common.S2Geography.Geography geom = readGeometry(SRID);
       polygons.add(((PolygonGeography) geom).polygon);
     }
-    return new MultiPolygonGeography(polygons);
+    return new MultiPolygonGeography(Geography.GeographyKind.MULTIPOLYGON, polygons);
   }
 
   private GeographyCollection readGeographyCollection(int SRID) throws IOException, ParseException {
