@@ -43,12 +43,10 @@ public class ConstructorsTest {
     Geography result = Constructors.geogFromWKB(wkb);
     assertEquals(geog.toString(), result.toString());
     assertEquals(0, result.getSRID());
-    assertEquals(0, result.getSRID());
 
     // Test specifying SRID
     result = Constructors.geogFromWKB(wkb, 1000);
     assertEquals(geog.toString(), result.toString());
-    assertEquals(1000, result.getSRID());
     assertEquals(1000, result.getSRID());
 
     // Test EWKB with SRID
@@ -58,16 +56,13 @@ public class ConstructorsTest {
     result = Constructors.geogFromWKB(wkb);
     assertEquals(geog.toString(), result.toString());
     assertEquals(2000, result.getSRID());
-    assertEquals(2000, result.getSRID());
 
     // Test overriding SRID
     result = Constructors.geogFromWKB(wkb, 3000);
     assertEquals(geog.toString(), result.toString());
     assertEquals(3000, result.getSRID());
-    assertEquals(3000, result.getSRID());
     result = Constructors.geogFromWKB(wkb, 0);
     assertEquals(geog.toString(), result.toString());
-    assertEquals(0, result.getSRID());
     assertEquals(0, result.getSRID());
   }
 }
