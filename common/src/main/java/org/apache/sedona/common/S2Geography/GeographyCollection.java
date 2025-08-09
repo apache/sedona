@@ -25,6 +25,7 @@ import com.google.common.geometry.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -51,10 +52,10 @@ public class GeographyCollection extends Geography {
       throw new IllegalArgumentException(
           "Invalid GeographyKind, only allow Multipolygon as in geographyCollection: " + kind);
     }
+    List<S2Polygon> inputPolygons = (polygons == null) ? Collections.emptyList() : polygons;
+    // Create the list of features.
     this.features =
-        polygons.stream()
-            .map(PolygonGeography::new) // wrap each S2Polygon
-            .collect(Collectors.toList());
+        inputPolygons.stream().map(PolygonGeography::new).collect(Collectors.toUnmodifiableList());
     this.numShapesList = new ArrayList<>();
     this.totalShapes = 0;
     countShapes();

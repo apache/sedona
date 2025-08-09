@@ -29,9 +29,6 @@ public class MultiPolygonGeography extends GeographyCollection {
    */
   public MultiPolygonGeography(GeographyKind kind, List<S2Polygon> polygons) {
     super(kind, polygons);
-    if (polygons.isEmpty()) {
-      new MultiPolygonGeography();
-    }
   }
 
   public MultiPolygonGeography() {
