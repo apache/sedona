@@ -73,4 +73,27 @@ class ConstructorsTest extends TestBaseScala {
       "GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((35 15, 45 15, 40 25, 35 15), (30 10, 40 20, 30 20, 30 10)))"
     assert(expected.equals(actual))
   }
+
+  it("Passed ST_GeogFromWKB") {
+    // RAW binary array
+    val wkbSeq = Seq[Array[Byte]](
+      Array[Byte](1, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, -124, -42, 0, -64, 0, 0, 0, 0, -128, -75,
+        -42, -65, 0, 0, 0, 96, -31, -17, -9, -65, 0, 0, 0, -128, 7, 93, -27, -65))
+    val rawWkbDf = wkbSeq.toDF("wkb")
+    rawWkbDf.createOrReplaceTempView("rawWKBTable")
+    val geometries = {
+      sparkSession.sql("SELECT ST_GeogFromWKB(rawWKBTable.wkb) as countyshape from rawWKBTable")
+    }
+    val expectedGeom =
+      "LINESTRING (-2.1047439575195317 -0.35482788085937506, -1.4960645437240603 -0.6676061153411864)"
+    assert(
+      geometries
+        .first()
+        .getAs[Geography](0)
+        .toString(new PrecisionModel(1e16))
+        .equals(expectedGeom))
+    // null input
+    val nullGeom = sparkSession.sql("SELECT ST_GeogFromWKB(null)")
+    assert(nullGeom.first().isNullAt(0))
+  }
 }

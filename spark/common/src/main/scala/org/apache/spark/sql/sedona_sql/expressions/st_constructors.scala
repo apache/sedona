@@ -102,11 +102,11 @@ object st_constructors {
     wrapExpression[ST_GeogFromText](wkt, srid)
   def ST_GeogFromText(wkt: String, srid: Int): Column = wrapExpression[ST_GeogFromText](wkt, srid)
 
-  def ST_GeogFromWKB(wkt: Column): Column = wrapExpression[ST_GeogFromWKB](wkt, 0)
-  def ST_GeogFromWKB(wkt: String): Column = wrapExpression[ST_GeogFromWKB](wkt, 0)
-  def ST_GeogFromWKB(wkt: Column, srid: Column): Column =
-    wrapExpression[ST_GeogFromWKT](wkt, srid)
-  def ST_GeogFromWKB(wkt: String, srid: Int): Column = wrapExpression[ST_GeogFromWKB](wkt, srid)
+  def ST_GeogFromWKB(wkb: Column): Column = wrapExpression[ST_GeogFromWKB](wkb, 0)
+  def ST_GeogFromWKB(wkb: String): Column = wrapExpression[ST_GeogFromWKB](wkb, 0)
+  def ST_GeogFromWKB(wkb: Column, srid: Column): Column =
+    wrapExpression[ST_GeogFromWKB](wkb, srid)
+  def ST_GeogFromWKB(wkb: String, srid: Int): Column = wrapExpression[ST_GeogFromWKB](wkb, srid)
 
   def ST_LineFromText(wkt: Column): Column = wrapExpression[ST_LineFromText](wkt)
   def ST_LineFromText(wkt: String): Column = wrapExpression[ST_LineFromText](wkt)
