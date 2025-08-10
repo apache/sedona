@@ -21,21 +21,14 @@ package org.apache.sedona.common.S2Geography;
 import com.google.common.geometry.S2Polygon;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MultiPolygonGeography extends GeographyCollection {
   /**
    * Wrap each raw S2Polygon in a PolygonGeography, then hand it off to GeographyCollection to do
    * the rest (including serialization).
    */
-  public MultiPolygonGeography(List<S2Polygon> polygons) {
-    super(
-        polygons.stream()
-            .map(PolygonGeography::new) // wrap each S2Polygon
-            .collect(Collectors.toList())); // into a List<PolygonGeography>
-    if (polygons.isEmpty()) {
-      new MultiPolygonGeography();
-    }
+  public MultiPolygonGeography(GeographyKind kind, List<S2Polygon> polygons) {
+    super(kind, polygons);
   }
 
   public MultiPolygonGeography() {
