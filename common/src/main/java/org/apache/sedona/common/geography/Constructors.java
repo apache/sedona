@@ -58,7 +58,16 @@ public class Constructors {
         throw new ParseException("Invalid EWKT string");
       }
     }
-    return geogFromWKT(wkt, SRID);
+    try {
+      return geogFromWKT(wkt, SRID);
+    } catch (ParseException e) {
+      String msg = e.getMessage();
+      // Normalize JUST the common JTS phrasing
+      if (msg != null && msg.startsWith("Unknown geometry type:")) {
+        msg = msg.replaceFirst("geometry", "geography");
+      }
+      throw new ParseException(msg);
+    }
   }
 
   public static Geography geogCollFromText(String wkt, int srid) throws ParseException {
