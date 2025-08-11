@@ -41,6 +41,26 @@ public class Constructors {
     return geog;
   }
 
+  public static Geography geogFromEWKT(String ewkt) throws ParseException {
+    if (ewkt == null) {
+      return null;
+    }
+    int SRID = 0;
+    String wkt = ewkt;
+
+    int index = ewkt.indexOf("SRID=");
+    if (index != -1) {
+      int semicolonIndex = ewkt.indexOf(';', index);
+      if (semicolonIndex != -1) {
+        SRID = Integer.parseInt(ewkt.substring(index + 5, semicolonIndex));
+        wkt = ewkt.substring(semicolonIndex + 1);
+      } else {
+        throw new ParseException("Invalid EWKT string");
+      }
+    }
+    return geogFromWKT(wkt, SRID);
+  }
+
   public static Geography geogCollFromText(String wkt, int srid) throws ParseException {
     if (wkt == null || !wkt.startsWith("GEOMETRYCOLLECTION")) {
       return null;

@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.common.Geography;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import com.google.common.geometry.S2LatLng;
 import com.google.common.geometry.S2Point;
@@ -30,6 +30,27 @@ import org.junit.Test;
 import org.locationtech.jts.io.ParseException;
 
 public class ConstructorsTest {
+
+  @Test
+  public void geogFromEWKT() throws ParseException {
+    assertNull(Constructors.geogFromEWKT(null));
+
+    Geography geog = Constructors.geogFromEWKT("POINT (1 1)");
+    assertEquals(0, geog.getSRID());
+    assertEquals("POINT (1 1)", geog.toString());
+
+    geog = Constructors.geogFromEWKT("SRID=4269; POINT (1 1)");
+    assertEquals(4269, geog.getSRID());
+    assertEquals("POINT (1 1)", geog.toString());
+
+    geog = Constructors.geogFromEWKT("SRID=4269;POINT (1 1)");
+    assertEquals(4269, geog.getSRID());
+    assertEquals("POINT (1 1)", geog.toString());
+
+    ParseException invalid =
+        assertThrows(ParseException.class, () -> Constructors.geogFromEWKT("not valid"));
+    assertEquals("Unknown geography type: NOT (line 1)", invalid.getMessage());
+  }
 
   @Test
   public void geogFromWKB() throws ParseException {

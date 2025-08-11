@@ -74,6 +74,26 @@ class ConstructorsTest extends TestBaseScala {
     assert(expected.equals(actual))
   }
 
+  it("Passed ST_GeogFromEWKT") {
+    val mixedWktGeometryInputLocation =
+      getClass.getResource("/county_small.tsv").getPath
+    var polygonWktDf = sparkSession.read
+      .format("csv")
+      .option("delimiter", "\t")
+      .option("header", "false")
+      .load(mixedWktGeometryInputLocation)
+    polygonWktDf.createOrReplaceTempView("polygontable")
+    var polygonDf = sparkSession.sql(
+      "select ST_GeogFromEWKT(polygontable._c0) as countyshape from polygontable")
+    assert(polygonDf.count() == 100)
+    val nullGeog = sparkSession.sql("select ST_GeogFromEWKT(null)")
+    assert(nullGeog.first().isNullAt(0))
+    val pointDf =
+      sparkSession.sql("select ST_GeogFromEWKT('SRID=4269;POINT(-71.064544 42.28787)')")
+    assert(pointDf.count() == 1)
+    assert(pointDf.first().getAs[Geography](0).getSRID == 4269)
+  }
+
   it("Passed ST_GeogFromWKB") {
     // RAW binary array
     val wkbSeq = Seq[Array[Byte]](
