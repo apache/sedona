@@ -1301,7 +1301,7 @@
                 <span class="c1"># Use _to_geopandas instead of to_geopandas to avoid logging extra warnings</span>
                 <span class="n">pd_df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">_to_geopandas</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">pd_df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+                <span class="n">pd_df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">_to_pandas</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">pd_df</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_geometry_column_name</span><span class="p">)</span>
 
