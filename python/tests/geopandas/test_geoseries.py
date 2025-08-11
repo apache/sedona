@@ -1192,6 +1192,39 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         expected = GeometryCollection()
         self.check_geom_equals(result, expected)
 
+    def test_row_wise_dataframe(self):
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+            ]
+        )
+        s2 = GeoSeries([Point(-5.5, 1), Point(1, 2), Point(3, 1)])
+
+        # self: GeoSeries, other: GeoDataFrame
+        expected = pd.Series([5.5, 1, 2])
+        result = s.distance(s2.to_geoframe())
+        self.check_pd_series_equal(result, expected)
+
+        # self: GeoDataFrame, other: GeoDataFrame
+        result = s.to_geoframe().distance(s2.to_geoframe())
+        assert_series_equal(result.to_pandas(), expected)
+
+        # Same but for overlay
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+                Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+                Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+            ]
+        )
+        result = s.difference(s2.to_geoframe())
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = s.to_geoframe().difference(s2.to_geoframe())
+        self.check_sgpd_equals_gpd(result, expected)
+
     def test_crosses(self):
         s = GeoSeries(
             [
