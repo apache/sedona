@@ -41,7 +41,7 @@ private[apache] case class ST_GeogFromWKT(inputExpressions: Seq[Expression])
  * Return a Geography from a EWKT string
  *
  * @param inputExpressions
- *   This function takes a geography string. The string format must be EWKT. / string.
+ *   This function takes a geography string. The string format must be EWKT.
  */
 private[apache] case class ST_GeogFromEWKT(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.geogFromEWKT _) {
