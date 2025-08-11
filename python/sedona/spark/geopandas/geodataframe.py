@@ -775,7 +775,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 # Use _to_geopandas instead of to_geopandas to avoid logging extra warnings
                 pd_df[col_name] = series._to_geopandas()
             else:
-                pd_df[col_name] = series.to_pandas()
+                pd_df[col_name] = series._to_pandas()
 
         return gpd.GeoDataFrame(pd_df, geometry=self._geometry_column_name)
 
