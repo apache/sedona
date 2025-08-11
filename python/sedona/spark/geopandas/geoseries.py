@@ -2351,14 +2351,6 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         from pyproj import CRS
 
-        old_crs = self.crs
-        if old_crs is None:
-            raise ValueError(
-                "Cannot transform naive geometries.  "
-                "Please set a crs on the object first."
-            )
-        assert isinstance(old_crs, CRS)
-
         if crs is not None:
             crs = CRS.from_user_input(crs)
         elif epsg is not None:
@@ -2366,13 +2358,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         else:
             raise ValueError("Must pass either crs or epsg.")
 
-        # skip if the input CRS and output CRS are the exact same
-        if old_crs.is_exact_same(crs):
-            return self
-
         spark_expr = stf.ST_Transform(
             self.spark.column,
-            F.lit(f"EPSG:{old_crs.to_epsg()}"),
             F.lit(f"EPSG:{crs.to_epsg()}"),
         )
         return self._query_geometry_column(
