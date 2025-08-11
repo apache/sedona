@@ -2364,6 +2364,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
         return self._query_geometry_column(
             spark_expr,
+            keep_name=True,
         )
 
     @property
