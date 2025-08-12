@@ -27,6 +27,7 @@ import org.apache.sedona.common.S2Geography.SinglePointGeography;
 import org.apache.sedona.common.S2Geography.WKBWriter;
 import org.apache.sedona.common.geography.Constructors;
 import org.junit.Test;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
 
 public class ConstructorsTest {
@@ -64,5 +65,20 @@ public class ConstructorsTest {
     result = Constructors.geogFromWKB(wkb, 0);
     assertEquals(geog.toString(), result.toString());
     assertEquals(0, result.getSRID());
+  }
+
+  @Test
+  public void geogFromGeoHash() throws ParseException {
+    Geography geog = Constructors.geogFromGeoHash("9q9j8ue2v71y5zzy0s4q", 16);
+    String expectedWkt =
+        "POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))";
+    String actualWkt = geog.toText(new PrecisionModel(1e6));
+    assertEquals(expectedWkt, actualWkt);
+
+    geog = Constructors.geogFromGeoHash("s00twy01mt", 4);
+    expectedWkt =
+        "POLYGON ((0.703125 0.8789062, 1.0546875 0.8789062, 1.0546875 1.0546875, 0.703125 1.0546875, 0.703125 0.8789062))";
+    actualWkt = geog.toText(new PrecisionModel(1e6));
+    assertEquals(expectedWkt, actualWkt);
   }
 }

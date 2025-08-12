@@ -62,4 +62,15 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
     assert(actualResult == expectedResult)
   }
 
+  it("Passed ST_GeogFromGeoHash") {
+    val df = sparkSession
+      .sql("SELECT '9q9j8ue2v71y5zzy0s4q' AS geohash")
+      .select(st_constructors.ST_GeogFromGeoHash("geohash", 16))
+    val actualResult =
+      df.take(1)(0).get(0).asInstanceOf[Geography].toText(new PrecisionModel(1e6))
+    var expectedWkt =
+      "POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))"
+    assertEquals(expectedWkt, actualResult)
+  }
+
 }

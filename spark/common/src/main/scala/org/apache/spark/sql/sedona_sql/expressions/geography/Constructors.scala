@@ -21,7 +21,7 @@ package org.apache.spark.sql.sedona_sql.expressions.geography
 import org.apache.sedona.common.geography.Constructors
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
-import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
+import org.apache.spark.sql.sedona_sql.expressions.{InferrableFunction, InferredExpression}
 
 /**
  * Return a Geography from a WKT string
@@ -75,6 +75,19 @@ private[apache] case class ST_GeogCollFromText(inputExpressions: Seq[Expression]
 private[apache] case class ST_GeogFromWKB(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.geogFromWKB(_: Array[Byte], _: Int)) {
 
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Return a Geography from a GeoHash string
+ *
+ * @param inputExpressions
+ *   This function takes a geography geohash
+ */
+private[apache] case class ST_GeogFromGeoHash(inputExpressions: Seq[Expression])
+    extends InferredExpression(InferrableFunction.allowRightNull(Constructors.geogFromGeoHash)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

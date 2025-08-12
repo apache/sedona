@@ -20,7 +20,7 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.spark.sql.Column
 import org.apache.spark.sql.sedona_sql.DataFrameShims._
-import org.apache.spark.sql.sedona_sql.expressions.geography.{ST_GeogCollFromText, ST_GeogFromText, ST_GeogFromWKB, ST_GeogFromWKT}
+import org.apache.spark.sql.sedona_sql.expressions.geography.{ST_GeogCollFromText, ST_GeogFromGeoHash, ST_GeogFromText, ST_GeogFromWKB, ST_GeogFromWKT}
 
 object st_constructors {
   def ST_GeomFromGeoHash(geohash: Column, precision: Column): Column =
@@ -33,6 +33,17 @@ object st_constructors {
 
   def ST_GeomFromGeoHash(geohash: String): Column =
     wrapExpression[ST_GeomFromGeoHash](geohash, null)
+
+  def ST_GeogFromGeoHash(geohash: Column, precision: Column): Column =
+    wrapExpression[ST_GeogFromGeoHash](geohash, precision)
+  def ST_GeogFromGeoHash(geohash: String, precision: Int): Column =
+    wrapExpression[ST_GeogFromGeoHash](geohash, precision)
+
+  def ST_GeogFromGeoHash(geohash: Column): Column =
+    wrapExpression[ST_GeogFromGeoHash](geohash, null)
+
+  def ST_GeogFromGeoHash(geohash: String): Column =
+    wrapExpression[ST_GeogFromGeoHash](geohash, null)
 
   def ST_PointFromGeoHash(geohash: Column, precision: Column): Column =
     wrapExpression[ST_PointFromGeoHash](geohash, precision)
