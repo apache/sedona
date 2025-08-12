@@ -1493,8 +1493,9 @@
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
 <span class="sd">        &gt;&gt;&gt; from shapely.geometry import Point</span>
+<span class="sd">        &gt;&gt;&gt; from sedona.spark.geopandas import GeoDataFrame</span>
 <span class="sd">        &gt;&gt;&gt; d = {&#39;col1&#39;: [&#39;name1&#39;, &#39;name2&#39;], &#39;geometry&#39;: [Point(1, 2), Point(2, 1)]}</span>
-<span class="sd">        &gt;&gt;&gt; gdf = geopandas.GeoDataFrame(d, crs=4326)</span>
+<span class="sd">        &gt;&gt;&gt; gdf = GeoDataFrame(d, crs=4326)</span>
 <span class="sd">        &gt;&gt;&gt; gdf</span>
 <span class="sd">            col1     geometry</span>
 <span class="sd">        0  name1  POINT (1 2)</span>
@@ -1638,8 +1639,8 @@
 <span class="sd">        --------</span>
 
 <span class="sd">        &gt;&gt;&gt; from sedona.spark.geopandas import GeoDataFrame</span>
-<span class="sd">        &gt;&gt;&gt; import geoarrow.pyarrow as ga</span>
-<span class="sd">        &gt;&gt;&gt; import pyarrow as pa</span>
+<span class="sd">        &gt;&gt;&gt; import geoarrow.pyarrow as ga  # requires: pip install geoarrow-pyarrow</span>
+<span class="sd">        &gt;&gt;&gt; import pyarrow as pa  # requires: pip install pyarrow</span>
 <span class="sd">        &gt;&gt;&gt; table = pa.Table.from_arrays([</span>
 <span class="sd">        ...     ga.as_geoarrow([None, &quot;POLYGON ((0 0, 1 1, 0 1, 0 0))&quot;, &quot;LINESTRING (0 0, -1 1, 0 -1)&quot;]),</span>
 <span class="sd">        ...     pa.array([1, 2, 3]),</span>
@@ -1831,7 +1832,7 @@
 <span class="sd">        The returned data object needs to be consumed by a library implementing</span>
 <span class="sd">        the Arrow PyCapsule Protocol. For example, wrapping the data as a</span>
 <span class="sd">        pyarrow.Table (requires pyarrow &gt;= 14.0):</span>
-<span class="sd">        &gt;&gt;&gt; import pyarrow as pa</span>
+<span class="sd">        &gt;&gt;&gt; import pyarrow as pa  # requires: pip install pyarrow</span>
 <span class="sd">        &gt;&gt;&gt; table = pa.table(arrow_table)</span>
 <span class="sd">        &gt;&gt;&gt; table</span>
 <span class="sd">        pyarrow.Table</span>
@@ -1992,8 +1993,9 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; import geodatasets</span>
-<span class="sd">        &gt;&gt;&gt; df = geopandas.read_file(geodatasets.get_path(&quot;nybb&quot;))</span>
+<span class="sd">        &gt;&gt;&gt; import geodatasets  # requires: pip install geodatasets</span>
+<span class="sd">        &gt;&gt;&gt; import geopandas as gpd</span>
+<span class="sd">        &gt;&gt;&gt; df = gpd.read_file(geodatasets.get_path(&quot;nybb&quot;))</span>
 <span class="sd">        &gt;&gt;&gt; df.head()  # doctest: +SKIP</span>
 <span class="sd">        BoroCode  ...                                           geometry</span>
 <span class="sd">        0         5  ...  MULTIPOLYGON (((970217.022 145643.332, 970227....</span>
@@ -2069,6 +2071,9 @@
 <span class="sd">        ...     &#39;value&#39;: [1, 2]</span>
 <span class="sd">        ... })</span>
 <span class="sd">        &gt;&gt;&gt; joined = points.sjoin(polygons)</span>
+<span class="sd">        &gt;&gt;&gt; joined</span>
+<span class="sd">            geometry_left  value_left            geometry_right  value_right</span>
+<span class="sd">        0  POINT (0.5 0.5)           1  POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))            1</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas.tools.sjoin</span><span class="w"> </span><span class="kn">import</span> <span class="n">sjoin</span> <span class="k">as</span> <span class="n">sjoin_tool</span>
 
@@ -2189,17 +2194,17 @@
 <span class="sd">        ...     &quot;geometry&quot;: [Point(0, 0), LineString([(0, 0), (1, 1)])],</span>
 <span class="sd">        ...     &quot;int&quot;: [1, 2]</span>
 <span class="sd">        ... })</span>
-<span class="sd">        &gt;&gt;&gt; gdf.to_file(filepath, driver=&quot;geoparquet&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; gdf.to_file(&quot;output.parquet&quot;, driver=&quot;geoparquet&quot;)</span>
 
 <span class="sd">        With selected drivers you can also append to a file with ``mode=&quot;a&quot;``:</span>
 
-<span class="sd">        &gt;&gt;&gt; gdf.to_file(filepath, driver=&quot;geojson&quot;, mode=&quot;a&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; gdf.to_file(&quot;output.geojson&quot;, driver=&quot;geojson&quot;, mode=&quot;a&quot;)</span>
 
 <span class="sd">        When the index is of non-integer dtype, ``index=None`` (default) is treated as True,</span>
 <span class="sd">        writing the index to the file.</span>
 
-<span class="sd">        &gt;&gt;&gt; gdf = GeoDataFrame({&quot;geometry&quot;: [Point(0, 0)]}, index=[&quot;a&quot;, &quot;b&quot;])</span>
-<span class="sd">        &gt;&gt;&gt; gdf.to_file(filepath, driver=&quot;geoparquet&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; gdf = GeoDataFrame({&quot;geometry&quot;: [Point(0, 0), Point(1, 1)]}, index=[&quot;a&quot;, &quot;b&quot;])</span>
+<span class="sd">        &gt;&gt;&gt; gdf.to_file(&quot;output_with_index.parquet&quot;, driver=&quot;geoparquet&quot;)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">sgpd</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">_to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">driver</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 

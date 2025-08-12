@@ -835,9 +835,11 @@
 <span class="sd">        - copy: Whether to copy the input data.</span>
 <span class="sd">        - fastpath: Internal parameter for fast initialization.</span>
 
-<span class="sd">        Examples:</span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
 <span class="sd">        &gt;&gt;&gt; from shapely.geometry import Point</span>
 <span class="sd">        &gt;&gt;&gt; import geopandas as gpd</span>
+<span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
 <span class="sd">        &gt;&gt;&gt; from sedona.spark.geopandas import GeoSeries</span>
 
 <span class="sd">        # Example 1: Initialize with GeoDataFrame</span>
@@ -960,6 +962,9 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from shapely.geometry import Point</span>
+<span class="sd">        &gt;&gt;&gt; from sedona.spark.geopandas import GeoSeries</span>
+<span class="sd">        &gt;&gt;&gt; s = GeoSeries([Point(1, 1), Point(2, 2)], crs=&#39;EPSG:4326&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; s.crs  # doctest: +SKIP</span>
 <span class="sd">        &lt;Geographic 2D CRS: EPSG:4326&gt;</span>
 <span class="sd">        Name: WGS 84</span>
@@ -2428,7 +2433,7 @@
 <span class="sd">        ...    b&quot;\x00\x08@\x00\x00\x00\x00\x00\x00\x08@&quot;</span>
 <span class="sd">        ... ),</span>
 <span class="sd">        ... ]</span>
-<span class="sd">        &gt;&gt;&gt; s = geopandas.GeoSeries.from_wkb(wkbs)</span>
+<span class="sd">        &gt;&gt;&gt; s = GeoSeries.from_wkb(wkbs)</span>
 <span class="sd">        &gt;&gt;&gt; s</span>
 <span class="sd">        0    POINT (1 1)</span>
 <span class="sd">        1    POINT (2 2)</span>
@@ -2577,7 +2582,7 @@
 
 <span class="sd">        &gt;&gt;&gt; x = [2.5, 5, -3.0]</span>
 <span class="sd">        &gt;&gt;&gt; y = [0.5, 1, 1.5]</span>
-<span class="sd">        &gt;&gt;&gt; s = geopandas.GeoSeries.from_xy(x, y, crs=&quot;EPSG:4326&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; s = GeoSeries.from_xy(x, y, crs=&quot;EPSG:4326&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; s</span>
 <span class="sd">        0    POINT (2.5 0.5)</span>
 <span class="sd">        1    POINT (5 1)</span>
@@ -3150,8 +3155,9 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; import geodatasets</span>
-<span class="sd">        &gt;&gt;&gt; df = geopandas.read_file(</span>
+<span class="sd">        &gt;&gt;&gt; import geodatasets  # requires: pip install geodatasets</span>
+<span class="sd">        &gt;&gt;&gt; import geopandas as gpd</span>
+<span class="sd">        &gt;&gt;&gt; df = gpd.read_file(</span>
 <span class="sd">        ...     geodatasets.get_path(&quot;geoda.chicago_commpop&quot;)</span>
 <span class="sd">        ... )</span>
 <span class="sd">        &gt;&gt;&gt; df.geometry.values.estimate_utm_crs()  # doctest: +SKIP</span>
