@@ -3592,7 +3592,9 @@
 <span class="sd">                - Whether returned value was a single object extended into a series (useful for row-wise &#39;align&#39; parameter)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># generator instead of a in-memory list</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">GeoDataFrame</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="kc">False</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
             <span class="n">lst</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))]</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">BaseGeometry</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">lst</span><span class="p">),</span> <span class="kc">True</span>
