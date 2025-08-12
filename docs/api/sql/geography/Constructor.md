@@ -21,8 +21,6 @@
 
 Introduction: Construct a Geography from WKT. If SRID is not set, it defaults to 0 (unknown).
 
-!!!note  The output WKT string uses the FIXED precision model, but all computations are performed using JTS’s default 16-digit precision model. Users can specify a different precision model when converting to a string if needed.
-
 Format:
 
 `ST_GeogFromWKT (Wkt: String)`
