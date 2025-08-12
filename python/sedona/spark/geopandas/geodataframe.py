@@ -574,7 +574,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         if inplace:
             frame = self
         else:
-            frame = self.copy(deep=False)
+            frame = self.copy()
 
         geo_column_name = self._geometry_column_name
         new_series = False
@@ -785,7 +785,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         """
         return pspd.DataFrame(self._internal)
 
-    def copy(self, deep=False):
+    def copy(self, deep=False) -> GeoDataFrame:
         """
         Make a copy of this GeoDataFrame object.
 
@@ -810,12 +810,10 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
            geometry  value1  value2
         0  POINT (1 1)       2       3
         """
-        if deep:
-            return GeoDataFrame(
-                self._anchor.copy(), dtype=self.dtypes, index=self._col_label
-            )
-        else:
-            return self  # GeoDataFrame(self._internal.spark_frame.copy())  "this parameter is not supported but just dummy parameter to match pandas."
+        # Note: The deep parameter is a dummy parameter just as it is in PySpark pandas
+        return GeoDataFrame(
+            pspd.DataFrame(self._internal.copy()), geometry=self.active_geometry_name
+        )
 
     def _safe_get_crs(self):
         """
