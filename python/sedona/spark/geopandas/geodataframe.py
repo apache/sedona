@@ -956,8 +956,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         Examples
         --------
         >>> from shapely.geometry import Point
+        >>> from sedona.spark.geopandas import GeoDataFrame
         >>> d = {'col1': ['name1', 'name2'], 'geometry': [Point(1, 2), Point(2, 1)]}
-        >>> gdf = geopandas.GeoDataFrame(d, crs=4326)
+        >>> gdf = GeoDataFrame(d, crs=4326)
         >>> gdf
             col1     geometry
         0  name1  POINT (1 2)
@@ -1089,8 +1090,8 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         --------
 
         >>> from sedona.spark.geopandas import GeoDataFrame
-        >>> import geoarrow.pyarrow as ga
-        >>> import pyarrow as pa
+        >>> import geoarrow.pyarrow as ga  # requires: pip install geoarrow-pyarrow
+        >>> import pyarrow as pa  # requires: pip install pyarrow
         >>> table = pa.Table.from_arrays([
         ...     ga.as_geoarrow([None, "POLYGON ((0 0, 1 1, 0 1, 0 0))", "LINESTRING (0 0, -1 1, 0 -1)"]),
         ...     pa.array([1, 2, 3]),
@@ -1264,7 +1265,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         The returned data object needs to be consumed by a library implementing
         the Arrow PyCapsule Protocol. For example, wrapping the data as a
         pyarrow.Table (requires pyarrow >= 14.0):
-        >>> import pyarrow as pa
+        >>> import pyarrow as pa  # requires: pip install pyarrow
         >>> table = pa.table(arrow_table)
         >>> table
         pyarrow.Table
@@ -1419,8 +1420,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         Examples
         --------
-        >>> import geodatasets
-        >>> df = geopandas.read_file(geodatasets.get_path("nybb"))
+        >>> import geodatasets  # requires: pip install geodatasets
+        >>> import geopandas as gpd
+        >>> df = gpd.read_file(geodatasets.get_path("nybb"))
         >>> df.head()  # doctest: +SKIP
         BoroCode  ...                                           geometry
         0         5  ...  MULTIPOLYGON (((970217.022 145643.332, 970227....
@@ -1493,6 +1495,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         ...     'value': [1, 2]
         ... })
         >>> joined = points.sjoin(polygons)
+        >>> joined
+            geometry_left  value_left            geometry_right  value_right
+        0  POINT (0.5 0.5)           1  POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))            1
         """
         from sedona.spark.geopandas.tools.sjoin import sjoin as sjoin_tool
 
@@ -1607,17 +1612,17 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         ...     "geometry": [Point(0, 0), LineString([(0, 0), (1, 1)])],
         ...     "int": [1, 2]
         ... })
-        >>> gdf.to_file(filepath, driver="geoparquet")
+        >>> gdf.to_file("output.parquet", driver="geoparquet")
 
         With selected drivers you can also append to a file with ``mode="a"``:
 
-        >>> gdf.to_file(filepath, driver="geojson", mode="a")
+        >>> gdf.to_file("output.geojson", driver="geojson", mode="a")
 
         When the index is of non-integer dtype, ``index=None`` (default) is treated as True,
         writing the index to the file.
 
-        >>> gdf = GeoDataFrame({"geometry": [Point(0, 0)]}, index=["a", "b"])
-        >>> gdf.to_file(filepath, driver="geoparquet")
+        >>> gdf = GeoDataFrame({"geometry": [Point(0, 0), Point(1, 1)]}, index=["a", "b"])
+        >>> gdf.to_file("output_with_index.parquet", driver="geoparquet")
         """
         sgpd.io._to_file(self, path, driver, index, **kwargs)
 
