@@ -65,12 +65,15 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
 
   it("passed ST_GeogFromEWKB") {
     val wkbSeq = Seq[Array[Byte]](
-      Array[Byte](1, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, -124, -42, 0, -64, 0, 0, 0, 0, -128, -75,
-        -42, -65, 0, 0, 0, 96, -31, -17, -9, -65, 0, 0, 0, -128, 7, 93, -27, -65))
+      Array[Byte](1, 2, 0, 0, 32, -26, 16, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, -124, -42, 0, -64, 0, 0,
+        0, 0, -128, -75, -42, -65, 0, 0, 0, 96, -31, -17, -9, -65, 0, 0, 0, -128, 7, 93, -27,
+        -65))
     val df = wkbSeq.toDF("wkb") select (st_constructors.ST_GeogFromEWKB("wkb"))
     val actualResult = df.take(1)(0).get(0).asInstanceOf[Geography].toString()
-    val expectedResult =
+    val expectedResult = {
       "LINESTRING (-2.1 -0.4, -1.5 -0.7)"
+    }
+    assert(df.take(1)(0).get(0).asInstanceOf[Geography].getSRID == 4326)
     assert(actualResult == expectedResult)
   }
 
