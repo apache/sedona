@@ -27,6 +27,14 @@ from sedona.core.geom.envelope import Envelope
 from sedona.core.geom.geography import Geography
 from sedona.core.spatialOperator import JoinQuery
 from sedona.core.spatialOperator import JoinQueryRaw, KNNQuery, RangeQuery
+from sedona.stats.clustering.dbscan import dbscan
+from sedona.stats.outlier_detection.local_outlier_factor import (
+    local_outlier_factor,
+)
+from sedona.stats.hotspot_detection.getis_ord import g_local
+from sedona.stats.weighting import add_distance_band_column
+from sedona.stats.weighting import add_binary_distance_band_column
+from sedona.stats.weighting import add_weighted_distance_band_column
 
 from sedona.sql import st_aggregates as sta
 from sedona.sql import st_constructors as stc
@@ -103,6 +111,8 @@ class TestPathCompatibility(TestBase):
         assert g_local is not None
         assert add_distance_band_column is not None
         assert add_binary_distance_band_column is not None
+        assert add_weighted_distance_band_column is not None
+        assert local_outlier_factor is not None
 
     def test_util_imports(self):
         # Test utility imports
