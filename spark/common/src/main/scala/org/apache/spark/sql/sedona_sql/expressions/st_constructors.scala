@@ -108,8 +108,8 @@ object st_constructors {
     wrapExpression[ST_GeogFromWKB](wkb, srid)
   def ST_GeogFromWKB(wkb: String, srid: Int): Column = wrapExpression[ST_GeogFromWKB](wkb, srid)
 
-  def ST_GeogFromEWKB(wkb: Column): Column = wrapExpression[ST_GeogFromEWKB](wkb, 0)
-  def ST_GeogFromEWKB(wkb: String): Column = wrapExpression[ST_GeogFromEWKB](wkb, 0)
+  def ST_GeogFromEWKB(wkb: Column): Column = wrapExpression[ST_GeogFromEWKB](wkb)
+  def ST_GeogFromEWKB(wkb: String): Column = wrapExpression[ST_GeogFromEWKB](wkb)
 
   def ST_LineFromText(wkt: Column): Column = wrapExpression[ST_LineFromText](wkt)
   def ST_LineFromText(wkt: String): Column = wrapExpression[ST_LineFromText](wkt)

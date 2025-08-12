@@ -88,7 +88,7 @@ private[apache] case class ST_GeogFromWKB(inputExpressions: Seq[Expression])
  *   / string.
  */
 private[apache] case class ST_GeogFromEWKB(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.geogFromWKB(_: Array[Byte], _: Int)) {
+    extends InferredExpression(Constructors.geogFromWKB(_: Array[Byte])) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

@@ -112,15 +112,17 @@ class ConstructorsTest extends TestBaseScala {
     assert(polygonDf.count() == 100)
     // RAW binary array
     val wkbSeq = Seq[Array[Byte]](
-      Array[Byte](1, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, -124, -42, 0, -64, 0, 0, 0, 0, -128, -75,
-        -42, -65, 0, 0, 0, 96, -31, -17, -9, -65, 0, 0, 0, -128, 7, 93, -27, -65))
+      Array[Byte](1, 2, 0, 0, 32, -26, 16, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, -124, -42, 0, -64, 0, 0,
+        0, 0, -128, -75, -42, -65, 0, 0, 0, 96, -31, -17, -9, -65, 0, 0, 0, -128, 7, 93, -27,
+        -65))
     val rawWkbDf = wkbSeq.toDF("wkb")
     rawWkbDf.createOrReplaceTempView("rawWKBTable")
-    val geometries =
+    val geography =
       sparkSession.sql("SELECT ST_GeogFromEWKB(rawWKBTable.wkb) as countyshape from rawWKBTable")
     val expectedGeom = {
       "LINESTRING (-2.1 -0.4, -1.5 -0.7)"
     }
-    assert(geometries.first().getAs[Geography](0).toString.equals(expectedGeom))
+    assert(geography.first().getAs[Geography](0).getSRID == 4326)
+    assert(geography.first().getAs[Geography](0).toString.equals(expectedGeom))
   }
 }
