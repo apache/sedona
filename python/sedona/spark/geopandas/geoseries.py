@@ -2862,7 +2862,9 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
                 - Whether returned value was a single object extended into a series (useful for row-wise 'align' parameter)
         """
         # generator instead of a in-memory list
-        if not isinstance(value, pspd.Series):
+        if isinstance(value, GeoDataFrame):
+            return value.geometry, False
+        elif not isinstance(value, pspd.Series):
             lst = [value for _ in range(len(self))]
             if isinstance(value, BaseGeometry):
                 return GeoSeries(lst), True
