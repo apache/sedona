@@ -1093,7 +1093,7 @@
         <span class="k">if</span> <span class="n">inplace</span><span class="p">:</span>
             <span class="n">frame</span> <span class="o">=</span> <span class="bp">self</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
         <span class="n">geo_column_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_column_name</span>
         <span class="n">new_series</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1316,7 +1316,7 @@
 
 <div class="viewcode-block" id="GeoDataFrame.copy">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.geodataframe.GeoDataFrame.copy">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeoDataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make a copy of this GeoDataFrame object.</span>
 
@@ -1341,12 +1341,10 @@
 <span class="sd">           geometry  value1  value2</span>
 <span class="sd">        0  POINT (1 1)       2       3</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">deep</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">GeoDataFrame</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_anchor</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtypes</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_col_label</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span>  <span class="c1"># GeoDataFrame(self._internal.spark_frame.copy())  &quot;this parameter is not supported but just dummy parameter to match pandas.&quot;</span></div>
+        <span class="c1"># Note: The deep parameter is a dummy parameter just as it is in PySpark pandas</span>
+        <span class="k">return</span> <span class="n">GeoDataFrame</span><span class="p">(</span>
+            <span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">copy</span><span class="p">()),</span> <span class="n">geometry</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">active_geometry_name</span>
+        <span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_safe_get_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
