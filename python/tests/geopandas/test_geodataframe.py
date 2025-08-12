@@ -277,9 +277,12 @@ class TestGeoDataFrame(TestGeopandasBase):
         )
 
     def test_copy(self):
-        df = GeoDataFrame([Point(x, x) for x in range(3)], name="test_df")
-        df_copy = df.copy()
-        assert type(df_copy) is GeoDataFrame
+        df = GeoDataFrame(
+            {"test": [Point(x, x) for x in range(3)]}, index=[1, 2, 3], geometry="test"
+        )
+        result = df.copy()
+        self.check_sgpd_df_equals_gpd_df(result, df.to_geopandas())
+        self.check_sgpd_df_equals_gpd_df(df, result.to_geopandas())
 
     def test_set_crs(self):
         sgpd_df = sgpd.GeoDataFrame({"geometry": [Point(0, 0), Point(1, 1)]})
@@ -297,9 +300,12 @@ class TestGeoDataFrame(TestGeopandasBase):
         assert sgpd_df.crs is None
 
         with self.ps_allow_diff_frames():
-            sgpd_df = sgpd_df.set_crs(4326, allow_override=True)
-        assert isinstance(sgpd_df, GeoDataFrame)
-        assert sgpd_df.crs.to_epsg() == 4326
+            result = sgpd_df.set_crs(4326, allow_override=True)
+        assert result.crs.to_epsg() == 4326
+        assert isinstance(result, GeoDataFrame)
+
+        # Ensure set_crs without inplace modifies a copy and not current df
+        assert sgpd_df.crs is None
 
     def test_to_crs(self):
         from pyproj import CRS
@@ -313,6 +319,8 @@ class TestGeoDataFrame(TestGeopandasBase):
         with self.ps_allow_diff_frames():
             result = gdf.to_crs(3857)
         assert isinstance(result.crs, CRS) and result.crs.to_epsg() == 3857
+        # Ensure original df is not modified
+        assert gdf.crs.to_epsg() == 4326
 
         expected = gpd.GeoSeries(
             [
@@ -338,21 +346,18 @@ class TestGeoDataFrame(TestGeopandasBase):
         with pytest.raises(MissingGeometryColumnError):
             _ = sgpd_df.geometry
 
-        # TODO: Try to optimize this with self.ps_allow_diff_frames() away
-        with self.ps_allow_diff_frames():
-            sgpd_df = sgpd_df.set_geometry("geometry1")
+        sgpd_df.set_geometry("geometry1", inplace=True)
 
         assert sgpd_df.geometry.name == "geometry1"
 
-        # TODO: Try to optimize this with self.ps_allow_diff_frames() away
-        with self.ps_allow_diff_frames():
-            sgpd_df.set_geometry("geometry2", inplace=True)
-        assert sgpd_df.geometry.name == "geometry2"
+        result = sgpd_df.set_geometry("geometry2")
+        assert result.geometry.name == "geometry2"
 
-        # Test the actual values of the geometry column
-        assert_series_equal(
-            sgpd_df.geometry.area.to_pandas(), sgpd_df["geometry2"].area.to_pandas()
-        )
+        # Ensure original df is not modified
+        assert sgpd_df.geometry.name == "geometry1"
+
+        # Test the actual values of the geometry column equal for an area calculation
+        self.check_pd_series_equal(result.area, sgpd_df["geometry2"].area.to_pandas())
 
         # unknown column
         with pytest.raises(ValueError):
