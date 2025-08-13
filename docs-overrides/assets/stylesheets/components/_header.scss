@@ -1,0 +1,50 @@
+.md-header {
+  box-shadow: none;
+  background-color: var(--color-dark);
+
+  .md-header__inner {
+    background-color: var(--color-dark);
+    min-height: 80px;
+    padding: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .md-header__button.md-logo {
+      padding: 0;
+      margin: 0;
+      img, svg {
+        height: 42px;
+        width: auto;
+        display: block;
+        object-fit: contain;
+      }
+    }
+
+  }
+}
+
+.md-tabs {
+  background-color: var(--color-red);
+
+  .md-grid {
+    max-width: 100%;
+  }
+
+  .md-tabs__list {
+    display: flex;
+    justify-content: center;
+
+    .md-tabs__item {
+      a {
+        font-family: var(--font-inter);
+        font-style: normal;
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 1.22;
+        color: var(--color-white);
+      }
+    }
+  }
+}
+

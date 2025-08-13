@@ -1,143 +1,235 @@
 {#-
-  This file was automatically generated - do not edit
+This file was automatically generated - do not edit
 -#}
 {% extends "base.html" %}
 
 {% block outdated %}
-  You're not viewing the latest stable version.
-  <a href="{{ '../' ~ base_url }}">
-    <strong>Click here to go to the latest stable version.</strong>
-  </a>
+You're not viewing the latest stable version.
+<a href="{{ '../' ~ base_url }}">
+  <strong>Click here to go to the latest stable version.</strong>
+</a>
 {% endblock %}
 
 {% block extrahead %}
-  {{ super() }}
-  <meta name="google-site-verification" content="o2riomKLozYKc2IQivWGsrI2unuyQs7hXiAD4kGMCTQ" />
+{{ super() }}
+<meta name="google-site-verification" content="o2riomKLozYKc2IQivWGsrI2unuyQs7hXiAD4kGMCTQ" />
 {% endblock %}
 
-{% block content %}
-  {% if page.is_homepage %}
-  <!-- {{ super() }} -->
-  <style>
-    .md-header{position:initial}.md-main__inner{margin-left:5%}.md-content{display:display}@media screen and (min-width:60em){.md-sidebar--secondary{display:display}}@media screen and (min-width:76.25em){.md-sidebar--primary{display:none}}
-    .br {
-            display: block;
-            margin-bottom: 14em;
-        }
-    .responsive-container {
-      display: grid;
-      grid-template-columns: 44% 56%;
-      grid-gap: 20px;
-    }
-    .responsive-text {
-      grid-column: 1;
-    }
-    .responsive-img {
-     grid-column: 2;
-    }
+{% block page_content %}
+<div class="md-container" data-md-component="container">
+  <main class="md-main" data-md-component="main">
 
-    @media (max-width: 490px) {
-      .responsive-container {
-        grid-template-columns: 100%;
-      }
-      .responsive-text , .responsive-img {
-        grid-column: 1;
-      }
-    }
-</style>
-    <section class="tx-container">
-      <div class="md-grid md-typeset">
-        <div class="tx-hero">
-          <div class="tx-hero__image">
-            <img src="image/sedona_logo.png" width="500">
+    {% if page.is_homepage %}
+    <div class="page-home">
+
+      <!-- Section Hero -->
+      <section class="section-hero">
+        <div class="container">
+
+          <div class="logo-wrap">
+            <img src="image/home/hero/logo.svg" alt="" class="logo">
           </div>
-          <div class="tx-hero__content">
-            <p>{{ config.site_description }}</p>
-            <p>Set up Scala and Java API in 5 minutes with Maven and SBT.</p>
-            <p>Python and R API are also available on PyPI and CRAN.</p>
-            <a href="{{ page.next_page.url | url }}" title="{{ page.next_page.title | striptags }}" class="md-button md-button--primary">
+
+          <div class="section-description editor">
+            Apache Sedona™ makes it easy to process spatial datasets of any scale.
+          </div>
+
+          <div class="btn-group">
+            <a href="{{ page.next_page.url | url }}" title="{{ page.next_page.title | striptags }}" class="btn btn-black">
               Get started
             </a>
-            <a href="{{ config.repo_url }}" title="{{ lang.t('source.link.title') }}" class="md-button">
-              Go to GitHub
-            </a>
-            <p>
-            <a href="community/contact/#discord-server" target="_blank">
-              <img src="https://dcbadge.limes.pink/api/server/https://discord.gg/9A3k5dEBsY" alt="Apache Sedona Discord server">
-            </a>
-            </p>
-
           </div>
-
-          <br><br><br>
-
-          <div class="tx-hero__content">
-            <h1>Sedona Ecosystem</h1>
-            <div style="width: 100%;">
-              <img src="image/sedona-ecosystem.png" width="800">
-            </div>
-          </div>
-
-          <br><br><br><br>
-
-          <div class="tx-hero__content">
-            <h1>High Speed</h1>
-            <div class="responsive-container">
-              <div class="responsive-text">
-                According to <a href="./community/publication/">our benchmark and third-party research papers</a>, Sedona runs 2X - 10X faster than other Spark-based geospatial data systems on computation-intensive query workloads.
-              </div>
-              <div class="responsive-img">
-                <figure>
-                    <img src="image/jointime.png" width="350">
-                    <figcaption>Execution time of spatial join with polygons</figcaption>
-                </figure>
-              </div>
-            </div>
-          </div>
-
-          <br><br><br><br>
-
-          <div class="tx-hero__content">
-            <h1>Low Memory Consumption</h1>
-            <div class="responsive-container">
-              <div class="responsive-text">
-                According to <a href="./community/publication/">our benchmark and third-party research papers</a>, Sedona has 50% less peak memory consumption than other Spark-based geospatial data systems for large-scale in-memory query processing.
-              </div>
-              <div class="responsive-img">
-                <figure>
-                    <img src="image/joinmem.png" width="350">
-                    <figcaption>Peak memory consumption of spatial join with polygons</figcaption>
-                </figure>
-              </div>
-            </div>
-          </div>
-
-          <br><br><br><br>
-
-          <div class="tx-hero__content">
-            <h1>Ease of Use</h1>
-            <div class="responsive-container">
-              <div class="responsive-text">
-                Sedona offers Scala, Java, Spatial SQL, Python, and R APIs and integrates them into underlying system kernels with care. You can simply create spatial analytics and data mining applications and run them in any cloud environments.
-              </div>
-              <div class="responsive-img">
-<pre class="hljs" style="display: block; overflow-x: auto; background: rgb(235, 248, 255); color: rgb(81, 109, 123); padding: 0.5em;"><span class="hljs-keyword" style="color: rgb(107, 107, 184);">SELECT</span> superhero.name
-<span class="hljs-keyword" style="color: rgb(107, 107, 184);">FROM</span> city, superhero
-<span class="hljs-keyword" style="color: rgb(107, 107, 184);">WHERE</span> ST_Contains(city.geom, superhero.geom)
-<span class="hljs-keyword" style="color: rgb(107, 107, 184);">AND</span> city.name = <span class="hljs-string" style="color: rgb(86, 140, 59);">'Gotham'</span></pre>
-              </div>
-            </div>
-          </div>
-
-          <br><br><br><br>
-
-          <span class="br"></span>
 
         </div>
-      </div>
-    </section>
 
-  {% else %}
+        <div class="img-bg-wrap">
+          <img src="image/home/hero/mountains-desktop.png" alt="" class="img-bg img-bg--desktop">
+          <img src="image/home/hero/mountains-mobile.png" alt="" class="img-bg img-bg--mobile">
+        </div>
+      </section>
+
+      <!-- Section GIF -->
+      <section class="section-img-wrap">
+        <div class="container">
+          <div class="img-wrap">
+            <img src="image/home/gif/gif.png" alt="" class="">
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Features -->
+      <section class="section-features">
+        <div class="container">
+          <h2 class="section-title">Apache Sedona at a glance</h2>
+          <div class="section-description editor">Core features that define Sedona’s geospatial performance</div>
+          <div class="features-grid">
+
+            <div class="feature-item">
+              <div class="feature-item__icon">
+                <img src="image/home/features/1.svg" alt="" class="">
+              </div>
+              <h3 class="feature-item__title">Scalable</h3>
+              <div class="feature-item__description editor">Works with planetary-scale datasets in Spark, Flink, or local systems.</div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-item__icon">
+                <img src="image/home/features/2.svg" alt="" class="">
+              </div>
+              <h3 class="feature-item__title">Feature Complete</h3>
+              <div class="feature-item__description editor">300+ spatial functions, multiple file formats, full integration with data lakes to databases.</div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-item__icon">
+                <img src="image/home/features/3.svg" alt="" class="">
+              </div>
+              <h3 class="feature-item__title">Raster + Vector Joins</h3>
+              <div class="feature-item__description editor">High-performance joins across multiple data types.</div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-item__icon">
+                <img src="image/home/features/4.svg" alt="" class="">
+              </div>
+              <h3 class="feature-item__title">Portable</h3>
+              <div class="feature-item__description editor">Run locally, on cloud, or in data platforms like Snowflake.</div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-item__icon">
+                <img src="image/home/features/5.svg" alt="" class="">
+              </div>
+              <h3 class="feature-item__title">Fast</h3>
+              <div class="feature-item__description editor">Works with planetary-scale datasets in Spark, Flink, or local systems.</div>
+              <div class="feature-item__cta">
+                <a href="#" class="btn-link">
+                  <span class="caption">See the benchmarks</span>
+                  <span class="icon">
+                    <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M3.95831 9.5H15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M9.5 3.95825L15.0417 9.49992L9.5 15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>
+                  </span>
+                </a>
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-item__icon">
+                <img src="image/home/features/6.svg" alt="" class="">
+              </div>
+              <h3 class="feature-item__title">Familiar</h3>
+              <div class="feature-item__description editor">Works with SQL, Python, Scala, Java, and R.</div>
+            </div>
+
+
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Deploy -->
+      <section class="section-deploy">
+        <div class="container">
+          <h2 class="section-title">Deploy Sedona where you need it</h2>
+          <div class="section-description editor">Choose the right runtime for your infrastructure, from local setups to distributed and cloud-native systems.</div>
+          <div class="info-grid">
+
+            <div class="info-item">
+              <div class="info-item__tag">
+                <img src="image/home/deploy/1.svg" alt="" class="">
+                <div class="caption">
+                  Local
+                </div>
+              </div>
+              <h3 class="info-item__title">SedonaDB</h3>
+              <div class="info-item__description editor">Standalone runtime for local processing and development.</div>
+              <div class="info-item__cta">
+                <a href="#" class="btn-link">
+                  <span class="caption">SedonaDB</span>
+                  <span class="icon">
+                    <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M3.95831 9.5H15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M9.5 3.95825L15.0417 9.49992L9.5 15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>
+                  </span>
+                </a>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-item__tag">
+                <img src="image/home/deploy/2.svg" alt="" class="">
+                <div class="caption">
+                  Batch
+                </div>
+              </div>
+              <h3 class="info-item__title">SedonaSpark</h3>
+              <div class="info-item__description editor">Distributed batch processing on Apache Spark clusters.</div>
+              <div class="info-item__cta">
+                <a href="#" class="btn-link">
+                  <span class="caption">SedonaSpark</span>
+                  <span class="icon">
+                    <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M3.95831 9.5H15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M9.5 3.95825L15.0417 9.49992L9.5 15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>
+                  </span>
+                </a>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-item__tag">
+                <img src="image/home/deploy/3.svg" alt="" class="">
+                <div class="caption">
+                  Streaming
+                </div>
+              </div>
+              <h3 class="info-item__title">SedonaFlink</h3>
+              <div class="info-item__description editor">Real-time spatial analytics using Apache Flink.</div>
+              <div class="info-item__cta">
+                <a href="#" class="btn-link">
+                  <span class="caption">SedonaFlink</span>
+                  <span class="icon">
+                    <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M3.95831 9.5H15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M9.5 3.95825L15.0417 9.49992L9.5 15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>
+                  </span>
+                </a>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-item__tag">
+                <img src="image/home/deploy/4.svg" alt="" class="">
+                <div class="caption">
+                  Cloud
+                </div>
+              </div>
+              <h3 class="info-item__title">SedonaSnow</h3>
+              <div class="info-item__description editor">Native spatial support inside Snowflake environments.</div>
+              <div class="info-item__cta">
+                <a href="#" class="btn-link">
+                  <span class="caption">SedonaSnow</span>
+                  <span class="icon">
+                    <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M3.95831 9.5H15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+<path d="M9.5 3.95825L15.0417 9.49992L9.5 15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>
+                  </span>
+                </a>
+              </div>
+            </div>
+
+
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    {% else %}
     {{ super() }}
-  {% endif %}
+    {% endif %}
+  </main>
+</div>
 {% endblock %}
