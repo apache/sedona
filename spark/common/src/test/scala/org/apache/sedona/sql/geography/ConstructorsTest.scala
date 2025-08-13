@@ -36,7 +36,7 @@ class ConstructorsTest extends TestBaseScala {
       sparkSession.sql(s"SELECT ST_GeogFromGeoHash('$geohash','$precision') AS geog").first()
     var geoStr = row.get(0).asInstanceOf[Geography].toText(new PrecisionModel(1e6))
     var expectedWkt =
-      "POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))"
+      "SRID=4326; POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))"
     assertEquals(expectedWkt, geoStr)
 
     geohash = "s00twy01mt"
@@ -44,7 +44,7 @@ class ConstructorsTest extends TestBaseScala {
     row = sparkSession.sql(s"SELECT ST_GeogFromGeoHash('$geohash','$precision') AS geog").first()
     geoStr = row.get(0).asInstanceOf[Geography].toText(new PrecisionModel(1e6))
     expectedWkt =
-      "POLYGON ((0.703125 0.8789062, 1.0546875 0.8789062, 1.0546875 1.0546875, 0.703125 1.0546875, 0.703125 0.8789062))"
+      "SRID=4326; POLYGON ((0.703125 0.8789062, 1.0546875 0.8789062, 1.0546875 1.0546875, 0.703125 1.0546875, 0.703125 0.8789062))"
     assertEquals(expectedWkt, geoStr)
   }
 

@@ -34,7 +34,7 @@ SELECT ST_GeogFromGeoHash('9q9j8ue2v71y5zzy0s4q', 16)
 Output:
 
 ```
-POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))"
+SRID=4326; POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))"
 ```
 
 Introduction: Construct a Geography from WKT. If SRID is not set, it defaults to 0 (unknown).

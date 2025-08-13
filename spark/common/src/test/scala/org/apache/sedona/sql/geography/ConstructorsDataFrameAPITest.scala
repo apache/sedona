@@ -79,7 +79,7 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
     val actualResult =
       df.take(1)(0).get(0).asInstanceOf[Geography].toText(new PrecisionModel(1e6))
     var expectedWkt =
-      "POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))"
+      "SRID=4326; POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))"
     assertEquals(expectedWkt, actualResult)
   }
 

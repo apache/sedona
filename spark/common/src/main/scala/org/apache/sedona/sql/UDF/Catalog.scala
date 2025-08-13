@@ -188,6 +188,7 @@ object Catalog extends AbstractCatalog {
     function[ST_GeoHash](),
     function[ST_GeomFromGeoHash](null),
     function[ST_PointFromGeoHash](null),
+    function[ST_GeogFromGeoHash](null),
     function[ST_Collect](),
     function[ST_Multi](),
     function[ST_PointOnSurface](),
