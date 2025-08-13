@@ -59,7 +59,7 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
     val df = wkbSeq.toDF("wkb").select(st_constructors.ST_GeogFromWKB(col("wkb")))
     val actualResult = df.take(1)(0).get(0).asInstanceOf[Geography].toString()
     val expectedResult =
-      "GEOMETRYCOLLECTION (POINT (0 1), POINT (0 1), POINT (2 3), LINESTRING (2 3, 4 5), LINESTRING (0 1, 2 3), LINESTRING (4 5, 6 7), POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0), (9 1, 9 9, 1 9, 1 1, 9 1)), POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0), (9 1, 9 9, 1 9, 1 1, 9 1)), POLYGON ((-9 0, -9 10, -1 10, -1 0, -9 0)))"
+      "GEOMETRYCOLLECTION (SRID=4326; POINT (0 1), SRID=4326; POINT (0 1), SRID=4326; POINT (2 3), SRID=4326; LINESTRING (2 3, 4 5), SRID=4326; LINESTRING (0 1, 2 3), SRID=4326; LINESTRING (4 5, 6 7), SRID=4326; POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0), (9 1, 9 9, 1 9, 1 1, 9 1)), SRID=4326; POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0), (9 1, 9 9, 1 9, 1 1, 9 1)), SRID=4326; POLYGON ((-9 0, -9 10, -1 10, -1 0, -9 0)))"
     assert(actualResult == expectedResult)
   }
 

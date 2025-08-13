@@ -53,42 +53,6 @@ Output:
 SRID=4326; LINESTRING (1 2, 3 4, 5 6)
 ```
 
-## ST_GeogFromWKT
-
-Introduction: Construct a Geography from WKT. If SRID is not set, it defaults to 0 (unknown).
-
-Format:
-
-`ST_GeogFromWKT (Wkt: String)`
-
-`ST_GeogFromWKT (Wkt: String, srid: Integer)`
-
-Since: `v1.8.0`
-
-SQL Example
-
-```sql
-SELECT ST_GeogFromWKT('LINESTRING (1 2, 3 4, 5 6)')
-```
-
-Output:
-
-```
-LINESTRING (1 2, 3 4, 5 6)
-```
-
-SQL Example:
-
-```sql
-SELECT ST_GeogFromWKT('GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((35 15, 45 15, 40 25, 35 15), (30 10, 40 20, 30 20, 30 10)))')
-```
-
-Output:
-
-```
-GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((35 15, 45 15, 40 25, 35 15), (30 10, 40 20, 30 20, 30 10)))
-```
-
 ## ST_GeogFromEWKT
 
 Introduction: Construct a Geography from OGC Extended WKT.
