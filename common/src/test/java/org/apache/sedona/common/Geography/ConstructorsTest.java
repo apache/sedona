@@ -67,7 +67,7 @@ public class ConstructorsTest {
 
     // Test specifying SRID
     result = Constructors.geogFromWKB(wkb, 1000);
-    assertEquals(geog.toString(), result.toString());
+    assertEquals("SRID=1000; POINT (-64 45)", result.toString());
     assertEquals(1000, result.getSRID());
 
     // Test EWKB with SRID
@@ -75,15 +75,15 @@ public class ConstructorsTest {
     geog.setSRID(2000);
     wkb = wkbWriter.write(geog);
     result = Constructors.geogFromWKB(wkb);
-    assertEquals(geog.toString(), result.toString());
+    assertEquals("SRID=2000; POINT (-64 45)", result.toString());
     assertEquals(2000, result.getSRID());
 
     // Test overriding SRID
     result = Constructors.geogFromWKB(wkb, 3000);
-    assertEquals(geog.toString(), result.toString());
+    assertEquals("SRID=3000; POINT (-64 45)", result.toString());
     assertEquals(3000, result.getSRID());
     result = Constructors.geogFromWKB(wkb, 0);
-    assertEquals(geog.toString(), result.toString());
+    assertEquals("POINT (-64 45)", result.toString());
     assertEquals(0, result.getSRID());
   }
 }
