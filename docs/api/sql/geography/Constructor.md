@@ -40,6 +40,30 @@ Output:
 ```
 LINESTRING (1 2, 3 4, 5 6)
 ```
+## ST_GeogFromWKT
+
+Introduction: Construct a Geography from WKT. If SRID is not set, it defaults to 0 (unknown).
+
+Format:
+
+`ST_GeogFromWKT (Wkt: String)`
+
+`ST_GeogFromWKT (Wkt: String, srid: Integer)`
+
+Since: `v1.8.0`
+
+SQL Example
+
+```sql
+SELECT ST_GeogFromWKT('LINESTRING (1 2, 3 4, 5 6)')
+```
+
+Output:
+
+```
+LINESTRING (1 2, 3 4, 5 6)
+```
+
 
 SQL Example:
 
@@ -65,11 +89,11 @@ Since: `v1.8.0`
 SQL example:
 
 ```sql
-SELECT ST_GeogFromEWKT('SRID=4326;LINESTRING (0 0, 3 3, 4 4)')
+SELECT ST_GeogFromEWKT('SRID=4326; LINESTRING (0 0, 3 3, 4 4)')
 ```
 
 Output:
 
 ```
-LINESTRING (0 0, 3 3, 4 4)
+SRID=4326; LINESTRING (0 0, 3 3, 4 4)
 ```

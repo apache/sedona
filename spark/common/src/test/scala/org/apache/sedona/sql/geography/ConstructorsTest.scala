@@ -29,24 +29,26 @@ class ConstructorsTest extends TestBaseScala {
 
   it("Passed ST_GeogFromWKT") {
     val wkt = "LINESTRING (1 2, 3 4, 5 6)"
+    val wktExpected = "SRID=4326; LINESTRING (1 2, 3 4, 5 6)"
     val row = sparkSession.sql(s"SELECT ST_GeogFromWKT('$wkt', 4326) AS geog").first()
     // Write output with precisionModel
     val geoStr = row.get(0).asInstanceOf[Geography].toString()
     val geog = row.get(0).asInstanceOf[Geography]
     assert(geog.getSRID == 4326)
     assert(geog.isInstanceOf[Geography])
-    assert(geoStr == wkt)
+    assert(geoStr == wktExpected)
   }
 
   it("Passed ST_GeogFromText") {
     val wkt = "LINESTRING (1 2, 3 4, 5 6)"
+    val wktExpected = "SRID=4326; LINESTRING (1 2, 3 4, 5 6)"
     val row = sparkSession.sql(s"SELECT ST_GeogFromText('$wkt', 4326) AS geog").first()
     // Write output with precisionModel
     val geoStr = row.get(0).asInstanceOf[Geography].toString()
     val geog = row.get(0).asInstanceOf[Geography]
     assert(geog.getSRID == 4326)
     assert(geog.isInstanceOf[Geography])
-    assert(geoStr == wkt)
+    assert(geoStr == wktExpected)
   }
 
   it("Passed ST_GeogFromWKT no SRID") {

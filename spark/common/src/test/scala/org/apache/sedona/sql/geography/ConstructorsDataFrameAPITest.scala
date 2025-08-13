@@ -68,7 +68,7 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
       .sql("SELECT 'SRID=4269;POINT(0.0 1.0)' AS wkt")
       .select(st_constructors.ST_GeogFromEWKT("wkt"))
     val actualResult = df.take(1)(0).get(0).asInstanceOf[Geography]
-    assert(actualResult.toString() == "POINT (0 1)")
+    assert(actualResult.toString() == "SRID=4269; POINT (0 1)")
     assert(actualResult.getSRID == 4269)
   }
 

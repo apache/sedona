@@ -41,11 +41,11 @@ public class ConstructorsTest {
 
     geog = Constructors.geogFromEWKT("SRID=4269; POINT (1 1)");
     assertEquals(4269, geog.getSRID());
-    assertEquals("POINT (1 1)", geog.toString());
+    assertEquals("SRID=4269; POINT (1 1)", geog.toString());
 
     geog = Constructors.geogFromEWKT("SRID=4269;POINT (1 1)");
     assertEquals(4269, geog.getSRID());
-    assertEquals("POINT (1 1)", geog.toString());
+    assertEquals("SRID=4269; POINT (1 1)", geog.toString());
 
     ParseException invalid =
         assertThrows(ParseException.class, () -> Constructors.geogFromEWKT("not valid"));

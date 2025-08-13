@@ -374,6 +374,18 @@ public class WKTWriter {
     Assert.shouldNeverReachHere("Unsupported Geometry implementation: " + geography.getClass());
   }
 
+  /** Check if need to write SRID */
+  public void writeSRID(Geography geography, Writer writer) throws IOException {
+    if (geography == null || writer == null) return;
+
+    int srid = geography.getSRID();
+    if (srid > 0) {
+      writer.write("SRID=");
+      writer.write(Integer.toString(srid));
+      writer.write(';');
+      writer.write(' ');
+    }
+  }
   /**
    * Converts a <code>Coordinate</code> to &lt;Point Tagged Text&gt; format, then appends it to the
    * writer.
@@ -392,6 +404,7 @@ public class WKTWriter {
       Writer writer,
       OrdinateFormat formatter)
       throws IOException {
+    writeSRID(point, writer);
     writer.write(WKTConstants.POINT);
     writer.write(" ");
     appendOrdinateText(outputOrdinates, writer);
@@ -424,6 +437,7 @@ public class WKTWriter {
       Writer writer,
       OrdinateFormat formatter)
       throws IOException {
+    writeSRID(lineString, writer);
     writer.write(WKTConstants.LINESTRING);
     writer.write(" ");
     appendOrdinateText(outputOrdinates, writer);
@@ -455,6 +469,7 @@ public class WKTWriter {
       Writer writer,
       OrdinateFormat formatter)
       throws IOException {
+    writeSRID(polygon, writer);
     writer.write(WKTConstants.POLYGON);
     writer.write(" ");
     appendOrdinateText(outputOrdinates, writer);
@@ -480,6 +495,7 @@ public class WKTWriter {
       Writer writer,
       OrdinateFormat formatter)
       throws IOException {
+    writeSRID(multipoint, writer);
     writer.write(WKTConstants.MULTIPOINT);
     writer.write(" ");
     appendOrdinateText(outputOrdinates, writer);
@@ -505,6 +521,7 @@ public class WKTWriter {
       Writer writer,
       OrdinateFormat formatter)
       throws IOException {
+    writeSRID(multiLineString, writer);
     writer.write(WKTConstants.MULTILINESTRING);
     writer.write(" ");
     appendOrdinateText(outputOrdinates, writer);
@@ -531,6 +548,7 @@ public class WKTWriter {
       Writer writer,
       OrdinateFormat formatter)
       throws IOException {
+    writeSRID(multiPolygon, writer);
     writer.write(WKTConstants.MULTIPOLYGON);
     writer.write(" ");
     appendOrdinateText(outputOrdinates, writer);
@@ -556,6 +574,7 @@ public class WKTWriter {
       Writer writer,
       OrdinateFormat formatter)
       throws IOException {
+    writeSRID(geometryCollection, writer);
     writer.write(WKTConstants.GEOMETRYCOLLECTION);
     writer.write(" ");
     appendOrdinateText(outputOrdinates, writer);
