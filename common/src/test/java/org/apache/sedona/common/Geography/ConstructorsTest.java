@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.common.Geography;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import com.google.common.geometry.S2LatLng;
 import com.google.common.geometry.S2Point;
@@ -31,6 +31,27 @@ import org.junit.Test;
 import org.locationtech.jts.io.ParseException;
 
 public class ConstructorsTest {
+
+  @Test
+  public void geogFromEWKT() throws ParseException {
+    assertNull(Constructors.geogFromEWKT(null));
+
+    Geography geog = Constructors.geogFromEWKT("POINT (1 1)");
+    assertEquals(0, geog.getSRID());
+    assertEquals("POINT (1 1)", geog.toString());
+
+    geog = Constructors.geogFromEWKT("SRID=4269; POINT (1 1)");
+    assertEquals(4269, geog.getSRID());
+    assertEquals("SRID=4269; POINT (1 1)", geog.toString());
+
+    geog = Constructors.geogFromEWKT("SRID=4269;POINT (1 1)");
+    assertEquals(4269, geog.getSRID());
+    assertEquals("SRID=4269; POINT (1 1)", geog.toString());
+
+    ParseException invalid =
+        assertThrows(ParseException.class, () -> Constructors.geogFromEWKT("not valid"));
+    assertEquals("Unknown geography type: NOT (line 1)", invalid.getMessage());
+  }
 
   @Test
   public void geogFromWKB() throws ParseException {
@@ -47,7 +68,7 @@ public class ConstructorsTest {
 
     // Test specifying SRID
     result = Constructors.geogFromWKB(wkb, 1000);
-    assertEquals(geog.toString(), result.toString());
+    assertEquals("SRID=1000; POINT (-64 45)", result.toString());
     assertEquals(1000, result.getSRID());
 
     // Test EWKB with SRID
@@ -55,15 +76,15 @@ public class ConstructorsTest {
     geog.setSRID(2000);
     wkb = wkbWriter.write(geog);
     result = Constructors.geogFromWKB(wkb);
-    assertEquals(geog.toString(), result.toString());
+    assertEquals("SRID=2000; POINT (-64 45)", result.toString());
     assertEquals(2000, result.getSRID());
 
     // Test overriding SRID
     result = Constructors.geogFromWKB(wkb, 3000);
-    assertEquals(geog.toString(), result.toString());
+    assertEquals("SRID=3000; POINT (-64 45)", result.toString());
     assertEquals(3000, result.getSRID());
     result = Constructors.geogFromWKB(wkb, 0);
-    assertEquals(geog.toString(), result.toString());
+    assertEquals("POINT (-64 45)", result.toString());
     assertEquals(0, result.getSRID());
   }
 

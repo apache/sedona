@@ -615,7 +615,7 @@ public class WKTReader {
     } else if (isTypeName(tokenizer, type, WKTConstants.GEOMETRYCOLLECTION)) {
       return readGeographyCollectionText(tokenizer, ordinateFlags);
     }
-    throw parseErrorWithLine(tokenizer, "Unknown geometry type: " + type);
+    throw parseErrorWithLine(tokenizer, "Unknown geography type: " + type);
   }
 
   private boolean isTypeName(StreamTokenizer tokenizer, String type, String typeName)

@@ -405,7 +405,9 @@ class TestGeoSeries(TestGeopandasBase):
     def test_to_crs(self):
         from pyproj import CRS
 
-        geoseries = sgpd.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)], crs=4326)
+        geoseries = sgpd.GeoSeries(
+            [Point(1, 1), Point(2, 2), Point(3, 3)], crs=4326, name="geometry"
+        )
         assert isinstance(geoseries.crs, CRS) and geoseries.crs.to_epsg() == 4326
         result = geoseries.to_crs(3857)
         assert isinstance(result.crs, CRS) and result.crs.to_epsg() == 3857
@@ -416,6 +418,7 @@ class TestGeoSeries(TestGeopandasBase):
                 Point(333958.4723798207, 334111.1714019597),
             ],
             crs=3857,
+            name="geometry",
         )
         self.check_sgpd_equals_gpd(result, expected)
 
@@ -1191,6 +1194,39 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = s.union_all()
         expected = GeometryCollection()
         self.check_geom_equals(result, expected)
+
+    def test_row_wise_dataframe(self):
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+            ]
+        )
+        s2 = GeoSeries([Point(-5.5, 1), Point(1, 2), Point(3, 1)])
+
+        # self: GeoSeries, other: GeoDataFrame
+        expected = pd.Series([5.5, 1, 2])
+        result = s.distance(s2.to_geoframe())
+        self.check_pd_series_equal(result, expected)
+
+        # self: GeoDataFrame, other: GeoDataFrame
+        result = s.to_geoframe().distance(s2.to_geoframe())
+        assert_series_equal(result.to_pandas(), expected)
+
+        # Same but for overlay
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+                Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+                Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+            ]
+        )
+        result = s.difference(s2.to_geoframe())
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = s.to_geoframe().difference(s2.to_geoframe())
+        self.check_sgpd_equals_gpd(result, expected)
 
     def test_crosses(self):
         s = GeoSeries(
