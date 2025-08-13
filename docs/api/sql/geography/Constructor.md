@@ -36,3 +36,58 @@ Output:
 ```
 POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))"
 ```
+
+Introduction: Construct a Geography from WKT. If SRID is not set, it defaults to 0 (unknown).
+
+Format:
+
+`ST_GeogFromWKT (Wkt: String)`
+
+`ST_GeogFromWKT (Wkt: String, srid: Integer)`
+
+Since: `v1.8.0`
+
+SQL Example
+
+```sql
+SELECT ST_GeogFromWKT('LINESTRING (1 2, 3 4, 5 6)')
+```
+
+Output:
+
+```
+LINESTRING (1 2, 3 4, 5 6)
+```
+
+SQL Example
+
+```sql
+SELECT ST_GeogFromWKT('LINESTRING (1 2, 3 4, 5 6)', 4326)
+```
+
+Output:
+
+```
+SRID=4326; LINESTRING (1 2, 3 4, 5 6)
+```
+
+## ST_GeogFromEWKT
+
+Introduction: Construct a Geography from OGC Extended WKT.
+
+Format:
+`ST_GeogFromEWKT (EWkt: String)`
+
+Since: `v1.8.0`
+
+SQL example:
+
+```sql
+SELECT ST_GeogFromEWKT('SRID=4326; LINESTRING (0 0, 3 3, 4 4)')
+```
+
+Output:
+
+```
+SRID=4326; LINESTRING (0 0, 3 3, 4 4)
+```

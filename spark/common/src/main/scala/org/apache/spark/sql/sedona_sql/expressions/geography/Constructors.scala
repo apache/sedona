@@ -27,7 +27,7 @@ import org.apache.spark.sql.sedona_sql.expressions.{InferrableFunction, Inferred
  * Return a Geography from a WKT string
  *
  * @param inputExpressions
- *   This function takes a geometry string and a srid. The string format must be WKT.
+ *   This function takes a geography string and a srid. The string format must be WKT.
  */
 private[apache] case class ST_GeogFromWKT(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.geogFromWKT _) {
@@ -38,10 +38,24 @@ private[apache] case class ST_GeogFromWKT(inputExpressions: Seq[Expression])
 }
 
 /**
+ * Return a Geography from a EWKT string
+ *
+ * @param inputExpressions
+ *   This function takes a geography string. The string format must be EWKT.
+ */
+private[apache] case class ST_GeogFromEWKT(inputExpressions: Seq[Expression])
+    extends InferredExpression(Constructors.geogFromEWKT _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
  * Return a Geography from a WKT string
  *
  * @param inputExpressions
- *   This function takes a geometry string and a srid. The string format must be WKT.
+ *   This function takes a geography string and a srid. The string format must be WKT.
  */
 private[apache] case class ST_GeogFromText(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.geogFromWKT _) {
@@ -55,7 +69,7 @@ private[apache] case class ST_GeogFromText(inputExpressions: Seq[Expression])
  * Return a Geography Collection from a WKT string
  *
  * @param inputExpressions
- *   This function takes a geometry string and a srid. The string format must be WKT.
+ *   This function takes a geography string and a srid. The string format must be WKT.
  */
 private[apache] case class ST_GeogCollFromText(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.geogCollFromText _) {
@@ -69,7 +83,7 @@ private[apache] case class ST_GeogCollFromText(inputExpressions: Seq[Expression]
  * Return a Geography from a WKB string
  *
  * @param inputExpressions
- *   This function takes a geometry string and a srid. The string format must be WKB binary array
+ *   This function takes a geography string and a srid. The string format must be WKB binary array
  *   / string.
  */
 private[apache] case class ST_GeogFromWKB(inputExpressions: Seq[Expression])

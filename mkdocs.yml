@@ -36,6 +36,7 @@ nav:
           - Install Sedona Scala/Java: setup/install-scala.md
           - Install Sedona Python: setup/install-python.md
           - Install Sedona R: api/rdocs
+          - Sedona Python: api/pydocs
           - Install Sedona-Zeppelin: setup/zeppelin.md
           - Play Sedona in Docker: setup/docker.md
           - Install on Wherobots: setup/wherobots.md
@@ -59,6 +60,7 @@ nav:
           - Pure SQL environment: tutorial/sql-pure-sql.md
           - Spatial RDD app: tutorial/rdd.md
           - Sedona R: api/rdocs
+          - Sedona Python: api/pydocs
           - Work with GeoPandas and Shapely: tutorial/geopandas-shapely.md
           - Files:
               - CSV: tutorial/files/csv-geometry-sedona-spark.md
@@ -127,6 +129,7 @@ nav:
               - DataFrame/SQL: api/viz/sql.md
               - RDD: api/viz/java-api.md
           - Sedona R: api/rdocs
+          - Sedona Python: api/pydocs
       - Sedona with Apache Flink:
           - SQL:
               - Overview (Flink): api/flink/Overview.md

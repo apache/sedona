@@ -50,24 +50,26 @@ class ConstructorsTest extends TestBaseScala {
 
   it("Passed ST_GeogFromWKT") {
     val wkt = "LINESTRING (1 2, 3 4, 5 6)"
+    val wktExpected = "SRID=4326; LINESTRING (1 2, 3 4, 5 6)"
     val row = sparkSession.sql(s"SELECT ST_GeogFromWKT('$wkt', 4326) AS geog").first()
     // Write output with precisionModel
     val geoStr = row.get(0).asInstanceOf[Geography].toString()
     val geog = row.get(0).asInstanceOf[Geography]
     assert(geog.getSRID == 4326)
     assert(geog.isInstanceOf[Geography])
-    assert(geoStr == wkt)
+    assert(geoStr == wktExpected)
   }
 
   it("Passed ST_GeogFromText") {
     val wkt = "LINESTRING (1 2, 3 4, 5 6)"
+    val wktExpected = "SRID=4326; LINESTRING (1 2, 3 4, 5 6)"
     val row = sparkSession.sql(s"SELECT ST_GeogFromText('$wkt', 4326) AS geog").first()
     // Write output with precisionModel
     val geoStr = row.get(0).asInstanceOf[Geography].toString()
     val geog = row.get(0).asInstanceOf[Geography]
     assert(geog.getSRID == 4326)
     assert(geog.isInstanceOf[Geography])
-    assert(geoStr == wkt)
+    assert(geoStr == wktExpected)
   }
 
   it("Passed ST_GeogFromWKT no SRID") {
@@ -93,6 +95,26 @@ class ConstructorsTest extends TestBaseScala {
     val expected =
       "GEOMETRYCOLLECTION (POINT (50 50), LINESTRING (20 30, 40 60, 80 90), POLYGON ((35 15, 45 15, 40 25, 35 15), (30 10, 40 20, 30 20, 30 10)))"
     assert(expected.equals(actual))
+  }
+
+  it("Passed ST_GeogFromEWKT") {
+    val mixedWktGeometryInputLocation =
+      getClass.getResource("/county_small.tsv").getPath
+    var polygonWktDf = sparkSession.read
+      .format("csv")
+      .option("delimiter", "\t")
+      .option("header", "false")
+      .load(mixedWktGeometryInputLocation)
+    polygonWktDf.createOrReplaceTempView("polygontable")
+    var polygonDf = sparkSession.sql(
+      "select ST_GeogFromEWKT(polygontable._c0) as countyshape from polygontable")
+    assert(polygonDf.count() == 100)
+    val nullGeog = sparkSession.sql("select ST_GeogFromEWKT(null)")
+    assert(nullGeog.first().isNullAt(0))
+    val pointDf =
+      sparkSession.sql("select ST_GeogFromEWKT('SRID=4269;POINT(-71.064544 42.28787)')")
+    assert(pointDf.count() == 1)
+    assert(pointDf.first().getAs[Geography](0).getSRID == 4269)
   }
 
   it("Passed ST_GeogFromWKB") {
