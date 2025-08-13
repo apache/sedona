@@ -51,13 +51,14 @@ Since: `v1.8.0`
 SQL Example
 
 ```sql
-SELECT ST_GeogFromEWKB([01 02 00 00 00 02 00 00 00 00 00 00 00 84 D6 00 C0 00 00 00 00 80 B5 D6 BF 00 00 00 60 E1 EF F7 BF 00 00 00 80 07 5D E5 BF])
+SELECT ST_GeogFromEWKB([01 02 00 00 20 E6 10 00 00 02 00 00 00 00 00 00 00 84 D6 00 C0 00 00 00 00 80 B5 D6 BF 00 00 00 60 E1 EF F7 BF 00 00 00 80 07 5D E5 BF])
 ```
 
 Output:
 
 ```
-LINESTRING (-2.1 -0.4, -1.5 -0.7)
+SRID: 4326; LINESTRING (-2.1 -0.4, -1.5 -0.7)
+```
 
 Introduction: Construct a Geography from WKT. If SRID is not set, it defaults to 0 (unknown).
 

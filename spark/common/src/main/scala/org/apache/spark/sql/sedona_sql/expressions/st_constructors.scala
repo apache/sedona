@@ -97,6 +97,9 @@ object st_constructors {
     wrapExpression[ST_GeogFromWKT](wkt, srid)
   def ST_GeogFromWKT(wkt: String, srid: Int): Column = wrapExpression[ST_GeogFromWKT](wkt, srid)
 
+  def ST_GeogFromEWKT(wkt: Column): Column = wrapExpression[ST_GeogFromEWKT](wkt)
+  def ST_GeogFromEWKT(wkt: String): Column = wrapExpression[ST_GeogFromEWKT](wkt)
+
   def ST_GeogFromText(wkt: Column): Column = wrapExpression[ST_GeogFromText](wkt, 0)
   def ST_GeogFromText(wkt: String): Column = wrapExpression[ST_GeogFromText](wkt, 0)
   def ST_GeogFromText(wkt: Column, srid: Column): Column =

@@ -141,10 +141,10 @@ class ConstructorsTest extends TestBaseScala {
     rawWkbDf.createOrReplaceTempView("rawWKBTable")
     val geography =
       sparkSession.sql("SELECT ST_GeogFromEWKB(rawWKBTable.wkb) as countyshape from rawWKBTable")
-    val expectedGeom = {
-      "LINESTRING (-2.1 -0.4, -1.5 -0.7)"
+    val expectedGeog = {
+      "SRID=4326; LINESTRING (-2.1 -0.4, -1.5 -0.7)"
     }
     assert(geography.first().getAs[Geography](0).getSRID == 4326)
-    assert(geography.first().getAs[Geography](0).toString.equals(expectedGeom))
+    assert(geography.first().getAs[Geography](0).toString.equals(expectedGeog))
   }
 }

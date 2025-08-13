@@ -93,7 +93,7 @@ public class ConstructorsTest {
     String ewkbString = "01010000A0E61000000000000000000000000000000000F03F0000000000000040";
     byte[] wkbBytes = WKBReader.hexToBytes(ewkbString);
     Geography result = Constructors.geogFromWKB(wkbBytes);
-    String expectedGeom = "POINT (0 1)";
+    String expectedGeom = "SRID=4326; POINT (0 1)";
     assertEquals(expectedGeom, result.toString());
     assertEquals(4326, result.getSRID());
 
@@ -101,7 +101,7 @@ public class ConstructorsTest {
         "0103000020E61000000100000005000000000000000000000000000000000000000000000000000000000000000000F03F000000000000F03F000000000000F03F000000000000F03F000000000000000000000000000000000000000000000000";
     wkbBytes = WKBReader.hexToBytes(ewkbString);
     result = Constructors.geogFromWKB(wkbBytes);
-    expectedGeom = "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))";
+    expectedGeom = "SRID=4326; POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))";
     assertEquals(expectedGeom, result.toString());
     assertEquals(4326, result.getSRID());
 
@@ -119,7 +119,7 @@ public class ConstructorsTest {
             + "000000000000F0BF000000000000F0BF";
     wkbBytes = WKBReader.hexToBytes(ewkbString);
     result = Constructors.geogFromWKB(wkbBytes);
-    expectedGeom = "MULTIPOLYGON (((0 0, 1 0, 1 1, 0 0)), ((-1 -1, -1 0, 0 -1, -1 -1)))";
+    expectedGeom = "SRID=4326; MULTIPOLYGON (((0 0, 1 0, 1 1, 0 0)), ((-1 -1, -1 0, 0 -1, -1 -1)))";
     assertEquals(expectedGeom, result.toString());
     assertEquals(4326, result.getSRID());
   }
