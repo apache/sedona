@@ -41,6 +41,18 @@ Output:
 LINESTRING (1 2, 3 4, 5 6)
 ```
 
+SQL Example
+
+```sql
+SELECT ST_GeogFromWKT('LINESTRING (1 2, 3 4, 5 6)', 4326)
+```
+
+Output:
+
+```
+SRID=4326; LINESTRING (1 2, 3 4, 5 6)
+```
+
 ## ST_GeogFromWKT
 
 Introduction: Construct a Geography from WKT. If SRID is not set, it defaults to 0 (unknown).
