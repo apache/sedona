@@ -140,3 +140,27 @@ Output:
 ```
 SRID=4326; LINESTRING (0 0, 3 3, 4 4)
 ```
+
+## ST_GeogToGeometry
+
+Introduction: Construct a Geometry from a Geography. SRID is assumed same as defined in original Geography.
+
+Format:
+
+`ST_GeogToGeometry (geog: Geography)`
+
+`ST_GeogToGeometry (geog: Geography, srid: Integer)`
+
+Since: `v1.8.0`
+
+SQL example:
+
+```sql
+SELECT ST_GeogToGeometry(ST_GeogFromWKT('MULTILINESTRING ((90 90, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))', 4326)))
+```
+
+Output:
+
+```
+MULTILINESTRING ((90 90, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))
+```

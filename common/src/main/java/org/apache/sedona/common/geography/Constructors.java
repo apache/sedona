@@ -19,14 +19,14 @@
 package org.apache.sedona.common.geography;
 
 import com.google.common.geometry.*;
+import java.io.IOException;
 import java.util.*;
 import org.apache.sedona.common.S2Geography.*;
-import org.locationtech.jts.geom.*;
-import java.io.IOException;
 import org.apache.sedona.common.S2Geography.Geography;
 import org.apache.sedona.common.S2Geography.WKBReader;
 import org.apache.sedona.common.S2Geography.WKTReader;
 import org.apache.sedona.common.utils.GeoHashDecoder;
+import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
 
 public class Constructors {
@@ -84,15 +84,14 @@ public class Constructors {
     }
   }
 
-  public static Geometry geogToGeometry(Geography geography, GeometryFactory geometryFactory)
-      throws ParseException {
-    return geogToGeometry(geography, geometryFactory, geography.getSRID());
+  public static Geometry geogToGeometry(Geography geography, int srid) {
+    int SRID = srid == geography.getSRID() ? srid : geography.getSRID();
+    GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), SRID);
+    return geogToGeometry(geography, geometryFactory);
   }
 
-  public static Geometry geogToGeometry(
-      Geography geography, GeometryFactory geometryFactory, int srid) {
+  public static Geometry geogToGeometry(Geography geography, GeometryFactory geometryFactory) {
     if (geography == null) return null;
-
     Geography.GeographyKind kind = Geography.GeographyKind.fromKind(geography.getKind());
     switch (kind) {
       case SINGLEPOINT:
@@ -131,7 +130,16 @@ public class Constructors {
 
   // POLYLINE/SINGLEPOLYLINE
   private static Geometry polylineToGeom(Geography g, GeometryFactory gf) {
-    if (g instanceof PolylineGeography) {
+    if (g instanceof SinglePolylineGeography) {
+      S2Polyline line = ((SinglePolylineGeography) g).getPolylines().get(0);
+      int n = line.numVertices();
+      Coordinate[] cs = new Coordinate[n];
+      for (int k = 0; k < n; k++) {
+        S2LatLng ll = S2LatLng.fromPoint(line.vertex(k));
+        cs[k] = new Coordinate(ll.lngDegrees(), ll.latDegrees());
+      }
+      return gf.createLineString(cs);
+    } else if (g instanceof PolylineGeography) {
       List<S2Polyline> lines = ((PolylineGeography) g).getPolylines();
       LineString[] lss = new LineString[lines.size()];
       for (int i = 0; i < lines.size(); i++) {
@@ -144,7 +152,7 @@ public class Constructors {
         }
         lss[i] = gf.createLineString(cs);
       }
-      return lss.length == 1 ? lss[0] : gf.createMultiLineString(lss);
+      return gf.createMultiLineString(lss);
     }
     return null;
   }
@@ -160,7 +168,7 @@ public class Constructors {
       for (int i = 0; i < parts.size(); i++) {
         polys[i] = (Polygon) s2LoopsToJts(((PolygonGeography) parts.get(i)).polygon.getLoops(), gf);
       }
-      return polys.length == 1 ? polys[0] : gf.createMultiPolygon(polys);
+      return gf.createMultiPolygon(polys);
     }
     return null;
   }
@@ -178,7 +186,7 @@ public class Constructors {
     //                depth 3: Hole H3 (a pond on that island)
     //    depth 0: Shell B     (disjoint area)
     //          depth 1: Hole H2   (a lake in B)
-    Deque<int[]> shellStack = new ArrayDeque<>();
+    List<int[]> shellStack = new ArrayList<>();
 
     for (S2Loop L : loops) {
       int n = L.numVertices();
@@ -201,18 +209,21 @@ public class Constructors {
       int depth = L.depth();
 
       // Unwind ancestors until parent depth < current depth
-      while (!shellStack.isEmpty() && shellStack.peek()[1] >= depth) shellStack.pop();
+      while (!shellStack.isEmpty() && shellStack.get(shellStack.size() - 1)[1] >= depth) {
+        shellStack.remove(shellStack.size() - 1);
+      }
 
       if (isShell) {
         // New shell => new polygon component
         shells.add(ring);
         holesPerShell.add(new ArrayList<>());
-        shellStack.push(new int[] {shells.size() - 1, depth});
+        shellStack.add(new int[] {shells.size() - 1, depth});
       } else {
         ring = ensureOrientation(ring, /*wantCCW=*/ false, gf);
         // Attach hole to nearest even-depth ancestor shell
         if (!shellStack.isEmpty()) {
-          holesPerShell.get(shellStack.peek()[0]).add(ring);
+          int[] shellContainer = shellStack.get(shellStack.size() - 1);
+          holesPerShell.get(shellContainer[0]).add(ring);
         }
         // If no ancestor shell (invalid structure), ignore the hole.
       }
@@ -249,7 +260,7 @@ public class Constructors {
     List<Geography> parts = ((GeographyCollection) g).getFeatures();
     Geometry[] gs = new Geometry[parts.size()];
     for (int i = 0; i < parts.size(); i++) {
-      gs[i] = geogToGeometry(parts.get(i), gf, gf.getSRID());
+      gs[i] = geogToGeometry(parts.get(i), gf.getSRID());
     }
     return gf.createGeometryCollection(gs);
   }

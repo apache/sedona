@@ -18,8 +18,10 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions.geography
 
+import org.apache.sedona.common.S2Geography.Geography
 import org.apache.sedona.common.geography.Constructors
 import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.sedona_sql.UDT.GeographyUDT
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.sql.sedona_sql.expressions.{InferrableFunction, InferredExpression}
 
@@ -117,6 +119,20 @@ private[apache] case class ST_GeogFromEWKB(inputExpressions: Seq[Expression])
  */
 private[apache] case class ST_GeogFromGeoHash(inputExpressions: Seq[Expression])
     extends InferredExpression(InferrableFunction.allowRightNull(Constructors.geogFromGeoHash)) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Return a Geometry from a Geography
+ *
+ * @param inputExpressions
+ *   This function takes a geography object and a srid.
+ */
+private[apache] case class ST_GeogToGeometry(inputExpressions: Seq[Expression])
+    extends InferredExpression(Constructors.geogToGeometry(_: Geography, _: Int)) {
+
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

@@ -25,6 +25,7 @@ import org.apache.spark.sql.sedona_sql.expressions._
 import org.apache.spark.sql.sedona_sql.expressions.geography.{ST_GeogCollFromText, ST_GeogFromGeoHash, ST_GeogFromText, ST_GeogFromWKB, ST_GeogFromWKT}
 import org.apache.spark.sql.sedona_sql.expressions.geography.{ST_GeogCollFromText, ST_GeogFromEWKT, ST_GeogFromText, ST_GeogFromWKB, ST_GeogFromWKT}
 import org.apache.spark.sql.sedona_sql.expressions.geography.{ST_GeogCollFromText, ST_GeogFromEWKB, ST_GeogFromEWKT, ST_GeogFromText, ST_GeogFromWKB, ST_GeogFromWKT}
+import org.apache.spark.sql.sedona_sql.expressions.geography.{ST_GeogCollFromText, ST_GeogFromEWKB, ST_GeogFromEWKT, ST_GeogFromText, ST_GeogFromWKB, ST_GeogFromWKT, ST_GeogToGeometry}
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.operation.buffer.BufferParameters
 
@@ -353,7 +354,8 @@ object Catalog extends AbstractCatalog {
     function[ST_LocalOutlierFactor](),
     function[ST_GLocal](),
     function[ST_BinaryDistanceBandColumn](),
-    function[ST_WeightedDistanceBandColumn]())
+    function[ST_WeightedDistanceBandColumn](),
+    function[ST_GeogToGeometry](0))
 
   val aggregateExpressions: Seq[Aggregator[Geometry, _, _]] =
     Seq(new ST_Envelope_Aggr, new ST_Intersection_Aggr, new ST_Union_Aggr())

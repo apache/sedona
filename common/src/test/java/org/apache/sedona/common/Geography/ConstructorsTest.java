@@ -33,6 +33,9 @@ import org.apache.sedona.common.S2Geography.WKBReader;
 import org.apache.sedona.common.S2Geography.WKBWriter;
 import org.apache.sedona.common.geography.Constructors;
 import org.junit.Test;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
 
 public class ConstructorsTest {
@@ -203,15 +206,17 @@ public class ConstructorsTest {
             + ")";
 
     Geography g = new WKTReader().read(wkt);
-    Geometry got =
-        Constructors.geogToGeometry(
-            g, new GeometryFactory(new PrecisionModel(PrecisionModel.FIXED)));
+    Geometry got = Constructors.geogToGeometry(g, 4326);
     String expected =
         "MULTIPOLYGON (((10 10, 70 10, 70 70, 10 70, 10 10), "
             + "(20 20, 20 60, 60 60, 60 20, 20 20)), "
             + "((30 30, 50 30, 50 50, 30 50, 30 30), "
             + "(36 36, 36 44, 44 44, 44 36, 36 36)))";
-    assertEquals(expected, got.toString());
+    assertEquals(4326, got.getSRID());
+    org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
+    wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
+    String gotGeom = wktWriter.write(got);
+    assertEquals(expected, gotGeom);
   }
 
   @Test
@@ -219,8 +224,7 @@ public class ConstructorsTest {
     String wkt =
         "POLYGON (("
             + "0 0, 95 20, 95 85, 10 85, 0 0"
-            + // <-- THE CHANGE IS HERE
-            "),("
+            + "),("
             + "20 30, 35 25, 30 40, 20 30"
             + "),("
             + "50 50, 65 50, 65 65, 50 65, 50 50"
@@ -237,10 +241,7 @@ public class ConstructorsTest {
     Geometry got =
         Constructors.geogToGeometry(
             g, new GeometryFactory(new PrecisionModel(PrecisionModel.FIXED)));
-    Geometry readBack =
-        new org.locationtech.jts.io.WKTReader(
-                new GeometryFactory(new PrecisionModel(PrecisionModel.FIXED)))
-            .read(got.toString());
-    assertEquals(expected, readBack.toString());
+    assertEquals(expected, got.toString());
+    assertEquals(0, got.getSRID());
   }
 }
