@@ -33,6 +33,10 @@ class TestGeopandasBase(TestBase):
     # -----------------------------------------------------------------------------
     # # Utils
     # -----------------------------------------------------------------------------
+    def setup_method(self):
+        # We enable this option by default for users, so we enable it by default for testing for developers.
+        # This option is useful in testing to catch inefficiencies in the code during development of geopandas.
+        ps.set_option("compute.ops_on_diff_frames", False)
 
     @classmethod
     def check_sgpd_equals_spark_df(
