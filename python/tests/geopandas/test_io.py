@@ -128,12 +128,13 @@ class TestIO(TestGeopandasBase):
         df = read_func(input_location)
         assert (df.count() == 5).all()
 
-        # Check that we can read what geopandas writes
-        gpd_df = df.to_geopandas()
-        temp_file_path = self._get_next_temp_file_path("parquet")
-        gpd_df.to_parquet(temp_file_path)
-        result = read_func(temp_file_path)
-        self.check_sgpd_df_equals_gpd_df(result, gpd_df)
+        if parse_version(shapely.__version__) >= parse_version("2.1.0"):
+            # Check that we can read what geopandas writes
+            gpd_df = df.to_geopandas()
+            temp_file_path = self._get_next_temp_file_path("parquet")
+            gpd_df.to_parquet(temp_file_path)
+            result = read_func(temp_file_path)
+            self.check_sgpd_df_equals_gpd_df(result, gpd_df)
 
     # From Sedona's GeoPackageReaderTest.scala
     @pytest.mark.parametrize(
