@@ -206,6 +206,7 @@ public class ConstructorsTest {
             + ")";
 
     Geography g = new WKTReader().read(wkt);
+    g.setSRID(4326);
     Geometry got = Constructors.geogToGeometry(g, 4326);
     String expected =
         "MULTIPOLYGON (((10 10, 70 10, 70 70, 10 70, 10 10), "
