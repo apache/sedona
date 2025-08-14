@@ -121,7 +121,8 @@ public class ConstructorsTest {
     geom = Constructors.geogToGeometry(geography, gf);
     assertEquals(multiGeog, geom.toString());
 
-    multiGeog = "MULTILINESTRING " + "((10 10, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))";
+    multiGeog = "MULTILINESTRING " + "((90 90, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))";
+    // Geography can not exceeding to more than 90 degrees / longitude
     geography = new WKTReader().read(multiGeog);
     geom = Constructors.geogToGeometry(geography, gf);
     assertEquals(multiGeog, geom.toString());
@@ -133,5 +134,61 @@ public class ConstructorsTest {
     geography = new WKTReader().read(multiGeog);
     geom = Constructors.geogToGeometry(geography, gf);
     assertEquals(multiGeog, geom.toString());
+  }
+
+  @Test
+  public void deep_nesting_twoComponents() throws Exception {
+    String wkt =
+        "MULTIPOLYGON ("
+            +
+            // Component A: outer shell + lake
+            "((10 10, 70 10, 70 70, 10 70, 10 10),"
+            + " (20 20, 60 20, 60 60, 20 60, 20 20)),"
+            +
+            // Component B: island with a pond
+            "((30 30, 50 30, 50 50, 30 50, 30 30),"
+            + " (36 36, 44 36, 44 44, 36 44, 36 36))"
+            + ")";
+
+    Geography g = new WKTReader().read(wkt);
+    Geometry got =
+        Constructors.geogToGeometry(
+            g, new GeometryFactory(new PrecisionModel(PrecisionModel.FIXED)));
+    String expected =
+        "MULTIPOLYGON (((10 10, 70 10, 70 70, 10 70, 10 10), "
+            + "(20 20, 20 60, 60 60, 60 20, 20 20)), "
+            + "((30 30, 50 30, 50 50, 30 50, 30 30), "
+            + "(36 36, 36 44, 44 44, 44 36, 36 36)))";
+    assertEquals(expected, got.toString());
+  }
+
+  @Test
+  public void polygon_threeHoles() throws Exception {
+    String wkt =
+        "POLYGON (("
+            + "0 0, 95 20, 95 85, 10 85, 0 0"
+            + // <-- THE CHANGE IS HERE
+            "),("
+            + "20 30, 35 25, 30 40, 20 30"
+            + "),("
+            + "50 50, 65 50, 65 65, 50 65, 50 50"
+            + "),("
+            + "25 60, 35 58, 38 66, 30 72, 22 66, 25 60"
+            + "))";
+
+    Geography g = new WKTReader().read(wkt);
+    String expected =
+        "POLYGON ((0 0, 95 20, 95 85, 10 85, 0 0), "
+            + "(20 30, 30 40, 35 25, 20 30), "
+            + "(50 50, 50 65, 65 65, 65 50, 50 50), "
+            + "(25 60, 22 66, 30 72, 38 66, 35 58, 25 60))";
+    Geometry got =
+        Constructors.geogToGeometry(
+            g, new GeometryFactory(new PrecisionModel(PrecisionModel.FIXED)));
+    Geometry readBack =
+        new org.locationtech.jts.io.WKTReader(
+                new GeometryFactory(new PrecisionModel(PrecisionModel.FIXED)))
+            .read(got.toString());
+    assertEquals(expected, readBack.toString());
   }
 }

@@ -21,7 +21,6 @@ package org.apache.sedona.common.geography;
 import com.google.common.geometry.*;
 import java.util.*;
 import org.apache.sedona.common.S2Geography.*;
-import org.locationtech.jts.algorithm.Orientation;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
 
@@ -173,7 +172,7 @@ public class Constructors {
       // Build & close ring once (x=lng, y=lat)
       Coordinate[] cs = new Coordinate[n + 1];
       for (int i = 0; i < n; i++) {
-        S2LatLng ll = S2LatLng.fromPoint(L.vertex(i));
+        S2LatLng ll = S2LatLng.fromPoint(L.vertex(i)).normalized();
         cs[i] = new Coordinate(ll.lngDegrees(), ll.latDegrees());
       }
       cs[n] = cs[0];
@@ -219,15 +218,14 @@ public class Constructors {
 
   private static LinearRing ensureOrientation(
       LinearRing ring, boolean wantCCW, GeometryFactory gf) {
-    Coordinate[] cs = ring.getCoordinates();
-    boolean isCCW = org.locationtech.jts.algorithm.Orientation.isCCW(cs);
-    if (!wantCCW && isCCW) {
-      cs = CoordinateArrays.copyDeep(cs);
+    boolean isCCW = org.locationtech.jts.algorithm.Orientation.isCCW(ring.getCoordinates());
+    // If the actual orientation doesn't match the desired orientation, fix it.
+    if (isCCW != wantCCW) {
+      Coordinate[] cs = CoordinateArrays.copyDeep(ring.getCoordinates());
       CoordinateArrays.reverse(cs);
       return gf.createLinearRing(cs);
     }
-    boolean holeIsCCW = Orientation.isCCW(ring.getCoordinates());
-    System.out.println("hole CW = " + !holeIsCCW); // should print true
+    // Otherwise, the ring is already correctly oriented, so return it as is.
     return ring;
   }
 
