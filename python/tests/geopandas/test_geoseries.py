@@ -1608,7 +1608,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         # Ensure the index is preserved when crs is set (previously an issue)
         expected_index = ps.Index(range(1, 6))
-        with self.ps_allow_diff_frames():
+        with ps.option_context("compute.ops_on_diff_frames", True):
             assert s2.index.equals(expected_index)
 
         result = s.intersection(s2, align=True)

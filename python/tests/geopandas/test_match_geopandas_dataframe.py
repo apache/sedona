@@ -219,8 +219,8 @@ class TestMatchGeopandasDataFrame(TestGeopandasBase):
             {"na": "drop", "show_bbox": True, "drop_id": True, "to_wgs84": True},
         ]
         for kwargs in tests:
-            # TODO: Try to optimize this with self.ps_allow_diff_frames() away
-            with self.ps_allow_diff_frames():
+            # TODO: Try to optimize this 'with ps.option_context("compute.ops_on_diff_frames", True)' away
+            with ps.option_context("compute.ops_on_diff_frames", True):
                 sgpd_result = GeoDataFrame(data, crs="EPSG:3857").to_json(**kwargs)
             gpd_result = gpd.GeoDataFrame(data, crs="EPSG:3857").to_json(**kwargs)
             assert sgpd_result == gpd_result

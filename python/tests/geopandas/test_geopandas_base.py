@@ -118,19 +118,6 @@ class TestGeopandasBase(TestBase):
     def contains_any_geom_collection(cls, geoms) -> bool:
         return any(isinstance(g, GeometryCollection) for g in geoms)
 
-    @contextmanager
-    def ps_allow_diff_frames(self):
-        """
-        A context manager to temporarily set a compute.ops_on_diff_frames option.
-        """
-        try:
-            ps.set_option("compute.ops_on_diff_frames", True)
-
-            # Yield control to the code inside the 'with' block
-            yield
-        finally:
-            ps.reset_option("compute.ops_on_diff_frames")
-
     def contains_any_geom_collection(self, geoms1, geoms2) -> bool:
         return any(isinstance(g, GeometryCollection) for g in geoms1) or any(
             isinstance(g, GeometryCollection) for g in geoms2
