@@ -65,7 +65,9 @@ SRID: 4326; LINESTRING (-2.1 -0.4, -1.5 -0.7)
 
 Introduction: Create Geography from geohash string and optional precision
 
-Format: `ST_GeogFromGeoHash(geohash: String, precision: Integer)`
+Format:
+
+`ST_GeogFromGeoHash(geohash: String, precision: Integer)`
 
 Since: `v1.8.0`
 
@@ -122,6 +124,7 @@ SRID=4326; LINESTRING (1 2, 3 4, 5 6)
 Introduction: Construct a Geography from OGC Extended WKT.
 
 Format:
+
 `ST_GeogFromEWKT (EWkt: String)`
 
 Since: `v1.8.0`
