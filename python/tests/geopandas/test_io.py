@@ -81,14 +81,16 @@ class TestIO(TestGeopandasBase):
 
         assert df.count().item() == 10000
 
-        # Check that we can read what geopandas writes
-        gpd_df = df.to_geopandas()
-        temp_file_path = self._get_next_temp_file_path("shp")
-        gpd_df.to_file(temp_file_path, driver="ESRI Shapefile")
-        result = read_func(temp_file_path)
-        # Reading in a shapefile adds an 'FID' column (geopandas does the same)
-        # so we compare it to geopandas's read_file result directly instead of the old gpd_df
-        self.check_sgpd_df_equals_gpd_df(result, gpd.read_file(temp_file_path))
+        # Test fails for shapely<2.1.0
+        if parse_version(shapely.__version__) < parse_version("2.1.0"):
+            # Check that we can read what geopandas writes
+            gpd_df = df.to_geopandas()
+            temp_file_path = self._get_next_temp_file_path("shp")
+            gpd_df.to_file(temp_file_path, driver="ESRI Shapefile")
+            result = read_func(temp_file_path)
+            # Reading in a shapefile adds an 'FID' column (geopandas does the same)
+            # so we compare it to geopandas's read_file result directly instead of the old gpd_df
+            self.check_sgpd_df_equals_gpd_df(result, gpd.read_file(temp_file_path))
 
     @pytest.mark.parametrize(
         "read_func",
@@ -156,12 +158,14 @@ class TestIO(TestGeopandasBase):
         df = read_func(datafile, table_name=table_name)
         assert df["geom"].count() == expected_cnt
 
-        # Check that we can read what geopandas writes
-        gpd_df = df.to_geopandas()
-        temp_file_path = self._get_next_temp_file_path("gpkg")
-        gpd_df.to_file(temp_file_path, driver="GPKG", layer="geometry")
-        result = read_func(temp_file_path, table_name="geometry")
-        self.check_sgpd_df_equals_gpd_df(result, gpd_df)
+        # Test fails for shapely<2.1.0
+        if parse_version(shapely.__version__) < parse_version("2.1.0"):
+            # Check that we can read what geopandas writes
+            gpd_df = df.to_geopandas()
+            temp_file_path = self._get_next_temp_file_path("gpkg")
+            gpd_df.to_file(temp_file_path, driver="GPKG", layer="geometry")
+            result = read_func(temp_file_path, table_name="geometry")
+            self.check_sgpd_df_equals_gpd_df(result, gpd_df)
 
     #########################################################
     # File writing tests
