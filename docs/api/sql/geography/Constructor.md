@@ -140,3 +140,71 @@ Output:
 ```
 SRID=4326; LINESTRING (0 0, 3 3, 4 4)
 ```
+
+## ST_TryToGeography
+
+Introduction: Construct a Geography from a geography string. It supports multiple input formats: WKT, EWKT, WKB, EWKB, and GeoHash. NULL Geography is returned if the input string is invalid or the format is not recognized.
+
+Format:
+
+`ST_TryToGeography (geog: String)`
+
+Since: `v1.8.0`
+
+SQL example:
+
+```sql
+SELECT ST_TryToGeography('01010000A0E61000000000000000000000000000000000F03F0000000000000040')
+```
+
+Output:
+
+```
+SRID=4326; POINT (0 1)
+```
+
+SQL example:
+
+```sql
+SELECT ST_TryToGeography('SRID=4269; POINT(0.0 1.0)')
+```
+
+Output:
+
+```
+SRID=4269; POINT (0 1)
+```
+
+SQL example:
+
+```sql
+SELECT ST_TryToGeography('NOT VALID STRING')
+```
+
+Output:
+
+```
+null
+```
+
+## ST_ToGeography
+
+Introduction: Construct a Geography from a geography string. It supports multiple input formats: WKT, EWKT, WKB, EWKB, and GeoHash. An error is returned if the input string is invalid or the format is not recognized.
+
+Format:
+
+`ST_ToGeography (geog: String)`
+
+Since: `v1.8.0`
+
+SQL example:
+
+```sql
+SELECT ST_ToGeography('SRID=4269; POINT(0.0 1.0)')
+```
+
+Output:
+
+```
+SRID=4269; POINT (0 1)
+```

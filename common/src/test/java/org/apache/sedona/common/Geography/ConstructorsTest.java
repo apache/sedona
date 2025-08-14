@@ -139,4 +139,37 @@ public class ConstructorsTest {
     actualWkt = geog.toText(new PrecisionModel(1e6));
     assertEquals(expectedWkt, actualWkt);
   }
+
+  @Test
+  public void tryToGeography() throws ParseException {
+
+    String ewkbString = "01010000A0E61000000000000000000000000000000000F03F0000000000000040";
+    String expectedEWkt = "SRID=4326; POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))";
+    String expectedWkt = "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))";
+    String geohash = "9q9j8ue2v71y5zzy0s4q";
+    String notValid = "NOT VALID";
+
+    byte[] wkbBytes = WKBReader.hexToBytes(ewkbString);
+    Geography result = Constructors.geogFromWKB(wkbBytes);
+    String expectedGeom = "SRID=4326; POINT (0 1)";
+    assertNotNull(result);
+    assertEquals(expectedGeom, result.toString());
+
+    result = Constructors.tryToGeography(expectedEWkt);
+    assertNotNull(result);
+    assertEquals(expectedEWkt, result.toString());
+
+    result = Constructors.tryToGeography(expectedWkt);
+    assertNotNull(result);
+    assertEquals(expectedWkt, result.toString());
+
+    result = Constructors.tryToGeography(geohash);
+    expectedWkt =
+        "SRID=4326; POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))";
+    assertNotNull(result);
+    assertEquals(expectedWkt, result.toText(new PrecisionModel(1e6)));
+
+    result = Constructors.tryToGeography(notValid);
+    assertNull(result);
+  }
 }

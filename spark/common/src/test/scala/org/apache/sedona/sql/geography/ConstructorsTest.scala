@@ -18,10 +18,10 @@
  */
 package org.apache.sedona.sql.geography
 
-import org.apache.sedona.common.S2Geography.Geography
+import org.apache.sedona.common.S2Geography.{Geography, WKBReader}
 import org.apache.sedona.common.geography.Constructors
 import org.apache.sedona.sql.TestBaseScala
-import org.junit.Assert.assertEquals
+import org.junit.Assert.{assertEquals, assertNotNull, assertNull}
 import org.locationtech.jts.geom.PrecisionModel
 
 class ConstructorsTest extends TestBaseScala {
@@ -167,5 +167,32 @@ class ConstructorsTest extends TestBaseScala {
     }
     assert(geography.first().getAs[Geography](0).getSRID == 4326)
     assert(geography.first().getAs[Geography](0).toString.equals(expectedGeog))
+  }
+
+  it("Passed ST_TryToGeography") {
+    val ewkbString = "01010000A0E61000000000000000000000000000000000F03F0000000000000040"
+    val geography =
+      sparkSession.sql(s"SELECT ST_TryToGeography('$ewkbString') as point")
+    val expectedGeog = {
+      "SRID=4326; POINT (0 1)"
+    }
+    assert(geography.first().getAs[Geography](0).getSRID == 4326)
+    assert(geography.first().getAs[Geography](0).toString.equals(expectedGeog))
+
+    val pointDf =
+      sparkSession.sql("select ST_TryToGeography('SRID=4269; POINT(-71.064544 42.28787)')")
+    assert(pointDf.count() == 1)
+    assert(pointDf.first().getAs[Geography](0).getSRID == 4269)
+
+    var geohash = "9q9j8ue2v71y5zzy0s4q";
+    var row =
+      sparkSession.sql(s"SELECT ST_TryToGeography('$geohash') AS geog").first()
+    var geoStr = row.get(0).asInstanceOf[Geography].toText(new PrecisionModel(1e6))
+    var expectedWkt =
+      "SRID=4326; POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))"
+    assertEquals(expectedWkt, geoStr)
+
+    row = sparkSession.sql(s"SELECT ST_TryToGeography('NOT VALID') AS geog").first()
+    assertNull(row.get(0))
   }
 }
