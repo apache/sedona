@@ -58,8 +58,7 @@ class TestGeoDataFrame(TestGeopandasBase):
         ],
     )
     def test_constructor(self, obj):
-        with self.ps_allow_diff_frames():
-            sgpd_df = GeoDataFrame(obj)
+        sgpd_df = GeoDataFrame(obj)
         check_geodataframe(sgpd_df)
 
     def test_construct_from_geopandas(self):
@@ -414,14 +413,10 @@ class TestGeoDataFrame(TestGeopandasBase):
         data = {"geometry1": points1, "geometry2": points2, "attribute": [1, 2, 3]}
         df = GeoDataFrame(data)
 
-        # TODO: Try to optimize this with self.ps_allow_diff_frames() away
-        with self.ps_allow_diff_frames():
-            df = df.set_geometry("geometry1")
+        df = df.set_geometry("geometry1")
         assert df.geometry.name == df.active_geometry_name == "geometry1"
 
-        # TODO: Try to optimize this with self.ps_allow_diff_frames() away
-        with self.ps_allow_diff_frames():
-            df.set_geometry("geometry2", inplace=True)
+        df.set_geometry("geometry2", inplace=True)
         assert df.geometry.name == df.active_geometry_name == "geometry2"
 
     def test_rename_geometry(self):
@@ -431,18 +426,14 @@ class TestGeoDataFrame(TestGeopandasBase):
         data = {"geometry1": points1, "geometry2": points2, "attribute": [1, 2, 3]}
         df = GeoDataFrame(data)
 
-        # TODO: Try to optimize all of these with self.ps_allow_diff_frames() calls away
-        with self.ps_allow_diff_frames():
-            df = df.set_geometry("geometry1")
+        df = df.set_geometry("geometry1")
         assert df.geometry.name == "geometry1"
 
-        with self.ps_allow_diff_frames():
-            df = df.rename_geometry("geometry3")
+        df = df.rename_geometry("geometry3")
         assert df.geometry.name == "geometry3"
 
         # test inplace rename
-        with self.ps_allow_diff_frames():
-            df.rename_geometry("geometry4", inplace=True)
+        df.rename_geometry("geometry4", inplace=True)
         assert df.geometry.name == "geometry4"
 
     def test_area(self):

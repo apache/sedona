@@ -61,6 +61,7 @@ class TestGeoSeries(TestGeopandasBase):
                 ),
             ]
         )
+        super().setup_method()
 
     def test_empty_list(self):
         s = sgpd.GeoSeries([])
@@ -500,9 +501,7 @@ class TestGeoSeries(TestGeopandasBase):
     def test_to_json(self):
         s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
 
-        # TODO: optimize this away
-        with self.ps_allow_diff_frames():
-            result = s.to_json()
+        result = s.to_json()
         expected = '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "pr\
 operties": {}, "geometry": {"type": "Point", "coordinates": [1.0, 1.0]}, "bbox": [1.0,\
  1.0, 1.0, 1.0]}, {"id": "1", "type": "Feature", "properties": {}, "geometry": {"type"\
@@ -512,20 +511,17 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         assert result == expected
 
-        with self.ps_allow_diff_frames():
-            result = s.to_json(show_bbox=True)
-            expected = '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [1.0, 1.0]}, "bbox": [1.0, 1.0, 1.0, 1.0]}, {"id": "1", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [2.0, 2.0]}, "bbox": [2.0, 2.0, 2.0, 2.0]}, {"id": "2", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3.0, 3.0]}, "bbox": [3.0, 3.0, 3.0, 3.0]}], "bbox": [1.0, 1.0, 3.0, 3.0]}'
-            assert result == expected
+        result = s.to_json(show_bbox=True)
+        expected = '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [1.0, 1.0]}, "bbox": [1.0, 1.0, 1.0, 1.0]}, {"id": "1", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [2.0, 2.0]}, "bbox": [2.0, 2.0, 2.0, 2.0]}, {"id": "2", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3.0, 3.0]}, "bbox": [3.0, 3.0, 3.0, 3.0]}], "bbox": [1.0, 1.0, 3.0, 3.0]}'
+        assert result == expected
 
-        with self.ps_allow_diff_frames():
-            result = s.to_json(drop_id=True)
-            expected = '{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [1.0, 1.0]}, "bbox": [1.0, 1.0, 1.0, 1.0]}, {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [2.0, 2.0]}, "bbox": [2.0, 2.0, 2.0, 2.0]}, {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3.0, 3.0]}, "bbox": [3.0, 3.0, 3.0, 3.0]}], "bbox": [1.0, 1.0, 3.0, 3.0]}'
-            assert result == expected
+        result = s.to_json(drop_id=True)
+        expected = '{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [1.0, 1.0]}, "bbox": [1.0, 1.0, 1.0, 1.0]}, {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [2.0, 2.0]}, "bbox": [2.0, 2.0, 2.0, 2.0]}, {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3.0, 3.0]}, "bbox": [3.0, 3.0, 3.0, 3.0]}], "bbox": [1.0, 1.0, 3.0, 3.0]}'
+        assert result == expected
 
-        with self.ps_allow_diff_frames():
-            result = s.set_crs("EPSG:3857").to_json(to_wgs84=True)
-            expected = '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [8.983152841195214e-06, 8.983152841195177e-06]}, "bbox": [8.983152841195214e-06, 8.983152841195177e-06, 8.983152841195214e-06, 8.983152841195177e-06]}, {"id": "1", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [1.7966305682390428e-05, 1.7966305682390134e-05]}, "bbox": [1.7966305682390428e-05, 1.7966305682390134e-05, 1.7966305682390428e-05, 1.7966305682390134e-05]}, {"id": "2", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [2.6949458523585642e-05, 2.694945852358465e-05]}, "bbox": [2.6949458523585642e-05, 2.694945852358465e-05, 2.6949458523585642e-05, 2.694945852358465e-05]}], "bbox": [8.983152841195214e-06, 8.983152841195177e-06, 2.6949458523585642e-05, 2.694945852358465e-05]}'
-            assert result == expected
+        result = s.set_crs("EPSG:3857").to_json(to_wgs84=True)
+        expected = '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [8.983152841195214e-06, 8.983152841195177e-06]}, "bbox": [8.983152841195214e-06, 8.983152841195177e-06, 8.983152841195214e-06, 8.983152841195177e-06]}, {"id": "1", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [1.7966305682390428e-05, 1.7966305682390134e-05]}, "bbox": [1.7966305682390428e-05, 1.7966305682390134e-05, 1.7966305682390428e-05, 1.7966305682390134e-05]}, {"id": "2", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [2.6949458523585642e-05, 2.694945852358465e-05]}, "bbox": [2.6949458523585642e-05, 2.694945852358465e-05, 2.6949458523585642e-05, 2.694945852358465e-05]}], "bbox": [8.983152841195214e-06, 8.983152841195177e-06, 2.6949458523585642e-05, 2.694945852358465e-05]}'
+        assert result == expected
 
     def test_to_wkb(self):
         if parse_version(shapely.__version__) < parse_version("2.0.0"):
@@ -603,9 +599,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         import pyarrow as pa
 
         gser = GeoSeries([Point(1, 2), Point(2, 1)])
-        # TODO: optimize this away
-        with self.ps_allow_diff_frames():
-            arrow_array = gser.to_arrow()
+        arrow_array = gser.to_arrow()
         result = pa.array(arrow_array)
 
         expected = [
