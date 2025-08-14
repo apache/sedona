@@ -37,6 +37,8 @@ Output:
 SRID=4326; POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))"
 ```
 
+## ST_GeogFromWKT
+
 Introduction: Construct a Geography from WKT. If SRID is not set, it defaults to 0 (unknown).
 
 Format:
@@ -76,6 +78,7 @@ SRID=4326; LINESTRING (1 2, 3 4, 5 6)
 Introduction: Construct a Geography from OGC Extended WKT.
 
 Format:
+
 `ST_GeogFromEWKT (EWkt: String)`
 
 Since: `v1.8.0`
