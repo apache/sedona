@@ -117,6 +117,9 @@ class TestSpatialJoin(TestGeopandasBase):
             "touches",
             "crosses",
             "overlaps",
+            "covers",
+            "covered_by",
+            # "contains_properly",  # not supported by Sedona yet
         ]
 
         for predicate in predicates:

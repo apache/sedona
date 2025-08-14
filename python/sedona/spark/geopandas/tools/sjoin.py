@@ -73,6 +73,9 @@ def _frame_join(
         "crosses": "ST_Crosses",
         "overlaps": "ST_Overlaps",
         "dwithin": "ST_DWithin",
+        "covers": "ST_Covers",
+        "covered_by": "ST_CoveredBy",
+        # "contains_properly": "ST_ContainsProperly",  # not supported by Sedona yet
     }
 
     if predicate not in predicate_map:
