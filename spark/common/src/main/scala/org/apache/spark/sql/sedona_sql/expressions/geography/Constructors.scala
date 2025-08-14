@@ -95,6 +95,21 @@ private[apache] case class ST_GeogFromWKB(inputExpressions: Seq[Expression])
 }
 
 /**
+ * Return a Geography from a EWKB string
+ *
+ * @param inputExpressions
+ *   This function takes a geometry string and a srid. The string format must be WKB binary array
+ *   / string.
+ */
+private[apache] case class ST_GeogFromEWKB(inputExpressions: Seq[Expression])
+    extends InferredExpression(Constructors.geogFromWKB(_: Array[Byte])) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
  * Return a Geography from a GeoHash string
  *
  * @param inputExpressions

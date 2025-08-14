@@ -139,4 +139,33 @@ class ConstructorsTest extends TestBaseScala {
     val nullGeom = sparkSession.sql("SELECT ST_GeogFromWKB(null)")
     assert(nullGeom.first().isNullAt(0))
   }
+
+  it("Passed ST_GeogFromEWKB") {
+    // UTF-8 encoded WKB String
+    val mixedWkbGeometryInputLocation =
+      getClass.getResource("/county_small_wkb.tsv").getPath
+    val polygonWkbDf = sparkSession.read
+      .format("csv")
+      .option("delimiter", "\t")
+      .option("header", "false")
+      .load(mixedWkbGeometryInputLocation)
+    polygonWkbDf.createOrReplaceTempView("polygontable")
+    val polygonDf = sparkSession.sql(
+      "select ST_GeogFromEWKB(polygontable._c0) as countyshape from polygontable")
+    assert(polygonDf.count() == 100)
+    // RAW binary array
+    val wkbSeq = Seq[Array[Byte]](
+      Array[Byte](1, 2, 0, 0, 32, -26, 16, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, -124, -42, 0, -64, 0, 0,
+        0, 0, -128, -75, -42, -65, 0, 0, 0, 96, -31, -17, -9, -65, 0, 0, 0, -128, 7, 93, -27,
+        -65))
+    val rawWkbDf = wkbSeq.toDF("wkb")
+    rawWkbDf.createOrReplaceTempView("rawWKBTable")
+    val geography =
+      sparkSession.sql("SELECT ST_GeogFromEWKB(rawWKBTable.wkb) as countyshape from rawWKBTable")
+    val expectedGeog = {
+      "SRID=4326; LINESTRING (-2.1 -0.4, -1.5 -0.7)"
+    }
+    assert(geography.first().getAs[Geography](0).getSRID == 4326)
+    assert(geography.first().getAs[Geography](0).toString.equals(expectedGeog))
+  }
 }
