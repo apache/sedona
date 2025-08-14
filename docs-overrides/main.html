@@ -48,6 +48,121 @@ You're not viewing the latest stable version.
         </div>
       </section>
 
+      <!-- Section Global Scale -->
+      <section class="section-global-scale">
+        <div class="container">
+          <div class="section-row">
+
+            <div class="col-left">
+              <div class="section-title">
+                <div>QUERY and JOIN</div>
+                <div class="typed">GPS points|</div>
+                <div>from local to global scale</div>
+              </div>
+              <div class="section-description editor">
+                Made for teams handling large-scale location data.
+              </div>
+            </div>
+
+            <div class="col-right">
+              <div class="hljs-snippet" data-initial="python">
+                <div class="hljs-snippet__tabs" role="tablist" aria-label="Code tabs">
+                  <button class="hljs-snippet__tab is-active" role="tab" aria-selected="true" data-lang="sql">SQL</button>
+                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="python">PySpark</button>
+                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="java">Java</button>
+                </div>
+                <div class="hljs-snippet__body">
+
+                  <button class="hljs-snippet__copy" aria-label="Copy code">
+                <span class="btn-inner">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M13.125 11.8749C13.125 12.0406 13.0592 12.1996 12.9419 12.3168C12.8247 12.434 12.6658 12.4999 12.5 12.4999H7.5C7.33424 12.4999 7.17527 12.434 7.05806 12.3168C6.94085 12.1996 6.875 12.0406 6.875 11.8749C6.875 11.7091 6.94085 11.5502 7.05806 11.4329C7.17527 11.3157 7.33424 11.2499 7.5 11.2499H12.5C12.6658 11.2499 12.8247 11.3157 12.9419 11.4329C13.0592 11.5502 13.125 11.7091 13.125 11.8749ZM12.5 8.74989H7.5C7.33424 8.74989 7.17527 8.81573 7.05806 8.93295C6.94085 9.05016 6.875 9.20913 6.875 9.37489C6.875 9.54065 6.94085 9.69962 7.05806 9.81683C7.17527 9.93404 7.33424 9.99989 7.5 9.99989H12.5C12.6658 9.99989 12.8247 9.93404 12.9419 9.81683C13.0592 9.69962 13.125 9.54065 13.125 9.37489C13.125 9.20913 13.0592 9.05016 12.9419 8.93295C12.8247 8.81573 12.6658 8.74989 12.5 8.74989ZM16.875 3.74989V16.8749C16.875 17.2064 16.7433 17.5243 16.5089 17.7588C16.2745 17.9932 15.9565 18.1249 15.625 18.1249H4.375C4.04348 18.1249 3.72554 17.9932 3.49112 17.7588C3.2567 17.5243 3.125 17.2064 3.125 16.8749V3.74989C3.125 3.41837 3.2567 3.10042 3.49112 2.866C3.72554 2.63158 4.04348 2.49989 4.375 2.49989H7.20781C7.55899 2.1067 7.98924 1.79212 8.47041 1.57673C8.95158 1.36134 9.47282 1.25 10 1.25C10.5272 1.25 11.0484 1.36134 11.5296 1.57673C12.0108 1.79212 12.441 2.1067 12.7922 2.49989H15.625C15.9565 2.49989 16.2745 2.63158 16.5089 2.866C16.7433 3.10042 16.875 3.41837 16.875 3.74989ZM7.5 4.99989H12.5C12.5 4.33685 12.2366 3.70096 11.7678 3.23212C11.2989 2.76328 10.663 2.49989 10 2.49989C9.33696 2.49989 8.70107 2.76328 8.23223 3.23212C7.76339 3.70096 7.5 4.33685 7.5 4.99989ZM15.625 3.74989H13.5352C13.6773 4.15131 13.75 4.57403 13.75 4.99989V5.62489C13.75 5.79065 13.6842 5.94962 13.5669 6.06683C13.4497 6.18404 13.2908 6.24989 13.125 6.24989H6.875C6.70924 6.24989 6.55027 6.18404 6.43306 6.06683C6.31585 5.94962 6.25 5.79065 6.25 5.62489V4.99989C6.25001 4.57403 6.32267 4.15131 6.46484 3.74989H4.375V16.8749H15.625V3.74989Z"
+                    fill="white" />
+                </svg>
+                  <span class="active-state">✅</span>
+                </span>
+                  </button>
+
+                  <pre class="hljs-snippet__panel" data-lang="sql"><code class="language-sql">-- Create a table
+CREATE TABLE users (
+    id INT PRIMARY KEY,
+    name VARCHAR(50),
+    email VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);</code></pre>
+                  <pre class="hljs-snippet__panel" data-lang="python" hidden><code class="language-python">df.withColumn(
+    "centroid", 
+    ST_Centroid(col("geometry"))
+).select("id", "centroid").show(truncate=False)</code></pre>
+                  <pre class="hljs-snippet__panel" data-lang="java" hidden><code class="language-java">public class Main {
+  public static void main(String[] args) {
+    System.out.println("Hello Java");
+  }
+}    </code></pre>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Get Started in  -->
+      <section class="section-get-started-in-seconds">
+        <div class="container">
+          <div class="section-row">
+            <div class="col-left">
+              <div class="hljs-snippet" data-initial="powershell">
+                <div class="hljs-snippet__tabs" role="tablist" aria-label="Code tabs">
+                  <button class="hljs-snippet__tab is-active" role="tab" aria-selected="true" data-lang="powershell">Command line</button>
+                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="python">PySpark</button>
+                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="java">Java</button>
+                </div>
+                <div class="hljs-snippet__body">
+
+                  <button class="hljs-snippet__copy" aria-label="Copy code">
+                <span class="btn-inner">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M13.125 11.8749C13.125 12.0406 13.0592 12.1996 12.9419 12.3168C12.8247 12.434 12.6658 12.4999 12.5 12.4999H7.5C7.33424 12.4999 7.17527 12.434 7.05806 12.3168C6.94085 12.1996 6.875 12.0406 6.875 11.8749C6.875 11.7091 6.94085 11.5502 7.05806 11.4329C7.17527 11.3157 7.33424 11.2499 7.5 11.2499H12.5C12.6658 11.2499 12.8247 11.3157 12.9419 11.4329C13.0592 11.5502 13.125 11.7091 13.125 11.8749ZM12.5 8.74989H7.5C7.33424 8.74989 7.17527 8.81573 7.05806 8.93295C6.94085 9.05016 6.875 9.20913 6.875 9.37489C6.875 9.54065 6.94085 9.69962 7.05806 9.81683C7.17527 9.93404 7.33424 9.99989 7.5 9.99989H12.5C12.6658 9.99989 12.8247 9.93404 12.9419 9.81683C13.0592 9.69962 13.125 9.54065 13.125 9.37489C13.125 9.20913 13.0592 9.05016 12.9419 8.93295C12.8247 8.81573 12.6658 8.74989 12.5 8.74989ZM16.875 3.74989V16.8749C16.875 17.2064 16.7433 17.5243 16.5089 17.7588C16.2745 17.9932 15.9565 18.1249 15.625 18.1249H4.375C4.04348 18.1249 3.72554 17.9932 3.49112 17.7588C3.2567 17.5243 3.125 17.2064 3.125 16.8749V3.74989C3.125 3.41837 3.2567 3.10042 3.49112 2.866C3.72554 2.63158 4.04348 2.49989 4.375 2.49989H7.20781C7.55899 2.1067 7.98924 1.79212 8.47041 1.57673C8.95158 1.36134 9.47282 1.25 10 1.25C10.5272 1.25 11.0484 1.36134 11.5296 1.57673C12.0108 1.79212 12.441 2.1067 12.7922 2.49989H15.625C15.9565 2.49989 16.2745 2.63158 16.5089 2.866C16.7433 3.10042 16.875 3.41837 16.875 3.74989ZM7.5 4.99989H12.5C12.5 4.33685 12.2366 3.70096 11.7678 3.23212C11.2989 2.76328 10.663 2.49989 10 2.49989C9.33696 2.49989 8.70107 2.76328 8.23223 3.23212C7.76339 3.70096 7.5 4.33685 7.5 4.99989ZM15.625 3.74989H13.5352C13.6773 4.15131 13.75 4.57403 13.75 4.99989V5.62489C13.75 5.79065 13.6842 5.94962 13.5669 6.06683C13.4497 6.18404 13.2908 6.24989 13.125 6.24989H6.875C6.70924 6.24989 6.55027 6.18404 6.43306 6.06683C6.31585 5.94962 6.25 5.79065 6.25 5.62489V4.99989C6.25001 4.57403 6.32267 4.15131 6.46484 3.74989H4.375V16.8749H15.625V3.74989Z"
+                    fill="white" />
+                </svg>
+                  <span class="active-state">✅</span>
+                </span>
+                  </button>
+
+                  <pre class="hljs-snippet__panel" data-lang="powershell"><code class="language-powershell">curl https://install.sedona.apache.org | sh</code></pre>
+                  <pre class="hljs-snippet__panel" data-lang="python" hidden><code class="language-python">print("Hello from PySpark!")
+# from pyspark.sql import SparkSession
+# spark = SparkSession.builder.getOrCreate()    </code></pre>
+                  <pre class="hljs-snippet__panel" data-lang="java" hidden><code class="language-java">public class Main {
+  public static void main(String[] args) {
+    System.out.println("Hello Java");
+  }
+}    </code></pre>
+                </div>
+              </div>
+            </div>
+            <div class="col-right">
+              <h2 class="section-title">
+                Get started in seconds
+              </h2>
+              <div class="section-description editor">
+                Install SedonaDB, or run Sedona on distributed systems when you need additional scale.
+              </div>
+              <div class="bth-group">
+                <a href="#" class="btn btn-red">
+                 <span class="caption">
+               Install SedonaDB
+              </span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Section GIF -->
       <section class="section-img-wrap">
         <div class="container">
@@ -156,6 +271,7 @@ You're not viewing the latest stable version.
                 </a>
               </div>
             </div>
+
             <div class="info-item">
               <div class="info-item__tag">
                 <img src="image/home/deploy/2.svg" alt="" class="">
@@ -177,6 +293,7 @@ You're not viewing the latest stable version.
                 </a>
               </div>
             </div>
+
             <div class="info-item">
               <div class="info-item__tag">
                 <img src="image/home/deploy/3.svg" alt="" class="">
@@ -198,6 +315,7 @@ You're not viewing the latest stable version.
                 </a>
               </div>
             </div>
+
             <div class="info-item">
               <div class="info-item__tag">
                 <img src="image/home/deploy/4.svg" alt="" class="">
@@ -220,13 +338,311 @@ You're not viewing the latest stable version.
               </div>
             </div>
 
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Industries Tabs -->
+      <section class="section-industries-tabs">
+        <div class="container">
+          <div class="content-box">
+            <h2 class="section-title">Used across industries to solve complex spatial problems</h2>
+
+            <div class="industries-tabs">
+              <div class="industries-tabs__head-wrap">
+                <div class="industries-tabs__head">
+                  <div class="industries-tabs__head-item active">
+                    Mobility & Telecom
+                  </div>
+                  <div class="industries-tabs__head-item">
+                    Data and map production
+                  </div>
+                  <div class="industries-tabs__head-item">
+                    Logistics
+                  </div>
+                  <div class="industries-tabs__head-item">
+                    Energy
+                  </div>
+                  <div class="industries-tabs__head-item">
+                    Finance
+                  </div>
+                </div>
+              </div>
+              <div class="industries-tabs__body">
+                <div class="industries-tabs__body-item active">
+                  <div class="industries-grid">
+                    <div class="grid-item">
+                      <img src="image/home/industries/1.svg" alt="" class="">
+                    </div>
+                    <div class="grid-item"><img src="image/home/industries/2.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/3.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/4.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/5.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/6.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/7.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/8.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/9.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/10.svg" alt="" class=""></div>
+                  </div>
+                </div>
+
+                <div class="industries-tabs__body-item">
+                  <div class="industries-grid">
+                    <div class="grid-item">
+                      <img src="image/home/industries/1.svg" alt="" class="">
+                    </div>
+                    <div class="grid-item"><img src="image/home/industries/2.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/9.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/4.svg" alt="" class=""></div>
+                  </div>
+                </div>
+
+                <div class="industries-tabs__body-item">
+                  <div class="industries-grid">
+                    <div class="grid-item">
+                      <img src="image/home/industries/1.svg" alt="" class="">
+                    </div>
+                    <div class="grid-item"><img src="image/home/industries/5.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/6.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/4.svg" alt="" class=""></div>
+                  </div>
+                </div>
+
+                <div class="industries-tabs__body-item">
+                  <div class="industries-grid">
+                    <div class="grid-item">
+                      <img src="image/home/industries/1.svg" alt="" class="">
+                    </div>
+                    <div class="grid-item"><img src="image/home/industries/2.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/7.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/8.svg" alt="" class=""></div>
+                  </div>
+                </div>
+
+                <div class="industries-tabs__body-item">
+                  <div class="industries-grid">
+                    <div class="grid-item">
+                      <img src="image/home/industries/1.svg" alt="" class="">
+                    </div>
+                    <div class="grid-item"><img src="image/home/industries/2.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/10.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/4.svg" alt="" class=""></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="btn-group">
+              <a href="#" class="btn btn-red">Showcase Your Case</a>
+              <a href="#" class="btn btn-light-red">
+                <span class="caption">See All Cases</span>
+                <span class="icon">
+                  <svg width="15" height="12" viewBox="0 0 15 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M1.25 6H13.75M13.75 6L9.0625 1M13.75 6L9.0625 11" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>
+
+                </span>
+              </a>
+            </div>
 
           </div>
         </div>
       </section>
 
-    </div>
+      <!-- Section Community -->
+      <section class="section-community">
+        <div class="container">
+          <h2 class="section-title">Join the community</h2>
+          <div class="section-description editor">Discover what our community has to say about their Apache Sedona experience.</div>
+          <div class="btn-group">
+            <a href="#" class="btn btn-light-red">
+              <span class="caption">
+                GitHub Discussions
+              </span>
+              <span class="icon icon-lg">
+<svg width="17" height="18" viewBox="0 0 17 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path
+  d="M8.5 16.5C12.6421 16.5 16 13.1421 16 9C16 4.85786 12.6421 1.5 8.5 1.5C4.35786 1.5 1 4.85786 1 9C1 10.1998 1.28171 11.3337 1.7826 12.3394C2.16071 13.0985 1.63606 14.1228 1.43613 14.87C1.24222 15.5947 1.90526 16.2578 2.63001 16.0639C3.37722 15.8639 4.4015 15.3393 5.16065 15.7174C6.16627 16.2183 7.30024 16.5 8.5 16.5Z"
+  stroke="#CA463A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+</svg>
 
+              </span>
+            </a>
+            <a href="#" class="btn btn-light-red">
+              <span class="caption">Discord</span>
+              <span class="icon  icon-lg">
+                 <svg width="17" height="18" viewBox="0 0 17 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path
+  d="M8.5 16.5C12.6421 16.5 16 13.1421 16 9C16 4.85786 12.6421 1.5 8.5 1.5C4.35786 1.5 1 4.85786 1 9C1 10.1998 1.28171 11.3337 1.7826 12.3394C2.16071 13.0985 1.63606 14.1228 1.43613 14.87C1.24222 15.5947 1.90526 16.2578 2.63001 16.0639C3.37722 15.8639 4.4015 15.3393 5.16065 15.7174C6.16627 16.2183 7.30024 16.5 8.5 16.5Z"
+  stroke="#CA463A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+</svg>
+
+
+                </span>
+            </a>
+          </div>
+
+          <div class="community-cards">
+
+            <div class="community-card">
+              <div class="community-card__author">
+                <div class="author-avatar">
+                  <img src="image/home/community/author.jpg" alt="" class="">
+                </div>
+                <div class="author-info">
+                  <div class="author-name">Sean Rose</div>
+                  <div class="author-tag">@seanrose</div>
+                </div>
+              </div>
+              <div class="community-card__text editor">
+                Really, really liking @apachesedona so far. It's just the right amount of simple/fast for.
+              </div>
+            </div>
+            <div class="community-card">
+              <div class="community-card__author">
+                <div class="author-avatar">
+                  <img src="image/home/community/author.jpg" alt="" class="">
+                </div>
+                <div class="author-info">
+                  <div class="author-name">Sean Rose</div>
+                  <div class="author-tag">@seanrose</div>
+                </div>
+              </div>
+              <div class="community-card__text editor">
+                Really, really liking @apachesedona so far. It's just the right amount of simple/fast for.
+              </div>
+            </div>
+            <div class="community-card">
+              <div class="community-card__author">
+                <div class="author-avatar">
+                  <img src="image/home/community/author.jpg" alt="" class="">
+                </div>
+                <div class="author-info">
+                  <div class="author-name">Sean Rose</div>
+                  <div class="author-tag">@seanrose</div>
+                </div>
+              </div>
+              <div class="community-card__text editor">
+                Really, really liking @apachesedona so far. It's just the right amount of simple/fast for.
+              </div>
+            </div>
+            <div class="community-card">
+              <div class="community-card__author">
+                <div class="author-avatar">
+                  <img src="image/home/community/author.jpg" alt="" class="">
+                </div>
+                <div class="author-info">
+                  <div class="author-name">Sean Rose</div>
+                  <div class="author-tag">@seanrose</div>
+                </div>
+              </div>
+              <div class="community-card__text editor">
+                Really, really liking @apachesedona so far. It's just the right amount of simple/fast for.
+              </div>
+            </div>
+            <div class="community-card">
+              <div class="community-card__author">
+                <div class="author-avatar">
+                  <img src="image/home/community/author.jpg" alt="" class="">
+                </div>
+                <div class="author-info">
+                  <div class="author-name">Sean Rose</div>
+                  <div class="author-tag">@seanrose</div>
+                </div>
+              </div>
+              <div class="community-card__text editor">
+                Really, really liking @apachesedona so far. It's just the right amount of simple/fast for.
+              </div>
+            </div>
+
+
+          </div>
+
+
+        </div>
+      </section>
+
+      <!-- Section Events -->
+      <section class="section-events">
+        <div class="container">
+          <div class="content-box">
+            <div class="content-box__inner">
+              <h2 class="section-title">
+                Monthly community meetings and programming conferences
+              </h2>
+              <div class="btn-group">
+                <a href="#" class="btn btn-red">
+                 <span class="caption">
+                Find Events
+              </span>
+                </a>
+              </div>
+            </div>
+            <img src="image/home/events/corner-mountains.svg" alt="" class="corner-img">
+            <div class="events-line">
+              <div>Apache <strong>Events</strong></div>
+              <div>Apache <strong>Events</strong></div>
+              <div>Apache <strong>Events</strong></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Get Started -->
+      <section class="section-get-started">
+        <div class="container">
+
+          <h2 class="section-title">
+            Start using SedonaDB in minutes
+          </h2>
+
+          <div class="section-description editor">
+            Install SedonaDB, or run Sedona on distributed systems when you need additional scale.
+          </div>
+
+          <div class="hljs-snippet" data-initial="powershell">
+            <div class="hljs-snippet__tabs" role="tablist" aria-label="Code tabs">
+              <button class="hljs-snippet__tab is-active" role="tab" aria-selected="true" data-lang="powershell">Command line</button>
+              <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="python">PySpark</button>
+              <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="java">Java</button>
+            </div>
+            <div class="hljs-snippet__body">
+
+              <button class="hljs-snippet__copy" aria-label="Copy code">
+                <span class="btn-inner">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M13.125 11.8749C13.125 12.0406 13.0592 12.1996 12.9419 12.3168C12.8247 12.434 12.6658 12.4999 12.5 12.4999H7.5C7.33424 12.4999 7.17527 12.434 7.05806 12.3168C6.94085 12.1996 6.875 12.0406 6.875 11.8749C6.875 11.7091 6.94085 11.5502 7.05806 11.4329C7.17527 11.3157 7.33424 11.2499 7.5 11.2499H12.5C12.6658 11.2499 12.8247 11.3157 12.9419 11.4329C13.0592 11.5502 13.125 11.7091 13.125 11.8749ZM12.5 8.74989H7.5C7.33424 8.74989 7.17527 8.81573 7.05806 8.93295C6.94085 9.05016 6.875 9.20913 6.875 9.37489C6.875 9.54065 6.94085 9.69962 7.05806 9.81683C7.17527 9.93404 7.33424 9.99989 7.5 9.99989H12.5C12.6658 9.99989 12.8247 9.93404 12.9419 9.81683C13.0592 9.69962 13.125 9.54065 13.125 9.37489C13.125 9.20913 13.0592 9.05016 12.9419 8.93295C12.8247 8.81573 12.6658 8.74989 12.5 8.74989ZM16.875 3.74989V16.8749C16.875 17.2064 16.7433 17.5243 16.5089 17.7588C16.2745 17.9932 15.9565 18.1249 15.625 18.1249H4.375C4.04348 18.1249 3.72554 17.9932 3.49112 17.7588C3.2567 17.5243 3.125 17.2064 3.125 16.8749V3.74989C3.125 3.41837 3.2567 3.10042 3.49112 2.866C3.72554 2.63158 4.04348 2.49989 4.375 2.49989H7.20781C7.55899 2.1067 7.98924 1.79212 8.47041 1.57673C8.95158 1.36134 9.47282 1.25 10 1.25C10.5272 1.25 11.0484 1.36134 11.5296 1.57673C12.0108 1.79212 12.441 2.1067 12.7922 2.49989H15.625C15.9565 2.49989 16.2745 2.63158 16.5089 2.866C16.7433 3.10042 16.875 3.41837 16.875 3.74989ZM7.5 4.99989H12.5C12.5 4.33685 12.2366 3.70096 11.7678 3.23212C11.2989 2.76328 10.663 2.49989 10 2.49989C9.33696 2.49989 8.70107 2.76328 8.23223 3.23212C7.76339 3.70096 7.5 4.33685 7.5 4.99989ZM15.625 3.74989H13.5352C13.6773 4.15131 13.75 4.57403 13.75 4.99989V5.62489C13.75 5.79065 13.6842 5.94962 13.5669 6.06683C13.4497 6.18404 13.2908 6.24989 13.125 6.24989H6.875C6.70924 6.24989 6.55027 6.18404 6.43306 6.06683C6.31585 5.94962 6.25 5.79065 6.25 5.62489V4.99989C6.25001 4.57403 6.32267 4.15131 6.46484 3.74989H4.375V16.8749H15.625V3.74989Z"
+                    fill="white" />
+                </svg>
+                  <span class="active-state">✅</span>
+                </span>
+              </button>
+
+              <pre class="hljs-snippet__panel" data-lang="powershell"><code class="language-powershell">curl https://install.sedona.apache.org | sh    </code></pre>
+              <pre class="hljs-snippet__panel" data-lang="python" hidden><code class="language-python">print("Hello from PySpark!")
+# from pyspark.sql import SparkSession
+# spark = SparkSession.builder.getOrCreate()    </code></pre>
+              <pre class="hljs-snippet__panel" data-lang="java" hidden><code class="language-java">public class Main {
+  public static void main(String[] args) {
+    System.out.println("Hello Java");
+  }
+}    </code></pre>
+            </div>
+          </div>
+
+          <div class="bth-group">
+            <a href="#" class="btn btn-red">
+                 <span class="caption">
+               Install SedonaDB
+              </span>
+            </a>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
     {% else %}
     {{ super() }}
     {% endif %}

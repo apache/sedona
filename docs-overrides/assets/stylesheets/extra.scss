@@ -1,7 +1,10 @@
 @import "vars";
 @import "other/mixing";
-
 @import "other/grid";
+
+// Vendors
+@import "vendors/highlightjs";
+
 
 @import "components/header";
 
