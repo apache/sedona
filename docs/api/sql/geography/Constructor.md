@@ -17,6 +17,50 @@
  under the License.
  -->
 
+## ST_GeogFromWKB
+
+Introduction: Construct a Geography from WKB Binary.
+
+Format:
+
+`ST_GeogFromWKB (Wkb: Binary)`
+
+Since: `v1.8.0`
+
+SQL Example
+
+```sql
+SELECT ST_GeogFromWKB([01 02 00 00 00 02 00 00 00 00 00 00 00 84 d6 00 c0 00 00 00 00 80 b5 d6 bf 00 00 00 60 e1 ef f7 bf 00 00 00 80 07 5d e5 bf])
+```
+
+Output:
+
+```
+LINESTRING (-2.1 -0.4, -1.5 -0.7)
+```
+
+## ST_GeogFromEWKB
+
+Introduction: Construct a Geography from EWKB Binary. This function is an alias of [ST_GeogFromWKB](#st_geogfromwkb).
+
+Format:
+
+`ST_GeogFromEWKB (EWkb: Binary)`
+
+Since: `v1.8.0`
+
+SQL Example
+
+```sql
+SELECT ST_GeogFromEWKB([01 02 00 00 20 E6 10 00 00 02 00 00 00 00 00 00 00 84 D6 00 C0 00 00 00 00 80 B5 D6 BF 00 00 00 60 E1 EF F7 BF 00 00 00 80 07 5D E5 BF])
+```
+
+Output:
+
+```
+SRID: 4326; LINESTRING (-2.1 -0.4, -1.5 -0.7)
+```
+
 ## ST_GeogFromWKT
 
 Introduction: Construct a Geography from WKT. If SRID is not set, it defaults to 0 (unknown).
@@ -58,6 +102,7 @@ SRID=4326; LINESTRING (1 2, 3 4, 5 6)
 Introduction: Construct a Geography from OGC Extended WKT.
 
 Format:
+
 `ST_GeogFromEWKT (EWkt: String)`
 
 Since: `v1.8.0`

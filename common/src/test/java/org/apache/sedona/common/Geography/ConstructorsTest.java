@@ -27,6 +27,10 @@ import com.google.common.geometry.S2Polygon;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.sedona.common.S2Geography.*;
+import org.apache.sedona.common.S2Geography.Geography;
+import org.apache.sedona.common.S2Geography.SinglePointGeography;
+import org.apache.sedona.common.S2Geography.WKBReader;
+import org.apache.sedona.common.S2Geography.WKBWriter;
 import org.apache.sedona.common.geography.Constructors;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
@@ -90,6 +94,42 @@ public class ConstructorsTest {
     result = Constructors.geogFromWKB(wkb, 0);
     assertEquals("POINT (-64 45)", result.toString());
     assertEquals(0, result.getSRID());
+  }
+
+  @Test
+  public void testGeogFromEWKB() throws ParseException {
+    String ewkbString = "01010000A0E61000000000000000000000000000000000F03F0000000000000040";
+    byte[] wkbBytes = WKBReader.hexToBytes(ewkbString);
+    Geography result = Constructors.geogFromWKB(wkbBytes);
+    String expectedGeom = "SRID=4326; POINT (0 1)";
+    assertEquals(expectedGeom, result.toString());
+    assertEquals(4326, result.getSRID());
+
+    ewkbString =
+        "0103000020E61000000100000005000000000000000000000000000000000000000000000000000000000000000000F03F000000000000F03F000000000000F03F000000000000F03F000000000000000000000000000000000000000000000000";
+    wkbBytes = WKBReader.hexToBytes(ewkbString);
+    result = Constructors.geogFromWKB(wkbBytes);
+    expectedGeom = "SRID=4326; POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))";
+    assertEquals(expectedGeom, result.toString());
+    assertEquals(4326, result.getSRID());
+
+    ewkbString =
+        "0106000020E610000002000000"
+            + "01030000000100000004000000"
+            + "00000000000000000000000000000000"
+            + "000000000000F03F0000000000000000"
+            + "000000000000F03F000000000000F03F"
+            + "00000000000000000000000000000000"
+            + "01030000000100000004000000"
+            + "000000000000F0BF000000000000F0BF"
+            + "000000000000F0BF0000000000000000"
+            + "0000000000000000000000000000F0BF"
+            + "000000000000F0BF000000000000F0BF";
+    wkbBytes = WKBReader.hexToBytes(ewkbString);
+    result = Constructors.geogFromWKB(wkbBytes);
+    expectedGeom = "SRID=4326; MULTIPOLYGON (((0 0, 1 0, 1 1, 0 0)), ((-1 -1, -1 0, 0 -1, -1 -1)))";
+    assertEquals(expectedGeom, result.toString());
+    assertEquals(4326, result.getSRID());
   }
 
   @Test
