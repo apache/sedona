@@ -121,3 +121,29 @@ private[apache] case class ST_GeogFromGeoHash(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+/**
+ * Return a Geography from a geography string
+ *
+ * @param inputExpressions
+ *   This function takes a geography string.
+ */
+case class ST_ToGeography(inputExpressions: Seq[Expression])
+    extends InferredExpression(Constructors.toGeography _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Return a Geography from a geography string
+ *
+ * @param inputExpressions
+ *   This function takes a geography string.
+ */
+case class ST_TryToGeography(inputExpressions: Seq[Expression])
+    extends InferredExpression(Constructors.tryToGeography _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}

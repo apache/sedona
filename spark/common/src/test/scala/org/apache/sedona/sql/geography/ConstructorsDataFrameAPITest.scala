@@ -22,7 +22,7 @@ import org.apache.sedona.common.S2Geography.{Geography, WKBReader}
 import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.sedona_sql.expressions.{implicits, st_constructors}
-import org.junit.Assert.{assertEquals, assertFalse, assertTrue}
+import org.junit.Assert.{assertEquals, assertFalse, assertNull, assertTrue}
 import org.locationtech.jts.geom.PrecisionModel
 
 class ConstructorsDataFrameAPITest extends TestBaseScala {
@@ -76,7 +76,7 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
     assert(actualResult == expectedResult)
   }
 
-  it("passed st_geomfromewkt") {
+  it("passed st_geogfromewkt") {
     val df = sparkSession
       .sql("SELECT 'SRID=4269;POINT(0.0 1.0)' AS wkt")
       .select(st_constructors.ST_GeogFromEWKT("wkt"))
@@ -94,6 +94,39 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
     var expectedWkt =
       "SRID=4326; POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))"
     assertEquals(expectedWkt, actualResult)
+  }
+
+  it("Passed ST_TryToGeography") {
+    val hexStr =
+      "0107000020E6100000090000000101000020E61000000000000000000000000000000000F03F0101000020E61000000000000000000000000000000000F03F0101000020E6100000000000000000004000000000000008400102000020E61000000200000000000000000000400000000000000840000000000000104000000000000014400102000020E6100000020000000000000000000000000000000000F03F000000000000004000000000000008400102000020E6100000020000000000000000001040000000000000144000000000000018400000000000001C400103000020E61000000200000005000000000000000000000000000000000000000000000000000000000000000000244000000000000024400000000000002440000000000000244000000000000000000000000000000000000000000000000005000000000000000000F03F000000000000F03F000000000000F03F0000000000002240000000000000224000000000000022400000000000002240000000000000F03F000000000000F03F000000000000F03F0103000020E61000000200000005000000000000000000000000000000000000000000000000000000000000000000244000000000000024400000000000002440000000000000244000000000000000000000000000000000000000000000000005000000000000000000F03F000000000000F03F000000000000F03F0000000000002240000000000000224000000000000022400000000000002240000000000000F03F000000000000F03F000000000000F03F0103000020E6100000010000000500000000000000000022C0000000000000000000000000000022C00000000000002440000000000000F0BF0000000000002440000000000000F0BF000000000000000000000000000022C00000000000000000";
+    val df = sparkSession
+      .sql(s"""SELECT '$hexStr' as wkb""")
+      .select(st_constructors.ST_TryToGeography(col("wkb")))
+    val actualResult = df.take(1)(0).get(0).asInstanceOf[Geography].toString()
+    val expectedResult =
+      "SRID=4326; GEOMETRYCOLLECTION (SRID=4326; POINT (0 1), SRID=4326; POINT (0 1), SRID=4326; POINT (2 3), SRID=4326; LINESTRING (2 3, 4 5), SRID=4326; LINESTRING (0 1, 2 3), SRID=4326; LINESTRING (4 5, 6 7), SRID=4326; POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0), (9 1, 9 9, 1 9, 1 1, 9 1)), SRID=4326; POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0), (9 1, 9 9, 1 9, 1 1, 9 1)), SRID=4326; POLYGON ((-9 0, -9 10, -1 10, -1 0, -9 0)))"
+    assert(expectedResult == actualResult)
+
+    val df_2 = sparkSession
+      .sql("SELECT 'SRID=4269;POINT(0.0 1.0)' AS wkt")
+      .select(st_constructors.ST_TryToGeography("wkt"))
+    val actualResult_2 = df_2.take(1)(0).get(0).asInstanceOf[Geography]
+    assert(actualResult_2.toString() == "SRID=4269; POINT (0 1)")
+    assert(actualResult_2.getSRID == 4269)
+
+    val df_3 = sparkSession
+      .sql("SELECT '9q9j8ue2v71y5zzy0s4q' AS geohash")
+      .select(st_constructors.ST_TryToGeography("geohash"))
+    val actualResult_3 =
+      df_3.take(1)(0).get(0).asInstanceOf[Geography].toText(new PrecisionModel(1e6))
+    var expectedWkt =
+      "SRID=4326; POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))"
+    assertEquals(expectedWkt, actualResult_3)
+
+    val df_4 = sparkSession
+      .sql("SELECT 'NOT VALID' AS geog")
+      .select(st_constructors.ST_TryToGeography("geog"))
+    assertNull(df_4.take(1)(0).get(0))
   }
 
 }
