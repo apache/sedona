@@ -61,6 +61,28 @@ Output:
 SRID: 4326; LINESTRING (-2.1 -0.4, -1.5 -0.7)
 ```
 
+## ST_GeogFromGeoHash
+
+Introduction: Create Geography from geohash string and optional precision
+
+Format:
+
+`ST_GeogFromGeoHash(geohash: String, precision: Integer)`
+
+Since: `v1.8.0`
+
+SQL Example
+
+```sql
+SELECT ST_GeogFromGeoHash('9q9j8ue2v71y5zzy0s4q', 16)
+```
+
+Output:
+
+```
+SRID=4326; POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))"
+```
+
 ## ST_GeogFromWKT
 
 Introduction: Construct a Geography from WKT. If SRID is not set, it defaults to 0 (unknown).

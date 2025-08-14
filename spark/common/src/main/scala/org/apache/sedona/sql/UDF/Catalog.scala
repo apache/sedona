@@ -22,6 +22,8 @@ import org.apache.spark.sql.expressions.Aggregator
 import org.apache.spark.sql.sedona_sql.expressions.collect.ST_Collect
 import org.apache.spark.sql.sedona_sql.expressions.raster._
 import org.apache.spark.sql.sedona_sql.expressions._
+import org.apache.spark.sql.sedona_sql.expressions.geography.{ST_GeogCollFromText, ST_GeogFromGeoHash, ST_GeogFromText, ST_GeogFromWKB, ST_GeogFromWKT}
+import org.apache.spark.sql.sedona_sql.expressions.geography.{ST_GeogCollFromText, ST_GeogFromEWKT, ST_GeogFromText, ST_GeogFromWKB, ST_GeogFromWKT}
 import org.apache.spark.sql.sedona_sql.expressions.geography.{ST_GeogCollFromText, ST_GeogFromEWKB, ST_GeogFromEWKT, ST_GeogFromText, ST_GeogFromWKB, ST_GeogFromWKT}
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.operation.buffer.BufferParameters
@@ -188,6 +190,7 @@ object Catalog extends AbstractCatalog {
     function[ST_GeoHash](),
     function[ST_GeomFromGeoHash](null),
     function[ST_PointFromGeoHash](null),
+    function[ST_GeogFromGeoHash](null),
     function[ST_Collect](),
     function[ST_Multi](),
     function[ST_PointOnSurface](),

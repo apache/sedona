@@ -33,9 +33,6 @@ import org.apache.sedona.common.S2Geography.WKBReader;
 import org.apache.sedona.common.S2Geography.WKBWriter;
 import org.apache.sedona.common.geography.Constructors;
 import org.junit.Test;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
 
 public class ConstructorsTest {
@@ -130,6 +127,21 @@ public class ConstructorsTest {
     expectedGeom = "SRID=4326; MULTIPOLYGON (((0 0, 1 0, 1 1, 0 0)), ((-1 -1, -1 0, 0 -1, -1 -1)))";
     assertEquals(expectedGeom, result.toString());
     assertEquals(4326, result.getSRID());
+  }
+
+  @Test
+  public void geogFromGeoHash() throws ParseException {
+    Geography geog = Constructors.geogFromGeoHash("9q9j8ue2v71y5zzy0s4q", 16);
+    String expectedWkt =
+        "SRID=4326; POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))";
+    String actualWkt = geog.toText(new PrecisionModel(1e6));
+    assertEquals(expectedWkt, actualWkt);
+
+    geog = Constructors.geogFromGeoHash("s00twy01mt", 4);
+    expectedWkt =
+        "SRID=4326; POLYGON ((0.703125 0.8789062, 1.0546875 0.8789062, 1.0546875 1.0546875, 0.703125 1.0546875, 0.703125 0.8789062))";
+    actualWkt = geog.toText(new PrecisionModel(1e6));
+    assertEquals(expectedWkt, actualWkt);
   }
 
   @Test
