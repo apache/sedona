@@ -82,7 +82,7 @@ class TestIO(TestGeopandasBase):
         assert df.count().item() == 10000
 
         # Test fails for shapely<2.1.0
-        if parse_version(shapely.__version__) < parse_version("2.1.0"):
+        if parse_version(shapely.__version__) >= parse_version("2.1.0"):
             # Check that we can read what geopandas writes
             gpd_df = df.to_geopandas()
             temp_file_path = self._get_next_temp_file_path("shp")
@@ -159,7 +159,7 @@ class TestIO(TestGeopandasBase):
         assert df["geom"].count() == expected_cnt
 
         # Test fails for shapely<2.1.0
-        if parse_version(shapely.__version__) < parse_version("2.1.0"):
+        if parse_version(shapely.__version__) >= parse_version("2.1.0"):
             # Check that we can read what geopandas writes
             gpd_df = df.to_geopandas()
             temp_file_path = self._get_next_temp_file_path("gpkg")
