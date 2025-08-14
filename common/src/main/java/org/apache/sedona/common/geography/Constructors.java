@@ -18,9 +18,11 @@
  */
 package org.apache.sedona.common.geography;
 
+import java.io.IOException;
 import org.apache.sedona.common.S2Geography.Geography;
 import org.apache.sedona.common.S2Geography.WKBReader;
 import org.apache.sedona.common.S2Geography.WKTReader;
+import org.apache.sedona.common.utils.GeoHashDecoder;
 import org.locationtech.jts.io.ParseException;
 
 public class Constructors {
@@ -66,5 +68,15 @@ public class Constructors {
       return null;
     }
     return geogFromWKT(wkt, srid);
+  }
+
+  public static Geography geogFromGeoHash(String geoHash, Integer precision) {
+    try {
+      return GeoHashDecoder.decodeGeog(geoHash, precision);
+    } catch (GeoHashDecoder.InvalidGeoHashException e) {
+      return null;
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

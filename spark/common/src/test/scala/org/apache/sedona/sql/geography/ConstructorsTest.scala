@@ -19,13 +19,34 @@
 package org.apache.sedona.sql.geography
 
 import org.apache.sedona.common.S2Geography.Geography
+import org.apache.sedona.common.geography.Constructors
 import org.apache.sedona.sql.TestBaseScala
+import org.junit.Assert.assertEquals
 import org.locationtech.jts.geom.PrecisionModel
 
 class ConstructorsTest extends TestBaseScala {
 
   import sparkSession.implicits._
   val precisionModel: PrecisionModel = new PrecisionModel(PrecisionModel.FIXED);
+
+  it("Passed ST_GeogFromGeoHash") {
+    var geohash = "9q9j8ue2v71y5zzy0s4q";
+    var precision = 16;
+    var row =
+      sparkSession.sql(s"SELECT ST_GeogFromGeoHash('$geohash','$precision') AS geog").first()
+    var geoStr = row.get(0).asInstanceOf[Geography].toText(new PrecisionModel(1e6))
+    var expectedWkt =
+      "SRID=4326; POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))"
+    assertEquals(expectedWkt, geoStr)
+
+    geohash = "s00twy01mt"
+    precision = 4;
+    row = sparkSession.sql(s"SELECT ST_GeogFromGeoHash('$geohash','$precision') AS geog").first()
+    geoStr = row.get(0).asInstanceOf[Geography].toText(new PrecisionModel(1e6))
+    expectedWkt =
+      "SRID=4326; POLYGON ((0.703125 0.8789062, 1.0546875 0.8789062, 1.0546875 1.0546875, 0.703125 1.0546875, 0.703125 0.8789062))"
+    assertEquals(expectedWkt, geoStr)
+  }
 
   it("Passed ST_GeogFromWKT") {
     val wkt = "LINESTRING (1 2, 3 4, 5 6)"
