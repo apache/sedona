@@ -61,7 +61,7 @@ Output:
 SRID: 4326; LINESTRING (-2.1 -0.4, -1.5 -0.7)
 ```
 
-## ST_GeomFromGeoHash
+## ST_GeogFromGeoHash
 
 Introduction: Create Geography from geohash string and optional precision
 
