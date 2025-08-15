@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.apache.spark.sql.execution.python
 
 /*
@@ -33,8 +51,8 @@ import java.io.DataOutputStream
 import java.net.Socket
 
 /**
- * A trait that can be mixed-in with [[python.BasePythonRunner]]. It implements the logic from
- * JVM (an iterator of internal rows + additional data if required) to Python (Arrow).
+ * A trait that can be mixed-in with [[python.BasePythonRunner]]. It implements the logic from JVM
+ * (an iterator of internal rows + additional data if required) to Python (Arrow).
  */
 private[python] trait SedonaPythonArrowInput[IN] { self: SedonaBasePythonRunner[IN, _] =>
   protected val workerConf: Map[String, String]
@@ -50,15 +68,15 @@ private[python] trait SedonaPythonArrowInput[IN] { self: SedonaBasePythonRunner[
   protected def pythonMetrics: Map[String, SQLMetric]
 
   protected def writeIteratorToArrowStream(
-                                            root: VectorSchemaRoot,
-                                            writer: ArrowStreamWriter,
-                                            dataOut: DataOutputStream,
-                                            inputIterator: Iterator[IN]): Unit
+      root: VectorSchemaRoot,
+      writer: ArrowStreamWriter,
+      dataOut: DataOutputStream,
+      inputIterator: Iterator[IN]): Unit
 
   protected def writeUDF(
-                          dataOut: DataOutputStream,
-                          funcs: Seq[ChainedPythonFunctions],
-                          argOffsets: Array[Array[Int]]): Unit =
+      dataOut: DataOutputStream,
+      funcs: Seq[ChainedPythonFunctions],
+      argOffsets: Array[Array[Int]]): Unit =
     SedonaPythonUDFRunner.writeUDFs(dataOut, funcs, argOffsets)
 
   protected def handleMetadataBeforeExec(stream: DataOutputStream): Unit = {
@@ -71,11 +89,11 @@ private[python] trait SedonaPythonArrowInput[IN] { self: SedonaBasePythonRunner[
   }
 
   protected override def newWriterThread(
-                                          env: SparkEnv,
-                                          worker: Socket,
-                                          inputIterator: Iterator[IN],
-                                          partitionIndex: Int,
-                                          context: TaskContext): WriterThread = {
+      env: SparkEnv,
+      worker: Socket,
+      inputIterator: Iterator[IN],
+      partitionIndex: Int,
+      context: TaskContext): WriterThread = {
     new WriterThread(env, worker, inputIterator, partitionIndex, context) {
 
       protected override def writeCommand(dataOut: DataOutputStream): Unit = {
@@ -85,9 +103,14 @@ private[python] trait SedonaPythonArrowInput[IN] { self: SedonaBasePythonRunner[
 
       protected override def writeIteratorToStream(dataOut: DataOutputStream): Unit = {
         val arrowSchema = SedonaArrowUtils.toArrowSchema(
-          schema, timeZoneId, errorOnDuplicatedFieldNames, largeVarTypes)
+          schema,
+          timeZoneId,
+          errorOnDuplicatedFieldNames,
+          largeVarTypes)
         val allocator = SedonaArrowUtils.rootAllocator.newChildAllocator(
-          s"stdout writer for $pythonExec", 0, Long.MaxValue)
+          s"stdout writer for $pythonExec",
+          0,
+          Long.MaxValue)
         val root = VectorSchemaRoot.create(arrowSchema, allocator)
 
         Utils.tryWithSafeFinally {
@@ -119,15 +142,15 @@ private[python] trait SedonaPythonArrowInput[IN] { self: SedonaBasePythonRunner[
   }
 }
 
-
-private[python] trait SedonaBasicPythonArrowInput extends SedonaPythonArrowInput[Iterator[InternalRow]] {
+private[python] trait SedonaBasicPythonArrowInput
+    extends SedonaPythonArrowInput[Iterator[InternalRow]] {
   self: SedonaBasePythonRunner[Iterator[InternalRow], _] =>
 
   protected def writeIteratorToArrowStream(
-                                            root: VectorSchemaRoot,
-                                            writer: ArrowStreamWriter,
-                                            dataOut: DataOutputStream,
-                                            inputIterator: Iterator[Iterator[InternalRow]]): Unit = {
+      root: VectorSchemaRoot,
+      writer: ArrowStreamWriter,
+      dataOut: DataOutputStream,
+      inputIterator: Iterator[Iterator[InternalRow]]): Unit = {
     val arrowWriter = ArrowWriter.create(root)
 
     while (inputIterator.hasNext) {

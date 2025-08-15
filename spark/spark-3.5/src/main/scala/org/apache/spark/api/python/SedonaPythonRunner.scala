@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.apache.spark.api.python
 
 /*
@@ -34,7 +52,6 @@ import java.nio.file.{Path, Files => JavaFiles}
 import java.util.concurrent.atomic.AtomicBoolean
 import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
-
 
 /**
  * Enumerate the type of command that will be sent to the Python worker
@@ -92,11 +109,11 @@ private object SedonaBasePythonRunner {
  * functions (from bottom to top).
  */
 private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
-                                                         protected val funcs: Seq[ChainedPythonFunctions],
-                                                         protected val evalType: Int,
-                                                         protected val argOffsets: Array[Array[Int]],
-                                                         protected val jobArtifactUUID: Option[String])
-  extends Logging {
+    protected val funcs: Seq[ChainedPythonFunctions],
+    protected val evalType: Int,
+    protected val argOffsets: Array[Array[Int]],
+    protected val jobArtifactUUID: Option[String])
+    extends Logging {
 
   require(funcs.length == argOffsets.length, "argOffsets should have the same length as funcs")
 
@@ -131,9 +148,9 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
   }
 
   def compute(
-               inputIterator: Iterator[IN],
-               partitionIndex: Int,
-               context: TaskContext): Iterator[OUT] = {
+      inputIterator: Iterator[IN],
+      partitionIndex: Int,
+      context: TaskContext): Iterator[OUT] = {
     val startTime = System.currentTimeMillis
     val sedonaEnv = SedonaSparkEnv.get
     val env = SparkEnv.get
@@ -170,8 +187,8 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
 
     envVars.put("SPARK_JOB_ARTIFACT_UUID", jobArtifactUUID.getOrElse("default"))
 
-    val (worker: Socket, pid: Option[Int]) = env.createPythonWorker(
-      pythonExec, envVars.asScala.toMap)
+    val (worker: Socket, pid: Option[Int]) =
+      env.createPythonWorker(pythonExec, envVars.asScala.toMap)
     // Whether is the worker released into idle pool or closed. When any codes try to release or
     // close a worker, they should use `releasedOrClosed.compareAndSet` to flip the state to make
     // sure there is only one winner that is going to release or close the worker.
@@ -209,38 +226,45 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
     val stream = new DataInputStream(new BufferedInputStream(worker.getInputStream, bufferSize))
 
     val stdoutIterator = newReaderIterator(
-      stream, writerThread, startTime, env, worker, pid, releasedOrClosed, context)
+      stream,
+      writerThread,
+      startTime,
+      env,
+      worker,
+      pid,
+      releasedOrClosed,
+      context)
     new InterruptibleIterator(context, stdoutIterator)
   }
 
   protected def newWriterThread(
-                                 env: SparkEnv,
-                                 worker: Socket,
-                                 inputIterator: Iterator[IN],
-                                 partitionIndex: Int,
-                                 context: TaskContext): WriterThread
+      env: SparkEnv,
+      worker: Socket,
+      inputIterator: Iterator[IN],
+      partitionIndex: Int,
+      context: TaskContext): WriterThread
 
   protected def newReaderIterator(
-                                   stream: DataInputStream,
-                                   writerThread: WriterThread,
-                                   startTime: Long,
-                                   env: SparkEnv,
-                                   worker: Socket,
-                                   pid: Option[Int],
-                                   releasedOrClosed: AtomicBoolean,
-                                   context: TaskContext): Iterator[OUT]
+      stream: DataInputStream,
+      writerThread: WriterThread,
+      startTime: Long,
+      env: SparkEnv,
+      worker: Socket,
+      pid: Option[Int],
+      releasedOrClosed: AtomicBoolean,
+      context: TaskContext): Iterator[OUT]
 
   /**
    * The thread responsible for writing the data from the PythonRDD's parent iterator to the
    * Python process.
    */
   abstract class WriterThread(
-                               env: SparkEnv,
-                               worker: Socket,
-                               inputIterator: Iterator[IN],
-                               partitionIndex: Int,
-                               context: TaskContext)
-    extends Thread(s"stdout writer for $pythonExec") {
+      env: SparkEnv,
+      worker: Socket,
+      inputIterator: Iterator[IN],
+      partitionIndex: Int,
+      context: TaskContext)
+      extends Thread(s"stdout writer for $pythonExec") {
 
     @volatile private var _exception: Throwable = null
 
@@ -253,8 +277,8 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
     def exception: Option[Throwable] = Option(_exception)
 
     /**
-     * Terminates the writer thread and waits for it to exit, ignoring any exceptions that may occur
-     * due to cleanup.
+     * Terminates the writer thread and waits for it to exit, ignoring any exceptions that may
+     * occur due to cleanup.
      */
     def shutdownOnTaskCompletion(): Unit = {
       assert(context.isCompleted)
@@ -290,9 +314,11 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
         // Init a ServerSocket to accept method calls from Python side.
         val isBarrier = context.isInstanceOf[BarrierTaskContext]
         if (isBarrier) {
-          serverSocket = Some(new ServerSocket(/* port */ 0,
-            /* backlog */ 1,
-            InetAddress.getByName("localhost")))
+          serverSocket = Some(
+            new ServerSocket(
+              /* port */ 0,
+              /* backlog */ 1,
+              InetAddress.getByName("localhost")))
           // A call to accept() for ServerSocket shall block infinitely.
           serverSocket.foreach(_.setSoTimeout(0))
           new Thread("accept-connections") {
@@ -320,8 +346,8 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
                       input.readFully(message)
                       barrierAndServe(requestMethod, sock, new String(message, UTF_8))
                     case _ =>
-                      val out = new DataOutputStream(new BufferedOutputStream(
-                        sock.getOutputStream))
+                      val out =
+                        new DataOutputStream(new BufferedOutputStream(sock.getOutputStream))
                       writeUTF(BarrierTaskContextMessageProtocol.ERROR_UNRECOGNIZED_FUNCTION, out)
                   }
                 } catch {
@@ -383,9 +409,11 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
         }
 
         // sparkFilesDir
-        val root = jobArtifactUUID.map { uuid =>
-          new File(SparkFiles.getRootDirectory(), uuid).getAbsolutePath
-        }.getOrElse(SparkFiles.getRootDirectory())
+        val root = jobArtifactUUID
+          .map { uuid =>
+            new File(SparkFiles.getRootDirectory(), uuid).getAbsolutePath
+          }
+          .getOrElse(SparkFiles.getRootDirectory())
         PythonRDD.writeUTF(root, dataOut)
         // Python includes (*.zip and *.egg files)
         dataOut.writeInt(pythonIncludes.size)
@@ -455,8 +483,10 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
       } catch {
         case t: Throwable if (NonFatal(t) || t.isInstanceOf[Exception]) =>
           if (context.isCompleted || context.isInterrupted) {
-            logDebug("Exception/NonFatal Error thrown after task completion (likely due to " +
-              "cleanup)", t)
+            logDebug(
+              "Exception/NonFatal Error thrown after task completion (likely due to " +
+                "cleanup)",
+              t)
             if (!worker.isClosed) {
               Utils.tryLog(worker.shutdownOutput())
             }
@@ -478,8 +508,7 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
     def barrierAndServe(requestMethod: Int, sock: Socket, message: String = ""): Unit = {
       require(
         serverSocket.isDefined,
-        "No available ServerSocket to redirect the BarrierTaskContext method call."
-      )
+        "No available ServerSocket to redirect the BarrierTaskContext method call.")
       val out = new DataOutputStream(new BufferedOutputStream(sock.getOutputStream))
       try {
         val messages = requestMethod match {
@@ -507,15 +536,15 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
   }
 
   abstract class ReaderIterator(
-                                 stream: DataInputStream,
-                                 writerThread: WriterThread,
-                                 startTime: Long,
-                                 env: SparkEnv,
-                                 worker: Socket,
-                                 pid: Option[Int],
-                                 releasedOrClosed: AtomicBoolean,
-                                 context: TaskContext)
-    extends Iterator[OUT] {
+      stream: DataInputStream,
+      writerThread: WriterThread,
+      startTime: Long,
+      env: SparkEnv,
+      worker: Socket,
+      pid: Option[Int],
+      releasedOrClosed: AtomicBoolean,
+      context: TaskContext)
+      extends Iterator[OUT] {
 
     private var nextObj: OUT = _
     private var eos = false
@@ -540,9 +569,8 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
     }
 
     /**
-     * Reads next object from the stream.
-     * When the stream reaches end of data, needs to process the following sections,
-     * and then returns null.
+     * Reads next object from the stream. When the stream reaches end of data, needs to process
+     * the following sections, and then returns null.
      */
     protected def read(): OUT
 
@@ -555,8 +583,8 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
       val init = initTime - bootTime
       val finish = finishTime - initTime
       val total = finishTime - startTime
-      logInfo("Times: total = %s, boot = %s, init = %s, finish = %s".format(total, boot,
-        init, finish))
+      logInfo(
+        "Times: total = %s, boot = %s, init = %s, finish = %s".format(total, boot, init, finish))
       val memoryBytesSpilled = stream.readLong()
       val diskBytesSpilled = stream.readLong()
       context.taskMetrics.incMemoryBytesSpilled(memoryBytesSpilled)
@@ -568,8 +596,7 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
       val exLength = stream.readInt()
       val obj = new Array[Byte](exLength)
       stream.readFully(obj)
-      new PythonException(new String(obj, StandardCharsets.UTF_8),
-        writerThread.exception.orNull)
+      new PythonException(new String(obj, StandardCharsets.UTF_8), writerThread.exception.orNull)
     }
 
     protected def handleEndOfDataSection(): Unit = {
@@ -601,8 +628,9 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
         logError("This may have been caused by a prior exception:", writerThread.exception.get)
         throw writerThread.exception.get
 
-      case eof: EOFException if faultHandlerEnabled && pid.isDefined &&
-        JavaFiles.exists(SedonaBasePythonRunner.faultHandlerLogPath(pid.get)) =>
+      case eof: EOFException
+          if faultHandlerEnabled && pid.isDefined &&
+            JavaFiles.exists(SedonaBasePythonRunner.faultHandlerLogPath(pid.get)) =>
         val path = SedonaBasePythonRunner.faultHandlerLogPath(pid.get)
         val error = String.join("\n", JavaFiles.readAllLines(path)) + "\n"
         JavaFiles.deleteIfExists(path)
@@ -619,7 +647,7 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
    * threads can block indefinitely.
    */
   class MonitorThread(env: SparkEnv, worker: Socket, context: TaskContext)
-    extends Thread(s"Worker Monitor for $pythonExec") {
+      extends Thread(s"Worker Monitor for $pythonExec") {
 
     /** How long to wait before killing the python worker if a task cannot be interrupted. */
     private val taskKillTimeout = env.conf.get(PYTHON_TASK_KILL_TIMEOUT)
@@ -666,16 +694,19 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
    *
    * A deadlock can arise if the task completes while the writer thread is sending input to the
    * Python process (e.g. due to the use of `take()`), and the Python process is still producing
-   * output. When the inputs are sufficiently large, this can result in a deadlock due to the use of
-   * blocking I/O (SPARK-38677). To resolve the deadlock, we need to close the socket.
+   * output. When the inputs are sufficiently large, this can result in a deadlock due to the use
+   * of blocking I/O (SPARK-38677). To resolve the deadlock, we need to close the socket.
    */
   class WriterMonitorThread(
-                             env: SparkEnv, worker: Socket, writerThread: WriterThread, context: TaskContext)
-    extends Thread(s"Writer Monitor for $pythonExec (writer thread id ${writerThread.getId})") {
+      env: SparkEnv,
+      worker: Socket,
+      writerThread: WriterThread,
+      context: TaskContext)
+      extends Thread(s"Writer Monitor for $pythonExec (writer thread id ${writerThread.getId})") {
 
     /**
-     * How long to wait before closing the socket if the writer thread has not exited after the task
-     * ends.
+     * How long to wait before closing the socket if the writer thread has not exited after the
+     * task ends.
      */
     private val taskKillTimeout = env.conf.get(PYTHON_TASK_KILL_TIMEOUT)
 

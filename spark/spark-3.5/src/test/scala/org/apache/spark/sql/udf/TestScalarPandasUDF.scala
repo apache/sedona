@@ -145,9 +145,9 @@ object ScalarUDF {
   }
 
   private val workerEnv = new java.util.HashMap[String, String]()
-    workerEnv.put("PYTHONPATH", s"$pysparkPythonPath:$pythonPath")
-    SparkEnv.get.conf.set(PYTHON_WORKER_MODULE, "sedonaworker.worker")
-    SparkEnv.get.conf.set(PYTHON_USE_DAEMON, false)
+  workerEnv.put("PYTHONPATH", s"$pysparkPythonPath:$pythonPath")
+  SparkEnv.get.conf.set(PYTHON_WORKER_MODULE, "sedonaworker.worker")
+  SparkEnv.get.conf.set(PYTHON_USE_DAEMON, false)
 
   val geometryToNonGeometryFunction: UserDefinedPythonFunction = UserDefinedPythonFunction(
     name = "geospatial_udf",

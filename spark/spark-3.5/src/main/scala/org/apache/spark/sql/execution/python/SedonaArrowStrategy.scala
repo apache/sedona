@@ -64,7 +64,9 @@ class SedonaArrowStrategy extends Strategy {
 object SedonaUnsafeProjection {
 
   def create(exprs: Seq[Expression], inputSchema: Seq[Attribute]): UnsafeProjection = {
-    GenerateUnsafeProjection.generate(bindReferences(exprs, inputSchema), SQLConf.get.subexpressionEliminationEnabled)
+    GenerateUnsafeProjection.generate(
+      bindReferences(exprs, inputSchema),
+      SQLConf.get.subexpressionEliminationEnabled)
 //    createObject(bindReferences(exprs, inputSchema))
   }
 }
@@ -127,13 +129,12 @@ case class SedonaArrowEvalPythonExec(
 
   override def doExecute(): RDD[InternalRow] = {
 
-      val customProjection = new Projection with Serializable{
-        def apply(row: InternalRow): InternalRow = {
-          row match {
-            case joinedRow: JoinedRow =>
-              val arrowField = joinedRow.getRight.asInstanceOf[ColumnarBatchRow]
-              val left = joinedRow.getLeft
-
+    val customProjection = new Projection with Serializable {
+      def apply(row: InternalRow): InternalRow = {
+        row match {
+          case joinedRow: JoinedRow =>
+            val arrowField = joinedRow.getRight.asInstanceOf[ColumnarBatchRow]
+            val left = joinedRow.getLeft
 
 //              resultAttrs.zipWithIndex.map {
 //                case (x, y) =>
@@ -153,8 +154,8 @@ case class SedonaArrowEvalPythonExec(
 //
 //              println("ssss")
 //              arrowField.
-              row
-              // We need to convert JoinedRow to UnsafeRow
+            row
+            // We need to convert JoinedRow to UnsafeRow
 //              val leftUnsafe = left.asInstanceOf[UnsafeRow]
 //              val rightUnsafe = right.asInstanceOf[UnsafeRow]
 //              val joinedUnsafe = new UnsafeRow(leftUnsafe.numFields + rightUnsafe.numFields)
@@ -165,15 +166,15 @@ case class SedonaArrowEvalPythonExec(
 //              joinedUnsafe.setRight(leftUnsafe)
 //              joinedUnsafe
 //              val wktReader = new WKTReader()
-              val resultProj = SedonaUnsafeProjection.create(output, output)
+            val resultProj = SedonaUnsafeProjection.create(output, output)
 //              val WKBWriter = new org.locationtech.jts.io.WKBWriter()
-              resultProj(new JoinedRow(left, arrowField))
-            case _ =>
-              println(row.getClass)
-              throw new UnsupportedOperationException("Unsupported row type")
-          }
+            resultProj(new JoinedRow(left, arrowField))
+          case _ =>
+            println(row.getClass)
+            throw new UnsupportedOperationException("Unsupported row type")
         }
       }
+    }
     val inputRDD = child.execute().map(_.copy())
 
     inputRDD.mapPartitions { iter =>
@@ -182,8 +183,10 @@ case class SedonaArrowEvalPythonExec(
 
       // The queue used to buffer input rows so we can drain it to
       // combine input with output from Python.
-      val queue = HybridRowQueue(context.taskMemoryManager(),
-        new File(Utils.getLocalDir(SparkEnv.get.conf)), child.output.length)
+      val queue = HybridRowQueue(
+        context.taskMemoryManager(),
+        new File(Utils.getLocalDir(SparkEnv.get.conf)),
+        child.output.length)
       context.addTaskCompletionListener[Unit] { ctx =>
         queue.close()
       }
@@ -216,8 +219,7 @@ case class SedonaArrowEvalPythonExec(
         projection(inputRow)
       }
 
-      val outputRowIterator = evaluate(
-        pyFuncs, argOffsets, projectedRowIter, schema, context)
+      val outputRowIterator = evaluate(pyFuncs, argOffsets, projectedRowIter, schema, context)
 
       val joined = new JoinedRow
 
@@ -232,18 +234,17 @@ case class SedonaArrowEvalPythonExec(
 
         val row = new GenericInternalRow(numFields)
 
-        resultAttrs.zipWithIndex.map {
-          case (attr, index) =>
-            if (attr.dataType.isInstanceOf[GeometryUDT]) {
-              // Convert the geometry type to WKB
-              val wkbReader = new org.locationtech.jts.io.WKBReader()
-              val wkbWriter = new org.locationtech.jts.io.WKBWriter()
-              val geom = wkbReader.read(projected.getBinary(startField + index))
+        resultAttrs.zipWithIndex.map { case (attr, index) =>
+          if (attr.dataType.isInstanceOf[GeometryUDT]) {
+            // Convert the geometry type to WKB
+            val wkbReader = new org.locationtech.jts.io.WKBReader()
+            val wkbWriter = new org.locationtech.jts.io.WKBWriter()
+            val geom = wkbReader.read(projected.getBinary(startField + index))
 
-              row.update(startField + index, wkbWriter.write(geom))
+            row.update(startField + index, wkbWriter.write(geom))
 
-              println("ssss")
-            }
+            println("ssss")
+          }
         }
 
         println("ssss")

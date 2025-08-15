@@ -1,20 +1,21 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.spark
 
 import java.io.File
@@ -49,31 +50,33 @@ import org.apache.spark.storage._
 import org.apache.spark.util.{RpcUtils, Utils}
 
 /**
- * :: DeveloperApi ::
- * Holds all the runtime environment objects for a running Spark instance (either master or worker),
- * including the serializer, RpcEnv, block manager, map output tracker, etc. Currently
- * Spark code finds the SparkEnv through a global variable, so all the threads can access the same
- * SparkEnv. It can be accessed by SparkEnv.get (e.g. after creating a SparkContext).
+ * :: DeveloperApi :: Holds all the runtime environment objects for a running Spark instance
+ * (either master or worker), including the serializer, RpcEnv, block manager, map output tracker,
+ * etc. Currently Spark code finds the SparkEnv through a global variable, so all the threads can
+ * access the same SparkEnv. It can be accessed by SparkEnv.get (e.g. after creating a
+ * SparkContext).
  */
 @DeveloperApi
-class SedonaSparkEnv (
-                 val executorId: String,
-                 private[spark] val rpcEnv: RpcEnv,
-                 val serializer: Serializer,
-                 val closureSerializer: Serializer,
-                 val serializerManager: SerializerManager,
-                 val mapOutputTracker: MapOutputTracker,
-                 val shuffleManager: ShuffleManager,
-                 val broadcastManager: BroadcastManager,
-                 val blockManager: BlockManager,
-                 val securityManager: SecurityManager,
-                 val metricsSystem: MetricsSystem,
-                 val memoryManager: MemoryManager,
-                 val outputCommitCoordinator: OutputCommitCoordinator,
-                 val conf: SparkConf) extends Logging {
+class SedonaSparkEnv(
+    val executorId: String,
+    private[spark] val rpcEnv: RpcEnv,
+    val serializer: Serializer,
+    val closureSerializer: Serializer,
+    val serializerManager: SerializerManager,
+    val mapOutputTracker: MapOutputTracker,
+    val shuffleManager: ShuffleManager,
+    val broadcastManager: BroadcastManager,
+    val blockManager: BlockManager,
+    val securityManager: SecurityManager,
+    val metricsSystem: MetricsSystem,
+    val memoryManager: MemoryManager,
+    val outputCommitCoordinator: OutputCommitCoordinator,
+    val conf: SparkConf)
+    extends Logging {
 
   @volatile private[spark] var isStopped = false
-  private val pythonWorkers = mutable.HashMap[(String, Map[String, String]), PythonWorkerFactory]()
+  private val pythonWorkers =
+    mutable.HashMap[(String, Map[String, String]), PythonWorkerFactory]()
 
   // A general, soft-reference map for metadata needed during HadoopRDD split computation
   // (e.g., HadoopFileRDD uses this to cache JobConfs and InputFormats).
@@ -115,28 +118,29 @@ class SedonaSparkEnv (
     }
   }
 
-  private[spark]
-  def createPythonWorker(
-                          pythonExec: String,
-                          envVars: Map[String, String]): (java.net.Socket, Option[Int]) = {
+  private[spark] def createPythonWorker(
+      pythonExec: String,
+      envVars: Map[String, String]): (java.net.Socket, Option[Int]) = {
     synchronized {
       val key = (pythonExec, envVars)
       pythonWorkers.getOrElseUpdate(key, new PythonWorkerFactory(pythonExec, envVars)).create()
     }
   }
 
-  private[spark]
-  def destroyPythonWorker(pythonExec: String,
-                          envVars: Map[String, String], worker: Socket): Unit = {
+  private[spark] def destroyPythonWorker(
+      pythonExec: String,
+      envVars: Map[String, String],
+      worker: Socket): Unit = {
     synchronized {
       val key = (pythonExec, envVars)
       pythonWorkers.get(key).foreach(_.stopWorker(worker))
     }
   }
 
-  private[spark]
-  def releasePythonWorker(pythonExec: String,
-                          envVars: Map[String, String], worker: Socket): Unit = {
+  private[spark] def releasePythonWorker(
+      pythonExec: String,
+      envVars: Map[String, String],
+      worker: Socket): Unit = {
     synchronized {
       val key = (pythonExec, envVars)
       pythonWorkers.get(key).foreach(_.releaseWorker(worker))
@@ -165,13 +169,14 @@ object SedonaSparkEnv extends Logging {
    * Create a SparkEnv for the driver.
    */
   private[spark] def createDriverEnv(
-                                      conf: SparkConf,
-                                      isLocal: Boolean,
-                                      listenerBus: LiveListenerBus,
-                                      numCores: Int,
-                                      sparkContext: SparkContext,
-                                      mockOutputCommitCoordinator: Option[OutputCommitCoordinator] = None): SparkEnv = {
-    assert(conf.contains(DRIVER_HOST_ADDRESS),
+      conf: SparkConf,
+      isLocal: Boolean,
+      listenerBus: LiveListenerBus,
+      numCores: Int,
+      sparkContext: SparkContext,
+      mockOutputCommitCoordinator: Option[OutputCommitCoordinator] = None): SparkEnv = {
+    assert(
+      conf.contains(DRIVER_HOST_ADDRESS),
       s"${DRIVER_HOST_ADDRESS.key} is not set on the driver!")
     assert(conf.contains(DRIVER_PORT), s"${DRIVER_PORT.key} is not set on the driver!")
     val bindAddress = conf.get(DRIVER_BIND_ADDRESS)
@@ -193,45 +198,35 @@ object SedonaSparkEnv extends Logging {
       ioEncryptionKey,
       listenerBus = listenerBus,
       Option(sparkContext),
-      mockOutputCommitCoordinator = mockOutputCommitCoordinator
-    )
+      mockOutputCommitCoordinator = mockOutputCommitCoordinator)
   }
 
   /**
-   * Create a SparkEnv for an executor.
-   * In coarse-grained mode, the executor provides an RpcEnv that is already instantiated.
+   * Create a SparkEnv for an executor. In coarse-grained mode, the executor provides an RpcEnv
+   * that is already instantiated.
    */
   private[spark] def createExecutorEnv(
-                                        conf: SparkConf,
-                                        executorId: String,
-                                        bindAddress: String,
-                                        hostname: String,
-                                        numCores: Int,
-                                        ioEncryptionKey: Option[Array[Byte]],
-                                        isLocal: Boolean): SparkEnv = {
-    val env = create(
-      conf,
-      executorId,
-      bindAddress,
-      hostname,
-      None,
-      isLocal,
-      numCores,
-      ioEncryptionKey
-    )
+      conf: SparkConf,
+      executorId: String,
+      bindAddress: String,
+      hostname: String,
+      numCores: Int,
+      ioEncryptionKey: Option[Array[Byte]],
+      isLocal: Boolean): SparkEnv = {
+    val env =
+      create(conf, executorId, bindAddress, hostname, None, isLocal, numCores, ioEncryptionKey)
     SparkEnv.set(env)
     env
   }
 
   private[spark] def createExecutorEnv(
-                                        conf: SparkConf,
-                                        executorId: String,
-                                        hostname: String,
-                                        numCores: Int,
-                                        ioEncryptionKey: Option[Array[Byte]],
-                                        isLocal: Boolean): SparkEnv = {
-    createExecutorEnv(conf, executorId, hostname,
-      hostname, numCores, ioEncryptionKey, isLocal)
+      conf: SparkConf,
+      executorId: String,
+      hostname: String,
+      numCores: Int,
+      ioEncryptionKey: Option[Array[Byte]],
+      isLocal: Boolean): SparkEnv = {
+    createExecutorEnv(conf, executorId, hostname, hostname, numCores, ioEncryptionKey, isLocal)
   }
 
   /**
@@ -239,17 +234,17 @@ object SedonaSparkEnv extends Logging {
    */
   // scalastyle:off argcount
   private def create(
-                      conf: SparkConf,
-                      executorId: String,
-                      bindAddress: String,
-                      advertiseAddress: String,
-                      port: Option[Int],
-                      isLocal: Boolean,
-                      numUsableCores: Int,
-                      ioEncryptionKey: Option[Array[Byte]],
-                      listenerBus: LiveListenerBus = null,
-                      sc: Option[SparkContext] = None,
-                      mockOutputCommitCoordinator: Option[OutputCommitCoordinator] = None): SparkEnv = {
+      conf: SparkConf,
+      executorId: String,
+      bindAddress: String,
+      advertiseAddress: String,
+      port: Option[Int],
+      isLocal: Boolean,
+      numUsableCores: Int,
+      ioEncryptionKey: Option[Array[Byte]],
+      listenerBus: LiveListenerBus = null,
+      sc: Option[SparkContext] = None,
+      mockOutputCommitCoordinator: Option[OutputCommitCoordinator] = None): SparkEnv = {
     // scalastyle:on argcount
 
     val isDriver = executorId == SparkContext.DRIVER_IDENTIFIER
@@ -266,14 +261,22 @@ object SedonaSparkEnv extends Logging {
 
     ioEncryptionKey.foreach { _ =>
       if (!securityManager.isEncryptionEnabled()) {
-        logWarning("I/O encryption enabled without RPC encryption: keys will be visible on the " +
-          "wire.")
+        logWarning(
+          "I/O encryption enabled without RPC encryption: keys will be visible on the " +
+            "wire.")
       }
     }
 
     val systemName = if (isDriver) driverSystemName else executorSystemName
-    val rpcEnv = RpcEnv.create(systemName, bindAddress, advertiseAddress, port.getOrElse(-1), conf,
-      securityManager, numUsableCores, !isDriver)
+    val rpcEnv = RpcEnv.create(
+      systemName,
+      bindAddress,
+      advertiseAddress,
+      port.getOrElse(-1),
+      conf,
+      securityManager,
+      numUsableCores,
+      !isDriver)
 
     // Figure out which port RpcEnv actually bound to in case the original port is 0 or occupied.
     if (isDriver) {
@@ -288,8 +291,8 @@ object SedonaSparkEnv extends Logging {
     val closureSerializer = new JavaSerializer(conf)
 
     def registerOrLookupEndpoint(
-                                  name: String, endpointCreator: => RpcEndpoint):
-    RpcEndpointRef = {
+        name: String,
+        endpointCreator: => RpcEndpoint): RpcEndpointRef = {
       if (isDriver) {
         logInfo("Registering " + name)
         rpcEnv.setupEndpoint(name, endpointCreator)
@@ -308,9 +311,12 @@ object SedonaSparkEnv extends Logging {
 
     // Have to assign trackerEndpoint after initialization as MapOutputTrackerEndpoint
     // requires the MapOutputTracker itself
-    mapOutputTracker.trackerEndpoint = registerOrLookupEndpoint(MapOutputTracker.ENDPOINT_NAME,
+    mapOutputTracker.trackerEndpoint = registerOrLookupEndpoint(
+      MapOutputTracker.ENDPOINT_NAME,
       new MapOutputTrackerMasterEndpoint(
-        rpcEnv, mapOutputTracker.asInstanceOf[MapOutputTrackerMaster], conf))
+        rpcEnv,
+        mapOutputTracker.asInstanceOf[MapOutputTrackerMaster],
+        conf))
 
     // Let the user specify short names for shuffle managers
     val shortShuffleMgrNames = Map(
@@ -319,8 +325,8 @@ object SedonaSparkEnv extends Logging {
     val shuffleMgrName = conf.get(config.SHUFFLE_MANAGER)
     val shuffleMgrClass =
       shortShuffleMgrNames.getOrElse(shuffleMgrName.toLowerCase(Locale.ROOT), shuffleMgrName)
-    val shuffleManager = Utils.instantiateSerializerOrShuffleManager[ShuffleManager](
-      shuffleMgrClass, conf, isDriver)
+    val shuffleManager =
+      Utils.instantiateSerializerOrShuffleManager[ShuffleManager](shuffleMgrClass, conf, isDriver)
 
     val memoryManager: MemoryManager = UnifiedMemoryManager(conf, numUsableCores)
 
@@ -332,8 +338,12 @@ object SedonaSparkEnv extends Logging {
 
     val externalShuffleClient = if (conf.get(config.SHUFFLE_SERVICE_ENABLED)) {
       val transConf = SparkTransportConf.fromSparkConf(conf, "shuffle", numUsableCores)
-      Some(new ExternalBlockStoreClient(transConf, securityManager,
-        securityManager.isAuthenticationEnabled(), conf.get(config.SHUFFLE_REGISTRATION_TIMEOUT)))
+      Some(
+        new ExternalBlockStoreClient(
+          transConf,
+          securityManager,
+          securityManager.isAuthenticationEnabled(),
+          conf.get(config.SHUFFLE_REGISTRATION_TIMEOUT)))
     } else {
       None
     }
@@ -352,7 +362,8 @@ object SedonaSparkEnv extends Logging {
             externalShuffleClient
           } else {
             None
-          }, blockManagerInfo,
+          },
+          blockManagerInfo,
           mapOutputTracker.asInstanceOf[MapOutputTrackerMaster],
           shuffleManager,
           isDriver)),
@@ -363,8 +374,15 @@ object SedonaSparkEnv extends Logging {
       isDriver)
 
     val blockTransferService =
-      new NettyBlockTransferService(conf, securityManager, serializerManager, bindAddress,
-        advertiseAddress, blockManagerPort, numUsableCores, blockManagerMaster.driverEndpoint)
+      new NettyBlockTransferService(
+        conf,
+        securityManager,
+        serializerManager,
+        bindAddress,
+        advertiseAddress,
+        blockManagerPort,
+        numUsableCores,
+        blockManagerMaster.driverEndpoint)
 
     // NB: blockManager is not valid until initialize() is called later.
     val blockManager = new BlockManager(
@@ -403,7 +421,8 @@ object SedonaSparkEnv extends Logging {
       }
 
     }
-    val outputCommitCoordinatorRef = registerOrLookupEndpoint("OutputCommitCoordinator",
+    val outputCommitCoordinatorRef = registerOrLookupEndpoint(
+      "OutputCommitCoordinator",
       new OutputCommitCoordinatorEndpoint(rpcEnv, outputCommitCoordinator))
     outputCommitCoordinator.coordinatorRef = Some(outputCommitCoordinatorRef)
 
@@ -427,7 +446,8 @@ object SedonaSparkEnv extends Logging {
     // called, and we only need to do it for driver. Because driver may run as a service, and if we
     // don't delete this tmp dir when sc is stopped, then will create too many tmp dirs.
     if (isDriver) {
-      val sparkFilesDir = Utils.createTempDir(Utils.getLocalDir(conf), "userFiles").getAbsolutePath
+      val sparkFilesDir =
+        Utils.createTempDir(Utils.getLocalDir(conf), "userFiles").getAbsolutePath
       envInstance.driverTmpDir = Some(sparkFilesDir)
     }
 
@@ -440,20 +460,19 @@ object SedonaSparkEnv extends Logging {
    * attributes as a sequence of KV pairs. This is used mainly for SparkListenerEnvironmentUpdate.
    */
   private[spark] def environmentDetails(
-                                         conf: SparkConf,
-                                         hadoopConf: Configuration,
-                                         schedulingMode: String,
-                                         addedJars: Seq[String],
-                                         addedFiles: Seq[String],
-                                         addedArchives: Seq[String],
-                                         metricsProperties: Map[String, String]): Map[String, Seq[(String, String)]] = {
+      conf: SparkConf,
+      hadoopConf: Configuration,
+      schedulingMode: String,
+      addedJars: Seq[String],
+      addedFiles: Seq[String],
+      addedArchives: Seq[String],
+      metricsProperties: Map[String, String]): Map[String, Seq[(String, String)]] = {
 
     import Properties._
     val jvmInformation = Seq(
       ("Java Version", s"$javaVersion ($javaVendor)"),
       ("Java Home", javaHome),
-      ("Scala Version", versionString)
-    ).sorted
+      ("Scala Version", versionString)).sorted
 
     // Spark properties
     // This includes the scheduling mode whether or not it is configured (used by SparkUI)
@@ -482,7 +501,9 @@ object SedonaSparkEnv extends Logging {
     // Add Hadoop properties, it will not ignore configs including in Spark. Some spark
     // conf starting with "spark.hadoop" may overwrite it.
     val hadoopProperties = hadoopConf.asScala
-      .map(entry => (entry.getKey, entry.getValue)).toSeq.sorted
+      .map(entry => (entry.getKey, entry.getValue))
+      .toSeq
+      .sorted
     Map[String, Seq[(String, String)]](
       "JVM Information" -> jvmInformation,
       "Spark Properties" -> sparkProperties,
@@ -492,4 +513,3 @@ object SedonaSparkEnv extends Logging {
       "Metrics Properties" -> metricsProperties.toSeq.sorted)
   }
 }
-
