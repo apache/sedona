@@ -32,38 +32,12 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.WKBConstants;
-import org.locationtech.jts.io.WKBReader;
-import org.locationtech.jts.io.WKBWriter;
 
 public class GeometrySerializer {
   private static final Coordinate NULL_COORDINATE = new Coordinate(Double.NaN, Double.NaN);
   private static final PrecisionModel PRECISION_MODEL = new PrecisionModel();
 
   public static byte[] serialize(Geometry geometry) {
-    return new WKBWriter().write(geometry);
-    //    GeometryBuffer buffer;
-    //    if (geometry instanceof Point) {
-    //      buffer = serializePoint((Point) geometry);
-    //    } else if (geometry instanceof MultiPoint) {
-    //      buffer = serializeMultiPoint((MultiPoint) geometry);
-    //    } else if (geometry instanceof LineString) {
-    //      buffer = serializeLineString((LineString) geometry);
-    //    } else if (geometry instanceof MultiLineString) {
-    //      buffer = serializeMultiLineString((MultiLineString) geometry);
-    //    } else if (geometry instanceof Polygon) {
-    //      buffer = serializePolygon((Polygon) geometry);
-    //    } else if (geometry instanceof MultiPolygon) {
-    //      buffer = serializeMultiPolygon((MultiPolygon) geometry);
-    //    } else if (geometry instanceof GeometryCollection) {
-    //      buffer = serializeGeometryCollection((GeometryCollection) geometry);
-    //    } else {
-    //      throw new UnsupportedOperationException(
-    //          "Geometry type is not supported: " + geometry.getClass().getSimpleName());
-    //    }
-    //    return buffer.toByteArray();
-  }
-
-  public static byte[] serializeLegacy(Geometry geometry) {
     GeometryBuffer buffer;
     if (geometry instanceof Point) {
       buffer = serializePoint((Point) geometry);
@@ -87,17 +61,6 @@ public class GeometrySerializer {
   }
 
   public static Geometry deserialize(byte[] bytes) {
-    WKBReader reader = new WKBReader();
-    try {
-      return reader.read(bytes);
-    } catch (Exception e) {
-      throw new IllegalArgumentException("Failed to deserialize geometry from bytes", e);
-    }
-    //    GeometryBuffer buffer = GeometryBufferFactory.wrap(bytes);
-    //    return deserialize(buffer);
-  }
-
-  public static Geometry deserializeLegacy(byte[] bytes) {
     GeometryBuffer buffer = GeometryBufferFactory.wrap(bytes);
     return deserialize(buffer);
   }
