@@ -659,7 +659,7 @@ class constructorTestScala extends TestBaseScala with Matchers {
           Row("POINT (60 50)", 4326))
       }
 
-      val mysql = new MySQLContainer("mysql:9.1.0")
+      val mysql = new MySQLContainer("mysql:8.4.0")
       mysql.withInitScript("mysql/init_mysql.sql")
       mysql.withUsername("sedona")
       mysql.withPassword("sedona")
