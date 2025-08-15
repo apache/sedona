@@ -70,7 +70,7 @@ object SedonaContext {
 
     val sedonaArrowStrategy = Try(
       Class
-        .forName("org.apache.spark.sql.execution.python.SedonaArrowStrategy")
+        .forName("org.apache.spark.sql.udf.SedonaArrowStrategy")
         .getDeclaredConstructor()
         .newInstance()
         .asInstanceOf[SparkStrategy])
