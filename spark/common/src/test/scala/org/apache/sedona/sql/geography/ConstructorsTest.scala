@@ -19,11 +19,10 @@
 package org.apache.sedona.sql.geography
 
 import org.apache.sedona.common.S2Geography.Geography
-import org.apache.sedona.common.geography.Constructors
 import org.apache.sedona.sql.TestBaseScala
-import org.junit.Assert.{assertEquals, assertTrue}
+import org.junit.Assert.assertEquals
 import org.locationtech.jts.geom.PrecisionModel
-import org.locationtech.jts.geom.{Geometry, PrecisionModel}
+import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.io.WKTWriter
 
 class ConstructorsTest extends TestBaseScala {

@@ -131,7 +131,7 @@ private[apache] case class ST_GeogFromGeoHash(inputExpressions: Seq[Expression])
  *   This function takes a geography object and a srid.
  */
 private[apache] case class ST_GeogToGeometry(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.geogToGeometry(_: Geography, _: Int)) {
+    extends InferredExpression(Constructors.geogToGeometry(_: Geography)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

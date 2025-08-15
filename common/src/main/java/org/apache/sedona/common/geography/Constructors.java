@@ -84,9 +84,9 @@ public class Constructors {
     }
   }
 
-  public static Geometry geogToGeometry(Geography geography, int srid) {
-    int SRID = srid == geography.getSRID() ? srid : geography.getSRID();
-    GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), SRID);
+  public static Geometry geogToGeometry(Geography geography) {
+    GeometryFactory geometryFactory =
+        new GeometryFactory(new PrecisionModel(), geography.getSRID());
     return geogToGeometry(geography, geometryFactory);
   }
 
@@ -260,7 +260,7 @@ public class Constructors {
     List<Geography> parts = ((GeographyCollection) g).getFeatures();
     Geometry[] gs = new Geometry[parts.size()];
     for (int i = 0; i < parts.size(); i++) {
-      gs[i] = geogToGeometry(parts.get(i), gf.getSRID());
+      gs[i] = geogToGeometry(parts.get(i));
     }
     return gf.createGeometryCollection(gs);
   }

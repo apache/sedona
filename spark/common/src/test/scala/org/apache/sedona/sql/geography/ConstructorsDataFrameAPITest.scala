@@ -21,10 +21,10 @@ package org.apache.sedona.sql.geography
 import org.apache.sedona.common.S2Geography.{Geography, WKBReader}
 import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.sql.functions.{col, lit}
-import org.apache.spark.sql.sedona_sql.expressions.{implicits, st_constructors}
-import org.junit.Assert.{assertEquals, assertFalse, assertTrue}
+import org.apache.spark.sql.sedona_sql.expressions.st_constructors
+import org.junit.Assert.assertEquals
 import org.locationtech.jts.geom.{Geometry, PrecisionModel}
-import org.locationtech.jts.io.{WKTReader, WKTWriter}
+import org.locationtech.jts.io.WKTWriter
 
 class ConstructorsDataFrameAPITest extends TestBaseScala {
   import sparkSession.implicits._
@@ -97,7 +97,7 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
     assertEquals(expectedWkt, actualResult)
   }
 
-  it("passed st_geogtogeometry pomultipolygonlygon") {
+  it("passed st_geogtogeometry multipolygon") {
     val wkt =
       "MULTIPOLYGON (" +
         "((10 10, 70 10, 70 70, 10 70, 10 10), (20 20, 60 20, 60 60, 20 60, 20 20))," +
@@ -107,7 +107,7 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
     val df = sparkSession
       .sql(s"SELECT '$wkt' AS wkt")
       .select(st_constructors.ST_GeogFromWKT(col("wkt"), lit(4326)).as("geog"))
-      .select(st_constructors.ST_GeogToGeometry(col("geog"), lit(4326)).as("geom"))
+      .select(st_constructors.ST_GeogToGeometry(col("geog")).as("geom"))
 
     val geom = df.head().getAs[Geometry]("geom")
     assert(geom.getGeometryType == "MultiPolygon")
