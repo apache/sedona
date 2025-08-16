@@ -18,6 +18,7 @@ from sedona.spark.stats.clustering.dbscan import dbscan
 from sedona.spark.stats.outlier_detection.local_outlier_factor import (
     local_outlier_factor,
 )
+from sedona.spark.stats.autocorrelation.moran import MoranResult, Moran
 from sedona.spark.stats.hotspot_detection.getis_ord import g_local
 from sedona.spark.stats.weighting import add_distance_band_column
 from sedona.spark.stats.weighting import add_binary_distance_band_column
