@@ -106,7 +106,7 @@ public class Constructors {
       case GEOGRAPHY_COLLECTION:
         return collectionToGeom(geography, geometryFactory);
       default:
-        return null;
+        throw new IllegalArgumentException("Unsupported Geography type: " + kind);
     }
   }
 
