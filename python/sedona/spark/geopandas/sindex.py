@@ -18,6 +18,7 @@
 import numpy as np
 from pyspark.pandas.utils import log_advice
 from pyspark.sql import DataFrame as PySparkDataFrame
+from shapely.geometry.base import BaseGeometry
 
 from sedona.spark import StructuredAdapter
 from sedona.spark.core.enums import IndexType
@@ -67,7 +68,7 @@ class SpatialIndex:
                 "Invalid type for `geometry`. Expected np.array or PySparkDataFrame."
             )
 
-    def query(self, geometry, predicate=None, sort=False):
+    def query(self, geometry: BaseGeometry, predicate: str = None, sort: bool = False):
         """
         Query the spatial index for geometries that intersect the given geometry.
 
@@ -75,16 +76,25 @@ class SpatialIndex:
         ----------
         geometry : Shapely geometry
             The geometry to query against the spatial index.
+
         predicate : str, optional
             Spatial predicate to filter results. Must be either 'intersects' (default) or 'contains'.
         sort : bool, optional, default False
             Whether to sort the results.
+
+        Note: Unlike Geopandas, Sedona does not support geometry input of type np.array or GeoSeries.
 
         Returns
         -------
         list
             List of indices of matching geometries.
         """
+
+        if not isinstance(geometry, BaseGeometry):
+            raise TypeError(
+                "Sedona only supports shapely geometries as input to `query`."
+            )
+
         log_advice(
             "`query` returns local list of indices of matching geometries onto driver's memory. "
             "It should only be used if the resulting collection is expected to be small."
@@ -142,7 +152,9 @@ class SpatialIndex:
 
             return results
 
-    def nearest(self, geometry, k=1, return_distance=False):
+    def nearest(
+        self, geometry: BaseGeometry, k: int = 1, return_distance: bool = False
+    ):
         """
         Find the nearest geometry in the spatial index.
 
@@ -150,16 +162,25 @@ class SpatialIndex:
         ----------
         geometry : Shapely geometry
             The geometry to find the nearest neighbor for.
+
         k : int, optional, default 1
             Number of nearest neighbors to find.
         return_distance : bool, optional, default False
             Whether to return distances along with indices.
+
+        Note: Unlike Geopandas, Sedona does not support geometry input of type np.array or GeoSeries.
 
         Returns
         -------
         list or tuple
             List of indices of nearest geometries, optionally with distances.
         """
+
+        if not isinstance(geometry, BaseGeometry):
+            raise TypeError(
+                "Sedona only supports shapely geometries as input to `nearest`."
+            )
+
         log_advice(
             "`nearest` returns local list of indices of matching geometries onto driver's memory. "
             "It should only be used if the resulting collection is expected to be small."
