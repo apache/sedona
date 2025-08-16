@@ -36,6 +36,7 @@ nav:
           - Install Sedona Scala/Java: setup/install-scala.md
           - Install Sedona Python: setup/install-python.md
           - Install Sedona R: api/rdocs
+          - Sedona Python: api/pydocs
           - Install Sedona-Zeppelin: setup/zeppelin.md
           - Play Sedona in Docker: setup/docker.md
           - Install on Wherobots: setup/wherobots.md
@@ -51,7 +52,6 @@ nav:
       - Install with Snowflake:
           - Install Sedona SQL: setup/snowflake/install.md
       - Release notes: setup/release-notes.md
-      - Compile the code: setup/compile.md
   - Download: download.md
   - Programming Guides:
       - Sedona with Apache Spark:
@@ -60,6 +60,7 @@ nav:
           - Pure SQL environment: tutorial/sql-pure-sql.md
           - Spatial RDD app: tutorial/rdd.md
           - Sedona R: api/rdocs
+          - Sedona Python: api/pydocs
           - Work with GeoPandas and Shapely: tutorial/geopandas-shapely.md
           - Files:
               - CSV: tutorial/files/csv-geometry-sedona-spark.md
@@ -93,10 +94,16 @@ nav:
           - SQL:
               - Quick start: api/sql/Overview.md
               - Vector data:
-                  - Constructor: api/sql/Constructor.md
-                  - Function: api/sql/Function.md
-                  - Predicate: api/sql/Predicate.md
-                  - Aggregate function: api/sql/AggregateFunction.md
+                  - Geometry type:
+                      - Constructor: api/sql/Constructor.md
+                      - Function: api/sql/Function.md
+                      - Predicate: api/sql/Predicate.md
+                      - Aggregate function: api/sql/AggregateFunction.md
+                  - Geography type:
+                      - Constructor: api/sql/geography/Constructor.md
+                      - Function: api/sql/geography/Function.md
+                      - Predicate: api/sql/geography/Predicate.md
+                      - Aggregate function: api/sql/geography/AggregateFunction.md
                   - DataFrame Style functions: api/sql/DataFrameAPI.md
                   - Query optimization: api/sql/Optimizer.md
                   - Nearest-Neighbour searching: api/sql/NearestNeighbourSearching.md
@@ -122,6 +129,7 @@ nav:
               - DataFrame/SQL: api/viz/sql.md
               - RDD: api/viz/java-api.md
           - Sedona R: api/rdocs
+          - Sedona Python: api/pydocs
       - Sedona with Apache Flink:
           - SQL:
               - Overview (Flink): api/flink/Overview.md
@@ -138,11 +146,12 @@ nav:
               - Predicate (Snowflake): api/snowflake/vector-data/Predicate.md
   - Blog: blog/index.md
   - Community:
+      - Compile the code: setup/compile.md
       - Community: community/contact.md
       - Contributor Guide:
           - Rules: community/rule.md
           - Develop: community/develop.md
-          - VSCode Development: community/vscode-development-guide.md
+          - Contribute to Geopandas: community/geopandas.md
       - Committer Guide:
           - Project Management Committee: community/contributor.md
           - Become a release manager: community/release-manager.md

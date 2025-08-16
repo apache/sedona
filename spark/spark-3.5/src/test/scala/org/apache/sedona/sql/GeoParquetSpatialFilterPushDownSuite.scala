@@ -170,12 +170,27 @@ class GeoParquetSpatialFilterPushDownSuite extends TestBaseScala with TableDrive
         Seq.empty)
     }
 
+    it("Push down ST_DWithin") {
+      testFilter("ST_DWithin(geom, ST_GeomFromText('POINT (3 4)'), 1)", Seq(1))
+      testFilter("ST_DWithin(geom, ST_GeomFromText('POINT (0 0)'), 1)", Seq.empty)
+      testFilter("ST_DWithin(geom, ST_GeomFromText('POINT (0 0)'), 3.9)", Seq.empty)
+      testFilter("ST_DWithin(geom, ST_GeomFromText('POINT (3 4)'), 1000000, true)", Seq(0, 1, 3))
+      testFilter("ST_DWithin(geom, ST_GeomFromText('POINT (0 0)'), 5)", Seq(0, 1, 2, 3))
+      testFilter("ST_DWithin(geom, ST_GeomFromText('POINT (-5 -5)'), 1)", Seq(2))
+      testFilter(
+        "ST_DWithin(geom, ST_GeomFromText('POLYGON ((-16 -16, -16 -14, -14 -14, -14 -16, -16 -16))'), 10)",
+        Seq(2))
+      testFilter("ST_DWithin(ST_GeomFromText('POINT (-5 -5)'), geom, 1)", Seq(2))
+      testFilter("ST_DWithin(ST_GeomFromText('POINT (-5 -5)'), geom, 1, false)", Seq(2))
+      testFilter("ST_DWithin(ST_GeomFromText('POINT (0 0)'), geom, 100, true)", Seq.empty)
+    }
+
     forAll(Table("<", "<=")) { op =>
       it(s"Push down ST_Distance $op d") {
         testFilter(s"ST_Distance(geom, ST_GeomFromText('POINT (0 0)')) $op 1", Seq.empty)
-        testFilter(s"ST_Distance(geom, ST_GeomFromText('POINT (0 0)')) $op 5", Seq.empty)
+        testFilter(s"ST_Distance(geom, ST_GeomFromText('POINT (0 0)')) $op 3.9", Seq.empty)
         testFilter(s"ST_Distance(geom, ST_GeomFromText('POINT (3 4)')) $op 1", Seq(1))
-        testFilter(s"ST_Distance(geom, ST_GeomFromText('POINT (0 0)')) $op 7.1", Seq(0, 1, 2, 3))
+        testFilter(s"ST_Distance(geom, ST_GeomFromText('POINT (0 0)')) $op 5", Seq(0, 1, 2, 3))
         testFilter(s"ST_Distance(geom, ST_GeomFromText('POINT (-5 -5)')) $op 1", Seq(2))
         testFilter(
           s"ST_Distance(geom, ST_GeomFromText('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))')) $op 2",
@@ -185,6 +200,68 @@ class GeoParquetSpatialFilterPushDownSuite extends TestBaseScala with TableDrive
           Seq(0, 1, 2, 3))
         testFilter(
           s"ST_Distance(geom, ST_GeomFromText('LINESTRING (17 17, 18 18)')) $op 1",
+          Seq(1))
+      }
+
+      it(s"Push down ST_DistanceSpheroid $op d") {
+        testFilter(
+          s"ST_DistanceSpheroid(geom, ST_GeomFromText('POINT (0 0)')) $op 100",
+          Seq.empty)
+        testFilter(
+          s"ST_DistanceSpheroid(geom, ST_GeomFromText('POINT (0 0)')) $op 500",
+          Seq.empty)
+        testFilter(
+          s"ST_DistanceSpheroid(geom, ST_GeomFromText('POINT (3 4)')) $op 500000",
+          Seq(1))
+        testFilter(
+          s"ST_DistanceSpheroid(geom, ST_GeomFromText('POINT (0 0)')) $op 7100000",
+          Seq(0, 1, 2, 3))
+        testFilter(
+          s"ST_DistanceSpheroid(geom, ST_GeomFromText('POINT (-5 -5)')) $op 500000",
+          Seq(2))
+        testFilter(
+          s"ST_DistanceSpheroid(geom, ST_GeomFromText('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))')) $op 2",
+          Seq.empty)
+        testFilter(
+          s"ST_DistanceSpheroid(geom, ST_GeomFromText('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))')) $op 500000",
+          Seq(0, 1, 2, 3))
+        testFilter(
+          s"ST_DistanceSpheroid(geom, ST_GeomFromText('LINESTRING (17 17, 18 18)')) $op 500000",
+          Seq(1))
+      }
+
+      it(s"Push down ST_DistanceSphere $op d") {
+        testFilter(s"ST_DistanceSphere(geom, ST_GeomFromText('POINT (0 0)')) $op 100", Seq.empty)
+        testFilter(s"ST_DistanceSphere(geom, ST_GeomFromText('POINT (0 0)')) $op 500", Seq.empty)
+        testFilter(
+          s"ST_DistanceSphere(geom, ST_GeomFromText('POINT (3 4)')) $op 808691.391",
+          Seq(0, 1))
+        testFilter(
+          s"ST_DistanceSphere(geom, ST_GeomFromText('POINT (0 0)')) $op 7100000",
+          Seq(0, 1, 2, 3))
+        testFilter(
+          s"ST_DistanceSphere(geom, ST_GeomFromText('POINT (-5 -5)')) $op 500000",
+          Seq(2))
+        testFilter(
+          s"ST_DistanceSphere(geom, ST_GeomFromText('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))')) $op 2",
+          Seq.empty)
+        testFilter(
+          s"ST_DistanceSphere(geom, ST_GeomFromText('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))')) $op 500000",
+          Seq(0, 1, 2, 3))
+        testFilter(
+          s"ST_DistanceSphere(geom, ST_GeomFromText('LINESTRING (17 17, 18 18)')) $op 500000",
+          Seq(1))
+        testFilter(
+          s"ST_DistanceSphere(geom, ST_GeomFromText('POINT (3 4)'), 5000000) $op 808691.391",
+          Seq(0, 1, 2, 3))
+        testFilter(
+          s"ST_DistanceSphere(geom, ST_GeomFromText('POINT (-5 -5)'), 5000000) $op 400000",
+          Seq(2))
+        testFilter(
+          s"ST_DistanceSphere(geom, ST_GeomFromText('POLYGON ((-1 -1, 1 -1, 1 1, -1 1, -1 -1))'), 7000000) $op 500000",
+          Seq(0, 1, 2, 3))
+        testFilter(
+          s"ST_DistanceSphere(geom, ST_GeomFromText('LINESTRING (17 17, 18 18)'), 6000000) $op 500000",
           Seq(1))
       }
     }

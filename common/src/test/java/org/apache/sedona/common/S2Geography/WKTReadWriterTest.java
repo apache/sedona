@@ -28,7 +28,7 @@ public class WKTReadWriterTest {
 
   private final WKTReader reader = new WKTReader() {};
 
-  private String writeWithPrecision(S2Geography geom, PrecisionModel pm) {
+  private String writeWithPrecision(Geography geom, PrecisionModel pm) {
     WKTWriter w = new WKTWriter();
     w.setPrecisionModel(pm);
     return w.write(geom);
@@ -36,7 +36,7 @@ public class WKTReadWriterTest {
 
   @Test
   public void significantDigits_defaultAndSingle() throws ParseException {
-    S2Geography geog = reader.read("POINT (0 3.333333333333334)");
+    Geography geog = reader.read("POINT (0 3.333333333333334)");
     String wkt = new WKTWriter().write(geog);
     // default ≈16 digits
     assertEquals("POINT (0 3.3333333333333344)", wkt);
@@ -50,14 +50,14 @@ public class WKTReadWriterTest {
   @Test
   public void lineString_roundTrip() throws ParseException {
     String wkt = "LINESTRING (30 10, 10 30, 40 40)";
-    S2Geography g = reader.read(wkt);
+    Geography g = reader.read(wkt);
     assertEquals(wkt, writeWithPrecision(g, new PrecisionModel(PrecisionModel.FIXED)));
   }
 
   @Test
   public void multilineString_roundTrip() throws ParseException {
     String wkt = "MULTILINESTRING ((30 10, 10 30, 40 40), (30 10, 20 30, 40 40))";
-    S2Geography g = reader.read(wkt);
+    Geography g = reader.read(wkt);
     assertEquals(wkt, writeWithPrecision(g, new PrecisionModel(PrecisionModel.FIXED)));
   }
 
@@ -71,7 +71,7 @@ public class WKTReadWriterTest {
         "POLYGON ((35 10, 45 45, 15 40, 10 20, 35 10), " + "(20 30, 35 35, 30 20, 20 30))";
     String expected =
         "POLYGON ((35 10, 45 45, 15 40, 10 20, 35 10), " + "(30 20, 35 35, 20 30, 30 20))";
-    PolygonGeography sp = (PolygonGeography) reader.read(withHole);
+    Geography sp = reader.read(withHole);
     assertEquals(
         expected,
         writeWithPrecision(reader.read(withHole), new PrecisionModel(PrecisionModel.FIXED)));

@@ -28,8 +28,8 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.sedona.common.S2Geography.Geography;
 import org.apache.sedona.common.geometryObjects.Circle;
-import org.apache.sedona.common.geometryObjects.Geography;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.subDivide.GeometrySubDivider;
 import org.apache.sedona.common.utils.*;
@@ -39,6 +39,7 @@ import org.locationtech.jts.algorithm.Orientation;
 import org.locationtech.jts.algorithm.construct.LargestEmptyCircle;
 import org.locationtech.jts.algorithm.construct.MaximumInscribedCircle;
 import org.locationtech.jts.algorithm.hull.ConcaveHull;
+import org.locationtech.jts.densify.Densifier;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
@@ -317,6 +318,7 @@ public class Functions {
 
     BufferParameters bufferParameters = new BufferParameters();
     String[] listParams = params.split(" ");
+    boolean endCapSpecified = false;
 
     for (String param : listParams) {
       String[] singleParam = param.split("=");
@@ -354,6 +356,7 @@ public class Functions {
                   "%s is not a valid option. Accepted options are %s.",
                   singleParam[1], Arrays.toString(endcapOptions)));
         }
+        endCapSpecified = true;
       }
       // Set join style
       else if (singleParam[0].equalsIgnoreCase(listBufferParameters[2])) {
@@ -386,12 +389,16 @@ public class Functions {
       // Set side to add buffer
       else if (singleParam[0].equalsIgnoreCase(listBufferParameters[5])) {
         if (singleParam[1].equalsIgnoreCase(sideOptions[0])) {
-          // It defaults to square end cap style when side is specified
-          bufferParameters.setEndCapStyle(BufferParameters.CAP_SQUARE);
+          // Default value is 'both'
           continue;
         } else if (singleParam[1].equalsIgnoreCase(sideOptions[1])
             || singleParam[1].equalsIgnoreCase(sideOptions[2])) {
           bufferParameters.setSingleSided(true);
+
+          // Specifying 'left' or 'right' defaults to square end cap style when side is specified
+          if (!endCapSpecified) {
+            bufferParameters.setEndCapStyle(BufferParameters.CAP_SQUARE);
+          }
         } else {
           throw new IllegalArgumentException(
               String.format(
@@ -778,7 +785,7 @@ public class Functions {
   }
 
   public static String asEWKT(Geography geography) {
-    return asEWKT(geography.getGeometry());
+    return asEWKT(geography);
   }
 
   public static String asWKT(Geometry geometry) {
@@ -790,7 +797,7 @@ public class Functions {
   }
 
   public static byte[] asEWKB(Geography geography) {
-    return asEWKB(geography.getGeometry());
+    return asEWKB(geography);
   }
 
   public static String asHexEWKB(Geometry geom, String endian) {
@@ -1870,6 +1877,13 @@ public class Functions {
       throw new IllegalArgumentException("ST_Subdivide needs 5 or more max vertices");
     }
     return GeometrySubDivider.subDivide(geometry, maxVertices);
+  }
+
+  public static Geometry segmentize(Geometry geometry, double maxSegmentLength) {
+    if (maxSegmentLength <= 0) {
+      throw new IllegalArgumentException("maxSegmentLength must be greater than 0");
+    }
+    return Densifier.densify(geometry, maxSegmentLength);
   }
 
   public static Geometry snap(Geometry input, Geometry reference, double tolerance) {

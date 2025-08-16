@@ -7,9 +7,15 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   sedona.core
    sedona.flink
-   sedona.geopandas
+   sedona.geoarrow
+   sedona.maps
+   sedona.raster
+   sedona.raster_utils
+   sedona.register
    sedona.spark
+   sedona.sql
    sedona.stac
    sedona.stats
    sedona.utils
@@ -22,21 +28,21 @@ sedona.exceptions module
 
 .. automodule:: sedona.exceptions
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 sedona.version module
 ---------------------
 
 .. automodule:: sedona.version
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: sedona
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

@@ -18,12 +18,10 @@
  */
 package org.apache.spark.sql.sedona_sql.UDT
 
-import org.apache.sedona.common.geometrySerde.GeometrySerializer;
-import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.types._
 import org.json4s.JsonDSL._
 import org.json4s.JsonAST.JValue
-import org.apache.sedona.common.geometryObjects.Geography;
+import org.apache.sedona.common.S2Geography.{GeographySerializer, Geography}
 
 class GeographyUDT extends UserDefinedType[Geography] {
   override def sqlType: DataType = BinaryType
@@ -33,11 +31,11 @@ class GeographyUDT extends UserDefinedType[Geography] {
   override def userClass: Class[Geography] = classOf[Geography]
 
   override def serialize(obj: Geography): Array[Byte] =
-    GeometrySerializer.serialize(obj.getGeometry)
+    GeographySerializer.serialize(obj)
 
   override def deserialize(datum: Any): Geography = {
     datum match {
-      case value: Array[Byte] => new Geography(GeometrySerializer.deserialize(value))
+      case value: Array[Byte] => GeographySerializer.deserialize(value)
     }
   }
 

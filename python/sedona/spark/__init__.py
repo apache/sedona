@@ -64,6 +64,9 @@ from sedona.spark.stats.weighting import (
     add_distance_band_column,
     add_binary_distance_band_column,
 )
+from sedona.spark.raster.awt_raster import AWTRaster
+from sedona.spark.raster.data_buffer import DataBuffer
+from sedona.spark.raster.meta import SampleDimension
 from sedona.spark.utils import KryoSerializer, SedonaKryoRegistrator
 from sedona.spark.utils.adapter import Adapter
 from sedona.spark.utils.spatial_rdd_parser import GeoData

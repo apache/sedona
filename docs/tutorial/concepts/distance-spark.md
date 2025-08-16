@@ -34,10 +34,13 @@ Suppose you have four points and would like to compute the distance between `poi
 Let’s create a DataFrame with these points.
 
 ```python
-df = sedona.createDataFrame([
-    (Point(2, 3), Point(6, 4)),
-    (Point(6, 2), Point(9, 2)),
-], ["start", "end"])
+df = sedona.createDataFrame(
+    [
+        (Point(2, 3), Point(6, 4)),
+        (Point(6, 2), Point(9, 2)),
+    ],
+    ["start", "end"],
+)
 ```
 
 The `start` and `end` columns both have the `geometry` type.
@@ -45,10 +48,7 @@ The `start` and `end` columns both have the `geometry` type.
 Now use the `ST_Distance` function to compute the distance between the points.
 
 ```python
-df.withColumn(
-    "distance",
-    ST_Distance(col("start"), col("end"))
-).show()
+df.withColumn("distance", ST_Distance(col("start"), col("end"))).show()
 ```
 
 Here are the results:
@@ -85,8 +85,7 @@ Let’s compute the distance between these points now:
 
 ```python
 df.withColumn(
-    "st_distance_sphere",
-    ST_DistanceSphere(col("place1"), col("place2"))
+    "st_distance_sphere", ST_DistanceSphere(col("place1"), col("place2"))
 ).show()
 ```
 
@@ -111,8 +110,7 @@ Let’s use the same DataFrame from the previous section, but compute the distan
 
 ```python
 res = df.withColumn(
-    "st_distance_spheroid",
-    ST_DistanceSpheroid(col("place1"), col("place2"))
+    "st_distance_spheroid", ST_DistanceSpheroid(col("place1"), col("place2"))
 )
 res.select("place1_name", "place2_name", "st_distance_spheroid").show()
 ```
@@ -141,10 +139,7 @@ The distance between two polygons is the minimum Euclidean distance between any 
 Let’s compute the distance:
 
 ```python
-res = df.withColumn(
-    "distance",
-    ST_Distance(col("geom1"), col("geom2"))
-)
+res = df.withColumn("distance", ST_Distance(col("geom1"), col("geom2")))
 ```
 
 Now, take a look at the results:
@@ -170,20 +165,19 @@ Let’s create the DataFrame:
 ```python
 empire_state_ground = Point(-73.9857, 40.7484, 0)
 empire_state_top = Point(-73.9857, 40.7484, 380)
-df = sedona.createDataFrame([
-    (empire_state_ground, empire_state_top),
-], ["point_a", "point_b"])
+df = sedona.createDataFrame(
+    [
+        (empire_state_ground, empire_state_top),
+    ],
+    ["point_a", "point_b"],
+)
 ```
 
 Now compute the distance and the 3D distance between the points:
 
 ```python
-res = df.withColumn(
-    "distance",
-    ST_Distance(col("point_a"), col("point_b"))
-).withColumn(
-    "3d_distance",
-    ST_3DDistance(col("point_a"), col("point_b"))
+res = df.withColumn("distance", ST_Distance(col("point_a"), col("point_b"))).withColumn(
+    "3d_distance", ST_3DDistance(col("point_a"), col("point_b"))
 )
 ```
 
@@ -211,18 +205,20 @@ Here’s how to create the Sedona DataFrame:
 a = LineString([(1, 1), (1, 3), (2, 4)])
 b = LineString([(1.1, 1), (1.1, 3), (3, 4)])
 c = LineString([(7, 1), (7, 3), (6, 4)])
-df = sedona.createDataFrame([
-    (a, "a", b, "b"),
-    (a, "a", c, "c"),
-], ["geometry1", "geometry1_id", "geometry2", "geometry2_id"])
+df = sedona.createDataFrame(
+    [
+        (a, "a", b, "b"),
+        (a, "a", c, "c"),
+    ],
+    ["geometry1", "geometry1_id", "geometry2", "geometry2_id"],
+)
 ```
 
 Compute the Frechet distance:
 
 ```python
 res = df.withColumn(
-    "frechet_distance",
-    ST_FrechetDistance(col("geometry1"), col("geometry2"))
+    "frechet_distance", ST_FrechetDistance(col("geometry1"), col("geometry2"))
 )
 ```
 
@@ -252,10 +248,7 @@ Suppose you have the following geometric objects:
 Here’s how to compute the max distance between some of these geometries.  Run the computations:
 
 ```python
-res = df.withColumn(
-    "max_distance",
-    ST_MaxDistance(col("geom1"), col("geom2"))
-)
+res = df.withColumn("max_distance", ST_MaxDistance(col("geom1"), col("geom2")))
 ```
 
 Now view the results:

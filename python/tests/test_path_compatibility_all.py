@@ -87,3 +87,33 @@ class TestPathCompatibilityAll(TestBase):
     def test_geoarrow_import(self):
         # Test create_spatial_dataframe import
         assert create_spatial_dataframe is not None
+        assert dataframe_to_arrow is not None
+
+    def test_raster_utils_imports(self):
+        # Test raster utils imports
+        assert SedonaUtils is not None
+
+    def test_import_df_functions_from_sedona_sql(self):
+        # one from each module
+        assert ST_MakePoint is not None
+        assert ST_Y is not None
+        assert ST_Touches is not None
+        assert ST_Envelope_Aggr is not None
+
+    def test_geoarrow_imports(self):
+        assert create_spatial_dataframe is not None
+        assert dataframe_to_arrow is not None
+
+    def test_sedona_util_imports(self):
+        assert KryoSerializer is not None
+        assert SedonaKryoRegistrator is not None
+
+    def test_maps_imports(self):
+        # Test Map imports
+        assert SedonaKepler is not None
+        assert SedonaPyDeck is not None
+
+    def test_raster_imports(self):
+        assert AWTRaster is not None
+        assert DataBuffer is not None
+        assert SampleDimension is not None

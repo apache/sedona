@@ -546,7 +546,7 @@ The optional forth parameter controls the buffer accuracy and style. Buffer accu
 - `endcap=round|flat|square` : End cap style (default is `round`). `butt` is an accepted synonym for `flat`.
 - `join=round|mitre|bevel` : Join style (default is `round`). `miter` is an accepted synonym for `mitre`.
 - `mitre_limit=#.#` : mitre ratio limit and it only affects mitred join style. `miter_limit` is an accepted synonym for `mitre_limit`.
-- `side=both|left|right` : The option `left` or `right` enables a single-sided buffer operation on the geometry, with the buffered side aligned according to the direction of the line. This functionality is specific to LINESTRING geometry and has no impact on POINT or POLYGON geometries. By default, square end caps are applied.
+- `side=both|left|right` : Defaults to `both`. Setting `left` or `right` enables a single-sided buffer operation on the geometry, with the buffered side aligned according to the direction of the line. This functionality is specific to LINESTRING geometry and has no impact on POINT or POLYGON geometries. By default, square end caps are applied when `left` or `right` are specified.
 
 !!!note
     `ST_Buffer` throws an `IllegalArgumentException` if the correct format, parameters, or options are not provided.
@@ -2924,6 +2924,41 @@ Output:
 
 ```
 POLYGON ((-2 -2, -2 1, 2.5 1, 2.5 -2, -2 -2))
+```
+
+## ST_Segmentize
+
+Introduction: Returns a modified geometry having no segment longer than the given max_segment_length.
+
+The length calculation is performed in 2D. When a segment is longer than the specified maximum length, it is split into multiple, equal-length subsegments.
+
+Format: `ST_Segmentize(geom: Geometry, max_segment_length: Double)`
+
+Since: v1.8.0
+
+SQL Example
+Long segments are split evenly into subsegments no longer than the specified length. Shorter segments are not modified.
+
+```sql
+SELECT ST_AsText(ST_Segmentize(ST_GeomFromText('MULTILINESTRING((0 0, 0 1, 0 9),(1 10, 1 18))'), 5));
+```
+
+Output:
+
+```
+MULTILINESTRING((0 0,0 1,0 5,0 9),(1 10,1 14,1 18))
+```
+
+SQL Example
+
+```sql
+SELECT ST_AsText(ST_Segmentize(ST_GeomFromText('POLYGON((0 0, 0 8, 30 0, 0 0))'), 10));
+```
+
+Output:
+
+```
+POLYGON((0 0,0 8,7.5 6,15 4,22.5 2,30 0,20 0,10 0,0 0))
 ```
 
 ## ST_SetPoint

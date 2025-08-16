@@ -18,7 +18,6 @@
  */
 package org.apache.sedona.sql
 
-import org.apache.sedona.common.geometryObjects.Geography
 import org.apache.sedona.core.formatMapper.GeoJsonReader
 import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader
 import org.apache.sedona.sql.utils.Adapter
@@ -262,14 +261,6 @@ class constructorTestScala extends TestBaseScala {
       assert(thrown.getMessage.contains("ST_GeomFromEWKT"))
       assert(thrown.getMessage.contains("not wkt"))
       assert(thrown.getMessage.contains("Unknown geometry type"))
-    }
-
-    it("Passed ST_GeogFromWKT") {
-      val wkt = "LINESTRING (1 2, 3 4, 5 6)"
-      val row = sparkSession.sql(s"SELECT ST_GeogFromWKT('$wkt') AS geog").first()
-      val geog = row.get(0)
-      assert(geog.isInstanceOf[Geography])
-      assert(geog.asInstanceOf[Geography].getGeometry.toText == wkt)
     }
 
     it("Passed ST_LineFromText") {

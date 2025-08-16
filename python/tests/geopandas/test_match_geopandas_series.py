@@ -35,7 +35,7 @@ from shapely.geometry import (
     LinearRing,
 )
 
-from sedona.geopandas import GeoSeries
+from sedona.spark.geopandas import GeoSeries
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 import pyspark.pandas as ps
 from packaging.version import parse as parse_version
@@ -189,17 +189,41 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_buffer(self):
-        buffer = self.g1.buffer(0.2)
-        assert buffer is not None
-        assert type(buffer) is GeoSeries
-        assert buffer.count() == 2
-
         for geom in self.geoms:
             dist = 0.2
             sgpd_result = GeoSeries(geom).buffer(dist)
             gpd_result = gpd.GeoSeries(geom).buffer(dist)
 
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # Check that the parameters work properly
+        sgpd_result = GeoSeries(self.linestrings).buffer(
+            0.2, resolution=20, cap_style="flat", join_style="bevel"
+        )
+        gpd_result = gpd.GeoSeries(self.linestrings).buffer(
+            0.2, resolution=20, cap_style="flat", join_style="bevel"
+        )
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        sgpd_result = GeoSeries(self.linestrings).buffer(0.2, single_sided=True)
+        gpd_result = gpd.GeoSeries(self.linestrings).buffer(0.2, single_sided=True)
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        sgpd_result = GeoSeries(self.linestrings).buffer(
+            0.2, join_style="mitre", mitre_limit=10.0
+        )
+        gpd_result = gpd.GeoSeries(self.linestrings).buffer(
+            0.2, join_style="mitre", mitre_limit=10.0
+        )
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        sgpd_result = GeoSeries(self.linestrings).buffer(
+            0.2, single_sided=True, cap_style="round"
+        )
+        gpd_result = gpd.GeoSeries(self.linestrings).buffer(
+            0.2, single_sided=True, cap_style="round"
+        )
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_buffer_then_area(self):
         area = self.g1.buffer(0.2).area
@@ -554,7 +578,11 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_is_ring(self):
-        pass
+        # is_ring is only meaningful for linestrings so we use self.linestrings instead of self.geoms
+        for geom in self.linestrings:
+            sgpd_result = GeoSeries(geom).is_ring
+            gpd_result = gpd.GeoSeries(geom).is_ring
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_is_ccw(self):
         pass
@@ -690,8 +718,15 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
     def test_reverse(self):
         pass
 
+    @pytest.mark.skipif(
+        parse_version(gpd.__version__) < parse_version("0.14.0"),
+        reason="geopandas segmentize requires version 0.14.0 or higher",
+    )
     def test_segmentize(self):
-        pass
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).segmentize(2.5)
+            gpd_result = gpd.GeoSeries(geom).segmentize(2.5)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_transform(self):
         pass
@@ -775,6 +810,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         sgpd_result = GeoSeries(geometries, index1).intersection(
             GeoSeries(geometries, index2), align=False
         )
+        sgpd_result.sort_index(inplace=True)
 
         gpd_result = gpd.GeoSeries(geometries, index1).intersection(
             gpd.GeoSeries(geometries, index2), align=False
@@ -789,6 +825,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             if not gpd_series1.is_valid.all() or not gpd_series2.is_valid.all():
                 continue
             sgpd_result = GeoSeries(geom).intersection(GeoSeries(geom2))
+            sgpd_result.sort_index(inplace=True)
             gpd_result = gpd_series1.intersection(gpd_series2)
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
@@ -796,6 +833,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                 sgpd_result = GeoSeries(geom).intersection(
                     GeoSeries(geom2), align=False
                 )
+                sgpd_result.sort_index(inplace=True)
                 gpd_result = gpd_series1.intersection(gpd_series2, align=False)
                 self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 

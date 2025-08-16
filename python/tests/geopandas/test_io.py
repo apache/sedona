@@ -23,7 +23,7 @@ import pandas as pd
 import geopandas as gpd
 import pyspark.pandas as ps
 from functools import partial
-from sedona.geopandas import GeoDataFrame, GeoSeries, read_file
+from sedona.spark.geopandas import GeoDataFrame, GeoSeries, read_file, read_parquet
 from tests import tests_resource
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 from shapely.geometry import (
@@ -102,6 +102,7 @@ class TestIO(TestGeopandasBase):
         [
             partial(GeoDataFrame.from_file, format="geoparquet"),
             partial(read_file, format="GeoParquet"),
+            read_parquet,
         ],
     )
     def test_read_geoparquet(self, read_func):
