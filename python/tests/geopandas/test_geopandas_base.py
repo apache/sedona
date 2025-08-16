@@ -33,6 +33,10 @@ class TestGeopandasBase(TestBase):
     # -----------------------------------------------------------------------------
     # # Utils
     # -----------------------------------------------------------------------------
+    def setup_method(self):
+        # We enable this option by default for users, so we enable it by default for testing for developers.
+        # This option is useful in testing to catch inefficiencies in the code during development of geopandas.
+        ps.set_option("compute.ops_on_diff_frames", False)
 
     @classmethod
     def check_sgpd_equals_spark_df(
@@ -113,19 +117,6 @@ class TestGeopandasBase(TestBase):
     @classmethod
     def contains_any_geom_collection(cls, geoms) -> bool:
         return any(isinstance(g, GeometryCollection) for g in geoms)
-
-    @contextmanager
-    def ps_allow_diff_frames(self):
-        """
-        A context manager to temporarily set a compute.ops_on_diff_frames option.
-        """
-        try:
-            ps.set_option("compute.ops_on_diff_frames", True)
-
-            # Yield control to the code inside the 'with' block
-            yield
-        finally:
-            ps.reset_option("compute.ops_on_diff_frames")
 
     def contains_any_geom_collection(self, geoms1, geoms2) -> bool:
         return any(isinstance(g, GeometryCollection) for g in geoms1) or any(
