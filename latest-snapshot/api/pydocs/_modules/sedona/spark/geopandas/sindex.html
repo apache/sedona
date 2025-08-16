@@ -530,6 +530,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_advice</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span> <span class="k">as</span> <span class="n">PySparkDataFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseGeometry</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructuredAdapter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">IndexType</span>
@@ -586,7 +587,7 @@
 
 <div class="viewcode-block" id="SpatialIndex.query">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex.query">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometry</span><span class="p">:</span> <span class="n">BaseGeometry</span><span class="p">,</span> <span class="n">predicate</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Query the spatial index for geometries that intersect the given geometry.</span>
 
@@ -594,16 +595,25 @@
 <span class="sd">        ----------</span>
 <span class="sd">        geometry : Shapely geometry</span>
 <span class="sd">            The geometry to query against the spatial index.</span>
+
 <span class="sd">        predicate : str, optional</span>
 <span class="sd">            Spatial predicate to filter results. Must be either &#39;intersects&#39; (default) or &#39;contains&#39;.</span>
 <span class="sd">        sort : bool, optional, default False</span>
 <span class="sd">            Whether to sort the results.</span>
+
+<span class="sd">        Note: Unlike Geopandas, Sedona does not support geometry input of type np.array or GeoSeries.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        list</span>
 <span class="sd">            List of indices of matching geometries.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">BaseGeometry</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;Sedona only supports shapely geometries as input to `query`.&quot;</span>
+            <span class="p">)</span>
+
         <span class="n">log_advice</span><span class="p">(</span>
             <span class="s2">&quot;`query` returns local list of indices of matching geometries onto driver&#39;s memory. &quot;</span>
             <span class="s2">&quot;It should only be used if the resulting collection is expected to be small.&quot;</span>
@@ -664,7 +674,9 @@
 
 <div class="viewcode-block" id="SpatialIndex.nearest">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex.nearest">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">nearest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">return_distance</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">nearest</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">geometry</span><span class="p">:</span> <span class="n">BaseGeometry</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">return_distance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find the nearest geometry in the spatial index.</span>
 
@@ -672,16 +684,25 @@
 <span class="sd">        ----------</span>
 <span class="sd">        geometry : Shapely geometry</span>
 <span class="sd">            The geometry to find the nearest neighbor for.</span>
+
 <span class="sd">        k : int, optional, default 1</span>
 <span class="sd">            Number of nearest neighbors to find.</span>
 <span class="sd">        return_distance : bool, optional, default False</span>
 <span class="sd">            Whether to return distances along with indices.</span>
+
+<span class="sd">        Note: Unlike Geopandas, Sedona does not support geometry input of type np.array or GeoSeries.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        list or tuple</span>
 <span class="sd">            List of indices of nearest geometries, optionally with distances.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">BaseGeometry</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;Sedona only supports shapely geometries as input to `nearest`.&quot;</span>
+            <span class="p">)</span>
+
         <span class="n">log_advice</span><span class="p">(</span>
             <span class="s2">&quot;`nearest` returns local list of indices of matching geometries onto driver&#39;s memory. &quot;</span>
             <span class="s2">&quot;It should only be used if the resulting collection is expected to be small.&quot;</span>
