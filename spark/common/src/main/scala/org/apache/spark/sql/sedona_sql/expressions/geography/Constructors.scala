@@ -128,7 +128,7 @@ private[apache] case class ST_GeogFromGeoHash(inputExpressions: Seq[Expression])
  * Return a Geometry from a Geography
  *
  * @param inputExpressions
- *   This function takes a geography object and a srid.
+ *   This function takes a geography object.
  */
 private[apache] case class ST_GeogToGeometry(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.geogToGeometry(_: Geography)) {
