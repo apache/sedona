@@ -20,10 +20,11 @@ package org.apache.sedona.sql.geography
 
 import org.apache.sedona.common.S2Geography.{Geography, WKBReader}
 import org.apache.sedona.sql.TestBaseScala
-import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.sedona_sql.expressions.{implicits, st_constructors}
-import org.junit.Assert.{assertEquals, assertFalse, assertTrue}
-import org.locationtech.jts.geom.PrecisionModel
+import org.apache.spark.sql.functions.{col, lit}
+import org.apache.spark.sql.sedona_sql.expressions.st_constructors
+import org.junit.Assert.assertEquals
+import org.locationtech.jts.geom.{Geometry, PrecisionModel}
+import org.locationtech.jts.io.WKTWriter
 
 class ConstructorsDataFrameAPITest extends TestBaseScala {
   import sparkSession.implicits._
@@ -94,6 +95,36 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
     var expectedWkt =
       "SRID=4326; POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))"
     assertEquals(expectedWkt, actualResult)
+  }
+
+  it("passed st_geogtogeometry multipolygon") {
+    val wkt =
+      "MULTIPOLYGON (" +
+        "((10 10, 70 10, 70 70, 10 70, 10 10), (20 20, 60 20, 60 60, 20 60, 20 20))," +
+        "((30 30, 50 30, 50 50, 30 50, 30 30), (36 36, 44 36, 44 44, 36 44, 36 36))" +
+        ")"
+
+    val df = sparkSession
+      .sql(s"SELECT '$wkt' AS wkt")
+      .select(st_constructors.ST_GeogFromWKT(col("wkt"), lit(4326)).as("geog"))
+      .select(st_constructors.ST_GeogToGeometry(col("geog")).as("geom"))
+
+    val geom = df.head().getAs[Geometry]("geom")
+    assert(geom.getGeometryType == "MultiPolygon")
+
+    val expectedWkt =
+      "MULTIPOLYGON (((10 10, 70 10, 70 70, 10 70, 10 10), " +
+        "(20 20, 20 60, 60 60, 60 20, 20 20)), " +
+        "((30 30, 50 30, 50 50, 30 50, 30 30), " +
+        "(36 36, 36 44, 44 44, 44 36, 36 36)))"
+
+    val writer = new WKTWriter()
+    writer.setFormatted(false)
+    writer.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED))
+
+    val got = writer.write(geom)
+    assert(got == expectedWkt)
+    assert(geom.getSRID == 4326)
   }
 
 }
