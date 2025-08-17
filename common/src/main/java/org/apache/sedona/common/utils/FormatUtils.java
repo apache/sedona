@@ -25,6 +25,7 @@ import java.util.*;
 import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.common.enums.GeometryType;
+import org.apache.sedona.common.jts2geojson.GeoJSONReader;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
@@ -34,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wololo.geojson.Feature;
 import org.wololo.geojson.GeoJSONFactory;
-import org.wololo.jts2geojson.GeoJSONReader;
 
 /** This format mapper is isolated on purpose for the sake of sharing across Spark and Flink */
 public class FormatUtils<T extends Geometry> implements Serializable {

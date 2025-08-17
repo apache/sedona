@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.sedona.common.jts2geojson.GeoJSONWriter;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.junit.AfterClass;
@@ -31,7 +32,6 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.wololo.geojson.Feature;
-import org.wololo.jts2geojson.GeoJSONWriter;
 
 /**
  * @author Arizona State University DataSystems Lab
