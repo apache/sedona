@@ -25,7 +25,7 @@ import org.apache.spark.util.Utils
 object DataSourceUtils extends PredicateHelper {
 
   /**
-   * Metadata key which is used to write Spark version in the followings:
+   * Metadata key which is used to write Spark version in the following:
    *   - Parquet file metadata
    *   - ORC file metadata
    *   - Avro file metadata
