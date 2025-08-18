@@ -34,10 +34,6 @@ public class Functions {
     return Math.abs(a - b) < EPSILON;
   }
 
-  public static Geography getEnvelope(Geography geography) {
-    return getEnvelope(geography, /* splitAtAntiMeridian = */ false);
-  }
-
   public static Geography getEnvelope(Geography geography, boolean splitAtAntiMeridian) {
     if (geography == null) return null;
     S2LatLngRect rect = geography.region().getRectBound();

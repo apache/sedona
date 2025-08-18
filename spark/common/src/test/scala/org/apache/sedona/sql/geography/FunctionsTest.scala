@@ -38,10 +38,6 @@ class FunctionsTest extends TestBaseScala {
     var env = row.get(0).asInstanceOf[Geography]
     var expectedWKT = "POLYGON ((-180 -63.3, 180 -63.3, 180 -90, -180 -90, -180 -63.3))";
     assertEquals(expectedWKT, env.toString)
-
-    row = sparkSession.sql(s"SELECT ST_Envelope(ST_GeogFromWKT('$antarctica')) AS env").first()
-    env = row.get(0).asInstanceOf[Geography]
-    assertEquals(expectedWKT, env.toString)
   }
 
   it("Passed ST_Envelope Fiji") {
@@ -56,4 +52,8 @@ class FunctionsTest extends TestBaseScala {
     assertEquals(expectedWKT, env.toString)
   }
 
+  it("Passed ST_Envelope null") {
+    val functionDf = sparkSession.sql("select ST_Envelope(null, false)")
+    assert(functionDf.first().get(0) == null)
+  }
 }

@@ -217,7 +217,6 @@ private[apache] case class ST_ShiftLongitude(inputExpressions: Seq[Expression])
 private[apache] case class ST_Envelope(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction1(Functions.envelope),
-      inferrableFunction1(org.apache.sedona.common.geography.Functions.getEnvelope),
       inferrableFunction2(org.apache.sedona.common.geography.Functions.getEnvelope)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
