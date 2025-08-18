@@ -24,6 +24,7 @@ import org.apache.parquet.schema.MessageType
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.util.RebaseDateTime.RebaseSpec
 import org.apache.spark.sql.types.StructType
+import org.apache.spark.sql.execution.datasources.geoparquet.internal.NoopUpdater
 
 /**
  * A [[RecordMaterializer]] for Catalyst rows.

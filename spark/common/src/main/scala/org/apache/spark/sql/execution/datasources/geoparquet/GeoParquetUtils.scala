@@ -30,7 +30,7 @@ object GeoParquetUtils {
       sparkSession: SparkSession,
       parameters: Map[String, String],
       files: Seq[FileStatus]): Option[StructType] = {
-    val parquetOptions = new ParquetOptions(parameters, sparkSession.sessionState.conf)
+    val parquetOptions = new internal.ParquetOptions(parameters, sparkSession.sessionState.conf)
     val shouldMergeSchemas = parquetOptions.mergeSchema
     val mergeRespectSummaries = sparkSession.sessionState.conf.isParquetSchemaRespectSummaries
     val filesByType = splitFiles(files)

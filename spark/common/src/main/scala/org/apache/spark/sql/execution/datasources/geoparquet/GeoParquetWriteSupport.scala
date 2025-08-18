@@ -113,7 +113,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
   private val geoParquetColumnCoveringMap: mutable.Map[String, Covering] = mutable.Map.empty
 
   override def init(configuration: Configuration): WriteContext = {
-    val schemaString = configuration.get(ParquetWriteSupport.SPARK_ROW_SCHEMA)
+    val schemaString = configuration.get(internal.ParquetWriteSupport.SPARK_ROW_SCHEMA)
     this.schema = StructType.fromString(schemaString)
     this.writeLegacyParquetFormat = {
       // `SQLConf.PARQUET_WRITE_LEGACY_FORMAT` should always be explicitly set in ParquetRelation
@@ -173,11 +173,11 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       }
     }
 
-    val messageType = new SparkToParquetSchemaConverter(configuration).convert(schema)
+    val messageType = new internal.SparkToParquetSchemaConverter(configuration).convert(schema)
     val sparkSqlParquetRowMetadata = GeoParquetWriteSupport.getSparkSqlParquetRowMetadata(schema)
     val metadata = Map(
       SPARK_VERSION_METADATA_KEY -> SPARK_VERSION_SHORT,
-      ParquetReadSupport.SPARK_METADATA_KEY -> sparkSqlParquetRowMetadata) ++ {
+      internal.ParquetReadSupport.SPARK_METADATA_KEY -> sparkSqlParquetRowMetadata) ++ {
       if (datetimeRebaseMode == LegacyBehaviorPolicy.LEGACY) {
         Some("org.apache.spark.legacyDateTime" -> "")
       } else {

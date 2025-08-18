@@ -436,7 +436,7 @@ object ParquetFileFormat extends Logging {
    * If the config "spark.sql.files.ignoreCorruptFiles" is set to true, we will ignore the corrupted
    * files when reading footers.
    */
-  private[internal] def readParquetFootersInParallel(
+  def readParquetFootersInParallel(
       conf: Configuration,
       partFiles: Seq[FileStatus],
       ignoreCorruptFiles: Boolean): Seq[Footer] = {

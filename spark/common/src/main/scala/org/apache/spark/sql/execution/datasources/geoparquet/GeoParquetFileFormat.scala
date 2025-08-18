@@ -18,7 +18,7 @@
  */
 package org.apache.spark.sql.execution.datasources.geoparquet
 
-import org.apache.spark.sql.execution.datasources.geoparquet.internal._
+import org.apache.spark.sql.execution.datasources.geoparquet.internal.{ParquetFileFormat, ParquetOutputWriter, ParquetReadSupport, ParquetWriteSupport, ParquetOptions, ParquetFooterReader, ParquetFilters, ParquetRowIndexUtil, DataSourceUtils => InternalDataSourceUtils}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.FileStatus
 import org.apache.hadoop.mapred.FileSplit
@@ -240,10 +240,10 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
         ParquetFooterReader
           .readFooter(sharedConf, file, ParquetFooterReader.SKIP_ROW_GROUPS)
           .getFileMetaData
-      val datetimeRebaseSpec = DataSourceUtils.datetimeRebaseSpec(
+      val datetimeRebaseSpec = InternalDataSourceUtils.datetimeRebaseSpec(
         footerFileMetaData.getKeyValueMetaData.get,
         datetimeRebaseModeInRead)
-      val int96RebaseSpec = DataSourceUtils.int96RebaseSpec(
+      val int96RebaseSpec = InternalDataSourceUtils.int96RebaseSpec(
         footerFileMetaData.getKeyValueMetaData.get,
         int96RebaseModeInRead)
       // Try to push down filters when filter push-down is enabled.
@@ -375,7 +375,7 @@ object GeoParquetFileFormat extends Logging {
     val assumeInt96IsTimestamp = sparkSession.sessionState.conf.isParquetINT96AsTimestamp
 
     val reader = (files: Seq[FileStatus], conf: Configuration, ignoreCorruptFiles: Boolean) => {
-      readParquetFootersInParallel(conf, files, ignoreCorruptFiles)
+      internal.ParquetFileFormat.readParquetFootersInParallel(conf, files, ignoreCorruptFiles)
         .map { footer =>
           // Converter used to convert Parquet `MessageType` to Spark SQL `StructType`
           val keyValueMetaData = footer.getParquetMetadata.getFileMetaData.getKeyValueMetaData

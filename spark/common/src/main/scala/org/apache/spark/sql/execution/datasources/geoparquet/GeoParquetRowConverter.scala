@@ -18,7 +18,7 @@
  */
 package org.apache.spark.sql.execution.datasources.geoparquet
 
-import org.apache.spark.sql.execution.datasources.geoparquet.internal._
+import org.apache.spark.sql.execution.datasources.geoparquet.internal.{ParentContainerUpdater, NoopUpdater, HasParentContainerUpdater, ParquetGroupConverter, ParquetPrimitiveConverter, ParquetRowConverter}
 import org.apache.parquet.column.Dictionary
 import org.apache.parquet.io.api.{Binary, Converter, GroupConverter, PrimitiveConverter}
 import org.apache.parquet.schema.LogicalTypeAnnotation.TimeUnit

@@ -24,7 +24,7 @@ import org.apache.parquet.schema._
 import org.apache.parquet.schema.OriginalType._
 import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName._
 import org.apache.parquet.schema.Type.Repetition._
-import org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetSchemaConverter.checkConversionRequirement
+import org.apache.spark.sql.execution.datasources.geoparquet.internal.{ParquetSchemaConverter, SparkToParquetSchemaConverter}
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
@@ -604,7 +604,7 @@ class SparkToGeoParquetSchemaConverter(
 private[sql] object GeoParquetSchemaConverter {
   def checkFieldName(name: String): Unit = {
     // ,;{}()\n\t= and space are special characters in Parquet schema
-    checkConversionRequirement(
+    ParquetSchemaConverter.checkConversionRequirement(
       !name.matches(".*[ ,;{}()\n\t=].*"),
       s"""Attribute name "$name" contains invalid character(s) among " ,;{}()\\n\\t=".
          |Please use alias to rename it.
