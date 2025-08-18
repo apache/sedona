@@ -19,27 +19,24 @@
 package org.apache.spark.sql.execution.datasources.geoparquet.internal
 
 import java.util.Locale
-
 import org.apache.parquet.hadoop.ParquetOutputFormat
 import org.apache.parquet.hadoop.metadata.CompressionCodecName
-
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.{DataSourceOptions, FileSourceOptions}
 import org.apache.spark.sql.catalyst.util.CaseInsensitiveMap
-import org.apache.spark.sql.internal.SQLConf
 
 /**
  * Options for the Parquet data source.
  */
 class ParquetOptions(
     @transient private val parameters: CaseInsensitiveMap[String],
-    @transient private val sqlConf: SQLConf)
+    @transient private val sqlConf: PortableSQLConf)
     extends FileSourceOptions(parameters)
     with Logging {
 
   import ParquetOptions._
 
-  def this(parameters: Map[String, String], sqlConf: SQLConf) =
+  def this(parameters: Map[String, String], sqlConf: PortableSQLConf) =
     this(CaseInsensitiveMap(parameters), sqlConf)
 
   /**
@@ -83,14 +80,14 @@ class ParquetOptions(
    */
   def datetimeRebaseModeInRead: String = parameters
     .get(DATETIME_REBASE_MODE)
-    .getOrElse(sqlConf.getConf(SQLConf.PARQUET_REBASE_MODE_IN_READ))
+    .getOrElse(sqlConf.getConf(PortableSQLConf.PARQUET_REBASE_MODE_IN_READ))
 
   /**
    * The rebasing mode for INT96 timestamp values in reads.
    */
   def int96RebaseModeInRead: String = parameters
     .get(INT96_REBASE_MODE)
-    .getOrElse(sqlConf.getConf(SQLConf.PARQUET_INT96_REBASE_MODE_IN_READ))
+    .getOrElse(sqlConf.getConf(PortableSQLConf.PARQUET_INT96_REBASE_MODE_IN_READ))
 }
 
 object ParquetOptions extends DataSourceOptions {

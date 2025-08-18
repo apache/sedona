@@ -33,8 +33,7 @@ import org.apache.spark.sql.catalyst.expressions.SpecializedGetters
 import org.apache.spark.sql.catalyst.util.DateTimeUtils
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData.{GEOPARQUET_COVERING_KEY, GEOPARQUET_CRS_KEY, GEOPARQUET_VERSION_KEY, VERSION, createCoveringColumnMetadata}
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetWriteSupport.GeometryColumnInfo
-import org.apache.spark.sql.execution.datasources.geoparquet.internal.{DataSourceUtils, LegacyBehaviorPolicy}
-import org.apache.spark.sql.internal.SQLConf
+import org.apache.spark.sql.execution.datasources.geoparquet.internal.{DataSourceUtils, LegacyBehaviorPolicy, PortableSQLConf}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
 import org.json4s.JValue
@@ -77,7 +76,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
   private var writeLegacyParquetFormat: Boolean = _
 
   // Which parquet timestamp type to use when writing.
-  private var outputTimestampType: SQLConf.ParquetOutputTimestampType.Value = _
+  private var outputTimestampType: PortableSQLConf.ParquetOutputTimestampType.Value = _
 
   // Reusable byte array used to write timestamps as Parquet INT96 values
   private val timestampBuffer = new Array[Byte](12)
@@ -87,7 +86,8 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
     new Array[Byte](Decimal.minBytesForPrecision(DecimalType.MAX_PRECISION))
 
   private val datetimeRebaseMode =
-    LegacyBehaviorPolicy.withName(SQLConf.get.getConf(SQLConf.PARQUET_REBASE_MODE_IN_WRITE))
+    LegacyBehaviorPolicy.withName(
+      PortableSQLConf.get.getConf(PortableSQLConf.PARQUET_REBASE_MODE_IN_WRITE))
 
   private val dateRebaseFunc =
     DataSourceUtils.createDateRebaseFuncInWrite(datetimeRebaseMode, "Parquet")
@@ -96,7 +96,8 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
     DataSourceUtils.createTimestampRebaseFuncInWrite(datetimeRebaseMode, "Parquet")
 
   private val int96RebaseMode =
-    LegacyBehaviorPolicy.withName(SQLConf.get.getConf(SQLConf.PARQUET_INT96_REBASE_MODE_IN_WRITE))
+    LegacyBehaviorPolicy.withName(
+      PortableSQLConf.get.getConf(PortableSQLConf.PARQUET_INT96_REBASE_MODE_IN_WRITE))
 
   private val int96RebaseFunc =
     DataSourceUtils.createTimestampRebaseFuncInWrite(int96RebaseMode, "Parquet INT96")
@@ -115,15 +116,15 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
     val schemaString = configuration.get(internal.ParquetWriteSupport.SPARK_ROW_SCHEMA)
     this.schema = StructType.fromString(schemaString)
     this.writeLegacyParquetFormat = {
-      // `SQLConf.PARQUET_WRITE_LEGACY_FORMAT` should always be explicitly set in ParquetRelation
-      assert(configuration.get(SQLConf.PARQUET_WRITE_LEGACY_FORMAT.key) != null)
-      configuration.get(SQLConf.PARQUET_WRITE_LEGACY_FORMAT.key).toBoolean
+      // `LenientSQLConf.PARQUET_WRITE_LEGACY_FORMAT` should always be explicitly set in ParquetRelation
+      assert(configuration.get(PortableSQLConf.PARQUET_WRITE_LEGACY_FORMAT.key) != null)
+      configuration.get(PortableSQLConf.PARQUET_WRITE_LEGACY_FORMAT.key).toBoolean
     }
 
     this.outputTimestampType = {
-      val key = SQLConf.PARQUET_OUTPUT_TIMESTAMP_TYPE.key
+      val key = PortableSQLConf.PARQUET_OUTPUT_TIMESTAMP_TYPE.key
       assert(configuration.get(key) != null)
-      SQLConf.ParquetOutputTimestampType.withName(configuration.get(key))
+      PortableSQLConf.ParquetOutputTimestampType.withName(configuration.get(key))
     }
 
     this.rootFieldWriters = schema.zipWithIndex
@@ -287,7 +288,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
 
       case TimestampType =>
         outputTimestampType match {
-          case SQLConf.ParquetOutputTimestampType.INT96 =>
+          case PortableSQLConf.ParquetOutputTimestampType.INT96 =>
             (row: SpecializedGetters, ordinal: Int) =>
               val micros = int96RebaseFunc(row.getLong(ordinal))
               val (julianDay, timeOfDayNanos) = DateTimeUtils.toJulianDay(micros)
@@ -295,12 +296,12 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
               buf.order(ByteOrder.LITTLE_ENDIAN).putLong(timeOfDayNanos).putInt(julianDay)
               recordConsumer.addBinary(Binary.fromReusedByteArray(timestampBuffer))
 
-          case SQLConf.ParquetOutputTimestampType.TIMESTAMP_MICROS =>
+          case PortableSQLConf.ParquetOutputTimestampType.TIMESTAMP_MICROS =>
             (row: SpecializedGetters, ordinal: Int) =>
               val micros = row.getLong(ordinal)
               recordConsumer.addLong(timestampRebaseFunc(micros))
 
-          case SQLConf.ParquetOutputTimestampType.TIMESTAMP_MILLIS =>
+          case PortableSQLConf.ParquetOutputTimestampType.TIMESTAMP_MILLIS =>
             (row: SpecializedGetters, ordinal: Int) =>
               val micros = row.getLong(ordinal)
               val millis = DateTimeUtils.microsToMillis(timestampRebaseFunc(micros))

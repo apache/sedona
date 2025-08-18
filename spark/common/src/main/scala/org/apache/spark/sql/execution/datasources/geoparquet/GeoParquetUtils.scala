@@ -21,6 +21,7 @@ package org.apache.spark.sql.execution.datasources.geoparquet
 import org.apache.hadoop.fs.{FileStatus, Path}
 import org.apache.parquet.hadoop.ParquetFileWriter
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.execution.datasources.geoparquet.internal.PortableSQLConf
 import org.apache.spark.sql.types.StructType
 
 import scala.language.existentials
@@ -30,9 +31,10 @@ object GeoParquetUtils {
       sparkSession: SparkSession,
       parameters: Map[String, String],
       files: Seq[FileStatus]): Option[StructType] = {
-    val parquetOptions = new internal.ParquetOptions(parameters, sparkSession.sessionState.conf)
+    val conf = new PortableSQLConf(sparkSession.sessionState.conf)
+    val parquetOptions = new internal.ParquetOptions(parameters, conf)
     val shouldMergeSchemas = parquetOptions.mergeSchema
-    val mergeRespectSummaries = sparkSession.sessionState.conf.isParquetSchemaRespectSummaries
+    val mergeRespectSummaries = conf.isParquetSchemaRespectSummaries
     val filesByType = splitFiles(files)
     val filesToTouch =
       if (shouldMergeSchemas) {

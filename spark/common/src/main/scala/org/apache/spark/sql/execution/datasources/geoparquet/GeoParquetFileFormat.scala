@@ -18,7 +18,7 @@
  */
 package org.apache.spark.sql.execution.datasources.geoparquet
 
-import org.apache.spark.sql.execution.datasources.geoparquet.internal.{DataTypeUtils, ParquetFileFormat, ParquetFilters, ParquetFooterReader, ParquetOptions, ParquetOutputWriter, ParquetReadSupport, ParquetRowIndexUtil, ParquetWriteSupport, DataSourceUtils => InternalDataSourceUtils}
+import org.apache.spark.sql.execution.datasources.geoparquet.internal.{DataTypeUtils, PortableSQLConf, ParquetFileFormat, ParquetFilters, ParquetFooterReader, ParquetOptions, ParquetOutputWriter, ParquetReadSupport, ParquetRowIndexUtil, ParquetWriteSupport, DataSourceUtils => InternalDataSourceUtils}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.FileStatus
 import org.apache.hadoop.mapred.FileSplit
@@ -38,7 +38,6 @@ import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeProjectio
 import org.apache.spark.sql.catalyst.parser.LegacyTypeStringParser
 import org.apache.spark.sql.catalyst.util.DateTimeUtils
 import org.apache.spark.sql.execution.datasources._
-import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sources._
 import org.apache.spark.sql.types._
@@ -86,18 +85,18 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
       job: Job,
       options: Map[String, String],
       dataSchema: StructType): OutputWriterFactory = {
-    val sqlConf = sparkSession.sessionState.conf
+    val sqlConf = new PortableSQLConf(sparkSession.sessionState.conf)
     val parquetOptions = new ParquetOptions(options, sqlConf)
 
     val conf = ContextUtil.getConfiguration(job)
 
     val committerClass =
       conf.getClass(
-        SQLConf.PARQUET_OUTPUT_COMMITTER_CLASS.key,
+        PortableSQLConf.PARQUET_OUTPUT_COMMITTER_CLASS.key,
         classOf[ParquetOutputCommitter],
         classOf[OutputCommitter])
 
-    if (conf.get(SQLConf.PARQUET_OUTPUT_COMMITTER_CLASS.key) == null) {
+    if (conf.get(PortableSQLConf.PARQUET_OUTPUT_COMMITTER_CLASS.key) == null) {
       logInfo(
         "Using default output committer for Parquet: " +
           classOf[ParquetOutputCommitter].getCanonicalName)
@@ -106,7 +105,10 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
         "Using user defined output committer for Parquet: " + committerClass.getCanonicalName)
     }
 
-    conf.setClass(SQLConf.OUTPUT_COMMITTER_CLASS.key, committerClass, classOf[OutputCommitter])
+    conf.setClass(
+      PortableSQLConf.OUTPUT_COMMITTER_CLASS.key,
+      committerClass,
+      classOf[OutputCommitter])
 
     // We're not really using `ParquetOutputFormat[Row]` for writing data here, because we override
     // it in `ParquetOutputWriter` to support appending and dynamic partitioning.  The reason why
@@ -121,17 +123,21 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
 
     // Sets flags for `ParquetWriteSupport`, which converts Catalyst schema to Parquet
     // schema and writes actual rows to Parquet files.
-    conf.set(SQLConf.PARQUET_WRITE_LEGACY_FORMAT.key, sqlConf.writeLegacyParquetFormat.toString)
+    conf.set(
+      PortableSQLConf.PARQUET_WRITE_LEGACY_FORMAT.key,
+      sqlConf.writeLegacyParquetFormat.toString)
 
     conf.set(
-      SQLConf.PARQUET_OUTPUT_TIMESTAMP_TYPE.key,
+      PortableSQLConf.PARQUET_OUTPUT_TIMESTAMP_TYPE.key,
       sqlConf.parquetOutputTimestampType.toString)
 
     conf.set(
-      SQLConf.PARQUET_FIELD_ID_WRITE_ENABLED.key,
+      PortableSQLConf.PARQUET_FIELD_ID_WRITE_ENABLED.key,
       sqlConf.parquetFieldIdWriteEnabled.toString)
 
-    conf.set(SQLConf.LEGACY_PARQUET_NANOS_AS_LONG.key, sqlConf.legacyParquetNanosAsLong.toString)
+    conf.set(
+      PortableSQLConf.LEGACY_PARQUET_NANOS_AS_LONG.key,
+      sqlConf.legacyParquetNanosAsLong.toString)
 
     // Sets compression scheme
     conf.set(ParquetOutputFormat.COMPRESSION, parquetOptions.compressionCodecClassName)
@@ -178,29 +184,30 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
     hadoopConf.set(ParquetInputFormat.READ_SUPPORT_CLASS, classOf[ParquetReadSupport].getName)
     hadoopConf.set(ParquetReadSupport.SPARK_ROW_REQUESTED_SCHEMA, requiredSchema.json)
     hadoopConf.set(ParquetWriteSupport.SPARK_ROW_SCHEMA, requiredSchema.json)
+    val conf = new PortableSQLConf(sparkSession.sessionState.conf)
     hadoopConf.set(
-      SQLConf.SESSION_LOCAL_TIMEZONE.key,
-      sparkSession.sessionState.conf.sessionLocalTimeZone)
+      PortableSQLConf.SESSION_LOCAL_TIMEZONE.key,
+      conf.sessionLocalTimeZone)
     hadoopConf.setBoolean(
-      SQLConf.NESTED_SCHEMA_PRUNING_ENABLED.key,
-      sparkSession.sessionState.conf.nestedSchemaPruningEnabled)
+      PortableSQLConf.NESTED_SCHEMA_PRUNING_ENABLED.key,
+      conf.nestedSchemaPruningEnabled)
     hadoopConf.setBoolean(
-      SQLConf.CASE_SENSITIVE.key,
-      sparkSession.sessionState.conf.caseSensitiveAnalysis)
+      PortableSQLConf.CASE_SENSITIVE.key,
+      conf.caseSensitiveAnalysis)
 
     // Sets flags for `ParquetToSparkSchemaConverter`
     hadoopConf.setBoolean(
-      SQLConf.PARQUET_BINARY_AS_STRING.key,
-      sparkSession.sessionState.conf.isParquetBinaryAsString)
+      PortableSQLConf.PARQUET_BINARY_AS_STRING.key,
+      conf.isParquetBinaryAsString)
     hadoopConf.setBoolean(
-      SQLConf.PARQUET_INT96_AS_TIMESTAMP.key,
-      sparkSession.sessionState.conf.isParquetINT96AsTimestamp)
+      PortableSQLConf.PARQUET_INT96_AS_TIMESTAMP.key,
+      conf.isParquetINT96AsTimestamp)
     hadoopConf.setBoolean(
-      SQLConf.PARQUET_INFER_TIMESTAMP_NTZ_ENABLED.key,
-      sparkSession.sessionState.conf.parquetInferTimestampNTZEnabled)
+      PortableSQLConf.PARQUET_INFER_TIMESTAMP_NTZ_ENABLED.key,
+      conf.parquetInferTimestampNTZEnabled)
     hadoopConf.setBoolean(
-      SQLConf.LEGACY_PARQUET_NANOS_AS_LONG.key,
-      sparkSession.sessionState.conf.legacyParquetNanosAsLong)
+      PortableSQLConf.LEGACY_PARQUET_NANOS_AS_LONG.key,
+      conf.legacyParquetNanosAsLong)
 
     val broadcastedHadoopConf =
       sparkSession.sparkContext.broadcast(new SerializableConfiguration(hadoopConf))
@@ -209,7 +216,7 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
     // If true, enable using the custom RecordReader for parquet. This only works for
     // a subset of the types (no complex types).
     val resultSchema = StructType(partitionSchema.fields ++ requiredSchema.fields)
-    val sqlConf = sparkSession.sessionState.conf
+    val sqlConf = new PortableSQLConf(sparkSession.sessionState.conf)
     val enableVectorizedReader: Boolean =
       sqlConf.parquetVectorizedReaderEnabled &&
         resultSchema.forall(_.dataType.isInstanceOf[AtomicType])
@@ -222,7 +229,8 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
     val parquetFilterPushDownStringPredicate = sqlConf.parquetFilterPushDownStringPredicate
     val pushDownInFilterThreshold = sqlConf.parquetFilterPushDownInFilterThreshold
     val isCaseSensitive = sqlConf.caseSensitiveAnalysis
-    val parquetOptions = new ParquetOptions(options, sparkSession.sessionState.conf)
+    val parquetOptions =
+      new ParquetOptions(options, new PortableSQLConf(sparkSession.sessionState.conf))
     val datetimeRebaseModeInRead = parquetOptions.datetimeRebaseModeInRead
     val int96RebaseModeInRead = parquetOptions.int96RebaseModeInRead
 
@@ -285,7 +293,8 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
 
         val convertTz =
           if (timestampConversion && !isCreatedByParquetMr) {
-            Some(DateTimeUtils.getZoneId(sharedConf.get(SQLConf.SESSION_LOCAL_TIMEZONE.key)))
+            Some(
+              DateTimeUtils.getZoneId(sharedConf.get(PortableSQLConf.SESSION_LOCAL_TIMEZONE.key)))
           } else {
             None
           }
@@ -371,8 +380,9 @@ object GeoParquetFileFormat extends Logging {
       parameters: Map[String, String],
       filesToTouch: Seq[FileStatus],
       sparkSession: SparkSession): Option[StructType] = {
-    val assumeBinaryIsString = sparkSession.sessionState.conf.isParquetBinaryAsString
-    val assumeInt96IsTimestamp = sparkSession.sessionState.conf.isParquetINT96AsTimestamp
+    val conf = new PortableSQLConf(sparkSession.sessionState.conf)
+    val assumeBinaryIsString = conf.isParquetBinaryAsString
+    val assumeInt96IsTimestamp = conf.isParquetINT96AsTimestamp
 
     val reader = (files: Seq[FileStatus], conf: Configuration, ignoreCorruptFiles: Boolean) => {
       ParquetFileFormat

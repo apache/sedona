@@ -24,8 +24,7 @@ import org.apache.parquet.schema._
 import org.apache.parquet.schema.OriginalType._
 import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName._
 import org.apache.parquet.schema.Type.Repetition._
-import org.apache.spark.sql.execution.datasources.geoparquet.internal.{ParquetSchemaConverter, SparkToParquetSchemaConverter}
-import org.apache.spark.sql.internal.SQLConf
+import org.apache.spark.sql.execution.datasources.geoparquet.internal.{PortableSQLConf, ParquetSchemaConverter, SparkToParquetSchemaConverter}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
 
@@ -49,9 +48,10 @@ import org.apache.spark.sql.types._
  */
 class GeoParquetToSparkSchemaConverter(
     keyValueMetaData: java.util.Map[String, String],
-    assumeBinaryIsString: Boolean = SQLConf.PARQUET_BINARY_AS_STRING.defaultValue.get,
-    assumeInt96IsTimestamp: Boolean = SQLConf.PARQUET_INT96_AS_TIMESTAMP.defaultValue.get,
-    inferTimestampNTZ: Boolean = SQLConf.PARQUET_INFER_TIMESTAMP_NTZ_ENABLED.defaultValue.get,
+    assumeBinaryIsString: Boolean = PortableSQLConf.PARQUET_BINARY_AS_STRING.defaultValue.get,
+    assumeInt96IsTimestamp: Boolean = PortableSQLConf.PARQUET_INT96_AS_TIMESTAMP.defaultValue.get,
+    inferTimestampNTZ: Boolean =
+      PortableSQLConf.PARQUET_INFER_TIMESTAMP_NTZ_ENABLED.defaultValue.get,
     parameters: Map[String, String]) {
 
   private val geoParquetMetaData: GeoParquetMetaData =
@@ -59,7 +59,7 @@ class GeoParquetToSparkSchemaConverter(
 
   def this(
       keyValueMetaData: java.util.Map[String, String],
-      conf: SQLConf,
+      conf: PortableSQLConf,
       parameters: Map[String, String]) = this(
     keyValueMetaData = keyValueMetaData,
     assumeBinaryIsString = conf.isParquetBinaryAsString,
@@ -72,9 +72,10 @@ class GeoParquetToSparkSchemaConverter(
       conf: Configuration,
       parameters: Map[String, String]) = this(
     keyValueMetaData = keyValueMetaData,
-    assumeBinaryIsString = conf.get(SQLConf.PARQUET_BINARY_AS_STRING.key).toBoolean,
-    assumeInt96IsTimestamp = conf.get(SQLConf.PARQUET_INT96_AS_TIMESTAMP.key).toBoolean,
-    inferTimestampNTZ = conf.get(SQLConf.PARQUET_INFER_TIMESTAMP_NTZ_ENABLED.key).toBoolean,
+    assumeBinaryIsString = conf.get(PortableSQLConf.PARQUET_BINARY_AS_STRING.key).toBoolean,
+    assumeInt96IsTimestamp = conf.get(PortableSQLConf.PARQUET_INT96_AS_TIMESTAMP.key).toBoolean,
+    inferTimestampNTZ =
+      conf.get(PortableSQLConf.PARQUET_INFER_TIMESTAMP_NTZ_ENABLED.key).toBoolean,
     parameters = parameters)
 
   /**
@@ -186,7 +187,7 @@ class GeoParquetToSparkSchemaConverter(
         ParquetSchemaConverter.checkConversionRequirement(
           assumeInt96IsTimestamp,
           "INT96 is not supported unless it's interpreted as timestamp. " +
-            s"Please try to set ${SQLConf.PARQUET_INT96_AS_TIMESTAMP.key} to true.")
+            s"Please try to set ${PortableSQLConf.PARQUET_INT96_AS_TIMESTAMP.key} to true.")
         TimestampType
 
       case BINARY =>
@@ -336,19 +337,21 @@ class GeoParquetToSparkSchemaConverter(
  *   which parquet timestamp type to use when writing.
  */
 class SparkToGeoParquetSchemaConverter(
-    writeLegacyParquetFormat: Boolean = SQLConf.PARQUET_WRITE_LEGACY_FORMAT.defaultValue.get,
-    outputTimestampType: SQLConf.ParquetOutputTimestampType.Value =
-      SQLConf.ParquetOutputTimestampType.INT96)
+    writeLegacyParquetFormat: Boolean =
+      PortableSQLConf.PARQUET_WRITE_LEGACY_FORMAT.defaultValue.get,
+    outputTimestampType: PortableSQLConf.ParquetOutputTimestampType.Value =
+      PortableSQLConf.ParquetOutputTimestampType.INT96)
     extends SparkToParquetSchemaConverter(writeLegacyParquetFormat, outputTimestampType) {
 
-  def this(conf: SQLConf) = this(
+  def this(conf: PortableSQLConf) = this(
     writeLegacyParquetFormat = conf.writeLegacyParquetFormat,
     outputTimestampType = conf.parquetOutputTimestampType)
 
   def this(conf: Configuration) = this(
-    writeLegacyParquetFormat = conf.get(SQLConf.PARQUET_WRITE_LEGACY_FORMAT.key).toBoolean,
-    outputTimestampType = SQLConf.ParquetOutputTimestampType.withName(
-      conf.get(SQLConf.PARQUET_OUTPUT_TIMESTAMP_TYPE.key)))
+    writeLegacyParquetFormat =
+      conf.get(PortableSQLConf.PARQUET_WRITE_LEGACY_FORMAT.key).toBoolean,
+    outputTimestampType = PortableSQLConf.ParquetOutputTimestampType.withName(
+      conf.get(PortableSQLConf.PARQUET_OUTPUT_TIMESTAMP_TYPE.key)))
 
   /**
    * Converts a Spark SQL [[StructType]] to a Parquet [[MessageType]].
@@ -418,11 +421,11 @@ class SparkToGeoParquetSchemaConverter(
       // example, we may resort to nanosecond precision in the future.
       case TimestampType =>
         outputTimestampType match {
-          case SQLConf.ParquetOutputTimestampType.INT96 =>
+          case PortableSQLConf.ParquetOutputTimestampType.INT96 =>
             Types.primitive(INT96, repetition).named(field.name)
-          case SQLConf.ParquetOutputTimestampType.TIMESTAMP_MICROS =>
+          case PortableSQLConf.ParquetOutputTimestampType.TIMESTAMP_MICROS =>
             Types.primitive(INT64, repetition).as(TIMESTAMP_MICROS).named(field.name)
-          case SQLConf.ParquetOutputTimestampType.TIMESTAMP_MILLIS =>
+          case PortableSQLConf.ParquetOutputTimestampType.TIMESTAMP_MILLIS =>
             Types.primitive(INT64, repetition).as(TIMESTAMP_MILLIS).named(field.name)
         }
 

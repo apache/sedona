@@ -21,7 +21,6 @@ package org.apache.spark.sql.execution.datasources.geoparquet.internal
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.util.{Failure, Try}
-
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileStatus, Path}
 import org.apache.hadoop.mapred.FileSplit
@@ -31,7 +30,6 @@ import org.apache.parquet.filter2.compat.FilterCompat
 import org.apache.parquet.filter2.predicate.FilterApi
 import org.apache.parquet.format.converter.ParquetMetadataConverter.SKIP_ROW_GROUPS
 import org.apache.parquet.hadoop._
-
 import org.apache.spark.TaskContext
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql._
@@ -67,7 +65,7 @@ class ParquetFileFormat
       job: Job,
       options: Map[String, String],
       dataSchema: StructType): OutputWriterFactory = {
-    val sqlConf = sparkSession.sessionState.conf
+    val sqlConf = new PortableSQLConf(sparkSession.sessionState.conf)
     val parquetOptions = new ParquetOptions(options, sqlConf)
     ParquetUtils.prepareWrite(sqlConf, job, dataSchema, parquetOptions)
   }
@@ -83,7 +81,7 @@ class ParquetFileFormat
    * Returns whether the reader can return the rows as batch or not.
    */
   override def supportBatch(sparkSession: SparkSession, schema: StructType): Boolean = {
-    val conf = sparkSession.sessionState.conf
+    val conf = new PortableSQLConf(sparkSession.sessionState.conf)
     ParquetUtils.isBatchReadSupportedForSchema(conf, schema)
   }
 
@@ -91,11 +89,13 @@ class ParquetFileFormat
       requiredSchema: StructType,
       partitionSchema: StructType,
       sqlConf: SQLConf): Option[Seq[String]] = {
-    Option(Seq.fill(requiredSchema.fields.length)(if (!sqlConf.offHeapColumnVectorEnabled) {
-      classOf[OnHeapColumnVector].getName
-    } else {
-      classOf[OffHeapColumnVector].getName
-    }) ++ Seq.fill(partitionSchema.fields.length)(classOf[ConstantColumnVector].getName))
+    val lenientSQLConf = new PortableSQLConf(sqlConf)
+    Option(
+      Seq.fill(requiredSchema.fields.length)(if (!lenientSQLConf.offHeapColumnVectorEnabled) {
+        classOf[OnHeapColumnVector].getName
+      } else {
+        classOf[OffHeapColumnVector].getName
+      }) ++ Seq.fill(partitionSchema.fields.length)(classOf[ConstantColumnVector].getName))
   }
 
   override def isSplitable(
@@ -126,29 +126,30 @@ class ParquetFileFormat
     hadoopConf.set(ParquetInputFormat.READ_SUPPORT_CLASS, classOf[ParquetReadSupport].getName)
     hadoopConf.set(ParquetReadSupport.SPARK_ROW_REQUESTED_SCHEMA, requiredSchema.json)
     hadoopConf.set(ParquetWriteSupport.SPARK_ROW_SCHEMA, requiredSchema.json)
+    val conf = new PortableSQLConf(sparkSession.sessionState.conf)
     hadoopConf.set(
-      SQLConf.SESSION_LOCAL_TIMEZONE.key,
-      sparkSession.sessionState.conf.sessionLocalTimeZone)
+      PortableSQLConf.SESSION_LOCAL_TIMEZONE.key,
+      conf.sessionLocalTimeZone)
     hadoopConf.setBoolean(
-      SQLConf.NESTED_SCHEMA_PRUNING_ENABLED.key,
-      sparkSession.sessionState.conf.nestedSchemaPruningEnabled)
+      PortableSQLConf.NESTED_SCHEMA_PRUNING_ENABLED.key,
+      conf.nestedSchemaPruningEnabled)
     hadoopConf.setBoolean(
-      SQLConf.CASE_SENSITIVE.key,
-      sparkSession.sessionState.conf.caseSensitiveAnalysis)
+      PortableSQLConf.CASE_SENSITIVE.key,
+      conf.caseSensitiveAnalysis)
 
     // Sets flags for `ParquetToSparkSchemaConverter`
     hadoopConf.setBoolean(
-      SQLConf.PARQUET_BINARY_AS_STRING.key,
-      sparkSession.sessionState.conf.isParquetBinaryAsString)
+      PortableSQLConf.PARQUET_BINARY_AS_STRING.key,
+      conf.isParquetBinaryAsString)
     hadoopConf.setBoolean(
-      SQLConf.PARQUET_INT96_AS_TIMESTAMP.key,
-      sparkSession.sessionState.conf.isParquetINT96AsTimestamp)
+      PortableSQLConf.PARQUET_INT96_AS_TIMESTAMP.key,
+      conf.isParquetINT96AsTimestamp)
     hadoopConf.setBoolean(
-      SQLConf.PARQUET_INFER_TIMESTAMP_NTZ_ENABLED.key,
-      sparkSession.sessionState.conf.parquetInferTimestampNTZEnabled)
+      PortableSQLConf.PARQUET_INFER_TIMESTAMP_NTZ_ENABLED.key,
+      conf.parquetInferTimestampNTZEnabled)
     hadoopConf.setBoolean(
-      SQLConf.LEGACY_PARQUET_NANOS_AS_LONG.key,
-      sparkSession.sessionState.conf.legacyParquetNanosAsLong)
+      PortableSQLConf.LEGACY_PARQUET_NANOS_AS_LONG.key,
+      conf.legacyParquetNanosAsLong)
 
     val broadcastedHadoopConf =
       sparkSession.sparkContext.broadcast(new SerializableConfiguration(hadoopConf))
@@ -157,7 +158,7 @@ class ParquetFileFormat
     // If true, enable using the custom RecordReader for parquet. This only works for
     // a subset of the types (no complex types).
     val resultSchema = StructType(partitionSchema.fields ++ requiredSchema.fields)
-    val sqlConf = sparkSession.sessionState.conf
+    val sqlConf = new PortableSQLConf(sparkSession.sessionState.conf)
     val enableOffHeapColumnVector = sqlConf.offHeapColumnVectorEnabled
     val enableVectorizedReader: Boolean =
       ParquetUtils.isBatchReadSupportedForSchema(sqlConf, resultSchema)
@@ -171,13 +172,14 @@ class ParquetFileFormat
     val pushDownStringPredicate = sqlConf.parquetFilterPushDownStringPredicate
     val pushDownInFilterThreshold = sqlConf.parquetFilterPushDownInFilterThreshold
     val isCaseSensitive = sqlConf.caseSensitiveAnalysis
-    val parquetOptions = new ParquetOptions(options, sparkSession.sessionState.conf)
+    val parquetOptions =
+      new ParquetOptions(options, new PortableSQLConf(sparkSession.sessionState.conf))
     val datetimeRebaseModeInRead = parquetOptions.datetimeRebaseModeInRead
     val int96RebaseModeInRead = parquetOptions.int96RebaseModeInRead
 
     // Should always be set by FileSourceScanExec creating this.
     // Check conf before checking option, to allow working around an issue by changing conf.
-    val returningBatch = sparkSession.sessionState.conf.parquetVectorizedReaderEnabled &&
+    val returningBatch = sqlConf.parquetVectorizedReaderEnabled &&
       options
         .getOrElse(
           FileFormat.OPTION_RETURNING_BATCH,
@@ -250,7 +252,8 @@ class ParquetFileFormat
 
       val convertTz =
         if (timestampConversion && !isCreatedByParquetMr) {
-          Some(DateTimeUtils.getZoneId(sharedConf.get(SQLConf.SESSION_LOCAL_TIMEZONE.key)))
+          Some(
+            DateTimeUtils.getZoneId(sharedConf.get(PortableSQLConf.SESSION_LOCAL_TIMEZONE.key)))
         } else {
           None
         }
@@ -369,11 +372,12 @@ object ParquetFileFormat extends Logging {
       footers: Seq[Footer],
       sparkSession: SparkSession): Option[StructType] = {
 
+    val conf = new PortableSQLConf(sparkSession.sessionState.conf)
     val converter = new ParquetToSparkSchemaConverter(
-      sparkSession.sessionState.conf.isParquetBinaryAsString,
-      sparkSession.sessionState.conf.isParquetINT96AsTimestamp,
-      inferTimestampNTZ = sparkSession.sessionState.conf.parquetInferTimestampNTZEnabled,
-      nanosAsLong = sparkSession.sessionState.conf.legacyParquetNanosAsLong)
+      conf.isParquetBinaryAsString,
+      conf.isParquetINT96AsTimestamp,
+      inferTimestampNTZ = conf.parquetInferTimestampNTZEnabled,
+      nanosAsLong = conf.legacyParquetNanosAsLong)
 
     val seen = mutable.HashSet[String]()
     val finalSchemas: Seq[StructType] = footers.flatMap { footer =>
@@ -472,10 +476,11 @@ object ParquetFileFormat extends Logging {
       parameters: Map[String, String],
       filesToTouch: Seq[FileStatus],
       sparkSession: SparkSession): Option[StructType] = {
-    val assumeBinaryIsString = sparkSession.sessionState.conf.isParquetBinaryAsString
-    val assumeInt96IsTimestamp = sparkSession.sessionState.conf.isParquetINT96AsTimestamp
-    val inferTimestampNTZ = sparkSession.sessionState.conf.parquetInferTimestampNTZEnabled
-    val nanosAsLong = sparkSession.sessionState.conf.legacyParquetNanosAsLong
+    val conf = new PortableSQLConf(sparkSession.sessionState.conf)
+    val assumeBinaryIsString = conf.isParquetBinaryAsString
+    val assumeInt96IsTimestamp = conf.isParquetINT96AsTimestamp
+    val inferTimestampNTZ = conf.parquetInferTimestampNTZEnabled
+    val nanosAsLong = conf.legacyParquetNanosAsLong
 
     val reader = (files: Seq[FileStatus], conf: Configuration, ignoreCorruptFiles: Boolean) => {
       // Converter used to convert Parquet `MessageType` to Spark SQL `StructType`

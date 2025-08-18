@@ -37,7 +37,7 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.util.{ArrayBasedMapData, CaseInsensitiveMap, DateTimeUtils, GenericArrayData}
 import org.apache.spark.sql.errors.QueryExecutionErrors
-import org.apache.spark.sql.internal.SQLConf
+
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
 import org.apache.spark.util.collection.Utils
@@ -219,7 +219,7 @@ private[internal] class ParquetRowConverter(
     // to prevent throwing IllegalArgumentException when searching catalyst type's field index
     def nameToIndex: Map[String, Int] = Utils.toMapWithIndex(catalystType.fieldNames)
 
-    val catalystFieldIdxByName = if (SQLConf.get.caseSensitiveAnalysis) {
+    val catalystFieldIdxByName = if (PortableSQLConf.get.caseSensitiveAnalysis) {
       nameToIndex
     } else {
       CaseInsensitiveMap(nameToIndex)
@@ -227,7 +227,8 @@ private[internal] class ParquetRowConverter(
 
     // (SPARK-38094) parquet field ids, if exist, should be prioritized for matching
     val catalystFieldIdxByFieldId =
-      if (SQLConf.get.parquetFieldIdReadEnabled && ParquetUtils.hasFieldIds(catalystType)) {
+      if (PortableSQLConf.get.parquetFieldIdReadEnabled && ParquetUtils.hasFieldIds(
+          catalystType)) {
         catalystType.fields.zipWithIndex
           .filter { case (f, _) => ParquetUtils.hasFieldId(f) }
           .map { case (f, idx) => (ParquetUtils.getFieldId(f), idx) }

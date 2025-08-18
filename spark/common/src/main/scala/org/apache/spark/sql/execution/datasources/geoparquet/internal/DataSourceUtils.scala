@@ -25,11 +25,12 @@ import org.apache.spark.sql.errors.QueryExecutionErrors
 import org.apache.spark.util.Utils
 
 object DataSourceUtils extends PredicateHelper {
+
   /**
    * Metadata key which is used to write Spark version in the followings:
-   * - Parquet file metadata
-   * - ORC file metadata
-   * - Avro file metadata
+   *   - Parquet file metadata
+   *   - ORC file metadata
+   *   - Avro file metadata
    *
    * Note that Hive table property `spark.sql.create.version` also has Spark version.
    */
@@ -37,8 +38,8 @@ object DataSourceUtils extends PredicateHelper {
 
   /**
    * The metadata key which is used to write the current session time zone into:
-   * - Parquet file metadata
-   * - Avro file metadata
+   *   - Parquet file metadata
+   *   - Avro file metadata
    */
   private[sql] val SPARK_TIMEZONE_METADATA_KEY = "org.apache.spark.timeZone"
 
@@ -49,8 +50,8 @@ object DataSourceUtils extends PredicateHelper {
   private[sql] val SPARK_LEGACY_DATETIME_METADATA_KEY = "org.apache.spark.legacyDateTime"
 
   /**
-   * Parquet file metadata key to indicate that the file with INT96 column type was written
-   * with rebasing.
+   * Parquet file metadata key to indicate that the file with INT96 column type was written with
+   * rebasing.
    */
   private[sql] val SPARK_LEGACY_INT96_METADATA_KEY = "org.apache.spark.legacyINT96"
 
@@ -61,7 +62,7 @@ object DataSourceUtils extends PredicateHelper {
       metadataKey: String): RebaseSpec = {
     val policy =
       if (Utils.isTesting &&
-        LenientSQLConf.get.getConfString("spark.test.forceNoRebase", "") == "true") {
+        PortableSQLConf.get.getConfString("spark.test.forceNoRebase", "") == "true") {
         LegacyBehaviorPolicy.CORRECTED
       } else {
         // If there is no version, we return the mode specified by the config.
@@ -99,11 +100,11 @@ object DataSourceUtils extends PredicateHelper {
   def newRebaseExceptionInRead(format: String): SparkUpgradeException = {
     val (config, option) = format match {
       case "Parquet INT96" =>
-        (LenientSQLConf.PARQUET_INT96_REBASE_MODE_IN_READ.key, ParquetOptions.INT96_REBASE_MODE)
+        (PortableSQLConf.PARQUET_INT96_REBASE_MODE_IN_READ.key, ParquetOptions.INT96_REBASE_MODE)
       case "Parquet" =>
-        (LenientSQLConf.PARQUET_REBASE_MODE_IN_READ.key, ParquetOptions.DATETIME_REBASE_MODE)
+        (PortableSQLConf.PARQUET_REBASE_MODE_IN_READ.key, ParquetOptions.DATETIME_REBASE_MODE)
       case "Avro" =>
-        (LenientSQLConf.AVRO_REBASE_MODE_IN_READ.key, "datetimeRebaseMode")
+        (PortableSQLConf.AVRO_REBASE_MODE_IN_READ.key, "datetimeRebaseMode")
       case _ => throw new IllegalStateException(s"Unrecognized format $format.")
     }
     QueryExecutionErrors.sparkUpgradeInReadingDatesError(format, config, option)
@@ -111,9 +112,9 @@ object DataSourceUtils extends PredicateHelper {
 
   def newRebaseExceptionInWrite(format: String): SparkUpgradeException = {
     val config = format match {
-      case "Parquet INT96" => LenientSQLConf.PARQUET_INT96_REBASE_MODE_IN_WRITE.key
-      case "Parquet" => LenientSQLConf.PARQUET_REBASE_MODE_IN_WRITE.key
-      case "Avro" => LenientSQLConf.AVRO_REBASE_MODE_IN_WRITE.key
+      case "Parquet INT96" => PortableSQLConf.PARQUET_INT96_REBASE_MODE_IN_WRITE.key
+      case "Parquet" => PortableSQLConf.PARQUET_REBASE_MODE_IN_WRITE.key
+      case "Avro" => PortableSQLConf.AVRO_REBASE_MODE_IN_WRITE.key
       case _ => throw new IllegalStateException(s"Unrecognized format $format.")
     }
     QueryExecutionErrors.sparkUpgradeInWritingDatesError(format, config)
@@ -168,7 +169,7 @@ object DataSourceUtils extends PredicateHelper {
         }
         micros
     case LegacyBehaviorPolicy.LEGACY =>
-      val timeZone = LenientSQLConf.get.sessionLocalTimeZone
+      val timeZone = PortableSQLConf.get.sessionLocalTimeZone
       RebaseDateTime.rebaseGregorianToJulianMicros(timeZone, _)
     case LegacyBehaviorPolicy.CORRECTED => identity[Long]
   }

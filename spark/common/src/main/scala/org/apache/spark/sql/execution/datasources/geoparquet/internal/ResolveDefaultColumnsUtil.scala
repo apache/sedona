@@ -34,7 +34,7 @@ import org.apache.spark.sql.catalyst.trees.TreePattern.PLAN_EXPRESSION
 import org.apache.spark.sql.connector.catalog.{CatalogManager, FunctionCatalog, Identifier}
 import org.apache.spark.sql.connector.catalog.functions.UnboundFunction
 import org.apache.spark.sql.errors.QueryCompilationErrors
-import org.apache.spark.sql.internal.SQLConf
+
 import org.apache.spark.sql.internal.connector.V1Function
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
@@ -173,7 +173,7 @@ object ResolveDefaultColumns extends ResolveDefaultColumnsUtils {
    *   the normalized result
    */
   def normalizeFieldName(str: String): String = {
-    if (SQLConf.get.caseSensitiveAnalysis) {
+    if (PortableSQLConf.get.caseSensitiveAnalysis) {
       str
     } else {
       str.toLowerCase()

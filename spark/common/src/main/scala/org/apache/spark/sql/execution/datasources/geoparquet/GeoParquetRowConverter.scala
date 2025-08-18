@@ -29,7 +29,7 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.util.{ArrayBasedMapData, CaseInsensitiveMap, DateTimeUtils, GenericArrayData}
 import org.apache.spark.sql.execution.datasources.geoparquet.internal._
-import org.apache.spark.sql.internal.SQLConf
+
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
@@ -160,7 +160,7 @@ private[geoparquet] class GeoParquetRowConverter(
   private[this] val fieldConverters: Array[Converter with HasParentContainerUpdater] = {
     // (SPARK-31116) Use case insensitive map if spark.sql.caseSensitive is false
     // to prevent throwing IllegalArgumentException when searching catalyst type's field index
-    val catalystFieldNameToIndex = if (SQLConf.get.caseSensitiveAnalysis) {
+    val catalystFieldNameToIndex = if (PortableSQLConf.get.caseSensitiveAnalysis) {
       catalystType.fieldNames.zipWithIndex.toMap
     } else {
       CaseInsensitiveMap(catalystType.fieldNames.zipWithIndex.toMap)

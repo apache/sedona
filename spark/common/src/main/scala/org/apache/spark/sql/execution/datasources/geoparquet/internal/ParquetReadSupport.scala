@@ -35,7 +35,7 @@ import org.apache.parquet.schema.Type.Repetition
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.errors.QueryExecutionErrors
-import org.apache.spark.sql.internal.SQLConf
+
 import org.apache.spark.sql.types._
 
 /**
@@ -128,19 +128,21 @@ object ParquetReadSupport extends Logging {
       conf: Configuration,
       enableVectorizedReader: Boolean): MessageType = {
     val caseSensitive =
-      conf.getBoolean(SQLConf.CASE_SENSITIVE.key, SQLConf.CASE_SENSITIVE.defaultValue.get)
+      conf.getBoolean(
+        PortableSQLConf.CASE_SENSITIVE.key,
+        PortableSQLConf.CASE_SENSITIVE.defaultValue.get)
     val schemaPruningEnabled = conf.getBoolean(
-      SQLConf.NESTED_SCHEMA_PRUNING_ENABLED.key,
-      SQLConf.NESTED_SCHEMA_PRUNING_ENABLED.defaultValue.get)
+      PortableSQLConf.NESTED_SCHEMA_PRUNING_ENABLED.key,
+      PortableSQLConf.NESTED_SCHEMA_PRUNING_ENABLED.defaultValue.get)
     val useFieldId = conf.getBoolean(
-      SQLConf.PARQUET_FIELD_ID_READ_ENABLED.key,
-      SQLConf.PARQUET_FIELD_ID_READ_ENABLED.defaultValue.get)
+      PortableSQLConf.PARQUET_FIELD_ID_READ_ENABLED.key,
+      PortableSQLConf.PARQUET_FIELD_ID_READ_ENABLED.defaultValue.get)
     val inferTimestampNTZ = conf.getBoolean(
-      SQLConf.PARQUET_INFER_TIMESTAMP_NTZ_ENABLED.key,
-      SQLConf.PARQUET_INFER_TIMESTAMP_NTZ_ENABLED.defaultValue.get)
+      PortableSQLConf.PARQUET_INFER_TIMESTAMP_NTZ_ENABLED.key,
+      PortableSQLConf.PARQUET_INFER_TIMESTAMP_NTZ_ENABLED.defaultValue.get)
     val ignoreMissingIds = conf.getBoolean(
-      SQLConf.IGNORE_MISSING_PARQUET_FIELD_ID.key,
-      SQLConf.IGNORE_MISSING_PARQUET_FIELD_ID.defaultValue.get)
+      PortableSQLConf.IGNORE_MISSING_PARQUET_FIELD_ID.key,
+      PortableSQLConf.IGNORE_MISSING_PARQUET_FIELD_ID.defaultValue.get)
 
     if (!ignoreMissingIds &&
       !containsFieldIds(parquetFileSchema) &&
@@ -149,7 +151,7 @@ object ParquetReadSupport extends Logging {
         "Spark read schema expects field Ids, " +
           "but Parquet file schema doesn't contain any field Ids.\n" +
           "Please remove the field ids from Spark schema or ignore missing ids by " +
-          s"setting `${SQLConf.IGNORE_MISSING_PARQUET_FIELD_ID.key} = true`\n" +
+          s"setting `${PortableSQLConf.IGNORE_MISSING_PARQUET_FIELD_ID.key} = true`\n" +
           s"""
            |Spark read schema:
            |${catalystRequestedSchema.prettyJson}

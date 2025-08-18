@@ -43,8 +43,7 @@ import org.apache.spark.sql.catalyst.expressions.JoinedRow
 import org.apache.spark.sql.connector.expressions.aggregate.{Aggregation, Count, CountStar, Max, Min}
 import org.apache.spark.sql.execution.datasources.{AggregatePushDownUtils, OutputWriter, OutputWriterFactory}
 import org.apache.spark.sql.execution.datasources.v2.V2ColumnUtils
-import org.apache.spark.sql.internal.SQLConf
-import org.apache.spark.sql.internal.SQLConf.PARQUET_AGGREGATE_PUSHDOWN_ENABLED
+
 import org.apache.spark.sql.types.{ArrayType, AtomicType, DataType, MapType, StructField, StructType, UserDefinedType}
 
 object ParquetUtils extends Logging {
@@ -53,12 +52,14 @@ object ParquetUtils extends Logging {
       sparkSession: SparkSession,
       parameters: Map[String, String],
       files: Seq[FileStatus]): Option[StructType] = {
-    val parquetOptions = new ParquetOptions(parameters, sparkSession.sessionState.conf)
+    val parquetOptions =
+      new ParquetOptions(parameters, new PortableSQLConf(sparkSession.sessionState.conf))
 
     // Should we merge schemas from all Parquet part-files?
     val shouldMergeSchemas = parquetOptions.mergeSchema
 
-    val mergeRespectSummaries = sparkSession.sessionState.conf.isParquetSchemaRespectSummaries
+    val conf = new PortableSQLConf(sparkSession.sessionState.conf)
+    val mergeRespectSummaries = conf.isParquetSchemaRespectSummaries
 
     val filesByType = splitFiles(files)
 
@@ -199,11 +200,11 @@ object ParquetUtils extends Logging {
   /**
    * Whether columnar read is supported for the input `schema`.
    */
-  def isBatchReadSupportedForSchema(sqlConf: SQLConf, schema: StructType): Boolean =
+  def isBatchReadSupportedForSchema(sqlConf: PortableSQLConf, schema: StructType): Boolean =
     sqlConf.parquetVectorizedReaderEnabled &&
       schema.forall(f => isBatchReadSupported(sqlConf, f.dataType))
 
-  def isBatchReadSupported(sqlConf: SQLConf, dt: DataType): Boolean = dt match {
+  def isBatchReadSupported(sqlConf: PortableSQLConf, dt: DataType): Boolean = dt match {
     case _: AtomicType =>
       true
     case at: ArrayType =>
@@ -394,9 +395,8 @@ object ParquetUtils extends Logging {
       isMax: Boolean): Any = {
     val statistics = columnChunkMetaData.get(i).getStatistics
     if (!statistics.hasNonNullValue) {
-      throw new UnsupportedOperationException(
-        s"No min/max found for Parquet file $filePath. " +
-          s"Set SQLConf ${PARQUET_AGGREGATE_PUSHDOWN_ENABLED.key} to false and execute again")
+      throw new UnsupportedOperationException(s"No min/max found for Parquet file $filePath. " +
+        s"Set SQLConf ${PortableSQLConf.PARQUET_AGGREGATE_PUSHDOWN_ENABLED.key} to false and execute again")
     } else {
       if (isMax) statistics.genericGetMax else statistics.genericGetMin
     }
@@ -408,15 +408,16 @@ object ParquetUtils extends Logging {
       i: Int): Long = {
     val statistics = columnChunkMetaData.get(i).getStatistics
     if (!statistics.isNumNullsSet) {
-      throw new UnsupportedOperationException(s"Number of nulls not set for Parquet file" +
-        s" $filePath. Set SQLConf ${PARQUET_AGGREGATE_PUSHDOWN_ENABLED.key} to false and execute" +
-        s" again")
+      throw new UnsupportedOperationException(
+        s"Number of nulls not set for Parquet file" +
+          s" $filePath. Set SQLConf ${PortableSQLConf.PARQUET_AGGREGATE_PUSHDOWN_ENABLED.key} to false and execute" +
+          s" again")
     }
     statistics.getNumNulls;
   }
 
   def prepareWrite(
-      sqlConf: SQLConf,
+      sqlConf: PortableSQLConf,
       job: Job,
       dataSchema: StructType,
       parquetOptions: ParquetOptions): OutputWriterFactory = {
@@ -424,11 +425,11 @@ object ParquetUtils extends Logging {
 
     val committerClass =
       conf.getClass(
-        SQLConf.PARQUET_OUTPUT_COMMITTER_CLASS.key,
+        PortableSQLConf.PARQUET_OUTPUT_COMMITTER_CLASS.key,
         classOf[ParquetOutputCommitter],
         classOf[OutputCommitter])
 
-    if (conf.get(SQLConf.PARQUET_OUTPUT_COMMITTER_CLASS.key) == null) {
+    if (conf.get(PortableSQLConf.PARQUET_OUTPUT_COMMITTER_CLASS.key) == null) {
       logInfo(
         "Using default output committer for Parquet: " +
           classOf[ParquetOutputCommitter].getCanonicalName)
@@ -437,7 +438,10 @@ object ParquetUtils extends Logging {
         "Using user defined output committer for Parquet: " + committerClass.getCanonicalName)
     }
 
-    conf.setClass(SQLConf.OUTPUT_COMMITTER_CLASS.key, committerClass, classOf[OutputCommitter])
+    conf.setClass(
+      PortableSQLConf.OUTPUT_COMMITTER_CLASS.key,
+      committerClass,
+      classOf[OutputCommitter])
 
     // We're not really using `ParquetOutputFormat[Row]` for writing data here, because we override
     // it in `ParquetOutputWriter` to support appending and dynamic partitioning.  The reason why
@@ -452,17 +456,21 @@ object ParquetUtils extends Logging {
 
     // Sets flags for `ParquetWriteSupport`, which converts Catalyst schema to Parquet
     // schema and writes actual rows to Parquet files.
-    conf.set(SQLConf.PARQUET_WRITE_LEGACY_FORMAT.key, sqlConf.writeLegacyParquetFormat.toString)
+    conf.set(
+      PortableSQLConf.PARQUET_WRITE_LEGACY_FORMAT.key,
+      sqlConf.writeLegacyParquetFormat.toString)
 
     conf.set(
-      SQLConf.PARQUET_OUTPUT_TIMESTAMP_TYPE.key,
+      PortableSQLConf.PARQUET_OUTPUT_TIMESTAMP_TYPE.key,
       sqlConf.parquetOutputTimestampType.toString)
 
     conf.set(
-      SQLConf.PARQUET_FIELD_ID_WRITE_ENABLED.key,
+      PortableSQLConf.PARQUET_FIELD_ID_WRITE_ENABLED.key,
       sqlConf.parquetFieldIdWriteEnabled.toString)
 
-    conf.set(SQLConf.LEGACY_PARQUET_NANOS_AS_LONG.key, sqlConf.legacyParquetNanosAsLong.toString)
+    conf.set(
+      PortableSQLConf.LEGACY_PARQUET_NANOS_AS_LONG.key,
+      sqlConf.legacyParquetNanosAsLong.toString)
 
     // Sets compression scheme
     conf.set(ParquetOutputFormat.COMPRESSION, parquetOptions.compressionCodecClassName)
