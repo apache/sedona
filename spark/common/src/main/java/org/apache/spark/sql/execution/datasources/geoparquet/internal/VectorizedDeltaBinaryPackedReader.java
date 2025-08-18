@@ -29,7 +29,6 @@ import org.apache.parquet.column.values.bitpacking.BytePackerForLong;
 import org.apache.parquet.column.values.bitpacking.Packer;
 import org.apache.parquet.io.ParquetDecodingException;
 import org.apache.spark.sql.catalyst.util.RebaseDateTime;
-import org.apache.spark.sql.execution.datasources.DataSourceUtils;
 import org.apache.spark.sql.execution.vectorized.WritableColumnVector;
 
 /**

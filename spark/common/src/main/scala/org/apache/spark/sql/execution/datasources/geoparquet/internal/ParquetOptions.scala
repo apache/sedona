@@ -103,9 +103,6 @@ object ParquetOptions extends DataSourceOptions {
     "lzo" -> CompressionCodecName.LZO,
     "brotli" -> CompressionCodecName.BROTLI,
     "lz4" -> CompressionCodecName.LZ4,
-    // Deprecated, to be removed at Spark 4.0.0, please use 'lz4_raw' instead.
-    "lz4raw" -> CompressionCodecName.LZ4_RAW,
-    "lz4_raw" -> CompressionCodecName.LZ4_RAW,
     "zstd" -> CompressionCodecName.ZSTD)
 
   def getParquetCompressionCodecName(name: String): String = {

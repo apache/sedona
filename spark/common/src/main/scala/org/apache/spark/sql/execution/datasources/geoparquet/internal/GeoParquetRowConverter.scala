@@ -30,10 +30,7 @@ import org.apache.parquet.schema.{GroupType, OriginalType, Type}
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions._
-import org.apache.spark.sql.catalyst.types.{PhysicalByteType, PhysicalShortType}
-import org.apache.spark.sql.catalyst.util.RebaseDateTime.RebaseSpec
 import org.apache.spark.sql.catalyst.util.{ArrayBasedMapData, CaseInsensitiveMap, DateTimeUtils, GenericArrayData}
-import org.apache.spark.sql.execution.datasources.DataSourceUtils
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
@@ -251,7 +248,7 @@ private[geoparquet] class GeoParquetRowConverter(
       case ByteType =>
         new ParquetPrimitiveConverter(updater) {
           override def addInt(value: Int): Unit =
-            updater.setByte(value.asInstanceOf[PhysicalByteType#InternalType])
+            updater.setByte(value.asInstanceOf[Byte])
 
           override def addBinary(value: Binary): Unit = {
             val bytes = value.getBytes
@@ -264,7 +261,7 @@ private[geoparquet] class GeoParquetRowConverter(
       case ShortType =>
         new ParquetPrimitiveConverter(updater) {
           override def addInt(value: Int): Unit =
-            updater.setShort(value.asInstanceOf[PhysicalShortType#InternalType])
+            updater.setShort(value.asInstanceOf[Short])
         }
 
       // For INT32 backed decimals

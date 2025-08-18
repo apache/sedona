@@ -35,12 +35,9 @@ import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName.{BINARY, FIXED_
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions._
-import org.apache.spark.sql.catalyst.types.{PhysicalByteType, PhysicalShortType}
 import org.apache.spark.sql.catalyst.util.{ArrayBasedMapData, CaseInsensitiveMap, DateTimeUtils, GenericArrayData, ResolveDefaultColumns}
-import org.apache.spark.sql.catalyst.util.RebaseDateTime.RebaseSpec
 import org.apache.spark.sql.catalyst.util.ResolveDefaultColumns._
 import org.apache.spark.sql.errors.QueryExecutionErrors
-import org.apache.spark.sql.execution.datasources.DataSourceUtils
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
@@ -331,13 +328,13 @@ private[internal] class ParquetRowConverter(
       case ByteType =>
         new ParquetPrimitiveConverter(updater) {
           override def addInt(value: Int): Unit =
-            updater.setByte(value.asInstanceOf[PhysicalByteType#InternalType])
+            updater.setByte(value.asInstanceOf[Byte])
         }
 
       case ShortType =>
         new ParquetPrimitiveConverter(updater) {
           override def addInt(value: Int): Unit =
-            updater.setShort(value.asInstanceOf[PhysicalShortType#InternalType])
+            updater.setShort(value.asInstanceOf[Short])
         }
 
       // For INT32 backed decimals

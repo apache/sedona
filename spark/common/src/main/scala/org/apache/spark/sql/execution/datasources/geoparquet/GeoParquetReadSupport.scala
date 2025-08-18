@@ -18,7 +18,7 @@
  */
 package org.apache.spark.sql.execution.datasources.geoparquet
 
-import org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetReadSupport
+import org.apache.spark.sql.execution.datasources.geoparquet.internal.{ParquetReadSupport, RebaseSpec}
 import org.apache.hadoop.conf.Configuration
 import org.apache.parquet.hadoop.api.ReadSupport.ReadContext
 import org.apache.parquet.hadoop.api.{InitContext, ReadSupport}
@@ -26,7 +26,6 @@ import org.apache.parquet.io.api.RecordMaterializer
 import org.apache.parquet.schema._
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.util.RebaseDateTime.RebaseSpec
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
 
