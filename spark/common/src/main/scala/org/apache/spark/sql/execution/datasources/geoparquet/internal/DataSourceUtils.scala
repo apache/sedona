@@ -22,11 +22,37 @@ import org.apache.spark.SparkUpgradeException
 import org.apache.spark.sql.catalyst.expressions.PredicateHelper
 import org.apache.spark.sql.catalyst.util.RebaseDateTime
 import org.apache.spark.sql.errors.QueryExecutionErrors
-import org.apache.spark.sql.internal.SQLConf
-import org.apache.spark.sql.{SPARK_LEGACY_DATETIME_METADATA_KEY, SPARK_LEGACY_INT96_METADATA_KEY, SPARK_TIMEZONE_METADATA_KEY, SPARK_VERSION_METADATA_KEY}
 import org.apache.spark.util.Utils
 
 object DataSourceUtils extends PredicateHelper {
+  /**
+   * Metadata key which is used to write Spark version in the followings:
+   * - Parquet file metadata
+   * - ORC file metadata
+   * - Avro file metadata
+   *
+   * Note that Hive table property `spark.sql.create.version` also has Spark version.
+   */
+  private[sql] val SPARK_VERSION_METADATA_KEY = "org.apache.spark.version"
+
+  /**
+   * The metadata key which is used to write the current session time zone into:
+   * - Parquet file metadata
+   * - Avro file metadata
+   */
+  private[sql] val SPARK_TIMEZONE_METADATA_KEY = "org.apache.spark.timeZone"
+
+  /**
+   * Parquet/Avro file metadata key to indicate that the file was written with legacy datetime
+   * values.
+   */
+  private[sql] val SPARK_LEGACY_DATETIME_METADATA_KEY = "org.apache.spark.legacyDateTime"
+
+  /**
+   * Parquet file metadata key to indicate that the file with INT96 column type was written
+   * with rebasing.
+   */
+  private[sql] val SPARK_LEGACY_INT96_METADATA_KEY = "org.apache.spark.legacyINT96"
 
   private def getRebaseSpec(
       lookupFileMeta: String => String,
@@ -35,7 +61,7 @@ object DataSourceUtils extends PredicateHelper {
       metadataKey: String): RebaseSpec = {
     val policy =
       if (Utils.isTesting &&
-        SQLConf.get.getConfString("spark.test.forceNoRebase", "") == "true") {
+        LenientSQLConf.get.getConfString("spark.test.forceNoRebase", "") == "true") {
         LegacyBehaviorPolicy.CORRECTED
       } else {
         // If there is no version, we return the mode specified by the config.
@@ -73,11 +99,11 @@ object DataSourceUtils extends PredicateHelper {
   def newRebaseExceptionInRead(format: String): SparkUpgradeException = {
     val (config, option) = format match {
       case "Parquet INT96" =>
-        (SQLConf.PARQUET_INT96_REBASE_MODE_IN_READ.key, ParquetOptions.INT96_REBASE_MODE)
+        (LenientSQLConf.PARQUET_INT96_REBASE_MODE_IN_READ.key, ParquetOptions.INT96_REBASE_MODE)
       case "Parquet" =>
-        (SQLConf.PARQUET_REBASE_MODE_IN_READ.key, ParquetOptions.DATETIME_REBASE_MODE)
+        (LenientSQLConf.PARQUET_REBASE_MODE_IN_READ.key, ParquetOptions.DATETIME_REBASE_MODE)
       case "Avro" =>
-        (SQLConf.AVRO_REBASE_MODE_IN_READ.key, "datetimeRebaseMode")
+        (LenientSQLConf.AVRO_REBASE_MODE_IN_READ.key, "datetimeRebaseMode")
       case _ => throw new IllegalStateException(s"Unrecognized format $format.")
     }
     QueryExecutionErrors.sparkUpgradeInReadingDatesError(format, config, option)
@@ -85,9 +111,9 @@ object DataSourceUtils extends PredicateHelper {
 
   def newRebaseExceptionInWrite(format: String): SparkUpgradeException = {
     val config = format match {
-      case "Parquet INT96" => SQLConf.PARQUET_INT96_REBASE_MODE_IN_WRITE.key
-      case "Parquet" => SQLConf.PARQUET_REBASE_MODE_IN_WRITE.key
-      case "Avro" => SQLConf.AVRO_REBASE_MODE_IN_WRITE.key
+      case "Parquet INT96" => LenientSQLConf.PARQUET_INT96_REBASE_MODE_IN_WRITE.key
+      case "Parquet" => LenientSQLConf.PARQUET_REBASE_MODE_IN_WRITE.key
+      case "Avro" => LenientSQLConf.AVRO_REBASE_MODE_IN_WRITE.key
       case _ => throw new IllegalStateException(s"Unrecognized format $format.")
     }
     QueryExecutionErrors.sparkUpgradeInWritingDatesError(format, config)
@@ -142,7 +168,7 @@ object DataSourceUtils extends PredicateHelper {
         }
         micros
     case LegacyBehaviorPolicy.LEGACY =>
-      val timeZone = SQLConf.get.sessionLocalTimeZone
+      val timeZone = LenientSQLConf.get.sessionLocalTimeZone
       RebaseDateTime.rebaseGregorianToJulianMicros(timeZone, _)
     case LegacyBehaviorPolicy.CORRECTED => identity[Long]
   }
