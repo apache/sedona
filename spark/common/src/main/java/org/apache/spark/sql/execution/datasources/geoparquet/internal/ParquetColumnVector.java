@@ -1,35 +1,34 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.spark.sql.execution.datasources.geoparquet.internal;
 
+import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import com.google.common.base.Preconditions;
-
 import org.apache.spark.memory.MemoryMode;
+import org.apache.spark.sql.catalyst.types.DataTypeUtils;
 import org.apache.spark.sql.execution.vectorized.OffHeapColumnVector;
 import org.apache.spark.sql.execution.vectorized.OnHeapColumnVector;
 import org.apache.spark.sql.execution.vectorized.WritableColumnVector;
 import org.apache.spark.sql.types.ArrayType;
 import org.apache.spark.sql.types.DataType;
-import org.apache.spark.sql.catalyst.types.DataTypeUtils;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.MapType;
 import org.apache.spark.sql.types.StructType;
@@ -43,11 +42,11 @@ final class ParquetColumnVector {
   private final WritableColumnVector vector;
 
   /**
-   * Repetition & Definition levels
-   * These are allocated only for leaf columns; for non-leaf columns, they simply maintain
-   * references to that of the former.
+   * Repetition & Definition levels These are allocated only for leaf columns; for non-leaf columns,
+   * they simply maintain references to that of the former.
    */
   private WritableColumnVector repetitionLevels;
+
   private WritableColumnVector definitionLevels;
 
   /** Whether this column is primitive (i.e., leaf column) */
@@ -66,8 +65,12 @@ final class ParquetColumnVector {
       Object defaultValue) {
     DataType sparkType = column.sparkType();
     if (!DataTypeUtils.sameType(sparkType, vector.dataType())) {
-      throw new IllegalArgumentException("Spark type: " + sparkType +
-        " doesn't match the type: " + vector.dataType() + " in column vector");
+      throw new IllegalArgumentException(
+          "Spark type: "
+              + sparkType
+              + " doesn't match the type: "
+              + vector.dataType()
+              + " in column vector");
     }
 
     this.column = column;
@@ -92,9 +95,10 @@ final class ParquetColumnVector {
       // type of 'defaultValue'; for example, if 'defaultValue' is a Float, then we call the
       // appendFloats method.
       if (!vector.appendObjects(capacity, defaultValue).isPresent()) {
-        throw new IllegalArgumentException("Cannot assign default column value to result " +
-          "column batch in vectorized Parquet reader because the data type is not supported: " +
-          defaultValue);
+        throw new IllegalArgumentException(
+            "Cannot assign default column value to result "
+                + "column batch in vectorized Parquet reader because the data type is not supported: "
+                + defaultValue);
       } else {
         vector.setIsConstant();
       }
@@ -113,10 +117,16 @@ final class ParquetColumnVector {
       boolean allChildrenAreMissing = true;
 
       for (int i = 0; i < column.children().size(); i++) {
-        ParquetColumnVector childCv = new ParquetColumnVector(column.children().apply(i),
-          vector.getChild(i), capacity, memoryMode, missingColumns, false, null);
+        ParquetColumnVector childCv =
+            new ParquetColumnVector(
+                column.children().apply(i),
+                vector.getChild(i),
+                capacity,
+                memoryMode,
+                missingColumns,
+                false,
+                null);
         children.add(childCv);
-
 
         // Only use levels from non-missing child, this can happen if only some but not all
         // fields of a struct are missing.
@@ -135,16 +145,12 @@ final class ParquetColumnVector {
     }
   }
 
-  /**
-   * Returns all the children of this column.
-   */
+  /** Returns all the children of this column. */
   List<ParquetColumnVector> getChildren() {
     return children;
   }
 
-  /**
-   * Returns all the leaf columns in depth-first order.
-   */
+  /** Returns all the leaf columns in depth-first order. */
   List<ParquetColumnVector> getLeaves() {
     List<ParquetColumnVector> result = new ArrayList<>();
     getLeavesHelper(this, result);
@@ -162,8 +168,8 @@ final class ParquetColumnVector {
   }
 
   /**
-   * Assembles this column and calculate collection offsets recursively.
-   * This is a no-op for primitive columns.
+   * Assembles this column and calculate collection offsets recursively. This is a no-op for
+   * primitive columns.
    */
   void assemble() {
     // nothing to do if the column itself is missing
@@ -203,44 +209,33 @@ final class ParquetColumnVector {
     }
   }
 
-  /**
-   * Returns the {@link ParquetColumn} of this column vector.
-   */
+  /** Returns the {@link ParquetColumn} of this column vector. */
   ParquetColumn getColumn() {
     return this.column;
   }
 
-  /**
-   * Returns the writable column vector used to store values.
-   */
+  /** Returns the writable column vector used to store values. */
   WritableColumnVector getValueVector() {
     return this.vector;
   }
 
-  /**
-   * Returns the writable column vector used to store repetition levels.
-   */
+  /** Returns the writable column vector used to store repetition levels. */
   WritableColumnVector getRepetitionLevelVector() {
     return this.repetitionLevels;
   }
 
-  /**
-   * Returns the writable column vector used to store definition levels.
-   */
+  /** Returns the writable column vector used to store definition levels. */
   WritableColumnVector getDefinitionLevelVector() {
     return this.definitionLevels;
   }
 
-  /**
-   * Returns the column reader for reading a Parquet column.
-   */
+  /** Returns the column reader for reading a Parquet column. */
   VectorizedColumnReader getColumnReader() {
     return this.columnReader;
   }
 
   /**
-   * Sets the column vector to 'reader'. Note this can only be called on a primitive Parquet
-   * column.
+   * Sets the column vector to 'reader'. Note this can only be called on a primitive Parquet column.
    */
   void setColumnReader(VectorizedColumnReader reader) {
     if (!isPrimitive) {
@@ -249,9 +244,7 @@ final class ParquetColumnVector {
     this.columnReader = reader;
   }
 
-  /**
-   * Assemble collections, e.g., array, map.
-   */
+  /** Assemble collections, e.g., array, map. */
   private void assembleCollection() {
     int maxDefinitionLevel = column.definitionLevel();
     int maxElementRepetitionLevel = column.repetitionLevel();
@@ -269,8 +262,9 @@ final class ParquetColumnVector {
     // `i` is the index over all leaf elements of this array, while `offset` is the index over
     // all top-level elements of this array.
     int rowId = 0;
-    for (int i = 0, offset = 0; i < definitionLevels.getElementsAppended();
-         i = getNextCollectionStart(maxElementRepetitionLevel, i)) {
+    for (int i = 0, offset = 0;
+        i < definitionLevels.getElementsAppended();
+        i = getNextCollectionStart(maxElementRepetitionLevel, i)) {
       vector.reserve(rowId + 1);
       int definitionLevel = definitionLevels.getInt(i);
       if (definitionLevel <= maxDefinitionLevel) {
@@ -323,7 +317,7 @@ final class ParquetColumnVector {
 
     int rowId = 0;
     boolean hasRepetitionLevels =
-      repetitionLevels != null && repetitionLevels.getElementsAppended() > 0;
+        repetitionLevels != null && repetitionLevels.getElementsAppended() > 0;
     for (int i = 0; i < definitionLevels.getElementsAppended(); i++) {
       // If repetition level > maxRepetitionLevel, the value is a nested element (e.g., an array
       // element in struct<array<int>>), and we should skip the definition level since it doesn't
@@ -354,8 +348,8 @@ final class ParquetColumnVector {
   }
 
   /**
-   * For a collection (i.e., array or map) element at index 'idx', returns the starting index of
-   * the next collection after it.
+   * For a collection (i.e., array or map) element at index 'idx', returns the starting index of the
+   * next collection after it.
    *
    * @param maxRepetitionLevel the maximum repetition level for the elements in this collection
    * @param idx the index of this collection in the Parquet column

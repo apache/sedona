@@ -1,20 +1,21 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.spark.sql.execution.datasources.geoparquet.internal
 
 import java.util.Locale
@@ -33,7 +34,8 @@ import org.apache.spark.sql.internal.SQLConf
 class ParquetOptions(
     @transient private val parameters: CaseInsensitiveMap[String],
     @transient private val sqlConf: SQLConf)
-  extends FileSourceOptions(parameters) with Logging {
+    extends FileSourceOptions(parameters)
+    with Logging {
 
   import ParquetOptions._
 
@@ -41,8 +43,8 @@ class ParquetOptions(
     this(CaseInsensitiveMap(parameters), sqlConf)
 
   /**
-   * Compression codec to use. By default use the value specified in SQLConf.
-   * Acceptable values are defined in [[shortParquetCompressionCodecNames]].
+   * Compression codec to use. By default use the value specified in SQLConf. Acceptable values
+   * are defined in [[shortParquetCompressionCodecNames]].
    */
   val compressionCodecClassName: String = {
     // `compression`, `parquet.compression`(i.e., ParquetOutputFormat.COMPRESSION), and
@@ -57,8 +59,9 @@ class ParquetOptions(
     if (!shortParquetCompressionCodecNames.contains(codecName)) {
       val availableCodecs =
         shortParquetCompressionCodecNames.keys.map(_.toLowerCase(Locale.ROOT))
-      throw new IllegalArgumentException(s"Codec [$codecName] " +
-        s"is not available. Available codecs are ${availableCodecs.mkString(", ")}.")
+      throw new IllegalArgumentException(
+        s"Codec [$codecName] " +
+          s"is not available. Available codecs are ${availableCodecs.mkString(", ")}.")
     }
     if (codecName == "lz4raw") {
       log.warn("Parquet compression codec 'lz4raw' is deprecated, please use 'lz4_raw'")
@@ -67,8 +70,8 @@ class ParquetOptions(
   }
 
   /**
-   * Whether it merges schemas or not. When the given Parquet files have different schemas,
-   * the schemas can be merged.  By default use the value specified in SQLConf.
+   * Whether it merges schemas or not. When the given Parquet files have different schemas, the
+   * schemas can be merged. By default use the value specified in SQLConf.
    */
   val mergeSchema: Boolean = parameters
     .get(MERGE_SCHEMA)
@@ -81,6 +84,7 @@ class ParquetOptions(
   def datetimeRebaseModeInRead: String = parameters
     .get(DATETIME_REBASE_MODE)
     .getOrElse(sqlConf.getConf(SQLConf.PARQUET_REBASE_MODE_IN_READ))
+
   /**
    * The rebasing mode for INT96 timestamp values in reads.
    */
@@ -88,7 +92,6 @@ class ParquetOptions(
     .get(INT96_REBASE_MODE)
     .getOrElse(sqlConf.getConf(SQLConf.PARQUET_INT96_REBASE_MODE_IN_READ))
 }
-
 
 object ParquetOptions extends DataSourceOptions {
   // The parquet compression short names

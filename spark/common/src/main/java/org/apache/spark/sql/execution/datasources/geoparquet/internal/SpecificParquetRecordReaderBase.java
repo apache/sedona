@@ -1,23 +1,24 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
-
 package org.apache.spark.sql.execution.datasources.geoparquet.internal;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -27,10 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import scala.Option;
-
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileSplit;
@@ -52,21 +49,17 @@ import org.apache.parquet.hadoop.util.ConfigurationUtil;
 import org.apache.parquet.hadoop.util.HadoopInputFile;
 import org.apache.parquet.schema.MessageType;
 import org.apache.parquet.schema.Types;
-
-import org.apache.spark.TaskContext;
-import org.apache.spark.TaskContext$;
 import org.apache.spark.sql.internal.SQLConf;
 import org.apache.spark.sql.types.StructType;
 import org.apache.spark.sql.types.StructType$;
-import org.apache.spark.util.AccumulatorV2;
+import scala.Option;
 
 /**
- * Base class for custom RecordReaders for Parquet that directly materialize to `T`.
- * This class handles computing row groups, filtering on them, setting up the column readers,
- * etc.
- * This is heavily based on parquet-mr's RecordReader.
- * TODO: move this to the parquet-mr project. There are performance benefits of doing it
- * this way, albeit at a higher cost to implement. This base class is reusable.
+ * Base class for custom RecordReaders for Parquet that directly materialize to `T`. This class
+ * handles computing row groups, filtering on them, setting up the column readers, etc. This is
+ * heavily based on parquet-mr's RecordReader. TODO: move this to the parquet-mr project. There are
+ * performance benefits of doing it this way, albeit at a higher cost to implement. This base class
+ * is reusable.
  */
 public abstract class SpecificParquetRecordReaderBase<T> extends RecordReader<Void, T> {
   protected Path file;
@@ -80,8 +73,8 @@ public abstract class SpecificParquetRecordReaderBase<T> extends RecordReader<Vo
   protected ParquetColumn parquetColumn;
 
   /**
-   * The total number of rows this RecordReader will eventually read. The sum of the
-   * rows of all the row groups.
+   * The total number of rows this RecordReader will eventually read. The sum of the rows of all the
+   * row groups.
    */
   protected long totalRowCount;
 
@@ -96,7 +89,8 @@ public abstract class SpecificParquetRecordReaderBase<T> extends RecordReader<Vo
   public void initialize(
       InputSplit inputSplit,
       TaskAttemptContext taskAttemptContext,
-      Option<ParquetMetadata> fileFooter) throws IOException, InterruptedException {
+      Option<ParquetMetadata> fileFooter)
+      throws IOException, InterruptedException {
     Configuration configuration = taskAttemptContext.getConfiguration();
     FileSplit split = (FileSplit) inputSplit;
     this.file = split.getPath();
@@ -104,12 +98,11 @@ public abstract class SpecificParquetRecordReaderBase<T> extends RecordReader<Vo
     if (fileFooter.isDefined()) {
       fileReader = new ParquetFileReader(configuration, file, fileFooter.get());
     } else {
-      ParquetReadOptions options = HadoopReadOptions
-          .builder(configuration, file)
-          .withRange(split.getStart(), split.getStart() + split.getLength())
-          .build();
-      fileReader = new ParquetFileReader(
-          HadoopInputFile.fromPath(file, configuration), options);
+      ParquetReadOptions options =
+          HadoopReadOptions.builder(configuration, file)
+              .withRange(split.getStart(), split.getStart() + split.getLength())
+              .build();
+      fileReader = new ParquetFileReader(HadoopInputFile.fromPath(file, configuration), options);
     }
     this.reader = new ParquetRowGroupReaderImpl(fileReader);
     this.fileSchema = fileReader.getFileMetaData().getSchema();
@@ -121,16 +114,18 @@ public abstract class SpecificParquetRecordReaderBase<T> extends RecordReader<Vo
     }
     Map<String, String> fileMetadata = fileReader.getFileMetaData().getKeyValueMetaData();
     ReadSupport<T> readSupport = getReadSupportInstance(getReadSupportClass(configuration));
-    ReadSupport.ReadContext readContext = readSupport.init(new InitContext(
-        taskAttemptContext.getConfiguration(), toSetMultiMap(fileMetadata), fileSchema));
+    ReadSupport.ReadContext readContext =
+        readSupport.init(
+            new InitContext(
+                taskAttemptContext.getConfiguration(), toSetMultiMap(fileMetadata), fileSchema));
     this.requestedSchema = readContext.getRequestedSchema();
     fileReader.setRequestedSchema(requestedSchema);
     String sparkRequestedSchemaString =
         configuration.get(ParquetReadSupport$.MODULE$.SPARK_ROW_REQUESTED_SCHEMA());
     this.sparkRequestedSchema = StructType$.MODULE$.fromString(sparkRequestedSchemaString);
     ParquetToSparkSchemaConverter converter = new ParquetToSparkSchemaConverter(configuration);
-    this.parquetColumn = converter.convertParquetColumn(requestedSchema,
-      Option.apply(this.sparkRequestedSchema));
+    this.parquetColumn =
+        converter.convertParquetColumn(requestedSchema, Option.apply(this.sparkRequestedSchema));
     this.sparkSchema = (StructType) parquetColumn.sparkType();
     this.totalRowCount = fileReader.getFilteredRecordCount();
 
@@ -138,6 +133,8 @@ public abstract class SpecificParquetRecordReaderBase<T> extends RecordReader<Vo
     // If the last external accumulator is `NumRowGroupsAccumulator`, the row group number to read
     // will be updated to the accumulator. So we can check if the row groups are filtered or not
     // in test case.
+    // TODO: This method is not available in Spark 3.5 API - withExternalAccums doesn't exist
+    /*
     TaskContext taskContext = TaskContext$.MODULE$.get();
     if (taskContext != null) {
       taskContext.taskMetrics().withExternalAccums((accums) -> {
@@ -150,19 +147,20 @@ public abstract class SpecificParquetRecordReaderBase<T> extends RecordReader<Vo
         return null;
       });
     }
+    */
   }
 
   /**
-   * Initializes the reader to read the file at `path` with `columns` projected. If columns is
-   * null, all the columns are projected.
+   * Initializes the reader to read the file at `path` with `columns` projected. If columns is null,
+   * all the columns are projected.
    *
-   * This is exposed for testing to be able to create this reader without the rest of the Hadoop
+   * <p>This is exposed for testing to be able to create this reader without the rest of the Hadoop
    * split machinery. It is not intended for general use and those not support all the
    * configurations.
    */
   protected void initialize(String path, List<String> columns) throws IOException {
     Configuration config = new Configuration();
-    config.setBoolean(SQLConf.PARQUET_BINARY_AS_STRING().key() , false);
+    config.setBoolean(SQLConf.PARQUET_BINARY_AS_STRING().key(), false);
     config.setBoolean(SQLConf.PARQUET_INT96_AS_TIMESTAMP().key(), false);
     config.setBoolean(SQLConf.CASE_SENSITIVE().key(), false);
     config.setBoolean(SQLConf.PARQUET_INFER_TIMESTAMP_NTZ_ENABLED().key(), false);
@@ -171,12 +169,10 @@ public abstract class SpecificParquetRecordReaderBase<T> extends RecordReader<Vo
     this.file = new Path(path);
     long length = this.file.getFileSystem(config).getFileStatus(this.file).getLen();
 
-    ParquetReadOptions options = HadoopReadOptions
-      .builder(config, file)
-      .withRange(0, length)
-      .build();
-    ParquetFileReader fileReader = ParquetFileReader.open(
-      HadoopInputFile.fromPath(file, config), options);
+    ParquetReadOptions options =
+        HadoopReadOptions.builder(config, file).withRange(0, length).build();
+    ParquetFileReader fileReader =
+        ParquetFileReader.open(HadoopInputFile.fromPath(file, config), options);
     this.reader = new ParquetRowGroupReaderImpl(fileReader);
     this.fileSchema = fileReader.getFooter().getFileMetaData().getSchema();
 
@@ -185,10 +181,13 @@ public abstract class SpecificParquetRecordReaderBase<T> extends RecordReader<Vo
     } else {
       if (columns.size() > 0) {
         Types.MessageTypeBuilder builder = Types.buildMessage();
-        for (String s: columns) {
+        for (String s : columns) {
           if (!fileSchema.containsField(s)) {
-            throw new IOException("Can only project existing columns. Unknown field: " + s +
-                    " File schema:\n" + fileSchema);
+            throw new IOException(
+                "Can only project existing columns. Unknown field: "
+                    + s
+                    + " File schema:\n"
+                    + fileSchema);
           }
           builder.addFields(fileSchema.getType(s));
         }
@@ -198,8 +197,9 @@ public abstract class SpecificParquetRecordReaderBase<T> extends RecordReader<Vo
       }
     }
     fileReader.setRequestedSchema(requestedSchema);
-    this.parquetColumn = new ParquetToSparkSchemaConverter(config)
-      .convertParquetColumn(requestedSchema, Option.empty());
+    this.parquetColumn =
+        new ParquetToSparkSchemaConverter(config)
+            .convertParquetColumn(requestedSchema, Option.empty());
     this.sparkSchema = (StructType) parquetColumn.sparkType();
     this.totalRowCount = fileReader.getFilteredRecordCount();
   }
@@ -209,18 +209,20 @@ public abstract class SpecificParquetRecordReaderBase<T> extends RecordReader<Vo
       MessageType fileSchema,
       MessageType requestedSchema,
       ParquetRowGroupReader rowGroupReader,
-      int totalRowCount) throws IOException {
+      int totalRowCount)
+      throws IOException {
     this.reader = rowGroupReader;
     this.fileSchema = fileSchema;
     this.requestedSchema = requestedSchema;
     Configuration config = new Configuration();
-    config.setBoolean(SQLConf.PARQUET_BINARY_AS_STRING().key() , false);
+    config.setBoolean(SQLConf.PARQUET_BINARY_AS_STRING().key(), false);
     config.setBoolean(SQLConf.PARQUET_INT96_AS_TIMESTAMP().key(), false);
     config.setBoolean(SQLConf.CASE_SENSITIVE().key(), false);
     config.setBoolean(SQLConf.PARQUET_INFER_TIMESTAMP_NTZ_ENABLED().key(), false);
     config.setBoolean(SQLConf.LEGACY_PARQUET_NANOS_AS_LONG().key(), false);
-    this.parquetColumn = new ParquetToSparkSchemaConverter(config)
-      .convertParquetColumn(requestedSchema, Option.empty());
+    this.parquetColumn =
+        new ParquetToSparkSchemaConverter(config)
+            .convertParquetColumn(requestedSchema, Option.empty());
     this.sparkSchema = (StructType) parquetColumn.sparkType();
     this.totalRowCount = totalRowCount;
   }
@@ -250,8 +252,9 @@ public abstract class SpecificParquetRecordReaderBase<T> extends RecordReader<Vo
 
   @SuppressWarnings("unchecked")
   private Class<? extends ReadSupport<T>> getReadSupportClass(Configuration configuration) {
-    return (Class<? extends ReadSupport<T>>) ConfigurationUtil.getClassFromConfig(configuration,
-        ParquetInputFormat.READ_SUPPORT_CLASS, ReadSupport.class);
+    return (Class<? extends ReadSupport<T>>)
+        ConfigurationUtil.getClassFromConfig(
+            configuration, ParquetInputFormat.READ_SUPPORT_CLASS, ReadSupport.class);
   }
 
   /**
@@ -259,19 +262,19 @@ public abstract class SpecificParquetRecordReaderBase<T> extends RecordReader<Vo
    * @return the configured read support
    */
   private static <T> ReadSupport<T> getReadSupportInstance(
-      Class<? extends ReadSupport<T>> readSupportClass){
+      Class<? extends ReadSupport<T>> readSupportClass) {
     try {
       return readSupportClass.getConstructor().newInstance();
-    } catch (InstantiationException | IllegalAccessException |
-             NoSuchMethodException | InvocationTargetException e) {
+    } catch (InstantiationException
+        | IllegalAccessException
+        | NoSuchMethodException
+        | InvocationTargetException e) {
       throw new BadConfigurationException("could not instantiate read support class", e);
     }
   }
 
   interface ParquetRowGroupReader extends Closeable {
-    /**
-     * Reads the next row group from this reader. Returns null if there is no more row group.
-     */
+    /** Reads the next row group from this reader. Returns null if there is no more row group. */
     PageReadStore readNextRowGroup() throws IOException;
   }
 

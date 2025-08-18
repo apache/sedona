@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.execution.datasources.geoparquet
+package org.apache.spark.sql.execution.datasources.geoparquet.internal
 
-import org.apache.spark.sql.execution.datasources.geoparquet.internal.{ParentContainerUpdater, NoopUpdater, HasParentContainerUpdater, ParquetGroupConverter, ParquetPrimitiveConverter, ParquetRowConverter}
+import org.apache.spark.sql.execution.datasources.geoparquet.{GeoParquetToSparkSchemaConverter, GeoParquetUtils}
+
 import org.apache.parquet.column.Dictionary
 import org.apache.parquet.io.api.{Binary, Converter, GroupConverter, PrimitiveConverter}
 import org.apache.parquet.schema.LogicalTypeAnnotation.TimeUnit

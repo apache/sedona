@@ -1,25 +1,25 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.spark.sql.execution.datasources.geoparquet.internal;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-
 import org.apache.parquet.Preconditions;
 import org.apache.parquet.bytes.ByteBufferInputStream;
 import org.apache.parquet.bytes.BytesUtils;
@@ -28,19 +28,15 @@ import org.apache.parquet.column.values.bitpacking.BytePacker;
 import org.apache.parquet.column.values.bitpacking.Packer;
 import org.apache.parquet.io.ParquetDecodingException;
 import org.apache.parquet.io.api.Binary;
-
 import org.apache.spark.sql.execution.vectorized.WritableColumnVector;
 
 /**
  * A values reader for Parquet's run-length encoded data. This is based off of the version in
- * parquet-mr with these changes:
- *  - Supports the vectorized interface.
- *  - Works on byte arrays(byte[]) instead of making byte streams.
+ * parquet-mr with these changes: - Supports the vectorized interface. - Works on byte
+ * arrays(byte[]) instead of making byte streams.
  *
- * This encoding is used in multiple places:
- *  - Definition/Repetition levels
- *  - Dictionary ids.
- *  - Boolean type values of Parquet DataPageV2
+ * <p>This encoding is used in multiple places: - Definition/Repetition levels - Dictionary ids. -
+ * Boolean type values of Parquet DataPageV2
  */
 public final class VectorizedRleValuesReader extends ValuesReader
     implements VectorizedValuesReader {
@@ -117,9 +113,7 @@ public final class VectorizedRleValuesReader extends ValuesReader
     }
   }
 
-  /**
-   * Initializes the internal state for decoding ints of `bitWidth`.
-   */
+  /** Initializes the internal state for decoding ints of `bitWidth`. */
   private void init(int bitWidth) {
     Preconditions.checkArgument(bitWidth >= 0 && bitWidth <= 32, "bitWidth must be >= 0 and <= 32");
     this.bitWidth = bitWidth;
@@ -144,7 +138,9 @@ public final class VectorizedRleValuesReader extends ValuesReader
 
   @Override
   public int readInteger() {
-    if (this.currentCount == 0) { this.readNextGroup(); }
+    if (this.currentCount == 0) {
+      this.readNextGroup();
+    }
 
     this.currentCount--;
     switch (mode) {
@@ -159,11 +155,11 @@ public final class VectorizedRleValuesReader extends ValuesReader
   /**
    * Reads a batch of definition levels and values into vector 'defLevels' and 'values'
    * respectively. The values are read using 'valueReader'.
-   * <p>
-   * The related states such as row index, offset, number of values left in the batch and page,
+   *
+   * <p>The related states such as row index, offset, number of values left in the batch and page,
    * are tracked by 'state'. The type-specific 'updater' is used to update or skip values.
-   * <p>
-   * This reader reads the definition levels and then will read from 'valueReader' for the
+   *
+   * <p>This reader reads the definition levels and then will read from 'valueReader' for the
    * non-null values. If the value is null, 'values' will be populated with null value.
    */
   public void readBatch(
@@ -190,11 +186,16 @@ public final class VectorizedRleValuesReader extends ValuesReader
       WritableColumnVector defLevels,
       VectorizedValuesReader valueReader) {
     if (defLevels == null) {
-      readBatchInternal(state, values, nulls, valueReader,
-        new ParquetVectorUpdaterFactory.IntegerUpdater());
+      readBatchInternal(
+          state, values, nulls, valueReader, new ParquetVectorUpdaterFactory.IntegerUpdater());
     } else {
-      readBatchInternalWithDefLevels(state, values, nulls, defLevels, valueReader,
-        new ParquetVectorUpdaterFactory.IntegerUpdater());
+      readBatchInternalWithDefLevels(
+          state,
+          values,
+          nulls,
+          defLevels,
+          valueReader,
+          new ParquetVectorUpdaterFactory.IntegerUpdater());
     }
   }
 
@@ -328,12 +329,12 @@ public final class VectorizedRleValuesReader extends ValuesReader
   }
 
   /**
-   * Reads a batch of repetition levels, definition levels and values into 'repLevels',
-   * 'defLevels' and 'values' respectively. The definition levels and values are read via
-   * 'defLevelsReader' and 'valueReader' respectively.
-   * <p>
-   * The related states such as row index, offset, number of rows left in the batch and page,
-   * are tracked by 'state'. The type-specific 'updater' is used to update or skip values.
+   * Reads a batch of repetition levels, definition levels and values into 'repLevels', 'defLevels'
+   * and 'values' respectively. The definition levels and values are read via 'defLevelsReader' and
+   * 'valueReader' respectively.
+   *
+   * <p>The related states such as row index, offset, number of rows left in the batch and page, are
+   * tracked by 'state'. The type-specific 'updater' is used to update or skip values.
    */
   public void readBatchRepeated(
       ParquetReadState state,
@@ -343,22 +344,23 @@ public final class VectorizedRleValuesReader extends ValuesReader
       WritableColumnVector values,
       VectorizedValuesReader valueReader,
       ParquetVectorUpdater updater) {
-    readBatchRepeatedInternal(state, repLevels, defLevelsReader, defLevels, values, values, true,
-      valueReader, updater);
+    readBatchRepeatedInternal(
+        state, repLevels, defLevelsReader, defLevels, values, values, true, valueReader, updater);
   }
 
   /**
    * Reads a batch of repetition levels, definition levels and integer values into 'repLevels',
    * 'defLevels', 'values' and 'nulls' respectively. The definition levels and values are read via
    * 'defLevelsReader' and 'valueReader' respectively.
-   * <p>
-   * The 'values' vector is used to hold non-null values, while 'nulls' vector is used to hold
+   *
+   * <p>The 'values' vector is used to hold non-null values, while 'nulls' vector is used to hold
    * null values.
-   * <p>
-   * The related states such as row index, offset, number of rows left in the batch and page,
-   * are tracked by 'state'.
-   * <p>
-   * Unlike 'readBatchRepeated', this is used to decode dictionary indices in dictionary encoding.
+   *
+   * <p>The related states such as row index, offset, number of rows left in the batch and page, are
+   * tracked by 'state'.
+   *
+   * <p>Unlike 'readBatchRepeated', this is used to decode dictionary indices in dictionary
+   * encoding.
    */
   public void readIntegersRepeated(
       ParquetReadState state,
@@ -368,13 +370,21 @@ public final class VectorizedRleValuesReader extends ValuesReader
       WritableColumnVector values,
       WritableColumnVector nulls,
       VectorizedValuesReader valueReader) {
-    readBatchRepeatedInternal(state, repLevels, defLevelsReader, defLevels, values, nulls, false,
-      valueReader, new ParquetVectorUpdaterFactory.IntegerUpdater());
+    readBatchRepeatedInternal(
+        state,
+        repLevels,
+        defLevelsReader,
+        defLevels,
+        values,
+        nulls,
+        false,
+        valueReader,
+        new ParquetVectorUpdaterFactory.IntegerUpdater());
   }
 
   /**
-   * Keep reading repetition level values from the page until either: 1) we've read enough
-   * top-level rows to fill the current batch, or 2) we've drained the data page completely.
+   * Keep reading repetition level values from the page until either: 1) we've read enough top-level
+   * rows to fill the current batch, or 2) we've drained the data page completely.
    *
    * @param valuesReused whether 'values' vector is reused for 'nulls'
    */
@@ -393,8 +403,9 @@ public final class VectorizedRleValuesReader extends ValuesReader
     int leftInPage = state.valuesToReadInPage;
     long rowId = state.rowId;
 
-    DefLevelProcessor defLevelProcessor = new DefLevelProcessor(defLevelsReader, state, defLevels,
-      values, nulls, valuesReused, valueReader, updater);
+    DefLevelProcessor defLevelProcessor =
+        new DefLevelProcessor(
+            defLevelsReader, state, defLevels, values, nulls, valuesReused, valueReader, updater);
 
     while ((leftInBatch > 0 || !state.lastListCompleted) && leftInPage > 0) {
       if (currentCount == 0 && !readNextGroup()) break;
@@ -556,8 +567,15 @@ public final class VectorizedRleValuesReader extends ValuesReader
       if (state.shouldSkip) {
         state.numBatchedDefLevels += n;
       } else {
-        reader.readValues(state.numBatchedDefLevels, state, defLevels, values, nulls, valuesReused,
-          valueReader, updater);
+        reader.readValues(
+            state.numBatchedDefLevels,
+            state,
+            defLevels,
+            values,
+            nulls,
+            valuesReused,
+            valueReader,
+            updater);
         state.numBatchedDefLevels = n;
         state.shouldSkip = true;
       }
@@ -568,8 +586,15 @@ public final class VectorizedRleValuesReader extends ValuesReader
         if (state.shouldSkip) {
           reader.skipValues(state.numBatchedDefLevels, state, valueReader, updater);
         } else {
-          reader.readValues(state.numBatchedDefLevels, state, defLevels, values, nulls,
-            valuesReused, valueReader, updater);
+          reader.readValues(
+              state.numBatchedDefLevels,
+              state,
+              defLevels,
+              values,
+              nulls,
+              valuesReused,
+              valueReader,
+              updater);
         }
         state.numBatchedDefLevels = 0;
       }
@@ -578,10 +603,10 @@ public final class VectorizedRleValuesReader extends ValuesReader
 
   /**
    * Read the next 'total' values (either null or non-null) from this definition level reader and
-   * 'valueReader'. The definition levels are read into 'defLevels'. If a value is not
-   * null, it is appended to 'values'. Otherwise, a null bit will be set in 'nulls'.
+   * 'valueReader'. The definition levels are read into 'defLevels'. If a value is not null, it is
+   * appended to 'values'. Otherwise, a null bit will be set in 'nulls'.
    *
-   * This is only used when reading repeated values.
+   * <p>This is only used when reading repeated values.
    */
   private void readValues(
       int total,
@@ -755,11 +780,7 @@ public final class VectorizedRleValuesReader extends ValuesReader
 
   @Override
   public void readLongsWithRebase(
-      int total,
-      WritableColumnVector c,
-      int rowId,
-      boolean failIfRebase,
-      String timeZone) {
+      int total, WritableColumnVector c, int rowId, boolean failIfRebase, String timeZone) {
     throw new UnsupportedOperationException("only readInts is valid.");
   }
 
@@ -851,9 +872,7 @@ public final class VectorizedRleValuesReader extends ValuesReader
     throw new UnsupportedOperationException("only skipIntegers is valid");
   }
 
-  /**
-   * Reads the next varint encoded int.
-   */
+  /** Reads the next varint encoded int. */
   private int readUnsignedVarInt() throws IOException {
     int value = 0;
     int shift = 0;
@@ -866,9 +885,7 @@ public final class VectorizedRleValuesReader extends ValuesReader
     return value;
   }
 
-  /**
-   * Reads the next 4 byte little endian int.
-   */
+  /** Reads the next 4 byte little endian int. */
   private int readIntLittleEndian() throws IOException {
     int ch4 = in.read();
     int ch3 = in.read();
@@ -877,36 +894,35 @@ public final class VectorizedRleValuesReader extends ValuesReader
     return ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4 << 0));
   }
 
-  /**
-   * Reads the next byteWidth little endian int.
-   */
+  /** Reads the next byteWidth little endian int. */
   private int readIntLittleEndianPaddedOnBitWidth() throws IOException {
     switch (bytesWidth) {
       case 0:
         return 0;
       case 1:
         return in.read();
-      case 2: {
-        int ch2 = in.read();
-        int ch1 = in.read();
-        return (ch1 << 8) + ch2;
-      }
-      case 3: {
-        int ch3 = in.read();
-        int ch2 = in.read();
-        int ch1 = in.read();
-        return (ch1 << 16) + (ch2 << 8) + (ch3 << 0);
-      }
-      case 4: {
-        return readIntLittleEndian();
-      }
+      case 2:
+        {
+          int ch2 = in.read();
+          int ch1 = in.read();
+          return (ch1 << 8) + ch2;
+        }
+      case 3:
+        {
+          int ch3 = in.read();
+          int ch2 = in.read();
+          int ch1 = in.read();
+          return (ch1 << 16) + (ch2 << 8) + (ch3 << 0);
+        }
+      case 4:
+        {
+          return readIntLittleEndian();
+        }
     }
     throw new RuntimeException("Unreachable");
   }
 
-  /**
-   * Reads the next group. Returns false if no more group available.
-   */
+  /** Reads the next group. Returns false if no more group available. */
   private boolean readNextGroup() {
     if (in.available() <= 0) {
       currentCount = 0;
@@ -947,9 +963,7 @@ public final class VectorizedRleValuesReader extends ValuesReader
     return true;
   }
 
-  /**
-   * Skip `n` values from the current reader.
-   */
+  /** Skip `n` values from the current reader. */
   private void skipValues(int n) {
     int left = n;
     while (left > 0) {

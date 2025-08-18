@@ -54,7 +54,7 @@ class GeoParquetRecordMaterializer(
     int96RebaseSpec: RebaseSpec,
     parameters: Map[String, String])
     extends RecordMaterializer[InternalRow] {
-  private val rootConverter = new GeoParquetRowConverter(
+  private val rootConverter = new internal.GeoParquetRowConverter(
     schemaConverter,
     parquetSchema,
     catalystSchema,
@@ -62,7 +62,7 @@ class GeoParquetRecordMaterializer(
     datetimeRebaseSpec,
     int96RebaseSpec,
     parameters,
-    NoopUpdater)
+    internal.NoopUpdater)
 
   override def getCurrentRecord: InternalRow = rootConverter.currentRecord
 

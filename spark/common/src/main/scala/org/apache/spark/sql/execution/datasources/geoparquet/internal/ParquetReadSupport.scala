@@ -1,20 +1,21 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package org.apache.spark.sql.execution.datasources.geoparquet.internal
 
 import java.time.ZoneId
@@ -43,23 +44,24 @@ import org.apache.spark.sql.types._
  * [[InternalRow]]s.
  *
  * The API interface of [[ReadSupport]] is a little bit over complicated because of historical
- * reasons.  In older versions of parquet-mr (say 1.6.0rc3 and prior), [[ReadSupport]] need to be
- * instantiated and initialized twice on both driver side and executor side.  The [[init()]] method
- * is for driver side initialization, while [[prepareForRead()]] is for executor side.  However,
- * starting from parquet-mr 1.6.0, it's no longer the case, and [[ReadSupport]] is only instantiated
- * and initialized on executor side.  So, theoretically, now it's totally fine to combine these two
- * methods into a single initialization method.  The only reason (I could think of) to still have
- * them here is for parquet-mr API backwards-compatibility.
+ * reasons. In older versions of parquet-mr (say 1.6.0rc3 and prior), [[ReadSupport]] need to be
+ * instantiated and initialized twice on both driver side and executor side. The [[init()]] method
+ * is for driver side initialization, while [[prepareForRead()]] is for executor side. However,
+ * starting from parquet-mr 1.6.0, it's no longer the case, and [[ReadSupport]] is only
+ * instantiated and initialized on executor side. So, theoretically, now it's totally fine to
+ * combine these two methods into a single initialization method. The only reason (I could think
+ * of) to still have them here is for parquet-mr API backwards-compatibility.
  *
- * Due to this reason, we no longer rely on [[ReadContext]] to pass requested schema from [[init()]]
- * to [[prepareForRead()]], but use a private `var` for simplicity.
+ * Due to this reason, we no longer rely on [[ReadContext]] to pass requested schema from
+ * [[init()]] to [[prepareForRead()]], but use a private `var` for simplicity.
  */
 class ParquetReadSupport(
     val convertTz: Option[ZoneId],
     enableVectorizedReader: Boolean,
     datetimeRebaseSpec: RebaseSpec,
     int96RebaseSpec: RebaseSpec)
-  extends ReadSupport[InternalRow] with Logging {
+    extends ReadSupport[InternalRow]
+    with Logging {
   private var catalystRequestedSchema: StructType = _
 
   def this() = {
@@ -75,7 +77,7 @@ class ParquetReadSupport(
 
   /**
    * Called on executor side before [[prepareForRead()]] and instantiating actual Parquet record
-   * readers.  Responsible for figuring out Parquet requested schema used for column pruning.
+   * readers. Responsible for figuring out Parquet requested schema used for column pruning.
    */
   override def init(context: InitContext): ReadContext = {
     val conf = context.getConfiguration
@@ -86,7 +88,10 @@ class ParquetReadSupport(
     }
 
     val parquetRequestedSchema = ParquetReadSupport.getRequestedSchema(
-      context.getFileSchema, catalystRequestedSchema, conf, enableVectorizedReader)
+      context.getFileSchema,
+      catalystRequestedSchema,
+      conf,
+      enableVectorizedReader)
     new ReadContext(parquetRequestedSchema, new util.HashMap[String, String]())
   }
 
@@ -123,26 +128,30 @@ object ParquetReadSupport extends Logging {
       catalystRequestedSchema: StructType,
       conf: Configuration,
       enableVectorizedReader: Boolean): MessageType = {
-    val caseSensitive = conf.getBoolean(SQLConf.CASE_SENSITIVE.key,
-      SQLConf.CASE_SENSITIVE.defaultValue.get)
-    val schemaPruningEnabled = conf.getBoolean(SQLConf.NESTED_SCHEMA_PRUNING_ENABLED.key,
+    val caseSensitive =
+      conf.getBoolean(SQLConf.CASE_SENSITIVE.key, SQLConf.CASE_SENSITIVE.defaultValue.get)
+    val schemaPruningEnabled = conf.getBoolean(
+      SQLConf.NESTED_SCHEMA_PRUNING_ENABLED.key,
       SQLConf.NESTED_SCHEMA_PRUNING_ENABLED.defaultValue.get)
-    val useFieldId = conf.getBoolean(SQLConf.PARQUET_FIELD_ID_READ_ENABLED.key,
+    val useFieldId = conf.getBoolean(
+      SQLConf.PARQUET_FIELD_ID_READ_ENABLED.key,
       SQLConf.PARQUET_FIELD_ID_READ_ENABLED.defaultValue.get)
-    val inferTimestampNTZ = conf.getBoolean(SQLConf.PARQUET_INFER_TIMESTAMP_NTZ_ENABLED.key,
+    val inferTimestampNTZ = conf.getBoolean(
+      SQLConf.PARQUET_INFER_TIMESTAMP_NTZ_ENABLED.key,
       SQLConf.PARQUET_INFER_TIMESTAMP_NTZ_ENABLED.defaultValue.get)
-    val ignoreMissingIds = conf.getBoolean(SQLConf.IGNORE_MISSING_PARQUET_FIELD_ID.key,
+    val ignoreMissingIds = conf.getBoolean(
+      SQLConf.IGNORE_MISSING_PARQUET_FIELD_ID.key,
       SQLConf.IGNORE_MISSING_PARQUET_FIELD_ID.defaultValue.get)
 
     if (!ignoreMissingIds &&
-        !containsFieldIds(parquetFileSchema) &&
-        ParquetUtils.hasFieldIds(catalystRequestedSchema)) {
+      !containsFieldIds(parquetFileSchema) &&
+      ParquetUtils.hasFieldIds(catalystRequestedSchema)) {
       throw new RuntimeException(
         "Spark read schema expects field Ids, " +
           "but Parquet file schema doesn't contain any field Ids.\n" +
-        "Please remove the field ids from Spark schema or ignore missing ids by " +
+          "Please remove the field ids from Spark schema or ignore missing ids by " +
           s"setting `${SQLConf.IGNORE_MISSING_PARQUET_FIELD_ID.key} = true`\n" +
-        s"""
+          s"""
            |Spark read schema:
            |${catalystRequestedSchema.prettyJson}
            |
@@ -150,8 +159,11 @@ object ParquetReadSupport extends Logging {
            |${parquetFileSchema.toString}
            |""".stripMargin)
     }
-    val parquetClippedSchema = ParquetReadSupport.clipParquetSchema(parquetFileSchema,
-      catalystRequestedSchema, caseSensitive, useFieldId)
+    val parquetClippedSchema = ParquetReadSupport.clipParquetSchema(
+      parquetFileSchema,
+      catalystRequestedSchema,
+      caseSensitive,
+      useFieldId)
 
     // We pass two schema to ParquetRecordMaterializer:
     // - parquetRequestedSchema: the schema of the file data we want to read
@@ -161,7 +173,8 @@ object ParquetReadSupport extends Logging {
       // Parquet-MR reader requires that parquetRequestedSchema include only those fields present
       // in the underlying parquetFileSchema. Therefore, we intersect the parquetClippedSchema
       // with the parquetFileSchema
-      ParquetReadSupport.intersectParquetGroups(parquetClippedSchema, parquetFileSchema)
+      ParquetReadSupport
+        .intersectParquetGroups(parquetClippedSchema, parquetFileSchema)
         .map(groupType => new MessageType(groupType.getName, groupType.getFields))
         .getOrElse(ParquetSchemaConverter.EMPTY_MESSAGE)
     } else {
@@ -186,8 +199,8 @@ object ParquetReadSupport extends Logging {
   }
 
   /**
-   * Tailors `parquetSchema` according to `catalystSchema` by removing column paths don't exist
-   * in `catalystSchema`, and adding those only exist in `catalystSchema`.
+   * Tailors `parquetSchema` according to `catalystSchema` by removing column paths don't exist in
+   * `catalystSchema`, and adding those only exist in `catalystSchema`.
    */
   def clipParquetSchema(
       parquetSchema: MessageType,
@@ -195,7 +208,10 @@ object ParquetReadSupport extends Logging {
       caseSensitive: Boolean,
       useFieldId: Boolean): MessageType = {
     val clippedParquetFields = clipParquetGroupFields(
-      parquetSchema.asGroupType(), catalystSchema, caseSensitive, useFieldId)
+      parquetSchema.asGroupType(),
+      catalystSchema,
+      caseSensitive,
+      useFieldId)
     if (clippedParquetFields.isEmpty) {
       ParquetSchemaConverter.EMPTY_MESSAGE
     } else {
@@ -217,11 +233,15 @@ object ParquetReadSupport extends Logging {
         clipParquetListType(parquetType.asGroupType(), t.elementType, caseSensitive, useFieldId)
 
       case t: MapType
-        if !isPrimitiveCatalystType(t.keyType) ||
-           !isPrimitiveCatalystType(t.valueType) =>
+          if !isPrimitiveCatalystType(t.keyType) ||
+            !isPrimitiveCatalystType(t.valueType) =>
         // Only clips map types with nested key type or value type
         clipParquetMapType(
-          parquetType.asGroupType(), t.keyType, t.valueType, caseSensitive, useFieldId)
+          parquetType.asGroupType(),
+          t.keyType,
+          t.valueType,
+          caseSensitive,
+          useFieldId)
 
       case t: StructType =>
         clipParquetGroup(parquetType.asGroupType(), t, caseSensitive, useFieldId)
@@ -240,8 +260,8 @@ object ParquetReadSupport extends Logging {
   }
 
   /**
-   * Whether a Catalyst [[DataType]] is primitive.  Primitive [[DataType]] is not equivalent to
-   * [[AtomicType]].  For example, [[CalendarIntervalType]] is primitive, but it's not an
+   * Whether a Catalyst [[DataType]] is primitive. Primitive [[DataType]] is not equivalent to
+   * [[AtomicType]]. For example, [[CalendarIntervalType]] is primitive, but it's not an
    * [[AtomicType]].
    */
   private def isPrimitiveCatalystType(dataType: DataType): Boolean = {
@@ -252,9 +272,9 @@ object ParquetReadSupport extends Logging {
   }
 
   /**
-   * Clips a Parquet [[GroupType]] which corresponds to a Catalyst [[ArrayType]].  The element type
-   * of the [[ArrayType]] should also be a nested type, namely an [[ArrayType]], a [[MapType]], or a
-   * [[StructType]].
+   * Clips a Parquet [[GroupType]] which corresponds to a Catalyst [[ArrayType]]. The element type
+   * of the [[ArrayType]] should also be a nested type, namely an [[ArrayType]], a [[MapType]], or
+   * a [[StructType]].
    */
   private def clipParquetListType(
       parquetList: GroupType,
@@ -277,7 +297,9 @@ object ParquetReadSupport extends Logging {
           parquetList.toString)
 
       assert(
-        parquetList.getFieldCount == 1 && parquetList.getType(0).isRepetition(Repetition.REPEATED),
+        parquetList.getFieldCount == 1 && parquetList
+          .getType(0)
+          .isRepetition(Repetition.REPEATED),
         "Invalid Parquet schema. " +
           "LIST-annotated group should only have exactly one repeated field: " +
           parquetList)
@@ -292,24 +314,19 @@ object ParquetReadSupport extends Logging {
       // "_tuple" appended then the repeated type is the element type and elements are required.
       // Build a new LIST-annotated group with clipped `repeatedGroup` as element type and the
       // only field.
-      if (
-        repeatedGroup.getFieldCount > 1 ||
+      if (repeatedGroup.getFieldCount > 1 ||
         repeatedGroup.getName == "array" ||
-        repeatedGroup.getName == parquetList.getName + "_tuple"
-      ) {
+        repeatedGroup.getName == parquetList.getName + "_tuple") {
         Types
           .buildGroup(parquetList.getRepetition)
           .as(LogicalTypeAnnotation.listType())
-          .addField(
-            clipParquetType(
-              repeatedGroup, elementType, caseSensitive, useFieldId))
+          .addField(clipParquetType(repeatedGroup, elementType, caseSensitive, useFieldId))
           .named(parquetList.getName)
       } else {
         val newRepeatedGroup = Types
           .repeatedGroup()
           .addField(
-            clipParquetType(
-              repeatedGroup.getType(0), elementType, caseSensitive, useFieldId))
+            clipParquetType(repeatedGroup.getType(0), elementType, caseSensitive, useFieldId))
           .named(repeatedGroup.getName)
 
         val newElementType = if (useFieldId && repeatedGroup.getId != null) {
@@ -330,9 +347,9 @@ object ParquetReadSupport extends Logging {
   }
 
   /**
-   * Clips a Parquet [[GroupType]] which corresponds to a Catalyst [[MapType]].  Either key type or
-   * value type of the [[MapType]] must be a nested type, namely an [[ArrayType]], a [[MapType]], or
-   * a [[StructType]].
+   * Clips a Parquet [[GroupType]] which corresponds to a Catalyst [[MapType]]. Either key type or
+   * value type of the [[MapType]] must be a nested type, namely an [[ArrayType]], a [[MapType]],
+   * or a [[StructType]].
    */
   private def clipParquetMapType(
       parquetMap: GroupType,
@@ -351,10 +368,8 @@ object ParquetReadSupport extends Logging {
       val newRepeatedGroup = Types
         .repeatedGroup()
         .as(repeatedGroup.getLogicalTypeAnnotation)
-        .addField(
-          clipParquetType(parquetKeyType, keyType, caseSensitive, useFieldId))
-        .addField(
-          clipParquetType(parquetValueType, valueType, caseSensitive, useFieldId))
+        .addField(clipParquetType(parquetKeyType, keyType, caseSensitive, useFieldId))
+        .addField(clipParquetType(parquetValueType, valueType, caseSensitive, useFieldId))
         .named(repeatedGroup.getName)
       if (useFieldId && repeatedGroup.getId != null) {
         newRepeatedGroup.withId(repeatedGroup.getId.intValue())
@@ -373,10 +388,12 @@ object ParquetReadSupport extends Logging {
   /**
    * Clips a Parquet [[GroupType]] which corresponds to a Catalyst [[StructType]].
    *
-   * @return A clipped [[GroupType]], which has at least one field.
-   * @note Parquet doesn't allow creating empty [[GroupType]] instances except for empty
-   *       [[MessageType]].  Because it's legal to construct an empty requested schema for column
-   *       pruning.
+   * @return
+   *   A clipped [[GroupType]], which has at least one field.
+   * @note
+   *   Parquet doesn't allow creating empty [[GroupType]] instances except for empty
+   *   [[MessageType]]. Because it's legal to construct an empty requested schema for column
+   *   pruning.
    */
   private def clipParquetGroup(
       parquetRecord: GroupType,
@@ -395,44 +412,46 @@ object ParquetReadSupport extends Logging {
   /**
    * Clips a Parquet [[GroupType]] which corresponds to a Catalyst [[StructType]].
    *
-   * @return A list of clipped [[GroupType]] fields, which can be empty.
+   * @return
+   *   A list of clipped [[GroupType]] fields, which can be empty.
    */
   private def clipParquetGroupFields(
       parquetRecord: GroupType,
       structType: StructType,
       caseSensitive: Boolean,
       useFieldId: Boolean): Seq[Type] = {
-    val toParquet = new SparkToParquetSchemaConverter(
-      writeLegacyParquetFormat = false,
-      useFieldId = useFieldId)
+    val toParquet =
+      new SparkToParquetSchemaConverter(writeLegacyParquetFormat = false, useFieldId = useFieldId)
     lazy val caseSensitiveParquetFieldMap =
-        parquetRecord.getFields.asScala.map(f => f.getName -> f).toMap
+      parquetRecord.getFields.asScala.map(f => f.getName -> f).toMap
     lazy val caseInsensitiveParquetFieldMap =
-        parquetRecord.getFields.asScala.groupBy(_.getName.toLowerCase(Locale.ROOT))
+      parquetRecord.getFields.asScala.groupBy(_.getName.toLowerCase(Locale.ROOT))
     lazy val idToParquetFieldMap =
-        parquetRecord.getFields.asScala.filter(_.getId != null).groupBy(f => f.getId.intValue())
+      parquetRecord.getFields.asScala.filter(_.getId != null).groupBy(f => f.getId.intValue())
 
     def matchCaseSensitiveField(f: StructField): Type = {
       caseSensitiveParquetFieldMap
-          .get(f.name)
-          .map(clipParquetType(_, f.dataType, caseSensitive, useFieldId))
-          .getOrElse(toParquet.convertField(f))
+        .get(f.name)
+        .map(clipParquetType(_, f.dataType, caseSensitive, useFieldId))
+        .getOrElse(toParquet.convertField(f))
     }
 
     def matchCaseInsensitiveField(f: StructField): Type = {
       // Do case-insensitive resolution only if in case-insensitive mode
       caseInsensitiveParquetFieldMap
-          .get(f.name.toLowerCase(Locale.ROOT))
-          .map { parquetTypes =>
-            if (parquetTypes.size > 1) {
-              // Need to fail if there is ambiguity, i.e. more than one field is matched
-              val parquetTypesString = parquetTypes.map(_.getName).mkString("[", ", ", "]")
-              throw QueryExecutionErrors.foundDuplicateFieldInCaseInsensitiveModeError(
-                f.name, parquetTypesString)
-            } else {
-              clipParquetType(parquetTypes.head, f.dataType, caseSensitive, useFieldId)
-            }
-          }.getOrElse(toParquet.convertField(f))
+        .get(f.name.toLowerCase(Locale.ROOT))
+        .map { parquetTypes =>
+          if (parquetTypes.size > 1) {
+            // Need to fail if there is ambiguity, i.e. more than one field is matched
+            val parquetTypesString = parquetTypes.map(_.getName).mkString("[", ", ", "]")
+            throw QueryExecutionErrors.foundDuplicateFieldInCaseInsensitiveModeError(
+              f.name,
+              parquetTypesString)
+          } else {
+            clipParquetType(parquetTypes.head, f.dataType, caseSensitive, useFieldId)
+          }
+        }
+        .getOrElse(toParquet.convertField(f))
     }
 
     def matchIdField(f: StructField): Type = {
@@ -444,11 +463,13 @@ object ParquetReadSupport extends Logging {
             // Need to fail if there is ambiguity, i.e. more than one field is matched
             val parquetTypesString = parquetTypes.map(_.getName).mkString("[", ", ", "]")
             throw QueryExecutionErrors.foundDuplicateFieldInFieldIdLookupModeError(
-              fieldId, parquetTypesString)
+              fieldId,
+              parquetTypesString)
           } else {
             clipParquetType(parquetTypes.head, f.dataType, caseSensitive, useFieldId)
           }
-        }.getOrElse {
+        }
+        .getOrElse {
           // When there is no ID match, we use a fake name to avoid a name match by accident
           // We need this name to be unique as well, otherwise there will be type conflicts
           toParquet.convertField(f.copy(name = generateFakeColumnName))
@@ -468,13 +489,14 @@ object ParquetReadSupport extends Logging {
   }
 
   /**
-   * Computes the structural intersection between two Parquet group types.
-   * This is used to create a requestedSchema for ReadContext of Parquet-MR reader.
-   * Parquet-MR reader does not support the nested field access to non-existent field
-   * while parquet library does support to read the non-existent field by regular field access.
+   * Computes the structural intersection between two Parquet group types. This is used to create
+   * a requestedSchema for ReadContext of Parquet-MR reader. Parquet-MR reader does not support
+   * the nested field access to non-existent field while parquet library does support to read the
+   * non-existent field by regular field access.
    */
   private def intersectParquetGroups(
-      groupType1: GroupType, groupType2: GroupType): Option[GroupType] = {
+      groupType1: GroupType,
+      groupType2: GroupType): Option[GroupType] = {
     val fields =
       groupType1.getFields.asScala
         .filter(field => groupType2.containsField(field.getName))
@@ -503,9 +525,7 @@ object ParquetReadSupport extends Logging {
           t.copy(elementType = expand(t.elementType))
 
         case t: MapType =>
-          t.copy(
-            keyType = expand(t.keyType),
-            valueType = expand(t.valueType))
+          t.copy(keyType = expand(t.keyType), valueType = expand(t.valueType))
 
         case t: StructType =>
           val expandedFields = t.fields.map(f => f.copy(dataType = expand(f.dataType)))

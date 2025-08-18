@@ -1,18 +1,20 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.spark.sql.execution.datasources.geoparquet.internal
 
@@ -28,11 +30,11 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.execution.vectorized.WritableColumnVector
 import org.apache.spark.sql.types.{LongType, StructField, StructType}
 
-
 object ParquetRowIndexUtil {
+
   /**
    * Generate row indexes for vectorized readers.
-  */
+   */
   class RowIndexGenerator(rowIndexColumnIdx: Int) {
     var rowIndexIterator: Iterator[Long] = _
 
@@ -72,13 +74,13 @@ object ParquetRowIndexUtil {
   }
 
   /**
-   * A wrapper for `ParquetRecordReader` that sets row index column to the correct value in
-   * the returned InternalRow. Used in combination with non-vectorized (parquet-mr) Parquet reader.
+   * A wrapper for `ParquetRecordReader` that sets row index column to the correct value in the
+   * returned InternalRow. Used in combination with non-vectorized (parquet-mr) Parquet reader.
    */
   private class RecordReaderWithRowIndexes(
       parent: ParquetRecordReader[InternalRow],
       rowIndexColumnIdx: Int)
-    extends RecordReader[Void, InternalRow] {
+      extends RecordReader[Void, InternalRow] {
 
     override def initialize(
         inputSplit: InputSplit,
@@ -118,8 +120,9 @@ object ParquetRowIndexUtil {
     } match {
       case Some((field: StructField, idx: Int)) =>
         if (field.dataType != LongType) {
-          throw new RuntimeException(s"${ParquetFileFormat.ROW_INDEX_TEMPORARY_COLUMN_NAME} " +
-            "must be of LongType")
+          throw new RuntimeException(
+            s"${ParquetFileFormat.ROW_INDEX_TEMPORARY_COLUMN_NAME} " +
+              "must be of LongType")
         }
         idx
       case _ => -1

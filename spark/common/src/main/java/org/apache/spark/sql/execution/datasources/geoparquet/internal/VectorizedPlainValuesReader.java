@@ -1,18 +1,20 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.spark.sql.execution.datasources.geoparquet.internal;
 
@@ -20,19 +22,15 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-
 import org.apache.parquet.bytes.ByteBufferInputStream;
 import org.apache.parquet.column.values.ValuesReader;
-import org.apache.parquet.io.api.Binary;
 import org.apache.parquet.io.ParquetDecodingException;
-
+import org.apache.parquet.io.api.Binary;
 import org.apache.spark.sql.catalyst.util.RebaseDateTime;
 import org.apache.spark.sql.execution.datasources.DataSourceUtils;
 import org.apache.spark.sql.execution.vectorized.WritableColumnVector;
 
-/**
- * An implementation of the Parquet PLAIN decoder that supports the vectorized interface.
- */
+/** An implementation of the Parquet PLAIN decoder that supports the vectorized interface. */
 public class VectorizedPlainValuesReader extends ValuesReader implements VectorizedValuesReader {
   private ByteBufferInputStream in = null;
 
@@ -40,8 +38,7 @@ public class VectorizedPlainValuesReader extends ValuesReader implements Vectori
   private int bitOffset;
   private byte currentByte = 0;
 
-  public VectorizedPlainValuesReader() {
-  }
+  public VectorizedPlainValuesReader() {}
 
   @Override
   public void initFromPage(int valueCount, ByteBufferInputStream in) throws IOException {
@@ -197,7 +194,7 @@ public class VectorizedPlainValuesReader extends ValuesReader implements Vectori
     ByteBuffer buffer = getBuffer(requiredBytes);
     for (int i = 0; i < total; i += 1) {
       c.putByteArray(
-        rowId + i, new BigInteger(Long.toUnsignedString(buffer.getLong())).toByteArray());
+          rowId + i, new BigInteger(Long.toUnsignedString(buffer.getLong())).toByteArray());
     }
   }
 
@@ -206,11 +203,7 @@ public class VectorizedPlainValuesReader extends ValuesReader implements Vectori
   // if rebase is not needed.
   @Override
   public final void readLongsWithRebase(
-      int total,
-      WritableColumnVector c,
-      int rowId,
-      boolean failIfRebase,
-      String timeZone) {
+      int total, WritableColumnVector c, int rowId, boolean failIfRebase, String timeZone) {
     int requiredBytes = total * 8;
     ByteBuffer buffer = getBuffer(requiredBytes);
     boolean rebase = false;
@@ -223,8 +216,7 @@ public class VectorizedPlainValuesReader extends ValuesReader implements Vectori
       } else {
         for (int i = 0; i < total; i += 1) {
           c.putLong(
-            rowId + i,
-            RebaseDateTime.rebaseJulianToGregorianMicros(timeZone, buffer.getLong()));
+              rowId + i, RebaseDateTime.rebaseJulianToGregorianMicros(timeZone, buffer.getLong()));
         }
       }
     } else {
