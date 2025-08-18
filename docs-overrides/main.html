@@ -15,12 +15,25 @@ You're not viewing the latest stable version.
 <meta name="google-site-verification" content="o2riomKLozYKc2IQivWGsrI2unuyQs7hXiAD4kGMCTQ" />
 {% endblock %}
 
+
+
+
 {% block page_content %}
 <div class="md-container" data-md-component="container">
   <main class="md-main" data-md-component="main">
 
     {% if page.is_homepage %}
+
     <div class="page-home">
+
+      <!-- Mobile Navigation ( required ) -->
+      <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" {{ hidden }}>
+        <div class="md-sidebar__scrollwrap">
+          <div class="md-sidebar__inner">
+            {% include "partials/nav.html" %}
+          </div>
+        </div>
+      </div>
 
       <!-- Section Hero -->
       <section class="section-hero">
@@ -28,6 +41,7 @@ You're not viewing the latest stable version.
 
           <div class="logo-wrap">
             <img src="image/home/hero/logo.svg" alt="" class="logo">
+            <h1 class="page-title">Apache Sedona</h1>
           </div>
 
           <div class="section-description editor">
@@ -36,7 +50,7 @@ You're not viewing the latest stable version.
 
           <div class="btn-group">
             <a href="{{ page.next_page.url | url }}" title="{{ page.next_page.title | striptags }}" class="btn btn-black">
-              Get started
+              Get Started
             </a>
           </div>
 
@@ -56,7 +70,21 @@ You're not viewing the latest stable version.
             <div class="col-left">
               <div class="section-title">
                 <div>QUERY and JOIN</div>
-                <div class="typed">GPS points|</div>
+
+                <p class="typed-wrap">GPS points <span class="typed"></span></p>
+                <div class="typed-strings">
+                  <p>buildings</p>
+                  <p>parcels</p>
+                  <p>trips</p>
+                  <p>places</p>
+                  <p>businesses</p>
+                  <p>land</p>
+                  <p>vegetation</p>
+                  <p>rasters</p>
+                  <p>vectors</p>
+                  <p>tabular tables</p>
+                </div>
+
                 <div>from local to global scale</div>
               </div>
               <div class="section-description editor">

@@ -1,6 +1,11 @@
 .page-home {
   font-family: var(--font-inter);
 
+  @media (min-width: 1220px) {
+    .md-sidebar {
+      display: none;
+    }
+  }
 }
 
 // Section Hero
@@ -20,12 +25,27 @@
   .logo-wrap {
     display: flex;
     justify-content: center;
+    flex-direction: column;
     align-items: center;
     margin-bottom: 12px;
 
     img {
       max-width: 100%;
       height: auto;
+      margin-bottom: 10px;
+    }
+
+    .page-title {
+      text-align: center;
+      font-family: var(--md-alternative-font);
+      font-style: normal;
+      font-weight: 500;
+      font-size: clamp-property(40, 48);
+      line-height: 1.25;
+      text-align: center;
+      letter-spacing: -0.02em;
+      color: #1A191C;
+      margin: 0;
     }
   }
 
@@ -91,7 +111,6 @@
 
   .section-row {
     display: flex;
-    align-items: center;
     justify-content: space-between;
     gap: 30px;
   }
@@ -111,7 +130,24 @@
       letter-spacing: -0.02em;
       color: #FFFFFF;
 
-      .typed {
+
+      .typed-wrap {
+        color: var(--color-red);
+        display: inline;
+
+        p {
+          display: inline;
+          margin: 0;
+        }
+      }
+
+      .typed-strings {
+        display: none;
+      }
+
+      .ti-cursor, /* TypewriterJS cursor class */
+      .typed-cursor {
+        display: inline;
         color: var(--color-red);
       }
     }
@@ -161,7 +197,6 @@
 
   .section-row {
     display: flex;
-    align-items: center;
     justify-content: space-between;
     gap: 30px;
   }
@@ -381,6 +416,9 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: clamp-property(16, 24);
+    max-width: 772px;
+    margin-left: auto;
+    margin-right: auto;
 
     .info-item {
       padding: 24px;

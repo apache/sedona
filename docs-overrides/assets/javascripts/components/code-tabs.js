@@ -5,24 +5,29 @@ import java from 'highlight.js/lib/languages/java';
 import powershell from 'highlight.js/lib/languages/powershell';
 import sql from 'highlight.js/lib/languages/sql';
 
-// Register the languages you need
+// Register the languages
+hljs.registerLanguage('bash', bash);
 hljs.registerLanguage('python', python);
 hljs.registerLanguage('java', java);
 hljs.registerLanguage('powershell', powershell);
-hljs.registerLanguage('bash', bash);
 hljs.registerLanguage('sql', sql);
 
 export const codeTabs = () => {
-
-  // Initialize every snippet block independently
   const initHljsSnippet = (root) => {
     const tabs = root.querySelectorAll('.hljs-snippet__tab');
     const panels = root.querySelectorAll('.hljs-snippet__panel');
     const copyBtn = root.querySelector('.hljs-snippet__copy');
 
-    // Highlight all panels once on load
-    panels.forEach((p) => hljs.highlightElement(p.querySelector('code')));
+    // Helper to highlight code safely
+    const highlight = (codeEl) => {
+      codeEl.removeAttribute('data-highlighted'); // remove previous flag
+      hljs.highlightElement(codeEl);
+    };
 
+    // Highlight all panels on load
+    panels.forEach((p) => highlight(p.querySelector('code')));
+
+    // Activate a specific language
     const activate = (lang) => {
       tabs.forEach((btn) => {
         const active = btn.dataset.lang === lang;
@@ -31,10 +36,11 @@ export const codeTabs = () => {
       });
 
       panels.forEach((panel) => {
-        panel.hidden = panel.dataset.lang !== lang;
+        const show = panel.dataset.lang === lang;
+        panel.hidden = !show;
+        if (show) highlight(panel.querySelector('code')); // safe re-highlight
       });
     };
-
 
     // Initial tab
     const initial = root.dataset.initial || tabs[0]?.dataset.lang;
@@ -45,7 +51,7 @@ export const codeTabs = () => {
       btn.addEventListener('click', () => activate(btn.dataset.lang));
     });
 
-    // Copy to clipboard (with fallback)
+    // Copy to clipboard
     const copyCurrent = async () => {
       const current = [...panels].find((p) => !p.hidden);
       if (!current) return;
@@ -53,8 +59,8 @@ export const codeTabs = () => {
       const code = current.querySelector('code').textContent;
 
       const showCopied = () => {
-        copyBtn.classList.add('copied');            // apply CSS class
-        setTimeout(() => copyBtn.classList.remove('copied'), 1200); // remove class
+        copyBtn.classList.add('copied');
+        setTimeout(() => copyBtn.classList.remove('copied'), 1200);
       };
 
       try {
@@ -69,27 +75,21 @@ export const codeTabs = () => {
         area.select();
         try {
           document.execCommand('copy');
-        } catch {
-        }
+        } catch {}
         document.body.removeChild(area);
         showCopied();
       }
     };
 
     if (copyBtn) {
-      copyBtn.addEventListener('click', function(e) {
+      copyBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-
         copyCurrent();
-
       });
     }
-
-
   };
 
-  // Boot all snippet instances on the page
+  // Initialize all snippet instances
   document.querySelectorAll('.hljs-snippet').forEach(initHljsSnippet);
-
 };
