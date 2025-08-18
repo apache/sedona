@@ -196,6 +196,11 @@ object st_functions {
   def ST_Envelope(geometry: Column): Column = wrapExpression[ST_Envelope](geometry)
   def ST_Envelope(geometry: String): Column = wrapExpression[ST_Envelope](geometry)
 
+  def ST_Envelope(geography: Column, split: Boolean): Column =
+    wrapExpression[ST_Envelope](geography, split)
+  def ST_Envelope(geography: String, split: Boolean): Column =
+    wrapExpression[ST_Envelope](geography, split)
+
   def ST_Expand(geometry: Column, uniformDelta: Column) =
     wrapExpression[ST_Expand](geometry, uniformDelta)
   def ST_Expand(geometry: String, uniformDelta: String) =

@@ -21,13 +21,24 @@ package org.apache.sedona.common.geography;
 import com.google.common.geometry.*;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.sedona.common.S2Geography.Geography;
-import org.apache.sedona.common.S2Geography.GeographyCollection;
-import org.apache.sedona.common.S2Geography.PolygonGeography;
+import org.apache.sedona.common.S2Geography.*;
 
 public class Functions {
 
+  private static final double EPSILON = 1e-9;
+
+  private static boolean nearlyEqual(double a, double b) {
+    if (Double.isNaN(a) || Double.isNaN(b)) {
+      return false;
+    }
+    return Math.abs(a - b) < EPSILON;
+  }
+
   public static Geography getEnvelope(Geography geography) {
+    return getEnvelope(geography, /* splitAtAntiMeridian = */ false);
+  }
+
+  public static Geography getEnvelope(Geography geography, boolean splitAtAntiMeridian) {
     if (geography == null) return null;
     S2LatLngRect rect = geography.region().getRectBound();
     double lngLo = rect.lngLo().degrees();
@@ -35,19 +46,23 @@ public class Functions {
     double lngHi = rect.lngHi().degrees();
     double latHi = rect.latHi().degrees();
 
+    if (nearlyEqual(latLo, latHi) && nearlyEqual(lngLo, lngHi)) {
+      S2Point point = S2LatLng.fromDegrees(latLo, lngLo).toPoint();
+      Geography pointGeo = new SinglePointGeography(point);
+      pointGeo.setSRID(geography.getSRID());
+      return pointGeo;
+    }
+
     Geography envelope;
-    if (!rect.lng().isInverted()) {
-      // No antimeridian crossing → ONE polygon
-      envelope = new PolygonGeography(rectToPolygon(lngLo, latLo, lngHi, latHi));
-    } else {
+    if (splitAtAntiMeridian && rect.lng().isInverted()) {
       // Crossing → split into two polygons
       S2Polygon left = rectToPolygon(lngLo, latLo, 180.0, latHi);
       S2Polygon right = rectToPolygon(-180.0, latLo, lngHi, latHi);
       envelope =
-          new GeographyCollection(Geography.GeographyKind.MULTIPOLYGON, List.of(left, right));
+          new MultiPolygonGeography(Geography.GeographyKind.MULTIPOLYGON, List.of(left, right));
+    } else {
+      envelope = new PolygonGeography(rectToPolygon(lngLo, latLo, lngHi, latHi));
     }
-
-    // Preserve SRID if you track it
     envelope.setSRID(geography.getSRID());
     return envelope;
   }

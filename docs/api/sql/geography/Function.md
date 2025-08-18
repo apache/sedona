@@ -16,3 +16,28 @@
  specific language governing permissions and limitations
  under the License.
  -->
+
+## ST_Envelope
+
+Introduction: This function returns the bounding box (envelope) of A. By default, it returns a Geography object containing a single Polygon. If the envelope crosses the antimeridian (the 180° longitude line), you can set the split parameter to true. This will return a Geography object containing two separate Polygon objects, split along that line.
+
+Format:
+
+`ST_Envelope (A: Geography)`
+
+`ST_Envelope (A: Geography, splitAtAntiMeridian: Boolean)`
+
+Since: `v1.8.0`
+
+SQL Example
+
+```sql
+SELECT ST_Envelope(ST_GeogFromWKT('MULTIPOLYGON (((177.285 -18.28799, 180 -18.28799, 180 -16.02088, 177.285 -16.02088, 177.285 -18.28799)),((-180 -18.28799, -179.7933 -18.28799, -179.7933 -16.02088, -180 -16.02088, -180 -18.28799)))
+'))
+```
+
+Output:
+
+```
+POLYGON ((177.3 -18.3, -179.8 -18.3, -179.8 -16, 177.3 -16, 177.3 -18.3))
+```
