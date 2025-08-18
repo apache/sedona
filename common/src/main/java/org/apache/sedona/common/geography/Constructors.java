@@ -264,4 +264,267 @@ public class Constructors {
     }
     return gf.createGeometryCollection(gs);
   }
+
+  public static Geography geomToGeography(Geometry geom) throws IOException {
+    if (geom == null) {
+      return null;
+    }
+    String type = geom.getGeometryType();
+    if ("Point".equalsIgnoreCase(type)) {
+      return pointToGeog(geom);
+    } else if ("MultiPoint".equalsIgnoreCase(type)) {
+      return mPointToGeog(geom);
+    } else if ("LineString".equalsIgnoreCase(type)) {
+      return lineToGeog(geom);
+    } else if ("MultiLineString".equalsIgnoreCase(type)) {
+      return mLineToGeog(geom);
+    } else if ("Polygon".equalsIgnoreCase(type)) {
+      return polyToGeog(geom);
+    } else if ("MultiPolygon".equalsIgnoreCase(type)) {
+      return mPolyToGeog(geom);
+    } else if ("GeometryCollection".equalsIgnoreCase(type)) {
+      return geomCollToGeog(geom);
+    } else {
+      throw new UnsupportedOperationException("Unsupported geometry type: " + type);
+    }
+  }
+
+  private static Geography pointToGeog(Geometry geom) throws IOException {
+    Coordinate[] pts = geom.getCoordinates();
+    if (pts.length == 0 || Double.isNaN(pts[0].x) || Double.isNaN(pts[0].y)) {
+      return new SinglePointGeography(); // empty
+    }
+    double lon = pts[0].x;
+    double lat = pts[0].y;
+
+    S2Point s2Point = S2LatLng.fromDegrees(lat, lon).toPoint();
+    S2Builder builder = new S2Builder.Builder().build();
+    S2PointVectorLayer layer = new S2PointVectorLayer();
+    builder.startLayer(layer);
+    builder.addPoint(s2Point);
+
+    // must call build() before reading out the points
+    S2Error error = new S2Error();
+    if (!builder.build(error)) {
+      throw new IOException("Failed to build S2 point layer: " + error.text());
+    }
+    // Extract the resulting points
+    List<S2Point> points = layer.getPointVector();
+    if (points.isEmpty()) {
+      return new SinglePointGeography();
+    }
+    return new SinglePointGeography(points.get(0));
+  }
+
+  private static Geography mPointToGeog(Geometry geom) throws IOException {
+    Coordinate[] pts = geom.getCoordinates();
+    if (pts.length == 0 || Double.isNaN(pts[0].x) || Double.isNaN(pts[0].y)) {
+      return new PointGeography(); // empty
+    }
+    List<S2Point> points = new ArrayList<>(pts.length);
+    // Build via S2Builder + S2PointVectorLayer
+    S2Builder builder = new S2Builder.Builder().build();
+    S2PointVectorLayer layer = new S2PointVectorLayer();
+    // must call build() before reading out the points
+    S2Error error = new S2Error();
+    for (int i = 0; i < pts.length; i++) {
+      double lon = pts[i].x;
+      double lat = pts[i].y;
+      S2Point s2Point = S2LatLng.fromDegrees(lat, lon).toPoint();
+
+      builder.startLayer(layer);
+      builder.addPoint(s2Point);
+
+      if (!builder.build(error)) {
+        throw new IOException("Failed to build S2 point layer: " + error.text());
+      }
+    }
+    for (int i = 0; i < layer.getPointVector().size(); i++) {
+      // Extract the resulting points
+      points.add(layer.getPointVector().get(i));
+    }
+    return new PointGeography(points);
+  }
+
+  private static Geography lineToGeog(Geometry geom) throws IOException {
+    LineString ls = (LineString) geom;
+
+    // Build S2 points
+    List<S2Point> pts = toS2Points(ls.getCoordinates());
+    if (pts.size() < 2) {
+      // empty or degenerate → empty single polyline
+      SinglePolylineGeography empty = new SinglePolylineGeography();
+      empty.setSRID(geom.getSRID());
+      return empty;
+    }
+
+    S2Builder builder = new S2Builder.Builder().build();
+    S2PolylineLayer layer = new S2PolylineLayer();
+    builder.startLayer(layer);
+
+    builder.addPolyline(new S2Polyline(pts));
+
+    S2Error error = new S2Error();
+    if (!builder.build(error)) {
+      throw new IOException("Failed to build S2 polyline: " + error.text());
+    }
+    S2Polyline s2poly = layer.getPolyline();
+    return new SinglePolylineGeography(s2poly);
+  }
+
+  private static Geography mLineToGeog(Geometry geom) throws IOException {
+    final List<S2Polyline> features = new ArrayList<>();
+    MultiLineString mls = (MultiLineString) geom;
+    for (int i = 0; i < mls.getNumGeometries(); i++) {
+      LineString ls = (LineString) mls.getGeometryN(i);
+      List<S2Point> pts = toS2Points(ls.getCoordinates());
+      if (pts.size() >= 2) {
+        features.add((new S2Polyline(pts)));
+      }
+      // Empty/degenerate parts are skipped
+    }
+    return new PolylineGeography(features);
+  }
+
+  private static Geography polyToGeog(Geometry geom) throws IOException {
+    // Build S2 loops: exterior + holes
+    Polygon poly = (Polygon) geom;
+    // Construct S2 polygon (parity handles holes automatically)
+    S2Polygon s2poly = toS2Polygon(poly);
+    PolygonGeography g = new PolygonGeography(s2poly);
+    g.setSRID(geom.getSRID());
+    return g;
+  }
+
+  private static Geography mPolyToGeog(Geometry geom) throws IOException {
+    final List<S2Polygon> polys = new ArrayList<>();
+
+    MultiPolygon mp = (MultiPolygon) geom;
+    for (int i = 0; i < mp.getNumGeometries(); i++) {
+      Polygon p = (Polygon) mp.getGeometryN(i);
+      S2Polygon s2 = toS2Polygon(p);
+      if (s2 != null && !s2.isEmpty()) polys.add(s2);
+    }
+
+    MultiPolygonGeography out =
+        new MultiPolygonGeography(
+            Geography.GeographyKind.MULTIPOLYGON, Collections.unmodifiableList(polys));
+    out.setSRID(geom.getSRID());
+    return out;
+  }
+
+  private static Geography geomCollToGeog(Geometry geom) throws IOException {
+    if (!(geom instanceof GeometryCollection)) {
+      throw new IllegalArgumentException(
+          "geomCollToGeog expects GeometryCollection, got " + geom.getGeometryType());
+    }
+    GeographyCollection coll = new GeographyCollection(); // same package → features is accessible
+
+    GeometryCollection gc = (GeometryCollection) geom;
+    for (int i = 0; i < gc.getNumGeometries(); i++) {
+      Geometry g = gc.getGeometryN(i);
+      Geography sub = null;
+
+      if (g instanceof Point) {
+        sub = pointToGeog((Point) g);
+      } else if (g instanceof MultiPoint) {
+        MultiPoint mp = (MultiPoint) g;
+        for (int k = 0; k < mp.getNumGeometries(); k++) {
+          coll.features.add(pointToGeog((Point) mp.getGeometryN(k)));
+        }
+        continue; // already appended children
+      } else if (g instanceof LineString) {
+        sub = lineToGeog(g);
+      } else if (g instanceof MultiLineString) {
+        sub = mLineToGeog(g);
+      } else if (g instanceof Polygon) {
+        sub = polyToGeog(g);
+      } else if (g instanceof MultiPolygon) {
+        sub = mPolyToGeog(g);
+      } else if (g instanceof GeometryCollection) {
+        // Recurse for nested collections
+        sub = geomCollToGeog(g);
+      }
+
+      if (sub != null) coll.features.add(sub);
+    }
+
+    coll.setSRID(geom.getSRID());
+    return coll;
+  }
+
+  /** Convert JTS coordinates to S2 points; drops NaNs and consecutive duplicates. */
+  private static List<S2Point> toS2Points(Coordinate[] coords) throws IOException {
+    List<S2Point> points = new ArrayList<>(coords.length);
+    // Build via S2Builder + S2PointVectorLayer
+    S2Builder builder = new S2Builder.Builder().build();
+    S2PointVectorLayer layer = new S2PointVectorLayer();
+    // must call build() before reading out the points
+    S2Error error = new S2Error();
+    for (int i = 0; i < coords.length; i++) {
+      double lon = coords[i].x;
+      double lat = coords[i].y;
+      S2Point s2Point = S2LatLng.fromDegrees(lat, lon).toPoint();
+
+      builder.startLayer(layer);
+      builder.addPoint(s2Point);
+
+      if (!builder.build(error)) {
+        throw new IOException("Failed to build S2 point layer: " + error.text());
+      }
+    }
+    for (int i = 0; i < layer.getPointVector().size(); i++) {
+      // Extract the resulting points
+      points.add(layer.getPointVector().get(i));
+    }
+    return points;
+  }
+
+  /** Convert a JTS LinearRing to a normalized S2Loop. Returns null if < 3 distinct vertices. */
+  private static S2Loop toS2Loop(LinearRing ring) {
+    Coordinate[] coords = ring.getCoordinates();
+    if (coords == null || coords.length < 4) { // JTS rings usually have first==last
+      return null;
+    }
+
+    // Detect if ring is explicitly closed (first == last)
+    int end = coords.length;
+    if (coords[0].equals2D(coords[coords.length - 1])) {
+      end = coords.length - 1; // skip duplicate closing vertex
+    }
+
+    List<S2Point> pts = new ArrayList<>(end);
+    Double prevLon = null, prevLat = null;
+
+    for (int i = 0; i < end; i++) {
+      double lon = coords[i].x; // JTS: x=lon, y=lat
+      double lat = coords[i].y;
+      if (Double.isNaN(lon) || Double.isNaN(lat)) continue;
+
+      // Skip consecutive duplicates
+      if (prevLon != null && lon == prevLon && lat == prevLat) continue;
+
+      pts.add(S2LatLng.fromDegrees(lat, lon).toPoint());
+      prevLon = lon;
+      prevLat = lat;
+    }
+
+    if (pts.size() < 3) return null;
+
+    S2Loop loop = new S2Loop(pts);
+    loop.normalize(); // ensure area <= 2π; orientation consistent for S2
+    return loop;
+  }
+
+  private static S2Polygon toS2Polygon(Polygon poly) {
+    List<S2Loop> loops = new ArrayList<>();
+    S2Loop shell = toS2Loop((LinearRing) poly.getExteriorRing());
+    if (shell != null) loops.add(shell);
+    for (int i = 0; i < poly.getNumInteriorRing(); i++) {
+      S2Loop hole = toS2Loop((LinearRing) poly.getInteriorRingN(i));
+      if (hole != null) loops.add(hole);
+    }
+    if (loops.isEmpty()) return null;
+    return new S2Polygon(loops); // even–odd handles holes
+  }
 }
