@@ -18,7 +18,7 @@
  */
 package org.apache.spark.sql.execution.datasources.geoparquet
 
-import org.apache.spark.sql.execution.datasources.geoparquet.internal.{ParquetFileFormat, ParquetOutputWriter, ParquetReadSupport, ParquetWriteSupport, ParquetOptions, ParquetFooterReader, ParquetFilters, ParquetRowIndexUtil, DataSourceUtils => InternalDataSourceUtils}
+import org.apache.spark.sql.execution.datasources.geoparquet.internal.{DataTypeUtils, ParquetFileFormat, ParquetFilters, ParquetFooterReader, ParquetOptions, ParquetOutputWriter, ParquetReadSupport, ParquetRowIndexUtil, ParquetWriteSupport, DataSourceUtils => InternalDataSourceUtils}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.FileStatus
 import org.apache.hadoop.mapred.FileSplit
@@ -36,10 +36,8 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeProjection
 import org.apache.spark.sql.catalyst.parser.LegacyTypeStringParser
-import org.apache.spark.sql.catalyst.types.DataTypeUtils.toAttributes
 import org.apache.spark.sql.catalyst.util.DateTimeUtils
 import org.apache.spark.sql.execution.datasources._
-import org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetFileFormat.readParquetFootersInParallel
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sources._
@@ -325,7 +323,9 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
         try {
           readerWithRowIndexes.initialize(split, hadoopAttemptContext)
 
-          val fullSchema = toAttributes(requiredSchema) ++ toAttributes(partitionSchema)
+          val fullSchema =
+            DataTypeUtils.toAttributes(requiredSchema) ++ DataTypeUtils.toAttributes(
+              partitionSchema)
           val unsafeProjection = GenerateUnsafeProjection.generate(fullSchema, fullSchema)
 
           if (partitionSchema.length == 0) {

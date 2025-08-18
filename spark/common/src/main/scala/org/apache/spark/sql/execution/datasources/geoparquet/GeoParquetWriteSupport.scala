@@ -37,8 +37,7 @@ import org.apache.spark.sql.execution.datasources.geoparquet.internal.{DataSourc
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
-import org.json4s.{DefaultFormats, Extraction, JValue}
-import org.json4s.jackson.compactJson
+import org.json4s.JValue
 import org.json4s.jackson.JsonMethods.parse
 import org.locationtech.jts.geom.Geometry
 

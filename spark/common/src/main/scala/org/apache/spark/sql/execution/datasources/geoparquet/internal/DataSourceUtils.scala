@@ -18,102 +18,15 @@
  */
 package org.apache.spark.sql.execution.datasources.geoparquet.internal
 
-import java.util.Locale
-import scala.collection.JavaConverters._
-import org.apache.hadoop.fs.Path
-import org.json4s.{Formats, NoTypeHints}
-import org.json4s.jackson.Serialization
 import org.apache.spark.SparkUpgradeException
-import org.apache.spark.sql.{SPARK_LEGACY_DATETIME_METADATA_KEY, SPARK_LEGACY_INT96_METADATA_KEY, SPARK_TIMEZONE_METADATA_KEY, SPARK_VERSION_METADATA_KEY}
-import org.apache.spark.sql.catalyst.catalog.{CatalogTable, CatalogUtils}
-import org.apache.spark.sql.catalyst.expressions.{AttributeReference, AttributeSet, Expression, ExpressionSet, PredicateHelper}
+import org.apache.spark.sql.catalyst.expressions.PredicateHelper
 import org.apache.spark.sql.catalyst.util.RebaseDateTime
-import org.apache.spark.sql.errors.{QueryCompilationErrors, QueryExecutionErrors}
-import org.apache.spark.sql.execution.datasources.{FileFormat, HadoopFsRelation}
+import org.apache.spark.sql.errors.QueryExecutionErrors
 import org.apache.spark.sql.internal.SQLConf
-import org.apache.spark.sql.sources.BaseRelation
-import org.apache.spark.sql.types._
-import org.apache.spark.sql.util.CaseInsensitiveStringMap
+import org.apache.spark.sql.{SPARK_LEGACY_DATETIME_METADATA_KEY, SPARK_LEGACY_INT96_METADATA_KEY, SPARK_TIMEZONE_METADATA_KEY, SPARK_VERSION_METADATA_KEY}
 import org.apache.spark.util.Utils
 
 object DataSourceUtils extends PredicateHelper {
-
-  /**
-   * The key to use for storing partitionBy columns as options.
-   */
-  val PARTITIONING_COLUMNS_KEY = "__partition_columns"
-
-  /**
-   * The key to use for specifying partition overwrite mode when INSERT OVERWRITE a partitioned
-   * data source table.
-   */
-  val PARTITION_OVERWRITE_MODE = "partitionOverwriteMode"
-
-  /**
-   * Utility methods for converting partitionBy columns to options and back.
-   */
-  private implicit val formats: AnyRef with Formats = Serialization.formats(NoTypeHints)
-
-  def encodePartitioningColumns(columns: Seq[String]): String = {
-    Serialization.write(columns)
-  }
-
-  def decodePartitioningColumns(str: String): Seq[String] = {
-    Serialization.read[Seq[String]](str)
-  }
-
-  /**
-   * Verify if the field name is supported in datasource. This verification should be done in a
-   * driver side.
-   */
-  def checkFieldNames(format: FileFormat, schema: StructType): Unit = {
-    schema.foreach { field =>
-      if (!format.supportFieldName(field.name)) {
-        throw QueryCompilationErrors.invalidColumnNameAsPathError(
-          format.getClass.getSimpleName,
-          field.name)
-      }
-      field.dataType match {
-        case s: StructType => checkFieldNames(format, s)
-        case _ =>
-      }
-    }
-  }
-
-  /**
-   * Verify if the schema is supported in datasource. This verification should be done in a driver
-   * side.
-   */
-  def verifySchema(format: FileFormat, schema: StructType): Unit = {
-    schema.foreach { field =>
-      if (!format.supportDataType(field.dataType)) {
-        throw QueryCompilationErrors.dataTypeUnsupportedByDataSourceError(format.toString, field)
-      }
-    }
-  }
-
-  // SPARK-24626: Metadata files and temporary files should not be
-  // counted as data files, so that they shouldn't participate in tasks like
-  // location size calculation.
-  private[sql] def isDataPath(path: Path): Boolean = isDataFile(path.getName)
-
-  private[sql] def isDataFile(fileName: String) =
-    !(fileName.startsWith("_") || fileName.startsWith("."))
-
-  /**
-   * Returns if the given relation's V1 datasource provider supports nested predicate pushdown.
-   */
-  private[sql] def supportNestedPredicatePushdown(relation: BaseRelation): Boolean =
-    relation match {
-      case hs: HadoopFsRelation =>
-        val supportedDatasources =
-          Utils.stringToSeq(
-            SQLConf.get
-              .getConf(SQLConf.NESTED_PREDICATE_PUSHDOWN_FILE_SOURCE_LIST)
-              .toLowerCase(Locale.ROOT))
-        supportedDatasources.contains(hs.toString)
-      case _ => false
-    }
 
   private def getRebaseSpec(
       lookupFileMeta: String => String,
@@ -232,52 +145,5 @@ object DataSourceUtils extends PredicateHelper {
       val timeZone = SQLConf.get.sessionLocalTimeZone
       RebaseDateTime.rebaseGregorianToJulianMicros(timeZone, _)
     case LegacyBehaviorPolicy.CORRECTED => identity[Long]
-  }
-
-  def generateDatasourceOptions(
-      extraOptions: CaseInsensitiveStringMap,
-      table: CatalogTable): Map[String, String] = {
-    val pathOption = table.storage.locationUri.map("path" -> CatalogUtils.URIToString(_))
-    val options = table.storage.properties ++ pathOption
-    if (!SQLConf.get.getConf(SQLConf.LEGACY_EXTRA_OPTIONS_BEHAVIOR)) {
-      // Check the same key with different values
-      table.storage.properties.foreach { case (k, v) =>
-        if (extraOptions.containsKey(k) && extraOptions.get(k) != v) {
-          throw QueryCompilationErrors.failToResolveDataSourceForTableError(table, k)
-        }
-      }
-      // To keep the original key from table properties, here we filter all case insensitive
-      // duplicate keys out from extra options.
-      val lowerCasedDuplicatedKeys =
-        table.storage.properties.keySet
-          .map(_.toLowerCase(Locale.ROOT))
-          .intersect(extraOptions.keySet.asScala)
-      extraOptions
-        .asCaseSensitiveMap()
-        .asScala
-        .filterNot { case (k, _) =>
-          lowerCasedDuplicatedKeys.contains(k.toLowerCase(Locale.ROOT))
-        }
-        .toMap ++ options
-    } else {
-      options
-    }
-  }
-
-  def getPartitionFiltersAndDataFilters(
-      partitionSchema: StructType,
-      normalizedFilters: Seq[Expression]): (Seq[Expression], Seq[Expression]) = {
-    val partitionColumns = normalizedFilters.flatMap { expr =>
-      expr.collect {
-        case attr: AttributeReference if partitionSchema.names.contains(attr.name) =>
-          attr
-      }
-    }
-    val partitionSet = AttributeSet(partitionColumns)
-    val (partitionFilters, dataFilters) = normalizedFilters.partition(f =>
-      f.references.nonEmpty && f.references.subsetOf(partitionSet))
-    val extraPartitionFilter =
-      dataFilters.flatMap(extractPredicatesWithinOutputSet(_, partitionSet))
-    (ExpressionSet(partitionFilters ++ extraPartitionFilter).toSeq, dataFilters)
   }
 }

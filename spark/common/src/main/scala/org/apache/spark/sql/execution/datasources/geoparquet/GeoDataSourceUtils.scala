@@ -22,7 +22,6 @@ import org.apache.spark.sql.catalyst.util.RebaseDateTime
 import org.apache.spark.sql.SPARK_VERSION_METADATA_KEY
 import org.apache.spark.sql.execution.datasources.geoparquet.internal.{DataSourceUtils, LegacyBehaviorPolicy}
 import org.apache.spark.sql.internal.SQLConf
-// Use Spark's original LegacyBehaviorPolicy to maintain compatibility
 import org.apache.spark.util.Utils
 
 import scala.util.Try

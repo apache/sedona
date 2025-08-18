@@ -35,8 +35,7 @@ import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName.{BINARY, FIXED_
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions._
-import org.apache.spark.sql.catalyst.util.{ArrayBasedMapData, CaseInsensitiveMap, DateTimeUtils, GenericArrayData, ResolveDefaultColumns}
-import org.apache.spark.sql.catalyst.util.ResolveDefaultColumns._
+import org.apache.spark.sql.catalyst.util.{ArrayBasedMapData, CaseInsensitiveMap, DateTimeUtils, GenericArrayData}
 import org.apache.spark.sql.errors.QueryExecutionErrors
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.types._
@@ -49,7 +48,7 @@ import org.apache.spark.util.collection.Utils
  * converted values to a [[InternalRow]]; or a converter for array elements may append converted
  * values to an [[ArrayBuffer]].
  */
-private[internal] trait ParentContainerUpdater {
+trait ParentContainerUpdater {
 
   /** Called before a record field is being converted */
   def start(): Unit = ()
@@ -70,14 +69,14 @@ private[internal] trait ParentContainerUpdater {
 /** A no-op updater used for root converter (who doesn't have a parent). */
 private[geoparquet] object NoopUpdater extends ParentContainerUpdater
 
-private[internal] trait HasParentContainerUpdater {
+trait HasParentContainerUpdater {
   def updater: ParentContainerUpdater
 }
 
 /**
  * A convenient converter class for Parquet group types with a [[HasParentContainerUpdater]].
  */
-private[internal] abstract class ParquetGroupConverter(val updater: ParentContainerUpdater)
+abstract class ParquetGroupConverter(val updater: ParentContainerUpdater)
     extends GroupConverter
     with HasParentContainerUpdater
 
@@ -86,7 +85,7 @@ private[internal] abstract class ParquetGroupConverter(val updater: ParentContai
  * handled by this converter. Parquet primitive types are only a subset of those of Spark SQL. For
  * example, BYTE, SHORT, and INT in Spark SQL are all covered by INT32 in Parquet.
  */
-private[internal] class ParquetPrimitiveConverter(val updater: ParentContainerUpdater)
+class ParquetPrimitiveConverter(val updater: ParentContainerUpdater)
     extends PrimitiveConverter
     with HasParentContainerUpdater {
 
@@ -201,7 +200,7 @@ private[internal] class ParquetRowConverter(
    * The [[InternalRow]] converted from an entire Parquet record.
    */
   def currentRecord: InternalRow = {
-    applyExistenceDefaultValuesToRow(catalystType, currentRow, bitmask)
+    ResolveDefaultColumns.applyExistenceDefaultValuesToRow(catalystType, currentRow, bitmask)
     currentRow
   }
 
@@ -921,7 +920,7 @@ private[internal] class ParquetRowConverter(
   }
 }
 
-private[internal] object ParquetRowConverter {
+object ParquetRowConverter {
   def binaryToUnscaledLong(binary: Binary): Long = {
     // The underlying `ByteBuffer` implementation is guaranteed to be `HeapByteBuffer`, so here
     // we are using `Binary.toByteBuffer.array()` to steal the underlying byte array without

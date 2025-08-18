@@ -23,7 +23,7 @@ import org.apache.parquet.io.api.{GroupConverter, RecordMaterializer}
 import org.apache.parquet.schema.MessageType
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.types.StructType
-import org.apache.spark.sql.execution.datasources.geoparquet.internal.{NoopUpdater, RebaseSpec}
+import org.apache.spark.sql.execution.datasources.geoparquet.internal.RebaseSpec
 
 /**
  * A [[RecordMaterializer]] for Catalyst rows.
@@ -53,7 +53,7 @@ class GeoParquetRecordMaterializer(
     int96RebaseSpec: RebaseSpec,
     parameters: Map[String, String])
     extends RecordMaterializer[InternalRow] {
-  private val rootConverter = new internal.GeoParquetRowConverter(
+  private val rootConverter = new GeoParquetRowConverter(
     schemaConverter,
     parquetSchema,
     catalystSchema,

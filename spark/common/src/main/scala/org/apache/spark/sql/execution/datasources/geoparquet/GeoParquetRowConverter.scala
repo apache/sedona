@@ -16,14 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.execution.datasources.geoparquet.internal
-
-import org.apache.spark.sql.execution.datasources.geoparquet.{GeoParquetToSparkSchemaConverter, GeoParquetUtils}
+package org.apache.spark.sql.execution.datasources.geoparquet
 
 import org.apache.parquet.column.Dictionary
 import org.apache.parquet.io.api.{Binary, Converter, GroupConverter, PrimitiveConverter}
-import org.apache.parquet.schema.LogicalTypeAnnotation.TimeUnit
-import org.apache.parquet.schema.LogicalTypeAnnotation.TimestampLogicalTypeAnnotation
+import org.apache.parquet.schema.LogicalTypeAnnotation.{TimeUnit, TimestampLogicalTypeAnnotation}
 import org.apache.parquet.schema.OriginalType.LIST
 import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName._
 import org.apache.parquet.schema.{GroupType, OriginalType, Type}
@@ -31,6 +28,7 @@ import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.util.{ArrayBasedMapData, CaseInsensitiveMap, DateTimeUtils, GenericArrayData}
+import org.apache.spark.sql.execution.datasources.geoparquet.internal._
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
