@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.execution.datasources.parquet
+package org.apache.spark.sql.execution.datasources.geoparquet
 
 import org.apache.spark.sql.execution.datasources.FileFormat
 import org.apache.spark.sql.sources.DataSourceRegister

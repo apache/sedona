@@ -23,7 +23,7 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.execution.datasource.stac.TemporalFilter
-import org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter
+import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter
 import org.apache.spark.sql.types.{MetadataBuilder, StructField, StructType}
 import org.locationtech.jts.geom.Envelope
 
