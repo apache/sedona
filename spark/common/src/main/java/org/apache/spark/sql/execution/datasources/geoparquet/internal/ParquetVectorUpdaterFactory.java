@@ -32,7 +32,6 @@ import org.apache.parquet.schema.LogicalTypeAnnotation.TimestampLogicalTypeAnnot
 import org.apache.parquet.schema.PrimitiveType;
 import org.apache.spark.sql.catalyst.util.DateTimeUtils;
 import org.apache.spark.sql.catalyst.util.RebaseDateTime;
-import org.apache.spark.sql.execution.datasources.SchemaColumnConvertNotSupportedException;
 import org.apache.spark.sql.execution.vectorized.WritableColumnVector;
 import org.apache.spark.sql.types.*;
 
@@ -1006,12 +1005,15 @@ public class ParquetVectorUpdaterFactory {
   }
 
   /** Helper function to construct exception for parquet schema mismatch. */
-  private SchemaColumnConvertNotSupportedException constructConvertNotSupportedException(
+  private RuntimeException constructConvertNotSupportedException(
       ColumnDescriptor descriptor, DataType sparkType) {
-    return new SchemaColumnConvertNotSupportedException(
-        Arrays.toString(descriptor.getPath()),
-        descriptor.getPrimitiveType().getPrimitiveTypeName().toString(),
-        sparkType.catalogString());
+    return new RuntimeException(
+        "Parquet schema mismatch: "
+            + Arrays.toString(descriptor.getPath())
+            + "\n"
+            + descriptor.getPrimitiveType().getPrimitiveTypeName().toString()
+            + " and "
+            + sparkType.catalogString());
   }
 
   private static boolean canReadAsIntDecimal(ColumnDescriptor descriptor, DataType dt) {

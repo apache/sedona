@@ -36,7 +36,6 @@ import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.util.{ArrayBasedMapData, CaseInsensitiveMap, DateTimeUtils, GenericArrayData}
-import org.apache.spark.sql.errors.QueryExecutionErrors
 
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String

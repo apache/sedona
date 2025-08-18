@@ -32,17 +32,16 @@ import org.apache.parquet.format.converter.ParquetMetadataConverter.SKIP_ROW_GRO
 import org.apache.parquet.hadoop._
 import org.apache.spark.TaskContext
 import org.apache.spark.internal.Logging
-import org.apache.spark.sql._
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeProjection
 import org.apache.spark.sql.catalyst.parser.LegacyTypeStringParser
 import org.apache.spark.sql.catalyst.util.DateTimeUtils
-import org.apache.spark.sql.errors.QueryExecutionErrors
-import org.apache.spark.sql.execution.datasources._
+import org.apache.spark.sql.execution.datasources.{FileFormat, OutputWriterFactory, PartitionedFile, RecordReaderIterator}
 import org.apache.spark.sql.execution.vectorized.{ConstantColumnVector, OffHeapColumnVector, OnHeapColumnVector}
 import org.apache.spark.sql.internal.SQLConf
-import org.apache.spark.sql.sources._
+import org.apache.spark.sql.sources.{DataSourceRegister, Filter}
 import org.apache.spark.sql.types._
 import org.apache.spark.util.{SerializableConfiguration, ThreadUtils}
 
@@ -127,15 +126,11 @@ class ParquetFileFormat
     hadoopConf.set(ParquetReadSupport.SPARK_ROW_REQUESTED_SCHEMA, requiredSchema.json)
     hadoopConf.set(ParquetWriteSupport.SPARK_ROW_SCHEMA, requiredSchema.json)
     val conf = new PortableSQLConf(sparkSession.sessionState.conf)
-    hadoopConf.set(
-      PortableSQLConf.SESSION_LOCAL_TIMEZONE.key,
-      conf.sessionLocalTimeZone)
+    hadoopConf.set(PortableSQLConf.SESSION_LOCAL_TIMEZONE.key, conf.sessionLocalTimeZone)
     hadoopConf.setBoolean(
       PortableSQLConf.NESTED_SCHEMA_PRUNING_ENABLED.key,
       conf.nestedSchemaPruningEnabled)
-    hadoopConf.setBoolean(
-      PortableSQLConf.CASE_SENSITIVE.key,
-      conf.caseSensitiveAnalysis)
+    hadoopConf.setBoolean(PortableSQLConf.CASE_SENSITIVE.key, conf.caseSensitiveAnalysis)
 
     // Sets flags for `ParquetToSparkSchemaConverter`
     hadoopConf.setBoolean(

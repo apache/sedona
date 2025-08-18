@@ -18,10 +18,8 @@
  */
 package org.apache.spark.sql.execution.datasources.geoparquet.internal
 
-import org.apache.spark.SparkUpgradeException
 import org.apache.spark.sql.catalyst.expressions.PredicateHelper
 import org.apache.spark.sql.catalyst.util.RebaseDateTime
-import org.apache.spark.sql.errors.QueryExecutionErrors
 import org.apache.spark.util.Utils
 
 object DataSourceUtils extends PredicateHelper {
@@ -97,7 +95,7 @@ object DataSourceUtils extends PredicateHelper {
     getRebaseSpec(lookupFileMeta, modeByConfig, "3.1.0", SPARK_LEGACY_INT96_METADATA_KEY)
   }
 
-  def newRebaseExceptionInRead(format: String): SparkUpgradeException = {
+  def newRebaseExceptionInRead(format: String): RuntimeException = {
     val (config, option) = format match {
       case "Parquet INT96" =>
         (PortableSQLConf.PARQUET_INT96_REBASE_MODE_IN_READ.key, ParquetOptions.INT96_REBASE_MODE)
@@ -110,7 +108,7 @@ object DataSourceUtils extends PredicateHelper {
     QueryExecutionErrors.sparkUpgradeInReadingDatesError(format, config, option)
   }
 
-  def newRebaseExceptionInWrite(format: String): SparkUpgradeException = {
+  def newRebaseExceptionInWrite(format: String): RuntimeException = {
     val config = format match {
       case "Parquet INT96" => PortableSQLConf.PARQUET_INT96_REBASE_MODE_IN_WRITE.key
       case "Parquet" => PortableSQLConf.PARQUET_REBASE_MODE_IN_WRITE.key

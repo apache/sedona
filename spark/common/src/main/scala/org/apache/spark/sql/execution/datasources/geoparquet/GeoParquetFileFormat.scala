@@ -18,7 +18,7 @@
  */
 package org.apache.spark.sql.execution.datasources.geoparquet
 
-import org.apache.spark.sql.execution.datasources.geoparquet.internal.{DataTypeUtils, PortableSQLConf, ParquetFileFormat, ParquetFilters, ParquetFooterReader, ParquetOptions, ParquetOutputWriter, ParquetReadSupport, ParquetRowIndexUtil, ParquetWriteSupport, DataSourceUtils => InternalDataSourceUtils}
+import org.apache.spark.sql.execution.datasources.geoparquet.internal.{DataTypeUtils, ParquetFileFormat, ParquetFilters, ParquetFooterReader, ParquetOptions, ParquetOutputWriter, ParquetReadSupport, ParquetRowIndexUtil, ParquetWriteSupport, PortableSQLConf, SchemaMergeUtils, DataSourceUtils => InternalDataSourceUtils}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.FileStatus
 import org.apache.hadoop.mapred.FileSplit
@@ -37,9 +37,9 @@ import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeProjection
 import org.apache.spark.sql.catalyst.parser.LegacyTypeStringParser
 import org.apache.spark.sql.catalyst.util.DateTimeUtils
-import org.apache.spark.sql.execution.datasources._
+import org.apache.spark.sql.execution.datasources.{FileFormat, OutputWriter, OutputWriterFactory, PartitionedFile, RecordReaderIterator}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.sql.sources._
+import org.apache.spark.sql.sources.{DataSourceRegister, Filter}
 import org.apache.spark.sql.types._
 import org.apache.spark.util.SerializableConfiguration
 
@@ -185,15 +185,11 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
     hadoopConf.set(ParquetReadSupport.SPARK_ROW_REQUESTED_SCHEMA, requiredSchema.json)
     hadoopConf.set(ParquetWriteSupport.SPARK_ROW_SCHEMA, requiredSchema.json)
     val conf = new PortableSQLConf(sparkSession.sessionState.conf)
-    hadoopConf.set(
-      PortableSQLConf.SESSION_LOCAL_TIMEZONE.key,
-      conf.sessionLocalTimeZone)
+    hadoopConf.set(PortableSQLConf.SESSION_LOCAL_TIMEZONE.key, conf.sessionLocalTimeZone)
     hadoopConf.setBoolean(
       PortableSQLConf.NESTED_SCHEMA_PRUNING_ENABLED.key,
       conf.nestedSchemaPruningEnabled)
-    hadoopConf.setBoolean(
-      PortableSQLConf.CASE_SENSITIVE.key,
-      conf.caseSensitiveAnalysis)
+    hadoopConf.setBoolean(PortableSQLConf.CASE_SENSITIVE.key, conf.caseSensitiveAnalysis)
 
     // Sets flags for `ParquetToSparkSchemaConverter`
     hadoopConf.setBoolean(

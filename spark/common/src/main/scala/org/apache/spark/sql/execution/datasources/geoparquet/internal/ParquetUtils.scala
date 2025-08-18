@@ -34,7 +34,6 @@ import org.apache.parquet.io.api.Binary
 import org.apache.parquet.schema.{PrimitiveType, Types}
 import org.apache.parquet.schema.PrimitiveType.PrimitiveTypeName
 
-import org.apache.spark.SparkException
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.SparkSession
@@ -288,7 +287,8 @@ object ParquetUtils extends Logging {
         val v = values(i).asInstanceOf[Binary]
         converter.getConverter(i).asPrimitiveConverter.addBinary(v)
       case (_, i) =>
-        throw new SparkException("Unexpected parquet type name: " + primitiveTypeNames(i))
+        throw new IllegalArgumentException(
+          "Unexpected parquet type name: " + primitiveTypeNames(i))
     }
 
     if (aggregation.groupByExpressions.nonEmpty) {

@@ -34,7 +34,6 @@ import org.apache.parquet.schema.Type.Repetition
 
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.errors.QueryExecutionErrors
 
 import org.apache.spark.sql.types._
 

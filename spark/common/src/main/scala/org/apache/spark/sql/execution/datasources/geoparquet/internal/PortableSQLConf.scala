@@ -144,35 +144,44 @@ object PortableSQLConf {
     buildConf("spark.sql.parquet.enableNestedColumnVectorizedReader").booleanConf
       .createWithDefault(false)
 
-  val PARQUET_RECORD_FILTER_ENABLED = buildConf("spark.sql.parquet.recordLevelFilter.enabled").booleanConf
-    .createWithDefault(false)
+  val PARQUET_RECORD_FILTER_ENABLED =
+    buildConf("spark.sql.parquet.recordLevelFilter.enabled").booleanConf
+      .createWithDefault(false)
 
-  val PARQUET_INT96_TIMESTAMP_CONVERSION = buildConf("spark.sql.parquet.int96TimestampConversion").booleanConf
-    .createWithDefault(false)
+  val PARQUET_INT96_TIMESTAMP_CONVERSION =
+    buildConf("spark.sql.parquet.int96TimestampConversion").booleanConf
+      .createWithDefault(false)
 
   val PARQUET_FILTER_PUSHDOWN_ENABLED = buildConf("spark.sql.parquet.filterPushdown").booleanConf
     .createWithDefault(true)
 
-  val PARQUET_FILTER_PUSHDOWN_DATE_ENABLED = buildConf("spark.sql.parquet.filterPushdown.date").booleanConf
-    .createWithDefault(true)
+  val PARQUET_FILTER_PUSHDOWN_DATE_ENABLED =
+    buildConf("spark.sql.parquet.filterPushdown.date").booleanConf
+      .createWithDefault(true)
 
-  val PARQUET_FILTER_PUSHDOWN_TIMESTAMP_ENABLED = buildConf("spark.sql.parquet.filterPushdown.timestamp").booleanConf
-    .createWithDefault(true)
+  val PARQUET_FILTER_PUSHDOWN_TIMESTAMP_ENABLED =
+    buildConf("spark.sql.parquet.filterPushdown.timestamp").booleanConf
+      .createWithDefault(true)
 
-  val PARQUET_FILTER_PUSHDOWN_DECIMAL_ENABLED = buildConf("spark.sql.parquet.filterPushdown.decimal").booleanConf
-    .createWithDefault(true)
+  val PARQUET_FILTER_PUSHDOWN_DECIMAL_ENABLED =
+    buildConf("spark.sql.parquet.filterPushdown.decimal").booleanConf
+      .createWithDefault(true)
 
-  val PARQUET_FILTER_PUSHDOWN_STRING_PREDICATE_ENABLED = buildConf("spark.sql.parquet.filterPushdown.stringPredicate").booleanConf
-    .createWithDefault(true)
+  val PARQUET_FILTER_PUSHDOWN_STRING_PREDICATE_ENABLED =
+    buildConf("spark.sql.parquet.filterPushdown.stringPredicate").booleanConf
+      .createWithDefault(true)
 
-  val PARQUET_FILTER_PUSHDOWN_INFILTERTHRESHOLD = buildConf("spark.sql.parquet.pushdown.inFilterThreshold").intConf
-    .createWithDefault(10)
+  val PARQUET_FILTER_PUSHDOWN_INFILTERTHRESHOLD =
+    buildConf("spark.sql.parquet.pushdown.inFilterThreshold").intConf
+      .createWithDefault(10)
 
-  val PARQUET_SCHEMA_RESPECT_SUMMARIES = buildConf("spark.sql.parquet.respectSummaryFiles").booleanConf
-    .createWithDefault(false)
+  val PARQUET_SCHEMA_RESPECT_SUMMARIES =
+    buildConf("spark.sql.parquet.respectSummaryFiles").booleanConf
+      .createWithDefault(false)
 
-  val PARQUET_VECTORIZED_READER_BATCH_SIZE = buildConf("spark.sql.parquet.columnarReaderBatchSize").intConf
-    .createWithDefault(4096)
+  val PARQUET_VECTORIZED_READER_BATCH_SIZE =
+    buildConf("spark.sql.parquet.columnarReaderBatchSize").intConf
+      .createWithDefault(4096)
 
   private def buildConf(key: String) = new ConfigBuilder(key)
 
@@ -229,15 +238,23 @@ class PortableSQLConf(sqlConf: SQLConf) {
     PortableSQLConf.PARQUET_FIELD_ID_WRITE_ENABLED)
   def nestedSchemaPruningEnabled: Boolean = getConf(PortableSQLConf.NESTED_SCHEMA_PRUNING_ENABLED)
   def parquetRecordFilterEnabled: Boolean = getConf(PortableSQLConf.PARQUET_RECORD_FILTER_ENABLED)
-  def isParquetINT96TimestampConversion: Boolean = getConf(PortableSQLConf.PARQUET_INT96_TIMESTAMP_CONVERSION)
+  def isParquetINT96TimestampConversion: Boolean = getConf(
+    PortableSQLConf.PARQUET_INT96_TIMESTAMP_CONVERSION)
   def parquetFilterPushDown: Boolean = getConf(PortableSQLConf.PARQUET_FILTER_PUSHDOWN_ENABLED)
-  def parquetFilterPushDownDate: Boolean = getConf(PortableSQLConf.PARQUET_FILTER_PUSHDOWN_DATE_ENABLED)
-  def parquetFilterPushDownTimestamp: Boolean = getConf(PortableSQLConf.PARQUET_FILTER_PUSHDOWN_TIMESTAMP_ENABLED)
-  def parquetFilterPushDownDecimal: Boolean = getConf(PortableSQLConf.PARQUET_FILTER_PUSHDOWN_DECIMAL_ENABLED)
-  def parquetFilterPushDownStringPredicate: Boolean = getConf(PortableSQLConf.PARQUET_FILTER_PUSHDOWN_STRING_PREDICATE_ENABLED)
-  def parquetFilterPushDownInFilterThreshold: Int = getConf(PortableSQLConf.PARQUET_FILTER_PUSHDOWN_INFILTERTHRESHOLD)
-  def isParquetSchemaRespectSummaries: Boolean = getConf(PortableSQLConf.PARQUET_SCHEMA_RESPECT_SUMMARIES)
-  def parquetVectorizedReaderBatchSize: Int = getConf(PortableSQLConf.PARQUET_VECTORIZED_READER_BATCH_SIZE)
+  def parquetFilterPushDownDate: Boolean = getConf(
+    PortableSQLConf.PARQUET_FILTER_PUSHDOWN_DATE_ENABLED)
+  def parquetFilterPushDownTimestamp: Boolean = getConf(
+    PortableSQLConf.PARQUET_FILTER_PUSHDOWN_TIMESTAMP_ENABLED)
+  def parquetFilterPushDownDecimal: Boolean = getConf(
+    PortableSQLConf.PARQUET_FILTER_PUSHDOWN_DECIMAL_ENABLED)
+  def parquetFilterPushDownStringPredicate: Boolean = getConf(
+    PortableSQLConf.PARQUET_FILTER_PUSHDOWN_STRING_PREDICATE_ENABLED)
+  def parquetFilterPushDownInFilterThreshold: Int = getConf(
+    PortableSQLConf.PARQUET_FILTER_PUSHDOWN_INFILTERTHRESHOLD)
+  def isParquetSchemaRespectSummaries: Boolean = getConf(
+    PortableSQLConf.PARQUET_SCHEMA_RESPECT_SUMMARIES)
+  def parquetVectorizedReaderBatchSize: Int = getConf(
+    PortableSQLConf.PARQUET_VECTORIZED_READER_BATCH_SIZE)
 
 }
 
@@ -253,10 +270,7 @@ class ConfigBuilder(val key: String, val alternatives: Seq[String] = Seq.empty) 
     alternatives,
     (s: String) => s.toLowerCase(Locale.ROOT).toBoolean)
 
-  def intConf = new TypedConfigBuilder[Int](
-    key,
-    alternatives,
-    (s: String) => s.toInt)
+  def intConf = new TypedConfigBuilder[Int](key, alternatives, (s: String) => s.toInt)
 }
 
 class TypedConfigBuilder[T](
