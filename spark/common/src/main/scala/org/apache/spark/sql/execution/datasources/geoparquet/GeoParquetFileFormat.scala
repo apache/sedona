@@ -375,7 +375,7 @@ object GeoParquetFileFormat extends Logging {
     val assumeInt96IsTimestamp = sparkSession.sessionState.conf.isParquetINT96AsTimestamp
 
     val reader = (files: Seq[FileStatus], conf: Configuration, ignoreCorruptFiles: Boolean) => {
-      internal.ParquetFileFormat
+      ParquetFileFormat
         .readParquetFootersInParallel(conf, files, ignoreCorruptFiles)
         .map { footer =>
           // Converter used to convert Parquet `MessageType` to Spark SQL `StructType`

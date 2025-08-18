@@ -222,7 +222,7 @@ private[geoparquet] class GeoParquetRowConverter(
             override def addBinary(value: Binary): Unit = {
               val wkbReader = new WKBReader()
               val geom = wkbReader.read(value.getBytes)
-              updater.set(GeometryUDT.serialize(geom))
+              this.updater.set(GeometryUDT.serialize(geom))
             }
           }
         } else {
@@ -235,7 +235,7 @@ private[geoparquet] class GeoParquetRowConverter(
                 val wkbReader = new WKBReader()
                 val byteArray = currentArray.map(_.asInstanceOf[Byte]).toArray
                 val geom = wkbReader.read(byteArray)
-                updater.set(GeometryUDT.serialize(geom))
+                this.updater.set(GeometryUDT.serialize(geom))
               }
             }
           } else {
@@ -248,12 +248,12 @@ private[geoparquet] class GeoParquetRowConverter(
       case ByteType =>
         new ParquetPrimitiveConverter(updater) {
           override def addInt(value: Int): Unit =
-            updater.setByte(value.asInstanceOf[Byte])
+            this.updater.setByte(value.asInstanceOf[Byte])
 
           override def addBinary(value: Binary): Unit = {
             val bytes = value.getBytes
             for (b <- bytes) {
-              updater.set(b)
+              this.updater.set(b)
             }
           }
         }
@@ -261,7 +261,7 @@ private[geoparquet] class GeoParquetRowConverter(
       case ShortType =>
         new ParquetPrimitiveConverter(updater) {
           override def addInt(value: Int): Unit =
-            updater.setShort(value.asInstanceOf[Short])
+            this.updater.setShort(value.asInstanceOf[Short])
         }
 
       // For INT32 backed decimals
@@ -290,7 +290,7 @@ private[geoparquet] class GeoParquetRowConverter(
       case TimestampType if parquetType.getOriginalType == OriginalType.TIMESTAMP_MICROS =>
         new ParquetPrimitiveConverter(updater) {
           override def addLong(value: Long): Unit = {
-            updater.setLong(timestampRebaseFunc(value))
+            this.updater.setLong(timestampRebaseFunc(value))
           }
         }
 
@@ -298,7 +298,7 @@ private[geoparquet] class GeoParquetRowConverter(
         new ParquetPrimitiveConverter(updater) {
           override def addLong(value: Long): Unit = {
             val micros = DateTimeUtils.millisToMicros(value)
-            updater.setLong(timestampRebaseFunc(micros))
+            this.updater.setLong(timestampRebaseFunc(micros))
           }
         }
 
@@ -312,7 +312,7 @@ private[geoparquet] class GeoParquetRowConverter(
             val adjTime = convertTz
               .map(DateTimeUtils.convertTz(gregorianMicros, _, ZoneOffset.UTC))
               .getOrElse(gregorianMicros)
-            updater.setLong(adjTime)
+            this.updater.setLong(adjTime)
           }
         }
 
@@ -331,14 +331,14 @@ private[geoparquet] class GeoParquetRowConverter(
         new ParquetPrimitiveConverter(updater) {
           override def addLong(value: Long): Unit = {
             val micros = DateTimeUtils.millisToMicros(value)
-            updater.setLong(micros)
+            this.updater.setLong(micros)
           }
         }
 
       case DateType =>
         new ParquetPrimitiveConverter(updater) {
           override def addInt(value: Int): Unit = {
-            updater.set(dateRebaseFunc(value))
+            this.updater.set(dateRebaseFunc(value))
           }
         }
 

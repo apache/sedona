@@ -210,12 +210,14 @@ class ParquetFileFormat
       }
 
       val footerFileMetaData = fileFooter.getFileMetaData
-      val datetimeRebaseSpec = DataSourceUtils.datetimeRebaseSpec(
-        footerFileMetaData.getKeyValueMetaData.get,
-        datetimeRebaseModeInRead)
-      val int96RebaseSpec = DataSourceUtils.int96RebaseSpec(
-        footerFileMetaData.getKeyValueMetaData.get,
-        int96RebaseModeInRead)
+      val datetimeRebaseSpec =
+        org.apache.spark.sql.execution.datasources.geoparquet.internal.DataSourceUtils
+          .datetimeRebaseSpec(
+            footerFileMetaData.getKeyValueMetaData.get,
+            datetimeRebaseModeInRead)
+      val int96RebaseSpec =
+        org.apache.spark.sql.execution.datasources.geoparquet.internal.DataSourceUtils
+          .int96RebaseSpec(footerFileMetaData.getKeyValueMetaData.get, int96RebaseModeInRead)
 
       // Try to push down filters when filter push-down is enabled.
       val pushed = if (enableParquetFilterPushDown) {
