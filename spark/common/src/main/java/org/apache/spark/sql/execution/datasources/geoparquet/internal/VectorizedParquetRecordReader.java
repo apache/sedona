@@ -253,7 +253,8 @@ public class VectorizedParquetRecordReader extends SpecificParquetRecordReaderBa
     columnVectors = new ParquetColumnVector[sparkSchema.fields().length];
     for (int i = 0; i < columnVectors.length; i++) {
       Object defaultValue = null;
-      if (sparkRequestedSchema != null) {
+      if (sparkRequestedSchema != null
+          && DataTypeUtils.hasExistenceDefaultValues(sparkRequestedSchema)) {
         defaultValue = ResolveDefaultColumns.existenceDefaultValues(sparkRequestedSchema)[i];
       }
       columnVectors[i] =

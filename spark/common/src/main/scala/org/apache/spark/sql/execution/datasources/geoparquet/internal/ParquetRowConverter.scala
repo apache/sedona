@@ -193,13 +193,22 @@ private[internal] class ParquetRowConverter(
 
   private[this] val currentRow = new SpecificInternalRow(catalystType.map(_.dataType))
 
-  private[this] lazy val bitmask = ResolveDefaultColumns.existenceDefaultsBitmask(catalystType)
+  private[this] val hasExistenceDefaultValues =
+    DataTypeUtils.hasExistenceDefaultValues(catalystType)
+
+  private[this] lazy val bitmask = if (hasExistenceDefaultValues) {
+    ResolveDefaultColumns.existenceDefaultsBitmask(catalystType)
+  } else {
+    Array.fill(catalystType.size)(false)
+  }
 
   /**
    * The [[InternalRow]] converted from an entire Parquet record.
    */
   def currentRecord: InternalRow = {
-    ResolveDefaultColumns.applyExistenceDefaultValuesToRow(catalystType, currentRow, bitmask)
+    if (hasExistenceDefaultValues) {
+      ResolveDefaultColumns.applyExistenceDefaultValuesToRow(catalystType, currentRow, bitmask)
+    }
     currentRow
   }
 
@@ -237,7 +246,7 @@ private[internal] class ParquetRowConverter(
       }
     // If any fields in the Catalyst result schema have associated existence default values,
     // maintain a boolean array to track which fields have been explicitly assigned for each row.
-    if (ResolveDefaultColumns.hasExistenceDefaultValues(catalystType)) {
+    if (hasExistenceDefaultValues) {
       val existingValues = ResolveDefaultColumns.existenceDefaultValues(catalystType)
       for (i <- 0 until existingValues.size) {
         bitmask(i) =

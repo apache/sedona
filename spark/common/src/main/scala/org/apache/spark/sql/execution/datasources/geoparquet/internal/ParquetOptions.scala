@@ -22,7 +22,6 @@ import java.util.Locale
 import org.apache.parquet.hadoop.ParquetOutputFormat
 import org.apache.parquet.hadoop.metadata.CompressionCodecName
 import org.apache.spark.internal.Logging
-import org.apache.spark.sql.catalyst.{DataSourceOptions, FileSourceOptions}
 import org.apache.spark.sql.catalyst.util.CaseInsensitiveMap
 
 /**
@@ -31,8 +30,7 @@ import org.apache.spark.sql.catalyst.util.CaseInsensitiveMap
 class ParquetOptions(
     @transient private val parameters: CaseInsensitiveMap[String],
     @transient private val sqlConf: PortableSQLConf)
-    extends FileSourceOptions(parameters)
-    with Logging {
+    extends Logging {
 
   import ParquetOptions._
 
@@ -90,7 +88,7 @@ class ParquetOptions(
     .getOrElse(sqlConf.getConf(PortableSQLConf.PARQUET_INT96_REBASE_MODE_IN_READ))
 }
 
-object ParquetOptions extends DataSourceOptions {
+object ParquetOptions {
   // The parquet compression short names
   private val shortParquetCompressionCodecNames = Map(
     "none" -> CompressionCodecName.UNCOMPRESSED,
@@ -104,6 +102,17 @@ object ParquetOptions extends DataSourceOptions {
 
   def getParquetCompressionCodecName(name: String): String = {
     shortParquetCompressionCodecNames(name).name()
+  }
+
+  // Option -> Alternative Option if any
+  private val validOptions = collection.mutable.Map[String, Option[String]]()
+
+  /**
+   * Register a new Option.
+   */
+  private def newOption(name: String): String = {
+    validOptions += (name -> None)
+    name
   }
 
   val MERGE_SCHEMA = newOption("mergeSchema")

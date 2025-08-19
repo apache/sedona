@@ -25,7 +25,8 @@ import java.util.{Locale, TimeZone}
 /**
  * A more portable SQLConf that works for both Apache Spark and Databricks Runtime. The whole
  * point is to avoid relying on the constants and methods defined in
- * org.apache.spark.sql.internal.SQLConf, since they are subject to change.
+ * org.apache.spark.sql.internal.SQLConf, since they are subject to change. We only depend on the
+ * getConfString method of SQLConf, which is more stable.
  */
 object PortableSQLConf {
 
@@ -183,6 +184,9 @@ object PortableSQLConf {
     buildConf("spark.sql.parquet.columnarReaderBatchSize").intConf
       .createWithDefault(4096)
 
+  val IGNORE_CORRUPT_FILES = buildConf("spark.sql.files.ignoreCorruptFiles").booleanConf
+    .createWithDefault(false)
+
   private def buildConf(key: String) = new ConfigBuilder(key)
 
   def get: PortableSQLConf = new PortableSQLConf(SQLConf.get)
@@ -256,6 +260,7 @@ class PortableSQLConf(sqlConf: SQLConf) {
   def parquetVectorizedReaderBatchSize: Int = getConf(
     PortableSQLConf.PARQUET_VECTORIZED_READER_BATCH_SIZE)
 
+  def ignoreCorruptFiles: Boolean = getConf(PortableSQLConf.IGNORE_CORRUPT_FILES)
 }
 
 class ConfigBuilder(val key: String, val alternatives: Seq[String] = Seq.empty) {

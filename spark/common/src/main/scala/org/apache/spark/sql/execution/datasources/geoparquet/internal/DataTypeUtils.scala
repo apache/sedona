@@ -41,4 +41,14 @@ object DataTypeUtils {
   def toAttributes(schema: StructType): Seq[AttributeReference] = {
     schema.map(toAttribute)
   }
+
+  /**
+   * Check if the schema has any default values. We do this check before calling functions in
+   * `ResolveDefaultColumns`, because `ResolveDefaultColumns` depends on lots of internal APIs of
+   * Spark, and it could easily break on Databricks. If it has to break, let's make it only break
+   * when existence default values are actually used.
+   */
+  def hasExistenceDefaultValues(schema: StructType): Boolean = {
+    schema.exists(_.getExistenceDefaultValue.isDefined)
+  }
 }

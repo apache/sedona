@@ -27,7 +27,6 @@ import org.apache.parquet.io.api.RecordConsumer
 import org.apache.sedona.common.utils.GeomUtils
 import org.apache.spark.SPARK_VERSION_SHORT
 import org.apache.spark.internal.Logging
-import org.apache.spark.sql.SPARK_VERSION_METADATA_KEY
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters
 import org.apache.spark.sql.catalyst.util.DateTimeUtils
@@ -176,7 +175,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
     val messageType = new internal.SparkToParquetSchemaConverter(configuration).convert(schema)
     val sparkSqlParquetRowMetadata = GeoParquetWriteSupport.getSparkSqlParquetRowMetadata(schema)
     val metadata = Map(
-      "org.apache.spark.version" -> SPARK_VERSION_SHORT,
+      DataSourceUtils.SPARK_VERSION_METADATA_KEY -> SPARK_VERSION_SHORT,
       internal.ParquetReadSupport.SPARK_METADATA_KEY -> sparkSqlParquetRowMetadata) ++ {
       if (datetimeRebaseMode == LegacyBehaviorPolicy.LEGACY) {
         Some("org.apache.spark.legacyDateTime" -> "")

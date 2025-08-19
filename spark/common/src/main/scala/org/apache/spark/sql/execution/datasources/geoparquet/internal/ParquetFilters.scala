@@ -103,8 +103,20 @@ class ParquetFilters(
     }
 
     val primitiveFields = getPrimitiveFields(schema.getFields.asScala.toSeq).map { field =>
-      import org.apache.spark.sql.connector.catalog.CatalogV2Implicits.MultipartIdentifierHelper
-      (field.fieldNames.toSeq.quoted, field)
+      // quoted and quoteIfNeeded were taken from org.apache.spark.sql.connector.catalog.CatalogV2Implicits.MultipartIdentifierHelper
+      // Copying it over eliminates the dependency on CatalogV2Implicits, which is a private[sql] object.
+      def quoted(parts: Seq[String]): String = {
+        parts.map(quoteIfNeeded).mkString(".")
+      }
+      def quoteIfNeeded(part: String): String = {
+        if (part.matches("[a-zA-Z0-9_]+") && !part.matches("\\d+")) {
+          part
+        } else {
+          s"`${part.replace("`", "``")}`"
+        }
+      }
+
+      (quoted(field.fieldNames.toSeq), field)
     }
     if (caseSensitive) {
       primitiveFields.toMap
