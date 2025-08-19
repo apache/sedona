@@ -162,3 +162,26 @@ Output:
 ```
 MULTILINESTRING ((90 90, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))
 ```
+
+## ST_GeomToGeography
+
+Introduction: Construct a Geography from a Geometry.
+
+Format:
+
+`ST_GeomToGeography (geom: Geometry)`
+
+Since: `v1.8.0`
+
+SQL example:
+
+```sql
+SELECT ST_GeomToGeography(ST_GeomFromWKT('MULTIPOLYGON (((10 10, 70 10, 70 70, 10 70, 10 10), (20 20, 60 20, 60 60, 20 60, 20 20)), ((30 30, 50 30, 50 50, 30 50, 30 30), (36 36, 44 36, 44 44, 36 44, 36 36)))
+'))
+```
+
+Output:
+
+```
+MULTIPOLYGON (((10 10, 70 10, 70 70, 10 70, 10 10), (20 20, 60 20, 60 60, 20 60, 20 20)), ((30 30, 50 30, 50 50, 30 50, 30 30), (36 36, 44 36, 44 44, 36 44, 36 36)))
+```

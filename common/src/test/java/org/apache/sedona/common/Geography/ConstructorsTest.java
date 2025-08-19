@@ -245,4 +245,27 @@ public class ConstructorsTest {
     assertEquals(expected, got.toString());
     assertEquals(0, got.getSRID());
   }
+
+  @Test
+  public void geomToGeography() throws Exception {
+    String wkt =
+        "MULTIPOLYGON ("
+            +
+            // Component A: outer shell + lake
+            "((10 10, 70 10, 70 70, 10 70, 10 10),"
+            + " (20 20, 60 20, 60 60, 20 60, 20 20)),"
+            +
+            // Component B: island with a pond
+            " ((30 30, 50 30, 50 50, 30 50, 30 30),"
+            + " (36 36, 44 36, 44 44, 36 44, 36 36))"
+            + ")";
+    Geometry g = new org.locationtech.jts.io.WKTReader().read(wkt);
+    g.setSRID(4326);
+    Geography got = Constructors.geomToGeography(g);
+    String expected = "SRID=4326; " + wkt;
+    assertEquals(4326, got.getSRID());
+    org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
+    wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
+    assertEquals(expected, got.toString());
+  }
 }

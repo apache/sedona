@@ -233,4 +233,14 @@ class ConstructorsTest extends TestBaseScala {
     assertEquals(4326, geom.getSRID)
     assert(geom.getGeometryType == "LineString")
   }
+
+  it("Passed ST_GeomToGeography multilingstring") {
+    var wkt = "MULTILINESTRING " + "((90 90, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))"
+    var df = sparkSession.sql(s"""
+        SELECT
+        ST_GeomToGeography(ST_GeomFromWKT('$wkt')) AS geog
+        """)
+    var geog = df.first().getAs[Geography](0)
+    assertEquals(wkt, geog.toString)
+  }
 }

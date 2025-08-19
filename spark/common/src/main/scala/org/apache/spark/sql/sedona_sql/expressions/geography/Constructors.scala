@@ -24,6 +24,7 @@ import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.sedona_sql.UDT.GeographyUDT
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.sql.sedona_sql.expressions.{InferrableFunction, InferredExpression}
+import org.locationtech.jts.geom.Geometry
 
 /**
  * Return a Geography from a WKT string
@@ -132,6 +133,20 @@ private[apache] case class ST_GeogFromGeoHash(inputExpressions: Seq[Expression])
  */
 private[apache] case class ST_GeogToGeometry(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.geogToGeometry(_: Geography)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Return a Geography from a Geometry
+ *
+ * @param inputExpressions
+ *   This function takes a geometry object.
+ */
+private[apache] case class ST_GeomToGeography(inputExpressions: Seq[Expression])
+    extends InferredExpression(Constructors.geomToGeography(_: Geometry)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
