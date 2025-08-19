@@ -20,9 +20,7 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.spark.sql.Column
 import org.apache.spark.sql.sedona_sql.DataFrameShims.{wrapExpression, _}
-import org.apache.spark.sql.sedona_sql.expressions.geography.{ST_GeogCollFromText, ST_GeogFromEWKB, ST_GeogFromEWKT, ST_GeogFromGeoHash, ST_GeogFromText, ST_GeogFromWKB, ST_GeogFromWKT, ST_GeogToGeometry}
-import org.apache.spark.sql.sedona_sql.DataFrameShims._
-import org.apache.spark.sql.sedona_sql.expressions.geography.{ST_GeogCollFromText, ST_GeogFromEWKB, ST_GeogFromEWKT, ST_GeogFromGeoHash, ST_GeogFromText, ST_GeogFromWKB, ST_GeogFromWKT, ST_ToGeography, ST_TryToGeography}
+import org.apache.spark.sql.sedona_sql.expressions.geography.{ST_GeogCollFromText, ST_GeogFromEWKB, ST_GeogFromEWKT, ST_GeogFromGeoHash, ST_GeogFromText, ST_GeogFromWKB, ST_GeogFromWKT, ST_GeogToGeometry, ST_ToGeometry, ST_TryToGeometry}
 
 object st_constructors {
   def ST_GeomFromGeoHash(geohash: Column, precision: Column): Column =
@@ -308,9 +306,9 @@ object st_constructors {
   def ST_GeogToGeometry(geog: Column): Column = wrapExpression[ST_GeogToGeometry](geog)
   def ST_GeogToGeometry(geog: String): Column = wrapExpression[ST_GeogToGeometry](geog)
 
-  def ST_TryToGeography(geog: Column): Column = wrapExpression[ST_TryToGeography](geog)
-  def ST_TryToGeography(geog: String): Column = wrapExpression[ST_TryToGeography](geog)
+  def ST_TryToGeometry(geog: Column): Column = wrapExpression[ST_TryToGeometry](geog)
+  def ST_TryToGeometry(geog: String): Column = wrapExpression[ST_TryToGeometry](geog)
 
-  def ST_ToGeography(geog: Column): Column = wrapExpression[ST_ToGeography](geog)
-  def ST_ToGeography(geog: String): Column = wrapExpression[ST_ToGeography](geog)
+  def ST_ToGeometry(geog: Column): Column = wrapExpression[ST_ToGeometry](geog)
+  def ST_ToGeometry(geog: String): Column = wrapExpression[ST_ToGeometry](geog)
 }

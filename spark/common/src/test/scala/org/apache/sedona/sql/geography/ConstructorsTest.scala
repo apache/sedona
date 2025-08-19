@@ -236,30 +236,29 @@ class ConstructorsTest extends TestBaseScala {
     assert(geom.getGeometryType == "LineString")
   }
 
-  it("Passed ST_TryToGeography") {
-    val ewkbString = "01010000A0E61000000000000000000000000000000000F03F0000000000000040"
-    val geography =
-      sparkSession.sql(s"SELECT ST_TryToGeography('$ewkbString') as point")
-    val expectedGeog = {
-      "SRID=4326; POINT (0 1)"
-    }
-    assert(geography.first().getAs[Geography](0).getSRID == 4326)
-    assert(geography.first().getAs[Geography](0).toString.equals(expectedGeog))
+  it("Passed ST_TryToGeometry") {
+    var wkt = "MULTILINESTRING " + "((90 90, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))"
+    var df = sparkSession.sql(s"""
+        SELECT
+        ST_TryToGeometry(ST_GeogFromWKT('$wkt', 4326)) AS geom
+        """)
+    var geom = df.first().getAs[Geometry](0)
+    val writer = new WKTWriter()
+    writer.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED))
+    var gotGeom = writer.write(geom)
+    assertEquals(wkt, gotGeom)
+    assertEquals(4326, geom.getSRID)
+    assert(geom.getGeometryType == "MultiLineString")
 
-    val pointDf =
-      sparkSession.sql("select ST_TryToGeography('SRID=4269; POINT(-71.064544 42.28787)')")
-    assert(pointDf.count() == 1)
-    assert(pointDf.first().getAs[Geography](0).getSRID == 4269)
-
-    var geohash = "9q9j8ue2v71y5zzy0s4q";
-    var row =
-      sparkSession.sql(s"SELECT ST_TryToGeography('$geohash') AS geog").first()
-    var geoStr = row.get(0).asInstanceOf[Geography].toText(new PrecisionModel(1e6))
-    var expectedWkt =
-      "SRID=4326; POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))"
-    assertEquals(expectedWkt, geoStr)
-
-    row = sparkSession.sql(s"SELECT ST_TryToGeography('NOT VALID') AS geog").first()
-    assertNull(row.get(0))
+    wkt = "LINESTRING " + "(90 90, 20 20, 10 40)"
+    df = sparkSession.sql(s"""
+        SELECT
+        ST_TryToGeometry(ST_GeogFromWKT('$wkt', 4326)) AS geom
+        """)
+    geom = df.first().getAs[Geometry](0)
+    gotGeom = writer.write(geom)
+    assertEquals(wkt, gotGeom)
+    assertEquals(4326, geom.getSRID)
+    assert(geom.getGeometryType == "LineString")
   }
 }

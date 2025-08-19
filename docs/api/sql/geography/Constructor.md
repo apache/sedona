@@ -163,44 +163,32 @@ Output:
 MULTILINESTRING ((90 90, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))
 ```
 
-## ST_TryToGeography
+## ST_TryToGeometry
 
-Introduction: Construct a Geography from a geography string. It supports multiple input formats: WKT, EWKT, WKB, EWKB, and GeoHash. NULL Geography is returned if the input string is invalid or the format is not recognized.
+Introduction: Construct a Geometry from a geography object.
 
 Format:
 
-`ST_TryToGeography (geog: String)`
+`ST_TryToGeometry (geog: Geography)`
 
 Since: `v1.8.0`
 
 SQL example:
 
 ```sql
-SELECT ST_TryToGeography('01010000A0E61000000000000000000000000000000000F03F0000000000000040')
+SELECT ST_TryToGeography(ST_GeogFromWKT('MULTILINESTRING ((90 90, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))'))
 ```
 
 Output:
 
 ```
-SRID=4326; POINT (0 1)
+MULTILINESTRING ((90 90, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))
 ```
 
 SQL example:
 
 ```sql
-SELECT ST_TryToGeography('SRID=4269; POINT(0.0 1.0)')
-```
-
-Output:
-
-```
-SRID=4269; POINT (0 1)
-```
-
-SQL example:
-
-```sql
-SELECT ST_TryToGeography('NOT VALID STRING')
+SELECT ST_TryToGeometry(null)
 ```
 
 Output:
@@ -209,24 +197,24 @@ Output:
 null
 ```
 
-## ST_ToGeography
+## ST_ToGeometry
 
-Introduction: Construct a Geography from a geography string. It supports multiple input formats: WKT, EWKT, WKB, EWKB, and GeoHash. An error is returned if the input string is invalid or the format is not recognized.
+Introduction: Construct a Geography from a geography object.
 
 Format:
 
-`ST_ToGeography (geog: String)`
+`ST_ToGeometry (geog: Geography)`
 
 Since: `v1.8.0`
 
 SQL example:
 
 ```sql
-SELECT ST_ToGeography('SRID=4269; POINT(0.0 1.0)')
+SELECT ST_ToGeometry(ST_GeogFromWKT('MULTILINESTRING ((90 90, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))'))
 ```
 
 Output:
 
 ```
-SRID=4269; POINT (0 1)
+MULTILINESTRING ((90 90, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))
 ```

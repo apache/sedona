@@ -139,26 +139,26 @@ private[apache] case class ST_GeogToGeometry(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return a Geography from a geography string
+ * Return a Geometry from a geography object
  *
  * @param inputExpressions
- *   This function takes a geography string.
+ *   This function takes a geography object.
  */
-case class ST_ToGeography(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.toGeography _) {
+case class ST_ToGeometry(inputExpressions: Seq[Expression])
+    extends InferredExpression(Constructors.toGeometry _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }
 }
 
 /**
- * Return a Geography from a geography string
+ * Return a Geometry from a geography object
  *
  * @param inputExpressions
- *   This function takes a geography string.
+ *   This function takes a geography object.
  */
-case class ST_TryToGeography(inputExpressions: Seq[Expression])
-    extends InferredExpression(Constructors.tryToGeography _) {
+case class ST_TryToGeometry(inputExpressions: Seq[Expression])
+    extends InferredExpression(Constructors.tryToGeometry _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

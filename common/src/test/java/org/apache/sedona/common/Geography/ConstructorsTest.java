@@ -37,6 +37,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.precision.GeometryPrecisionReducer;
 
 public class ConstructorsTest {
 
@@ -247,35 +248,56 @@ public class ConstructorsTest {
   }
 
   @Test
-  public void tryToGeography() throws ParseException {
+  public void tryToGeometry() throws ParseException {
+    PrecisionModel pm = new PrecisionModel(PrecisionModel.FIXED);
 
-    String ewkbString = "01010000A0E61000000000000000000000000000000000F03F0000000000000040";
-    String expectedEWkt = "SRID=4326; POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))";
-    String expectedWkt = "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))";
-    String geohash = "9q9j8ue2v71y5zzy0s4q";
-    String notValid = "NOT VALID";
+    S2Point pt = S2LatLng.fromDegrees(45, -64).toPoint();
+    S2Point pt_mid = S2LatLng.fromDegrees(45, 0).toPoint();
+    S2Point pt_end = S2LatLng.fromDegrees(0, 0).toPoint();
+    // Build a single polygon and wrap in geography
+    List<S2Point> points = new ArrayList<>();
+    points.add(pt);
+    points.add(pt_mid);
+    points.add(pt_end);
+    S2Loop polyline = new S2Loop(points);
+    S2Polygon poly = new S2Polygon(polyline);
+    Geography geography = new PolygonGeography(poly);
+    Geometry geom = Constructors.tryToGeometry(geography);
+    assertEquals(geography.toText(new PrecisionModel()), geom.toString());
 
-    byte[] wkbBytes = WKBReader.hexToBytes(ewkbString);
-    Geography result = Constructors.geogFromWKB(wkbBytes);
-    String expectedGeom = "SRID=4326; POINT (0 1)";
-    assertNotNull(result);
-    assertEquals(expectedGeom, result.toString());
+    String withHole =
+        "POLYGON ((35 10, 45 45, 15 40, 10 20, 35 10), " + "(20 30, 35 35, 30 20, 20 30))";
+    String expected = "POLYGON ((10 20, 15 40, 45 45, 35 10, 10 20), (20 30, 30 20, 35 35, 20 30))";
+    geography = new WKTReader().read(withHole);
+    geom = Constructors.tryToGeometry(geography);
+    geom = GeometryPrecisionReducer.reduce(geom, pm);
+    geom.normalize();
+    assertEquals(expected, geom.toString());
 
-    result = Constructors.tryToGeography(expectedEWkt);
-    assertNotNull(result);
-    assertEquals(expectedEWkt, result.toString());
+    String multiGeog = "MULTIPOINT ((10 40), (40 30), (20 20), (30 10))";
+    geography = new WKTReader().read(multiGeog);
+    geom = Constructors.geogToGeometry(geography);
+    geom = GeometryPrecisionReducer.reduce(geom, pm);
+    assertEquals(geography.toString(), geom.toString());
 
-    result = Constructors.tryToGeography(expectedWkt);
-    assertNotNull(result);
-    assertEquals(expectedWkt, result.toString());
+    multiGeog = "MULTILINESTRING " + "((90 90, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))";
+    // Geography can not exceeding to more than 90 degrees / longitude
+    geography = new WKTReader().read(multiGeog);
+    geom = Constructors.tryToGeometry(geography);
+    geom = GeometryPrecisionReducer.reduce(geom, pm);
+    assertEquals(geography.toString(), geom.toString());
 
-    result = Constructors.tryToGeography(geohash);
-    expectedWkt =
-        "SRID=4326; POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))";
-    assertNotNull(result);
-    assertEquals(expectedWkt, result.toText(new PrecisionModel(1e6)));
+    multiGeog =
+        "MULTIPOLYGON "
+            + "(((30 20, 45 40, 10 40, 30 20)), "
+            + "((15 5, 40 10, 10 20, 5 10, 15 5)))";
+    geography = new WKTReader().read(multiGeog);
+    geom = Constructors.tryToGeometry(geography);
+    geom = GeometryPrecisionReducer.reduce(geom, pm);
+    expected = "MULTIPOLYGON (((10 40, 45 40, 30 20, 10 40)), ((5 10, 10 20, 40 10, 15 5, 5 10)))";
+    assertEquals(expected, geom.toString());
 
-    result = Constructors.tryToGeography(notValid);
-    assertNull(result);
+    geom = Constructors.tryToGeometry(null);
+    assertNull(geom);
   }
 }

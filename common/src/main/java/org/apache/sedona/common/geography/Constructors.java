@@ -74,46 +74,16 @@ public class Constructors {
     return geogFromWKT(wkt, srid);
   }
 
-  public static Geography tryToGeography(String geogString) {
+  public static Geometry tryToGeometry(Geography geography) {
     try {
-      return toGeography(geogString);
+      return toGeometry(geography);
     } catch (Exception e) {
       return null;
     }
   }
 
-  public static Geography toGeography(String geogString) throws ParseException {
-    if (geogString == null || geogString.trim().isEmpty()) {
-      return null;
-    }
-    geogString = geogString.trim();
-
-    // EWKT format (e.g., "SRID=4326;POINT(...)")
-    if (geogString.toUpperCase().startsWith("SRID")) {
-      return Constructors.geogFromEWKT(geogString);
-    }
-    // WKB hex string (only hex digits)
-    if (isHex(geogString)) {
-      byte[] wkbBytes = WKBReader.hexToBytes(geogString);
-      return Constructors.geogFromWKB(wkbBytes);
-    }
-    // GeoHash (short alphanumeric string without spaces)
-    if (isGeoHash(geogString)) {
-      return Constructors.geogFromGeoHash(geogString, 16);
-    }
-    // Default: WKT
-    return Constructors.geogFromWKT(geogString, 0);
-  }
-
-  private static boolean isHex(String s) {
-    // (?i) = case-insensitive; matches only 0-9 A-F
-    return s.matches("(?i)^[0-9a-f]+$");
-  }
-
-  private static boolean isGeoHash(String s) {
-    // GeoHash Base32: digits + bcdefghjkmnpqrstuvwxyz (no a, i, l, o)
-    // (?i) = case-insensitive so upper/lower both pass
-    return s.matches("(?i)^[0-9bcdefghjkmnpqrstuvwxyz]+$");
+  public static Geometry toGeometry(Geography geography) throws ParseException {
+    return Constructors.geogToGeometry(geography);
   }
 
   public static Geography geogFromGeoHash(String geoHash, Integer precision) {
