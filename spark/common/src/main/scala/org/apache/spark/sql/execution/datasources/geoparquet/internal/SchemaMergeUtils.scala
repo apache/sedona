@@ -74,8 +74,10 @@ object SchemaMergeUtils extends Logging {
       files: Seq[FileStatus],
       schemaReader: (Seq[FileStatus], Configuration, Boolean) => Seq[StructType])
       : Option[StructType] = {
-    val serializedConf = new SerializableConfiguration(
-      sparkSession.sessionState.newHadoopConfWithOptions(parameters))
+    val hadoopConf = sparkSession.sessionState.newHadoopConfWithOptions(parameters)
+    // Workaround "The file might have been updated during query execution" on Databricks
+    hadoopConf.set("spark.databricks.scan.modTimeCheck.enabled", "false")
+    val serializedConf = new SerializableConfiguration(hadoopConf)
 
     // !! HACK ALERT !!
     // Here is a hack for Parquet, but it can be used by Orc as well.

@@ -205,6 +205,9 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
       PortableSQLConf.LEGACY_PARQUET_NANOS_AS_LONG.key,
       conf.legacyParquetNanosAsLong)
 
+    // Workaround "The file might have been updated during query execution" on Databricks
+    hadoopConf.setBoolean("spark.databricks.scan.modTimeCheck.enabled", false)
+
     val broadcastedHadoopConf =
       sparkSession.sparkContext.broadcast(new SerializableConfiguration(hadoopConf))
 
