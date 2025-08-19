@@ -26,3 +26,14 @@ from sedona.spark.geopandas.geodataframe import GeoDataFrame
 from sedona.spark.geopandas.tools import sjoin
 
 from sedona.spark.geopandas.io import read_file, read_parquet
+
+# This used to default to False, but Spark 4.0.0 changed it to True
+# We also want also it to default to True for Sedona, so we set it here
+# to apply the change for users using Spark < 4.0.0.
+
+# Having this set to False will cause these errors, which most users should not have to worry about:
+# ValueError: Cannot combine the series or dataframe because it comes from a different dataframe.
+# In order to allow this operation, enable 'compute.ops_on_diff_frames' option.
+import pyspark.pandas as ps
+
+ps.set_option("compute.ops_on_diff_frames", True)
