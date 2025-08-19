@@ -1463,7 +1463,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             * 'right': use keys from right_df; retain only right_df geometry column
             * 'inner': use intersection of keys from both dfs; retain only left_df geometry column
         predicate : str, default 'intersects'
-            Binary predicate. Valid values: 'intersects', 'contains', 'within', 'dwithin'
+            Binary predicate. Valid values: 'intersects', 'contains', 'within', 'dwithin', 'touches', 'crosses', 'overlaps', 'covers', 'covered_by'
         lsuffix : str, default 'left'
             Suffix to apply to overlapping column names (left GeoDataFrame).
         rsuffix : str, default 'right'

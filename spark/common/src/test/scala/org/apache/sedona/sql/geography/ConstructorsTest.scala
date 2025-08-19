@@ -18,11 +18,14 @@
  */
 package org.apache.sedona.sql.geography
 
+import org.apache.sedona.common.S2Geography.Geography
 import org.apache.sedona.common.S2Geography.{Geography, WKBReader}
 import org.apache.sedona.common.geography.Constructors
 import org.apache.sedona.sql.TestBaseScala
 import org.junit.Assert.{assertEquals, assertNotNull, assertNull}
 import org.locationtech.jts.geom.PrecisionModel
+import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.io.WKTWriter
 
 class ConstructorsTest extends TestBaseScala {
 
@@ -167,6 +170,70 @@ class ConstructorsTest extends TestBaseScala {
     }
     assert(geography.first().getAs[Geography](0).getSRID == 4326)
     assert(geography.first().getAs[Geography](0).toString.equals(expectedGeog))
+  }
+
+  it("Passed ST_GeogToGeometry polygon") {
+    val wkt =
+      "POLYGON ((" + "0 0, 95 20, 95 85, 10 85, 0 0" + "),(" + "20 30, 35 25, 30 40, 20 30" + "),(" + "50 50, 65 50, 65 65, 50 65, 50 50" + "),(" + "25 60, 35 58, 38 66, 30 72, 22 66, 25 60" + "))"
+    val df = sparkSession.sql(s"""
+        SELECT
+        ST_GeogToGeometry(ST_GeogFromWKT('$wkt')) AS geom
+        """)
+    val geom = df.first().getAs[Geometry](0)
+    val expected =
+      "POLYGON ((0 0, 95 20, 95 85, 10 85, 0 0), " + "(20 30, 30 40, 35 25, 20 30), " + "(50 50, 50 65, 65 65, 65 50, 50 50), " + "(25 60, 22 66, 30 72, 38 66, 35 58, 25 60))"
+    assert(geom.getGeometryType == "Polygon")
+    val writer = new WKTWriter()
+    writer.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED))
+    val gotGeom = writer.write(geom)
+    assert(gotGeom == expected)
+  }
+
+  it("Passed ST_GeogToGeometry multipolygon") {
+    val wkt = "MULTIPOLYGON (" + // Component A: outer shell + lake
+      "((10 10, 70 10, 70 70, 10 70, 10 10)," + " (20 20, 60 20, 60 60, 20 60, 20 20))," +
+      // Component B: island with a pond
+      "((30 30, 50 30, 50 50, 30 50, 30 30)," + " (36 36, 44 36, 44 44, 36 44, 36 36))" + ")";
+    val df = sparkSession.sql(s"""
+        SELECT
+        ST_GeogToGeometry(ST_GeogFromWKT('$wkt', 4326)) AS geom
+        """)
+    val geom = df.first().getAs[Geometry](0)
+    val expected = "MULTIPOLYGON (((10 10, 70 10, 70 70, 10 70, 10 10), " +
+      "(20 20, 20 60, 60 60, 60 20, 20 20)), " + "((30 30, 50 30, 50 50, 30 50, 30 30), " +
+      "(36 36, 36 44, 44 44, 44 36, 36 36)))";
+    assert(geom.getGeometryType == "MultiPolygon")
+    val writer = new WKTWriter()
+    writer.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED))
+    val gotGeom = writer.write(geom)
+    assert(gotGeom == expected)
+    assert(geom.getSRID == 4326)
+  }
+
+  it("Passed ST_GeogToGeometry linestring") {
+    var wkt = "MULTILINESTRING " + "((90 90, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))"
+    var df = sparkSession.sql(s"""
+        SELECT
+        ST_GeogToGeometry(ST_GeogFromWKT('$wkt', 4326)) AS geom
+        """)
+    var geom = df.first().getAs[Geometry](0)
+    val writer = new WKTWriter()
+    writer.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED))
+    var gotGeom = writer.write(geom)
+    assertEquals(wkt, gotGeom)
+    assertEquals(4326, geom.getSRID)
+    assert(geom.getGeometryType == "MultiLineString")
+
+    wkt = "LINESTRING " + "(90 90, 20 20, 10 40)"
+    df = sparkSession.sql(s"""
+        SELECT
+        ST_GeogToGeometry(ST_GeogFromWKT('$wkt', 4326)) AS geom
+        """)
+    geom = df.first().getAs[Geometry](0)
+    gotGeom = writer.write(geom)
+    assertEquals(wkt, gotGeom)
+    assertEquals(4326, geom.getSRID)
+    assert(geom.getGeometryType == "LineString")
   }
 
   it("Passed ST_TryToGeography") {
