@@ -18,11 +18,18 @@
  */
 package org.apache.sedona.common.S2Geography;
 
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.UnsafeInput;
+import com.esotericsoftware.kryo.io.UnsafeOutput;
 import com.google.common.geometry.S2Polygon;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class MultiPolygonGeography extends GeographyCollection {
+  private static final Logger logger = Logger.getLogger(MultiPolygonGeography.class.getName());
   /**
    * Wrap each raw S2Polygon in a PolygonGeography, then hand it off to GeographyCollection to do
    * the rest (including serialization).
@@ -43,5 +50,51 @@ public class MultiPolygonGeography extends GeographyCollection {
   public int dimension() {
     // every child PolygonGeography
     return 2;
+  }
+
+  @Override
+  public void encode(UnsafeOutput out, EncodeOptions opts) throws IOException {
+    out.writeInt(features.size());
+    for (Geography feature : features) {
+      ((PolygonGeography) feature).polygon.encode(out);
+    }
+    out.flush();
+  }
+
+  /** This is what decodeTagged() actually calls */
+  public static MultiPolygonGeography decode(Input in, EncodeTag tag) throws IOException {
+    // cast to UnsafeInput—will work if you always pass a Kryo-backed stream
+    if (!(in instanceof UnsafeInput)) {
+      throw new IllegalArgumentException("Expected UnsafeInput");
+    }
+    return decode((UnsafeInput) in, tag);
+  }
+
+  /** Decodes a GeographyCollection from a tagged input stream. */
+  public static MultiPolygonGeography decode(UnsafeInput in, EncodeTag tag) throws IOException {
+    List<S2Polygon> polygons = new ArrayList<>();
+
+    // Handle EMPTY flag
+    if ((tag.getFlags() & EncodeTag.FLAG_EMPTY) != 0) {
+      logger.fine("Decoded empty Multipolygon.");
+      return new MultiPolygonGeography();
+    }
+
+    // Skip any covering data
+    tag.skipCovering(in);
+
+    // 3) Ensure we have at least 4 bytes for the count
+    if (in.available() < Integer.BYTES) {
+      throw new IOException("MultiPolygon.decodeTagged error: insufficient header bytes");
+    }
+
+    // Read feature count
+    int n = in.readInt();
+    for (int i = 0; i < n; i++) {
+      polygons.add(S2Polygon.decode(in));
+    }
+    MultiPolygonGeography geo = new MultiPolygonGeography(GeographyKind.MULTIPOLYGON, polygons);
+    geo.countShapes();
+    return geo;
   }
 }
