@@ -47,6 +47,7 @@ from packaging.version import parse as parse_version
 )
 class TestGeoSeries(TestGeopandasBase):
     def setup_method(self):
+        super().setup_method()
         self.geoseries = sgpd.GeoSeries(
             [
                 Point(2.3, -1),
@@ -61,7 +62,6 @@ class TestGeoSeries(TestGeopandasBase):
                 ),
             ]
         )
-        super().setup_method()
 
     def test_empty_list(self):
         s = sgpd.GeoSeries([])

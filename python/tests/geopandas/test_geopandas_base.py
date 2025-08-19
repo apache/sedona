@@ -34,8 +34,8 @@ class TestGeopandasBase(TestBase):
     # # Utils
     # -----------------------------------------------------------------------------
     def setup_method(self):
-        # We enable this option by default for users, so we enable it by default for testing for developers.
-        # This option is useful in testing to catch inefficiencies in the code during development of geopandas.
+        # We enable this option by default for external users, but we disable it for development testing.
+        # This is useful to catch inefficiencies in the code while developing this package.
         ps.set_option("compute.ops_on_diff_frames", False)
 
     @classmethod
