@@ -268,4 +268,47 @@ public class ConstructorsTest {
     wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
     assertEquals(expected, got.toString());
   }
+
+  @Test
+  public void PointGeomToGeography() throws Exception {
+    Geometry geom = org.apache.sedona.common.Constructors.geomFromWKT("POINT (1 1)", 0);
+    Geography got = Constructors.geomToGeography(geom);
+    org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
+    wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
+    assertEquals(geom.toString(), got.toString());
+
+    geom =
+        org.apache.sedona.common.Constructors.geomFromWKT(
+            "MULTIPOINT ((10 10), (20 20), (30 30))", 0);
+    got = Constructors.geomToGeography(geom);
+    assertEquals(geom.toString(), got.toString());
+  }
+
+  @Test
+  public void LineGeomToGeography() throws Exception {
+    Geometry geom =
+        org.apache.sedona.common.Constructors.geomFromWKT("LINESTRING (1 2, 3 4, 5 6)", 0);
+    Geography got = Constructors.geomToGeography(geom);
+    org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
+    wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
+    assertEquals(geom.toString(), got.toString());
+
+    geom =
+        org.apache.sedona.common.Constructors.geomFromWKT(
+            "MULTILINESTRING((1 2, 3 4), (4 5, 6 7))", 0);
+    got = Constructors.geomToGeography(geom);
+    assertEquals(geom.toString(), got.toString());
+  }
+
+  @Test
+  public void CollGeomToGeography() throws Exception {
+    Geometry geom =
+        org.apache.sedona.common.Constructors.geomFromWKT(
+            "GEOMETRYCOLLECTION (POINT (10 20), LINESTRING (30 40, 50 60, 70 80), POLYGON ((10 10, 20 20, 10 20, 10 10)))",
+            0);
+    Geography got = Constructors.geomToGeography(geom);
+    org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
+    wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
+    assertEquals(geom.toString(), got.toString());
+  }
 }

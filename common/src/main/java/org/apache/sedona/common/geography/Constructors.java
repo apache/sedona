@@ -265,28 +265,31 @@ public class Constructors {
     return gf.createGeometryCollection(gs);
   }
 
-  public static Geography geomToGeography(Geometry geom) throws IOException {
+  public static Geography geomToGeography(Geometry geom) throws Exception {
     if (geom == null) {
       return null;
     }
-    String type = geom.getGeometryType();
-    if ("Point".equalsIgnoreCase(type)) {
-      return pointToGeog(geom);
-    } else if ("MultiPoint".equalsIgnoreCase(type)) {
-      return mPointToGeog(geom);
-    } else if ("LineString".equalsIgnoreCase(type)) {
-      return lineToGeog(geom);
-    } else if ("MultiLineString".equalsIgnoreCase(type)) {
-      return mLineToGeog(geom);
-    } else if ("Polygon".equalsIgnoreCase(type)) {
-      return polyToGeog(geom);
-    } else if ("MultiPolygon".equalsIgnoreCase(type)) {
-      return mPolyToGeog(geom);
-    } else if ("GeometryCollection".equalsIgnoreCase(type)) {
-      return geomCollToGeog(geom);
+    Geography geography;
+    if (geom instanceof Point) {
+      geography = pointToGeog((Point) geom);
+    } else if (geom instanceof MultiPoint) {
+      geography = mPointToGeog((MultiPoint) geom);
+    } else if (geom instanceof LineString) {
+      geography = lineToGeog((LineString) geom);
+    } else if (geom instanceof MultiLineString) {
+      geography = mLineToGeog((MultiLineString) geom);
+    } else if (geom instanceof Polygon) {
+      geography = polyToGeog((Polygon) geom);
+    } else if (geom instanceof MultiPolygon) {
+      geography = mPolyToGeog((MultiPolygon) geom);
+    } else if (geom instanceof GeometryCollection) {
+      geography = geomCollToGeog((GeometryCollection) geom);
     } else {
-      throw new UnsupportedOperationException("Unsupported geometry type: " + type);
+      throw new UnsupportedOperationException(
+          "Geometry type is not supported: " + geom.getClass().getSimpleName());
     }
+    geography.setSRID(geom.getSRID());
+    return geography;
   }
 
   private static Geography pointToGeog(Geometry geom) throws IOException {
@@ -323,24 +326,20 @@ public class Constructors {
     // Build via S2Builder + S2PointVectorLayer
     S2Builder builder = new S2Builder.Builder().build();
     S2PointVectorLayer layer = new S2PointVectorLayer();
+    builder.startLayer(layer);
     // must call build() before reading out the points
-    S2Error error = new S2Error();
-    for (int i = 0; i < pts.length; i++) {
-      double lon = pts[i].x;
-      double lat = pts[i].y;
+    for (Coordinate pt : pts) {
+      double lon = pt.x;
+      double lat = pt.y;
       S2Point s2Point = S2LatLng.fromDegrees(lat, lon).toPoint();
-
-      builder.startLayer(layer);
       builder.addPoint(s2Point);
-
-      if (!builder.build(error)) {
-        throw new IOException("Failed to build S2 point layer: " + error.text());
-      }
     }
-    for (int i = 0; i < layer.getPointVector().size(); i++) {
-      // Extract the resulting points
-      points.add(layer.getPointVector().get(i));
+    S2Error error = new S2Error();
+    if (!builder.build(error)) {
+      throw new IOException("Failed to build S2 point layer: " + error.text());
     }
+    // Extract the resulting points
+    points.addAll(layer.getPointVector());
     return new PointGeography(points);
   }
 
@@ -351,9 +350,7 @@ public class Constructors {
     List<S2Point> pts = toS2Points(ls.getCoordinates());
     if (pts.size() < 2) {
       // empty or degenerate → empty single polyline
-      SinglePolylineGeography empty = new SinglePolylineGeography();
-      empty.setSRID(geom.getSRID());
-      return empty;
+      return new SinglePolylineGeography();
     }
 
     S2Builder builder = new S2Builder.Builder().build();
@@ -397,9 +394,7 @@ public class Constructors {
     Polygon poly = (Polygon) geom;
     // Construct S2 polygon (parity handles holes automatically)
     S2Polygon s2poly = toS2Polygon(poly);
-    PolygonGeography g = new PolygonGeography(s2poly);
-    g.setSRID(geom.getSRID());
-    return g;
+    return new PolygonGeography(s2poly);
   }
 
   private static Geography mPolyToGeog(Geometry geom) throws IOException {
@@ -412,49 +407,24 @@ public class Constructors {
       if (s2 != null && !s2.isEmpty()) polys.add(s2);
     }
 
-    MultiPolygonGeography out =
-        new MultiPolygonGeography(
-            Geography.GeographyKind.MULTIPOLYGON, Collections.unmodifiableList(polys));
-    out.setSRID(geom.getSRID());
-    return out;
+    return new MultiPolygonGeography(
+        Geography.GeographyKind.MULTIPOLYGON, Collections.unmodifiableList(polys));
   }
 
-  private static Geography geomCollToGeog(Geometry geom) throws IOException {
+  private static Geography geomCollToGeog(Geometry geom) throws Exception {
     if (!(geom instanceof GeometryCollection)) {
       throw new IllegalArgumentException(
           "geomCollToGeog expects GeometryCollection, got " + geom.getGeometryType());
     }
-    GeographyCollection coll = new GeographyCollection();
 
+    List<Geography> features = new ArrayList<>();
     GeometryCollection gc = (GeometryCollection) geom;
     for (int i = 0; i < gc.getNumGeometries(); i++) {
       Geometry g = gc.getGeometryN(i);
-      Geography sub = null;
-
-      if (g instanceof Point) {
-        sub = pointToGeog((Point) g);
-      } else if (g instanceof MultiPoint) {
-        MultiPoint mp = (MultiPoint) g;
-        for (int k = 0; k < mp.getNumGeometries(); k++) {
-          coll.features.add(pointToGeog((Point) mp.getGeometryN(k)));
-        }
-        continue;
-      } else if (g instanceof LineString) {
-        sub = lineToGeog(g);
-      } else if (g instanceof MultiLineString) {
-        sub = mLineToGeog(g);
-      } else if (g instanceof Polygon) {
-        sub = polyToGeog(g);
-      } else if (g instanceof MultiPolygon) {
-        sub = mPolyToGeog(g);
-      } else if (g instanceof GeometryCollection) {
-        sub = geomCollToGeog(g);
-      }
-      if (sub != null) coll.features.add(sub);
+      Geography sub = geomToGeography(g);
+      if (sub != null) features.add(sub);
     }
-
-    coll.setSRID(geom.getSRID());
-    return coll;
+    return new GeographyCollection(features);
   }
 
   /** Convert JTS coordinates to S2 points; drops NaNs and consecutive duplicates. */
