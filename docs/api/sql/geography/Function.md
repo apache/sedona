@@ -19,7 +19,7 @@
 
 ## ST_Envelope
 
-Introduction: This function returns the bounding box (envelope) of A. If the envelope crosses the antimeridian (the 180° longitude line), you can set the split parameter to true. This will return a Geography object containing two separate Polygon objects, split along that line.
+Introduction: This function returns the bounding box (envelope) of A. It's important to note that the bounding box is calculated using a cylindrical topology, not a spherical one. If the envelope crosses the antimeridian (the 180° longitude line), you can set the split parameter to true. This will return a Geography object containing two separate Polygon objects, split along that line.
 
 Format:
 
@@ -30,8 +30,7 @@ Since: `v1.8.0`
 SQL Example
 
 ```sql
-SELECT ST_Envelope(ST_GeogFromWKT('MULTIPOLYGON (((177.285 -18.28799, 180 -18.28799, 180 -16.02088, 177.285 -16.02088, 177.285 -18.28799)),((-180 -18.28799, -179.7933 -18.28799, -179.7933 -16.02088, -180 -16.02088, -180 -18.28799)))
-', false))
+SELECT ST_Envelope(ST_GeogFromWKT('MULTIPOLYGON (((177.285 -18.28799, 180 -18.28799, 180 -16.02088, 177.285 -16.02088, 177.285 -18.28799)), ((-180 -18.28799, -179.7933 -18.28799, -179.7933 -16.02088, -180 -16.02088, -180 -18.28799)))'), false);
 ```
 
 Output:
