@@ -152,7 +152,7 @@ public class GeographyCollection extends Geography {
     return geo;
   }
 
-  private void countShapes() {
+  void countShapes() {
     numShapesList.clear();
     totalShapes = 0;
     for (Geography geo : features) {
