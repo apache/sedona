@@ -624,3 +624,11 @@ private[apache] case class ST_GeomCollFromText(inputExpressions: Seq[Expression]
     copy(inputExpressions = newChildren)
   }
 }
+
+private[apache] case class ST_GeomFromMySQL(inputExpressions: Seq[Expression])
+    extends InferredExpression(Constructors.geomFromMySQL _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
