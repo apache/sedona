@@ -135,20 +135,25 @@ public class GeographyCollection extends Geography {
     // Skip any covering data
     tag.skipCovering(in);
 
-    // 3) Ensure we have at least 4 bytes for the count
-    if (in.available() < Integer.BYTES) {
-      throw new IOException("GeographyCollection.decodeTagged error: insufficient header bytes");
-    }
+    try {
+      int count = in.readInt();
+      if (count < 0) {
+        throw new IOException("GeographyCollection.decodeTagged error: negative count: " + count);
+      }
 
-    // Read feature count
-    int n = in.readInt();
-    for (int i = 0; i < n; i++) {
-      tag = EncodeTag.decode(in);
-      // avoid creating new stream, directly call S2Geography.decode
-      Geography feature = Geography.decode(in, tag);
-      geo.features.add(feature);
+      for (int i = 0; i < count; i++) {
+        tag = EncodeTag.decode(in);
+        // avoid creating new stream, directly call S2Geography.decode
+        Geography feature = Geography.decode(in, tag);
+        geo.features.add(feature);
+      }
+      geo.countShapes();
+
+    } catch (EOFException e) {
+      throw new IOException(
+          "GeographyCollection.decodeTagged error: insufficient data to decode all parts of the geography.",
+          e);
     }
-    geo.countShapes();
     return geo;
   }
 

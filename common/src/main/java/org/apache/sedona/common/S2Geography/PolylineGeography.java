@@ -138,22 +138,26 @@ public class PolylineGeography extends Geography {
     // 2) Skip past any covering cell-IDs written by encodeTagged
     tag.skipCovering(in);
 
-    // 3) Ensure we have at least 4 bytes for the count
-    if (in.available() < Integer.BYTES) {
-      throw new IOException("PolylineGeography.decodeTagged error: insufficient header bytes");
-    }
+    // 3) Read the number of polylines (4-byte)
+    try {
+      int count = in.readInt();
+      if (count < 0) {
+        throw new IOException("PolylineGeography.decodeTagged error: negative count: " + count);
+      }
+      if (tag.getKind() == GeographyKind.SINGLEPOLYLINE) {
+        return new SinglePolylineGeography(S2Polyline.decode(in));
+      }
 
-    // 5) Read the number of polylines (4-byte)
-    int count = in.readInt();
+      // 4) For each polyline, read its block and let S2Polyline.decode(InputStream) do the rest
+      for (int i = 0; i < count; i++) {
+        S2Polyline pl = S2Polyline.decode(in);
+        geo.polylines.add(pl);
+      }
 
-    if (tag.getKind() == GeographyKind.SINGLEPOLYLINE) {
-      return new SinglePolylineGeography(S2Polyline.decode(in));
-    }
-
-    // 6) For each polyline, read its block and let S2Polyline.decode(InputStream) do the rest
-    for (int i = 0; i < count; i++) {
-      S2Polyline pl = S2Polyline.decode(in);
-      geo.polylines.add(pl);
+    } catch (EOFException e) {
+      throw new IOException(
+          "PolylineGeography.decodeTagged error: insufficient data to decode all parts of the geography.",
+          e);
     }
     return geo;
   }
