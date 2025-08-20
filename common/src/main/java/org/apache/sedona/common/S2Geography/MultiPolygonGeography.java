@@ -22,6 +22,7 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.UnsafeInput;
 import com.esotericsoftware.kryo.io.UnsafeOutput;
 import com.google.common.geometry.S2Polygon;
+import java.io.EOFException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -71,9 +72,8 @@ public class MultiPolygonGeography extends GeographyCollection {
   }
 
   /** Decodes a GeographyCollection from a tagged input stream. */
-  public static MultiPolygonGeography decode(UnsafeInput in, EncodeTag tag) throws IOException {
-    List<S2Polygon> polygons = new ArrayList<>();
-
+  public static MultiPolygonGeography decode(UnsafeInput in, EncodeTag tag)
+      throws IOException, EOFException {
     // Handle EMPTY flag
     if ((tag.getFlags() & EncodeTag.FLAG_EMPTY) != 0) {
       logger.fine("Decoded empty Multipolygon.");
@@ -83,18 +83,26 @@ public class MultiPolygonGeography extends GeographyCollection {
     // Skip any covering data
     tag.skipCovering(in);
 
-    // 3) Ensure we have at least 4 bytes for the count
-    if (in.available() < Integer.BYTES) {
-      throw new IOException("MultiPolygon.decodeTagged error: insufficient header bytes");
-    }
+    MultiPolygonGeography geo;
+    try {
+      int count = in.readInt();
+      if (count < 0) {
+        throw new IOException("MultiPolygon.decodeTagged error: negative polygon count: " + count);
+      }
 
-    // Read feature count
-    int n = in.readInt();
-    for (int i = 0; i < n; i++) {
-      polygons.add(S2Polygon.decode(in));
+      List<S2Polygon> polygons = new ArrayList<>();
+      for (int i = 0; i < count; i++) {
+        polygons.add(S2Polygon.decode(in));
+      }
+
+      geo = new MultiPolygonGeography(GeographyKind.MULTIPOLYGON, polygons);
+      geo.countShapes();
+
+    } catch (EOFException e) {
+      throw new IOException(
+          "MultiPolygon.decodeTagged error: insufficient data to decode all parts of the geography.",
+          e);
     }
-    MultiPolygonGeography geo = new MultiPolygonGeography(GeographyKind.MULTIPOLYGON, polygons);
-    geo.countShapes();
     return geo;
   }
 }

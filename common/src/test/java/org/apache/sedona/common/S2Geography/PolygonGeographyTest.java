@@ -61,9 +61,9 @@ public class PolygonGeographyTest {
     S2Loop polyline = new S2Loop(points);
     S2Polygon poly = new S2Polygon(polyline);
 
-    S2Point pt2 = S2LatLng.fromDegrees(45, -64).toPoint();
-    S2Point pt_mid2 = S2LatLng.fromDegrees(45, 0).toPoint();
-    S2Point pt_end2 = S2LatLng.fromDegrees(0, 0).toPoint();
+    S2Point pt2 = S2LatLng.fromDegrees(30, 10).toPoint();
+    S2Point pt_mid2 = S2LatLng.fromDegrees(35, 20).toPoint();
+    S2Point pt_end2 = S2LatLng.fromDegrees(32, 15).toPoint();
     // Build a single polygon and wrap in geography
     List<S2Point> points2 = new ArrayList<>();
     points2.add(pt2);
