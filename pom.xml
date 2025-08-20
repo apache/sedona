@@ -640,6 +640,7 @@
                 </executions>
                 <configuration>
                     <additionalparam>-Xdoclint:none</additionalparam>
+                    <excludePackageNames>org.apache.spark.sql.execution.datasources.geoparquet.internal</excludePackageNames>
                 </configuration>
             </plugin>
             <plugin>

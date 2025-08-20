@@ -21,7 +21,7 @@ package org.apache.spark.sql.sedona_sql.io.stac
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.connector.read.{Batch, Scan}
 import org.apache.spark.sql.execution.datasource.stac.TemporalFilter
-import org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter
+import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter
 import org.apache.spark.sql.internal.connector.SupportsMetadata
 import org.apache.spark.sql.sedona_sql.io.stac.StacUtils.{getFullCollectionUrl, inferStacSchema}
 import org.apache.spark.sql.types.StructType

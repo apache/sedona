@@ -58,15 +58,14 @@ class TestGeoDataFrame(TestGeopandasBase):
         ],
     )
     def test_constructor(self, obj):
-        with self.ps_allow_diff_frames():
-            sgpd_df = GeoDataFrame(obj)
+        sgpd_df = GeoDataFrame(obj)
         check_geodataframe(sgpd_df)
 
     def test_construct_from_geopandas(self):
         gpd_df = gpd.GeoDataFrame(
             {"geometry1": [Point(0, 0)]}, geometry="geometry1", crs="EPSG:3857"
         )
-        with self.ps_allow_diff_frames():
+        with ps.option_context("compute.ops_on_diff_frames", True):
             sgpd_df = GeoDataFrame(gpd_df)
         assert sgpd_df.crs == "EPSG:3857"
         assert sgpd_df.geometry.crs == "EPSG:3857"
@@ -143,7 +142,7 @@ class TestGeoDataFrame(TestGeopandasBase):
         index = [1, 2, 3]
         crs = "EPSG:3857"
         # TODO: try to optimize this away
-        with self.ps_allow_diff_frames():
+        with ps.option_context("compute.ops_on_diff_frames", True):
             result = GeoDataFrame(data, index=index, crs=crs).to_geopandas()
         gpd_df = gpd.GeoDataFrame(data, index=index, crs=crs)
         assert_geodataframe_equal(result, gpd_df)
@@ -161,7 +160,7 @@ class TestGeoDataFrame(TestGeopandasBase):
         values = ["a", "b", "c"]
         crs = "EPSG:3857"
 
-        with self.ps_allow_diff_frames():
+        with ps.option_context("compute.ops_on_diff_frames", True):
             df = GeoDataFrame({"geometry": geoms, "id": ids, "value": values}, crs=crs)
 
         # get a single non-geometry series
@@ -286,20 +285,20 @@ class TestGeoDataFrame(TestGeopandasBase):
 
     def test_set_crs(self):
         sgpd_df = sgpd.GeoDataFrame({"geometry": [Point(0, 0), Point(1, 1)]})
-        with self.ps_allow_diff_frames():
+        with ps.option_context("compute.ops_on_diff_frames", True):
             sgpd_df.crs = 4326
         assert sgpd_df.crs.to_epsg() == 4326
 
-        with self.ps_allow_diff_frames():
+        with ps.option_context("compute.ops_on_diff_frames", True):
             sgpd_df.set_crs(3857, inplace=True, allow_override=True)
         assert sgpd_df.crs.to_epsg() == 3857
 
-        with self.ps_allow_diff_frames():
+        with ps.option_context("compute.ops_on_diff_frames", True):
             sgpd_df = sgpd_df.set_crs(None, allow_override=True)
         assert isinstance(sgpd_df, GeoDataFrame)
         assert sgpd_df.crs is None
 
-        with self.ps_allow_diff_frames():
+        with ps.option_context("compute.ops_on_diff_frames", True):
             result = sgpd_df.set_crs(4326, allow_override=True)
         assert result.crs.to_epsg() == 4326
         assert isinstance(result, GeoDataFrame)
@@ -310,13 +309,13 @@ class TestGeoDataFrame(TestGeopandasBase):
     def test_to_crs(self):
         from pyproj import CRS
 
-        with self.ps_allow_diff_frames():
+        with ps.option_context("compute.ops_on_diff_frames", True):
             gdf = sgpd.GeoDataFrame(
                 {"geometry": [Point(1, 1), Point(2, 2), Point(3, 3)]}, crs=4326
             )
         assert isinstance(gdf.crs, CRS) and gdf.crs.to_epsg() == 4326
 
-        with self.ps_allow_diff_frames():
+        with ps.option_context("compute.ops_on_diff_frames", True):
             result = gdf.to_crs(3857)
         assert isinstance(result.crs, CRS) and result.crs.to_epsg() == 3857
         # Ensure original df is not modified
@@ -370,20 +369,20 @@ class TestGeoDataFrame(TestGeopandasBase):
         # new crs - setting should default to GeoSeries' crs
         gs = GeoSeries(geom, crs="epsg:3857")
 
-        with self.ps_allow_diff_frames():
+        with ps.option_context("compute.ops_on_diff_frames", True):
             new_df = sgpd_df.set_geometry(gs)
 
         assert new_df.crs == "epsg:3857"
 
         # explicit crs overrides self and dataframe
-        with self.ps_allow_diff_frames():
+        with ps.option_context("compute.ops_on_diff_frames", True):
             new_df = sgpd_df.set_geometry(gs, crs="epsg:26909")
 
         assert new_df.crs == "epsg:26909"
         assert new_df.geometry.crs == "epsg:26909"
 
         # Series should use dataframe's crs
-        with self.ps_allow_diff_frames():
+        with ps.option_context("compute.ops_on_diff_frames", True):
             new_df = sgpd_df.set_geometry(geom.values)
 
         assert new_df.crs == sgpd_df.crs
@@ -391,12 +390,12 @@ class TestGeoDataFrame(TestGeopandasBase):
 
     def test_set_geometry_crs(self):
         df = GeoDataFrame({"geometry1": [Point(0, 0)]})
-        with self.ps_allow_diff_frames():
+        with ps.option_context("compute.ops_on_diff_frames", True):
             df.set_geometry("geometry1", crs="EPSG:3857", inplace=True)
         assert df.crs == "EPSG:3857"
         assert df.geometry.crs == "EPSG:3857"
 
-        with self.ps_allow_diff_frames():
+        with ps.option_context("compute.ops_on_diff_frames", True):
             df = GeoDataFrame(
                 {"geometry1": [Point(0, 0)]}, geometry="geometry1", crs="EPSG:3857"
             )
@@ -414,14 +413,10 @@ class TestGeoDataFrame(TestGeopandasBase):
         data = {"geometry1": points1, "geometry2": points2, "attribute": [1, 2, 3]}
         df = GeoDataFrame(data)
 
-        # TODO: Try to optimize this with self.ps_allow_diff_frames() away
-        with self.ps_allow_diff_frames():
-            df = df.set_geometry("geometry1")
+        df = df.set_geometry("geometry1")
         assert df.geometry.name == df.active_geometry_name == "geometry1"
 
-        # TODO: Try to optimize this with self.ps_allow_diff_frames() away
-        with self.ps_allow_diff_frames():
-            df.set_geometry("geometry2", inplace=True)
+        df.set_geometry("geometry2", inplace=True)
         assert df.geometry.name == df.active_geometry_name == "geometry2"
 
     def test_rename_geometry(self):
@@ -431,18 +426,14 @@ class TestGeoDataFrame(TestGeopandasBase):
         data = {"geometry1": points1, "geometry2": points2, "attribute": [1, 2, 3]}
         df = GeoDataFrame(data)
 
-        # TODO: Try to optimize all of these with self.ps_allow_diff_frames() calls away
-        with self.ps_allow_diff_frames():
-            df = df.set_geometry("geometry1")
+        df = df.set_geometry("geometry1")
         assert df.geometry.name == "geometry1"
 
-        with self.ps_allow_diff_frames():
-            df = df.rename_geometry("geometry3")
+        df = df.rename_geometry("geometry3")
         assert df.geometry.name == "geometry3"
 
         # test inplace rename
-        with self.ps_allow_diff_frames():
-            df.rename_geometry("geometry4", inplace=True)
+        df.rename_geometry("geometry4", inplace=True)
         assert df.geometry.name == "geometry4"
 
     def test_area(self):
@@ -535,7 +526,7 @@ class TestGeoDataFrame(TestGeopandasBase):
         d = {"col1": ["name1", "name2"], "geometry": [Point(1, 2), Point(2, 1)]}
 
         # Currently, adding the crs information later requires us to join across partitions
-        with self.ps_allow_diff_frames():
+        with ps.option_context("compute.ops_on_diff_frames", True):
             gdf = GeoDataFrame(d, crs="EPSG:3857")
 
         result = gdf.to_json()

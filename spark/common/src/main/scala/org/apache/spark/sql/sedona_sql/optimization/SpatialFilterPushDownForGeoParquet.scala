@@ -39,11 +39,11 @@ import org.apache.spark.sql.execution.datasources.HadoopFsRelation
 import org.apache.spark.sql.execution.datasources.LogicalRelation
 import org.apache.spark.sql.execution.datasources.PushableColumn
 import org.apache.spark.sql.execution.datasources.PushableColumnBase
-import org.apache.spark.sql.execution.datasources.parquet.GeoParquetFileFormatBase
-import org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter
-import org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter.AndFilter
-import org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter.LeafFilter
-import org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter.OrFilter
+import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetFileFormatBase
+import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter
+import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.AndFilter
+import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.LeafFilter
+import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.OrFilter
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.{ST_AsEWKT, ST_Buffer, ST_Contains, ST_CoveredBy, ST_Covers, ST_Crosses, ST_DWithin, ST_Distance, ST_DistanceSphere, ST_DistanceSpheroid, ST_Equals, ST_Intersects, ST_OrderingEquals, ST_Overlaps, ST_Touches, ST_Within}
 import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils.splitConjunctivePredicates
