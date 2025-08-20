@@ -849,7 +849,7 @@ Introduction: Construct a Geometry from MySQL Geometry binary.
 
 Format: `ST_GeomFromMySQL (binary: Binary)`
 
-Since: `v1.0.0`
+Since: `v1.8.0`
 
 SQL Example
 
