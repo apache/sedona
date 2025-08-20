@@ -372,9 +372,9 @@
   Array of STAC extension definitions</p></dd><dt>returns</dt><dd class="cmt"><p>
   Enhanced schema with extension fields added to the properties struct</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacUtils#addFiltersToUrl" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="addFiltersToUrl(baseUrl:String,spatialFilter:Option[org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter],temporalFilter:Option[org.apache.spark.sql.execution.datasource.stac.TemporalFilter]):String"></a><a id="addFiltersToUrl(String,Option[GeoParquetSpatialFilter],Option[TemporalFilter]):String"></a>
+      <a id="addFiltersToUrl(baseUrl:String,spatialFilter:Option[org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter],temporalFilter:Option[org.apache.spark.sql.execution.datasource.stac.TemporalFilter]):String"></a><a id="addFiltersToUrl(String,Option[GeoParquetSpatialFilter],Option[TemporalFilter]):String"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacUtils$.html#addFiltersToUrl(baseUrl:String,spatialFilter:Option[org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter],temporalFilter:Option[org.apache.spark.sql.execution.datasource.stac.TemporalFilter]):String" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacUtils$.html#addFiltersToUrl(baseUrl:String,spatialFilter:Option[org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter],temporalFilter:Option[org.apache.spark.sql.execution.datasource.stac.TemporalFilter]):String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -383,7 +383,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">addFiltersToUrl</span><span class="params">(<span name="baseUrl">baseUrl: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="spatialFilter">spatialFilter: <span class="extype" name="scala.Option">Option</span>[<a href="../../../execution/datasources/parquet/GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a>]</span>, <span name="temporalFilter">temporalFilter: <span class="extype" name="scala.Option">Option</span>[<a href="../../../execution/datasource/stac/TemporalFilter.html" class="extype" name="org.apache.spark.sql.execution.datasource.stac.TemporalFilter">TemporalFilter</a>]</span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+        <span class="name">addFiltersToUrl</span><span class="params">(<span name="baseUrl">baseUrl: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="spatialFilter">spatialFilter: <span class="extype" name="scala.Option">Option</span>[<a href="../../../execution/datasources/geoparquet/GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a>]</span>, <span name="temporalFilter">temporalFilter: <span class="extype" name="scala.Option">Option</span>[<a href="../../../execution/datasource/stac/TemporalFilter.html" class="extype" name="org.apache.spark.sql.execution.datasource.stac.TemporalFilter">TemporalFilter</a>]</span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
       <p class="shortcomment cmt">Adds the spatial and temporal filters to the base URL.</p>
@@ -483,9 +483,9 @@
               
         </dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacUtils#getFilterBBox" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="getFilterBBox(filter:org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter):String"></a><a id="getFilterBBox(GeoParquetSpatialFilter):String"></a>
+      <a id="getFilterBBox(filter:org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter):String"></a><a id="getFilterBBox(GeoParquetSpatialFilter):String"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacUtils$.html#getFilterBBox(filter:org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter):String" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacUtils$.html#getFilterBBox(filter:org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter):String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -494,7 +494,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getFilterBBox</span><span class="params">(<span name="filter">filter: <a href="../../../execution/datasources/parquet/GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+        <span class="name">getFilterBBox</span><span class="params">(<span name="filter">filter: <a href="../../../execution/datasources/geoparquet/GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
       <p class="shortcomment cmt">Returns the temporal filter string based on the temporal filter.</p>
