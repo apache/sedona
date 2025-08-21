@@ -244,8 +244,10 @@ public abstract class Geography {
         geo = PolylineGeography.decode(in, tag);
         break;
       case POLYGON:
-      case MULTIPOLYGON:
         geo = PolygonGeography.decode(in, tag);
+        break;
+      case MULTIPOLYGON:
+        geo = MultiPolygonGeography.decode(in, tag);
         break;
       case GEOGRAPHY_COLLECTION:
         geo = GeographyCollection.decode(in, tag);

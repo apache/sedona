@@ -19,6 +19,8 @@
 package org.apache.sedona.common;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.common.enums.GeometryType;
@@ -301,5 +303,22 @@ public class Constructors {
 
   public static Geometry geomFromKML(String kml) throws ParseException {
     return new KMLReader().read(kml);
+  }
+
+  public static Geometry geomFromMySQL(byte[] binary) throws ParseException {
+    ByteBuffer buffer = ByteBuffer.wrap(binary);
+
+    buffer.order(ByteOrder.LITTLE_ENDIAN);
+    int srid = buffer.getInt();
+
+    byte[] wkb = new byte[buffer.remaining()];
+
+    buffer.get(wkb);
+
+    Geometry geom = geomFromWKB(wkb);
+
+    geom.setSRID(srid);
+
+    return geom;
   }
 }

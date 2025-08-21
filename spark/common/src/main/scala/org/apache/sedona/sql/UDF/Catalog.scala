@@ -215,6 +215,7 @@ object Catalog extends AbstractCatalog {
     function[ST_MLineFromText](0),
     function[ST_GeomCollFromText](0),
     function[ST_GeogCollFromText](0),
+    function[ST_GeomFromMySQL](),
     function[ST_Split](),
     function[ST_S2CellIDs](),
     function[ST_S2ToGeom](),
