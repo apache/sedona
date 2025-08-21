@@ -346,9 +346,11 @@ public class Constructors {
 
   private static Geography mLineToGeog(MultiLineString geom) throws IllegalArgumentException {
     S2Builder builder = new S2Builder.Builder().build();
-    S2PolylineVectorLayer.Options opts = new S2PolylineVectorLayer.Options()
-            .setDuplicateEdges(S2Builder.GraphOptions.DuplicateEdges.MERGE);     // reject duplicate segments
-    S2PolylineVectorLayer  vectorLayer = new S2PolylineVectorLayer(opts);
+    S2PolylineVectorLayer.Options opts =
+        new S2PolylineVectorLayer.Options()
+            .setDuplicateEdges(
+                S2Builder.GraphOptions.DuplicateEdges.MERGE); // reject duplicate segments
+    S2PolylineVectorLayer vectorLayer = new S2PolylineVectorLayer(opts);
     builder.startLayer(vectorLayer);
     for (int i = 0; i < geom.getNumGeometries(); i++) {
       LineString ls = (LineString) geom.getGeometryN(i);
