@@ -385,7 +385,7 @@ public class Constructors {
         Geography.GeographyKind.MULTIPOLYGON, Collections.unmodifiableList(polys));
   }
 
-  private static Geography geomCollToGeog(GeometryCollection geom) throws Exception {
+  private static Geography geomCollToGeog(GeometryCollection geom) {
     List<Geography> features = new ArrayList<>();
     for (int i = 0; i < geom.getNumGeometries(); i++) {
       Geometry g = geom.getGeometryN(i);
