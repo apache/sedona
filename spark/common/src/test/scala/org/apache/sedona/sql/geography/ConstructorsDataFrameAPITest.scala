@@ -127,7 +127,7 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
     assert(geom.getSRID == 4326)
   }
 
-  it("Passed ST_GeomToGeography multilingstring") {
+  it("Passed ST_GeomToGeography multilinestring") {
     var wkt = "MULTILINESTRING " + "((90 90, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))"
     val df = sparkSession
       .sql(s"SELECT '$wkt' AS wkt")
