@@ -265,7 +265,7 @@ public class Constructors {
     return gf.createGeometryCollection(gs);
   }
 
-  public static Geography geomToGeography(Geometry geom) throws Exception {
+  public static Geography geomToGeography(Geometry geom) {
     if (geom == null) {
       return null;
     }
