@@ -220,6 +220,14 @@ public class TestHelper {
         Geography g2 = (Geography) ((GeographyCollection) geo2).features.get(i);
         compareTo(g1, g2);
       }
+    } else if (geo1 instanceof MultiPolygonGeography && geo2 instanceof MultiPolygonGeography) {
+      if (S2_isEmpty(geo1) && S2_isEmpty(geo2)) return 0;
+      assertEquals(geo1.numShapes(), geo2.numShapes());
+      for (int i = 0; i < geo1.numShapes(); i++) {
+        Geography g1 = (Geography) ((MultiPolygonGeography) geo1).features.get(i);
+        Geography g2 = (Geography) ((MultiPolygonGeography) geo2).features.get(i);
+        compareTo(g1, g2);
+      }
     }
     return 0;
   }

@@ -33,8 +33,6 @@ For example, one Databricks Runtime 16.4 depends on Scala 2.12 and Spark 3.5.  H
 
 If you use a Databricks Runtime compiled with Spark 3.5 and Scala 2.12, then you should use a Sedona version compiled with Spark 3.5 and Scala 2.12.  You need to make sure the Scala versions are aligned, even if you’re using the Python or SQL APIs.
 
-Only some Sedona functions work when Databricks Photon acceleration is enabled, so you can consider disabling Photon when using Sedona for better compatibility.
-
 ## Install the Sedona library in Databricks
 
 Download the required Sedona packages by executing the following commands:
@@ -86,8 +84,6 @@ EOF
 ## Create a Databricks cluster
 
 You need to create a Databricks cluster compatible with the Sedona JAR files.  If you use Sedona JAR files compiled with Scala 2.12, you must use a Databricks cluster that runs Scala 2.12.
-
-Databricks Photon is only partially compatible with Apache Sedona, so you will have better compatibility if you unselect the Photon button when configuring the cluster.
 
 Go to the compute tab and configure the cluster:
 

@@ -143,7 +143,21 @@ SRID=4326; LINESTRING (0 0, 3 3, 4 4)
 
 ## ST_GeogToGeometry
 
-Introduction: Construct a Geometry from a Geography.
+Introduction:
+
+This function constructs a planar Geometry object from a Geography. While Sedona makes every effort to preserve the original spatial object, the conversion is not always exact because Geography and Geometry have different underlying models:
+
+* Geography represents shapes on the Earth’s surface (spherical).
+* Geometry represents shapes on a flat, Euclidean plane.
+
+This difference can cause certain ambiguities during conversion. For example:
+
+* A polygon in Geography always refers to the region on the Earth’s surface that the ring encloses. When converted to Geometry, however, it becomes unclear whether the polygon is intended to represent the “inside” or its complement (the “outside”) on the sphere.
+* Long edges that cross the antimeridian or cover poles may also be represented differently once projected into planar space.
+
+In practice, Sedona preserves the coordinates and ring orientation as closely as possible, but you should be aware that some topological properties (e.g., area, distance) may not match exactly after conversion.
+
+Sedona does not validate or enforce the SRID of the input Geography. Whatever SRID is attached to the Geography will be carried over to the resulting Geometry, even if it is not appropriate for planar interpretation. It is the user’s responsibility to ensure that the Geography’s SRID is meaningful in the target Geometry context.
 
 Format:
 
@@ -161,4 +175,32 @@ Output:
 
 ```
 MULTILINESTRING ((90 90, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))
+```
+
+## ST_GeomToGeography
+
+Introduction:
+
+This function constructs a Geography object from a planar Geometry. This function is intended for geometries defined in a Geographic Coordinate Reference System (CRS), most commonly WGS84 (EPSG:4326), where coordinates are expressed in degrees and the longitude/latitude order
+
+If the input Geometry is defined in a projected CRS (e.g., Web Mercator EPSG:3857, UTM zones), the conversion may succeed syntactically, but the resulting Geography will not be meaningful. This is because Geography interprets coordinates on the surface of a sphere, not a flat plane.
+
+Sedona does not validate or enforce the SRID of the input Geometry. Whatever SRID is attached to the Geometry will simply be carried over to the Geography, even if it is inappropriate for spherical interpretation. It is the user’s responsibility to ensure the input Geometry uses a Geographic CRS.
+
+Format:
+
+`ST_GeomToGeography (geom: Geometry)`
+
+Since: `v1.8.0`
+
+SQL example:
+
+```sql
+SELECT ST_GeomToGeography(ST_GeomFromWKT('MULTIPOLYGON (((10 10, 70 10, 70 70, 10 70, 10 10), (20 20, 60 20, 60 60, 20 60, 20 20)), ((30 30, 50 30, 50 50, 30 50, 30 30), (36 36, 44 36, 44 44, 36 44, 36 36)))'))
+```
+
+Output:
+
+```
+MULTIPOLYGON (((10 10, 70 10, 70 70, 10 70, 10 10), (20 20, 60 20, 60 60, 20 60, 20 20)), ((30 30, 50 30, 50 50, 30 50, 30 30), (36 36, 44 36, 44 44, 36 44, 36 36)))
 ```

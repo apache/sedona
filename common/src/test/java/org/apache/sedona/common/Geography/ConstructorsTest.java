@@ -245,4 +245,109 @@ public class ConstructorsTest {
     assertEquals(expected, got.toString());
     assertEquals(0, got.getSRID());
   }
+
+  @Test
+  public void MultiPolygonGeomToGeography() throws Exception {
+    String wkt =
+        "MULTIPOLYGON ("
+            +
+            // Component A: outer shell + lake
+            "((10 10, 70 10, 70 70, 10 70, 10 10),"
+            + " (20 20, 60 20, 60 60, 20 60, 20 20)),"
+            +
+            // Component B: island with a pond
+            " ((30 30, 50 30, 50 50, 30 50, 30 30),"
+            + " (36 36, 44 36, 44 44, 36 44, 36 36))"
+            + ")";
+    Geometry g = new org.locationtech.jts.io.WKTReader().read(wkt);
+    g.setSRID(4326);
+    Geography got = Constructors.geomToGeography(g);
+    String expected = "SRID=4326; " + wkt;
+    assertEquals(4326, got.getSRID());
+    org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
+    wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
+    assertEquals(expected, got.toString());
+  }
+
+  @Test
+  public void PointGeomToGeography() throws Exception {
+    Geometry geom = org.apache.sedona.common.Constructors.geomFromWKT("POINT (1 1)", 0);
+    Geography got = Constructors.geomToGeography(geom);
+    org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
+    wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
+    assertEquals(geom.toString(), got.toString());
+
+    geom =
+        org.apache.sedona.common.Constructors.geomFromWKT(
+            "MULTIPOINT ((10 10), (20 20), (30 30))", 0);
+    got = Constructors.geomToGeography(geom);
+    assertEquals(geom.toString(), got.toString());
+  }
+
+  @Test
+  public void PointGeomToGeographyDuplicate() throws Exception {
+    Geometry geom =
+        org.apache.sedona.common.Constructors.geomFromWKT(
+            "MULTIPOINT ((10 10), (20 20), (20 20), (30 30))", 0);
+    Geography got = Constructors.geomToGeography(geom);
+    org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
+    wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
+    assertEquals("MULTIPOINT ((10 10), (20 20), (30 30))", got.toString());
+
+    geom =
+        org.apache.sedona.common.Constructors.geomFromWKT(
+            "MULTIPOINT ((10 10), (20 20), (30 30), (20 20), (10 10))", 0);
+    got = Constructors.geomToGeography(geom);
+    assertEquals("MULTIPOINT ((10 10), (20 20), (30 30))", got.toString());
+  }
+
+  @Test
+  public void LineGeomToGeography() throws Exception {
+    Geometry geom =
+        org.apache.sedona.common.Constructors.geomFromWKT("LINESTRING (1 2, 3 4, 5 6)", 0);
+    Geography got = Constructors.geomToGeography(geom);
+    org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
+    wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
+    assertEquals(geom.toString(), got.toString());
+
+    geom =
+        org.apache.sedona.common.Constructors.geomFromWKT(
+            "MULTILINESTRING((1 2, 3 4), (4 5, 6 7))", 0);
+    got = Constructors.geomToGeography(geom);
+    assertEquals(geom.toString(), got.toString());
+  }
+
+  @Test
+  public void LineGeomToGeographyDuplicate() throws Exception {
+    Geometry geom =
+        org.apache.sedona.common.Constructors.geomFromWKT("LINESTRING (1 2, 3 4, 3 4, 5 6)", 0);
+    Geography got = Constructors.geomToGeography(geom);
+    org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
+    wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
+    assertEquals("LINESTRING (1 2, 3 4, 5 6)", got.toString());
+
+    geom =
+        org.apache.sedona.common.Constructors.geomFromWKT(
+            "MULTILINESTRING ((1 2, 3 4), (4 5, 6 7), (1 2, 3 4))", 0);
+    got = Constructors.geomToGeography(geom);
+    assertEquals("MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))", got.toString());
+
+    geom =
+        org.apache.sedona.common.Constructors.geomFromWKT(
+            "MULTILINESTRING ((1 2, 3 4), EMPTY, (4 5, 6 7), (1 2, 3 4))", 0);
+    got = Constructors.geomToGeography(geom);
+    assertEquals("MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))", got.toString());
+  }
+
+  @Test
+  public void CollGeomToGeography() throws Exception {
+    Geometry geom =
+        org.apache.sedona.common.Constructors.geomFromWKT(
+            "GEOMETRYCOLLECTION (POINT (10 20), LINESTRING (30 40, 50 60, 70 80), POLYGON ((10 10, 20 20, 10 20, 10 10)))",
+            0);
+    Geography got = Constructors.geomToGeography(geom);
+    org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
+    wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
+    assertEquals(geom.toString(), got.toString());
+  }
 }
