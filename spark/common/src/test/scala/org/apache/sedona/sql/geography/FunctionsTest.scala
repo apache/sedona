@@ -23,12 +23,10 @@ import org.apache.sedona.common.geography.{Constructors, Functions}
 import org.apache.sedona.sql.TestBaseScala
 import org.junit.Assert.assertEquals
 import org.locationtech.jts.geom.{Geometry, PrecisionModel}
-import org.locationtech.jts.io.WKTWriter
 
 class FunctionsTest extends TestBaseScala {
 
   import sparkSession.implicits._
-  val precisionModel: PrecisionModel = new PrecisionModel(PrecisionModel.FIXED);
 
   it("Passed ST_Envelope antarctica") {
     val antarctica =

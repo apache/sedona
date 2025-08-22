@@ -32,7 +32,7 @@ import org.apache.sedona.common.geography.Functions;
 import org.junit.Test;
 import org.locationtech.jts.io.ParseException;
 
-public class FucntionTest {
+public class FunctionTest {
   private static final double EPS = 1e-9;
 
   private static void assertDegAlmostEqual(double a, double b) {
