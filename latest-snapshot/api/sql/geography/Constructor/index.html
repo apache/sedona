@@ -2981,6 +2981,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#st_geomtogeography" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_GeomToGeography
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -4985,6 +4994,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#st_geomtogeography" class="md-nav__link">
+    <span class="md-ellipsis">
+      ST_GeomToGeography
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -5095,7 +5113,19 @@
 <div class="highlight"><pre><span></span><code>SRID=4326; LINESTRING (0 0, 3 3, 4 4)
 </code></pre></div>
 <h2 id="st_geogtogeometry">ST_GeogToGeometry<a class="headerlink" href="#st_geogtogeometry" title="Permanent link">&para;</a></h2>
-<p>Introduction: Construct a Geometry from a Geography.</p>
+<p>Introduction:</p>
+<p>This function constructs a planar Geometry object from a Geography. While Sedona makes every effort to preserve the original spatial object, the conversion is not always exact because Geography and Geometry have different underlying models:</p>
+<ul>
+<li>Geography represents shapes on the Earth’s surface (spherical).</li>
+<li>Geometry represents shapes on a flat, Euclidean plane.</li>
+</ul>
+<p>This difference can cause certain ambiguities during conversion. For example:</p>
+<ul>
+<li>A polygon in Geography always refers to the region on the Earth’s surface that the ring encloses. When converted to Geometry, however, it becomes unclear whether the polygon is intended to represent the “inside” or its complement (the “outside”) on the sphere.</li>
+<li>Long edges that cross the antimeridian or cover poles may also be represented differently once projected into planar space.</li>
+</ul>
+<p>In practice, Sedona preserves the coordinates and ring orientation as closely as possible, but you should be aware that some topological properties (e.g., area, distance) may not match exactly after conversion.</p>
+<p>Sedona does not validate or enforce the SRID of the input Geography. Whatever SRID is attached to the Geography will be carried over to the resulting Geometry, even if it is not appropriate for planar interpretation. It is the user’s responsibility to ensure that the Geography’s SRID is meaningful in the target Geometry context.</p>
 <p>Format:</p>
 <p><code>ST_GeogToGeometry (geog: Geography)</code></p>
 <p>Since: <code>v1.8.0</code></p>
@@ -5104,6 +5134,20 @@
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>MULTILINESTRING ((90 90, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))
+</code></pre></div>
+<h2 id="st_geomtogeography">ST_GeomToGeography<a class="headerlink" href="#st_geomtogeography" title="Permanent link">&para;</a></h2>
+<p>Introduction:</p>
+<p>This function constructs a Geography object from a planar Geometry. This function is intended for geometries defined in a Geographic Coordinate Reference System (CRS), most commonly WGS84 (EPSG:4326), where coordinates are expressed in degrees and the longitude/latitude order</p>
+<p>If the input Geometry is defined in a projected CRS (e.g., Web Mercator EPSG:3857, UTM zones), the conversion may succeed syntactically, but the resulting Geography will not be meaningful. This is because Geography interprets coordinates on the surface of a sphere, not a flat plane.</p>
+<p>Sedona does not validate or enforce the SRID of the input Geometry. Whatever SRID is attached to the Geometry will simply be carried over to the Geography, even if it is inappropriate for spherical interpretation. It is the user’s responsibility to ensure the input Geometry uses a Geographic CRS.</p>
+<p>Format:</p>
+<p><code>ST_GeomToGeography (geom: Geometry)</code></p>
+<p>Since: <code>v1.8.0</code></p>
+<p>SQL example:</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeomToGeography</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;MULTIPOLYGON (((10 10, 70 10, 70 70, 10 70, 10 10), (20 20, 60 20, 60 60, 20 60, 20 20)), ((30 30, 50 30, 50 50, 30 50, 30 30), (36 36, 44 36, 44 44, 36 44, 36 36)))&#39;</span><span class="p">))</span>
+</code></pre></div>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code>MULTIPOLYGON (((10 10, 70 10, 70 70, 10 70, 10 10), (20 20, 60 20, 60 60, 20 60, 20 20)), ((30 30, 50 30, 50 50, 30 50, 30 30), (36 36, 44 36, 44 44, 36 44, 36 36)))
 </code></pre></div>
 
 
@@ -5125,7 +5169,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="August 16, 2025 20:15:33 UTC">August 16, 2025 20:15:33</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="August 22, 2025 07:39:49 UTC">August 22, 2025 07:39:49</span>
   </span>
 
     
