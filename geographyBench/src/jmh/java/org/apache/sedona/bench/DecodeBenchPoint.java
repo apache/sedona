@@ -161,9 +161,14 @@ public class DecodeBenchPoint {
 
   // ---------------- RAW S2Point.Shape coder decode (no tags/wrappers) ----------------
   @Benchmark
-  public void raw_S2points_compact_decode(Blackhole bh) throws IOException {
+  public double raw_S2points_compact_decode(Blackhole bh) throws IOException {
     List<S2Point> out = S2Point.Shape.COMPACT_CODER.decode(rawCompactBytesAdapter, compactCur);
-    bh.consume(out.size());
+    double acc = 0;
+    for (int i = 0; i < out.size(); i++) {
+      S2Point p = out.get(i);
+      acc += p.getX() + p.getY() + p.getZ();
+    }
+    return acc; // returning prevents DCE; no Blackhole needed
   }
 
   //  @Benchmark
