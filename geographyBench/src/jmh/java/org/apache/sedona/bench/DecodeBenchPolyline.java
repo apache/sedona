@@ -20,9 +20,7 @@ package org.apache.sedona.bench;
 
 import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.io.UnsafeInput;
-import com.google.common.geometry.PrimitiveArrays;
-import com.google.common.geometry.S2LatLng;
-import com.google.common.geometry.S2Point;
+import com.google.common.geometry.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -34,11 +32,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import one.profiler.AsyncProfiler;
 import one.profiler.AsyncProfilerLoader;
-import org.apache.sedona.common.S2Geography.EncodeOptions;
-import org.apache.sedona.common.S2Geography.EncodeTag;
-import org.apache.sedona.common.S2Geography.Geography;
-import org.apache.sedona.common.S2Geography.PointGeography;
-import org.apache.sedona.common.S2Geography.SinglePointGeography;
+import org.apache.sedona.common.S2Geography.*;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.Blackhole;
@@ -51,11 +45,14 @@ import org.openjdk.jmh.runner.IterationType;
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(2)
 @State(Scope.Thread)
-public class DecodeBenchPoint {
+public class DecodeBenchPolyline {
 
   // -------- Params --------
-  @Param({"1", "16", "256", "4096", "65536"})
-  public int points;
+  @Param({"1", "16", "256", "4096"})
+  public int numPolylines;
+
+  @Param({"8", "64", "128", "256"})
+  public int verticesPerPolyline;
 
   @Param({"XY", "XYZ"})
   public String dimension;
@@ -63,72 +60,70 @@ public class DecodeBenchPoint {
   @Param({"COMPACT"})
   public String pointEncoding;
 
-  // -------- Reused points --------
-  private List<S2Point> pts;
+  // -------- Reused geometries --------
+  private List<S2Polyline> polylines;
 
-  // -------- Tagged payloads (POINT/MULTIPOINT) --------
-  private byte[] taggedPointBytes;
-  private byte[] taggedMultiPointBytes;
-  private UnsafeInput taggedPointIn;
-  private UnsafeInput taggedMultiPointIn;
+  // -------- Tagged payloads (POLYLINE/MULTIPOLYLINE) --------
+  private byte[] taggedPolylineBytes;
+  private byte[] taggedMultiPolylineBytes;
+  private UnsafeInput taggedPolylineIn;
+  private UnsafeInput taggedMultiPolylineIn;
 
-  // -------- Raw coder payloads (using the SAME pts) --------
-  private PrimitiveArrays.Bytes rawCompactBytesAdapter;
-  private PrimitiveArrays.Cursor compactCur;
+  // -------- Raw coder payloads (using the SAME polylines) --------
+  private byte[] rawMultiPolylineBytes;
+  private UnsafeInput rawMultiPolylineIn;
+
   // ---------------- Setup ----------------
   @Setup(Level.Trial)
   public void setup() throws Exception {
-    pts = buildPoints(points);
+    polylines = buildPolylines(numPolylines, verticesPerPolyline);
 
-    // --- Tagged POINT ---
+    // --- Tagged POLYLINE ---
     {
       EncodeOptions opts = new EncodeOptions();
       applyPointEncodingPreference(opts, pointEncoding);
-      Geography g = new SinglePointGeography(pts.get(0));
+      Geography g = new SinglePolylineGeography(polylines.get(0));
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       g.encodeTagged(baos, opts);
-      taggedPointBytes = baos.toByteArray();
+      taggedPolylineBytes = baos.toByteArray();
     }
 
-    // --- Tagged MULTIPOINT ---
+    // --- Tagged MULTIPOLYLINE ---
     {
       EncodeOptions opts = new EncodeOptions();
       applyPointEncodingPreference(opts, pointEncoding);
-      Geography g = new PointGeography(pts);
+      Geography g = new PolylineGeography(polylines);
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       g.encodeTagged(baos, opts);
-      taggedMultiPointBytes = baos.toByteArray();
+      taggedMultiPolylineBytes = baos.toByteArray();
     }
 
-    // --- Raw coder payloads from the SAME points (COMPACT & FAST) ---
-    byte[] rawCompactBytes = encodePointsPayload(pts, /*compact=*/ true);
-    byte[] rawFastBytes = encodePointsPayload(pts, /*compact=*/ false);
+    // --- Raw S2 coder payload from the SAME polylines ---
+    rawMultiPolylineBytes = encodeMultiPolylinePayload(polylines);
 
     // Inputs for tagged payloads
-    taggedPointIn = new UnsafeInput(taggedPointBytes);
-    taggedMultiPointIn = new UnsafeInput(taggedMultiPointBytes);
+    taggedPolylineIn = new UnsafeInput(taggedPolylineBytes);
+    taggedMultiPolylineIn = new UnsafeInput(taggedMultiPolylineBytes);
 
-    // Bytes adapters & cursors
-    rawCompactBytesAdapter = bytesOverArray(rawCompactBytes);
-    compactCur = rawCompactBytesAdapter.cursor();
+    // Input for raw payload
+    rawMultiPolylineIn = new UnsafeInput(rawMultiPolylineBytes);
 
     System.out.printf(
-        "points=%d enc=%s  tagged[POINT]=%dB  tagged[MULTIPOINT]=%dB  rawCompact=%dB  rawFast=%dB%n",
-        points,
+        "numPolylines=%d, verticesPerPolyline=%d, enc=%s, tagged[POLYLINE]=%dB, tagged[MULTIPOLYLINE]=%dB, rawS2=%dB%n",
+        numPolylines,
+        verticesPerPolyline,
         pointEncoding,
-        taggedPointBytes.length,
-        taggedMultiPointBytes.length,
-        rawCompactBytes.length,
-        rawFastBytes.length);
+        taggedPolylineBytes.length,
+        taggedMultiPolylineBytes.length,
+        rawMultiPolylineBytes.length);
   }
 
   @Setup(Level.Invocation)
   public void rewind() {
     // Rewind Kryo inputs
-    taggedPointIn.rewind();
-    taggedMultiPointIn.rewind();
-    // Reset S2 cursor positions
-    compactCur.position = 0;
+    taggedPolylineIn.rewind();
+    taggedMultiPolylineIn.rewind();
+    rawMultiPolylineIn.rewind();
   }
 
   // =====================================================================
@@ -136,23 +131,23 @@ public class DecodeBenchPoint {
   // =====================================================================
 
   @Benchmark
-  public void tagged_point_full(ProfilerHook ph, Blackhole bh) throws IOException {
-    Geography g = Geography.decodeTagged(taggedPointIn);
+  public void tagged_polyline_decode(ProfilerHook ph, Blackhole bh) throws IOException {
+    Geography g = Geography.decodeTagged(taggedPolylineIn);
     bh.consume(g);
   }
 
   @Benchmark
-  public void tagged_multipoint_decode(ProfilerHook ph, Blackhole bh) throws IOException {
+  public void tagged_multipolyline_decode(ProfilerHook ph, Blackhole bh) throws IOException {
     // Note: profiling is handled per-iteration by ProfilerHook; keep the body clean.
-    Geography g = Geography.decodeTagged(taggedMultiPointIn);
+    Geography g = Geography.decodeTagged(taggedMultiPolylineIn);
     bh.consume(g);
   }
 
   @Benchmark
-  public double tagged_multipoint_encode(ProfilerHook ph, Blackhole bh) throws IOException {
+  public double tagged_polyline_encode(ProfilerHook ph, Blackhole bh) throws IOException {
     EncodeOptions opts = new EncodeOptions();
     applyPointEncodingPreference(opts, pointEncoding);
-    Geography g = new PointGeography(pts);
+    Geography g = new PolylineGeography(polylines.get(0));
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     g.encodeTagged(baos, opts);
     byte[] data = baos.toByteArray();
@@ -163,10 +158,10 @@ public class DecodeBenchPoint {
   }
 
   @Benchmark
-  public double tagged_point_encode(ProfilerHook ph, Blackhole bh) throws IOException {
+  public double tagged_multipolyline_encode(ProfilerHook ph, Blackhole bh) throws IOException {
     EncodeOptions opts = new EncodeOptions();
     applyPointEncodingPreference(opts, pointEncoding);
-    Geography g = new PointGeography(pts.get(0));
+    Geography g = new PolylineGeography(polylines);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     g.encodeTagged(baos, opts);
     byte[] data = baos.toByteArray();
@@ -177,11 +172,11 @@ public class DecodeBenchPoint {
   }
 
   @Benchmark
-  public int tagged_multipoint_tagOnly() throws IOException {
-    // Header + covering + count only (no point decode)
-    EncodeTag tag = EncodeTag.decode(taggedMultiPointIn);
-    tag.skipCovering(taggedMultiPointIn);
-    int n = taggedMultiPointIn.readInt(false); // varint length of payload we wrote
+  public int tagged_multipolyline_tagOnly() throws IOException {
+    // Header + covering + count only (no geometry decode)
+    EncodeTag tag = EncodeTag.decode(taggedMultiPolylineIn);
+    tag.skipCovering(taggedMultiPolylineIn);
+    int n = taggedMultiPolylineIn.readInt(false); // varint length of payload we wrote
     return n;
   }
 
@@ -190,21 +185,46 @@ public class DecodeBenchPoint {
   // =====================================================================
 
   @Benchmark
-  public double raw_S2points_compact_decode(ProfilerHook ph) throws IOException {
-    List<S2Point> out = S2Point.Shape.COMPACT_CODER.decode(rawCompactBytesAdapter, compactCur);
-    double acc = 0;
-    for (int i = 0; i < out.size(); i++) {
-      S2Point p = out.get(i);
-      acc += p.getX() + p.getY() + p.getZ();
+  public double raw_S2multipolyline_decode(ProfilerHook ph) throws IOException {
+    int b0 = rawMultiPolylineIn.read();
+    int b1 = rawMultiPolylineIn.read();
+    int b2 = rawMultiPolylineIn.read();
+    int b3 = rawMultiPolylineIn.read();
+    int count = (b0 & 0xFF) | ((b1 & 0xFF) << 8) | ((b2 & 0xFF) << 16) | ((b3 & 0xFF) << 24);
+
+    List<S2Polyline> out = new ArrayList<>(count);
+    for (int i = 0; i < count; i++) {
+      S2Polyline p = S2Polyline.decode(rawMultiPolylineIn);
+      out.add(p);
     }
-    return acc; // returning prevents DCE
+    double acc = 0;
+    // Consume the data to prevent Dead Code Elimination (DCE)
+    for (S2Polyline polyline : out) {
+      if (polyline.numVertices() > 0) {
+        S2Point p = polyline.vertex(0);
+        acc += p.getX() + p.getY() + p.getZ();
+      }
+    }
+    return acc;
   }
 
   @Benchmark
-  public double raw_S2points_compact_encode(ProfilerHook ph, Blackhole bh) throws IOException {
+  public double raw_S2polyline_compact_encode(DecodeBenchPoint.ProfilerHook ph, Blackhole bh)
+      throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     Output out = new Output(baos);
-    S2Point.Shape.COMPACT_CODER.encode(S2Point.Shape.fromList(pts), out);
+    // LITTLE-ENDIAN count:
+    int n = polylines.size();
+    out.writeByte(n & 0xFF);
+    out.writeByte((n >>> 8) & 0xFF);
+    out.writeByte((n >>> 16) & 0xFF);
+    out.writeByte((n >>> 24) & 0xFF);
+
+    for (S2Polyline polyline : polylines) {
+      // Use the high-level API: writes the coder id + payload that S2Polyline.decode expects
+      S2Polyline.COMPACT_CODER.encode(polyline, out);
+    }
+    out.flush();
     // Materialize once to make the work observable & defeat DCE
     byte[] arr = out.toBytes();
     long s = 0;
@@ -217,28 +237,44 @@ public class DecodeBenchPoint {
   // == Helpers ==
   // =====================================================================
 
-  /** Encode the list of S2Points into the raw S2 payload for COMPACT/FAST coder. */
-  static byte[] encodePointsPayload(List<S2Point> points, boolean compact) throws IOException {
+  /**
+   * Encode the list of S2Polylines into a raw S2 payload. The format is [count (varint)]
+   * [polyline_1_bytes] [polyline_2_bytes] ...
+   */
+  static byte[] encodeMultiPolylinePayload(List<S2Polyline> polylines) throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     Output out = new Output(baos);
-    if (compact) {
-      S2Point.Shape.COMPACT_CODER.encode(S2Point.Shape.fromList(points), out);
-    } else {
-      S2Point.Shape.FAST_CODER.encode(S2Point.Shape.fromList(points), out);
+
+    // Write count as a fixed 4-byte int (match reader)
+    // LITTLE-ENDIAN count:
+    int n = polylines.size();
+    out.writeByte(n & 0xFF);
+    out.writeByte((n >>> 8) & 0xFF);
+    out.writeByte((n >>> 16) & 0xFF);
+    out.writeByte((n >>> 24) & 0xFF);
+
+    for (S2Polyline polyline : polylines) {
+      // Use the high-level API: writes the coder id + payload that S2Polyline.decode expects
+      S2Polyline.COMPACT_CODER.encode(polyline, out);
     }
     out.flush();
     return baos.toByteArray();
   }
 
-  private static List<S2Point> buildPoints(int n) {
-    // Deterministic pseudo-grid; S2Point is inherently 3D, 'dimension' is retained as a param only
-    List<S2Point> out = new ArrayList<>(n);
-    for (int i = 0; i < n; i++) {
-      double lat = -60.0 + (i % 120);
-      double lng = -170.0 + (i % 340);
-      out.add(S2LatLng.fromDegrees(lat, lng).toPoint());
+  public static List<S2Polyline> buildPolylines(int numPolylines, int verticesPerPolyline) {
+    List<S2Polyline> result = new ArrayList<>(numPolylines);
+    for (int j = 0; j < numPolylines; j++) {
+      List<S2Point> vertices = new ArrayList<>(verticesPerPolyline);
+      for (int i = 0; i < verticesPerPolyline; i++) {
+        // Shift each polyline so they don’t overlap completely
+        double latDeg = -60.0 + (i % 120) + j * 0.5;
+        double lngDeg = -170.0 + (i % 340) + j * 0.5;
+        S2LatLng ll = S2LatLng.fromDegrees(latDeg, lngDeg).normalized();
+        vertices.add(ll.toPoint());
+      }
+      result.add(new S2Polyline(vertices));
     }
-    return out;
+    return result;
   }
 
   private static void applyPointEncodingPreference(EncodeOptions opts, String enc) {
@@ -250,24 +286,6 @@ public class DecodeBenchPoint {
     } else {
       opts.setEnableLazyDecode(true);
     }
-  }
-
-  private static PrimitiveArrays.Bytes bytesOverArray(byte[] arr) {
-    return bytesOverSlice(arr, 0, arr.length);
-  }
-
-  private static PrimitiveArrays.Bytes bytesOverSlice(byte[] buf, int off, int len) {
-    return new PrimitiveArrays.Bytes() {
-      @Override
-      public long length() {
-        return len;
-      }
-
-      @Override
-      public byte get(long i) {
-        return buf[off + (int) i];
-      }
-    };
   }
 
   // =====================================================================
@@ -306,7 +324,6 @@ public class DecodeBenchPoint {
               .resolve(base + (format.equals("jfr") ? ".jfr" : ".html"))
               .toAbsolutePath()
               .toFile();
-
       if ("jfr".equals(format)) {
         profiler.execute(
             String.format("start,jfr,event=%s,interval=%s,file=%s", event, interval, out));
@@ -316,7 +333,6 @@ public class DecodeBenchPoint {
         System.setProperty("ap.out", out.getAbsolutePath());
         System.setProperty("ap.format", format);
       }
-      // Optional sanity: System.out.println(profiler.execute("status"));
     }
 
     @TearDown(Level.Iteration)
