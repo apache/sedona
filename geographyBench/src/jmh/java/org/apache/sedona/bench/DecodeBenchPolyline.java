@@ -48,10 +48,10 @@ import org.openjdk.jmh.runner.IterationType;
 public class DecodeBenchPolyline {
 
   // -------- Params --------
-  @Param({"1", "16", "256", "4096"})
+  @Param({"1", "1", "1", "1", "16", "256", "1028"})
   public int numPolylines;
 
-  @Param({"8", "64", "128", "256"})
+  @Param({"2", "16", "256", "1028", "1028", "1028", "1028"})
   public int verticesPerPolyline;
 
   @Param({"XY", "XYZ"})

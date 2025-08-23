@@ -48,10 +48,10 @@ import org.openjdk.jmh.runner.IterationType;
 public class DecodeBenchPolygon {
 
   // -------- Params --------
-  @Param({"1", "16", "128", "4096", "4096"})
+  @Param({"1", "1", "1", "1", "16", "256", "1028"})
   public int numPolygons;
 
-  @Param({"4", "16", "64", "128", "256"})
+  @Param({"4", "16", "256", "1028", "1028", "1028", "1028"})
   public int verticesPerPolygon;
 
   @Param({"XY", "XYZ"})
