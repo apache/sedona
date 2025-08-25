@@ -171,6 +171,16 @@ public abstract class Geography {
     return writer.write(this);
   }
 
+  public String toEWKT() {
+    return toEWKT(new PrecisionModel(PrecisionModel.FIXED));
+  }
+
+  public String toEWKT(PrecisionModel precisionModel) {
+    WKTWriter writer = new WKTWriter(true);
+    writer.setPrecisionModel(precisionModel);
+    return writer.write(this);
+  }
+
   // ─── Encoding / decoding machinery ────────────────────────────────────────────
   /**
    * Serialize this geography to an encoder. This does not include any encapsulating information

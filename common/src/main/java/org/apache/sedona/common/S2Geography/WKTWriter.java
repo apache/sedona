@@ -49,6 +49,7 @@ public class WKTWriter {
 
   private static final int INDENT = 2;
   private static final int OUTPUT_DIMENSION = 2;
+  private boolean EWKT = false;
 
   /**
    * Creates the <code>DecimalFormat</code> used to write <code>double</code>s with a sufficient
@@ -89,6 +90,11 @@ public class WKTWriter {
   /** Creates a new WKTWriter with default settings */
   public WKTWriter() {
     this(OUTPUT_DIMENSION);
+  }
+
+  public WKTWriter(boolean isEwkt) {
+    this(OUTPUT_DIMENSION);
+    this.EWKT = isEwkt;
   }
 
   /**
@@ -404,7 +410,7 @@ public class WKTWriter {
       Writer writer,
       OrdinateFormat formatter)
       throws IOException {
-    writeSRID(point, writer);
+    if (EWKT) writeSRID(point, writer);
     writer.write(WKTConstants.POINT);
     writer.write(" ");
     appendOrdinateText(outputOrdinates, writer);
@@ -437,7 +443,7 @@ public class WKTWriter {
       Writer writer,
       OrdinateFormat formatter)
       throws IOException {
-    writeSRID(lineString, writer);
+    if (EWKT) writeSRID(lineString, writer);
     writer.write(WKTConstants.LINESTRING);
     writer.write(" ");
     appendOrdinateText(outputOrdinates, writer);
@@ -469,7 +475,7 @@ public class WKTWriter {
       Writer writer,
       OrdinateFormat formatter)
       throws IOException {
-    writeSRID(polygon, writer);
+    if (EWKT) writeSRID(polygon, writer);
     writer.write(WKTConstants.POLYGON);
     writer.write(" ");
     appendOrdinateText(outputOrdinates, writer);
@@ -495,7 +501,7 @@ public class WKTWriter {
       Writer writer,
       OrdinateFormat formatter)
       throws IOException {
-    writeSRID(multipoint, writer);
+    if (EWKT) writeSRID(multipoint, writer);
     writer.write(WKTConstants.MULTIPOINT);
     writer.write(" ");
     appendOrdinateText(outputOrdinates, writer);
@@ -521,7 +527,7 @@ public class WKTWriter {
       Writer writer,
       OrdinateFormat formatter)
       throws IOException {
-    writeSRID(multiLineString, writer);
+    if (EWKT) writeSRID(multiLineString, writer);
     writer.write(WKTConstants.MULTILINESTRING);
     writer.write(" ");
     appendOrdinateText(outputOrdinates, writer);
@@ -548,7 +554,7 @@ public class WKTWriter {
       Writer writer,
       OrdinateFormat formatter)
       throws IOException {
-    writeSRID(multiPolygon, writer);
+    if (EWKT) writeSRID(multiPolygon, writer);
     writer.write(WKTConstants.MULTIPOLYGON);
     writer.write(" ");
     appendOrdinateText(outputOrdinates, writer);
@@ -574,7 +580,7 @@ public class WKTWriter {
       Writer writer,
       OrdinateFormat formatter)
       throws IOException {
-    writeSRID(geometryCollection, writer);
+    if (EWKT) writeSRID(geometryCollection, writer);
     writer.write(WKTConstants.GEOMETRYCOLLECTION);
     writer.write(" ");
     appendOrdinateText(outputOrdinates, writer);

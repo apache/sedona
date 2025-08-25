@@ -80,4 +80,9 @@ public class Functions {
 
     return new S2Polygon(loop);
   }
+
+  /** Return EWKT for geography object */
+  public static String asEWKT(Geography geography) {
+    return geography.toEWKT();
+  }
 }
