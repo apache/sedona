@@ -43,9 +43,9 @@ import org.openjdk.jmh.runner.IterationType;
 
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
-@Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-@Fork(2)
+@Warmup(iterations = 1, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
+@Fork(1)
 @State(Scope.Thread)
 public class BenchPolygonWKB {
   /** Limit dimension to XY / XYZ only */
@@ -57,7 +57,7 @@ public class BenchPolygonWKB {
   public int nPolygons;
 
   /** number of vertices per polygon ring (must be >= 4) */
-  @Param({"4", "16", "256", "1028", "1028", "1028", "1028"})
+  @Param({"4", "16", "256", "1028", "1028", "1028"})
   public int nVerticesPerRing;
 
   /** WKB endianness */
