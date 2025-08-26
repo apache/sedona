@@ -27,9 +27,9 @@ error handling and reporting.
 import argparse
 import os
 import shutil
-import sys
 import traceback
 from typing import List, Optional, Tuple
+import uuid
 
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, expr, rand
@@ -42,6 +42,10 @@ class SedonaSmokeTest:
         self.spark: Optional[SparkSession] = None
         self.test_results: List[Tuple[str, bool, str]] = []
         self.session_id = session_id or "default"
+        rand_suffix = uuid.uuid4()
+        self.base_temp_path = (
+            f"dbfs:/tmp/sedona-smoke-test/{self.session_id}-{rand_suffix}"
+        )
 
     def setup(self) -> bool:
         """Initialize Spark session and basic setup."""
@@ -205,9 +209,7 @@ class SedonaSmokeTest:
     def test_geoparquet_io(self) -> None:
         """Test GeoParquet I/O operations."""
         # Use DBFS path with session_id for better isolation
-        output_path = (
-            f"dbfs:/tmp/sedona-smoke-test/{self.session_id}/sedona_test_geoparquet"
-        )
+        output_path = f"{self.base_temp_path}/sedona_test_geoparquet"
 
         # Create sample spatial data
         sample_data = self.spark.range(100).select(
@@ -232,9 +234,7 @@ class SedonaSmokeTest:
     def test_geojson_io(self) -> None:
         """Test GeoJSON I/O operations."""
         # Use DBFS path with session_id for better isolation
-        output_path = (
-            f"dbfs:/tmp/sedona-smoke-test/{self.session_id}/sedona_test_geojson"
-        )
+        output_path = f"{self.base_temp_path}/sedona_test_geojson"
 
         # Create sample spatial data with different geometry types
         sample_data = self.spark.range(50).select(
@@ -343,8 +343,8 @@ class SedonaSmokeTest:
         # Print summary
         self.print_summary()
 
-        # Clean up /dbfs/tmp/sedona-smoke-test/{self.session_id}
-        test_dir = f"/dbfs/tmp/sedona-smoke-test/{self.session_id}"
+        # Clean up base temp path
+        test_dir = self.base_temp_path
         try:
             if os.path.exists(test_dir):
                 shutil.rmtree(test_dir)
