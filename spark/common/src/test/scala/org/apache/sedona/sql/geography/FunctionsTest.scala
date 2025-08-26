@@ -54,4 +54,12 @@ class FunctionsTest extends TestBaseScala {
     val functionDf = sparkSession.sql("select ST_Envelope(null, false)")
     assert(functionDf.first().get(0) == null)
   }
+
+  it("Passed ST_AsEWKT") {
+    val wkt = "LINESTRING (1 2, 3 4, 5 6)"
+    val wktExpected = "SRID=4326; LINESTRING (1 2, 3 4, 5 6)"
+    val row = sparkSession.sql(s"SELECT ST_AsEWKT(ST_GeogFromText('$wkt', 4326)) AS geog").first()
+    val geoStr = row.get(0)
+    assert(geoStr == wktExpected)
+  }
 }
