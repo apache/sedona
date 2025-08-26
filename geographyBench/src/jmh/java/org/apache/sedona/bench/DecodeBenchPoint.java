@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import one.profiler.AsyncProfiler;
-import one.profiler.AsyncProfilerLoader;
 import org.apache.sedona.common.S2Geography.EncodeOptions;
 import org.apache.sedona.common.S2Geography.EncodeTag;
 import org.apache.sedona.common.S2Geography.Geography;
@@ -54,13 +53,13 @@ import org.openjdk.jmh.runner.IterationType;
 public class DecodeBenchPoint {
 
   // -------- Params --------
-  @Param({"1", "16", "256", "4096", "65536"})
+  @Param({"1", "16", "256", "1024", "4096", "65536"})
   public int points;
 
   @Param({"XY", "XYZ"})
   public String dimension;
 
-  @Param({"COMPACT"})
+  @Param({"COMPACT", "FAST"})
   public String pointEncoding;
 
   // -------- Reused points --------
@@ -75,6 +74,9 @@ public class DecodeBenchPoint {
   // -------- Raw coder payloads (using the SAME pts) --------
   private PrimitiveArrays.Bytes rawCompactBytesAdapter;
   private PrimitiveArrays.Cursor compactCur;
+  private PrimitiveArrays.Bytes rawFastBytesAdapter;
+  private PrimitiveArrays.Cursor fastCur;
+
   // ---------------- Setup ----------------
   @Setup(Level.Trial)
   public void setup() throws Exception {
@@ -111,6 +113,8 @@ public class DecodeBenchPoint {
     // Bytes adapters & cursors
     rawCompactBytesAdapter = bytesOverArray(rawCompactBytes);
     compactCur = rawCompactBytesAdapter.cursor();
+    rawFastBytesAdapter = bytesOverArray(rawFastBytes);
+    fastCur = rawFastBytesAdapter.cursor();
 
     System.out.printf(
         "points=%d enc=%s  tagged[POINT]=%dB  tagged[MULTIPOINT]=%dB  rawCompact=%dB  rawFast=%dB%n",
@@ -129,6 +133,7 @@ public class DecodeBenchPoint {
     taggedMultiPointIn.rewind();
     // Reset S2 cursor positions
     compactCur.position = 0;
+    fastCur.position = 0;
   }
 
   // =====================================================================
@@ -136,20 +141,23 @@ public class DecodeBenchPoint {
   // =====================================================================
 
   @Benchmark
-  public void tagged_point_full(ProfilerHook ph, Blackhole bh) throws IOException {
+  public void tagged_point_decode(DecodeBenchPoint.ProfilerHook ph, Blackhole bh)
+      throws IOException {
     Geography g = Geography.decodeTagged(taggedPointIn);
     bh.consume(g);
   }
 
   @Benchmark
-  public void tagged_multipoint_decode(ProfilerHook ph, Blackhole bh) throws IOException {
+  public void tagged_multipoint_decode(DecodeBenchPoint.ProfilerHook ph, Blackhole bh)
+      throws IOException {
     // Note: profiling is handled per-iteration by ProfilerHook; keep the body clean.
     Geography g = Geography.decodeTagged(taggedMultiPointIn);
     bh.consume(g);
   }
 
   @Benchmark
-  public double tagged_multipoint_encode(ProfilerHook ph, Blackhole bh) throws IOException {
+  public double tagged_multipoint_encode(DecodeBenchPoint.ProfilerHook ph, Blackhole bh)
+      throws IOException {
     EncodeOptions opts = new EncodeOptions();
     applyPointEncodingPreference(opts, pointEncoding);
     Geography g = new PointGeography(pts);
@@ -163,10 +171,11 @@ public class DecodeBenchPoint {
   }
 
   @Benchmark
-  public double tagged_point_encode(ProfilerHook ph, Blackhole bh) throws IOException {
+  public double tagged_point_encode(DecodeBenchPoint.ProfilerHook ph, Blackhole bh)
+      throws IOException {
     EncodeOptions opts = new EncodeOptions();
     applyPointEncodingPreference(opts, pointEncoding);
-    Geography g = new PointGeography(pts.get(0));
+    Geography g = new SinglePointGeography(pts.get(0));
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     g.encodeTagged(baos, opts);
     byte[] data = baos.toByteArray();
@@ -190,7 +199,7 @@ public class DecodeBenchPoint {
   // =====================================================================
 
   @Benchmark
-  public double raw_S2points_compact_decode(ProfilerHook ph) throws IOException {
+  public double raw_S2points_compact_decode(DecodeBenchPoint.ProfilerHook ph) throws IOException {
     List<S2Point> out = S2Point.Shape.COMPACT_CODER.decode(rawCompactBytesAdapter, compactCur);
     double acc = 0;
     for (int i = 0; i < out.size(); i++) {
@@ -201,10 +210,36 @@ public class DecodeBenchPoint {
   }
 
   @Benchmark
-  public double raw_S2points_compact_encode(ProfilerHook ph, Blackhole bh) throws IOException {
+  public double raw_S2points_fast_decode(DecodeBenchPoint.ProfilerHook ph) throws IOException {
+    List<S2Point> out = S2Point.Shape.FAST_CODER.decode(rawFastBytesAdapter, fastCur);
+    double acc = 0;
+    for (int i = 0; i < out.size(); i++) {
+      S2Point p = out.get(i);
+      acc += p.getX() + p.getY() + p.getZ();
+    }
+    return acc; // returning prevents DCE
+  }
+
+  @Benchmark
+  public double raw_S2points_compact_encode(DecodeBenchPoint.ProfilerHook ph, Blackhole bh)
+      throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     Output out = new Output(baos);
     S2Point.Shape.COMPACT_CODER.encode(S2Point.Shape.fromList(pts), out);
+    // Materialize once to make the work observable & defeat DCE
+    byte[] arr = out.toBytes();
+    long s = 0;
+    for (byte b : arr) s += (b & 0xFF);
+    bh.consume(arr);
+    return (double) s;
+  }
+
+  @Benchmark
+  public double raw_S2points_fast_encode(DecodeBenchPoint.ProfilerHook ph, Blackhole bh)
+      throws IOException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    Output out = new Output(baos);
+    S2Point.Shape.FAST_CODER.encode(S2Point.Shape.fromList(pts), out);
     // Materialize once to make the work observable & defeat DCE
     byte[] arr = out.toBytes();
     long s = 0;
@@ -242,12 +277,11 @@ public class DecodeBenchPoint {
   }
 
   private static void applyPointEncodingPreference(EncodeOptions opts, String enc) {
-    // Adjust to your real EncodeOptions API; placeholder keeps parity with your earlier code.
-    // If you have an explicit "use compact vs fast" switch, set it here.
     if ("COMPACT".equals(enc)) {
-      opts.setEnableLazyDecode(false);
       opts.setCodingHint(EncodeOptions.CodingHint.COMPACT);
-    } else {
+      opts.setEnableLazyDecode(false);
+    } else if ("FAST".equals(enc)) {
+      opts.setCodingHint(EncodeOptions.CodingHint.FAST);
       opts.setEnableLazyDecode(true);
     }
   }
@@ -274,55 +308,56 @@ public class DecodeBenchPoint {
   // == Async-profiler hook (per-iteration, not inside the benchmark) ==
   // =====================================================================
 
+  // -------- Async-profiler hook (runs inside fork) --------
   /** Per-iteration profiler: start on measurement iterations, stop after each iteration. */
   @State(Scope.Benchmark)
   public static class ProfilerHook {
     @Param({"cpu"})
-    public String event; // cpu | alloc | wall | lock
+    public String event;
 
     @Param({"jfr"})
-    public String format; // jfr | flamegraph | collapsed
+    public String format;
 
     @Param({"1ms"})
-    public String interval; // e.g., 1ms (for CPU), ignored by alloc
+    public String interval;
 
     private AsyncProfiler profiler;
     private Path outDir;
 
     @Setup(Level.Trial)
     public void trial() throws Exception {
-      profiler = AsyncProfilerLoader.load();
+      profiler = AsyncProfiler.getInstance();
       outDir = Paths.get("profiles");
       Files.createDirectories(outDir);
     }
 
     @Setup(Level.Iteration)
     public void start(BenchmarkParams b, IterationParams it) throws Exception {
-      if (it.getType() != IterationType.MEASUREMENT) return; // skip warmups
-      // Make a readable, unique file per iteration
+      if (it.getType() != IterationType.MEASUREMENT) return;
       String base = String.format("%s-iter%02d-%s", b.getBenchmark(), it.getCount(), event);
       File out =
           outDir
-              .resolve(base + (format.equals("jfr") ? ".jfr" : ".html"))
+              .resolve(base + (format.equalsIgnoreCase("jfr") ? ".jfr" : ".html"))
               .toAbsolutePath()
               .toFile();
 
-      if ("jfr".equals(format)) {
-        profiler.execute(
-            String.format("start,jfr,event=%s,interval=%s,file=%s", event, interval, out));
+      // Using 'all-user' helps the profiler find the correct forked JMH process.
+      // The filter is removed to avoid accidentally hiding the benchmark thread.
+      String common = String.format("event=%s,interval=%s,cstack=fp,threads", event, interval);
+
+      if ("jfr".equalsIgnoreCase(format)) {
+        profiler.execute("start," + common + ",jfr,file=" + out.getAbsolutePath());
       } else {
-        // For non-JFR, start now; we'll set file/output on stop
-        profiler.execute(String.format("start,event=%s,interval=%s", event, interval));
+        profiler.execute("start," + common);
         System.setProperty("ap.out", out.getAbsolutePath());
         System.setProperty("ap.format", format);
       }
-      // Optional sanity: System.out.println(profiler.execute("status"));
     }
 
     @TearDown(Level.Iteration)
     public void stop(IterationParams it) throws Exception {
       if (it.getType() != IterationType.MEASUREMENT) return;
-      if ("jfr".equals(format)) {
+      if ("jfr".equalsIgnoreCase(format)) {
         profiler.execute("stop");
       } else {
         String file = System.getProperty("ap.out");

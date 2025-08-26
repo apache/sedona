@@ -20,15 +20,14 @@ package org.apache.sedona.bench;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.file.*;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import one.profiler.AsyncProfiler;
-import one.profiler.AsyncProfilerLoader;
 import org.apache.sedona.common.S2Geography.Geography;
 import org.apache.sedona.common.S2Geography.WKBReader;
 import org.apache.sedona.common.S2Geography.WKBWriter;
@@ -36,9 +35,7 @@ import org.apache.sedona.common.S2Geography.WKTReader;
 import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.ParseException;
 import org.openjdk.jmh.annotations.*;
-import org.openjdk.jmh.infra.BenchmarkParams;
-import org.openjdk.jmh.infra.Blackhole;
-import org.openjdk.jmh.infra.IterationParams;
+import org.openjdk.jmh.infra.*;
 import org.openjdk.jmh.runner.IterationType;
 
 @BenchmarkMode(Mode.AverageTime)
@@ -48,168 +45,249 @@ import org.openjdk.jmh.runner.IterationType;
 @Fork(1)
 @State(Scope.Thread)
 public class BenchPolygonWKB {
-  /** Limit dimension to XY / XYZ only */
+  /** XY or XYZ */
   @Param({"XY", "XYZ"})
   public String dim;
 
   /** number of polygons in MULTIPOLYGON */
-  @Param({"1", "1", "1", "1", "16", "256", "1028"})
+  @Param({"1", "16", "256"})
   public int nPolygons;
 
-  /** number of vertices per polygon ring (must be >= 4) */
-  @Param({"4", "16", "256", "1028", "1028", "1028"})
+  /** vertices per polygon outer ring (>=4; last coord auto‑closed) */
+  @Param({"4", "16", "256"})
   public int nVerticesPerRing;
 
   /** WKB endianness */
   @Param({"LE", "BE"})
   public String endianness;
 
-  // Fixtures prepared once per trial
-  private String wkt;
-  private Geography geo;
-  private byte[] wkbLE;
-  private byte[] wkbBE;
+  // ---- Fixtures (prepared once per trial) ----
+  private String wktPolygon;
+  private String wktMultiPolygon;
+  private Geography geoPolygon;
+  private Geography geoMultiPolygon;
+  // Payloads for READ benchmarks are now hand-built
+  private byte[] wkbReadPolygonLE, wkbReadPolygonBE;
+  private byte[] wkbReadMultiLE, wkbReadMultiBE;
 
   @Setup(Level.Trial)
-  public void setup() throws ParseException, IOException, org.locationtech.jts.io.ParseException {
-    wkt = buildMultiPolygonWKT(nPolygons, nVerticesPerRing, dim);
+  public void setup() throws ParseException, IOException {
+    int v = Math.max(4, nVerticesPerRing);
+    int p = Math.max(1, nPolygons);
 
-    // Precompute Geography for writer bench
+    // WKT and Geography objects are still needed for the WRITE benchmarks
+    wktPolygon = buildPolygonWKT(v, dim, 0);
+    wktMultiPolygon = buildMultiPolygonWKT(p, v, dim);
     WKTReader wktReader = new WKTReader();
-    geo = wktReader.read(wkt);
+    geoPolygon = wktReader.read(wktPolygon);
+    geoMultiPolygon = wktReader.read(wktMultiPolygon);
 
-    // Precompute WKB for reader bench
-    int outDims = ("XY".equals(dim) ? 2 : 3);
-    WKBWriter le = new WKBWriter(outDims, ByteOrderValues.LITTLE_ENDIAN);
-    WKBWriter be = new WKBWriter(outDims, ByteOrderValues.BIG_ENDIAN);
-    wkbLE = le.write(geo);
-    wkbBE = be.write(geo);
+    // THE FIX: Build custom WKB for the READ benchmarks
+    boolean isXYZ = "XYZ".equals(dim);
+    wkbReadPolygonLE = buildPolygonWKB(true, isXYZ, v, 0);
+    wkbReadPolygonBE = buildPolygonWKB(false, isXYZ, v, 0);
+    wkbReadMultiLE = buildMultiPolygonWKB(true, isXYZ, p, v);
+    wkbReadMultiBE = buildMultiPolygonWKB(false, isXYZ, p, v);
   }
 
-  /** WKT → Geography (parse only) */
+  // ---- WRITE (Geography -> WKB) ----
   @Benchmark
-  public void wkt_read(Blackhole bh) throws ParseException, org.locationtech.jts.io.ParseException {
-    WKTReader reader = new WKTReader();
-    Geography g = reader.read(wkt);
-    bh.consume(g);
-    bh.consume(g.numShapes());
+  public double wkb_write_polygon(Blackhole bh, BenchPolygonWKB.ProfilerHook ph)
+      throws IOException {
+    return write(geoPolygon, bh);
   }
 
-  /** Geography → WKB (serialize only) */
   @Benchmark
-  public double wkb_write(Blackhole bh, ProfilerHook ph) throws IOException {
-    // choose output dimensions (2 = XY, 3 = XYZ)
+  public double wkb_write_multipolygon(Blackhole bh, BenchPolygonWKB.ProfilerHook ph)
+      throws IOException {
+    return write(geoMultiPolygon, bh);
+  }
+
+  private double write(Geography g, Blackhole bh) throws IOException {
     int outDims = ("XY".equals(dim) ? 2 : 3);
     int order =
         "LE".equals(endianness) ? ByteOrderValues.LITTLE_ENDIAN : ByteOrderValues.BIG_ENDIAN;
-
-    // do the actual write
     WKBWriter writer = new WKBWriter(outDims, order);
-    byte[] out = writer.write(geo);
+    byte[] out = writer.write(g);
     long sum = 0;
-    for (byte b : out) {
-      sum += (b & 0xFF);
-    }
+    for (byte b : out) sum += (b & 0xFF); // prevent DCE
     bh.consume(out);
     return (double) sum;
   }
 
-  /** WKB → Geography (deserialize only) */
+  // ---- READ (WKB -> Geography) ----
   @Benchmark
-  public void wkb_read(Blackhole bh, ProfilerHook ph)
-      throws IOException, org.locationtech.jts.io.ParseException {
+  public void wkb_read_polygon(Blackhole bh, BenchPolygonWKB.ProfilerHook ph)
+      throws IOException, ParseException {
+    read(("LE".equals(endianness) ? wkbReadPolygonLE : wkbReadPolygonBE), bh);
+  }
+
+  @Benchmark
+  public void wkb_read_multipolygon(Blackhole bh, BenchPolygonWKB.ProfilerHook ph)
+      throws IOException, ParseException {
+    read(("LE".equals(endianness) ? wkbReadMultiLE : wkbReadMultiBE), bh);
+  }
+
+  private void read(byte[] src, Blackhole bh) throws IOException, ParseException {
     WKBReader reader = new WKBReader();
-    byte[] src = "LE".equals(endianness) ? wkbLE : wkbBE;
     Geography g = reader.read(src);
     bh.consume(g);
     bh.consume(g.numShapes());
   }
 
-  // ---------- helpers ----------
+  // ---- Hand-built WKB for READ benches ----
 
-  private static String buildMultiPolygonWKT(int numPolygons, int numVerticesPerRing, String dim) {
-    if (numVerticesPerRing < 4) {
-      throw new IllegalArgumentException(
-          "A polygon ring must have at least 4 vertices to be closed.");
+  private static byte[] buildPolygonWKB(boolean little, boolean xyz, int nVertices, int polyIndex) {
+    int type = xyz ? 1003 : 3; // Polygon type
+    int doubles = xyz ? 3 : 2;
+    // endian, type, num_rings, num_coords, coords
+    int len = 1 + 4 + 4 + 4 + (8 * doubles * nVertices);
+
+    ByteBuffer bb =
+        ByteBuffer.allocate(len).order(little ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
+    bb.put(little ? (byte) 1 : (byte) 0);
+    bb.putInt(type);
+    bb.putInt(1); // num_rings = 1 (simple polygon with no holes)
+    bb.putInt(nVertices);
+
+    // Build coordinates for the ring
+    double cx = -170.0 + polyIndex * 0.5;
+    double cy = -60.0 + polyIndex * 0.5;
+    double rDeg = 0.1 + (polyIndex % 5) * 0.02;
+
+    for (int i = 0; i < nVertices - 1; i++) {
+      double ang = (2.0 * Math.PI * i) / (nVertices - 1);
+      double x = cx + rDeg * Math.cos(ang);
+      double y = cy + rDeg * Math.sin(ang);
+      putCoord(bb, x, y, xyz, i);
     }
-    String dimToken = "XYZ".equals(dim) ? " Z" : "";
-    String polygons =
-        IntStream.range(0, numPolygons)
-            .mapToObj(
-                i -> {
-                  // Generate vertices for the outer ring
-                  int baseCoordIndex = i * numVerticesPerRing;
-                  String firstCoord = coord(baseCoordIndex, dim);
-                  String vertices =
-                      IntStream.range(0, numVerticesPerRing - 1)
-                          .mapToObj(j -> coord(baseCoordIndex + j, dim))
-                          .collect(Collectors.joining(", "));
-                  // A ring must be closed, so the last coordinate is the same as the first
-                  String ring = vertices + ", " + firstCoord;
-                  // For simplicity, we only generate polygons with one outer ring and no holes.
-                  return "((" + ring + "))";
-                })
-            .collect(Collectors.joining(", "));
-    return "MULTIPOLYGON" + dimToken + " (" + polygons + ")";
+    // Close the ring
+    putCoord(bb, cx + rDeg, cy, xyz, 0);
+
+    return bb.array();
   }
 
-  // Emit small non-zero Z in XYZ to ensure real parsing work
-  private static String coord(int i, String dim) {
-    // Generate non-overlapping convex polygons for simplicity
-    double angle = 2 * Math.PI * (i % 100) / 100;
-    double radius = 10 + (i / 100);
-    double x = radius * Math.cos(angle);
-    double y = radius * Math.sin(angle);
+  private static byte[] buildMultiPolygonWKB(
+      boolean little, boolean xyz, int nPolys, int nVertices) {
+    int multiType = xyz ? 1006 : 6; // MultiPolygon type
+    int header = 1 + 4 + 4; // endian, type, num_polygons
+    // Get the size of a single polygon WKB to calculate total length
+    byte[] singlePoly = buildPolygonWKB(little, xyz, nVertices, 0);
+    int len = header + (nPolys * singlePoly.length);
 
+    ByteBuffer bb =
+        ByteBuffer.allocate(len).order(little ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
+    bb.put(little ? (byte) 1 : (byte) 0);
+    bb.putInt(multiType);
+    bb.putInt(nPolys);
+    for (int i = 0; i < nPolys; i++) {
+      // The reader expects each polygon to be a full, self-contained WKB geometry
+      bb.put(buildPolygonWKB(little, xyz, nVertices, i));
+    }
+    return bb.array();
+  }
+
+  private static void putCoord(ByteBuffer bb, double x, double y, boolean xyz, int i) {
+    bb.putDouble(x);
+    bb.putDouble(y);
+    if (xyz) {
+      double z = (i % 19) + 0.5;
+      bb.putDouble(z);
+    }
+  }
+
+  // ---- Helpers: WKT generators ----
+
+  private static String buildPolygonWKT(int verticesPerRing, String dim, int polyIndex) {
+    String dimToken = "XYZ".equals(dim) ? " Z" : "";
+    String ring = buildRing(verticesPerRing, dim, polyIndex);
+    return "POLYGON" + dimToken + " ((" + ring + "))";
+  }
+
+  private static String buildMultiPolygonWKT(int p, int verticesPerRing, String dim) {
+    String dimToken = "XYZ".equals(dim) ? " Z" : "";
+    String polys =
+        IntStream.range(0, p)
+            .mapToObj(i -> "((" + buildRing(verticesPerRing, dim, i) + "))")
+            .collect(Collectors.joining(", "));
+    return "MULTIPOLYGON" + dimToken + " (" + polys + ")";
+  }
+
+  private static String buildRing(int v, String dim, int polyIndex) {
+    if (v < 4) throw new IllegalArgumentException("Polygon ring must have >= 4 vertices");
+    double cx = -170.0 + polyIndex * 0.5;
+    double cy = -60.0 + polyIndex * 0.5;
+    double rDeg = 0.1 + (polyIndex % 5) * 0.02;
+
+    String vertices =
+        IntStream.range(0, v - 1)
+            .mapToObj(
+                i -> {
+                  double ang = (2.0 * Math.PI * i) / (v - 1);
+                  double x = cx + rDeg * Math.cos(ang);
+                  double y = cy + rDeg * Math.sin(ang);
+                  return formatCoord(x, y, dim, i);
+                })
+            .collect(Collectors.joining(", "));
+
+    String first = formatCoord(cx + rDeg, cy, dim, 0);
+    return vertices + ", " + first;
+  }
+
+  private static String formatCoord(double x, double y, String dim, int i) {
     if ("XY".equals(dim)) {
       return String.format(Locale.ROOT, "%.6f %.6f", x, y);
-    } else { // XYZ
-      double z = (i % 11) + 0.25;
+    } else {
+      double z = (i % 19) + 0.5;
       return String.format(Locale.ROOT, "%.6f %.6f %.6f", x, y, z);
     }
   }
+
   // =====================================================================
-  // == Async-profiler hook (per-iteration, not inside the benchmark) ==
+  // == Async-profiler hook (runs inside the fork) ==
   // =====================================================================
 
+  // -------- Async-profiler hook (runs inside fork) --------
   /** Per-iteration profiler: start on measurement iterations, stop after each iteration. */
   @State(Scope.Benchmark)
   public static class ProfilerHook {
     @Param({"cpu"})
-    public String event; // cpu | alloc | wall | lock
+    public String event;
 
     @Param({"jfr"})
-    public String format; // jfr | flamegraph | collapsed
+    public String format;
 
     @Param({"1ms"})
-    public String interval; // e.g., 1ms (for CPU), ignored by alloc
+    public String interval;
 
     private AsyncProfiler profiler;
     private Path outDir;
 
     @Setup(Level.Trial)
     public void trial() throws Exception {
-      profiler = AsyncProfilerLoader.load();
+      profiler = AsyncProfiler.getInstance();
       outDir = Paths.get("profiles");
       Files.createDirectories(outDir);
     }
 
     @Setup(Level.Iteration)
     public void start(BenchmarkParams b, IterationParams it) throws Exception {
-      if (it.getType() != IterationType.MEASUREMENT) return; // skip warmups
-      // Make a readable, unique file per iteration
+      if (it.getType() != IterationType.MEASUREMENT) return;
       String base = String.format("%s-iter%02d-%s", b.getBenchmark(), it.getCount(), event);
       File out =
           outDir
-              .resolve(base + (format.equals("jfr") ? ".jfr" : ".html"))
+              .resolve(base + (format.equalsIgnoreCase("jfr") ? ".jfr" : ".html"))
               .toAbsolutePath()
               .toFile();
-      if ("jfr".equals(format)) {
-        profiler.execute(
-            String.format("start,jfr,event=%s,interval=%s,file=%s", event, interval, out));
+
+      // Using 'all-user' helps the profiler find the correct forked JMH process.
+      // The filter is removed to avoid accidentally hiding the benchmark thread.
+      String common = String.format("event=%s,interval=%s,cstack=fp,threads", event, interval);
+
+      if ("jfr".equalsIgnoreCase(format)) {
+        profiler.execute("start," + common + ",jfr,file=" + out.getAbsolutePath());
       } else {
-        // For non-JFR, start now; we'll set file/output on stop
-        profiler.execute(String.format("start,event=%s,interval=%s", event, interval));
+        profiler.execute("start," + common);
         System.setProperty("ap.out", out.getAbsolutePath());
         System.setProperty("ap.format", format);
       }
@@ -218,7 +296,7 @@ public class BenchPolygonWKB {
     @TearDown(Level.Iteration)
     public void stop(IterationParams it) throws Exception {
       if (it.getType() != IterationType.MEASUREMENT) return;
-      if ("jfr".equals(format)) {
+      if ("jfr".equalsIgnoreCase(format)) {
         profiler.execute("stop");
       } else {
         String file = System.getProperty("ap.out");

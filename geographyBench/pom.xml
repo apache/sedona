@@ -167,6 +167,12 @@
             <artifactId>janino</artifactId>
             <version>${janino-version}</version>
         </dependency>
+        <dependency>
+            <groupId>tools.profiler</groupId>
+            <artifactId>async-profiler</artifactId>
+            <version>4.1</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
     <build>
         <sourceDirectory>src/jmh/java</sourceDirectory>

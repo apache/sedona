@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import one.profiler.AsyncProfiler;
-import one.profiler.AsyncProfilerLoader;
 import org.apache.sedona.common.S2Geography.*;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.BenchmarkParams;
@@ -48,10 +47,10 @@ import org.openjdk.jmh.runner.IterationType;
 public class DecodeBenchPolygon {
 
   // -------- Params --------
-  @Param({"1", "1", "1", "1", "16", "256", "1028"})
+  @Param({"1", "16", "256", "1024"})
   public int numPolygons;
 
-  @Param({"4", "16", "256", "1028", "1028", "1028", "1028"})
+  @Param({"4", "16", "256", "1024"})
   public int verticesPerPolygon;
 
   @Param({"XY", "XYZ"})
@@ -131,19 +130,21 @@ public class DecodeBenchPolygon {
   // =====================================================================
 
   @Benchmark
-  public void tagged_polygon_full(ProfilerHook ph, Blackhole bh) throws IOException {
+  public void tagged_polygon_full(DecodeBenchPolygon.ProfilerHook ph, Blackhole bh)
+      throws IOException {
     Geography g = Geography.decodeTagged(taggedPolygonIn);
     bh.consume(g);
   }
 
   @Benchmark
-  public void tagged_multipolygon_full(ProfilerHook ph, Blackhole bh) throws IOException {
+  public void tagged_multipolygon_full(DecodeBenchPolygon.ProfilerHook ph, Blackhole bh)
+      throws IOException {
     Geography g = Geography.decodeTagged(taggedMultiPolygonIn);
     bh.consume(g);
   }
 
   @Benchmark
-  public double tagged_polygon_encode(DecodeBenchPolyline.ProfilerHook ph, Blackhole bh)
+  public double tagged_polygon_encode(DecodeBenchPolygon.ProfilerHook ph, Blackhole bh)
       throws IOException {
     EncodeOptions opts = new EncodeOptions();
     applyPointEncodingPreference(opts, pointEncoding);
@@ -158,7 +159,7 @@ public class DecodeBenchPolygon {
   }
 
   @Benchmark
-  public double tagged_multipolygon_encode(DecodeBenchPolyline.ProfilerHook ph, Blackhole bh)
+  public double tagged_multipolygon_encode(DecodeBenchPolygon.ProfilerHook ph, Blackhole bh)
       throws IOException {
     EncodeOptions opts = new EncodeOptions();
     applyPointEncodingPreference(opts, pointEncoding);
@@ -186,7 +187,7 @@ public class DecodeBenchPolygon {
   // =====================================================================
 
   @Benchmark
-  public double raw_S2multipolygon_decode(ProfilerHook ph) throws IOException {
+  public double raw_S2multipolygon_decode(DecodeBenchPolygon.ProfilerHook ph) throws IOException {
     int b0 = rawMultiPolygonIn.read();
     int b1 = rawMultiPolygonIn.read();
     int b2 = rawMultiPolygonIn.read();
@@ -207,7 +208,7 @@ public class DecodeBenchPolygon {
   }
 
   @Benchmark
-  public double raw_S2polygon_compact_encode(DecodeBenchPoint.ProfilerHook ph, Blackhole bh)
+  public double raw_S2polygon_compact_encode(DecodeBenchPolygon.ProfilerHook ph, Blackhole bh)
       throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     Output out = new Output(baos);
@@ -296,44 +297,47 @@ public class DecodeBenchPolygon {
   // == Async-profiler hook (per-iteration, not inside the benchmark) ==
   // =====================================================================
 
+  // -------- Async-profiler hook (runs inside fork) --------
   /** Per-iteration profiler: start on measurement iterations, stop after each iteration. */
   @State(Scope.Benchmark)
   public static class ProfilerHook {
     @Param({"cpu"})
-    public String event; // cpu | alloc | wall | lock
+    public String event;
 
     @Param({"jfr"})
-    public String format; // jfr | flamegraph | collapsed
+    public String format;
 
     @Param({"1ms"})
-    public String interval; // e.g., 1ms (for CPU), ignored by alloc
+    public String interval;
 
     private AsyncProfiler profiler;
     private Path outDir;
 
     @Setup(Level.Trial)
     public void trial() throws Exception {
-      profiler = AsyncProfilerLoader.load();
+      profiler = AsyncProfiler.getInstance();
       outDir = Paths.get("profiles");
       Files.createDirectories(outDir);
     }
 
     @Setup(Level.Iteration)
     public void start(BenchmarkParams b, IterationParams it) throws Exception {
-      if (it.getType() != IterationType.MEASUREMENT) return; // skip warmups
-      // Make a readable, unique file per iteration
+      if (it.getType() != IterationType.MEASUREMENT) return;
       String base = String.format("%s-iter%02d-%s", b.getBenchmark(), it.getCount(), event);
       File out =
           outDir
-              .resolve(base + (format.equals("jfr") ? ".jfr" : ".html"))
+              .resolve(base + (format.equalsIgnoreCase("jfr") ? ".jfr" : ".html"))
               .toAbsolutePath()
               .toFile();
-      if ("jfr".equals(format)) {
-        profiler.execute(
-            String.format("start,jfr,event=%s,interval=%s,file=%s", event, interval, out));
+
+      // Using 'all-user' helps the profiler find the correct forked JMH process.
+      // The filter is removed to avoid accidentally hiding the benchmark thread.
+      String common = String.format("event=%s,interval=%s,cstack=fp,threads", event, interval);
+
+      if ("jfr".equalsIgnoreCase(format)) {
+        profiler.execute("start," + common + ",jfr,file=" + out.getAbsolutePath());
       } else {
-        // For non-JFR, start now; we'll set file/output on stop
-        profiler.execute(String.format("start,event=%s,interval=%s", event, interval));
+        profiler.execute("start," + common);
         System.setProperty("ap.out", out.getAbsolutePath());
         System.setProperty("ap.format", format);
       }
@@ -342,7 +346,7 @@ public class DecodeBenchPolygon {
     @TearDown(Level.Iteration)
     public void stop(IterationParams it) throws Exception {
       if (it.getType() != IterationType.MEASUREMENT) return;
-      if ("jfr".equals(format)) {
+      if ("jfr".equalsIgnoreCase(format)) {
         profiler.execute("stop");
       } else {
         String file = System.getProperty("ap.out");
