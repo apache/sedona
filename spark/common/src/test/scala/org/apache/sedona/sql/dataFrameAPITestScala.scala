@@ -239,9 +239,7 @@ class dataFrameAPITestScala extends TestBaseScala {
       val df =
         sparkSession.sql("SELECT 'POINT(0.0 1.0)' AS wkt").select(ST_GeogFromWKT("wkt", 4326))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geography]
-      assert(
-        actualResult.toString(
-          new PrecisionModel(PrecisionModel.FIXED)) == "SRID=4326; POINT (0 1)")
+      assert(actualResult.toString(new PrecisionModel(PrecisionModel.FIXED)) == "POINT (0 1)")
       assert(actualResult.getSRID == 4326)
     }
 

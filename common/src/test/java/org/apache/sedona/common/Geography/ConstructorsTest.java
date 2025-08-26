@@ -50,11 +50,11 @@ public class ConstructorsTest {
 
     geog = Constructors.geogFromEWKT("SRID=4269; POINT (1 1)");
     assertEquals(4269, geog.getSRID());
-    assertEquals("SRID=4269; POINT (1 1)", geog.toString());
+    assertEquals("SRID=4269; POINT (1 1)", geog.toEWKT());
 
     geog = Constructors.geogFromEWKT("SRID=4269;POINT (1 1)");
     assertEquals(4269, geog.getSRID());
-    assertEquals("SRID=4269; POINT (1 1)", geog.toString());
+    assertEquals("SRID=4269; POINT (1 1)", geog.toEWKT());
 
     ParseException invalid =
         assertThrows(ParseException.class, () -> Constructors.geogFromEWKT("not valid"));
@@ -76,7 +76,7 @@ public class ConstructorsTest {
 
     // Test specifying SRID
     result = Constructors.geogFromWKB(wkb, 1000);
-    assertEquals("SRID=1000; POINT (-64 45)", result.toString());
+    assertEquals("POINT (-64 45)", result.toString());
     assertEquals(1000, result.getSRID());
 
     // Test EWKB with SRID
@@ -84,12 +84,12 @@ public class ConstructorsTest {
     geog.setSRID(2000);
     wkb = wkbWriter.write(geog);
     result = Constructors.geogFromWKB(wkb);
-    assertEquals("SRID=2000; POINT (-64 45)", result.toString());
+    assertEquals("POINT (-64 45)", result.toString());
     assertEquals(2000, result.getSRID());
 
     // Test overriding SRID
     result = Constructors.geogFromWKB(wkb, 3000);
-    assertEquals("SRID=3000; POINT (-64 45)", result.toString());
+    assertEquals("POINT (-64 45)", result.toString());
     assertEquals(3000, result.getSRID());
     result = Constructors.geogFromWKB(wkb, 0);
     assertEquals("POINT (-64 45)", result.toString());
@@ -102,14 +102,14 @@ public class ConstructorsTest {
     byte[] wkbBytes = WKBReader.hexToBytes(ewkbString);
     Geography result = Constructors.geogFromWKB(wkbBytes);
     String expectedGeom = "SRID=4326; POINT (0 1)";
-    assertEquals(expectedGeom, result.toString());
+    assertEquals(expectedGeom, result.toEWKT());
     assertEquals(4326, result.getSRID());
 
     ewkbString =
         "0103000020E61000000100000005000000000000000000000000000000000000000000000000000000000000000000F03F000000000000F03F000000000000F03F000000000000F03F000000000000000000000000000000000000000000000000";
     wkbBytes = WKBReader.hexToBytes(ewkbString);
     result = Constructors.geogFromWKB(wkbBytes);
-    expectedGeom = "SRID=4326; POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))";
+    expectedGeom = "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))";
     assertEquals(expectedGeom, result.toString());
     assertEquals(4326, result.getSRID());
 
@@ -127,7 +127,7 @@ public class ConstructorsTest {
             + "000000000000F0BF000000000000F0BF";
     wkbBytes = WKBReader.hexToBytes(ewkbString);
     result = Constructors.geogFromWKB(wkbBytes);
-    expectedGeom = "SRID=4326; MULTIPOLYGON (((0 0, 1 0, 1 1, 0 0)), ((-1 -1, -1 0, 0 -1, -1 -1)))";
+    expectedGeom = "MULTIPOLYGON (((0 0, 1 0, 1 1, 0 0)), ((-1 -1, -1 0, 0 -1, -1 -1)))";
     assertEquals(expectedGeom, result.toString());
     assertEquals(4326, result.getSRID());
   }
@@ -136,14 +136,16 @@ public class ConstructorsTest {
   public void geogFromGeoHash() throws ParseException {
     Geography geog = Constructors.geogFromGeoHash("9q9j8ue2v71y5zzy0s4q", 16);
     String expectedWkt =
-        "SRID=4326; POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))";
-    String actualWkt = geog.toText(new PrecisionModel(1e6));
+        "POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))";
+    assertNotNull(geog);
+    String actualWkt = geog.toString(new PrecisionModel(1e6));
     assertEquals(expectedWkt, actualWkt);
 
     geog = Constructors.geogFromGeoHash("s00twy01mt", 4);
     expectedWkt =
-        "SRID=4326; POLYGON ((0.703125 0.8789062, 1.0546875 0.8789062, 1.0546875 1.0546875, 0.703125 1.0546875, 0.703125 0.8789062))";
-    actualWkt = geog.toText(new PrecisionModel(1e6));
+        "POLYGON ((0.703125 0.8789062, 1.0546875 0.8789062, 1.0546875 1.0546875, 0.703125 1.0546875, 0.703125 0.8789062))";
+    assertNotNull(geog);
+    actualWkt = geog.toString(new PrecisionModel(1e6));
     assertEquals(expectedWkt, actualWkt);
   }
 
@@ -266,7 +268,7 @@ public class ConstructorsTest {
     assertEquals(4326, got.getSRID());
     org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
     wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
-    assertEquals(expected, got.toString());
+    assertEquals(expected, got.toEWKT());
   }
 
   @Test

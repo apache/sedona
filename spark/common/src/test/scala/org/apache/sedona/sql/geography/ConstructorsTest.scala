@@ -37,7 +37,7 @@ class ConstructorsTest extends TestBaseScala {
       sparkSession.sql(s"SELECT ST_GeogFromGeoHash('$geohash','$precision') AS geog").first()
     var geoStr = row.get(0).asInstanceOf[Geography].toText(new PrecisionModel(1e6))
     var expectedWkt =
-      "SRID=4326; POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))"
+      "POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))"
     assertEquals(expectedWkt, geoStr)
 
     geohash = "s00twy01mt"
@@ -45,13 +45,13 @@ class ConstructorsTest extends TestBaseScala {
     row = sparkSession.sql(s"SELECT ST_GeogFromGeoHash('$geohash','$precision') AS geog").first()
     geoStr = row.get(0).asInstanceOf[Geography].toText(new PrecisionModel(1e6))
     expectedWkt =
-      "SRID=4326; POLYGON ((0.703125 0.8789062, 1.0546875 0.8789062, 1.0546875 1.0546875, 0.703125 1.0546875, 0.703125 0.8789062))"
+      "POLYGON ((0.703125 0.8789062, 1.0546875 0.8789062, 1.0546875 1.0546875, 0.703125 1.0546875, 0.703125 0.8789062))"
     assertEquals(expectedWkt, geoStr)
   }
 
   it("Passed ST_GeogFromWKT") {
     val wkt = "LINESTRING (1 2, 3 4, 5 6)"
-    val wktExpected = "SRID=4326; LINESTRING (1 2, 3 4, 5 6)"
+    val wktExpected = "LINESTRING (1 2, 3 4, 5 6)"
     val row = sparkSession.sql(s"SELECT ST_GeogFromWKT('$wkt', 4326) AS geog").first()
     // Write output with precisionModel
     val geoStr = row.get(0).asInstanceOf[Geography].toString()
@@ -63,7 +63,7 @@ class ConstructorsTest extends TestBaseScala {
 
   it("Passed ST_GeogFromText") {
     val wkt = "LINESTRING (1 2, 3 4, 5 6)"
-    val wktExpected = "SRID=4326; LINESTRING (1 2, 3 4, 5 6)"
+    val wktExpected = "LINESTRING (1 2, 3 4, 5 6)"
     val row = sparkSession.sql(s"SELECT ST_GeogFromText('$wkt', 4326) AS geog").first()
     // Write output with precisionModel
     val geoStr = row.get(0).asInstanceOf[Geography].toString()
@@ -167,7 +167,7 @@ class ConstructorsTest extends TestBaseScala {
       "SRID=4326; LINESTRING (-2.1 -0.4, -1.5 -0.7)"
     }
     assert(geography.first().getAs[Geography](0).getSRID == 4326)
-    assert(geography.first().getAs[Geography](0).toString.equals(expectedGeog))
+    assert(geography.first().getAs[Geography](0).toEWKT().equals(expectedGeog))
   }
 
   it("Passed ST_GeogToGeometry polygon") {

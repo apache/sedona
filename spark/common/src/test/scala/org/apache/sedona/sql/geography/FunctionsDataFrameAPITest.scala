@@ -38,7 +38,7 @@ class FunctionsDataFrameAPITest extends TestBaseScala {
 
     val env = df.first().get(0).asInstanceOf[Geography]
     val expectedWKT =
-      "SRID=4326; POLYGON ((-180 -63.3, 180 -63.3, 180 -90, -180 -90, -180 -63.3))";
+      "POLYGON ((-180 -63.3, 180 -63.3, 180 -90, -180 -90, -180 -63.3))";
     assertEquals(expectedWKT, env.toString)
   }
 
@@ -55,8 +55,19 @@ class FunctionsDataFrameAPITest extends TestBaseScala {
 
     val env = df.first().get(0).asInstanceOf[Geography]
     val expectedWKT =
-      "SRID=4326; POLYGON ((177.3 -18.3, -179.8 -18.3, -179.8 -16, 177.3 -16, 177.3 -18.3))";
+      "POLYGON ((177.3 -18.3, -179.8 -18.3, -179.8 -16, 177.3 -16, 177.3 -18.3))";
     assertEquals(expectedWKT, env.toString)
+  }
+
+  it("Passed ST_AsEWKT") {
+    val wkt = "LINESTRING (1 2, 3 4, 5 6)"
+    val wktExpected = "SRID=4326; LINESTRING (1 2, 3 4, 5 6)"
+    val df = sparkSession
+      .sql(s"SELECT '$wkt' AS wkt")
+      .select(st_constructors.ST_GeogFromWKT(col("wkt"), lit(4326)).as("geog"))
+      .select(st_functions.ST_AsEWKT(col("geog")))
+    val geoStr = df.first().get(0)
+    assert(geoStr == wktExpected)
   }
 
 }

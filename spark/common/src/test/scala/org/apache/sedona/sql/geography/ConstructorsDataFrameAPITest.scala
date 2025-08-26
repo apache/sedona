@@ -57,7 +57,7 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
     val array = WKBReader.hexToBytes(hexStr)
     val wkbSeq = Seq[Array[Byte]](array)
     val df = wkbSeq.toDF("wkb").select(st_constructors.ST_GeogFromWKB(col("wkb")))
-    val actualResult = df.take(1)(0).get(0).asInstanceOf[Geography].toString()
+    val actualResult = df.take(1)(0).get(0).asInstanceOf[Geography].toEWKT()
     val expectedResult =
       "GEOMETRYCOLLECTION (SRID=4326; POINT (0 1), SRID=4326; POINT (0 1), SRID=4326; POINT (2 3), SRID=4326; LINESTRING (2 3, 4 5), SRID=4326; LINESTRING (0 1, 2 3), SRID=4326; LINESTRING (4 5, 6 7), SRID=4326; POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0), (9 1, 9 9, 1 9, 1 1, 9 1)), SRID=4326; POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0), (9 1, 9 9, 1 9, 1 1, 9 1)), SRID=4326; POLYGON ((-9 0, -9 10, -1 10, -1 0, -9 0)))"
     assert(actualResult == expectedResult)
@@ -69,7 +69,7 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
         0, 0, -128, -75, -42, -65, 0, 0, 0, 96, -31, -17, -9, -65, 0, 0, 0, -128, 7, 93, -27,
         -65))
     val df = wkbSeq.toDF("wkb") select (st_constructors.ST_GeogFromEWKB("wkb"))
-    val actualResult = df.take(1)(0).get(0).asInstanceOf[Geography].toString()
+    val actualResult = df.take(1)(0).get(0).asInstanceOf[Geography].toEWKT()
     val expectedResult = {
       "SRID=4326; LINESTRING (-2.1 -0.4, -1.5 -0.7)"
     }
@@ -82,7 +82,7 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
       .sql("SELECT 'SRID=4269;POINT(0.0 1.0)' AS wkt")
       .select(st_constructors.ST_GeogFromEWKT("wkt"))
     val actualResult = df.take(1)(0).get(0).asInstanceOf[Geography]
-    assert(actualResult.toString() == "SRID=4269; POINT (0 1)")
+    assert(actualResult.toEWKT() == "SRID=4269; POINT (0 1)")
     assert(actualResult.getSRID == 4269)
   }
 
@@ -93,7 +93,7 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
     val actualResult =
       df.take(1)(0).get(0).asInstanceOf[Geography].toText(new PrecisionModel(1e6))
     var expectedWkt =
-      "SRID=4326; POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))"
+      "POLYGON ((-122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162, -122.3061 37.554162))"
     assertEquals(expectedWkt, actualResult)
   }
 
