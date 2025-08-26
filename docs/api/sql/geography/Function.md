@@ -52,7 +52,7 @@ Since: `v1.8.0`
 SQL Example
 
 ```sql
-SELECT ST_AsEWKT(ST_GeomFromWKT('LINESTRING (1 2, 3 4, 5 6)', 4326))
+SELECT ST_AsEWKT(ST_GeogFromWKT('LINESTRING (1 2, 3 4, 5 6)', 4326))
 ```
 
 Output:
