@@ -86,6 +86,7 @@ class TestIO(TestGeopandasBase):
         [
             partial(GeoDataFrame.from_file, format="geojson"),
             partial(read_file, format="GeoJSON"),
+            partial(read_file),  # check format inference works
         ],
     )
     def test_read_geojson(self, read_func):
@@ -102,6 +103,7 @@ class TestIO(TestGeopandasBase):
         [
             partial(GeoDataFrame.from_file, format="geoparquet"),
             partial(read_file, format="GeoParquet"),
+            partial(read_file),  # check format inference works
             read_parquet,
         ],
     )
@@ -121,6 +123,7 @@ class TestIO(TestGeopandasBase):
         [
             partial(GeoDataFrame.from_file, format="geopackage"),
             partial(read_file, format="GeoPackage"),
+            partial(read_file),  # check format inference works
         ],
     )
     def test_read_geopackage(self, read_func):
@@ -152,6 +155,7 @@ class TestIO(TestGeopandasBase):
         [
             partial(GeoDataFrame.to_file, driver="GeoParquet"),
             partial(GeoDataFrame.to_file, driver="geoparquet"),
+            partial(GeoDataFrame.to_file),  # check format inference works
             GeoDataFrame.to_parquet,
         ],
     )
@@ -174,6 +178,7 @@ class TestIO(TestGeopandasBase):
             partial(GeoDataFrame.to_file, driver="geojson"),  # index=None here is False
             partial(GeoDataFrame.to_file, driver="GeoJSON", index=True),
             partial(GeoDataFrame.to_file, driver="geojson", index=True),
+            partial(GeoDataFrame.to_file),  # check format inference works
         ],
     )
     def test_to_geojson(self, write_func):
