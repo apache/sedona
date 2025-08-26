@@ -15,26 +15,9 @@
 # specific language governing permissions and limitations
 # under the License.
 
-*.iml
-.DS_Store
-.Rproj.user
-/*.ipr
-/*.iws
-/.bloop/
-/.bsp
-/.classpath
-/.idea
-/.metals/
-/.project
-/.scala-build
-/.settings/
-/.vscode/
-/bin/
-/conf/
-/doc/
-/log/
-/site/
-__pycache__
-dependency-reduced-pom.xml
-target
-.env
+"""Main entry point for the sedona_databricks_tester package."""
+
+from .cli import cli
+
+if __name__ == "__main__":
+    cli()

@@ -21,7 +21,7 @@ on:
   push:
     branches:
       - master
-  pull_request_target:  # This is a dangerous operation. Only people who are within Wherobots organization should be able to trigger this PR.
+  pull_request_target: # This is a dangerous operation. Only people who are within Wherobots organization should be able to trigger this PR.
     types:
       - opened
       - synchronize

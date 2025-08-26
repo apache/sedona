@@ -1,0 +1,213 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+name: Databricks Spark integration test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request_target: # This is a dangerous operation. Only people who are within Wherobots organization should be able to trigger this PR.
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+env:
+  MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
+  DO_NOT_TRACK: true
+  SPARK_LOCAL_IP: 127.0.0.1
+  DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+  DATABRICKS_VOLUME_PATH: ${{ vars.DATABRICKS_VOLUME_PATH }}
+  DATABRICKS_WORKSPACE_PATH: ${{ vars.DATABRICKS_WORKSPACE_PATH }}
+  DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+  GEOTOOLS_VERSION: '1.8.0-33.1-rc1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - spark: 3.5
+            scala: 2.12
+            jdk: '11'
+            enable_databricks_test: true
+    outputs:
+      jar-path: ${{ steps.build-info.outputs.jar-path }}
+      sedona-version: ${{ steps.build-info.outputs.sedona-version }}
+      geotools-path: ${{ steps.build-info.outputs.geotools-path }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: ${{ matrix.jdk }}
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Create temporary directory for artifacts
+        run: mkdir -p databricks-artifacts/tmp
+      - name: Build Sedona Spark
+        env:
+          SPARK_VERSION: ${{ matrix.spark }}
+          SCALA_VERSION: ${{ matrix.scala }}
+        run: |
+          # Build Sedona with specific Spark and Scala versions
+          mvn clean package -DskipTests -Dspark=${SPARK_VERSION} -Dscala=${SCALA_VERSION} -pl spark-shaded -am
+      - name: Copy Sedona JAR to artifacts directory
+        run: |
+          find spark-shaded/target -name "sedona-*.jar" -not -name "*-javadoc.jar" -not -name "*-sources.jar" -exec cp {} databricks-artifacts/tmp/ \;
+      - name: Set build info outputs
+        id: build-info
+        run: |
+          # Get the Sedona JAR path and version
+          SEDONA_JAR_PATH=$(find databricks-artifacts/tmp -name "sedona-*.jar" | head -1)
+          SEDONA_VERSION=$(echo $SEDONA_JAR_PATH | sed 's/.*sedona-spark-shaded-\([^/]*\)\.jar/\1/')
+          GEOTOOLS_JAR_PATH="databricks-artifacts/tmp/geotools-wrapper-${GEOTOOLS_VERSION}.jar"
+
+          echo "jar-path=${SEDONA_JAR_PATH}" >> $GITHUB_OUTPUT
+          echo "sedona-version=${SEDONA_VERSION}" >> $GITHUB_OUTPUT
+          echo "geotools-path=${GEOTOOLS_JAR_PATH}" >> $GITHUB_OUTPUT
+
+          echo "Built Sedona JAR: ${SEDONA_JAR_PATH}"
+          echo "Sedona Version: ${SEDONA_VERSION}"
+          echo "GeoTools JAR: ${GEOTOOLS_JAR_PATH}"
+      - name: Upload build artifacts
+        if: matrix.enable_databricks_test
+        uses: actions/upload-artifact@v4
+        with:
+          name: sedona-jars-${{ matrix.spark }}-${{ matrix.scala }}
+          path: databricks-artifacts/tmp/
+          retention-days: 1
+
+  databricks-test:
+    needs: build
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - spark: 3.5
+            scala: 2.12
+            jdk: '11'
+            runtime: '16.4.x-scala2.12'
+          - spark: 3.5
+            scala: 2.12
+            jdk: '11'
+            runtime: '16.4.x-scala2.12-photon'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: sedona-jars-${{ matrix.spark }}-${{ matrix.scala }}
+          path: databricks-artifacts/tmp/
+      - name: Download GeoTools wrapper
+        run: |
+          curl -L "https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/${GEOTOOLS_VERSION}/geotools-wrapper-${GEOTOOLS_VERSION}.jar" -o databricks-artifacts/tmp/geotools-wrapper-${GEOTOOLS_VERSION}.jar
+      - name: Setup Databricks tester environment
+        working-directory: databricks-tester
+        run: |
+          source $HOME/.cargo/env
+          uv sync
+      - name: Test Databricks connection
+        working-directory: databricks-tester
+        run: |
+          source $HOME/.cargo/env
+          uv run python -m sedona_databricks_tester test-connection
+      - name: Run Databricks smoke tests
+        working-directory: databricks-tester
+        run: |
+          source $HOME/.cargo/env
+
+          # Generate unique session ID for this test run
+          SESSION_ID="${{ github.run_id }}"
+
+          # Find the JAR files
+          SEDONA_JAR=$(find ../databricks-artifacts/tmp -name "sedona-*.jar" | head -1)
+          GEOTOOLS_JAR=$(find ../databricks-artifacts/tmp -name "geotools-wrapper-*.jar" | head -1)
+
+          echo "Testing Spark ${{ matrix.spark }} with runtime ${{ matrix.runtime }}"
+          echo "Session ID: $SESSION_ID"
+          echo "Sedona JAR: $SEDONA_JAR"
+          echo "GeoTools JAR: $GEOTOOLS_JAR"
+
+          # Run smoke tests
+          uv run python -m sedona_databricks_tester smoke-test \
+            --runtime "${{ matrix.runtime }}" \
+            --session-id "$SESSION_ID" \
+            --jar "$SEDONA_JAR" \
+            --jar "$GEOTOOLS_JAR" \
+            --no-cleanup
+
+  cleanup:
+    needs: databricks-test
+    runs-on: ubuntu-22.04
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Setup Databricks tester environment
+        working-directory: databricks-tester
+        run: |
+          source $HOME/.cargo/env
+          uv sync
+      - name: Cleanup Databricks resources
+        working-directory: databricks-tester
+        run: |
+          source $HOME/.cargo/env
+
+          # Use the same session ID as the test job
+          SESSION_ID="${{ github.run_id }}"
+
+          echo "Cleaning up Databricks resources for session: $SESSION_ID"
+          echo "Test job status: ${{ needs.databricks-test.result }}"
+
+          # Run cleanup command - this will clean up clusters, volumes, and workspace files
+          uv run python -m sedona_databricks_tester cleanup --session-id "$SESSION_ID" --force || {
+            echo "Cleanup failed, but continuing..."
+            exit 0
+          }
+
+          echo "Cleanup completed successfully"

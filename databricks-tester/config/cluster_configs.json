@@ -1,0 +1,48 @@
+{
+    "runtimes": {
+        "16.4.x-scala2.12": {
+            "spark_version": "16.4.x-scala2.12",
+            "node_type_id": "m5d.large",
+            "num_workers": 1,
+            "data_security_mode": "SINGLE_USER",
+            "runtime_engine": "STANDARD",
+            "init_scripts": [
+                {
+                    "volumes": {
+                        "destination": "/Volumes/wherobots/kristin/sedona/smoke-test/init_scripts/sedona_init.sh"
+                    }
+                }
+            ],
+            "spark_conf": {
+                "spark.serializer": "org.apache.spark.serializer.KryoSerializer",
+                "spark.kryo.registrator": "org.apache.sedona.core.serde.SedonaKryoRegistrator",
+                "spark.sql.extensions": "org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions",
+                "spark.sedona.enableParserExtension": "false"
+            },
+            "autotermination_minutes": 20,
+            "enable_elastic_disk": true
+        },
+        "16.4.x-scala2.12-photon": {
+            "spark_version": "16.4.x-scala2.12",
+            "node_type_id": "m5d.large",
+            "num_workers": 1,
+            "data_security_mode": "SINGLE_USER",
+            "runtime_engine": "PHOTON",
+            "init_scripts": [
+                {
+                    "volumes": {
+                        "destination": "/Volumes/wherobots/kristin/sedona/smoke-test/init_scripts/sedona_init.sh"
+                    }
+                }
+            ],
+            "spark_conf": {
+                "spark.serializer": "org.apache.spark.serializer.KryoSerializer",
+                "spark.kryo.registrator": "org.apache.sedona.core.serde.SedonaKryoRegistrator",
+                "spark.sql.extensions": "org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions",
+                "spark.sedona.enableParserExtension": "false"
+            },
+            "autotermination_minutes": 20,
+            "enable_elastic_disk": true
+        }
+    }
+}

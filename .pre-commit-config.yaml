@@ -264,6 +264,7 @@ repos:
       - id: check-shebang-scripts-are-executable
         name: run check-shebang-scripts-are-executable
         description: check that scripts with shebangs are executable
+        exclude: ^databricks-tester/config/init_script\.j2$|^databricks-tester/smoke-tests/smoke_test\.py$
       - id: check-toml
         name: run check-toml
         description: check TOML files for syntax errors

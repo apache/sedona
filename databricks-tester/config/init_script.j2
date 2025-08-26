@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+#
+# Databricks cluster initialization script for Sedona
+# Template for JAR deployment from Volumes
+#
+
+set -euo pipefail
+
+echo "Starting Sedona initialization script..."
+
+# Function to log messages
+log() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"
+}
+
+log "Sedona initialization starting..."
+
+# Create JAR directory if it doesn't exist
+JAR_DIR="/databricks/jars"
+mkdir -p "$JAR_DIR"
+
+log "Copying JAR files from Volumes..."
+
+# Copy JARs from Volumes to cluster JAR directory
+{% for jar in jars %}
+log "Copying {{ jar.name }} from Volumes..."
+if cp "{{ jar.volume_path }}" "$JAR_DIR/{{ jar.name }}"; then
+    log "Successfully copied {{ jar.name }}"
+else
+    log "ERROR: Failed to copy {{ jar.name }}"
+    exit 1
+fi
+{% endfor %}
+
+# List all JARs for verification
+log "JAR files in $JAR_DIR:"
+ls -la "$JAR_DIR"/*.jar
+
+log "Sedona initialization completed successfully!"
+log "JAR files are available for Spark to use."
