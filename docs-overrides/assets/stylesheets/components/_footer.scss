@@ -68,17 +68,25 @@
       line-height: 1.25;
       text-align: center;
       color: rgba(255, 255, 255, 0.5);
+      a {
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        transition: 0.3s all ease;
+        &:hover {
+          color: var(--color-white);
+        }
+      }
     }
   }
 
   @media (max-width: 480px) {
-    &__top{
+    &__top {
       flex-direction: column;
       justify-content: center;
       align-items: center;
     }
     &__bot {
-      .md-copyright{
+      .md-copyright {
         text-align: left;
       }
     }
