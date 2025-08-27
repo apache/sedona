@@ -547,6 +547,24 @@
     margin-left: auto;
     margin-right: auto;
   }
+  .section__subtitle {
+    text-align: center;
+    font-family: var(--font-inter);
+    font-style: normal;
+    font-weight: 400;
+    font-size: clamp-property(16, 18);
+    line-height: 1.5;
+    letter-spacing: -0.015em;
+    color: #434547;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 640px;
+    a {
+      text-decoration: underline;
+      color: var(--color-red);
+      text-underline-offset: 3px;
+    }
+  }
   .industries-tabs {
     display: flex;
     flex-direction: column;
@@ -633,42 +651,6 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 16px;
-  }
-  .section-cta {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin-top: clamp-property(32, 50);
-    &__title {
-      text-align: center;
-      font-family: var(--font-inter);
-      font-style: normal;
-      font-weight: 600;
-      font-size: clamp-property(20, 26);
-      line-height: 1.4;
-      letter-spacing: -0.02em;
-      color: var(--color-dark);
-      margin-bottom: clamp-property(16, 20);
-    }
-    &__subtitle {
-      text-align: center;
-      font-family: var(--font-inter);
-      font-style: normal;
-      font-weight: 400;
-      font-size: clamp-property(16, 18);
-      line-height: 1.5;
-      letter-spacing: -0.015em;
-      color: #434547;
-      margin-left: auto;
-      margin-right: auto;
-      max-width: 640px;
-      a {
-        text-decoration: underline;
-        color: var(--color-red);
-        text-underline-offset: 3px;
-      }
-    }
   }
   @media (max-width: 767px) {
     .content-box {
@@ -1146,12 +1128,10 @@
       &::-webkit-scrollbar {
         height: 8px;
       }
-
       &::-webkit-scrollbar-track {
         background: #f1f1f1;
         border-radius: 4px;
       }
-
       &::-webkit-scrollbar-thumb {
         background: #888;
         border-radius: 4px;
@@ -1160,10 +1140,7 @@
           background: #555;
         }
       }
-
-      // ✅ Firefox
-      scrollbar-color: #888 #f1f1f1;
-      scrollbar-width: thin;
     }
+
   }
 }
