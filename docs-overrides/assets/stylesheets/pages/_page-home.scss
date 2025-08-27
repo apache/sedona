@@ -131,11 +131,14 @@
       letter-spacing: -0.02em;
       color: #FFFFFF;
 
-
       .typed-wrap {
         color: var(--color-red);
         display: inline;
-
+        .typed {
+          white-space: nowrap;
+          min-height: clamp-property(37, 51);
+          display: block;
+        }
         p {
           display: inline;
           margin: 0;
@@ -523,6 +526,7 @@
   padding-top: clamp-property(48, 100);
   padding-bottom: clamp-property(48, 100);
   background-color: var(--color-light-blue);
+
   .content-box {
     background-color: var(--color-white);
     border-radius: 24px;
@@ -532,6 +536,7 @@
     padding-right: clamp-property(24, 60);
     overflow: hidden;
   }
+
   .section-title {
     text-align: center;
     margin-top: 0;
@@ -547,6 +552,7 @@
     margin-left: auto;
     margin-right: auto;
   }
+
   .section__subtitle {
     text-align: center;
     font-family: var(--font-inter);
@@ -559,12 +565,14 @@
     margin-left: auto;
     margin-right: auto;
     max-width: 640px;
+
     a {
       text-decoration: underline;
       color: var(--color-red);
       text-underline-offset: 3px;
     }
   }
+
   .industries-tabs {
     display: flex;
     flex-direction: column;
@@ -644,6 +652,7 @@
       }
     }
   }
+
   .btn-group {
     margin-top: clamp-property(32, 50);
     display: flex;
@@ -652,6 +661,7 @@
     flex-wrap: wrap;
     gap: 16px;
   }
+
   @media (max-width: 767px) {
     .content-box {
       margin-left: -24px;
@@ -1128,10 +1138,12 @@
       &::-webkit-scrollbar {
         height: 8px;
       }
+
       &::-webkit-scrollbar-track {
         background: #f1f1f1;
         border-radius: 4px;
       }
+
       &::-webkit-scrollbar-thumb {
         background: #888;
         border-radius: 4px;
