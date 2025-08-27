@@ -120,11 +120,13 @@ CREATE TABLE users (
     "centroid", 
     ST_Centroid(col("geometry"))
 ).select("id", "centroid").show(truncate=False)</code></pre>
-                  <pre class="hljs-snippet__panel" data-lang="java" hidden><code class="language-java">public class Main {
-  public static void main(String[] args) {
-    System.out.println("Hello Java");
-  }
-}    </code></pre>
+                  <pre class="hljs-snippet__panel" data-lang="java" hidden><code class="language-java">Dataset<Row> df = sedona.read.format("geojson").option("multiLine", "true").load("PATH/TO/MYFILE.json")
+
+ .selectExpr("explode(features) as features")
+
+ .select("features.*")
+
+ .withColumn("prop0", expr("properties['prop0']")).drop("properties").drop("type")</code></pre>
                 </div>
               </div>
             </div>
@@ -141,8 +143,9 @@ CREATE TABLE users (
               <div class="hljs-snippet" data-initial="powershell">
                 <div class="hljs-snippet__tabs" role="tablist" aria-label="Code tabs">
                   <button class="hljs-snippet__tab is-active" role="tab" aria-selected="true" data-lang="powershell">Command line</button>
-                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="python">PySpark</button>
-                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="java">Java</button>
+                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="pyspark">PySpark</button>
+                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="python">Python</button>
+                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="java">Snowflake</button>
                 </div>
                 <div class="hljs-snippet__body">
 
@@ -156,16 +159,10 @@ CREATE TABLE users (
                   <span class="active-state">✅</span>
                 </span>
                   </button>
-
                   <pre class="hljs-snippet__panel" data-lang="powershell"><code class="language-powershell">curl https://install.sedona.apache.org | sh</code></pre>
-                  <pre class="hljs-snippet__panel" data-lang="python" hidden><code class="language-python">print("Hello from PySpark!")
-# from pyspark.sql import SparkSession
-# spark = SparkSession.builder.getOrCreate()    </code></pre>
-                  <pre class="hljs-snippet__panel" data-lang="java" hidden><code class="language-java">public class Main {
-  public static void main(String[] args) {
-    System.out.println("Hello Java");
-  }
-}    </code></pre>
+                  <pre class="hljs-snippet__panel" data-lang="pyspark" hidden><code class="language-python">pip install apache-sedona</code></pre>
+                  <pre class="hljs-snippet__panel" data-lang="python" hidden><code class="language-python">pip install sedonadb</code></pre>
+                  <pre class="hljs-snippet__panel" data-lang="java" hidden><code class="language-java">java -jar sedona-snowflake-1.7.2.jar --geotools-version 1.7.2-28.5 > sedona-snowflake.sql</code></pre>
                 </div>
               </div>
             </div>
@@ -188,11 +185,124 @@ CREATE TABLE users (
         </div>
       </section>
 
-      <!-- Section GIF -->
-      <section class="section-img-wrap">
+      <!-- Section Industries Tabs -->
+      <section class="section-industries-tabs">
         <div class="container">
-          <div class="img-wrap">
-            <img src="image/home/gif/gif.png" alt="" class="">
+          <div class="content-box">
+            <h2 class="section-title">Used across industries to solve complex spatial problems</h2>
+            <div class="industries-tabs">
+
+              <div class="industries-tabs__head-wrap">
+                <div class="industries-tabs__head">
+                  <div class="industries-tabs__head-item active">
+                    Mobility
+                  </div>
+                  <div class="industries-tabs__head-item ">
+                    Telecom
+                  </div>
+                  <div class="industries-tabs__head-item">
+                    Data and map production
+                  </div>
+                  <div class="industries-tabs__head-item">
+                    Logistics
+                  </div>
+                  <div class="industries-tabs__head-item">
+                    Energy
+                  </div>
+                  <div class="industries-tabs__head-item">
+                    Finance
+                  </div>
+                </div>
+              </div>
+
+              <div class="industries-tabs__body">
+
+                <div data-tab="Mobility" class="industries-tabs__body-item active">
+                  <div class="industries-grid">
+                    <div class="grid-item">
+                      <img src="image/home/industries/bmw.svg" alt="" class="">
+                    </div>
+                    <div class="grid-item">
+                      <img src="image/home/industries/gm.svg" alt="" class="">
+                    </div>
+                    <div class="grid-item">
+                      <img src="image/home/industries/placer-ai.svg" alt="" class="">
+                    </div>
+                    <div class="grid-item">
+                      <img src="image/home/industries/arity.svg" alt="" class="">
+                    </div>
+                  </div>
+                </div>
+
+                <div data-tab="Telecom" class="industries-tabs__body-item">
+                  <div class="industries-grid">
+                    <div class="grid-item"><img src="image/home/industries/comcast.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/at&t.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/telus.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/t-mobile.svg" alt="" class=""></div>
+                  </div>
+                </div>
+
+                <div data-tab="Data and map production" class="industries-tabs__body-item">
+                  <div class="industries-grid">
+                    <div class="grid-item"><img src="image/home/industries/space-x.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/maxar.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/mapbox.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/tom-tom.svg" alt="" class=""></div>
+                  </div>
+                </div>
+
+                <div data-tab="Logistics" class="industries-tabs__body-item">
+                  <div class="industries-grid">
+                    <div class="grid-item"><img src="image/home/industries/instacart.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/uber.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/UnitedAirlines.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/Boeing.svg" alt="" class=""></div>
+                  </div>
+                </div>
+
+                <div data-tab="Energy" class="industries-tabs__body-item">
+                  <div class="industries-grid">
+                    <div class="grid-item"><img src="image/home/industries/shell.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/DukeEnergy.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/PG&E.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/Southern_Company.svg" alt="" class=""></div>
+                  </div>
+                </div>
+
+                <div data-tab="Finance" class="industries-tabs__body-item">
+                  <div class="industries-grid">
+                    <div class="grid-item"><img src="image/home/industries/Allstate.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/CapitalOne.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/cigna.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/JPMorganChase.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/StateFarm.svg" alt="" class=""></div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <div class="section-cta">
+
+              <h3 class="h3 section-cta__title">Want to appear on our use new case page (coming soon)? </h3>
+
+              <div class="section-cta__subtitle editor">
+                Submit a pull request or send a quick description of your organization and usage to <a target="_blank" href="https://sedona.apache.org/latest/community/contact/">the mailing list</a> and we'll add you.
+              </div>
+
+            </div>
+            <!--<div class="btn-group">
+              <a href="#" class="btn btn-red">Showcase your use case</a>
+              <a href="#" class="btn btn-light-red">
+                <span class="caption">See All Cases</span>
+                <span class="icon">
+                  <svg width="15" height="12" viewBox="0 0 15 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M1.25 6H13.75M13.75 6L9.0625 1M13.75 6L9.0625 11" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>
+
+                </span>
+              </a>
+            </div>-->
           </div>
         </div>
       </section>
@@ -267,6 +377,19 @@ CREATE TABLE users (
           </div>
         </div>
       </section>
+
+
+      <!-- Section GIF -->
+      <!--
+      <section  hidden="hidden" class="section-img-wrap">
+        <div class="container">
+          <div class="img-wrap">
+            <img src="image/home/gif/gif.png" alt="" class="">
+          </div>
+        </div>
+      </section>
+      -->
+
 
       <!-- Section Deploy -->
       <section class="section-deploy">
@@ -391,121 +514,6 @@ CREATE TABLE users (
         </div>
       </section>
 
-      <!-- Section Industries Tabs -->
-      <section class="section-industries-tabs">
-        <div class="container">
-          <div class="content-box">
-            <h2 class="section-title">Used across industries to solve complex spatial problems</h2>
-
-            <div class="industries-tabs">
-
-              <div class="industries-tabs__head-wrap">
-                <div class="industries-tabs__head">
-                  <div class="industries-tabs__head-item active">
-                    Mobility
-                  </div>
-                  <div class="industries-tabs__head-item ">
-                    Telecom
-                  </div>
-                  <div class="industries-tabs__head-item">
-                    Data and map production
-                  </div>
-                  <div class="industries-tabs__head-item">
-                    Logistics
-                  </div>
-                  <div class="industries-tabs__head-item">
-                    Energy
-                  </div>
-                  <div class="industries-tabs__head-item">
-                    Finance
-                  </div>
-                </div>
-              </div>
-
-              <div class="industries-tabs__body">
-
-                <div data-tab="Mobility" class="industries-tabs__body-item active">
-                  <div class="industries-grid">
-                    <div class="grid-item">
-                      <img src="image/home/industries/bmw.svg" alt="" class="">
-                    </div>
-                    <div class="grid-item">
-                      <img src="image/home/industries/gm.svg" alt="" class="">
-                    </div>
-                    <div class="grid-item">
-                      <img src="image/home/industries/placer-ai.svg" alt="" class="">
-                    </div>
-                    <div class="grid-item">
-                      <img src="image/home/industries/arity.svg" alt="" class="">
-                    </div>
-                  </div>
-                </div>
-
-                <div data-tab="Telecom" class="industries-tabs__body-item">
-                  <div class="industries-grid">
-                    <div class="grid-item"><img src="image/home/industries/comcast.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/at&t.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/telus.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/t-mobile.svg" alt="" class=""></div>
-                  </div>
-                </div>
-
-                <div data-tab="Data and map production" class="industries-tabs__body-item">
-                  <div class="industries-grid">
-                    <div class="grid-item"><img src="image/home/industries/space-x.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/maxar.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/mapbox.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/tom-tom.svg" alt="" class=""></div>
-                  </div>
-                </div>
-
-                <div data-tab="Logistics" class="industries-tabs__body-item">
-                  <div class="industries-grid">
-                    <div class="grid-item"><img src="image/home/industries/instacart.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/uber.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/UnitedAirlines.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/Boeing.svg" alt="" class=""></div>
-                  </div>
-                </div>
-
-                <div data-tab="Energy" class="industries-tabs__body-item">
-                  <div class="industries-grid">
-                    <div class="grid-item"><img src="image/home/industries/shell.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/DukeEnergy.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/PG&E.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/Southern_Company.svg" alt="" class=""></div>
-                  </div>
-                </div>
-
-                <div data-tab="Finance" class="industries-tabs__body-item">
-                  <div class="industries-grid">
-                    <div class="grid-item"><img src="image/home/industries/Allstate.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/CapitalOne.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/cigna.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/JPMorganChase.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/StateFarm.svg" alt="" class=""></div>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-            <div class="btn-group">
-              <a href="#" class="btn btn-red">Showcase Your Case</a>
-              <a href="#" class="btn btn-light-red">
-                <span class="caption">See All Cases</span>
-                <span class="icon">
-                  <svg width="15" height="12" viewBox="0 0 15 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M1.25 6H13.75M13.75 6L9.0625 1M13.75 6L9.0625 11" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-</svg>
-
-                </span>
-              </a>
-            </div>
-
-          </div>
-        </div>
-      </section>
 
       <!-- Section Community -->
       <section class="section-community">
