@@ -137,7 +137,7 @@ public class DecodeBenchPolygon {
   }
 
   @Benchmark
-  public void tagged_multipolygon_full(DecodeBenchPolygon.ProfilerHook ph, Blackhole bh)
+  public void tagged_multipolygon_decode(DecodeBenchPolygon.ProfilerHook ph, Blackhole bh)
       throws IOException {
     Geography g = Geography.decodeTagged(taggedMultiPolygonIn);
     bh.consume(g);
@@ -202,7 +202,7 @@ public class DecodeBenchPolygon {
     double acc = 0;
     // Consume the data to prevent Dead Code Elimination (DCE)
     for (S2Polygon polygon : out) {
-      acc += polygon.getArea();
+      acc += polygon.numLoops();
     }
     return acc;
   }

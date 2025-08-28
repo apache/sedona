@@ -50,11 +50,11 @@ public class BenchPolygonWKB {
   public String dim;
 
   /** number of polygons in MULTIPOLYGON */
-  @Param({"1", "16", "256"})
+  @Param({"1", "16", "256", "1024"})
   public int nPolygons;
 
   /** vertices per polygon outer ring (>=4; last coord auto‑closed) */
-  @Param({"4", "16", "256"})
+  @Param({"4", "16", "256", "1024"})
   public int nVerticesPerRing;
 
   /** WKB endianness */

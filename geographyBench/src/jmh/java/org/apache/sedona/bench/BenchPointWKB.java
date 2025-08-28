@@ -35,7 +35,9 @@ import org.apache.sedona.common.S2Geography.WKTReader;
 import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.ParseException;
 import org.openjdk.jmh.annotations.*;
-import org.openjdk.jmh.infra.*;
+import org.openjdk.jmh.infra.BenchmarkParams;
+import org.openjdk.jmh.infra.Blackhole;
+import org.openjdk.jmh.infra.IterationParams;
 import org.openjdk.jmh.runner.IterationType;
 
 @BenchmarkMode(Mode.AverageTime)
@@ -59,46 +61,36 @@ public class BenchPointWKB {
   private String wktPoint, wktMulti;
   private Geography geoPoint, geoMulti;
 
-  // use writer for write benches (to benchmark it)
-  private byte[] wkbPointLE, wkbPointBE;
-
-  // use hand-built payloads for read benches (so reader always accepts them)
+  // Hand-built payloads for READ benches (explicit WKB layout)
   private byte[] wkbReadPointLE, wkbReadPointBE;
   private byte[] wkbReadMultiLE, wkbReadMultiBE;
 
   @Setup(Level.Trial)
   public void setup() throws ParseException, IOException {
     wktPoint = buildPointWKT(dim);
-    wktMulti = buildMultiPointWKT(nPoints, dim);
+    wktMulti = buildMultiPointWKT(nPoints, dim); // <-- double-paren per-point
 
     WKTReader wktReader = new WKTReader();
     geoPoint = wktReader.read(wktPoint);
     geoMulti = wktReader.read(wktMulti);
 
-    // Precompute writer outputs (so write benches time only serialization)
-    int outDims = "XY".equals(dim) ? 2 : 3;
-    WKBWriter le = new WKBWriter(outDims, ByteOrderValues.LITTLE_ENDIAN);
-    WKBWriter be = new WKBWriter(outDims, ByteOrderValues.BIG_ENDIAN);
-    wkbPointLE = le.write(geoPoint);
-    wkbPointBE = be.write(geoPoint);
-
     // Precompute READ payloads with explicit layout the reader expects
     boolean isXYZ = "XYZ".equals(dim);
-    wkbReadPointLE = buildPointWKB(/*little=*/ true, isXYZ, 0);
-    wkbReadPointBE = buildPointWKB(/*little=*/ false, isXYZ, 0);
-    wkbReadMultiLE = buildMultiPointWKB(/*little=*/ true, isXYZ, nPoints);
-    wkbReadMultiBE = buildMultiPointWKB(/*little=*/ false, isXYZ, nPoints);
+    wkbReadPointLE = buildPointWKB(true, isXYZ, 0);
+    wkbReadPointBE = buildPointWKB(false, isXYZ, 0);
+    wkbReadMultiLE = buildMultiPointWKB(true, isXYZ, nPoints);
+    wkbReadMultiBE = buildMultiPointWKB(false, isXYZ, nPoints);
   }
 
   // ---------------- WRITE (Geography -> WKB) ----------------
 
   @Benchmark
-  public double wkb_write_point(Blackhole bh, BenchPolygonWKB.ProfilerHook ph) throws IOException {
+  public double wkb_write_point(Blackhole bh, BenchPointWKB.ProfilerHook ph) throws IOException {
     return write(geoPoint, bh);
   }
 
   @Benchmark
-  public double wkb_write_multipoint(Blackhole bh, BenchPolygonWKB.ProfilerHook ph)
+  public double wkb_write_multipoint(Blackhole bh, BenchPointWKB.ProfilerHook ph)
       throws IOException {
     return write(geoMulti, bh);
   }
@@ -171,12 +163,12 @@ public class BenchPointWKB {
         ByteBuffer.allocate(header + n * perPoint)
             .order(little ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
 
-    // Write MultiPoint header
+    // MultiPoint header
     bb.put(little ? (byte) 1 : (byte) 0);
     bb.putInt(multiType);
     bb.putInt(n);
 
-    // THE FIX: Write each Point as a full WKB geometry, as the reader expects
+    // Each Point as a full WKB geometry
     for (int i = 0; i < n; i++) {
       bb.put(little ? (byte) 1 : (byte) 0); // inner endian
       bb.putInt(pointType); // inner type (POINT)
@@ -202,11 +194,14 @@ public class BenchPointWKB {
     return "POINT" + ("XYZ".equals(dim) ? " Z" : "") + " (" + coord(0, dim) + ")";
   }
 
+  // IMPORTANT: MULTIPOINT requires double-paren ((x y), (x y), ...)
   private static String buildMultiPointWKT(int n, String dim) {
     if (n <= 1) return buildPointWKT(dim);
     String dimToken = "XYZ".equals(dim) ? " Z" : "";
     String pts =
-        IntStream.range(0, n).mapToObj(i -> coord(i, dim)).collect(Collectors.joining(", "));
+        IntStream.range(0, n)
+            .mapToObj(i -> "(" + coord(i, dim) + ")") // wrap each point!
+            .collect(Collectors.joining(", "));
     return "MULTIPOINT" + dimToken + " (" + pts + ")";
   }
 
@@ -216,6 +211,22 @@ public class BenchPointWKB {
     if ("XY".equals(dim)) return String.format(Locale.ROOT, "%.6f %.6f", x, y);
     double z = (i % 13) + 0.125;
     return String.format(Locale.ROOT, "%.6f %.6f %.6f", x, y, z);
+  }
+
+  // -------- Sanity: confirm shape count/bytes scale with nPoints --------
+  @TearDown(Level.Trial)
+  public void sanity() throws IOException {
+    int outDims = "XY".equals(dim) ? 2 : 3;
+    int order =
+        "LE".equals(endianness) ? ByteOrderValues.LITTLE_ENDIAN : ByteOrderValues.BIG_ENDIAN;
+    WKBWriter w = new WKBWriter(outDims, order);
+    byte[] out = w.write(geoMulti);
+
+    int coordsPerPt = "XY".equals(dim) ? 2 : 3;
+    int expectedApprox = 1 + 4 + 4 + nPoints * (1 + 4 + 8 * coordsPerPt); // header + N*(point)
+    System.out.printf(
+        "sanity: dim=%s order=%s n=%d shapes=%d bytes=%d (~%d)%n",
+        dim, endianness, nPoints, geoMulti.numShapes(), out.length, expectedApprox);
   }
 
   // -------- Async-profiler hook (runs inside fork) --------
@@ -251,8 +262,6 @@ public class BenchPointWKB {
               .toAbsolutePath()
               .toFile();
 
-      // Using 'all-user' helps the profiler find the correct forked JMH process.
-      // The filter is removed to avoid accidentally hiding the benchmark thread.
       String common = String.format("event=%s,interval=%s,cstack=fp,threads", event, interval);
 
       if ("jfr".equalsIgnoreCase(format)) {
