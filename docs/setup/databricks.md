@@ -129,6 +129,14 @@ Create a Databricks notebook and connect it to the cluster.  Verify that you can
 
 ![Python computation](../image/databricks/image1.png)
 
+If you want to use Sedona Python functions such as [DataFrame APIs](../api/sql/DataFrameAPI.md) or [StructuredAdapter](../tutorial/sql.md#spatialrdd-to-dataframe-with-spatial-partitioning), you need to initialize Sedona as follows:
+
+```python
+from sedona.spark import *
+
+sedona = SedonaContext.create(spark)
+```
+
 You can also use the SQL API as follows:
 
 ![SQL computation](../image/databricks/image8.png)
