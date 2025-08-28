@@ -5,16 +5,19 @@ export const typedAnimation = () => {
   const stringsContainer = document.querySelectorAll('.typed-strings p');
 
   if (container && stringsContainer.length) {
-    const stringsArray = Array.from(stringsContainer).map(el => el.textContent.trim());
+    const stringsArray = Array.from(stringsContainer).map((el) =>
+      el.textContent.trim(),
+    );
 
     const typewriter = new Typewriter(container, {
       loop: true,
-      delay: 95,       // typing speed
-      deleteSpeed: 65  // deleting speed
+      delay: 95, // typing speed
+      deleteSpeed: 65, // deleting speed
     });
 
-    stringsArray.forEach((text, index) => {
-      typewriter.typeString(text)
+    stringsArray.forEach((text) => {
+      typewriter
+        .typeString(text)
         .pauseFor(0) // no pause after typing
         .deleteAll();
     });

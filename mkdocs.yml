@@ -261,6 +261,6 @@ plugins:
   - mike:
       canonical_version: 'latest'
 extra_css:
-    - assets/stylesheets/extra.css
+  - assets/stylesheets/extra.css
 extra_javascript:
   - assets/javascripts/main.min.js
