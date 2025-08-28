@@ -601,6 +601,7 @@
                 <version>1.0</version>
                 <configuration>
                     <properties>
+                        <spark.major.version>${spark.major.version}</spark.major.version>
                         <spark.compat.version>${spark.compat.version}</spark.compat.version>
                         <scala.compat.version>${scala.compat.version}</scala.compat.version>
                         <spark.version>${spark.version}</spark.version>
