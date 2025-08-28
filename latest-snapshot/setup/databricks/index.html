@@ -5095,6 +5095,11 @@ pydeck==0.9.1
 <h2 id="create-a-databricks-notebook">Create a Databricks notebook<a class="headerlink" href="#create-a-databricks-notebook" title="Permanent link">&para;</a></h2>
 <p>Create a Databricks notebook and connect it to the cluster.  Verify that you can run a Python computation with a Sedona function:</p>
 <p><img alt="Python computation" src="../../image/databricks/image1.png" /></p>
+<p>If you want to use Sedona Python functions such as <a href="../../api/sql/DataFrameAPI/">DataFrame APIs</a> or <a href="../../tutorial/sql/#spatialrdd-to-dataframe-with-spatial-partitioning">StructuredAdapter</a>, you need to initialize Sedona as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
+</code></pre></div>
 <p>You can also use the SQL API as follows:</p>
 <p><img alt="SQL computation" src="../../image/databricks/image8.png" /></p>
 <h2 id="saving-geometry-in-databricks-delta-lake-tables">Saving geometry in Databricks Delta Lake tables<a class="headerlink" href="#saving-geometry-in-databricks-delta-lake-tables" title="Permanent link">&para;</a></h2>
@@ -5137,7 +5142,7 @@ pydeck==0.9.1
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="August 20, 2025 02:05:06 UTC">August 20, 2025 02:05:06</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="August 28, 2025 06:53:13 UTC">August 28, 2025 06:53:13</span>
   </span>
 
     
