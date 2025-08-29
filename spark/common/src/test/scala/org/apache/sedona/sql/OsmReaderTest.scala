@@ -134,9 +134,7 @@ class OsmReaderTest extends TestBaseScala with Matchers {
       osmData
         .selectExpr("min(location.longitude)", "max(location.latitude)")
         .collect()
-        .flatMap(row => Array(row.get(0), row.get(1))) shouldEqual (Array(
-        7.208188056945801,
-        43.759483337402344))
+        .flatMap(row => Array(row.get(0), row.get(1))) shouldEqual (Array(7.2081882, 43.7594835))
 
       osmData
         .where("id == 4098197")
