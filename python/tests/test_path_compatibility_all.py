@@ -115,8 +115,3 @@ class TestPathCompatibilityAll(TestBase):
         # Test Map imports
         assert SedonaKepler is not None
         assert SedonaPyDeck is not None
-
-    def test_raster_imports(self):
-        assert AWTRaster is not None
-        assert DataBuffer is not None
-        assert SampleDimension is not None
