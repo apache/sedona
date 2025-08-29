@@ -1,4 +1,4 @@
-sedona.spark.geopandas package
+sedona.spark.geopandas core
 ==============================
 
 .. Option: inherited-members: Series
