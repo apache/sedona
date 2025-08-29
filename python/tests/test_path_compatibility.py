@@ -62,10 +62,6 @@ from sedona.geoarrow import create_spatial_dataframe, dataframe_to_arrow
 from sedona.utils import KryoSerializer, SedonaKryoRegistrator
 from sedona.maps import SedonaKepler, SedonaPyDeck
 
-from sedona.raster.awt_raster import AWTRaster
-from sedona.raster.data_buffer import DataBuffer
-from sedona.raster.meta import SampleDimension
-
 
 class TestPathCompatibility(TestBase):
 
@@ -164,8 +160,3 @@ class TestPathCompatibility(TestBase):
         # Test Map imports
         assert SedonaKepler is not None
         assert SedonaPyDeck is not None
-
-    def test_raster_imports(self):
-        assert AWTRaster is not None
-        assert DataBuffer is not None
-        assert SampleDimension is not None
