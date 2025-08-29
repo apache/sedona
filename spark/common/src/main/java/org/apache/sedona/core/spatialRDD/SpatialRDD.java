@@ -25,7 +25,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang.NullArgumentException;
 import org.apache.log4j.Logger;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.jts2geojson.GeoJSONWriter;
@@ -542,7 +541,7 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
    */
   public void saveAsWKB(String outputLocation) {
     if (this.rawSpatialRDD == null) {
-      throw new NullArgumentException("save as WKB cannot operate on null RDD");
+      throw new IllegalArgumentException("save as WKB cannot operate on null RDD");
     }
     this.rawSpatialRDD
         .mapPartitions(
@@ -571,7 +570,7 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
   /** Save as WKT */
   public void saveAsWKT(String outputLocation) {
     if (this.rawSpatialRDD == null) {
-      throw new NullArgumentException("save as WKT cannot operate on null RDD");
+      throw new IllegalArgumentException("save as WKT cannot operate on null RDD");
     }
     this.rawSpatialRDD
         .mapPartitions(
