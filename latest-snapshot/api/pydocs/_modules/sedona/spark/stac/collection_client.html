@@ -467,7 +467,6 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">python_datetime</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">SparkSession</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">dt</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pystac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Item</span> <span class="k">as</span> <span class="n">PyStacItem</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseGeometry</span>
 
 
@@ -775,7 +774,7 @@
         <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">datetime</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">python_datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">max_items</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">PyStacItem</span><span class="p">]:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns an iterator of items. Each item has the supplied item ID and/or optional spatial and temporal extents.</span>
 
@@ -797,6 +796,14 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_items_df</span><span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">max_items</span><span class="p">)</span>
+
+            <span class="c1"># Import pystac only when needed</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">pystac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Item</span> <span class="k">as</span> <span class="n">PyStacItem</span>
+            <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+                    <span class="s2">&quot;STAC functionality requires pystac. Please install pystac: pip install pystac&quot;</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
 
             <span class="c1"># Collect the filtered rows and convert them to PyStacItem objects</span>
             <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>

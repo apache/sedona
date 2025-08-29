@@ -464,7 +464,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.stac.collection_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">CollectionClient</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">python_datetime</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pystac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Item</span> <span class="k">as</span> <span class="n">PyStacItem</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseGeometry</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span>
@@ -537,7 +536,7 @@
         <span class="n">datetime</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">python_datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">max_items</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">return_dataframe</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Iterator</span><span class="p">[</span><span class="n">PyStacItem</span><span class="p">],</span> <span class="n">DataFrame</span><span class="p">]:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Iterator</span><span class="p">,</span> <span class="n">DataFrame</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Searches for items in the specified collection with optional filters.</span>
 
