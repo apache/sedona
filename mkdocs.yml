@@ -179,7 +179,7 @@ theme:
     primary: 'deep orange'
     accent: 'green'
   favicon: image/sedona_logo_symbol.png
-  logo: image/sedona_logo_symbol_white.svg
+  logo: image/logo.svg
   icon:
     logo: fontawesome/solid/earth-americas
     repo: fontawesome/brands/github
@@ -200,7 +200,7 @@ extra:
     default:
       - latest
   social:
-    - icon: fontawesome/brands/github-alt
+    - icon: fontawesome/brands/github
       link: 'https://github.com/apache/sedona'
     - icon: fontawesome/brands/twitter
       link: 'https://twitter.com/ApacheSedona'
@@ -263,3 +263,7 @@ plugins:
       type: datetime
   - mike:
       canonical_version: 'latest'
+extra_css:
+  - assets/stylesheets/extra.css
+extra_javascript:
+  - assets/javascripts/main.min.js
