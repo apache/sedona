@@ -22,7 +22,6 @@ from typing import Optional
 import datetime as python_datetime
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import dt
-from pystac import Item as PyStacItem
 from shapely.geometry.base import BaseGeometry
 
 
@@ -320,7 +319,7 @@ class CollectionClient:
         ] = None,
         datetime: Optional[Union[str, python_datetime.datetime, list]] = None,
         max_items: Optional[int] = None,
-    ) -> Iterator[PyStacItem]:
+    ) -> Iterator:
         """
         Returns an iterator of items. Each item has the supplied item ID and/or optional spatial and temporal extents.
 
@@ -342,6 +341,14 @@ class CollectionClient:
         """
         try:
             df = self.load_items_df(bbox, geometry, datetime, ids, max_items)
+
+            # Import pystac only when needed
+            try:
+                from pystac import Item as PyStacItem
+            except ImportError as e:
+                raise ImportError(
+                    "STAC functionality requires pystac. Please install pystac: pip install pystac"
+                ) from e
 
             # Collect the filtered rows and convert them to PyStacItem objects
             items = []
