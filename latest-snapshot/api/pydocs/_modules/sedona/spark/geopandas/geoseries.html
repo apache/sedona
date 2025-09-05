@@ -1210,9 +1210,7 @@
         <span class="k">if</span> <span class="n">geometry_column</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No geometry column found in GeoSeries&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sindex</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_sindex</span> <span class="o">=</span> <span class="n">SpatialIndex</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="p">,</span> <span class="n">column_name</span><span class="o">=</span><span class="n">geometry_column</span>
-            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sindex</span> <span class="o">=</span> <span class="n">SpatialIndex</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sindex</span>
 
     <span class="nd">@property</span>

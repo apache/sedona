@@ -4951,9 +4951,14 @@ CRS is exported if it’s set.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>geometry</strong> (<em>np.array</em><em> of </em><em>Shapely geometries</em><em>, </em><em>PySparkDataFrame column</em><em>, or </em><em>PySparkDataFrame</em>)</p></li>
+<li><p><strong>geometry</strong> (<em>np.array</em><em> of </em><em>Shapely geometries</em><em>, </em><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries"><em>GeoSeries</em></a><em>, or </em><em>PySparkDataFrame</em>)</p></li>
 <li><p><strong>index_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>default &quot;strtree&quot;</em>) – The type of spatial index to use.</p></li>
 <li><p><strong>column_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – The column name to extract geometry from if <cite>geometry</cite> is a PySparkDataFrame.</p></li>
+<li><p><strong>Note</strong> (<em>query methods</em><em> (</em><em>ie. query</em><em>, </em><em>nearest</em><em>, </em><em>intersection</em><em>) </em><em>have different behaviors depending on how the index is constructed.</em>)</p></li>
+<li><p><strong>np.array</strong> (<em>When constructed from a</em>)</p></li>
+<li><p><strong>geopandas.</strong> (<em>the query methods return indices like original</em>)</p></li>
+<li><p><strong>PySparkDataFrame</strong> (<em>When constructed from a GeoSeries or</em>)</p></li>
+<li><p><strong>geometries.</strong> (<em>the query methods return</em>)</p></li>
 </ul>
 </dd>
 </dl>
@@ -4962,13 +4967,24 @@ CRS is exported if it’s set.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.sindex.SpatialIndex.intersection">
 <span class="sig-name descname"><span class="pre">intersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/geopandas/sindex.html#SpatialIndex.intersection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.sindex.SpatialIndex.intersection" title="Link to this definition"></a></dt>
-<dd><p>Find geometries that intersect the given bounding box.</p>
+<dd><p>Find geometries that intersect the given bounding box. Similar to the Geopandas version,
+this is a compatibility wrapper for rtree.index.Index.intersection, use query instead.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>bounds</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a>) – Bounding box as (min_x, min_y, max_x, max_y).</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bounds</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a>) – Bounding box as (min_x, min_y, max_x, max_y).</p></li>
+<li><p><strong>Note</strong> (<em>Unlike Geopandas</em><em>, </em><em>Sedona does not support geometry input</em><em> of </em><em>type np.array</em><em> or </em><em>GeoSeries.</em>)</p></li>
+<li><p><strong>np.array</strong> (<em>When constructed from a</em>)</p></li>
+<li><p><strong>geopandas.</strong> (<em>this method returns indices like original</em>)</p></li>
+<li><p><strong>PySparkDataFrame</strong> (<em>When constructed from a GeoSeries or</em>)</p></li>
+<li><p><strong>geometries.</strong> (<em>this method returns</em>)</p></li>
+<li><p><strong>Note</strong></p></li>
+<li><p><strong>directly.</strong> (<em>It is recommended to instead use GeoSeries.intersects</em>)</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of indices of matching geometries.</p>
+<dd class="field-even"><p>List of geometries if constructed from a GeoSeries or PySparkDataFrame.
+List of the corresponding indices if constructed from a np.array.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
@@ -5000,11 +5016,17 @@ CRS is exported if it’s set.</p>
 <li><p><strong>geometry</strong> (<em>Shapely geometry</em>) – The geometry to find the nearest neighbor for.</p></li>
 <li><p><strong>k</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em><em>, </em><em>default 1</em>) – Number of nearest neighbors to find.</p></li>
 <li><p><strong>return_distance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em><em>, </em><em>default False</em>) – Whether to return distances along with indices.</p></li>
-<li><p><strong>Note</strong> (<em>Unlike Geopandas</em><em>, </em><em>Sedona does not support geometry input</em><em> of </em><em>type np.array</em><em> or </em><em>GeoSeries.</em>)</p></li>
+<li><p><strong>Note</strong> (<em>nearest</em><em>(</em><em>) </em><em>has different behaviors depending on how the index is constructed.</em>)</p></li>
+<li><p><strong>Note</strong></p></li>
+<li><p><strong>np.array</strong> (<em>When constructed from a</em>)</p></li>
+<li><p><strong>geopandas.</strong> (<em>this method returns indices like original</em>)</p></li>
+<li><p><strong>PySparkDataFrame</strong> (<em>When constructed from a GeoSeries or</em>)</p></li>
+<li><p><strong>geometries.</strong> (<em>this method returns</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of indices of nearest geometries, optionally with distances.</p>
+<dd class="field-even"><p>List of geometries if constructed from a GeoSeries or PySparkDataFrame.
+List of the corresponding indices if constructed from a np.array.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a> or <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a></p>
@@ -5023,10 +5045,17 @@ CRS is exported if it’s set.</p>
 <li><p><strong>predicate</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Spatial predicate to filter results. Must be either ‘intersects’ (default) or ‘contains’.</p></li>
 <li><p><strong>sort</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em><em>, </em><em>default False</em>) – Whether to sort the results.</p></li>
 <li><p><strong>Note</strong> (<em>Unlike Geopandas</em><em>, </em><em>Sedona does not support geometry input</em><em> of </em><em>type np.array</em><em> or </em><em>GeoSeries.</em>)</p></li>
+<li><p><strong>np.array</strong> (<em>When constructed from a</em>)</p></li>
+<li><p><strong>geopandas.</strong> (<em>this method returns indices like original</em>)</p></li>
+<li><p><strong>PySparkDataFrame</strong> (<em>When constructed from a GeoSeries or</em>)</p></li>
+<li><p><strong>geometries.</strong> (<em>this method returns</em>)</p></li>
+<li><p><strong>Note</strong></p></li>
+<li><p><strong>directly.</strong> (<em>It is recommended to instead use GeoSeries.intersects</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of indices of matching geometries.</p>
+<dd class="field-even"><p>List of geometries if constructed from a GeoSeries or PySparkDataFrame.
+List of the corresponding indices if constructed from a np.array.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
