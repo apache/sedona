@@ -19,7 +19,7 @@ import pytest
 import numpy as np
 import shapely
 from pyspark.sql.functions import expr
-from shapely.geometry import Point, Polygon, LineString
+from shapely.geometry import Point, Polygon, LineString, box
 
 from tests.test_base import TestBase
 from sedona.spark.geopandas import GeoSeries
@@ -463,3 +463,11 @@ class TestSpatialIndex(TestBase):
 
         # Verify results
         assert len(results) == 2
+
+    # test from the geopandas docstring
+    def test_geoseries_sindex_intersection(self):
+        gs = GeoSeries([Point(x, x) for x in range(10)])
+        result = gs.sindex.intersection(box(1, 1, 3, 3).bounds)
+        # Unlike original geopandas, this returns geometries instead of indices
+        expected = [Point(1, 1), Point(2, 2), Point(3, 3)]
+        assert result == expected
