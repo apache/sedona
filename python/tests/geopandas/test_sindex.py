@@ -63,6 +63,31 @@ class TestSpatialIndex(TestBase):
             ]
         )
 
+    def test_construct_from_geoseries(self):
+        # Construct from a GeoSeries
+        gs = GeoSeries([Point(x, x) for x in range(5)])
+        sindex = SpatialIndex(gs)
+        result = sindex.query(Point(2, 2))
+        # SpatialIndex constructed from GeoSeries return geometries
+        assert result == [Point(2, 2)]
+
+    def test_construct_from_pyspark_dataframe(self):
+        # Construct from PySparkDataFrame
+        df = self.spark.createDataFrame(
+            [(Point(x, x),) for x in range(5)], ["geometry"]
+        )
+        sindex = SpatialIndex(df, column_name="geometry")
+        result = sindex.query(Point(2, 2))
+        assert result == [Point(2, 2)]
+
+    def test_construct_from_nparray(self):
+        # Construct from np.array
+        array = np.array([Point(x, x) for x in range(5)])
+        sindex = SpatialIndex(array)
+        result = sindex.query(Point(2, 2))
+        # Returns indices like original geopandas
+        assert result.tolist() == np.array([2])
+
     def test_geoseries_sindex_property_exists(self):
         """Test that the sindex property exists on GeoSeries."""
         assert hasattr(self.points, "sindex")

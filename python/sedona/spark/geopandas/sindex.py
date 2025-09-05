@@ -38,12 +38,19 @@ class SpatialIndex:
 
         Parameters
         ----------
-        geometry : np.array of Shapely geometries, PySparkDataFrame column, or PySparkDataFrame
+        geometry : np.array of Shapely geometries, GeoSeries, or PySparkDataFrame
         index_type : str, default "strtree"
             The type of spatial index to use.
         column_name : str, optional
             The column name to extract geometry from if `geometry` is a PySparkDataFrame.
         """
+        from sedona.spark.geopandas import GeoSeries
+
+        if isinstance(geometry, GeoSeries):
+            from sedona.spark.geopandas.geoseries import _get_series_col_name
+
+            column_name = _get_series_col_name(geometry)
+            geometry = geometry._internal.spark_frame
 
         if isinstance(geometry, np.ndarray):
             self.geometry = geometry
@@ -65,7 +72,7 @@ class SpatialIndex:
             self._build_spark_index(column_name)
         else:
             raise TypeError(
-                "Invalid type for `geometry`. Expected np.array or PySparkDataFrame."
+                "Invalid type for `geometry`. Expected np.array, GeoSeries, or PySparkDataFrame."
             )
 
     def query(self, geometry: BaseGeometry, predicate: str = None, sort: bool = False):
