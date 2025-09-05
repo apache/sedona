@@ -196,15 +196,18 @@ class SpatialIndex:
             from sedona.spark.core.spatialOperator import KNNQuery
 
             # Execute the KNN query
-            results = KNNQuery.SpatialKnnQuery(self._indexed_rdd, geometry, k, False)
+            geo_data_list = KNNQuery.SpatialKnnQuery(
+                self._indexed_rdd, geometry, k, False
+            )
+
+            # No need to keep the userData field, so convert it directly to a list of geometries
+            geoms_list = [row.geom for row in geo_data_list]
 
             if return_distance:
                 # Calculate distances if requested
-                distances = [
-                    geom.distance(geometry) for geom in [row.geom for row in results]
-                ]
-                return results, distances
-            return results
+                distances = [geom.distance(geometry) for geom in geoms_list]
+                return geoms_list, distances
+            return geoms_list
         else:
             # For local spatial index based on Shapely STRtree
             if k > len(self.geometry):

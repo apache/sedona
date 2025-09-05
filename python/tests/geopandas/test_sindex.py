@@ -182,7 +182,7 @@ class TestSpatialIndex(TestBase):
         assert len(nearest_result) == 1
 
         # The nearest point should have id=2 (POINT(1 1))
-        assert nearest_result[0].geom.wkt == "POINT (1 1)"
+        assert nearest_result[0].wkt == "POINT (1 1)"
 
         # Test finding k=2 nearest neighbors
         nearest_2_results = spark_sindex.nearest(query_point, k=2)
@@ -219,7 +219,7 @@ class TestSpatialIndex(TestBase):
 
         # Should find polygon containing the point
         assert len(nearest_geom) == 1
-        assert "POLYGON" in nearest_geom[0].geom.wkt
+        assert "POLYGON" in nearest_geom[0].wkt
 
         # Test with linestring query
         query_line = LineString([(1.5, 1.5), (2.5, 2.5)])
