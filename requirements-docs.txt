@@ -1,3 +1,4 @@
+blacken-docs
 mike
 mkdocs
 mkdocs-git-revision-date-localized-plugin
