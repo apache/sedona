@@ -103,7 +103,8 @@ class SpatialIndex:
         Returns
         -------
         list
-            List of matching geometries.
+            List of geometries if constructed from a GeoSeries or PySparkDataFrame.
+            List of the corresponding indices if constructed from a np.array.
         """
 
         if not isinstance(geometry, BaseGeometry):
@@ -112,7 +113,7 @@ class SpatialIndex:
             )
 
         log_advice(
-            "`query` returns local list of indices of matching geometries onto driver's memory. "
+            "`query` returns a local list onto driver's memory. "
             "It should only be used if the resulting collection is expected to be small."
         )
 
@@ -193,7 +194,8 @@ class SpatialIndex:
         Returns
         -------
         list or tuple
-            List of the nearest geometries, optionally with distances.
+            List of geometries if constructed from a GeoSeries or PySparkDataFrame.
+            List of the corresponding indices if constructed from a np.array.
         """
 
         if not isinstance(geometry, BaseGeometry):
@@ -261,7 +263,8 @@ class SpatialIndex:
         Returns
         -------
         list
-            List of matching geometries.
+            List of geometries if constructed from a GeoSeries or PySparkDataFrame.
+            List of the corresponding indices if constructed from a np.array.
         """
         log_advice(
             "`intersection` returns local list of matching geometries onto driver's memory. "

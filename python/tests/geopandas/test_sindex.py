@@ -86,7 +86,7 @@ class TestSpatialIndex(TestBase):
         sindex = SpatialIndex(array)
         result = sindex.query(Point(2, 2))
         # Returns indices like original geopandas
-        assert result.tolist() == np.array([2])
+        assert result == np.array([2])
 
     def test_geoseries_sindex_property_exists(self):
         """Test that the sindex property exists on GeoSeries."""
