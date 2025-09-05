@@ -82,12 +82,13 @@ class SpatialIndex:
         sort : bool, optional, default False
             Whether to sort the results.
 
-        Note: Unlike Geopandas, Sedona does not support geometry input of type np.array or GeoSeries.
+        Note: Unlike Geopandas, Sedona returns the actual geometries instead of indices.
+        Sedona also does not support geometry input of type np.array or GeoSeries.
 
         Returns
         -------
         list
-            List of indices of matching geometries.
+            List of matching geometries.
         """
 
         if not isinstance(geometry, BaseGeometry):
@@ -168,12 +169,13 @@ class SpatialIndex:
         return_distance : bool, optional, default False
             Whether to return distances along with indices.
 
-        Note: Unlike Geopandas, Sedona does not support geometry input of type np.array or GeoSeries.
+        Note: Unlike Geopandas, Sedona returns the actual geometries instead of indices.
+        Sedona also does not support geometry input of type np.array or GeoSeries.
 
         Returns
         -------
         list or tuple
-            List of indices of nearest geometries, optionally with distances.
+            List of the nearest geometries, optionally with distances.
         """
 
         if not isinstance(geometry, BaseGeometry):
@@ -227,13 +229,15 @@ class SpatialIndex:
         bounds : tuple
             Bounding box as (min_x, min_y, max_x, max_y).
 
+        Note: Unlike Geopandas, Sedona returns the actual geometries instead of indices.
+
         Returns
         -------
         list
-            List of indices of matching geometries.
+            List of matching geometries.
         """
         log_advice(
-            "`intersection` returns local list of indices of matching geometries onto driver's memory. "
+            "`intersection` returns local list of matching geometries onto driver's memory. "
             "It should only be used if the resulting collection is expected to be small."
         )
 
