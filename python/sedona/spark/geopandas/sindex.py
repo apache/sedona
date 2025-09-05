@@ -261,8 +261,9 @@ class SpatialIndex:
                 self._indexed_rdd, bbox, True, True
             )
 
-            results = result_rdd.collect()
-            return results
+            geo_data_list = result_rdd.collect()
+            geoms_list = [row.geom for row in geo_data_list]
+            return geoms_list
         else:
             # For local spatial index based on Shapely STRtree
             try:
