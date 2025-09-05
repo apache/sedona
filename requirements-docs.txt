@@ -5,3 +5,4 @@ mkdocs-jupyter
 mkdocs-macros-plugin
 mkdocs-material
 pymdown-extensions
+blacken-docs
