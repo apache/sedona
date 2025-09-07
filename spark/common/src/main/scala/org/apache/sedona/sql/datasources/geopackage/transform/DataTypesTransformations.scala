@@ -59,9 +59,8 @@ object DataTypesTransformations {
         }
 
         // If all formatters failed, throw a descriptive exception
-        throw new IllegalArgumentException(
-          s"Unable to parse datetime: $timestampStr. " +
-            s"Expected formats: 'yyyy-MM-ddTHH:mm:ss[.S]' or 'yyyy-MM-ddTHH:mm:ss[.S]Z'")
+        throw new IllegalArgumentException(s"Unable to parse datetime: $timestampStr. " +
+          s"Expected formats: 'yyyy-MM-ddTHH:mm:ss[.SSS|.SS|.S]' or 'yyyy-MM-ddTHH:mm:ss[.SSS|.SS|.S]Z'")
     }
   }
 }
