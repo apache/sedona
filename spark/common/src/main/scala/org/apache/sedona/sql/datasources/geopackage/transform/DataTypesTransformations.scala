@@ -24,13 +24,18 @@ import java.time.format.DateTimeParseException
 import java.time.temporal.ChronoUnit
 
 object DataTypesTransformations {
+  // Pre-created formatters to avoid repeated object creation
+  private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+  private val datetimeFormatters = Array(
+    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS"), // 3 digits
+    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SS"), // 2 digits
+    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.S"), // 1 digit
+    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss") // no milliseconds
+  )
+
   def getDays(dateString: String): Int = {
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-
-    val date = LocalDate.parse(dateString, formatter)
-
+    val date = LocalDate.parse(dateString, dateFormatter)
     val epochDate = LocalDate.of(1970, 1, 1)
-
     ChronoUnit.DAYS.between(epochDate, date).toInt
   }
 
@@ -41,42 +46,22 @@ object DataTypesTransformations {
     } catch {
       case _: DateTimeParseException =>
         // If parsing fails, try treating it as UTC (common case for GeoPackage)
-        try {
-          // Handle various datetime formats without timezone info
-          // Try different patterns to handle various millisecond formats
-          val patterns = Array(
-            "yyyy-MM-dd'T'HH:mm:ss.SSS", // 3 digits
-            "yyyy-MM-dd'T'HH:mm:ss.SS", // 2 digits
-            "yyyy-MM-dd'T'HH:mm:ss.S", // 1 digit
-            "yyyy-MM-dd'T'HH:mm:ss" // no milliseconds
-          )
-
-          var localDateTime: LocalDateTime = null
-          var lastException: DateTimeParseException = null
-
-          for (pattern <- patterns) {
-            try {
-              val formatter = DateTimeFormatter.ofPattern(pattern)
-              localDateTime = LocalDateTime.parse(timestampStr, formatter)
-              lastException = null
-            } catch {
-              case e: DateTimeParseException =>
-                lastException = e
-            }
+        // Handle various datetime formats without timezone info
+        // Try different patterns to handle various millisecond formats
+        for (formatter <- datetimeFormatters) {
+          try {
+            val localDateTime = LocalDateTime.parse(timestampStr, formatter)
+            return localDateTime.toInstant(ZoneOffset.UTC).toEpochMilli
+          } catch {
+            case _: DateTimeParseException =>
+            // Continue to next formatter
           }
-
-          if (localDateTime != null) {
-            localDateTime.toInstant(ZoneOffset.UTC).toEpochMilli
-          } else {
-            throw lastException
-          }
-        } catch {
-          case e: DateTimeParseException =>
-            throw new IllegalArgumentException(
-              s"Unable to parse datetime: $timestampStr. " +
-                s"Expected formats: 'yyyy-MM-ddTHH:mm:ss[.S]' or 'yyyy-MM-ddTHH:mm:ss[.S]Z'",
-              e)
         }
+
+        // If all formatters failed, throw a descriptive exception
+        throw new IllegalArgumentException(
+          s"Unable to parse datetime: $timestampStr. " +
+            s"Expected formats: 'yyyy-MM-ddTHH:mm:ss[.S]' or 'yyyy-MM-ddTHH:mm:ss[.S]Z'")
     }
   }
 }
