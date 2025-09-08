@@ -151,7 +151,7 @@ nav:
       - Contributor Guide:
           - Rules: community/rule.md
           - Develop: community/develop.md
-          - Contribute to Geopandas: community/geopandas.md
+          - Contribute to Geopandas API on Sedona: community/geopandas.md
       - Committer Guide:
           - Project Management Committee: community/contributor.md
           - Become a release manager: community/release-manager.md
