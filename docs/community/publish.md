@@ -386,10 +386,6 @@ JAVA_VERSION=$(get_java_version "4.0")
 MVN_WRAPPER=$(create_mvn_wrapper $JAVA_VERSION)
 verify_java_version $MVN_WRAPPER $JAVA_VERSION
 
-echo "Compiling for Spark 4.0 with Scala 2.12 using Java $JAVA_VERSION..."
-cd apache-sedona-${SEDONA_VERSION}-src && $MVN_WRAPPER -q clean install -DskipTests -Dspark=4.0 -Dscala=2.12 && cd ..
-cp apache-sedona-${SEDONA_VERSION}-src/spark-shaded/target/sedona-*${SEDONA_VERSION}.jar apache-sedona-${SEDONA_VERSION}-bin/
-
 echo "Compiling for Spark 4.0 with Scala 2.13 using Java $JAVA_VERSION..."
 cd apache-sedona-${SEDONA_VERSION}-src && $MVN_WRAPPER -q clean install -DskipTests -Dspark=4.0 -Dscala=2.13 && cd ..
 cp apache-sedona-${SEDONA_VERSION}-src/spark-shaded/target/sedona-*${SEDONA_VERSION}.jar apache-sedona-${SEDONA_VERSION}-bin/
