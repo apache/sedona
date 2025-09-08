@@ -119,13 +119,63 @@ rm -rf $LOCAL_DIR && git clone --depth 1 --branch $TAG $REPO_URL $LOCAL_DIR && c
 MAVEN_PLUGIN_VERSION="2.3.2"
 
 # Define Spark and Scala versions
-declare -a SPARK_VERSIONS=("3.3" "3.4" "3.5")
+declare -a SPARK_VERSIONS=("3.4" "3.5" "4.0")
 declare -a SCALA_VERSIONS=("2.12" "2.13")
+
+# Function to get Java version for Spark version
+get_java_version() {
+  local spark_version=$1
+  if [[ "$spark_version" == "4.0" ]]; then
+    echo "17"
+  else
+    echo "11"
+  fi
+}
+
+# Function to set JAVA_HOME based on Java version
+set_java_home() {
+  local java_version=$1
+  if [[ "$java_version" == "17" ]]; then
+    # Try to find Java 17 installation
+    if command -v /usr/libexec/java_home >/dev/null 2>&1; then
+      export JAVA_HOME=$(/usr/libexec/java_home -v 17 2>/dev/null || /usr/libexec/java_home -v 1.17 2>/dev/null || echo "")
+    fi
+    if [[ -z "$JAVA_HOME" ]]; then
+      echo "Warning: Java 17 not found, using system default"
+    else
+      echo "Using Java 17: $JAVA_HOME"
+    fi
+  else
+    # Try to find Java 11 installation
+    if command -v /usr/libexec/java_home >/dev/null 2>&1; then
+      export JAVA_HOME=$(/usr/libexec/java_home -v 11 2>/dev/null || /usr/libexec/java_home -v 1.11 2>/dev/null || echo "")
+    fi
+    if [[ -z "$JAVA_HOME" ]]; then
+      echo "Warning: Java 11 not found, using system default"
+    else
+      echo "Using Java 11: $JAVA_HOME"
+    fi
+  fi
+
+  # Verify Java version using Maven
+  echo "Verifying Java version with Maven..."
+  local mvn_java_version=$(mvn --version | grep "Java version" | sed 's/.*Java version: \([0-9]*\).*/\1/')
+  if [[ "$mvn_java_version" != "$java_version" ]]; then
+    echo "ERROR: Maven is using Java $mvn_java_version, but expected Java $java_version"
+    echo "Please ensure the correct Java version is installed and JAVA_HOME is set properly"
+    exit 1
+  fi
+  echo "✓ Verified: Maven is using Java $mvn_java_version"
+}
 
 # Iterate through Spark and Scala versions
 for SPARK in "${SPARK_VERSIONS[@]}"; do
   for SCALA in "${SCALA_VERSIONS[@]}"; do
-    echo "Running release:perform for Spark $SPARK and Scala $SCALA..."
+    JAVA_VERSION=$(get_java_version $SPARK)
+    echo "Running release:perform for Spark $SPARK and Scala $SCALA with Java $JAVA_VERSION..."
+
+    # Set appropriate Java version
+    set_java_home $JAVA_VERSION
 
     mvn org.apache.maven.plugins:maven-release-plugin:$MAVEN_PLUGIN_VERSION:perform \
       -DconnectionUrl=scm:git:file://$(pwd) \
@@ -159,24 +209,77 @@ echo "Compiling the source code..."
 
 mkdir apache-sedona-{{ sedona_create_release.current_version }}-bin
 
-cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn -q clean install -DskipTests -Dspark=3.3 -Dscala=2.12 && cd ..
-cp apache-sedona-{{ sedona_create_release.current_version }}-src/spark-shaded/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
-cp apache-sedona-{{ sedona_create_release.current_version }}-src/flink-shaded/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
-cp apache-sedona-{{ sedona_create_release.current_version }}-src/snowflake/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+# Function to get Java version for Spark version
+get_java_version() {
+  local spark_version=$1
+  if [[ "$spark_version" == "4.0" ]]; then
+    echo "17"
+  else
+    echo "11"
+  fi
+}
 
-cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn -q clean install -DskipTests -Dspark=3.3 -Dscala=2.13 && cd ..
-cp apache-sedona-{{ sedona_create_release.current_version }}-src/spark-shaded/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+# Function to set JAVA_HOME based on Java version
+set_java_home() {
+  local java_version=$1
+  if [[ "$java_version" == "17" ]]; then
+    # Try to find Java 17 installation
+    if command -v /usr/libexec/java_home >/dev/null 2>&1; then
+      export JAVA_HOME=$(/usr/libexec/java_home -v 17 2>/dev/null || /usr/libexec/java_home -v 1.17 2>/dev/null || echo "")
+    fi
+    if [[ -z "$JAVA_HOME" ]]; then
+      echo "Warning: Java 17 not found, using system default"
+    else
+      echo "Using Java 17: $JAVA_HOME"
+    fi
+  else
+    # Try to find Java 11 installation
+    if command -v /usr/libexec/java_home >/dev/null 2>&1; then
+      export JAVA_HOME=$(/usr/libexec/java_home -v 11 2>/dev/null || /usr/libexec/java_home -v 1.11 2>/dev/null || echo "")
+    fi
+    if [[ -z "$JAVA_HOME" ]]; then
+      echo "Warning: Java 11 not found, using system default"
+    else
+      echo "Using Java 11: $JAVA_HOME"
+    fi
+  fi
 
+  # Verify Java version using Maven
+  echo "Verifying Java version with Maven..."
+  local mvn_java_version=$(mvn --version | grep "Java version" | sed 's/.*Java version: \([0-9]*\).*/\1/')
+  if [[ "$mvn_java_version" != "$java_version" ]]; then
+    echo "ERROR: Maven is using Java $mvn_java_version, but expected Java $java_version"
+    echo "Please ensure the correct Java version is installed and JAVA_HOME is set properly"
+    exit 1
+  fi
+  echo "✓ Verified: Maven is using Java $mvn_java_version"
+}
+
+# Compile for Spark 3.4 with Java 11
+JAVA_VERSION=$(get_java_version "3.4")
+set_java_home $JAVA_VERSION
 cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn -q clean install -DskipTests -Dspark=3.4 -Dscala=2.12 && cd ..
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/spark-shaded/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 
 cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn -q clean install -DskipTests -Dspark=3.4 -Dscala=2.13 && cd ..
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/spark-shaded/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 
+# Compile for Spark 3.5 with Java 11
+JAVA_VERSION=$(get_java_version "3.5")
+set_java_home $JAVA_VERSION
 cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn -q clean install -DskipTests -Dspark=3.5 -Dscala=2.12 && cd ..
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/spark-shaded/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 
 cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn -q clean install -DskipTests -Dspark=3.5 -Dscala=2.13 && cd ..
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/spark-shaded/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+
+# Compile for Spark 4.0 with Java 17
+JAVA_VERSION=$(get_java_version "4.0")
+set_java_home $JAVA_VERSION
+cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn -q clean install -DskipTests -Dspark=4.0 -Dscala=2.12 && cd ..
+cp apache-sedona-{{ sedona_create_release.current_version }}-src/spark-shaded/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
+
+cd apache-sedona-{{ sedona_create_release.current_version }}-src && mvn -q clean install -DskipTests -Dspark=4.0 -Dscala=2.13 && cd ..
 cp apache-sedona-{{ sedona_create_release.current_version }}-src/spark-shaded/target/sedona-*{{ sedona_create_release.current_version}}.jar apache-sedona-{{ sedona_create_release.current_version }}-bin/
 
 tar czf apache-sedona-{{ sedona_create_release.current_version }}-bin.tar.gz apache-sedona-{{ sedona_create_release.current_version }}-bin
@@ -384,17 +487,75 @@ git pull
 rm -f release.*
 rm -f pom.xml.*
 
-# For Spark 3.3 and Scala 2.12
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.3 -Dscala=2.12" -Dspark=3.3 -Dscala=2.12
+# Function to get Java version for Spark version
+get_java_version() {
+  local spark_version=$1
+  if [[ "$spark_version" == "4.0" ]]; then
+    echo "17"
+  else
+    echo "11"
+  fi
+}
 
-# For Spark 3.3 and Scala 2.13
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.3 -Dscala=2.13" -Dspark=3.3 -Dscala=2.13
+# Function to set JAVA_HOME based on Java version
+set_java_home() {
+  local java_version=$1
+  if [[ "$java_version" == "17" ]]; then
+    # Try to find Java 17 installation
+    if command -v /usr/libexec/java_home >/dev/null 2>&1; then
+      export JAVA_HOME=$(/usr/libexec/java_home -v 17 2>/dev/null || /usr/libexec/java_home -v 1.17 2>/dev/null || echo "")
+    fi
+    if [[ -z "$JAVA_HOME" ]]; then
+      echo "Warning: Java 17 not found, using system default"
+    else
+      echo "Using Java 17: $JAVA_HOME"
+    fi
+  else
+    # Try to find Java 11 installation
+    if command -v /usr/libexec/java_home >/dev/null 2>&1; then
+      export JAVA_HOME=$(/usr/libexec/java_home -v 11 2>/dev/null || /usr/libexec/java_home -v 1.11 2>/dev/null || echo "")
+    fi
+    if [[ -z "$JAVA_HOME" ]]; then
+      echo "Warning: Java 11 not found, using system default"
+    else
+      echo "Using Java 11: $JAVA_HOME"
+    fi
+  fi
 
-# For Spark 3.4 and Scala 2.12
+  # Verify Java version using Maven
+  echo "Verifying Java version with Maven..."
+  local mvn_java_version=$(mvn --version | grep "Java version" | sed 's/.*Java version: \([0-9]*\).*/\1/')
+  if [[ "$mvn_java_version" != "$java_version" ]]; then
+    echo "ERROR: Maven is using Java $mvn_java_version, but expected Java $java_version"
+    echo "Please ensure the correct Java version is installed and JAVA_HOME is set properly"
+    exit 1
+  fi
+  echo "✓ Verified: Maven is using Java $mvn_java_version"
+}
+
+# For Spark 3.4 and Scala 2.12 (Java 11)
+JAVA_VERSION=$(get_java_version "3.4")
+set_java_home $JAVA_VERSION
 mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.4 -Dscala=2.12" -Dspark=3.4 -Dscala=2.12
 
-# For Spark 3.4 and Scala 2.13
+# For Spark 3.4 and Scala 2.13 (Java 11)
 mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.4 -Dscala=2.13" -Dspark=3.4 -Dscala=2.13
+
+# For Spark 3.5 and Scala 2.12 (Java 11)
+JAVA_VERSION=$(get_java_version "3.5")
+set_java_home $JAVA_VERSION
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.5 -Dscala=2.12" -Dspark=3.5 -Dscala=2.12
+
+# For Spark 3.5 and Scala 2.13 (Java 11)
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.5 -Dscala=2.13" -Dspark=3.5 -Dscala=2.13
+
+# For Spark 4.0 and Scala 2.12 (Java 17)
+JAVA_VERSION=$(get_java_version "4.0")
+set_java_home $JAVA_VERSION
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=4.0 -Dscala=2.12" -Dspark=4.0 -Dscala=2.12
+
+# For Spark 4.0 and Scala 2.13 (Java 17)
+mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=4.0 -Dscala=2.13" -Dspark=4.0 -Dscala=2.13
 ```
 
 ## 9. Release Sedona Python and Zeppelin
