@@ -17,6 +17,21 @@
  under the License.
  -->
 
+## Sedona 1.8.0
+
+Sedona 1.8.0 is compiled against:
+
+- **Spark**: 3.4, 3.5, 4.0
+- **Flink**: 1.19
+- **Snowflake**: 7+
+
+**Java Requirements:**
+
+- Spark 3.4 & 3.5: Java 11
+- Spark 4.0: Java 17
+
+Spark 3.3 support is dropped since the 1.8.0 release.
+
 ## Sedona 1.7.2
 
 Sedona 1.7.2 is compiled against Spark 3.3 / Spark 3.4 / Spark 3.5, Flink 1.19, Snowflake 7+, Java 8.
