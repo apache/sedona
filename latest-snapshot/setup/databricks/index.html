@@ -4452,7 +4452,7 @@
   
   
   <span class="md-ellipsis">
-    Contribute to Geopandas
+    Contribute to Geopandas API on Sedona
     
   </span>
   
@@ -5034,18 +5034,18 @@
 <p>Download the required Sedona packages by executing the following commands:</p>
 <div class="highlight"><pre><span></span><code>%sh
 <span class="c1"># Create JAR directory for Sedona</span>
-mkdir<span class="w"> </span>-p<span class="w"> </span>/Workspace/Shared/sedona/1.7.2
+mkdir<span class="w"> </span>-p<span class="w"> </span>/Workspace/Shared/sedona/1.8.0
 
 <span class="c1"># Download the dependencies from Maven into DBFS</span>
-curl<span class="w"> </span>-o<span class="w"> </span>/Workspace/Shared/sedona/1.7.2/geotools-wrapper-1.7.2-28.5.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.7.2-28.5/geotools-wrapper-1.7.2-28.5.jar&quot;</span>
+curl<span class="w"> </span>-o<span class="w"> </span>/Workspace/Shared/sedona/1.8.0/geotools-wrapper-1.8.0-33.1.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.8.0-33.1/geotools-wrapper-1.8.0-33.1.jar&quot;</span>
 
-curl<span class="w"> </span>-o<span class="w"> </span>/Workspace/Shared/sedona/1.7.2/sedona-spark-shaded-3.5_2.12-1.7.2.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/1.7.2/sedona-spark-shaded-3.5_2.12-1.7.2.jar&quot;</span>
+curl<span class="w"> </span>-o<span class="w"> </span>/Workspace/Shared/sedona/1.8.0/sedona-spark-shaded-3.5_2.12-1.8.0.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/1.8.0/sedona-spark-shaded-3.5_2.12-1.8.0.jar&quot;</span>
 </code></pre></div>
-<p>Here are the software versions used to compile <code>sedona-spark-shaded-3.5_2.12-1.7.1.jar</code>:</p>
+<p>Here are the software versions used to compile <code>sedona-spark-shaded-3.5_2.12-1.8.0.jar</code>:</p>
 <ul>
 <li>Spark 3.5</li>
 <li>Scala 2.12</li>
-<li>Sedona 1.7.1</li>
+<li>Sedona 1.8.0</li>
 </ul>
 <p>Ensure that you use a Databricks Runtime with versions compatible with this jar.</p>
 <p>You will be able to see these in your Databricks environment after downloading them:</p>
@@ -5064,7 +5064,7 @@ cat &gt; /Workspace/Shared/sedona/sedona-init.sh &lt;&lt;&#39;EOF&#39;
 #
 # On cluster startup, this script will copy the Sedona jars to the cluster&#39;s default jar directory.
 
-cp /Workspace/Shared/sedona/1.7.1/*.jar /databricks/jars
+cp /Workspace/Shared/sedona/1.8.0/*.jar /databricks/jars
 
 EOF
 </code></pre></div>
@@ -5086,7 +5086,7 @@ spark.sedona.enableParserExtension false
 <p>Add the required dependencies in the Library tab:</p>
 <p><img alt="Python libraries" src="../../image/databricks/image7.png" /></p>
 <p>Here’s the full list of libraries:</p>
-<div class="highlight"><pre><span></span><code>apache-sedona==1.7.2
+<div class="highlight"><pre><span></span><code>apache-sedona==1.8.0
 geopandas==1.0.1
 keplergl==0.3.7
 pydeck==0.9.1
@@ -5142,7 +5142,7 @@ pydeck==0.9.1
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="August 28, 2025 06:53:13 UTC">August 28, 2025 06:53:13</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 8, 2025 04:31:05 UTC">September 8, 2025 04:31:05</span>
   </span>
 
     

@@ -4358,7 +4358,7 @@
   
   
   <span class="md-ellipsis">
-    Contribute to Geopandas
+    Contribute to Geopandas API on Sedona
     
   </span>
   
@@ -5048,13 +5048,13 @@
 <p>You only need to perform these steps if this is your first time being a release manager.</p>
 <h2 id="0-software-requirement">0. Software requirement<a class="headerlink" href="#0-software-requirement" title="Permanent link">&para;</a></h2>
 <ul>
-<li>JDK 8: <code>brew install openjdk@8</code></li>
-<li>Maven 3.X. Your Maven must point to JDK 8 (1.8). Check it by <code>mvn --version</code></li>
+<li>JDK 11/17: <code>brew install openjdk@11</code> or <code>brew install openjdk@17</code></li>
+<li>Maven 3.X. Your Maven must point to JDK 11 or 17. Check it by <code>mvn --version</code></li>
 <li>Git and SVN</li>
 </ul>
-<p>If your Maven (<code>mvn --version</code>) points to other JDK versions, you must change it to JDK 8. Steps are as follows:</p>
+<p>If your Maven (<code>mvn --version</code>) points to other JDK versions, you must change it to JDK 11 or 17. Steps are as follows:</p>
 <ol>
-<li>Find all Java installed on your machine: <code>/usr/libexec/java_home -V</code>. You should see multiple JDK versions including JDK 8.</li>
+<li>Find all Java installed on your machine: <code>/usr/libexec/java_home -V</code>. You should see multiple JDK versions including JDK 11 and 17.</li>
 <li>Run <code>whereis mvn</code> to get the installation location of your Maven. The result is a symlink to the actual location.</li>
 <li>Open it in the terminal (with <code>sudo</code> if needed). It will be like this</li>
 </ol>
@@ -5062,13 +5062,13 @@
 JAVA_HOME=&quot;${JAVA_HOME:-$(/usr/libexec/java_home)}&quot; exec &quot;/usr/local/Cellar/maven/3.6.3/libexec/bin/mvn&quot; &quot;$@&quot;
 </code></pre></div>
 <ol>
-<li>Change <code>JAVA_HOME:-$(/usr/libexec/java_home)}</code> to <code>JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}</code>. The resulting content will be like this:</li>
+<li>Change <code>JAVA_HOME:-$(/usr/libexec/java_home)}</code> to <code>JAVA_HOME:-$(/usr/libexec/java_home -v 11)}</code> or <code>JAVA_HOME:-$(/usr/libexec/java_home -v 17)}</code>. The resulting content will be like this:</li>
 </ol>
 <div class="highlight"><pre><span></span><code>#!/bin/bash
-JAVA_HOME=&quot;${JAVA_HOME:-$(/usr/libexec/java_home -v 1.8)}&quot; exec &quot;/usr/local/Cellar/maven/3.6.3/libexec/bin/mvn&quot; &quot;$@&quot;
+JAVA_HOME=&quot;${JAVA_HOME:-$(/usr/libexec/java_home -v 11)}&quot; exec &quot;/usr/local/Cellar/maven/3.6.3/libexec/bin/mvn&quot; &quot;$@&quot;
 </code></pre></div>
 <ol>
-<li>Run <code>mvn --version</code> again. It should now point to JDK 8.</li>
+<li>Run <code>mvn --version</code> again. It should now point to JDK 11 or 17.</li>
 </ol>
 <h2 id="1-obtain-write-access-to-sedona-github-repo">1. Obtain Write Access to Sedona GitHub repo<a class="headerlink" href="#1-obtain-write-access-to-sedona-github-repo" title="Permanent link">&para;</a></h2>
 <ol>
@@ -5201,7 +5201,7 @@ rm<span class="w"> </span>-rf<span class="w"> </span>sedona-release
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="December 4, 2024 07:01:47 UTC">December 4, 2024 07:01:47</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 8, 2025 04:31:05 UTC">September 8, 2025 04:31:05</span>
   </span>
 
     
