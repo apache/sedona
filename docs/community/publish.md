@@ -249,6 +249,9 @@ svn mkdir -m "Adding folder" https://dist.apache.org/repos/dist/dev/sedona/${RC_
 
 echo "Creating release files locally..."
 
+# Go back to parent directory for file operations
+cd ..
+
 echo "Downloading source code..."
 
 wget https://github.com/apache/sedona/archive/refs/tags/sedona-${RC_VERSION}.tar.gz
