@@ -55,12 +55,12 @@ nav:
   - Download: download.md
   - Programming Guides:
       - Sedona with Apache Spark:
-          - Spatial SQL app: tutorial/sql.md
-          - Raster SQL app: tutorial/raster.md
+          - Spatial DataFrame / SQL app: tutorial/sql.md
+          - Raster DataFrame / SQL app: tutorial/raster.md
           - Pure SQL environment: tutorial/sql-pure-sql.md
+          - GeoPandas API on Sedona: tutorial/geopandas-api.md
           - Spatial RDD app: tutorial/rdd.md
           - Sedona R: api/rdocs
-          - Sedona Python: api/pydocs
           - Work with GeoPandas and Shapely: tutorial/geopandas-shapely.md
           - Files:
               - CSV: tutorial/files/csv-geometry-sedona-spark.md
