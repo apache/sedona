@@ -250,7 +250,7 @@ svn mkdir -m "Adding folder" https://dist.apache.org/repos/dist/dev/sedona/${RC_
 echo "Creating release files locally..."
 
 # Go back to parent directory for file operations
-cd ..
+cd ../..
 
 echo "Downloading source code..."
 
@@ -261,6 +261,17 @@ cp -r sedona-sedona-${RC_VERSION}/* apache-sedona-${SEDONA_VERSION}-src/
 tar czf apache-sedona-${SEDONA_VERSION}-src.tar.gz apache-sedona-${SEDONA_VERSION}-src
 rm sedona-${RC_VERSION}.tar.gz
 rm -rf sedona-sedona-${RC_VERSION}
+
+# Create checksums and signatures for source files
+shasum -a 512 apache-sedona-${SEDONA_VERSION}-src.tar.gz > apache-sedona-${SEDONA_VERSION}-src.tar.gz.sha512
+gpg -ab apache-sedona-${SEDONA_VERSION}-src.tar.gz
+
+echo "Uploading source files..."
+
+# Upload source files first
+svn import -m "Adding file" apache-sedona-${SEDONA_VERSION}-src.tar.gz https://dist.apache.org/repos/dist/dev/sedona/${RC_VERSION}/apache-sedona-${SEDONA_VERSION}-src.tar.gz
+svn import -m "Adding file" apache-sedona-${SEDONA_VERSION}-src.tar.gz.asc https://dist.apache.org/repos/dist/dev/sedona/${RC_VERSION}/apache-sedona-${SEDONA_VERSION}-src.tar.gz.asc
+svn import -m "Adding file" apache-sedona-${SEDONA_VERSION}-src.tar.gz.sha512 https://dist.apache.org/repos/dist/dev/sedona/${RC_VERSION}/apache-sedona-${SEDONA_VERSION}-src.tar.gz.sha512
 
 echo "Compiling the source code..."
 
@@ -397,16 +408,14 @@ cp apache-sedona-${SEDONA_VERSION}-src/spark-shaded/target/sedona-*${SEDONA_VERS
 rm -f /tmp/mvn-java11 /tmp/mvn-java17
 
 tar czf apache-sedona-${SEDONA_VERSION}-bin.tar.gz apache-sedona-${SEDONA_VERSION}-bin
-shasum -a 512 apache-sedona-${SEDONA_VERSION}-src.tar.gz > apache-sedona-${SEDONA_VERSION}-src.tar.gz.sha512
+
+# Create checksums and signatures for binary files
 shasum -a 512 apache-sedona-${SEDONA_VERSION}-bin.tar.gz > apache-sedona-${SEDONA_VERSION}-bin.tar.gz.sha512
-gpg -ab apache-sedona-${SEDONA_VERSION}-src.tar.gz
 gpg -ab apache-sedona-${SEDONA_VERSION}-bin.tar.gz
 
-echo "Uploading local release files..."
+echo "Uploading binary files..."
 
-svn import -m "Adding file" apache-sedona-${SEDONA_VERSION}-src.tar.gz https://dist.apache.org/repos/dist/dev/sedona/${RC_VERSION}/apache-sedona-${SEDONA_VERSION}-src.tar.gz
-svn import -m "Adding file" apache-sedona-${SEDONA_VERSION}-src.tar.gz.asc https://dist.apache.org/repos/dist/dev/sedona/${RC_VERSION}/apache-sedona-${SEDONA_VERSION}-src.tar.gz.asc
-svn import -m "Adding file" apache-sedona-${SEDONA_VERSION}-src.tar.gz.sha512 https://dist.apache.org/repos/dist/dev/sedona/${RC_VERSION}/apache-sedona-${SEDONA_VERSION}-src.tar.gz.sha512
+# Upload binary files
 svn import -m "Adding file" apache-sedona-${SEDONA_VERSION}-bin.tar.gz https://dist.apache.org/repos/dist/dev/sedona/${RC_VERSION}/apache-sedona-${SEDONA_VERSION}-bin.tar.gz
 svn import -m "Adding file" apache-sedona-${SEDONA_VERSION}-bin.tar.gz.asc https://dist.apache.org/repos/dist/dev/sedona/${RC_VERSION}/apache-sedona-${SEDONA_VERSION}-bin.tar.gz.asc
 svn import -m "Adding file" apache-sedona-${SEDONA_VERSION}-bin.tar.gz.sha512 https://dist.apache.org/repos/dist/dev/sedona/${RC_VERSION}/apache-sedona-${SEDONA_VERSION}-bin.tar.gz.sha512
