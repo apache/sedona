@@ -25,6 +25,9 @@ In the tutorial, we use
 Sedona {{ sedona.current_version }} and [Glue 4.0](https://docs.aws.amazon.com/glue/latest/dg/release-notes.html) which runs on Spark 3.3.0, Java 8, Scala 2.12,
 and Python 3.10. We recommend Sedona-1.3.1-incubating and above for Glue.
 
+!!!warning
+    **Important:** Since Sedona 1.8.0, Java 8 support is dropped and Spark 3.3 support is dropped. For Sedona 1.8.0+, you need to use Glue 5.0+ which supports Java 11 and Spark 3.4+.
+
 ## Gather Maven Links
 
 You will need to point your glue job to the Sedona and Geotools jars. We recommend using the jars available from maven. The links below are those intended for Glue 4.0
