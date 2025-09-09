@@ -710,8 +710,7 @@
                 <spark.version>3.4.0</spark.version>
                 <spark.compat.version>3.4</spark.compat.version>
                 <log4j.version>2.19.0</log4j.version>
-                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
-                <skip.deploy.common.modules>true</skip.deploy.common.modules>
+                <skip.deploy.common.modules>false</skip.deploy.common.modules>
             </properties>
         </profile>
         <profile>
@@ -726,7 +725,7 @@
                 <spark.version>3.5.0</spark.version>
                 <spark.compat.version>3.5</spark.compat.version>
                 <log4j.version>2.20.0</log4j.version>
-                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
+                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.4 -->
                 <skip.deploy.common.modules>true</skip.deploy.common.modules>
             </properties>
         </profile>
@@ -749,7 +748,7 @@
                 <scala.version>2.13.12</scala.version>
                 <scala.compat.version>2.13</scala.compat.version>
 
-                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.3 -->
+                <!-- Skip deploying parent module. it will be deployed with sedona-spark-3.4 -->
                 <skip.deploy.common.modules>true</skip.deploy.common.modules>
             </properties>
         </profile>
