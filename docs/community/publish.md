@@ -217,6 +217,12 @@ verify_java_version() {
 # Iterate through Spark and Scala versions
 for SPARK in "${SPARK_VERSIONS[@]}"; do
   for SCALA in "${SCALA_VERSIONS[@]}"; do
+    # Skip Spark 4.0 + Scala 2.12 combination as it's not supported
+    if [[ "$SPARK" == "4.0" && "$SCALA" == "2.12" ]]; then
+      echo "Skipping Spark $SPARK with Scala $SCALA (not supported)"
+      continue
+    fi
+
     JAVA_VERSION=$(get_java_version $SPARK)
     echo "Running release:perform for Spark $SPARK and Scala $SCALA with Java $JAVA_VERSION..."
 
@@ -672,12 +678,10 @@ mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionU
 # For Spark 3.5 and Scala 2.13 (Java 11)
 mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=3.5 -Dscala=2.13" -Dspark=3.5 -Dscala=2.13
 
-# For Spark 4.0 and Scala 2.12 (Java 17)
+# For Spark 4.0 and Scala 2.13 (Java 17)
+# Note: Spark 4.0 + Scala 2.12 is not supported, so we skip it
 JAVA_VERSION=$(get_java_version "4.0")
 set_java_home $JAVA_VERSION
-mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=4.0 -Dscala=2.12" -Dspark=4.0 -Dscala=2.12
-
-# For Spark 4.0 and Scala 2.13 (Java 17)
 mvn -q org.apache.maven.plugins:maven-release-plugin:2.3.2:perform -DconnectionUrl=scm:git:https://github.com/apache/sedona.git -Dtag={{ sedona_create_release.current_git_tag }} -Dresume=false -Darguments="-DskipTests -Dspark=4.0 -Dscala=2.13" -Dspark=4.0 -Dscala=2.13
 ```
 
