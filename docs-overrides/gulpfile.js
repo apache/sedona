@@ -72,6 +72,7 @@ gulp.task('scss', function () {
         .on('error', sass.logError),
     )
     .pipe(postcss([autoprefixer]))
+    .pipe(rename({suffix: '.min'}))
     .pipe(gulpIf(!isProd, sourcemaps.write()))
     .pipe(gulpIf(isProd, sourcemaps.write('.')))
     .pipe(gulp.dest('assets/stylesheets/'))
