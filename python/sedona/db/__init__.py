@@ -15,6 +15,12 @@
 # specific language governing permissions and limitations
 # under the License.
 
+# Send telemetry on import
+from .telemetry import track_package_import
+
+track_package_import()
+
+# Import the actual sedonadb functions
 from sedonadb import connect, context, dataframe
 
 __all__ = [
