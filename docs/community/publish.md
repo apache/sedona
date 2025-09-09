@@ -107,8 +107,8 @@ echo "*****Step 2: Upload the Release Candidate to https://repository.apache.org
 
 # Define repository details
 REPO_URL="https://github.com/apache/sedona.git"
-RC_VERSION="1.8.0-rc1"
-SEDONA_VERSION="1.8.0"
+RC_VERSION="{{ sedona_create_release.current_rc }}"
+SEDONA_VERSION="{{ sedona_create_release.current_version }}"
 TAG="sedona-${RC_VERSION}"
 LOCAL_DIR="sedona-release"
 
@@ -136,12 +136,12 @@ get_java_version() {
 find_maven_path() {
   # Try different methods to find Maven
   local mvn_path=""
-  
+
   # Method 1: Check if mvn is in PATH
   if command -v mvn >/dev/null 2>&1; then
     mvn_path=$(command -v mvn)
   fi
-  
+
   # Method 2: Check common Homebrew locations
   if [[ -z "$mvn_path" ]]; then
     for version_dir in /opt/homebrew/Cellar/maven/*/libexec/bin/mvn; do
@@ -151,7 +151,7 @@ find_maven_path() {
       fi
     done
   fi
-  
+
   # Method 3: Check /usr/local (older Homebrew installations)
   if [[ -z "$mvn_path" ]]; then
     for version_dir in /usr/local/Cellar/maven/*/libexec/bin/mvn; do
@@ -161,7 +161,7 @@ find_maven_path() {
       fi
     done
   fi
-  
+
   # Method 4: Check system locations
   if [[ -z "$mvn_path" ]]; then
     for path in /usr/bin/mvn /usr/local/bin/mvn; do
@@ -171,13 +171,13 @@ find_maven_path() {
       fi
     done
   fi
-  
+
   if [[ -z "$mvn_path" ]]; then
     echo "ERROR: Could not find Maven installation" >&2
     echo "Please ensure Maven is installed and available in PATH or in standard locations" >&2
     exit 1
   fi
-  
+
   echo "$mvn_path"
 }
 
@@ -186,15 +186,15 @@ create_mvn_wrapper() {
   local java_version=$1
   local mvn_wrapper="/tmp/mvn-java${java_version}"
   local mvn_path=$(find_maven_path)
-  
+
   echo "Using Maven at: $mvn_path" >&2
-  
+
   # Create a wrapper script that sets JAVA_HOME and executes Maven
   cat > "$mvn_wrapper" << EOF
 #!/bin/bash
 JAVA_HOME="\${JAVA_HOME:-\$(/usr/libexec/java_home -v ${java_version})}" exec "${mvn_path}" "\$@"
 EOF
-  
+
   chmod +x "$mvn_wrapper"
   echo "$mvn_wrapper"
 }
@@ -203,7 +203,7 @@ EOF
 verify_java_version() {
   local mvn_wrapper=$1
   local expected_java_version=$2
-  
+
   echo "Verifying Java version with Maven wrapper..."
   local mvn_java_version=$($mvn_wrapper --version | grep "Java version" | sed 's/.*Java version: \([0-9]*\).*/\1/')
   if [[ "$mvn_java_version" != "$expected_java_version" ]]; then
@@ -223,7 +223,7 @@ for SPARK in "${SPARK_VERSIONS[@]}"; do
     # Create Maven wrapper with appropriate Java version
     MVN_WRAPPER=$(create_mvn_wrapper $JAVA_VERSION)
     echo "Created Maven wrapper: $MVN_WRAPPER"
-    
+
     # Verify Java version
     verify_java_version $MVN_WRAPPER $JAVA_VERSION
 
@@ -235,7 +235,7 @@ for SPARK in "${SPARK_VERSIONS[@]}"; do
       -Darguments="-DskipTests -Dspark=$SPARK -Dscala=$SCALA" \
       -Dspark=$SPARK \
       -Dscala=$SCALA
-      
+
     # Clean up the wrapper
     rm -f $MVN_WRAPPER
   done
@@ -291,12 +291,12 @@ get_java_version() {
 find_maven_path() {
   # Try different methods to find Maven
   local mvn_path=""
-  
+
   # Method 1: Check if mvn is in PATH
   if command -v mvn >/dev/null 2>&1; then
     mvn_path=$(command -v mvn)
   fi
-  
+
   # Method 2: Check common Homebrew locations
   if [[ -z "$mvn_path" ]]; then
     for version_dir in /opt/homebrew/Cellar/maven/*/libexec/bin/mvn; do
@@ -306,7 +306,7 @@ find_maven_path() {
       fi
     done
   fi
-  
+
   # Method 3: Check /usr/local (older Homebrew installations)
   if [[ -z "$mvn_path" ]]; then
     for version_dir in /usr/local/Cellar/maven/*/libexec/bin/mvn; do
@@ -316,7 +316,7 @@ find_maven_path() {
       fi
     done
   fi
-  
+
   # Method 4: Check system locations
   if [[ -z "$mvn_path" ]]; then
     for path in /usr/bin/mvn /usr/local/bin/mvn; do
@@ -326,13 +326,13 @@ find_maven_path() {
       fi
     done
   fi
-  
+
   if [[ -z "$mvn_path" ]]; then
     echo "ERROR: Could not find Maven installation" >&2
     echo "Please ensure Maven is installed and available in PATH or in standard locations" >&2
     exit 1
   fi
-  
+
   echo "$mvn_path"
 }
 
@@ -341,15 +341,15 @@ create_mvn_wrapper() {
   local java_version=$1
   local mvn_wrapper="/tmp/mvn-java${java_version}"
   local mvn_path=$(find_maven_path)
-  
+
   echo "Using Maven at: $mvn_path" >&2
-  
+
   # Create a wrapper script that sets JAVA_HOME and executes Maven
   cat > "$mvn_wrapper" << EOF
 #!/bin/bash
 JAVA_HOME="\${JAVA_HOME:-\$(/usr/libexec/java_home -v ${java_version})}" exec "${mvn_path}" "\$@"
 EOF
-  
+
   chmod +x "$mvn_wrapper"
   echo "$mvn_wrapper"
 }
@@ -358,7 +358,7 @@ EOF
 verify_java_version() {
   local mvn_wrapper=$1
   local expected_java_version=$2
-  
+
   echo "Verifying Java version with Maven wrapper..."
   local mvn_java_version=$($mvn_wrapper --version | grep "Java version" | sed 's/.*Java version: \([0-9]*\).*/\1/')
   if [[ "$mvn_java_version" != "$expected_java_version" ]]; then
