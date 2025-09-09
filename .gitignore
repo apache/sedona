@@ -37,3 +37,12 @@
 __pycache__
 dependency-reduced-pom.xml
 target
+
+# Windows WSL Images copy
+.Identifier
+*:Zone.Identifier
+*.Identifier
+
+# Ignore minified files
+*.min.css
+*.min.js
