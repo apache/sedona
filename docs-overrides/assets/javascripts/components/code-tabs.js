@@ -12,6 +12,10 @@ hljs.registerLanguage('java', java);
 hljs.registerLanguage('powershell', powershell);
 hljs.registerLanguage('sql', sql);
 
+hljs.configure({
+  ignoreUnescapedHTML: true,
+});
+
 export const codeTabs = () => {
   const initHljsSnippet = (root) => {
     const tabs = root.querySelectorAll('.hljs-snippet__tab');
