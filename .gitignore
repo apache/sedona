@@ -43,6 +43,8 @@ target
 *:Zone.Identifier
 *.Identifier
 
-# Ignore minified files
+# Ignore minified files and source maps
 *.min.css
+*.min.css.map
 *.min.js
+*.min.js.map
