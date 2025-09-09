@@ -18,7 +18,7 @@ export const typedAnimation = () => {
     stringsArray.forEach((text) => {
       typewriter
         .typeString(text)
-        .pauseFor(0) // no pause after typing
+        .pauseFor(500) // no pause after typing
         .deleteAll();
     });
 
