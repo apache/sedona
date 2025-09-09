@@ -48,3 +48,6 @@ target
 *.min.css.map
 *.min.js
 *.min.js.map
+
+# But allow main.min.js
+!main.min.js
