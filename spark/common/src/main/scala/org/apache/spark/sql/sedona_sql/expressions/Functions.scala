@@ -37,6 +37,7 @@ import org.apache.spark.sql.sedona_sql.expressions.LibPostalUtils.{getExpanderFr
 import org.apache.spark.unsafe.types.UTF8String
 import org.apache.spark.util.Utils
 import com.mapzen.jpostal.{AddressExpander, AddressParser}
+import org.apache.sedona.common.S2Geography.Geography
 import org.apache.spark.sql.catalyst.expressions.codegen.Block.BlockHelper
 
 private[apache] case class ST_LabelPoint(inputExpressions: Seq[Expression])
@@ -1277,8 +1278,9 @@ private[apache] case class ST_Force2D(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_AsEWKT(inputExpressions: Seq[Expression])
-    extends InferredExpression((geom: Geometry) => Functions.asEWKT(geom)) {
-  // (geog: Geography) => Functions.asEWKT(geog)
+    extends InferredExpression(
+      (geom: Geometry) => Functions.asEWKT(geom),
+      (geog: Geography) => org.apache.sedona.common.geography.Functions.asEWKT(geog)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

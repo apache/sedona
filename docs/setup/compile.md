@@ -25,7 +25,7 @@
 
 Sedona Scala/Java code is a project with multiple modules. Each module is a Scala/Java mixed project which is managed by Apache Maven 3.
 
-* Make sure your Linux/Mac machine has Java 1.11, Apache Maven 3.3.1+, and Python3.8+. The compilation of Sedona is not tested on Windows machines.
+* Make sure your Linux/Mac machine has Java 11/17, Apache Maven 3.3.1+, and Python3.8+. The compilation of Sedona is not tested on Windows machines.
 
 To compile all modules, please make sure you are in the root folder of all modules. Then enter the following command in the terminal:
 
@@ -48,7 +48,7 @@ To compile all modules, please make sure you are in the root folder of all modul
 	Geotools jars will be packaged into the produced fat jars.
 
 !!!note
-	By default, this command will compile Sedona with Spark 3.3 and Scala 2.12
+	By default, this command will compile Sedona with Spark 3.4 and Scala 2.12
 
 ### Compile with different targets
 
@@ -57,19 +57,19 @@ User can specify `-Dspark` and `-Dscala` command line options to compile with di
 * `-Dspark`: `{major}.{minor}`: For example, specify `-Dspark=3.4` to build for Spark 3.4.
 * `-Dscala`: `2.12` or `2.13`
 
-=== "Spark 3.3+ Scala 2.12"
+=== "Spark 3.4+ Scala 2.12"
 	```
-	mvn clean install -DskipTests -Dspark=3.3 -Dscala=2.12
+	mvn clean install -DskipTests -Dspark=3.4 -Dscala=2.12
 	```
-    Please replace `3.3` with Spark major.minor version when building for higher Spark versions.
-=== "Spark 3.3+ Scala 2.13"
+    Please replace `3.4` with Spark major.minor version when building for higher Spark versions.
+=== "Spark 3.4+ Scala 2.13"
 	```
 	mvn clean install -DskipTests -Dspark=3.4 -Dscala=2.13
 	```
-    Please replace `3.3` with Spark major.minor version when building for higher Spark versions.
+    Please replace `3.4` with Spark major.minor version when building for higher Spark versions.
 
 !!!tip
-	To get the Sedona Spark Shaded jar with all GeoTools jars included, simply append `-Dgeotools` option. The command is like this:`mvn clean install -DskipTests -Dscala=2.12 -Dspark=3.0 -Dgeotools`
+	To get the Sedona Spark Shaded jar with all GeoTools jars included, simply append `-Dgeotools` option. The command is like this:`mvn clean install -DskipTests -Dscala=2.12 -Dspark=3.4 -Dgeotools`
 
 ### Download staged jars
 

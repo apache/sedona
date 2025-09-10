@@ -751,9 +751,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         if geometry_column is None:
             raise ValueError("No geometry column found in GeoSeries")
         if self._sindex is None:
-            self._sindex = SpatialIndex(
-                self._internal.spark_frame, column_name=geometry_column
-            )
+            self._sindex = SpatialIndex(self)
         return self._sindex
 
     @property

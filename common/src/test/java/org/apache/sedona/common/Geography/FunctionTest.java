@@ -82,8 +82,9 @@ public class FunctionTest {
         "POLYGON ((3.314971 50.80372, 7.092053 50.80372, 7.092053 53.5104, 3.314971 53.5104, 3.314971 50.80372))";
     Geography g = Constructors.geogFromWKT(nl, 4326);
     Geography env = Functions.getEnvelope(g, true);
-    String expectedWKT = "SRID=4326; POLYGON ((3.3 50.8, 7.1 50.8, 7.1 53.5, 3.3 53.5, 3.3 50.8))";
+    String expectedWKT = "POLYGON ((3.3 50.8, 7.1 50.8, 7.1 53.5, 3.3 53.5, 3.3 50.8))";
     assertEquals(expectedWKT, env.toString());
+    assertEquals(4326, env.getSRID());
   }
 
   @Test
@@ -113,12 +114,11 @@ public class FunctionTest {
     Geography g = Constructors.geogFromWKT(fiji, 4326);
     Geography env = Functions.getEnvelope(g, /*split*/ true);
     String expectedWKT =
-        "SRID=4326; MULTIPOLYGON (((177.3 -18.3, 180 -18.3, 180 -16, 177.3 -16, 177.3 -18.3)), "
+        "MULTIPOLYGON (((177.3 -18.3, 180 -18.3, 180 -16, 177.3 -16, 177.3 -18.3)), "
             + "((-180 -18.3, -179.8 -18.3, -179.8 -16, -180 -16, -180 -18.3)))";
     assertEquals(expectedWKT, env.toString());
 
-    expectedWKT =
-        "SRID=4326; POLYGON ((177.3 -18.3, -179.8 -18.3, -179.8 -16, 177.3 -16, 177.3 -18.3))";
+    expectedWKT = "POLYGON ((177.3 -18.3, -179.8 -18.3, -179.8 -16, 177.3 -16, 177.3 -18.3))";
     env = Functions.getEnvelope(g, /*split*/ false);
     assertEquals(expectedWKT, env.toString());
   }
@@ -137,8 +137,7 @@ public class FunctionTest {
     Geography g = Constructors.geogFromWKT(antarctica, 4326);
     Geography env = Functions.getEnvelope(g, true);
 
-    String expectedWKT =
-        "SRID=4326; POLYGON ((-180 -63.3, 180 -63.3, 180 -90, -180 -90, -180 -63.3))";
+    String expectedWKT = "POLYGON ((-180 -63.3, 180 -63.3, 180 -90, -180 -90, -180 -63.3))";
     assertEquals((expectedWKT), (env.toString()));
 
     String multiCountry =
@@ -147,8 +146,7 @@ public class FunctionTest {
     g = Constructors.geogFromWKT(multiCountry, 4326);
     env = Functions.getEnvelope(g, true);
 
-    String expectedWKT2 =
-        "SRID=4326; POLYGON ((-180 53.5, 180 53.5, 180 -90, -180 -90, -180 53.5))";
+    String expectedWKT2 = "POLYGON ((-180 53.5, 180 53.5, 180 -90, -180 -90, -180 53.5))";
     assertEquals((expectedWKT2), (env.toString()));
   }
 }

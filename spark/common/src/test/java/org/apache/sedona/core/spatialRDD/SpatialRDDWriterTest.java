@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.NullArgumentException;
 import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.junit.AfterClass;
@@ -137,8 +136,8 @@ public class SpatialRDDWriterTest extends SpatialRDDTestBase {
     verifyResult(resultWKT.rawSpatialRDD.takeOrdered(5), spatialRDD.rawSpatialRDD.takeOrdered(5));
   }
 
-  /** Test throws NullArgumentException when Spatial RDD is null. */
-  @Test(expected = NullArgumentException.class)
+  /** Test throws IllegalArgumentException when Spatial RDD is null. */
+  @Test(expected = IllegalArgumentException.class)
   public void testSaveAsEmptyWKB() {
 
     PointRDD emptySpatialRDD = new PointRDD();

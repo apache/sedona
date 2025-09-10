@@ -48,11 +48,11 @@ curl -o /Workspace/Shared/sedona/{{ sedona.current_version }}/geotools-wrapper-{
 curl -o /Workspace/Shared/sedona/{{ sedona.current_version }}/sedona-spark-shaded-3.5_2.12-{{ sedona.current_version }}.jar "https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/{{ sedona.current_version }}/sedona-spark-shaded-3.5_2.12-{{ sedona.current_version }}.jar"
 ```
 
-Here are the software versions used to compile `sedona-spark-shaded-3.5_2.12-1.7.1.jar`:
+Here are the software versions used to compile `sedona-spark-shaded-3.5_2.12-{{ sedona.current_version }}.jar`:
 
 * Spark 3.5
 * Scala 2.12
-* Sedona 1.7.1
+* Sedona {{ sedona.current_version }}
 
 Ensure that you use a Databricks Runtime with versions compatible with this jar.
 
@@ -76,7 +76,7 @@ cat > /Workspace/Shared/sedona/sedona-init.sh <<'EOF'
 #
 # On cluster startup, this script will copy the Sedona jars to the cluster's default jar directory.
 
-cp /Workspace/Shared/sedona/1.7.1/*.jar /databricks/jars
+cp /Workspace/Shared/sedona/{{ sedona.current_version }}/*.jar /databricks/jars
 
 EOF
 ```
@@ -128,6 +128,14 @@ Then click “Create compute” to start the cluster.
 Create a Databricks notebook and connect it to the cluster.  Verify that you can run a Python computation with a Sedona function:
 
 ![Python computation](../image/databricks/image1.png)
+
+If you want to use Sedona Python functions such as [DataFrame APIs](../api/sql/DataFrameAPI.md) or [StructuredAdapter](../tutorial/sql.md#spatialrdd-to-dataframe-with-spatial-partitioning), you need to initialize Sedona as follows:
+
+```python
+from sedona.spark import *
+
+sedona = SedonaContext.create(spark)
+```
 
 You can also use the SQL API as follows:
 

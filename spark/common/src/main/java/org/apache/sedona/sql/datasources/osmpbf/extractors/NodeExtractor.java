@@ -52,8 +52,8 @@ public class NodeExtractor {
     // https://wiki.openstreetmap.org/wiki/PBF_Format
     // latitude = .000000001 * (lat_offset + (granularity * lat))
     // longitude = .000000001 * (lon_offset + (granularity * lon))
-    float lat = (float) (.000000001 * (latOffset + (latitude * granularity)));
-    float lon = (float) (.000000001 * (lonOffset + (longitude * granularity)));
+    double lat = .000000001 * (latOffset + (latitude * granularity));
+    double lon = .000000001 * (lonOffset + (longitude * granularity));
 
     HashMap<String, String> tags =
         TagsResolver.resolveTags(node.getKeysCount(), node::getKeys, node::getVals, stringTable);

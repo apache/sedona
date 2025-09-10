@@ -19,7 +19,7 @@ import pytest
 import numpy as np
 import shapely
 from pyspark.sql.functions import expr
-from shapely.geometry import Point, Polygon, LineString
+from shapely.geometry import Point, Polygon, LineString, box
 
 from tests.test_base import TestBase
 from sedona.spark.geopandas import GeoSeries
@@ -62,6 +62,31 @@ class TestSpatialIndex(TestBase):
                 LineString([(4, 4), (5, 5)]),
             ]
         )
+
+    def test_construct_from_geoseries(self):
+        # Construct from a GeoSeries
+        gs = GeoSeries([Point(x, x) for x in range(5)])
+        sindex = SpatialIndex(gs)
+        result = sindex.query(Point(2, 2))
+        # SpatialIndex constructed from GeoSeries return geometries
+        assert result == [Point(2, 2)]
+
+    def test_construct_from_pyspark_dataframe(self):
+        # Construct from PySparkDataFrame
+        df = self.spark.createDataFrame(
+            [(Point(x, x),) for x in range(5)], ["geometry"]
+        )
+        sindex = SpatialIndex(df, column_name="geometry")
+        result = sindex.query(Point(2, 2))
+        assert result == [Point(2, 2)]
+
+    def test_construct_from_nparray(self):
+        # Construct from np.array
+        array = np.array([Point(x, x) for x in range(5)])
+        sindex = SpatialIndex(array)
+        result = sindex.query(Point(2, 2))
+        # Returns indices like original geopandas
+        assert result == np.array([2])
 
     def test_geoseries_sindex_property_exists(self):
         """Test that the sindex property exists on GeoSeries."""
@@ -182,7 +207,7 @@ class TestSpatialIndex(TestBase):
         assert len(nearest_result) == 1
 
         # The nearest point should have id=2 (POINT(1 1))
-        assert nearest_result[0].geom.wkt == "POINT (1 1)"
+        assert nearest_result[0].wkt == "POINT (1 1)"
 
         # Test finding k=2 nearest neighbors
         nearest_2_results = spark_sindex.nearest(query_point, k=2)
@@ -219,7 +244,7 @@ class TestSpatialIndex(TestBase):
 
         # Should find polygon containing the point
         assert len(nearest_geom) == 1
-        assert "POLYGON" in nearest_geom[0].geom.wkt
+        assert "POLYGON" in nearest_geom[0].wkt
 
         # Test with linestring query
         query_line = LineString([(1.5, 1.5), (2.5, 2.5)])
@@ -343,7 +368,12 @@ class TestSpatialIndex(TestBase):
         result_rows = spark_sindex.intersection(bounds)
 
         # Verify correct results are returned
-        assert len(result_rows) >= 2
+        expected = [
+            Polygon([(1, 1), (2, 1), (2, 2), (1, 2), (1, 1)]),
+            Polygon([(2, 2), (3, 2), (3, 3), (2, 3), (2, 2)]),
+            Polygon([(3, 3), (4, 3), (4, 4), (3, 4), (3, 3)]),
+        ]
+        assert result_rows == expected
 
         # Test with bounds that don't intersect any geometry
         empty_bounds = (10, 10, 11, 11)
@@ -353,7 +383,14 @@ class TestSpatialIndex(TestBase):
         # Test with bounds that cover all geometries
         full_bounds = (-1, -1, 6, 6)
         full_results = spark_sindex.intersection(full_bounds)
-        assert len(full_results) == 5  # Should match all 5 polygons
+        expected = [
+            Polygon([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)]),
+            Polygon([(1, 1), (2, 1), (2, 2), (1, 2), (1, 1)]),
+            Polygon([(2, 2), (3, 2), (3, 3), (2, 3), (2, 2)]),
+            Polygon([(3, 3), (4, 3), (4, 4), (3, 4), (3, 3)]),
+            Polygon([(4, 4), (5, 4), (5, 5), (4, 5), (4, 4)]),
+        ]
+        assert full_results == expected
 
     def test_intersection_with_points(self):
         """Test the intersection method with point geometries."""
@@ -426,3 +463,11 @@ class TestSpatialIndex(TestBase):
 
         # Verify results
         assert len(results) == 2
+
+    # test from the geopandas docstring
+    def test_geoseries_sindex_intersection(self):
+        gs = GeoSeries([Point(x, x) for x in range(10)])
+        result = gs.sindex.intersection(box(1, 1, 3, 3).bounds)
+        # Unlike original geopandas, this returns geometries instead of indices
+        expected = [Point(1, 1), Point(2, 2), Point(3, 3)]
+        assert result == expected

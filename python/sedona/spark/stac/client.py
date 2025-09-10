@@ -19,7 +19,6 @@ from typing import Union, Optional, Iterator, List
 from sedona.spark.stac.collection_client import CollectionClient
 
 import datetime as python_datetime
-from pystac import Item as PyStacItem
 from shapely.geometry.base import BaseGeometry
 
 from pyspark.sql import DataFrame
@@ -76,7 +75,7 @@ class Client:
         datetime: Optional[Union[str, python_datetime.datetime, list]] = None,
         max_items: Optional[int] = None,
         return_dataframe: bool = True,
-    ) -> Union[Iterator[PyStacItem], DataFrame]:
+    ) -> Union[Iterator, DataFrame]:
         """
         Searches for items in the specified collection with optional filters.
 

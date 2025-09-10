@@ -54,8 +54,8 @@ public class DenseNodeExtractor {
     long latitude = nodes.getLat(idx) + firstLat;
     long longitude = nodes.getLon(idx) + firstLon;
 
-    float lat = (float) (.000000001 * (latOffset + (latitude * granularity)));
-    float lon = (float) (.000000001 * (lonOffset + (longitude * granularity)));
+    double lat = .000000001 * (latOffset + (latitude * granularity));
+    double lon = .000000001 * (lonOffset + (longitude * granularity));
 
     firstId = id;
     firstLat = latitude;
