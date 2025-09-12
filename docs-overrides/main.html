@@ -16,10 +16,7 @@ You're not viewing the latest stable version.
 {% endblock %}
 
 
-{% block page_content %}
-<div class="md-container" data-md-component="container">
-  <main class="md-main" data-md-component="main">
-
+{% block container %}
     {% if page.is_homepage %}
     <div class="page-home">
 
@@ -710,7 +707,4 @@ You're not viewing the latest stable version.
     {% else %}
     {{ super() }}
     {% endif %}
-
-  </main>
-</div>
 {% endblock %}

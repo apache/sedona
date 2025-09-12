@@ -1,6 +1,20 @@
+// Fix Layout for homepage only
+body:has(.page-home) {
+  .md-main {
+    .md-main__inner {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      margin: 0;
+      &>.md-sidebar{
+        display: none;
+      }
+    }
+  }
+}
+
 .page-home {
   font-family: var(--font-inter);
-
   @media (min-width: 1220px) {
     .md-sidebar {
       display: none;
@@ -1148,4 +1162,10 @@
     }
 
   }
+
+}
+
+
+.hljs-regexp, .hljs-string, .hljs-meta .hljs-string{
+  color: #406b9d!important;
 }
