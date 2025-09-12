@@ -25,7 +25,7 @@ import com.google.common.geometry.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class ShapeIndexGeography extends S2Geography {
+public class ShapeIndexGeography extends Geography {
   public S2ShapeIndex shapeIndex;
 
   /** Build an empty ShapeIndexGeography. */
@@ -35,7 +35,7 @@ public class ShapeIndexGeography extends S2Geography {
   }
 
   /** Build and immediately add one Geography. */
-  public ShapeIndexGeography(S2Geography geog) {
+  public ShapeIndexGeography(Geography geog) {
     super(GeographyKind.SHAPE_INDEX);
     this.shapeIndex = new S2ShapeIndex();
     addIndex(geog);
@@ -70,7 +70,7 @@ public class ShapeIndexGeography extends S2Geography {
     return new S2ShapeIndexRegion(shapeIndex);
   }
   /** Index every S2Shape from the given Geography. */
-  public void addIndex(S2Geography geog) {
+  public void addIndex(Geography geog) {
     for (int i = 0, n = geog.numShapes(); i < n; i++) {
       shapeIndex.add(geog.shape(i));
     }

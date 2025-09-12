@@ -62,7 +62,7 @@ class OsmReaderTest extends TestBaseScala with Matchers {
         .collect() should contain theSameElementsAs Array(
         Node(1002, 48.86, 2.35, Map("amenity" -> "cafe", "name" -> "Cafe de Paris")),
         Node(1003, 30.12, 22.23, Map("amenity" -> "bakery", "name" -> "Delicious Pastries")),
-        Node(1001, 52.52, 13.40, Map("amenity" -> "restaurant", "name" -> "Curry 36")))
+        Node(1001, 52.52, 13.41, Map("amenity" -> "restaurant", "name" -> "Curry 36")))
     }
 
     it("should parse dense nodes") {
@@ -79,7 +79,7 @@ class OsmReaderTest extends TestBaseScala with Matchers {
         .collect() should contain theSameElementsAs Array(
         Node(1002, 48.86, 2.35, Map("amenity" -> "cafe", "name" -> "Cafe de Paris")),
         Node(1003, 30.12, 22.23, Map("amenity" -> "bakery", "name" -> "Delicious Pastries")),
-        Node(1001, 52.52, 13.40, Map("amenity" -> "restaurant", "name" -> "Curry 36")))
+        Node(1001, 52.52, 13.41, Map("amenity" -> "restaurant", "name" -> "Curry 36")))
     }
 
     it("should be able to read from osm file on s3") {
@@ -134,9 +134,7 @@ class OsmReaderTest extends TestBaseScala with Matchers {
       osmData
         .selectExpr("min(location.longitude)", "max(location.latitude)")
         .collect()
-        .flatMap(row => Array(row.get(0), row.get(1))) shouldEqual (Array(
-        7.208188056945801,
-        43.759483337402344))
+        .flatMap(row => Array(row.get(0), row.get(1))) shouldEqual (Array(7.2081882, 43.7594835))
 
       osmData
         .where("id == 4098197")
@@ -205,6 +203,30 @@ class OsmReaderTest extends TestBaseScala with Matchers {
 
       relationsList.length shouldEqual (expectedRelationsList.length)
       relationsList should contain theSameElementsAs expectedRelationsList
+    }
+
+    it("should not lose precision due to float to double conversion") {
+      // Test for accuracy loss bug in NodeExtractor and DenseNodeExtractor
+      val node = sparkSession.read
+        .format("osmpbf")
+        .load(nodesPath)
+        .where("kind == 'node'")
+        .select("location.latitude", "location.longitude")
+        .first()
+
+      val latitude = node.getDouble(0)
+      val longitude = node.getDouble(1)
+
+      // Check that coordinates maintain precision beyond float limits
+      val latAsFloat = latitude.toFloat
+      val lonAsFloat = longitude.toFloat
+
+      // If there's a difference, it indicates potential precision loss from float arithmetic
+      val latDiff = Math.abs(latitude - latAsFloat)
+      val lonDiff = Math.abs(longitude - lonAsFloat)
+
+      // For high-precision coordinates, there should be some difference
+      (latDiff > 1e-10 || lonDiff > 1e-10) shouldBe true
     }
   }
 

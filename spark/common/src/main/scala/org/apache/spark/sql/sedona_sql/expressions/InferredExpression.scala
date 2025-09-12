@@ -19,22 +19,20 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.commons.lang3.StringUtils
+import org.apache.sedona.common.S2Geography.Geography
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{Expression, ImplicitCastInputTypes}
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
+import org.apache.spark.sql.catalyst.expressions.{Expression, ImplicitCastInputTypes}
 import org.apache.spark.sql.catalyst.util.ArrayData
-import org.apache.spark.sql.sedona_sql.UDT.{GeometryUDT, GeographyUDT}
-import org.apache.spark.sql.types.{AbstractDataType, BinaryType, BooleanType, DataType, DataTypes, DoubleType, IntegerType, LongType, StringType}
+import org.apache.spark.sql.sedona_sql.UDT.{GeographyUDT, GeometryUDT}
+import org.apache.spark.sql.sedona_sql.expressions.implicits._
+import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
 import org.locationtech.jts.geom.Geometry
-import org.apache.spark.sql.sedona_sql.expressions.implicits._
 
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 import scala.collection.mutable.ArrayBuffer
-import scala.reflect.runtime.universe.TypeTag
-import scala.reflect.runtime.universe.Type
-import scala.reflect.runtime.universe.typeOf
-import org.apache.sedona.common.geometryObjects.Geography
+import scala.reflect.runtime.universe.{Type, TypeTag, typeOf}
 
 /**
  * Custom exception to include the input row and the original exception message.
@@ -200,16 +198,20 @@ object InferrableType {
     new InferrableType[java.util.List[java.lang.Double]] {}
   implicit val javaGeomListInstance: InferrableType[java.util.List[Geometry]] =
     new InferrableType[java.util.List[Geometry]] {}
+  implicit val javaGeogListInstance: InferrableType[java.util.List[Geography]] =
+    new InferrableType[java.util.List[Geography]] {}
 }
 
 object InferredTypes {
   def buildArgumentExtractor(t: Type): Expression => InternalRow => Any = {
     if (t =:= typeOf[Geometry]) { expr => input =>
       expr.toGeometry(input)
-    } else if (t =:= typeOf[Geography]) { expr => input =>
-      expr.toGeography(input)
     } else if (t =:= typeOf[Array[Geometry]]) { expr => input =>
       expr.toGeometryArray(input)
+    } else if (t =:= typeOf[Geography]) { expr => input =>
+      expr.toGeography(input)
+    } else if (t =:= typeOf[Array[Geography]]) { expr => input =>
+      expr.toGeographyArray(input)
     } else if (InferredRasterExpression.isRasterType(t)) {
       InferredRasterExpression.rasterExtractor
     } else if (t =:= typeOf[Array[Double]]) { expr => input =>
@@ -225,6 +227,8 @@ object InferredTypes {
       }
     } else if (t =:= typeOf[java.util.List[Geometry]]) { expr => input =>
       expr.toGeometryList(input)
+    } else if (t =:= typeOf[java.util.List[Geography]]) { expr => input =>
+      expr.toGeographyList(input)
     } else if (t =:= typeOf[java.util.List[java.lang.Double]]) { expr => input =>
       expr.toDoubleList(input)
     } else { expr => input =>
@@ -280,7 +284,6 @@ object InferredTypes {
         } else {
           null
         }
-
     } else if (InferredRasterExpression.isRasterArrayType(t)) {
       InferredRasterExpression.rasterArraySerializer
     } else if (t =:= typeOf[Option[Boolean]]) { output =>

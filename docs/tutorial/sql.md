@@ -111,7 +111,7 @@ You can add additional Spark runtime config to the config builder. For example, 
 
 ## Initiate SedonaContext
 
-Add the following line after creating Sedona config. If you already have a SparkSession (usually named `spark`) created by AWS EMR/Databricks/Microsoft Fabric, please call `sedona = SedonaContext.create(spark)` instead. For ==Databricks==, the situation is more complicated, please refer to [Databricks setup guide](../setup/databricks.md), but generally you don't need to create SedonaContext.
+Add the following line after creating Sedona config. If you already have a SparkSession (usually named `spark`) created by AWS EMR/Databricks/Microsoft Fabric, please call `sedona = SedonaContext.create(spark)` instead.
 
 === "Scala"
 
@@ -348,10 +348,6 @@ Sedona supports spatial predicate push-down for GeoParquet files, please refer t
 
 GeoParquet file reader can also be used to read legacy Parquet files written by Apache Sedona 1.3.1-incubating or earlier.
 Please refer to [Reading Legacy Parquet Files](../api/sql/Reading-legacy-parquet.md) for details.
-
-!!!warning
-	GeoParquet file reader does not work on Databricks runtime when Photon is enabled. Please disable Photon when using
-	GeoParquet file reader on Databricks runtime.
 
 See [this page](files/geoparquet-sedona-spark.md) for more information on loading GeoParquet.
 

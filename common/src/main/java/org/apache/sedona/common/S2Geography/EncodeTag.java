@@ -24,7 +24,7 @@ import com.esotericsoftware.kryo.io.UnsafeInput;
 import com.google.common.geometry.S2CellId;
 import java.io.*;
 import java.util.List;
-import org.apache.sedona.common.S2Geography.S2Geography.GeographyKind;
+import org.apache.sedona.common.S2Geography.Geography.GeographyKind;
 
 /**
  * A 4 byte prefix for encoded geographies. Builds a 5-byte header (EncodeTag) containing 1 byte:

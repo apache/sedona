@@ -36,6 +36,7 @@ nav:
           - Install Sedona Scala/Java: setup/install-scala.md
           - Install Sedona Python: setup/install-python.md
           - Install Sedona R: api/rdocs
+          - Sedona Python: api/pydocs
           - Install Sedona-Zeppelin: setup/zeppelin.md
           - Play Sedona in Docker: setup/docker.md
           - Install on Wherobots: setup/wherobots.md
@@ -54,9 +55,10 @@ nav:
   - Download: download.md
   - Programming Guides:
       - Sedona with Apache Spark:
-          - Spatial SQL app: tutorial/sql.md
-          - Raster SQL app: tutorial/raster.md
+          - Spatial DataFrame / SQL app: tutorial/sql.md
+          - Raster DataFrame / SQL app: tutorial/raster.md
           - Pure SQL environment: tutorial/sql-pure-sql.md
+          - GeoPandas API on Sedona: tutorial/geopandas-api.md
           - Spatial RDD app: tutorial/rdd.md
           - Sedona R: api/rdocs
           - Work with GeoPandas and Shapely: tutorial/geopandas-shapely.md
@@ -127,6 +129,7 @@ nav:
               - DataFrame/SQL: api/viz/sql.md
               - RDD: api/viz/java-api.md
           - Sedona R: api/rdocs
+          - Sedona Python: api/pydocs
       - Sedona with Apache Flink:
           - SQL:
               - Overview (Flink): api/flink/Overview.md
@@ -148,7 +151,7 @@ nav:
       - Contributor Guide:
           - Rules: community/rule.md
           - Develop: community/develop.md
-          - Contribute to Geopandas: community/geopandas.md
+          - Contribute to Geopandas API on Sedona: community/geopandas.md
       - Committer Guide:
           - Project Management Committee: community/contributor.md
           - Become a release manager: community/release-manager.md
@@ -204,14 +207,14 @@ extra:
     - icon: fontawesome/brands/discord
       link: 'https://discord.gg/9A3k5dEBsY'
   sedona:
-    current_version: 1.7.2
-    current_geotools: 1.7.2-28.5
+    current_version: 1.8.0
+    current_geotools: 1.8.0-33.1
   sedona_create_release:
-    current_version: 1.7.1
-    current_git_tag: sedona-1.7.1-rc1
-    current_rc: 1.7.1-rc1
-    current_snapshot: 1.8.0-SNAPSHOT
-    next_version: 1.8.0
+    current_version: 1.8.0
+    current_git_tag: sedona-1.8.0-rc1
+    current_rc: 1.8.0-rc1
+    current_snapshot: 1.8.1-SNAPSHOT
+    next_version: 1.8.1
 copyright: Copyright © 2025 The Apache Software Foundation. Apache Sedona, Sedona, Apache, the Apache feather logo, and the Apache Sedona project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries. All other marks mentioned may be trademarks or registered trademarks of their respective owners. Please visit <a href="https://www.apache.org/">Apache Software Foundation</a> for more details.<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=f3e121f6-c909-4592-8be6-5bd345768cba" /><img referrerpolicy="no-referrer-when-downgrade" src="https://analytics.apache.org/matomo.php?idsite=74&rec=1" />
 
 markdown_extensions:

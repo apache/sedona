@@ -224,6 +224,15 @@ repos:
       - id: gitleaks
         name: run gitleaks
         description: check for secrets with gitleaks
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+      - id: rst-backticks
+        name: detect common mistake of using single backticks when writing rst
+      - id: rst-directive-colons
+        name: detect mistake of rst directive not ending with double colon or space before the double colon
+      - id: rst-inline-touching-normal
+        name: detect mistake of inline code touching normal text in rst
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:

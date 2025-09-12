@@ -18,6 +18,7 @@
 import numpy as np
 from pyspark.pandas.utils import log_advice
 from pyspark.sql import DataFrame as PySparkDataFrame
+from shapely.geometry.base import BaseGeometry
 
 from sedona.spark import StructuredAdapter
 from sedona.spark.core.enums import IndexType
@@ -37,12 +38,23 @@ class SpatialIndex:
 
         Parameters
         ----------
-        geometry : np.array of Shapely geometries, PySparkDataFrame column, or PySparkDataFrame
+        geometry : np.array of Shapely geometries, GeoSeries, or PySparkDataFrame
         index_type : str, default "strtree"
             The type of spatial index to use.
         column_name : str, optional
             The column name to extract geometry from if `geometry` is a PySparkDataFrame.
+
+        Note: query methods (ie. query, nearest, intersection) have different behaviors depending on how the index is constructed.
+        When constructed from a np.array, the query methods return indices like original geopandas.
+        When constructed from a GeoSeries or PySparkDataFrame, the query methods return geometries.
         """
+        from sedona.spark.geopandas import GeoSeries
+
+        if isinstance(geometry, GeoSeries):
+            from sedona.spark.geopandas.geoseries import _get_series_col_name
+
+            column_name = _get_series_col_name(geometry)
+            geometry = geometry._internal.spark_frame
 
         if isinstance(geometry, np.ndarray):
             self.geometry = geometry
@@ -64,10 +76,10 @@ class SpatialIndex:
             self._build_spark_index(column_name)
         else:
             raise TypeError(
-                "Invalid type for `geometry`. Expected np.array or PySparkDataFrame."
+                "Invalid type for `geometry`. Expected np.array, GeoSeries, or PySparkDataFrame."
             )
 
-    def query(self, geometry, predicate=None, sort=False):
+    def query(self, geometry: BaseGeometry, predicate: str = None, sort: bool = False):
         """
         Query the spatial index for geometries that intersect the given geometry.
 
@@ -75,18 +87,33 @@ class SpatialIndex:
         ----------
         geometry : Shapely geometry
             The geometry to query against the spatial index.
+
         predicate : str, optional
             Spatial predicate to filter results. Must be either 'intersects' (default) or 'contains'.
         sort : bool, optional, default False
             Whether to sort the results.
 
+        Note: query() has different behaviors depending on how the index is constructed.
+        When constructed from a np.array, this method returns indices like original geopandas.
+        When constructed from a GeoSeries or PySparkDataFrame, this method returns geometries.
+
+        Note: Unlike Geopandas, Sedona does not support geometry input of type np.array or GeoSeries.
+        It is recommended to instead use GeoSeries.intersects directly.
+
         Returns
         -------
         list
-            List of indices of matching geometries.
+            List of geometries if constructed from a GeoSeries or PySparkDataFrame.
+            List of the corresponding indices if constructed from a np.array.
         """
+
+        if not isinstance(geometry, BaseGeometry):
+            raise TypeError(
+                "Sedona only supports shapely geometries as input to `query`."
+            )
+
         log_advice(
-            "`query` returns local list of indices of matching geometries onto driver's memory. "
+            "`query` returns a local list onto driver's memory. "
             "It should only be used if the resulting collection is expected to be small."
         )
 
@@ -142,7 +169,9 @@ class SpatialIndex:
 
             return results
 
-    def nearest(self, geometry, k=1, return_distance=False):
+    def nearest(
+        self, geometry: BaseGeometry, k: int = 1, return_distance: bool = False
+    ):
         """
         Find the nearest geometry in the spatial index.
 
@@ -150,16 +179,30 @@ class SpatialIndex:
         ----------
         geometry : Shapely geometry
             The geometry to find the nearest neighbor for.
+
         k : int, optional, default 1
             Number of nearest neighbors to find.
         return_distance : bool, optional, default False
             Whether to return distances along with indices.
 
+        Note: Unlike Geopandas, Sedona does not support geometry input of type np.array or GeoSeries.
+
+        Note: nearest() has different behaviors depending on how the index is constructed.
+        When constructed from a np.array, this method returns indices like original geopandas.
+        When constructed from a GeoSeries or PySparkDataFrame, this method returns geometries.
+
         Returns
         -------
         list or tuple
-            List of indices of nearest geometries, optionally with distances.
+            List of geometries if constructed from a GeoSeries or PySparkDataFrame.
+            List of the corresponding indices if constructed from a np.array.
         """
+
+        if not isinstance(geometry, BaseGeometry):
+            raise TypeError(
+                "Sedona only supports shapely geometries as input to `nearest`."
+            )
+
         log_advice(
             "`nearest` returns local list of indices of matching geometries onto driver's memory. "
             "It should only be used if the resulting collection is expected to be small."
@@ -173,15 +216,18 @@ class SpatialIndex:
             from sedona.spark.core.spatialOperator import KNNQuery
 
             # Execute the KNN query
-            results = KNNQuery.SpatialKnnQuery(self._indexed_rdd, geometry, k, False)
+            geo_data_list = KNNQuery.SpatialKnnQuery(
+                self._indexed_rdd, geometry, k, False
+            )
+
+            # No need to keep the userData field, so convert it directly to a list of geometries
+            geoms_list = [row.geom for row in geo_data_list]
 
             if return_distance:
                 # Calculate distances if requested
-                distances = [
-                    geom.distance(geometry) for geom in [row.geom for row in results]
-                ]
-                return results, distances
-            return results
+                distances = [geom.distance(geometry) for geom in geoms_list]
+                return geoms_list, distances
+            return geoms_list
         else:
             # For local spatial index based on Shapely STRtree
             if k > len(self.geometry):
@@ -199,20 +245,29 @@ class SpatialIndex:
 
     def intersection(self, bounds):
         """
-        Find geometries that intersect the given bounding box.
+        Find geometries that intersect the given bounding box. Similar to the Geopandas version,
+        this is a compatibility wrapper for rtree.index.Index.intersection, use query instead.
 
         Parameters
         ----------
         bounds : tuple
             Bounding box as (min_x, min_y, max_x, max_y).
 
+        Note: intersection() has different behaviors depending on how the index is constructed.
+        When constructed from a np.array, this method returns indices like original geopandas.
+        When constructed from a GeoSeries or PySparkDataFrame, this method returns geometries.
+
+        Note: Unlike Geopandas, Sedona does not support geometry input of type np.array or GeoSeries.
+        It is recommended to instead use GeoSeries.intersects directly.
+
         Returns
         -------
         list
-            List of indices of matching geometries.
+            List of geometries if constructed from a GeoSeries or PySparkDataFrame.
+            List of the corresponding indices if constructed from a np.array.
         """
         log_advice(
-            "`intersection` returns local list of indices of matching geometries onto driver's memory. "
+            "`intersection` returns local list of matching geometries onto driver's memory. "
             "It should only be used if the resulting collection is expected to be small."
         )
 
@@ -225,16 +280,7 @@ class SpatialIndex:
         bbox = box(*bounds)
 
         if self._is_spark:
-            # For Spark-based spatial index
-            from sedona.spark.core.spatialOperator import RangeQuery
-
-            # Execute the spatial range query with the bounding box
-            result_rdd = RangeQuery.SpatialRangeQuery(
-                self._indexed_rdd, bbox, True, True
-            )
-
-            results = result_rdd.collect()
-            return results
+            return self.query(bbox, predicate="intersects")
         else:
             # For local spatial index based on Shapely STRtree
             try:

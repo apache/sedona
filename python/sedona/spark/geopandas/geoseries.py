@@ -319,9 +319,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         - copy: Whether to copy the input data.
         - fastpath: Internal parameter for fast initialization.
 
-        Examples:
+        Examples
+        --------
         >>> from shapely.geometry import Point
         >>> import geopandas as gpd
+        >>> import pandas as pd
         >>> from sedona.spark.geopandas import GeoSeries
 
         # Example 1: Initialize with GeoDataFrame
@@ -443,6 +445,9 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
+        >>> from shapely.geometry import Point
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> s = GeoSeries([Point(1, 1), Point(2, 2)], crs='EPSG:4326')
         >>> s.crs  # doctest: +SKIP
         <Geographic 2D CRS: EPSG:4326>
         Name: WGS 84
@@ -746,9 +751,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         if geometry_column is None:
             raise ValueError("No geometry column found in GeoSeries")
         if self._sindex is None:
-            self._sindex = SpatialIndex(
-                self._internal.spark_frame, column_name=geometry_column
-            )
+            self._sindex = SpatialIndex(self)
         return self._sindex
 
     @property
@@ -1756,7 +1759,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         ...    b"\x00\x08@\x00\x00\x00\x00\x00\x00\x08@"
         ... ),
         ... ]
-        >>> s = geopandas.GeoSeries.from_wkb(wkbs)
+        >>> s = GeoSeries.from_wkb(wkbs)
         >>> s
         0    POINT (1 1)
         1    POINT (2 2)
@@ -1899,7 +1902,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         >>> x = [2.5, 5, -3.0]
         >>> y = [0.5, 1, 1.5]
-        >>> s = geopandas.GeoSeries.from_xy(x, y, crs="EPSG:4326")
+        >>> s = GeoSeries.from_xy(x, y, crs="EPSG:4326")
         >>> s
         0    POINT (2.5 0.5)
         1    POINT (5 1)
@@ -2351,14 +2354,6 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         from pyproj import CRS
 
-        old_crs = self.crs
-        if old_crs is None:
-            raise ValueError(
-                "Cannot transform naive geometries.  "
-                "Please set a crs on the object first."
-            )
-        assert isinstance(old_crs, CRS)
-
         if crs is not None:
             crs = CRS.from_user_input(crs)
         elif epsg is not None:
@@ -2366,17 +2361,13 @@ class GeoSeries(GeoFrame, pspd.Series):
         else:
             raise ValueError("Must pass either crs or epsg.")
 
-        # skip if the input CRS and output CRS are the exact same
-        if old_crs.is_exact_same(crs):
-            return self
-
         spark_expr = stf.ST_Transform(
             self.spark.column,
-            F.lit(f"EPSG:{old_crs.to_epsg()}"),
             F.lit(f"EPSG:{crs.to_epsg()}"),
         )
         return self._query_geometry_column(
             spark_expr,
+            keep_name=True,
         )
 
     @property
@@ -2454,8 +2445,9 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         Examples
         --------
-        >>> import geodatasets
-        >>> df = geopandas.read_file(
+        >>> import geodatasets  # requires: pip install geodatasets
+        >>> import geopandas as gpd
+        >>> df = gpd.read_file(
         ...     geodatasets.get_path("geoda.chicago_commpop")
         ... )
         >>> df.geometry.values.estimate_utm_crs()  # doctest: +SKIP
@@ -2874,7 +2866,9 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
                 - Whether returned value was a single object extended into a series (useful for row-wise 'align' parameter)
         """
         # generator instead of a in-memory list
-        if not isinstance(value, pspd.Series):
+        if isinstance(value, GeoDataFrame):
+            return value.geometry, False
+        elif not isinstance(value, pspd.Series):
             lst = [value for _ in range(len(self))]
             if isinstance(value, BaseGeometry):
                 return GeoSeries(lst), True

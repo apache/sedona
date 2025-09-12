@@ -36,7 +36,7 @@ public class GeographyIndex {
     this.values = new ArrayList<>(Collections.singletonList(-1)); // list of shape id
   }
 
-  public void add(S2Geography geog, int value) {
+  public void add(Geography geog, int value) {
     for (int i = 0; i < geog.numShapes(); i++) {
       index.add(geog.shape(i));
       int shapeId = index.getShapes().size();

@@ -27,6 +27,14 @@ from sedona.core.geom.envelope import Envelope
 from sedona.core.geom.geography import Geography
 from sedona.core.spatialOperator import JoinQuery
 from sedona.core.spatialOperator import JoinQueryRaw, KNNQuery, RangeQuery
+from sedona.stats.clustering.dbscan import dbscan
+from sedona.stats.outlier_detection.local_outlier_factor import (
+    local_outlier_factor,
+)
+from sedona.stats.hotspot_detection.getis_ord import g_local
+from sedona.stats.weighting import add_distance_band_column
+from sedona.stats.weighting import add_binary_distance_band_column
+from sedona.stats.weighting import add_weighted_distance_band_column
 
 from sedona.sql import st_aggregates as sta
 from sedona.sql import st_constructors as stc
@@ -46,16 +54,13 @@ from sedona.stats.weighting import (
 )
 from sedona.utils.adapter import Adapter
 from sedona.utils.spatial_rdd_parser import GeoData
+from sedona.utils.structured_adapter import StructuredAdapter
 from tests.test_base import TestBase
 from sedona.raster_utils.SedonaUtils import SedonaUtils
 from sedona.sql import ST_MakePoint, ST_Y, ST_Touches, ST_Envelope_Aggr
 from sedona.geoarrow import create_spatial_dataframe, dataframe_to_arrow
 from sedona.utils import KryoSerializer, SedonaKryoRegistrator
 from sedona.maps import SedonaKepler, SedonaPyDeck
-
-from sedona.raster.awt_raster import AWTRaster
-from sedona.raster.data_buffer import DataBuffer
-from sedona.raster.meta import SampleDimension
 
 
 class TestPathCompatibility(TestBase):
@@ -102,11 +107,14 @@ class TestPathCompatibility(TestBase):
         assert g_local is not None
         assert add_distance_band_column is not None
         assert add_binary_distance_band_column is not None
+        assert add_weighted_distance_band_column is not None
+        assert local_outlier_factor is not None
 
     def test_util_imports(self):
         # Test utility imports
         assert Adapter is not None
         assert GeoData is not None
+        assert StructuredAdapter is not None
 
     def test_format_mapper_imports(self):
         # Test GeoJsonReader and ShapefileReader imports
@@ -152,8 +160,3 @@ class TestPathCompatibility(TestBase):
         # Test Map imports
         assert SedonaKepler is not None
         assert SedonaPyDeck is not None
-
-    def test_raster_imports(self):
-        assert AWTRaster is not None
-        assert DataBuffer is not None
-        assert SampleDimension is not None

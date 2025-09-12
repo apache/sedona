@@ -27,7 +27,7 @@ import org.apache.spark.sql.connector.read.PartitionReader
 import org.apache.spark.sql.execution.datasource.stac.TemporalFilter
 import org.apache.spark.sql.execution.datasources.PartitionedFile
 import org.apache.spark.sql.execution.datasources.json.JsonDataSource
-import org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter
+import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter
 import org.apache.spark.sql.sedona_sql.io.geojson.{GeoJSONUtils, SparkCompatUtil}
 import org.apache.spark.sql.sedona_sql.io.stac.StacUtils.promotePropertiesToTop
 import org.apache.spark.sql.types.{StringType, StructType}

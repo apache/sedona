@@ -47,6 +47,7 @@ from packaging.version import parse as parse_version
 )
 class TestGeoSeries(TestGeopandasBase):
     def setup_method(self):
+        super().setup_method()
         self.geoseries = sgpd.GeoSeries(
             [
                 Point(2.3, -1),
@@ -405,7 +406,9 @@ class TestGeoSeries(TestGeopandasBase):
     def test_to_crs(self):
         from pyproj import CRS
 
-        geoseries = sgpd.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)], crs=4326)
+        geoseries = sgpd.GeoSeries(
+            [Point(1, 1), Point(2, 2), Point(3, 3)], crs=4326, name="geometry"
+        )
         assert isinstance(geoseries.crs, CRS) and geoseries.crs.to_epsg() == 4326
         result = geoseries.to_crs(3857)
         assert isinstance(result.crs, CRS) and result.crs.to_epsg() == 3857
@@ -416,6 +419,7 @@ class TestGeoSeries(TestGeopandasBase):
                 Point(333958.4723798207, 334111.1714019597),
             ],
             crs=3857,
+            name="geometry",
         )
         self.check_sgpd_equals_gpd(result, expected)
 
@@ -497,9 +501,7 @@ class TestGeoSeries(TestGeopandasBase):
     def test_to_json(self):
         s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
 
-        # TODO: optimize this away
-        with self.ps_allow_diff_frames():
-            result = s.to_json()
+        result = s.to_json()
         expected = '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "pr\
 operties": {}, "geometry": {"type": "Point", "coordinates": [1.0, 1.0]}, "bbox": [1.0,\
  1.0, 1.0, 1.0]}, {"id": "1", "type": "Feature", "properties": {}, "geometry": {"type"\
@@ -509,20 +511,17 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         assert result == expected
 
-        with self.ps_allow_diff_frames():
-            result = s.to_json(show_bbox=True)
-            expected = '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [1.0, 1.0]}, "bbox": [1.0, 1.0, 1.0, 1.0]}, {"id": "1", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [2.0, 2.0]}, "bbox": [2.0, 2.0, 2.0, 2.0]}, {"id": "2", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3.0, 3.0]}, "bbox": [3.0, 3.0, 3.0, 3.0]}], "bbox": [1.0, 1.0, 3.0, 3.0]}'
-            assert result == expected
+        result = s.to_json(show_bbox=True)
+        expected = '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [1.0, 1.0]}, "bbox": [1.0, 1.0, 1.0, 1.0]}, {"id": "1", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [2.0, 2.0]}, "bbox": [2.0, 2.0, 2.0, 2.0]}, {"id": "2", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3.0, 3.0]}, "bbox": [3.0, 3.0, 3.0, 3.0]}], "bbox": [1.0, 1.0, 3.0, 3.0]}'
+        assert result == expected
 
-        with self.ps_allow_diff_frames():
-            result = s.to_json(drop_id=True)
-            expected = '{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [1.0, 1.0]}, "bbox": [1.0, 1.0, 1.0, 1.0]}, {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [2.0, 2.0]}, "bbox": [2.0, 2.0, 2.0, 2.0]}, {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3.0, 3.0]}, "bbox": [3.0, 3.0, 3.0, 3.0]}], "bbox": [1.0, 1.0, 3.0, 3.0]}'
-            assert result == expected
+        result = s.to_json(drop_id=True)
+        expected = '{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [1.0, 1.0]}, "bbox": [1.0, 1.0, 1.0, 1.0]}, {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [2.0, 2.0]}, "bbox": [2.0, 2.0, 2.0, 2.0]}, {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3.0, 3.0]}, "bbox": [3.0, 3.0, 3.0, 3.0]}], "bbox": [1.0, 1.0, 3.0, 3.0]}'
+        assert result == expected
 
-        with self.ps_allow_diff_frames():
-            result = s.set_crs("EPSG:3857").to_json(to_wgs84=True)
-            expected = '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [8.983152841195214e-06, 8.983152841195177e-06]}, "bbox": [8.983152841195214e-06, 8.983152841195177e-06, 8.983152841195214e-06, 8.983152841195177e-06]}, {"id": "1", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [1.7966305682390428e-05, 1.7966305682390134e-05]}, "bbox": [1.7966305682390428e-05, 1.7966305682390134e-05, 1.7966305682390428e-05, 1.7966305682390134e-05]}, {"id": "2", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [2.6949458523585642e-05, 2.694945852358465e-05]}, "bbox": [2.6949458523585642e-05, 2.694945852358465e-05, 2.6949458523585642e-05, 2.694945852358465e-05]}], "bbox": [8.983152841195214e-06, 8.983152841195177e-06, 2.6949458523585642e-05, 2.694945852358465e-05]}'
-            assert result == expected
+        result = s.set_crs("EPSG:3857").to_json(to_wgs84=True)
+        expected = '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [8.983152841195214e-06, 8.983152841195177e-06]}, "bbox": [8.983152841195214e-06, 8.983152841195177e-06, 8.983152841195214e-06, 8.983152841195177e-06]}, {"id": "1", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [1.7966305682390428e-05, 1.7966305682390134e-05]}, "bbox": [1.7966305682390428e-05, 1.7966305682390134e-05, 1.7966305682390428e-05, 1.7966305682390134e-05]}, {"id": "2", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [2.6949458523585642e-05, 2.694945852358465e-05]}, "bbox": [2.6949458523585642e-05, 2.694945852358465e-05, 2.6949458523585642e-05, 2.694945852358465e-05]}], "bbox": [8.983152841195214e-06, 8.983152841195177e-06, 2.6949458523585642e-05, 2.694945852358465e-05]}'
+        assert result == expected
 
     def test_to_wkb(self):
         if parse_version(shapely.__version__) < parse_version("2.0.0"):
@@ -600,9 +599,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         import pyarrow as pa
 
         gser = GeoSeries([Point(1, 2), Point(2, 1)])
-        # TODO: optimize this away
-        with self.ps_allow_diff_frames():
-            arrow_array = gser.to_arrow()
+        arrow_array = gser.to_arrow()
         result = pa.array(arrow_array)
 
         expected = [
@@ -1192,6 +1189,39 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         expected = GeometryCollection()
         self.check_geom_equals(result, expected)
 
+    def test_row_wise_dataframe(self):
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+            ]
+        )
+        s2 = GeoSeries([Point(-5.5, 1), Point(1, 2), Point(3, 1)])
+
+        # self: GeoSeries, other: GeoDataFrame
+        expected = pd.Series([5.5, 1, 2])
+        result = s.distance(s2.to_geoframe())
+        self.check_pd_series_equal(result, expected)
+
+        # self: GeoDataFrame, other: GeoDataFrame
+        result = s.to_geoframe().distance(s2.to_geoframe())
+        assert_series_equal(result.to_pandas(), expected)
+
+        # Same but for overlay
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+                Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+                Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+            ]
+        )
+        result = s.difference(s2.to_geoframe())
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = s.to_geoframe().difference(s2.to_geoframe())
+        self.check_sgpd_equals_gpd(result, expected)
+
     def test_crosses(self):
         s = GeoSeries(
             [
@@ -1578,7 +1608,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         # Ensure the index is preserved when crs is set (previously an issue)
         expected_index = ps.Index(range(1, 6))
-        with self.ps_allow_diff_frames():
+        with ps.option_context("compute.ops_on_diff_frames", True):
             assert s2.index.equals(expected_index)
 
         result = s.intersection(s2, align=True)

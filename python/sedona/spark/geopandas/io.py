@@ -96,7 +96,7 @@ def _to_file(
     """
 
     ext_to_driver = {
-        ".parquet": "Parquet",
+        ".parquet": "GeoParquet",
         ".json": "GeoJSON",
         ".geojson": "GeoJSON",
     }

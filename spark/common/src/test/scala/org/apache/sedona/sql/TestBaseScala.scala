@@ -189,7 +189,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     }
 
   def withConf[T](conf: Map[String, String])(f: => T): T = {
-    val oldConf = conf.values.map(key => key -> sparkSession.conf.getOption(key))
+    val oldConf = conf.keys.map(key => key -> sparkSession.conf.getOption(key))
     conf.foreach { case (key, value) => sparkSession.conf.set(key, value) }
     try {
       f

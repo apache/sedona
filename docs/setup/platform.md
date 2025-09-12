@@ -17,31 +17,33 @@
  under the License.
  -->
 
-Sedona binary releases are compiled by Java 1.8 and Scala 2.11/2.12 and tested in the following environments:
+Sedona binary releases are compiled by Java 11/17 and Scala 2.12/2.13 and tested in the following environments:
 
-!!!warning
-	Support of Spark 3.0, 3.1, 3.2 was removed in Sedona 1.7.0+ although some parts of the source code might still be compatible.
+**Java Requirements:**
+
+- Spark 3.4 & 3.5: Java 11
+- Spark 4.0: Java 17
+
+**Note:** Java 8 support is dropped since Sedona 1.8.0. Spark 3.3 support is dropped since Sedona 1.8.0.
 
 === "Sedona Scala/Java"
 
-	|             | Spark 3.0 | Spark 3.1 | Spark 3.2| Spark 3.3| Spark 3.4| Spark 3.5 |
-	|:---------:|:---------:|:---------:|:---------:|:---------:|:---------:|:---------:|
-	| Scala 2.11  |  not tested  | not tested  | not tested  |not tested  |not tested |not tested |
-	| Scala 2.12 | not tested  | not tested | not tested |✅ |✅ |✅ |
-	| Scala 2.13 |  not tested  | not tested  | not tested|✅ |✅ |✅ |
+	|             | Spark 3.4| Spark 3.5 | Spark 4.0 |
+	|:---------:|:---------:|:---------:|:---------:|
+	| Scala 2.12 |✅ |✅ |✅ |
+	| Scala 2.13 |✅ |✅ |✅ |
 
 === "Sedona Python"
 
-    |             | Spark 3.0 (Scala 2.12)|Spark 3.1 (Scala 2.12)| Spark 3.2 (Scala 2.12)| Spark 3.3 (Scala 2.12)|Spark 3.4 (Scala 2.12)|Spark 3.5 (Scala 2.12)|
-    |:---------:|:---------:|:---------:|:---------:|:---------:|:---------:|:---------:|
-    | Python 3.7  |  not tested  |  not tested  |  not tested  |  ✅  |  ✅  | ✅ |
-    | Python 3.8 | not tested  |not tested  |not tested  |  ✅  |  ✅  | ✅  |
-    | Python 3.9 | not tested  |not tested  |not tested  |  ✅  |  ✅  | ✅  |
-    | Python 3.10 | not tested  |not tested  |not tested  |  ✅  |  ✅  | ✅  |
+    |             | Spark 3.4 (Scala 2.12)|Spark 3.5 (Scala 2.12)| Spark 4.0 (Scala 2.12)|
+    |:---------:|:---------:|:---------:|:---------:|
+    | Python 3.7  |  ✅  |  ✅  | ✅ |
+    | Python 3.8 |  ✅  |  ✅  | ✅  |
+    | Python 3.9 |  ✅  |  ✅  | ✅  |
+    | Python 3.10 |  ✅  |  ✅  | ✅  |
 
 === "Sedona R"
 
-	|             | Spark 3.0 | Spark 3.1 | Spark 3.2 | Spark 3.3 | Spark 3.4 | Spark 3.5 |
-	|:---------:|:---------:|:---------:|:---------:|:---------:|:---------:|:---------:|
-	| Scala 2.11  |  not tested  | not tested  | not tested  | not tested  |not tested  |not tested  |
-	| Scala 2.12 | not tested  | not tested |  not tested | ✅ | ✅ | ✅ |
+	|             | Spark 3.4 | Spark 3.5 | Spark 4.0 |
+	|:---------:|:---------:|:---------:|:---------:|
+	| Scala 2.12 | ✅ | ✅ | ✅ |
