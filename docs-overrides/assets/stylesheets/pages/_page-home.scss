@@ -77,10 +77,7 @@
   .img-bg {
     margin-left: auto;
     margin-right: auto;
-
-    &.img-bg--mobile {
-      display: none;
-    }
+    display: block;
   }
 
   @media (max-width: 480px) {
@@ -92,14 +89,8 @@
       justify-content: flex-start;
     }
     .img-bg {
-      &.img-bg--desktop {
-        display: none;
-      }
-
-      &.img-bg--mobile {
-        display: block;
-        max-height: 340px;
-      }
+      max-height: 340px;
+      transform: translateX(-40%);
     }
   }
 }
@@ -134,11 +125,13 @@
       .typed-wrap {
         color: var(--color-red);
         display: inline;
+
         .typed {
           white-space: nowrap;
           min-height: clamp-property(37, 51);
           display: block;
         }
+
         p {
           display: inline;
           margin: 0;
