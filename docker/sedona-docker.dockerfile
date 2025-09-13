@@ -23,8 +23,8 @@ ARG hadoop_s3_version=3.3.4
 ARG aws_sdk_version=1.12.402
 ARG spark_xml_version=0.16.0
 ARG sedona_version=1.7.1
-ARG geotools_wrapper_version=1.7.1-28.5
-ARG spark_extension_version=2.11.0
+ARG geotools_wrapper_version=1.8.0-33.1
+ARG spark_extension_version=2.14.2
 ARG zeppelin_version=0.12.0
 
 # Set up envs
@@ -43,7 +43,7 @@ ENV PYSPARK_DRIVER_PYTHON=jupyter
 
 # Set up OS libraries and PySpark
 RUN apt-get update
-RUN apt-get install -y openjdk-19-jdk-headless curl python3-pip maven
+RUN apt-get install -y openjdk-17-jdk-headless curl python3-pip maven
 RUN pip3 install --upgrade pip && pip3 install pipenv
 COPY ./docker/install-spark.sh ${SEDONA_HOME}/docker/
 RUN chmod +x ${SEDONA_HOME}/docker/install-spark.sh
