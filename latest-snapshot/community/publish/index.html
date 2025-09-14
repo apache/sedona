@@ -5302,8 +5302,6 @@ rm<span class="w"> </span>-f<span class="w"> </span>pom.xml.*
 mvn<span class="w"> </span>-q<span class="w"> </span>-B<span class="w"> </span>clean<span class="w"> </span>release:prepare<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.0-rc1<span class="w"> </span>-DreleaseVersion<span class="o">=</span><span class="m">1</span>.8.0<span class="w"> </span>-DdevelopmentVersion<span class="o">=</span><span class="m">1</span>.8.1-SNAPSHOT<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Penable-all-submodules<span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests&quot;</span>
 mvn<span class="w"> </span>-q<span class="w"> </span>-B<span class="w"> </span>release:clean<span class="w"> </span>-Penable-all-submodules
 
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Now the releases are staged. A tag and two commits have been created on Sedona GitHub repo&quot;</span>
-
 <span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;*****Step 2: Upload the Release Candidate to https://repository.apache.org.&quot;</span>
 
 <span class="c1">## Note that we use maven-release-plugin 2.3.2 instead of more recent version (e.g., 3.0.1) to get rid of a bug of maven-release-plugin,</span>
@@ -5316,7 +5314,9 @@ mvn<span class="w"> </span>-q<span class="w"> </span>-B<span class="w"> </span>r
 
 <span class="c1"># Define repository details</span>
 <span class="nv">REPO_URL</span><span class="o">=</span><span class="s2">&quot;https://github.com/apache/sedona.git&quot;</span>
-<span class="nv">TAG</span><span class="o">=</span><span class="s2">&quot;1.8.0-rc1&quot;</span>
+<span class="nv">RC_VERSION</span><span class="o">=</span><span class="s2">&quot;1.8.0-rc1&quot;</span>
+<span class="nv">SEDONA_VERSION</span><span class="o">=</span><span class="s2">&quot;1.8.0&quot;</span>
+<span class="nv">TAG</span><span class="o">=</span><span class="s2">&quot;sedona-</span><span class="si">${</span><span class="nv">RC_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
 <span class="nv">LOCAL_DIR</span><span class="o">=</span><span class="s2">&quot;sedona-release&quot;</span>
 
 <span class="c1"># Remove existing directory if it exists and clone the repository</span>
@@ -5326,91 +5326,323 @@ rm<span class="w"> </span>-rf<span class="w"> </span><span class="nv">$LOCAL_DIR
 <span class="nv">MAVEN_PLUGIN_VERSION</span><span class="o">=</span><span class="s2">&quot;2.3.2&quot;</span>
 
 <span class="c1"># Define Spark and Scala versions</span>
-<span class="nb">declare</span><span class="w"> </span>-a<span class="w"> </span><span class="nv">SPARK_VERSIONS</span><span class="o">=(</span><span class="s2">&quot;3.3&quot;</span><span class="w"> </span><span class="s2">&quot;3.4&quot;</span><span class="w"> </span><span class="s2">&quot;3.5&quot;</span><span class="o">)</span>
+<span class="nb">declare</span><span class="w"> </span>-a<span class="w"> </span><span class="nv">SPARK_VERSIONS</span><span class="o">=(</span><span class="s2">&quot;3.4&quot;</span><span class="w"> </span><span class="s2">&quot;3.5&quot;</span><span class="w"> </span><span class="s2">&quot;4.0&quot;</span><span class="o">)</span>
 <span class="nb">declare</span><span class="w"> </span>-a<span class="w"> </span><span class="nv">SCALA_VERSIONS</span><span class="o">=(</span><span class="s2">&quot;2.12&quot;</span><span class="w"> </span><span class="s2">&quot;2.13&quot;</span><span class="o">)</span>
+
+<span class="c1"># Function to get Java version for Spark version</span>
+get_java_version<span class="o">()</span><span class="w"> </span><span class="o">{</span>
+<span class="w">  </span><span class="nb">local</span><span class="w"> </span><span class="nv">spark_version</span><span class="o">=</span><span class="nv">$1</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$spark_version</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;4.0&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;17&quot;</span>
+<span class="w">  </span><span class="k">else</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;11&quot;</span>
+<span class="w">  </span><span class="k">fi</span>
+<span class="o">}</span>
+
+<span class="c1"># Function to find Maven installation path</span>
+find_maven_path<span class="o">()</span><span class="w"> </span><span class="o">{</span>
+<span class="w">  </span><span class="c1"># Try different methods to find Maven</span>
+<span class="w">  </span><span class="nb">local</span><span class="w"> </span><span class="nv">mvn_path</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
+
+<span class="w">  </span><span class="c1"># Method 1: Check if mvn is in PATH</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="nb">command</span><span class="w"> </span>-v<span class="w"> </span>mvn<span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nv">mvn_path</span><span class="o">=</span><span class="k">$(</span><span class="nb">command</span><span class="w"> </span>-v<span class="w"> </span>mvn<span class="k">)</span>
+<span class="w">  </span><span class="k">fi</span>
+
+<span class="w">  </span><span class="c1"># Method 2: Check common Homebrew locations</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$mvn_path</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span>version_dir<span class="w"> </span><span class="k">in</span><span class="w"> </span>/opt/homebrew/Cellar/maven/*/libexec/bin/mvn<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-x<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$version_dir</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">        </span><span class="nv">mvn_path</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$version_dir</span><span class="s2">&quot;</span>
+<span class="w">        </span><span class="k">break</span>
+<span class="w">      </span><span class="k">fi</span>
+<span class="w">    </span><span class="k">done</span>
+<span class="w">  </span><span class="k">fi</span>
+
+<span class="w">  </span><span class="c1"># Method 3: Check /usr/local (older Homebrew installations)</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$mvn_path</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span>version_dir<span class="w"> </span><span class="k">in</span><span class="w"> </span>/usr/local/Cellar/maven/*/libexec/bin/mvn<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-x<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$version_dir</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">        </span><span class="nv">mvn_path</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$version_dir</span><span class="s2">&quot;</span>
+<span class="w">        </span><span class="k">break</span>
+<span class="w">      </span><span class="k">fi</span>
+<span class="w">    </span><span class="k">done</span>
+<span class="w">  </span><span class="k">fi</span>
+
+<span class="w">  </span><span class="c1"># Method 4: Check system locations</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$mvn_path</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span>path<span class="w"> </span><span class="k">in</span><span class="w"> </span>/usr/bin/mvn<span class="w"> </span>/usr/local/bin/mvn<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-x<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$path</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">        </span><span class="nv">mvn_path</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$path</span><span class="s2">&quot;</span>
+<span class="w">        </span><span class="k">break</span>
+<span class="w">      </span><span class="k">fi</span>
+<span class="w">    </span><span class="k">done</span>
+<span class="w">  </span><span class="k">fi</span>
+
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$mvn_path</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;ERROR: Could not find Maven installation&quot;</span><span class="w"> </span>&gt;<span class="p">&amp;</span><span class="m">2</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Please ensure Maven is installed and available in PATH or in standard locations&quot;</span><span class="w"> </span>&gt;<span class="p">&amp;</span><span class="m">2</span>
+<span class="w">    </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<span class="w">  </span><span class="k">fi</span>
+
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$mvn_path</span><span class="s2">&quot;</span>
+<span class="o">}</span>
+
+<span class="c1"># Function to create Maven wrapper with specific Java version</span>
+create_mvn_wrapper<span class="o">()</span><span class="w"> </span><span class="o">{</span>
+<span class="w">  </span><span class="nb">local</span><span class="w"> </span><span class="nv">java_version</span><span class="o">=</span><span class="nv">$1</span>
+<span class="w">  </span><span class="nb">local</span><span class="w"> </span><span class="nv">mvn_wrapper</span><span class="o">=</span><span class="s2">&quot;/tmp/mvn-java</span><span class="si">${</span><span class="nv">java_version</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="w">  </span><span class="nb">local</span><span class="w"> </span><span class="nv">mvn_path</span><span class="o">=</span><span class="k">$(</span>find_maven_path<span class="k">)</span>
+
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Using Maven at: </span><span class="nv">$mvn_path</span><span class="s2">&quot;</span><span class="w"> </span>&gt;<span class="p">&amp;</span><span class="m">2</span>
+
+<span class="w">  </span><span class="c1"># Create a wrapper script that sets JAVA_HOME and executes Maven</span>
+<span class="w">  </span>cat<span class="w"> </span>&gt;<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$mvn_wrapper</span><span class="s2">&quot;</span><span class="w"> </span><span class="s">&lt;&lt; EOF</span>
+<span class="s">#!/bin/bash</span>
+<span class="s">JAVA_HOME=&quot;\${JAVA_HOME:-\$(/usr/libexec/java_home -v ${java_version})}&quot; exec &quot;${mvn_path}&quot; &quot;\$@&quot;</span>
+<span class="s">EOF</span>
+
+<span class="w">  </span>chmod<span class="w"> </span>+x<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$mvn_wrapper</span><span class="s2">&quot;</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$mvn_wrapper</span><span class="s2">&quot;</span>
+<span class="o">}</span>
+
+<span class="c1"># Function to verify Java version using Maven wrapper</span>
+verify_java_version<span class="o">()</span><span class="w"> </span><span class="o">{</span>
+<span class="w">  </span><span class="nb">local</span><span class="w"> </span><span class="nv">mvn_wrapper</span><span class="o">=</span><span class="nv">$1</span>
+<span class="w">  </span><span class="nb">local</span><span class="w"> </span><span class="nv">expected_java_version</span><span class="o">=</span><span class="nv">$2</span>
+
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Verifying Java version with Maven wrapper...&quot;</span>
+<span class="w">  </span><span class="nb">local</span><span class="w"> </span><span class="nv">mvn_java_version</span><span class="o">=</span><span class="k">$(</span><span class="nv">$mvn_wrapper</span><span class="w"> </span>--version<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;Java version&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/.*Java version: \([0-9]*\).*/\1/&#39;</span><span class="k">)</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$mvn_java_version</span><span class="s2">&quot;</span><span class="w"> </span>!<span class="o">=</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$expected_java_version</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;ERROR: Maven wrapper is using Java </span><span class="nv">$mvn_java_version</span><span class="s2">, but expected Java </span><span class="nv">$expected_java_version</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Please ensure the correct Java version is installed&quot;</span>
+<span class="w">    </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<span class="w">  </span><span class="k">fi</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✓ Verified: Maven wrapper is using Java </span><span class="nv">$mvn_java_version</span><span class="s2">&quot;</span>
+<span class="o">}</span>
 
 <span class="c1"># Iterate through Spark and Scala versions</span>
 <span class="k">for</span><span class="w"> </span>SPARK<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">SPARK_VERSIONS</span><span class="p">[@]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
 <span class="w">  </span><span class="k">for</span><span class="w"> </span>SCALA<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">SCALA_VERSIONS</span><span class="p">[@]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
-<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Running release:perform for Spark </span><span class="nv">$SPARK</span><span class="s2"> and Scala </span><span class="nv">$SCALA</span><span class="s2">...&quot;</span>
+<span class="w">    </span><span class="c1"># Skip Spark 4.0 + Scala 2.12 combination as it&#39;s not supported</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$SPARK</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;4.0&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$SCALA</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;2.12&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">      </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Skipping Spark </span><span class="nv">$SPARK</span><span class="s2"> with Scala </span><span class="nv">$SCALA</span><span class="s2"> (not supported)&quot;</span>
+<span class="w">      </span><span class="k">continue</span>
+<span class="w">    </span><span class="k">fi</span>
 
-<span class="w">    </span>mvn<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:<span class="nv">$MAVEN_PLUGIN_VERSION</span>:perform<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="nv">JAVA_VERSION</span><span class="o">=</span><span class="k">$(</span>get_java_version<span class="w"> </span><span class="nv">$SPARK</span><span class="k">)</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Running release:perform for Spark </span><span class="nv">$SPARK</span><span class="s2"> and Scala </span><span class="nv">$SCALA</span><span class="s2"> with Java </span><span class="nv">$JAVA_VERSION</span><span class="s2">...&quot;</span>
+
+<span class="w">    </span><span class="c1"># Create Maven wrapper with appropriate Java version</span>
+<span class="w">    </span><span class="nv">MVN_WRAPPER</span><span class="o">=</span><span class="k">$(</span>create_mvn_wrapper<span class="w"> </span><span class="nv">$JAVA_VERSION</span><span class="k">)</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Created Maven wrapper: </span><span class="nv">$MVN_WRAPPER</span><span class="s2">&quot;</span>
+
+<span class="w">    </span><span class="c1"># Verify Java version</span>
+<span class="w">    </span>verify_java_version<span class="w"> </span><span class="nv">$MVN_WRAPPER</span><span class="w"> </span><span class="nv">$JAVA_VERSION</span>
+
+<span class="w">    </span><span class="c1"># Execute Maven with the wrapper</span>
+<span class="w">    </span><span class="nv">$MVN_WRAPPER</span><span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:<span class="nv">$MAVEN_PLUGIN_VERSION</span>:perform<span class="w"> </span><span class="se">\</span>
 <span class="w">      </span>-DconnectionUrl<span class="o">=</span>scm:git:file://<span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="w"> </span><span class="se">\</span>
 <span class="w">      </span>-Dtag<span class="o">=</span><span class="nv">$TAG</span><span class="w"> </span><span class="se">\</span>
 <span class="w">      </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span><span class="se">\</span>
 <span class="w">      </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=</span><span class="nv">$SPARK</span><span class="s2"> -Dscala=</span><span class="nv">$SCALA</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">      </span>-Dspark<span class="o">=</span><span class="nv">$SPARK</span><span class="w"> </span><span class="se">\</span>
 <span class="w">      </span>-Dscala<span class="o">=</span><span class="nv">$SCALA</span>
+
+<span class="w">    </span><span class="c1"># Clean up the wrapper</span>
+<span class="w">    </span>rm<span class="w"> </span>-f<span class="w"> </span><span class="nv">$MVN_WRAPPER</span>
 <span class="w">  </span><span class="k">done</span>
 <span class="k">done</span>
 
 <span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;*****Step 3: Upload Release Candidate on ASF SVN: https://dist.apache.org/repos/dist/dev/sedona&quot;</span>
 
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Creating 1.8.0-rc1 folder on SVN...&quot;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Creating </span><span class="si">${</span><span class="nv">RC_VERSION</span><span class="si">}</span><span class="s2"> folder on SVN...&quot;</span>
 
-svn<span class="w"> </span>mkdir<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding folder&quot;</span><span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/1.8.0-rc1
+svn<span class="w"> </span>mkdir<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding folder&quot;</span><span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/<span class="si">${</span><span class="nv">RC_VERSION</span><span class="si">}</span>
 
 <span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Creating release files locally...&quot;</span>
 
+<span class="c1"># Go back to parent directory for file operations</span>
+<span class="nb">cd</span><span class="w"> </span>../..
+
 <span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Downloading source code...&quot;</span>
 
-wget<span class="w"> </span>https://github.com/apache/sedona/archive/refs/tags/sedona-1.8.0-rc1.tar.gz
-tar<span class="w"> </span>-xvf<span class="w"> </span>sedona-1.8.0-rc1.tar.gz
-mkdir<span class="w"> </span>apache-sedona-1.8.0-src
-cp<span class="w"> </span>-r<span class="w"> </span>sedona-sedona-1.8.0-rc1/*<span class="w"> </span>apache-sedona-1.8.0-src/
-tar<span class="w"> </span>czf<span class="w"> </span>apache-sedona-1.8.0-src.tar.gz<span class="w"> </span>apache-sedona-1.8.0-src
-rm<span class="w"> </span>sedona-1.8.0-rc1.tar.gz
-rm<span class="w"> </span>-rf<span class="w"> </span>sedona-sedona-1.8.0-rc1
+wget<span class="w"> </span>https://github.com/apache/sedona/archive/refs/tags/sedona-<span class="si">${</span><span class="nv">RC_VERSION</span><span class="si">}</span>.tar.gz
+tar<span class="w"> </span>-xvf<span class="w"> </span>sedona-<span class="si">${</span><span class="nv">RC_VERSION</span><span class="si">}</span>.tar.gz
+mkdir<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src
+cp<span class="w"> </span>-r<span class="w"> </span>sedona-sedona-<span class="si">${</span><span class="nv">RC_VERSION</span><span class="si">}</span>/*<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src/
+tar<span class="w"> </span>czf<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src.tar.gz<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src
+rm<span class="w"> </span>sedona-<span class="si">${</span><span class="nv">RC_VERSION</span><span class="si">}</span>.tar.gz
+rm<span class="w"> </span>-rf<span class="w"> </span>sedona-sedona-<span class="si">${</span><span class="nv">RC_VERSION</span><span class="si">}</span>
+
+<span class="c1"># Create checksums and signatures for source files</span>
+shasum<span class="w"> </span>-a<span class="w"> </span><span class="m">512</span><span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src.tar.gz<span class="w"> </span>&gt;<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src.tar.gz.sha512
+gpg<span class="w"> </span>-ab<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src.tar.gz
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Uploading source files...&quot;</span>
+
+<span class="c1"># Upload source files first</span>
+svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src.tar.gz<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/<span class="si">${</span><span class="nv">RC_VERSION</span><span class="si">}</span>/apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src.tar.gz
+svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src.tar.gz.asc<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/<span class="si">${</span><span class="nv">RC_VERSION</span><span class="si">}</span>/apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src.tar.gz.asc
+svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src.tar.gz.sha512<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/<span class="si">${</span><span class="nv">RC_VERSION</span><span class="si">}</span>/apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src.tar.gz.sha512
 
 <span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Compiling the source code...&quot;</span>
 
-mkdir<span class="w"> </span>apache-sedona-1.8.0-bin
+mkdir<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin
 
-<span class="nb">cd</span><span class="w"> </span>apache-sedona-1.8.0-src<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>mvn<span class="w"> </span>-q<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-DskipTests<span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.3<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.12<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>..
-cp<span class="w"> </span>apache-sedona-1.8.0-src/spark-shaded/target/sedona-*1.8.0.jar<span class="w"> </span>apache-sedona-1.8.0-bin/
-cp<span class="w"> </span>apache-sedona-1.8.0-src/flink-shaded/target/sedona-*1.8.0.jar<span class="w"> </span>apache-sedona-1.8.0-bin/
-cp<span class="w"> </span>apache-sedona-1.8.0-src/snowflake/target/sedona-*1.8.0.jar<span class="w"> </span>apache-sedona-1.8.0-bin/
+<span class="c1"># Function to get Java version for Spark version</span>
+get_java_version<span class="o">()</span><span class="w"> </span><span class="o">{</span>
+<span class="w">  </span><span class="nb">local</span><span class="w"> </span><span class="nv">spark_version</span><span class="o">=</span><span class="nv">$1</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$spark_version</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;4.0&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;17&quot;</span>
+<span class="w">  </span><span class="k">else</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;11&quot;</span>
+<span class="w">  </span><span class="k">fi</span>
+<span class="o">}</span>
 
-<span class="nb">cd</span><span class="w"> </span>apache-sedona-1.8.0-src<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>mvn<span class="w"> </span>-q<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-DskipTests<span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.3<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>..
-cp<span class="w"> </span>apache-sedona-1.8.0-src/spark-shaded/target/sedona-*1.8.0.jar<span class="w"> </span>apache-sedona-1.8.0-bin/
+<span class="c1"># Function to find Maven installation path</span>
+find_maven_path<span class="o">()</span><span class="w"> </span><span class="o">{</span>
+<span class="w">  </span><span class="c1"># Try different methods to find Maven</span>
+<span class="w">  </span><span class="nb">local</span><span class="w"> </span><span class="nv">mvn_path</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
 
-<span class="nb">cd</span><span class="w"> </span>apache-sedona-1.8.0-src<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>mvn<span class="w"> </span>-q<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-DskipTests<span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.4<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.12<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>..
-cp<span class="w"> </span>apache-sedona-1.8.0-src/spark-shaded/target/sedona-*1.8.0.jar<span class="w"> </span>apache-sedona-1.8.0-bin/
+<span class="w">  </span><span class="c1"># Method 1: Check if mvn is in PATH</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="nb">command</span><span class="w"> </span>-v<span class="w"> </span>mvn<span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nv">mvn_path</span><span class="o">=</span><span class="k">$(</span><span class="nb">command</span><span class="w"> </span>-v<span class="w"> </span>mvn<span class="k">)</span>
+<span class="w">  </span><span class="k">fi</span>
 
-<span class="nb">cd</span><span class="w"> </span>apache-sedona-1.8.0-src<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>mvn<span class="w"> </span>-q<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-DskipTests<span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.4<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>..
-cp<span class="w"> </span>apache-sedona-1.8.0-src/spark-shaded/target/sedona-*1.8.0.jar<span class="w"> </span>apache-sedona-1.8.0-bin/
+<span class="w">  </span><span class="c1"># Method 2: Check common Homebrew locations</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$mvn_path</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span>version_dir<span class="w"> </span><span class="k">in</span><span class="w"> </span>/opt/homebrew/Cellar/maven/*/libexec/bin/mvn<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-x<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$version_dir</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">        </span><span class="nv">mvn_path</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$version_dir</span><span class="s2">&quot;</span>
+<span class="w">        </span><span class="k">break</span>
+<span class="w">      </span><span class="k">fi</span>
+<span class="w">    </span><span class="k">done</span>
+<span class="w">  </span><span class="k">fi</span>
 
-<span class="nb">cd</span><span class="w"> </span>apache-sedona-1.8.0-src<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>mvn<span class="w"> </span>-q<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-DskipTests<span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.5<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.12<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>..
-cp<span class="w"> </span>apache-sedona-1.8.0-src/spark-shaded/target/sedona-*1.8.0.jar<span class="w"> </span>apache-sedona-1.8.0-bin/
+<span class="w">  </span><span class="c1"># Method 3: Check /usr/local (older Homebrew installations)</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$mvn_path</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span>version_dir<span class="w"> </span><span class="k">in</span><span class="w"> </span>/usr/local/Cellar/maven/*/libexec/bin/mvn<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-x<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$version_dir</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">        </span><span class="nv">mvn_path</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$version_dir</span><span class="s2">&quot;</span>
+<span class="w">        </span><span class="k">break</span>
+<span class="w">      </span><span class="k">fi</span>
+<span class="w">    </span><span class="k">done</span>
+<span class="w">  </span><span class="k">fi</span>
 
-<span class="nb">cd</span><span class="w"> </span>apache-sedona-1.8.0-src<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>mvn<span class="w"> </span>-q<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-DskipTests<span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.5<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>..
-cp<span class="w"> </span>apache-sedona-1.8.0-src/spark-shaded/target/sedona-*1.8.0.jar<span class="w"> </span>apache-sedona-1.8.0-bin/
+<span class="w">  </span><span class="c1"># Method 4: Check system locations</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$mvn_path</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span>path<span class="w"> </span><span class="k">in</span><span class="w"> </span>/usr/bin/mvn<span class="w"> </span>/usr/local/bin/mvn<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-x<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$path</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">        </span><span class="nv">mvn_path</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$path</span><span class="s2">&quot;</span>
+<span class="w">        </span><span class="k">break</span>
+<span class="w">      </span><span class="k">fi</span>
+<span class="w">    </span><span class="k">done</span>
+<span class="w">  </span><span class="k">fi</span>
 
-tar<span class="w"> </span>czf<span class="w"> </span>apache-sedona-1.8.0-bin.tar.gz<span class="w"> </span>apache-sedona-1.8.0-bin
-shasum<span class="w"> </span>-a<span class="w"> </span><span class="m">512</span><span class="w"> </span>apache-sedona-1.8.0-src.tar.gz<span class="w"> </span>&gt;<span class="w"> </span>apache-sedona-1.8.0-src.tar.gz.sha512
-shasum<span class="w"> </span>-a<span class="w"> </span><span class="m">512</span><span class="w"> </span>apache-sedona-1.8.0-bin.tar.gz<span class="w"> </span>&gt;<span class="w"> </span>apache-sedona-1.8.0-bin.tar.gz.sha512
-gpg<span class="w"> </span>-ab<span class="w"> </span>apache-sedona-1.8.0-src.tar.gz
-gpg<span class="w"> </span>-ab<span class="w"> </span>apache-sedona-1.8.0-bin.tar.gz
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$mvn_path</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;ERROR: Could not find Maven installation&quot;</span><span class="w"> </span>&gt;<span class="p">&amp;</span><span class="m">2</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Please ensure Maven is installed and available in PATH or in standard locations&quot;</span><span class="w"> </span>&gt;<span class="p">&amp;</span><span class="m">2</span>
+<span class="w">    </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<span class="w">  </span><span class="k">fi</span>
 
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Uploading local release files...&quot;</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$mvn_path</span><span class="s2">&quot;</span>
+<span class="o">}</span>
 
-svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-1.8.0-src.tar.gz<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/1.8.0-rc1/apache-sedona-1.8.0-src.tar.gz
-svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-1.8.0-src.tar.gz.asc<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/1.8.0-rc1/apache-sedona-1.8.0-src.tar.gz.asc
-svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-1.8.0-src.tar.gz.sha512<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/1.8.0-rc1/apache-sedona-1.8.0-src.tar.gz.sha512
-svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-1.8.0-bin.tar.gz<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/1.8.0-rc1/apache-sedona-1.8.0-bin.tar.gz
-svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-1.8.0-bin.tar.gz.asc<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/1.8.0-rc1/apache-sedona-1.8.0-bin.tar.gz.asc
-svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-1.8.0-bin.tar.gz.sha512<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/1.8.0-rc1/apache-sedona-1.8.0-bin.tar.gz.sha512
+<span class="c1"># Function to create Maven wrapper with specific Java version</span>
+create_mvn_wrapper<span class="o">()</span><span class="w"> </span><span class="o">{</span>
+<span class="w">  </span><span class="nb">local</span><span class="w"> </span><span class="nv">java_version</span><span class="o">=</span><span class="nv">$1</span>
+<span class="w">  </span><span class="nb">local</span><span class="w"> </span><span class="nv">mvn_wrapper</span><span class="o">=</span><span class="s2">&quot;/tmp/mvn-java</span><span class="si">${</span><span class="nv">java_version</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="w">  </span><span class="nb">local</span><span class="w"> </span><span class="nv">mvn_path</span><span class="o">=</span><span class="k">$(</span>find_maven_path<span class="k">)</span>
+
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Using Maven at: </span><span class="nv">$mvn_path</span><span class="s2">&quot;</span><span class="w"> </span>&gt;<span class="p">&amp;</span><span class="m">2</span>
+
+<span class="w">  </span><span class="c1"># Create a wrapper script that sets JAVA_HOME and executes Maven</span>
+<span class="w">  </span>cat<span class="w"> </span>&gt;<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$mvn_wrapper</span><span class="s2">&quot;</span><span class="w"> </span><span class="s">&lt;&lt; EOF</span>
+<span class="s">#!/bin/bash</span>
+<span class="s">JAVA_HOME=&quot;\${JAVA_HOME:-\$(/usr/libexec/java_home -v ${java_version})}&quot; exec &quot;${mvn_path}&quot; &quot;\$@&quot;</span>
+<span class="s">EOF</span>
+
+<span class="w">  </span>chmod<span class="w"> </span>+x<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$mvn_wrapper</span><span class="s2">&quot;</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$mvn_wrapper</span><span class="s2">&quot;</span>
+<span class="o">}</span>
+
+<span class="c1"># Function to verify Java version using Maven wrapper</span>
+verify_java_version<span class="o">()</span><span class="w"> </span><span class="o">{</span>
+<span class="w">  </span><span class="nb">local</span><span class="w"> </span><span class="nv">mvn_wrapper</span><span class="o">=</span><span class="nv">$1</span>
+<span class="w">  </span><span class="nb">local</span><span class="w"> </span><span class="nv">expected_java_version</span><span class="o">=</span><span class="nv">$2</span>
+
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Verifying Java version with Maven wrapper...&quot;</span>
+<span class="w">  </span><span class="nb">local</span><span class="w"> </span><span class="nv">mvn_java_version</span><span class="o">=</span><span class="k">$(</span><span class="nv">$mvn_wrapper</span><span class="w"> </span>--version<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;Java version&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/.*Java version: \([0-9]*\).*/\1/&#39;</span><span class="k">)</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$mvn_java_version</span><span class="s2">&quot;</span><span class="w"> </span>!<span class="o">=</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$expected_java_version</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;ERROR: Maven wrapper is using Java </span><span class="nv">$mvn_java_version</span><span class="s2">, but expected Java </span><span class="nv">$expected_java_version</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Please ensure the correct Java version is installed&quot;</span>
+<span class="w">    </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<span class="w">  </span><span class="k">fi</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✓ Verified: Maven wrapper is using Java </span><span class="nv">$mvn_java_version</span><span class="s2">&quot;</span>
+<span class="o">}</span>
+
+<span class="c1"># Compile for Spark 3.4 with Java 11</span>
+<span class="nv">JAVA_VERSION</span><span class="o">=</span><span class="k">$(</span>get_java_version<span class="w"> </span><span class="s2">&quot;3.4&quot;</span><span class="k">)</span>
+<span class="nv">MVN_WRAPPER</span><span class="o">=</span><span class="k">$(</span>create_mvn_wrapper<span class="w"> </span><span class="nv">$JAVA_VERSION</span><span class="k">)</span>
+verify_java_version<span class="w"> </span><span class="nv">$MVN_WRAPPER</span><span class="w"> </span><span class="nv">$JAVA_VERSION</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Compiling for Spark 3.4 with Scala 2.12 using Java </span><span class="nv">$JAVA_VERSION</span><span class="s2">...&quot;</span>
+<span class="nb">cd</span><span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nv">$MVN_WRAPPER</span><span class="w"> </span>-q<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-DskipTests<span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.4<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.12<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>..
+cp<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src/spark-shaded/target/sedona-*<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>.jar<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin/
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Compiling for Spark 3.4 with Scala 2.13 using Java </span><span class="nv">$JAVA_VERSION</span><span class="s2">...&quot;</span>
+<span class="nb">cd</span><span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nv">$MVN_WRAPPER</span><span class="w"> </span>-q<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-DskipTests<span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.4<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>..
+cp<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src/spark-shaded/target/sedona-*<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>.jar<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin/
+
+<span class="c1"># Compile for Spark 3.5 with Java 11</span>
+<span class="nv">JAVA_VERSION</span><span class="o">=</span><span class="k">$(</span>get_java_version<span class="w"> </span><span class="s2">&quot;3.5&quot;</span><span class="k">)</span>
+<span class="nv">MVN_WRAPPER</span><span class="o">=</span><span class="k">$(</span>create_mvn_wrapper<span class="w"> </span><span class="nv">$JAVA_VERSION</span><span class="k">)</span>
+verify_java_version<span class="w"> </span><span class="nv">$MVN_WRAPPER</span><span class="w"> </span><span class="nv">$JAVA_VERSION</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Compiling for Spark 3.5 with Scala 2.12 using Java </span><span class="nv">$JAVA_VERSION</span><span class="s2">...&quot;</span>
+<span class="nb">cd</span><span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nv">$MVN_WRAPPER</span><span class="w"> </span>-q<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-DskipTests<span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.5<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.12<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>..
+cp<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src/spark-shaded/target/sedona-*<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>.jar<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin/
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Compiling for Spark 3.5 with Scala 2.13 using Java </span><span class="nv">$JAVA_VERSION</span><span class="s2">...&quot;</span>
+<span class="nb">cd</span><span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nv">$MVN_WRAPPER</span><span class="w"> </span>-q<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-DskipTests<span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.5<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>..
+cp<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src/spark-shaded/target/sedona-*<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>.jar<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin/
+
+<span class="c1"># Compile for Spark 4.0 with Java 17</span>
+<span class="nv">JAVA_VERSION</span><span class="o">=</span><span class="k">$(</span>get_java_version<span class="w"> </span><span class="s2">&quot;4.0&quot;</span><span class="k">)</span>
+<span class="nv">MVN_WRAPPER</span><span class="o">=</span><span class="k">$(</span>create_mvn_wrapper<span class="w"> </span><span class="nv">$JAVA_VERSION</span><span class="k">)</span>
+verify_java_version<span class="w"> </span><span class="nv">$MVN_WRAPPER</span><span class="w"> </span><span class="nv">$JAVA_VERSION</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Compiling for Spark 4.0 with Scala 2.13 using Java </span><span class="nv">$JAVA_VERSION</span><span class="s2">...&quot;</span>
+<span class="nb">cd</span><span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nv">$MVN_WRAPPER</span><span class="w"> </span>-q<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-DskipTests<span class="w"> </span>-Dspark<span class="o">=</span><span class="m">4</span>.0<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>..
+cp<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src/spark-shaded/target/sedona-*<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>.jar<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin/
+
+<span class="c1"># Clean up Maven wrappers</span>
+rm<span class="w"> </span>-f<span class="w"> </span>/tmp/mvn-java11<span class="w"> </span>/tmp/mvn-java17
+
+tar<span class="w"> </span>czf<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin.tar.gz<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin
+
+<span class="c1"># Create checksums and signatures for binary files</span>
+shasum<span class="w"> </span>-a<span class="w"> </span><span class="m">512</span><span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin.tar.gz<span class="w"> </span>&gt;<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin.tar.gz.sha512
+gpg<span class="w"> </span>-ab<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin.tar.gz
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Uploading binary files...&quot;</span>
+
+<span class="c1"># Upload binary files</span>
+svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin.tar.gz<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/<span class="si">${</span><span class="nv">RC_VERSION</span><span class="si">}</span>/apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin.tar.gz
+svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin.tar.gz.asc<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/<span class="si">${</span><span class="nv">RC_VERSION</span><span class="si">}</span>/apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin.tar.gz.asc
+svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin.tar.gz.sha512<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/<span class="si">${</span><span class="nv">RC_VERSION</span><span class="si">}</span>/apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin.tar.gz.sha512
 
 <span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Removing local release files...&quot;</span>
 
-rm<span class="w"> </span>apache-sedona-1.8.0-src.tar.gz
-rm<span class="w"> </span>apache-sedona-1.8.0-src.tar.gz.asc
-rm<span class="w"> </span>apache-sedona-1.8.0-src.tar.gz.sha512
-rm<span class="w"> </span>apache-sedona-1.8.0-bin.tar.gz
-rm<span class="w"> </span>apache-sedona-1.8.0-bin.tar.gz.asc
-rm<span class="w"> </span>apache-sedona-1.8.0-bin.tar.gz.sha512
-rm<span class="w"> </span>-rf<span class="w"> </span>apache-sedona-1.8.0-src
-rm<span class="w"> </span>-rf<span class="w"> </span>apache-sedona-1.8.0-bin
+rm<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src.tar.gz
+rm<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src.tar.gz.asc
+rm<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src.tar.gz.sha512
+rm<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin.tar.gz
+rm<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin.tar.gz.asc
+rm<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin.tar.gz.sha512
+rm<span class="w"> </span>-rf<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src
+rm<span class="w"> </span>-rf<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin
 </code></pre></div>
 <h2 id="5-vote-in-dev-sedonaapacheorg">5. Vote in dev sedona.apache.org<a class="headerlink" href="#5-vote-in-dev-sedonaapacheorg" title="Permanent link">&para;</a></h2>
 <h3 id="vote-email">Vote email<a class="headerlink" href="#vote-email" title="Permanent link">&para;</a></h3>
@@ -5568,17 +5800,73 @@ git<span class="w"> </span>pull
 rm<span class="w"> </span>-f<span class="w"> </span>release.*
 rm<span class="w"> </span>-f<span class="w"> </span>pom.xml.*
 
-<span class="c1"># For Spark 3.3 and Scala 2.12</span>
-mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.0-rc1<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.3 -Dscala=2.12&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.3<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.12
+<span class="c1"># Function to get Java version for Spark version</span>
+get_java_version<span class="o">()</span><span class="w"> </span><span class="o">{</span>
+<span class="w">  </span><span class="nb">local</span><span class="w"> </span><span class="nv">spark_version</span><span class="o">=</span><span class="nv">$1</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$spark_version</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;4.0&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;17&quot;</span>
+<span class="w">  </span><span class="k">else</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;11&quot;</span>
+<span class="w">  </span><span class="k">fi</span>
+<span class="o">}</span>
 
-<span class="c1"># For Spark 3.3 and Scala 2.13</span>
-mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.0-rc1<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.3 -Dscala=2.13&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.3<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13
+<span class="c1"># Function to set JAVA_HOME based on Java version</span>
+set_java_home<span class="o">()</span><span class="w"> </span><span class="o">{</span>
+<span class="w">  </span><span class="nb">local</span><span class="w"> </span><span class="nv">java_version</span><span class="o">=</span><span class="nv">$1</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$java_version</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;17&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="c1"># Try to find Java 17 installation</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nb">command</span><span class="w"> </span>-v<span class="w"> </span>/usr/libexec/java_home<span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">      </span><span class="nb">export</span><span class="w"> </span><span class="nv">JAVA_HOME</span><span class="o">=</span><span class="k">$(</span>/usr/libexec/java_home<span class="w"> </span>-v<span class="w"> </span><span class="m">17</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span>/usr/libexec/java_home<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.17<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="k">)</span>
+<span class="w">    </span><span class="k">fi</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$JAVA_HOME</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">      </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Warning: Java 17 not found, using system default&quot;</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="w">      </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Using Java 17: </span><span class="nv">$JAVA_HOME</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="k">fi</span>
+<span class="w">  </span><span class="k">else</span>
+<span class="w">    </span><span class="c1"># Try to find Java 11 installation</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nb">command</span><span class="w"> </span>-v<span class="w"> </span>/usr/libexec/java_home<span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">      </span><span class="nb">export</span><span class="w"> </span><span class="nv">JAVA_HOME</span><span class="o">=</span><span class="k">$(</span>/usr/libexec/java_home<span class="w"> </span>-v<span class="w"> </span><span class="m">11</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span>/usr/libexec/java_home<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.11<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="k">)</span>
+<span class="w">    </span><span class="k">fi</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$JAVA_HOME</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">      </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Warning: Java 11 not found, using system default&quot;</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="w">      </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Using Java 11: </span><span class="nv">$JAVA_HOME</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="k">fi</span>
+<span class="w">  </span><span class="k">fi</span>
 
-<span class="c1"># For Spark 3.4 and Scala 2.12</span>
+<span class="w">  </span><span class="c1"># Verify Java version using Maven</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Verifying Java version with Maven...&quot;</span>
+<span class="w">  </span><span class="nb">local</span><span class="w"> </span><span class="nv">mvn_java_version</span><span class="o">=</span><span class="k">$(</span>mvn<span class="w"> </span>--version<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;Java version&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/.*Java version: \([0-9]*\).*/\1/&#39;</span><span class="k">)</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$mvn_java_version</span><span class="s2">&quot;</span><span class="w"> </span>!<span class="o">=</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$java_version</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;ERROR: Maven is using Java </span><span class="nv">$mvn_java_version</span><span class="s2">, but expected Java </span><span class="nv">$java_version</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Please ensure the correct Java version is installed and JAVA_HOME is set properly&quot;</span>
+<span class="w">    </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<span class="w">  </span><span class="k">fi</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✓ Verified: Maven is using Java </span><span class="nv">$mvn_java_version</span><span class="s2">&quot;</span>
+<span class="o">}</span>
+
+<span class="c1"># For Spark 3.4 and Scala 2.12 (Java 11)</span>
+<span class="nv">JAVA_VERSION</span><span class="o">=</span><span class="k">$(</span>get_java_version<span class="w"> </span><span class="s2">&quot;3.4&quot;</span><span class="k">)</span>
+set_java_home<span class="w"> </span><span class="nv">$JAVA_VERSION</span>
 mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.0-rc1<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.4 -Dscala=2.12&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.4<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.12
 
-<span class="c1"># For Spark 3.4 and Scala 2.13</span>
+<span class="c1"># For Spark 3.4 and Scala 2.13 (Java 11)</span>
 mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.0-rc1<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.4 -Dscala=2.13&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.4<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13
+
+<span class="c1"># For Spark 3.5 and Scala 2.12 (Java 11)</span>
+<span class="nv">JAVA_VERSION</span><span class="o">=</span><span class="k">$(</span>get_java_version<span class="w"> </span><span class="s2">&quot;3.5&quot;</span><span class="k">)</span>
+set_java_home<span class="w"> </span><span class="nv">$JAVA_VERSION</span>
+mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.0-rc1<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.5 -Dscala=2.12&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.5<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.12
+
+<span class="c1"># For Spark 3.5 and Scala 2.13 (Java 11)</span>
+mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.0-rc1<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.5 -Dscala=2.13&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.5<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13
+
+<span class="c1"># For Spark 4.0 and Scala 2.13 (Java 17)</span>
+<span class="c1"># Note: Spark 4.0 + Scala 2.12 is not supported, so we skip it</span>
+<span class="nv">JAVA_VERSION</span><span class="o">=</span><span class="k">$(</span>get_java_version<span class="w"> </span><span class="s2">&quot;4.0&quot;</span><span class="k">)</span>
+set_java_home<span class="w"> </span><span class="nv">$JAVA_VERSION</span>
+mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.0-rc1<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=4.0 -Dscala=2.13&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">4</span>.0<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13
 </code></pre></div>
 <h2 id="9-release-sedona-python-and-zeppelin">9. Release Sedona Python and Zeppelin<a class="headerlink" href="#9-release-sedona-python-and-zeppelin" title="Permanent link">&para;</a></h2>
 <p>You must have the maintainer privilege of <code>https://pypi.org/project/apache-sedona/</code> and <code>https://www.npmjs.com/package/apache-sedona</code></p>
@@ -5630,7 +5918,7 @@ R<span class="w"> </span>CMD<span class="w"> </span>check<span class="w"> </span
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="March 16, 2025 06:33:20 UTC">March 16, 2025 06:33:20</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 14, 2025 04:48:01 UTC">September 14, 2025 04:48:01</span>
   </span>
 
     
