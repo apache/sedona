@@ -1,0 +1,53 @@
+{
+  "name": "gulp-notify",
+  "version": "5.0.0",
+  "description": "gulp plugin to send messages based on Vinyl Files or Errors to Mac OS X, Linux or Windows using the node-notifier module. Fallbacks to Growl or simply logging",
+  "keywords": [
+    "gulpplugin",
+    "notify",
+    "gulp",
+    "notification",
+    "reporter",
+    "windows notification",
+    "mac notification",
+    "notify-send",
+    "notify-osd",
+    "growl"
+  ],
+  "homepage": "https://github.com/mikaelbr/gulp-notify",
+  "bugs": "https://github.com/mikaelbr/gulp-notify/issues",
+  "author": {
+    "name": "Mikael Brevik",
+    "email": "mikaelbre@gmail.com",
+    "url": "https://github.com/mikaelbr"
+  },
+  "main": "./index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mikaelbr/gulp-notify.git"
+  },
+  "scripts": {
+    "test": "mocha -R spec",
+    "gulp": "gulp --gulpfile ./examples/gulpfile.js"
+  },
+  "dependencies": {
+    "ansi-colors": "^4.1.3",
+    "fancy-log": "^2.0.0",
+    "lodash": "^4.17.21",
+    "node-notifier": "^10.0.1",
+    "node.extend": "^2.0.3",
+    "plugin-error": "^2.0.1",
+    "through2": "^4.0.2"
+  },
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-plumber": "^1.2.1",
+    "mocha": "^10.7.3",
+    "should": "^13.2.3",
+    "vinyl": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT"
+}
