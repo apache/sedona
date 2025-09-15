@@ -23,15 +23,16 @@ from pyspark.sql import DataFrame
 
 class MockItem:
     """Mock STAC Item"""
+
     def __init__(self, item_id: str = "test_item"):
         self.id = item_id
         self.properties = {
             "datetime": "2006-12-26T18:03:22Z",
-            "collection": "aster-l1t"
+            "collection": "aster-l1t",
         }
         self.geometry = {
             "type": "Polygon",
-            "coordinates": [[[90, -73], [105, -73], [105, -69], [90, -69], [90, -73]]]
+            "coordinates": [[[90, -73], [105, -73], [105, -69], [90, -69], [90, -73]]],
         }
         self.bbox = [90, -73, 105, -69]
         self.assets = {}
@@ -39,6 +40,7 @@ class MockItem:
 
 class MockIterator:
     """Mock iterator for STAC items"""
+
     def __init__(self, items: List[MockItem] = None):
         self.items = items or [MockItem(f"item_{i}") for i in range(5)]
         self.index = 0
@@ -67,6 +69,7 @@ def create_mock_dataframe(data=None):
 
 class MockCollectionClient:
     """Mock CollectionClient"""
+
     def __init__(self, url: str, collection_id: str):
         self.url = url
         self.collection_id = collection_id
@@ -90,13 +93,15 @@ class MockCollectionClient:
     def save_to_geoparquet(self, output_path: str, **kwargs):
         """Mock save to geoparquet - just create an empty file"""
         import os
+
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        with open(output_path, 'w') as f:
+        with open(output_path, "w") as f:
             f.write("")
 
 
 class MockClient:
     """Mock STAC Client"""
+
     def __init__(self, url: str):
         self.url = url
 
@@ -129,7 +134,11 @@ class MockClient:
                 if isinstance(ids[0], str):
                     items = [MockItem(ids[0])]
                 else:
-                    items = [MockItem(item_id) for item_id in ids[0] if isinstance(item_id, str)]
+                    items = [
+                        MockItem(item_id)
+                        for item_id in ids[0]
+                        if isinstance(item_id, str)
+                    ]
             else:
                 num_items = min(max_items, 5) if max_items else 5
                 items = [MockItem(f"item_{i}") for i in range(num_items)]
@@ -143,6 +152,7 @@ def create_mock_client(url: str) -> MockClient:
 
 def mock_client_open(monkeypatch):
     """Pytest fixture to mock Client.open"""
+
     def _mock_open(url: str):
         return MockClient(url)
 

@@ -21,7 +21,7 @@ from sedona.spark.stac.client import Client
 from pyspark.sql import DataFrame
 
 from tests.test_base import TestBase
-from tests.stac.mock_fixtures import MockClient
+from tests.stac.test_mock_fixtures import MockClient
 
 STAC_URLS = {
     "PLANETARY-COMPUTER": "https://planetarycomputer.microsoft.com/api/stac/v1",
@@ -30,7 +30,7 @@ STAC_URLS = {
 
 
 class TestStacClient(TestBase):
-    @patch('sedona.spark.stac.client.Client.open')
+    @patch("sedona.spark.stac.client.Client.open")
     def test_collection_client(self, mock_open) -> None:
         mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
 
@@ -44,7 +44,7 @@ class TestStacClient(TestBase):
         assert items is not None
         assert isinstance(items, collections.abc.Iterator)
 
-    @patch('sedona.spark.stac.client.Client.open')
+    @patch("sedona.spark.stac.client.Client.open")
     def test_search_with_ids(self, mock_open) -> None:
         mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
 
@@ -57,7 +57,7 @@ class TestStacClient(TestBase):
         assert items is not None
         assert isinstance(items, collections.abc.Iterator)
 
-    @patch('sedona.spark.stac.client.Client.open')
+    @patch("sedona.spark.stac.client.Client.open")
     def test_search_with_single_id(self, mock_open) -> None:
         mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
 
@@ -70,7 +70,7 @@ class TestStacClient(TestBase):
         assert items is not None
         assert isinstance(items, collections.abc.Iterator)
 
-    @patch('sedona.spark.stac.client.Client.open')
+    @patch("sedona.spark.stac.client.Client.open")
     def test_search_with_bbox_and_datetime(self, mock_open) -> None:
         mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
 
@@ -84,7 +84,7 @@ class TestStacClient(TestBase):
         assert items is not None
         assert isinstance(items, collections.abc.Iterator)
 
-    @patch('sedona.spark.stac.client.Client.open')
+    @patch("sedona.spark.stac.client.Client.open")
     def test_search_with_multiple_bboxes_and_intervals(self, mock_open) -> None:
         mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
 
@@ -102,7 +102,7 @@ class TestStacClient(TestBase):
         assert items is not None
         assert isinstance(items, collections.abc.Iterator)
 
-    @patch('sedona.spark.stac.client.Client.open')
+    @patch("sedona.spark.stac.client.Client.open")
     def test_search_with_bbox_and_non_overlapping_intervals(self, mock_open) -> None:
         mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
 
@@ -119,7 +119,7 @@ class TestStacClient(TestBase):
         assert items is not None
         assert isinstance(items, collections.abc.Iterator)
 
-    @patch('sedona.spark.stac.client.Client.open')
+    @patch("sedona.spark.stac.client.Client.open")
     def test_search_with_max_items(self, mock_open) -> None:
         mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
 
@@ -134,7 +134,7 @@ class TestStacClient(TestBase):
         assert items is not None
         assert isinstance(items, collections.abc.Iterator)
 
-    @patch('sedona.spark.stac.client.Client.open')
+    @patch("sedona.spark.stac.client.Client.open")
     def test_search_with_single_datetime(self, mock_open) -> None:
         from datetime import datetime
 
@@ -150,7 +150,7 @@ class TestStacClient(TestBase):
         assert items is not None
         assert isinstance(items, collections.abc.Iterator)
 
-    @patch('sedona.spark.stac.client.Client.open')
+    @patch("sedona.spark.stac.client.Client.open")
     def test_search_with_YYYY(self, mock_open) -> None:
         mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
 
@@ -164,7 +164,7 @@ class TestStacClient(TestBase):
         assert items is not None
         assert isinstance(items, collections.abc.Iterator)
 
-    @patch('sedona.spark.stac.client.Client.open')
+    @patch("sedona.spark.stac.client.Client.open")
     def test_search_with_return_dataframe(self, mock_open) -> None:
         mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
 
@@ -177,7 +177,7 @@ class TestStacClient(TestBase):
         assert df is not None
         assert isinstance(df, DataFrame)
 
-    @patch('sedona.spark.stac.client.Client.open')
+    @patch("sedona.spark.stac.client.Client.open")
     def test_search_with_catalog_url(self, mock_open) -> None:
         mock_open.return_value = MockClient(STAC_URLS["EARTHVIEW-CATALOG"])
 
