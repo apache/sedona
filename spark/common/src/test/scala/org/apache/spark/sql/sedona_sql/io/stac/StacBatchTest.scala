@@ -44,7 +44,7 @@ class StacBatchTest extends TestBaseScala {
 
   it("collectItemLinks should collect correct item links") {
     val collectionUrl =
-      "https://earth-search.aws.element84.com/v1/collections/sentinel-2-pre-c1-l2a"
+      "file://" + getAbsolutePathOfResource("stac/collections/sentinel-2-pre-c1-l2a.json")
     val stacCollectionJson = StacUtils.loadStacCollectionToJson(collectionUrl)
     val opts = mutable
       .Map(
@@ -85,15 +85,16 @@ class StacBatchTest extends TestBaseScala {
         |  "id": "sample-collection",
         |  "description": "A sample STAC collection",
         |  "links": [
-        |    {"rel": "item", "href": "https://storage.googleapis.com/cfo-public/vegetation/California-Vegetation-CanopyBaseHeight-2016-Summer-00010m.json"},
-        |    {"rel": "item", "href": "https://storage.googleapis.com/cfo-public/vegetation/California-Vegetation-CanopyBaseHeight-2016-Summer-00010m.json"},
-        |    {"rel": "item", "href": "https://storage.googleapis.com/cfo-public/vegetation/California-Vegetation-CanopyBaseHeight-2016-Summer-00010m.json"}
+        |    {"rel": "item", "href": "mock-item-1.json"},
+        |    {"rel": "item", "href": "mock-item-2.json"},
+        |    {"rel": "item", "href": "mock-item-3.json"}
         |  ]
         |}
       """.stripMargin
 
     val opts = mutable.Map("numPartitions" -> "2", "itemsLimitMax" -> "20").toMap
-    val collectionUrl = "https://storage.googleapis.com/cfo-public/vegetation/collection.json"
+    val collectionUrl =
+      "file://" + getAbsolutePathOfResource("stac/collections/vegetation-collection.json")
 
     val stacBatch =
       StacBatch(
@@ -121,7 +122,8 @@ class StacBatchTest extends TestBaseScala {
       """.stripMargin
 
     val opts = mutable.Map("numPartitions" -> "2", "itemsLimitMax" -> "20").toMap
-    val collectionUrl = "https://path/to/collection.json"
+    val collectionUrl =
+      "file://" + getAbsolutePathOfResource("stac/collections/vegetation-collection.json")
 
     val stacBatch =
       StacBatch(

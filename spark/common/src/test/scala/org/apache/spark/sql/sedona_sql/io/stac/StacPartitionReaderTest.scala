@@ -27,14 +27,23 @@ import scala.jdk.CollectionConverters._
 
 class StacPartitionReaderTest extends TestBaseScala {
 
+  def getAbsolutePathOfResource(resourceFilePath: String): String = {
+    val resourceUrl = getClass.getClassLoader.getResource(resourceFilePath)
+    if (resourceUrl != null) {
+      resourceUrl.getPath
+    } else {
+      throw new IllegalArgumentException(s"Resource not found: $resourceFilePath")
+    }
+  }
+
   val TEST_DATA_FOLDER: String =
     System.getProperty("user.dir") + "/src/test/resources/datasource_stac"
   val JSON_STAC_ITEM_SIMPLE: String = s"file://$TEST_DATA_FOLDER/simple-item.json"
   val JSON_STAC_ITEM_CORE: String = s"file://$TEST_DATA_FOLDER/core-item.json"
   val JSON_STAC_ITEM_EXTENDED: String = s"file://$TEST_DATA_FOLDER/extended-item.json"
   val JSON_STAC_ITEM_FEATURES: String = s"file://$TEST_DATA_FOLDER/collection-items.json"
-  val HTTPS_STAC_ITEM_FEATURES: String =
-    "https://earth-search.aws.element84.com/v1/collections/sentinel-2-pre-c1-l2a/items"
+  val MOCK_STAC_ITEM_FEATURES: String =
+    "file://" + getAbsolutePathOfResource("stac/items/sentinel-2-items.json")
 
   it("StacPartitionReader should read feature files from local files") {
     val jsonFiles =
@@ -81,8 +90,8 @@ class StacPartitionReaderTest extends TestBaseScala {
     reader.close()
   }
 
-  it("StacPartitionReader should read features collection file from https endpoint") {
-    val jsonFiles = Seq(HTTPS_STAC_ITEM_FEATURES).toArray
+  it("StacPartitionReader should read features collection file from mock endpoint") {
+    val jsonFiles = Seq(MOCK_STAC_ITEM_FEATURES).toArray
     val partition = StacPartition(0, jsonFiles, Map.empty[String, String].asJava)
     val reader =
       new StacPartitionReader(

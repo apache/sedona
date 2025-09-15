@@ -24,16 +24,25 @@ import org.apache.spark.sql.types._
 
 class StacDataSourceTest extends TestBaseScala {
 
+  def getAbsolutePathOfResource(resourceFilePath: String): String = {
+    val resourceUrl = getClass.getClassLoader.getResource(resourceFilePath)
+    if (resourceUrl != null) {
+      resourceUrl.getPath
+    } else {
+      throw new IllegalArgumentException(s"Resource not found: $resourceFilePath")
+    }
+  }
+
   val STAC_COLLECTION_LOCAL: String = resourceFolder + "datasource_stac/collection.json"
   val STAC_ITEM_LOCAL: String = resourceFolder + "geojson/core-item.json"
 
-  val STAC_COLLECTION_REMOTE: List[String] = List(
-    "https://earth-search.aws.element84.com/v1/collections/sentinel-2-pre-c1-l2a",
-    "https://storage.googleapis.com/cfo-public/vegetation/collection.json",
-    "https://storage.googleapis.com/cfo-public/wildfire/collection.json",
-    "https://earthdatahub.destine.eu/api/stac/v1/collections/copernicus-dem",
-    "https://planetarycomputer.microsoft.com/api/stac/v1/collections/naip",
-    "https://satellogic-earthview.s3.us-west-2.amazonaws.com/stac/catalog.json")
+  val STAC_COLLECTION_MOCK: List[String] = List(
+    "file://" + getAbsolutePathOfResource("stac/collections/sentinel-2-pre-c1-l2a.json"),
+    "file://" + getAbsolutePathOfResource("stac/collections/vegetation-collection.json"),
+    "file://" + getAbsolutePathOfResource("stac/collections/wildfire-collection.json"),
+    "file://" + getAbsolutePathOfResource("stac/collections/copernicus-dem.json"),
+    "file://" + getAbsolutePathOfResource("stac/collections/naip.json"),
+    "file://" + getAbsolutePathOfResource("stac/collections/earthview-catalog.json"))
 
   it("basic df load from local file should work") {
     val dfStac = sparkSession.read.format("stac").load(STAC_COLLECTION_LOCAL)
@@ -49,8 +58,8 @@ class StacDataSourceTest extends TestBaseScala {
     assert(rowCount > 0)
   }
 
-  it("basic df load from remote service endpoints should work") {
-    STAC_COLLECTION_REMOTE.foreach { endpoint =>
+  it("basic df load from mock service endpoints should work") {
+    STAC_COLLECTION_MOCK.foreach { endpoint =>
       val dfStac = sparkSession.read.format("stac").load(endpoint)
       assertSchema(dfStac.schema)
     }
