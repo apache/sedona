@@ -191,6 +191,7 @@ theme:
     - search.suggest
     - navigation.footer
     - navigation.instant
+    - navigation.instant.prefetch
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.top

@@ -7,3 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
   codeTabs();
   typedAnimation();
 });
+
+document$.subscribe(function () {
+  industriesTabs();
+  codeTabs();
+  typedAnimation();
+});
