@@ -49,6 +49,20 @@ jobs:
         run: mvn -q clean install -DskipTests && mkdir -p docs/api/javadoc/spark && cp -r spark/common/target/apidocs/* docs/api/javadoc/spark/
       - name: Compile ScalaDoc
         run: mvn generate-sources scala:doc -pl !common,!snowflake,!flink && mkdir -p docs/api/scaladoc/spark && cp -r spark/common/target/site/scaladocs/* docs/api/scaladoc/spark
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'docs-overrides/package-lock.json'
+      - name: Install docs-overrides dependencies
+        run: |
+          cd docs-overrides
+          npm ci
+      - name: Build docs-overrides assets
+        run: |
+          cd docs-overrides
+          npx gulp build
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -121,3 +135,10 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+      - name: Cache Node modules
+        uses: actions/cache@v4
+        with:
+          path: docs-overrides/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('docs-overrides/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-

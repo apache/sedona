@@ -1,0 +1,27 @@
+{#-
+This file was automatically generated - do not edit
+-#}
+<footer class="footer md-footer">
+  <div class="container">
+
+    <div class="footer__top">
+
+      <div class="col-left">
+        <img src="{{ 'image/footer/logo-footer.svg' | url }}" alt="" class="footer-logo">
+      </div>
+
+      <div class="col-right">
+        {% if config.extra.social %}
+        {% include "partials/social.html" %}
+        {% endif %}
+      </div>
+    </div>
+
+    <hr class="footer-hr"></hr>
+
+    <div class="footer__bot">
+      {% include "partials/copyright.html" %}
+    </div>
+
+  </div>
+</footer>
