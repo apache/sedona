@@ -16,10 +16,12 @@
 # under the License.
 
 import collections.abc
+from unittest.mock import patch
 from sedona.spark.stac.client import Client
 from pyspark.sql import DataFrame
 
 from tests.test_base import TestBase
+from tests.stac.test_mock_fixtures import MockClient
 
 STAC_URLS = {
     "PLANETARY-COMPUTER": "https://planetarycomputer.microsoft.com/api/stac/v1",
@@ -28,7 +30,10 @@ STAC_URLS = {
 
 
 class TestStacClient(TestBase):
-    def test_collection_client(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_collection_client(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         items = client.search(
             collection_id="aster-l1t",
@@ -39,7 +44,10 @@ class TestStacClient(TestBase):
         assert items is not None
         assert isinstance(items, collections.abc.Iterator)
 
-    def test_search_with_ids(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_search_with_ids(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         items = client.search(
             *["AST_L1T_00312272006020322_20150518201805", "item2"],
@@ -49,7 +57,10 @@ class TestStacClient(TestBase):
         assert items is not None
         assert isinstance(items, collections.abc.Iterator)
 
-    def test_search_with_single_id(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_search_with_single_id(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         items = client.search(
             "AST_L1T_00312272006020322_20150518201805",
@@ -59,7 +70,10 @@ class TestStacClient(TestBase):
         assert items is not None
         assert isinstance(items, collections.abc.Iterator)
 
-    def test_search_with_bbox_and_datetime(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_search_with_bbox_and_datetime(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         items = client.search(
             collection_id="aster-l1t",
@@ -70,7 +84,10 @@ class TestStacClient(TestBase):
         assert items is not None
         assert isinstance(items, collections.abc.Iterator)
 
-    def test_search_with_multiple_bboxes_and_intervals(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_search_with_multiple_bboxes_and_intervals(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         items = client.search(
             collection_id="aster-l1t",
@@ -85,7 +102,10 @@ class TestStacClient(TestBase):
         assert items is not None
         assert isinstance(items, collections.abc.Iterator)
 
-    def test_search_with_bbox_and_non_overlapping_intervals(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_search_with_bbox_and_non_overlapping_intervals(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         items = client.search(
             collection_id="aster-l1t",
@@ -99,7 +119,10 @@ class TestStacClient(TestBase):
         assert items is not None
         assert isinstance(items, collections.abc.Iterator)
 
-    def test_search_with_max_items(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_search_with_max_items(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         items = client.search(
             collection_id="aster-l1t",
@@ -111,8 +134,11 @@ class TestStacClient(TestBase):
         assert items is not None
         assert isinstance(items, collections.abc.Iterator)
 
-    def test_search_with_single_datetime(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_search_with_single_datetime(self, mock_open) -> None:
         from datetime import datetime
+
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
 
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         items = client.search(
@@ -124,7 +150,10 @@ class TestStacClient(TestBase):
         assert items is not None
         assert isinstance(items, collections.abc.Iterator)
 
-    def test_search_with_YYYY(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_search_with_YYYY(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         items = client.search(
             collection_id="aster-l1t",
@@ -135,7 +164,10 @@ class TestStacClient(TestBase):
         assert items is not None
         assert isinstance(items, collections.abc.Iterator)
 
-    def test_search_with_return_dataframe(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_search_with_return_dataframe(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         df = client.search(
             collection_id="aster-l1t",
@@ -145,7 +177,10 @@ class TestStacClient(TestBase):
         assert df is not None
         assert isinstance(df, DataFrame)
 
-    def test_search_with_catalog_url(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_search_with_catalog_url(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["EARTHVIEW-CATALOG"])
+
         client = Client.open(STAC_URLS["EARTHVIEW-CATALOG"])
         df = client.search(
             return_dataframe=True,
