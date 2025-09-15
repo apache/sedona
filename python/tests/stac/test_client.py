@@ -16,7 +16,7 @@
 # under the License.
 
 import collections.abc
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from sedona.spark.stac.client import Client
 from pyspark.sql import DataFrame
 
