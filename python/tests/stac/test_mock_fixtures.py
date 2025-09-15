@@ -16,7 +16,7 @@
 # under the License.
 
 from typing import Iterator, List, Optional, Union
-from unittest.mock import create_autospec
+from unittest.mock import create_autospec, MagicMock
 
 from pyspark.sql import DataFrame
 
