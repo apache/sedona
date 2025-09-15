@@ -1,5 +1,5 @@
 {#-
-  This file was automatically generated - do not edit
+This file was automatically generated - do not edit
 -#}
 {% extends "base.html" %}
 
@@ -17,34 +17,40 @@
 
 {% block content %}
   {% if page.is_homepage %}
-  <!-- {{ super() }} -->
-  <style>
-    .md-header{position:initial}.md-main__inner{margin-left:5%}.md-content{display:display}@media screen and (min-width:60em){.md-sidebar--secondary{display:display}}@media screen and (min-width:76.25em){.md-sidebar--primary{display:none}}
-    .br {
-            display: block;
-            margin-bottom: 14em;
-        }
-    .responsive-container {
-      display: grid;
-      grid-template-columns: 44% 56%;
-      grid-gap: 20px;
-    }
-    .responsive-text {
-      grid-column: 1;
-    }
-    .responsive-img {
-     grid-column: 2;
-    }
-
-    @media (max-width: 490px) {
-      .responsive-container {
-        grid-template-columns: 100%;
+    <style>
+      /* Fix for the hero section layout */
+      .tx-hero {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        flex-wrap: wrap;
       }
-      .responsive-text , .responsive-img {
+      .tx-hero__image {
+        flex-shrink: 0;
+      }
+
+      .md-header{position:initial}@media screen and (min-width:76.25em){.md-sidebar--primary{display:none}}
+      .responsive-container {
+        display: grid;
+        grid-template-columns: 44% 56%;
+        grid-gap: 20px;
+      }
+      .responsive-text {
         grid-column: 1;
       }
-    }
-</style>
+      .responsive-img {
+        grid-column: 2;
+      }
+
+      @media (max-width: 490px) {
+        .responsive-container {
+          grid-template-columns: 100%;
+        }
+        .responsive-text , .responsive-img {
+          grid-column: 1;
+        }
+      }
+    </style>
     <section class="tx-container">
       <div class="md-grid md-typeset">
         <div class="tx-hero">
@@ -62,81 +68,61 @@
               Go to GitHub
             </a>
             <p>
-            <a href="community/contact/#discord-server" target="_blank">
-              <img src="https://dcbadge.limes.pink/api/server/https://discord.gg/9A3k5dEBsY" alt="Apache Sedona Discord server">
-            </a>
+              <a href="community/contact/#discord-server" target="_blank">
+                <img src="https://dcbadge.limes.pink/api/server/https://discord.gg/9A3k5dEBsY" alt="Apache Sedona Discord server">
+              </a>
             </p>
-
           </div>
+        </div>
 
-          <br><br><br>
+        <div class="tx-hero__content">
+          <h1>Sedona Ecosystem</h1>
+          <div style="width: 100%;">
+            <img src="image/sedona-ecosystem.png" width="800">
+          </div>
+        </div>
 
-          <div class="tx-hero__content">
-            <h1>Sedona Ecosystem</h1>
-            <div style="width: 100%;">
-              <img src="image/sedona-ecosystem.png" width="800">
+        <div class="tx-hero__content">
+          <h1>High Speed</h1>
+          <div class="responsive-container">
+            <div class="responsive-text">
+              According to <a href="./community/publication/">our benchmark and third-party research papers</a>, Sedona runs 2X - 10X faster than other Spark-based geospatial data systems on computation-intensive query workloads.
+            </div>
+            <div class="responsive-img">
+              <figure>
+                <img src="image/jointime.png" width="350">
+                <figcaption>Execution time of spatial join with polygons</figcaption>
+              </figure>
             </div>
           </div>
+        </div>
 
-          <br><br><br><br>
-
-          <div class="tx-hero__content">
-            <h1>High Speed</h1>
-            <div class="responsive-container">
-              <div class="responsive-text">
-                According to <a href="./community/publication/">our benchmark and third-party research papers</a>, Sedona runs 2X - 10X faster than other Spark-based geospatial data systems on computation-intensive query workloads.
-              </div>
-              <div class="responsive-img">
-                <figure>
-                    <img src="image/jointime.png" width="350">
-                    <figcaption>Execution time of spatial join with polygons</figcaption>
-                </figure>
-              </div>
+        <div class="tx-hero__content">
+          <h1>Low Memory Consumption</h1>
+          <div class="responsive-container">
+            <div class="responsive-text">
+              According to <a href="./community/publication/">our benchmark and third-party research papers</a>, Sedona has 50% less peak memory consumption than other Spark-based geospatial data systems for large-scale in-memory query processing.
+            </div>
+            <div class="responsive-img">
+              <figure>
+                <img src="image/joinmem.png" width="350">
+                <figcaption>Peak memory consumption of spatial join with polygons</figcaption>
+              </figure>
             </div>
           </div>
+        </div>
 
-          <br><br><br><br>
-
-          <div class="tx-hero__content">
-            <h1>Low Memory Consumption</h1>
-            <div class="responsive-container">
-              <div class="responsive-text">
-                According to <a href="./community/publication/">our benchmark and third-party research papers</a>, Sedona has 50% less peak memory consumption than other Spark-based geospatial data systems for large-scale in-memory query processing.
-              </div>
-              <div class="responsive-img">
-                <figure>
-                    <img src="image/joinmem.png" width="350">
-                    <figcaption>Peak memory consumption of spatial join with polygons</figcaption>
-                </figure>
-              </div>
-            </div>
-          </div>
-
-          <br><br><br><br>
-
-          <div class="tx-hero__content">
-            <h1>Ease of Use</h1>
-            <div class="responsive-container">
-              <div class="responsive-text">
-                Sedona offers Scala, Java, Spatial SQL, Python, and R APIs and integrates them into underlying system kernels with care. You can simply create spatial analytics and data mining applications and run them in any cloud environments.
-              </div>
-              <div class="responsive-img">
-<pre class="hljs" style="display: block; overflow-x: auto; background: rgb(235, 248, 255); color: rgb(81, 109, 123); padding: 0.5em;"><span class="hljs-keyword" style="color: rgb(107, 107, 184);">SELECT</span> superhero.name
+        <div class="tx-hero__content">
+          <h1>Ease of Use</h1>
+          <p>Sedona offers Scala, Java, Spatial SQL, Python, and R APIs and integrates them into underlying system kernels with care. You can simply create spatial analytics and data mining applications and run them in any cloud environments.</p>
+          <pre class="hljs" style="display: block; overflow-x: auto; background: rgb(235, 248, 255); color: rgb(81, 109, 123); padding: 0.5em;"><span class="hljs-keyword" style="color: rgb(107, 107, 184);">SELECT</span> superhero.name
 <span class="hljs-keyword" style="color: rgb(107, 107, 184);">FROM</span> city, superhero
 <span class="hljs-keyword" style="color: rgb(107, 107, 184);">WHERE</span> ST_Contains(city.geom, superhero.geom)
 <span class="hljs-keyword" style="color: rgb(107, 107, 184);">AND</span> city.name = <span class="hljs-string" style="color: rgb(86, 140, 59);">'Gotham'</span></pre>
-              </div>
-            </div>
-          </div>
-
-          <br><br><br><br>
-
-          <span class="br"></span>
-
         </div>
+
       </div>
     </section>
-
   {% else %}
     {{ super() }}
   {% endif %}
