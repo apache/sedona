@@ -22,7 +22,29 @@ testthat_spark_connection <- function(conn_retry_interval_s = 2) {
     hadoop_version <- Sys.getenv("HADOOP_VERSION")
     spark_installed <- spark_installed_versions()
     if (nrow(spark_installed[spark_installed$spark == version & spark_installed$hadoop == hadoop_version, ]) == 0) {
-      spark_install(version, hadoop_version)
+      # Install Spark with retry logic to handle download failures
+      install_attempts <- 3
+      install_delay <- 5
+      for (attempt in seq(install_attempts)) {
+        install_success <- tryCatch(
+          {
+            spark_install(version, hadoop_version)
+            TRUE
+          },
+          error = function(e) {
+            if (attempt < install_attempts) {
+              message(sprintf("Spark installation attempt %d failed: %s", attempt, e$message))
+              message(sprintf("Retrying in %d seconds...", install_delay))
+              Sys.sleep(install_delay)
+              install_delay <<- install_delay * 2  # Exponential backoff
+              FALSE
+            } else {
+              stop(sprintf("Failed to install Spark after %d attempts: %s", install_attempts, e$message))
+            }
+          }
+        )
+        if (install_success) break
+      }
     }
 
     conn_attempts <- 3

@@ -143,6 +143,7 @@ jobs:
           cd ./R/tests
           NOT_CRAN='true' Rscript testthat.R
         shell: bash
+        timeout-minutes: 30
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
