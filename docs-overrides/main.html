@@ -104,13 +104,12 @@ You're not viewing the latest stable version.
                     </span>
                   </button>
 
-                  <pre class="hljs-snippet__panel" data-lang="sql"><code class="language-sql"><pre><code class="language-sql">-- Create a table
-    CREATE TABLE users (
-        id INT PRIMARY KEY,
-        name VARCHAR(50),
-        email VARCHAR(100),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );</code></pre>
+                  <pre class="hljs-snippet__panel" data-lang="sql"><code class="language-sql"><pre><code class="language-sql">
+    SELECT ST_Contains(
+        ST_GeomFromWKT('POLYGON((175 150,20 40,50 60,125 100,175 150))'),
+        ST_GeomFromWKT('POINT(174 149)')
+    ) as result
+</code></pre>
     </code></pre>
                   <pre class="hljs-snippet__panel" data-lang="python" hidden><code class="language-python">df.withColumn(
         &quot;centroid&quot;,
@@ -119,11 +118,8 @@ You're not viewing the latest stable version.
                   <pre class="hljs-snippet__panel" data-lang="java" hidden><code class="language-java">Dataset&lt;Row&gt; df = sedona.read.format(&quot;geojson&quot;)
         .option(&quot;multiLine&quot;, &quot;true&quot;)
         .load(&quot;PATH/TO/MYFILE.json&quot;)
-
         .selectExpr(&quot;explode(features) as features&quot;)
-
         .select(&quot;features.*&quot;)
-
         .withColumn(&quot;prop0&quot;, expr(&quot;properties['prop0']&quot;))
         .drop(&quot;properties&quot;)
         .drop(&quot;type&quot;);</code></pre>
@@ -140,10 +136,9 @@ You're not viewing the latest stable version.
         <div class="container">
           <div class="section-row">
             <div class="col-left">
-              <div class="hljs-snippet" data-initial="powershell">
+              <div class="hljs-snippet" data-initial="pyspark">
                 <div class="hljs-snippet__tabs" role="tablist" aria-label="Code tabs">
-                  <button class="hljs-snippet__tab is-active" role="tab" aria-selected="true" data-lang="powershell">Command line</button>
-                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="pyspark">PySpark</button>
+                  <button class="hljs-snippet__tab is-active" role="tab" aria-selected="true" data-lang="pyspark">PySpark</button>
                   <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="python">Python</button>
                   <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="java">Snowflake</button>
                 </div>
@@ -159,9 +154,8 @@ You're not viewing the latest stable version.
                       <span class="active-state">✅</span>
                     </span>
                   </button>
-                  <pre class="hljs-snippet__panel" data-lang="powershell"><code class="language-powershell">curl https://install.sedona.apache.org | sh</code></pre>
                   <pre class="hljs-snippet__panel" data-lang="pyspark" hidden><code class="language-python">pip install apache-sedona</code></pre>
-                  <pre class="hljs-snippet__panel" data-lang="python" hidden><code class="language-python">pip install sedonadb</code></pre>
+                  <pre class="hljs-snippet__panel" data-lang="python" hidden><code class="language-python">pip install apache-sedona[db]</code></pre>
                   <pre class="hljs-snippet__panel" data-lang="java" hidden><code class="language-java">java -jar sedona-snowflake-1.7.2.jar --geotools-version 1.7.2-28.5 > sedona-snowflake.sql</code></pre>
                 </div>
               </div>
@@ -174,7 +168,7 @@ You're not viewing the latest stable version.
                 Install SedonaDB, or run Sedona on distributed systems when you need additional scale.
               </div>
               <div class="bth-group">
-                <a href="#" class="btn btn-red">
+                <a href="https://github.com/apache/sedona-db" class="btn btn-red">
                      <span class="caption">
                    Install SedonaDB
                   </span>
@@ -190,10 +184,10 @@ You're not viewing the latest stable version.
         <div class="container">
           <div class="content-box">
 
-            <h2 class="section-title">Want to appear on our use new case page (coming soon)?</h2>
+            <h2 class="section-title">Want to share your Sedona use case?</h2>
 
             <div class="section__subtitle editor">
-              Submit a pull request or send a quick description of your organization and usage to <a target="_blank" href="https://sedona.apache.org/latest/community/contact/">the mailing list</a> and we'll add you.
+              Join our Discord or create a GitHub Discussion so we can collaborate.
             </div>
 
             <div class="industries-tabs">
@@ -351,7 +345,7 @@ You're not viewing the latest stable version.
               <h3 class="feature-item__title">Fast</h3>
               <div class="feature-item__description editor">Works with planetary-scale datasets in Spark, Flink, or local systems.</div>
               <div class="feature-item__cta">
-                <a href="#" class="btn-link">
+                <a href="https://github.com/apache/sedona-spatialbench" class="btn-link">
                   <span class="caption">See the benchmarks</span>
                   <span class="icon">
                         <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -404,7 +398,7 @@ You're not viewing the latest stable version.
               <h3 class="info-item__title">SedonaDB</h3>
               <div class="info-item__description editor">Standalone runtime for local processing and development.</div>
               <div class="info-item__cta">
-                <a href="#" class="btn-link">
+                <a href="https://github.com/apache/sedona-db" class="btn-link">
                   <span class="caption">SedonaDB</span>
                   <span class="icon">
                         <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -426,7 +420,7 @@ You're not viewing the latest stable version.
               <h3 class="info-item__title">SedonaSpark</h3>
               <div class="info-item__description editor">Distributed batch processing on Apache Spark clusters.</div>
               <div class="info-item__cta">
-                <a href="#" class="btn-link">
+                <a href="https://sedona.apache.org/latest/setup/overview/" class="btn-link">
                   <span class="caption">SedonaSpark</span>
                   <span class="icon">
                         <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -448,7 +442,7 @@ You're not viewing the latest stable version.
               <h3 class="info-item__title">SedonaFlink</h3>
               <div class="info-item__description editor">Real-time spatial analytics using Apache Flink.</div>
               <div class="info-item__cta">
-                <a href="#" class="btn-link">
+                <a href="https://sedona.apache.org/latest/setup/flink/install-scala/" class="btn-link">
                   <span class="caption">SedonaFlink</span>
                   <span class="icon">
                         <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -472,7 +466,7 @@ You're not viewing the latest stable version.
                 Native spatial support inside Snowflake environments.
               </div>
               <div class="info-item__cta">
-                <a href="#" class="btn-link">
+                <a href="https://sedona.apache.org/latest/setup/snowflake/install/" class="btn-link">
                   <span class="caption">SedonaSnow</span>
                   <span class="icon">
                         <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -494,7 +488,7 @@ You're not viewing the latest stable version.
               <h3 class="info-item__title">Sedona in the Cloud</h3>
               <div class="info-item__description editor">Integrated spatial support in your preferred cloud environment</div>
               <div class="info-item__cta">
-                <a href="#" class="btn-link">
+                <a href="https://sedona.apache.org/latest/setup/overview/" class="btn-link">
                   <span class="caption">Explore the ecosystem</span>
                   <span class="icon">
                         <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -516,7 +510,7 @@ You're not viewing the latest stable version.
           <h2 class="section-title">Join the community</h2>
           <div class="section-description editor">Discover what our community has to say about their Apache Sedona experience.</div>
           <div class="btn-group">
-            <a href="#" class="btn btn-light-red">
+            <a href="https://github.com/apache/sedona/discussions" class="btn btn-light-red">
                   <span class="caption">
                     GitHub Discussions
                   </span>
@@ -529,7 +523,7 @@ You're not viewing the latest stable version.
 
                   </span>
             </a>
-            <a href="#" class="btn btn-light-red">
+            <a href="https://discord.gg/9A3k5dEBsY" class="btn btn-light-red">
               <span class="caption">Discord</span>
               <span class="icon  icon-lg">
                      <svg width="17" height="18" viewBox="0 0 17 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -633,7 +627,7 @@ You're not viewing the latest stable version.
                 Monthly community meetings and programming conferences
               </h2>
               <div class="btn-group">
-                <a href="#" class="btn btn-red">
+                <a href="https://sedona.apache.org/latest/community/contact/" class="btn btn-red">
                      <span class="caption">
                     Find Events
                   </span>
@@ -651,7 +645,7 @@ You're not viewing the latest stable version.
       </section>
 
       <!-- Section Get Started -->
-      <section class="section-get-started">
+      <!-- <section class="section-get-started">
         <div class="container">
 
           <h2 class="section-title">
@@ -702,7 +696,8 @@ You're not viewing the latest stable version.
           </div>
 
         </div>
-      </section>
+      </section> -->
+
     </div>
     {% else %}
     {{ super() }}
