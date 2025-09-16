@@ -27,15 +27,6 @@ import scala.jdk.CollectionConverters._
 
 class StacPartitionReaderTest extends TestBaseScala {
 
-  def getAbsolutePathOfResource(resourceFilePath: String): String = {
-    val resourceUrl = getClass.getClassLoader.getResource(resourceFilePath)
-    if (resourceUrl != null) {
-      resourceUrl.getPath
-    } else {
-      throw new IllegalArgumentException(s"Resource not found: $resourceFilePath")
-    }
-  }
-
   val TEST_DATA_FOLDER: String =
     System.getProperty("user.dir") + "/src/test/resources/datasource_stac"
   val JSON_STAC_ITEM_SIMPLE: String = s"file://$TEST_DATA_FOLDER/simple-item.json"
@@ -43,7 +34,7 @@ class StacPartitionReaderTest extends TestBaseScala {
   val JSON_STAC_ITEM_EXTENDED: String = s"file://$TEST_DATA_FOLDER/extended-item.json"
   val JSON_STAC_ITEM_FEATURES: String = s"file://$TEST_DATA_FOLDER/collection-items.json"
   val MOCK_STAC_ITEM_FEATURES: String =
-    "file://" + getAbsolutePathOfResource("stac/items/sentinel-2-items.json")
+    StacTestUtils.getFileUrlOfResource("stac/items/sentinel-2-items.json")
 
   it("StacPartitionReader should read feature files from local files") {
     val jsonFiles =

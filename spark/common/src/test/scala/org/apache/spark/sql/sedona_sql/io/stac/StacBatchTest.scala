@@ -33,18 +33,9 @@ class StacBatchTest extends TestBaseScala {
     Source.fromResource(resourceFilePath).getLines().mkString("\n")
   }
 
-  def getAbsolutePathOfResource(resourceFilePath: String): String = {
-    val resourceUrl = getClass.getClassLoader.getResource(resourceFilePath)
-    if (resourceUrl != null) {
-      resourceUrl.getPath
-    } else {
-      throw new IllegalArgumentException(s"Resource not found: $resourceFilePath")
-    }
-  }
-
   it("collectItemLinks should collect correct item links") {
     val collectionUrl =
-      "file://" + getAbsolutePathOfResource("stac/collections/sentinel-2-pre-c1-l2a.json")
+      StacTestUtils.getFileUrlOfResource("stac/collections/sentinel-2-pre-c1-l2a.json")
     val stacCollectionJson = StacUtils.loadStacCollectionToJson(collectionUrl)
     val opts = mutable
       .Map(
@@ -94,7 +85,7 @@ class StacBatchTest extends TestBaseScala {
 
     val opts = mutable.Map("numPartitions" -> "2", "itemsLimitMax" -> "20").toMap
     val collectionUrl =
-      "file://" + getAbsolutePathOfResource("stac/collections/vegetation-collection.json")
+      StacTestUtils.getFileUrlOfResource("stac/collections/vegetation-collection.json")
 
     val stacBatch =
       StacBatch(
@@ -123,7 +114,7 @@ class StacBatchTest extends TestBaseScala {
 
     val opts = mutable.Map("numPartitions" -> "2", "itemsLimitMax" -> "20").toMap
     val collectionUrl =
-      "file://" + getAbsolutePathOfResource("stac/collections/vegetation-collection.json")
+      StacTestUtils.getFileUrlOfResource("stac/collections/vegetation-collection.json")
 
     val stacBatch =
       StacBatch(
@@ -144,7 +135,7 @@ class StacBatchTest extends TestBaseScala {
     val rootJsonFile = "datasource_stac/collection.json"
     val stacCollectionJson = loadJsonFromResource(rootJsonFile)
     val opts = mutable.Map("numPartitions" -> "3", "itemsLimitMax" -> "20").toMap
-    val collectionUrl = getAbsolutePathOfResource(rootJsonFile)
+    val collectionUrl = StacTestUtils.getFileUrlOfResource(rootJsonFile)
 
     val stacBatch =
       StacBatch(

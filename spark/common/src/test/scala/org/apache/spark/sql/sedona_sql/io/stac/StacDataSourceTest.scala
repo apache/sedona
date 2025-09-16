@@ -24,25 +24,16 @@ import org.apache.spark.sql.types._
 
 class StacDataSourceTest extends TestBaseScala {
 
-  def getAbsolutePathOfResource(resourceFilePath: String): String = {
-    val resourceUrl = getClass.getClassLoader.getResource(resourceFilePath)
-    if (resourceUrl != null) {
-      resourceUrl.getPath
-    } else {
-      throw new IllegalArgumentException(s"Resource not found: $resourceFilePath")
-    }
-  }
-
   val STAC_COLLECTION_LOCAL: String = resourceFolder + "datasource_stac/collection.json"
   val STAC_ITEM_LOCAL: String = resourceFolder + "geojson/core-item.json"
 
   val STAC_COLLECTION_MOCK: List[String] = List(
-    "file://" + getAbsolutePathOfResource("stac/collections/sentinel-2-pre-c1-l2a.json"),
-    "file://" + getAbsolutePathOfResource("stac/collections/vegetation-collection.json"),
-    "file://" + getAbsolutePathOfResource("stac/collections/wildfire-collection.json"),
-    "file://" + getAbsolutePathOfResource("stac/collections/copernicus-dem.json"),
-    "file://" + getAbsolutePathOfResource("stac/collections/naip.json"),
-    "file://" + getAbsolutePathOfResource("stac/collections/earthview-catalog.json"))
+    StacTestUtils.getFileUrlOfResource("stac/collections/sentinel-2-pre-c1-l2a.json"),
+    StacTestUtils.getFileUrlOfResource("stac/collections/vegetation-collection.json"),
+    StacTestUtils.getFileUrlOfResource("stac/collections/wildfire-collection.json"),
+    StacTestUtils.getFileUrlOfResource("stac/collections/copernicus-dem.json"),
+    StacTestUtils.getFileUrlOfResource("stac/collections/naip.json"),
+    StacTestUtils.getFileUrlOfResource("stac/collections/earthview-catalog.json"))
 
   it("basic df load from local file should work") {
     val dfStac = sparkSession.read.format("stac").load(STAC_COLLECTION_LOCAL)
