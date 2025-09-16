@@ -20,30 +20,18 @@ testthat_spark_connection <- function(conn_retry_interval_s = 2) {
   if (!exists(conn_key, envir = .GlobalEnv)) {
     version <- Sys.getenv("SPARK_VERSION")
     hadoop_version <- Sys.getenv("HADOOP_VERSION")
-    spark_installed <- spark_installed_versions()
-    if (nrow(spark_installed[spark_installed$spark == version & spark_installed$hadoop == hadoop_version, ]) == 0) {
-      # Install Spark with retry logic to handle download failures
-      install_attempts <- 3
-      install_delay <- 5
-      for (attempt in seq(install_attempts)) {
-        install_success <- tryCatch(
-          {
-            spark_install(version, hadoop_version)
-            TRUE
-          },
-          error = function(e) {
-            if (attempt < install_attempts) {
-              message(sprintf("Spark installation attempt %d failed: %s", attempt, e$message))
-              message(sprintf("Retrying in %d seconds...", install_delay))
-              Sys.sleep(install_delay)
-              install_delay <<- install_delay * 2  # Exponential backoff
-              FALSE
-            } else {
-              stop(sprintf("Failed to install Spark after %d attempts: %s", install_attempts, e$message))
-            }
-          }
-        )
-        if (install_success) break
+    spark_home <- Sys.getenv("SPARK_HOME")
+
+    # Check if SPARK_HOME is set (from CI workflow)
+    if (spark_home != "") {
+      # Use pre-installed Spark from CI
+      message(sprintf("Using pre-installed Spark from: %s", spark_home))
+    } else {
+      # Local development: install Spark if needed
+      spark_installed <- spark_installed_versions()
+      if (nrow(spark_installed[spark_installed$spark == version & spark_installed$hadoop == hadoop_version, ]) == 0) {
+        message("Installing Spark for local development...")
+        spark_install(version, hadoop_version)
       }
     }
 
@@ -55,13 +43,21 @@ testthat_spark_connection <- function(conn_retry_interval_s = 2) {
           config <- spark_config()
           config[["sparklyr.connect.timeout"]] <- 300
 
-          sc <- spark_connect(
+          # Use SPARK_HOME if set, otherwise use version
+          connect_args <- list(
             master = "local",
             method = "shell",
             config = config,
-            app_name = paste0("testthat-", uuid::UUIDgenerate()),
-            version = version
+            app_name = paste0("testthat-", uuid::UUIDgenerate())
           )
+
+          if (spark_home != "") {
+            connect_args$spark_home <- spark_home
+          } else {
+            connect_args$version <- version
+          }
+
+          sc <- do.call(spark_connect, connect_args)
           assign(conn_key, sc, envir = .GlobalEnv)
           TRUE
         },
