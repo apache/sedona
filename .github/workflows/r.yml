@@ -115,13 +115,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install PySpark (same as python.yml)
+      - name: Install PySpark
         run: |
-          # Follow python.yml approach exactly
           pip3 install pyspark==${SPARK_VERSION}
-      - name: Download JAI libraries (same as python.yml)
+      - name: Download JAI libraries
         run: |
-          # Follow python.yml JAI download pattern exactly
           PYSPARK_PATH=$(python3 -c "import pyspark; print(pyspark.__path__[0])")
           wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_core/${JAI_CORE_VERSION}/jai_core-${JAI_CORE_VERSION}.jar
           wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_codec/${JAI_CODEC_VERSION}/jai_codec-${JAI_CODEC_VERSION}.jar
@@ -134,13 +132,12 @@ jobs:
         run: |
           SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
           mvn -q clean install -DskipTests -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dgeotools
-      - name: Copy Sedona JARs to PySpark (same as python.yml)
+      - name: Copy Sedona JARs to PySpark
         run: |
-          # Follow python.yml Sedona JAR copying pattern exactly
           find spark-shaded/target -name sedona-*.jar -exec cp {} ${PYSPARK_PATH}/jars/ \;
       - name: Run tests
         run: |
-          # Set SPARK_HOME to PySpark path (same as python.yml pattern)
+          # Set SPARK_HOME to PySpark path
           export SPARK_HOME=${PYSPARK_PATH}
 
           if [[ "${SPARK_VERSION:0:3}" < "3.3" ]]; then

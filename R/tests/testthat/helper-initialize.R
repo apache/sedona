@@ -22,12 +22,9 @@ testthat_spark_connection <- function(conn_retry_interval_s = 2) {
     hadoop_version <- Sys.getenv("HADOOP_VERSION")
     spark_home <- Sys.getenv("SPARK_HOME")
 
-    # Use pre-installed Spark from CI (via PySpark)
     if (spark_home != "") {
       message(sprintf("Using pre-installed Spark from: %s", spark_home))
-      # No need to download - Spark is already available via PySpark
     } else {
-      # For local development only (not CI)
       spark_installed <- spark_installed_versions()
       if (nrow(spark_installed[spark_installed$spark == version & spark_installed$hadoop == hadoop_version, ]) == 0) {
         message("Installing Spark for local development...")
