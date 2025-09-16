@@ -1,0 +1,103 @@
+{
+  "id": "sentinel-2-pre-c1-l2a",
+  "type": "Collection",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/eo/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/projection/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/view/v1.0.0/schema.json"
+  ],
+  "stac_version": "1.0.0",
+  "description": "Mock Sentinel-2 Pre-Collection 1 Level-2A collection for testing",
+  "title": "Mock Sentinel-2 Pre-Collection 1 Level-2A",
+  "keywords": [
+    "sentinel",
+    "earth observation",
+    "esa"
+  ],
+  "providers": [
+    {
+      "name": "Mock Earth Search",
+      "description": "Mock provider for testing",
+      "roles": [
+        "producer",
+        "processor"
+      ],
+      "url": "http://mock-earth-search.example.com"
+    }
+  ],
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -180.0,
+          -90.0,
+          180.0,
+          90.0
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2015-06-23T00:00:00Z",
+          "2021-12-31T23:59:59Z"
+        ]
+      ]
+    }
+  },
+  "license": "proprietary",
+  "links": [
+    {
+      "rel": "root",
+      "href": "https://earth-search.aws.element84.com/v1",
+      "type": "application/json"
+    },
+    {
+      "rel": "parent",
+      "href": "https://earth-search.aws.element84.com/v1",
+      "type": "application/json"
+    },
+    {
+      "rel": "self",
+      "href": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-pre-c1-l2a",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "mock-item-1.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "mock-item-2.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "mock-item-3.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "mock-item-4.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "mock-item-5.json",
+      "type": "application/json"
+    }
+  ],
+  "summaries": {
+    "platform": [
+      "sentinel-2a",
+      "sentinel-2b"
+    ],
+    "constellation": [
+      "sentinel-2"
+    ],
+    "instruments": [
+      "msi"
+    ]
+  }
+}
