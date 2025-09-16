@@ -20,19 +20,9 @@ testthat_spark_connection <- function(conn_retry_interval_s = 2) {
   if (!exists(conn_key, envir = .GlobalEnv)) {
     version <- Sys.getenv("SPARK_VERSION")
     hadoop_version <- Sys.getenv("HADOOP_VERSION")
-    spark_home <- Sys.getenv("SPARK_HOME")
-
-    # Check if SPARK_HOME is set (from CI workflow)
-    if (spark_home != "") {
-      # Use pre-installed Spark from CI
-      message(sprintf("Using pre-installed Spark from: %s", spark_home))
-    } else {
-      # Local development: install Spark if needed
-      spark_installed <- spark_installed_versions()
-      if (nrow(spark_installed[spark_installed$spark == version & spark_installed$hadoop == hadoop_version, ]) == 0) {
-        message("Installing Spark for local development...")
-        spark_install(version, hadoop_version)
-      }
+    spark_installed <- spark_installed_versions()
+    if (nrow(spark_installed[spark_installed$spark == version & spark_installed$hadoop == hadoop_version, ]) == 0) {
+      spark_install(version, hadoop_version)
     }
 
     conn_attempts <- 3
@@ -43,21 +33,13 @@ testthat_spark_connection <- function(conn_retry_interval_s = 2) {
           config <- spark_config()
           config[["sparklyr.connect.timeout"]] <- 300
 
-          # Use SPARK_HOME if set, otherwise use version
-          connect_args <- list(
+          sc <- spark_connect(
             master = "local",
             method = "shell",
             config = config,
-            app_name = paste0("testthat-", uuid::UUIDgenerate())
+            app_name = paste0("testthat-", uuid::UUIDgenerate()),
+            version = version
           )
-
-          if (spark_home != "") {
-            connect_args$spark_home <- spark_home
-          } else {
-            connect_args$version <- version
-          }
-
-          sc <- do.call(spark_connect, connect_args)
           assign(conn_key, sc, envir = .GlobalEnv)
           TRUE
         },
