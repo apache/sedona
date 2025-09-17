@@ -50,7 +50,7 @@ def _to_file(
             - "geopackage"
             - "geoparquet"
     schema : dict, default None
-        Not applicable to Sedona's implementation
+        Not applicable to Sedona's implementation.
     index : bool, default None
         If True, write index into one or more columns (for MultiIndex).
         Default None writes the index into one or more columns only if
@@ -62,15 +62,15 @@ def _to_file(
     crs : pyproj.CRS, default None
         If specified, the CRS is passed to Fiona to
         better control how the file is written. If None, GeoPandas
-        will determine the crs based on crs df attribute.
+        will determine the CRS based on CRS df attribute.
         The value can be anything accepted
         by :meth:`pyproj.CRS.from_user_input() <pyproj.crs.CRS.from_user_input>`,
         such as an authority string (eg "EPSG:4326") or a WKT string.
     engine : str
-        Not applicable to Sedona's implementation
+        Not applicable to Sedona's implementation.
     metadata : dict[str, str], default None
         Optional metadata to be stored in the file. Keys and values must be
-        strings. Supported only for "GPKG" driver. Not supported by Sedona
+        strings. Supported only for "GPKG" driver. Not supported by Sedona.
     **kwargs :
         Keyword args to be passed to the engine, and can be used to write
         to multi-layer data, store data within archives (zip files), etc.
@@ -101,7 +101,7 @@ def _to_file(
         ".geojson": "GeoJSON",
     }
 
-    # auto detect driver from filename if not provided
+    # Auto detect driver from filename if not provided.
     if driver is None:
         _, extension = os.path.splitext(path)
         if extension not in ext_to_driver:
@@ -120,7 +120,7 @@ def _to_file(
 
     if index is None:
         # Determine if index attribute(s) should be saved to file
-        # (only if they are named or are non-integer)
+        # (only if they are named or are non-integer).
         index = list(df.index.names) != [None] or not is_integer_dtype(df.index.dtype)
 
     if not index:
@@ -168,7 +168,7 @@ def read_file(filename: str, format: Union[str, None] = None, **kwargs):
     GeoDataFrame.to_file : write GeoDataFrame to file
     """
 
-    # We warn the user if they try to use arguments that geopandas supports but not Sedona
+    # We warn the user if they try to use arguments that GeoPandas supports but not Sedona.
     if kwargs:
         warnings.warn(f"The given arguments are not supported in Sedona: {kwargs}")
 
@@ -205,7 +205,7 @@ def read_file(filename: str, format: Union[str, None] = None, **kwargs):
                 "geometry", f"properties.*"
             )  # select all non-geometry columns (which are under properties)
         )
-        # geojson also has a 'type' field, but we ignore it
+        # GeoJSON also has a 'type' field, but we ignore it.
 
     elif format == "geopackage":
         table_name = kwargs.get("table_name", None)
@@ -225,7 +225,7 @@ def read_file(filename: str, format: Union[str, None] = None, **kwargs):
 
     index_spark_columns = []
 
-    # If index was retained, we sort by it so the dataframe has the same order as the original one
+    # If index was retained, we sort by it so the DataFrame has the same order as the original one.
     if SPARK_DEFAULT_INDEX_NAME in sdf.columns:
         sdf = sdf.orderBy(SPARK_DEFAULT_INDEX_NAME)
         index_spark_columns = [scol_for(sdf, SPARK_DEFAULT_INDEX_NAME)]
