@@ -525,14 +525,19 @@ or other GeoSeries/GeoDataFrame objects.</p></li>
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fastpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.__init__" title="Link to this definition"></a></dt>
 <dd><p>Initialize a GeoSeries object.</p>
-<p>Parameters:
-- data: The input data for the GeoSeries. It can be a GeoDataFrame, GeoSeries, or pandas Series.
-- index: The index for the GeoSeries.
-- crs: Coordinate Reference System for the GeoSeries.
-- dtype: Data type for the GeoSeries.
-- name: Name of the GeoSeries.
-- copy: Whether to copy the input data.
-- fastpath: Internal parameter for fast initialization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>array-like</em><em>, </em><a class="reference internal" href="#sedona.spark.geopandas.GeoDataFrame" title="sedona.spark.geopandas.GeoDataFrame"><em>GeoDataFrame</em></a><em>, </em><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries"><em>GeoSeries</em></a><em>, or </em><em>pandas Series</em>) – The input data for the GeoSeries.</p></li>
+<li><p><strong>index</strong> (<em>array-like</em><em>, </em><em>optional</em>) – The index for the GeoSeries.</p></li>
+<li><p><strong>crs</strong> (<em>pyproj.CRS</em><em>, </em><em>optional</em>) – Coordinate Reference System for the GeoSeries.</p></li>
+<li><p><strong>dtype</strong> (<em>dtype</em><em>, </em><em>optional</em>) – Data type for the GeoSeries.</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Name of the GeoSeries.</p></li>
+<li><p><strong>copy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>default False</em>) – Whether to copy the input data.</p></li>
+<li><p><strong>fastpath</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>default False</em>) – Internal parameter for fast initialization.</p></li>
+</ul>
+</dd>
+</dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
@@ -3446,9 +3451,15 @@ authority string (e.g., “EPSG:4326”) or a WKT string.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.to_geopandas">
 <span class="sig-name descname"><span class="pre">to_geopandas</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.geoseries.GeoSeries"><span class="pre">GeoSeries</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.to_geopandas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.to_geopandas" title="Link to this definition"></a></dt>
-<dd><p>Convert the GeoSeries to a geopandas GeoSeries.</p>
-<p>Returns:
-- geopandas.GeoSeries: A geopandas GeoSeries.</p>
+<dd><p>Convert the GeoSeries to a GeoPandas GeoSeries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A GeoPandas GeoSeries.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries">geopandas.GeoSeries</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -4954,9 +4965,9 @@ CRS is exported if it’s set.</p>
 <li><p><strong>geometry</strong> (<em>np.array</em><em> of </em><em>Shapely geometries</em><em>, </em><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries"><em>GeoSeries</em></a><em>, or </em><em>PySparkDataFrame</em>)</p></li>
 <li><p><strong>index_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>default &quot;strtree&quot;</em>) – The type of spatial index to use.</p></li>
 <li><p><strong>column_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – The column name to extract geometry from if <cite>geometry</cite> is a PySparkDataFrame.</p></li>
-<li><p><strong>Note</strong> (<em>query methods</em><em> (</em><em>ie. query</em><em>, </em><em>nearest</em><em>, </em><em>intersection</em><em>) </em><em>have different behaviors depending on how the index is constructed.</em>)</p></li>
+<li><p><strong>Note</strong> (<em>query methods</em><em> (</em><em>i.e. query</em><em>, </em><em>nearest</em><em>, </em><em>intersection</em><em>) </em><em>have different behaviors depending on how the index is constructed.</em>)</p></li>
 <li><p><strong>np.array</strong> (<em>When constructed from a</em>)</p></li>
-<li><p><strong>geopandas.</strong> (<em>the query methods return indices like original</em>)</p></li>
+<li><p><strong>GeoPandas.</strong> (<em>the query methods return indices like original</em>)</p></li>
 <li><p><strong>PySparkDataFrame</strong> (<em>When constructed from a GeoSeries or</em>)</p></li>
 <li><p><strong>geometries.</strong> (<em>the query methods return</em>)</p></li>
 </ul>
@@ -4973,9 +4984,9 @@ this is a compatibility wrapper for rtree.index.Index.intersection, use query in
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>bounds</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a>) – Bounding box as (min_x, min_y, max_x, max_y).</p></li>
-<li><p><strong>Note</strong> (<em>Unlike Geopandas</em><em>, </em><em>Sedona does not support geometry input</em><em> of </em><em>type np.array</em><em> or </em><em>GeoSeries.</em>)</p></li>
+<li><p><strong>Note</strong> (<em>Unlike GeoPandas</em><em>, </em><em>Sedona does not support geometry input</em><em> of </em><em>type np.array</em><em> or </em><em>GeoSeries.</em>)</p></li>
 <li><p><strong>np.array</strong> (<em>When constructed from a</em>)</p></li>
-<li><p><strong>geopandas.</strong> (<em>this method returns indices like original</em>)</p></li>
+<li><p><strong>GeoPandas.</strong> (<em>this method returns indices like original</em>)</p></li>
 <li><p><strong>PySparkDataFrame</strong> (<em>When constructed from a GeoSeries or</em>)</p></li>
 <li><p><strong>geometries.</strong> (<em>this method returns</em>)</p></li>
 <li><p><strong>Note</strong></p></li>
@@ -5019,7 +5030,7 @@ List of the corresponding indices if constructed from a np.array.</p>
 <li><p><strong>Note</strong> (<em>nearest</em><em>(</em><em>) </em><em>has different behaviors depending on how the index is constructed.</em>)</p></li>
 <li><p><strong>Note</strong></p></li>
 <li><p><strong>np.array</strong> (<em>When constructed from a</em>)</p></li>
-<li><p><strong>geopandas.</strong> (<em>this method returns indices like original</em>)</p></li>
+<li><p><strong>GeoPandas.</strong> (<em>this method returns indices like original</em>)</p></li>
 <li><p><strong>PySparkDataFrame</strong> (<em>When constructed from a GeoSeries or</em>)</p></li>
 <li><p><strong>geometries.</strong> (<em>this method returns</em>)</p></li>
 </ul>
@@ -5044,9 +5055,9 @@ List of the corresponding indices if constructed from a np.array.</p>
 <li><p><strong>geometry</strong> (<em>Shapely geometry</em>) – The geometry to query against the spatial index.</p></li>
 <li><p><strong>predicate</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Spatial predicate to filter results. Must be either ‘intersects’ (default) or ‘contains’.</p></li>
 <li><p><strong>sort</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em><em>, </em><em>default False</em>) – Whether to sort the results.</p></li>
-<li><p><strong>Note</strong> (<em>Unlike Geopandas</em><em>, </em><em>Sedona does not support geometry input</em><em> of </em><em>type np.array</em><em> or </em><em>GeoSeries.</em>)</p></li>
+<li><p><strong>Note</strong> (<em>Unlike GeoPandas</em><em>, </em><em>Sedona does not support geometry input</em><em> of </em><em>type np.array</em><em> or </em><em>GeoSeries.</em>)</p></li>
 <li><p><strong>np.array</strong> (<em>When constructed from a</em>)</p></li>
-<li><p><strong>geopandas.</strong> (<em>this method returns indices like original</em>)</p></li>
+<li><p><strong>GeoPandas.</strong> (<em>this method returns indices like original</em>)</p></li>
 <li><p><strong>PySparkDataFrame</strong> (<em>When constructed from a GeoSeries or</em>)</p></li>
 <li><p><strong>geometries.</strong> (<em>this method returns</em>)</p></li>
 <li><p><strong>Note</strong></p></li>

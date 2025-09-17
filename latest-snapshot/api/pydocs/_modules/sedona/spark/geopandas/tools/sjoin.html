@@ -467,7 +467,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">GeoSeries</span>
 
-<span class="c1"># Pre-compiled regex pattern for suffix validation</span>
+<span class="c1"># Pre-compiled regex pattern for suffix validation.</span>
 <span class="n">SUFFIX_PATTERN</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^[a-zA-Z_][a-zA-Z0-9_]*$&quot;</span><span class="p">)</span>
 
 
@@ -509,7 +509,7 @@
 <span class="sd">    GeoDataFrame or GeoSeries</span>
 <span class="sd">        Joined result</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Predicate mapping</span>
+    <span class="c1"># Predicate mapping.</span>
     <span class="n">predicate_map</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;intersects&quot;</span><span class="p">:</span> <span class="s2">&quot;ST_Intersects&quot;</span><span class="p">,</span>
         <span class="s2">&quot;contains&quot;</span><span class="p">:</span> <span class="s2">&quot;ST_Contains&quot;</span><span class="p">,</span>
@@ -520,7 +520,7 @@
         <span class="s2">&quot;dwithin&quot;</span><span class="p">:</span> <span class="s2">&quot;ST_DWithin&quot;</span><span class="p">,</span>
         <span class="s2">&quot;covers&quot;</span><span class="p">:</span> <span class="s2">&quot;ST_Covers&quot;</span><span class="p">,</span>
         <span class="s2">&quot;covered_by&quot;</span><span class="p">:</span> <span class="s2">&quot;ST_CoveredBy&quot;</span><span class="p">,</span>
-        <span class="c1"># &quot;contains_properly&quot;: &quot;ST_ContainsProperly&quot;,  # not supported by Sedona yet</span>
+        <span class="c1"># &quot;contains_properly&quot;: &quot;ST_ContainsProperly&quot;,  # Not supported by Sedona yet.</span>
     <span class="p">}</span>
 
     <span class="k">if</span> <span class="n">predicate</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">predicate_map</span><span class="p">:</span>
@@ -530,29 +530,29 @@
 
     <span class="n">spatial_func</span> <span class="o">=</span> <span class="n">predicate_map</span><span class="p">[</span><span class="n">predicate</span><span class="p">]</span>
 
-    <span class="c1"># Get the internal Spark DataFrames</span>
+    <span class="c1"># Get the internal Spark DataFrames.</span>
     <span class="n">left_sdf</span> <span class="o">=</span> <span class="n">left_df</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span>
     <span class="n">right_sdf</span> <span class="o">=</span> <span class="n">right_df</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span>
 
-    <span class="c1"># Handle geometry columns - check if they exist and get proper column names</span>
+    <span class="c1"># Handle geometry columns - check if they exist and get proper column names.</span>
     <span class="n">left_geom_col</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">right_geom_col</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="c1"># Find geometry columns in left dataframe</span>
+    <span class="c1"># Find geometry columns in left DataFrame.</span>
     <span class="n">left_geom_col</span> <span class="o">=</span> <span class="n">left_df</span><span class="o">.</span><span class="n">active_geometry_name</span>
 
-    <span class="c1"># Find geometry columns in right dataframe</span>
+    <span class="c1"># Find geometry columns in right DataFrame.</span>
     <span class="n">right_geom_col</span> <span class="o">=</span> <span class="n">right_df</span><span class="o">.</span><span class="n">active_geometry_name</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">left_geom_col</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Left dataframe geometry column not set&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Left DataFrame geometry column not set&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">right_geom_col</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Right dataframe geometry column not set&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Right DataFrame geometry column not set&quot;</span><span class="p">)</span>
 
     <span class="n">left_geom_expr</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">left_geom_col</span><span class="si">}</span><span class="s2">` as l_geometry&quot;</span>
     <span class="n">right_geom_expr</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">right_geom_col</span><span class="si">}</span><span class="s2">` as r_geometry&quot;</span>
 
-    <span class="c1"># Select all columns with geometry</span>
+    <span class="c1"># Select all columns with geometry.</span>
     <span class="n">left_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">left_geom_expr</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span>
         <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">` as l_</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">left_sdf</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">fields</span>
@@ -571,7 +571,7 @@
         <span class="o">*</span><span class="n">right_cols</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">SPARK_DEFAULT_INDEX_NAME</span><span class="si">}</span><span class="s2">` as index_</span><span class="si">{</span><span class="n">rsuffix</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="p">)</span>
 
-    <span class="c1"># Build spatial join condition</span>
+    <span class="c1"># Build spatial join condition.</span>
     <span class="k">if</span> <span class="n">predicate</span> <span class="o">==</span> <span class="s2">&quot;dwithin&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">distance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Distance parameter is required for &#39;dwithin&#39; predicate&quot;</span><span class="p">)</span>
@@ -579,13 +579,13 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">spatial_condition</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">spatial_func</span><span class="si">}</span><span class="s2">(l_geometry, r_geometry)&quot;</span>
 
-    <span class="c1"># Add attribute-based join condition if specified</span>
+    <span class="c1"># Add attribute-based join condition if specified.</span>
     <span class="n">join_condition</span> <span class="o">=</span> <span class="n">spatial_condition</span>
     <span class="k">if</span> <span class="n">on_attribute</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">on_attribute</span><span class="p">:</span>
             <span class="n">join_condition</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; AND l_</span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2"> = r_</span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2">&quot;</span>
 
-    <span class="c1"># Perform spatial join based on join type</span>
+    <span class="c1"># Perform spatial join based on join type.</span>
     <span class="k">if</span> <span class="n">how</span> <span class="o">==</span> <span class="s2">&quot;inner&quot;</span><span class="p">:</span>
         <span class="n">spatial_join_df</span> <span class="o">=</span> <span class="n">left_geo_df</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;l&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="n">right_geo_df</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;r&quot;</span><span class="p">),</span> <span class="n">expr</span><span class="p">(</span><span class="n">join_condition</span><span class="p">)</span>
@@ -601,16 +601,16 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Join type &#39;</span><span class="si">{</span><span class="n">how</span><span class="si">}</span><span class="s2">&#39; not supported&quot;</span><span class="p">)</span>
 
-    <span class="c1"># Pick which index to use for the resulting df&#39;s index based on &#39;how&#39;</span>
+    <span class="c1"># Pick which index to use for the resulting df&#39;s index based on &#39;how&#39;.</span>
     <span class="n">index_col</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;index_</span><span class="si">{</span><span class="n">lsuffix</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">how</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span> <span class="s2">&quot;left&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;index_</span><span class="si">{</span><span class="n">rsuffix</span><span class="si">}</span><span class="s2">&quot;</span>
 
-    <span class="c1"># Handle column naming with suffixes</span>
+    <span class="c1"># Handle column naming with suffixes.</span>
     <span class="n">final_columns</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="c1"># Add geometry column (always from left for geopandas compatibility)</span>
+    <span class="c1"># Add geometry column (always from left for GeoPandas compatibility).</span>
     <span class="n">final_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;l_geometry as geometry&quot;</span><span class="p">)</span>
 
-    <span class="c1"># Add other columns with suffix handling</span>
+    <span class="c1"># Add other columns with suffix handling.</span>
     <span class="n">left_data_cols</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">col</span>
         <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">left_geo_df</span><span class="o">.</span><span class="n">columns</span>
@@ -632,10 +632,10 @@
         <span class="n">right_col</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;r_</span><span class="si">{</span><span class="n">base_name</span><span class="si">}</span><span class="s2">&quot;</span>
 
         <span class="k">if</span> <span class="n">right_col</span> <span class="ow">in</span> <span class="n">right_data_cols</span><span class="p">:</span>
-            <span class="c1"># Column exists in both - apply suffixes</span>
+            <span class="c1"># Column exists in both - apply suffixes.</span>
             <span class="n">final_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">col_name</span><span class="si">}</span><span class="s2"> as </span><span class="si">{</span><span class="n">base_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">lsuffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Column only in left</span>
+            <span class="c1"># Column only in left.</span>
             <span class="n">final_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">col_name</span><span class="si">}</span><span class="s2"> as </span><span class="si">{</span><span class="n">base_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">index_col</span> <span class="o">!=</span> <span class="sa">f</span><span class="s2">&quot;index_</span><span class="si">{</span><span class="n">rsuffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span>
@@ -646,15 +646,15 @@
         <span class="n">left_col</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;l_</span><span class="si">{</span><span class="n">base_name</span><span class="si">}</span><span class="s2">&quot;</span>
 
         <span class="k">if</span> <span class="n">left_col</span> <span class="ow">in</span> <span class="n">left_data_cols</span><span class="p">:</span>
-            <span class="c1"># Column exists in both - apply suffixes</span>
+            <span class="c1"># Column exists in both - apply suffixes.</span>
             <span class="n">final_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">col_name</span><span class="si">}</span><span class="s2"> as </span><span class="si">{</span><span class="n">base_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">rsuffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Column only in right</span>
+            <span class="c1"># Column only in right.</span>
             <span class="n">final_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">col_name</span><span class="si">}</span><span class="s2"> as </span><span class="si">{</span><span class="n">base_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="c1"># Select final columns</span>
+    <span class="c1"># Select final columns.</span>
     <span class="n">result_df</span> <span class="o">=</span> <span class="n">spatial_join_df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="o">*</span><span class="n">final_columns</span><span class="p">)</span>
-    <span class="c1"># Note, we do not .orderBy(SPARK_DEFAULT_INDEX_NAME) to avoid a performance hit</span>
+    <span class="c1"># Note, we do not .orderBy(SPARK_DEFAULT_INDEX_NAME) to avoid a performance hit.</span>
 
     <span class="n">data_spark_columns</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">scol_for</span><span class="p">(</span><span class="n">result_df</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
@@ -708,7 +708,7 @@
 <span class="sd">    distance : number or array_like, optional</span>
 <span class="sd">        Distance(s) around each input geometry within which to query the tree</span>
 <span class="sd">        for the &#39;dwithin&#39; predicate. If array_like, must be</span>
-<span class="sd">        one-dimesional with length equal to length of left GeoDataFrame.</span>
+<span class="sd">        one-dimensional with length equal to length of left GeoDataFrame.</span>
 <span class="sd">        Required if ``predicate=&#39;dwithin&#39;``.</span>
 <span class="sd">    on_attribute : string, list or tuple</span>
 <span class="sd">        Column name(s) to join on as an additional join restriction on top</span>
@@ -723,7 +723,8 @@
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
-<span class="sd">    &gt;&gt;&gt; groceries_w_communities = geopandas.sjoin(groceries, chicago)</span>
+<span class="sd">    &gt;&gt;&gt; from sedona.spark.geopandas.tools import sjoin</span>
+<span class="sd">    &gt;&gt;&gt; groceries_w_communities = sjoin(groceries, chicago)</span>
 <span class="sd">    &gt;&gt;&gt; groceries_w_communities.head()  # doctest: +SKIP</span>
 <span class="sd">       OBJECTID       community                           geometry</span>
 <span class="sd">    0        16          UPTOWN  MULTIPOINT ((-87.65661 41.97321))</span>
@@ -799,7 +800,7 @@
     <span class="k">if</span> <span class="n">how</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_hows</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;`how` was &quot;</span><span class="si">{</span><span class="n">how</span><span class="si">}</span><span class="s1">&quot; but is expected to be in </span><span class="si">{</span><span class="n">allowed_hows</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-    <span class="c1"># Check if on_attribute columns exist in both datasets</span>
+    <span class="c1"># Check if on_attribute columns exist in both datasets.</span>
     <span class="k">if</span> <span class="n">on_attribute</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">on_attribute</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">left_df</span><span class="p">,</span> <span class="s2">&quot;columns&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">attr</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">left_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
@@ -807,11 +808,11 @@
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">right_df</span><span class="p">,</span> <span class="s2">&quot;columns&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">attr</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">right_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Column &#39;</span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2">&#39; not found in right dataset&quot;</span><span class="p">)</span>
 
-    <span class="c1"># Check for reserved column names that would conflict</span>
+    <span class="c1"># Check for reserved column names that would conflict.</span>
     <span class="k">if</span> <span class="n">lsuffix</span> <span class="o">==</span> <span class="n">rsuffix</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;lsuffix and rsuffix cannot be the same&quot;</span><span class="p">)</span>
 
-    <span class="c1"># Validate suffix format (should not contain special characters that would break SQL)</span>
+    <span class="c1"># Validate suffix format (should not contain special characters that would break SQL).</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">SUFFIX_PATTERN</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">lsuffix</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;lsuffix &#39;</span><span class="si">{</span><span class="n">lsuffix</span><span class="si">}</span><span class="s2">&#39; contains invalid characters&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">SUFFIX_PATTERN</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">rsuffix</span><span class="p">):</span>
@@ -822,11 +823,15 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the first Series from the DataFrame.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    - df: The input DataFrame.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df : ps.Series</span>
+<span class="sd">        The input DataFrame.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    - GeoSeries: The first Series from the DataFrame.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    GeoSeries</span>
+<span class="sd">        The first Series from the DataFrame.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
 </pre></div>

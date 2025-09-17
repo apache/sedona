@@ -495,7 +495,7 @@
 <span class="sd">            - &quot;geopackage&quot;</span>
 <span class="sd">            - &quot;geoparquet&quot;</span>
 <span class="sd">    schema : dict, default None</span>
-<span class="sd">        Not applicable to Sedona&#39;s implementation</span>
+<span class="sd">        Not applicable to Sedona&#39;s implementation.</span>
 <span class="sd">    index : bool, default None</span>
 <span class="sd">        If True, write index into one or more columns (for MultiIndex).</span>
 <span class="sd">        Default None writes the index into one or more columns only if</span>
@@ -507,15 +507,15 @@
 <span class="sd">    crs : pyproj.CRS, default None</span>
 <span class="sd">        If specified, the CRS is passed to Fiona to</span>
 <span class="sd">        better control how the file is written. If None, GeoPandas</span>
-<span class="sd">        will determine the crs based on crs df attribute.</span>
+<span class="sd">        will determine the CRS based on CRS df attribute.</span>
 <span class="sd">        The value can be anything accepted</span>
 <span class="sd">        by :meth:`pyproj.CRS.from_user_input() &lt;pyproj.crs.CRS.from_user_input&gt;`,</span>
 <span class="sd">        such as an authority string (eg &quot;EPSG:4326&quot;) or a WKT string.</span>
 <span class="sd">    engine : str</span>
-<span class="sd">        Not applicable to Sedona&#39;s implementation</span>
+<span class="sd">        Not applicable to Sedona&#39;s implementation.</span>
 <span class="sd">    metadata : dict[str, str], default None</span>
 <span class="sd">        Optional metadata to be stored in the file. Keys and values must be</span>
-<span class="sd">        strings. Supported only for &quot;GPKG&quot; driver. Not supported by Sedona</span>
+<span class="sd">        strings. Supported only for &quot;GPKG&quot; driver. Not supported by Sedona.</span>
 <span class="sd">    **kwargs :</span>
 <span class="sd">        Keyword args to be passed to the engine, and can be used to write</span>
 <span class="sd">        to multi-layer data, store data within archives (zip files), etc.</span>
@@ -546,7 +546,7 @@
         <span class="s2">&quot;.geojson&quot;</span><span class="p">:</span> <span class="s2">&quot;GeoJSON&quot;</span><span class="p">,</span>
     <span class="p">}</span>
 
-    <span class="c1"># auto detect driver from filename if not provided</span>
+    <span class="c1"># Auto detect driver from filename if not provided.</span>
     <span class="k">if</span> <span class="n">driver</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">extension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">extension</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ext_to_driver</span><span class="p">:</span>
@@ -565,7 +565,7 @@
 
     <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># Determine if index attribute(s) should be saved to file</span>
-        <span class="c1"># (only if they are named or are non-integer)</span>
+        <span class="c1"># (only if they are named or are non-integer).</span>
         <span class="n">index</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span> <span class="o">!=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">is_integer_dtype</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">index</span><span class="p">:</span>
@@ -615,7 +615,7 @@
 <span class="sd">    GeoDataFrame.to_file : write GeoDataFrame to file</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># We warn the user if they try to use arguments that geopandas supports but not Sedona</span>
+    <span class="c1"># We warn the user if they try to use arguments that GeoPandas supports but not Sedona.</span>
     <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The given arguments are not supported in Sedona: </span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -652,7 +652,7 @@
                 <span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;properties.*&quot;</span>
             <span class="p">)</span>  <span class="c1"># select all non-geometry columns (which are under properties)</span>
         <span class="p">)</span>
-        <span class="c1"># geojson also has a &#39;type&#39; field, but we ignore it</span>
+        <span class="c1"># GeoJSON also has a &#39;type&#39; field, but we ignore it.</span>
 
     <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;geopackage&quot;</span><span class="p">:</span>
         <span class="n">table_name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;table_name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -672,7 +672,7 @@
 
     <span class="n">index_spark_columns</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="c1"># If index was retained, we sort by it so the dataframe has the same order as the original one</span>
+    <span class="c1"># If index was retained, we sort by it so the DataFrame has the same order as the original one.</span>
     <span class="k">if</span> <span class="n">SPARK_DEFAULT_INDEX_NAME</span> <span class="ow">in</span> <span class="n">sdf</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
         <span class="n">sdf</span> <span class="o">=</span> <span class="n">sdf</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">SPARK_DEFAULT_INDEX_NAME</span><span class="p">)</span>
         <span class="n">index_spark_columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">sdf</span><span class="p">,</span> <span class="n">SPARK_DEFAULT_INDEX_NAME</span><span class="p">)]</span>

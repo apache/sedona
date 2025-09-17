@@ -477,7 +477,7 @@ Replaces deprecated <code class="docutils literal notranslate"><span class="pre"
 <li><p><strong>rsuffix</strong> (<em>string</em><em>, </em><em>default 'right'</em>) – Suffix to apply to overlapping column names (right GeoDataFrame).</p></li>
 <li><p><strong>distance</strong> (<em>number</em><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – Distance(s) around each input geometry within which to query the tree
 for the ‘dwithin’ predicate. If array_like, must be
-one-dimesional with length equal to length of left GeoDataFrame.
+one-dimensional with length equal to length of left GeoDataFrame.
 Required if <code class="docutils literal notranslate"><span class="pre">predicate='dwithin'</span></code>.</p></li>
 <li><p><strong>on_attribute</strong> (<em>string</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a>) – Column name(s) to join on as an additional join restriction on top
 of the spatial predicate. These must be found in both DataFrames.
@@ -493,7 +493,8 @@ and values in specified columns match.</p></li>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">groceries_w_communities</span> <span class="o">=</span> <span class="n">geopandas</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">groceries</span><span class="p">,</span> <span class="n">chicago</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">sjoin</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">groceries_w_communities</span> <span class="o">=</span> <span class="n">sjoin</span><span class="p">(</span><span class="n">groceries</span><span class="p">,</span> <span class="n">chicago</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">groceries_w_communities</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="go">   OBJECTID       community                           geometry</span>
 <span class="go">0        16          UPTOWN  MULTIPOINT ((-87.65661 41.97321))</span>

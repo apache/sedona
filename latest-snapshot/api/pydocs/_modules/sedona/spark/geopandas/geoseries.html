@@ -759,14 +759,22 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize a GeoSeries object.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        - data: The input data for the GeoSeries. It can be a GeoDataFrame, GeoSeries, or pandas Series.</span>
-<span class="sd">        - index: The index for the GeoSeries.</span>
-<span class="sd">        - crs: Coordinate Reference System for the GeoSeries.</span>
-<span class="sd">        - dtype: Data type for the GeoSeries.</span>
-<span class="sd">        - name: Name of the GeoSeries.</span>
-<span class="sd">        - copy: Whether to copy the input data.</span>
-<span class="sd">        - fastpath: Internal parameter for fast initialization.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : array-like, GeoDataFrame, GeoSeries, or pandas Series</span>
+<span class="sd">            The input data for the GeoSeries.</span>
+<span class="sd">        index : array-like, optional</span>
+<span class="sd">            The index for the GeoSeries.</span>
+<span class="sd">        crs : pyproj.CRS, optional</span>
+<span class="sd">            Coordinate Reference System for the GeoSeries.</span>
+<span class="sd">        dtype : dtype, optional</span>
+<span class="sd">            Data type for the GeoSeries.</span>
+<span class="sd">        name : str, optional</span>
+<span class="sd">            Name of the GeoSeries.</span>
+<span class="sd">        copy : bool, default False</span>
+<span class="sd">            Whether to copy the input data.</span>
+<span class="sd">        fastpath : bool, default False</span>
+<span class="sd">            Internal parameter for fast initialization.</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
@@ -813,8 +821,8 @@
             <span class="k">assert</span> <span class="ow">not</span> <span class="n">copy</span>
             <span class="k">assert</span> <span class="ow">not</span> <span class="n">fastpath</span>
 
-            <span class="c1"># We don&#39;t check crs validity to keep the operation lazy.</span>
-            <span class="c1"># Keep the original code for now</span>
+            <span class="c1"># We don&#39;t check CRS validity to keep the operation lazy.</span>
+            <span class="c1"># Keep the original code for now.</span>
             <span class="c1"># data_crs = None</span>
             <span class="c1"># if hasattr(data, &quot;crs&quot;):</span>
             <span class="c1">#     data_crs = data.crs</span>
@@ -826,7 +834,7 @@
             <span class="c1">#         &quot;&#39;GeoSeries.to_crs(crs)&#39; to reproject geometries. &quot;</span>
             <span class="c1">#     )</span>
 
-            <span class="c1"># PySpark Pandas&#39; ps.Series.__init__() does not construction from a</span>
+            <span class="c1"># PySpark Pandas&#39; ps.Series.__init__() does not support construction from a</span>
             <span class="c1"># ps.Series input. For now, we manually implement the logic.</span>
 
             <span class="n">index</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">_col_label</span> <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">index</span>
@@ -860,10 +868,10 @@
 
             <span class="n">pd_series</span> <span class="o">=</span> <span class="n">pd_series</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
 
-            <span class="c1"># initialize the parent class pyspark Series with the pandas Series</span>
+            <span class="c1"># Initialize the parent class PySpark Series with the pandas Series.</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">pd_series</span><span class="p">)</span>
 
-        <span class="c1"># Ensure we&#39;re storing geometry types</span>
+        <span class="c1"># Ensure we&#39;re storing geometry types.</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">data_type</span> <span class="o">!=</span> <span class="n">GeometryType</span><span class="p">()</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">data_type</span> <span class="o">!=</span> <span class="n">NullType</span><span class="p">()</span>
@@ -921,23 +929,23 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="c1"># F.first is non-deterministic, but it doesn&#39;t matter because all non-null values should be the same</span>
+        <span class="c1"># F.first is non-deterministic, but it doesn&#39;t matter because all non-null values should be the same.</span>
         <span class="n">spark_col</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_SRID</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">first</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">,</span> <span class="n">ignorenulls</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 
-        <span class="c1"># Set this to avoid error complaining that we don&#39;t have a groupby column</span>
+        <span class="c1"># Set this to avoid error complaining that we don&#39;t have a groupby column.</span>
         <span class="n">tmp_series</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
             <span class="n">spark_col</span><span class="p">,</span>
             <span class="n">returns_geom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">is_aggr</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="c1"># All geometries should have the same srid</span>
-        <span class="c1"># so we just take the srid of the first non-null element</span>
+        <span class="c1"># All geometries should have the same SRID,</span>
+        <span class="c1"># so we just take the SRID of the first non-null element.</span>
         <span class="n">srid</span> <span class="o">=</span> <span class="n">tmp_series</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
-        <span class="c1"># Turn np.nan to 0 to avoid error</span>
+        <span class="c1"># Turn np.nan to 0 to avoid error.</span>
         <span class="n">srid</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">srid</span><span class="p">)</span> <span class="k">else</span> <span class="n">srid</span>
 
-        <span class="c1"># Sedona returns 0 if doesn&#39;t exist</span>
+        <span class="c1"># Sedona returns 0 if SRID doesn&#39;t exist.</span>
         <span class="k">return</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">srid</span><span class="p">)</span> <span class="k">if</span> <span class="n">srid</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span>
 
     <span class="nd">@crs</span><span class="o">.</span><span class="n">setter</span>
@@ -1055,8 +1063,8 @@
         <span class="k">elif</span> <span class="n">epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="n">epsg</span><span class="p">)</span>
 
-        <span class="c1"># The below block for the not allow_override case is eager due to the self.crs call</span>
-        <span class="c1"># This hurts performance and user experience, hence the default being set to True in Sedona</span>
+        <span class="c1"># The below block for the not allow_override case is eager due to the self.crs call.</span>
+        <span class="c1"># This hurts performance and user experience, hence the default being set to True in Sedona.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">allow_override</span><span class="p">:</span>
             <span class="n">curr_crs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span>
 
@@ -1068,7 +1076,7 @@
                     <span class="s2">&quot;transform the geometries, use &#39;GeoSeries.to_crs&#39; instead.&quot;</span>
                 <span class="p">)</span>
 
-        <span class="c1"># 0 indicates no srid in sedona</span>
+        <span class="c1"># 0 indicates no SRID in Sedona.</span>
         <span class="n">new_epsg</span> <span class="o">=</span> <span class="n">crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="k">if</span> <span class="n">crs</span> <span class="k">else</span> <span class="mi">0</span>
 
         <span class="n">spark_col</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_SetSRID</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">,</span> <span class="n">new_epsg</span><span class="p">)</span>
@@ -1127,8 +1135,8 @@
         <span class="n">index_spark_columns</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">index_fields</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">is_aggr</span><span class="p">:</span>
-            <span class="c1"># We always select NATURAL_ORDER_COLUMN_NAME, to avoid having to regenerate it in the result</span>
-            <span class="c1"># We always select SPARK_DEFAULT_INDEX_NAME, to retain series index info</span>
+            <span class="c1"># We always select NATURAL_ORDER_COLUMN_NAME, to avoid having to regenerate it in the result.</span>
+            <span class="c1"># We always select SPARK_DEFAULT_INDEX_NAME, to retain series index info.</span>
 
             <span class="n">exprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scol_for</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">SPARK_DEFAULT_INDEX_NAME</span><span class="p">))</span>
             <span class="n">exprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scol_for</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">))</span>
@@ -1140,7 +1148,7 @@
                 <span class="n">scol_for</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">SPARK_DEFAULT_INDEX_NAME</span><span class="p">),</span>
                 <span class="n">scol_for</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">),</span>
             <span class="p">)</span>
-        <span class="c1"># else if is_aggr, we don&#39;t select the index columns</span>
+        <span class="c1"># Otherwise, if is_aggr, we don&#39;t select the index columns.</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">sdf</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="n">exprs</span><span class="p">)</span>
 
@@ -1154,7 +1162,7 @@
         <span class="p">)</span>
         <span class="n">ps_series</span> <span class="o">=</span> <span class="n">first_series</span><span class="p">(</span><span class="n">PandasOnSparkDataFrame</span><span class="p">(</span><span class="n">internal</span><span class="p">))</span>
 
-        <span class="c1"># Convert spark series default name to pandas series default name (None) if needed</span>
+        <span class="c1"># Convert Spark series default name to pandas series default name (None) if needed.</span>
         <span class="n">series_name</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">rename</span> <span class="o">==</span> <span class="n">SPARK_DEFAULT_SERIES_NAME</span> <span class="k">else</span> <span class="n">rename</span>
         <span class="n">ps_series</span> <span class="o">=</span> <span class="n">ps_series</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">series_name</span><span class="p">)</span>
 
@@ -1169,16 +1177,18 @@
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_geopandas">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_geopandas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Convert the GeoSeries to a geopandas GeoSeries.</span>
+<span class="sd">        Convert the GeoSeries to a GeoPandas GeoSeries.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        - geopandas.GeoSeries: A geopandas GeoSeries.</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        geopandas.GeoSeries</span>
+<span class="sd">            A GeoPandas GeoSeries.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_advice</span>
 
         <span class="n">log_advice</span><span class="p">(</span>
             <span class="s2">&quot;`to_geopandas` loads all data into the driver&#39;s memory. &quot;</span>
-            <span class="s2">&quot;It should only be used if the resulting geopandas GeoSeries is expected to be small.&quot;</span>
+            <span class="s2">&quot;It should only be used if the resulting GeoPandas GeoSeries is expected to be small.&quot;</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_geopandas</span><span class="p">()</span></div>
 
@@ -1269,7 +1279,7 @@
             <span class="n">returns_geom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="c1"># Sedona returns the string in all caps unlike Geopandas</span>
+        <span class="c1"># Sedona returns the string in all caps unlike GeoPandas.</span>
         <span class="n">sgpd_to_gpg_name_map</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;POINT&quot;</span><span class="p">:</span> <span class="s2">&quot;Point&quot;</span><span class="p">,</span>
             <span class="s2">&quot;LINESTRING&quot;</span><span class="p">:</span> <span class="s2">&quot;LineString&quot;</span><span class="p">,</span>
@@ -1284,7 +1294,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
             <span class="n">_not_implemented_error</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;Returns numeric geometry type codes.&quot;</span><span class="p">)</span>
         <span class="p">)</span>
@@ -1347,7 +1357,7 @@
 <div class="viewcode-block" id="GeoSeries.count_coordinates">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.count_coordinates">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">count_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
             <span class="n">_not_implemented_error</span><span class="p">(</span>
                 <span class="s2">&quot;count_coordinates&quot;</span><span class="p">,</span>
@@ -1359,7 +1369,7 @@
 <div class="viewcode-block" id="GeoSeries.count_geometries">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.count_geometries">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">count_geometries</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
             <span class="n">_not_implemented_error</span><span class="p">(</span>
                 <span class="s2">&quot;count_geometries&quot;</span><span class="p">,</span>
@@ -1371,7 +1381,7 @@
 <div class="viewcode-block" id="GeoSeries.count_interior_rings">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.count_interior_rings">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">count_interior_rings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
             <span class="n">_not_implemented_error</span><span class="p">(</span>
                 <span class="s2">&quot;count_interior_rings&quot;</span><span class="p">,</span>
@@ -1436,7 +1446,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_ccw</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
             <span class="n">_not_implemented_error</span><span class="p">(</span>
                 <span class="s2">&quot;is_ccw&quot;</span><span class="p">,</span>
@@ -1446,7 +1456,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_closed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
             <span class="n">_not_implemented_error</span><span class="p">(</span>
                 <span class="s2">&quot;is_closed&quot;</span><span class="p">,</span>
@@ -1465,14 +1475,14 @@
 <div class="viewcode-block" id="GeoSeries.get_precision">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.get_precision">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_precision</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="GeoSeries.get_geometry">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.get_geometry">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeoSeries&quot;</span><span class="p">:</span>
-        <span class="c1"># Sedona errors on negative indexes, so we use a case statement to handle it ourselves</span>
+        <span class="c1"># Sedona errors on negative indexes, so we use a case statement to handle it ourselves.</span>
         <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_GeometryN</span><span class="p">(</span>
             <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">),</span>
             <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span>
@@ -1520,13 +1530,13 @@
 <div class="viewcode-block" id="GeoSeries.concave_hull">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.concave_hull">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">concave_hull</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ratio</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">allow_holes</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
 
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">convex_hull</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
             <span class="n">_not_implemented_error</span><span class="p">(</span>
                 <span class="s2">&quot;convex_hull&quot;</span><span class="p">,</span> <span class="s2">&quot;Computes the convex hull of each geometry.&quot;</span>
@@ -1536,14 +1546,14 @@
 <div class="viewcode-block" id="GeoSeries.delaunay_triangles">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.delaunay_triangles">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">delaunay_triangles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">only_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="GeoSeries.voronoi_polygons">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.voronoi_polygons">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">voronoi_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">extend_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">only_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
 
 
@@ -1558,80 +1568,80 @@
 <div class="viewcode-block" id="GeoSeries.minimum_rotated_rectangle">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.minimum_rotated_rectangle">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">minimum_rotated_rectangle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
 
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">exterior</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="GeoSeries.extract_unique_points">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.extract_unique_points">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">extract_unique_points</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="GeoSeries.offset_curve">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.offset_curve">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">offset_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">quad_segs</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">join_style</span><span class="o">=</span><span class="s2">&quot;round&quot;</span><span class="p">,</span> <span class="n">mitre_limit</span><span class="o">=</span><span class="mf">5.0</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
 
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">interiors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="GeoSeries.remove_repeated_points">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.remove_repeated_points">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">remove_repeated_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="GeoSeries.set_precision">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.set_precision">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_precision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;valid_output&quot;</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="GeoSeries.representative_point">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.representative_point">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">representative_point</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="GeoSeries.minimum_bounding_circle">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.minimum_bounding_circle">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">minimum_bounding_circle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="GeoSeries.minimum_bounding_radius">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.minimum_bounding_radius">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">minimum_bounding_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="GeoSeries.minimum_clearance">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.minimum_clearance">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">minimum_clearance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="GeoSeries.normalize">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.normalize">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
 
 
@@ -1653,7 +1663,7 @@
 <div class="viewcode-block" id="GeoSeries.reverse">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.reverse">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
 
 
@@ -1675,28 +1685,28 @@
 <div class="viewcode-block" id="GeoSeries.transform">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.transform">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transformation</span><span class="p">,</span> <span class="n">include_z</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="GeoSeries.force_2d">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.force_2d">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">force_2d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="GeoSeries.force_3d">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.force_3d">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">force_3d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="GeoSeries.line_merge">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.line_merge">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">line_merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directed</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
 
 
@@ -1706,7 +1716,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">unary_union</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="GeoSeries.union_all">
@@ -1722,7 +1732,7 @@
             <span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="c1"># While it&#39;s not explicitly defined in geopandas docs, this is what geopandas returns for empty GeoSeries</span>
+            <span class="c1"># While it&#39;s not explicitly defined in GeoPandas docs, this is what GeoPandas returns for empty GeoSeries.</span>
             <span class="c1"># If it ever changes for some reason, we&#39;ll catch that with the test</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryCollection</span>
 
@@ -1739,7 +1749,7 @@
 <div class="viewcode-block" id="GeoSeries.crosses">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.crosses">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">crosses</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
-        <span class="c1"># Sedona does not support GeometryCollection (errors), so we return NULL for now to avoid error</span>
+        <span class="c1"># Sedona does not support GeometryCollection (errors), so we return NULL for now to avoid error.</span>
         <span class="n">other_series</span><span class="p">,</span> <span class="n">extended</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_series_of_val</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
         <span class="n">align</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">extended</span> <span class="k">else</span> <span class="n">align</span>
 
@@ -1761,7 +1771,7 @@
 <div class="viewcode-block" id="GeoSeries.disjoint">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.disjoint">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">disjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
 
 
@@ -1786,7 +1796,7 @@
 <div class="viewcode-block" id="GeoSeries.overlaps">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.overlaps">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">overlaps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
-        <span class="c1"># Note: We cannot efficiently match geopandas behavior because Sedona&#39;s ST_Overlaps returns True for equal geometries</span>
+        <span class="c1"># Note: We cannot efficiently match GeoPandas behavior because Sedona&#39;s ST_Overlaps returns True for equal geometries.</span>
         <span class="c1"># ST_Overlaps(`L`, `R`) AND ST_Equals(`L`, `R`) does not work because ST_Equals errors on invalid geometries</span>
 
         <span class="n">other_series</span><span class="p">,</span> <span class="n">extended</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_series_of_val</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
@@ -1953,13 +1963,13 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">col</span>
 
-        <span class="c1"># Note: this is specifically False. None is valid since it defaults to True similar to geopandas</span>
+        <span class="c1"># Note: this is specifically False. None is valid since it defaults to True similar to GeoPandas.</span>
         <span class="n">index_col</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">NATURAL_ORDER_COLUMN_NAME</span> <span class="k">if</span> <span class="n">align</span> <span class="ow">is</span> <span class="kc">False</span> <span class="k">else</span> <span class="n">SPARK_DEFAULT_INDEX_NAME</span>
         <span class="p">)</span>
 
         <span class="c1"># This code assumes there is only one index (SPARK_DEFAULT_INDEX_NAME)</span>
-        <span class="c1"># and would need to be updated if Sedona later supports multi-index</span>
+        <span class="c1"># and would need to be updated if Sedona later supports multi-index.</span>
 
         <span class="n">sdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span>
         <span class="n">other_sdf</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span>
@@ -2009,7 +2019,7 @@
 <div class="viewcode-block" id="GeoSeries.intersection_all">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.intersection_all">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">intersection_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
 
 
@@ -2037,7 +2047,7 @@
 <div class="viewcode-block" id="GeoSeries.contains_properly">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.contains_properly">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">contains_properly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method</span>
+        <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
             <span class="n">_not_implemented_error</span><span class="p">(</span>
                 <span class="s2">&quot;contains_properly&quot;</span><span class="p">,</span>
@@ -2059,7 +2069,7 @@
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeoSeries&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">single_sided</span><span class="p">:</span>
-            <span class="c1"># Reverse the following logic in common/src/main/java/org/apache/sedona/common/Functions.java buffer() to avoid negating the distance</span>
+            <span class="c1"># Reverse the following logic in common/src/main/java/org/apache/sedona/common/Functions.java buffer() to avoid negating the distance.</span>
             <span class="c1">#   if (bufferParameters.isSingleSided()</span>
             <span class="c1">#       &amp;&amp; (params.toLowerCase().contains(&quot;left&quot;) &amp;&amp; radius &lt; 0</span>
             <span class="c1">#           || params.toLowerCase().contains(&quot;right&quot;) &amp;&amp; radius &gt; 0)) {</span>
@@ -2756,7 +2766,7 @@
 <span class="sd">        GeoSeries.isna : inverse of notna</span>
 <span class="sd">        GeoSeries.is_empty : detect empty geometries</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># After Sedona&#39;s minimum spark version is 3.5.0, we can use F.isnotnull(self.spark.column) instead</span>
+        <span class="c1"># After Sedona&#39;s minimum Spark version is 3.5.0, we can use F.isnotnull(self.spark.column) instead.</span>
         <span class="n">spark_expr</span> <span class="o">=</span> <span class="o">~</span><span class="n">F</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">)</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
             <span class="n">spark_expr</span><span class="p">,</span>
@@ -3112,10 +3122,10 @@
         <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj.aoi</span><span class="w"> </span><span class="kn">import</span> <span class="n">AreaOfInterest</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj.database</span><span class="w"> </span><span class="kn">import</span> <span class="n">query_utm_crs_info</span>
 
-        <span class="c1"># This implementation replicates the implementation in geopandas&#39;s implementation exactly.</span>
+        <span class="c1"># This implementation replicates the implementation in GeoPandas&#39;s implementation exactly.</span>
         <span class="c1"># https://github.com/geopandas/geopandas/blob/main/geopandas/array.py</span>
         <span class="c1"># The only difference is that we use Sedona&#39;s total_bounds property which is more efficient and scalable</span>
-        <span class="c1"># than the geopandas implementation. The rest of the implementation always executes on 4 points (minx, miny, maxx, maxy),</span>
+        <span class="c1"># than the GeoPandas implementation. The rest of the implementation always executes on 4 points (minx, miny, maxx, maxy),</span>
         <span class="c1"># so the numpy and pyproj implementations are reasonable.</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
@@ -3402,8 +3412,8 @@
 <span class="sd">        ]</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Because this function returns the arrow array in memory, we simply rely on geopandas&#39;s implementation.</span>
-        <span class="c1"># This also returns a geopandas specific data type, which can be converted to an actual pyarrow array,</span>
+        <span class="c1"># Because this function returns the Arrow array in memory, we simply rely on GeoPandas&#39;s implementation.</span>
+        <span class="c1"># This also returns a GeoPandas-specific data type, which can be converted to an actual PyArrow array,</span>
         <span class="c1"># so there is no direct Sedona equivalent. This way we also get all of the arguments implemented for free.</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_geopandas</span><span class="p">()</span><span class="o">.</span><span class="n">to_arrow</span><span class="p">(</span>
             <span class="n">geometry_encoding</span><span class="o">=</span><span class="n">geometry_encoding</span><span class="p">,</span>

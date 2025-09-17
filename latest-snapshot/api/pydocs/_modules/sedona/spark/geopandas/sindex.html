@@ -493,8 +493,8 @@
 <span class="sd">        column_name : str, optional</span>
 <span class="sd">            The column name to extract geometry from if `geometry` is a PySparkDataFrame.</span>
 
-<span class="sd">        Note: query methods (ie. query, nearest, intersection) have different behaviors depending on how the index is constructed.</span>
-<span class="sd">        When constructed from a np.array, the query methods return indices like original geopandas.</span>
+<span class="sd">        Note: query methods (i.e. query, nearest, intersection) have different behaviors depending on how the index is constructed.</span>
+<span class="sd">        When constructed from a np.array, the query methods return indices like original GeoPandas.</span>
 <span class="sd">        When constructed from a GeoSeries or PySparkDataFrame, the query methods return geometries.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
@@ -510,7 +510,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">index_type</span> <span class="o">=</span> <span class="n">index_type</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_dataframe</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_is_spark</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="c1"># Build local index for numpy array</span>
+            <span class="c1"># Build local index for NumPy array.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_build_local_index</span><span class="p">()</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">PySparkDataFrame</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">column_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -521,7 +521,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">index_type</span> <span class="o">=</span> <span class="n">index_type</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_dataframe</span> <span class="o">=</span> <span class="n">geometry</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_is_spark</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="c1"># Build distributed spatial index</span>
+            <span class="c1"># Build distributed spatial index.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_build_spark_index</span><span class="p">(</span><span class="n">column_name</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
@@ -546,10 +546,10 @@
 <span class="sd">            Whether to sort the results.</span>
 
 <span class="sd">        Note: query() has different behaviors depending on how the index is constructed.</span>
-<span class="sd">        When constructed from a np.array, this method returns indices like original geopandas.</span>
+<span class="sd">        When constructed from a np.array, this method returns indices like original GeoPandas.</span>
 <span class="sd">        When constructed from a GeoSeries or PySparkDataFrame, this method returns geometries.</span>
 
-<span class="sd">        Note: Unlike Geopandas, Sedona does not support geometry input of type np.array or GeoSeries.</span>
+<span class="sd">        Note: Unlike GeoPandas, Sedona does not support geometry input of type np.array or GeoSeries.</span>
 <span class="sd">        It is recommended to instead use GeoSeries.intersects directly.</span>
 
 <span class="sd">        Returns</span>
@@ -578,15 +578,15 @@
                 <span class="sa">f</span><span class="s2">&quot;Predicate must be either </span><span class="si">{</span><span class="s1">&#39; or &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">repr</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">ALLOWED_PREDICATES</span><span class="p">])</span><span class="si">}</span><span class="s2">, got &#39;</span><span class="si">{</span><span class="n">predicate</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
             <span class="p">)</span>
 
-        <span class="c1"># Default to &#39;intersects&#39; if not specified</span>
+        <span class="c1"># Default to &#39;intersects&#39; if not specified.</span>
         <span class="k">if</span> <span class="n">predicate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">predicate</span> <span class="o">=</span> <span class="s2">&quot;intersects&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_spark</span><span class="p">:</span>
-            <span class="c1"># For Spark-based spatial index</span>
+            <span class="c1"># For Spark-based spatial index.</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.spatialOperator</span><span class="w"> </span><span class="kn">import</span> <span class="n">RangeQuery</span>
 
-            <span class="c1"># Execute the spatial range query</span>
+            <span class="c1"># Execute the spatial range query.</span>
             <span class="k">if</span> <span class="n">predicate</span> <span class="o">==</span> <span class="s2">&quot;contains&quot;</span><span class="p">:</span>
                 <span class="n">result_rdd</span> <span class="o">=</span> <span class="n">RangeQuery</span><span class="o">.</span><span class="n">SpatialRangeQuery</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_indexed_rdd</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span>
@@ -597,24 +597,24 @@
                 <span class="p">)</span>
 
             <span class="n">geo_data_list</span> <span class="o">=</span> <span class="n">result_rdd</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
-            <span class="c1"># No need to keep the userData field, so convert it directly to a list of geometries</span>
+            <span class="c1"># No need to keep the userData field, so convert it directly to a list of geometries.</span>
             <span class="n">geoms_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="o">.</span><span class="n">geom</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">geo_data_list</span><span class="p">]</span>
             <span class="k">return</span> <span class="n">geoms_list</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># For local spatial index based on Shapely STRtree</span>
+            <span class="c1"># For local spatial index based on Shapely STRtree.</span>
             <span class="k">if</span> <span class="n">predicate</span> <span class="o">==</span> <span class="s2">&quot;contains&quot;</span><span class="p">:</span>
-                <span class="c1"># STRtree doesn&#39;t directly support contains predicate</span>
-                <span class="c1"># We need to filter results after querying</span>
+                <span class="c1"># STRtree doesn&#39;t directly support contains predicate.</span>
+                <span class="c1"># We need to filter results after querying.</span>
                 <span class="n">candidate_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
                 <span class="n">results</span> <span class="o">=</span> <span class="p">[</span>
                     <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">candidate_indices</span> <span class="k">if</span> <span class="n">geometry</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
                 <span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>  <span class="c1"># intersects</span>
-                <span class="c1"># Default is intersects</span>
+                <span class="c1"># Default is intersects.</span>
                 <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">sort</span> <span class="ow">and</span> <span class="n">results</span><span class="p">:</span>
-                <span class="c1"># Sort by distance to the query geometry if requested</span>
+                <span class="c1"># Sort by distance to the query geometry if requested.</span>
                 <span class="n">results</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
                     <span class="n">results</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
                 <span class="p">)</span>
@@ -640,10 +640,10 @@
 <span class="sd">        return_distance : bool, optional, default False</span>
 <span class="sd">            Whether to return distances along with indices.</span>
 
-<span class="sd">        Note: Unlike Geopandas, Sedona does not support geometry input of type np.array or GeoSeries.</span>
+<span class="sd">        Note: Unlike GeoPandas, Sedona does not support geometry input of type np.array or GeoSeries.</span>
 
 <span class="sd">        Note: nearest() has different behaviors depending on how the index is constructed.</span>
-<span class="sd">        When constructed from a np.array, this method returns indices like original geopandas.</span>
+<span class="sd">        When constructed from a np.array, this method returns indices like original GeoPandas.</span>
 <span class="sd">        When constructed from a GeoSeries or PySparkDataFrame, this method returns geometries.</span>
 
 <span class="sd">        Returns</span>
@@ -667,31 +667,31 @@
             <span class="k">return</span> <span class="p">[]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">return_distance</span> <span class="k">else</span> <span class="p">([],</span> <span class="p">[])</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_spark</span><span class="p">:</span>
-            <span class="c1"># For Spark-based spatial index</span>
+            <span class="c1"># For Spark-based spatial index.</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.spatialOperator</span><span class="w"> </span><span class="kn">import</span> <span class="n">KNNQuery</span>
 
-            <span class="c1"># Execute the KNN query</span>
+            <span class="c1"># Execute the KNN query.</span>
             <span class="n">geo_data_list</span> <span class="o">=</span> <span class="n">KNNQuery</span><span class="o">.</span><span class="n">SpatialKnnQuery</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_indexed_rdd</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="kc">False</span>
             <span class="p">)</span>
 
-            <span class="c1"># No need to keep the userData field, so convert it directly to a list of geometries</span>
+            <span class="c1"># No need to keep the userData field, so convert it directly to a list of geometries.</span>
             <span class="n">geoms_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="o">.</span><span class="n">geom</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">geo_data_list</span><span class="p">]</span>
 
             <span class="k">if</span> <span class="n">return_distance</span><span class="p">:</span>
-                <span class="c1"># Calculate distances if requested</span>
+                <span class="c1"># Calculate distances if requested.</span>
                 <span class="n">distances</span> <span class="o">=</span> <span class="p">[</span><span class="n">geom</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span> <span class="k">for</span> <span class="n">geom</span> <span class="ow">in</span> <span class="n">geoms_list</span><span class="p">]</span>
                 <span class="k">return</span> <span class="n">geoms_list</span><span class="p">,</span> <span class="n">distances</span>
             <span class="k">return</span> <span class="n">geoms_list</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># For local spatial index based on Shapely STRtree</span>
+            <span class="c1"># For local spatial index based on Shapely STRtree.</span>
             <span class="k">if</span> <span class="n">k</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">):</span>
                 <span class="n">k</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
 
-            <span class="c1"># Get all geometries and calculate distances</span>
+            <span class="c1"># Get all geometries and calculate distances.</span>
             <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">geom</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span> <span class="k">for</span> <span class="n">geom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">])</span>
 
-            <span class="c1"># Get indices of k nearest neighbors</span>
+            <span class="c1"># Get indices of k nearest neighbors.</span>
             <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">distances</span><span class="p">)[:</span><span class="n">k</span><span class="p">]</span>
 
             <span class="k">if</span> <span class="n">return_distance</span><span class="p">:</span>
@@ -712,10 +712,10 @@
 <span class="sd">            Bounding box as (min_x, min_y, max_x, max_y).</span>
 
 <span class="sd">        Note: intersection() has different behaviors depending on how the index is constructed.</span>
-<span class="sd">        When constructed from a np.array, this method returns indices like original geopandas.</span>
+<span class="sd">        When constructed from a np.array, this method returns indices like original GeoPandas.</span>
 <span class="sd">        When constructed from a GeoSeries or PySparkDataFrame, this method returns geometries.</span>
 
-<span class="sd">        Note: Unlike Geopandas, Sedona does not support geometry input of type np.array or GeoSeries.</span>
+<span class="sd">        Note: Unlike GeoPandas, Sedona does not support geometry input of type np.array or GeoSeries.</span>
 <span class="sd">        It is recommended to instead use GeoSeries.intersects directly.</span>
 
 <span class="sd">        Returns</span>
@@ -732,7 +732,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_empty</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span>
 
-        <span class="c1"># Create a polygon from the bounds</span>
+        <span class="c1"># Create a polygon from the bounds.</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">box</span>
 
         <span class="n">bbox</span> <span class="o">=</span> <span class="n">box</span><span class="p">(</span><span class="o">*</span><span class="n">bounds</span><span class="p">)</span>
@@ -740,12 +740,12 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_spark</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s2">&quot;intersects&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># For local spatial index based on Shapely STRtree</span>
+            <span class="c1"># For local spatial index based on Shapely STRtree.</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="c1"># Try using direct bounds query (Shapely &gt;= 1.8)</span>
+                <span class="c1"># Try using direct bounds query (Shapely &gt;= 1.8).</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-                <span class="c1"># Fall back to querying with a box geometry (older Shapely)</span>
+                <span class="c1"># Fall back to querying with a box geometry (older Shapely).</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">bbox</span><span class="p">)</span></div>
 
 
@@ -782,17 +782,17 @@
 <span class="sd">        This uses Sedona&#39;s built-in indexing functionality.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># Convert index_type string to Sedona IndexType enum</span>
+        <span class="c1"># Convert index_type string to Sedona IndexType enum.</span>
         <span class="n">index_type_map</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;strtree&quot;</span><span class="p">:</span> <span class="n">IndexType</span><span class="o">.</span><span class="n">RTREE</span><span class="p">,</span> <span class="s2">&quot;quadtree&quot;</span><span class="p">:</span> <span class="n">IndexType</span><span class="o">.</span><span class="n">QUADTREE</span><span class="p">}</span>
         <span class="n">sedona_index_type</span> <span class="o">=</span> <span class="n">index_type_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index_type</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">IndexType</span><span class="o">.</span><span class="n">RTREE</span><span class="p">)</span>
 
-        <span class="c1"># Create a SpatialRDD from the DataFrame</span>
+        <span class="c1"># Create a SpatialRDD from the DataFrame.</span>
         <span class="n">spatial_rdd</span> <span class="o">=</span> <span class="n">StructuredAdapter</span><span class="o">.</span><span class="n">toSpatialRdd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataframe</span><span class="p">,</span> <span class="n">column_name</span><span class="p">)</span>
 
-        <span class="c1"># Build spatial index</span>
+        <span class="c1"># Build spatial index.</span>
         <span class="n">spatial_rdd</span><span class="o">.</span><span class="n">buildIndex</span><span class="p">(</span><span class="n">sedona_index_type</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
-        <span class="c1"># Store the indexed RDD</span>
+        <span class="c1"># Store the indexed RDD.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_indexed_rdd</span> <span class="o">=</span> <span class="n">spatial_rdd</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_local_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
