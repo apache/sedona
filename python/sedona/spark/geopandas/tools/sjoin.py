@@ -22,7 +22,7 @@ from pyspark.sql.functions import expr
 
 from sedona.spark.geopandas import GeoDataFrame, GeoSeries
 
-# Pre-compiled regex pattern for suffix validation
+# Pre-compiled regex pattern for suffix validation.
 SUFFIX_PATTERN = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 
@@ -64,7 +64,7 @@ def _frame_join(
     GeoDataFrame or GeoSeries
         Joined result
     """
-    # Predicate mapping
+    # Predicate mapping.
     predicate_map = {
         "intersects": "ST_Intersects",
         "contains": "ST_Contains",
@@ -75,7 +75,7 @@ def _frame_join(
         "dwithin": "ST_DWithin",
         "covers": "ST_Covers",
         "covered_by": "ST_CoveredBy",
-        # "contains_properly": "ST_ContainsProperly",  # not supported by Sedona yet
+        # "contains_properly": "ST_ContainsProperly",  # Not supported by Sedona yet.
     }
 
     if predicate not in predicate_map:
@@ -85,29 +85,29 @@ def _frame_join(
 
     spatial_func = predicate_map[predicate]
 
-    # Get the internal Spark DataFrames
+    # Get the internal Spark DataFrames.
     left_sdf = left_df._internal.spark_frame
     right_sdf = right_df._internal.spark_frame
 
-    # Handle geometry columns - check if they exist and get proper column names
+    # Handle geometry columns - check if they exist and get proper column names.
     left_geom_col = None
     right_geom_col = None
 
-    # Find geometry columns in left dataframe
+    # Find geometry columns in left DataFrame.
     left_geom_col = left_df.active_geometry_name
 
-    # Find geometry columns in right dataframe
+    # Find geometry columns in right DataFrame.
     right_geom_col = right_df.active_geometry_name
 
     if not left_geom_col:
-        raise ValueError("Left dataframe geometry column not set")
+        raise ValueError("Left DataFrame geometry column not set")
     if not right_geom_col:
-        raise ValueError("Right dataframe geometry column not set")
+        raise ValueError("Right DataFrame geometry column not set")
 
     left_geom_expr = f"`{left_geom_col}` as l_geometry"
     right_geom_expr = f"`{right_geom_col}` as r_geometry"
 
-    # Select all columns with geometry
+    # Select all columns with geometry.
     left_cols = [left_geom_expr] + [
         f"`{field.name}` as l_{field.name}"
         for field in left_sdf.schema.fields
@@ -126,7 +126,7 @@ def _frame_join(
         *right_cols, f"`{SPARK_DEFAULT_INDEX_NAME}` as index_{rsuffix}"
     )
 
-    # Build spatial join condition
+    # Build spatial join condition.
     if predicate == "dwithin":
         if distance is None:
             raise ValueError("Distance parameter is required for 'dwithin' predicate")
@@ -134,13 +134,13 @@ def _frame_join(
     else:
         spatial_condition = f"{spatial_func}(l_geometry, r_geometry)"
 
-    # Add attribute-based join condition if specified
+    # Add attribute-based join condition if specified.
     join_condition = spatial_condition
     if on_attribute:
         for attr in on_attribute:
             join_condition += f" AND l_{attr} = r_{attr}"
 
-    # Perform spatial join based on join type
+    # Perform spatial join based on join type.
     if how == "inner":
         spatial_join_df = left_geo_df.alias("l").join(
             right_geo_df.alias("r"), expr(join_condition)
@@ -156,16 +156,16 @@ def _frame_join(
     else:
         raise ValueError(f"Join type '{how}' not supported")
 
-    # Pick which index to use for the resulting df's index based on 'how'
+    # Pick which index to use for the resulting df's index based on 'how'.
     index_col = f"index_{lsuffix}" if how in ("inner", "left") else f"index_{rsuffix}"
 
-    # Handle column naming with suffixes
+    # Handle column naming with suffixes.
     final_columns = []
 
-    # Add geometry column (always from left for geopandas compatibility)
+    # Add geometry column (always from left for GeoPandas compatibility).
     final_columns.append("l_geometry as geometry")
 
-    # Add other columns with suffix handling
+    # Add other columns with suffix handling.
     left_data_cols = [
         col
         for col in left_geo_df.columns
@@ -187,10 +187,10 @@ def _frame_join(
         right_col = f"r_{base_name}"
 
         if right_col in right_data_cols:
-            # Column exists in both - apply suffixes
+            # Column exists in both - apply suffixes.
             final_columns.append(f"{col_name} as {base_name}_{lsuffix}")
         else:
-            # Column only in left
+            # Column only in left.
             final_columns.append(f"{col_name} as {base_name}")
 
     if index_col != f"index_{rsuffix}":
@@ -201,15 +201,15 @@ def _frame_join(
         left_col = f"l_{base_name}"
 
         if left_col in left_data_cols:
-            # Column exists in both - apply suffixes
+            # Column exists in both - apply suffixes.
             final_columns.append(f"{col_name} as {base_name}_{rsuffix}")
         else:
-            # Column only in right
+            # Column only in right.
             final_columns.append(f"{col_name} as {base_name}")
 
-    # Select final columns
+    # Select final columns.
     result_df = spatial_join_df.selectExpr(*final_columns)
-    # Note, we do not .orderBy(SPARK_DEFAULT_INDEX_NAME) to avoid a performance hit
+    # Note, we do not .orderBy(SPARK_DEFAULT_INDEX_NAME) to avoid a performance hit.
 
     data_spark_columns = [
         scol_for(result_df, col)
@@ -261,7 +261,7 @@ def sjoin(
     distance : number or array_like, optional
         Distance(s) around each input geometry within which to query the tree
         for the 'dwithin' predicate. If array_like, must be
-        one-dimesional with length equal to length of left GeoDataFrame.
+        one-dimensional with length equal to length of left GeoDataFrame.
         Required if ``predicate='dwithin'``.
     on_attribute : string, list or tuple
         Column name(s) to join on as an additional join restriction on top
@@ -276,7 +276,8 @@ def sjoin(
 
     Examples
     --------
-    >>> groceries_w_communities = geopandas.sjoin(groceries, chicago)
+    >>> from sedona.spark.geopandas.tools import sjoin
+    >>> groceries_w_communities = sjoin(groceries, chicago)
     >>> groceries_w_communities.head()  # doctest: +SKIP
        OBJECTID       community                           geometry
     0        16          UPTOWN  MULTIPOINT ((-87.65661 41.97321))
@@ -351,7 +352,7 @@ def _basic_checks(left_df, right_df, how, lsuffix, rsuffix, on_attribute=None):
     if how not in allowed_hows:
         raise ValueError(f'`how` was "{how}" but is expected to be in {allowed_hows}')
 
-    # Check if on_attribute columns exist in both datasets
+    # Check if on_attribute columns exist in both datasets.
     if on_attribute:
         for attr in on_attribute:
             if hasattr(left_df, "columns") and attr not in left_df.columns:
@@ -359,11 +360,11 @@ def _basic_checks(left_df, right_df, how, lsuffix, rsuffix, on_attribute=None):
             if hasattr(right_df, "columns") and attr not in right_df.columns:
                 raise ValueError(f"Column '{attr}' not found in right dataset")
 
-    # Check for reserved column names that would conflict
+    # Check for reserved column names that would conflict.
     if lsuffix == rsuffix:
         raise ValueError("lsuffix and rsuffix cannot be the same")
 
-    # Validate suffix format (should not contain special characters that would break SQL)
+    # Validate suffix format (should not contain special characters that would break SQL).
     if not SUFFIX_PATTERN.match(lsuffix):
         raise ValueError(f"lsuffix '{lsuffix}' contains invalid characters")
     if not SUFFIX_PATTERN.match(rsuffix):
@@ -374,10 +375,14 @@ def _to_geo_series(df: ps.Series) -> GeoSeries:
     """
     Get the first Series from the DataFrame.
 
-    Parameters:
-    - df: The input DataFrame.
+    Parameters
+    ----------
+    df : ps.Series
+        The input DataFrame.
 
-    Returns:
-    - GeoSeries: The first Series from the DataFrame.
+    Returns
+    -------
+    GeoSeries
+        The first Series from the DataFrame.
     """
     return GeoSeries(data=df)
