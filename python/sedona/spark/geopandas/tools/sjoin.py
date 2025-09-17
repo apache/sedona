@@ -276,7 +276,8 @@ def sjoin(
 
     Examples
     --------
-    >>> groceries_w_communities = sedona.spark.geopandas.sjoin(groceries, chicago)
+    >>> from sedona.spark.geopandas.tools import sjoin
+    >>> groceries_w_communities = sjoin(groceries, chicago)
     >>> groceries_w_communities.head()  # doctest: +SKIP
        OBJECTID       community                           geometry
     0        16          UPTOWN  MULTIPOINT ((-87.65661 41.97321))
