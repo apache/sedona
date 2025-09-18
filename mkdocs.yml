@@ -144,8 +144,8 @@ nav:
               - Function (Snowflake): api/snowflake/vector-data/Function.md
               - Aggregate Function (Snowflake): api/snowflake/vector-data/AggregateFunction.md
               - Predicate (Snowflake): api/snowflake/vector-data/Predicate.md
-  - SedonaDB: "https://sedona.apache.org/sedonadb/"
-  - SpatialBench: "https://sedona.apache.org/spatialbench/"
+  - SedonaDB: 'https://sedona.apache.org/sedonadb/'
+  - SpatialBench: 'https://sedona.apache.org/spatialbench/'
   - Blog: blog/index.md
   - Community:
       - Compile the code: setup/compile.md
