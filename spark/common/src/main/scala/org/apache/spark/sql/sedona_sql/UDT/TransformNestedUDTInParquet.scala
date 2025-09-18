@@ -16,17 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.catalyst
+package org.apache.spark.sql.sedona_sql.UDT
 
-import org.apache.spark.sql.catalyst.analysis.Analyzer
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.expressions.AttributeReference
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.catalyst.rules.Rule
-import org.apache.spark.sql.execution.datasources.{HadoopFsRelation, LogicalRelation}
 import org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.execution.datasources.{HadoopFsRelation, LogicalRelation}
 import org.apache.spark.sql.types._
-import org.apache.spark.sql.SparkSession
 
 /**
  * Catalyst rule that automatically transforms schemas with nested GeometryUDT to prevent
@@ -35,7 +33,7 @@ import org.apache.spark.sql.SparkSession
  * This rule detects LogicalRelations that use ParquetFileFormat and have nested GeometryUDT in
  * their schema, then transforms the schema to use BinaryType instead.
  */
-case class FixNestedUDTInParquetRule(spark: SparkSession) extends Rule[LogicalPlan] {
+class TransformNestedUDTInParquet(spark: SparkSession) extends Rule[LogicalPlan] {
 
   override def apply(plan: LogicalPlan): LogicalPlan = {
     plan.transformUp {
