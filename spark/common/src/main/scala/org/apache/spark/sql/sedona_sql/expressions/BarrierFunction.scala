@@ -33,8 +33,8 @@ import scala.util.parsing.combinator._
  * barrier('rating > 4.0 AND stars >= 4', 'rating', r.rating, 'stars', h.stars)
  *
  * Extends CodegenFallback to prevent Catalyst optimizer from pushing this filter through joins.
- * CodegenFallback makes this expression opaque to optimization rules, ensuring it evaluates
- * at runtime in its original position within the query plan.
+ * CodegenFallback makes this expression opaque to optimization rules, ensuring it evaluates at
+ * runtime in its original position within the query plan.
  */
 private[apache] case class Barrier(inputExpressions: Seq[Expression])
     extends Expression
