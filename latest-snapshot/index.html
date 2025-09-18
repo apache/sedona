@@ -9684,7 +9684,7 @@ You're not viewing the latest stable version.
                 <div class="hljs-snippet__tabs" role="tablist" aria-label="Code tabs">
                   <button class="hljs-snippet__tab is-active" role="tab" aria-selected="true" data-lang="sql">SQL</button>
                   <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="python">PySpark</button>
-                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="java">Java</button>
+                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="bash">SedonaDB</button>
                 </div>
                 <div class="hljs-snippet__body">
 
@@ -9699,29 +9699,23 @@ You're not viewing the latest stable version.
                     </span>
                   </button>
 
-                  <pre class="hljs-snippet__panel" data-lang="sql"><code class="language-sql"><pre><code class="language-sql">-- Create a table
-    CREATE TABLE users (
-        id INT PRIMARY KEY,
-        name VARCHAR(50),
-        email VARCHAR(100),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );</code></pre>
+                  <pre class="hljs-snippet__panel" data-lang="sql"><code class="language-sql"><pre><code class="language-sql">SELECT superhero.name
+FROM city, superhero
+WHERE ST_Contains(city.geom, superhero.geom)
+AND city.name = 'Gotham'</code></pre>
     </code></pre>
-                  <pre class="hljs-snippet__panel" data-lang="python" hidden><code class="language-python">df.withColumn(
-        &quot;centroid&quot;,
-        ST_Centroid(col(&quot;geometry&quot;))
-    ).select(&quot;id&quot;, &quot;centroid&quot;).show(truncate=false)</code></pre>
-                  <pre class="hljs-snippet__panel" data-lang="java" hidden><code class="language-java">Dataset&lt;Row&gt; df = sedona.read.format(&quot;geojson&quot;)
-        .option(&quot;multiLine&quot;, &quot;true&quot;)
-        .load(&quot;PATH/TO/MYFILE.json&quot;)
-
-        .selectExpr(&quot;explode(features) as features&quot;)
-
-        .select(&quot;features.*&quot;)
-
-        .withColumn(&quot;prop0&quot;, expr(&quot;properties['prop0']&quot;))
-        .drop(&quot;properties&quot;)
-        .drop(&quot;type&quot;);</code></pre>
+                  <pre class="hljs-snippet__panel" data-lang="python" hidden><code class="language-python">sedona.sql("""
+SELECT superhero.name
+FROM city, superhero
+WHERE ST_Contains(city.geom, superhero.geom)
+AND city.name = 'Gotham'
+""")</code></pre>
+                  <pre class="hljs-snippet__panel" data-lang="bash" hidden><code class="language-bash">sd.sql("""
+SELECT superhero.name
+FROM city, superhero
+WHERE ST_Contains(city.geom, superhero.geom)
+AND city.name = 'Gotham'
+""")</code></pre>
                 </div>
               </div>
             </div>
@@ -9735,12 +9729,11 @@ You're not viewing the latest stable version.
         <div class="container">
           <div class="section-row">
             <div class="col-left">
-              <div class="hljs-snippet" data-initial="powershell">
+              <div class="hljs-snippet" data-initial="pyspark">
                 <div class="hljs-snippet__tabs" role="tablist" aria-label="Code tabs">
-                  <button class="hljs-snippet__tab is-active" role="tab" aria-selected="true" data-lang="powershell">Command line</button>
-                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="pyspark">PySpark</button>
-                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="python">Python</button>
-                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="java">Snowflake</button>
+                  <button class="hljs-snippet__tab is-active" role="tab" aria-selected="true" data-lang="pyspark">SedonaSpark</button>
+                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="python">SedonaDB</button>
+                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="bash">SedonaSpark in Docker</button>
                 </div>
                 <div class="hljs-snippet__body">
 
@@ -9754,10 +9747,11 @@ You're not viewing the latest stable version.
                       <span class="active-state">✅</span>
                     </span>
                   </button>
-                  <pre class="hljs-snippet__panel" data-lang="powershell"><code class="language-powershell">curl https://install.sedona.apache.org | sh</code></pre>
                   <pre class="hljs-snippet__panel" data-lang="pyspark" hidden><code class="language-python">pip install apache-sedona</code></pre>
-                  <pre class="hljs-snippet__panel" data-lang="python" hidden><code class="language-python">pip install sedonadb</code></pre>
-                  <pre class="hljs-snippet__panel" data-lang="java" hidden><code class="language-java">java -jar sedona-snowflake-1.7.2.jar --geotools-version 1.7.2-28.5 > sedona-snowflake.sql</code></pre>
+                  <pre class="hljs-snippet__panel" data-lang="python" hidden><code class="language-python">pip install "apache-sedona[db]"</code></pre>
+                  <pre class="hljs-snippet__panel" data-lang="bash" hidden><code class="language-bash">docker pull apache/sedona:latest
+docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
+                  </code></pre>
                 </div>
               </div>
             </div>
@@ -9769,7 +9763,7 @@ You're not viewing the latest stable version.
                 Install SedonaDB, or run Sedona on distributed systems when you need additional scale.
               </div>
               <div class="bth-group">
-                <a href="#" class="btn btn-red">
+                <a href="https://github.com/apache/sedona-db" class="btn btn-red">
                      <span class="caption">
                    Install SedonaDB
                   </span>
@@ -9785,10 +9779,10 @@ You're not viewing the latest stable version.
         <div class="container">
           <div class="content-box">
 
-            <h2 class="section-title">Want to appear on our use new case page (coming soon)?</h2>
+            <h2 class="section-title">Want to share your Sedona use case?</h2>
 
             <div class="section__subtitle editor">
-              Submit a pull request or send a quick description of your organization and usage to <a target="_blank" href="https://sedona.apache.org/latest/community/contact/">the mailing list</a> and we'll add you.
+              Join our Discord or create a GitHub Discussion so we can collaborate.
             </div>
 
             <div class="industries-tabs">
@@ -9912,7 +9906,7 @@ You're not viewing the latest stable version.
                 <img src="image/home/features/scalable.svg" alt="" class="">
               </div>
               <h3 class="feature-item__title">Scalable</h3>
-              <div class="feature-item__description editor">Works with planetary-scale datasets in Spark, Flink, or local systems.</div>
+              <div class="feature-item__description editor">Works with small or large datasets with Spark, Flink, or locally.</div>
             </div>
 
             <div class="feature-item">
@@ -9920,15 +9914,15 @@ You're not viewing the latest stable version.
                 <img src="image/home/features/waves.svg" alt="" class="">
               </div>
               <h3 class="feature-item__title">Feature Complete</h3>
-              <div class="feature-item__description editor">300+ spatial functions, multiple file formats, full integration with data lakes to databases.</div>
+              <div class="feature-item__description editor">300+ spatial functions, support for spatial file formats, and compatible with lakehouses and databases.</div>
             </div>
 
             <div class="feature-item">
               <div class="feature-item__icon">
                 <img src="image/home/features/picture.svg" alt="" class="">
               </div>
-              <h3 class="feature-item__title">Raster + Vector Joins</h3>
-              <div class="feature-item__description editor">High-performance joins across multiple data types.</div>
+              <h3 class="feature-item__title">Raster and Vector Support</h3>
+              <div class="feature-item__description editor">Analyze both raster and vector datasets.</div>
             </div>
 
             <div class="feature-item">
@@ -9936,7 +9930,7 @@ You're not viewing the latest stable version.
                 <img src="image/home/features/cloud.svg" alt="" class="">
               </div>
               <h3 class="feature-item__title">Portable</h3>
-              <div class="feature-item__description editor">Run locally, on cloud, or in data platforms like Snowflake.</div>
+              <div class="feature-item__description editor">Easy to run locally, in the cloud, or with any data platform.</div>
             </div>
 
             <div class="feature-item">
@@ -9944,9 +9938,9 @@ You're not viewing the latest stable version.
                 <img src="image/home/features/rocket.svg" alt="" class="">
               </div>
               <h3 class="feature-item__title">Fast</h3>
-              <div class="feature-item__description editor">Works with planetary-scale datasets in Spark, Flink, or local systems.</div>
+              <div class="feature-item__description editor">Optimized execution for single node or distribute cluster environments.</div>
               <div class="feature-item__cta">
-                <a href="#" class="btn-link">
+                <a href="https://github.com/apache/sedona-spatialbench" class="btn-link">
                   <span class="caption">See the benchmarks</span>
                   <span class="icon">
                         <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -9963,7 +9957,7 @@ You're not viewing the latest stable version.
                 <img src="image/home/features/code.svg" alt="" class="">
               </div>
               <h3 class="feature-item__title">Familiar</h3>
-              <div class="feature-item__description editor">Works with SQL, Python, Scala, Java, and R.</div>
+              <div class="feature-item__description editor">Supports many programming languages and runnable in the environment where you feel most comfortable.</div>
             </div>
 
 
@@ -9999,7 +9993,7 @@ You're not viewing the latest stable version.
               <h3 class="info-item__title">SedonaDB</h3>
               <div class="info-item__description editor">Standalone runtime for local processing and development.</div>
               <div class="info-item__cta">
-                <a href="#" class="btn-link">
+                <a href="https://github.com/apache/sedona-db" class="btn-link">
                   <span class="caption">SedonaDB</span>
                   <span class="icon">
                         <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -10021,7 +10015,7 @@ You're not viewing the latest stable version.
               <h3 class="info-item__title">SedonaSpark</h3>
               <div class="info-item__description editor">Distributed batch processing on Apache Spark clusters.</div>
               <div class="info-item__cta">
-                <a href="#" class="btn-link">
+                <a href="setup/overview/" class="btn-link">
                   <span class="caption">SedonaSpark</span>
                   <span class="icon">
                         <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -10043,7 +10037,7 @@ You're not viewing the latest stable version.
               <h3 class="info-item__title">SedonaFlink</h3>
               <div class="info-item__description editor">Real-time spatial analytics using Apache Flink.</div>
               <div class="info-item__cta">
-                <a href="#" class="btn-link">
+                <a href="setup/flink/install-scala/" class="btn-link">
                   <span class="caption">SedonaFlink</span>
                   <span class="icon">
                         <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -10059,7 +10053,7 @@ You're not viewing the latest stable version.
               <div class="info-item__tag">
                 <img src="image/home/deploy/snowflake.svg" alt="" class="">
                 <div class="caption">
-                  Snowflake
+                    Batch
                 </div>
               </div>
               <h3 class="info-item__title">SedonaSnow</h3>
@@ -10067,7 +10061,7 @@ You're not viewing the latest stable version.
                 Native spatial support inside Snowflake environments.
               </div>
               <div class="info-item__cta">
-                <a href="#" class="btn-link">
+                <a href="setup/snowflake/install/" class="btn-link">
                   <span class="caption">SedonaSnow</span>
                   <span class="icon">
                         <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -10089,7 +10083,7 @@ You're not viewing the latest stable version.
               <h3 class="info-item__title">Sedona in the Cloud</h3>
               <div class="info-item__description editor">Integrated spatial support in your preferred cloud environment</div>
               <div class="info-item__cta">
-                <a href="#" class="btn-link">
+                <a href="setup/overview/" class="btn-link">
                   <span class="caption">Explore the ecosystem</span>
                   <span class="icon">
                         <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -10111,7 +10105,7 @@ You're not viewing the latest stable version.
           <h2 class="section-title">Join the community</h2>
           <div class="section-description editor">Discover what our community has to say about their Apache Sedona experience.</div>
           <div class="btn-group">
-            <a href="#" class="btn btn-light-red">
+            <a href="https://github.com/apache/sedona/discussions" class="btn btn-light-red">
                   <span class="caption">
                     GitHub Discussions
                   </span>
@@ -10124,7 +10118,7 @@ You're not viewing the latest stable version.
 
                   </span>
             </a>
-            <a href="#" class="btn btn-light-red">
+            <a href="https://discord.gg/9A3k5dEBsY" class="btn btn-light-red">
               <span class="caption">Discord</span>
               <span class="icon  icon-lg">
                      <svg width="17" height="18" viewBox="0 0 17 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -10228,7 +10222,7 @@ You're not viewing the latest stable version.
                 Monthly community meetings and programming conferences
               </h2>
               <div class="btn-group">
-                <a href="#" class="btn btn-red">
+                <a href="community/contact/" class="btn btn-red">
                      <span class="caption">
                     Find Events
                   </span>
@@ -10246,7 +10240,7 @@ You're not viewing the latest stable version.
       </section>
 
       <!-- Section Get Started -->
-      <section class="section-get-started">
+      <!-- <section class="section-get-started">
         <div class="container">
 
           <h2 class="section-title">
@@ -10297,7 +10291,8 @@ You're not viewing the latest stable version.
           </div>
 
         </div>
-      </section>
+      </section> -->
+
     </div>
     
 
