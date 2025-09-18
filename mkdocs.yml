@@ -15,9 +15,9 @@
 # specific language governing permissions and limitations
 # under the License.
 
-site_name: Apache Sedona&trade;
+site_name: Apache Sedona
 site_url: https://sedona.apache.org
-site_description: Apache Sedona&trade; is a cluster computing system for processing large-scale spatial data. Sedona extends existing cluster computing systems, such as Apache Spark, Apache Flink, and Snowflake, with a set of out-of-the-box distributed Spatial Datasets and Spatial SQL that efficiently load, process, and analyze large-scale spatial data across machines.
+site_description: Apache Sedona is a cluster computing system for processing large-scale spatial data. Sedona extends existing cluster computing systems, such as Apache Spark, Apache Flink, and Snowflake, with a set of out-of-the-box distributed Spatial Datasets and Spatial SQL that efficiently load, process, and analyze large-scale spatial data across machines.
 nav:
   - Home: index.md
   - Setup:
@@ -144,6 +144,8 @@ nav:
               - Function (Snowflake): api/snowflake/vector-data/Function.md
               - Aggregate Function (Snowflake): api/snowflake/vector-data/AggregateFunction.md
               - Predicate (Snowflake): api/snowflake/vector-data/Predicate.md
+  - SedonaDB: "https://sedona.apache.org/sedonadb/"
+  - SpatialBench: "https://sedona.apache.org/spatialbench/"
   - Blog: blog/index.md
   - Community:
       - Compile the code: setup/compile.md
@@ -184,6 +186,7 @@ theme:
     logo: fontawesome/solid/earth-americas
     repo: fontawesome/brands/github
   features:
+    - announce.dismiss
     - content.code.copy
     - content.action.edit
     - search.highlight
