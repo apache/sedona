@@ -180,13 +180,29 @@ class BarrierFunctionTest extends TestBaseScala with TableDrivenPropertyChecks {
 
       testDf.createOrReplaceTempView("test_table")
 
-      // Test null comparisons
-      val result = sparkSession.sql("""SELECT id, barrier('val1 = val2',
+      // Test null equality comparisons
+      val resultEq = sparkSession.sql("""SELECT id, barrier('val1 = val2',
                              'val1', val1,
                              'val2', val2) as result
            FROM test_table""")
-      val expected = Seq(false, false, false, true)
-      result.collect().map(_.getBoolean(1)) should be(expected)
+      val expectedEq = Seq(false, false, false, true)
+      resultEq.collect().map(_.getBoolean(1)) should be(expectedEq)
+
+      // Test null inequality comparisons
+      val resultNe = sparkSession.sql("""SELECT id, barrier('val1 != val2',
+                             'val1', val1,
+                             'val2', val2) as result
+           FROM test_table""")
+      val expectedNe = Seq(true, true, true, false)
+      resultNe.collect().map(_.getBoolean(1)) should be(expectedNe)
+
+      // Test null with <= operator
+      val resultLe = sparkSession.sql("""SELECT id, barrier('val1 <= val2',
+                             'val1', val1,
+                             'val2', val2) as result
+           FROM test_table""")
+      val expectedLe = Seq(true, false, false, true)
+      resultLe.collect().map(_.getBoolean(1)) should be(expectedLe)
     }
   }
 

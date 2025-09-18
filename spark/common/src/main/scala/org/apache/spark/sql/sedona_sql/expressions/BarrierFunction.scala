@@ -108,20 +108,28 @@ private[apache] case class Barrier(inputExpressions: Seq[Expression])
  */
 private class BooleanExpressionParser(variables: Map[String, Any]) extends JavaTokenParsers {
 
+  // Pre-compiled regex patterns for better performance
+  private val truePattern = "(?i)true".r
+  private val falsePattern = "(?i)false".r
+  private val nullPattern = "(?i)null".r
+  private val andPattern = "(?i)AND".r
+  private val orPattern = "(?i)OR".r
+  private val notPattern = "(?i)NOT".r
+
   def parseExpression(expr: String): ParseResult[Boolean] = parseAll(boolExpr, expr)
 
   def boolExpr: Parser[Boolean] = orExpr
 
-  def orExpr: Parser[Boolean] = andExpr ~ rep("(?i)OR".r ~> andExpr) ^^ { case left ~ rights =>
+  def orExpr: Parser[Boolean] = andExpr ~ rep(orPattern ~> andExpr) ^^ { case left ~ rights =>
     rights.foldLeft(left)(_ || _)
   }
 
-  def andExpr: Parser[Boolean] = notExpr ~ rep("(?i)AND".r ~> notExpr) ^^ { case left ~ rights =>
+  def andExpr: Parser[Boolean] = notExpr ~ rep(andPattern ~> notExpr) ^^ { case left ~ rights =>
     rights.foldLeft(left)(_ && _)
   }
 
   def notExpr: Parser[Boolean] =
-    "(?i)NOT".r ~> notExpr ^^ (!_) |
+    notPattern ~> notExpr ^^ (!_) |
       primaryExpr
 
   def primaryExpr: Parser[Boolean] =
@@ -141,8 +149,8 @@ private class BooleanExpressionParser(variables: Map[String, Any]) extends JavaT
   }
 
   def booleanValue: Parser[Boolean] =
-    "(?i)true".r ^^ (_ => true) |
-      "(?i)false".r ^^ (_ => false) |
+    truePattern ^^ (_ => true) |
+      falsePattern ^^ (_ => false) |
       ident.filter(id => !id.toUpperCase.matches("AND|OR|NOT")) ^^ { name =>
         variables.get(name) match {
           case Some(b: Boolean) => b
@@ -159,9 +167,9 @@ private class BooleanExpressionParser(variables: Map[String, Any]) extends JavaT
     floatingPointNumber ^^ (_.toDouble) |
       wholeNumber ^^ (_.toLong) |
       stringLiteral ^^ (s => s.substring(1, s.length - 1)) | // Remove quotes
-      "(?i)true".r ^^ (_ => true) |
-      "(?i)false".r ^^ (_ => false) |
-      "(?i)null".r ^^ (_ => null) |
+      truePattern ^^ (_ => true) |
+      falsePattern ^^ (_ => false) |
+      nullPattern ^^ (_ => null) |
       ident.filter(id => !id.toUpperCase.matches("AND|OR|NOT")) ^^ (name =>
         variables.getOrElse(name, throw new IllegalArgumentException(s"Unknown variable: $name")))
 
