@@ -28,6 +28,7 @@ import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.catalyst.rules.Rule
 import org.apache.spark.sql.execution.SparkStrategy
 import org.apache.spark.sql.sedona_sql.optimization._
+import org.apache.spark.sql.sedona_sql.catalyst.FixNestedUDTInParquetRule
 import org.apache.spark.sql.sedona_sql.strategy.join.JoinQueryDetector
 import org.apache.spark.sql.sedona_sql.strategy.physical.function.EvalPhysicalFunctionStrategy
 import org.apache.spark.sql.{SQLContext, SparkSession}
@@ -43,6 +44,7 @@ object SedonaContext {
 
   private def customOptimizationsWithSession(sparkSession: SparkSession) =
     Seq(
+      FixNestedUDTInParquetRule(sparkSession),
       new SpatialFilterPushDownForGeoParquet(sparkSession),
       new SpatialTemporalFilterPushDownForStacScan(sparkSession))
 

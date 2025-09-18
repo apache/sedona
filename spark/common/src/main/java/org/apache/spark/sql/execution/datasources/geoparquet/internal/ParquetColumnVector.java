@@ -31,6 +31,7 @@ import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.MapType;
 import org.apache.spark.sql.types.StructType;
+import org.apache.spark.sql.types.UserDefinedType;
 
 /**
  * Contains necessary information representing a Parquet column, either of primitive or nested type.
@@ -63,7 +64,7 @@ final class ParquetColumnVector {
       boolean isTopLevel,
       Object defaultValue) {
     DataType sparkType = column.sparkType();
-    if (!DataTypeUtils.sameType(sparkType, vector.dataType())) {
+    if (!isCompatibleType(sparkType, vector.dataType())) {
       throw new IllegalArgumentException(
           "Spark type: "
               + sparkType
@@ -404,5 +405,66 @@ final class ParquetColumnVector {
       }
     }
     return size;
+  }
+
+  /**
+   * Checks if two data types are compatible for Parquet column vector operations. This method
+   * handles the special case where one type is a UserDefinedType (UDT) and the other is the UDT's
+   * sqlType, which should be considered compatible.
+   *
+   * <p>This fixes SPARK-48942 where nested GeometryUDT fields fail to read from Parquet due to type
+   * mismatch between the logical schema (GeometryUDT) and physical schema (BinaryType).
+   *
+   * @param type1 First data type to compare
+   * @param type2 Second data type to compare
+   * @return true if the types are compatible, false otherwise
+   */
+  private static boolean isCompatibleType(DataType type1, DataType type2) {
+    // First try the standard type comparison
+    if (DataTypeUtils.sameType(type1, type2)) {
+      return true;
+    }
+
+    // Handle UDT compatibility: if one is UDT and the other is its sqlType, they're compatible
+    if (type1 instanceof UserDefinedType && !(type2 instanceof UserDefinedType)) {
+      UserDefinedType<?> udt1 = (UserDefinedType<?>) type1;
+      return isCompatibleType(udt1.sqlType(), type2);
+    }
+
+    if (type2 instanceof UserDefinedType && !(type1 instanceof UserDefinedType)) {
+      UserDefinedType<?> udt2 = (UserDefinedType<?>) type2;
+      return isCompatibleType(type1, udt2.sqlType());
+    }
+
+    // Handle nested types recursively
+    if (type1 instanceof ArrayType && type2 instanceof ArrayType) {
+      ArrayType array1 = (ArrayType) type1;
+      ArrayType array2 = (ArrayType) type2;
+      return isCompatibleType(array1.elementType(), array2.elementType());
+    }
+
+    if (type1 instanceof MapType && type2 instanceof MapType) {
+      MapType map1 = (MapType) type1;
+      MapType map2 = (MapType) type2;
+      return isCompatibleType(map1.keyType(), map2.keyType())
+          && isCompatibleType(map1.valueType(), map2.valueType());
+    }
+
+    if (type1 instanceof StructType && type2 instanceof StructType) {
+      StructType struct1 = (StructType) type1;
+      StructType struct2 = (StructType) type2;
+      if (struct1.fields().length != struct2.fields().length) {
+        return false;
+      }
+      for (int i = 0; i < struct1.fields().length; i++) {
+        if (!isCompatibleType(struct1.fields()[i].dataType(), struct2.fields()[i].dataType())) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // Types are not compatible
+    return false;
   }
 }

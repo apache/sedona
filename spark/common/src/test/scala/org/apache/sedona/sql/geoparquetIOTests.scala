@@ -784,6 +784,84 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
     }
   }
 
+  describe("SPARK-48942 reproduction") {
+    it("should handle array of struct with geometry UDT") {
+      // This test reproduces the issue described in SPARK-48942 and GitHub issue #2240
+      // where reading back nested geometry from Parquet with PySpark 3.5 fails
+      val testPath = geoparquetoutputlocation + "/spark_48942_test.parquet"
+
+      // Create DataFrame with array of struct containing geometry
+      val df = sparkSession.sql("""
+        SELECT ARRAY(STRUCT(ST_POINT(1.0, 1.1) AS geometry)) AS nested_geom_array
+      """)
+
+      df.printSchema()
+      df.show(false)
+
+      // Write to Parquet
+      df.write.mode("overwrite").format("parquet").save(testPath)
+
+      // This should now work with the fix for SPARK-48942 in ParquetColumnVector.isCompatibleType()
+      // The fix allows vectorized reading to handle UDT compatibility properly
+      val readDf = sparkSession.read.format("parquet").load(testPath)
+      readDf.printSchema()
+
+      // Try to show the data - this should work with the fix
+      readDf.show(false)
+      println("SUCCESS: Nested geometry array read successfully with vectorized reading enabled")
+
+      // Verify the geometry data is correct
+      val result = readDf.collect()
+      assert(result.length == 1)
+      val nestedArray = result(0).getAs[Seq[Any]](0)
+      assert(nestedArray.length == 1)
+      // Note: The exact geometry verification would require accessing the nested structure
+    }
+
+    it("should reject nested geometry when using GeoParquet format") {
+      // GeoParquet specification requires "Geometry columns MUST be at the root of the schema"
+      // Therefore, nested geometry should be rejected
+      val testPath = geoparquetoutputlocation + "/spark_48942_geoparquet_test.geoparquet"
+
+      val df = sparkSession.sql("""
+        SELECT ARRAY(STRUCT(ST_POINT(1.0, 1.1) AS geometry)) AS nested_geom_array
+      """)
+
+      // Writing nested geometry to GeoParquet should fail according to the specification
+      assertThrows[SparkException] {
+        df.write.mode("overwrite").format("geoparquet").save(testPath)
+      }
+      println("SUCCESS: GeoParquet correctly rejects nested geometry as per specification")
+    }
+
+    it("should handle deeply nested arrays with geometry UDT") {
+      // Test deeply nested arrays: array of array of struct with geometry
+      val testPath = geoparquetoutputlocation + "/spark_48942_deep_nested_test.parquet"
+
+      val df = sparkSession.sql("""
+        SELECT ARRAY(
+          ARRAY(STRUCT(ST_POINT(1.0, 1.1) AS geometry)),
+          ARRAY(STRUCT(ST_POINT(2.0, 2.1) AS geometry))
+        ) AS deeply_nested_geom_array
+      """)
+
+      df.printSchema()
+      df.show(false)
+
+      // Write to Parquet
+      df.write.mode("overwrite").format("parquet").save(testPath)
+
+      // Read back and verify
+      val readDf = sparkSession.read.format("parquet").load(testPath)
+      readDf.printSchema()
+      readDf.show(false)
+
+      val result = readDf.collect()
+      assert(result.length == 1)
+      println("SUCCESS: Deeply nested arrays with geometry read successfully")
+    }
+  }
+
   def validateGeoParquetMetadata(path: String)(body: org.json4s.JValue => Unit): Unit = {
     val parquetFiles = new File(path).listFiles().filter(_.getName.endsWith(".parquet"))
     parquetFiles.foreach { filePath =>
