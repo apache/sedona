@@ -805,7 +805,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       // Verify the geometry data is correct
       val result = readDf.collect()
       assert(result.length == 1)
-      val nestedArray = result(0).getAs[Seq[Any]](0)
+      val nestedArray = result(0).getSeq[Any](0)
       assert(nestedArray.length == 1)
     }
 
