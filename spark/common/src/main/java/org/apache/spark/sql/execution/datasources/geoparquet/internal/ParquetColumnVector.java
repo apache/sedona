@@ -460,14 +460,37 @@ final class ParquetColumnVector {
    * @return true if the types are compatible, false otherwise
    */
   private static boolean isCompatibleType(DataType type1, DataType type2) {
-    // Check cache first to avoid redundant computations
+    // Fast path: For most regular cases, types are exactly the same
+    // This avoids cache overhead for simple comparisons
+    if (DataTypeUtils.sameType(type1, type2)) {
+      return true;
+    }
+
+    // Only use cache for complex cases (UDT or nested types)
+    // This avoids overhead for regular Parquet files without nested UDT
+    boolean needsCaching =
+        (type1 instanceof UserDefinedType)
+            || (type2 instanceof UserDefinedType)
+            || (type1 instanceof ArrayType)
+            || (type2 instanceof ArrayType)
+            || (type1 instanceof MapType)
+            || (type2 instanceof MapType)
+            || (type1 instanceof StructType)
+            || (type2 instanceof StructType);
+
+    if (!needsCaching) {
+      // Simple types that don't match - no need to cache
+      return false;
+    }
+
+    // Check cache for complex type comparisons
     TypePair typePair = new TypePair(type1, type2);
     Boolean cached = TYPE_COMPATIBILITY_CACHE.get(typePair);
     if (cached != null) {
       return cached;
     }
 
-    // Compute compatibility
+    // Compute compatibility for complex types
     boolean result = computeCompatibility(type1, type2);
 
     // Cache the result for future use
@@ -477,10 +500,7 @@ final class ParquetColumnVector {
   }
 
   private static boolean computeCompatibility(DataType type1, DataType type2) {
-    // First try the standard type comparison
-    if (DataTypeUtils.sameType(type1, type2)) {
-      return true;
-    }
+    // Note: sameType check already done in isCompatibleType fast path
 
     // Handle UDT compatibility: if one is UDT and the other is its sqlType, they're compatible
     if (type1 instanceof UserDefinedType && !(type2 instanceof UserDefinedType)) {
