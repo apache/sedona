@@ -296,6 +296,25 @@ def ST_Azimuth(point_a: ColumnOrName, point_b: ColumnOrName) -> Column:
 
 
 @validate_argument_types
+def barrier(expression: ColumnOrName, *args) -> Column:
+    """Prevent filter pushdown and control predicate evaluation order in complex spatial joins.
+    This function creates an optimization barrier by evaluating boolean expressions at runtime.
+
+    :param expression: Boolean expression string to evaluate
+    :type expression: ColumnOrName
+    :param args: Variable name and value pairs (var_name1, var_value1, var_name2, var_value2, ...)
+    :return: Boolean result of the expression evaluation
+    :rtype: Column
+
+    Example:
+        df.where(barrier('rating > 4.0 AND stars >= 4',
+                        'rating', col('r.rating'),
+                        'stars', col('h.stars')))
+    """
+    return _call_st_function("barrier", (expression,) + args)
+
+
+@validate_argument_types
 def ST_BestSRID(geometry: ColumnOrName) -> Column:
     """Estimates the best SRID (EPSG code) of the geometry.
 
