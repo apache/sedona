@@ -37,9 +37,15 @@ class TransformNestedUDTParquet(spark: SparkSession) extends Rule[LogicalPlan] {
 
   override def apply(plan: LogicalPlan): LogicalPlan = {
     plan.transformUp {
-      case lr @ LogicalRelation(relation: HadoopFsRelation, _, _, _)
-          if relation.fileFormat.isInstanceOf[ParquetFileFormat] && hasNestedGeometryUDT(
-            lr.schema) =>
+      case lr: LogicalRelation
+          if lr.relation.isInstanceOf[HadoopFsRelation] &&
+            lr.relation
+              .asInstanceOf[HadoopFsRelation]
+              .fileFormat
+              .isInstanceOf[ParquetFileFormat] &&
+            hasNestedGeometryUDT(lr.schema) =>
+        val relation = lr.relation.asInstanceOf[HadoopFsRelation]
+
         // Transform the schema to use BinaryType for nested GeometryUDT
         val transformedSchema = transformSchemaForNestedUDT(lr.schema)
 
