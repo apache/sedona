@@ -33,7 +33,7 @@ import org.apache.spark.sql.types._
  * This rule detects LogicalRelations that use ParquetFileFormat and have nested GeometryUDT in
  * their schema, then transforms the schema to use BinaryType instead.
  */
-class TransformNestedUDTInParquet(spark: SparkSession) extends Rule[LogicalPlan] {
+class TransformNestedUDTParquet(spark: SparkSession) extends Rule[LogicalPlan] {
 
   override def apply(plan: LogicalPlan): LogicalPlan = {
     plan.transformUp {
@@ -77,10 +77,10 @@ class TransformNestedUDTInParquet(spark: SparkSession) extends Rule[LogicalPlan]
 
   private def transformNestedUDTToBinary(schema: StructType): StructType = {
     StructType(
-      schema.fields.map(field => field.copy(dataType = transformUDTToBinary(field.dataType))))
+      schema.fields.map(field => field.copy(dataType = transformTopLevelUDT(field.dataType))))
   }
 
-  private def transformUDTToBinary(dataType: DataType): DataType = {
+  private def transformTopLevelUDT(dataType: DataType): DataType = {
     dataType match {
       case ArrayType(elementType, containsNull) =>
         ArrayType(transformNestedUDTToBinary(elementType), containsNull)
