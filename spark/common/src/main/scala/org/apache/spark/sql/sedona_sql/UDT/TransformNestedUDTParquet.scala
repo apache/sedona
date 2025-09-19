@@ -57,13 +57,26 @@ class TransformNestedUDTParquet(spark: SparkSession) extends Rule[LogicalPlan] {
     }
   }
 
+  /**
+   * Check if a schema contains nested GeometryUDT (i.e., GeometryUDT inside arrays, maps, or
+   * structs). Top-level GeometryUDT fields are NOT considered nested.
+   */
   private def hasNestedGeometryUDT(schema: StructType): Boolean = {
     schema.fields.exists(field => hasNestedGeometryUDTInType(field.dataType, isTopLevel = true))
   }
 
+  /**
+   * Recursively check if a data type contains nested GeometryUDT.
+   * @param dataType
+   *   the data type to check
+   * @param isTopLevel
+   *   true if this is a top-level field, false if nested inside a container
+   * @return
+   *   true if nested GeometryUDT is found, false otherwise
+   */
   private def hasNestedGeometryUDTInType(dataType: DataType, isTopLevel: Boolean): Boolean = {
     dataType match {
-      case _: GeometryUDT => !isTopLevel
+      case _: GeometryUDT => !isTopLevel // GeometryUDT is "nested" only if NOT at top level
       case ArrayType(elementType, _) =>
         hasNestedGeometryUDTInType(elementType, isTopLevel = false)
       case MapType(keyType, valueType, _) =>
