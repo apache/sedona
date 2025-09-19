@@ -21,7 +21,9 @@ package org.apache.spark.sql.execution.datasources.geoparquet.internal;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.spark.memory.MemoryMode;
 import org.apache.spark.sql.execution.vectorized.OffHeapColumnVector;
 import org.apache.spark.sql.execution.vectorized.OnHeapColumnVector;
@@ -37,6 +39,44 @@ import org.apache.spark.sql.types.UserDefinedType;
  * Contains necessary information representing a Parquet column, either of primitive or nested type.
  */
 final class ParquetColumnVector {
+  /** Cache for type compatibility checks to avoid redundant recursive computations */
+  private static final Map<TypePair, Boolean> TYPE_COMPATIBILITY_CACHE = new ConcurrentHashMap<>();
+
+  /** Key class for caching type pairs */
+  private static class TypePair {
+    private final DataType type1;
+    private final DataType type2;
+    private final int hashCode;
+
+    TypePair(DataType type1, DataType type2) {
+      this.type1 = type1;
+      this.type2 = type2;
+      // Pre-compute hash code for efficiency
+      this.hashCode = 31 * type1.hashCode() + type2.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) return true;
+      if (!(obj instanceof TypePair)) return false;
+      TypePair other = (TypePair) obj;
+      return type1.equals(other.type1) && type2.equals(other.type2);
+    }
+
+    @Override
+    public int hashCode() {
+      return hashCode;
+    }
+  }
+
+  /**
+   * Clear the type compatibility cache. This can be useful for testing or when the cache grows too
+   * large.
+   */
+  public static void clearCompatibilityCache() {
+    TYPE_COMPATIBILITY_CACHE.clear();
+  }
+
   private final ParquetColumn column;
   private final List<ParquetColumnVector> children;
   private final WritableColumnVector vector;
@@ -420,6 +460,23 @@ final class ParquetColumnVector {
    * @return true if the types are compatible, false otherwise
    */
   private static boolean isCompatibleType(DataType type1, DataType type2) {
+    // Check cache first to avoid redundant computations
+    TypePair typePair = new TypePair(type1, type2);
+    Boolean cached = TYPE_COMPATIBILITY_CACHE.get(typePair);
+    if (cached != null) {
+      return cached;
+    }
+
+    // Compute compatibility
+    boolean result = computeCompatibility(type1, type2);
+
+    // Cache the result for future use
+    TYPE_COMPATIBILITY_CACHE.put(typePair, result);
+
+    return result;
+  }
+
+  private static boolean computeCompatibility(DataType type1, DataType type2) {
     // First try the standard type comparison
     if (DataTypeUtils.sameType(type1, type2)) {
       return true;
