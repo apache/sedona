@@ -794,6 +794,28 @@
 
 
 
+<div class="viewcode-block" id="barrier">
+<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.barrier">[docs]</a>
+<span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">barrier</span><span class="p">(</span><span class="n">expression</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Prevent filter pushdown and control predicate evaluation order in complex spatial joins.</span>
+<span class="sd">    This function creates an optimization barrier by evaluating boolean expressions at runtime.</span>
+
+<span class="sd">    :param expression: Boolean expression string to evaluate</span>
+<span class="sd">    :type expression: ColumnOrName</span>
+<span class="sd">    :param args: Variable name and value pairs (var_name1, var_value1, var_name2, var_value2, ...)</span>
+<span class="sd">    :return: Boolean result of the expression evaluation</span>
+<span class="sd">    :rtype: Column</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        df.where(barrier(&#39;rating &gt; 4.0 AND stars &gt;= 4&#39;,</span>
+<span class="sd">                        &#39;rating&#39;, col(&#39;r.rating&#39;),</span>
+<span class="sd">                        &#39;stars&#39;, col(&#39;h.stars&#39;)))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;barrier&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">expression</span><span class="p">,)</span> <span class="o">+</span> <span class="n">args</span><span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="ST_BestSRID">
 <a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_BestSRID">[docs]</a>
 <span class="nd">@validate_argument_types</span>
