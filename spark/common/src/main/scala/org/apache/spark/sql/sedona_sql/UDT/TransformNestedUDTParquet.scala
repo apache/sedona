@@ -41,7 +41,7 @@ class TransformNestedUDTParquet(spark: SparkSession) extends Rule[LogicalPlan] {
           if relation.fileFormat.isInstanceOf[ParquetFileFormat] && hasNestedGeometryUDT(
             lr.schema) =>
         // Transform the schema to use BinaryType for nested GeometryUDT
-        val transformedSchema = transformNestedUDTToBinary(lr.schema)
+        val transformedSchema = transformSchemaForNestedUDT(lr.schema)
 
         // Create new AttributeReferences with transformed data types
         val transformedAttributes = transformedSchema.fields.zipWithIndex.map {
@@ -75,11 +75,19 @@ class TransformNestedUDTParquet(spark: SparkSession) extends Rule[LogicalPlan] {
     }
   }
 
-  private def transformNestedUDTToBinary(schema: StructType): StructType = {
+  /**
+   * Transform a schema to handle nested UDT by processing each top-level field. This preserves
+   * top-level GeometryUDT fields while transforming nested ones to BinaryType.
+   */
+  private def transformSchemaForNestedUDT(schema: StructType): StructType = {
     StructType(
       schema.fields.map(field => field.copy(dataType = transformTopLevelUDT(field.dataType))))
   }
 
+  /**
+   * Transform a top-level field's data type, preserving GeometryUDT at the top level but
+   * converting nested GeometryUDT to BinaryType.
+   */
   private def transformTopLevelUDT(dataType: DataType): DataType = {
     dataType match {
       case ArrayType(elementType, containsNull) =>
@@ -97,6 +105,10 @@ class TransformNestedUDTParquet(spark: SparkSession) extends Rule[LogicalPlan] {
     }
   }
 
+  /**
+   * Recursively transform nested data types, converting ALL GeometryUDT to BinaryType. This is
+   * used for nested structures where GeometryUDT must be converted.
+   */
   private def transformNestedUDTToBinary(dataType: DataType): DataType = {
     dataType match {
       case _: GeometryUDT => BinaryType

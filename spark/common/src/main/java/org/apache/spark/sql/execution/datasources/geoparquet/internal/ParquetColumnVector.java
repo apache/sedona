@@ -77,6 +77,20 @@ final class ParquetColumnVector {
     TYPE_COMPATIBILITY_CACHE.clear();
   }
 
+  /**
+   * Check if a DataType is complex (i.e., requires recursive type checking). Complex types include
+   * UDT, Arrays, Maps, and Structs.
+   *
+   * @param type the DataType to check
+   * @return true if the type is complex, false otherwise
+   */
+  private static boolean isComplexType(DataType type) {
+    return (type instanceof UserDefinedType)
+        || (type instanceof ArrayType)
+        || (type instanceof MapType)
+        || (type instanceof StructType);
+  }
+
   private final ParquetColumn column;
   private final List<ParquetColumnVector> children;
   private final WritableColumnVector vector;
@@ -468,15 +482,7 @@ final class ParquetColumnVector {
 
     // Only use cache for complex cases (UDT or nested types)
     // This avoids overhead for regular Parquet files without nested UDT
-    boolean needsCaching =
-        (type1 instanceof UserDefinedType)
-            || (type2 instanceof UserDefinedType)
-            || (type1 instanceof ArrayType)
-            || (type2 instanceof ArrayType)
-            || (type1 instanceof MapType)
-            || (type2 instanceof MapType)
-            || (type1 instanceof StructType)
-            || (type2 instanceof StructType);
+    boolean needsCaching = isComplexType(type1) || isComplexType(type2);
 
     if (!needsCaching) {
       // Simple types that don't match - no need to cache
