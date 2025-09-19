@@ -46,13 +46,13 @@ final class ParquetColumnVector {
   private static class TypePair {
     private final DataType type1;
     private final DataType type2;
-    private final int hashCode;
+    private final int cachedHashCode;
 
     TypePair(DataType type1, DataType type2) {
       this.type1 = type1;
       this.type2 = type2;
       // Pre-compute hash code for efficiency
-      this.hashCode = 31 * type1.hashCode() + type2.hashCode();
+      this.cachedHashCode = 31 * type1.hashCode() + type2.hashCode();
     }
 
     @Override
@@ -65,7 +65,7 @@ final class ParquetColumnVector {
 
     @Override
     public int hashCode() {
-      return hashCode;
+      return this.cachedHashCode;
     }
   }
 
