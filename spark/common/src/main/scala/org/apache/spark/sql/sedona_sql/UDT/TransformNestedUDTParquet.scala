@@ -64,8 +64,13 @@ class TransformNestedUDTParquet(spark: SparkSession) extends Rule[LogicalPlan] {
   }
 
   /**
-   * Check if a schema contains nested GeometryUDT (i.e., GeometryUDT inside arrays, maps, or
-   * structs). Top-level GeometryUDT fields are NOT considered nested.
+   * Checks if a schema contains nested GeometryUDT fields, meaning GeometryUDT instances that are
+   * inside arrays, maps, or structs (i.e., not at the top level of the schema). Top-level
+   * GeometryUDT fields (fields whose type is GeometryUDT directly in the StructType) are NOT
+   * considered nested and do not trigger the transformation. This distinction is important
+   * because the SPARK-48942 Parquet bug only affects nested UDTs, not top-level ones. Therefore,
+   * this method returns true only if a GeometryUDT is found inside a container type, ensuring
+   * that only affected fields are transformed.
    */
   private def hasNestedGeometryUDT(schema: StructType): Boolean = {
     schema.fields.exists(field => hasNestedGeometryUDTInType(field.dataType, isTopLevel = true))

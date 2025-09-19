@@ -51,7 +51,8 @@ final class ParquetColumnVector {
     TypePair(DataType type1, DataType type2) {
       this.type1 = type1;
       this.type2 = type2;
-      // Pre-compute hash code for efficiency
+      // Pre-compute hash code to avoid repeated hash code calculations during map operations,
+      // which improves efficiency when TypePair is used as a key in hash-based collections.
       this.cachedHashCode = 31 * type1.hashCode() + type2.hashCode();
     }
 
@@ -474,8 +475,9 @@ final class ParquetColumnVector {
    * @return true if the types are compatible, false otherwise
    */
   private static boolean isCompatibleType(DataType type1, DataType type2) {
-    // Fast path: For most regular cases, types are exactly the same
-    // This avoids cache overhead for simple comparisons
+    // Fast path: For most regular cases, types are exactly the same.
+    // This avoids the overhead of TypePair object creation and cache map operations
+    // (lookup and insertion) for simple comparisons where types are identical.
     if (DataTypeUtils.sameType(type1, type2)) {
       return true;
     }
