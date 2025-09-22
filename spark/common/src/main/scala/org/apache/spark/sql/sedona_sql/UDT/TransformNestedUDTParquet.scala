@@ -100,53 +100,45 @@ class TransformNestedUDTParquet(spark: SparkSession) extends Rule[LogicalPlan] {
   }
 
   /**
-   * Transform a schema to handle nested UDT by processing each top-level field. This preserves
-   * top-level GeometryUDT fields while transforming nested ones to BinaryType.
+   * Transform a schema to handle nested UDT by processing each field. This preserves top-level
+   * GeometryUDT fields while transforming nested ones to BinaryType.
    */
   private def transformSchemaForNestedUDT(schema: StructType): StructType = {
-    StructType(
-      schema.fields.map(field => field.copy(dataType = transformTopLevelUDT(field.dataType))))
+    StructType(schema.fields.map(field =>
+      field.copy(dataType = transformDataType(field.dataType, isTopLevel = true))))
   }
 
   /**
-   * Transform a top-level field's data type, preserving GeometryUDT at the top level but
-   * converting nested GeometryUDT to BinaryType.
+   * Recursively transform data types based on nesting level.
+   * @param dataType
+   *   the data type to transform
+   * @param isTopLevel
+   *   true if this is a top-level field (preserves GeometryUDT), false if nested (converts
+   *   GeometryUDT to BinaryType)
+   * @return
+   *   transformed data type
    */
-  private def transformTopLevelUDT(dataType: DataType): DataType = {
+  private def transformDataType(dataType: DataType, isTopLevel: Boolean): DataType = {
     dataType match {
-      case ArrayType(elementType, containsNull) =>
-        ArrayType(transformNestedUDTToBinary(elementType), containsNull)
-      case MapType(keyType, valueType, valueContainsNull) =>
-        MapType(
-          transformNestedUDTToBinary(keyType),
-          transformNestedUDTToBinary(valueType),
-          valueContainsNull)
-      case StructType(fields) =>
-        StructType(
-          fields.map(field => field.copy(dataType = transformNestedUDTToBinary(field.dataType))))
-      case _: GeometryUDT => dataType // Preserve top-level GeometryUDT
-      case other => other
-    }
-  }
+      case _: GeometryUDT =>
+        if (isTopLevel) dataType else BinaryType // Preserve at top-level, convert if nested
 
-  /**
-   * Recursively transform nested data types, converting ALL GeometryUDT to BinaryType. This is
-   * used for nested structures where GeometryUDT must be converted.
-   */
-  private def transformNestedUDTToBinary(dataType: DataType): DataType = {
-    dataType match {
-      case _: GeometryUDT => BinaryType
       case ArrayType(elementType, containsNull) =>
-        ArrayType(transformNestedUDTToBinary(elementType), containsNull)
+        ArrayType(transformDataType(elementType, isTopLevel = false), containsNull)
+
       case MapType(keyType, valueType, valueContainsNull) =>
         MapType(
-          transformNestedUDTToBinary(keyType),
-          transformNestedUDTToBinary(valueType),
+          transformDataType(keyType, isTopLevel = false),
+          transformDataType(valueType, isTopLevel = false),
           valueContainsNull)
+
       case StructType(fields) =>
-        StructType(
-          fields.map(field => field.copy(dataType = transformNestedUDTToBinary(field.dataType))))
-      case udt: UserDefinedType[_] => transformNestedUDTToBinary(udt.sqlType)
+        StructType(fields.map(field =>
+          field.copy(dataType = transformDataType(field.dataType, isTopLevel = false))))
+
+      case udt: UserDefinedType[_] if !isTopLevel =>
+        transformDataType(udt.sqlType, isTopLevel = false)
+
       case other => other
     }
   }
