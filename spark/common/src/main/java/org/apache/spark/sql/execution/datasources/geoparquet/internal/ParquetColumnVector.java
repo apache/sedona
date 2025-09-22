@@ -21,9 +21,7 @@ package org.apache.spark.sql.execution.datasources.geoparquet.internal;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import org.apache.spark.memory.MemoryMode;
 import org.apache.spark.sql.execution.vectorized.OffHeapColumnVector;
 import org.apache.spark.sql.execution.vectorized.OnHeapColumnVector;
@@ -33,65 +31,11 @@ import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.MapType;
 import org.apache.spark.sql.types.StructType;
-import org.apache.spark.sql.types.UserDefinedType;
 
 /**
  * Contains necessary information representing a Parquet column, either of primitive or nested type.
  */
 final class ParquetColumnVector {
-  /** Cache for type compatibility checks to avoid redundant recursive computations */
-  private static final Map<TypePair, Boolean> TYPE_COMPATIBILITY_CACHE = new ConcurrentHashMap<>();
-
-  /** Key class for caching type pairs */
-  private static class TypePair {
-    private final DataType type1;
-    private final DataType type2;
-    private final int cachedHashCode;
-
-    TypePair(DataType type1, DataType type2) {
-      this.type1 = type1;
-      this.type2 = type2;
-      // Pre-compute hash code to avoid repeated hash code calculations during map operations,
-      // which improves efficiency when TypePair is used as a key in hash-based collections.
-      this.cachedHashCode = 31 * type1.hashCode() + type2.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (this == obj) return true;
-      if (!(obj instanceof TypePair)) return false;
-      TypePair other = (TypePair) obj;
-      return type1.equals(other.type1) && type2.equals(other.type2);
-    }
-
-    @Override
-    public int hashCode() {
-      return this.cachedHashCode;
-    }
-  }
-
-  /**
-   * Clear the type compatibility cache. This can be useful for testing or when the cache grows too
-   * large.
-   */
-  public static void clearCompatibilityCache() {
-    TYPE_COMPATIBILITY_CACHE.clear();
-  }
-
-  /**
-   * Check if a DataType is complex (i.e., requires recursive type checking). Complex types include
-   * UDT, Arrays, Maps, and Structs.
-   *
-   * @param type the DataType to check
-   * @return true if the type is complex, false otherwise
-   */
-  private static boolean isComplexType(DataType type) {
-    return (type instanceof UserDefinedType)
-        || (type instanceof ArrayType)
-        || (type instanceof MapType)
-        || (type instanceof StructType);
-  }
-
   private final ParquetColumn column;
   private final List<ParquetColumnVector> children;
   private final WritableColumnVector vector;
@@ -119,7 +63,7 @@ final class ParquetColumnVector {
       boolean isTopLevel,
       Object defaultValue) {
     DataType sparkType = column.sparkType();
-    if (!isCompatibleType(sparkType, vector.dataType())) {
+    if (!DataTypeUtils.sameType(sparkType, vector.dataType())) {
       throw new IllegalArgumentException(
           "Spark type: "
               + sparkType
@@ -460,96 +404,5 @@ final class ParquetColumnVector {
       }
     }
     return size;
-  }
-
-  /**
-   * Checks if two data types are compatible for Parquet column vector operations. This method
-   * handles the special case where one type is a UserDefinedType (UDT) and the other is the UDT's
-   * sqlType, which should be considered compatible.
-   *
-   * <p>This fixes SPARK-48942 where nested GeometryUDT fields fail to read from Parquet due to type
-   * mismatch between the logical schema (GeometryUDT) and physical schema (BinaryType).
-   *
-   * @param type1 First data type to compare
-   * @param type2 Second data type to compare
-   * @return true if the types are compatible, false otherwise
-   */
-  private static boolean isCompatibleType(DataType type1, DataType type2) {
-    // Fast path: For most regular cases, types are exactly the same.
-    // This avoids the overhead of TypePair object creation and cache map operations
-    // (lookup and insertion) for simple comparisons where types are identical.
-    if (DataTypeUtils.sameType(type1, type2)) {
-      return true;
-    }
-
-    // Only use cache for complex cases (UDT or nested types)
-    // This avoids overhead for regular Parquet files without nested UDT
-    boolean needsCaching = isComplexType(type1) || isComplexType(type2);
-
-    if (!needsCaching) {
-      // Simple types that don't match - no need to cache
-      return false;
-    }
-
-    // Check cache for complex type comparisons
-    TypePair typePair = new TypePair(type1, type2);
-    Boolean cached = TYPE_COMPATIBILITY_CACHE.get(typePair);
-    if (cached != null) {
-      return cached;
-    }
-
-    // Compute compatibility for complex types
-    boolean result = computeCompatibility(type1, type2);
-
-    // Cache the result for future use
-    TYPE_COMPATIBILITY_CACHE.put(typePair, result);
-
-    return result;
-  }
-
-  private static boolean computeCompatibility(DataType type1, DataType type2) {
-    // Note: sameType check already done in isCompatibleType fast path
-
-    // Handle UDT compatibility: if one is UDT and the other is its sqlType, they're compatible
-    if (type1 instanceof UserDefinedType && !(type2 instanceof UserDefinedType)) {
-      UserDefinedType<?> udt1 = (UserDefinedType<?>) type1;
-      return isCompatibleType(udt1.sqlType(), type2);
-    }
-
-    if (type2 instanceof UserDefinedType && !(type1 instanceof UserDefinedType)) {
-      UserDefinedType<?> udt2 = (UserDefinedType<?>) type2;
-      return isCompatibleType(type1, udt2.sqlType());
-    }
-
-    // Handle nested types recursively
-    if (type1 instanceof ArrayType && type2 instanceof ArrayType) {
-      ArrayType array1 = (ArrayType) type1;
-      ArrayType array2 = (ArrayType) type2;
-      return isCompatibleType(array1.elementType(), array2.elementType());
-    }
-
-    if (type1 instanceof MapType && type2 instanceof MapType) {
-      MapType map1 = (MapType) type1;
-      MapType map2 = (MapType) type2;
-      return isCompatibleType(map1.keyType(), map2.keyType())
-          && isCompatibleType(map1.valueType(), map2.valueType());
-    }
-
-    if (type1 instanceof StructType && type2 instanceof StructType) {
-      StructType struct1 = (StructType) type1;
-      StructType struct2 = (StructType) type2;
-      if (struct1.fields().length != struct2.fields().length) {
-        return false;
-      }
-      for (int i = 0; i < struct1.fields().length; i++) {
-        if (!isCompatibleType(struct1.fields()[i].dataType(), struct2.fields()[i].dataType())) {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    // Types are not compatible
-    return false;
   }
 }
