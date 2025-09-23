@@ -35,7 +35,9 @@ The Apache Sedona community is excited to announce the initial release of Sedona
 
 SedonaDB is the first open-source, single-node analytical database engine that treats spatial data as a first-class citizen.
 
-Written in Rust, it’s lightweight, blazing fast, and spatial-native. Out of the box, it provides: \
+<!-- more -->
+
+Written in Rust, it’s lightweight, blazing fast, and spatial-native. Out of the box, it provides:
 
 * Full support for spatial types, joins, CRS (coordinate reference systems), and functions on top of industry-standard query operations.
 * Query optimizations, indexing, and data pruning features under the hood that make spatial operations just work with high performance.
