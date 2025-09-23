@@ -62,6 +62,7 @@ Now instantiate the connection:
 
 ```python
 import sedona.db
+
 sd = sedona.db.connect()
 ```
 
@@ -102,7 +103,8 @@ And here are a few rows from the countries table:
 Here’s how to perform a spatial join to compute the country of each city:
 
 ```python
-sd.sql("""
+sd.sql(
+    """
 select 
     cities.name as city_name,
     countries.name as country_name,
@@ -110,7 +112,8 @@ select
 from cities
 join countries
 where ST_Intersects(cities.geometry, countries.geometry)
-""").show(3)
+"""
+).show(3)
 ```
 
 The code utilizes `ST_Intersects` to determine if a city is contained within a given country.
@@ -175,9 +178,7 @@ trips_df = pd.read_parquet(data_paths["trip"])
 trips_df["pickup_geom"] = gpd.GeoSeries.from_wkb(
     trips_df["t_pickuploc"], crs="EPSG:4326"
 )
-pickups_gdf = gpd.GeoDataFrame(
-    trips_df, geometry="pickup_geom", crs="EPSG:4326"
-)
+pickups_gdf = gpd.GeoDataFrame(trips_df, geometry="pickup_geom", crs="EPSG:4326")
 
 buildings_df = pd.read_parquet(data_paths["building"])
 buildings_df["boundary_geom"] = gpd.GeoSeries.from_wkb(
@@ -193,9 +194,7 @@ result = (
     .groupby(["b_buildingkey", "b_name"], as_index=False)
     .size()
     .rename(columns={"size": "nearby_pickup_count"})
-    .sort_values(
-        ["nearby_pickup_count", "b_buildingkey"], ascending=[False, True]
-    )
+    .sort_values(["nearby_pickup_count", "b_buildingkey"], ascending=[False, True])
     .reset_index(drop=True)
 )
 ```
@@ -254,11 +253,13 @@ Let’s expose these two tables as views and run a spatial join to see how many 
 buildings.to_view("buildings", overwrite=True)
 vermont.to_view("vermont", overwrite=True)
 
-sd.sql("""
+sd.sql(
+    """
 select count(*) from buildings
 join vermont
 where ST_Intersects(buildings.geometry, vermont.geometry)
-""").show()
+"""
+).show()
 ```
 
 This command correctly errors out because the tables have different CRSs.  For safety, SedonaDB errors out rather than give you the wrong answer!  Here’s the error message that’s easy to debug:
@@ -273,11 +274,13 @@ Use ST_Transform() or ST_SetSRID() to ensure arguments are compatible.
 Let’s rewrite the spatial join to convert the `vermont` CRS to EPSG:4326, so it’s compatible with the `buildings` CRS.
 
 ```python
-sd.sql("""
+sd.sql(
+    """
 select count(*) from buildings
 join vermont
 where ST_Intersects(buildings.geometry, ST_Transform(vermont.geometry, 'EPSG:4326'))
-""").show()
+"""
+).show()
 ```
 
 We now get the correct result:
