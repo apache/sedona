@@ -4,6 +4,10 @@ date:
 links:
   - Apache Sedona Discord: https://discord.com/invite/9A3k5dEBsY
 authors:
+  - dewey
+  - feng
+  - jia
+  - kristin
   - matt_powers
 title: "Introducing SedonaDB: A spatial-first query engine"
 ---
