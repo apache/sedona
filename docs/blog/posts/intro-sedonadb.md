@@ -145,9 +145,13 @@ To test our work on SedonaDB, we also needed to develop a mechanism to evaluate 
 
 ## Single-node spatial benchmarks
 
-Let’s compare the performance of SedonaDB vs. GeoPandas and DuckDB Spatial for some representative spatial queries as defined in [SpatialBench](https://sedona.apache.org/spatialbench/):
+Let’s compare the performance of SedonaDB vs. GeoPandas and DuckDB Spatial for some representative spatial queries as defined in [SpatialBench](https://sedona.apache.org/spatialbench/).  Here are the results for Scale Factor 1 (SF 1):
 
 ![SpatialBench SF1](../../image/blog/sedonadb1/image1.png){ align=center width="80%" }
+
+And here are the results for SF 10:
+
+![SpatialBench SF10](../../image/blog/sedonadb1/image2.png){ align=center width="80%" }
 
 Here’s an example of the SpatialBench query #8 SQL code that works for SedonaDB and DuckDB:
 
