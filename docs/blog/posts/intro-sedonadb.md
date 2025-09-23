@@ -40,9 +40,9 @@ Written in Rust, it’s lightweight, blazing fast, and spatial-native. Out of th
 * Full support for spatial types, joins, CRS (coordinate reference systems), and functions on top of industry-standard query operations.
 * Query optimizations, indexing, and data pruning features under the hood that make spatial operations just work with high performance.
 * Pythonic and SQL interfaces familiar to developers, plus APIs for R and Rust.
-* Flexibility to run in single-machine environments on local files or data lakes. 
+* Flexibility to run in single-machine environments on local files or data lakes.
 
-SedonaDB utilizes Apache Arrow and Apache DataFusion, providing everything you need from a modern, vectorized query engine. However, it also delivers the unique ability to run high-performance spatial workloads easily, without requiring extensions. It's for builders who need a spatial-first query engine. 
+SedonaDB utilizes Apache Arrow and Apache DataFusion, providing everything you need from a modern, vectorized query engine. However, it also delivers the unique ability to run high-performance spatial workloads easily, without requiring extensions. It's for builders who need a spatial-first query engine.
 
 SedonaDB is easy to download and run on your local machine or in the cloud. You can install it easily in any runtime.
 
@@ -105,7 +105,7 @@ Here’s how to perform a spatial join to compute the country of each city:
 ```python
 sd.sql(
     """
-select 
+select
     cities.name as city_name,
     countries.name as country_name,
     continent
@@ -327,7 +327,7 @@ ORDER BY distance_to_building ASC, b.b_buildingkey ASC
 ```
 
 Here are the results of the query:
- 
+
 ```
 ┌───────────┬───────────────────────────────┬───────────────┬───────────────┬──────────────────────┐
 │ t_tripkey ┆          t_pickuploc          ┆ b_buildingkey ┆ building_name ┆ distance_to_building │
@@ -347,7 +347,7 @@ This is one of the queries from [SpatialBench](https://github.com/apache/sedona-
 
 SedonaDB is built in Rust to leverage performance, fine-grained memory management capabilities, and an expansive ecosystem of data libraries.
 
-Rust is a high-performance, memory-safe programming language. 
+Rust is a high-performance, memory-safe programming language.
 
 The Rust data ecosystem is mature, and SedonaDB leverages Rust libraries like [Apache DataFusion](https://github.com/apache/datafusion), [GeoArrow](https://github.com/geoarrow/geoarrow), and [georust/geo](https://github.com/georust/geo).
 
@@ -393,7 +393,7 @@ The community will add built-in support for other spatial file formats, such as 
 
 Raster support is also on the roadmap, which is a complex undertaking, so it’s an excellent opportunity to contribute if you’re interested in solving challenging problems with Rust.
 
-Refer to the [SedonaDB v0.2 milestone](https://github.com/apache/sedona-db/milestone/1) for more details on the specific tasks outlined for the next release.  Additionally, feel free to create issues, comment on the Discord, or start GitHub discussions to brainstorm new features. 
+Refer to the [SedonaDB v0.2 milestone](https://github.com/apache/sedona-db/milestone/1) for more details on the specific tasks outlined for the next release.  Additionally, feel free to create issues, comment on the Discord, or start GitHub discussions to brainstorm new features.
 
 ## Join the community
 
