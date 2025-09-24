@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://sedona.apache.org/latest/blog/2025/09/24/introducing-sedonadb-a-spatial-first-query-engine/">
+        <link rel="canonical" href="https://sedona.apache.org/latest/blog/2025/09/24/introducing-sedonadb-a-single-node-analytical-database-engine-with-geospatial-as-a-first-class-citizen/">
       
       
         <link rel="prev" href="../../05/should-you-use-h3-for-geospatial-analytics-a-deep-dive-with-apache-spark-and-sedona/">
@@ -22,7 +22,7 @@
     
     
       
-        <title>Introducing SedonaDB: A spatial-first query engine - Apache Sedona</title>
+        <title>Introducing SedonaDB: A single-node analytical database engine with geospatial as a first-class citizen - Apache Sedona</title>
       
     
     
@@ -71,7 +71,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#sedonadb-quickstart-example" class="md-skip">
+        <a href="#what-is-sedonadb" class="md-skip">
           Skip to content
         </a>
       
@@ -98,7 +98,7 @@ You're not viewing the latest stable version.
     
     
   <div style="background: #CA463A; color: white; text-align: center; padding: 0.5rem;">
-    <a href="https://sedona.apache.org/sedonadb/" title="Announcement">📢 Introducing SedonaDB: A single-node analytical database engine with geospatial as the first-class citizen.</a>
+    <a href="/blog/2025/09/24/introducing-sedonadb-a-single-node-analytical-database-engine-with-geospatial-as-a-first-class-citizen/" title="Announcement">📢 Introducing SedonaDB: A single-node analytical database engine with geospatial as the first-class citizen.</a>
   </div>
   
       <!--
@@ -167,7 +167,7 @@ You're not viewing the latest stable version.
             <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Introducing SedonaDB: A spatial-first query engine
+              Introducing SedonaDB: A single-node analytical database engine with geospatial as a first-class citizen
             
           </span>
             </div>
@@ -4985,9 +4985,18 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#what-is-sedonadb" class="md-nav__link">
+    <span class="md-ellipsis">
+      🤔 What is SedonaDB
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#sedonadb-quickstart-example" class="md-nav__link">
     <span class="md-ellipsis">
-      SedonaDB quickstart example
+      🚀 SedonaDB quickstart example
     </span>
   </a>
   
@@ -4996,16 +5005,7 @@ You're not viewing the latest stable version.
         <li class="md-nav__item">
   <a href="#apache-sedona-spatialbench" class="md-nav__link">
     <span class="md-ellipsis">
-      Apache Sedona SpatialBench
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#single-node-spatial-benchmarks" class="md-nav__link">
-    <span class="md-ellipsis">
-      Single-node spatial benchmarks
+      📊 Apache Sedona SpatialBench
     </span>
   </a>
   
@@ -5014,7 +5014,7 @@ You're not viewing the latest stable version.
         <li class="md-nav__item">
   <a href="#sedonadb-crs-management" class="md-nav__link">
     <span class="md-ellipsis">
-      SedonaDB CRS management
+      🗺️ SedonaDB CRS management
     </span>
   </a>
   
@@ -5023,7 +5023,7 @@ You're not viewing the latest stable version.
         <li class="md-nav__item">
   <a href="#realistic-example-with-sedonadb" class="md-nav__link">
     <span class="md-ellipsis">
-      Realistic example with SedonaDB
+      🎯 Realistic example with SedonaDB
     </span>
   </a>
   
@@ -5032,7 +5032,7 @@ You're not viewing the latest stable version.
         <li class="md-nav__item">
   <a href="#why-sedonadb-was-built-in-rust" class="md-nav__link">
     <span class="md-ellipsis">
-      Why SedonaDB was built in Rust
+      🦀 Why SedonaDB was built in Rust
     </span>
   </a>
   
@@ -5041,7 +5041,7 @@ You're not viewing the latest stable version.
         <li class="md-nav__item">
   <a href="#why-sedonadb-and-sedonaspark-are-both-needed" class="md-nav__link">
     <span class="md-ellipsis">
-      Why SedonaDB and SedonaSpark are Both Needed
+      ⚖️ Why SedonaDB and SedonaSpark are Both Needed
     </span>
   </a>
   
@@ -5050,7 +5050,7 @@ You're not viewing the latest stable version.
         <li class="md-nav__item">
   <a href="#next-steps" class="md-nav__link">
     <span class="md-ellipsis">
-      Next steps
+      🚀 Next steps
     </span>
   </a>
   
@@ -5059,7 +5059,7 @@ You're not viewing the latest stable version.
         <li class="md-nav__item">
   <a href="#join-the-community" class="md-nav__link">
     <span class="md-ellipsis">
-      Join the community
+      🤝 Join the community
     </span>
   </a>
   
@@ -5094,61 +5094,121 @@ You're not viewing the latest stable version.
                 
                   <div class="md-profile md-post__profile">
                     <span class="md-author md-author--long">
-                      <img src="https://media.licdn.com/dms/image/v2/C5603AQEQpLYQ6u-a8Q/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1630000445999?e=1761782400&v=beta&t=dR8biUFIxB_KL1nYXTibNrjaRzTAkfc3LO6FSfRPREE" alt="Dewey">
+                      <img src="https://media.licdn.com/dms/image/v2/C5603AQEQpLYQ6u-a8Q/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1630000445999?e=1761782400&v=beta&t=dR8biUFIxB_KL1nYXTibNrjaRzTAkfc3LO6FSfRPREE" alt="Dewey Dunnington">
                     </span>
                     <span class="md-profile__description">
                       <strong>
                         
-                          Dewey
+                          Dewey Dunnington
                         
                       </strong>
                       <br>
-                      Software Engineer
+                      Apache Sedona Contributor, Apache Arrow PMC member
                     </span>
                   </div>
                 
                   <div class="md-profile md-post__profile">
                     <span class="md-author md-author--long">
-                      <img src="https://media.licdn.com/dms/image/v2/C5603AQEuI_xKhOjapA/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1645716542340?e=1761782400&v=beta&t=6vDu04f9Mun3LXoQaTs-C9DVSSZcH1LaasulqWqpliw" alt="Feng">
+                      <img src="https://avatars.githubusercontent.com/u/5501374?v=4" alt="Kristin Cowalcijk">
                     </span>
                     <span class="md-profile__description">
                       <strong>
                         
-                          Feng
+                          Kristin Cowalcijk
                         
                       </strong>
                       <br>
-                      Software Engineer
+                      Apache Sedona PMC member
                     </span>
                   </div>
                 
                   <div class="md-profile md-post__profile">
                     <span class="md-author md-author--long">
-                      <img src="https://media.licdn.com/dms/image/v2/D5603AQEez8EVYH82LQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1719619666312?e=1761782400&v=beta&t=4xYyTp1peAtupNdaPfbWEYbdMjMMbcdHWEbqO7Y-2dw" alt="Jia">
+                      <img src="https://media.licdn.com/dms/image/v2/C5603AQEuI_xKhOjapA/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1645716542340?e=1761782400&v=beta&t=6vDu04f9Mun3LXoQaTs-C9DVSSZcH1LaasulqWqpliw" alt="Feng Zhang">
                     </span>
                     <span class="md-profile__description">
                       <strong>
                         
-                          Jia
+                          Feng Zhang
                         
                       </strong>
                       <br>
-                      Sedona PMC
+                      Apache Sedona Committer
                     </span>
                   </div>
                 
                   <div class="md-profile md-post__profile">
                     <span class="md-author md-author--long">
-                      <img src="https://avatars.githubusercontent.com/u/5501374?v=4" alt="Kristin">
+                      <img src="https://avatars.githubusercontent.com/u/115442597?v=4" alt="Peter Nguyen">
                     </span>
                     <span class="md-profile__description">
                       <strong>
                         
-                          Kristin
+                          Peter Nguyen
                         
                       </strong>
                       <br>
-                      Software Engineer
+                      Apache Sedona Contributor
+                    </span>
+                  </div>
+                
+                  <div class="md-profile md-post__profile">
+                    <span class="md-author md-author--long">
+                      <img src="https://avatars.githubusercontent.com/u/202656197?v=4" alt="Jess Pavlin">
+                    </span>
+                    <span class="md-profile__description">
+                      <strong>
+                        
+                          Jess Pavlin
+                        
+                      </strong>
+                      <br>
+                      Apache Sedona Contributor
+                    </span>
+                  </div>
+                
+                  <div class="md-profile md-post__profile">
+                    <span class="md-author md-author--long">
+                      <img src="https://media.licdn.com/dms/image/v2/D4E03AQE1XVwinur7-w/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1729284611733?e=1761782400&v=beta&t=B1SOzUOz9CW0J0LEVICMLztKFLAwDg3okem5p-VE--4" alt="Pranav Toggi">
+                    </span>
+                    <span class="md-profile__description">
+                      <strong>
+                        
+                          Pranav Toggi
+                        
+                      </strong>
+                      <br>
+                      Apache Sedona Committer
+                    </span>
+                  </div>
+                
+                  <div class="md-profile md-post__profile">
+                    <span class="md-author md-author--long">
+                      <img src="https://media.licdn.com/dms/image/v2/C4E03AQETRcdZDZNlRg/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1516810351294?e=1761782400&v=beta&t=AlPGe5RqTMd6gfh4qEILx9XsivRWnIM5KIdVSx7AzFE" alt="James Willis">
+                    </span>
+                    <span class="md-profile__description">
+                      <strong>
+                        
+                          James Willis
+                        
+                      </strong>
+                      <br>
+                      Apache Sedona Contributor
+                    </span>
+                  </div>
+                
+                  <div class="md-profile md-post__profile">
+                    <span class="md-author md-author--long">
+                      <img src="https://media.licdn.com/dms/image/v2/D5603AQEez8EVYH82LQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1719619666312?e=1761782400&v=beta&t=4xYyTp1peAtupNdaPfbWEYbdMjMMbcdHWEbqO7Y-2dw" alt="Jia Yu">
+                    </span>
+                    <span class="md-profile__description">
+                      <strong>
+                        
+                          Jia Yu
+                        
+                      </strong>
+                      <br>
+                      Apache Sedona PMC chair
                     </span>
                   </div>
                 
@@ -5164,6 +5224,21 @@ You're not viewing the latest stable version.
                       </strong>
                       <br>
                       Staff Developer Relations Engineer, Apache Sedona
+                    </span>
+                  </div>
+                
+                  <div class="md-profile md-post__profile">
+                    <span class="md-author md-author--long">
+                      <img src="https://media.licdn.com/dms/image/v2/C4D03AQHKr_fPpGdNGw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1516866211726?e=2147483647&v=beta&t=p4PcyFNjZhvAIX8e1qZt4i3HbH5yOIXuEs8MTNoYZ3Y" alt="Kelly-Ann Dolor">
+                    </span>
+                    <span class="md-profile__description">
+                      <strong>
+                        
+                          Kelly-Ann Dolor
+                        
+                      </strong>
+                      <br>
+                      Staff Technical Writer, Apache Sedona
                     </span>
                   </div>
                 
@@ -5221,12 +5296,34 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="https://discord.com/invite/9A3k5dEBsY" class="md-nav__link">
+      <a href="https://sedona.apache.org/sedonadb/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Apache Sedona Discord
+    SedonaDB
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+                      
+                        
+                        
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://sedona.apache.org/spatialbench/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    SpatialBench
     
   </span>
   
@@ -5262,7 +5359,7 @@ You're not viewing the latest stable version.
   
 
 
-  <h1>Introducing SedonaDB: A spatial-first query engine</h1>
+  <h1>Introducing SedonaDB: A single-node analytical database engine with geospatial as a first-class citizen</h1>
 
 <!--
 # Licensed to the Apache Software Foundation (ASF) under one
@@ -5283,22 +5380,31 @@ You're not viewing the latest stable version.
 # under the License.
 -->
 
-<p>The Apache Sedona community is excited to announce the initial release of SedonaDB.</p>
-<p>SedonaDB is the first open-source, single-node analytical database engine that treats spatial data as a first-class citizen.</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>🚀🎉 Big News! 🎉🚀</p>
+<p>We’re celebrating the launch of SedonaDB &amp; SpatialBench with a special Apache Sedona Community Office Hour!</p>
+<p>📅 October 7, 2025</p>
+<p>⏰ 8–9 AM Pacific Time</p>
+<p>📍 Online</p>
+<p>🔗 <a href="https://bit.ly/3UBmxFY">Sign up here</a></p>
+</div>
+<p>The Apache Sedona community is excited to announce the initial release of <a href="https://sedona.apache.org/sedonadb">SedonaDB</a>! 🎉</p>
+<p>SedonaDB is the first open-source, single-node analytical database engine that treats spatial data as a first-class citizen. It is developed as a subproject of Apache Sedona.</p>
+<p>Apache Sedona powers large-scale geospatial processing on distributed engines like Spark (SedonaSpark), Flink (SedonaFlink), and Snowflake (SedonaSnow). SedonaDB extends the Sedona ecosystem with a single-node engine optimized for small-to-medium data analytics, delivering the simplicity and speed that distributed systems often cannot.</p>
 <!-- more -->
 
-<p>Written in Rust, it’s lightweight, blazing fast, and spatial-native. Out of the box, it provides:</p>
+<h2 id="what-is-sedonadb">🤔 What is SedonaDB<a class="headerlink" href="#what-is-sedonadb" title="Permanent link">&para;</a></h2>
+<p>Written in Rust, SedonaDB is lightweight, blazing fast, and spatial-native. Out of the box, it provides:</p>
 <ul>
-<li>Full support for spatial types, joins, CRS (coordinate reference systems), and functions on top of industry-standard query operations.</li>
-<li>Query optimizations, indexing, and data pruning features under the hood that make spatial operations just work with high performance.</li>
-<li>Pythonic and SQL interfaces familiar to developers, plus APIs for R and Rust.</li>
-<li>Flexibility to run in single-machine environments on local files or data lakes.</li>
+<li>🗺️ Full support for spatial types, joins, CRS (coordinate reference systems), and functions on top of industry-standard query operations.</li>
+<li>⚡ Query optimizations, indexing, and data pruning features under the hood that make spatial operations just work with high performance.</li>
+<li>🐍 Pythonic and SQL interfaces familiar to developers, plus APIs for R and Rust.</li>
+<li>☁️ Flexibility to run in single-machine environments on local files or data lakes.</li>
 </ul>
-<p>SedonaDB utilizes Apache Arrow and Apache DataFusion, providing everything you need from a modern, vectorized query engine. However, it also delivers the unique ability to run high-performance spatial workloads easily, without requiring extensions. It's for builders who need a spatial-first query engine.</p>
-<p>SedonaDB is easy to download and run on your local machine or in the cloud. You can install it easily in any runtime.</p>
-<p>Apache Sedona already adds geospatial support to Apache Spark (SedonaSpark), Apache Flink (SedonaFlink), and Snowflake (SedonaSnow).  SedonaDB is an excellent small data complement to the existing big data/streaming Sedona libraries.  </p>
-<p>The initial release of SedonaDB provides a comprehensive suite of geometric vector operations and seamlessly integrates with GeoArrow, GeoParquet, and GeoPandas.  Subsequent releases will support all popular spatial functions, including functions for raster data.</p>
-<h2 id="sedonadb-quickstart-example">SedonaDB quickstart example<a class="headerlink" href="#sedonadb-quickstart-example" title="Permanent link">&para;</a></h2>
+<p>SedonaDB utilizes Apache Arrow and Apache DataFusion, providing everything you need from a modern, vectorized query engine. What sets it apart is the ability to process spatial workloads natively, without extensions or plugins. Installation is straightforward, and SedonaDB integrates easily into both local development and cloud pipelines, offering a consistent experience across environments.</p>
+<p>The initial release of SedonaDB provides a comprehensive suite of geometric vector operations and seamlessly integrates with GeoArrow, GeoParquet, and GeoPandas. Future versions will support all popular spatial functions, including functions for raster data.</p>
+<h2 id="sedonadb-quickstart-example">🚀 SedonaDB quickstart example<a class="headerlink" href="#sedonadb-quickstart-example" title="Permanent link">&para;</a></h2>
 <p>Start by installing SedonaDB:</p>
 <div class="highlight"><pre><span></span><code>pip install &quot;apache-sedona[db]&quot;
 </code></pre></div>
@@ -5347,7 +5453,7 @@ You're not viewing the latest stable version.
 <span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </code></pre></div>
 <p>The code utilizes <code>ST_Intersects</code> to determine if a city is contained within a given country.</p>
-<p>Here’s the result of the query:</p>
+<p>Here's the result of the query:</p>
 <div class="highlight"><pre><span></span><code>┌───────────────┬─────────────────────────────┬───────────┐
 │   city_name   ┆         country_name        ┆ continent │
 │    utf8view   ┆           utf8view          ┆  utf8view │
@@ -5359,22 +5465,22 @@ You're not viewing the latest stable version.
 │ Dar es Salaam ┆ United Republic of Tanzania ┆ Africa    │
 └───────────────┴─────────────────────────────┴───────────┘
 </code></pre></div>
-<p>The code above is an example of a point-in-polygon join.  The point represents the city, and the polygon represents the area that represents the country.  SedonaDB can easily perform spatial joins with optimizations, such as effectively utilizing spatial indices where required and adapting join strategies at runtime based on samples of the input data.</p>
-<p>These types of spatial operations can be relatively slow for engines that are not optimized for spatial data.  SedonaDB is optimized for these spatial computations.  </p>
-<h2 id="apache-sedona-spatialbench">Apache Sedona SpatialBench<a class="headerlink" href="#apache-sedona-spatialbench" title="Permanent link">&para;</a></h2>
-<p>To test our work on SedonaDB, we also needed to develop a mechanism to evaluate its performance and speed. As a result of this, and other motivations, we also created Apache Sedona SpatialBench, which is a new standard for measuring the performance of spatial data processing engines and databases. We will discuss the benefits and capabilities of SpatialBench in more detail in our next blog.</p>
-<h2 id="single-node-spatial-benchmarks">Single-node spatial benchmarks<a class="headerlink" href="#single-node-spatial-benchmarks" title="Permanent link">&para;</a></h2>
-<p>Let’s compare the performance of SedonaDB vs. GeoPandas and DuckDB Spatial for some representative spatial queries as defined in <a href="https://sedona.apache.org/spatialbench/">SpatialBench</a>.  Here are the results for Scale Factor 1 (SF 1):</p>
-<p><img align="center" alt="SpatialBench SF1" src="../../../../../image/blog/sedonadb1/image1.png" width="80%" /></p>
-<p>And here are the results for SF 10:</p>
-<p><img align="center" alt="SpatialBench SF10" src="../../../../../image/blog/sedonadb1/image2.png" width="80%" /></p>
-<p>Here’s an example of the SpatialBench query #8 SQL code that works for SedonaDB and DuckDB:</p>
+<p>The example above performs a point-in-polygon join, mapping city locations (points) to the countries they fall within (polygons). SedonaDB executes these joins efficiently by leveraging spatial indices where beneficial and dynamically adapting join strategies at runtime using input data samples. While many general-purpose engines struggle with the performance of such operations, SedonaDB is purpose-built for spatial workloads and delivers consistently fast results.</p>
+<h2 id="apache-sedona-spatialbench">📊 Apache Sedona SpatialBench<a class="headerlink" href="#apache-sedona-spatialbench" title="Permanent link">&para;</a></h2>
+<p>To test our work on SedonaDB, we also needed to develop a mechanism to evaluate its performance and speed. This led us to develop Apache Sedona SpatialBench, a benchmark for assessing geospatial SQL analytics query performance across database systems.</p>
+<p>Let's compare the performance of SedonaDB vs. GeoPandas and DuckDB Spatial for some representative spatial queries as defined in <a href="https://sedona.apache.org/spatialbench/">SpatialBench</a>.</p>
+<p>Here are the results from SpatialBench v0.1 for Queries 1–12 at scale factor 1 (SF1) and scale factor 10 (SF10).</p>
+<p class="grid"><img alt="Scale Factor 1 benchmark results" src="../../../../../image/blog/sedonadb1/sf1-09242025.png" width="400" />
+<img alt="Scale Factor 10 benchmark results" src="../../../../../image/blog/sedonadb1/sf10-09242025.png" width="400" /></p>
+<p>SedonaDB demonstrates balanced performance across all query types and scales effectively to SF 10. DuckDB excels at spatial filters and some geometric operations but faces challenges with complex joins and KNN queries. GeoPandas, while popular in the Python ecosystem, requires manual optimization and parallelization to handle larger datasets effectively. An in-depth performance analysis can be found in the <a href="https://sedona.apache.org/spatialbench/single-node-benchmarks/">SpatialBench website</a>.</p>
+<p>Here’s an example of the SpatialBench Query #8 that works for SedonaDB and DuckDB:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">b_buildingkey</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">b_name</span><span class="p">,</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">nearby_pickup_count</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">trip</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">building</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">ST_DWithin</span><span class="p">(</span><span class="n">ST_GeomFromWKB</span><span class="p">(</span><span class="n">t</span><span class="p">.</span><span class="n">t_pickuploc</span><span class="p">),</span><span class="w"> </span><span class="n">ST_GeomFromWKB</span><span class="p">(</span><span class="n">b</span><span class="p">.</span><span class="n">b_boundary</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0045</span><span class="p">)</span><span class="w"> </span><span class="c1">-- ~500m</span>
 <span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">b_buildingkey</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">b_name</span>
 <span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">nearby_pickup_count</span><span class="w"> </span><span class="k">DESC</span>
 </code></pre></div>
-<p>Here’s what the query returns:</p>
+<p>This query intentionally performs a distance-based spatial join between points and polygons, followed by an aggregation of the results.</p>
+<p>Here's what the query returns:</p>
 <div class="highlight"><pre><span></span><code>┌───────────────┬──────────┬─────────────────────┐
 │ b_buildingkey ┆  b_name  ┆ nearby_pickup_count │
 │     int64     ┆ utf8view ┆        int64        │
@@ -5411,11 +5517,9 @@ You're not viewing the latest stable version.
     <span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="p">)</span>
 </code></pre></div>
-<p>SedonaDB optimizes query execution behind the scenes. GeoPandas requires more manual optimizations for better performance.  If you have experience tuning GeoPandas code and would like to help optimize it, please comment on <a href="https://github.com/apache/sedona-spatialbench">this issue</a>.</p>
-<p>DuckDB Spatial offers optimized spatial join capabilities, enabling the quick execution of some queries, but it errors out for other queries. We encourage the DuckDB community to investigate these issues.</p>
-<h2 id="sedonadb-crs-management">SedonaDB CRS management<a class="headerlink" href="#sedonadb-crs-management" title="Permanent link">&para;</a></h2>
+<h2 id="sedonadb-crs-management">🗺️ SedonaDB CRS management<a class="headerlink" href="#sedonadb-crs-management" title="Permanent link">&para;</a></h2>
 <p>SedonaDB manages the CRS when reading/writing files, as well as in DataFrames, making your pipelines safer and saving you from manual work.</p>
-<p>Let’s compute the number of buildings in the state of Vermont to highlight the CRS management features embedded in SedonaDB.</p>
+<p>Let's compute the number of buildings in the state of Vermont to highlight the CRS management features embedded in SedonaDB.</p>
 <p>Start by reading in a FlatGeobuf file that uses the EPSG 32618 CRS with GeoPandas and then convert it to a SedonaDB DataFrame:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
 
@@ -5453,7 +5557,7 @@ SedonaSchema with 1 field:
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
-<p>This command correctly errors out because the tables have different CRSs.  For safety, SedonaDB errors out rather than give you the wrong answer!  Here’s the error message that’s easy to debug:</p>
+<p>This command correctly errors out because the tables have different CRSs.  For safety, SedonaDB errors out rather than give you the wrong answer! Here's the error message that's easy to debug:</p>
 <div class="highlight"><pre><span></span><code>SedonaError: type_coercion
 caused by
 Error during planning: Mismatched CRS arguments: ogc:crs84 vs epsg:32618
@@ -5468,7 +5572,7 @@ Use ST_Transform() or ST_SetSRID() to ensure arguments are compatible.
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
-<p>We now get the correct result:</p>
+<p>We now get the correct result!</p>
 <div class="highlight"><pre><span></span><code>┌──────────┐
 │ count(*) │
 │   int64  │
@@ -5477,9 +5581,9 @@ Use ST_Transform() or ST_SetSRID() to ensure arguments are compatible.
 └──────────┘
 </code></pre></div>
 <p>SedonaDB tracks the CRS when reading/writing files, converting to/from GeoPandas DataFrames, or when performing DataFrame operations, so your spatial computations run safely and correctly!</p>
-<h2 id="realistic-example-with-sedonadb">Realistic example with SedonaDB<a class="headerlink" href="#realistic-example-with-sedonadb" title="Permanent link">&para;</a></h2>
-<p>Let’s now turn our attention to a KNN join, which is a more complex spatial operation.</p>
-<p>Suppose you’re analyzing ride-sharing data and want to identify which buildings are most commonly near pickup points, helping understand the relationship between trip origins and nearby landmarks, businesses, or residential structures that might influence ride demand patterns.</p>
+<h2 id="realistic-example-with-sedonadb">🎯 Realistic example with SedonaDB<a class="headerlink" href="#realistic-example-with-sedonadb" title="Permanent link">&para;</a></h2>
+<p>Let's now turn our attention to a KNN join, which is a more complex spatial operation.</p>
+<p>Suppose you're analyzing ride-sharing data and want to identify which buildings are most commonly near pickup points, helping understand the relationship between trip origins and nearby landmarks, businesses, or residential structures that might influence ride demand patterns.</p>
 <p>This query finds the five closest buildings to each trip pickup location using spatial nearest neighbor analysis. For every trip, it identifies the five buildings that are geographically closest to where the passenger was picked up and calculates the exact distance to each of those buildings.</p>
 <p>Here’s the query:</p>
 <div class="highlight"><pre><span></span><code><span class="k">WITH</span><span class="w"> </span><span class="n">trip_with_geom</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
@@ -5512,16 +5616,13 @@ Use ST_Transform() or ST_SetSRID() to ensure arguments are compatible.
 │   1239844 ┆ 0101000000ce471770d6ce2a40f9… ┆           618 ┆ ivory         ┆                  0.0 │
 └───────────┴───────────────────────────────┴───────────────┴───────────────┴──────────────────────┘
 </code></pre></div>
-<p>This is one of the queries from <a href="https://github.com/apache/sedona-spatialbench/">SpatialBench</a>.  </p>
-<h2 id="why-sedonadb-was-built-in-rust">Why SedonaDB was built in Rust<a class="headerlink" href="#why-sedonadb-was-built-in-rust" title="Permanent link">&para;</a></h2>
-<p>SedonaDB is built in Rust to leverage performance, fine-grained memory management capabilities, and an expansive ecosystem of data libraries.</p>
-<p>Rust is a high-performance, memory-safe programming language.</p>
-<p>The Rust data ecosystem is mature, and SedonaDB leverages Rust libraries like <a href="https://github.com/apache/datafusion">Apache DataFusion</a>, <a href="https://github.com/geoarrow/geoarrow">GeoArrow</a>, and <a href="https://github.com/georust/geo">georust/geo</a>.</p>
-<p>Whereas Spark, as a database engine, exposes several extension points that allow Sedona Spark to optimize spatial queries in a distributed setting, on a single node, DataFusion exposes stable and well-documented APIs for pruning, specialized physical operators like spatial joins, and optimizer rules at the logical and execution levels. This allowed us to add deep spatial awareness throughout the engine while maintaining non-spatial type and function coverage that users need and expect. Not only did DataFusion make our vision of a single-node spatial engine possible, but the project and its community made it enjoyable at every turn!</p>
-<h2 id="why-sedonadb-and-sedonaspark-are-both-needed">Why SedonaDB and SedonaSpark are Both Needed<a class="headerlink" href="#why-sedonadb-and-sedonaspark-are-both-needed" title="Permanent link">&para;</a></h2>
-<p>SedonaSpark is an excellent option for users who have large geospatial datasets or an existing production Spark runtime.  For example, if you have a large 4-terabyte vector dataset and want to join it with a large raster dataset, then SedonaSpark is clearly the best option.</p>
-<p>But Spark has limitations for smaller datasets. It is slow to run locally, cumbersome to install, and challenging to tune.</p>
-<p>SedonaDB is better for smaller datasets and when running computations locally.  The SedonaDB spatial functions are compatible with the SparkSedona functions, so SQL chunks that work for one engine will usually work for the other.  Over time, we will ensure that both project APIs are fully interoperable.  Here’s an example of a chunk to analyze the Overture buildings table that works for both engines.</p>
+<p>This is one of the queries from <a href="https://github.com/apache/sedona-spatialbench/">SpatialBench</a>.</p>
+<h2 id="why-sedonadb-was-built-in-rust">🦀 Why SedonaDB was built in Rust<a class="headerlink" href="#why-sedonadb-was-built-in-rust" title="Permanent link">&para;</a></h2>
+<p>SedonaDB is built in Rust, a high-performance, memory-safe language that offers fine-grained memory management and a mature ecosystem of data libraries. It takes full advantage of this ecosystem by integrating with projects such as <a href="https://github.com/apache/datafusion">Apache DataFusion</a>, <a href="https://github.com/geoarrow/geoarrow">GeoArrow</a>, and <a href="https://github.com/georust/geo">georust/geo</a>.</p>
+<p>While Spark provides extension points that let SedonaSpark optimize spatial queries in distributed settings, DataFusion offers stable APIs for pruning, spatial operators, and optimizer rules on a single node. This enabled us to embed deep spatial awareness into the engine while preserving full non-spatial functionality. Thanks to the DataFusion project and community, the experience was both possible and enjoyable.</p>
+<h2 id="why-sedonadb-and-sedonaspark-are-both-needed">⚖️ Why SedonaDB and SedonaSpark are Both Needed<a class="headerlink" href="#why-sedonadb-and-sedonaspark-are-both-needed" title="Permanent link">&para;</a></h2>
+<p>SedonaSpark is well-suited for large-scale geospatial workloads or environments where Spark is already part of your production stack. For instance, joining a 100 GB vector dataset with a large raster dataset. For smaller datasets, however, Spark's distributed architecture can introduce unnecessary overhead, making it slower to run locally, harder to install, and more difficult to tune.</p>
+<p>SedonaDB is better for smaller datasets and when running computations locally. The SedonaDB spatial functions are compatible with the SedonaSpark functions, so SQL chunks that work for one engine will usually work for the other. Over time, we will ensure that both project APIs are fully interoperable. Here's an example of a chunk to analyze the Overture buildings table that works for both engines.</p>
 <div class="highlight"><pre><span></span><code>nyc_bbox_wkt = (
     &quot;POLYGON((-74.2591 40.4774, -74.2591 40.9176, -73.7004 40.9176, -73.7004 40.4774, -74.2591 40.4774))&quot;
 )
@@ -5542,15 +5643,15 @@ WHERE
     AND ST_Intersects(geometry, ST_SetSRID(ST_GeomFromText(&#39;{nyc_bbox_wkt}&#39;), 4326))
 LIMIT 5;
 </code></pre></div>
-<h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<h2 id="next-steps">🚀 Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <p>While SedonaDB is well-tested and provides a core set of features that can perform numerous spatial analyses, it remains an early-stage project with multiple opportunities for new features.</p>
 <p>Many more ST functions are required.  Some are relatively straightforward, but others are complex.</p>
-<p>The community will add built-in support for other spatial file formats, such as GeoPackage and GeoJSON, to SedonaDB.  You can read data in these formats into GeoPandas DataFrames and convert them to SedonaDB DataFrames in the meantime.</p>
-<p>Raster support is also on the roadmap, which is a complex undertaking, so it’s an excellent opportunity to contribute if you’re interested in solving challenging problems with Rust.</p>
-<p>Refer to the <a href="https://github.com/apache/sedona-db/milestone/1">SedonaDB v0.2 milestone</a> for more details on the specific tasks outlined for the next release.  Additionally, feel free to create issues, comment on the Discord, or start GitHub discussions to brainstorm new features.</p>
-<h2 id="join-the-community">Join the community<a class="headerlink" href="#join-the-community" title="Permanent link">&para;</a></h2>
-<p>The Apache Sedona community has an active Discord community, monthly user meetings, and regular contributor meetings.  </p>
-<p>SedonaDB has a <a href="https://github.com/apache/sedona-db/milestones">well-defined roadmap</a> and welcomes contributions from the community.  Feel free to request to take ownership of an issue, and we will be happy to assign it to you.  You’re also welcome to join the contributor meetings, and the other active contributors will be glad to help you get your pull request over the finish line!</p>
+<p>The community will add built-in support for other spatial file formats, such as GeoPackage and GeoJSON, to SedonaDB. You can read data in these formats into GeoPandas DataFrames and convert them to SedonaDB DataFrames in the meantime.</p>
+<p>Raster support is also on the roadmap, which is a complex undertaking, so it's an excellent opportunity to contribute if you're interested in solving challenging problems with Rust.</p>
+<p>Refer to the <a href="https://github.com/apache/sedona-db/milestone/1">SedonaDB v0.2 milestone</a> for more details on the specific tasks outlined for the next release. Additionally, feel free to create issues, comment on the Discord, or start GitHub discussions to brainstorm new features.</p>
+<h2 id="join-the-community">🤝 Join the community<a class="headerlink" href="#join-the-community" title="Permanent link">&para;</a></h2>
+<p>The Apache Sedona community has an active Discord community, monthly user meetings, and regular contributor meetings.</p>
+<p>SedonaDB welcomes contributions from the community. Feel free to request to take ownership of an issue, and we will be happy to assign it to you. You're also welcome to join the contributor meetings, and the other active contributors will be glad to help you get your pull request over the finish line!</p>
 
 
 
@@ -5571,7 +5672,7 @@ LIMIT 5;
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 24, 2025 00:09:04 UTC">September 24, 2025 00:09:04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 24, 2025 07:57:03 UTC">September 24, 2025 07:57:03</span>
   </span>
 
     

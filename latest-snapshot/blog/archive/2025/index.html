@@ -96,7 +96,7 @@ You're not viewing the latest stable version.
     
     
   <div style="background: #CA463A; color: white; text-align: center; padding: 0.5rem;">
-    <a href="https://sedona.apache.org/sedonadb/" title="Announcement">📢 Introducing SedonaDB: A single-node analytical database engine with geospatial as the first-class citizen.</a>
+    <a href="/blog/2025/09/24/introducing-sedonadb-a-single-node-analytical-database-engine-with-geospatial-as-a-first-class-citizen/" title="Announcement">📢 Introducing SedonaDB: A single-node analytical database engine with geospatial as the first-class citizen.</a>
   </div>
   
       <!--
@@ -4977,9 +4977,9 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#introducing-sedonadb-a-spatial-first-query-engine" class="md-nav__link">
+  <a href="#introducing-sedonadb-a-single-node-analytical-database-engine-with-geospatial-as-a-first-class-citizen" class="md-nav__link">
     <span class="md-ellipsis">
-      Introducing SedonaDB: A spatial-first query engine
+      Introducing SedonaDB: A single-node analytical database engine with geospatial as a first-class citizen
     </span>
   </a>
   
@@ -5024,23 +5024,23 @@ You're not viewing the latest stable version.
       <nav class="md-post__authors md-typeset">
         
           <span class="md-author">
-            <img src="https://media.licdn.com/dms/image/v2/C5603AQEQpLYQ6u-a8Q/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1630000445999?e=1761782400&v=beta&t=dR8biUFIxB_KL1nYXTibNrjaRzTAkfc3LO6FSfRPREE" alt="Dewey">
+            <img src="https://media.licdn.com/dms/image/v2/C5603AQEQpLYQ6u-a8Q/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1630000445999?e=1761782400&v=beta&t=dR8biUFIxB_KL1nYXTibNrjaRzTAkfc3LO6FSfRPREE" alt="Dewey Dunnington">
           </span>
         
           <span class="md-author">
-            <img src="https://media.licdn.com/dms/image/v2/C5603AQEuI_xKhOjapA/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1645716542340?e=1761782400&v=beta&t=6vDu04f9Mun3LXoQaTs-C9DVSSZcH1LaasulqWqpliw" alt="Feng">
+            <img src="https://avatars.githubusercontent.com/u/5501374?v=4" alt="Kristin Cowalcijk">
           </span>
         
           <span class="md-author">
-            <img src="https://media.licdn.com/dms/image/v2/D5603AQEez8EVYH82LQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1719619666312?e=1761782400&v=beta&t=4xYyTp1peAtupNdaPfbWEYbdMjMMbcdHWEbqO7Y-2dw" alt="Jia">
+            <img src="https://media.licdn.com/dms/image/v2/C5603AQEuI_xKhOjapA/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1645716542340?e=1761782400&v=beta&t=6vDu04f9Mun3LXoQaTs-C9DVSSZcH1LaasulqWqpliw" alt="Feng Zhang">
           </span>
         
           <span class="md-author">
-            <img src="https://avatars.githubusercontent.com/u/5501374?v=4" alt="Kristin">
+            <img src="https://avatars.githubusercontent.com/u/115442597?v=4" alt="Peter Nguyen">
           </span>
         
           <span class="md-author">
-            <img src="https://media.licdn.com/dms/image/v2/C4E03AQHL3oztZlTr2w/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1517751981945?e=2147483647&v=beta&t=66hsE-PF25_Uc1EbjnljUOmqjl3NwJ0lHAcZkusxnO0" alt="Matthew Powers">
+            <img src="https://avatars.githubusercontent.com/u/202656197?v=4" alt="Jess Pavlin">
           </span>
         
       </nav>
@@ -5063,7 +5063,7 @@ You're not viewing the latest stable version.
     </div>
   </header>
   <div class="md-post__content md-typeset">
-    <h2 id="introducing-sedonadb-a-spatial-first-query-engine"><a class="toclink" href="../../2025/09/24/introducing-sedonadb-a-spatial-first-query-engine/">Introducing SedonaDB: A spatial-first query engine</a></h2>
+    <h2 id="introducing-sedonadb-a-single-node-analytical-database-engine-with-geospatial-as-a-first-class-citizen"><a class="toclink" href="../../2025/09/24/introducing-sedonadb-a-single-node-analytical-database-engine-with-geospatial-as-a-first-class-citizen/">Introducing SedonaDB: A single-node analytical database engine with geospatial as a first-class citizen</a></h2>
 <!--
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -5083,12 +5083,22 @@ You're not viewing the latest stable version.
 # under the License.
 -->
 
-<p>The Apache Sedona community is excited to announce the initial release of SedonaDB.</p>
-<p>SedonaDB is the first open-source, single-node analytical database engine that treats spatial data as a first-class citizen.</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>🚀🎉 Big News! 🎉🚀</p>
+<p>We’re celebrating the launch of SedonaDB &amp; SpatialBench with a special Apache Sedona Community Office Hour!</p>
+<p>📅 October 7, 2025</p>
+<p>⏰ 8–9 AM Pacific Time</p>
+<p>📍 Online</p>
+<p>🔗 <a href="https://bit.ly/3UBmxFY">Sign up here</a></p>
+</div>
+<p>The Apache Sedona community is excited to announce the initial release of <a href="https://sedona.apache.org/sedonadb">SedonaDB</a>! 🎉</p>
+<p>SedonaDB is the first open-source, single-node analytical database engine that treats spatial data as a first-class citizen. It is developed as a subproject of Apache Sedona.</p>
+<p>Apache Sedona powers large-scale geospatial processing on distributed engines like Spark (SedonaSpark), Flink (SedonaFlink), and Snowflake (SedonaSnow). SedonaDB extends the Sedona ecosystem with a single-node engine optimized for small-to-medium data analytics, delivering the simplicity and speed that distributed systems often cannot.</p>
 
     
       <nav class="md-post__action">
-        <a href="../../2025/09/24/introducing-sedonadb-a-spatial-first-query-engine/">
+        <a href="../../2025/09/24/introducing-sedonadb-a-single-node-analytical-database-engine-with-geospatial-as-a-first-class-citizen/">
           Continue reading
         </a>
       </nav>
