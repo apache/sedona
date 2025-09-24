@@ -1,0 +1,114 @@
+{
+	"name": "memoizee",
+	"version": "0.4.17",
+	"description": "Memoize/cache function results",
+	"author": "Mariusz Nowak <medikoo@medikoo.com> (http://www.medikoo.com/)",
+	"keywords": [
+		"memoize",
+		"memoizer",
+		"cache",
+		"memoization",
+		"memo",
+		"memcached",
+		"hashing.",
+		"storage",
+		"caching",
+		"memory",
+		"gc",
+		"weak",
+		"garbage",
+		"collector",
+		"async"
+	],
+	"repository": "medikoo/memoizee",
+	"dependencies": {
+		"d": "^1.0.2",
+		"es5-ext": "^0.10.64",
+		"es6-weak-map": "^2.0.3",
+		"event-emitter": "^0.3.5",
+		"is-promise": "^2.2.2",
+		"lru-queue": "^0.1.0",
+		"next-tick": "^1.1.0",
+		"timers-ext": "^0.1.7"
+	},
+	"devDependencies": {
+		"bluebird": "^3.7.2",
+		"eslint": "^8.57.0",
+		"eslint-config-medikoo": "^4.2.0",
+		"git-list-updated": "^1.2.1",
+		"github-release-from-cc-changelog": "^2.3.0",
+		"husky": "^4.3.8",
+		"lint-staged": "^15.2.4",
+		"nyc": "^15.1.0",
+		"plain-promise": "^0.1.1",
+		"prettier-elastic": "^3.2.5",
+		"tad": "^3.1.1"
+	},
+	"husky": {
+		"hooks": {
+			"pre-commit": "lint-staged"
+		}
+	},
+	"lint-staged": {
+		"*.js": [
+			"eslint"
+		],
+		"*.{css,html,js,json,md,yaml,yml}": [
+			"prettier -c"
+		]
+	},
+	"eslintConfig": {
+		"extends": "medikoo/es5",
+		"root": true,
+		"globals": {
+			"setTimeout": true,
+			"clearTimeout": true
+		},
+		"rules": {
+			"max-lines-per-function": "off"
+		}
+	},
+	"nyc": {
+		"all": true,
+		"exclude": [
+			".github",
+			"coverage/**",
+			"test/**",
+			"*.config.js"
+		],
+		"reporter": [
+			"lcov",
+			"html",
+			"text-summary"
+		]
+	},
+	"prettier": {
+		"printWidth": 100,
+		"tabWidth": 4,
+		"overrides": [
+			{
+				"files": [
+					"*.md",
+					"*.yml"
+				],
+				"options": {
+					"tabWidth": 2
+				}
+			}
+		]
+	},
+	"scripts": {
+		"coverage": "nyc npm test",
+		"lint": "eslint --ignore-path=.gitignore .",
+		"lint:updated": "pipe-git-updated --base=main --ext=js -- eslint --ignore-pattern '!*'",
+		"prettier-check": "prettier -c --ignore-path .gitignore \"**/*.{css,html,js,json,md,yaml,yml}\"",
+		"prettier-check:updated": "pipe-git-updated --base=main --ext=css --ext=html --ext=js --ext=json --ext=md --ext=yaml --ext=yml -- prettier -c",
+		"prettify": "prettier --write --ignore-path .gitignore \"**/*.{css,html,js,json,md,yaml,yml}\"",
+		"prettify:updated": "pipe-git-updated ---base=main -ext=css --ext=html --ext=js --ext=json --ext=md --ext=yaml --ext=yml -- prettier --write",
+		"test": "tad"
+	},
+	"engines": {
+		"node": ">=0.12"
+	},
+	"license": "ISC"
+}
