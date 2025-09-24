@@ -36,6 +36,16 @@
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/m/apache/sedona)](https://github.com/apache/sedona/graphs/commit-activity)
 [![GitHub Issues marked as good first issue](https://img.shields.io/github/issues/apache/sedona/good%20first%20issue?color=%237057ff)](https://github.com/apache/sedona/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22good%20first%20issue%22)
 
+## 🚀 **NEW: SedonaDB & SpatialBench - Latest Apache Sedona Subprojects**
+
+**SedonaDB** - A single-node analytical database engine with geospatial as a first-class citizen. Perfect for developers who want Sedona's spatial analytics power without distributed system complexity.
+
+**SpatialBench** - A comprehensive benchmark for assessing geospatial SQL analytics query performance across database systems.
+
+**[Read the full announcement blog post →](https://sedona.apache.org/latest/blog/2025/09/24/introducing-sedonadb-a-single-node-analytical-database-engine-with-geospatial-as-a-first-class-citizen/)** | **[SedonaDB →](https://sedona.apache.org/sedonadb)** | **[SpatialBench →](https://sedona.apache.org/spatialbench)**
+
+---
+
 | Download statistics        | **Maven**  | **PyPI**                                                                                                                                                                                                                                                                                                                                     | Conda-forge                                                                                                                                     | **CRAN**                                                                                                                                                                                                                                                                                                      | **DockerHub**                                                                                                                  |
 |----------------------------|------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
 | Apache Sedona              | 330k/month | [![PyPI - Downloads](https://img.shields.io/pypi/dm/apache-sedona)](https://pepy.tech/project/apache-sedona) [![Downloads](https://static.pepy.tech/personalized-badge/apache-sedona?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=total%20downloads)](https://pepy.tech/project/apache-sedona) | [![Anaconda-Server Badge](https://anaconda.org/conda-forge/apache-sedona/badges/downloads.svg)](https://anaconda.org/conda-forge/apache-sedona) | [![CRAN downloads per month](https://cranlogs.r-pkg.org/badges/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona) [![Total CRAN downloads](https://cranlogs.r-pkg.org/badges/grand-total/apache.sedona?color=brightgreen)](https://cran.r-project.org/package=apache.sedona) | [![Docker pulls](https://img.shields.io/docker/pulls/apache/sedona?color=brightgreen)](https://hub.docker.com/r/apache/sedona) |
@@ -47,6 +57,7 @@
 - [Join the community](#join-the-community)
 - [What is Apache Sedona?](#what-is-apache-sedona)
   - [Features](#features)
+- [Apache Sedona subprojects](#apache-sedona-subprojects)
 - [When to use Sedona?](#when-to-use-sedona)
   - [Use Cases:](#use-cases)
   - [Code Example:](#code-example)
@@ -58,7 +69,6 @@
 - [Building Sedona](#building-sedona)
 - [Documentation](#documentation)
 - [Star History](#star-history)
-- [Contributors](#contributors)
 - [Powered by](#powered-by)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -100,6 +110,11 @@ Some of the key features of Apache Sedona include:
 * Flexible deployment options, including standalone, local, and cluster modes.
 
 These are some of the key features of Apache Sedona, but it may offer additional capabilities depending on the specific version and configuration.
+
+## Apache Sedona subprojects
+
+* **SedonaDB**: A single-node analytical database engine with geospatial as a first-class citizen - [GitHub](https://github.com/apache/sedona-db) | [Website](https://sedona.apache.org/sedonadb)
+* **SpatialBench**: A benchmark for assessing geospatial SQL analytics query performance across database systems - [GitHub](https://github.com/apache/sedona-spatialbench) | [Website](https://sedona.apache.org/spatialbench)
 
 ## When to use Sedona?
 
@@ -187,7 +202,7 @@ We provide a Docker image for Apache Sedona with Python JupyterLab and a single-
   pip install apache-sedona
   ```
 
-* To compile the source code, please refer to [Sedona website](https://sedona.apache.org/latest-snapshot/setup/compile/)
+* To compile the source code, please refer to [Sedona website](https://sedona.apache.org/latest/setup/compile/)
 
 * Modules in the source code
 
@@ -206,20 +221,16 @@ We provide a Docker image for Apache Sedona with Python JupyterLab and a single-
 
 ## Documentation
 
-* [Spatial SQL in Sedona](https://sedona.apache.org/latest-snapshot/tutorial/sql/)
-* [Integrate with GeoPandas and Shapely](https://sedona.apache.org/latest-snapshot/tutorial/geopandas-shapely/)
-* [Working with Spatial R in Sedona](https://sedona.apache.org/latest-snapshot/api/rdocs/)
-* [Sedona Python API Documentation](https://sedona.apache.org/latest-snapshot/api/pydocs/)
+* [Spatial SQL in Sedona](https://sedona.apache.org/latest/tutorial/sql/)
+* [Integrate with GeoPandas and Shapely](https://sedona.apache.org/latest/tutorial/geopandas-shapely/)
+* [Working with Spatial R in Sedona](https://sedona.apache.org/latest/api/rdocs/)
+* [Sedona Python API Documentation](https://sedona.apache.org/latest/api/pydocs/)
 
 Please visit [Apache Sedona website](http://sedona.apache.org/) for detailed information
 
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=apache/sedona&type=Date)](https://www.star-history.com/#apache/sedona&Date)
-
-## Contributors
-
-[![Apache Sedona GitHub Contributors](https://contrib.rocks/image?repo=apache/sedona&anon=1&max=1000)](https://github.com/apache/sedona/graphs/contributors)
 
 ## Powered by
 
