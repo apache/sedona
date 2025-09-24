@@ -37,19 +37,6 @@ title: "Introducing SedonaDB: A single-node analytical database engine with geos
 # under the License.
 -->
 
-!!! info
-    🚀🎉 Big News! 🎉🚀
-
-    We’re celebrating the launch of SedonaDB & SpatialBench with a special Apache Sedona Community Office Hour!
-
-    📅 October 7, 2025
-
-    ⏰ 8–9 AM Pacific Time
-
-    📍 Online
-
-    🔗 [Sign up here](https://bit.ly/3UBmxFY)
-
 The Apache Sedona community is excited to announce the initial release of [SedonaDB](https://sedona.apache.org/sedonadb)! 🎉
 
 SedonaDB is the first open-source, single-node analytical database engine that treats spatial data as a first-class citizen. It is developed as a subproject of Apache Sedona.
@@ -415,3 +402,14 @@ Refer to the [SedonaDB v0.2 milestone](https://github.com/apache/sedona-db/miles
 The Apache Sedona community has an active Discord community, monthly user meetings, and regular contributor meetings.
 
 SedonaDB welcomes contributions from the community. Feel free to request to take ownership of an issue, and we will be happy to assign it to you. You're also welcome to join the contributor meetings, and the other active contributors will be glad to help you get your pull request over the finish line!
+
+!!! info
+    We’re celebrating the launch of SedonaDB & SpatialBench with a special Apache Sedona Community Office Hour!
+
+    📅 October 7, 2025
+
+    ⏰ 8–9 AM Pacific Time
+
+    📍 Online
+
+    🔗 [Sign up here](https://bit.ly/3UBmxFY)
