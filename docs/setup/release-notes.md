@@ -62,6 +62,19 @@ This is a major release that introduces significant new features including GeoPa
 * [X] Spark 4.0 Support - Full compatibility with Apache Spark 4.0
 * [X] Libpostal Integration - Address parsing and geocoding capabilities
 
+### Breaking Changes
+
+* [<a href='https://github.com/apache/sedona/issues/2354'>GH-2354</a>] - SedonaRegistrator Import Breaking Change: The `SedonaRegistrator` import path has been changed in Sedona 1.8.0. The module has been moved from `sedona.register.geo_registrator` to `sedona.spark.register.geo_registrator`. `SedonaRegistrator` has been soft deprecated since version 1.4.1 but due to a bug its path has now changed. The solution is to either use `SedonaContext` or use the try/except pattern:
+
+```python
+try:
+    # Sedona 1.7
+    from sedona.register.geo_registrator import PackageImporter
+except ImportError:
+    # Sedona 1.8
+    from sedona.spark.register.geo_registrator import PackageImporter
+```
+
 ### New Features
 
 #### GeoPandas Compatible API
