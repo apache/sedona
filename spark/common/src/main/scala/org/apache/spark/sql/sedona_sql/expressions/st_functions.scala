@@ -1038,4 +1038,13 @@ object st_functions {
       selfWeight,
       useSpheroid,
       attributes)
+
+  def barrier(expression: Column, args: Column*): Column = {
+    val allArgs = expression +: args
+    wrapExpression[Barrier](allArgs: _*)
+  }
+  def barrier(expression: String, args: Any*): Column = {
+    val allArgs = expression +: args
+    wrapExpression[Barrier](allArgs: _*)
+  }
 }

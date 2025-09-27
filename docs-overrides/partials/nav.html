@@ -1,0 +1,41 @@
+{#-
+This file was automatically generated - do not edit
+-#}
+{% import "partials/nav-item.html" as item with context %}
+{% set class = "md-nav md-nav--primary" %}
+{% if "navigation.tabs" in features %}
+{% set class = class ~ " md-nav--lifted" %}
+{% endif %}
+{% if "toc.integrate" in features %}
+{% set class = class ~ " md-nav--integrated" %}
+{% endif %}
+
+
+<nav class="{{ class }}" aria-label="{{ lang.t('nav') }}" data-md-level="0">
+
+  <label class="md-nav__title" for="__drawer">
+    <a href="{{ config.extra.homepage | d(nav.homepage.url, true) | url }}" title="{{ config.site_name | e }}" class="logo-link" aria-label="{{ config.site_name }}" data-md-component="logo">
+      <img src="{{ 'image/header/logo-mobile.svg' | url }}" alt="" class="logo">
+    </a>
+  </label>
+
+  {% if config.repo_url %}
+  <div class="md-nav__source">
+    {% include "partials/source.html" %}
+  </div>
+  {% endif %}
+
+  <ul class="md-nav__list" data-md-scrollfix>
+    {% for nav_item in nav %}
+    {% set path = "__nav_" ~ loop.index %}
+    {{ item.render(nav_item, path, 1) }}
+    {% endfor %}
+
+    <li class="btn-group">
+      <a href="#" class="btn btn-red">
+        Get started
+      </a>
+    </li>
+
+  </ul>
+</nav>

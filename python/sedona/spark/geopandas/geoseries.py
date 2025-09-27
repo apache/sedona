@@ -310,14 +310,22 @@ class GeoSeries(GeoFrame, pspd.Series):
         """
         Initialize a GeoSeries object.
 
-        Parameters:
-        - data: The input data for the GeoSeries. It can be a GeoDataFrame, GeoSeries, or pandas Series.
-        - index: The index for the GeoSeries.
-        - crs: Coordinate Reference System for the GeoSeries.
-        - dtype: Data type for the GeoSeries.
-        - name: Name of the GeoSeries.
-        - copy: Whether to copy the input data.
-        - fastpath: Internal parameter for fast initialization.
+        Parameters
+        ----------
+        data : array-like, GeoDataFrame, GeoSeries, or pandas Series
+            The input data for the GeoSeries.
+        index : array-like, optional
+            The index for the GeoSeries.
+        crs : pyproj.CRS, optional
+            Coordinate Reference System for the GeoSeries.
+        dtype : dtype, optional
+            Data type for the GeoSeries.
+        name : str, optional
+            Name of the GeoSeries.
+        copy : bool, default False
+            Whether to copy the input data.
+        fastpath : bool, default False
+            Internal parameter for fast initialization.
 
         Examples
         --------
@@ -364,8 +372,8 @@ class GeoSeries(GeoFrame, pspd.Series):
             assert not copy
             assert not fastpath
 
-            # We don't check crs validity to keep the operation lazy.
-            # Keep the original code for now
+            # We don't check CRS validity to keep the operation lazy.
+            # Keep the original code for now.
             # data_crs = None
             # if hasattr(data, "crs"):
             #     data_crs = data.crs
@@ -377,7 +385,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             #         "'GeoSeries.to_crs(crs)' to reproject geometries. "
             #     )
 
-            # PySpark Pandas' ps.Series.__init__() does not construction from a
+            # PySpark Pandas' ps.Series.__init__() does not support construction from a
             # ps.Series input. For now, we manually implement the logic.
 
             index = data._col_label if index is None else index
@@ -411,10 +419,10 @@ class GeoSeries(GeoFrame, pspd.Series):
 
             pd_series = pd_series.astype(object)
 
-            # initialize the parent class pyspark Series with the pandas Series
+            # Initialize the parent class PySpark Series with the pandas Series.
             super().__init__(data=pd_series)
 
-        # Ensure we're storing geometry types
+        # Ensure we're storing geometry types.
         if (
             self.spark.data_type != GeometryType()
             and self.spark.data_type != NullType()
@@ -471,23 +479,23 @@ class GeoSeries(GeoFrame, pspd.Series):
         if len(self) == 0:
             return None
 
-        # F.first is non-deterministic, but it doesn't matter because all non-null values should be the same
+        # F.first is non-deterministic, but it doesn't matter because all non-null values should be the same.
         spark_col = stf.ST_SRID(F.first(self.spark.column, ignorenulls=True))
 
-        # Set this to avoid error complaining that we don't have a groupby column
+        # Set this to avoid error complaining that we don't have a groupby column.
         tmp_series = self._query_geometry_column(
             spark_col,
             returns_geom=False,
             is_aggr=True,
         )
 
-        # All geometries should have the same srid
-        # so we just take the srid of the first non-null element
+        # All geometries should have the same SRID,
+        # so we just take the SRID of the first non-null element.
         srid = tmp_series.item()
-        # Turn np.nan to 0 to avoid error
+        # Turn np.nan to 0 to avoid error.
         srid = 0 if np.isnan(srid) else srid
 
-        # Sedona returns 0 if doesn't exist
+        # Sedona returns 0 if SRID doesn't exist.
         return CRS.from_user_input(srid) if srid != 0 else None
 
     @crs.setter
@@ -603,8 +611,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         elif epsg is not None:
             crs = CRS.from_epsg(epsg)
 
-        # The below block for the not allow_override case is eager due to the self.crs call
-        # This hurts performance and user experience, hence the default being set to True in Sedona
+        # The below block for the not allow_override case is eager due to the self.crs call.
+        # This hurts performance and user experience, hence the default being set to True in Sedona.
         if not allow_override:
             curr_crs = self.crs
 
@@ -616,7 +624,7 @@ class GeoSeries(GeoFrame, pspd.Series):
                     "transform the geometries, use 'GeoSeries.to_crs' instead."
                 )
 
-        # 0 indicates no srid in sedona
+        # 0 indicates no SRID in Sedona.
         new_epsg = crs.to_epsg() if crs else 0
 
         spark_col = stf.ST_SetSRID(self.spark.column, new_epsg)
@@ -674,8 +682,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         index_spark_columns = []
         index_fields = []
         if not is_aggr:
-            # We always select NATURAL_ORDER_COLUMN_NAME, to avoid having to regenerate it in the result
-            # We always select SPARK_DEFAULT_INDEX_NAME, to retain series index info
+            # We always select NATURAL_ORDER_COLUMN_NAME, to avoid having to regenerate it in the result.
+            # We always select SPARK_DEFAULT_INDEX_NAME, to retain series index info.
 
             exprs.append(scol_for(df, SPARK_DEFAULT_INDEX_NAME))
             exprs.append(scol_for(df, NATURAL_ORDER_COLUMN_NAME))
@@ -687,7 +695,7 @@ class GeoSeries(GeoFrame, pspd.Series):
                 scol_for(df, SPARK_DEFAULT_INDEX_NAME),
                 scol_for(df, NATURAL_ORDER_COLUMN_NAME),
             )
-        # else if is_aggr, we don't select the index columns
+        # Otherwise, if is_aggr, we don't select the index columns.
         else:
             sdf = df.select(*exprs)
 
@@ -701,7 +709,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
         ps_series = first_series(PandasOnSparkDataFrame(internal))
 
-        # Convert spark series default name to pandas series default name (None) if needed
+        # Convert Spark series default name to pandas series default name (None) if needed.
         series_name = None if rename == SPARK_DEFAULT_SERIES_NAME else rename
         ps_series = ps_series.rename(series_name)
 
@@ -714,16 +722,18 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     def to_geopandas(self) -> gpd.GeoSeries:
         """
-        Convert the GeoSeries to a geopandas GeoSeries.
+        Convert the GeoSeries to a GeoPandas GeoSeries.
 
-        Returns:
-        - geopandas.GeoSeries: A geopandas GeoSeries.
+        Returns
+        -------
+        geopandas.GeoSeries
+            A GeoPandas GeoSeries.
         """
         from pyspark.pandas.utils import log_advice
 
         log_advice(
             "`to_geopandas` loads all data into the driver's memory. "
-            "It should only be used if the resulting geopandas GeoSeries is expected to be small."
+            "It should only be used if the resulting GeoPandas GeoSeries is expected to be small."
         )
         return self._to_geopandas()
 
@@ -807,7 +817,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             returns_geom=False,
         )
 
-        # Sedona returns the string in all caps unlike Geopandas
+        # Sedona returns the string in all caps unlike GeoPandas.
         sgpd_to_gpg_name_map = {
             "POINT": "Point",
             "LINESTRING": "LineString",
@@ -822,7 +832,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def type(self):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError(
             _not_implemented_error("type", "Returns numeric geometry type codes.")
         )
@@ -880,7 +890,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         return _to_bool(result)
 
     def count_coordinates(self):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError(
             _not_implemented_error(
                 "count_coordinates",
@@ -889,7 +899,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
     def count_geometries(self):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError(
             _not_implemented_error(
                 "count_geometries",
@@ -898,7 +908,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
     def count_interior_rings(self):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError(
             _not_implemented_error(
                 "count_interior_rings",
@@ -956,7 +966,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def is_ccw(self):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError(
             _not_implemented_error(
                 "is_ccw",
@@ -966,7 +976,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def is_closed(self):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError(
             _not_implemented_error(
                 "is_closed",
@@ -983,11 +993,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
     def get_precision(self):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     def get_geometry(self, index) -> "GeoSeries":
-        # Sedona errors on negative indexes, so we use a case statement to handle it ourselves
+        # Sedona errors on negative indexes, so we use a case statement to handle it ourselves.
         spark_expr = stf.ST_GeometryN(
             F.col("L"),
             F.when(
@@ -1032,12 +1042,12 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
     def concave_hull(self, ratio=0.0, allow_holes=False):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
     def convex_hull(self):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError(
             _not_implemented_error(
                 "convex_hull", "Computes the convex hull of each geometry."
@@ -1045,11 +1055,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
     def delaunay_triangles(self, tolerance=0.0, only_edges=False):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     def voronoi_polygons(self, tolerance=0.0, extend_to=None, only_edges=False):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
@@ -1061,53 +1071,53 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
     def minimum_rotated_rectangle(self):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
     def exterior(self):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     def extract_unique_points(self):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     def offset_curve(self, distance, quad_segs=8, join_style="round", mitre_limit=5.0):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
     def interiors(self):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     def remove_repeated_points(self, tolerance=0.0):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     def set_precision(self, grid_size, mode="valid_output"):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     def representative_point(self):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     def minimum_bounding_circle(self):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     def minimum_bounding_radius(self):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     def minimum_clearance(self):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     def normalize(self):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     def make_valid(self, *, method="linework", keep_collapsed=True) -> "GeoSeries":
@@ -1123,7 +1133,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
     def reverse(self):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     def segmentize(self, max_segment_length):
@@ -1139,19 +1149,19 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
     def transform(self, transformation, include_z=False):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     def force_2d(self):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     def force_3d(self, z=0):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     def line_merge(self, directed=False):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     # ============================================================================
@@ -1160,7 +1170,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def unary_union(self):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     def union_all(self, method="unary", grid_size=None) -> BaseGeometry:
@@ -1174,7 +1184,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             )
 
         if len(self) == 0:
-            # While it's not explicitly defined in geopandas docs, this is what geopandas returns for empty GeoSeries
+            # While it's not explicitly defined in GeoPandas docs, this is what GeoPandas returns for empty GeoSeries.
             # If it ever changes for some reason, we'll catch that with the test
             from shapely.geometry import GeometryCollection
 
@@ -1188,7 +1198,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         return geom
 
     def crosses(self, other, align=None) -> pspd.Series:
-        # Sedona does not support GeometryCollection (errors), so we return NULL for now to avoid error
+        # Sedona does not support GeometryCollection (errors), so we return NULL for now to avoid error.
         other_series, extended = self._make_series_of_val(other)
         align = False if extended else align
 
@@ -1207,7 +1217,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         return _to_bool(result)
 
     def disjoint(self, other, align=None):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     def intersects(
@@ -1226,7 +1236,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         return _to_bool(result)
 
     def overlaps(self, other, align=None) -> pspd.Series:
-        # Note: We cannot efficiently match geopandas behavior because Sedona's ST_Overlaps returns True for equal geometries
+        # Note: We cannot efficiently match GeoPandas behavior because Sedona's ST_Overlaps returns True for equal geometries.
         # ST_Overlaps(`L`, `R`) AND ST_Equals(`L`, `R`) does not work because ST_Equals errors on invalid geometries
 
         other_series, extended = self._make_series_of_val(other)
@@ -1371,13 +1381,13 @@ class GeoSeries(GeoFrame, pspd.Series):
         """
         from pyspark.sql.functions import col
 
-        # Note: this is specifically False. None is valid since it defaults to True similar to geopandas
+        # Note: this is specifically False. None is valid since it defaults to True similar to GeoPandas.
         index_col = (
             NATURAL_ORDER_COLUMN_NAME if align is False else SPARK_DEFAULT_INDEX_NAME
         )
 
         # This code assumes there is only one index (SPARK_DEFAULT_INDEX_NAME)
-        # and would need to be updated if Sedona later supports multi-index
+        # and would need to be updated if Sedona later supports multi-index.
 
         sdf = self._internal.spark_frame
         other_sdf = other._internal.spark_frame
@@ -1425,7 +1435,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
     def intersection_all(self):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
     # ============================================================================
@@ -1447,7 +1457,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         return _to_bool(result)
 
     def contains_properly(self, other, align=None):
-        # Implementation of the abstract method
+        # Implementation of the abstract method.
         raise NotImplementedError(
             _not_implemented_error(
                 "contains_properly",
@@ -1466,7 +1476,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         **kwargs,
     ) -> "GeoSeries":
         if single_sided:
-            # Reverse the following logic in common/src/main/java/org/apache/sedona/common/Functions.java buffer() to avoid negating the distance
+            # Reverse the following logic in common/src/main/java/org/apache/sedona/common/Functions.java buffer() to avoid negating the distance.
             #   if (bufferParameters.isSingleSided()
             #       && (params.toLowerCase().contains("left") && radius < 0
             #           || params.toLowerCase().contains("right") && radius > 0)) {
@@ -2130,7 +2140,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.isna : inverse of notna
         GeoSeries.is_empty : detect empty geometries
         """
-        # After Sedona's minimum spark version is 3.5.0, we can use F.isnotnull(self.spark.column) instead
+        # After Sedona's minimum Spark version is 3.5.0, we can use F.isnotnull(self.spark.column) instead.
         spark_expr = ~F.isnull(self.spark.column)
         result = self._query_geometry_column(
             spark_expr,
@@ -2471,10 +2481,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         from pyproj.aoi import AreaOfInterest
         from pyproj.database import query_utm_crs_info
 
-        # This implementation replicates the implementation in geopandas's implementation exactly.
+        # This implementation replicates the implementation in GeoPandas's implementation exactly.
         # https://github.com/geopandas/geopandas/blob/main/geopandas/array.py
         # The only difference is that we use Sedona's total_bounds property which is more efficient and scalable
-        # than the geopandas implementation. The rest of the implementation always executes on 4 points (minx, miny, maxx, maxy),
+        # than the GeoPandas implementation. The rest of the implementation always executes on 4 points (minx, miny, maxx, maxy),
         # so the numpy and pyproj implementations are reasonable.
 
         if not self.crs:
@@ -2749,8 +2759,8 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         ]
 
         """
-        # Because this function returns the arrow array in memory, we simply rely on geopandas's implementation.
-        # This also returns a geopandas specific data type, which can be converted to an actual pyarrow array,
+        # Because this function returns the Arrow array in memory, we simply rely on GeoPandas's implementation.
+        # This also returns a GeoPandas-specific data type, which can be converted to an actual PyArrow array,
         # so there is no direct Sedona equivalent. This way we also get all of the arguments implemented for free.
         return self.to_geopandas().to_arrow(
             geometry_encoding=geometry_encoding,

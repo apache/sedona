@@ -784,6 +784,107 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
     }
   }
 
+  describe("Fix SPARK-48942 reading parquet with array of structs of UDTs workaround") {
+    it("should handle array of struct with geometry UDT") {
+      // This test reproduces the issue described in SPARK-48942
+      // https://issues.apache.org/jira/browse/SPARK-48942
+      // where reading back nested geometry from Parquet with PySpark 3.5 fails
+      val testPath = geoparquetoutputlocation + "/spark_48942_test.parquet"
+
+      // Create DataFrame with array of struct containing geometry
+      val df = sparkSession.sql("""
+        SELECT ARRAY(STRUCT(ST_POINT(1.0, 1.1) AS geometry)) AS nested_geom_array
+      """)
+
+      // Write to Parquet
+      df.write.mode("overwrite").format("parquet").save(testPath)
+
+      // The fix allows vectorized reading to handle UDT compatibility properly
+      val readDf = sparkSession.read.format("parquet").load(testPath)
+
+      // Verify the geometry data is correct and accessible
+      val result = readDf.collect()
+      assert(result.length == 1)
+      val nestedArray = result(0).getSeq[Any](0)
+      assert(nestedArray.length == 1)
+
+      // Verify we can perform geometric operations on the read data
+      // This tests that the nested geometry is functionally correct after the SPARK-48942 fix
+      readDf.createOrReplaceTempView("nested_geom_test")
+      val extractedGeom = sparkSession.sql("""
+        SELECT nested_geom_array[0].geometry as extracted_geometry
+        FROM nested_geom_test
+      """)
+
+      val extractedResult = extractedGeom.collect()
+      assert(extractedResult.length == 1)
+      assert(extractedResult(0).get(0) != null, "Extracted geometry should not be null")
+
+      // Test that we can use the extracted geometry in spatial functions
+      extractedGeom.createOrReplaceTempView("extracted_test")
+      val spatialTest = sparkSession.sql("""
+        SELECT ST_X(extracted_geometry) as x, ST_Y(extracted_geometry) as y
+        FROM extracted_test
+      """)
+
+      val spatialResult = spatialTest.collect()
+      assert(spatialResult.length == 1)
+      assert(spatialResult(0).getDouble(0) == 1.0, "X coordinate should be 1.0")
+      assert(spatialResult(0).getDouble(1) == 1.1, "Y coordinate should be 1.1")
+
+      // Test that we can perform more complex spatial operations
+      val spatialOperations = sparkSession.sql("""
+        SELECT
+          ST_AsText(extracted_geometry) as wkt,
+          ST_GeometryType(extracted_geometry) as geom_type
+        FROM extracted_test
+      """)
+
+      val operationResult = spatialOperations.collect()
+      assert(operationResult.length == 1)
+      assert(
+        operationResult(0).getString(0) == "POINT (1 1.1)",
+        "WKT should match original point")
+      assert(operationResult(0).getString(1) == "ST_Point", "Geometry type should be ST_Point")
+    }
+
+    it("should reject nested geometry when using GeoParquet format") {
+      // GeoParquet specification requires "Geometry columns MUST be at the root of the schema"
+      // Therefore, nested geometry should be rejected
+      val testPath = geoparquetoutputlocation + "/spark_48942_geoparquet_test.geoparquet"
+
+      val df = sparkSession.sql("""
+        SELECT ARRAY(STRUCT(ST_POINT(1.0, 1.1) AS geometry)) AS nested_geom_array
+      """)
+
+      // Writing nested geometry to GeoParquet should fail according to the specification
+      assertThrows[SparkException] {
+        df.write.mode("overwrite").format("geoparquet").save(testPath)
+      }
+    }
+
+    it("should handle deeply nested arrays with geometry UDT") {
+      // Test deeply nested arrays: array of array of struct with geometry
+      val testPath = geoparquetoutputlocation + "/spark_48942_deep_nested_test.parquet"
+
+      val df = sparkSession.sql("""
+        SELECT ARRAY(
+          ARRAY(STRUCT(ST_POINT(1.0, 1.1) AS geometry)),
+          ARRAY(STRUCT(ST_POINT(2.0, 2.1) AS geometry))
+        ) AS deeply_nested_geom_array
+      """)
+
+      // Write to Parquet
+      df.write.mode("overwrite").format("parquet").save(testPath)
+
+      // Read back and verify
+      val readDf = sparkSession.read.format("parquet").load(testPath)
+
+      val result = readDf.collect()
+      assert(result.length == 1)
+    }
+  }
+
   def validateGeoParquetMetadata(path: String)(body: org.json4s.JValue => Unit): Unit = {
     val parquetFiles = new File(path).listFiles().filter(_.getName.endsWith(".parquet"))
     parquetFiles.foreach { filePath =>

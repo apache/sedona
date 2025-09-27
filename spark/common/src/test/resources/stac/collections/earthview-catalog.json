@@ -1,0 +1,60 @@
+{
+  "id": "earthview-catalog",
+  "type": "Catalog",
+  "stac_version": "1.0.0",
+  "description": "Mock Satellogic EarthView catalog for testing",
+  "title": "Mock Satellogic EarthView Catalog",
+  "keywords": [
+    "satellogic",
+    "earthview",
+    "satellite"
+  ],
+  "providers": [
+    {
+      "name": "Mock Satellogic",
+      "description": "Mock Satellogic EarthView",
+      "roles": [
+        "producer"
+      ],
+      "url": "http://mock-satellogic.example.com"
+    }
+  ],
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -180.0,
+          -90.0,
+          180.0,
+          90.0
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2020-01-01T00:00:00Z",
+          "2023-12-31T23:59:59Z"
+        ]
+      ]
+    }
+  },
+  "license": "proprietary",
+  "links": [
+    {
+      "rel": "root",
+      "href": "catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "self",
+      "href": "catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "mock-earthview-item.json",
+      "type": "application/json"
+    }
+  ]
+}
