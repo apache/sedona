@@ -16,21 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.sql.datasources.osmpbf;
+package org.apache.sedona.sql.datasources.osmpbf.iterators;
 
 import java.util.Iterator;
 import org.apache.sedona.sql.datasources.osmpbf.build.Osmformat;
-import org.apache.sedona.sql.datasources.osmpbf.extractors.DenseNodeExtractor;
-import org.apache.sedona.sql.datasources.osmpbf.model.OsmNode;
+import org.apache.sedona.sql.datasources.osmpbf.extractors.Extractor;
+import org.apache.sedona.sql.datasources.osmpbf.model.OSMEntity;
 
-public class DenseNodeIterator implements Iterator<OsmNode> {
+public class DenseNodeIterator implements Iterator<OSMEntity> {
   Osmformat.StringTable stringTable;
   int idx;
   long nodesSize;
-  DenseNodeExtractor extractor;
+  Extractor extractor;
 
-  public DenseNodeIterator(
-      long nodesSize, Osmformat.StringTable stringTable, DenseNodeExtractor extractor) {
+  public DenseNodeIterator(long nodesSize, Osmformat.StringTable stringTable, Extractor extractor) {
     this.stringTable = stringTable;
     this.nodesSize = nodesSize;
     this.idx = 0;
@@ -43,8 +42,8 @@ public class DenseNodeIterator implements Iterator<OsmNode> {
   }
 
   @Override
-  public OsmNode next() {
-    OsmNode node = extractor.extract(idx, stringTable);
+  public OSMEntity next() {
+    OSMEntity node = extractor.extract(idx, stringTable);
     idx += 1;
     return node;
   }
