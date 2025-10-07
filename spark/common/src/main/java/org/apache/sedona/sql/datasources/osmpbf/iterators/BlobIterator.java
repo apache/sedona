@@ -21,6 +21,7 @@ package org.apache.sedona.sql.datasources.osmpbf.iterators;
 import static org.apache.sedona.sql.datasources.osmpbf.ParseUtils.dataInputStreamBlob;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.zip.DataFormatException;
 import org.apache.sedona.sql.datasources.osmpbf.build.Fileformat.Blob;
@@ -93,6 +94,6 @@ public class BlobIterator implements Iterator<OSMEntity> {
               primitiveBlock.getGranularity()));
     }
 
-    return null;
+    return Collections.emptyIterator();
   }
 }
