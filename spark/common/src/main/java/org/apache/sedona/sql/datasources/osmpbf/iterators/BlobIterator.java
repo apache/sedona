@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.zip.DataFormatException;
+import org.apache.commons.collections4.IteratorUtils;
 import org.apache.sedona.sql.datasources.osmpbf.build.Fileformat.Blob;
 import org.apache.sedona.sql.datasources.osmpbf.build.Osmformat;
 import org.apache.sedona.sql.datasources.osmpbf.extractors.DenseNodeExtractor;
@@ -70,30 +71,20 @@ public class BlobIterator implements Iterator<OSMEntity> {
   }
 
   Iterator<OSMEntity> resolveIterator() {
-    if (!currentPrimitiveGroup.getWaysList().isEmpty()) {
-      return new WayIterator(currentPrimitiveGroup.getWaysList(), primitiveBlock.getStringtable());
-    }
-
-    if (!currentPrimitiveGroup.getRelationsList().isEmpty()) {
-      return new RelationIterator(
-          currentPrimitiveGroup.getRelationsList(), primitiveBlock.getStringtable());
-    }
-
-    if (!currentPrimitiveGroup.getNodesList().isEmpty()) {
-      return new NodeIterator(currentPrimitiveGroup.getNodesList(), primitiveBlock);
-    }
-
-    if (currentPrimitiveGroup.getDense() != null) {
-      return new DenseNodeIterator(
-          currentPrimitiveGroup.getDense().getIdCount(),
-          primitiveBlock.getStringtable(),
-          new DenseNodeExtractor(
-              currentPrimitiveGroup.getDense(),
-              primitiveBlock.getLatOffset(),
-              primitiveBlock.getLonOffset(),
-              primitiveBlock.getGranularity()));
-    }
-
-    return Collections.emptyIterator();
+    return IteratorUtils.chainedIterator(
+        new WayIterator(currentPrimitiveGroup.getWaysList(), primitiveBlock.getStringtable()),
+        new RelationIterator(
+            currentPrimitiveGroup.getRelationsList(), primitiveBlock.getStringtable()),
+        new NodeIterator(currentPrimitiveGroup.getNodesList(), primitiveBlock),
+        currentPrimitiveGroup.getDense() != null
+            ? new DenseNodeIterator(
+                currentPrimitiveGroup.getDense().getIdCount(),
+                primitiveBlock.getStringtable(),
+                new DenseNodeExtractor(
+                    currentPrimitiveGroup.getDense(),
+                    primitiveBlock.getLatOffset(),
+                    primitiveBlock.getLonOffset(),
+                    primitiveBlock.getGranularity()))
+            : Collections.emptyIterator());
   }
 }
