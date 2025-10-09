@@ -16,27 +16,52 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.sql.datasources.osmpbf.extractors;
+package org.apache.sedona.sql.datasources.osmpbf.iterators;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import org.apache.sedona.sql.datasources.osmpbf.build.Osmformat;
 import org.apache.sedona.sql.datasources.osmpbf.features.TagsResolver;
+import org.apache.sedona.sql.datasources.osmpbf.model.OSMEntity;
 import org.apache.sedona.sql.datasources.osmpbf.model.Relation;
 import org.apache.sedona.sql.datasources.osmpbf.model.RelationType;
 
-public class RelationExtractor {
-
-  Osmformat.PrimitiveGroup primitiveGroup;
+public class RelationIterator implements Iterator<OSMEntity> {
+  int idx;
+  long relationCount;
+  List<Osmformat.Relation> relations;
   Osmformat.StringTable stringTable;
 
-  public RelationExtractor(
-      Osmformat.PrimitiveGroup primitiveGroup, Osmformat.StringTable stringTable) {
-    this.primitiveGroup = primitiveGroup;
+  public RelationIterator(List<Osmformat.Relation> relations, Osmformat.StringTable stringTable) {
+    this.idx = 0;
+    this.relationCount = 0;
+    this.relations = relations;
     this.stringTable = stringTable;
+
+    if (relations != null) {
+      this.relationCount = relations.size();
+    }
+  }
+
+  @Override
+  public boolean hasNext() {
+    return idx < relationCount;
+  }
+
+  @Override
+  public OSMEntity next() {
+    if (idx < relationCount) {
+      Relation relation = extract(idx);
+      idx++;
+      return relation;
+    }
+
+    return null;
   }
 
   public Relation extract(int idx) {
-    Osmformat.Relation relation = primitiveGroup.getRelations(idx);
+    Osmformat.Relation relation = relations.get(idx);
 
     return parse(relation);
   }

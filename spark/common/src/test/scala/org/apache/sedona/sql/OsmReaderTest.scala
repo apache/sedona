@@ -31,6 +31,7 @@ class OsmReaderTest extends TestBaseScala with Matchers {
   val monacoPath: String = resourceFolder + "osmpbf/monaco-latest.osm.pbf"
   val densePath: String = resourceFolder + "osmpbf/dense.pbf"
   val nodesPath: String = resourceFolder + "osmpbf/nodes.pbf"
+  val planetOsmPath: String = resourceFolder + "osmpbf/planetosm.pbf"
 
   import sparkSession.implicits._
 
@@ -46,6 +47,32 @@ class OsmReaderTest extends TestBaseScala with Matchers {
         .count()
 
       assert(cnt > 0)
+    }
+
+    it("should be able to process planet osm files") {
+      val numberOfUniques = sparkSession.read
+        .format("osmpbf")
+        .load(planetOsmPath)
+        .dropDuplicates("id")
+        .count
+
+      val numberOfElements = sparkSession.read
+        .format("osmpbf")
+        .load(planetOsmPath)
+        .count
+
+      numberOfUniques shouldBe 64000
+      numberOfElements shouldBe 64000
+
+      val idsToVerify = Seq(64949611, 64955092, 64949580, 64949694, 64949868, 64958096, 64958295)
+
+      val elementsCount = sparkSession.read
+        .format("osmpbf")
+        .load(planetOsmPath)
+        .where($"id".isin(idsToVerify: _*))
+        .count
+
+      elementsCount shouldBe idsToVerify.length
     }
 
     it("should parse normal nodes") {

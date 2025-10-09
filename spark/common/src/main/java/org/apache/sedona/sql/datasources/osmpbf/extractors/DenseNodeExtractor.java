@@ -22,7 +22,7 @@ import java.util.HashMap;
 import org.apache.sedona.sql.datasources.osmpbf.build.Osmformat;
 import org.apache.sedona.sql.datasources.osmpbf.model.OsmNode;
 
-public class DenseNodeExtractor {
+public class DenseNodeExtractor implements Extractor {
   long latOffset;
   long lonOffset;
   long granularity;

@@ -16,24 +16,51 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.sql.datasources.osmpbf.extractors;
+package org.apache.sedona.sql.datasources.osmpbf.iterators;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import org.apache.sedona.sql.datasources.osmpbf.build.Osmformat;
 import org.apache.sedona.sql.datasources.osmpbf.features.TagsResolver;
+import org.apache.sedona.sql.datasources.osmpbf.model.OSMEntity;
 import org.apache.sedona.sql.datasources.osmpbf.model.Way;
 
-public class WaysExtractor {
-  Osmformat.PrimitiveGroup primitiveGroup;
+public class WayIterator implements Iterator<OSMEntity> {
+  int idx;
+  long waysCount;
+  List<Osmformat.Way> ways;
   Osmformat.StringTable stringTable;
 
-  public WaysExtractor(Osmformat.PrimitiveGroup primitiveGroup, Osmformat.StringTable stringTable) {
-    this.primitiveGroup = primitiveGroup;
+  public WayIterator(List<Osmformat.Way> ways, Osmformat.StringTable stringTable) {
+    this.idx = 0;
+    this.waysCount = 0;
+    this.ways = ways;
     this.stringTable = stringTable;
+
+    if (ways != null) {
+      this.waysCount = ways.size();
+    }
   }
 
-  public Way extract(int idx) {
-    Osmformat.Way way = primitiveGroup.getWays(idx);
+  @Override
+  public boolean hasNext() {
+    return idx < waysCount;
+  }
+
+  @Override
+  public Way next() {
+    if (idx < waysCount) {
+      Way way = extract(idx);
+      idx++;
+      return way;
+    }
+
+    return null;
+  }
+
+  private Way extract(int idx) {
+    Osmformat.Way way = ways.get(idx);
 
     return parse(way);
   }

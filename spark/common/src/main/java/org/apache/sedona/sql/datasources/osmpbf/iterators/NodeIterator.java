@@ -16,30 +16,57 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.sql.datasources.osmpbf.extractors;
+package org.apache.sedona.sql.datasources.osmpbf.iterators;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import org.apache.sedona.sql.datasources.osmpbf.build.Osmformat;
 import org.apache.sedona.sql.datasources.osmpbf.features.TagsResolver;
+import org.apache.sedona.sql.datasources.osmpbf.model.OSMEntity;
 import org.apache.sedona.sql.datasources.osmpbf.model.OsmNode;
 
-public class NodeExtractor {
-
-  Osmformat.PrimitiveGroup primitiveGroup;
+public class NodeIterator implements Iterator<OSMEntity> {
+  int idx;
+  long nodesCount;
+  List<Osmformat.Node> nodes;
+  Osmformat.StringTable stringTable;
   Osmformat.PrimitiveBlock primitiveBlock;
 
-  public NodeExtractor(
-      Osmformat.PrimitiveGroup primitiveGroup, Osmformat.PrimitiveBlock primitiveBlock) {
-    this.primitiveGroup = primitiveGroup;
+  public NodeIterator(List<Osmformat.Node> nodes, Osmformat.PrimitiveBlock primitiveBlock) {
+    this.idx = 0;
+    this.nodesCount = 0;
+    this.nodes = nodes;
+    this.stringTable = primitiveBlock.getStringtable();
     this.primitiveBlock = primitiveBlock;
+
+    if (nodes != null) {
+      this.nodesCount = nodes.size();
+    }
   }
 
-  public OsmNode extract(int idx, Osmformat.StringTable stringTable) {
-    return parse(idx, stringTable);
+  @Override
+  public boolean hasNext() {
+    return idx < nodesCount;
   }
 
-  private OsmNode parse(int idx, Osmformat.StringTable stringTable) {
-    Osmformat.Node node = primitiveGroup.getNodes(idx);
+  @Override
+  public OSMEntity next() {
+    if (idx < nodesCount) {
+      OsmNode node = extract(idx);
+      idx++;
+      return node;
+    }
+
+    return null;
+  }
+
+  public OsmNode extract(int idx) {
+    return parse(idx);
+  }
+
+  private OsmNode parse(int idx) {
+    Osmformat.Node node = nodes.get(idx);
 
     long id = node.getId();
     long latitude = node.getLat();
