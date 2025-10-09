@@ -390,9 +390,42 @@ class GeoFrame(metaclass=ABCMeta):
     # def is_ccw(self):
     #     raise NotImplementedError("This method is not implemented yet.")
 
-    # @property
-    # def is_closed(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    @property
+    def is_closed(self):
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        geometries that are closed.
+
+        A LineString is closed if its first and last points are equal.
+        A MultiLineString is closed if all of its elements are closed.
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import LineString, LinearRing
+        >>> s = GeoSeries(
+        ...     [
+        ...         LineString([(0, 0), (1, 1), (1, -1)]),
+        ...         LineString([(0, 0), (1, 1), (1, -1), (0, 0)]),
+        ...         LinearRing([(0, 0), (1, 1), (1, -1)]),
+        ...     ]
+        ... )
+        >>> s
+        0         LINESTRING (0 0, 1 1, 1 -1)
+        1    LINESTRING (0 0, 1 1, 1 -1, 0 0)
+        2    LINEARRING (0 0, 1 1, 1 -1, 0 0)
+        dtype: geometry
+
+        >>> s.is_closed
+        0    False
+        1     True
+        2     True
+        dtype: bool
+
+        See also
+        --------
+        GeoSeries.is_ring : check if geometry is a closed and simple line
+        """
+        return _delegate_to_geometry_column("is_closed", self)
 
     @property
     def has_z(self):
