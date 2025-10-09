@@ -20,19 +20,9 @@ site_url: https://sedona.apache.org
 site_description: Apache Sedona is a cluster computing system for processing large-scale spatial data. Sedona extends existing cluster computing systems, such as Apache Spark, Apache Flink, and Snowflake, with a set of out-of-the-box distributed Spatial Datasets and Spatial SQL that efficiently load, process, and analyze large-scale spatial data across machines.
 nav:
   - Home: index.md
-  - Setup:
-      - Overview: setup/overview.md
-      - Supported platforms:
-          - Sedona with Apache Spark:
-              - Modules: setup/modules.md
-              - Language wrappers: setup/platform.md
-          - Sedona with Apache Flink:
-              - Modules: setup/flink/modules.md
-              - Language wrappers: setup/flink/platform.md
-          - Sedona with Snowflake:
-              - Modules: setup/snowflake/modules.md
-      - Maven Central coordinate: setup/maven-coordinates.md
-      - Install with Apache Spark:
+  - SedonaSpark:
+        - Home: sedonaspark.md
+        - Install:
           - Install Sedona Scala/Java: setup/install-scala.md
           - Install Sedona Python: setup/install-python.md
           - Install Sedona R: api/rdocs
@@ -46,15 +36,7 @@ nav:
           - Install on Microsoft Fabric: setup/fabric.md
           - Set up Spark cluster manually: setup/cluster.md
           - Install on Azure Synapse Analytics: setup/azure-synapse-analytics.md
-      - Install with Apache Flink:
-          - Install Sedona Scala/Java: setup/flink/install-scala.md
-          - Install Sedona Python: setup/flink/install-python.md
-      - Install with Snowflake:
-          - Install Sedona SQL: setup/snowflake/install.md
-      - Release notes: setup/release-notes.md
-  - Download: download.md
-  - Programming Guides:
-      - Sedona with Apache Spark:
+        - Programming Guide:
           - Spatial DataFrame / SQL app: tutorial/sql.md
           - Raster DataFrame / SQL app: tutorial/raster.md
           - Pure SQL environment: tutorial/sql-pure-sql.md
@@ -81,69 +63,96 @@ nav:
               - Benchmark: tutorial/benchmark.md
               - Tune RDD application: tutorial/Advanced-Tutorial-Tune-your-Application.md
               - Storing large raster geometries in Parquet files: tutorial/storing-blobs-in-parquet.md
-      - Sedona with Apache Flink:
-          - Spatial SQL app (Flink): tutorial/flink/sql.md
-          - Spatial SQL app (PyFlink): tutorial/flink/pyflink-sql.md
-      - Sedona with Snowflake:
-          - Spatial SQL app (Snowflake): tutorial/snowflake/sql.md
-      - Examples:
-          - Scala/Java: tutorial/demo.md
-          - Python: tutorial/jupyter-notebook.md
-  - API Docs:
-      - Sedona with Apache Spark:
-          - SQL:
-              - Quick start: api/sql/Overview.md
-              - Vector data:
-                  - Geometry type:
-                      - Constructor: api/sql/Constructor.md
-                      - Function: api/sql/Function.md
-                      - Predicate: api/sql/Predicate.md
-                      - Aggregate function: api/sql/AggregateFunction.md
-                  - Geography type:
-                      - Constructor: api/sql/geography/Constructor.md
-                      - Function: api/sql/geography/Function.md
-                      - Predicate: api/sql/geography/Predicate.md
-                      - Aggregate function: api/sql/geography/AggregateFunction.md
-                  - DataFrame Style functions: api/sql/DataFrameAPI.md
-                  - Query optimization: api/sql/Optimizer.md
-                  - Nearest-Neighbour searching: api/sql/NearestNeighbourSearching.md
-                  - 'Spider:Spatial Data Generator': api/sql/Spider.md
-                  - Reading Legacy Parquet Files: api/sql/Reading-legacy-parquet.md
-                  - Visualization:
-                      - SedonaPyDeck: api/sql/Visualization-SedonaPyDeck.md
-                      - SedonaKepler: api/sql/Visualization-SedonaKepler.md
-              - Raster data:
-                  - Raster loader: api/sql/Raster-loader.md
-                  - Raster aggregates: api/sql/Raster-aggregate-function.md
-                  - Raster writer: api/sql/Raster-writer.md
-                  - Raster operators: api/sql/Raster-operators.md
-                  - Raster map algebra: api/sql/Raster-map-algebra.md
-                  - Raster visualization: api/sql/Raster-visualizer.md
-                  - Raster affine transformation: api/sql/Raster-affine-transformation.md
-              - Parameter: api/sql/Parameter.md
-          - RDD (core):
-              - Scala/Java doc: api/java-api.md
-          - Stats:
-              - DataFrame: api/stats/sql.md
-          - Viz:
-              - DataFrame/SQL: api/viz/sql.md
-              - RDD: api/viz/java-api.md
-          - Sedona R: api/rdocs
-          - Sedona Python: api/pydocs
-      - Sedona with Apache Flink:
-          - SQL:
-              - Overview (Flink): api/flink/Overview.md
-              - Constructor (Flink): api/flink/Constructor.md
-              - Function (Flink): api/flink/Function.md
-              - Aggregator (Flink): api/flink/Aggregator.md
-              - Predicate (Flink): api/flink/Predicate.md
-      - Sedona with Snowflake:
-          - SQL:
-              - Overview (Snowflake): api/snowflake/vector-data/Overview.md
-              - Constructor (Snowflake): api/snowflake/vector-data/Constructor.md
-              - Function (Snowflake): api/snowflake/vector-data/Function.md
-              - Aggregate Function (Snowflake): api/snowflake/vector-data/AggregateFunction.md
-              - Predicate (Snowflake): api/snowflake/vector-data/Predicate.md
+        - API:
+            - SQL:
+                - Quick start: api/sql/Overview.md
+                - Vector data:
+                    - Geometry type:
+                        - Constructor: api/sql/Constructor.md
+                        - Function: api/sql/Function.md
+                        - Predicate: api/sql/Predicate.md
+                        - Aggregate function: api/sql/AggregateFunction.md
+                    - Geography type:
+                        - Constructor: api/sql/geography/Constructor.md
+                        - Function: api/sql/geography/Function.md
+                        - Predicate: api/sql/geography/Predicate.md
+                        - Aggregate function: api/sql/geography/AggregateFunction.md
+                    - DataFrame Style functions: api/sql/DataFrameAPI.md
+                    - Query optimization: api/sql/Optimizer.md
+                    - Nearest-Neighbour searching: api/sql/NearestNeighbourSearching.md
+                    - 'Spider:Spatial Data Generator': api/sql/Spider.md
+                    - Reading Legacy Parquet Files: api/sql/Reading-legacy-parquet.md
+                    - Visualization:
+                        - SedonaPyDeck: api/sql/Visualization-SedonaPyDeck.md
+                        - SedonaKepler: api/sql/Visualization-SedonaKepler.md
+                - Raster data:
+                    - Raster loader: api/sql/Raster-loader.md
+                    - Raster aggregates: api/sql/Raster-aggregate-function.md
+                    - Raster writer: api/sql/Raster-writer.md
+                    - Raster operators: api/sql/Raster-operators.md
+                    - Raster map algebra: api/sql/Raster-map-algebra.md
+                    - Raster visualization: api/sql/Raster-visualizer.md
+                    - Raster affine transformation: api/sql/Raster-affine-transformation.md
+                - Parameter: api/sql/Parameter.md
+            - RDD (core):
+                - Scala/Java doc: api/java-api.md
+            - Stats:
+                - DataFrame: api/stats/sql.md
+            - Viz:
+                - DataFrame/SQL: api/viz/sql.md
+                - RDD: api/viz/java-api.md
+            - Sedona R: api/rdocs
+            - Sedona Python: api/pydocs
+
+  - SedonaFlink:
+    - Home: sedonaflink.md
+    - Install:
+        - Install Sedona Scala/Java: setup/flink/install-scala.md
+        - Install Sedona Python: setup/flink/install-python.md
+    - Programming Guides:
+        - Sedona with Apache Flink:
+            - Spatial SQL app (Flink): tutorial/flink/sql.md
+            - Spatial SQL app (PyFlink): tutorial/flink/pyflink-sql.md
+        - Examples:
+            - Scala/Java: tutorial/demo.md
+            - Python: tutorial/jupyter-notebook.md
+    - API:
+        - SQL:
+            - Overview (Flink): api/flink/Overview.md
+            - Constructor (Flink): api/flink/Constructor.md
+            - Function (Flink): api/flink/Function.md
+            - Aggregator (Flink): api/flink/Aggregator.md
+            - Predicate (Flink): api/flink/Predicate.md
+
+  - SedonaSnow:
+    - Home: sedonasnow.md
+    - Install:
+        - Spatial SQL app (Snowflake): tutorial/snowflake/sql.md
+    - API:
+        - SQL:
+            - Overview (Snowflake): api/snowflake/vector-data/Overview.md
+            - Constructor (Snowflake): api/snowflake/vector-data/Constructor.md
+            - Function (Snowflake): api/snowflake/vector-data/Function.md
+            - Aggregate Function (Snowflake): api/snowflake/vector-data/AggregateFunction.md
+            - Predicate (Snowflake): api/snowflake/vector-data/Predicate.md
+
+#   - Setup:
+#       - Overview: setup/overview.md
+#       - Supported platforms:
+#           - Sedona with Apache Spark:
+#               - Modules: setup/modules.md
+#               - Language wrappers: setup/platform.md
+#           - Sedona with Apache Flink:
+#               - Modules: setup/flink/modules.md
+#               - Language wrappers: setup/flink/platform.md
+#           - Sedona with Snowflake:
+#               - Modules: setup/snowflake/modules.md
+#       - Maven Central coordinate: setup/maven-coordinates.md
+
+#       - Install with Snowflake:
+#           - Install Sedona SQL: setup/snowflake/install.md
+#       - Release notes: setup/release-notes.md
+#   - Download: download.md
   - SedonaDB: 'https://sedona.apache.org/sedonadb/'
   - SpatialBench: 'https://sedona.apache.org/spatialbench/'
   - Blog: blog/index.md
