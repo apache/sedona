@@ -3791,4 +3791,116 @@ class functionTestScala
     }
     exception.getMessage should include("ST_Subdivide needs 5 or more max vertices")
   }
+
+  it("Passed ST_ApproximateMedialAxis") {
+    val polygonWktDf = sparkSession.read
+      .format("csv")
+      .option("delimiter", "\t")
+      .option("header", "false")
+      .load(mixedWktGeometryInputLocation)
+    polygonWktDf.createOrReplaceTempView("polygontable")
+    val polygonDf =
+      sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+    polygonDf.createOrReplaceTempView("polygondf")
+    val functionDf =
+      sparkSession.sql("select ST_ApproximateMedialAxis(polygondf.countyshape) from polygondf")
+    assert(functionDf.count() > 0)
+  }
+
+  it("Passed ST_ApproximateMedialAxis with simple polygon") {
+    val squareDf = sparkSession.sql("""
+        |SELECT ST_ApproximateMedialAxis(ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))')) as result
+    """.stripMargin)
+    val result = squareDf.collect()
+    assert(result.length == 1)
+    val medialAxis = result(0).get(0)
+    assert(medialAxis != null)
+  }
+
+  it("Passed ST_ApproximateMedialAxis returns MultiLineString") {
+    val rectangleDf = sparkSession.sql("""
+        |SELECT ST_GeometryType(ST_ApproximateMedialAxis(ST_GeomFromWKT('POLYGON ((0 0, 20 0, 20 5, 0 5, 0 0))'))) as geomType
+    """.stripMargin)
+    val result = rectangleDf.collect()
+    assert(result.length == 1)
+    assert(result(0).getString(0) == "ST_MultiLineString")
+  }
+
+  it("Passed ST_ApproximateMedialAxis with SRID preservation") {
+    val geomWithSridDf = sparkSession.sql("""
+        |SELECT ST_SRID(ST_ApproximateMedialAxis(ST_SetSRID(ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))'), 4326))) as srid
+    """.stripMargin)
+    val result = geomWithSridDf.collect()
+    assert(result.length == 1)
+    assert(result(0).getInt(0) == 4326)
+  }
+
+  it("Passed ST_ApproximateMedialAxis with L-shaped polygon") {
+    val lShapeDf = sparkSession.sql("""
+        |SELECT ST_ApproximateMedialAxis(ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 5, 5 5, 5 10, 0 10, 0 0))')) as result
+    """.stripMargin)
+    val result = lShapeDf.collect()
+    assert(result.length == 1)
+    val medialAxis = result(0).get(0)
+    assert(medialAxis != null)
+  }
+
+  it("Passed ST_ApproximateMedialAxis with MultiPolygon") {
+    val multiPolygonDf = sparkSession.sql("""
+        |SELECT ST_ApproximateMedialAxis(
+        |  ST_GeomFromWKT('MULTIPOLYGON (((0 0, 5 0, 5 5, 0 5, 0 0)), ((10 10, 15 10, 15 15, 10 15, 10 10)))')
+        |) as result
+    """.stripMargin)
+    val result = multiPolygonDf.collect()
+    assert(result.length == 1)
+    val medialAxis = result(0).get(0)
+    assert(medialAxis != null)
+  }
+
+  it("should handle ST_ApproximateMedialAxis with null geometry") {
+    val nullGeomDf = sparkSession.sql("""
+        |SELECT ST_ApproximateMedialAxis(null) as result
+    """.stripMargin)
+    val result = nullGeomDf.collect()
+    assert(result.length == 1)
+    assert(result(0).get(0) == null)
+  }
+
+  it("should raise an error when using ST_ApproximateMedialAxis with non-areal geometry") {
+    val invalidDf = sparkSession.sql("""
+        |SELECT ST_ApproximateMedialAxis(ST_GeomFromWKT('LINESTRING (0 0, 10 10)')) as result
+    """.stripMargin)
+
+    val exception = intercept[Exception] {
+      invalidDf.collect()
+    }
+    exception.getMessage should include(
+      "ST_ApproximateMedialAxis only supports Polygon and MultiPolygon geometries")
+  }
+
+  it("Manual test: ST_ApproximateMedialAxis with L-shaped polygon for PostGIS comparison") {
+    val testDf = sparkSession.sql("""
+        |SELECT
+        |  ST_AsText(ST_ApproximateMedialAxis(
+        |    ST_GeomFromWKT('POLYGON ((190 190, 10 190, 10 10, 190 10, 190 20, 160 30, 60 30, 60 130, 190 140, 190 190))')
+        |  )) as medial_axis_wkt,
+        |  ST_NumGeometries(ST_ApproximateMedialAxis(
+        |    ST_GeomFromWKT('POLYGON ((190 190, 10 190, 10 10, 190 10, 190 20, 160 30, 60 30, 60 130, 190 140, 190 190))')
+        |  )) as num_segments,
+        |  ST_Length(ST_ApproximateMedialAxis(
+        |    ST_GeomFromWKT('POLYGON ((190 190, 10 190, 10 10, 190 10, 190 20, 160 30, 60 30, 60 130, 190 140, 190 190))')
+        |  )) as total_length,
+        |  ST_GeometryType(ST_ApproximateMedialAxis(
+        |    ST_GeomFromWKT('POLYGON ((190 190, 10 190, 10 10, 190 10, 190 20, 160 30, 60 30, 60 130, 190 140, 190 190))')
+        |  )) as geometry_type
+    """.stripMargin)
+
+    val result = testDf.collect()
+    assert(result.length == 1)
+
+    // Basic assertions
+    assert(result(0).getInt(1) > 0, "Should have at least one segment")
+    assert(result(0).getDouble(2) > 0, "Should have positive length")
+    assert(result(0).getString(3) == "ST_MultiLineString")
+  }
 }

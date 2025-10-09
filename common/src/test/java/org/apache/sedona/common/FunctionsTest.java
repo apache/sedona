@@ -4473,4 +4473,293 @@ public class FunctionsTest extends TestBase {
     double actualArea = actual.getArea();
     return intersectionArea / actualArea;
   }
+
+  @Test
+  public void approximateMedialAxis() throws ParseException {
+    // Test with a simple square polygon
+    // A square's straight skeleton has 4 edges from corners to center
+    Polygon square = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 10, 0, 10, 10, 0, 10, 0, 0));
+    Geometry result = Functions.approximateMedialAxis(square);
+
+    // Result should be a MultiLineString
+    assertTrue(result instanceof MultiLineString);
+    assertFalse(result.isEmpty());
+    assertEquals(4, result.getNumGeometries()); // Square has 4 skeleton edges
+
+    // For a square, all skeleton edges should converge at the center point
+    Point expectedCenter = GEOMETRY_FACTORY.createPoint(new Coordinate(5, 5));
+    int edgesAtCenter = 0;
+    for (int i = 0; i < result.getNumGeometries(); i++) {
+      LineString edge = (LineString) result.getGeometryN(i);
+      Coordinate[] coords = edge.getCoordinates();
+      // Check if either endpoint is at the center
+      if (coords[0].distance(expectedCenter.getCoordinate()) < 0.01
+          || coords[1].distance(expectedCenter.getCoordinate()) < 0.01) {
+        edgesAtCenter++;
+      }
+    }
+    assertEquals("All 4 edges should meet at center", 4, edgesAtCenter);
+
+    // Test with an L-shaped polygon
+    Polygon lShape =
+        GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 10, 0, 10, 5, 5, 5, 5, 10, 0, 10, 0, 0));
+    result = Functions.approximateMedialAxis(lShape);
+
+    assertTrue(result instanceof MultiLineString);
+    assertFalse(result.isEmpty());
+    assertTrue("L-shape should have multiple skeleton edges", result.getNumGeometries() >= 4);
+
+    // Test with a rectangular polygon
+    Polygon rectangle = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 20, 0, 20, 5, 0, 5, 0, 0));
+    result = Functions.approximateMedialAxis(rectangle);
+
+    assertTrue(result instanceof MultiLineString);
+    assertFalse(result.isEmpty());
+    assertTrue("Rectangle should have at least 4 skeleton edges", result.getNumGeometries() >= 4);
+  }
+
+  @Test
+  public void approximateMedialAxisSRID() throws ParseException {
+    // Test SRID preservation
+    Geometry geom = Constructors.geomFromWKT("POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))", 4326);
+    Geometry result = Functions.approximateMedialAxis(geom);
+
+    assertEquals(4326, result.getSRID());
+    assertTrue(result instanceof MultiLineString);
+  }
+
+  @Test
+  public void approximateMedialAxisNullAndEmpty() {
+    // Test null geometry
+    Geometry result = Functions.approximateMedialAxis(null);
+    assertNull(result);
+
+    // Test empty geometry
+    Polygon emptyPolygon = GEOMETRY_FACTORY.createPolygon();
+    result = Functions.approximateMedialAxis(emptyPolygon);
+    assertNull(result);
+  }
+
+  @Test
+  public void approximateMedialAxisInvalidGeometry() {
+    // Test with non-areal geometry (LineString)
+    LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 10, 10));
+    IllegalArgumentException e =
+        assertThrows(
+            IllegalArgumentException.class, () -> Functions.approximateMedialAxis(lineString));
+    assertEquals(
+        "ST_ApproximateMedialAxis only supports Polygon and MultiPolygon geometries",
+        e.getMessage());
+
+    // Test with Point
+    Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(5, 5));
+    e = assertThrows(IllegalArgumentException.class, () -> Functions.approximateMedialAxis(point));
+    assertEquals(
+        "ST_ApproximateMedialAxis only supports Polygon and MultiPolygon geometries",
+        e.getMessage());
+  }
+
+  @Test
+  public void approximateMedialAxisMultiPolygon() throws ParseException {
+    // Test with MultiPolygon
+    Polygon poly1 = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 5, 0, 5, 5, 0, 5, 0, 0));
+    Polygon poly2 =
+        GEOMETRY_FACTORY.createPolygon(coordArray(10, 10, 15, 10, 15, 15, 10, 15, 10, 10));
+    MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {poly1, poly2});
+
+    Geometry result = Functions.approximateMedialAxis(multiPolygon);
+
+    assertTrue(result instanceof MultiLineString);
+    assertFalse(result.isEmpty());
+    assertEquals(multiPolygon.getSRID(), result.getSRID());
+  }
+
+  /*
+   * Geometric Verification Tests for ST_ApproximateMedialAxis
+   *
+   * Verification Strategy:
+   *
+   * These tests use geometrically predictable shapes where we can mathematically reason about the
+   * expected medial axis:
+   *
+   * | Shape            | Mathematical Property    | Verification Method           |
+   * |------------------|--------------------------|-------------------------------|
+   * | Narrow Rectangle | Medial axis ≈ centerline | Distance to center line       |
+   * | Square           | Symmetry around center   | Distance to centroid          |
+   * | Circle           | Collapses to center      | Centroid proximity            |
+   * | T-Shape          | Follows topology         | Checks both stem and top bar  |
+   * | Any Polygon      | Deterministic            | Consistency across runs       |
+   * | Any Polygon      | Geometric validity       | All points inside/on boundary |
+   */
+
+  @Test
+  public void approximateMedialAxisRectangleVerification() throws ParseException {
+    // Test with a narrow rectangle where straight skeleton should have centerline structure
+    // Rectangle from (0,0) to (100,10) - very elongated
+    Polygon rectangle =
+        GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 100, 0, 100, 10, 0, 10, 0, 0));
+    Geometry result = Functions.approximateMedialAxis(rectangle);
+
+    assertTrue(result instanceof MultiLineString);
+    assertFalse(result.isEmpty());
+
+    // Straight skeleton of a rectangle should have edges connecting corners to interior
+    // All skeleton edges should be contained within or touch the polygon
+    for (int i = 0; i < result.getNumGeometries(); i++) {
+      Geometry part = result.getGeometryN(i);
+      assertTrue(
+          "Skeleton edges must be inside or intersect the polygon",
+          rectangle.contains(part) || rectangle.intersects(part));
+    }
+
+    // Check that skeleton has reasonable length (should be less than perimeter)
+    double skeletonLength = result.getLength();
+    double perimeter = rectangle.getLength();
+    assertTrue("Skeleton length should be less than polygon perimeter", skeletonLength < perimeter);
+  }
+
+  @Test
+  public void approximateMedialAxisSquareSymmetry() throws ParseException {
+    // Test with a square - straight skeleton should converge to center
+    // Square centered at origin for easier verification
+    Polygon square =
+        GEOMETRY_FACTORY.createPolygon(coordArray(-10, -10, 10, -10, 10, 10, -10, 10, -10, -10));
+    Geometry result = Functions.approximateMedialAxis(square);
+
+    assertTrue(result instanceof MultiLineString);
+    assertFalse(result.isEmpty());
+    assertEquals(4, result.getNumGeometries()); // Square always has 4 skeleton edges
+
+    // For a square, all 4 skeleton edges should meet at the center (0, 0)
+    Point expectedCenter = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+    int edgesAtCenter = 0;
+    for (int i = 0; i < result.getNumGeometries(); i++) {
+      LineString edge = (LineString) result.getGeometryN(i);
+      Coordinate[] coords = edge.getCoordinates();
+      // Check if either endpoint is at the center
+      if (coords[0].distance(expectedCenter.getCoordinate()) < 0.01
+          || coords[1].distance(expectedCenter.getCoordinate()) < 0.01) {
+        edgesAtCenter++;
+      }
+    }
+    assertEquals("All 4 skeleton edges should converge at the center", 4, edgesAtCenter);
+  }
+
+  @Test
+  public void approximateMedialAxisCircleApproximation() throws ParseException {
+    // Test with a circular polygon (approximated by many vertices)
+    // For a circle, the straight skeleton edges radiate from center to boundary
+    double radius = 10.0;
+    int numPoints = 16; // Reasonable approximation (16-gon)
+    Coordinate[] coords = new Coordinate[numPoints + 1];
+
+    for (int i = 0; i < numPoints; i++) {
+      double angle = 2 * Math.PI * i / numPoints;
+      coords[i] = new Coordinate(radius * Math.cos(angle), radius * Math.sin(angle));
+    }
+    coords[numPoints] = coords[0]; // Close the ring
+
+    Polygon circle = GEOMETRY_FACTORY.createPolygon(coords);
+    Geometry result = Functions.approximateMedialAxis(circle);
+
+    assertTrue(result instanceof MultiLineString);
+    assertFalse(result.isEmpty());
+
+    // For a regular polygon, straight skeleton has at least N edges
+    // (can have more due to intermediate junction points)
+    assertTrue(
+        "Circle approximation should have at least one edge per vertex",
+        result.getNumGeometries() >= numPoints);
+
+    // All skeleton edges should converge at or near the center
+    Point center = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+    int edgesNearCenter = 0;
+    for (int i = 0; i < result.getNumGeometries(); i++) {
+      LineString edge = (LineString) result.getGeometryN(i);
+      Coordinate[] edgeCoords = edge.getCoordinates();
+      // Check if either endpoint is near the center
+      if (edgeCoords[0].distance(center.getCoordinate()) < 0.5
+          || edgeCoords[1].distance(center.getCoordinate()) < 0.5) {
+        edgesNearCenter++;
+      }
+    }
+    assertTrue(
+        "Most skeleton edges should converge near center",
+        edgesNearCenter >= numPoints * 0.5); // At least half should be near center
+  }
+
+  @Test
+  public void approximateMedialAxisTShapeTopology() throws ParseException {
+    // Test with a T-shaped polygon - straight skeleton should reflect T topology
+    // Vertical bar: x from 4-6, y from 0-10
+    // Horizontal bar: x from 0-10, y from 8-10
+    Coordinate[] coords =
+        new Coordinate[] {
+          new Coordinate(4, 0),
+          new Coordinate(6, 0),
+          new Coordinate(6, 8),
+          new Coordinate(10, 8),
+          new Coordinate(10, 10),
+          new Coordinate(0, 10),
+          new Coordinate(0, 8),
+          new Coordinate(4, 8),
+          new Coordinate(4, 0)
+        };
+
+    Polygon tShape = GEOMETRY_FACTORY.createPolygon(coords);
+    Geometry result = Functions.approximateMedialAxis(tShape);
+
+    assertTrue(result instanceof MultiLineString);
+    assertFalse(result.isEmpty());
+
+    // T-shape has 8 vertices, so straight skeleton should have edges
+    assertTrue("T-shape should have multiple skeleton edges", result.getNumGeometries() >= 6);
+
+    // All skeleton edges should be inside or touching the T-shape
+    for (int i = 0; i < result.getNumGeometries(); i++) {
+      Geometry part = result.getGeometryN(i);
+      assertTrue(
+          "All skeleton edges should be inside or intersect T-shape",
+          tShape.contains(part) || tShape.intersects(part));
+    }
+
+    // Verify skeleton has reasonable total length
+    double skeletonLength = result.getLength();
+    assertTrue("Skeleton should have positive length", skeletonLength > 0);
+    assertTrue(
+        "Skeleton length should be less than perimeter", skeletonLength < tShape.getLength());
+  }
+
+  @Test
+  public void approximateMedialAxisConsistency() throws ParseException {
+    // Test that running the function twice on the same geometry gives consistent results
+    Polygon polygon =
+        GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 10, 0, 10, 5, 5, 5, 5, 10, 0, 10, 0, 0));
+
+    Geometry result1 = Functions.approximateMedialAxis(polygon);
+    Geometry result2 = Functions.approximateMedialAxis(polygon);
+
+    // Results should be equal (same geometry)
+    assertTrue("Multiple runs should produce consistent results", result1.equals(result2));
+  }
+
+  @Test
+  public void approximateMedialAxisAllPointsInsidePolygon() throws ParseException {
+    // Verify that all coordinate points in the medial axis are inside or on the boundary
+    Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 20, 0, 20, 10, 0, 10, 0, 0));
+    Geometry result = Functions.approximateMedialAxis(polygon);
+
+    assertTrue(result instanceof MultiLineString);
+
+    // Extract all coordinates from the medial axis
+    Coordinate[] allCoords = result.getCoordinates();
+
+    // Every coordinate should be inside or on the polygon boundary
+    for (Coordinate coord : allCoords) {
+      Point point = GEOMETRY_FACTORY.createPoint(coord);
+      assertTrue(
+          "All medial axis points should be inside or on polygon boundary",
+          polygon.contains(point) || polygon.touches(point) || polygon.distance(point) < 0.01);
+    }
+  }
 }

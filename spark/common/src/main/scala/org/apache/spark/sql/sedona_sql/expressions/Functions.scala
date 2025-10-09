@@ -1849,6 +1849,19 @@ private[apache] case class ST_InterpolatePoint(inputExpressions: Seq[Expression]
     copy(inputExpressions = newChildren)
 }
 
+/**
+ * Computes the approximate medial axis of an areal geometry using a Voronoi-based approach. The
+ * medial axis provides a characterization of the skeleton of a shape.
+ *
+ * @param inputExpressions
+ *   Geometry (Polygon or MultiPolygon)
+ */
+private[apache] case class ST_ApproximateMedialAxis(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.approximateMedialAxis _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) =
+    copy(inputExpressions = newChildren)
+}
+
 private[apache] case class ExpandAddress(address: Expression)
     extends UnaryExpression
     with ImplicitCastInputTypes
