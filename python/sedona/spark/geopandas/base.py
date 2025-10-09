@@ -392,9 +392,9 @@ class GeoFrame(metaclass=ABCMeta):
 
     @property
     def is_closed(self):
-        """Return a ``Series`` of ``dtype('bool')`` with value ``True`` if a 
+        """Return a ``Series`` of ``dtype('bool')`` with value ``True`` if a
         LineString's or LinearRing's first and last points are equal.
-        
+
         Returns False for any other geometry type.
 
         Examples
