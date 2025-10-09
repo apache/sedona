@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.S2Geography.Geography;
+import org.apache.sedona.common.approximate.StraightSkeleton;
 import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.common.jts2geojson.GeoJSONWriter;
 import org.apache.sedona.common.sphere.Spheroid;
@@ -2696,10 +2697,6 @@ public class Functions {
    * inward movement of polygon edges to construct the skeleton. The algorithm processes edge and
    * split events in temporal order.
    *
-   * <p>The straight skeleton provides a more accurate representation of the medial axis compared to
-   * Voronoi-based approaches, matching the results from PostGIS ST_ApproximateMedialAxis (which
-   * uses SFCGAL/CGAL).
-   *
    * @param geometry The input geometry (Polygon or MultiPolygon)
    * @param factory GeometryFactory for creating result geometries
    * @return MultiLineString representing the medial axis skeleton
@@ -2745,8 +2742,6 @@ public class Functions {
         return result;
       }
     } catch (Exception e) {
-      // If straight skeleton fails, return empty MultiLineString
-      // In production, consider logging this error
       return factory.createMultiLineString(new LineString[0]);
     }
   }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.common;
+package org.apache.sedona.common.approximate;
 
 import java.util.*;
 import org.locationtech.jts.geom.*;
@@ -770,10 +770,16 @@ public class StraightSkeleton {
    * <p>This matches the behavior of PostGIS ST_ApproximateMedialAxis which uses SFCGAL.
    */
   private List<LineString> extractMedialAxisEdges(GeometryFactory factory) {
-    // Return ALL skeleton edges
+    // Return ALL skeleton edges (filtering out degenerate edges)
     // The straight skeleton IS the medial axis
     List<LineString> result = new ArrayList<>();
     for (Edge edge : skeletonEdges) {
+      // Skip degenerate edges (zero-length)
+      double length = edge.start.position.distance(edge.end.position);
+      if (length < EPSILON) {
+        continue; // Skip zero-length edges
+      }
+
       Coordinate[] coords = new Coordinate[] {edge.start.position, edge.end.position};
       LineString line = factory.createLineString(coords);
       result.add(line);
