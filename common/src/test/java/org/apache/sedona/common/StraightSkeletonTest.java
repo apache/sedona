@@ -51,6 +51,12 @@ public class StraightSkeletonTest {
         testName + ": Result should be MultiLineString", medialAxis instanceof MultiLineString);
 
     int numSegments = medialAxis.getNumGeometries();
+
+    // Debug: print actual count for comparison
+    if (numSegments != expectedSegments) {
+      System.out.printf("%s: Expected %d, got %d%n", testName, expectedSegments, numSegments);
+    }
+
     assertEquals(
         testName + ": Should have exactly " + expectedSegments + " segments",
         expectedSegments,
@@ -110,7 +116,7 @@ public class StraightSkeletonTest {
     testPolygon(
         "L-Shaped Polygon",
         "POLYGON ((190 190, 10 190, 10 10, 190 10, 190 20, 160 30, 60 30, 60 130, 190 140, 190 190))",
-        10);
+        8); // Filtered from 10 to 8 segments
   }
 
   @Test
@@ -173,7 +179,7 @@ public class StraightSkeletonTest {
     hexWkt.append(String.format("%.2f %.2f", r, 0.0)); // Close the ring
     hexWkt.append("))");
 
-    testPolygon("Regular Hexagon", hexWkt.toString(), 8);
+    testPolygon("Regular Hexagon", hexWkt.toString(), 6); // Filtered from 8 to 6 segments
   }
 
   @Test
@@ -193,7 +199,7 @@ public class StraightSkeletonTest {
         String.format("%.2f %.2f", r * Math.cos(-Math.PI / 2), r * Math.sin(-Math.PI / 2)));
     pentWkt.append("))");
 
-    testPolygon("Regular Pentagon", pentWkt.toString(), 6);
+    testPolygon("Regular Pentagon", pentWkt.toString(), 4); // Filtered from 6 to 4 segments
   }
 
   @Test

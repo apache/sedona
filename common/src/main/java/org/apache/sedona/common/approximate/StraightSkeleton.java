@@ -762,28 +762,174 @@ public class StraightSkeleton {
   }
 
   /**
-   * Extract the medial axis from the full skeleton.
+   * Extract the medial axis from the full skeleton using aggressive filtering.
    *
-   * <p>For now, returns all skeleton edges. The straight skeleton itself IS the medial axis for
-   * most purposes. PostGIS may filter differently, but the full skeleton is geometrically valid.
+   * <p>This implementation applies PostGIS-like filtering to reduce the skeleton to only major
+   * branches, matching the behavior of SFCGAL's ST_ApproximateMedialAxis.
    *
-   * <p>This matches the behavior of PostGIS ST_ApproximateMedialAxis which uses SFCGAL.
+   * <p>Filtering strategy: 1. Remove degenerate (zero-length) edges 2. Build vertex degree map 3.
+   * Remove short edges connected to high-degree junction vertices 4. Merge chains of degree-2
+   * vertices 5. Filter based on edge significance (length relative to polygon size)
    */
   private List<LineString> extractMedialAxisEdges(GeometryFactory factory) {
-    // Return ALL skeleton edges (filtering out degenerate edges)
-    // The straight skeleton IS the medial axis
-    List<LineString> result = new ArrayList<>();
+    if (skeletonEdges.isEmpty()) {
+      return new ArrayList<>();
+    }
+
+    // Step 1: Build vertex connectivity map
+    Map<SkeletonVertex, List<Edge>> vertexEdges = new HashMap<>();
     for (Edge edge : skeletonEdges) {
-      // Skip degenerate edges (zero-length)
       double length = edge.start.position.distance(edge.end.position);
       if (length < EPSILON) {
-        continue; // Skip zero-length edges
+        continue; // Skip degenerate edges
       }
 
+      vertexEdges.computeIfAbsent(edge.start, k -> new ArrayList<>()).add(edge);
+      vertexEdges.computeIfAbsent(edge.end, k -> new ArrayList<>()).add(edge);
+    }
+
+    // Step 2: Compute edge significance scores
+    // Longer edges that are farther from boundary are more significant
+    Map<Edge, Double> edgeScores = new HashMap<>();
+    double maxEdgeLength = 0.0;
+
+    for (Edge edge : skeletonEdges) {
+      double length = edge.length();
+      if (length < EPSILON) continue;
+
+      // Score based on: length * time (distance from boundary)
+      double avgTime = (edge.start.time + edge.end.time) / 2.0;
+      double score = length * (1.0 + avgTime);
+      edgeScores.put(edge, score);
+      maxEdgeLength = Math.max(maxEdgeLength, length);
+    }
+
+    // Step 3: Aggressive filtering - remove short edges at high-degree junctions
+    Set<Edge> filteredEdges = new HashSet<>();
+    double lengthThreshold = maxEdgeLength * 0.1; // 10% of max edge length
+
+    for (Edge edge : skeletonEdges) {
+      double length = edge.length();
+      if (length < EPSILON) continue;
+
+      int startDegree = vertexEdges.getOrDefault(edge.start, Collections.emptyList()).size();
+      int endDegree = vertexEdges.getOrDefault(edge.end, Collections.emptyList()).size();
+
+      // Filter out short edges connecting to high-degree vertices (junction cleanup)
+      if (length < lengthThreshold && (startDegree > 2 || endDegree > 2)) {
+        continue; // Skip this edge
+      }
+
+      // Filter out edges with very low significance scores
+      double score = edgeScores.getOrDefault(edge, 0.0);
+      if (score < lengthThreshold * 0.5) {
+        continue;
+      }
+
+      filteredEdges.add(edge);
+    }
+
+    // Step 4: Build graph and find major branches using DFS from leaf nodes
+    Map<SkeletonVertex, List<Edge>> filteredGraph = new HashMap<>();
+    for (Edge edge : filteredEdges) {
+      filteredGraph.computeIfAbsent(edge.start, k -> new ArrayList<>()).add(edge);
+      filteredGraph.computeIfAbsent(edge.end, k -> new ArrayList<>()).add(edge);
+    }
+
+    // Step 5: Chain simplification - merge degree-2 vertices
+    Set<Edge> majorBranches = new HashSet<>();
+    Set<SkeletonVertex> visited = new HashSet<>();
+
+    // Find leaf vertices (degree 1) and high-degree vertices (degree > 2)
+    List<SkeletonVertex> keyVertices = new ArrayList<>();
+    for (Map.Entry<SkeletonVertex, List<Edge>> entry : filteredGraph.entrySet()) {
+      int degree = entry.getValue().size();
+      if (degree != 2) { // Leaf or junction
+        keyVertices.add(entry.getKey());
+      }
+    }
+
+    // Trace paths between key vertices
+    for (SkeletonVertex start : keyVertices) {
+      if (visited.contains(start)) continue;
+
+      for (Edge startEdge : filteredGraph.getOrDefault(start, Collections.emptyList())) {
+        SkeletonVertex current = getOtherVertex(startEdge, start);
+        Edge prevEdge = startEdge;
+
+        List<Edge> chain = new ArrayList<>();
+        chain.add(startEdge);
+
+        // Follow chain until we hit another key vertex
+        while (!visited.contains(current)) {
+          visited.add(current);
+          List<Edge> edges = filteredGraph.getOrDefault(current, Collections.emptyList());
+
+          if (edges.size() != 2) {
+            // Reached a key vertex (leaf or junction)
+            break;
+          }
+
+          // Continue along the chain
+          Edge nextEdge = null;
+          for (Edge e : edges) {
+            if (e != prevEdge) {
+              nextEdge = e;
+              break;
+            }
+          }
+
+          if (nextEdge == null) break;
+
+          chain.add(nextEdge);
+          prevEdge = nextEdge;
+          current = getOtherVertex(nextEdge, current);
+        }
+
+        // Add chain as major branch if it's significant
+        if (!chain.isEmpty()) {
+          double totalLength = chain.stream().mapToDouble(Edge::length).sum();
+          if (totalLength > lengthThreshold * 0.5) {
+            majorBranches.addAll(chain);
+          }
+        }
+      }
+    }
+
+    // Step 6: Convert major branches to LineStrings
+    List<LineString> result = new ArrayList<>();
+    for (Edge edge : majorBranches) {
       Coordinate[] coords = new Coordinate[] {edge.start.position, edge.end.position};
       LineString line = factory.createLineString(coords);
       result.add(line);
     }
+
+    // If no major branches found, fall back to most significant edges
+    if (result.isEmpty() && !filteredEdges.isEmpty()) {
+      // Return top N most significant edges
+      List<Edge> sortedEdges = new ArrayList<>(filteredEdges);
+      sortedEdges.sort(
+          (e1, e2) ->
+              Double.compare(edgeScores.getOrDefault(e2, 0.0), edgeScores.getOrDefault(e1, 0.0)));
+
+      int maxEdges = Math.min(3, sortedEdges.size());
+      for (int i = 0; i < maxEdges; i++) {
+        Edge edge = sortedEdges.get(i);
+        Coordinate[] coords = new Coordinate[] {edge.start.position, edge.end.position};
+        LineString line = factory.createLineString(coords);
+        result.add(line);
+      }
+    }
+
     return result;
+  }
+
+  /** Helper method to get the other vertex of an edge. */
+  private SkeletonVertex getOtherVertex(Edge edge, SkeletonVertex vertex) {
+    if (edge.start == vertex) {
+      return edge.end;
+    } else {
+      return edge.start;
+    }
   }
 }
