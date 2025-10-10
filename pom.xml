@@ -376,6 +376,11 @@
                 <version>4.11.0</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>com.github.twak</groupId>
+                <artifactId>campskeleton</artifactId>
+                <version>0.0.1</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <repositories>
@@ -415,6 +420,10 @@
         <repository>
             <id>Spark Packages</id>
             <url>https://repos.spark-packages.org/</url>
+        </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
     <build>
