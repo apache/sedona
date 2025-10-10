@@ -882,7 +882,21 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         self.check_pd_series_equal(result, expected)
 
     def test_is_ccw(self):
-        pass
+        s = GeoSeries(
+            [
+                LinearRing([(0, 0), (0, 1), (1, 1), (0, 0)]),
+                LinearRing([(0, 0), (1, 1), (0, 1), (0, 0)]),
+                LineString([(0, 0), (1, 1), (0, 1)]),
+                Point(3, 3),
+            ]
+        )
+        result = s.is_ccw
+        expected = pd.Series([False, True, False, False])
+        self.check_pd_series_equal(result, expected)
+
+        # Check that GeoDataFrame works too
+        result = s.to_geoframe().is_ccw
+        self.check_pd_series_equal(result, expected)
 
     def test_is_closed(self):
         s = GeoSeries(

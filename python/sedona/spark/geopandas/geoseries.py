@@ -966,13 +966,12 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def is_ccw(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError(
-            _not_implemented_error(
-                "is_ccw",
-                "Tests if LinearRing geometries are oriented counter-clockwise.",
-            )
+        spark_expr = stf.ST_IsPolygonCCW(self.spark.column)
+        result = self._query_geometry_column(
+            spark_expr,
+            returns_geom=False,
         )
+        return _to_bool(result)
 
     @property
     def is_closed(self):

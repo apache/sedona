@@ -585,7 +585,10 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_is_ccw(self):
-        pass
+        for geom in self.linestrings:
+            sgpd_result = GeoSeries(geom).is_ccw
+            gpd_result = gpd.GeoSeries(geom).is_ccw
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_is_closed(self):
         if parse_version(gpd.__version__) < parse_version("1.0.0"):

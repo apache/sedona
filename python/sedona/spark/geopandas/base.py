@@ -386,9 +386,49 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("is_ring", self)
 
-    # @property
-    # def is_ccw(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    @property
+    def is_ccw(self):
+        """
+        Return a ``Series`` of ``dtype('bool')`` with value ``True`` if a 
+        LineString or LinearRing is counterclockwise.
+
+        Note that there are no checks on whether lines are actually closed 
+        and not self-intersecting, while this is a requirement for ``is_ccw``. 
+        The recommended usage of this property for LineStrings is 
+        ``GeoSeries.is_ccw & GeoSeries.is_simple`` and for LinearRings 
+        ``GeoSeries.is_ccw & GeoSeries.is_valid``.
+
+        This property will return False for non-linear geometries and for 
+        lines with fewer than 4 points (including the closing point).
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import LineString, LinearRing, Point
+        >>> s = GeoSeries(
+        ...    [
+        ...        LinearRing([(0, 0), (0, 1), (1, 1), (0, 0)]),
+        ...        LinearRing([(0, 0), (1, 1), (0, 1), (0, 0)]),
+        ...        LineString([(0, 0), (1, 1), (0, 1)]),
+        ...        Point(3, 3)
+        ...    ]
+        ... )
+        s
+        0    LINEARRING (0 0, 0 1, 1 1, 0 0)
+        1    LINEARRING (0 0, 1 1, 0 1, 0 0)
+        2         LINESTRING (0 0, 1 1, 0 1)
+        3                        POINT (3 3)
+        dtype: geometry
+
+        >>> s.is_ccw
+        0    False
+        1     True
+        2    False
+        3    False
+        dtype: bool
+
+        """
+        return _delegate_to_geometry_column("is_ccw", self)
 
     @property
     def is_closed(self):
