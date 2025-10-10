@@ -2720,14 +2720,48 @@ public class Functions {
           "ST_ApproximateMedialAxis only supports Polygon and MultiPolygon geometries");
     }
 
-    // First compute the straight skeleton
+    GeometryFactory factory = geometry.getFactory();
+
+    // Handle MultiPolygon by processing each polygon separately
+    if (geometry instanceof MultiPolygon) {
+      MultiPolygon multiPoly = (MultiPolygon) geometry;
+      java.util.List<LineString> allPrunedEdges = new java.util.ArrayList<>();
+
+      for (int i = 0; i < multiPoly.getNumGeometries(); i++) {
+        Polygon poly = (Polygon) multiPoly.getGeometryN(i);
+
+        // Compute skeleton for this individual polygon
+        Geometry skeleton = straightSkeleton(poly);
+        if (skeleton != null && !skeleton.isEmpty()) {
+          // Prune this polygon's skeleton
+          Geometry pruned = pruneSkeletonBranches(skeleton, poly, factory);
+
+          if (pruned != null && !pruned.isEmpty()) {
+            // Extract LineStrings from the pruned skeleton
+            for (int j = 0; j < pruned.getNumGeometries(); j++) {
+              allPrunedEdges.add((LineString) pruned.getGeometryN(j));
+            }
+          }
+        }
+      }
+
+      if (allPrunedEdges.isEmpty()) {
+        Geometry result = factory.createMultiLineString(new LineString[0]);
+        result.setSRID(geometry.getSRID());
+        return result;
+      }
+
+      Geometry result = factory.createMultiLineString(allPrunedEdges.toArray(new LineString[0]));
+      result.setSRID(geometry.getSRID());
+      return result;
+    }
+
+    // Single polygon case
     Geometry skeleton = straightSkeleton(geometry);
 
     if (skeleton == null || skeleton.isEmpty()) {
       return skeleton;
     }
-
-    GeometryFactory factory = geometry.getFactory();
 
     // Apply pruning to clean up the skeleton
     return pruneSkeletonBranches(skeleton, geometry, factory);
@@ -2849,6 +2883,14 @@ public class Functions {
           Point leafPoint = factory.createPoint(leafVertex);
           double d1 = polygon.getBoundary().distance(leafPoint);
 
+          // Special case: if the leaf vertex is ON the boundary (i.e., a corner branch),
+          // always prune it as these are insignificant branches to polygon corners
+          if (d1 < 0.01) {
+            edgesToRemove.add(edge);
+            changed = true;
+            continue;
+          }
+
           // Compute d2: distance between two closest boundary points
           double d2 = computeCornerWidth(leafVertex, polygon);
 
@@ -2868,6 +2910,21 @@ public class Functions {
 
     // Convert remaining edges back to MultiLineString
     if (remainingEdges.isEmpty()) {
+      // Special case: if all edges were pruned, return the center point as a degenerate line
+      // This happens for highly symmetric shapes like squares where all branches go to corners
+      if (skeleton.getNumGeometries() > 0) {
+        // Find the interior point (most likely the center)
+        Point center = polygon.getCentroid();
+        if (polygon.contains(center) || polygon.touches(center)) {
+          // Create a zero-length line at the center point
+          Coordinate centerCoord = center.getCoordinate();
+          LineString degenerateLine =
+              factory.createLineString(new Coordinate[] {centerCoord, centerCoord});
+          Geometry result = factory.createMultiLineString(new LineString[] {degenerateLine});
+          result.setSRID(skeleton.getSRID());
+          return result;
+        }
+      }
       return factory.createMultiLineString(new LineString[0]);
     }
 
