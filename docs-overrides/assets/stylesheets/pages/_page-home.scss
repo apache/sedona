@@ -6,9 +6,17 @@ body:has(.page-home) {
       width: 100%;
       max-width: 100%;
       margin: 0;
-      &>.md-sidebar{
+
+      & > .md-sidebar {
         display: none;
       }
+
+      @media (max-width: 1219px) {
+        & > .md-sidebar.md-sidebar--primary {
+          display: block;
+        }
+      }
+
     }
   }
 }
@@ -1166,6 +1174,6 @@ body:has(.page-home) {
 }
 
 
-.hljs-regexp, .hljs-string, .hljs-meta .hljs-string{
-  color: #406b9d!important;
+.hljs-regexp, .hljs-string, .hljs-meta .hljs-string {
+  color: #406b9d !important;
 }

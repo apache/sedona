@@ -20,15 +20,6 @@ You're not viewing the latest stable version.
     {% if page.is_homepage %}
     <div class="page-home">
 
-      <!-- Mobile Navigation ( required ) -->
-      <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" {{ hidden }}>
-        <div class="md-sidebar__scrollwrap">
-          <div class="md-sidebar__inner">
-            {% include "partials/nav.html" %}
-          </div>
-        </div>
-      </div>
-
       <!-- Section Hero -->
       <section class="section-hero">
         <div class="container">
@@ -703,6 +694,7 @@ You're not viewing the latest stable version.
 
         </div>
       </section>
+
     </div>
     {% else %}
     {{ super() }}

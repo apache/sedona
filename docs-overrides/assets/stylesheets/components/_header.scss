@@ -9,20 +9,18 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-
     .left-part {
       display: flex;
       justify-content: flex-start;
       align-items: center;
     }
-
     .right-part {
       display: flex;
       justify-content: flex-end;
       align-items: center;
       gap: 32px;
       @media (min-width: 1220px) {
-        .md-search__inner{
+        .md-search__inner {
           max-width: 510px;
         }
       }
@@ -83,6 +81,17 @@
       justify-content: center;
       align-items: center;
       margin-right: 14px;
+
+      &.btn-search {
+        display: none;
+      }
+    }
+  }
+  @media (max-width: 959px) {
+    .md-header__button {
+      &.btn-search {
+        display: flex;
+      }
     }
   }
 }
@@ -110,7 +119,6 @@
     }
   }
 }
-
 
 // Mobile Menu
 @media (max-width: 1219px) {
