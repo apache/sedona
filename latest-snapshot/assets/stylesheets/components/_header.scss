@@ -83,6 +83,17 @@
       justify-content: center;
       align-items: center;
       margin-right: 14px;
+
+      &.btn-search {
+        display: none;
+      }
+    }
+  }
+  @media (max-width: 959px) {
+    .md-header__button {
+      &.btn-search {
+        display: flex;
+      }
     }
   }
 }
