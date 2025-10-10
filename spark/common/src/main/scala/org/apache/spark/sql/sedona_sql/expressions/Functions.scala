@@ -1850,14 +1850,15 @@ private[apache] case class ST_InterpolatePoint(inputExpressions: Seq[Expression]
 }
 
 /**
- * Computes the approximate medial axis of an areal geometry using a Voronoi-based approach. The
- * medial axis provides a characterization of the skeleton of a shape.
+ * Computes the straight skeleton of an areal geometry. The straight skeleton is a method of
+ * representing a polygon by a topological skeleton, formed by a continuous shrinking process
+ * where each edge moves inward in parallel at a uniform speed.
  *
  * @param inputExpressions
  *   Geometry (Polygon or MultiPolygon)
  */
-private[apache] case class ST_ApproximateMedialAxis(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.approximateMedialAxis _) {
+private[apache] case class ST_StraightSkeleton(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.straightSkeleton _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) =
     copy(inputExpressions = newChildren)
 }

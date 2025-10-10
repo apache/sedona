@@ -4475,11 +4475,11 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
-  public void approximateMedialAxis() throws ParseException {
+  public void straightSkeleton() throws ParseException {
     // Test with a simple square polygon
     // A square's straight skeleton has 4 edges from corners to center
     Polygon square = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 10, 0, 10, 10, 0, 10, 0, 0));
-    Geometry result = Functions.approximateMedialAxis(square);
+    Geometry result = Functions.straightSkeleton(square);
 
     // Result should be a MultiLineString
     assertTrue(result instanceof MultiLineString);
@@ -4503,7 +4503,7 @@ public class FunctionsTest extends TestBase {
     // Test with an L-shaped polygon
     Polygon lShape =
         GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 10, 0, 10, 5, 5, 5, 5, 10, 0, 10, 0, 0));
-    result = Functions.approximateMedialAxis(lShape);
+    result = Functions.straightSkeleton(lShape);
 
     assertTrue(result instanceof MultiLineString);
     assertFalse(result.isEmpty());
@@ -4511,7 +4511,7 @@ public class FunctionsTest extends TestBase {
 
     // Test with a rectangular polygon
     Polygon rectangle = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 20, 0, 20, 5, 0, 5, 0, 0));
-    result = Functions.approximateMedialAxis(rectangle);
+    result = Functions.straightSkeleton(rectangle);
 
     assertTrue(result instanceof MultiLineString);
     assertFalse(result.isEmpty());
@@ -4519,55 +4519,52 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
-  public void approximateMedialAxisSRID() throws ParseException {
+  public void straightSkeletonSRID() throws ParseException {
     // Test SRID preservation
     Geometry geom = Constructors.geomFromWKT("POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))", 4326);
-    Geometry result = Functions.approximateMedialAxis(geom);
+    Geometry result = Functions.straightSkeleton(geom);
 
     assertEquals(4326, result.getSRID());
     assertTrue(result instanceof MultiLineString);
   }
 
   @Test
-  public void approximateMedialAxisNullAndEmpty() {
+  public void straightSkeletonNullAndEmpty() {
     // Test null geometry
-    Geometry result = Functions.approximateMedialAxis(null);
+    Geometry result = Functions.straightSkeleton(null);
     assertNull(result);
 
     // Test empty geometry
     Polygon emptyPolygon = GEOMETRY_FACTORY.createPolygon();
-    result = Functions.approximateMedialAxis(emptyPolygon);
+    result = Functions.straightSkeleton(emptyPolygon);
     assertNull(result);
   }
 
   @Test
-  public void approximateMedialAxisInvalidGeometry() {
+  public void straightSkeletonInvalidGeometry() {
     // Test with non-areal geometry (LineString)
     LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 10, 10));
     IllegalArgumentException e =
-        assertThrows(
-            IllegalArgumentException.class, () -> Functions.approximateMedialAxis(lineString));
+        assertThrows(IllegalArgumentException.class, () -> Functions.straightSkeleton(lineString));
     assertEquals(
-        "ST_ApproximateMedialAxis only supports Polygon and MultiPolygon geometries",
-        e.getMessage());
+        "ST_StraightSkeleton only supports Polygon and MultiPolygon geometries", e.getMessage());
 
     // Test with Point
     Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(5, 5));
-    e = assertThrows(IllegalArgumentException.class, () -> Functions.approximateMedialAxis(point));
+    e = assertThrows(IllegalArgumentException.class, () -> Functions.straightSkeleton(point));
     assertEquals(
-        "ST_ApproximateMedialAxis only supports Polygon and MultiPolygon geometries",
-        e.getMessage());
+        "ST_StraightSkeleton only supports Polygon and MultiPolygon geometries", e.getMessage());
   }
 
   @Test
-  public void approximateMedialAxisMultiPolygon() throws ParseException {
+  public void straightSkeletonMultiPolygon() throws ParseException {
     // Test with MultiPolygon
     Polygon poly1 = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 5, 0, 5, 5, 0, 5, 0, 0));
     Polygon poly2 =
         GEOMETRY_FACTORY.createPolygon(coordArray(10, 10, 15, 10, 15, 15, 10, 15, 10, 10));
     MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {poly1, poly2});
 
-    Geometry result = Functions.approximateMedialAxis(multiPolygon);
+    Geometry result = Functions.straightSkeleton(multiPolygon);
 
     assertTrue(result instanceof MultiLineString);
     assertFalse(result.isEmpty());
@@ -4575,7 +4572,7 @@ public class FunctionsTest extends TestBase {
   }
 
   /*
-   * Geometric Verification Tests for ST_ApproximateMedialAxis
+   * Geometric Verification Tests for ST_StraightSkeleton
    *
    * Verification Strategy:
    *
@@ -4593,12 +4590,12 @@ public class FunctionsTest extends TestBase {
    */
 
   @Test
-  public void approximateMedialAxisRectangleVerification() throws ParseException {
+  public void straightSkeletonRectangleVerification() throws ParseException {
     // Test with a narrow rectangle where straight skeleton should have centerline structure
     // Rectangle from (0,0) to (100,10) - very elongated
     Polygon rectangle =
         GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 100, 0, 100, 10, 0, 10, 0, 0));
-    Geometry result = Functions.approximateMedialAxis(rectangle);
+    Geometry result = Functions.straightSkeleton(rectangle);
 
     assertTrue(result instanceof MultiLineString);
     assertFalse(result.isEmpty());
@@ -4619,12 +4616,12 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
-  public void approximateMedialAxisSquareSymmetry() throws ParseException {
+  public void straightSkeletonSquareSymmetry() throws ParseException {
     // Test with a square - straight skeleton should converge to center
     // Square centered at origin for easier verification
     Polygon square =
         GEOMETRY_FACTORY.createPolygon(coordArray(-10, -10, 10, -10, 10, 10, -10, 10, -10, -10));
-    Geometry result = Functions.approximateMedialAxis(square);
+    Geometry result = Functions.straightSkeleton(square);
 
     assertTrue(result instanceof MultiLineString);
     assertFalse(result.isEmpty());
@@ -4646,7 +4643,7 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
-  public void approximateMedialAxisCircleApproximation() throws ParseException {
+  public void straightSkeletonCircleApproximation() throws ParseException {
     // Test with a circular polygon (approximated by many vertices)
     // For a circle, the straight skeleton edges radiate from center to boundary
     double radius = 10.0;
@@ -4660,7 +4657,7 @@ public class FunctionsTest extends TestBase {
     coords[numPoints] = coords[0]; // Close the ring
 
     Polygon circle = GEOMETRY_FACTORY.createPolygon(coords);
-    Geometry result = Functions.approximateMedialAxis(circle);
+    Geometry result = Functions.straightSkeleton(circle);
 
     assertTrue(result instanceof MultiLineString);
     assertFalse(result.isEmpty());
@@ -4689,7 +4686,7 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
-  public void approximateMedialAxisTShapeTopology() throws ParseException {
+  public void straightSkeletonTShapeTopology() throws ParseException {
     // Test with a T-shaped polygon - straight skeleton should reflect T topology
     // Vertical bar: x from 4-6, y from 0-10
     // Horizontal bar: x from 0-10, y from 8-10
@@ -4707,7 +4704,7 @@ public class FunctionsTest extends TestBase {
         };
 
     Polygon tShape = GEOMETRY_FACTORY.createPolygon(coords);
-    Geometry result = Functions.approximateMedialAxis(tShape);
+    Geometry result = Functions.straightSkeleton(tShape);
 
     assertTrue(result instanceof MultiLineString);
     assertFalse(result.isEmpty());
@@ -4731,23 +4728,23 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
-  public void approximateMedialAxisConsistency() throws ParseException {
+  public void straightSkeletonConsistency() throws ParseException {
     // Test that running the function twice on the same geometry gives consistent results
     Polygon polygon =
         GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 10, 0, 10, 5, 5, 5, 5, 10, 0, 10, 0, 0));
 
-    Geometry result1 = Functions.approximateMedialAxis(polygon);
-    Geometry result2 = Functions.approximateMedialAxis(polygon);
+    Geometry result1 = Functions.straightSkeleton(polygon);
+    Geometry result2 = Functions.straightSkeleton(polygon);
 
     // Results should be equal (same geometry)
     assertTrue("Multiple runs should produce consistent results", result1.equals(result2));
   }
 
   @Test
-  public void approximateMedialAxisAllPointsInsidePolygon() throws ParseException {
+  public void straightSkeletonAllPointsInsidePolygon() throws ParseException {
     // Verify that all coordinate points in the medial axis are inside or on the boundary
     Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 20, 0, 20, 10, 0, 10, 0, 0));
-    Geometry result = Functions.approximateMedialAxis(polygon);
+    Geometry result = Functions.straightSkeleton(polygon);
 
     assertTrue(result instanceof MultiLineString);
 

@@ -2664,16 +2664,18 @@ public class Functions {
   }
 
   /**
-   * Computes the approximate medial axis of an areal geometry using a Voronoi-based approach. The
-   * medial axis provides a characterization of the skeleton of a shape.
+   * Computes the straight skeleton of an areal geometry. The straight skeleton is a method of
+   * representing a polygon by a topological skeleton, formed by a continuous shrinking process
+   * where each edge moves inward in parallel at a uniform speed.
    *
-   * <p>This implementation uses JTS's Voronoi diagram builder to compute an approximation of the
-   * medial axis. The result represents the "skeleton" or centerline of the polygon.
+   * <p>This implementation uses the campskeleton library which implements the weighted straight
+   * skeleton algorithm based on Felkel's approach. The result represents the "skeleton" or
+   * centerline of the polygon.
    *
    * @param geometry The areal geometry (Polygon or MultiPolygon)
-   * @return A MultiLineString representing the medial axis, or null if input is null/empty
+   * @return A MultiLineString representing the straight skeleton, or null if input is null/empty
    */
-  public static Geometry approximateMedialAxis(Geometry geometry) {
+  public static Geometry straightSkeleton(Geometry geometry) {
     if (geometry == null || geometry.isEmpty()) {
       return null;
     }
@@ -2681,28 +2683,27 @@ public class Functions {
     // Check if the geometry is areal (Polygon or MultiPolygon)
     if (!(geometry instanceof Polygon || geometry instanceof MultiPolygon)) {
       throw new IllegalArgumentException(
-          "ST_ApproximateMedialAxis only supports Polygon and MultiPolygon geometries");
+          "ST_StraightSkeleton only supports Polygon and MultiPolygon geometries");
     }
 
     GeometryFactory factory = geometry.getFactory();
 
-    // Use straight skeleton algorithm for exact medial axis computation
-    return approximateMedialAxisStraightSkeleton(geometry, factory);
+    // Use straight skeleton algorithm
+    return computeStraightSkeleton(geometry, factory);
   }
 
   /**
-   * Compute the medial axis using the straight skeleton algorithm.
+   * Compute the straight skeleton of a geometry.
    *
-   * <p>This method implements the exact straight skeleton algorithm, which simulates continuous
-   * inward movement of polygon edges to construct the skeleton. The algorithm processes edge and
-   * split events in temporal order.
+   * <p>This method implements the straight skeleton algorithm, which simulates continuous inward
+   * movement of polygon edges to construct the skeleton. The algorithm processes edge and split
+   * events in temporal order.
    *
    * @param geometry The input geometry (Polygon or MultiPolygon)
    * @param factory GeometryFactory for creating result geometries
-   * @return MultiLineString representing the medial axis skeleton
+   * @return MultiLineString representing the straight skeleton
    */
-  private static Geometry approximateMedialAxisStraightSkeleton(
-      Geometry geometry, GeometryFactory factory) {
+  private static Geometry computeStraightSkeleton(Geometry geometry, GeometryFactory factory) {
     try {
       // Handle MultiPolygon by processing each polygon separately
       if (geometry instanceof MultiPolygon) {

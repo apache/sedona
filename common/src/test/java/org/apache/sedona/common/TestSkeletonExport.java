@@ -46,7 +46,7 @@ public class TestSkeletonExport {
       System.out.println("### " + name + " ###");
 
       Geometry polygon = Constructors.geomFromWKT(wkt, 0);
-      Geometry skeleton = Functions.approximateMedialAxis(polygon);
+      Geometry skeleton = Functions.straightSkeleton(polygon);
 
       System.out.println("SEGMENTS:" + skeleton.getNumGeometries());
 

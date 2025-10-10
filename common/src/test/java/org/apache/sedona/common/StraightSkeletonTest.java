@@ -57,7 +57,7 @@ public class StraightSkeletonTest {
       String testName, String wkt, int expectedSegments, boolean strictLengthCheck)
       throws Exception {
     Geometry polygon = Constructors.geomFromWKT(wkt, 0);
-    Geometry medialAxis = Functions.approximateMedialAxis(polygon);
+    Geometry medialAxis = Functions.straightSkeleton(polygon);
 
     // Print skeleton for visualization (only for road network tests)
     if (testName.contains("Road")
@@ -257,7 +257,7 @@ public class StraightSkeletonTest {
         "MULTIPOLYGON (((0 0, 10 0, 10 10, 0 10, 0 0)), ((20 20, 30 20, 30 30, 20 30, 20 20)))";
 
     Geometry multiPolygon = Constructors.geomFromWKT(wkt, 0);
-    Geometry medialAxis = Functions.approximateMedialAxis(multiPolygon);
+    Geometry medialAxis = Functions.straightSkeleton(multiPolygon);
 
     assertNotNull("MultiPolygon: Medial axis should not be null", medialAxis);
     assertTrue(
@@ -285,7 +285,7 @@ public class StraightSkeletonTest {
             ")";
 
     Geometry multiPolygon = Constructors.geomFromWKT(wkt, 0);
-    Geometry medialAxis = Functions.approximateMedialAxis(multiPolygon);
+    Geometry medialAxis = Functions.straightSkeleton(multiPolygon);
 
     assertNotNull("Complex MultiPolygon: Medial axis should not be null", medialAxis);
     assertTrue(
@@ -317,7 +317,7 @@ public class StraightSkeletonTest {
             ")";
 
     Geometry multiPolygon = Constructors.geomFromWKT(wkt, 0);
-    Geometry medialAxis = Functions.approximateMedialAxis(multiPolygon);
+    Geometry medialAxis = Functions.straightSkeleton(multiPolygon);
 
     assertNotNull("Complex shapes MultiPolygon: Medial axis should not be null", medialAxis);
     int numSegments = medialAxis.getNumGeometries();
@@ -325,7 +325,7 @@ public class StraightSkeletonTest {
 
     // Verify SRID preservation
     multiPolygon = Constructors.geomFromWKT(wkt, 4326);
-    medialAxis = Functions.approximateMedialAxis(multiPolygon);
+    medialAxis = Functions.straightSkeleton(multiPolygon);
     assertEquals(
         "Complex shapes MultiPolygon: SRID should be preserved", 4326, medialAxis.getSRID());
   }
