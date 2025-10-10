@@ -4899,4 +4899,32 @@ public class FunctionsTest extends TestBase {
           polygon.contains(point) || polygon.touches(point) || polygon.distance(point) < 0.01);
     }
   }
+
+  @Test
+  public void approximateMedialAxisPolygonWithHole() throws ParseException {
+    // Test polygon with a rectangular hole (donut shape)
+    LinearRing shell =
+        GEOMETRY_FACTORY.createLinearRing(coordArray(0, 0, 100, 0, 100, 60, 0, 60, 0, 0));
+    LinearRing hole =
+        GEOMETRY_FACTORY.createLinearRing(coordArray(20, 20, 80, 20, 80, 40, 20, 40, 20, 20));
+    Polygon polygonWithHole = GEOMETRY_FACTORY.createPolygon(shell, new LinearRing[] {hole});
+
+    Geometry result = Functions.approximateMedialAxis(polygonWithHole);
+
+    assertNotNull("Result should not be null for polygon with hole", result);
+    assertTrue("Result should be MultiLineString", result instanceof MultiLineString);
+    assertTrue(
+        "Result should have segments, got: " + result.getNumGeometries(),
+        result.getNumGeometries() > 0);
+
+    // Verify the result has fewer or equal segments compared to straight skeleton
+    Geometry straightSkel = Functions.straightSkeleton(polygonWithHole);
+    assertNotNull("Straight skeleton should not be null", straightSkel);
+    assertTrue(
+        "Pruned skeleton should have <= segments than raw skeleton. Pruned: "
+            + result.getNumGeometries()
+            + ", Raw: "
+            + straightSkel.getNumGeometries(),
+        result.getNumGeometries() <= straightSkel.getNumGeometries());
+  }
 }
