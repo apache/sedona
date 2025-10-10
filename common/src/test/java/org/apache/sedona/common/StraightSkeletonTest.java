@@ -59,24 +59,12 @@ public class StraightSkeletonTest {
     Geometry polygon = Constructors.geomFromWKT(wkt, 0);
     Geometry medialAxis = Functions.straightSkeleton(polygon);
 
-    // Print skeleton for visualization (only for road network tests)
-    if (testName.contains("Road")
-        || testName.contains("Junction")
-        || testName.contains("Intersection")) {
-      System.out.println("SKELETON_WKT:" + testName + ":" + medialAxis.toText());
-    }
-
     // Basic assertions
     assertNotNull(testName + ": Medial axis should not be null", medialAxis);
     assertTrue(
         testName + ": Result should be MultiLineString", medialAxis instanceof MultiLineString);
 
     int numSegments = medialAxis.getNumGeometries();
-
-    // Debug: print actual count for comparison
-    if (numSegments != expectedSegments && expectedSegments >= 0) {
-      System.out.printf("%s: Expected %d, got %d%n", testName, expectedSegments, numSegments);
-    }
 
     // If expectedSegments is -1, skip exact count assertion (just verify it works)
     if (expectedSegments >= 0) {
@@ -87,7 +75,6 @@ public class StraightSkeletonTest {
     } else {
       // Just verify we got some segments
       assertTrue(testName + ": Should produce at least one segment", numSegments > 0);
-      System.out.printf("%s: Produced %d segments%n", testName, numSegments);
     }
 
     // Verify all skeleton edges are inside or touch the polygon

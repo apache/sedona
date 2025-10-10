@@ -21,6 +21,8 @@ package org.apache.sedona.common.approximate;
 import java.util.*;
 import javax.vecmath.Point3d;
 import org.locationtech.jts.geom.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.twak.camp.Corner;
 import org.twak.camp.Edge;
 import org.twak.camp.Machine;
@@ -41,6 +43,7 @@ import org.twak.utils.collections.LoopL;
  * Procedural Extrusions - Felkel, P., & Obdržálek, Š. (1998). Straight skeleton implementation
  */
 public class StraightSkeleton {
+  private static final Logger log = LoggerFactory.getLogger(StraightSkeleton.class);
 
   public StraightSkeleton() {}
 
@@ -67,8 +70,7 @@ public class StraightSkeleton {
 
       // Check if skeleton computation succeeded
       if (skeleton.output == null || skeleton.output.edges == null) {
-        System.err.println(
-            "WARNING: Campskeleton failed to produce output for polygon: " + polygon.toText());
+        log.warn("Campskeleton failed to produce output for polygon: {}", polygon.toText());
         return factory.createMultiLineString(new LineString[0]);
       }
 
@@ -76,16 +78,14 @@ public class StraightSkeleton {
       List<LineString> skeletonEdges = extractSkeletonEdges(skeleton, factory);
 
       if (skeletonEdges.isEmpty()) {
-        System.err.println("WARNING: No skeleton edges extracted for polygon: " + polygon.toText());
+        log.warn("No skeleton edges extracted for polygon: {}", polygon.toText());
         return factory.createMultiLineString(new LineString[0]);
       }
 
       return factory.createMultiLineString(skeletonEdges.toArray(new LineString[0]));
 
     } catch (Exception e) {
-      System.err.println(
-          "ERROR: Failed to compute straight skeleton for polygon: " + polygon.toText());
-      e.printStackTrace();
+      log.error("Failed to compute straight skeleton for polygon: {}", polygon.toText(), e);
       throw new RuntimeException("Failed to compute straight skeleton: " + e.getMessage(), e);
     }
   }

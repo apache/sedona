@@ -3991,4 +3991,27 @@ class functionTestScala
       exception.getMessage.contains(
         "ST_ApproximateMedialAxis only supports Polygon and MultiPolygon geometries"))
   }
+
+  it("Passed ST_ApproximateMedialAxis with T-Junction polygon") {
+    val testDf = sparkSession.sql("""
+                                    |SELECT
+                                    |  ST_AsText(ST_ApproximateMedialAxis(
+                                    |    ST_GeomFromWKT('POLYGON ((45 0, 55 0, 55 40, 70 40, 70 50, 30 50, 30 40, 45 40, 45 0))')
+                                    |  )) as result,
+                                    |  ST_NumGeometries(ST_ApproximateMedialAxis(
+                                    |    ST_GeomFromWKT('POLYGON ((45 0, 55 0, 55 40, 70 40, 70 50, 30 50, 30 40, 45 40, 45 0))')
+                                    |  )) as num_segments,
+                                    |  ST_GeometryType(ST_ApproximateMedialAxis(
+                                    |    ST_GeomFromWKT('POLYGON ((45 0, 55 0, 55 40, 70 40, 70 50, 30 50, 30 40, 45 40, 45 0))')
+                                    |  )) as geom_type
+      """.stripMargin)
+    val result = testDf.collect()
+    assert(result.length == 1)
+    assert(!result(0).isNullAt(0), "Result should not be null")
+    assert(result(0).getString(2) == "ST_MultiLineString", "Result should be MultiLineString")
+    val numSegments = result(0).getInt(1)
+    assert(numSegments > 0, "Should have at least one segment")
+    val wkt = result(0).getString(0)
+    assert(wkt.startsWith("MULTILINESTRING"), "WKT should start with MULTILINESTRING")
+  }
 }
