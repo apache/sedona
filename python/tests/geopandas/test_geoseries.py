@@ -885,7 +885,20 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         pass
 
     def test_is_closed(self):
-        pass
+        s = GeoSeries(
+            [
+                LineString([(0, 0), (1, 1), (1, -1)]),
+                LineString([(0, 0), (1, 1), (1, -1), (0, 0)]),
+                LinearRing([(0, 0), (1, 1), (1, -1)]),
+            ]
+        )
+        result = s.is_closed
+        expected = pd.Series([False, True, True])
+        self.check_pd_series_equal(result, expected)
+
+        # Check that GeoDataFrame works too
+        result = s.to_geoframe().is_closed
+        self.check_pd_series_equal(result, expected)
 
     def test_has_z(self):
         s = sgpd.GeoSeries(

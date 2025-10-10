@@ -390,9 +390,40 @@ class GeoFrame(metaclass=ABCMeta):
     # def is_ccw(self):
     #     raise NotImplementedError("This method is not implemented yet.")
 
-    # @property
-    # def is_closed(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    @property
+    def is_closed(self):
+        """Return a ``Series`` of ``dtype('bool')`` with value ``True`` if a
+        LineString's or LinearRing's first and last points are equal.
+
+        Returns False for any other geometry type.
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import LineString, Point, Polygon
+        >>> s = GeoSeries(
+        ...     [
+        ...         LineString([(0, 0), (1, 1), (0, 1), (0, 0)]),
+        ...         LineString([(0, 0), (1, 1), (0, 1)]),
+        ...         Polygon([(0, 0), (0, 1), (1, 1), (0, 0)]),
+                    Point(3, 3)
+        ...     ]
+        ... )
+        >>> s
+        0    LINESTRING (0 0, 1 1, 0 1, 0 0)
+        1         LINESTRING (0 0, 1 1, 0 1)
+        2     POLYGON ((0 0, 0 1, 1 1, 0 0))
+        3                        POINT (3 3)
+        dtype: geometry
+
+        >>> s.is_closed
+        0     True
+        1    False
+        2    False
+        3    False
+        dtype: bool
+        """
+        return _delegate_to_geometry_column("is_closed", self)
 
     @property
     def has_z(self):

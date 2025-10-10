@@ -976,13 +976,12 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def is_closed(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError(
-            _not_implemented_error(
-                "is_closed",
-                "Tests if LineString geometries are closed (start equals end point).",
-            )
+        spark_expr = stf.ST_IsClosed(self.spark.column)
+        result = self._query_geometry_column(
+            spark_expr,
+            returns_geom=False,
         )
+        return _to_bool(result)
 
     @property
     def has_z(self) -> pspd.Series:
