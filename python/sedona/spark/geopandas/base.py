@@ -413,7 +413,7 @@ class GeoFrame(metaclass=ABCMeta):
         ...        Point(3, 3)
         ...    ]
         ... )
-        s
+        >>> s
         0    LINEARRING (0 0, 0 1, 1 1, 0 0)
         1    LINEARRING (0 0, 1 1, 0 1, 0 0)
         2         LINESTRING (0 0, 1 1, 0 1)
