@@ -588,6 +588,8 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_is_closed(self):
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            pytest.skip("geopandas is_closed requires version 1.0.0 or higher")
         # is_closed is only meaningful for linestrings so we use self.linestrings instead of self.geoms
         for geom in self.linestrings:
             sgpd_result = GeoSeries(geom).is_closed
