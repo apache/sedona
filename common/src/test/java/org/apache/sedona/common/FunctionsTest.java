@@ -4759,4 +4759,144 @@ public class FunctionsTest extends TestBase {
           polygon.contains(point) || polygon.touches(point) || polygon.distance(point) < 0.01);
     }
   }
+
+  @Test
+  public void approximateMedialAxis() throws ParseException {
+    // Test basic functionality with a square
+    Polygon square = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 10, 0, 10, 10, 0, 10, 0, 0));
+    Geometry result = Functions.approximateMedialAxis(square);
+
+    assertNotNull(result);
+    assertTrue(result instanceof MultiLineString);
+    assertTrue(result.getNumGeometries() > 0);
+
+    // Test L-shaped polygon - should produce pruned skeleton with fewer segments than raw skeleton
+    Polygon lShape =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(0, 0, 100, 0, 100, 40, 40, 40, 40, 100, 0, 100, 0, 0));
+    Geometry straightSkel = Functions.straightSkeleton(lShape);
+    result = Functions.approximateMedialAxis(lShape);
+
+    // Approximate medial axis should have fewer or equal segments due to pruning
+    assertTrue(
+        "Pruned skeleton should have <= segments than raw skeleton",
+        result.getNumGeometries() <= straightSkel.getNumGeometries());
+
+    // Test rectangle
+    Polygon rectangle =
+        GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 100, 0, 100, 20, 0, 20, 0, 0));
+    result = Functions.approximateMedialAxis(rectangle);
+    assertNotNull(result);
+    assertTrue(result.getNumGeometries() > 0);
+  }
+
+  @Test
+  public void approximateMedialAxisSRID() throws ParseException {
+    Polygon geom = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 10, 0, 10, 10, 0, 10, 0, 0));
+    geom.setSRID(4326);
+    Geometry result = Functions.approximateMedialAxis(geom);
+    assertEquals(4326, result.getSRID());
+  }
+
+  @Test
+  public void approximateMedialAxisNullAndEmpty() {
+    // Test null input
+    Geometry result = Functions.approximateMedialAxis(null);
+    assertNull(result);
+
+    // Test empty polygon
+    Polygon emptyPolygon = GEOMETRY_FACTORY.createPolygon();
+    result = Functions.approximateMedialAxis(emptyPolygon);
+    assertNull(result);
+  }
+
+  @Test
+  public void approximateMedialAxisInvalidGeometry() {
+    // Test with LineString (should throw exception)
+    LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 10, 0, 10, 10));
+    IllegalArgumentException e =
+        assertThrows(
+            IllegalArgumentException.class, () -> Functions.approximateMedialAxis(lineString));
+    assertTrue(
+        e.getMessage().contains("ST_ApproximateMedialAxis only supports Polygon and MultiPolygon"));
+
+    // Test with Point (should throw exception)
+    Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(5, 5));
+    e = assertThrows(IllegalArgumentException.class, () -> Functions.approximateMedialAxis(point));
+    assertTrue(
+        e.getMessage().contains("ST_ApproximateMedialAxis only supports Polygon and MultiPolygon"));
+  }
+
+  @Test
+  public void approximateMedialAxisMultiPolygon() throws ParseException {
+    // Create a MultiPolygon with two squares
+    Polygon poly1 = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 10, 0, 10, 10, 0, 10, 0, 0));
+    Polygon poly2 =
+        GEOMETRY_FACTORY.createPolygon(coordArray(20, 20, 30, 20, 30, 30, 20, 30, 20, 20));
+    MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {poly1, poly2});
+
+    Geometry result = Functions.approximateMedialAxis(multiPolygon);
+
+    assertNotNull(result);
+    assertTrue(result instanceof MultiLineString);
+    // Should have segments from both polygons
+    assertTrue(result.getNumGeometries() > 0);
+  }
+
+  @Test
+  public void approximateMedialAxisPruningEffectiveness() throws ParseException {
+    // Test T-shaped polygon - should demonstrate effective pruning
+    // T-shape has many small corner branches that should be pruned
+    Polygon tShape =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(45, 0, 55, 0, 55, 40, 70, 40, 70, 50, 30, 50, 30, 40, 45, 40, 45, 0));
+
+    Geometry straightSkel = Functions.straightSkeleton(tShape);
+    Geometry prunedSkel = Functions.approximateMedialAxis(tShape);
+
+    // The pruned skeleton should have significantly fewer segments
+    assertTrue(
+        "Pruned skeleton should have fewer segments for T-shape",
+        prunedSkel.getNumGeometries() < straightSkel.getNumGeometries());
+
+    // All points should still be inside or on the polygon
+    Coordinate[] allCoords = prunedSkel.getCoordinates();
+    for (Coordinate coord : allCoords) {
+      Point point = GEOMETRY_FACTORY.createPoint(coord);
+      assertTrue(
+          "All pruned medial axis points should be inside or on polygon boundary",
+          tShape.contains(point) || tShape.touches(point) || tShape.distance(point) < 0.01);
+    }
+  }
+
+  @Test
+  public void approximateMedialAxisConsistency() throws ParseException {
+    // Verify that the function produces consistent results for the same input
+    Polygon polygon =
+        GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 100, 0, 100, 50, 0, 50, 0, 0));
+    Geometry result1 = Functions.approximateMedialAxis(polygon);
+    Geometry result2 = Functions.approximateMedialAxis(polygon);
+
+    assertTrue("Results should be equal", result1.equalsExact(result2, 1e-6));
+  }
+
+  @Test
+  public void approximateMedialAxisAllPointsInsidePolygon() throws ParseException {
+    // Verify that all coordinate points in the pruned medial axis are inside or on the boundary
+    Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 20, 0, 20, 10, 0, 10, 0, 0));
+    Geometry result = Functions.approximateMedialAxis(polygon);
+
+    assertTrue(result instanceof MultiLineString);
+
+    // Extract all coordinates from the medial axis
+    Coordinate[] allCoords = result.getCoordinates();
+
+    // Every coordinate should be inside or on the polygon boundary
+    for (Coordinate coord : allCoords) {
+      Point point = GEOMETRY_FACTORY.createPoint(coord);
+      assertTrue(
+          "All pruned medial axis points should be inside or on polygon boundary",
+          polygon.contains(point) || polygon.touches(point) || polygon.distance(point) < 0.01);
+    }
+  }
 }

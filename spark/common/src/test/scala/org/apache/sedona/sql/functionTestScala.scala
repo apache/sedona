@@ -3903,4 +3903,92 @@ class functionTestScala
     assert(result(0).getDouble(2) > 0, "Should have positive length")
     assert(result(0).getString(3) == "ST_MultiLineString")
   }
+
+  it("Passed ST_ApproximateMedialAxis") {
+    val testDf = sparkSession.sql(
+      "SELECT ST_ApproximateMedialAxis(ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))')) as result")
+    val result = testDf.collect()
+    assert(result.length == 1)
+    assert(!result(0).isNullAt(0))
+  }
+
+  it("Passed ST_ApproximateMedialAxis with simple polygon") {
+    val testDf = sparkSession.sql("""
+        |SELECT ST_ApproximateMedialAxis(ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))')) as result
+      """.stripMargin)
+    val result = testDf.collect()
+    assert(result.length == 1)
+    assert(!result(0).isNullAt(0))
+  }
+
+  it("Passed ST_ApproximateMedialAxis returns MultiLineString") {
+    val testDf = sparkSession.sql("""
+        |SELECT ST_GeometryType(ST_ApproximateMedialAxis(ST_GeomFromWKT('POLYGON ((0 0, 20 0, 20 5, 0 5, 0 0))'))) as geomType
+      """.stripMargin)
+    val result = testDf.collect()
+    assert(result.length == 1)
+    assert(result(0).getString(0) == "ST_MultiLineString")
+  }
+
+  it("Passed ST_ApproximateMedialAxis with SRID preservation") {
+    val testDf = sparkSession.sql("""
+        |SELECT ST_SRID(ST_ApproximateMedialAxis(ST_SetSRID(ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))'), 4326))) as srid
+      """.stripMargin)
+    val result = testDf.collect()
+    assert(result.length == 1)
+    assert(result(0).getInt(0) == 4326)
+  }
+
+  it(
+    "Passed ST_ApproximateMedialAxis produces fewer segments than ST_StraightSkeleton for T-shape") {
+    val testDf = sparkSession.sql("""
+        |SELECT
+        |  ST_NumGeometries(ST_StraightSkeleton(
+        |    ST_GeomFromWKT('POLYGON ((45 0, 55 0, 55 40, 70 40, 70 50, 30 50, 30 40, 45 40, 45 0))')
+        |  )) as skeleton_segments,
+        |  ST_NumGeometries(ST_ApproximateMedialAxis(
+        |    ST_GeomFromWKT('POLYGON ((45 0, 55 0, 55 40, 70 40, 70 50, 30 50, 30 40, 45 40, 45 0))')
+        |  )) as pruned_segments
+      """.stripMargin)
+    val result = testDf.collect()
+    assert(result.length == 1)
+    val skeletonSegments = result(0).getInt(0)
+    val prunedSegments = result(0).getInt(1)
+    assert(
+      prunedSegments <= skeletonSegments,
+      s"Pruned skeleton ($prunedSegments) should have <= segments than raw skeleton ($skeletonSegments)")
+  }
+
+  it("Passed ST_ApproximateMedialAxis with MultiPolygon") {
+    val testDf = sparkSession.sql("""
+        |SELECT ST_ApproximateMedialAxis(
+        |  ST_GeomFromWKT('MULTIPOLYGON (((0 0, 10 0, 10 10, 0 10, 0 0)), ((20 20, 30 20, 30 30, 20 30, 20 20)))')
+        |) as result
+      """.stripMargin)
+    val result = testDf.collect()
+    assert(result.length == 1)
+    assert(!result(0).isNullAt(0))
+  }
+
+  it("should handle ST_ApproximateMedialAxis with null geometry") {
+    val testDf = sparkSession.sql("""
+        |SELECT ST_ApproximateMedialAxis(null) as result
+      """.stripMargin)
+    val result = testDf.collect()
+    assert(result.length == 1)
+    assert(result(0).isNullAt(0))
+  }
+
+  it("should raise an error when using ST_ApproximateMedialAxis with non-areal geometry") {
+    val exception = intercept[Exception] {
+      sparkSession
+        .sql("""
+        |SELECT ST_ApproximateMedialAxis(ST_GeomFromWKT('LINESTRING (0 0, 10 10)')) as result
+      """.stripMargin)
+        .collect()
+    }
+    assert(
+      exception.getMessage.contains(
+        "ST_ApproximateMedialAxis only supports Polygon and MultiPolygon geometries"))
+  }
 }

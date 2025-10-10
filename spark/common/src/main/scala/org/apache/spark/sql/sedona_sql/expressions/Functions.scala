@@ -1863,6 +1863,20 @@ private[apache] case class ST_StraightSkeleton(inputExpressions: Seq[Expression]
     copy(inputExpressions = newChildren)
 }
 
+/**
+ * Computes an approximate medial axis of an areal geometry by computing the straight skeleton and
+ * then pruning insignificant branches. The pruning algorithm removes small "leaf" branches that
+ * represent insignificant penetrations into corners, using a penetration depth threshold.
+ *
+ * @param inputExpressions
+ *   Geometry (Polygon or MultiPolygon)
+ */
+private[apache] case class ST_ApproximateMedialAxis(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.approximateMedialAxis _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) =
+    copy(inputExpressions = newChildren)
+}
+
 private[apache] case class ExpandAddress(address: Expression)
     extends UnaryExpression
     with ImplicitCastInputTypes
