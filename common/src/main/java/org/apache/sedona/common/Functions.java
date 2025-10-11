@@ -2676,6 +2676,26 @@ public class Functions {
    * @return A MultiLineString representing the straight skeleton, or null if input is null/empty
    */
   public static Geometry straightSkeleton(Geometry geometry) {
+    return straightSkeleton(geometry, 0);
+  }
+
+  /**
+   * Computes the straight skeleton of an areal geometry with optional vertex simplification.
+   *
+   * <p>The straight skeleton is a method of representing a polygon by a topological skeleton,
+   * formed by a continuous shrinking process where each edge moves inward in parallel at a uniform
+   * speed.
+   *
+   * <p>For polygons with many vertices, performance can be improved by limiting the vertex count.
+   * The algorithm will merge the shortest edges until the vertex count is reduced to the specified
+   * limit.
+   *
+   * @param geometry The areal geometry (Polygon or MultiPolygon)
+   * @param maxVertices Maximum number of vertices per polygon (0 to disable simplification).
+   *     Recommended: 100-500 for performance
+   * @return A MultiLineString representing the straight skeleton, or null if input is null/empty
+   */
+  public static Geometry straightSkeleton(Geometry geometry, Integer maxVertices) {
     if (geometry == null || geometry.isEmpty()) {
       return null;
     }
@@ -2688,28 +2708,46 @@ public class Functions {
 
     GeometryFactory factory = geometry.getFactory();
 
-    // Use straight skeleton algorithm
-    return computeStraightSkeleton(geometry, factory);
+    // Use straight skeleton algorithm with optional simplification
+    int maxVerts = (maxVertices != null) ? maxVertices : 0;
+    return computeStraightSkeleton(geometry, factory, maxVerts);
   }
 
   /**
    * Computes an approximate medial axis of an areal geometry by computing the straight skeleton and
-   * then pruning insignificant branches.
+   * filtering to keep only interior edges.
    *
-   * <p>The medial axis is approximated by first computing the straight skeleton, then iteratively
-   * removing small "leaf" branches that represent insignificant penetrations into corners. A leaf
-   * branch is pruned if its penetration depth (d1) is less than 20% of the width of the corner it
-   * bisects (d2), where: - d1 = shortest distance from leaf vertex to polygon boundary - d2 =
-   * distance between the two closest points on the boundary
-   *
-   * <p>This pruning process continues until no more branches meet the removal criterion, resulting
-   * in a cleaner skeleton that better represents the polygon's centerline.
+   * <p>The medial axis is approximated by first computing the straight skeleton, then filtering to
+   * keep only edges where both endpoints are interior to the polygon (not on the boundary). This
+   * produces a cleaner skeleton by removing branches that extend to the boundary.
    *
    * @param geometry The areal geometry (Polygon or MultiPolygon)
    * @return A MultiLineString representing the approximate medial axis, or null if input is
    *     null/empty
    */
   public static Geometry approximateMedialAxis(Geometry geometry) {
+    return approximateMedialAxis(geometry, 0);
+  }
+
+  /**
+   * Computes an approximate medial axis of an areal geometry by computing the straight skeleton and
+   * filtering to keep only interior edges, with optional vertex simplification.
+   *
+   * <p>The medial axis is approximated by first computing the straight skeleton, then filtering to
+   * keep only edges where both endpoints are interior to the polygon (not on the boundary). This
+   * produces a cleaner skeleton by removing branches that extend to the boundary.
+   *
+   * <p>For polygons with many vertices, performance can be improved by limiting the vertex count
+   * before computing the skeleton. The algorithm will merge the shortest edges until the vertex
+   * count is reduced to the specified limit.
+   *
+   * @param geometry The areal geometry (Polygon or MultiPolygon)
+   * @param maxVertices Maximum number of vertices per polygon (0 to disable simplification).
+   *     Recommended: 100-500 for performance
+   * @return A MultiLineString representing the approximate medial axis, or null if input is
+   *     null/empty
+   */
+  public static Geometry approximateMedialAxis(Geometry geometry, Integer maxVertices) {
     if (geometry == null || geometry.isEmpty()) {
       return null;
     }
@@ -2722,49 +2760,15 @@ public class Functions {
 
     GeometryFactory factory = geometry.getFactory();
 
-    // Handle MultiPolygon by processing each polygon separately
-    if (geometry instanceof MultiPolygon) {
-      MultiPolygon multiPoly = (MultiPolygon) geometry;
-      java.util.List<LineString> allPrunedEdges = new java.util.ArrayList<>();
-
-      for (int i = 0; i < multiPoly.getNumGeometries(); i++) {
-        Polygon poly = (Polygon) multiPoly.getGeometryN(i);
-
-        // Compute skeleton for this individual polygon
-        Geometry skeleton = straightSkeleton(poly);
-        if (skeleton != null && !skeleton.isEmpty()) {
-          // Prune this polygon's skeleton
-          Geometry pruned = pruneSkeletonBranches(skeleton, poly, factory);
-
-          if (pruned != null && !pruned.isEmpty()) {
-            // Extract LineStrings from the pruned skeleton
-            for (int j = 0; j < pruned.getNumGeometries(); j++) {
-              allPrunedEdges.add((LineString) pruned.getGeometryN(j));
-            }
-          }
-        }
-      }
-
-      if (allPrunedEdges.isEmpty()) {
-        Geometry result = factory.createMultiLineString(new LineString[0]);
-        result.setSRID(geometry.getSRID());
-        return result;
-      }
-
-      Geometry result = factory.createMultiLineString(allPrunedEdges.toArray(new LineString[0]));
-      result.setSRID(geometry.getSRID());
-      return result;
-    }
-
-    // Single polygon case
-    Geometry skeleton = straightSkeleton(geometry);
+    // Compute the straight skeleton with optional vertex simplification
+    Geometry skeleton = straightSkeleton(geometry, maxVertices);
 
     if (skeleton == null || skeleton.isEmpty()) {
       return skeleton;
     }
 
-    // Apply pruning to clean up the skeleton
-    return pruneSkeletonBranches(skeleton, geometry, factory);
+    // Filter to keep only interior edges (not touching boundary)
+    return filterInteriorEdges(skeleton, geometry, factory);
   }
 
   /**
@@ -2778,7 +2782,8 @@ public class Functions {
    * @param factory GeometryFactory for creating result geometries
    * @return MultiLineString representing the straight skeleton
    */
-  private static Geometry computeStraightSkeleton(Geometry geometry, GeometryFactory factory) {
+  private static Geometry computeStraightSkeleton(
+      Geometry geometry, GeometryFactory factory, int maxVertices) {
     try {
       // Handle MultiPolygon by processing each polygon separately
       if (geometry instanceof MultiPolygon) {
@@ -2788,7 +2793,7 @@ public class Functions {
         for (int i = 0; i < multiPoly.getNumGeometries(); i++) {
           Polygon poly = (Polygon) multiPoly.getGeometryN(i);
           StraightSkeleton skeleton = new StraightSkeleton();
-          Geometry skeletonGeom = skeleton.computeSkeleton(poly);
+          Geometry skeletonGeom = skeleton.computeSkeleton(poly, maxVertices);
 
           if (skeletonGeom != null && !skeletonGeom.isEmpty()) {
             // Extract LineStrings from the skeleton geometry
@@ -2809,7 +2814,7 @@ public class Functions {
         // Single polygon
         Polygon poly = (Polygon) geometry;
         StraightSkeleton skeleton = new StraightSkeleton();
-        Geometry result = skeleton.computeSkeleton(poly);
+        Geometry result = skeleton.computeSkeleton(poly, maxVertices);
 
         if (result != null) {
           result.setSRID(geometry.getSRID());
@@ -2823,184 +2828,54 @@ public class Functions {
   }
 
   /**
-   * Prunes insignificant leaf branches from a skeleton to produce a cleaner medial axis
-   * approximation.
+   * Filters skeleton edges to keep only interior edges (those that don't touch the polygon
+   * boundary).
    *
-   * <p>This implements the SFCGAL cleaning algorithm: iteratively remove leaf branches where the
-   * penetration depth (d1) is less than 20% of the corner width (d2).
+   * <p>An edge is considered interior if both of its endpoints are NOT on the polygon boundary.
+   * This produces a cleaner medial axis by removing all branches that extend to corners and edges.
    *
    * @param skeleton The straight skeleton as a MultiLineString
    * @param polygon The original polygon geometry
    * @param factory GeometryFactory for creating result geometries
-   * @return Pruned skeleton as a MultiLineString
+   * @return MultiLineString containing only interior skeleton edges
    */
-  private static Geometry pruneSkeletonBranches(
+  private static Geometry filterInteriorEdges(
       Geometry skeleton, Geometry polygon, GeometryFactory factory) {
-    // Build a graph representation of the skeleton
-    java.util.Map<Coordinate, java.util.List<LineString>> vertexToEdges = new java.util.HashMap<>();
-    java.util.Set<LineString> remainingEdges = new java.util.HashSet<>();
+    java.util.List<LineString> interiorEdges = new java.util.ArrayList<>();
 
-    // Populate the graph
+    // Get the polygon boundary for distance checking
+    Geometry boundary = polygon.getBoundary();
+
+    // Distance threshold for considering a point "on" the boundary
+    final double BOUNDARY_TOLERANCE = 1e-6;
+
+    // Check each skeleton edge
     for (int i = 0; i < skeleton.getNumGeometries(); i++) {
       LineString edge = (LineString) skeleton.getGeometryN(i);
-      remainingEdges.add(edge);
 
       Coordinate start = edge.getCoordinateN(0);
       Coordinate end = edge.getCoordinateN(edge.getNumPoints() - 1);
 
-      vertexToEdges.computeIfAbsent(start, k -> new java.util.ArrayList<>()).add(edge);
-      vertexToEdges.computeIfAbsent(end, k -> new java.util.ArrayList<>()).add(edge);
-    }
+      // Check if both endpoints are interior (not on boundary)
+      Point startPoint = factory.createPoint(start);
+      Point endPoint = factory.createPoint(end);
 
-    // Pruning threshold: d1 < 0.2 * d2
-    final double PRUNING_RATIO = 0.2;
+      double startDist = boundary.distance(startPoint);
+      double endDist = boundary.distance(endPoint);
 
-    boolean changed = true;
-    int maxIterations = 100; // Prevent infinite loops
-    int iteration = 0;
-
-    while (changed && iteration < maxIterations) {
-      changed = false;
-      iteration++;
-
-      java.util.List<LineString> edgesToRemove = new java.util.ArrayList<>();
-
-      // Find leaf branches
-      for (LineString edge : remainingEdges) {
-        Coordinate start = edge.getCoordinateN(0);
-        Coordinate end = edge.getCoordinateN(edge.getNumPoints() - 1);
-
-        // Check if this edge is a leaf (one endpoint has degree 1)
-        Coordinate leafVertex = null;
-        if (countActiveEdges(start, vertexToEdges, remainingEdges) == 1) {
-          leafVertex = start;
-        } else if (countActiveEdges(end, vertexToEdges, remainingEdges) == 1) {
-          leafVertex = end;
-        }
-
-        if (leafVertex != null) {
-          // Compute d1: shortest distance from leaf vertex to polygon boundary
-          Point leafPoint = factory.createPoint(leafVertex);
-          double d1 = polygon.getBoundary().distance(leafPoint);
-
-          // Special case: if the leaf vertex is ON the boundary (i.e., a corner branch),
-          // always prune it as these are insignificant branches to polygon corners
-          if (d1 < 0.01) {
-            edgesToRemove.add(edge);
-            changed = true;
-            continue;
-          }
-
-          // Compute d2: distance between two closest boundary points
-          double d2 = computeCornerWidth(leafVertex, polygon);
-
-          // Prune if penetration is insignificant
-          if (d1 < PRUNING_RATIO * d2) {
-            edgesToRemove.add(edge);
-            changed = true;
-          }
-        }
-      }
-
-      // Remove pruned edges
-      for (LineString edge : edgesToRemove) {
-        remainingEdges.remove(edge);
+      // Keep edge only if BOTH endpoints are interior (away from boundary)
+      if (startDist > BOUNDARY_TOLERANCE && endDist > BOUNDARY_TOLERANCE) {
+        interiorEdges.add(edge);
       }
     }
 
-    // Convert remaining edges back to MultiLineString
-    if (remainingEdges.isEmpty()) {
-      // Special case: if all edges were pruned, return the center point as a degenerate line
-      // This happens for highly symmetric shapes like squares where all branches go to corners
-      if (skeleton.getNumGeometries() > 0) {
-        // Find the interior point (most likely the center)
-        Point center = polygon.getCentroid();
-        if (polygon.contains(center) || polygon.touches(center)) {
-          // Create a zero-length line at the center point
-          Coordinate centerCoord = center.getCoordinate();
-          LineString degenerateLine =
-              factory.createLineString(new Coordinate[] {centerCoord, centerCoord});
-          Geometry result = factory.createMultiLineString(new LineString[] {degenerateLine});
-          result.setSRID(skeleton.getSRID());
-          return result;
-        }
-      }
+    // Return the filtered edges
+    if (interiorEdges.isEmpty()) {
       return factory.createMultiLineString(new LineString[0]);
     }
 
-    LineString[] edgeArray = remainingEdges.toArray(new LineString[0]);
-    Geometry result = factory.createMultiLineString(edgeArray);
+    Geometry result = factory.createMultiLineString(interiorEdges.toArray(new LineString[0]));
     result.setSRID(skeleton.getSRID());
     return result;
-  }
-
-  /**
-   * Count how many edges connected to a vertex are still in the remaining set.
-   *
-   * @param vertex The vertex to check
-   * @param vertexToEdges Map of vertices to their connected edges
-   * @param remainingEdges Set of edges that haven't been pruned
-   * @return Number of active edges at this vertex
-   */
-  private static int countActiveEdges(
-      Coordinate vertex,
-      java.util.Map<Coordinate, java.util.List<LineString>> vertexToEdges,
-      java.util.Set<LineString> remainingEdges) {
-    java.util.List<LineString> edges = vertexToEdges.get(vertex);
-    if (edges == null) {
-      return 0;
-    }
-
-    int count = 0;
-    for (LineString edge : edges) {
-      if (remainingEdges.contains(edge)) {
-        count++;
-      }
-    }
-    return count;
-  }
-
-  /**
-   * Compute the "width" of the corner at a leaf vertex.
-   *
-   * <p>This finds the two closest points on the polygon boundary to the leaf vertex and returns the
-   * distance between them. This represents how wide the corner is that the leaf branch bisects.
-   *
-   * @param leafVertex The leaf vertex
-   * @param polygon The original polygon
-   * @return Distance between the two closest boundary points (d2)
-   */
-  private static double computeCornerWidth(Coordinate leafVertex, Geometry polygon) {
-    Coordinate[] boundaryCoords = polygon.getBoundary().getCoordinates();
-
-    // Find the two closest points on the boundary
-    double minDist1 = Double.MAX_VALUE;
-    double minDist2 = Double.MAX_VALUE;
-    Coordinate closest1 = null;
-    Coordinate closest2 = null;
-
-    for (Coordinate boundaryCoord : boundaryCoords) {
-      double dist = leafVertex.distance(boundaryCoord);
-
-      if (dist < minDist1) {
-        // New closest point
-        minDist2 = minDist1;
-        closest2 = closest1;
-        minDist1 = dist;
-        closest1 = boundaryCoord;
-      } else if (dist < minDist2) {
-        // New second closest
-        minDist2 = dist;
-        closest2 = boundaryCoord;
-      }
-    }
-
-    // Return distance between the two closest points
-    if (closest1 != null && closest2 != null) {
-      return closest1.distance(closest2);
-    }
-
-    // Fallback
-    return Double.MAX_VALUE;
   }
 }

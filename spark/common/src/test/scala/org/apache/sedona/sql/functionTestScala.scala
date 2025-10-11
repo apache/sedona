@@ -4062,6 +4062,7 @@ class functionTestScala
   it("Passed ST_ApproximateMedialAxis with real-world Maryland road segmentation data") {
     // Read the real-world GeoParquet file containing polygon geometries
     val inputPath = "/Users/feng/temp/data/maryland-road-segmentation.parquet"
+    val inputDebugPath = "/Users/feng/temp/data/maryland-road-segmentation-debug.parquet"
     val outputPath = "/Users/feng/temp/data/maryland-road-medialaxis-output.parquet"
 
     // Check if input file exists
@@ -4070,17 +4071,167 @@ class functionTestScala
 
     // Read the GeoParquet file using Sedona's GeoParquet reader
     val df = sparkSession.read.format("geoparquet").load(inputPath)
-//    df.show(100, false)
 
-    // Apply ST_ApproximateMedialAxis to compute medial axis for each road polygon
-    val dfWithMedialAxis = df.selectExpr(
-      "ST_ApproximateMedialAxis(geometry) as medial_axis",
-      "ST_StraightSkeleton(geometry) as straight_skeleton",
-      "geometry")
+    // Register the DataFrame as a temporary view
+    df.createOrReplaceTempView("polygons")
 
-//    dfWithMedialAxis.show(100, false)
+//    // Query to get the number of vertices for each polygon
+//    val vertexCounts = sparkSession.sql("""
+//    SELECT
+//      geometry,
+//      ST_NPoints(geometry) as num_vertices
+//    FROM polygons
+//    WHERE ST_NPoints(geometry) = 155919
+//  """)
+//
+//    vertexCounts.show()
+
+    val subdividedPolygons = sparkSession.sql("""
+    SELECT
+      ST_SubDivideExplode(geometry, 500) as sub_geometry
+    FROM polygons
+    WHERE ST_NPoints(geometry) <= 155919
+  """)
+
+    println(s"Number of subdivided polygons: ${subdividedPolygons.count()}")
+    // subdividedPolygons.write.mode("overwrite").format("geoparquet").save(inputDebugPath)
+
+    // Apply ST_StraightSkeleton to compute skeleton for each subdivided polygon
+    println("Computing straight skeleton for subdivided polygons...")
+    val dfWithSkeleton = subdividedPolygons
+      .selectExpr(
+        "ST_StraightSkeleton(sub_geometry, 50) as straight_skeleton",
+        "ST_ApproximateMedialAxis(sub_geometry, 50) as medial_axis",
+        "sub_geometry as geometry")
+//      .limit(100)
+
+    println("Sample of straight skeleton results:")
+    dfWithSkeleton.show(true)
 
     // Write the results to a new GeoParquet file
-    dfWithMedialAxis.write.mode("overwrite").format("geoparquet").save(outputPath)
+    dfWithSkeleton.write.mode("overwrite").format("geoparquet").save(outputPath)
+  }
+
+  it("Test ST_ApproximateMedialAxis") {
+    // Test with a simple rectangle
+    val simpleRect = sparkSession.sql("""
+      SELECT ST_ApproximateMedialAxis(
+        ST_GeomFromText('POLYGON((0 0, 10 0, 10 10, 0 10, 0 0))')
+      ) as medial_axis
+    """)
+
+    println("=== ST_ApproximateMedialAxis Test (simple rectangle) ===")
+    simpleRect.selectExpr("ST_AsText(medial_axis)").show(false)
+
+    // Test with a rectangle with hole
+    val rectWithHole = sparkSession.sql("""
+      SELECT ST_ApproximateMedialAxis(
+        ST_GeomFromText('POLYGON((0 0, 100 0, 100 100, 0 100, 0 0), (20 20, 80 20, 80 80, 20 80, 20 20))')
+      ) as medial_axis
+    """)
+
+    println("=== ST_ApproximateMedialAxis Test (rectangle with hole) ===")
+    rectWithHole
+      .selectExpr("ST_AsText(medial_axis)", "ST_NumGeometries(medial_axis) as num_edges")
+      .show(false)
+
+    // Verify the function returns a geometry
+    val result = simpleRect.first().getAs[org.locationtech.jts.geom.Geometry](0)
+    assert(result != null, "ST_ApproximateMedialAxis should return a non-null geometry")
+    println(s"Result geometry type: ${result.getGeometryType}")
+  }
+
+  it("Test ST_StraightSkeleton with polygons with multiple holes") {
+    // Test with a square containing two rectangular holes
+    val squareWithTwoHoles = sparkSession.sql("""
+      SELECT ST_StraightSkeleton(
+        ST_GeomFromText('POLYGON((0 0, 100 0, 100 100, 0 100, 0 0), (20 20, 40 20, 40 40, 20 40, 20 20), (60 60, 80 60, 80 80, 60 80, 60 60))')
+      ) as skeleton
+    """)
+
+    println("=== ST_StraightSkeleton Test (square with two rectangular holes) ===")
+    squareWithTwoHoles.selectExpr("ST_AsText(skeleton)").show(false)
+
+    // Verify the skeleton is generated
+    val skeleton = squareWithTwoHoles.first().getAs[org.locationtech.jts.geom.Geometry](0)
+    assert(
+      skeleton != null,
+      "ST_StraightSkeleton should return a non-null geometry for polygon with holes")
+    assert(
+      !skeleton.isEmpty,
+      "ST_StraightSkeleton should not return empty geometry for polygon with holes")
+    assert(
+      skeleton.getGeometryType == "MultiLineString",
+      "ST_StraightSkeleton should return MultiLineString")
+
+    val numEdges = skeleton.getNumGeometries
+    println(s"Number of skeleton edges: $numEdges")
+    assert(numEdges > 0, "Skeleton should contain at least one edge")
+
+    // Test with vertex simplification
+    val squareWithTwoHolesSimplified = sparkSession.sql("""
+      SELECT ST_StraightSkeleton(
+        ST_GeomFromText('POLYGON((0 0, 100 0, 100 100, 0 100, 0 0), (20 20, 40 20, 40 40, 20 40, 20 20), (60 60, 80 60, 80 80, 60 80, 60 60))'),
+        10
+      ) as skeleton
+    """)
+
+    println("=== ST_StraightSkeleton Test (with vertex simplification, maxVertices=10) ===")
+    squareWithTwoHolesSimplified.selectExpr("ST_AsText(skeleton)").show(false)
+
+    val simplifiedSkeleton =
+      squareWithTwoHolesSimplified.first().getAs[org.locationtech.jts.geom.Geometry](0)
+    assert(simplifiedSkeleton != null, "Simplified skeleton should not be null")
+    assert(!simplifiedSkeleton.isEmpty, "Simplified skeleton should not be empty")
+  }
+
+  it("Test ST_ApproximateMedialAxis with polygons with multiple holes") {
+    // Test with a square containing two rectangular holes
+    val squareWithTwoHoles = sparkSession.sql("""
+      SELECT ST_ApproximateMedialAxis(
+        ST_GeomFromText('POLYGON((0 0, 100 0, 100 100, 0 100, 0 0), (20 20, 40 20, 40 40, 20 40, 20 20), (60 60, 80 60, 80 80, 60 80, 60 60))')
+      ) as medial_axis
+    """)
+
+    println("=== ST_ApproximateMedialAxis Test (square with two rectangular holes) ===")
+    squareWithTwoHoles
+      .selectExpr("ST_AsText(medial_axis)", "ST_NumGeometries(medial_axis) as num_edges")
+      .show(false)
+
+    // Verify the medial axis is generated
+    val medialAxis = squareWithTwoHoles.first().getAs[org.locationtech.jts.geom.Geometry](0)
+    assert(
+      medialAxis != null,
+      "ST_ApproximateMedialAxis should return a non-null geometry for polygon with holes")
+    assert(
+      medialAxis.getGeometryType == "MultiLineString",
+      "ST_ApproximateMedialAxis should return MultiLineString")
+
+    // The medial axis should have fewer edges than the full skeleton since it filters out boundary edges
+    val numEdges = medialAxis.getNumGeometries
+    println(s"Number of medial axis edges: $numEdges")
+
+    // Test with vertex simplification
+    val squareWithTwoHolesSimplified = sparkSession.sql("""
+      SELECT ST_ApproximateMedialAxis(
+        ST_GeomFromText('POLYGON((0 0, 100 0, 100 100, 0 100, 0 0), (20 20, 40 20, 40 40, 20 40, 20 20), (60 60, 80 60, 80 80, 60 80, 60 60))'),
+        10
+      ) as medial_axis
+    """)
+
+    println("=== ST_ApproximateMedialAxis Test (with vertex simplification, maxVertices=10) ===")
+    squareWithTwoHolesSimplified.selectExpr("ST_AsText(medial_axis)").show(false)
+
+    val simplifiedMedialAxis =
+      squareWithTwoHolesSimplified.first().getAs[org.locationtech.jts.geom.Geometry](0)
+    assert(simplifiedMedialAxis != null, "Simplified medial axis should not be null")
+  }
+
+  it("Load Maryland road segmentation data") {
+    // Read the GeoParquet file using Sedona's GeoParquet reader
+    val df = sparkSession.read
+      .format("geoparquet")
+      .load("/Users/feng/temp/data/maryland-road-medialaxis-output.parquet")
+    df.show(20, false)
   }
 }

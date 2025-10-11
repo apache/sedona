@@ -66,35 +66,25 @@ public class StraightSkeleton {
    */
   private static final double BOUNDARY_EDGE_EPSILON = 1e-10;
 
-  /**
-   * Percentage of polygon perimeter used as distance threshold for vertex merging. Vertices closer
-   * than this percentage of the total perimeter will be merged to reduce complexity.
-   */
-  private static final double SIMPLIFY_DISTANCE_RATIO = 0.01; // 1% of perimeter
-
-  /**
-   * Maximum number of vertices allowed before simplification is applied. Polygons with more
-   * vertices than this threshold will be simplified by merging nearby vertices to reduce memory
-   * consumption and improve performance.
-   */
-  private static final int MAX_VERTICES_BEFORE_SIMPLIFICATION = 200;
-
   public StraightSkeleton() {}
 
   /**
    * Compute the straight skeleton for a polygon.
    *
-   * <p>The campskeleton library has numerical stability and memory issues with certain geometries.
-   * To improve robustness, we preprocess the polygon by: 1. Centering it at the origin (0,0) 2.
-   * Scaling it to a reasonable size 3. Simplifying polygons with > 200 vertices by merging nearby
-   * vertices (within 1% of perimeter) 4. Ensuring counter-clockwise orientation
+   * <p>The campskeleton library has numerical stability issues with certain geometries. To improve
+   * robustness, we preprocess the polygon by: 1. Centering it at the origin (0,0) 2. Scaling it to
+   * a reasonable size 3. Ensuring counter-clockwise orientation 4. Optionally reducing vertex count
+   * by merging shortest edges
    *
    * <p>After computing the skeleton, we transform it back to the original coordinate system.
    *
    * @param polygon Input polygon (must be simple, non-self-intersecting)
+   * @param maxVertices Maximum number of vertices to keep (0 to disable simplification). If the
+   *     polygon has more vertices than this limit, the shortest edges will be merged until the
+   *     vertex count is reduced. Recommended: 100-500 for performance
    * @return MultiLineString representing the straight skeleton edges
    */
-  public Geometry computeSkeleton(Polygon polygon) {
+  public Geometry computeSkeleton(Polygon polygon, int maxVertices) {
     if (polygon == null || polygon.isEmpty()) {
       return null;
     }
@@ -114,25 +104,15 @@ public class StraightSkeleton {
       // This improves numerical stability in campskeleton
       double scaleFactor = (maxDim > 0) ? (NORMALIZED_SIZE / maxDim) : 1.0;
 
-      // Step 2: Normalize the polygon (center and scale)
-      Polygon normalizedPolygon = normalizePolygon(polygon, offsetX, offsetY, scaleFactor);
+      // Step 2: Normalize the polygon (center, scale, and optionally simplify by merging short
+      // edges)
+      Polygon normalizedPolygon =
+          normalizePolygon(polygon, offsetX, offsetY, scaleFactor, maxVertices);
 
-      // Step 3: Simplify the polygon if it has too many vertices
-      // This reduces memory consumption and prevents OutOfMemoryError in campskeleton
-      int vertexCount = normalizedPolygon.getNumPoints();
-      if (vertexCount > MAX_VERTICES_BEFORE_SIMPLIFICATION) {
-        log.debug(
-            "Polygon has {} vertices (> {}), applying vertex merging simplification",
-            vertexCount,
-            MAX_VERTICES_BEFORE_SIMPLIFICATION);
-        normalizedPolygon = simplifyByMergingNearbyVertices(normalizedPolygon);
-        log.debug("Simplified polygon now has {} vertices", normalizedPolygon.getNumPoints());
-      }
-
-      // Step 4: Convert JTS polygon to campskeleton format
+      // Step 3: Convert JTS polygon to campskeleton format
       LoopL<Edge> input = convertPolygonToEdges(normalizedPolygon);
 
-      // Step 5: Compute straight skeleton
+      // Step 4: Compute straight skeleton
       Skeleton skeleton = new Skeleton(input, true);
       skeleton.skeleton();
 
@@ -142,7 +122,7 @@ public class StraightSkeleton {
         return factory.createMultiLineString(new LineString[0]);
       }
 
-      // Step 6: Extract skeleton edges from normalized coordinate system
+      // Step 5: Extract skeleton edges from normalized coordinate system
       List<LineString> normalizedEdges = extractSkeletonEdges(skeleton, factory);
 
       if (normalizedEdges.isEmpty()) {
@@ -150,7 +130,7 @@ public class StraightSkeleton {
         return factory.createMultiLineString(new LineString[0]);
       }
 
-      // Step 7: Transform skeleton edges back to original coordinate system
+      // Step 6: Transform skeleton edges back to original coordinate system
       List<LineString> transformedEdges = new ArrayList<>();
       for (LineString edge : normalizedEdges) {
         LineString transformed = transformLineStringBack(edge, offsetX, offsetY, scaleFactor);
@@ -159,82 +139,123 @@ public class StraightSkeleton {
 
       return factory.createMultiLineString(transformedEdges.toArray(new LineString[0]));
 
-    } catch (RuntimeException e) {
-      log.warn(
-          "Campskeleton failed with exception for polygon: {}, returning empty result",
-          polygon.toText(),
-          e);
-      return factory.createMultiLineString(new LineString[0]);
+    } catch (Exception e) {
+      log.error("Failed to compute straight skeleton for polygon: {}", polygon.toText(), e);
+      throw new RuntimeException("Failed to compute straight skeleton: " + e.getMessage(), e);
     }
   }
 
   /**
-   * Normalize polygon by centering at origin and scaling.
+   * Normalize polygon by centering at origin and scaling. If the polygon has too many vertices, it
+   * will merge the shortest edges to reduce vertex count. Handles both exterior ring and interior
+   * rings (holes).
    *
    * @param polygon Original polygon
    * @param offsetX X offset to subtract (centroid x)
    * @param offsetY Y offset to subtract (centroid y)
    * @param scaleFactor Scale factor to apply
+   * @param maxVertices Maximum number of vertices to keep (0 to disable simplification)
    * @return Normalized polygon
    */
   private Polygon normalizePolygon(
-      Polygon polygon, double offsetX, double offsetY, double scaleFactor) {
-    Coordinate[] coords = polygon.getExteriorRing().getCoordinates();
-    Coordinate[] normalizedCoords = new Coordinate[coords.length];
+      Polygon polygon, double offsetX, double offsetY, double scaleFactor, int maxVertices) {
+    GeometryFactory factory = polygon.getFactory();
 
-    for (int i = 0; i < coords.length; i++) {
-      double x = (coords[i].x - offsetX) * scaleFactor;
-      double y = (coords[i].y - offsetY) * scaleFactor;
-      normalizedCoords[i] = new Coordinate(x, y);
+    // Normalize exterior ring
+    LinearRing normalizedShell =
+        normalizeRing(
+            polygon.getExteriorRing(), offsetX, offsetY, scaleFactor, maxVertices, factory);
+
+    // Normalize interior rings (holes)
+    LinearRing[] normalizedHoles = new LinearRing[polygon.getNumInteriorRing()];
+    for (int i = 0; i < polygon.getNumInteriorRing(); i++) {
+      normalizedHoles[i] =
+          normalizeRing(
+              polygon.getInteriorRingN(i), offsetX, offsetY, scaleFactor, maxVertices, factory);
     }
 
-    GeometryFactory factory = polygon.getFactory();
-    LinearRing shell = factory.createLinearRing(normalizedCoords);
-    return factory.createPolygon(shell);
+    return factory.createPolygon(normalizedShell, normalizedHoles);
   }
 
   /**
-   * Simplify polygon by merging vertices that are closer than a threshold distance. The threshold
-   * is calculated as a percentage of the polygon's perimeter (SIMPLIFY_DISTANCE_RATIO).
+   * Normalize a single ring by centering at origin and scaling.
    *
-   * <p>This is a fast, linear-time simplification algorithm that removes vertices by merging nearby
-   * points. It's much faster than Douglas-Peucker for polygons with many vertices.
-   *
-   * @param polygon Input polygon to simplify
-   * @return Simplified polygon with fewer vertices
+   * @param ring Original ring
+   * @param offsetX X offset to subtract
+   * @param offsetY Y offset to subtract
+   * @param scaleFactor Scale factor to apply
+   * @param maxVertices Maximum number of vertices to keep (0 to disable simplification)
+   * @param factory GeometryFactory for creating the result
+   * @return Normalized ring
    */
-  private Polygon simplifyByMergingNearbyVertices(Polygon polygon) {
-    Coordinate[] coords = polygon.getExteriorRing().getCoordinates();
-    GeometryFactory factory = polygon.getFactory();
+  private LinearRing normalizeRing(
+      LineString ring,
+      double offsetX,
+      double offsetY,
+      double scaleFactor,
+      int maxVertices,
+      GeometryFactory factory) {
+    Coordinate[] coords = ring.getCoordinates();
 
-    // Calculate perimeter to determine merge threshold
-    double perimeter = polygon.getLength();
-    double mergeThreshold = perimeter * SIMPLIFY_DISTANCE_RATIO;
+    // First pass: normalize all coordinates
+    List<Coordinate> normalizedCoords = new ArrayList<>();
+    for (int i = 0; i < coords.length - 1; i++) { // Skip last coordinate (duplicate of first)
+      double x = (coords[i].x - offsetX) * scaleFactor;
+      double y = (coords[i].y - offsetY) * scaleFactor;
+      normalizedCoords.add(new Coordinate(x, y));
+    }
 
-    List<Coordinate> simplified = new ArrayList<>();
-    simplified.add(coords[0]); // Always keep first vertex
+    // Second pass: merge shortest edges if we exceed maxVertices
+    if (maxVertices > 0 && normalizedCoords.size() > maxVertices) {
+      normalizedCoords = simplifyByMergingShortestEdges(normalizedCoords, maxVertices);
+    }
 
-    // Iterate through vertices and keep only those far enough from the last kept vertex
-    for (int i = 1; i < coords.length - 1; i++) { // Skip last (closing) coordinate
-      Coordinate lastKept = simplified.get(simplified.size() - 1);
-      Coordinate current = coords[i];
+    // Close the ring
+    normalizedCoords.add(new Coordinate(normalizedCoords.get(0)));
 
-      double distance = lastKept.distance(current);
-      if (distance >= mergeThreshold) {
-        simplified.add(current);
+    Coordinate[] coordArray = normalizedCoords.toArray(new Coordinate[0]);
+    return factory.createLinearRing(coordArray);
+  }
+
+  /**
+   * Simplify a polygon by repeatedly removing the vertex that creates the shortest edge.
+   *
+   * @param coords List of coordinates (without closing coordinate)
+   * @param targetVertexCount Target number of vertices
+   * @return Simplified list of coordinates
+   */
+  private List<Coordinate> simplifyByMergingShortestEdges(
+      List<Coordinate> coords, int targetVertexCount) {
+    // Ensure we keep at least 3 vertices for a valid polygon
+    targetVertexCount = Math.max(3, targetVertexCount);
+
+    // Create a working copy
+    List<Coordinate> result = new ArrayList<>(coords);
+
+    // Keep removing the shortest edge until we reach target
+    while (result.size() > targetVertexCount) {
+      double minLength = Double.MAX_VALUE;
+      int shortestEdgeIdx = -1;
+
+      // Find the shortest edge
+      for (int i = 0; i < result.size(); i++) {
+        Coordinate curr = result.get(i);
+        Coordinate next = result.get((i + 1) % result.size());
+        double length = curr.distance(next);
+
+        if (length < minLength) {
+          minLength = length;
+          shortestEdgeIdx = i;
+        }
       }
+
+      // Remove the vertex at the end of the shortest edge
+      // This effectively merges the two edges adjacent to this vertex
+      int vertexToRemove = (shortestEdgeIdx + 1) % result.size();
+      result.remove(vertexToRemove);
     }
 
-    // Ensure we have at least 3 vertices (+ closing point) for a valid polygon
-    if (simplified.size() < 3) {
-      return polygon; // Return original if simplification would break polygon
-    }
-
-    // Add closing coordinate
-    simplified.add(simplified.get(0));
-
-    LinearRing shell = factory.createLinearRing(simplified.toArray(new Coordinate[0]));
-    return factory.createPolygon(shell);
+    return result;
   }
 
   /**
@@ -266,18 +287,49 @@ public class StraightSkeleton {
    * <p>Creates Corner objects for each vertex and connects them with Edge objects. Each edge is
    * assigned a default Machine (speed) for uniform shrinking.
    *
-   * <p>The campskeleton library requires polygons to be in counter-clockwise (CCW) orientation.
-   * This method ensures the polygon is properly oriented before conversion.
+   * <p>The campskeleton library requires the exterior ring to be in counter-clockwise (CCW)
+   * orientation and interior rings (holes) to be in clockwise (CW) orientation. This method ensures
+   * proper orientation before conversion.
+   *
+   * @param polygon Input polygon with potential holes
+   * @return LoopL containing the exterior ring and all interior rings as separate loops
    */
   private LoopL<Edge> convertPolygonToEdges(Polygon polygon) {
     LoopL<Edge> input = new LoopL<>();
+    Machine defaultMachine = new Machine(DEFAULT_MACHINE_ANGLE);
+
+    // Add exterior ring (must be CCW)
+    Loop<Edge> exteriorLoop = convertRingToLoop(polygon.getExteriorRing(), true, defaultMachine);
+    input.add(exteriorLoop);
+
+    // Add interior rings / holes (must be CW)
+    for (int i = 0; i < polygon.getNumInteriorRing(); i++) {
+      Loop<Edge> holeLoop = convertRingToLoop(polygon.getInteriorRingN(i), false, defaultMachine);
+      input.add(holeLoop);
+    }
+
+    return input;
+  }
+
+  /**
+   * Convert a single ring (exterior or interior) to a campskeleton Loop.
+   *
+   * @param ring The linear ring to convert
+   * @param isExterior true if this is the exterior ring (CCW), false for holes (CW)
+   * @param machine The Machine to assign to all edges
+   * @return Loop of edges representing the ring
+   */
+  private Loop<Edge> convertRingToLoop(LineString ring, boolean isExterior, Machine machine) {
     Loop<Edge> loop = new Loop<>();
+    Coordinate[] coords = ring.getCoordinates();
 
-    Coordinate[] coords = polygon.getExteriorRing().getCoordinates();
+    // Check orientation and reverse if needed
+    boolean isCCW = Orientation.isCCW(coords);
 
-    // Ensure counter-clockwise orientation (required by campskeleton)
-    // If the ring is clockwise, reverse the coordinate order
-    if (!Orientation.isCCW(coords)) {
+    // Exterior rings should be CCW, holes should be CW
+    boolean needsReverse = (isExterior && !isCCW) || (!isExterior && isCCW);
+
+    if (needsReverse) {
       // Reverse the coordinates (excluding the closing point)
       Coordinate[] reversed = new Coordinate[coords.length];
       for (int i = 0; i < coords.length - 1; i++) {
@@ -288,15 +340,12 @@ public class StraightSkeleton {
       coords = reversed;
     }
 
-    // Create corners first - share corners between consecutive edges
+    // Create corners for each vertex
     List<Corner> corners = new ArrayList<>();
     for (int i = 0; i < coords.length - 1; i++) { // -1 because last coord = first coord
       Coordinate c = coords[i];
       corners.add(new Corner(c.x, c.y));
     }
-
-    // Create a default machine (uniform speed for all edges)
-    Machine defaultMachine = new Machine(DEFAULT_MACHINE_ANGLE);
 
     // Create edges connecting consecutive corners
     for (int i = 0; i < corners.size(); i++) {
@@ -304,12 +353,11 @@ public class StraightSkeleton {
       Corner c2 = corners.get((i + 1) % corners.size());
 
       Edge edge = new Edge(c1, c2);
-      edge.machine = defaultMachine; // Set machine for the edge
+      edge.machine = machine; // Set machine for the edge
       loop.append(edge);
     }
 
-    input.add(loop);
-    return input;
+    return loop;
   }
 
   /**

@@ -1855,24 +1855,28 @@ private[apache] case class ST_InterpolatePoint(inputExpressions: Seq[Expression]
  * where each edge moves inward in parallel at a uniform speed.
  *
  * @param inputExpressions
- *   Geometry (Polygon or MultiPolygon)
+ *   Geometry (Polygon or MultiPolygon), optional: maxVertices (Integer) for vertex limit
  */
 private[apache] case class ST_StraightSkeleton(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.straightSkeleton _) {
+    extends InferredExpression(
+      inferrableFunction2(Functions.straightSkeleton),
+      inferrableFunction1(Functions.straightSkeleton)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) =
     copy(inputExpressions = newChildren)
 }
 
 /**
  * Computes an approximate medial axis of an areal geometry by computing the straight skeleton and
- * then pruning insignificant branches. The pruning algorithm removes small "leaf" branches that
- * represent insignificant penetrations into corners, using a penetration depth threshold.
+ * filtering to keep only interior edges. Edges where both endpoints are interior to the polygon
+ * (not on the boundary) are kept, producing a cleaner skeleton.
  *
  * @param inputExpressions
- *   Geometry (Polygon or MultiPolygon)
+ *   Geometry (Polygon or MultiPolygon), optional: maxVertices (Integer) for vertex limit
  */
 private[apache] case class ST_ApproximateMedialAxis(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.approximateMedialAxis _) {
+    extends InferredExpression(
+      inferrableFunction2(Functions.approximateMedialAxis),
+      inferrableFunction1(Functions.approximateMedialAxis)) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) =
     copy(inputExpressions = newChildren)
 }
