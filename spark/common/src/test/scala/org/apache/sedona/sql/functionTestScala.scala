@@ -4062,7 +4062,6 @@ class functionTestScala
   it("Passed ST_ApproximateMedialAxis with real-world Maryland road segmentation data") {
     // Read the real-world GeoParquet file containing polygon geometries
     val inputPath = "/Users/feng/temp/data/maryland-road-segmentation.parquet"
-    val inputDebugPath = "/Users/feng/temp/data/maryland-road-segmentation-debug.parquet"
     val outputPath = "/Users/feng/temp/data/maryland-road-medialaxis-output.parquet"
 
     // Check if input file exists
@@ -4075,17 +4074,6 @@ class functionTestScala
     // Register the DataFrame as a temporary view
     df.createOrReplaceTempView("polygons")
 
-//    // Query to get the number of vertices for each polygon
-//    val vertexCounts = sparkSession.sql("""
-//    SELECT
-//      geometry,
-//      ST_NPoints(geometry) as num_vertices
-//    FROM polygons
-//    WHERE ST_NPoints(geometry) = 155919
-//  """)
-//
-//    vertexCounts.show()
-
     val subdividedPolygons = sparkSession.sql("""
     SELECT
       ST_SubDivideExplode(geometry, 500) as sub_geometry
@@ -4094,14 +4082,15 @@ class functionTestScala
   """)
 
     println(s"Number of subdivided polygons: ${subdividedPolygons.count()}")
+    // val inputDebugPath = "/Users/feng/temp/data/maryland-road-segmentation-debug.parquet"
     // subdividedPolygons.write.mode("overwrite").format("geoparquet").save(inputDebugPath)
 
     // Apply ST_StraightSkeleton to compute skeleton for each subdivided polygon
     println("Computing straight skeleton for subdivided polygons...")
     val dfWithSkeleton = subdividedPolygons
       .selectExpr(
-        "ST_StraightSkeleton(sub_geometry, 50) as straight_skeleton",
-        "ST_ApproximateMedialAxis(sub_geometry, 50) as medial_axis",
+        "ST_StraightSkeleton(sub_geometry) as straight_skeleton",
+        "ST_ApproximateMedialAxis(sub_geometry) as medial_axis",
         "sub_geometry as geometry")
 //      .limit(100)
 
