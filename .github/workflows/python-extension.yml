@@ -61,41 +61,33 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - name: Install pipenv
-        run: pip install -U pipenv
-      - name: Install dependencies
+      - name: Install uv
+        run: pip install -U uv
+      - name: Install dependencies (dev)
         run: |
           cd python
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-              PYTHON_EXE_PATH="$pythonLocation/python.exe"
-          else
-              PYTHON_EXE_PATH="$pythonLocation/python"
-          fi
-          echo "Using Python executable at: $PYTHON_EXE_PATH"
-          pipenv install --dev --python "$PYTHON_EXE_PATH"
-      - name: Build extension
+          uv pip install -e .[dev]
+      - name: Build extension (explicit)
         run: |
           cd python
-          pipenv run python setup.py build_ext --inplace
+          python setup.py build_ext --inplace
       - name: Run tests
         run: |
           cd python
-          pipenv run pytest tests/utils/test_geomserde_speedup.py
+          pytest tests/utils/test_geomserde_speedup.py
       - name: Run tests on Shapely 2.0
         run: |
           cd python
-          pipenv install shapely~=2.0
-          pipenv run pytest tests/utils/test_geomserde_speedup.py
+          uv pip install "shapely~=2.0" --reinstall
+          pytest tests/utils/test_geomserde_speedup.py
       - name: Run tests on Shapley 1.7
-        # Shapely 1.7 only provides wheels for cp36 ~ cp39, so we'll skip running
-        # this test for recent python versions.
         if: ${{ matrix.python == '3.9' || matrix.python == '3.8' }}
         run: |
           cd python
-          pipenv install shapely~=1.7
-          pipenv run pytest tests/utils/test_geomserde_speedup.py
+          uv pip install "shapely~=1.7" --reinstall
+          pytest tests/utils/test_geomserde_speedup.py
       - name: Install from sdist
         run: |
           cd python
-          pipenv run python setup.py sdist
-          pipenv run python -m pip install dist/*sedona-*.tar.gz
+          python -m build --sdist
+          uv pip install dist/*sedona-*.tar.gz --force-reinstall

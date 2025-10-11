@@ -65,12 +65,11 @@ jobs:
       - run: sudo pip3 install -U wheel
       - run: sudo pip3 install -U virtualenvwrapper
       - run: python3 -m pip install uv
-      - run: cd python
-      - run: rm pyproject.toml
-      - run: uv init --no-workspace
-      - run: uv add apache-flink==1.20.1 shapely attr setuptools
-      - run: uv add pytest --dev
+      - name: Install python package + flink extra
+        run: |
+          cd python
+          uv pip install -e .[flink,dev]
       - run: |
           wget https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.8.0-33.1-rc1/geotools-wrapper-1.8.0-33.1-rc1.jar
           export SEDONA_PYFLINK_EXTRA_JARS=${PWD}/$(find flink-shaded/target -name sedona-flink*.jar),${PWD}/geotools-wrapper-1.8.0-33.1-rc1.jar
-          (cd python; PYTHONPATH=$(pwd) uv run pytest -v -s ./tests/flink)
+          (cd python; PYTHONPATH=$(pwd) pytest -v -s ./tests/flink)
