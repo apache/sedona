@@ -138,23 +138,70 @@ If you want to test changes with different Spark/Scala versions, you can select 
 
 We recommend [PyCharm](https://www.jetbrains.com/pycharm/).
 
-### Run Python tests
+### Python project layout modernization
 
-#### Run all Python tests
+The Python package now uses `pyproject.toml` (PEP 517/518) with setuptools as the build backend. `setup.py` remains only for backwards compatibility. All metadata & extras are declared in `pyproject.toml` and mirror the legacy configuration to keep published artifacts identical.
 
-To run all Python test cases, follow steps mentioned [here](../setup/compile.md#run-python-test).
+Changes:
+- Dev/test dependencies migrated from Pipenv to the `dev` optional extra.
+- Environment management switched from Pipenv to `uv`.
+- C extension (`sedona.spark.utils.geomserde_speedup`) still built via setuptools automatically.
 
-#### Run all Python tests in a single test file
+### Create & activate a virtual environment
+```bash
+cd python
+python -m pip install --upgrade uv
+uv venv --python 3.10   # or any supported version (>=3.8)
+source .venv/bin/activate
+```
 
-To run a particular Python test file, specify the path of the `.py` file to `pipenv`.
+### Install for development
+Core + dev dependencies:
+```bash
+uv pip install -e .[dev]
+```
+Include all extras:
+```bash
+uv pip install -e .[dev,all]
+```
 
-For example, to run all tests in `test_function.py` located in `python/tests/sql/`, use: `pipenv run pytest tests/sql/test_function.py`.
+### Build (sdist & wheel)
+```bash
+python -m build
+# legacy alternative
+python setup.py sdist bdist_wheel
+```
 
-#### Run a single test
+### Run tests
+Fast extension test:
+```bash
+pytest -v tests/utils/test_geomserde_speedup.py
+```
+Representative subset:
+```bash
+pytest -v tests/sql/test_aggregate_functions.py tests/utils/test_geomserde_speedup.py
+```
+All tests:
+```bash
+pytest -v tests
+```
+Single test function:
+```bash
+pytest tests/sql/test_predicate.py::TestPredicate::test_st_contains
+```
 
-To run a particular test in a particular `.py` test file, specify `file_name::class_name::test_name` to the `pytest` command.
+### Spark & Flink extras
+- Spark: build jars (`mvn -q clean install -DskipTests`) then `uv pip install pyspark==<version>`.
+- Flink: `uv pip install -e .[flink]`.
 
-For example, to run the test on `ST_Contains` function located in `sql/test_predicate.py`, use: `pipenv run pytest tests/sql/test_predicate.py::TestPredicate::test_st_contains`
+### AddressSanitizer build
+```bash
+ENABLE_ASAN=1 uv pip install -e .
+pytest -k geomserde_speedup
+```
+
+### Migrated from Pipenv
+Pipenv is deprecated; do not commit new Pipfile changes. Use `uv` instead.
 
 ### Import the project
 

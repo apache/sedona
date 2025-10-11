@@ -19,7 +19,7 @@ import os
 
 from setuptools import Extension, find_packages, setup
 
-from sedona import version
+version = "1.8.0"  # Kept for backward compatibility; authoritative version in pyproject.toml
 
 with open("README.md") as fh:
     long_description = fh.read()
