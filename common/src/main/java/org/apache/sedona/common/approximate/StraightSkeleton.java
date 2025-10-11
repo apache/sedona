@@ -66,14 +66,28 @@ public class StraightSkeleton {
    */
   private static final double BOUNDARY_EDGE_EPSILON = 1e-10;
 
+  /**
+   * Percentage of polygon perimeter used as distance threshold for vertex merging. Vertices closer
+   * than this percentage of the total perimeter will be merged to reduce complexity.
+   */
+  private static final double SIMPLIFY_DISTANCE_RATIO = 0.01; // 1% of perimeter
+
+  /**
+   * Maximum number of vertices allowed before simplification is applied. Polygons with more
+   * vertices than this threshold will be simplified by merging nearby vertices to reduce memory
+   * consumption and improve performance.
+   */
+  private static final int MAX_VERTICES_BEFORE_SIMPLIFICATION = 200;
+
   public StraightSkeleton() {}
 
   /**
    * Compute the straight skeleton for a polygon.
    *
-   * <p>The campskeleton library has numerical stability issues with certain geometries. To improve
-   * robustness, we preprocess the polygon by: 1. Centering it at the origin (0,0) 2. Scaling it to
-   * a reasonable size 3. Ensuring counter-clockwise orientation
+   * <p>The campskeleton library has numerical stability and memory issues with certain geometries.
+   * To improve robustness, we preprocess the polygon by: 1. Centering it at the origin (0,0) 2.
+   * Scaling it to a reasonable size 3. Simplifying polygons with > 200 vertices by merging nearby
+   * vertices (within 1% of perimeter) 4. Ensuring counter-clockwise orientation
    *
    * <p>After computing the skeleton, we transform it back to the original coordinate system.
    *
@@ -103,10 +117,22 @@ public class StraightSkeleton {
       // Step 2: Normalize the polygon (center and scale)
       Polygon normalizedPolygon = normalizePolygon(polygon, offsetX, offsetY, scaleFactor);
 
-      // Step 3: Convert JTS polygon to campskeleton format
+      // Step 3: Simplify the polygon if it has too many vertices
+      // This reduces memory consumption and prevents OutOfMemoryError in campskeleton
+      int vertexCount = normalizedPolygon.getNumPoints();
+      if (vertexCount > MAX_VERTICES_BEFORE_SIMPLIFICATION) {
+        log.debug(
+            "Polygon has {} vertices (> {}), applying vertex merging simplification",
+            vertexCount,
+            MAX_VERTICES_BEFORE_SIMPLIFICATION);
+        normalizedPolygon = simplifyByMergingNearbyVertices(normalizedPolygon);
+        log.debug("Simplified polygon now has {} vertices", normalizedPolygon.getNumPoints());
+      }
+
+      // Step 4: Convert JTS polygon to campskeleton format
       LoopL<Edge> input = convertPolygonToEdges(normalizedPolygon);
 
-      // Step 4: Compute straight skeleton
+      // Step 5: Compute straight skeleton
       Skeleton skeleton = new Skeleton(input, true);
       skeleton.skeleton();
 
@@ -116,7 +142,7 @@ public class StraightSkeleton {
         return factory.createMultiLineString(new LineString[0]);
       }
 
-      // Step 5: Extract skeleton edges from normalized coordinate system
+      // Step 6: Extract skeleton edges from normalized coordinate system
       List<LineString> normalizedEdges = extractSkeletonEdges(skeleton, factory);
 
       if (normalizedEdges.isEmpty()) {
@@ -124,7 +150,7 @@ public class StraightSkeleton {
         return factory.createMultiLineString(new LineString[0]);
       }
 
-      // Step 6: Transform skeleton edges back to original coordinate system
+      // Step 7: Transform skeleton edges back to original coordinate system
       List<LineString> transformedEdges = new ArrayList<>();
       for (LineString edge : normalizedEdges) {
         LineString transformed = transformLineStringBack(edge, offsetX, offsetY, scaleFactor);
@@ -133,9 +159,12 @@ public class StraightSkeleton {
 
       return factory.createMultiLineString(transformedEdges.toArray(new LineString[0]));
 
-    } catch (Exception e) {
-      log.error("Failed to compute straight skeleton for polygon: {}", polygon.toText(), e);
-      throw new RuntimeException("Failed to compute straight skeleton: " + e.getMessage(), e);
+    } catch (RuntimeException e) {
+      log.warn(
+          "Campskeleton failed with exception for polygon: {}, returning empty result",
+          polygon.toText(),
+          e);
+      return factory.createMultiLineString(new LineString[0]);
     }
   }
 
@@ -161,6 +190,50 @@ public class StraightSkeleton {
 
     GeometryFactory factory = polygon.getFactory();
     LinearRing shell = factory.createLinearRing(normalizedCoords);
+    return factory.createPolygon(shell);
+  }
+
+  /**
+   * Simplify polygon by merging vertices that are closer than a threshold distance. The threshold
+   * is calculated as a percentage of the polygon's perimeter (SIMPLIFY_DISTANCE_RATIO).
+   *
+   * <p>This is a fast, linear-time simplification algorithm that removes vertices by merging nearby
+   * points. It's much faster than Douglas-Peucker for polygons with many vertices.
+   *
+   * @param polygon Input polygon to simplify
+   * @return Simplified polygon with fewer vertices
+   */
+  private Polygon simplifyByMergingNearbyVertices(Polygon polygon) {
+    Coordinate[] coords = polygon.getExteriorRing().getCoordinates();
+    GeometryFactory factory = polygon.getFactory();
+
+    // Calculate perimeter to determine merge threshold
+    double perimeter = polygon.getLength();
+    double mergeThreshold = perimeter * SIMPLIFY_DISTANCE_RATIO;
+
+    List<Coordinate> simplified = new ArrayList<>();
+    simplified.add(coords[0]); // Always keep first vertex
+
+    // Iterate through vertices and keep only those far enough from the last kept vertex
+    for (int i = 1; i < coords.length - 1; i++) { // Skip last (closing) coordinate
+      Coordinate lastKept = simplified.get(simplified.size() - 1);
+      Coordinate current = coords[i];
+
+      double distance = lastKept.distance(current);
+      if (distance >= mergeThreshold) {
+        simplified.add(current);
+      }
+    }
+
+    // Ensure we have at least 3 vertices (+ closing point) for a valid polygon
+    if (simplified.size() < 3) {
+      return polygon; // Return original if simplification would break polygon
+    }
+
+    // Add closing coordinate
+    simplified.add(simplified.get(0));
+
+    LinearRing shell = factory.createLinearRing(simplified.toArray(new Coordinate[0]));
     return factory.createPolygon(shell);
   }
 
