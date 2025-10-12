@@ -976,7 +976,12 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def is_closed(self):
-        spark_expr = stf.ST_IsClosed(self.spark.column)
+        # Only check LineStrings; return False for all other geometry types
+        spark_expr = F.when(
+            stf.ST_GeometryType(self.spark.column) == "ST_LineString",
+            stf.ST_IsClosed(self.spark.column),
+        ).otherwise(False)
+
         result = self._query_geometry_column(
             spark_expr,
             returns_geom=False,
