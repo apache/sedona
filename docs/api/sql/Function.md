@@ -1920,7 +1920,7 @@ SELECT ST_GeometryType(ST_GeomFromText('LINESTRING(77.29 29.07,77.42 29.26,77.27
 Output:
 
 ```
-ST_LINESTRING
+ST_LineString
 ```
 
 ## ST_GLocal
