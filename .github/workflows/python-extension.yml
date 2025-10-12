@@ -77,18 +77,15 @@ jobs:
         run: uv pip install pip
       - name: Run tests on Shapely 2
         run: |
-          source .venv/bin/activate
           uv add "shapely~=2.0"
           uv run pytest tests/utils/test_geomserde_speedup.py
       - name: Run tests on Shapely 1.8
         run: |
-          source .venv/bin/activate
           uv add "shapely~=1.8"
           uv run pytest tests/utils/test_geomserde_speedup.py
       - name: Run tests on Shapely 1.7
         if: ${{ matrix.python == '3.9' || matrix.python == '3.8' }}
         run: |
-          source .venv/bin/activate
           uv add "shapely==1.7.1"
           uv run pytest tests/utils/test_geomserde_speedup.py
       - name: Install from sdist
