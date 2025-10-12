@@ -77,8 +77,6 @@ Sedona uses GitHub Actions to automatically generate jars per commit. You can go
 
 ## Run Python test
 
-Sedona's Python module now uses a modern `pyproject.toml` + `uv` workflow. Pipenv steps are deprecated (left only for historical reference). Below are the updated steps to build and run the Python tests against a local Spark installation.
-
 1) Set up Spark (download if needed) and environment variables
 
 ```bash
@@ -108,61 +106,32 @@ mvn clean install -DskipTests -Dgeotools
 cp spark-shaded/target/sedona-spark-shaded-*.jar $SPARK_HOME/jars/
 ```
 
-4) Install system prerequisites (libgeos, build essentials)
+4) Setup Python development environment
 
-Ubuntu / Debian:
-```bash
-sudo apt-get -y install python3-pip python3-dev libgeos-dev
-```
-macOS (Homebrew):
-```bash
-brew install geos
-```
-
-5) Create & activate a virtual environment using uv
+The Python package uses `pyproject.toml` (PEP 517/518) with setuptools as the build backend. We recommend using [uv](https://uv.run/) to manage virtual environments and dependencies.
 
 ```bash
 cd python
 python -m pip install --upgrade uv
-uv venv --python 3.10   # or any supported version >=3.8
-source .venv/bin/activate
+uv venv --python 3.10   # or any supported version (>=3.8)
 ```
 
-6) Install Sedona (editable) with dev dependencies and a Spark version
+5) Install the PySpark version and the other dependency
 
 ```bash
-uv pip install -e .[dev]
-uv pip install pyspark==${SPARK_VERSION}
-```
-If you need all optional extras (maps, raster, etc.):
-```bash
-uv pip install -e .[dev,all]
+cd python
+# Use the correct PySpark version, otherwise latest version will be installed
+uv add pyspark==${SPARK_VERSION} --optional spark
+uv sync --extra dev
 ```
 
-7) (Optional) Rebuild the C extension explicitly (normally done automatically on install)
-```bash
-python setup.py build_ext --inplace
-```
+6) Install Sedona (editable) and run the Python tests
 
-8) Run Python tests
-
-Fast extension-only test:
 ```bash
-pytest -v tests/utils/test_geomserde_speedup.py
+cd python
+uv run pip install -e .
+uv run pytest -v tests
 ```
-Representative subset:
-```bash
-pytest -v tests/sql/test_aggregate_functions.py tests/utils/test_geomserde_speedup.py
-```
-All tests:
-```bash
-pytest -v tests
-```
-
-Notes:
-- Keep SPARK_HOME exported so PySpark locates the correct distribution.
-- To test different pyspark versions, reinstall with `uv pip install pyspark==<version> --reinstall`.
-- For Spark Connect tests (Spark >= 3.4): `uv pip install "pyspark[connect]==${SPARK_VERSION}"` then run the relevant tests.
 
 ## Compile the documentation
 

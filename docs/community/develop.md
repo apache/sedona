@@ -138,49 +138,32 @@ If you want to test changes with different Spark/Scala versions, you can select 
 
 We recommend [PyCharm](https://www.jetbrains.com/pycharm/).
 
-### Python project overview
-
-The Python package uses `pyproject.toml` (PEP 517/518) with setuptools as the build backend. We recommend using [uv](https://uv.run/) to manage virtual environments and dependencies.
-
-### Create a virtual environment
-
-```bash
-cd python
-python -m pip install --upgrade uv
-uv venv --python 3.10   # or any supported version (>=3.8)
-```
-
-### Install dependencies for development
-
-```bash
-uv sync --extra dev
-```
-
-### Install in editable mode for development
-
-```bash
-uv pip install -e .
-```
-
 ### Run tests
 
-All tests:
+#### Sedona Spark
+
+To run all Python test cases, follow steps mentioned [here](../setup/compile.md#run-python-test).
+
+Once the environment is set up, you can run all tests using the following command in python directory:
 
 ```bash
 uv run pytest -v tests
 ```
 
-Single test function:
+To run a particular Python test file, specify the path of the `.py`.
+
+For example, to run all tests in `test_function.py` located in `python/tests/sql/`, use:
+
+```bash
+uv run pytest -v tests/sql/test_function.py
+```
+
+To run a particular test in a particular `.py` test file, specify `file_name::class_name::test_name` to the `pytest` command.
+
+For example, to run the test on `ST_Contains` function located in `sql/test_predicate.py`, use:
 
 ```bash
 uv run pytest -v tests/sql/test_predicate.py::TestPredicate::test_st_contains
-```
-
-Run Flink test:
-
-```bash
-uv sync --extra dev --extra flink  # Install flink dependencies
-PYTHONPATH=$(pwd) uv run pytest -v tests/flink
 ```
 
 ### Build packages
