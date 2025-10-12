@@ -138,72 +138,58 @@ If you want to test changes with different Spark/Scala versions, you can select 
 
 We recommend [PyCharm](https://www.jetbrains.com/pycharm/).
 
-### Python project layout modernization
+### Python project overview
 
-The Python package now uses `pyproject.toml` (PEP 517/518) with setuptools as the build backend. `setup.py` remains only for backwards compatibility. All metadata & extras are declared in `pyproject.toml` and mirror the legacy configuration to keep published artifacts identical.
+The Python package uses `pyproject.toml` (PEP 517/518) with setuptools as the build backend. We recommand using [uv](https://uv.run/) to manage virtual environments and dependencies.
 
-Changes:
-- Dev/test dependencies migrated from Pipenv to the `dev` optional extra.
-- Environment management switched from Pipenv to `uv`.
-- C extension (`sedona.spark.utils.geomserde_speedup`) still built via setuptools automatically.
+### Create a virtual environment
 
-### Create & activate a virtual environment
 ```bash
 cd python
 python -m pip install --upgrade uv
 uv venv --python 3.10   # or any supported version (>=3.8)
-source .venv/bin/activate
 ```
 
-### Install for development
-Core + dev dependencies:
+### Install dependencies for development
+
 ```bash
-uv pip install -e .[dev]
-```
-Include all extras:
-```bash
-uv pip install -e .[dev,all]
+uv sync --extra dev
 ```
 
-### Build (sdist & wheel)
+### Install in editable mode for development
+
 ```bash
-python -m build
-# legacy alternative
-python setup.py sdist bdist_wheel
+uv pip install -e .
 ```
 
 ### Run tests
-Fast extension test:
-```bash
-pytest -v tests/utils/test_geomserde_speedup.py
-```
-Representative subset:
-```bash
-pytest -v tests/sql/test_aggregate_functions.py tests/utils/test_geomserde_speedup.py
-```
+
 All tests:
+
 ```bash
-pytest -v tests
+uv run pytest -v tests
 ```
+
 Single test function:
+
 ```bash
-pytest tests/sql/test_predicate.py::TestPredicate::test_st_contains
+uv run pytest -v tests/sql/test_predicate.py::TestPredicate::test_st_contains
 ```
 
-### Spark & Flink extras
-- Spark: build jars (`mvn -q clean install -DskipTests`) then `uv pip install pyspark==<version>`.
-- Flink: `uv pip install -e .[flink]`.
+Run Flink test:
 
-### AddressSanitizer build
 ```bash
-ENABLE_ASAN=1 uv pip install -e .
-pytest -k geomserde_speedup
+uv sync --extra dev --extra flink  # Install flink dependencies
+PYTHONPATH=$(pwd) uv run pytest -v tests/flink
 ```
 
-### Migrated from Pipenv
-Pipenv is deprecated; do not commit new Pipfile changes. Use `uv` instead.
+### Build packages
 
-### Import the project
+The following command will build the sdist and whl packages in the `dist` folder.
+
+```bash
+uv build
+```
 
 ## R developers
 

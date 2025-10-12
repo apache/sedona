@@ -56,38 +56,42 @@ jobs:
     defaults:
       run:
         shell: bash
+        working-directory: python
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
       - name: Install uv
-        run: pip install -U uv
+        uses: astral-sh/setup-uv@v6
       - name: Install dependencies (dev)
         run: |
-          cd python
-          uv pip install -e .[dev]
+          uv sync --extra dev
       - name: Build extension (explicit)
         run: |
-          cd python
-          python setup.py build_ext --inplace
+          uv pip install -e .
       - name: Run tests
         run: |
-          cd python
-          pytest tests/utils/test_geomserde_speedup.py
-      - name: Run tests on Shapely 2.0
+          uv run pytest tests/utils/test_geomserde_speedup.py
+      - name: Install pip
+        run: uv pip install pip
+      - name: Run tests on Shapely 2
         run: |
-          cd python
-          uv pip install "shapely~=2.0" --reinstall
+          source .venv/bin/activate
+          pip install "shapely~=2.0"
           pytest tests/utils/test_geomserde_speedup.py
-      - name: Run tests on Shapley 1.7
+      - name: Run tests on Shapely 1.8
+        run: |
+          source .venv/bin/activate
+          pip install "shapely~=1.8"
+          pytest tests/utils/test_geomserde_speedup.py
+      - name: Run tests on Shapely 1.7
         if: ${{ matrix.python == '3.9' || matrix.python == '3.8' }}
         run: |
-          cd python
-          uv pip install "shapely~=1.7" --reinstall
+          source .venv/bin/activate
+          pip install "shapely==1.7.1"
           pytest tests/utils/test_geomserde_speedup.py
       - name: Install from sdist
         run: |
-          cd python
-          python -m build --sdist
+          uv build
           uv pip install dist/*sedona-*.tar.gz --force-reinstall

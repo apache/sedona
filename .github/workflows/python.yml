@@ -99,8 +99,6 @@ jobs:
             python: '3.8'
             shapely: '1'
 
-    env:
-      VENV_PATH: /home/runner/.local/share/virtualenvs/python-${{ matrix.python }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -110,6 +108,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
       - name: Cache Maven packages
         uses: actions/cache@v4
         with:
@@ -122,12 +122,12 @@ jobs:
         run: |
           SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
           mvn -q clean install -DskipTests -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dgeotools
-      - run: sudo apt-get -y install python3-pip python-dev-is-python3
-      - run: sudo pip3 install -U setuptools
-      - run: sudo pip3 install -U wheel
-      - run: sudo pip3 install -U virtualenvwrapper
-      - run: python3 -m pip install uv
-      - run: cd python; python3 setup.py build_ext --inplace
+      - name: Setup Python build environment
+        run: |
+          cd python
+          uv sync --extra dev
+      - name: Install sedona package
+        run: cd python; uv pip install -e .
       - env:
           SPARK_VERSION: ${{ matrix.spark }}
           PYTHON_VERSION: ${{ matrix.python }}
@@ -147,6 +147,8 @@ jobs:
           fi
           # Install specific pyspark version matching matrix
           uv pip install pyspark==${SPARK_VERSION} --reinstall
+
+          source .venv/bin/activate
           python -c "import pyspark,sys;print('Using pyspark', pyspark.__version__)"
       - env:
           PYTHON_VERSION: ${{ matrix.python }}
@@ -154,6 +156,8 @@ jobs:
           wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_core/${JAI_CORE_VERSION}/jai_core-${JAI_CORE_VERSION}.jar
           wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_codec/${JAI_CODEC_VERSION}/jai_codec-${JAI_CODEC_VERSION}.jar
           wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_imageio/${JAI_IMAGEIO_VERSION}/jai_imageio-${JAI_IMAGEIO_VERSION}.jar
+
+          source python/.venv/bin/activate
           PY_SITE=$(python - <<'PY'
 import site,sys
 print(site.getsitepackages()[0])
@@ -166,6 +170,7 @@ PY
       - env:
           PYTHON_VERSION: ${{ matrix.python }}
         run: |
+          source python/.venv/bin/activate
           PY_SITE=$(python - <<'PY'
 import site
 print(site.getsitepackages()[0])
@@ -174,6 +179,7 @@ PY
           find spark-shaded/target -name sedona-*.jar -exec cp {} ${PY_SITE}/pyspark/jars/ \;
       - name: Run tests
         run: |
+          source python/.venv/bin/activate
           export SPARK_HOME=$(python - <<'PY'
 import site
 print(site.getsitepackages()[0]+"/pyspark")
@@ -183,17 +189,20 @@ PY
           pytest -v tests
       - name: Run basic tests without rasterio
         run: |
+          source python/.venv/bin/activate
           export SPARK_HOME=$(python - <<'PY'
 import site
 print(site.getsitepackages()[0]+"/pyspark")
 PY
 )
           cd python
-          uv pip uninstall -y rasterio || true
+          uv pip uninstall rasterio || true
           pytest -v tests/core/test_rdd.py tests/sql/test_dataframe_api.py
       - name: Run Spark Connect tests
         if: ${{ matrix.spark >= '3.4.0' }}
         run: |
+          source python/.venv/bin/activate
+
           export SPARK_REMOTE=local
           export SPARK_HOME=$(python - <<'PY'
 import site

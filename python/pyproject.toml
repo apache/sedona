@@ -37,20 +37,18 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Keep extras identical to legacy setup.py
-spark = ["pyspark>=2.3.0"]
+spark = ["pyspark>=3.4.0"]
 pydeck-map = ["geopandas", "pydeck==0.8.0"]
 kepler-map = ["geopandas", "keplergl==0.3.2"]
 flink = ["apache-flink>=1.19.0"]
-db = ["sedonadb[geopandas]"]
+db = ["sedonadb[geopandas]; python_version >= '3.9'"]
 all = [
-  "pyspark>=2.3.0",
+  "pyspark>=3.4.0",
   "geopandas",
   "pydeck==0.8.0",
   "keplergl==0.3.2",
   "rasterio>=1.2.10",
 ]
-# Development / test dependencies migrated from Pipfile
 dev = [
   "pytest",
   "pytest-cov",
@@ -67,7 +65,7 @@ dev = [
   "geopandas",
   "fiona<1.10.0",
   "pyarrow",
-  "pyspark>=2.3.0",
+  "pyspark>=3.4.0",
   "keplergl==0.3.2",
   "pydeck==0.8.0",
   "pystac==1.5.0",
@@ -83,14 +81,15 @@ Documentation = "https://sedona.apache.org"
 include-package-data = true
 
 [tool.setuptools.packages.find]
-include = ["sedona*" ]
+include = ["sedona*"]
 exclude = ["*.tests", "*.tests.*", "tests", "tests.*"]
 
-# C extension definition (legacy maintained via setup.py for now)
-
-[tool.setuptools.dynamic]
-# Nothing dynamic besides version (handled via attr above)
-
-# Allow opting into ASAN via environment variable like legacy setup.py.
-# setuptools doesn't support conditional flags declaratively; users can set
-# CFLAGS/LDFLAGS externally. Documented in develop.md.
+# C extension module for geometry serialization speedup
+[[tool.setuptools.ext-modules]]
+name = "sedona.spark.utils.geomserde_speedup"
+sources = [
+  "src/geomserde_speedup_module.c",
+  "src/geomserde.c",
+  "src/geom_buf.c",
+  "src/geos_c_dyn.c",
+]
