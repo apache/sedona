@@ -77,27 +77,22 @@ Sedona uses GitHub Actions to automatically generate jars per commit. You can go
 
 ## Run Python test
 
-1) Set up the environment variable SPARK_HOME and PYTHONPATH
+Sedona's Python module now uses a modern `pyproject.toml` + `uv` workflow. Pipenv steps are deprecated (left only for historical reference). Below are the updated steps to build and run the Python tests against a local Spark installation.
 
-For example,
+1) Set up Spark (download if needed) and environment variables
 
-```
-export SPARK_VERSION=3.4.0
+```bash
+export SPARK_VERSION=3.4.0   # or another supported version
+wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.tgz
+ tar -xvzf spark-${SPARK_VERSION}-bin-hadoop3.tgz
+rm spark-${SPARK_VERSION}-bin-hadoop3.tgz
 export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop3
 export PYTHONPATH=$SPARK_HOME/python
 ```
 
-2) Install Spark if you haven't already
+2) Add required JAI jars into $SPARK_HOME/jars
 
-```
-wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.tgz
-tar -xvzf spark-${SPARK_VERSION}-bin-hadoop3.tgz
-rm spark-${SPARK_VERSION}-bin-hadoop3.tgz
-```
-
-3) Put JAI jars to ==SPARK_HOME/jars/== folder.
-
-```
+```bash
 export JAI_CORE_VERSION="1.1.3"
 export JAI_CODEC_VERSION="1.1.3"
 export JAI_IMAGEIO_VERSION="1.1"
@@ -106,53 +101,68 @@ wget -P $SPARK_HOME/jars/ https://repo.osgeo.org/repository/release/javax/media/
 wget -P $SPARK_HOME/jars/ https://repo.osgeo.org/repository/release/javax/media/jai_imageio/${JAI_IMAGEIO_VERSION}/jai_imageio-${JAI_IMAGEIO_VERSION}.jar
 ```
 
-4) Compile the Sedona Scala and Java code with `-Dgeotools` and then copy the ==sedona-spark-shaded-{{ sedona.current_version }}.jar== to ==SPARK_HOME/jars/== folder.
+3) Build Sedona Scala/Java jars with GeoTools shaded (from repo root)
 
-```
+```bash
+mvn clean install -DskipTests -Dgeotools
 cp spark-shaded/target/sedona-spark-shaded-*.jar $SPARK_HOME/jars/
 ```
 
-5) Install the following libraries
+4) Install system prerequisites (libgeos, build essentials)
 
+Ubuntu / Debian:
+```bash
+sudo apt-get -y install python3-pip python3-dev libgeos-dev
 ```
-sudo apt-get -y install python3-pip python-dev libgeos-dev
-sudo pip3 install -U setuptools
-sudo pip3 install -U wheel
-sudo pip3 install -U virtualenvwrapper
-sudo pip3 install -U pipenv
-```
-
-Homebrew can be used to install libgeos-dev in macOS:
-
-```
+macOS (Homebrew):
+```bash
 brew install geos
 ```
 
-6) Set up pipenv to the desired Python version: 3.8, 3.9, or 3.10
+5) Create & activate a virtual environment using uv
 
-```
+```bash
 cd python
-pipenv --python 3.8
+python -m pip install --upgrade uv
+uv venv --python 3.10   # or any supported version >=3.8
+source .venv/bin/activate
 ```
 
-7) Install the PySpark version and the other dependency
+6) Install Sedona (editable) with dev dependencies and a Spark version
 
+```bash
+uv pip install -e .[dev]
+uv pip install pyspark==${SPARK_VERSION}
 ```
-cd python
-pipenv install pyspark==${SPARK_VERSION}
-pipenv install --dev
+If you need all optional extras (maps, raster, etc.):
+```bash
+uv pip install -e .[dev,all]
 ```
 
-`pipenv install pyspark` installs the latest version of pyspark.
-In order to remain consistent with the installed spark version, use `pipenv install pyspark==<spark_version>`
-
-8) Run the Python tests
-
+7) (Optional) Rebuild the C extension explicitly (normally done automatically on install)
+```bash
+python setup.py build_ext --inplace
 ```
-cd python
-pipenv run python setup.py build_ext --inplace
-pipenv run pytest tests
+
+8) Run Python tests
+
+Fast extension-only test:
+```bash
+pytest -v tests/utils/test_geomserde_speedup.py
 ```
+Representative subset:
+```bash
+pytest -v tests/sql/test_aggregate_functions.py tests/utils/test_geomserde_speedup.py
+```
+All tests:
+```bash
+pytest -v tests
+```
+
+Notes:
+- Keep SPARK_HOME exported so PySpark locates the correct distribution.
+- To test different pyspark versions, reinstall with `uv pip install pyspark==<version> --reinstall`.
+- For Spark Connect tests (Spark >= 3.4): `uv pip install "pyspark[connect]==${SPARK_VERSION}"` then run the relevant tests.
 
 ## Compile the documentation
 
