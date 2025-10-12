@@ -140,7 +140,7 @@ We recommend [PyCharm](https://www.jetbrains.com/pycharm/).
 
 ### Python project overview
 
-The Python package uses `pyproject.toml` (PEP 517/518) with setuptools as the build backend. We recommand using [uv](https://uv.run/) to manage virtual environments and dependencies.
+The Python package uses `pyproject.toml` (PEP 517/518) with setuptools as the build backend. We recommend using [uv](https://uv.run/) to manage virtual environments and dependencies.
 
 ### Create a virtual environment
 
