@@ -147,6 +147,7 @@ To run all Python test cases, follow steps mentioned [here](../setup/compile.md#
 Once the environment is set up, you can run all tests using the following command in python directory:
 
 ```bash
+cd python
 uv run pytest -v tests
 ```
 
@@ -155,6 +156,7 @@ To run a particular Python test file, specify the path of the `.py`.
 For example, to run all tests in `test_function.py` located in `python/tests/sql/`, use:
 
 ```bash
+cd python
 uv run pytest -v tests/sql/test_function.py
 ```
 
@@ -163,6 +165,7 @@ To run a particular test in a particular `.py` test file, specify `file_name::cl
 For example, to run the test on `ST_Contains` function located in `sql/test_predicate.py`, use:
 
 ```bash
+cd python
 uv run pytest -v tests/sql/test_predicate.py::TestPredicate::test_st_contains
 ```
 

@@ -60,11 +60,14 @@ dev = [
   "scikit-learn",
   "esda",
   "libpysal",
-  "matplotlib",
+  "matplotlib",  # implicit dependency of esda
+  # prevent incompatibility with pysal 4.7.0, which is what is resolved to when shapely >2 is specified
   "scipy<=1.10.0",
   "pandas>=2.0.0",
   "numpy<2",
   "geopandas",
+  # https://stackoverflow.com/questions/78949093/how-to-resolve-attributeerror-module-fiona-has-no-attribute-path
+  # cannot set geopandas>=0.14.4 since it doesn't support python 3.8, so we pin fiona to <1.10.0
   "fiona<1.10.0",
   "pyarrow",
   "pyspark>=3.4.0",

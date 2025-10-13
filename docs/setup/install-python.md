@@ -45,7 +45,7 @@ Clone Sedona GitHub source code and run the following command
 
 ```bash
 cd python
-python3 setup.py install
+python3 -m pip install .
 ```
 
 ### Prepare sedona-spark jar
