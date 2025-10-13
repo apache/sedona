@@ -2869,13 +2869,9 @@ public class Functions {
       }
     }
 
-    // Return the filtered edges
-    if (interiorEdges.isEmpty()) {
-      return factory.createMultiLineString(new LineString[0]);
-    }
-
+    // Return the filtered edges, preserving SRID from input polygon
     Geometry result = factory.createMultiLineString(interiorEdges.toArray(new LineString[0]));
-    result.setSRID(skeleton.getSRID());
+    result.setSRID(polygon.getSRID());
     return result;
   }
 }

@@ -4762,37 +4762,38 @@ public class FunctionsTest extends TestBase {
 
   @Test
   public void approximateMedialAxis() throws ParseException {
-    // Test basic functionality with a square
-    Polygon square = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 10, 0, 10, 10, 0, 10, 0, 0));
-    Geometry result = Functions.approximateMedialAxis(square);
+    // Test basic functionality with an L-shaped polygon
+    // L-shapes have interior edges, unlike simple squares/rectangles
+    Polygon lShape =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(0, 0, 100, 0, 100, 40, 40, 40, 40, 100, 0, 100, 0, 0));
+    Geometry result = Functions.approximateMedialAxis(lShape);
 
     assertNotNull(result);
     assertTrue(result instanceof MultiLineString);
     assertTrue(result.getNumGeometries() > 0);
 
-    // Test L-shaped polygon - should produce pruned skeleton with fewer segments than raw skeleton
-    Polygon lShape =
-        GEOMETRY_FACTORY.createPolygon(
-            coordArray(0, 0, 100, 0, 100, 40, 40, 40, 40, 100, 0, 100, 0, 0));
+    // Approximate medial axis should have fewer or equal segments than raw skeleton due to
+    // filtering
     Geometry straightSkel = Functions.straightSkeleton(lShape);
-    result = Functions.approximateMedialAxis(lShape);
-
-    // Approximate medial axis should have fewer or equal segments due to pruning
     assertTrue(
-        "Pruned skeleton should have <= segments than raw skeleton",
+        "Filtered skeleton should have <= segments than raw skeleton",
         result.getNumGeometries() <= straightSkel.getNumGeometries());
 
-    // Test rectangle
-    Polygon rectangle =
-        GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 100, 0, 100, 20, 0, 20, 0, 0));
-    result = Functions.approximateMedialAxis(rectangle);
+    // Test T-shaped polygon - another shape with interior edges
+    Polygon tShape =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(45, 0, 55, 0, 55, 40, 70, 40, 70, 50, 30, 50, 30, 40, 45, 40, 45, 0));
+    result = Functions.approximateMedialAxis(tShape);
     assertNotNull(result);
     assertTrue(result.getNumGeometries() > 0);
   }
 
   @Test
   public void approximateMedialAxisSRID() throws ParseException {
-    Polygon geom = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 10, 0, 10, 10, 0, 10, 0, 0));
+    // Use L-shaped polygon to ensure interior edges exist
+    Polygon geom =
+        GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 10, 0, 10, 4, 4, 4, 4, 10, 0, 10, 0, 0));
     geom.setSRID(4326);
     Geometry result = Functions.approximateMedialAxis(geom);
     assertEquals(4326, result.getSRID());
@@ -4829,10 +4830,12 @@ public class FunctionsTest extends TestBase {
 
   @Test
   public void approximateMedialAxisMultiPolygon() throws ParseException {
-    // Create a MultiPolygon with two squares
-    Polygon poly1 = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 10, 0, 10, 10, 0, 10, 0, 0));
+    // Create a MultiPolygon with two L-shaped polygons (which have interior edges)
+    Polygon poly1 =
+        GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 10, 0, 10, 4, 4, 4, 4, 10, 0, 10, 0, 0));
     Polygon poly2 =
-        GEOMETRY_FACTORY.createPolygon(coordArray(20, 20, 30, 20, 30, 30, 20, 30, 20, 20));
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(20, 20, 30, 20, 30, 24, 24, 24, 24, 30, 20, 30, 20, 20));
     MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {poly1, poly2});
 
     Geometry result = Functions.approximateMedialAxis(multiPolygon);
