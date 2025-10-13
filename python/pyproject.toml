@@ -75,6 +75,7 @@ dev = [
 ]
 
 [project.urls]
+HomePage = "https://sedona.apache.org"
 Documentation = "https://sedona.apache.org"
 "Source code" = "https://github.com/apache/sedona"
 "Bug Reports" = "https://issues.apache.org/jira/projects/SEDONA"
