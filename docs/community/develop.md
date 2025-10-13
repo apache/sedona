@@ -140,7 +140,7 @@ We recommend [PyCharm](https://www.jetbrains.com/pycharm/).
 
 ### Run tests
 
-#### Sedona Spark
+#### Run all Python tests
 
 To run all Python test cases, follow steps mentioned [here](../setup/compile.md#run-python-test).
 
@@ -150,6 +150,8 @@ Once the environment is set up, you can run all tests using the following comman
 cd python
 uv run pytest -v tests
 ```
+
+#### Run a single test
 
 To run a particular Python test file, specify the path of the `.py`.
 
@@ -174,6 +176,7 @@ uv run pytest -v tests/sql/test_predicate.py::TestPredicate::test_st_contains
 The following command will build the sdist and whl packages in the `dist` folder.
 
 ```bash
+cd python
 uv build
 ```
 

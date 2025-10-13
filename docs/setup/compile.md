@@ -108,7 +108,7 @@ cp spark-shaded/target/sedona-spark-shaded-*.jar $SPARK_HOME/jars/
 
 4) Setup Python development environment
 
-The Python package uses `pyproject.toml` (PEP 517/518) with setuptools as the build backend. We recommend using [uv](https://uv.run/) to manage virtual environments and dependencies.
+The Python package uses `pyproject.toml` (PEP 517/518) with setuptools as the build backend. We recommend using [uv](https://docs.astral.sh/uv/) to manage virtual environments and dependencies.
 
 ```bash
 cd python
