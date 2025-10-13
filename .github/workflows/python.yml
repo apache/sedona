@@ -134,10 +134,16 @@ jobs:
             uv add "shapely<2.0.0"
           fi
 
-          # Install specific pyspark version matching matrix
-          uv add pyspark==${SPARK_VERSION}
+          if [ "${SPARK_VERSION:0:1}" == "4" ]; then
+            # Spark 4.0 requires Python 3.9+, and we remove flink since it conflicts with pyspark 4.0
+            uv remove apache-flink --optional flink
+            uv add "pyspark==4.0.0; python_version >= '3.9'"
+          else
+            # Install specific pyspark version matching matrix
+            uv add pyspark==${SPARK_VERSION}
+          fi
 
-          uv sync --extra dev
+          uv sync
 
           uv run python -c "import pyspark,sys;print('Using pyspark', pyspark.__version__)"
       - name: Install sedona package
@@ -167,8 +173,8 @@ jobs:
           cd python
           export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
           uv remove rasterio --optional all
-          uv remove rasterio --optional dev
-          uv sync --extra dev
+          uv remove rasterio --dev
+          uv sync
           uv run pytest -v tests/core/test_rdd.py tests/sql/test_dataframe_api.py
       - name: Run Spark Connect tests
         if: ${{ matrix.spark >= '3.4.0' }}

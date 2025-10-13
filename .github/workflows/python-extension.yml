@@ -66,7 +66,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
       - name: Install dependencies (dev)
         run: |
-          uv sync --extra dev
+          uv sync
       - name: Build extension (explicit)
         run: |
           uv pip install -e .

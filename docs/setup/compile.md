@@ -122,7 +122,7 @@ uv venv --python 3.10   # or any supported version (>=3.8)
 cd python
 # Use the correct PySpark version, otherwise latest version will be installed
 uv add pyspark==${SPARK_VERSION} --optional spark
-uv sync --extra dev
+uv sync
 ```
 
 6) Install Sedona (editable) and run the Python tests

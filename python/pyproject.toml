@@ -49,6 +49,8 @@ all = [
   "keplergl==0.3.2",
   "rasterio>=1.2.10",
 ]
+
+[dependency-groups]
 dev = [
   "pytest",
   "pytest-cov",
