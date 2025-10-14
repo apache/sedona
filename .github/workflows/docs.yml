@@ -97,10 +97,8 @@ jobs:
         env:
           CI: true
         run: |
-          cd python/sedona/doc
-          make clean
-          make html
-          cd ../../..
+          # Use uv run so sphinx-build from the virtual environment is on PATH
+          ~/.local/bin/uv run bash -c 'cd python/sedona/doc && make clean && make html'
           mkdir -p docs/api/pydocs
           cp -r python/sedona/doc/_build/html/* docs/api/pydocs/
       - run: git config --global user.name = "GitHub Action"
