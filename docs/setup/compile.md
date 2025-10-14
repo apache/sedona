@@ -77,27 +77,20 @@ Sedona uses GitHub Actions to automatically generate jars per commit. You can go
 
 ## Run Python test
 
-1) Set up the environment variable SPARK_HOME and PYTHONPATH
+1) Set up Spark (download if needed) and environment variables
 
-For example,
-
-```
-export SPARK_VERSION=3.4.0
+```bash
+export SPARK_VERSION=3.4.0   # or another supported version
+wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.tgz
+tar -xvzf spark-${SPARK_VERSION}-bin-hadoop3.tgz
+rm spark-${SPARK_VERSION}-bin-hadoop3.tgz
 export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop3
 export PYTHONPATH=$SPARK_HOME/python
 ```
 
-2) Install Spark if you haven't already
+2) Add required JAI jars into $SPARK_HOME/jars
 
-```
-wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.tgz
-tar -xvzf spark-${SPARK_VERSION}-bin-hadoop3.tgz
-rm spark-${SPARK_VERSION}-bin-hadoop3.tgz
-```
-
-3) Put JAI jars to ==SPARK_HOME/jars/== folder.
-
-```
+```bash
 export JAI_CORE_VERSION="1.1.3"
 export JAI_CODEC_VERSION="1.1.3"
 export JAI_IMAGEIO_VERSION="1.1"
@@ -106,52 +99,38 @@ wget -P $SPARK_HOME/jars/ https://repo.osgeo.org/repository/release/javax/media/
 wget -P $SPARK_HOME/jars/ https://repo.osgeo.org/repository/release/javax/media/jai_imageio/${JAI_IMAGEIO_VERSION}/jai_imageio-${JAI_IMAGEIO_VERSION}.jar
 ```
 
-4) Compile the Sedona Scala and Java code with `-Dgeotools` and then copy the ==sedona-spark-shaded-{{ sedona.current_version }}.jar== to ==SPARK_HOME/jars/== folder.
+3) Build Sedona Scala/Java jars with GeoTools shaded (from repo root)
 
-```
+```bash
+mvn clean install -DskipTests -Dgeotools
 cp spark-shaded/target/sedona-spark-shaded-*.jar $SPARK_HOME/jars/
 ```
 
-5) Install the following libraries
+4) Setup Python development environment
 
-```
-sudo apt-get -y install python3-pip python-dev libgeos-dev
-sudo pip3 install -U setuptools
-sudo pip3 install -U wheel
-sudo pip3 install -U virtualenvwrapper
-sudo pip3 install -U pipenv
-```
+The Python package uses `pyproject.toml` (PEP 517/518) with setuptools as the build backend. We recommend using [uv](https://docs.astral.sh/uv/) to manage virtual environments and dependencies.
 
-Homebrew can be used to install libgeos-dev in macOS:
-
-```
-brew install geos
-```
-
-6) Set up pipenv to the desired Python version: 3.8, 3.9, or 3.10
-
-```
+```bash
 cd python
-pipenv --python 3.8
+python -m pip install --upgrade uv
+uv venv --python 3.10   # or any supported version (>=3.8)
 ```
 
-7) Install the PySpark version and the other dependency
+5) Install the PySpark version and the other dependency
 
-```
+```bash
 cd python
-pipenv install pyspark==${SPARK_VERSION}
-pipenv install --dev
+# Use the correct PySpark version, otherwise latest version will be installed
+uv add pyspark==${SPARK_VERSION} --optional spark
+uv sync
 ```
 
-`pipenv install pyspark` installs the latest version of pyspark.
-In order to remain consistent with the installed spark version, use `pipenv install pyspark==<spark_version>`
+6) Install Sedona (editable) and run the Python tests
 
-8) Run the Python tests
-
-```
+```bash
 cd python
-pipenv run python setup.py build_ext --inplace
-pipenv run pytest tests
+uv pip install -e .
+uv run pytest -v tests
 ```
 
 ## Compile the documentation
