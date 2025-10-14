@@ -20,7 +20,7 @@ PIP := $(PYTHON) -m pip
 MKDOCS := mkdocs
 MIKE := mike
 
-.PHONY: check checkinstall checkupdate install docsinstall docsbuild clean test
+.PHONY: check checkinstall checkupdate install docs docs-full clean test
 
 check:
 	@echo "Running pre-commit checks..."
@@ -42,23 +42,27 @@ checkupdate: checkinstall
 	pre-commit autoupdate
 
 install:
-	@echo "Installing dependencies..."
-	@if [ -f requirements-dev.txt ]; then \
-		$(PIP) install -r requirements-dev.txt; \
-	else \
-		echo "Error: requirements-dev.txt not found."; \
-		exit 1; \
-	fi
+	@echo "(Deprecated shim) Use 'uv sync --group docs --group dev' instead of 'make install'."
+	@command -v uv >/dev/null 2>&1 || (echo 'uv not found, install via: curl -LsSf https://astral.sh/uv/install.sh | sh' && exit 1)
+	uv sync --group docs --group dev
 
-docsinstall:
-	@echo "Installing documentation dependencies..."
-	$(PIP) install -r requirements-docs.txt
+docs:
+	@echo "Building MkDocs site (dependencies via uv)"
+	@command -v uv >/dev/null 2>&1 || (echo 'uv not found, install via: curl -LsSf https://astral.sh/uv/install.sh | sh' && exit 1)
+	uv sync --group docs
+	uv run mkdocs serve
 
-docsbuild: docsinstall
-	@echo "Building documentation..."
-	$(MKDOCS) build
-	$(MIKE) deploy --update-aliases latest-snapshot -b website -p
-	$(MIKE) serve
+docs-full:
+	@echo "Building full documentation (MkDocs + Sphinx Python API)"
+	@command -v uv >/dev/null 2>&1 || (echo 'uv not found, install via: curl -LsSf https://astral.sh/uv/install.sh | sh' && exit 1)
+	uv sync --group docs
+	SPARK_VERSION=$$(mvn help:evaluate -Dexpression=spark.version -q -DforceStdout); \
+	uv pip install pyspark==$$SPARK_VERSION; \
+	uv pip install -e python/.[all]; \
+	uv run bash -c 'cd python/sedona/doc && make clean && make html'; \
+	mkdir -p docs/api/pydocs; \
+	cp -r python/sedona/doc/_build/html/* docs/api/pydocs/; \
+	uv run mkdocs build
 
 clean:
 	@echo "Cleaning up generated files... (TODO)"
