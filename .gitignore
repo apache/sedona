@@ -51,3 +51,7 @@ target
 
 # Ignore node_modules in docs-overrides
 docs-overrides/node_modules/
+
+
+# uv lock file is intentionally committed for reproducible doc builds
+# (Keep this note to avoid future accidental ignores)

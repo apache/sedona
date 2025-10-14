@@ -21,3 +21,47 @@ skips = ["B101", "B403", "B405", "B608"]
 [tool.codespell]
 ignore-words = '.github/linters/codespell.txt'
 skip = './docs/image,./docs/usecases,./site,./spark/common/src/test/resources,./tools/maven/scalafmt.conf'
+
+# ---------------------------------------------------------------------------
+# Root pyproject.toml used only for documentation & dev dependency management.
+# This is NOT a distributable Python package. Actual Sedona Python package is
+# defined in python/pyproject.toml. Do not publish this meta project.
+# ---------------------------------------------------------------------------
+[project]
+name = "sedona-monorepo-meta"
+version = "0.0.0"
+description = "Internal meta project for Sedona documentation and development tooling (not published)"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.8"
+
+[project.optional-dependencies]
+# Mirror of docs dependency group for familiarity (e.g. `pip install .[docs]`)
+docs = [
+  "mkdocs",
+  "mkdocs-material",
+  "mkdocs-git-revision-date-localized-plugin",
+  "mkdocs-jupyter",
+  "mkdocs-macros-plugin",
+  "pymdown-extensions",
+  "mike",
+  "blacken-docs",
+  "sphinx",
+  "sphinx_rtd_theme",
+]
+
+[tool.uv.dependency-groups]
+docs = [
+  "mkdocs",
+  "mkdocs-material",
+  "mkdocs-git-revision-date-localized-plugin",
+  "mkdocs-jupyter",
+  "mkdocs-macros-plugin",
+  "pymdown-extensions",
+  "mike",
+  "blacken-docs",
+  "sphinx",
+  "sphinx_rtd_theme",
+]
+# pre-commit only; bandit/codespell deferred (managed via pre-commit itself)
+dev = ["pre-commit"]
