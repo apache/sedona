@@ -5282,53 +5282,42 @@ Please replace <code>3.4</code> with Spark major.minor version when building for
 <h3 id="download-staged-jars">Download staged jars<a class="headerlink" href="#download-staged-jars" title="Permanent link">&para;</a></h3>
 <p>Sedona uses GitHub Actions to automatically generate jars per commit. You can go <a href="https://github.com/apache/sedona/actions/workflows/java.yml">here</a> and download the jars by clicking the commits <mark>Artifacts</mark> tag.</p>
 <h2 id="run-python-test">Run Python test<a class="headerlink" href="#run-python-test" title="Permanent link">&para;</a></h2>
-<p>1) Set up the environment variable SPARK_HOME and PYTHONPATH</p>
-<p>For example,</p>
-<div class="highlight"><pre><span></span><code>export SPARK_VERSION=3.4.0
-export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop3
-export PYTHONPATH=$SPARK_HOME/python
+<p>1) Set up Spark (download if needed) and environment variables</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">SPARK_VERSION</span><span class="o">=</span><span class="m">3</span>.4.0<span class="w">   </span><span class="c1"># or another supported version</span>
+wget<span class="w"> </span>https://archive.apache.org/dist/spark/spark-<span class="si">${</span><span class="nv">SPARK_VERSION</span><span class="si">}</span>/spark-<span class="si">${</span><span class="nv">SPARK_VERSION</span><span class="si">}</span>-bin-hadoop3.tgz
+tar<span class="w"> </span>-xvzf<span class="w"> </span>spark-<span class="si">${</span><span class="nv">SPARK_VERSION</span><span class="si">}</span>-bin-hadoop3.tgz
+rm<span class="w"> </span>spark-<span class="si">${</span><span class="nv">SPARK_VERSION</span><span class="si">}</span>-bin-hadoop3.tgz
+<span class="nb">export</span><span class="w"> </span><span class="nv">SPARK_HOME</span><span class="o">=</span><span class="nv">$PWD</span>/spark-<span class="si">${</span><span class="nv">SPARK_VERSION</span><span class="si">}</span>-bin-hadoop3
+<span class="nb">export</span><span class="w"> </span><span class="nv">PYTHONPATH</span><span class="o">=</span><span class="nv">$SPARK_HOME</span>/python
 </code></pre></div>
-<p>2) Install Spark if you haven't already</p>
-<div class="highlight"><pre><span></span><code>wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.tgz
-tar -xvzf spark-${SPARK_VERSION}-bin-hadoop3.tgz
-rm spark-${SPARK_VERSION}-bin-hadoop3.tgz
+<p>2) Add required JAI jars into $SPARK_HOME/jars</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">JAI_CORE_VERSION</span><span class="o">=</span><span class="s2">&quot;1.1.3&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">JAI_CODEC_VERSION</span><span class="o">=</span><span class="s2">&quot;1.1.3&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">JAI_IMAGEIO_VERSION</span><span class="o">=</span><span class="s2">&quot;1.1&quot;</span>
+wget<span class="w"> </span>-P<span class="w"> </span><span class="nv">$SPARK_HOME</span>/jars/<span class="w"> </span>https://repo.osgeo.org/repository/release/javax/media/jai_core/<span class="si">${</span><span class="nv">JAI_CORE_VERSION</span><span class="si">}</span>/jai_core-<span class="si">${</span><span class="nv">JAI_CORE_VERSION</span><span class="si">}</span>.jar
+wget<span class="w"> </span>-P<span class="w"> </span><span class="nv">$SPARK_HOME</span>/jars/<span class="w"> </span>https://repo.osgeo.org/repository/release/javax/media/jai_codec/<span class="si">${</span><span class="nv">JAI_CODEC_VERSION</span><span class="si">}</span>/jai_codec-<span class="si">${</span><span class="nv">JAI_CODEC_VERSION</span><span class="si">}</span>.jar
+wget<span class="w"> </span>-P<span class="w"> </span><span class="nv">$SPARK_HOME</span>/jars/<span class="w"> </span>https://repo.osgeo.org/repository/release/javax/media/jai_imageio/<span class="si">${</span><span class="nv">JAI_IMAGEIO_VERSION</span><span class="si">}</span>/jai_imageio-<span class="si">${</span><span class="nv">JAI_IMAGEIO_VERSION</span><span class="si">}</span>.jar
 </code></pre></div>
-<p>3) Put JAI jars to <mark>SPARK_HOME/jars/</mark> folder.</p>
-<div class="highlight"><pre><span></span><code>export JAI_CORE_VERSION=&quot;1.1.3&quot;
-export JAI_CODEC_VERSION=&quot;1.1.3&quot;
-export JAI_IMAGEIO_VERSION=&quot;1.1&quot;
-wget -P $SPARK_HOME/jars/ https://repo.osgeo.org/repository/release/javax/media/jai_core/${JAI_CORE_VERSION}/jai_core-${JAI_CORE_VERSION}.jar
-wget -P $SPARK_HOME/jars/ https://repo.osgeo.org/repository/release/javax/media/jai_codec/${JAI_CODEC_VERSION}/jai_codec-${JAI_CODEC_VERSION}.jar
-wget -P $SPARK_HOME/jars/ https://repo.osgeo.org/repository/release/javax/media/jai_imageio/${JAI_IMAGEIO_VERSION}/jai_imageio-${JAI_IMAGEIO_VERSION}.jar
+<p>3) Build Sedona Scala/Java jars with GeoTools shaded (from repo root)</p>
+<div class="highlight"><pre><span></span><code>mvn<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-DskipTests<span class="w"> </span>-Dgeotools
+cp<span class="w"> </span>spark-shaded/target/sedona-spark-shaded-*.jar<span class="w"> </span><span class="nv">$SPARK_HOME</span>/jars/
 </code></pre></div>
-<p>4) Compile the Sedona Scala and Java code with <code>-Dgeotools</code> and then copy the <mark>sedona-spark-shaded-1.8.0.jar</mark> to <mark>SPARK_HOME/jars/</mark> folder.</p>
-<div class="highlight"><pre><span></span><code>cp spark-shaded/target/sedona-spark-shaded-*.jar $SPARK_HOME/jars/
+<p>4) Setup Python development environment</p>
+<p>The Python package uses <code>pyproject.toml</code> (PEP 517/518) with setuptools as the build backend. We recommend using <a href="https://docs.astral.sh/uv/">uv</a> to manage virtual environments and dependencies.</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>python
+python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>uv
+uv<span class="w"> </span>venv<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.10<span class="w">   </span><span class="c1"># or any supported version (&gt;=3.8)</span>
 </code></pre></div>
-<p>5) Install the following libraries</p>
-<div class="highlight"><pre><span></span><code>sudo apt-get -y install python3-pip python-dev libgeos-dev
-sudo pip3 install -U setuptools
-sudo pip3 install -U wheel
-sudo pip3 install -U virtualenvwrapper
-sudo pip3 install -U pipenv
+<p>5) Install the PySpark version and the other dependency</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>python
+<span class="c1"># Use the correct PySpark version, otherwise latest version will be installed</span>
+uv<span class="w"> </span>add<span class="w"> </span><span class="nv">pyspark</span><span class="o">==</span><span class="si">${</span><span class="nv">SPARK_VERSION</span><span class="si">}</span><span class="w"> </span>--optional<span class="w"> </span>spark
+uv<span class="w"> </span>sync
 </code></pre></div>
-<p>Homebrew can be used to install libgeos-dev in macOS:</p>
-<div class="highlight"><pre><span></span><code>brew install geos
-</code></pre></div>
-<p>6) Set up pipenv to the desired Python version: 3.8, 3.9, or 3.10</p>
-<div class="highlight"><pre><span></span><code>cd python
-pipenv --python 3.8
-</code></pre></div>
-<p>7) Install the PySpark version and the other dependency</p>
-<div class="highlight"><pre><span></span><code>cd python
-pipenv install pyspark==${SPARK_VERSION}
-pipenv install --dev
-</code></pre></div>
-<p><code>pipenv install pyspark</code> installs the latest version of pyspark.
-In order to remain consistent with the installed spark version, use <code>pipenv install pyspark==&lt;spark_version&gt;</code></p>
-<p>8) Run the Python tests</p>
-<div class="highlight"><pre><span></span><code>cd python
-pipenv run python setup.py build_ext --inplace
-pipenv run pytest tests
+<p>6) Install Sedona (editable) and run the Python tests</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>python
+uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-v<span class="w"> </span>tests
 </code></pre></div>
 <h2 id="compile-the-documentation">Compile the documentation<a class="headerlink" href="#compile-the-documentation" title="Permanent link">&para;</a></h2>
 <p>The website is automatically built after each commit. The built website can be downloaded here:</p>
@@ -5390,7 +5379,7 @@ commit and stop <code>pre-commit</code> from checking the hooks. For example:</p
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 8, 2025 04:31:05 UTC">September 8, 2025 04:31:05</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="October 14, 2025 04:10:04 UTC">October 14, 2025 04:10:04</span>
   </span>
 
     
