@@ -50,7 +50,7 @@ docs = [
   "sphinx_rtd_theme",
 ]
 
-[tool.uv.dependency-groups]
+[dependency-groups]
 docs = [
   "mkdocs",
   "mkdocs-material",
