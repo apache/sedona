@@ -1,0 +1,101 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "apache-sedona"
+version = "1.8.0"
+description = "Apache Sedona is a cluster computing system for processing large-scale spatial data"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+authors = [ { name = "Apache Sedona", email = "dev@sedona.apache.org" } ]
+requires-python = ">=3.8"
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: Apache Software License",
+]
+dependencies = [
+  "attrs",
+  "shapely>=1.7.0",
+]
+
+[project.optional-dependencies]
+spark = ["pyspark>=3.4.0"]
+pydeck-map = ["geopandas", "pydeck==0.8.0"]
+kepler-map = ["geopandas", "keplergl==0.3.2"]
+flink = ["apache-flink>=1.19.0"]
+db = ["sedonadb[geopandas]; python_version >= '3.9'"]
+all = [
+  "pyspark>=3.4.0",
+  "geopandas",
+  "pydeck==0.8.0",
+  "keplergl==0.3.2",
+  "rasterio>=1.2.10",
+]
+
+[dependency-groups]
+dev = [
+  "pytest",
+  "pytest-cov",
+  "notebook==6.4.12",
+  "jupyter",
+  "mkdocs",
+  "scikit-learn",
+  "esda",
+  "libpysal",
+  "matplotlib",  # implicit dependency of esda
+  # prevent incompatibility with pysal 4.7.0, which is what is resolved to when shapely >2 is specified
+  "scipy<=1.10.0",
+  "pandas>=2.0.0",
+  "numpy<2",
+  "geopandas",
+  # https://stackoverflow.com/questions/78949093/how-to-resolve-attributeerror-module-fiona-has-no-attribute-path
+  # cannot set geopandas>=0.14.4 since it doesn't support python 3.8, so we pin fiona to <1.10.0
+  "fiona<1.10.0",
+  "pyarrow",
+  "pyspark>=3.4.0",
+  "keplergl==0.3.2",
+  "pydeck==0.8.0",
+  "pystac==1.5.0",
+  "rasterio>=1.2.10",
+]
+
+[project.urls]
+HomePage = "https://sedona.apache.org"
+Documentation = "https://sedona.apache.org"
+"Source code" = "https://github.com/apache/sedona"
+"Bug Reports" = "https://issues.apache.org/jira/projects/SEDONA"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["sedona*"]
+exclude = ["*.tests", "*.tests.*", "tests", "tests.*"]
+
+# C extension module for geometry serialization speedup
+[[tool.setuptools.ext-modules]]
+name = "sedona.spark.utils.geomserde_speedup"
+sources = [
+  "src/geomserde_speedup_module.c",
+  "src/geomserde.c",
+  "src/geom_buf.c",
+  "src/geos_c_dyn.c",
+]

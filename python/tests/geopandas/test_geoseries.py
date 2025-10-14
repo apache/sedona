@@ -848,6 +848,102 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = s.to_geoframe().difference(s2, align=False)
         self.check_sgpd_equals_gpd(df_result, expected)
 
+    def test_symmetric_difference(self):
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (2, 2), (0, 2)]),
+                Polygon([(0, 0), (2, 2), (0, 2)]),
+                LineString([(0, 0), (2, 2)]),
+                LineString([(2, 0), (0, 2)]),
+                Point(0, 1),
+            ],
+        )
+        s2 = GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                LineString([(1, 0), (1, 3)]),
+                LineString([(2, 0), (0, 2)]),
+                Point(1, 1),
+                Point(0, 1),
+            ],
+            index=range(1, 6),
+        )
+
+        # Test with single geometry
+        result = s.symmetric_difference(Polygon([(0, 0), (1, 1), (0, 1)]))
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 2), (2, 2), (1, 1), (0, 1), (0, 2)]),
+                Polygon([(0, 2), (2, 2), (1, 1), (0, 1), (0, 2)]),
+                GeometryCollection(
+                    [
+                        Polygon([(0, 0), (0, 1), (1, 1), (0, 0)]),
+                        LineString([(1, 1), (2, 2)]),
+                    ]
+                ),
+                GeometryCollection(
+                    [
+                        Polygon([(0, 0), (0, 1), (1, 1), (0, 0)]),
+                        LineString([(2, 0), (1, 1)]),
+                        LineString([(1, 1), (0, 2)]),
+                    ]
+                ),
+                Polygon([(0, 1), (1, 1), (0, 0), (0, 1)]),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Test with align=True
+        result = s.symmetric_difference(s2, align=True)
+        expected = gpd.GeoSeries(
+            [
+                None,
+                Polygon([(0, 2), (2, 2), (1, 1), (0, 1), (0, 2)]),
+                MultiLineString(
+                    [
+                        LineString([(0, 0), (1, 1)]),
+                        LineString([(1, 1), (2, 2)]),
+                        LineString([(1, 0), (1, 1)]),
+                        LineString([(1, 1), (1, 3)]),
+                    ]
+                ),
+                LineString(),
+                MultiPoint([Point(0, 1), Point(1, 1)]),
+                None,
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Test with align=False
+        result = s.symmetric_difference(s2, align=False)
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 2), (2, 2), (1, 1), (0, 1), (0, 2)]),
+                GeometryCollection(
+                    [
+                        Polygon([(0, 0), (0, 2), (1, 2), (2, 2), (1, 1), (0, 0)]),
+                        LineString([(1, 0), (1, 1)]),
+                        LineString([(1, 1), (1, 3)]),
+                    ]
+                ),
+                MultiLineString(
+                    [
+                        LineString([(0, 0), (1, 1)]),
+                        LineString([(1, 1), (2, 2)]),
+                        LineString([(2, 0), (1, 1)]),
+                        LineString([(1, 1), (0, 2)]),
+                    ]
+                ),
+                LineString([(2, 0), (0, 2)]),
+                Point(),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().symmetric_difference(s2, align=False)
+        self.check_sgpd_equals_gpd(df_result, expected)
+
     def test_is_simple(self):
         s = sgpd.GeoSeries(
             [
@@ -885,7 +981,20 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         pass
 
     def test_is_closed(self):
-        pass
+        s = GeoSeries(
+            [
+                LineString([(0, 0), (1, 1), (1, -1)]),
+                LineString([(0, 0), (1, 1), (1, -1), (0, 0)]),
+                LinearRing([(0, 0), (1, 1), (1, -1)]),
+            ]
+        )
+        result = s.is_closed
+        expected = pd.Series([False, True, True])
+        self.check_pd_series_equal(result, expected)
+
+        # Check that GeoDataFrame works too
+        result = s.to_geoframe().is_closed
+        self.check_pd_series_equal(result, expected)
 
     def test_has_z(self):
         s = sgpd.GeoSeries(

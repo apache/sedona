@@ -946,6 +946,18 @@ class GeoSeries(GeoFrame, pspd.Series):
             returns_geom=True,
         )
 
+    def symmetric_difference(self, other, align=None) -> "GeoSeries":
+        other_series, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
+        spark_expr = stf.ST_SymDifference(F.col("L"), F.col("R"))
+        return self._row_wise_operation(
+            spark_expr,
+            other_series,
+            align=align,
+            returns_geom=True,
+        )
+
     @property
     def is_simple(self) -> pspd.Series:
         spark_expr = stf.ST_IsSimple(self.spark.column)
@@ -976,13 +988,17 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def is_closed(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError(
-            _not_implemented_error(
-                "is_closed",
-                "Tests if LineString geometries are closed (start equals end point).",
-            )
+        # Only check LineStrings; return False for all other geometry types
+        spark_expr = F.when(
+            stf.ST_GeometryType(self.spark.column) == "ST_LineString",
+            stf.ST_IsClosed(self.spark.column),
+        ).otherwise(False)
+
+        result = self._query_geometry_column(
+            spark_expr,
+            returns_geom=False,
         )
+        return _to_bool(result)
 
     @property
     def has_z(self) -> pspd.Series:

@@ -564,6 +564,28 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                 )
                 self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
+    def test_symmetric_difference(self):
+        for geom, geom2 in self.pairs:
+            # Operation doesn't work on invalid geometries
+            if (
+                not gpd.GeoSeries(geom).is_valid.all()
+                or not gpd.GeoSeries(geom2).is_valid.all()
+            ):
+                continue
+
+            sgpd_result = GeoSeries(geom).symmetric_difference(GeoSeries(geom2))
+            gpd_result = gpd.GeoSeries(geom).symmetric_difference(gpd.GeoSeries(geom2))
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).symmetric_difference(
+                    GeoSeries(geom2), align=False
+                )
+                gpd_result = gpd.GeoSeries(geom).symmetric_difference(
+                    gpd.GeoSeries(geom2), align=False
+                )
+                self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
     def test_is_simple(self):
         # 'is_simple' is meaningful only for `LineStrings` and `LinearRings`
         data = [
@@ -588,7 +610,13 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_is_closed(self):
-        pass
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            pytest.skip("geopandas is_closed requires version 1.0.0 or higher")
+        # Test all geometry types to ensure non-LineString/LinearRing geometries return False
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).is_closed
+            gpd_result = gpd.GeoSeries(geom).is_closed
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_has_z(self):
         for geom in self.geoms:
