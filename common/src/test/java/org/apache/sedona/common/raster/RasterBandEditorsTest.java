@@ -259,10 +259,9 @@ public class RasterBandEditorsTest extends RasterTestBase {
 
   @Test
   public void testClipWithClippedGeometryWithHole()
-      throws FactoryException, TransformException, ParseException {
-    Configuration conf = new Configuration();
-    Path path = new Path(resourceFolder + "rasterization/test_rasterization.tiff");
-    GridCoverage2D raster = new LazyLoadOutDbGridCoverage2D("test", path, conf);
+      throws FactoryException, TransformException, ParseException, IOException {
+    GridCoverage2D raster =
+        rasterFromGeoTiff(resourceFolder + "rasterization/test_rasterization.tiff");
     String polygon =
         "POLYGON ((-116.974798 27.410563, -113.10645 25.244469, -110.249147 27.566499, -110.205189 28.420171, -111.392068 29.036741, -109.28206 29.420242, -107.831429 28.49744, -108.446848 27.566499, -107.391844 25.720509, -102.995994 24.08636, -99.479314 27.722214, -112.183321 32.063743, -116.974798 27.410563))";
     Geometry geom = Constructors.geomFromWKT(polygon, 4326);
