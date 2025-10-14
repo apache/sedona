@@ -258,6 +258,31 @@ public class RasterBandEditorsTest extends RasterTestBase {
   }
 
   @Test
+  public void testClipWithClippedGeometryWithHole()
+      throws FactoryException, TransformException, ParseException {
+    Configuration conf = new Configuration();
+    Path path = new Path(resourceFolder + "rasterization/test_rasterization.tiff");
+    GridCoverage2D raster = new LazyLoadOutDbGridCoverage2D("test", path, conf);
+    String polygon =
+        "POLYGON ((-116.974798 27.410563, -113.10645 25.244469, -110.249147 27.566499, -110.205189 28.420171, -111.392068 29.036741, -109.28206 29.420242, -107.831429 28.49744, -108.446848 27.566499, -107.391844 25.720509, -102.995994 24.08636, -99.479314 27.722214, -112.183321 32.063743, -116.974798 27.410563))";
+    Geometry geom = Constructors.geomFromWKT(polygon, 4326);
+    GridCoverage2D clippedRaster = RasterBandEditors.clip(raster, 1, geom, true, 0, true);
+
+    double bandNoDataValue = RasterBandAccessors.getBandNoDataValue(clippedRaster);
+    double expectedBandNoDataValue = 0.0;
+    double[] actualValues = MapAlgebra.bandAsArray(clippedRaster, 1);
+    double[] expectedValues = {
+      0.0, 42.0, 43.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 51.0, 52.0, 53.0, 54.0, 55.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 61.0, 62.0, 63.0, 64.0, 65.0, 66.0, 67.0, 68.0, 0.0, 0.0, 71.0, 72.0, 73.0,
+      74.0, 75.0, 76.0, 77.0, 78.0, 79.0, 80.0, 81.0, 82.0, 83.0, 84.0, 0.0, 86.0, 87.0, 88.0, 89.0,
+      90.0, 91.0, 92.0, 93.0, 94.0, 0.0, 96.0, 97.0, 98.0, 99.0, 100.0
+    };
+
+    assertEquals(expectedBandNoDataValue, bandNoDataValue, FP_TOLERANCE);
+    assertArrayEquals(expectedValues, actualValues, 0.0);
+  }
+
+  @Test
   public void testClip()
       throws IOException, FactoryException, TransformException, ParseException,
           ClassNotFoundException {
