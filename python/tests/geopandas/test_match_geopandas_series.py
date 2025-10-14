@@ -566,11 +566,6 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
     def test_symmetric_difference(self):
         for geom, geom2 in self.pairs:
-            # Sedona doesn't support difference for GeometryCollections
-            if isinstance(geom[0], GeometryCollection) or isinstance(
-                geom2[0], GeometryCollection
-            ):
-                continue
             # Operation doesn't work on invalid geometries
             if (
                 not gpd.GeoSeries(geom).is_valid.all()
