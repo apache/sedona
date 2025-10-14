@@ -302,6 +302,8 @@ Introduction: Computes an approximate medial axis of a polygonal geometry. The m
 
 The pruning removes small branches that represent minor penetrations into corners. A branch is pruned if its penetration depth is less than 20% of the width of the corner it bisects.
 
+This function may have significant performance limitations when processing polygons with a very large number of vertices. For very large polygons (e.g., 10,000+ vertices), applying vertex reduction or simplification is essential to achieve practical computation times.
+
 Format: `ST_ApproximateMedialAxis(geom: Geometry)`
 
 Since: `v1.8.0`
@@ -4379,6 +4381,8 @@ POINT(100 150)
 Introduction: Computes the straight skeleton of a polygonal geometry. The straight skeleton is a method of representing a polygon by a topological skeleton, formed by a continuous shrinking process where each edge moves inward in parallel at a uniform speed.
 
 This function uses the weighted straight skeleton algorithm based on Felkel's approach.
+
+This function may have significant performance limitations when processing polygons with a very large number of vertices. For very large polygons (e.g., 10,000+ vertices), applying vertex reduction or simplification is essential to achieve practical computation times.
 
 Format: `ST_StraightSkeleton(geom: Geometry)`
 
