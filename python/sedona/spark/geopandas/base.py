@@ -2140,6 +2140,110 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("difference", self, other, align)
 
+    def symmetric_difference(self, other, align=None):
+        """Return a ``GeoSeries`` of the symmetric difference of points in
+        each aligned geometry with `other`.
+
+        For each geometry, the symmetric difference consists of points in the
+        geometry not in `other`, and points in `other` not in the geometry.
+
+        The operation works on a 1-to-1 row-wise manner.
+
+        Parameters
+        ----------
+        other : Geoseries or geometric object
+            The Geoseries (elementwise) or geometric object to find the
+            symmetric difference to.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices.
+            If False, the order of elements is preserved. None defaults to True.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
+        ...         Polygon([(0, 0), (2, 2), (0, 2)]),
+        ...         LineString([(0, 0), (2, 2)]),
+        ...         LineString([(2, 0), (0, 2)]),
+        ...         Point(0, 1),
+        ...     ],
+        ... )
+        >>> s2 = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
+        ...         LineString([(1, 0), (1, 3)]),
+        ...         LineString([(2, 0), (0, 2)]),
+        ...         Point(1, 1),
+        ...         Point(0, 1),
+        ...     ],
+        ...     index=range(1, 6),
+        ... )
+
+        >>> s
+        0    POLYGON ((0 0, 2 2, 0 2, 0 0))
+        1    POLYGON ((0 0, 2 2, 0 2, 0 0))
+        2             LINESTRING (0 0, 2 2)
+        3             LINESTRING (2 0, 0 2)
+        4                       POINT (0 1)
+        dtype: geometry
+
+        >>> s2
+        1    POLYGON ((0 0, 1 1, 0 1, 0 0))
+        2             LINESTRING (1 0, 1 3)
+        3             LINESTRING (2 0, 0 2)
+        4                       POINT (1 1)
+        5                       POINT (0 1)
+        dtype: geometry
+
+        We can do symmetric difference of each geometry and a single
+        shapely geometry:
+
+        >>> s.symmetric_difference(Polygon([(0, 0), (1, 1), (0, 1)]))
+        0                  POLYGON ((0 2, 2 2, 1 1, 0 1, 0 2))
+        1                  POLYGON ((0 2, 2 2, 1 1, 0 1, 0 2))
+        2    GEOMETRYCOLLECTION (POLYGON ((0 0, 0 1, 1 1, 0...
+        3    GEOMETRYCOLLECTION (POLYGON ((0 0, 0 1, 1 1, 0...
+        4                       POLYGON ((0 1, 1 1, 0 0, 0 1))
+        dtype: geometry
+
+        We can also check two GeoSeries against each other, row by row.
+        The GeoSeries above have different indices. We can either align both GeoSeries
+        based on index values and compare elements with the same index using
+        ``align=True`` or ignore index and compare elements based on their matching
+        order using ``align=False``:
+
+        >>> s.symmetric_difference(s2, align=True)
+        0                                                 None
+        1                  POLYGON ((0 2, 2 2, 1 1, 0 1, 0 2))
+        2    MULTILINESTRING ((0 0, 1 1), (1 1, 2 2), (1 0,...
+        3                                     LINESTRING EMPTY
+        4                            MULTIPOINT ((0 1), (1 1))
+        5                                                 None
+        dtype: geometry
+
+        >>> s.symmetric_difference(s2, align=False)
+        0                  POLYGON ((0 2, 2 2, 1 1, 0 1, 0 2))
+        1    GEOMETRYCOLLECTION (POLYGON ((0 0, 0 2, 1 2, 2...
+        2    MULTILINESTRING ((0 0, 1 1), (1 1, 2 2), (2 0,...
+        3                                LINESTRING (2 0, 0 2)
+        4                                          POINT EMPTY
+        dtype: geometry
+
+        See also
+        --------
+        GeoSeries.difference
+        GeoSeries.union
+        GeoSeries.intersection
+        """
+        return _delegate_to_geometry_column("symmetric_difference", self, other, align)
+
     def intersection_all(self):
         raise NotImplementedError("This method is not implemented yet.")
 
