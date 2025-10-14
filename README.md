@@ -119,9 +119,9 @@ These are some of the key features of Apache Sedona, but it may offer additional
 ## When to use Sedona?
 
 
-## Building documentation locally (modernized uv workflow)
+## Building documentation locally
 
-The documentation (MkDocs + Sphinx + Mike) dependencies are now managed via the root `pyproject.toml` using `uv`.
+Documentation (MkDocs + Sphinx + Mike) dependencies are managed via the root `pyproject.toml` using `uv`.
 
 Prerequisites:
 - Python >= 3.8
@@ -153,7 +153,7 @@ cp -r python/sedona/doc/_build/html/* docs/api/pydocs/
 uv run mkdocs serve
 ```
 
-The legacy `requirements-dev.txt` and `requirements-docs.txt` have been removed in favor of dependency groups defined in `pyproject.toml`.
+Dependency groups are defined in `pyproject.toml` and resolved with `uv sync --group docs`.
 
 ### Use Cases:
 
