@@ -958,6 +958,18 @@ class GeoSeries(GeoFrame, pspd.Series):
             returns_geom=True,
         )
 
+    def union(self, other, align=None) -> "GeoSeries":
+        other_series, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
+        spark_expr = stf.ST_Union(F.col("L"), F.col("R"))
+        return self._row_wise_operation(
+            spark_expr,
+            other_series,
+            align=align,
+            returns_geom=True,
+        )
+
     @property
     def is_simple(self) -> pspd.Series:
         spark_expr = stf.ST_IsSimple(self.spark.column)
