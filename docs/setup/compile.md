@@ -82,7 +82,7 @@ Sedona uses GitHub Actions to automatically generate jars per commit. You can go
 ```bash
 export SPARK_VERSION=3.4.0   # or another supported version
 wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.tgz
- tar -xvzf spark-${SPARK_VERSION}-bin-hadoop3.tgz
+tar -xvzf spark-${SPARK_VERSION}-bin-hadoop3.tgz
 rm spark-${SPARK_VERSION}-bin-hadoop3.tgz
 export SPARK_HOME=$PWD/spark-${SPARK_VERSION}-bin-hadoop3
 export PYTHONPATH=$SPARK_HOME/python
@@ -129,7 +129,7 @@ uv sync
 
 ```bash
 cd python
-uv run pip install -e .
+uv pip install -e .
 uv run pytest -v tests
 ```
 
