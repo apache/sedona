@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.common.raster;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;

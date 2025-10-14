@@ -633,11 +633,11 @@ public class Rasterization {
           }
         } else {
           double slope = (worldP2.y - worldP1.y) / (worldP2.x - worldP1.x);
+          double xMin = (geomExtent.getMinX() - params.upperLeftX) / params.scaleX;
+          double xMax = (geomExtent.getMaxX() - params.upperLeftX) / params.scaleX;
 
           for (double y = yStart; y >= yEnd; y--) {
             double xIntercept = p1X + ((p1Y - y) / slope);
-            double xMin = (geomExtent.getMinX() - params.upperLeftX) / params.scaleX;
-            double xMax = (geomExtent.getMaxX() - params.upperLeftX) / params.scaleX;
             if ((xIntercept < xMin) || (xIntercept >= xMax)) {
               continue; // Skip xIntercepts outside geomExtent
             }
