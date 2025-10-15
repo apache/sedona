@@ -944,6 +944,101 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = s.to_geoframe().symmetric_difference(s2, align=False)
         self.check_sgpd_equals_gpd(df_result, expected)
 
+    def test_union(self):
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (2, 2), (0, 2)]),
+                Polygon([(0, 0), (2, 2), (0, 2)]),
+                LineString([(0, 0), (2, 2)]),
+                LineString([(2, 0), (0, 2)]),
+                Point(0, 1),
+            ],
+        )
+        s2 = GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                LineString([(1, 0), (1, 3)]),
+                LineString([(2, 0), (0, 2)]),
+                Point(1, 1),
+                Point(0, 1),
+            ],
+            index=range(1, 6),
+        )
+
+        # Test with single geometry
+        result = s.union(Polygon([(0, 0), (1, 1), (0, 1)]))
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (0, 1), (0, 2), (2, 2), (1, 1), (0, 0)]),
+                Polygon([(0, 0), (0, 1), (0, 2), (2, 2), (1, 1), (0, 0)]),
+                GeometryCollection(
+                    [
+                        Polygon([(0, 0), (0, 1), (1, 1), (0, 0)]),
+                        LineString([(0, 0), (2, 2)]),
+                    ]
+                ),
+                GeometryCollection(
+                    [
+                        Polygon([(0, 0), (0, 1), (1, 1), (0, 0)]),
+                        LineString([(2, 0), (0, 2)]),
+                    ]
+                ),
+                Polygon([(0, 1), (1, 1), (0, 0), (0, 1)]),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Test with align=True
+        result = s.union(s2, align=True)
+        expected = gpd.GeoSeries(
+            [
+                None,
+                Polygon([(0, 0), (0, 1), (0, 2), (2, 2), (1, 1), (0, 0)]),
+                MultiLineString(
+                    [
+                        LineString([(0, 0), (1, 1)]),
+                        LineString([(1, 1), (2, 2)]),
+                        LineString([(1, 0), (1, 1)]),
+                        LineString([(1, 1), (1, 3)]),
+                    ]
+                ),
+                LineString([(2, 0), (0, 2)]),
+                MultiPoint([Point(0, 1), Point(1, 1)]),
+                None,
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Test with align=False
+        result = s.union(s2, align=False)
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (0, 1), (0, 2), (2, 2), (1, 1), (0, 0)]),
+                GeometryCollection(
+                    [
+                        Polygon([(0, 0), (0, 2), (1, 2), (2, 2), (1, 1), (0, 0)]),
+                        LineString([(1, 0), (1, 1)]),
+                        LineString([(1, 1), (1, 3)]),
+                    ]
+                ),
+                MultiLineString(
+                    [
+                        LineString([(0, 0), (1, 1)]),
+                        LineString([(1, 1), (2, 2)]),
+                        LineString([(2, 0), (1, 1)]),
+                        LineString([(1, 1), (0, 2)]),
+                    ]
+                ),
+                LineString([(2, 0), (0, 2)]),
+                Point(0, 1),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().union(s2, align=False)
+        self.check_sgpd_equals_gpd(df_result, expected)
+
     def test_is_simple(self):
         s = sgpd.GeoSeries(
             [
