@@ -377,9 +377,9 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>com.github.twak</groupId>
+                <groupId>org.datasyslab</groupId>
                 <artifactId>campskeleton</artifactId>
-                <version>0.0.1</version>
+                <version>0.0.2-20251014</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -420,10 +420,6 @@
         <repository>
             <id>Spark Packages</id>
             <url>https://repos.spark-packages.org/</url>
-        </repository>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
         </repository>
     </repositories>
     <build>
