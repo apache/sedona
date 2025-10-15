@@ -305,6 +305,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.transform"><code class="docutils literal notranslate"><span class="pre">GeoSeries.transform()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.type"><code class="docutils literal notranslate"><span class="pre">GeoSeries.type</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.unary_union"><code class="docutils literal notranslate"><span class="pre">GeoSeries.unary_union</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.union"><code class="docutils literal notranslate"><span class="pre">GeoSeries.union()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.union_all"><code class="docutils literal notranslate"><span class="pre">GeoSeries.union_all()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.voronoi_polygons"><code class="docutils literal notranslate"><span class="pre">GeoSeries.voronoi_polygons()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.within"><code class="docutils literal notranslate"><span class="pre">GeoSeries.within()</span></code></a></li>
@@ -1434,6 +1435,21 @@
         <span class="n">align</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">extended</span> <span class="k">else</span> <span class="n">align</span>
 
         <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_SymDifference</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_row_wise_operation</span><span class="p">(</span>
+            <span class="n">spark_expr</span><span class="p">,</span>
+            <span class="n">other_series</span><span class="p">,</span>
+            <span class="n">align</span><span class="o">=</span><span class="n">align</span><span class="p">,</span>
+            <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GeoSeries.union">
+<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.union">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">union</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeoSeries&quot;</span><span class="p">:</span>
+        <span class="n">other_series</span><span class="p">,</span> <span class="n">extended</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_series_of_val</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="n">align</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">extended</span> <span class="k">else</span> <span class="n">align</span>
+
+        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_Union</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_row_wise_operation</span><span class="p">(</span>
             <span class="n">spark_expr</span><span class="p">,</span>
             <span class="n">other_series</span><span class="p">,</span>
