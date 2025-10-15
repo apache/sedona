@@ -796,6 +796,30 @@
 
 
 
+<div class="viewcode-block" id="ST_ApproximateMedialAxis">
+<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_ApproximateMedialAxis">[docs]</a>
+<span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_ApproximateMedialAxis</span><span class="p">(</span>
+    <span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">max_vertices</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute an approximate medial axis of an areal geometry by computing the straight skeleton</span>
+<span class="sd">    and filtering to keep only interior edges. The medial axis provides a centerline representation</span>
+<span class="sd">    of polygons that is useful for various spatial analysis tasks.</span>
+
+<span class="sd">    :param geometry: Polygon or MultiPolygon geometry column to compute the medial axis for.</span>
+<span class="sd">    :type geometry: ColumnOrName</span>
+<span class="sd">    :param max_vertices: Optional maximum number of vertices to keep in the input geometry before computing.</span>
+<span class="sd">        If the geometry has more vertices, it will be simplified. This improves performance for complex geometries.</span>
+<span class="sd">    :type max_vertices: Optional[Union[ColumnOrName, int]]</span>
+<span class="sd">    :return: MultiLineString representing the approximate medial axis as a geometry column.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">max_vertices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_ApproximateMedialAxis&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">max_vertices</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_ApproximateMedialAxis&quot;</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="barrier">
 <a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.barrier">[docs]</a>
 <span class="nd">@validate_argument_types</span>
@@ -2580,6 +2604,30 @@
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_StartPoint&quot;</span><span class="p">,</span> <span class="n">line_string</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ST_StraightSkeleton">
+<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_StraightSkeleton">[docs]</a>
+<span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_StraightSkeleton</span><span class="p">(</span>
+    <span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">max_vertices</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the straight skeleton of an areal geometry. The straight skeleton is a method</span>
+<span class="sd">    of representing a polygon by a topological skeleton formed by a continuous shrinking process</span>
+<span class="sd">    where each edge moves inward in parallel at a uniform speed.</span>
+
+<span class="sd">    :param geometry: Polygon or MultiPolygon geometry column to compute the straight skeleton for.</span>
+<span class="sd">    :type geometry: ColumnOrName</span>
+<span class="sd">    :param max_vertices: Optional maximum number of vertices to keep in the input geometry before computing.</span>
+<span class="sd">        If the geometry has more vertices, it will be simplified. This improves performance for complex geometries.</span>
+<span class="sd">    :type max_vertices: Optional[Union[ColumnOrName, int]]</span>
+<span class="sd">    :return: MultiLineString representing the straight skeleton as a geometry column.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">max_vertices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_StraightSkeleton&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">max_vertices</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_StraightSkeleton&quot;</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span></div>
 
 
 
