@@ -51,7 +51,7 @@ public class StraightSkeleton {
    * reasonable size (around 100 units). Geometries are scaled to have their maximum dimension equal
    * to this value.
    */
-  private static final double NORMALIZED_SIZE = 100.0;
+  private static final double NORMALIZED_SIZE = 1000.0;
 
   /**
    * Default roof slope angle (in radians) for the skeleton machine. This represents the angle at

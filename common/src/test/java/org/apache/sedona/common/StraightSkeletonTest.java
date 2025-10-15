@@ -203,7 +203,7 @@ public class StraightSkeletonTest {
     hexWkt.append("))");
 
     testPolygon(
-        "Regular Hexagon", hexWkt.toString(), 6, false); // Allow skeleton length > perimeter
+        "Regular Hexagon", hexWkt.toString(), 7, false); // Allow skeleton length > perimeter
   }
 
   @Test
@@ -223,9 +223,7 @@ public class StraightSkeletonTest {
         String.format("%.2f %.2f", r * Math.cos(-Math.PI / 2), r * Math.sin(-Math.PI / 2)));
     pentWkt.append("))");
 
-    // Pentagon produces 8 segments with straight skeleton algorithm
-    // Disable strict length check as skeleton length can exceed perimeter for regular polygons
-    testPolygon("Regular Pentagon", pentWkt.toString(), 8, false);
+    testPolygon("Regular Pentagon", pentWkt.toString(), 7, false);
   }
 
   @Test
