@@ -1374,12 +1374,12 @@ public class TestFunctions extends TestBase {
     registerUDF("ST_ApproximateMedialAxis", byte[].class);
     registerUDF("GeometryType", byte[].class);
     verifySqlSingleRes(
-        "SELECT sedona.GeometryType(sedona.ST_ApproximateMedialAxis(sedona.ST_GeomFromWKT('POLYGON ((1 1, 1 3, 4 3, 4 1, 1 1))')))",
+        "SELECT sedona.GeometryType(sedona.ST_ApproximateMedialAxis(sedona.ST_GeomFromWKT('POLYGON ((45 0, 55 0, 55 40, 70 40, 70 50, 30 50, 30 40, 45 40, 45 0))')))",
         "MULTILINESTRING");
 
     registerUDF("ST_ApproximateMedialAxis", byte[].class, int.class);
     verifySqlSingleRes(
-        "SELECT sedona.GeometryType(sedona.ST_ApproximateMedialAxis(sedona.ST_GeomFromWKT('POLYGON ((0 0, 4 0, 4 4, 0 4, 0 0))'), 10))",
+        "SELECT sedona.GeometryType(sedona.ST_ApproximateMedialAxis(sedona.ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 5, 5 5, 5 10, 0 10, 0 0))'), 100))",
         "MULTILINESTRING");
   }
 }
