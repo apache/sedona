@@ -2535,5 +2535,46 @@ class dataFrameAPITestScala extends TestBaseScala {
           assert(actual == expected, s"Expected $expected but got $actual")
         }
     }
+
+    it("Passed ST_StraightSkeleton") {
+      val baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 0.5 0.5, 1 1, 0 1, 0 0))') as poly")
+      val result = baseDf.select(ST_StraightSkeleton(col("poly"))).first().get(0)
+      assert(result != null)
+      val skeleton = result.asInstanceOf[Geometry]
+      assert(skeleton.getGeometryType == "MultiLineString")
+      assert(skeleton.getNumGeometries > 0)
+    }
+
+    it("Passed ST_StraightSkeleton with maxVertices") {
+      val baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 0.5 0.5, 1 1, 0 1, 0 0))') as poly")
+      val result = baseDf.select(ST_StraightSkeleton(col("poly"), lit(100))).first().get(0)
+      assert(result != null)
+      val skeleton = result.asInstanceOf[Geometry]
+      assert(skeleton.getGeometryType == "MultiLineString")
+    }
+
+    it("Passed ST_ApproximateMedialAxis") {
+      val baseDf =
+        sparkSession.sql(
+          "SELECT ST_GeomFromWKT('POLYGON ((0 0, 100 0, 100 40, 40 40, 40 100, 0 100, 0 0))') as poly")
+      val result = baseDf.select(ST_ApproximateMedialAxis(col("poly"))).first().get(0)
+      assert(result != null)
+      val medialAxis = result.asInstanceOf[Geometry]
+      assert(medialAxis.getGeometryType == "MultiLineString")
+      // L-shaped polygon should have interior edges
+      assert(medialAxis.getNumGeometries > 0)
+    }
+
+    it("Passed ST_ApproximateMedialAxis with maxVertices") {
+      val baseDf =
+        sparkSession.sql(
+          "SELECT ST_GeomFromWKT('POLYGON ((0 0, 100 0, 100 40, 40 40, 40 100, 0 100, 0 0))') as poly")
+      val result = baseDf.select(ST_ApproximateMedialAxis(col("poly"), lit(100))).first().get(0)
+      assert(result != null)
+      val medialAxis = result.asInstanceOf[Geometry]
+      assert(medialAxis.getGeometryType == "MultiLineString")
+    }
   }
 }

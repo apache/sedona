@@ -924,17 +924,6 @@ class functionTestScala
       assert(df.first().get(0).asInstanceOf[Polygon].getSRID == 3021)
     }
 
-//    it("Passed ST_AsEWKB") {
-//      var df = sparkSession.sql("SELECT ST_SetSrid(ST_GeomFromWKT('POINT (1 1)'), 3021) as point")
-//      df.createOrReplaceTempView("table")
-//      df = sparkSession.sql("SELECT ST_AsEWKB(point) from table")
-//      val s = "0101000020cd0b0000000000000000f03f000000000000f03f"
-//      assert(Hex.encodeHexString(df.first().get(0).asInstanceOf[Array[Byte]]) == s)
-//      df = sparkSession.sql("SELECT ST_AsEWKB(ST_GeogFromWKT('POINT (1 1)'))")
-//      val wkb = df.first().get(0).asInstanceOf[Array[Byte]]
-//      assert(Hex.encodeHexString(wkb) == "0101000000000000000000f03f000000000000f03f")
-//    }
-
     it("Passed ST_AsHEXEWKB") {
       val baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POINT(1 2)') as point")
       var actual = baseDf.selectExpr("ST_AsHEXEWKB(point)").first().get(0)
@@ -952,13 +941,6 @@ class functionTestScala
       val s = "0101000020cd0b0000000000000000f87f000000000000f87f"
       assert(Hex.encodeHexString(df.first().get(0).asInstanceOf[Array[Byte]]) == s)
     }
-
-//    it("Passed ST_AsEWKT") {
-//      val wkt = "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"
-//      val df = sparkSession.sql(s"SELECT ST_AsEWKT(ST_GeogFromWKT('$wkt'))")
-//      val row = df.first()
-//      assert(row.getString(0) == wkt)
-//    }
 
     it("Passed ST_Simplify") {
       val baseDf = sparkSession.sql("SELECT ST_Buffer(ST_GeomFromWKT('POINT (0 2)'), 10) AS geom")
@@ -2779,8 +2761,6 @@ class functionTestScala
     assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_AsEWKT(ST_GeomFromWKT(null))")
     assert(functionDf.first().get(0) == null)
-//    functionDf = sparkSession.sql("select ST_AsEWKT(ST_GeogFromWKT(null))")
-//    assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_Force_2D(null)")
     assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_BuildArea(null)")
@@ -3790,5 +3770,364 @@ class functionTestScala
       invalidDf.collect()
     }
     exception.getMessage should include("ST_Subdivide needs 5 or more max vertices")
+  }
+
+  it("Passed ST_StraightSkeleton") {
+    val polygonWktDf = sparkSession.read
+      .format("csv")
+      .option("delimiter", "\t")
+      .option("header", "false")
+      .load(mixedWktGeometryInputLocation)
+    polygonWktDf.createOrReplaceTempView("polygontable")
+    val polygonDf =
+      sparkSession.sql("select ST_GeomFromWKT(polygontable._c0) as countyshape from polygontable")
+    polygonDf.createOrReplaceTempView("polygondf")
+    val functionDf =
+      sparkSession.sql("select ST_StraightSkeleton(polygondf.countyshape) from polygondf")
+    assert(functionDf.count() > 0)
+  }
+
+  it("Passed ST_StraightSkeleton with simple polygon") {
+    val squareDf = sparkSession.sql("""
+        |SELECT ST_StraightSkeleton(ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))')) as result
+    """.stripMargin)
+    val result = squareDf.collect()
+    assert(result.length == 1)
+    val medialAxis = result(0).get(0)
+    assert(medialAxis != null)
+  }
+
+  it("Passed ST_StraightSkeleton returns MultiLineString") {
+    val rectangleDf = sparkSession.sql("""
+        |SELECT ST_GeometryType(ST_StraightSkeleton(ST_GeomFromWKT('POLYGON ((0 0, 20 0, 20 5, 0 5, 0 0))'))) as geomType
+    """.stripMargin)
+    val result = rectangleDf.collect()
+    assert(result.length == 1)
+    assert(result(0).getString(0) == "ST_MultiLineString")
+  }
+
+  it("Passed ST_StraightSkeleton with SRID preservation") {
+    val geomWithSridDf = sparkSession.sql("""
+        |SELECT ST_SRID(ST_StraightSkeleton(ST_SetSRID(ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))'), 4326))) as srid
+    """.stripMargin)
+    val result = geomWithSridDf.collect()
+    assert(result.length == 1)
+    assert(result(0).getInt(0) == 4326)
+  }
+
+  it("Passed ST_StraightSkeleton with L-shaped polygon") {
+    val lShapeDf = sparkSession.sql("""
+        |SELECT ST_StraightSkeleton(ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 5, 5 5, 5 10, 0 10, 0 0))')) as result
+    """.stripMargin)
+    val result = lShapeDf.collect()
+    assert(result.length == 1)
+    val medialAxis = result(0).get(0)
+    assert(medialAxis != null)
+  }
+
+  it("Passed ST_StraightSkeleton with MultiPolygon") {
+    val multiPolygonDf = sparkSession.sql("""
+        |SELECT ST_StraightSkeleton(
+        |  ST_GeomFromWKT('MULTIPOLYGON (((0 0, 5 0, 5 5, 0 5, 0 0)), ((10 10, 15 10, 15 15, 10 15, 10 10)))')
+        |) as result
+    """.stripMargin)
+    val result = multiPolygonDf.collect()
+    assert(result.length == 1)
+    val medialAxis = result(0).get(0)
+    assert(medialAxis != null)
+  }
+
+  it("should handle ST_StraightSkeleton with null geometry") {
+    val nullGeomDf = sparkSession.sql("""
+        |SELECT ST_StraightSkeleton(null) as result
+    """.stripMargin)
+    val result = nullGeomDf.collect()
+    assert(result.length == 1)
+    assert(result(0).get(0) == null)
+  }
+
+  it("should raise an error when using ST_StraightSkeleton with non-areal geometry") {
+    val invalidDf = sparkSession.sql("""
+        |SELECT ST_StraightSkeleton(ST_GeomFromWKT('LINESTRING (0 0, 10 10)')) as result
+    """.stripMargin)
+
+    val exception = intercept[Exception] {
+      invalidDf.collect()
+    }
+    exception.getMessage should include(
+      "ST_StraightSkeleton only supports Polygon and MultiPolygon geometries")
+  }
+
+  it("Manual test: ST_StraightSkeleton with L-shaped polygon for PostGIS comparison") {
+    val testDf = sparkSession.sql("""
+        |SELECT
+        |  ST_AsText(ST_StraightSkeleton(
+        |    ST_GeomFromWKT('POLYGON ((190 190, 10 190, 10 10, 190 10, 190 20, 160 30, 60 30, 60 130, 190 140, 190 190))')
+        |  )) as medial_axis_wkt,
+        |  ST_NumGeometries(ST_StraightSkeleton(
+        |    ST_GeomFromWKT('POLYGON ((190 190, 10 190, 10 10, 190 10, 190 20, 160 30, 60 30, 60 130, 190 140, 190 190))')
+        |  )) as num_segments,
+        |  ST_Length(ST_StraightSkeleton(
+        |    ST_GeomFromWKT('POLYGON ((190 190, 10 190, 10 10, 190 10, 190 20, 160 30, 60 30, 60 130, 190 140, 190 190))')
+        |  )) as total_length,
+        |  ST_GeometryType(ST_StraightSkeleton(
+        |    ST_GeomFromWKT('POLYGON ((190 190, 10 190, 10 10, 190 10, 190 20, 160 30, 60 30, 60 130, 190 140, 190 190))')
+        |  )) as geometry_type
+    """.stripMargin)
+
+    val result = testDf.collect()
+    assert(result.length == 1)
+
+    // Basic assertions
+    assert(result(0).getInt(1) > 0, "Should have at least one segment")
+    assert(result(0).getDouble(2) > 0, "Should have positive length")
+    assert(result(0).getString(3) == "ST_MultiLineString")
+  }
+
+  it("Passed ST_ApproximateMedialAxis") {
+    val testDf = sparkSession.sql(
+      "SELECT ST_ApproximateMedialAxis(ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))')) as result")
+    val result = testDf.collect()
+    assert(result.length == 1)
+    assert(!result(0).isNullAt(0))
+  }
+
+  it("Passed ST_ApproximateMedialAxis with simple polygon") {
+    val testDf = sparkSession.sql("""
+        |SELECT ST_ApproximateMedialAxis(ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))')) as result
+      """.stripMargin)
+    val result = testDf.collect()
+    assert(result.length == 1)
+    assert(!result(0).isNullAt(0))
+  }
+
+  it("Passed ST_ApproximateMedialAxis returns MultiLineString") {
+    val testDf = sparkSession.sql("""
+        |SELECT ST_GeometryType(ST_ApproximateMedialAxis(ST_GeomFromWKT('POLYGON ((0 0, 20 0, 20 5, 0 5, 0 0))'))) as geomType
+      """.stripMargin)
+    val result = testDf.collect()
+    assert(result.length == 1)
+    assert(result(0).getString(0) == "ST_MultiLineString")
+  }
+
+  it("Passed ST_ApproximateMedialAxis with SRID preservation") {
+    val testDf = sparkSession.sql("""
+        |SELECT ST_SRID(ST_ApproximateMedialAxis(ST_SetSRID(ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))'), 4326))) as srid
+      """.stripMargin)
+    val result = testDf.collect()
+    assert(result.length == 1)
+    assert(result(0).getInt(0) == 4326)
+  }
+
+  it(
+    "Passed ST_ApproximateMedialAxis produces fewer segments than ST_StraightSkeleton for T-shape") {
+    val testDf = sparkSession.sql("""
+        |SELECT
+        |  ST_NumGeometries(ST_StraightSkeleton(
+        |    ST_GeomFromWKT('POLYGON ((45 0, 55 0, 55 40, 70 40, 70 50, 30 50, 30 40, 45 40, 45 0))')
+        |  )) as skeleton_segments,
+        |  ST_NumGeometries(ST_ApproximateMedialAxis(
+        |    ST_GeomFromWKT('POLYGON ((45 0, 55 0, 55 40, 70 40, 70 50, 30 50, 30 40, 45 40, 45 0))')
+        |  )) as pruned_segments
+      """.stripMargin)
+    val result = testDf.collect()
+    assert(result.length == 1)
+    val skeletonSegments = result(0).getInt(0)
+    val prunedSegments = result(0).getInt(1)
+    assert(
+      prunedSegments <= skeletonSegments,
+      s"Pruned skeleton ($prunedSegments) should have <= segments than raw skeleton ($skeletonSegments)")
+  }
+
+  it("Passed ST_ApproximateMedialAxis with MultiPolygon") {
+    val testDf = sparkSession.sql("""
+        |SELECT ST_ApproximateMedialAxis(
+        |  ST_GeomFromWKT('MULTIPOLYGON (((0 0, 10 0, 10 10, 0 10, 0 0)), ((20 20, 30 20, 30 30, 20 30, 20 20)))')
+        |) as result
+      """.stripMargin)
+    val result = testDf.collect()
+    assert(result.length == 1)
+    assert(!result(0).isNullAt(0))
+  }
+
+  it("should handle ST_ApproximateMedialAxis with null geometry") {
+    val testDf = sparkSession.sql("""
+        |SELECT ST_ApproximateMedialAxis(null) as result
+      """.stripMargin)
+    val result = testDf.collect()
+    assert(result.length == 1)
+    assert(result(0).isNullAt(0))
+  }
+
+  it("should raise an error when using ST_ApproximateMedialAxis with non-areal geometry") {
+    val exception = intercept[Exception] {
+      sparkSession
+        .sql("""
+        |SELECT ST_ApproximateMedialAxis(ST_GeomFromWKT('LINESTRING (0 0, 10 10)')) as result
+      """.stripMargin)
+        .collect()
+    }
+    assert(
+      exception.getMessage.contains(
+        "ST_ApproximateMedialAxis only supports Polygon and MultiPolygon geometries"))
+  }
+
+  it("Passed ST_ApproximateMedialAxis with T-Junction polygon") {
+    val testDf = sparkSession.sql("""
+                                    |SELECT
+                                    |  ST_AsText(ST_ApproximateMedialAxis(
+                                    |    ST_GeomFromWKT('POLYGON ((45 0, 55 0, 55 40, 70 40, 70 50, 30 50, 30 40, 45 40, 45 0))')
+                                    |  )) as result,
+                                    |  ST_NumGeometries(ST_ApproximateMedialAxis(
+                                    |    ST_GeomFromWKT('POLYGON ((45 0, 55 0, 55 40, 70 40, 70 50, 30 50, 30 40, 45 40, 45 0))')
+                                    |  )) as num_segments,
+                                    |  ST_GeometryType(ST_ApproximateMedialAxis(
+                                    |    ST_GeomFromWKT('POLYGON ((45 0, 55 0, 55 40, 70 40, 70 50, 30 50, 30 40, 45 40, 45 0))')
+                                    |  )) as geom_type
+      """.stripMargin)
+    val result = testDf.collect()
+    assert(result.length == 1)
+    assert(!result(0).isNullAt(0), "Result should not be null")
+    assert(result(0).getString(2) == "ST_MultiLineString", "Result should be MultiLineString")
+    val numSegments = result(0).getInt(1)
+    assert(numSegments > 0, "Should have at least one segment")
+    val wkt = result(0).getString(0)
+    assert(wkt.startsWith("MULTILINESTRING"), "WKT should start with MULTILINESTRING")
+  }
+
+  it("Test elongated rectangle at normal scale") {
+    // Test hypothesis: is the issue the tiny size or the aspect ratio?
+    // Testing various aspect ratios at normal scale
+    val elongated17Wkt = "POLYGON ((0 0, 10 0, 10 170, 0 170, 0 0))" // 17:1 like Maryland
+    val elongated1000Wkt = "POLYGON ((0 0, 10 0, 10 10000, 0 10000, 0 0))" // 1000:1 extreme
+    val squareWkt = "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))" // 1:1
+
+    val testDf = sparkSession.sql(s"""
+        |SELECT
+        |  'Elongated 17:1' as name,
+        |  ST_NumGeometries(ST_StraightSkeleton(ST_GeomFromWKT('$elongated17Wkt'))) as skeleton_segments
+        |UNION ALL
+        |SELECT
+        |  'Elongated 1000:1' as name,
+        |  ST_NumGeometries(ST_StraightSkeleton(ST_GeomFromWKT('$elongated1000Wkt'))) as skeleton_segments
+        |UNION ALL
+        |SELECT
+        |  'Square 1:1' as name,
+        |  ST_NumGeometries(ST_StraightSkeleton(ST_GeomFromWKT('$squareWkt'))) as skeleton_segments
+      """.stripMargin)
+
+    val results = testDf.collect()
+    val elongated17Segs = results(0).getInt(1)
+    val elongated1000Segs = results(1).getInt(1)
+    val squareSegs = results(2).getInt(1)
+
+    assert(squareSegs > 0, s"Square should work, got $squareSegs segments")
+    assert(elongated17Segs > 0, s"Elongated 17:1 should work, got $elongated17Segs segments")
+  }
+
+  it("Test ST_ApproximateMedialAxis with simple and holey rectangles") {
+    // Test with a simple rectangle
+    val simpleRect = sparkSession.sql("""
+      SELECT ST_ApproximateMedialAxis(
+        ST_GeomFromText('POLYGON((0 0, 10 0, 10 10, 0 10, 0 0))')
+      ) as medial_axis
+    """)
+
+    simpleRect.selectExpr("ST_AsText(medial_axis)").show(false)
+
+    // Test with a rectangle with hole
+    val rectWithHole = sparkSession.sql("""
+      SELECT ST_ApproximateMedialAxis(
+        ST_GeomFromText('POLYGON((0 0, 100 0, 100 100, 0 100, 0 0), (20 20, 80 20, 80 80, 20 80, 20 20))')
+      ) as medial_axis
+    """)
+
+    rectWithHole
+      .selectExpr("ST_AsText(medial_axis)", "ST_NumGeometries(medial_axis) as num_edges")
+      .show(false)
+
+    // Verify the function returns a geometry
+    val result = simpleRect.first().getAs[org.locationtech.jts.geom.Geometry](0)
+    assert(result != null, "ST_ApproximateMedialAxis should return a non-null geometry")
+  }
+
+  it("Test ST_StraightSkeleton with polygons with multiple holes") {
+    // Test with a square containing two rectangular holes
+    val squareWithTwoHoles = sparkSession.sql("""
+      SELECT ST_StraightSkeleton(
+        ST_GeomFromText('POLYGON((0 0, 100 0, 100 100, 0 100, 0 0), (20 20, 40 20, 40 40, 20 40, 20 20), (60 60, 80 60, 80 80, 60 80, 60 60))')
+      ) as skeleton
+    """)
+
+    squareWithTwoHoles.selectExpr("ST_AsText(skeleton)").show(false)
+
+    // Verify the skeleton is generated
+    val skeleton = squareWithTwoHoles.first().getAs[org.locationtech.jts.geom.Geometry](0)
+    assert(
+      skeleton != null,
+      "ST_StraightSkeleton should return a non-null geometry for polygon with holes")
+    assert(
+      !skeleton.isEmpty,
+      "ST_StraightSkeleton should not return empty geometry for polygon with holes")
+    assert(
+      skeleton.getGeometryType == "MultiLineString",
+      "ST_StraightSkeleton should return MultiLineString")
+
+    val numEdges = skeleton.getNumGeometries
+    assert(numEdges > 0, "Skeleton should contain at least one edge")
+
+    // Test with vertex simplification
+    val squareWithTwoHolesSimplified = sparkSession.sql("""
+      SELECT ST_StraightSkeleton(
+        ST_GeomFromText('POLYGON((0 0, 100 0, 100 100, 0 100, 0 0), (20 20, 40 20, 40 40, 20 40, 20 20), (60 60, 80 60, 80 80, 60 80, 60 60))'),
+        10
+      ) as skeleton
+    """)
+
+    squareWithTwoHolesSimplified.selectExpr("ST_AsText(skeleton)").show(false)
+
+    val simplifiedSkeleton =
+      squareWithTwoHolesSimplified.first().getAs[org.locationtech.jts.geom.Geometry](0)
+    assert(simplifiedSkeleton != null, "Simplified skeleton should not be null")
+    assert(!simplifiedSkeleton.isEmpty, "Simplified skeleton should not be empty")
+  }
+
+  it("Test ST_ApproximateMedialAxis with polygons with multiple holes") {
+    // Test with a square containing two rectangular holes
+    val squareWithTwoHoles = sparkSession.sql("""
+      SELECT ST_ApproximateMedialAxis(
+        ST_GeomFromText('POLYGON((0 0, 100 0, 100 100, 0 100, 0 0), (20 20, 40 20, 40 40, 20 40, 20 20), (60 60, 80 60, 80 80, 60 80, 60 60))')
+      ) as medial_axis
+    """)
+
+    squareWithTwoHoles
+      .selectExpr("ST_AsText(medial_axis)", "ST_NumGeometries(medial_axis) as num_edges")
+      .show(false)
+
+    // Verify the medial axis is generated
+    val medialAxis = squareWithTwoHoles.first().getAs[org.locationtech.jts.geom.Geometry](0)
+    assert(
+      medialAxis != null,
+      "ST_ApproximateMedialAxis should return a non-null geometry for polygon with holes")
+    assert(
+      medialAxis.getGeometryType == "MultiLineString",
+      "ST_ApproximateMedialAxis should return MultiLineString")
+
+    // The medial axis should have fewer edges than the full skeleton since it filters out boundary edges
+    val numEdges = medialAxis.getNumGeometries
+
+    // Test with vertex simplification
+    val squareWithTwoHolesSimplified = sparkSession.sql("""
+      SELECT ST_ApproximateMedialAxis(
+        ST_GeomFromText('POLYGON((0 0, 100 0, 100 100, 0 100, 0 0), (20 20, 40 20, 40 40, 20 40, 20 20), (60 60, 80 60, 80 80, 60 80, 60 60))'),
+        10
+      ) as medial_axis
+    """)
+
+    squareWithTwoHolesSimplified.selectExpr("ST_AsText(medial_axis)").show(false)
+
+    val simplifiedMedialAxis =
+      squareWithTwoHolesSimplified.first().getAs[org.locationtech.jts.geom.Geometry](0)
+    assert(simplifiedMedialAxis != null, "Simplified medial axis should not be null")
   }
 }

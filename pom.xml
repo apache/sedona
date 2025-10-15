@@ -376,6 +376,11 @@
                 <version>4.11.0</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.datasyslab</groupId>
+                <artifactId>campskeleton</artifactId>
+                <version>0.0.2-20251014</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <repositories>

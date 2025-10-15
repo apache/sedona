@@ -1849,6 +1849,38 @@ private[apache] case class ST_InterpolatePoint(inputExpressions: Seq[Expression]
     copy(inputExpressions = newChildren)
 }
 
+/**
+ * Computes the straight skeleton of an areal geometry. The straight skeleton is a method of
+ * representing a polygon by a topological skeleton, formed by a continuous shrinking process
+ * where each edge moves inward in parallel at a uniform speed.
+ *
+ * @param inputExpressions
+ *   Geometry (Polygon or MultiPolygon), optional: maxVertices (Integer) for vertex limit
+ */
+private[apache] case class ST_StraightSkeleton(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction2(Functions.straightSkeleton),
+      inferrableFunction1(Functions.straightSkeleton)) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) =
+    copy(inputExpressions = newChildren)
+}
+
+/**
+ * Computes an approximate medial axis of an areal geometry by computing the straight skeleton and
+ * filtering to keep only interior edges. Edges where both endpoints are interior to the polygon
+ * (not on the boundary) are kept, producing a cleaner skeleton.
+ *
+ * @param inputExpressions
+ *   Geometry (Polygon or MultiPolygon), optional: maxVertices (Integer) for vertex limit
+ */
+private[apache] case class ST_ApproximateMedialAxis(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction2(Functions.approximateMedialAxis),
+      inferrableFunction1(Functions.approximateMedialAxis)) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) =
+    copy(inputExpressions = newChildren)
+}
+
 private[apache] case class ExpandAddress(address: Expression)
     extends UnaryExpression
     with ImplicitCastInputTypes

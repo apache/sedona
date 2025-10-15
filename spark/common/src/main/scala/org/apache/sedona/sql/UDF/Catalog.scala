@@ -249,6 +249,8 @@ object Catalog extends AbstractCatalog {
     function[ST_Rotate](),
     function[ST_RotateX](),
     function[ST_RotateY](),
+    function[ST_StraightSkeleton](),
+    function[ST_ApproximateMedialAxis](),
     function[Barrier](),
     // Expression for rasters
     function[RS_NormalizedDifference](),

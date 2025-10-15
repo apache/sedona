@@ -108,6 +108,15 @@ object st_functions {
   def ST_Azimuth(pointA: String, pointB: String): Column =
     wrapExpression[ST_Azimuth](pointA, pointB)
 
+  def ST_ApproximateMedialAxis(geometry: Column): Column =
+    wrapExpression[ST_ApproximateMedialAxis](geometry)
+  def ST_ApproximateMedialAxis(geometry: String): Column =
+    wrapExpression[ST_ApproximateMedialAxis](geometry)
+  def ST_ApproximateMedialAxis(geometry: Column, maxVertices: Column): Column =
+    wrapExpression[ST_ApproximateMedialAxis](geometry, maxVertices)
+  def ST_ApproximateMedialAxis(geometry: String, maxVertices: Int): Column =
+    wrapExpression[ST_ApproximateMedialAxis](geometry, maxVertices)
+
   def ST_Boundary(geometry: Column): Column = wrapExpression[ST_Boundary](geometry)
   def ST_Boundary(geometry: String): Column = wrapExpression[ST_Boundary](geometry)
 
@@ -624,6 +633,15 @@ object st_functions {
 
   def ST_StartPoint(lineString: Column): Column = wrapExpression[ST_StartPoint](lineString)
   def ST_StartPoint(lineString: String): Column = wrapExpression[ST_StartPoint](lineString)
+
+  def ST_StraightSkeleton(geometry: Column): Column =
+    wrapExpression[ST_StraightSkeleton](geometry)
+  def ST_StraightSkeleton(geometry: String): Column =
+    wrapExpression[ST_StraightSkeleton](geometry)
+  def ST_StraightSkeleton(geometry: Column, maxVertices: Column): Column =
+    wrapExpression[ST_StraightSkeleton](geometry, maxVertices)
+  def ST_StraightSkeleton(geometry: String, maxVertices: Int): Column =
+    wrapExpression[ST_StraightSkeleton](geometry, maxVertices)
 
   def ST_Snap(input: Column, reference: Column, tolerance: Column): Column =
     wrapExpression[ST_Snap](input, reference, tolerance)

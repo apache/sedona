@@ -120,6 +120,10 @@
             <artifactId>janino</artifactId>
             <version>${janino-version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.datasyslab</groupId>
+            <artifactId>campskeleton</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>

@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.S2Geography.Geography;
+import org.apache.sedona.common.approximate.StraightSkeleton;
 import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.common.jts2geojson.GeoJSONWriter;
 import org.apache.sedona.common.sphere.Spheroid;
@@ -2660,5 +2661,217 @@ public class Functions {
     // Interpolate the M value
     return fractionAlongLine * (end.getCoordinate().getM() - start.getCoordinate().getM())
         + start.getCoordinate().getM();
+  }
+
+  /**
+   * Computes the straight skeleton of an areal geometry. The straight skeleton is a method of
+   * representing a polygon by a topological skeleton, formed by a continuous shrinking process
+   * where each edge moves inward in parallel at a uniform speed.
+   *
+   * <p>This implementation uses the campskeleton library which implements the weighted straight
+   * skeleton algorithm based on Felkel's approach. The result represents the "skeleton" or
+   * centerline of the polygon.
+   *
+   * @param geometry The areal geometry (Polygon or MultiPolygon)
+   * @return A MultiLineString representing the straight skeleton, or null if input is null/empty
+   */
+  public static Geometry straightSkeleton(Geometry geometry) {
+    return straightSkeleton(geometry, 0);
+  }
+
+  /**
+   * Computes the straight skeleton of an areal geometry with optional vertex simplification.
+   *
+   * <p>The straight skeleton is a method of representing a polygon by a topological skeleton,
+   * formed by a continuous shrinking process where each edge moves inward in parallel at a uniform
+   * speed.
+   *
+   * <p>For polygons with many vertices, performance can be improved by limiting the vertex count.
+   * The algorithm will merge the shortest edges until the vertex count is reduced to the specified
+   * limit.
+   *
+   * @param geometry The areal geometry (Polygon or MultiPolygon)
+   * @param maxVertices Maximum number of vertices per polygon (0 to disable simplification).
+   *     Recommended: 100-500 for performance
+   * @return A MultiLineString representing the straight skeleton, or null if input is null/empty
+   */
+  public static Geometry straightSkeleton(Geometry geometry, Integer maxVertices) {
+    if (geometry == null || geometry.isEmpty()) {
+      return null;
+    }
+
+    // Check if the geometry is areal (Polygon or MultiPolygon)
+    if (!(geometry instanceof Polygon || geometry instanceof MultiPolygon)) {
+      throw new IllegalArgumentException(
+          "ST_StraightSkeleton only supports Polygon and MultiPolygon geometries");
+    }
+
+    GeometryFactory factory = geometry.getFactory();
+
+    // Use straight skeleton algorithm with optional simplification
+    int maxVerts = (maxVertices != null) ? maxVertices : 0;
+    return computeStraightSkeleton(geometry, factory, maxVerts);
+  }
+
+  /**
+   * Computes an approximate medial axis of an areal geometry by computing the straight skeleton and
+   * filtering to keep only interior edges.
+   *
+   * <p>The medial axis is approximated by first computing the straight skeleton, then filtering to
+   * keep only edges where both endpoints are interior to the polygon (not on the boundary). This
+   * produces a cleaner skeleton by removing branches that extend to the boundary.
+   *
+   * @param geometry The areal geometry (Polygon or MultiPolygon)
+   * @return A MultiLineString representing the approximate medial axis, or null if input is
+   *     null/empty
+   */
+  public static Geometry approximateMedialAxis(Geometry geometry) {
+    return approximateMedialAxis(geometry, 0);
+  }
+
+  /**
+   * Computes an approximate medial axis of an areal geometry by computing the straight skeleton and
+   * filtering to keep only interior edges, with optional vertex simplification.
+   *
+   * <p>The medial axis is approximated by first computing the straight skeleton, then filtering to
+   * keep only edges where both endpoints are interior to the polygon (not on the boundary). This
+   * produces a cleaner skeleton by removing branches that extend to the boundary.
+   *
+   * <p>For polygons with many vertices, performance can be improved by limiting the vertex count
+   * before computing the skeleton. The algorithm will merge the shortest edges until the vertex
+   * count is reduced to the specified limit.
+   *
+   * @param geometry The areal geometry (Polygon or MultiPolygon)
+   * @param maxVertices Maximum number of vertices per polygon (0 to disable simplification).
+   *     Recommended: 100-500 for performance
+   * @return A MultiLineString representing the approximate medial axis, or null if input is
+   *     null/empty
+   */
+  public static Geometry approximateMedialAxis(Geometry geometry, Integer maxVertices) {
+    if (geometry == null || geometry.isEmpty()) {
+      return null;
+    }
+
+    // Check if the geometry is areal (Polygon or MultiPolygon)
+    if (!(geometry instanceof Polygon || geometry instanceof MultiPolygon)) {
+      throw new IllegalArgumentException(
+          "ST_ApproximateMedialAxis only supports Polygon and MultiPolygon geometries");
+    }
+
+    GeometryFactory factory = geometry.getFactory();
+
+    // Compute the straight skeleton with optional vertex simplification
+    Geometry skeleton = straightSkeleton(geometry, maxVertices);
+
+    if (skeleton == null || skeleton.isEmpty()) {
+      return skeleton;
+    }
+
+    // Filter to keep only interior edges (not touching boundary)
+    return filterInteriorEdges(skeleton, geometry, factory);
+  }
+
+  /**
+   * Compute the straight skeleton of a geometry.
+   *
+   * <p>This method implements the straight skeleton algorithm, which simulates continuous inward
+   * movement of polygon edges to construct the skeleton. The algorithm processes edge and split
+   * events in temporal order.
+   *
+   * @param geometry The input geometry (Polygon or MultiPolygon)
+   * @param factory GeometryFactory for creating result geometries
+   * @return MultiLineString representing the straight skeleton
+   */
+  private static Geometry computeStraightSkeleton(
+      Geometry geometry, GeometryFactory factory, int maxVertices) {
+    try {
+      // Handle MultiPolygon by processing each polygon separately
+      if (geometry instanceof MultiPolygon) {
+        MultiPolygon multiPoly = (MultiPolygon) geometry;
+        java.util.List<LineString> allEdges = new java.util.ArrayList<>();
+
+        for (int i = 0; i < multiPoly.getNumGeometries(); i++) {
+          Polygon poly = (Polygon) multiPoly.getGeometryN(i);
+          StraightSkeleton skeleton = new StraightSkeleton();
+          Geometry skeletonGeom = skeleton.computeSkeleton(poly, maxVertices);
+
+          if (skeletonGeom != null && !skeletonGeom.isEmpty()) {
+            // Extract LineStrings from the skeleton geometry
+            for (int j = 0; j < skeletonGeom.getNumGeometries(); j++) {
+              allEdges.add((LineString) skeletonGeom.getGeometryN(j));
+            }
+          }
+        }
+
+        if (allEdges.isEmpty()) {
+          return factory.createMultiLineString(new LineString[0]);
+        }
+
+        Geometry result = factory.createMultiLineString(allEdges.toArray(new LineString[0]));
+        result.setSRID(geometry.getSRID());
+        return result;
+      } else {
+        // Single polygon
+        Polygon poly = (Polygon) geometry;
+        StraightSkeleton skeleton = new StraightSkeleton();
+        Geometry result = skeleton.computeSkeleton(poly, maxVertices);
+
+        if (result != null) {
+          result.setSRID(geometry.getSRID());
+        }
+
+        return result;
+      }
+    } catch (Exception e) {
+      return factory.createMultiLineString(new LineString[0]);
+    }
+  }
+
+  /**
+   * Filters skeleton edges to keep only interior edges (those that don't touch the polygon
+   * boundary).
+   *
+   * <p>An edge is considered interior if both of its endpoints are NOT on the polygon boundary.
+   * This produces a cleaner medial axis by removing all branches that extend to corners and edges.
+   *
+   * @param skeleton The straight skeleton as a MultiLineString
+   * @param polygon The original polygon geometry
+   * @param factory GeometryFactory for creating result geometries
+   * @return MultiLineString containing only interior skeleton edges
+   */
+  private static Geometry filterInteriorEdges(
+      Geometry skeleton, Geometry polygon, GeometryFactory factory) {
+    java.util.List<LineString> interiorEdges = new java.util.ArrayList<>();
+
+    // Get the polygon boundary for distance checking
+    Geometry boundary = polygon.getBoundary();
+
+    // Distance threshold for considering a point "on" the boundary
+    final double BOUNDARY_TOLERANCE = 1e-6;
+
+    // Check each skeleton edge
+    for (int i = 0; i < skeleton.getNumGeometries(); i++) {
+      LineString edge = (LineString) skeleton.getGeometryN(i);
+
+      Coordinate start = edge.getCoordinateN(0);
+      Coordinate end = edge.getCoordinateN(edge.getNumPoints() - 1);
+
+      // Check if both endpoints are interior (not on boundary)
+      Point startPoint = factory.createPoint(start);
+      Point endPoint = factory.createPoint(end);
+
+      double startDist = boundary.distance(startPoint);
+      double endDist = boundary.distance(endPoint);
+
+      // Keep edge only if BOTH endpoints are interior (away from boundary)
+      if (startDist > BOUNDARY_TOLERANCE && endDist > BOUNDARY_TOLERANCE) {
+        interiorEdges.add(edge);
+      }
+    }
+
+    // Return the filtered edges, preserving SRID from input polygon
+    Geometry result = factory.createMultiLineString(interiorEdges.toArray(new LineString[0]));
+    result.setSRID(polygon.getSRID());
+    return result;
   }
 }

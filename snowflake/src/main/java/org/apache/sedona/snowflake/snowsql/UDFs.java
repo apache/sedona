@@ -176,6 +176,18 @@ public class UDFs {
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+  public static byte[] ST_ApproximateMedialAxis(byte[] geometry) {
+    return GeometrySerde.serialize(
+        Functions.approximateMedialAxis(GeometrySerde.deserialize(geometry)));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "maxVertices"})
+  public static byte[] ST_ApproximateMedialAxis(byte[] geometry, int maxVertices) {
+    return GeometrySerde.serialize(
+        Functions.approximateMedialAxis(GeometrySerde.deserialize(geometry), maxVertices));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry"})
   public static byte[] ST_Boundary(byte[] geometry) {
     return GeometrySerde.serialize(Functions.boundary(GeometrySerde.deserialize(geometry)));
   }
@@ -1053,6 +1065,17 @@ public class UDFs {
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
   public static byte[] ST_StartPoint(byte[] geometry) {
     return GeometrySerde.serialize(Functions.startPoint(GeometrySerde.deserialize(geometry)));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+  public static byte[] ST_StraightSkeleton(byte[] geometry) {
+    return GeometrySerde.serialize(Functions.straightSkeleton(GeometrySerde.deserialize(geometry)));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "maxVertices"})
+  public static byte[] ST_StraightSkeleton(byte[] geometry, int maxVertices) {
+    return GeometrySerde.serialize(
+        Functions.straightSkeleton(GeometrySerde.deserialize(geometry), maxVertices));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"input", "reference", "tolerance"})
