@@ -2493,3 +2493,39 @@ class TestPredicateJoin(TestBase):
             pt_row[0] for pt_row in point_df.selectExpr("ST_CoordDim(geom)").collect()
         ]
         assert point_row == [3]
+
+    def test_st_straight_skeleton(self):
+        polygon_wkt = "POLYGON ((1 1, 1 3, 4 3, 4 1, 1 1))"
+        actual_df = self.spark.sql(
+            f"SELECT ST_StraightSkeleton(ST_GeomFromText('{polygon_wkt}')) AS geom"
+        )
+        actual = actual_df.take(1)[0][0]
+        assert actual is not None
+        assert actual.geom_type == "MultiLineString"
+
+        # Test with maxVertices parameter
+        complex_polygon_wkt = "POLYGON ((0 0, 4 0, 4 4, 0 4, 0 0))"
+        actual_df_with_max = self.spark.sql(
+            f"SELECT ST_StraightSkeleton(ST_GeomFromText('{complex_polygon_wkt}'), 10) AS geom"
+        )
+        actual_with_max = actual_df_with_max.take(1)[0][0]
+        assert actual_with_max is not None
+        assert actual_with_max.geom_type == "MultiLineString"
+
+    def test_st_approximate_medial_axis(self):
+        polygon_wkt = "POLYGON ((1 1, 1 3, 4 3, 4 1, 1 1))"
+        actual_df = self.spark.sql(
+            f"SELECT ST_ApproximateMedialAxis(ST_GeomFromText('{polygon_wkt}')) AS geom"
+        )
+        actual = actual_df.take(1)[0][0]
+        assert actual is not None
+        assert actual.geom_type == "MultiLineString"
+
+        # Test with maxVertices parameter
+        complex_polygon_wkt = "POLYGON ((0 0, 4 0, 4 4, 0 4, 0 0))"
+        actual_df_with_max = self.spark.sql(
+            f"SELECT ST_ApproximateMedialAxis(ST_GeomFromText('{complex_polygon_wkt}'), 10) AS geom"
+        )
+        actual_with_max = actual_df_with_max.take(1)[0][0]
+        assert actual_with_max is not None
+        assert actual_with_max.geom_type == "MultiLineString"
