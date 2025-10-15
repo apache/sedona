@@ -2983,7 +2983,7 @@ public class FunctionTest extends TestBase {
                             + polygonWkt
                             + "')))"))
                 .getField(0);
-    assertEquals("MULTILINESTRING", actual);
+    assertEquals("ST_MultiLineString", actual);
 
     // Test with maxVertices parameter
     String complexPolygonWkt = "POLYGON ((0 0, 4 0, 4 4, 0 4, 0 0))";
@@ -2995,7 +2995,7 @@ public class FunctionTest extends TestBase {
                             + complexPolygonWkt
                             + "'), 10))"))
                 .getField(0);
-    assertEquals("MULTILINESTRING", actual);
+    assertEquals("ST_MultiLineString", actual);
   }
 
   @Test
@@ -3009,7 +3009,7 @@ public class FunctionTest extends TestBase {
                             + polygonWkt
                             + "')))"))
                 .getField(0);
-    assertEquals("MULTILINESTRING", actual);
+    assertEquals("ST_MultiLineString", actual);
 
     // Test with maxVertices parameter
     String complexPolygonWkt = "POLYGON ((0 0, 4 0, 4 4, 0 4, 0 0))";
@@ -3021,6 +3021,6 @@ public class FunctionTest extends TestBase {
                             + complexPolygonWkt
                             + "'), 10))"))
                 .getField(0);
-    assertEquals("MULTILINESTRING", actual);
+    assertEquals("ST_MultiLineString", actual);
   }
 }
