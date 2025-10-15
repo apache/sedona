@@ -236,6 +236,24 @@ public class UDFsV2 {
       argNames = {"geometry"},
       argTypes = {"Geometry"},
       returnTypes = "Geometry")
+  public static String ST_ApproximateMedialAxis(String geometry) {
+    return GeometrySerde.serGeoJson(
+        Functions.approximateMedialAxis(GeometrySerde.deserGeoJson(geometry)));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "maxVertices"},
+      argTypes = {"Geometry", "int"},
+      returnTypes = "Geometry")
+  public static String ST_ApproximateMedialAxis(String geometry, int maxVertices) {
+    return GeometrySerde.serGeoJson(
+        Functions.approximateMedialAxis(GeometrySerde.deserGeoJson(geometry), maxVertices));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry"},
+      argTypes = {"Geometry"},
+      returnTypes = "Geometry")
   public static String ST_Boundary(String geometry) {
     return GeometrySerde.serGeoJson(Functions.boundary(GeometrySerde.deserGeoJson(geometry)));
   }
@@ -1226,6 +1244,24 @@ public class UDFsV2 {
       returnTypes = "Geometry")
   public static String ST_StartPoint(String geometry) {
     return GeometrySerde.serGeoJson(Functions.startPoint(GeometrySerde.deserGeoJson(geometry)));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry"},
+      argTypes = {"Geometry"},
+      returnTypes = "Geometry")
+  public static String ST_StraightSkeleton(String geometry) {
+    return GeometrySerde.serGeoJson(
+        Functions.straightSkeleton(GeometrySerde.deserGeoJson(geometry)));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "maxVertices"},
+      argTypes = {"Geometry", "int"},
+      returnTypes = "Geometry")
+  public static String ST_StraightSkeleton(String geometry, int maxVertices) {
+    return GeometrySerde.serGeoJson(
+        Functions.straightSkeleton(GeometrySerde.deserGeoJson(geometry), maxVertices));
   }
 
   @UDFAnnotations.ParamMeta(
