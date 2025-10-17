@@ -2051,7 +2051,6 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         from pyspark.pandas.utils import default_session
         from pyspark.pandas.internal import InternalField
-        import numpy as np
 
         if isinstance(data, list) and not isinstance(data[0], (tuple, list)):
             data = [(obj,) for obj in data]
@@ -2432,7 +2431,13 @@ class GeoSeries(GeoFrame, pspd.Series):
             ],
             column_label_names=None,
         )
-        return pspd.DataFrame(internal)
+        result = pspd.DataFrame(internal)
+        # Convert max/min float values to NaN
+        # e.g POINT EMPTY, represented as POINT (NaN NaN), should result in all NaN
+        result = result.replace(np.finfo(np.float64).max, np.nan).replace(
+            -np.finfo(np.float64).max, np.nan
+        )
+        return result
 
     @property
     def total_bounds(self):
