@@ -148,15 +148,16 @@ To compile the source code and test the website on your local machine, please re
 In short, you need to run:
 
 ```
-pip install -r requirements-docs.txt
+python3 -m pip install uv
+uv sync --group docs
 ```
 
 After installing MkDocs and MkDocs-Material, run these commands in the Sedona root folder:
 
 ```
-mkdocs build
-mike deploy --update-aliases latest-snapshot -b website -p
-mike serve
+uv run mkdocs build
+uv run mike deploy --update-aliases latest-snapshot -b website -p
+uv run mike serve
 ```
 
 ## pre-commit

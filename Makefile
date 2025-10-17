@@ -17,10 +17,8 @@
 
 PYTHON := $(shell command -v python || command -v python3 || echo python)
 PIP := $(PYTHON) -m pip
-MKDOCS := mkdocs
-MIKE := mike
 
-.PHONY: check checkinstall checkupdate install docs docs-full clean test
+.PHONY: check checkinstall checkupdate install docsinstall docsbuild clean test
 
 check:
 	@echo "Running pre-commit checks..."
@@ -41,28 +39,18 @@ checkupdate: checkinstall
 	@echo "Updating pre-commit hooks..."
 	pre-commit autoupdate
 
-install:
-	@echo "(Deprecated shim) Use 'uv sync --group docs --group dev' instead of 'make install'."
-	@command -v uv >/dev/null 2>&1 || (echo 'uv not found, install via: curl -LsSf https://astral.sh/uv/install.sh | sh' && exit 1)
-	uv sync --group docs --group dev
+install: checkinstall
 
-docs:
-	@echo "Building MkDocs site (dependencies via uv)"
+docsinstall:
+	@echo "Installing documentation dependencies..."
 	@command -v uv >/dev/null 2>&1 || (echo 'uv not found, install via: curl -LsSf https://astral.sh/uv/install.sh | sh' && exit 1)
 	uv sync --group docs
-	uv run mkdocs serve
 
-docs-full:
-	@echo "Building full documentation (MkDocs + Sphinx Python API)"
-	@command -v uv >/dev/null 2>&1 || (echo 'uv not found, install via: curl -LsSf https://astral.sh/uv/install.sh | sh' && exit 1)
-	uv sync --group docs
-	SPARK_VERSION=$$(mvn help:evaluate -Dexpression=spark.version -q -DforceStdout); \
-	uv pip install pyspark==$$SPARK_VERSION; \
-	uv pip install -e python/.[all]; \
-	uv run bash -c 'cd python/sedona/doc && make clean && make html'; \
-	mkdir -p docs/api/pydocs; \
-	cp -r python/sedona/doc/_build/html/* docs/api/pydocs/; \
+docsbuild: docsinstall
+	@echo "Building documentation..."
 	uv run mkdocs build
+	uv run mike deploy --update-aliases latest-snapshot -b website -p
+	uv run mike serve
 
 clean:
 	@echo "Cleaning up generated files... (TODO)"

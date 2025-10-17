@@ -63,5 +63,3 @@ docs = [
   "sphinx",
   "sphinx_rtd_theme",
 ]
-# pre-commit only; bandit/codespell deferred (managed via pre-commit itself)
-dev = ["pre-commit"]

@@ -118,43 +118,6 @@ These are some of the key features of Apache Sedona, but it may offer additional
 
 ## When to use Sedona?
 
-
-## Building documentation locally
-
-Documentation (MkDocs + Sphinx + Mike) dependencies are managed via the root `pyproject.toml` using `uv`.
-
-Prerequisites:
-- Python >= 3.8
-- `uv` (install: `curl -LsSf https://astral.sh/uv/install.sh | sh`)
-- Java / Maven (for Javadoc / Scaladoc & Spark version if you plan to rebuild API docs)
-- Node.js (for docs-overrides assets) and R (for R docs) if you need full site parity
-
-Quick start (MkDocs pages only):
-```
-uv sync --group docs
-uv run mkdocs serve
-```
-
-Full site including Python API docs:
-```
-# Sync base doc environment
-uv sync --group docs
-# Determine Spark version from Maven
-SPARK_VERSION=$(mvn help:evaluate -Dexpression=spark.version -q -DforceStdout)
-# Install matching pyspark
-uv pip install pyspark==$SPARK_VERSION
-# Install Sedona Python package (editable) with all extras
-uv pip install -e python/.[all]
-# Build Sphinx Python API docs
-( cd python/sedona/doc && make clean && make html )
-mkdir -p docs/api/pydocs
-cp -r python/sedona/doc/_build/html/* docs/api/pydocs/
-# Serve site
-uv run mkdocs serve
-```
-
-Dependency groups are defined in `pyproject.toml` and resolved with `uv sync --group docs`.
-
 ### Use Cases:
 
 Apache Sedona is a widely used framework for working with spatial data, and it has many different use cases and applications. Some of the main use cases for Apache Sedona include:

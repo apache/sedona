@@ -67,9 +67,9 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install uv
-        run: curl -LsSf https://astral.sh/uv/install.sh | sh
-      - name: Sync doc environment (mkdocs, sphinx, etc.)
-        run: ~/.local/bin/uv sync --group docs --group dev
+        uses: astral-sh/setup-uv@v6
+      - name: Sync doc environment
+        run: uv sync --group docs
       - run: sudo apt update
       - uses: r-lib/actions/setup-r@v2.11.3
         with:
@@ -89,21 +89,21 @@ jobs:
           SPARK_VERSION=$(mvn help:evaluate -Dexpression=spark.version -q -DforceStdout)
 
           # Install pyspark matching Spark version (other deps handled by uv sync)
-          ~/.local/bin/uv pip install pyspark==$SPARK_VERSION
+          uv pip install pyspark==$SPARK_VERSION
 
           # Install sedona with all optional dependencies for complete documentation
-          ~/.local/bin/uv pip install -e python/.[all]
+          uv pip install -e python/.[all]
       - name: Build Python API documentation with Sphinx
         env:
           CI: true
         run: |
           # Use uv run so sphinx-build from the virtual environment is on PATH
-          ~/.local/bin/uv run bash -c 'cd python/sedona/doc && make clean && make html'
+          uv run bash -c 'cd python/sedona/doc && make clean && make html'
           mkdir -p docs/api/pydocs
           cp -r python/sedona/doc/_build/html/* docs/api/pydocs/
       - run: git config --global user.name = "GitHub Action"
       - run: git config --global user.email = "test@abc.com"
-      - run: ~/.local/bin/uv run mkdocs build
+      - run: uv run mkdocs build
       - name: Deploy the doc to the website branch
         if: ${{ github.event_name != 'pull_request' && github.repository == 'apache/sedona' }}
         run: |
