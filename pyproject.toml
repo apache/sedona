@@ -35,21 +35,6 @@ readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.8"
 
-[project.optional-dependencies]
-# Mirror of docs dependency group for familiarity (e.g. `pip install .[docs]`)
-docs = [
-  "mkdocs",
-  "mkdocs-material",
-  "mkdocs-git-revision-date-localized-plugin",
-  "mkdocs-jupyter",
-  "mkdocs-macros-plugin",
-  "pymdown-extensions",
-  "mike",
-  "blacken-docs",
-  "sphinx",
-  "sphinx_rtd_theme",
-]
-
 [dependency-groups]
 docs = [
   "mkdocs",
