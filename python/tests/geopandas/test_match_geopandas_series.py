@@ -339,6 +339,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             return
 
         for geom in self.geoms:
+            print(geom)
             gpd_series = gpd.GeoSeries(geom)
             gpd_result = gpd.GeoSeries.from_arrow(gpd_series.to_arrow())
 
