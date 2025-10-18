@@ -2441,9 +2441,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def total_bounds(self):
-        import numpy as np
         import warnings
-        from pyspark.sql import functions as F
 
         if len(self) == 0:
             # numpy 'min' cannot handle empty arrays
@@ -2455,23 +2453,26 @@ class GeoSeries(GeoFrame, pspd.Series):
             warnings.filterwarnings(
                 "ignore", r"All-NaN slice encountered", RuntimeWarning
             )
-            total_bounds_df = ps_df.agg(
-                {
-                    "minx": ["min"],
-                    "miny": ["min"],
-                    "maxx": ["max"],
-                    "maxy": ["max"],
-                }
+
+            minx = ps_df["minx"].min(skipna=True)
+            miny = ps_df["miny"].min(skipna=True)
+
+            # skina=True doesn't work properly for max(), so we use dropna() as a workaround
+            ps_df["maxx"] = ps_df["maxx"].dropna()
+            ps_df["maxy"] = ps_df["maxy"].dropna()
+
+            maxx = (
+                ps_df["maxx"].max(skipna=True)
+                if not ps_df["maxx"].dropna().empty
+                else np.nan
+            )
+            maxy = (
+                ps_df["maxy"].max(skipna=True)
+                if not ps_df["maxy"].dropna().empty
+                else np.nan
             )
 
-            return np.array(
-                (
-                    np.nanmin(total_bounds_df["minx"]["min"]),  # minx
-                    np.nanmin(total_bounds_df["miny"]["min"]),  # miny
-                    np.nanmax(total_bounds_df["maxx"]["max"]),  # maxx
-                    np.nanmax(total_bounds_df["maxy"]["max"]),  # maxy
-                )
-            )
+            return np.array((minx, miny, maxx, maxy))
 
     # GeoSeries-only (not in GeoDataFrame)
     def estimate_utm_crs(self, datum_name: str = "WGS 84") -> "CRS":
