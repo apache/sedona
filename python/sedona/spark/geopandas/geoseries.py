@@ -811,23 +811,15 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def geom_type(self) -> pspd.Series:
-        spark_col = stf.GeometryType(self.spark.column)
+        spark_col = stf.ST_GeometryType(self.spark.column)
         result = self._query_geometry_column(
             spark_col,
             returns_geom=False,
         )
 
-        # Sedona returns the string in all caps unlike GeoPandas.
-        sgpd_to_gpg_name_map = {
-            "POINT": "Point",
-            "LINESTRING": "LineString",
-            "POLYGON": "Polygon",
-            "MULTIPOINT": "MultiPoint",
-            "MULTILINESTRING": "MultiLineString",
-            "MULTIPOLYGON": "MultiPolygon",
-            "GEOMETRYCOLLECTION": "GeometryCollection",
-        }
-        result = result.map(lambda x: sgpd_to_gpg_name_map.get(x, x))
+        # ST_GeometryType returns string as 'ST_Point'
+        # we crop the prefix off to get 'Point'
+        result = result.map(lambda x: x[3:])
         return result
 
     @property
