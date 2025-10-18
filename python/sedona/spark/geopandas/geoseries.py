@@ -2458,19 +2458,11 @@ class GeoSeries(GeoFrame, pspd.Series):
             miny = ps_df["miny"].min(skipna=True)
 
             # skina=True doesn't work properly for max(), so we use dropna() as a workaround
-            ps_df["maxx"] = ps_df["maxx"].dropna()
-            ps_df["maxy"] = ps_df["maxy"].dropna()
+            maxx = ps_df["maxx"].dropna()
+            maxy = ps_df["maxy"].dropna()
 
-            maxx = (
-                ps_df["maxx"].max(skipna=True)
-                if not ps_df["maxx"].dropna().empty
-                else np.nan
-            )
-            maxy = (
-                ps_df["maxy"].max(skipna=True)
-                if not ps_df["maxy"].dropna().empty
-                else np.nan
-            )
+            maxx = maxx.max(skipna=True) if not maxx.empty else np.nan
+            maxy = maxy.max(skipna=True) if not maxy.empty else np.nan
 
             return np.array((minx, miny, maxx, maxy))
 
