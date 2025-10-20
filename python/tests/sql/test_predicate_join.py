@@ -375,7 +375,7 @@ class TestPredicateJoin(TestBase):
         point_df.show()
 
         range_join_df = self.spark.sql(
-            "select * from polygondf, pointdf where ST_Contains(polygondf.polygonshape,pointdf.pointshape) "  # nosec B608
+            "select * from polygondf, pointdf where ST_Contains(polygondf.polygonshape,pointdf.pointshape) "
             + "and ST_Contains(ST_PolygonFromEnvelope(1.0,101.0,501.0,601.0), polygondf.polygonshape)"
         )
 
@@ -429,7 +429,7 @@ class TestPredicateJoin(TestBase):
         raw_polygon_df.createOrReplaceTempView("rawPolygonDf")
 
         polygon_envelope_df = self.spark.sql(
-            "select id, ST_PolygonFromEnvelope("  # nosec B608
+            "select id, ST_PolygonFromEnvelope("
             + "cast(latmin as Decimal(24,20)), cast(lonmin as Decimal(24,20)), "
             + "cast(latmax as Decimal(24,20)), cast(lonmax as Decimal(24,20))) AS polygon FROM rawPolygonDf"
         )

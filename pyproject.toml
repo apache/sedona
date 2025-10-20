@@ -16,6 +16,7 @@
 # under the License.
 
 [tool.bandit]
+exclude_dirs = ["python/tests"]
 skips = ["B101"]
 
 [tool.codespell]

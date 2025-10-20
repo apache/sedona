@@ -519,7 +519,7 @@ class TestConstructorFunctions(TestBase):
         # then result should be as expected
         transform_query = "result" if not transform else f"{transform}(result)"
         queryResult = self.spark.sql(
-            f"select {transform_query} from {random_table_name}"  # nosec B608
+            f"select {transform_query} from {random_table_name}"
         ).collect()[0][0]
         if type(queryResult) is float and type(expected_result) is float:
             assert math.isclose(queryResult, expected_result, rel_tol=1e-9)
