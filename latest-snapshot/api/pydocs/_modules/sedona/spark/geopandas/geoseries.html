@@ -1275,23 +1275,15 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">geom_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
-        <span class="n">spark_col</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">GeometryType</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">)</span>
+        <span class="n">spark_col</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_GeometryType</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">)</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
             <span class="n">spark_col</span><span class="p">,</span>
             <span class="n">returns_geom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="c1"># Sedona returns the string in all caps unlike GeoPandas.</span>
-        <span class="n">sgpd_to_gpg_name_map</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;POINT&quot;</span><span class="p">:</span> <span class="s2">&quot;Point&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;LINESTRING&quot;</span><span class="p">:</span> <span class="s2">&quot;LineString&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;POLYGON&quot;</span><span class="p">:</span> <span class="s2">&quot;Polygon&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;MULTIPOINT&quot;</span><span class="p">:</span> <span class="s2">&quot;MultiPoint&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;MULTILINESTRING&quot;</span><span class="p">:</span> <span class="s2">&quot;MultiLineString&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;MULTIPOLYGON&quot;</span><span class="p">:</span> <span class="s2">&quot;MultiPolygon&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;GEOMETRYCOLLECTION&quot;</span><span class="p">:</span> <span class="s2">&quot;GeometryCollection&quot;</span><span class="p">,</span>
-        <span class="p">}</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">sgpd_to_gpg_name_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+        <span class="c1"># ST_GeometryType returns string as &#39;ST_Point&#39;</span>
+        <span class="c1"># we crop the prefix off to get &#39;Point&#39;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">3</span><span class="p">:])</span>
         <span class="k">return</span> <span class="n">result</span>
 
     <span class="nd">@property</span>
@@ -2677,7 +2669,6 @@
 
         <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">default_session</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.internal</span><span class="w"> </span><span class="kn">import</span> <span class="n">InternalField</span>
-        <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
             <span class="n">data</span> <span class="o">=</span> <span class="p">[(</span><span class="n">obj</span><span class="p">,)</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
@@ -3079,13 +3070,17 @@
             <span class="p">],</span>
             <span class="n">column_label_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">internal</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">internal</span><span class="p">)</span>
+        <span class="c1"># Convert max/min float values to NaN</span>
+        <span class="c1"># e.g POINT EMPTY, represented as POINT (NaN NaN), should result in all NaN</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+            <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">total_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">functions</span> <span class="k">as</span> <span class="n">F</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># numpy &#39;min&#39; cannot handle empty arrays</span>
@@ -3097,23 +3092,18 @@
             <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span>
                 <span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;All-NaN slice encountered&quot;</span><span class="p">,</span> <span class="ne">RuntimeWarning</span>
             <span class="p">)</span>
-            <span class="n">total_bounds_df</span> <span class="o">=</span> <span class="n">ps_df</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;minx&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;min&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;miny&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;min&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;maxx&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;max&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;maxy&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;max&quot;</span><span class="p">],</span>
-                <span class="p">}</span>
-            <span class="p">)</span>
 
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-                <span class="p">(</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">total_bounds_df</span><span class="p">[</span><span class="s2">&quot;minx&quot;</span><span class="p">][</span><span class="s2">&quot;min&quot;</span><span class="p">]),</span>  <span class="c1"># minx</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">total_bounds_df</span><span class="p">[</span><span class="s2">&quot;miny&quot;</span><span class="p">][</span><span class="s2">&quot;min&quot;</span><span class="p">]),</span>  <span class="c1"># miny</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">total_bounds_df</span><span class="p">[</span><span class="s2">&quot;maxx&quot;</span><span class="p">][</span><span class="s2">&quot;max&quot;</span><span class="p">]),</span>  <span class="c1"># maxx</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">total_bounds_df</span><span class="p">[</span><span class="s2">&quot;maxy&quot;</span><span class="p">][</span><span class="s2">&quot;max&quot;</span><span class="p">]),</span>  <span class="c1"># maxy</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
+            <span class="n">minx</span> <span class="o">=</span> <span class="n">ps_df</span><span class="p">[</span><span class="s2">&quot;minx&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">skipna</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">miny</span> <span class="o">=</span> <span class="n">ps_df</span><span class="p">[</span><span class="s2">&quot;miny&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">skipna</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># skipna=True doesn&#39;t work properly for max(), so we use dropna() as a workaround</span>
+            <span class="n">maxx</span> <span class="o">=</span> <span class="n">ps_df</span><span class="p">[</span><span class="s2">&quot;maxx&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+            <span class="n">maxy</span> <span class="o">=</span> <span class="n">ps_df</span><span class="p">[</span><span class="s2">&quot;maxy&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+
+            <span class="n">maxx</span> <span class="o">=</span> <span class="n">maxx</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">skipna</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">maxx</span><span class="o">.</span><span class="n">empty</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="n">maxy</span> <span class="o">=</span> <span class="n">maxy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">skipna</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">maxy</span><span class="o">.</span><span class="n">empty</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">))</span>
 
     <span class="c1"># GeoSeries-only (not in GeoDataFrame)</span>
 <div class="viewcode-block" id="GeoSeries.estimate_utm_crs">
