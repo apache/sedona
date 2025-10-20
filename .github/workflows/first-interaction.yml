@@ -34,6 +34,6 @@ jobs:
       - name: First Interaction
         uses: actions/first-interaction@v3
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          issue-message: 'Thank you for your interest in Apache Sedona! We appreciate you opening your first issue. Contributions like yours help make Apache Sedona better.'
-          pr-message: 'Welcome and thank you for your first pull request! We appreciate your contribution to Apache Sedona. Your code changes will be reviewed shortly.'
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          issue_message: 'Thank you for your interest in Apache Sedona! We appreciate you opening your first issue. Contributions like yours help make Apache Sedona better.'
+          pr_message: 'Welcome and thank you for your first pull request! We appreciate your contribution to Apache Sedona. Your code changes will be reviewed shortly.'
