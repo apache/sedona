@@ -195,12 +195,7 @@ public class GeomUtils {
     if (geometry == null) {
       return null;
     }
-    int endian =
-        ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN
-            ? ByteOrderValues.BIG_ENDIAN
-            : ByteOrderValues.LITTLE_ENDIAN;
-    WKBWriter writer =
-        new WKBWriter(GeomUtils.getDimension(geometry), endian, geometry.getSRID() != 0);
+    WKBWriter writer = createWKBWriter(GeomUtils.getDimension(geometry), geometry.getSRID() != 0);
     return writer.write(geometry);
   }
 
@@ -208,12 +203,21 @@ public class GeomUtils {
     if (geometry == null) {
       return null;
     }
-    int endian =
-        ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN
-            ? ByteOrderValues.BIG_ENDIAN
-            : ByteOrderValues.LITTLE_ENDIAN;
-    WKBWriter writer = new WKBWriter(GeomUtils.getDimension(geometry), endian, false);
+    WKBWriter writer = createWKBWriter(GeomUtils.getDimension(geometry), false);
     return writer.write(geometry);
+  }
+
+  private static final int NATIVE_WKB_BYTE_ORDER =
+      ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN
+          ? ByteOrderValues.BIG_ENDIAN
+          : ByteOrderValues.LITTLE_ENDIAN;
+
+  public static WKBWriter createWKBWriter(int dimension, boolean includeSRID) {
+    return new WKBWriter(dimension, NATIVE_WKB_BYTE_ORDER, includeSRID);
+  }
+
+  public static WKBWriter createWKBWriter(int dimension) {
+    return createWKBWriter(dimension, false);
   }
 
   public static Geometry get2dGeom(Geometry geom) {
@@ -618,6 +622,9 @@ public class GeomUtils {
 
   public static Boolean isMeasuredGeometry(Geometry geom) {
     Coordinate coordinate = geom.getCoordinate();
+    if (coordinate == null) {
+      return false; // Empty geometries are not measured
+    }
     return !Double.isNaN(coordinate.getM());
   }
 

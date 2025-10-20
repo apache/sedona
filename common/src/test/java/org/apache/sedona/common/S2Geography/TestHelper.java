@@ -34,7 +34,13 @@ public class TestHelper {
 
   private static final double EPS = 1e-6;
 
-  public static void assertRoundTrip(S2Geography original, EncodeOptions opts) throws IOException {
+  public static void assertRoundTrip(Geography original, EncodeOptions opts) throws IOException {
+    int srid = original.getSRID();
+    assertTrue("SRID must be non-negative", srid >= 0);
+    if (srid == 0) {
+      // If SRID is not set, we set it to a default value for testing purposes
+      original.setSRID(4326);
+    }
     // 1) Encode to bytes
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     original.encodeTagged(baos, opts);
@@ -42,7 +48,10 @@ public class TestHelper {
 
     // 2) Decode back
     ByteArrayInputStream in = new ByteArrayInputStream(data);
-    S2Geography decoded = original.decodeTagged(in);
+    Geography decoded = Geography.decodeTagged(in);
+
+    assertEquals(original.getSRID(), decoded.getSRID()); // Ensure SRID matches
+    original.setSRID(srid); // Restore original SRID
 
     // 3) Compare kind, shapes, dimension
     assertEquals("Kind should round-trip", original.kind, decoded.kind);
@@ -104,7 +113,7 @@ public class TestHelper {
    * Asserts that the EncodeTag for the given geography honors the includeCovering option; if
    * includeCovering==true, coveringSize should be >0, otherwise it must be zero.
    */
-  public static void assertCovering(S2Geography original, EncodeOptions opts) throws IOException {
+  public static void assertCovering(Geography original, EncodeOptions opts) throws IOException {
     // encode and read only the tag
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     original.encodeTagged(baos, opts);
@@ -156,10 +165,10 @@ public class TestHelper {
   public static void checkWKBGeography(String wkbHex, String expectedWKT) throws ParseException {
     WKBReader wkbReader = new WKBReader();
     byte[] wkb = WKBReader.hexToBytes(wkbHex);
-    S2Geography geoWKB = wkbReader.read(wkb);
+    Geography geoWKB = wkbReader.read(wkb);
 
     WKTReader wktReader = new WKTReader();
-    S2Geography geoWKT = wktReader.read(expectedWKT);
+    Geography geoWKT = wktReader.read(expectedWKT);
 
     boolean isEqual = compareTo(geoWKT, geoWKT) == 0;
     if (!isEqual) {
@@ -169,7 +178,7 @@ public class TestHelper {
     assertTrue(isEqual);
   }
 
-  public static int compareTo(S2Geography geo1, S2Geography geo2) {
+  public static int compareTo(Geography geo1, Geography geo2) {
     int compare = geo1.kind.getKind() - geo2.kind.getKind();
     if (compare != 0) {
       return compare;
@@ -207,8 +216,16 @@ public class TestHelper {
       if (S2_isEmpty(geo1) && S2_isEmpty(geo2)) return 0;
       assertEquals(geo1.numShapes(), geo2.numShapes());
       for (int i = 0; i < geo1.numShapes(); i++) {
-        S2Geography g1 = (S2Geography) ((GeographyCollection) geo1).features.get(i);
-        S2Geography g2 = (S2Geography) ((GeographyCollection) geo2).features.get(i);
+        Geography g1 = (Geography) ((GeographyCollection) geo1).features.get(i);
+        Geography g2 = (Geography) ((GeographyCollection) geo2).features.get(i);
+        compareTo(g1, g2);
+      }
+    } else if (geo1 instanceof MultiPolygonGeography && geo2 instanceof MultiPolygonGeography) {
+      if (S2_isEmpty(geo1) && S2_isEmpty(geo2)) return 0;
+      assertEquals(geo1.numShapes(), geo2.numShapes());
+      for (int i = 0; i < geo1.numShapes(); i++) {
+        Geography g1 = (Geography) ((MultiPolygonGeography) geo1).features.get(i);
+        Geography g2 = (Geography) ((MultiPolygonGeography) geo2).features.get(i);
         compareTo(g1, g2);
       }
     }

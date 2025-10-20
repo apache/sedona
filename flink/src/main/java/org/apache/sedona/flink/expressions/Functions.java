@@ -100,6 +100,24 @@ public class Functions {
     }
   }
 
+  public static class ST_ApproximateMedialAxis extends ScalarFunction {
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+            Object o) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.approximateMedialAxis(geom);
+    }
+
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        @DataTypeHint("Integer") Integer maxVertices) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.approximateMedialAxis(geom, maxVertices);
+    }
+  }
+
   public static class ST_Boundary extends ScalarFunction {
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
     public Geometry eval(
@@ -1422,6 +1440,24 @@ public class Functions {
     }
   }
 
+  public static class ST_StraightSkeleton extends ScalarFunction {
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+            Object o) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.straightSkeleton(geom);
+    }
+
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        @DataTypeHint("Integer") Integer maxVertices) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.straightSkeleton(geom, maxVertices);
+    }
+  }
+
   public static class ST_Split extends ScalarFunction {
     @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
     public Geometry eval(
@@ -1559,6 +1595,16 @@ public class Functions {
         @DataTypeHint("INT") Integer maxVertices) {
       Geometry geom = (Geometry) o;
       return org.apache.sedona.common.Functions.subDivide(geom, maxVertices);
+    }
+  }
+
+  public static class ST_Segmentize extends ScalarFunction {
+    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class) Object o,
+        @DataTypeHint("Double") Double maxSegmentLength) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.segmentize(geom, maxSegmentLength);
     }
   }
 

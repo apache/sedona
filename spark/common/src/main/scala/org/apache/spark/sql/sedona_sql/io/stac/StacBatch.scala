@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.connector.read.{Batch, InputPartition, PartitionReaderFactory}
 import org.apache.spark.sql.execution.datasource.stac.TemporalFilter
-import org.apache.spark.sql.execution.datasources.parquet.{GeoParquetSpatialFilter, GeometryFieldMetaData}
+import org.apache.spark.sql.execution.datasources.geoparquet.{GeoParquetSpatialFilter, GeometryFieldMetaData}
 import org.apache.spark.sql.sedona_sql.io.stac.StacUtils.getNumPartitions
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.util.SerializableConfiguration

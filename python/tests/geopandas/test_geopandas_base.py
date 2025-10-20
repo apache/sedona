@@ -17,7 +17,7 @@
 
 from typing import Union
 from tests.test_base import TestBase
-from sedona.geopandas import GeoDataFrame, GeoSeries
+from sedona.spark.geopandas import GeoDataFrame, GeoSeries
 import pyspark.sql
 import geopandas as gpd
 import pandas as pd
@@ -33,6 +33,10 @@ class TestGeopandasBase(TestBase):
     # -----------------------------------------------------------------------------
     # # Utils
     # -----------------------------------------------------------------------------
+    def setup_method(self):
+        # We enable this option by default for external users, but we disable it for development testing.
+        # This is useful to catch inefficiencies in the code while developing this package.
+        ps.set_option("compute.ops_on_diff_frames", False)
 
     @classmethod
     def check_sgpd_equals_spark_df(
@@ -55,6 +59,7 @@ class TestGeopandasBase(TestBase):
     ):
         assert isinstance(actual, GeoSeries)
         assert isinstance(expected, gpd.GeoSeries)
+        assert actual.name == expected.name, "results are of different names"
         sgpd_result = actual.to_geopandas()
         assert len(sgpd_result) == len(expected), "results are of different lengths"
         for a, e in zip(sgpd_result, expected):
@@ -112,19 +117,6 @@ class TestGeopandasBase(TestBase):
     @classmethod
     def contains_any_geom_collection(cls, geoms) -> bool:
         return any(isinstance(g, GeometryCollection) for g in geoms)
-
-    @contextmanager
-    def ps_allow_diff_frames(self):
-        """
-        A context manager to temporarily set a compute.ops_on_diff_frames option.
-        """
-        try:
-            ps.set_option("compute.ops_on_diff_frames", True)
-
-            # Yield control to the code inside the 'with' block
-            yield
-        finally:
-            ps.reset_option("compute.ops_on_diff_frames")
 
     def contains_any_geom_collection(self, geoms1, geoms2) -> bool:
         return any(isinstance(g, GeometryCollection) for g in geoms1) or any(

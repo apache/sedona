@@ -23,7 +23,7 @@ import pandas as pd
 import geopandas as gpd
 import pyspark.pandas as ps
 from functools import partial
-from sedona.geopandas import GeoDataFrame, GeoSeries, read_file
+from sedona.spark.geopandas import GeoDataFrame, GeoSeries, read_file, read_parquet
 from tests import tests_resource
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 from shapely.geometry import (
@@ -86,6 +86,7 @@ class TestIO(TestGeopandasBase):
         [
             partial(GeoDataFrame.from_file, format="geojson"),
             partial(read_file, format="GeoJSON"),
+            partial(read_file),  # check format inference works
         ],
     )
     def test_read_geojson(self, read_func):
@@ -102,6 +103,8 @@ class TestIO(TestGeopandasBase):
         [
             partial(GeoDataFrame.from_file, format="geoparquet"),
             partial(read_file, format="GeoParquet"),
+            partial(read_file),  # check format inference works
+            read_parquet,
         ],
     )
     def test_read_geoparquet(self, read_func):
@@ -120,6 +123,7 @@ class TestIO(TestGeopandasBase):
         [
             partial(GeoDataFrame.from_file, format="geopackage"),
             partial(read_file, format="GeoPackage"),
+            partial(read_file),  # check format inference works
         ],
     )
     def test_read_geopackage(self, read_func):
@@ -151,6 +155,7 @@ class TestIO(TestGeopandasBase):
         [
             partial(GeoDataFrame.to_file, driver="GeoParquet"),
             partial(GeoDataFrame.to_file, driver="geoparquet"),
+            partial(GeoDataFrame.to_file),  # check format inference works
             GeoDataFrame.to_parquet,
         ],
     )
@@ -173,6 +178,7 @@ class TestIO(TestGeopandasBase):
             partial(GeoDataFrame.to_file, driver="geojson"),  # index=None here is False
             partial(GeoDataFrame.to_file, driver="GeoJSON", index=True),
             partial(GeoDataFrame.to_file, driver="geojson", index=True),
+            partial(GeoDataFrame.to_file),  # check format inference works
         ],
     )
     def test_to_geojson(self, write_func):
@@ -231,6 +237,9 @@ class TestIO(TestGeopandasBase):
 
         read_result = GeoSeries.from_file(temp_file_path, format=format)
         read_result = read_result.to_geopandas()
+
+        # In Geopandas, the name of the series is always read in to be "geometry"
+        sgpd_ser.name = "geometry"
 
         # Since index=True, the contents should be in the same order as the original GeoSeries
         self.check_sgpd_equals_gpd(sgpd_ser, read_result)

@@ -186,6 +186,7 @@ public class Catalog {
       new Functions.ST_SimplifyPolygonHull(),
       new Functions.ST_Split(),
       new Functions.ST_Subdivide(),
+      new Functions.ST_Segmentize(),
       new Functions.ST_SymDifference(),
       new Functions.ST_S2CellIDs(),
       new Functions.ST_Snap(),
@@ -212,11 +213,13 @@ public class Catalog {
       new Functions.ST_Affine(),
       new Functions.ST_BoundingDiagonal(),
       new Functions.ST_Angle(),
+      new Functions.ST_ApproximateMedialAxis(),
       new Functions.ST_Degrees(),
       new Functions.ST_HausdorffDistance(),
       new Functions.ST_IsCollection(),
       new Functions.ST_CoordDim(),
-      new Functions.ST_IsValidReason()
+      new Functions.ST_IsValidReason(),
+      new Functions.ST_StraightSkeleton()
     };
   }
 

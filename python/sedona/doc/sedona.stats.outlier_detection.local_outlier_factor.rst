@@ -6,5 +6,5 @@ Module contents
 
 .. automodule:: sedona.stats.outlier_detection.local_outlier_factor
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

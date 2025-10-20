@@ -19,7 +19,6 @@ from typing import Union, Optional, Iterator, List
 from sedona.spark.stac.collection_client import CollectionClient
 
 import datetime as python_datetime
-from pystac import Item as PyStacItem
 from shapely.geometry.base import BaseGeometry
 
 from pyspark.sql import DataFrame
@@ -36,12 +35,8 @@ class Client:
 
         This class method creates an instance of the Client class with the given URL.
 
-        Parameters:
-        - url (str): The URL of the STAC API to connect to.
-          Example: "https://planetarycomputer.microsoft.com/api/stac/v1"
-
-        Returns:
-        - Client: An instance of the Client class connected to the specified URL.
+        :param url: The URL of the STAC API to connect to. Example: "https://planetarycomputer.microsoft.com/api/stac/v1"
+        :return: An instance of the Client class connected to the specified URL.
         """
         return cls(url)
 
@@ -52,12 +47,8 @@ class Client:
         This method creates an instance of the CollectionClient class for the given collection ID,
         allowing interaction with the specified collection in the STAC API.
 
-        Parameters:
-        - collection_id (str): The ID of the collection to retrieve.
-          Example: "aster-l1t"
-
-        Returns:
-        - CollectionClient: An instance of the CollectionClient class for the specified collection.
+        :param collection_id: The ID of the collection to retrieve. Example: "aster-l1t"
+        :return: An instance of the CollectionClient class for the specified collection.
         """
         return CollectionClient(self.url, collection_id)
 
@@ -68,7 +59,7 @@ class Client:
         This method fetches the root catalog from the STAC API, providing access to all collections and items.
 
         Returns:
-        - dict: The root catalog of the STAC API.
+            dict: The root catalog of the STAC API.
         """
         # Implement logic to fetch and return the root catalog
         return CollectionClient(self.url, None)
@@ -84,43 +75,36 @@ class Client:
         datetime: Optional[Union[str, python_datetime.datetime, list]] = None,
         max_items: Optional[int] = None,
         return_dataframe: bool = True,
-    ) -> Union[Iterator[PyStacItem], DataFrame]:
+    ) -> Union[Iterator, DataFrame]:
         """
         Searches for items in the specified collection with optional filters.
 
-        Parameters:
-        - ids (Union[str, list]): A variable number of item IDs to filter the items.
-          Example: "item_id1" or ["item_id1", "item_id2"]
+        :param ids: A variable number of item IDs to filter the items.
+            Example: "item_id1" or ["item_id1", "item_id2"]
+        :param collection_id: The ID of the collection to search in.
+            Example: "aster-l1t"
+        :param bbox: A list of bounding boxes for filtering the items.
+            Each bounding box is represented as a list of four float values: [min_lon, min_lat, max_lon, max_lat].
+            Example: [[-180.0, -90.0, 180.0, 90.0]]  # This bounding box covers the entire world.
+        :param geometry: Shapely geometry object(s) or WKT string(s) for spatial filtering.
+            Can be a single geometry, WKT string, or a list of geometries/WKT strings.
+            If both bbox and geometry are provided, geometry takes precedence.
+            Example: Polygon(...) or "POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))" or [Polygon(...), Polygon(...)]
+        :param datetime: A single datetime, RFC 3339-compliant timestamp,
+            or a list of date-time ranges for filtering the items. The datetime can be specified in various formats:
 
-        - collection_id (Optional[str]): The ID of the collection to search in.
-          Example: "aster-l1t"
+            - "YYYY" expands to ["YYYY-01-01T00:00:00Z", "YYYY-12-31T23:59:59Z"]
+            - "YYYY-mm" expands to ["YYYY-mm-01T00:00:00Z", "YYYY-mm-<last_day>T23:59:59Z"]
+            - "YYYY-mm-dd" expands to ["YYYY-mm-ddT00:00:00Z", "YYYY-mm-ddT23:59:59Z"]
+            - "YYYY-mm-ddTHH:MM:SSZ" remains as ["YYYY-mm-ddTHH:MM:SSZ", "YYYY-mm-ddTHH:MM:SSZ"]
+            - A list of date-time ranges can be provided for multiple intervals.
 
-        - bbox (Optional[list]): A list of bounding boxes for filtering the items.
-          Each bounding box is represented as a list of four float values: [min_lon, min_lat, max_lon, max_lat].
-          Example: [[-180.0, -90.0, 180.0, 90.0]]  # This bounding box covers the entire world.
-
-        - geometry (Optional[Union[str, BaseGeometry, List[Union[str, BaseGeometry]]]]): Shapely geometry object(s) or WKT string(s) for spatial filtering.
-          Can be a single geometry, WKT string, or a list of geometries/WKT strings.
-          If both bbox and geometry are provided, geometry takes precedence.
-          Example: Polygon(...) or "POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))" or [Polygon(...), Polygon(...)]
-
-        - datetime (Optional[Union[str, python_datetime.datetime, list]]): A single datetime, RFC 3339-compliant timestamp,
-          or a list of date-time ranges for filtering the items. The datetime can be specified in various formats:
-          - "YYYY" expands to ["YYYY-01-01T00:00:00Z", "YYYY-12-31T23:59:59Z"]
-          - "YYYY-mm" expands to ["YYYY-mm-01T00:00:00Z", "YYYY-mm-<last_day>T23:59:59Z"]
-          - "YYYY-mm-dd" expands to ["YYYY-mm-ddT00:00:00Z", "YYYY-mm-ddT23:59:59Z"]
-          - "YYYY-mm-ddTHH:MM:SSZ" remains as ["YYYY-mm-ddTHH:MM:SSZ", "YYYY-mm-ddTHH:MM:SSZ"]
-          - A list of date-time ranges can be provided for multiple intervals.
-          Example: "2020-01-01T00:00:00Z" or python_datetime.datetime(2020, 1, 1) or [["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]
-
-        - max_items (Optional[int]): The maximum number of items to return from the search, even if there are more matching results.
-          Example: 100
-
-        - return_dataframe (bool): If True, return the result as a Spark DataFrame instead of an iterator of PyStacItem objects.
-          Example: True
-
-        Returns:
-        - Union[Iterator[PyStacItem], DataFrame]: An iterator of PyStacItem objects or a Spark DataFrame that match the specified filters.
+            Example: "2020-01-01T00:00:00Z" or python_datetime.datetime(2020, 1, 1) or [["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]
+        :param max_items: The maximum number of items to return from the search, even if there are more matching results.
+            Example: 100
+        :param return_dataframe: If True, return the result as a Spark DataFrame instead of an iterator of PyStacItem objects.
+            Example: True
+        :return: An iterator of PyStacItem objects or a Spark DataFrame that match the specified filters.
         """
         if collection_id:
             client = self.get_collection(collection_id)

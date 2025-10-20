@@ -6,5 +6,5 @@ Module contents
 
 .. automodule:: sedona.stats.hotspot_detection.getis_ord
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

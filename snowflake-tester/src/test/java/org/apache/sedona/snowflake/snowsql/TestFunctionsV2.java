@@ -957,6 +957,14 @@ public class TestFunctionsV2 extends TestBase {
   }
 
   @Test
+  public void test_ST_Segmentize() {
+    registerUDFV2("ST_Segmentize", String.class, double.class);
+    verifySqlSingleRes(
+        "select ST_AsText(sedona.ST_Segmentize(ST_GeometryFromWKT('POLYGON((0 0, 0 8, 30 0, 0 0))'), 10))",
+        "POLYGON((0 0,0 8,7.5 6,15 4,22.5 2,30 0,20 0,10 0,0 0))");
+  }
+
+  @Test
   public void test_ST_SymDifference() {
     registerUDFV2("ST_SymDifference", String.class, String.class);
     verifySqlSingleRes(
@@ -1286,5 +1294,33 @@ public class TestFunctionsV2 extends TestBase {
     verifySqlSingleRes(
         "select ST_AsText(ST_ReducePrecision(sedona.ST_Rotate(ST_GeometryFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)'), 10, 0, 0),2))",
         "LINESTRING(0 0,-0.84 -0.54,-0.3 -1.38,0 0)");
+  }
+
+  @Test
+  public void test_ST_StraightSkeleton() {
+    registerUDFV2("ST_StraightSkeleton", String.class);
+    registerUDFV2("GeometryType", String.class);
+    verifySqlSingleRes(
+        "select sedona.GeometryType(sedona.ST_StraightSkeleton(ST_GeometryFromWKT('POLYGON ((1 1, 1 3, 4 3, 4 1, 1 1))')))",
+        "MULTILINESTRING");
+
+    registerUDFV2("ST_StraightSkeleton", String.class, int.class);
+    verifySqlSingleRes(
+        "select sedona.GeometryType(sedona.ST_StraightSkeleton(ST_GeometryFromWKT('POLYGON ((0 0, 4 0, 4 4, 0 4, 0 0))'), 10))",
+        "MULTILINESTRING");
+  }
+
+  @Test
+  public void test_ST_ApproximateMedialAxis() {
+    registerUDFV2("ST_ApproximateMedialAxis", String.class);
+    registerUDFV2("GeometryType", String.class);
+    verifySqlSingleRes(
+        "select sedona.GeometryType(sedona.ST_ApproximateMedialAxis(ST_GeometryFromWKT('POLYGON ((45 0, 55 0, 55 40, 70 40, 70 50, 30 50, 30 40, 45 40, 45 0))')))",
+        "MULTILINESTRING");
+
+    registerUDFV2("ST_ApproximateMedialAxis", String.class, int.class);
+    verifySqlSingleRes(
+        "select sedona.GeometryType(sedona.ST_ApproximateMedialAxis(ST_GeometryFromWKT('POLYGON ((0 0, 10 0, 10 5, 5 5, 5 10, 0 10, 0 0))'), 100))",
+        "MULTILINESTRING");
   }
 }

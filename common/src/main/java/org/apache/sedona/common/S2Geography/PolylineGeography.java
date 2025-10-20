@@ -33,7 +33,7 @@ import org.locationtech.jts.geom.CoordinateSequence;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 
 /** A Geography representing zero or more polylines using S2Polyline. */
-public class PolylineGeography extends S2Geography {
+public class PolylineGeography extends Geography {
   private static final Logger logger = Logger.getLogger(PolylineGeography.class.getName());
 
   public final List<S2Polyline> polylines;
@@ -56,6 +56,15 @@ public class PolylineGeography extends S2Geography {
   public PolylineGeography(List<S2Polyline> polylines) {
     super(GeographyKind.POLYLINE);
     this.polylines = new ArrayList<>(polylines);
+  }
+
+  public PolylineGeography(GeographyKind kind, S2Polyline polyline) {
+    super(kind);
+    if (kind != GeographyKind.POLYLINE && kind != GeographyKind.SINGLEPOLYLINE) {
+      throw new IllegalArgumentException("Invalid GeographyKind for PolylineGeography: " + kind);
+    }
+    this.polylines = new ArrayList<>();
+    this.polylines.add(polyline);
   }
 
   @Override
@@ -129,18 +138,26 @@ public class PolylineGeography extends S2Geography {
     // 2) Skip past any covering cell-IDs written by encodeTagged
     tag.skipCovering(in);
 
-    // 3) Ensure we have at least 4 bytes for the count
-    if (in.available() < Integer.BYTES) {
-      throw new IOException("PolylineGeography.decodeTagged error: insufficient header bytes");
-    }
+    // 3) Read the number of polylines (4-byte)
+    try {
+      int count = in.readInt();
+      if (count < 0) {
+        throw new IOException("PolylineGeography.decodeTagged error: negative count: " + count);
+      }
+      if (tag.getKind() == GeographyKind.SINGLEPOLYLINE) {
+        return new SinglePolylineGeography(S2Polyline.decode(in));
+      }
 
-    // 5) Read the number of polylines (4-byte)
-    int count = in.readInt();
+      // 4) For each polyline, read its block and let S2Polyline.decode(InputStream) do the rest
+      for (int i = 0; i < count; i++) {
+        S2Polyline pl = S2Polyline.decode(in);
+        geo.polylines.add(pl);
+      }
 
-    // 6) For each polyline, read its block and let S2Polyline.decode(InputStream) do the rest
-    for (int i = 0; i < count; i++) {
-      S2Polyline pl = S2Polyline.decode(in);
-      geo.polylines.add(pl);
+    } catch (EOFException e) {
+      throw new IOException(
+          "PolylineGeography.decodeTagged error: insufficient data to decode all parts of the geography.",
+          e);
     }
     return geo;
   }

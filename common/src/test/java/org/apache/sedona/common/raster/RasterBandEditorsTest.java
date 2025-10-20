@@ -30,11 +30,11 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.sedona.common.Constructors;
+import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.raster.serde.Serde;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.coverage.processing.CannotCropException;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
@@ -217,10 +217,68 @@ public class RasterBandEditorsTest extends RasterTestBase {
     double bandNoDataValue = RasterBandAccessors.getBandNoDataValue(clippedRaster);
     double expectedBandNoDataValue = 0.0;
     double[] actualValues = MapAlgebra.bandAsArray(clippedRaster, 1);
-    double[] expectedValues = {2.0, 3.0, 6.0, 7.0};
+    double[] expectedValues = {0.0, 0.0, 0.0, 7.0};
 
     assertEquals(expectedBandNoDataValue, bandNoDataValue, FP_TOLERANCE);
     assertTrue(Arrays.equals(expectedValues, actualValues));
+
+    Geometry geomTransformed = FunctionsGeoTools.transform(geom, "EPSG:5070", "EPSG:4326");
+
+    clippedRaster = RasterBandEditors.clip(raster, 1, geomTransformed, false, 0, true);
+    bandNoDataValue = RasterBandAccessors.getBandNoDataValue(clippedRaster);
+    expectedBandNoDataValue = 0.0;
+    actualValues = MapAlgebra.bandAsArray(clippedRaster, 1);
+    expectedValues = new double[] {0.0, 0.0, 0.0, 7.0};
+
+    assertEquals(expectedBandNoDataValue, bandNoDataValue, FP_TOLERANCE);
+    assertTrue(Arrays.equals(expectedValues, actualValues));
+  }
+
+  @Test
+  public void testClipEdgeCase()
+      throws FactoryException, TransformException, ParseException, IOException {
+    GridCoverage2D raster =
+        rasterFromGeoTiff(resourceFolder + "rasterization/test_rasterization.tiff");
+    String polygon =
+        "POLYGON ((-112.33284156960647 35.2847218363903, -111.83787460663726 32.58335532290123, -110.70619885787484 32.647569129204015, -110.29612639967809 30.671467842387234, -108.19258739561617 31.285215692431052, -107.96086869190255 34.366572252095835, -108.22326988847186 35.68843747308277, -110.52624509609558 35.31045505826484, -112.33284156960647 35.2847218363903))";
+    Geometry geom = Constructors.geomFromWKT(polygon, RasterAccessors.srid(raster));
+    GridCoverage2D clippedRaster = RasterBandEditors.clip(raster, 1, geom, true, 0, true);
+
+    double bandNoDataValue = RasterBandAccessors.getBandNoDataValue(clippedRaster);
+    double expectedBandNoDataValue = 0.0;
+    double[] actualValues = MapAlgebra.bandAsArray(clippedRaster, 1);
+    double[] expectedValues = {
+      12.0, 13.0, 14.0, 15.0, 16.0, 0.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 32.0, 33.0, 34.0, 35.0,
+      36.0, 37.0, 0.0, 43.0, 44.0, 45.0, 46.0, 47.0, 0.0, 0.0, 54.0, 55.0, 56.0, 0.0, 0.0, 0.0,
+      64.0, 65.0, 0.0, 0.0
+    };
+
+    assertEquals(expectedBandNoDataValue, bandNoDataValue, FP_TOLERANCE);
+    assertArrayEquals(expectedValues, actualValues, 0.0);
+  }
+
+  @Test
+  public void testClipWithClippedGeometryWithHole()
+      throws FactoryException, TransformException, ParseException, IOException {
+    GridCoverage2D raster =
+        rasterFromGeoTiff(resourceFolder + "rasterization/test_rasterization.tiff");
+    String polygon =
+        "POLYGON ((-116.974798 27.410563, -113.10645 25.244469, -110.249147 27.566499, -110.205189 28.420171, -111.392068 29.036741, -109.28206 29.420242, -107.831429 28.49744, -108.446848 27.566499, -107.391844 25.720509, -102.995994 24.08636, -99.479314 27.722214, -112.183321 32.063743, -116.974798 27.410563))";
+    Geometry geom = Constructors.geomFromWKT(polygon, 4326);
+    GridCoverage2D clippedRaster = RasterBandEditors.clip(raster, 1, geom, true, 0, true);
+
+    double bandNoDataValue = RasterBandAccessors.getBandNoDataValue(clippedRaster);
+    double expectedBandNoDataValue = 0.0;
+    double[] actualValues = MapAlgebra.bandAsArray(clippedRaster, 1);
+    double[] expectedValues = {
+      0.0, 42.0, 43.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 51.0, 52.0, 53.0, 54.0, 55.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 61.0, 62.0, 63.0, 64.0, 65.0, 66.0, 67.0, 68.0, 0.0, 0.0, 71.0, 72.0, 73.0,
+      74.0, 75.0, 76.0, 77.0, 78.0, 79.0, 80.0, 81.0, 82.0, 83.0, 84.0, 0.0, 86.0, 87.0, 88.0, 89.0,
+      90.0, 91.0, 92.0, 93.0, 94.0, 0.0, 96.0, 97.0, 98.0, 99.0, 100.0
+    };
+
+    assertEquals(expectedBandNoDataValue, bandNoDataValue, FP_TOLERANCE);
+    assertArrayEquals(expectedValues, actualValues, 0.0);
   }
 
   @Test
@@ -233,11 +291,17 @@ public class RasterBandEditorsTest extends RasterTestBase {
         "POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))";
     Geometry geom = Constructors.geomFromWKT(polygon, RasterAccessors.srid(raster));
 
+    // Testing red band without crop
     GridCoverage2D clippedRaster = RasterBandEditors.clip(raster, 1, geom, false, 200, false);
-    double[] clippedMetadata =
-        Arrays.stream(RasterAccessors.metadata(clippedRaster), 0, 9).toArray();
-    double[] originalMetadata = Arrays.stream(RasterAccessors.metadata(raster), 0, 9).toArray();
-    assertArrayEquals(originalMetadata, clippedMetadata, 0.01d);
+
+    double[] clippedMetadata = RasterAccessors.metadata(clippedRaster);
+    double[] originalMetadata = RasterAccessors.metadata(raster);
+    assertArrayEquals(
+        Arrays.stream(originalMetadata, 0, 9).toArray(),
+        Arrays.stream(clippedMetadata, 0, 9).toArray(),
+        0.01d);
+
+    assertEquals(1, clippedMetadata[9], FP_TOLERANCE);
 
     String actual = String.valueOf(clippedRaster.getSampleDimensions()[0]);
     String expected =
@@ -254,7 +318,9 @@ public class RasterBandEditorsTest extends RasterTestBase {
     Double[] expectedValues = new Double[] {null, null, 0.0, 0.0, null};
     assertTrue(Arrays.equals(expectedValues, actualValues));
 
-    GridCoverage2D croppedRaster = RasterBandEditors.clip(raster, 1, geom, false, 200, true);
+    // Testing green band with crop
+    GridCoverage2D croppedRaster = RasterBandEditors.clip(raster, 2, geom, false, 200, true);
+
     assertEquals(0, croppedRaster.getRenderedImage().getMinX());
     assertEquals(0, croppedRaster.getRenderedImage().getMinY());
     GridCoverage2D croppedRaster2 = Serde.deserialize(Serde.serialize(croppedRaster));
@@ -265,9 +331,25 @@ public class RasterBandEditorsTest extends RasterTestBase {
     points.add(Constructors.geomFromWKT("POINT(237201 4.20429e+06)", 26918));
     points.add(Constructors.geomFromWKT("POINT(237919 4.20357e+06)", 26918));
     points.add(Constructors.geomFromWKT("POINT(223802 4.20465e+06)", 26918));
+
+    actual = String.valueOf(croppedRaster.getSampleDimensions()[0]);
+    expected =
+        "RenderedSampleDimension(\"GREEN_BAND\":[200.0 ... 200.0])\n"
+            + "  ‣ Category(\"No data\":[200...200])\n";
+    assertEquals(expected, actual);
+
+    double[] croppedMetadata = RasterAccessors.metadata(clippedRaster);
+    originalMetadata = RasterAccessors.metadata(raster);
+    assertArrayEquals(
+        Arrays.stream(originalMetadata, 0, 9).toArray(),
+        Arrays.stream(croppedMetadata, 0, 9).toArray(),
+        0.01d);
+
+    assertEquals(1, croppedMetadata[9], FP_TOLERANCE);
+
     actualValues = PixelFunctions.values(croppedRaster, points, 1).toArray(new Double[0]);
-    expectedValues = new Double[] {0.0, 0.0, 0.0, 0.0, 255.0};
-    assertTrue(Arrays.equals(expectedValues, actualValues));
+    expectedValues = new Double[] {85.0, 85.0, 127.0, 212.0, null};
+    assertArrayEquals(expectedValues, actualValues);
   }
 
   @Test
@@ -283,8 +365,10 @@ public class RasterBandEditorsTest extends RasterTestBase {
             0);
 
     // Throws an exception in non-lenient mode
+    // Throws "Geometry does not intersect Raster." instead - emitted by Rasterization.rasterize()
+    // Should Rasterization.rasterize() have a lenient mode as well?
     assertThrows(
-        CannotCropException.class,
+        IllegalArgumentException.class,
         () -> RasterBandEditors.clip(raster, 1, nonIntersectingGeom, false, 200, false, false));
 
     // Returns null in lenient mode

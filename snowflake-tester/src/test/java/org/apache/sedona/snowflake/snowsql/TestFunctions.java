@@ -1011,6 +1011,14 @@ public class TestFunctions extends TestBase {
   }
 
   @Test
+  public void test_ST_Segmentize() {
+    registerUDF("ST_Segmentize", byte[].class, double.class);
+    verifySqlSingleRes(
+        "select sedona.ST_AsText(sedona.ST_Segmentize(sedona.ST_GeomFromText('POLYGON((0 0, 0 8, 30 0, 0 0))'), 10))",
+        "POLYGON ((0 0, 0 8, 7.5 6, 15 4, 22.5 2, 30 0, 20 0, 10 0, 0 0))");
+  }
+
+  @Test
   public void test_ST_SymDifference() {
     registerUDF("ST_SymDifference", byte[].class, byte[].class);
     verifySqlSingleRes(
@@ -1345,5 +1353,33 @@ public class TestFunctions extends TestBase {
     verifySqlSingleRes(
         "SELECT sedona.ST_AsText(sedona.ST_Rotate(sedona.ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 0)'), 10, 0, 0))",
         "LINESTRING (0 0, -0.8390715290764524 -0.5440211108893698, -0.2950504181870827 -1.383092639965822, 0 0)");
+  }
+
+  @Test
+  public void test_ST_StraightSkeleton() {
+    registerUDF("ST_StraightSkeleton", byte[].class);
+    registerUDF("GeometryType", byte[].class);
+    verifySqlSingleRes(
+        "SELECT sedona.GeometryType(sedona.ST_StraightSkeleton(sedona.ST_GeomFromWKT('POLYGON ((1 1, 1 3, 4 3, 4 1, 1 1))')))",
+        "MULTILINESTRING");
+
+    registerUDF("ST_StraightSkeleton", byte[].class, int.class);
+    verifySqlSingleRes(
+        "SELECT sedona.GeometryType(sedona.ST_StraightSkeleton(sedona.ST_GeomFromWKT('POLYGON ((0 0, 4 0, 4 4, 0 4, 0 0))'), 10))",
+        "MULTILINESTRING");
+  }
+
+  @Test
+  public void test_ST_ApproximateMedialAxis() {
+    registerUDF("ST_ApproximateMedialAxis", byte[].class);
+    registerUDF("GeometryType", byte[].class);
+    verifySqlSingleRes(
+        "SELECT sedona.GeometryType(sedona.ST_ApproximateMedialAxis(sedona.ST_GeomFromWKT('POLYGON ((45 0, 55 0, 55 40, 70 40, 70 50, 30 50, 30 40, 45 40, 45 0))')))",
+        "MULTILINESTRING");
+
+    registerUDF("ST_ApproximateMedialAxis", byte[].class, int.class);
+    verifySqlSingleRes(
+        "SELECT sedona.GeometryType(sedona.ST_ApproximateMedialAxis(sedona.ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 5, 5 5, 5 10, 0 10, 0 0))'), 100))",
+        "MULTILINESTRING");
   }
 }

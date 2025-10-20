@@ -48,16 +48,18 @@ class SedonaPyDeck:
     ):
         """
         Create a pydeck map with a choropleth layer added
-        :param elevation_col: Optional elevation for the polygons
+
         :param df: SedonaDataFrame to plot on the choropleth map.
         :param fill_color: color scheme to fill the map with.
-                If no color scheme is given, a default color scheme is created using the 'plot_col' column as the quantizing column
+            If no color scheme is given, a default color scheme is created using the 'plot_col' column as the quantizing column
         :param plot_col: Column to be used to create a default color scheme. If fill_color is provided, this parameter is ignored.
-        :param initial_view_state:
-        :param map_style:
-        :param map_provider:
+        :param initial_view_state: Initial view state for the map
+        :param map_style: Map style to use
+        :param map_provider: Map provider to use
+        :param elevation_col: Optional elevation for the polygons
         :param api_keys: Optional dictionary of API keys for Map providers
-        :return: A pydeck Map object with choropleth layer added:
+        :param stroked: Whether to stroke the polygons
+        :return: A pydeck Map object with choropleth layer added
         """
 
         for field in df.schema.fields:

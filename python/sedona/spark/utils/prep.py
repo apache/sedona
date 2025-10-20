@@ -44,6 +44,7 @@ def assign_all() -> bool:
     assign_udt_shapely_objects(geoms=geoms)
     assign_user_data_to_shapely_objects(geoms=geoms)
     assign_udt_geography()
+    assign_udt_raster()
     return True
 
 
@@ -64,3 +65,17 @@ def assign_udt_geography():
     from sedona.spark.sql.types import GeographyType
 
     Geography.__UDT__ = GeographyType()
+
+
+def assign_udt_raster():
+    from sedona.spark.sql.types import RasterType
+
+    try:
+        from sedona.spark.raster.sedona_raster import SedonaRaster
+
+        SedonaRaster.__UDT__ = RasterType()
+    except ImportError:
+        # Some dependencies for SedonaRaster to work is not available (for
+        # instance, rasterio), Raster support is an opt-in feature, so we
+        # ignore this error and skip registering UDT for it.
+        pass

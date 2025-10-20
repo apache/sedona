@@ -22,7 +22,7 @@ import java.util.HashMap;
 import org.apache.sedona.sql.datasources.osmpbf.build.Osmformat;
 import org.apache.sedona.sql.datasources.osmpbf.model.OsmNode;
 
-public class DenseNodeExtractor {
+public class DenseNodeExtractor implements Extractor {
   long latOffset;
   long lonOffset;
   long granularity;
@@ -54,8 +54,8 @@ public class DenseNodeExtractor {
     long latitude = nodes.getLat(idx) + firstLat;
     long longitude = nodes.getLon(idx) + firstLon;
 
-    float lat = (float) (.000000001 * (latOffset + (latitude * granularity)));
-    float lon = (float) (.000000001 * (lonOffset + (longitude * granularity)));
+    double lat = .000000001 * (latOffset + (latitude * granularity));
+    double lon = .000000001 * (lonOffset + (longitude * granularity));
 
     firstId = id;
     firstLat = latitude;

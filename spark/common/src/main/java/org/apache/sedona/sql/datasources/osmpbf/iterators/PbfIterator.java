@@ -56,7 +56,7 @@ public class PbfIterator implements Iterator<OSMEntity> {
   }
 
   private BlobIterator readNextBlock() throws DataFormatException, IOException {
-    while (pmGroupIterator.hasNext()) {
+    if (pmGroupIterator.hasNext()) {
       BlobData next = pmGroupIterator.next();
       if (next.getHeader().getType().equals("OSMData")) {
         return new BlobIterator(next.getBlob());

@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.apache.sedona</groupId>
         <artifactId>sedona-parent</artifactId>
-        <version>1.8.0-SNAPSHOT</version>
+        <version>1.8.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>sedona-spark-parent-${spark.compat.version}_${scala.compat.version}</artifactId>
@@ -48,8 +48,8 @@
         <profile>
             <id>enable-all-submodules</id>
             <modules>
-                <module>spark-3.4</module>
                 <module>spark-3.5</module>
+                <module>spark-4.0</module>
             </modules>
         </profile>
     </profiles>
@@ -88,6 +88,11 @@
                 <artifactId>spark-sql_${scala.compat.version}</artifactId>
                 <version>${spark.version}</version>
                 <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.graphframes</groupId>
+                <artifactId>graphframes-spark${spark.major.version}_${scala.compat.version}</artifactId>
+                <version>${graphframes.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.scala-lang</groupId>

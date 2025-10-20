@@ -236,6 +236,24 @@ public class UDFsV2 {
       argNames = {"geometry"},
       argTypes = {"Geometry"},
       returnTypes = "Geometry")
+  public static String ST_ApproximateMedialAxis(String geometry) {
+    return GeometrySerde.serGeoJson(
+        Functions.approximateMedialAxis(GeometrySerde.deserGeoJson(geometry)));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "maxVertices"},
+      argTypes = {"Geometry", "int"},
+      returnTypes = "Geometry")
+  public static String ST_ApproximateMedialAxis(String geometry, int maxVertices) {
+    return GeometrySerde.serGeoJson(
+        Functions.approximateMedialAxis(GeometrySerde.deserGeoJson(geometry), maxVertices));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry"},
+      argTypes = {"Geometry"},
+      returnTypes = "Geometry")
   public static String ST_Boundary(String geometry) {
     return GeometrySerde.serGeoJson(Functions.boundary(GeometrySerde.deserGeoJson(geometry)));
   }
@@ -1229,6 +1247,24 @@ public class UDFsV2 {
   }
 
   @UDFAnnotations.ParamMeta(
+      argNames = {"geometry"},
+      argTypes = {"Geometry"},
+      returnTypes = "Geometry")
+  public static String ST_StraightSkeleton(String geometry) {
+    return GeometrySerde.serGeoJson(
+        Functions.straightSkeleton(GeometrySerde.deserGeoJson(geometry)));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "maxVertices"},
+      argTypes = {"Geometry", "int"},
+      returnTypes = "Geometry")
+  public static String ST_StraightSkeleton(String geometry, int maxVertices) {
+    return GeometrySerde.serGeoJson(
+        Functions.straightSkeleton(GeometrySerde.deserGeoJson(geometry), maxVertices));
+  }
+
+  @UDFAnnotations.ParamMeta(
       argNames = {"input", "reference", "tolerance"},
       argTypes = {"Geometry", "Geometry", "double"},
       returnTypes = "Geometry")
@@ -1245,6 +1281,15 @@ public class UDFsV2 {
   public static String ST_SubDivide(String geometry, int maxVertices) {
     return GeometrySerde.serGeoJson(
         Functions.subDivide(GeometrySerde.deserGeoJson(geometry), maxVertices));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "maxSegmentLength"},
+      argTypes = {"Geometry", "double"},
+      returnTypes = "Geometry")
+  public static String ST_Segmentize(String geometry, double maxSegmentLength) {
+    return GeometrySerde.serGeoJson(
+        Functions.segmentize(GeometrySerde.deserGeoJson(geometry), maxSegmentLength));
   }
 
   @UDFAnnotations.ParamMeta(
