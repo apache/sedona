@@ -29,9 +29,7 @@ stream_env = StreamExecutionEnvironment.get_execution_environment()
 flink_settings = EnvironmentSettings.in_streaming_mode()
 table_env = SedonaContext.create(stream_env, flink_settings)
 
-table_env.\
-    sql_query("SELECT ST_Point(1.0, 2.0)").\
-    execute()
+table_env.sql_query("SELECT ST_Point(1.0, 2.0)").execute()
 ```
 
 PyFlink does not expose the possibility of transforming Scala's own user-defined types (UDT) to Python UDT.
@@ -41,10 +39,7 @@ like `ST_AsText` or `ST_ASBinary` to convert the result to a string or binary.
 ```python
 from shapely.wkb import loads
 
-table_env.\
-    sql_query("SELECT ST_ASBinary(ST_Point(1.0, 2.0))").\
-    execute().\
-    collect()
+table_env.sql_query("SELECT ST_ASBinary(ST_Point(1.0, 2.0))").execute().collect()
 
 [loads(bytes(el[0])) for el in result]
 ```
@@ -59,10 +54,12 @@ Similar with User Defined Scalar functions
 from pyflink.table.udf import ScalarFunction, udf
 from shapely.wkb import loads
 
+
 class Buffer(ScalarFunction):
     def eval(self, s):
         geom = loads(s)
         return geom.buffer(1).wkb
+
 
 table_env.create_temporary_function(
     "ST_BufferPython", udf(Buffer(), result_type="Binary")

@@ -64,6 +64,12 @@ public class WKTReader {
     this.precisionModel = geometryFactory.getPrecisionModel();
   }
 
+  public WKTReader(GeometryFactory geometryFactory) {
+    this.geometryFactory = geometryFactory;
+    this.csFactory = geometryFactory.getCoordinateSequenceFactory();
+    this.precisionModel = geometryFactory.getPrecisionModel();
+  }
+
   /**
    * Sets a flag indicating, that coordinates may have 3 ordinate values even though no Z or M
    * ordinate indicator is present. The default value is {@link #ALLOW_OLD_JTS_COORDINATE_SYNTAX}.
@@ -104,7 +110,7 @@ public class WKTReader {
    * @return a <code>Geometry</code> specified by <code>wellKnownText</code>
    * @throws ParseException if a parsing problem occurs
    */
-  public S2Geography read(String wellKnownText) throws ParseException {
+  public Geography read(String wellKnownText) throws ParseException {
     StringReader reader = new StringReader(wellKnownText);
     try {
       return read(reader);
@@ -114,14 +120,15 @@ public class WKTReader {
   }
 
   /**
-   * Reads a Well-Known Text representation of a {@link S2Geography} from a {@link Reader}.
+   * Reads a Well-Known Text representation of a {@link
+   * org.apache.sedona.common.S2Geography.Geography} from a {@link Reader}.
    *
    * @param reader a Reader which will return a &lt;Geometry Tagged Text&gt; string (see the OpenGIS
    *     Simple Features Specification)
    * @return a <code>Geometry</code> read from <code>reader</code>
    * @throws ParseException if a parsing problem occurs
    */
-  public S2Geography read(Reader reader) throws ParseException {
+  public Geography read(Reader reader) throws ParseException {
     StreamTokenizer tokenizer = createTokenizer(reader);
     try {
       return readGeometryTaggedText(tokenizer);
@@ -553,8 +560,8 @@ public class WKTReader {
    * @throws IOException if an I/O error occurs
    * @param tokenizer tokenizer over a stream of text in Well-known Text
    */
-  private S2Geography readGeometryTaggedText(StreamTokenizer tokenizer)
-      throws IOException, ParseException {
+  private org.apache.sedona.common.S2Geography.Geography readGeometryTaggedText(
+      StreamTokenizer tokenizer) throws IOException, ParseException {
     String type;
 
     EnumSet<Ordinate> ordinateFlags = EnumSet.of(Ordinate.X, Ordinate.Y);
@@ -570,7 +577,7 @@ public class WKTReader {
     return readGeometryTaggedText(tokenizer, type, ordinateFlags);
   }
 
-  private S2Geography readGeometryTaggedText(
+  private org.apache.sedona.common.S2Geography.Geography readGeometryTaggedText(
       StreamTokenizer tokenizer, String type, EnumSet<Ordinate> ordinateFlags)
       throws IOException, ParseException {
 
@@ -608,7 +615,7 @@ public class WKTReader {
     } else if (isTypeName(tokenizer, type, WKTConstants.GEOMETRYCOLLECTION)) {
       return readGeographyCollectionText(tokenizer, ordinateFlags);
     }
-    throw parseErrorWithLine(tokenizer, "Unknown geometry type: " + type);
+    throw parseErrorWithLine(tokenizer, "Unknown geography type: " + type);
   }
 
   private boolean isTypeName(StreamTokenizer tokenizer, String type, String typeName)
@@ -890,7 +897,7 @@ public class WKTReader {
       throws IOException, ParseException {
     String nextToken = getNextEmptyOrOpener(tokenizer);
     if (nextToken.equals(WKTConstants.EMPTY)) {
-      return new MultiPolygonGeography(new ArrayList<>());
+      return new MultiPolygonGeography(Geography.GeographyKind.MULTIPOLYGON, new ArrayList<>());
     }
     List<S2Polygon> polygons = new ArrayList<S2Polygon>();
     do {
@@ -898,7 +905,7 @@ public class WKTReader {
       polygons.add(polygon.polygon);
       nextToken = getNextCloserOrComma(tokenizer);
     } while (nextToken.equals(COMMA));
-    return new MultiPolygonGeography(polygons);
+    return new MultiPolygonGeography(Geography.GeographyKind.MULTIPOLYGON, polygons);
   }
 
   /**
@@ -918,9 +925,10 @@ public class WKTReader {
     if (nextToken.equals(WKTConstants.EMPTY)) {
       return new GeographyCollection();
     }
-    List<S2Geography> geometries = new ArrayList<S2Geography>();
+    List<org.apache.sedona.common.S2Geography.Geography> geometries =
+        new ArrayList<org.apache.sedona.common.S2Geography.Geography>();
     do {
-      S2Geography geometry = readGeometryTaggedText(tokenizer);
+      org.apache.sedona.common.S2Geography.Geography geometry = readGeometryTaggedText(tokenizer);
       geometries.add(geometry);
       nextToken = getNextCloserOrComma(tokenizer);
     } while (nextToken.equals(COMMA));

@@ -8,7 +8,7 @@
     --sedona-accent-dark: #333333;
     --sedona-secondary: #e0e0e0;
     --sedona-text: #333333;
-    --sedona-light-gray: #f5f5f5;
+    --sedona-light-gray: #263238;
     --sedona-white: #ffffff;
     --sedona-dark: #263238;
 }
@@ -66,10 +66,66 @@ body {
 
 .wy-menu-vertical .toctree-l2 > a {
     padding-left: 40px !important;
+    background: rgba(0, 0, 0, 0.4) !important;
+    color: #ffffff !important;
+}
+
+.wy-menu-vertical .toctree-l2 > a:hover {
+    background: rgba(0, 0, 0, 0.6) !important;
+    color: #ffffff !important;
+}
+
+.wy-menu-vertical .toctree-l2.current > a {
+    background: var(--sedona-primary) !important;
+    color: var(--sedona-white) !important;
 }
 
 .wy-menu-vertical .toctree-l3 > a {
     padding-left: 56px !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    color: #ffffff !important;
+}
+
+.wy-menu-vertical .toctree-l3 > a:hover {
+    background: rgba(0, 0, 0, 0.7) !important;
+    color: #ffffff !important;
+}
+
+.wy-menu-vertical .toctree-l3.current > a {
+    background: var(--sedona-primary) !important;
+    color: var(--sedona-white) !important;
+}
+
+/* Fix for deeper navigation levels (l4, l5, etc.) */
+.wy-menu-vertical .toctree-l4 > a,
+.wy-menu-vertical .toctree-l5 > a,
+.wy-menu-vertical .toctree-l6 > a {
+    padding-left: 72px !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    color: #ffffff !important;
+}
+
+.wy-menu-vertical .toctree-l4 > a:hover,
+.wy-menu-vertical .toctree-l5 > a:hover,
+.wy-menu-vertical .toctree-l6 > a:hover {
+    background: rgba(0, 0, 0, 0.8) !important;
+    color: #ffffff !important;
+}
+
+.wy-menu-vertical .toctree-l4.current > a,
+.wy-menu-vertical .toctree-l5.current > a,
+.wy-menu-vertical .toctree-l6.current > a {
+    background: var(--sedona-primary) !important;
+    color: var(--sedona-white) !important;
+}
+
+/* Fix for any remaining navigation items that might have poor contrast */
+.wy-menu-vertical li a {
+    color: #ffffff !important;
+}
+
+.wy-menu-vertical li a:hover {
+    color: #ffffff !important;
 }
 
 /* Hide Contents: caption in left navigation bar */
@@ -120,8 +176,8 @@ h3 {
 
 /* Code Blocks */
 .highlight {
-    background: var(--sedona-light-gray) !important;
-    border: 1px solid var(--sedona-secondary) !important;
+    background: var(--sedona-dark) !important;
+    border: 1px solid var(--sedona-accent-dark) !important;
     border-radius: 4px !important;
     margin: 1rem 0 !important;
 }
@@ -130,11 +186,12 @@ h3 {
     background: transparent !important;
     border: none !important;
     padding: 16px !important;
+    color: var(--sedona-white) !important;
 }
 
 code {
-    background: var(--sedona-light-gray) !important;
-    color: var(--sedona-primary-dark) !important;
+    background: var(--sedona-dark) !important;
+    color: var(--sedona-white) !important;
     padding: 2px 4px !important;
     border-radius: 3px !important;
     font-family: 'Roboto Mono', 'Consolas', 'Monaco', monospace !important;
@@ -149,7 +206,8 @@ code {
 }
 
 .wy-table-responsive table th {
-    background: var(--sedona-light-gray) !important;
+    background: var(--sedona-dark) !important;
+    color: var(--sedona-white) !important;
     font-weight: 500 !important;
 }
 
@@ -242,6 +300,12 @@ a:hover {
     background: var(--sedona-primary) !important;
 }
 
+.wy-side-nav-search .wy-dropdown > a,
+.wy-side-nav-search > a {
+    color: var(--sedona-white) !important;
+    font-weight: 500 !important;
+}
+
 .wy-side-nav-search input[type=text] {
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
     background: rgba(255, 255, 255, 0.1) !important;
@@ -280,8 +344,9 @@ a:hover {
 
 /* Version notice styling */
 .version {
-    background: var(--sedona-light-gray);
-    border: 1px solid var(--sedona-secondary);
+    background: var(--sedona-dark);
+    color: var(--sedona-white);
+    border: 1px solid var(--sedona-accent-dark);
     border-radius: 4px;
     padding: 12px;
     margin: 1rem 0;

@@ -21,8 +21,8 @@ import pytest
 import pandas as pd
 import geopandas as gpd
 import pyspark.pandas as ps
-import sedona.geopandas as sgpd
-from sedona.geopandas import GeoSeries, GeoDataFrame
+import sedona.spark.geopandas as sgpd
+from sedona.spark.geopandas import GeoSeries, GeoDataFrame
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 from shapely import wkt
 from shapely.geometry import (
@@ -47,6 +47,7 @@ from packaging.version import parse as parse_version
 )
 class TestGeoSeries(TestGeopandasBase):
     def setup_method(self):
+        super().setup_method()
         self.geoseries = sgpd.GeoSeries(
             [
                 Point(2.3, -1),
@@ -94,6 +95,66 @@ class TestGeoSeries(TestGeopandasBase):
         obj = ps.Series([Point(x, x) for x in range(3)])
         sgpd_series = GeoSeries(obj)
         assert isinstance(sgpd_series, sgpd.GeoSeries)
+
+    def test_to_geopandas(self):
+        from geopandas.testing import assert_geoseries_equal
+
+        data = [Point(x, x) for x in range(3)]
+        index = [1, 2, 3]
+        crs = "EPSG:3857"
+        result = GeoSeries(data, index=index, crs=crs).to_geopandas()
+        gpd_df = gpd.GeoSeries(data, index=index, crs=crs)
+        assert_geoseries_equal(result, gpd_df)
+
+    def test_to_spark_pandas(self):
+        data = [Point(x, x) for x in range(3)]
+        index = [1, 2, 3]
+        crs = "EPSG:3857"
+        result = GeoSeries(data, index=index, crs=crs).to_spark_pandas()
+        ps_df = ps.Series(data, index=index)
+        assert_series_equal(result.to_pandas(), ps_df.to_pandas())
+
+    def test_sindex(self):
+        s = GeoSeries([Point(x, x) for x in range(5)])
+        assert not s.has_sindex
+
+        result = s.sindex.query(box(1, 1, 3, 3))
+        expected = [Point(1, 1), Point(2, 2), Point(3, 3)]
+        assert result == expected
+        assert s.has_sindex
+
+        result = s.sindex.query(box(1, 1, 3, 3), predicate="contains")
+        expected = [Point(1, 1), Point(2, 2), Point(3, 3)]
+        assert result == expected
+        assert s.has_sindex
+
+        # Check that it works with a GeoDataFrame
+        gdf = s.to_geoframe()
+        result = gdf.sindex.query(box(1, 1, 3, 3), predicate="contains")
+        assert result == expected
+
+        # This is challenging to support due to gdf.__setitem__ casting GeoSeries into pspd.Series
+        # assert gdf.has_sindex
+
+    def test_invalidate_sindex(self):
+        geoseries = GeoSeries([Point(0, 0), None, Point(2, 2)])
+
+        line = LineString([(1, 1), (3, 3)])
+        result1 = geoseries.sindex.query(line)
+        assert len(result1) == 1
+        assert geoseries.has_sindex
+
+        # Fill the None element with a new geometry that intersects with the line
+        # This should invalidate the sindex
+        geoseries.fillna(Point(1, 1), inplace=True)
+        assert not geoseries.has_sindex
+
+        result = geoseries.sindex.query(line)
+        assert len(result) == 2
+
+        # For set_crs, no need to invalidate the sindex
+        geoseries.set_crs(4326, inplace=True)
+        assert geoseries.has_sindex
 
     def test_plot(self):
         # Just make sure it doesn't error
@@ -345,7 +406,9 @@ class TestGeoSeries(TestGeopandasBase):
     def test_to_crs(self):
         from pyproj import CRS
 
-        geoseries = sgpd.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)], crs=4326)
+        geoseries = sgpd.GeoSeries(
+            [Point(1, 1), Point(2, 2), Point(3, 3)], crs=4326, name="geometry"
+        )
         assert isinstance(geoseries.crs, CRS) and geoseries.crs.to_epsg() == 4326
         result = geoseries.to_crs(3857)
         assert isinstance(result.crs, CRS) and result.crs.to_epsg() == 3857
@@ -356,6 +419,7 @@ class TestGeoSeries(TestGeopandasBase):
                 Point(333958.4723798207, 334111.1714019597),
             ],
             crs=3857,
+            name="geometry",
         )
         self.check_sgpd_equals_gpd(result, expected)
 
@@ -437,9 +501,7 @@ class TestGeoSeries(TestGeopandasBase):
     def test_to_json(self):
         s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
 
-        # TODO: optimize this away
-        with self.ps_allow_diff_frames():
-            result = s.to_json()
+        result = s.to_json()
         expected = '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "pr\
 operties": {}, "geometry": {"type": "Point", "coordinates": [1.0, 1.0]}, "bbox": [1.0,\
  1.0, 1.0, 1.0]}, {"id": "1", "type": "Feature", "properties": {}, "geometry": {"type"\
@@ -449,20 +511,17 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         assert result == expected
 
-        with self.ps_allow_diff_frames():
-            result = s.to_json(show_bbox=True)
-            expected = '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [1.0, 1.0]}, "bbox": [1.0, 1.0, 1.0, 1.0]}, {"id": "1", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [2.0, 2.0]}, "bbox": [2.0, 2.0, 2.0, 2.0]}, {"id": "2", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3.0, 3.0]}, "bbox": [3.0, 3.0, 3.0, 3.0]}], "bbox": [1.0, 1.0, 3.0, 3.0]}'
-            assert result == expected
+        result = s.to_json(show_bbox=True)
+        expected = '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [1.0, 1.0]}, "bbox": [1.0, 1.0, 1.0, 1.0]}, {"id": "1", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [2.0, 2.0]}, "bbox": [2.0, 2.0, 2.0, 2.0]}, {"id": "2", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3.0, 3.0]}, "bbox": [3.0, 3.0, 3.0, 3.0]}], "bbox": [1.0, 1.0, 3.0, 3.0]}'
+        assert result == expected
 
-        with self.ps_allow_diff_frames():
-            result = s.to_json(drop_id=True)
-            expected = '{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [1.0, 1.0]}, "bbox": [1.0, 1.0, 1.0, 1.0]}, {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [2.0, 2.0]}, "bbox": [2.0, 2.0, 2.0, 2.0]}, {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3.0, 3.0]}, "bbox": [3.0, 3.0, 3.0, 3.0]}], "bbox": [1.0, 1.0, 3.0, 3.0]}'
-            assert result == expected
+        result = s.to_json(drop_id=True)
+        expected = '{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [1.0, 1.0]}, "bbox": [1.0, 1.0, 1.0, 1.0]}, {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [2.0, 2.0]}, "bbox": [2.0, 2.0, 2.0, 2.0]}, {"type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3.0, 3.0]}, "bbox": [3.0, 3.0, 3.0, 3.0]}], "bbox": [1.0, 1.0, 3.0, 3.0]}'
+        assert result == expected
 
-        with self.ps_allow_diff_frames():
-            result = s.set_crs("EPSG:3857").to_json(to_wgs84=True)
-            expected = '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [8.983152841195214e-06, 8.983152841195177e-06]}, "bbox": [8.983152841195214e-06, 8.983152841195177e-06, 8.983152841195214e-06, 8.983152841195177e-06]}, {"id": "1", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [1.7966305682390428e-05, 1.7966305682390134e-05]}, "bbox": [1.7966305682390428e-05, 1.7966305682390134e-05, 1.7966305682390428e-05, 1.7966305682390134e-05]}, {"id": "2", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [2.6949458523585642e-05, 2.694945852358465e-05]}, "bbox": [2.6949458523585642e-05, 2.694945852358465e-05, 2.6949458523585642e-05, 2.694945852358465e-05]}], "bbox": [8.983152841195214e-06, 8.983152841195177e-06, 2.6949458523585642e-05, 2.694945852358465e-05]}'
-            assert result == expected
+        result = s.set_crs("EPSG:3857").to_json(to_wgs84=True)
+        expected = '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [8.983152841195214e-06, 8.983152841195177e-06]}, "bbox": [8.983152841195214e-06, 8.983152841195177e-06, 8.983152841195214e-06, 8.983152841195177e-06]}, {"id": "1", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [1.7966305682390428e-05, 1.7966305682390134e-05]}, "bbox": [1.7966305682390428e-05, 1.7966305682390134e-05, 1.7966305682390428e-05, 1.7966305682390134e-05]}, {"id": "2", "type": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [2.6949458523585642e-05, 2.694945852358465e-05]}, "bbox": [2.6949458523585642e-05, 2.694945852358465e-05, 2.6949458523585642e-05, 2.694945852358465e-05]}], "bbox": [8.983152841195214e-06, 8.983152841195177e-06, 2.6949458523585642e-05, 2.694945852358465e-05]}'
+        assert result == expected
 
     def test_to_wkb(self):
         if parse_version(shapely.__version__) < parse_version("2.0.0"):
@@ -540,9 +599,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         import pyarrow as pa
 
         gser = GeoSeries([Point(1, 2), Point(2, 1)])
-        # TODO: optimize this away
-        with self.ps_allow_diff_frames():
-            arrow_array = gser.to_arrow()
+        arrow_array = gser.to_arrow()
         result = pa.array(arrow_array)
 
         expected = [
@@ -791,6 +848,197 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = s.to_geoframe().difference(s2, align=False)
         self.check_sgpd_equals_gpd(df_result, expected)
 
+    def test_symmetric_difference(self):
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (2, 2), (0, 2)]),
+                Polygon([(0, 0), (2, 2), (0, 2)]),
+                LineString([(0, 0), (2, 2)]),
+                LineString([(2, 0), (0, 2)]),
+                Point(0, 1),
+            ],
+        )
+        s2 = GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                LineString([(1, 0), (1, 3)]),
+                LineString([(2, 0), (0, 2)]),
+                Point(1, 1),
+                Point(0, 1),
+            ],
+            index=range(1, 6),
+        )
+
+        # Test with single geometry
+        result = s.symmetric_difference(Polygon([(0, 0), (1, 1), (0, 1)]))
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 2), (2, 2), (1, 1), (0, 1), (0, 2)]),
+                Polygon([(0, 2), (2, 2), (1, 1), (0, 1), (0, 2)]),
+                GeometryCollection(
+                    [
+                        Polygon([(0, 0), (0, 1), (1, 1), (0, 0)]),
+                        LineString([(1, 1), (2, 2)]),
+                    ]
+                ),
+                GeometryCollection(
+                    [
+                        Polygon([(0, 0), (0, 1), (1, 1), (0, 0)]),
+                        LineString([(2, 0), (1, 1)]),
+                        LineString([(1, 1), (0, 2)]),
+                    ]
+                ),
+                Polygon([(0, 1), (1, 1), (0, 0), (0, 1)]),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Test with align=True
+        result = s.symmetric_difference(s2, align=True)
+        expected = gpd.GeoSeries(
+            [
+                None,
+                Polygon([(0, 2), (2, 2), (1, 1), (0, 1), (0, 2)]),
+                MultiLineString(
+                    [
+                        LineString([(0, 0), (1, 1)]),
+                        LineString([(1, 1), (2, 2)]),
+                        LineString([(1, 0), (1, 1)]),
+                        LineString([(1, 1), (1, 3)]),
+                    ]
+                ),
+                LineString(),
+                MultiPoint([Point(0, 1), Point(1, 1)]),
+                None,
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Test with align=False
+        result = s.symmetric_difference(s2, align=False)
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 2), (2, 2), (1, 1), (0, 1), (0, 2)]),
+                GeometryCollection(
+                    [
+                        Polygon([(0, 0), (0, 2), (1, 2), (2, 2), (1, 1), (0, 0)]),
+                        LineString([(1, 0), (1, 1)]),
+                        LineString([(1, 1), (1, 3)]),
+                    ]
+                ),
+                MultiLineString(
+                    [
+                        LineString([(0, 0), (1, 1)]),
+                        LineString([(1, 1), (2, 2)]),
+                        LineString([(2, 0), (1, 1)]),
+                        LineString([(1, 1), (0, 2)]),
+                    ]
+                ),
+                LineString([(2, 0), (0, 2)]),
+                Point(),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().symmetric_difference(s2, align=False)
+        self.check_sgpd_equals_gpd(df_result, expected)
+
+    def test_union(self):
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (2, 2), (0, 2)]),
+                Polygon([(0, 0), (2, 2), (0, 2)]),
+                LineString([(0, 0), (2, 2)]),
+                LineString([(2, 0), (0, 2)]),
+                Point(0, 1),
+            ],
+        )
+        s2 = GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                LineString([(1, 0), (1, 3)]),
+                LineString([(2, 0), (0, 2)]),
+                Point(1, 1),
+                Point(0, 1),
+            ],
+            index=range(1, 6),
+        )
+
+        # Test with single geometry
+        result = s.union(Polygon([(0, 0), (1, 1), (0, 1)]))
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (0, 1), (0, 2), (2, 2), (1, 1), (0, 0)]),
+                Polygon([(0, 0), (0, 1), (0, 2), (2, 2), (1, 1), (0, 0)]),
+                GeometryCollection(
+                    [
+                        Polygon([(0, 0), (0, 1), (1, 1), (0, 0)]),
+                        LineString([(0, 0), (2, 2)]),
+                    ]
+                ),
+                GeometryCollection(
+                    [
+                        Polygon([(0, 0), (0, 1), (1, 1), (0, 0)]),
+                        LineString([(2, 0), (0, 2)]),
+                    ]
+                ),
+                Polygon([(0, 1), (1, 1), (0, 0), (0, 1)]),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Test with align=True
+        result = s.union(s2, align=True)
+        expected = gpd.GeoSeries(
+            [
+                None,
+                Polygon([(0, 0), (0, 1), (0, 2), (2, 2), (1, 1), (0, 0)]),
+                MultiLineString(
+                    [
+                        LineString([(0, 0), (1, 1)]),
+                        LineString([(1, 1), (2, 2)]),
+                        LineString([(1, 0), (1, 1)]),
+                        LineString([(1, 1), (1, 3)]),
+                    ]
+                ),
+                LineString([(2, 0), (0, 2)]),
+                MultiPoint([Point(0, 1), Point(1, 1)]),
+                None,
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Test with align=False
+        result = s.union(s2, align=False)
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (0, 1), (0, 2), (2, 2), (1, 1), (0, 0)]),
+                GeometryCollection(
+                    [
+                        Polygon([(0, 0), (0, 2), (1, 2), (2, 2), (1, 1), (0, 0)]),
+                        LineString([(1, 0), (1, 1)]),
+                        LineString([(1, 1), (1, 3)]),
+                    ]
+                ),
+                MultiLineString(
+                    [
+                        LineString([(0, 0), (1, 1)]),
+                        LineString([(1, 1), (2, 2)]),
+                        LineString([(2, 0), (1, 1)]),
+                        LineString([(1, 1), (0, 2)]),
+                    ]
+                ),
+                LineString([(2, 0), (0, 2)]),
+                Point(0, 1),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().union(s2, align=False)
+        self.check_sgpd_equals_gpd(df_result, expected)
+
     def test_is_simple(self):
         s = sgpd.GeoSeries(
             [
@@ -809,13 +1057,39 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         assert_series_equal(df_result, expected)
 
     def test_is_ring(self):
-        pass
+        s = GeoSeries(
+            [
+                LineString([(0, 0), (1, 1), (1, -1)]),
+                LineString([(0, 0), (1, 1), (1, -1), (0, 0)]),
+                LinearRing([(0, 0), (1, 1), (1, -1)]),
+            ]
+        )
+        result = s.is_ring
+        expected = pd.Series([False, True, True])
+        self.check_pd_series_equal(result, expected)
+
+        # Check that GeoDataFrame works too
+        result = s.to_geoframe().is_ring
+        self.check_pd_series_equal(result, expected)
 
     def test_is_ccw(self):
         pass
 
     def test_is_closed(self):
-        pass
+        s = GeoSeries(
+            [
+                LineString([(0, 0), (1, 1), (1, -1)]),
+                LineString([(0, 0), (1, 1), (1, -1), (0, 0)]),
+                LinearRing([(0, 0), (1, 1), (1, -1)]),
+            ]
+        )
+        result = s.is_closed
+        expected = pd.Series([False, True, True])
+        self.check_pd_series_equal(result, expected)
+
+        # Check that GeoDataFrame works too
+        result = s.to_geoframe().is_closed
+        self.check_pd_series_equal(result, expected)
 
     def test_has_z(self):
         s = sgpd.GeoSeries(
@@ -1118,6 +1392,39 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = s.union_all()
         expected = GeometryCollection()
         self.check_geom_equals(result, expected)
+
+    def test_row_wise_dataframe(self):
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+            ]
+        )
+        s2 = GeoSeries([Point(-5.5, 1), Point(1, 2), Point(3, 1)])
+
+        # self: GeoSeries, other: GeoDataFrame
+        expected = pd.Series([5.5, 1, 2])
+        result = s.distance(s2.to_geoframe())
+        self.check_pd_series_equal(result, expected)
+
+        # self: GeoDataFrame, other: GeoDataFrame
+        result = s.to_geoframe().distance(s2.to_geoframe())
+        assert_series_equal(result.to_pandas(), expected)
+
+        # Same but for overlay
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+                Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+                Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+            ]
+        )
+        result = s.difference(s2.to_geoframe())
+        self.check_sgpd_equals_gpd(result, expected)
+
+        result = s.to_geoframe().difference(s2.to_geoframe())
+        self.check_sgpd_equals_gpd(result, expected)
 
     def test_crosses(self):
         s = GeoSeries(
@@ -1433,8 +1740,6 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         assert_series_equal(df_result.to_pandas(), expected)
 
     def test_intersection(self):
-        import pyspark.pandas as ps
-
         s = sgpd.GeoSeries(
             [
                 Polygon([(0, 0), (2, 2), (0, 2)]),
@@ -1449,6 +1754,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             [(-0.5, -0.5), (-0.5, 2.5), (2.5, 2.5), (2.5, -0.5), (-0.5, -0.5)]
         )
         result = s.intersection(geom)
+        result.sort_index(inplace=True)
         expected = gpd.GeoSeries(
             [
                 Polygon([(0, 0), (2, 2), (0, 2)]),
@@ -1470,6 +1776,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             ],
         )
         result = s.intersection(s2)
+        result.sort_index(inplace=True)
         expected = gpd.GeoSeries(
             [
                 Polygon([(0, 0), (0, 1), (1, 1), (0, 0)]),
@@ -1505,10 +1812,11 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         # Ensure the index is preserved when crs is set (previously an issue)
         expected_index = ps.Index(range(1, 6))
-        with self.ps_allow_diff_frames():
+        with ps.option_context("compute.ops_on_diff_frames", True):
             assert s2.index.equals(expected_index)
 
         result = s.intersection(s2, align=True)
+        result.sort_index(inplace=True)
         expected = gpd.GeoSeries(
             [
                 None,
@@ -1523,9 +1831,11 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         # Check that GeoDataFrame works too
         df_result = s.to_geoframe().intersection(s2, align=True)
+        df_result.sort_index(inplace=True)
         self.check_sgpd_equals_gpd(df_result, expected)
 
         result = s2.intersection(s, align=False)
+        result.sort_index(inplace=True)
         expected = gpd.GeoSeries(
             [
                 Polygon([(0, 0), (0, 1), (1, 1), (0, 0)]),
@@ -1540,6 +1850,11 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         # Ensure result of align=False retains the left's index
         assert result.index.to_pandas().equals(expected.index)
+
+        # Check that GeoDataFrame works too
+        df_result = s2.to_geoframe().intersection(s, align=False)
+        df_result.sort_index(inplace=True)
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_snap(self):
         s = GeoSeries(
@@ -1632,6 +1947,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         expected = pd.Series([True, False, True, True], index=range(1, 5))
         assert_series_equal(result.to_pandas(), expected)
 
+        # Check that GeoDataFrame works too
+        df_result = s2.to_geoframe().contains(s, align=False)
+        assert_series_equal(df_result.to_pandas(), expected)
+
     def test_contains_properly(self):
         pass
 
@@ -1642,9 +1961,9 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         assert geo_series.crs.to_epsg() == 4326
 
         with pytest.raises(ValueError):
-            geo_series.set_crs(4328)
+            geo_series.set_crs(4328, allow_override=False)
         with pytest.raises(ValueError):
-            geo_series.crs = None
+            geo_series.set_crs(None, allow_override=False)
 
         geo_series = geo_series.set_crs(None, allow_override=True)
         assert geo_series.crs == None

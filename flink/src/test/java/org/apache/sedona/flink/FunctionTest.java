@@ -2971,4 +2971,56 @@ public class FunctionTest extends TestBase {
     expected = 2.75;
     assertEquals(expected, actual, 1e-6);
   }
+
+  @Test
+  public void testST_StraightSkeleton() {
+    String polygonWkt = "POLYGON ((1 1, 1 3, 4 3, 4 1, 1 1))";
+    String actual =
+        (String)
+            first(
+                    tableEnv.sqlQuery(
+                        "SELECT ST_GeometryType(ST_StraightSkeleton(ST_GeomFromWKT('"
+                            + polygonWkt
+                            + "')))"))
+                .getField(0);
+    assertEquals("ST_MultiLineString", actual);
+
+    // Test with maxVertices parameter
+    String complexPolygonWkt = "POLYGON ((0 0, 4 0, 4 4, 0 4, 0 0))";
+    actual =
+        (String)
+            first(
+                    tableEnv.sqlQuery(
+                        "SELECT ST_GeometryType(ST_StraightSkeleton(ST_GeomFromWKT('"
+                            + complexPolygonWkt
+                            + "'), 10))"))
+                .getField(0);
+    assertEquals("ST_MultiLineString", actual);
+  }
+
+  @Test
+  public void testST_ApproximateMedialAxis() {
+    String polygonWkt = "POLYGON ((1 1, 1 3, 4 3, 4 1, 1 1))";
+    String actual =
+        (String)
+            first(
+                    tableEnv.sqlQuery(
+                        "SELECT ST_GeometryType(ST_ApproximateMedialAxis(ST_GeomFromWKT('"
+                            + polygonWkt
+                            + "')))"))
+                .getField(0);
+    assertEquals("ST_MultiLineString", actual);
+
+    // Test with maxVertices parameter
+    String complexPolygonWkt = "POLYGON ((0 0, 4 0, 4 4, 0 4, 0 0))";
+    actual =
+        (String)
+            first(
+                    tableEnv.sqlQuery(
+                        "SELECT ST_GeometryType(ST_ApproximateMedialAxis(ST_GeomFromWKT('"
+                            + complexPolygonWkt
+                            + "'), 10))"))
+                .getField(0);
+    assertEquals("ST_MultiLineString", actual);
+  }
 }

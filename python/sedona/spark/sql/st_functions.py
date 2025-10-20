@@ -296,6 +296,46 @@ def ST_Azimuth(point_a: ColumnOrName, point_b: ColumnOrName) -> Column:
 
 
 @validate_argument_types
+def ST_ApproximateMedialAxis(
+    geometry: ColumnOrName, max_vertices: Optional[Union[ColumnOrName, int]] = None
+) -> Column:
+    """Compute an approximate medial axis of an areal geometry by computing the straight skeleton
+    and filtering to keep only interior edges. The medial axis provides a centerline representation
+    of polygons that is useful for various spatial analysis tasks.
+
+    :param geometry: Polygon or MultiPolygon geometry column to compute the medial axis for.
+    :type geometry: ColumnOrName
+    :param max_vertices: Optional maximum number of vertices to keep in the input geometry before computing.
+        If the geometry has more vertices, it will be simplified. This improves performance for complex geometries.
+    :type max_vertices: Optional[Union[ColumnOrName, int]]
+    :return: MultiLineString representing the approximate medial axis as a geometry column.
+    :rtype: Column
+    """
+    if max_vertices is not None:
+        return _call_st_function("ST_ApproximateMedialAxis", (geometry, max_vertices))
+    return _call_st_function("ST_ApproximateMedialAxis", geometry)
+
+
+@validate_argument_types
+def barrier(expression: ColumnOrName, *args) -> Column:
+    """Prevent filter pushdown and control predicate evaluation order in complex spatial joins.
+    This function creates an optimization barrier by evaluating boolean expressions at runtime.
+
+    :param expression: Boolean expression string to evaluate
+    :type expression: ColumnOrName
+    :param args: Variable name and value pairs (var_name1, var_value1, var_name2, var_value2, ...)
+    :return: Boolean result of the expression evaluation
+    :rtype: Column
+
+    Example:
+        df.where(barrier('rating > 4.0 AND stars >= 4',
+                        'rating', col('r.rating'),
+                        'stars', col('h.stars')))
+    """
+    return _call_st_function("barrier", (expression,) + args)
+
+
+@validate_argument_types
 def ST_BestSRID(geometry: ColumnOrName) -> Column:
     """Estimates the best SRID (EPSG code) of the geometry.
 
@@ -1761,6 +1801,27 @@ def ST_StartPoint(line_string: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_st_function("ST_StartPoint", line_string)
+
+
+@validate_argument_types
+def ST_StraightSkeleton(
+    geometry: ColumnOrName, max_vertices: Optional[Union[ColumnOrName, int]] = None
+) -> Column:
+    """Compute the straight skeleton of an areal geometry. The straight skeleton is a method
+    of representing a polygon by a topological skeleton formed by a continuous shrinking process
+    where each edge moves inward in parallel at a uniform speed.
+
+    :param geometry: Polygon or MultiPolygon geometry column to compute the straight skeleton for.
+    :type geometry: ColumnOrName
+    :param max_vertices: Optional maximum number of vertices to keep in the input geometry before computing.
+        If the geometry has more vertices, it will be simplified. This improves performance for complex geometries.
+    :type max_vertices: Optional[Union[ColumnOrName, int]]
+    :return: MultiLineString representing the straight skeleton as a geometry column.
+    :rtype: Column
+    """
+    if max_vertices is not None:
+        return _call_st_function("ST_StraightSkeleton", (geometry, max_vertices))
+    return _call_st_function("ST_StraightSkeleton", geometry)
 
 
 @validate_argument_types

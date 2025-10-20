@@ -27,7 +27,6 @@ import javax.media.jai.RasterFactory;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.utils.RasterUtils;
-import org.geotools.api.geometry.BoundingBox;
 import org.geotools.api.parameter.ParameterValueGroup;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.operation.TransformException;
@@ -35,8 +34,6 @@ import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.processing.CannotCropException;
 import org.geotools.coverage.processing.operation.Crop;
-import org.geotools.geometry.jts.JTS;
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.geom.Geometry;
 
 public class RasterBandEditors {
@@ -269,6 +266,46 @@ public class RasterBandEditors {
     }
   }
 
+  public static GridCoverage2D crop(
+      GridCoverage2D raster, double noDataValue, Geometry geomExtent, boolean lenient) {
+    // Crop the raster
+    // this will shrink the extent of the raster to the geometry
+    Crop cropObject = new Crop();
+    ParameterValueGroup parameters = cropObject.getParameters();
+    parameters.parameter("Source").setValue(raster);
+    parameters.parameter(Crop.PARAMNAME_DEST_NODATA).setValue(new double[] {noDataValue});
+    parameters.parameter(Crop.PARAMNAME_ROI).setValue(geomExtent);
+
+    // crop the raster to the geometry extent
+    try {
+      raster = (GridCoverage2D) cropObject.doOperation(parameters, null);
+    } catch (CannotCropException e) {
+      if (lenient) {
+        return null;
+      } else {
+        throw e;
+      }
+    }
+
+    RenderedImage image = raster.getRenderedImage();
+    int minX = image.getMinX();
+    int minY = image.getMinY();
+    if (minX != 0 || minY != 0) {
+      raster = RasterUtils.shiftRasterToZeroOrigin(raster, noDataValue);
+    } else {
+      raster =
+          RasterUtils.clone(
+              raster.getRenderedImage(),
+              raster.getGridGeometry(),
+              raster.getSampleDimensions(),
+              raster,
+              noDataValue,
+              true);
+    }
+
+    return raster;
+  }
+
   /**
    * Return a clipped raster with the specified ROI by the geometry
    *
@@ -292,121 +329,97 @@ public class RasterBandEditors {
       boolean lenient)
       throws FactoryException, TransformException {
 
-    // Selecting the band from original raster
-    RasterUtils.ensureBand(raster, band);
-    GridCoverage2D singleBandRaster = RasterBandAccessors.getBand(raster, new int[] {band});
-
-    Pair<GridCoverage2D, Geometry> pair =
-        RasterUtils.setDefaultCRSAndTransform(singleBandRaster, geometry);
-    singleBandRaster = pair.getLeft();
-    geometry = pair.getRight();
-
-    // Use rasterizeGeomExtent for AOI geometries smaller than a pixel
-    double[] metadata = RasterAccessors.metadata(singleBandRaster);
-    ReferencedEnvelope geomEnvelope =
-        Rasterization.rasterizeGeomExtent(geometry, singleBandRaster, metadata, allTouched);
-    Geometry geomExtent = JTS.toGeometry((BoundingBox) geomEnvelope);
-
-    // Crop the raster
-    // this will shrink the extent of the raster to the geometry
-    Crop cropObject = new Crop();
-    ParameterValueGroup parameters = cropObject.getParameters();
-    parameters.parameter("Source").setValue(singleBandRaster);
-    parameters.parameter(Crop.PARAMNAME_DEST_NODATA).setValue(new double[] {noDataValue});
-    parameters.parameter(Crop.PARAMNAME_ROI).setValue(geomExtent);
-
-    GridCoverage2D newRaster;
-    try {
-      newRaster = (GridCoverage2D) cropObject.doOperation(parameters, null);
-    } catch (CannotCropException e) {
+    if (!RasterPredicates.rsIntersects(raster, geometry)) {
       if (lenient) {
         return null;
-      } else {
-        throw e;
+      }
+      throw new IllegalArgumentException("Geometry does not intersect Raster.");
+    }
+
+    // Selecting the band from original raster
+    RasterUtils.ensureBand(raster, band);
+    Pair<GridCoverage2D, Geometry> pair = RasterUtils.setDefaultCRSAndTransform(raster, geometry);
+    geometry = pair.getRight();
+
+    double[] rasterMetadata = RasterAccessors.metadata(raster);
+    int rasterWidth = (int) rasterMetadata[2], rasterHeight = (int) rasterMetadata[3];
+    Raster rasterData = RasterUtils.getRaster(raster.getRenderedImage());
+
+    // create a new raster and set a default value that's the no-data value
+    String bandType = RasterBandAccessors.getBandType(raster, band);
+    int dataTypeCode = RasterUtils.getDataTypeCode(RasterBandAccessors.getBandType(raster, band));
+    boolean isDataTypeIntegral = RasterUtils.isDataTypeIntegral(dataTypeCode);
+    WritableRaster writableRaster =
+        RasterFactory.createBandedRaster(dataTypeCode, rasterWidth, rasterHeight, 1, null);
+    int sizeOfArray = rasterWidth * rasterHeight;
+    if (isDataTypeIntegral) {
+      int[] array =
+          ArrayUtils.toPrimitive(
+              Collections.nCopies(sizeOfArray, (int) noDataValue)
+                  .toArray(new Integer[sizeOfArray]));
+      writableRaster.setSamples(0, 0, rasterWidth, rasterHeight, 0, array);
+    } else {
+      double[] array =
+          ArrayUtils.toPrimitive(
+              Collections.nCopies(sizeOfArray, noDataValue).toArray(new Double[sizeOfArray]));
+      writableRaster.setSamples(0, 0, rasterWidth, rasterHeight, 0, array);
+    }
+
+    // rasterize the geometry to iterate over the clipped raster
+    GridCoverage2D maskRaster =
+        RasterConstructors.asRaster(geometry, raster, bandType, allTouched, 150);
+    Raster maskData = RasterUtils.getRaster(maskRaster.getRenderedImage());
+    double[] maskMetadata = RasterAccessors.metadata(maskRaster);
+    int maskWidth = (int) maskMetadata[2], maskHeight = (int) maskMetadata[3];
+
+    // Calculate offset
+    Point2D point = RasterUtils.getWorldCornerCoordinates(maskRaster, 1, 1);
+
+    // Add half the pixel length to account for floating-point precision issues.
+    // This adjustment increases the margin of error because the upper-left corner of a pixel
+    // is very close to neighboring pixels. Without this adjustment, floating-point inaccuracies
+    // can cause the calculated world coordinates to incorrectly fall into an adjacent pixel.
+    // For example, the upperLeftY of a maskRaster pixel might be 243924.000000000001,
+    // while the upperLeftY of the original raster pixel is 243924.000000000000.
+    int[] rasterCoord =
+        RasterUtils.getGridCoordinatesFromWorld(
+            raster, point.getX() + (rasterMetadata[4] / 2), point.getY() + (rasterMetadata[5] / 2));
+    double offsetX = rasterCoord[0];
+    double offsetY = rasterCoord[1];
+
+    for (int j = 0; j < maskHeight; j++) {
+      for (int i = 0; i < maskWidth; i++) {
+        // Calculate mapped raster index
+        int x = (int) (i + offsetX), y = (int) (j + offsetY);
+
+        // Check if the pixel in the maskRaster data is valid
+        if (maskData.getPixel(i, j, (int[]) null)[0] == 0) {
+          continue;
+        }
+
+        if (isDataTypeIntegral) {
+          int[] pixelValue = rasterData.getPixel(x, y, (int[]) null);
+          writableRaster.setPixel(x, y, new int[] {pixelValue[band - 1]});
+        } else {
+          double[] pixelValue = rasterData.getPixel(x, y, (double[]) null);
+          writableRaster.setPixel(x, y, new double[] {pixelValue[band - 1]});
+        }
       }
     }
 
-    if (!crop) {
-      double[] metadataOriginal = RasterAccessors.metadata(raster);
-      int widthOriginalRaster = (int) metadataOriginal[2],
-          heightOriginalRaster = (int) metadataOriginal[3];
-      Raster rasterData = RasterUtils.getRaster(raster.getRenderedImage());
+    // Not cropped but clipped
+    GridCoverage2D newRaster =
+        RasterUtils.clone(
+            writableRaster,
+            raster.getGridGeometry(),
+            new GridSampleDimension[] {raster.getSampleDimension(band - 1)},
+            raster,
+            noDataValue,
+            true);
 
-      // create a new raster and set a default value that's the no-data value
-      String bandType = RasterBandAccessors.getBandType(raster, 1);
-      int dataTypeCode = RasterUtils.getDataTypeCode(RasterBandAccessors.getBandType(raster, 1));
-      boolean isDataTypeIntegral = RasterUtils.isDataTypeIntegral(dataTypeCode);
-      WritableRaster resultRaster =
-          RasterFactory.createBandedRaster(
-              dataTypeCode, widthOriginalRaster, heightOriginalRaster, 1, null);
-      int sizeOfArray = widthOriginalRaster * heightOriginalRaster;
-      if (isDataTypeIntegral) {
-        int[] array =
-            ArrayUtils.toPrimitive(
-                Collections.nCopies(sizeOfArray, (int) noDataValue)
-                    .toArray(new Integer[sizeOfArray]));
-        resultRaster.setSamples(0, 0, widthOriginalRaster, heightOriginalRaster, 0, array);
-      } else {
-        double[] array =
-            ArrayUtils.toPrimitive(
-                Collections.nCopies(sizeOfArray, noDataValue).toArray(new Double[sizeOfArray]));
-        resultRaster.setSamples(0, 0, widthOriginalRaster, heightOriginalRaster, 0, array);
-      }
-
-      // rasterize the geometry to iterate over the clipped raster
-      GridCoverage2D rasterized =
-          RasterConstructors.asRaster(geometry, raster, bandType, allTouched, 150);
-      Raster rasterizedData = RasterUtils.getRaster(rasterized.getRenderedImage());
-      double[] metadataRasterized = RasterAccessors.metadata(rasterized);
-      int widthRasterized = (int) metadataRasterized[2],
-          heightRasterized = (int) metadataRasterized[3];
-
-      for (int j = 0; j < heightRasterized; j++) {
-        for (int i = 0; i < widthRasterized; i++) {
-          Point2D point = RasterUtils.getWorldCornerCoordinates(rasterized, i, j);
-          int[] rasterCoord =
-              RasterUtils.getGridCoordinatesFromWorld(raster, point.getX(), point.getY());
-          int x = Math.abs(rasterCoord[0]), y = Math.abs(rasterCoord[1]);
-
-          if (rasterizedData.getPixel(i, j, (int[]) null)[0] == 0) {
-            continue;
-          }
-
-          if (isDataTypeIntegral) {
-            int[] pixelValue = rasterData.getPixel(x, y, (int[]) null);
-
-            resultRaster.setPixel(x, y, new int[] {pixelValue[band - 1]});
-          } else {
-            double[] pixelValue = rasterData.getPixel(x, y, (double[]) null);
-
-            resultRaster.setPixel(x, y, new double[] {pixelValue[band - 1]});
-          }
-        }
-      }
-      newRaster =
-          RasterUtils.clone(
-              resultRaster,
-              raster.getGridGeometry(),
-              newRaster.getSampleDimensions(),
-              newRaster,
-              noDataValue,
-              true);
-    } else {
-      RenderedImage image = newRaster.getRenderedImage();
-      int minX = image.getMinX();
-      int minY = image.getMinY();
-      if (minX != 0 || minY != 0) {
-        newRaster = RasterUtils.shiftRasterToZeroOrigin(newRaster, noDataValue);
-      } else {
-        newRaster =
-            RasterUtils.clone(
-                newRaster.getRenderedImage(),
-                newRaster.getGridGeometry(),
-                newRaster.getSampleDimensions(),
-                newRaster,
-                noDataValue,
-                true);
-      }
+    if (crop) {
+      Geometry maskRasterExtent = GeometryFunctions.envelope(maskRaster);
+      return crop(newRaster, noDataValue, maskRasterExtent, lenient);
     }
 
     return newRaster;

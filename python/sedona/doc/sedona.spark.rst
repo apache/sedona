@@ -9,6 +9,7 @@ Subpackages
 
    sedona.spark.core
    sedona.spark.geoarrow
+   sedona.spark.geopandas
    sedona.spark.maps
    sedona.spark.raster
    sedona.spark.raster_utils
@@ -26,13 +27,13 @@ sedona.spark.SedonaContext module
 
 .. automodule:: sedona.spark.SedonaContext
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: sedona.spark
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

@@ -622,6 +622,9 @@ public class GeomUtils {
 
   public static Boolean isMeasuredGeometry(Geometry geom) {
     Coordinate coordinate = geom.getCoordinate();
+    if (coordinate == null) {
+      return false; // Empty geometries are not measured
+    }
     return !Double.isNaN(coordinate.getM());
   }
 

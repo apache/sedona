@@ -22,7 +22,7 @@
     <parent>
         <artifactId>sedona-parent</artifactId>
         <groupId>org.apache.sedona</groupId>
-        <version>1.8.0-SNAPSHOT</version>
+        <version>1.8.1-SNAPSHOT</version>
     </parent>
     <artifactId>sedona-spark-shaded-${spark.compat.version}_${scala.compat.version}</artifactId>
 
@@ -236,7 +236,6 @@
                                     <exclude>org.scala-lang:scala-library</exclude>
                                     <exclude>org.apache.commons:commons-*</exclude>
                                     <exclude>commons-pool:commons-pool</exclude>
-                                    <exclude>commons-lang:commons-lang</exclude>
                                     <exclude>commons-io:commons-io</exclude>
                                     <exclude>commons-logging:commons-logging</exclude>
                                 </excludes>

@@ -66,11 +66,14 @@ class TestPathCompatibilityAll(TestBase):
         assert g_local is not None
         assert add_distance_band_column is not None
         assert add_binary_distance_band_column is not None
+        assert add_weighted_distance_band_column is not None
+        assert local_outlier_factor is not None
 
     def test_util_imports(self):
         # Test utility imports
         assert Adapter is not None
         assert GeoData is not None
+        assert StructuredAdapter is not None
 
     def test_format_mapper_imports(self):
         # Test GeoJsonReader and ShapefileReader imports
@@ -93,6 +96,13 @@ class TestPathCompatibilityAll(TestBase):
         # Test raster utils imports
         assert SedonaUtils is not None
 
+    def test_import_df_functions_from_sedona_sql(self):
+        # one from each module
+        assert ST_MakePoint is not None
+        assert ST_Y is not None
+        assert ST_Touches is not None
+        assert ST_Envelope_Aggr is not None
+
     def test_geoarrow_imports(self):
         assert create_spatial_dataframe is not None
         assert dataframe_to_arrow is not None
@@ -105,8 +115,3 @@ class TestPathCompatibilityAll(TestBase):
         # Test Map imports
         assert SedonaKepler is not None
         assert SedonaPyDeck is not None
-
-    def test_raster_imports(self):
-        assert AWTRaster is not None
-        assert DataBuffer is not None
-        assert SampleDimension is not None

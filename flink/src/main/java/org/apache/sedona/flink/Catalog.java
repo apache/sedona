@@ -213,11 +213,13 @@ public class Catalog {
       new Functions.ST_Affine(),
       new Functions.ST_BoundingDiagonal(),
       new Functions.ST_Angle(),
+      new Functions.ST_ApproximateMedialAxis(),
       new Functions.ST_Degrees(),
       new Functions.ST_HausdorffDistance(),
       new Functions.ST_IsCollection(),
       new Functions.ST_CoordDim(),
-      new Functions.ST_IsValidReason()
+      new Functions.ST_IsValidReason(),
+      new Functions.ST_StraightSkeleton()
     };
   }
 

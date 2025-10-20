@@ -111,7 +111,7 @@ You can add additional Spark runtime config to the config builder. For example, 
 
 ## Initiate SedonaContext
 
-Add the following line after creating Sedona config. If you already have a SparkSession (usually named `spark`) created by AWS EMR/Databricks/Microsoft Fabric, please call `sedona = SedonaContext.create(spark)` instead. For ==Databricks==, the situation is more complicated, please refer to [Databricks setup guide](../setup/databricks.md), but generally you don't need to create SedonaContext.
+Add the following line after creating Sedona config. If you already have a SparkSession (usually named `spark`) created by AWS EMR/Databricks/Microsoft Fabric, please call `sedona = SedonaContext.create(spark)` instead.
 
 === "Scala"
 
@@ -241,10 +241,16 @@ Set the `multiLine` option to `True` to read multiline GeoJSON files.
 === "Python"
 
     ```python
-    df = sedona.read.format("geojson").option("multiLine", "true").load("PATH/TO/MYFILE.json")
-     .selectExpr("explode(features) as features") # Explode the envelope to get one feature per row.
-     .select("features.*") # Unpack the features struct.
-     .withColumn("prop0", f.expr("properties['prop0']")).drop("properties").drop("type")
+    df = (
+        sedona.read.format("geojson")
+        .option("multiLine", "true")
+        .load("PATH/TO/MYFILE.json")
+        .selectExpr("explode(features) as features")  # Explode the envelope
+        .select("features.*")  # Unpack the features struct
+        .withColumn("prop0", f.expr("properties['prop0']"))
+        .drop("properties")
+        .drop("type")
+    )
 
     df.show()
     df.printSchema()
@@ -342,10 +348,6 @@ Sedona supports spatial predicate push-down for GeoParquet files, please refer t
 
 GeoParquet file reader can also be used to read legacy Parquet files written by Apache Sedona 1.3.1-incubating or earlier.
 Please refer to [Reading Legacy Parquet Files](../api/sql/Reading-legacy-parquet.md) for details.
-
-!!!warning
-	GeoParquet file reader does not work on Databricks runtime when Photon is enabled. Please disable Photon when using
-	GeoParquet file reader on Databricks runtime.
 
 See [this page](files/geoparquet-sedona-spark.md) for more information on loading GeoParquet.
 
@@ -844,7 +846,7 @@ SedonaPyDeck exposes a `create_choropleth_map` API which can be used to visualiz
 Example:
 
 ```python
-SedonaPyDeck.create_choropleth_map(df=groupedresult, plot_col='AirportCount')
+SedonaPyDeck.create_choropleth_map(df=groupedresult, plot_col="AirportCount")
 ```
 
 !!!Note
@@ -862,7 +864,7 @@ SedonaPyDeck exposes a create_geometry_map API which can be used to visualize a 
 Example:
 
 ```python
-SedonaPyDeck.create_geometry_map(df_building, elevation_col='height')
+SedonaPyDeck.create_geometry_map(df_building, elevation_col="height")
 ```
 
 ![Creating a Geometry map using SedonaPyDeck](../image/buildings.gif)
@@ -1214,7 +1216,9 @@ the normal UDFs. It might be even 2x faster than the normal UDFs.
 Decorator signature looks as follows:
 
 ```python
-def sedona_vectorized_udf(udf_type: SedonaUDFType = SedonaUDFType.SHAPELY_SCALAR, return_type: DataType)
+def sedona_vectorized_udf(
+    udf_type: SedonaUDFType = SedonaUDFType.SHAPELY_SCALAR, return_type: DataType
+): ...
 ```
 
 where udf_type is the type of the UDF function, currently supported are:
@@ -1231,6 +1235,7 @@ a given geometry.
 ```python
 import shapely.geometry.base as b
 from sedona.spark import sedona_vectorized_udf
+
 
 @sedona_vectorized_udf(return_type=GeometryType())
 def vectorized_buffer(geom: b.BaseGeometry) -> b.BaseGeometry:

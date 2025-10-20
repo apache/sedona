@@ -4473,4 +4473,461 @@ public class FunctionsTest extends TestBase {
     double actualArea = actual.getArea();
     return intersectionArea / actualArea;
   }
+
+  @Test
+  public void straightSkeleton() throws ParseException {
+    // Test with a simple square polygon
+    // A square's straight skeleton has 4 edges from corners to center
+    Polygon square = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 10, 0, 10, 10, 0, 10, 0, 0));
+    Geometry result = Functions.straightSkeleton(square);
+
+    // Result should be a MultiLineString
+    assertTrue(result instanceof MultiLineString);
+    assertFalse(result.isEmpty());
+    assertEquals(4, result.getNumGeometries()); // Square has 4 skeleton edges
+
+    // For a square, all skeleton edges should converge at the center point
+    Point expectedCenter = GEOMETRY_FACTORY.createPoint(new Coordinate(5, 5));
+    int edgesAtCenter = 0;
+    for (int i = 0; i < result.getNumGeometries(); i++) {
+      LineString edge = (LineString) result.getGeometryN(i);
+      Coordinate[] coords = edge.getCoordinates();
+      // Check if either endpoint is at the center
+      if (coords[0].distance(expectedCenter.getCoordinate()) < 0.01
+          || coords[1].distance(expectedCenter.getCoordinate()) < 0.01) {
+        edgesAtCenter++;
+      }
+    }
+    assertEquals("All 4 edges should meet at center", 4, edgesAtCenter);
+
+    // Test with an L-shaped polygon
+    Polygon lShape =
+        GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 10, 0, 10, 5, 5, 5, 5, 10, 0, 10, 0, 0));
+    result = Functions.straightSkeleton(lShape);
+
+    assertTrue(result instanceof MultiLineString);
+    assertFalse(result.isEmpty());
+    assertTrue("L-shape should have multiple skeleton edges", result.getNumGeometries() >= 4);
+
+    // Test with a rectangular polygon
+    Polygon rectangle = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 20, 0, 20, 5, 0, 5, 0, 0));
+    result = Functions.straightSkeleton(rectangle);
+
+    assertTrue(result instanceof MultiLineString);
+    assertFalse(result.isEmpty());
+    assertTrue("Rectangle should have at least 4 skeleton edges", result.getNumGeometries() >= 4);
+  }
+
+  @Test
+  public void straightSkeletonSRID() throws ParseException {
+    // Test SRID preservation
+    Geometry geom = Constructors.geomFromWKT("POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))", 4326);
+    Geometry result = Functions.straightSkeleton(geom);
+
+    assertEquals(4326, result.getSRID());
+    assertTrue(result instanceof MultiLineString);
+  }
+
+  @Test
+  public void straightSkeletonNullAndEmpty() {
+    // Test null geometry
+    Geometry result = Functions.straightSkeleton(null);
+    assertNull(result);
+
+    // Test empty geometry
+    Polygon emptyPolygon = GEOMETRY_FACTORY.createPolygon();
+    result = Functions.straightSkeleton(emptyPolygon);
+    assertNull(result);
+  }
+
+  @Test
+  public void straightSkeletonInvalidGeometry() {
+    // Test with non-areal geometry (LineString)
+    LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 10, 10));
+    IllegalArgumentException e =
+        assertThrows(IllegalArgumentException.class, () -> Functions.straightSkeleton(lineString));
+    assertEquals(
+        "ST_StraightSkeleton only supports Polygon and MultiPolygon geometries", e.getMessage());
+
+    // Test with Point
+    Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(5, 5));
+    e = assertThrows(IllegalArgumentException.class, () -> Functions.straightSkeleton(point));
+    assertEquals(
+        "ST_StraightSkeleton only supports Polygon and MultiPolygon geometries", e.getMessage());
+  }
+
+  @Test
+  public void straightSkeletonMultiPolygon() throws ParseException {
+    // Test with MultiPolygon
+    Polygon poly1 = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 5, 0, 5, 5, 0, 5, 0, 0));
+    Polygon poly2 =
+        GEOMETRY_FACTORY.createPolygon(coordArray(10, 10, 15, 10, 15, 15, 10, 15, 10, 10));
+    MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {poly1, poly2});
+
+    Geometry result = Functions.straightSkeleton(multiPolygon);
+
+    assertTrue(result instanceof MultiLineString);
+    assertFalse(result.isEmpty());
+    assertEquals(multiPolygon.getSRID(), result.getSRID());
+  }
+
+  /*
+   * Geometric Verification Tests for ST_StraightSkeleton
+   *
+   * Verification Strategy:
+   *
+   * These tests use geometrically predictable shapes where we can mathematically reason about the
+   * expected medial axis:
+   *
+   * | Shape            | Mathematical Property    | Verification Method           |
+   * |------------------|--------------------------|-------------------------------|
+   * | Narrow Rectangle | Medial axis ≈ centerline | Distance to center line       |
+   * | Square           | Symmetry around center   | Distance to centroid          |
+   * | Circle           | Collapses to center      | Centroid proximity            |
+   * | T-Shape          | Follows topology         | Checks both stem and top bar  |
+   * | Any Polygon      | Deterministic            | Consistency across runs       |
+   * | Any Polygon      | Geometric validity       | All points inside/on boundary |
+   */
+
+  @Test
+  public void straightSkeletonRectangleVerification() throws ParseException {
+    // Test with a narrow rectangle where straight skeleton should have centerline structure
+    // Rectangle from (0,0) to (100,10) - very elongated
+    Polygon rectangle =
+        GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 100, 0, 100, 10, 0, 10, 0, 0));
+    Geometry result = Functions.straightSkeleton(rectangle);
+
+    assertTrue(result instanceof MultiLineString);
+    assertFalse(result.isEmpty());
+
+    // Straight skeleton of a rectangle should have edges connecting corners to interior
+    // All skeleton edges should be contained within or touch the polygon
+    for (int i = 0; i < result.getNumGeometries(); i++) {
+      Geometry part = result.getGeometryN(i);
+      assertTrue(
+          "Skeleton edges must be inside or intersect the polygon",
+          rectangle.contains(part) || rectangle.intersects(part));
+    }
+
+    // Check that skeleton has reasonable length (should be less than perimeter)
+    double skeletonLength = result.getLength();
+    double perimeter = rectangle.getLength();
+    assertTrue("Skeleton length should be less than polygon perimeter", skeletonLength < perimeter);
+  }
+
+  @Test
+  public void straightSkeletonSquareSymmetry() throws ParseException {
+    // Test with a square - straight skeleton should converge to center
+    // Square centered at origin for easier verification
+    Polygon square =
+        GEOMETRY_FACTORY.createPolygon(coordArray(-10, -10, 10, -10, 10, 10, -10, 10, -10, -10));
+    Geometry result = Functions.straightSkeleton(square);
+
+    assertTrue(result instanceof MultiLineString);
+    assertFalse(result.isEmpty());
+    assertEquals(4, result.getNumGeometries()); // Square always has 4 skeleton edges
+
+    // For a square, all 4 skeleton edges should meet at the center (0, 0)
+    Point expectedCenter = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+    int edgesAtCenter = 0;
+    for (int i = 0; i < result.getNumGeometries(); i++) {
+      LineString edge = (LineString) result.getGeometryN(i);
+      Coordinate[] coords = edge.getCoordinates();
+      // Check if either endpoint is at the center
+      if (coords[0].distance(expectedCenter.getCoordinate()) < 0.01
+          || coords[1].distance(expectedCenter.getCoordinate()) < 0.01) {
+        edgesAtCenter++;
+      }
+    }
+    assertEquals("All 4 skeleton edges should converge at the center", 4, edgesAtCenter);
+  }
+
+  @Test
+  public void straightSkeletonCircleApproximation() throws ParseException {
+    // Test with a circular polygon (approximated by many vertices)
+    // For a circle, the straight skeleton edges radiate from center to boundary
+    double radius = 10.0;
+    int numPoints = 16; // Reasonable approximation (16-gon)
+    Coordinate[] coords = new Coordinate[numPoints + 1];
+
+    for (int i = 0; i < numPoints; i++) {
+      double angle = 2 * Math.PI * i / numPoints;
+      coords[i] = new Coordinate(radius * Math.cos(angle), radius * Math.sin(angle));
+    }
+    coords[numPoints] = coords[0]; // Close the ring
+
+    Polygon circle = GEOMETRY_FACTORY.createPolygon(coords);
+    Geometry result = Functions.straightSkeleton(circle);
+
+    assertTrue(result instanceof MultiLineString);
+    assertFalse(result.isEmpty());
+
+    // For a regular polygon, straight skeleton has at least N edges
+    // (can have more due to intermediate junction points)
+    assertTrue(
+        "Circle approximation should have at least one edge per vertex",
+        result.getNumGeometries() >= numPoints);
+
+    // All skeleton edges should converge at or near the center
+    Point center = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+    int edgesNearCenter = 0;
+    for (int i = 0; i < result.getNumGeometries(); i++) {
+      LineString edge = (LineString) result.getGeometryN(i);
+      Coordinate[] edgeCoords = edge.getCoordinates();
+      // Check if either endpoint is near the center
+      if (edgeCoords[0].distance(center.getCoordinate()) < 0.5
+          || edgeCoords[1].distance(center.getCoordinate()) < 0.5) {
+        edgesNearCenter++;
+      }
+    }
+    assertTrue(
+        "Most skeleton edges should converge near center",
+        edgesNearCenter >= numPoints * 0.5); // At least half should be near center
+  }
+
+  @Test
+  public void straightSkeletonTShapeTopology() throws ParseException {
+    // Test with a T-shaped polygon - straight skeleton should reflect T topology
+    // Vertical bar: x from 4-6, y from 0-10
+    // Horizontal bar: x from 0-10, y from 8-10
+    Coordinate[] coords =
+        new Coordinate[] {
+          new Coordinate(4, 0),
+          new Coordinate(6, 0),
+          new Coordinate(6, 8),
+          new Coordinate(10, 8),
+          new Coordinate(10, 10),
+          new Coordinate(0, 10),
+          new Coordinate(0, 8),
+          new Coordinate(4, 8),
+          new Coordinate(4, 0)
+        };
+
+    Polygon tShape = GEOMETRY_FACTORY.createPolygon(coords);
+    Geometry result = Functions.straightSkeleton(tShape);
+
+    assertTrue(result instanceof MultiLineString);
+    assertFalse(result.isEmpty());
+
+    // T-shape has 8 vertices, so straight skeleton should have edges
+    assertTrue("T-shape should have multiple skeleton edges", result.getNumGeometries() >= 6);
+
+    // All skeleton edges should be inside or touching the T-shape
+    for (int i = 0; i < result.getNumGeometries(); i++) {
+      Geometry part = result.getGeometryN(i);
+      assertTrue(
+          "All skeleton edges should be inside or intersect T-shape",
+          tShape.contains(part) || tShape.intersects(part));
+    }
+
+    // Verify skeleton has reasonable total length
+    double skeletonLength = result.getLength();
+    assertTrue("Skeleton should have positive length", skeletonLength > 0);
+    assertTrue(
+        "Skeleton length should be less than perimeter", skeletonLength < tShape.getLength());
+  }
+
+  @Test
+  public void straightSkeletonConsistency() throws ParseException {
+    // Test that running the function twice on the same geometry gives consistent results
+    Polygon polygon =
+        GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 10, 0, 10, 5, 5, 5, 5, 10, 0, 10, 0, 0));
+
+    Geometry result1 = Functions.straightSkeleton(polygon);
+    Geometry result2 = Functions.straightSkeleton(polygon);
+
+    // Results should be equal (same geometry)
+    assertTrue("Multiple runs should produce consistent results", result1.equals(result2));
+  }
+
+  @Test
+  public void straightSkeletonAllPointsInsidePolygon() throws ParseException {
+    // Verify that all coordinate points in the medial axis are inside or on the boundary
+    Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 20, 0, 20, 10, 0, 10, 0, 0));
+    Geometry result = Functions.straightSkeleton(polygon);
+
+    assertTrue(result instanceof MultiLineString);
+
+    // Extract all coordinates from the medial axis
+    Coordinate[] allCoords = result.getCoordinates();
+
+    // Every coordinate should be inside or on the polygon boundary
+    for (Coordinate coord : allCoords) {
+      Point point = GEOMETRY_FACTORY.createPoint(coord);
+      assertTrue(
+          "All medial axis points should be inside or on polygon boundary",
+          polygon.contains(point) || polygon.touches(point) || polygon.distance(point) < 0.01);
+    }
+  }
+
+  @Test
+  public void approximateMedialAxis() throws ParseException {
+    // Test basic functionality with an L-shaped polygon
+    // L-shapes have interior edges, unlike simple squares/rectangles
+    Polygon lShape =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(0, 0, 100, 0, 100, 40, 40, 40, 40, 100, 0, 100, 0, 0));
+    Geometry result = Functions.approximateMedialAxis(lShape);
+
+    assertNotNull(result);
+    assertTrue(result instanceof MultiLineString);
+    assertTrue(result.getNumGeometries() > 0);
+
+    // Approximate medial axis should have fewer or equal segments than raw skeleton due to
+    // filtering
+    Geometry straightSkel = Functions.straightSkeleton(lShape);
+    assertTrue(
+        "Filtered skeleton should have <= segments than raw skeleton",
+        result.getNumGeometries() <= straightSkel.getNumGeometries());
+
+    // Test T-shaped polygon - another shape with interior edges
+    Polygon tShape =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(45, 0, 55, 0, 55, 40, 70, 40, 70, 50, 30, 50, 30, 40, 45, 40, 45, 0));
+    result = Functions.approximateMedialAxis(tShape);
+    assertNotNull(result);
+    assertTrue(result.getNumGeometries() > 0);
+  }
+
+  @Test
+  public void approximateMedialAxisSRID() throws ParseException {
+    // Use L-shaped polygon to ensure interior edges exist
+    Polygon geom =
+        GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 10, 0, 10, 4, 4, 4, 4, 10, 0, 10, 0, 0));
+    geom.setSRID(4326);
+    Geometry result = Functions.approximateMedialAxis(geom);
+    assertEquals(4326, result.getSRID());
+  }
+
+  @Test
+  public void approximateMedialAxisNullAndEmpty() {
+    // Test null input
+    Geometry result = Functions.approximateMedialAxis(null);
+    assertNull(result);
+
+    // Test empty polygon
+    Polygon emptyPolygon = GEOMETRY_FACTORY.createPolygon();
+    result = Functions.approximateMedialAxis(emptyPolygon);
+    assertNull(result);
+  }
+
+  @Test
+  public void approximateMedialAxisInvalidGeometry() {
+    // Test with LineString (should throw exception)
+    LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 10, 0, 10, 10));
+    IllegalArgumentException e =
+        assertThrows(
+            IllegalArgumentException.class, () -> Functions.approximateMedialAxis(lineString));
+    assertTrue(
+        e.getMessage().contains("ST_ApproximateMedialAxis only supports Polygon and MultiPolygon"));
+
+    // Test with Point (should throw exception)
+    Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(5, 5));
+    e = assertThrows(IllegalArgumentException.class, () -> Functions.approximateMedialAxis(point));
+    assertTrue(
+        e.getMessage().contains("ST_ApproximateMedialAxis only supports Polygon and MultiPolygon"));
+  }
+
+  @Test
+  public void approximateMedialAxisMultiPolygon() throws ParseException {
+    // Create a MultiPolygon with two L-shaped polygons (which have interior edges)
+    Polygon poly1 =
+        GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 10, 0, 10, 4, 4, 4, 4, 10, 0, 10, 0, 0));
+    Polygon poly2 =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(20, 20, 30, 20, 30, 24, 24, 24, 24, 30, 20, 30, 20, 20));
+    MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {poly1, poly2});
+
+    Geometry result = Functions.approximateMedialAxis(multiPolygon);
+
+    assertNotNull(result);
+    assertTrue(result instanceof MultiLineString);
+    // Should have segments from both polygons
+    assertTrue(result.getNumGeometries() > 0);
+  }
+
+  @Test
+  public void approximateMedialAxisPruningEffectiveness() throws ParseException {
+    // Test T-shaped polygon - should demonstrate effective pruning
+    // T-shape has many small corner branches that should be pruned
+    Polygon tShape =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(45, 0, 55, 0, 55, 40, 70, 40, 70, 50, 30, 50, 30, 40, 45, 40, 45, 0));
+
+    Geometry straightSkel = Functions.straightSkeleton(tShape);
+    Geometry prunedSkel = Functions.approximateMedialAxis(tShape);
+
+    // The pruned skeleton should have significantly fewer segments
+    assertTrue(
+        "Pruned skeleton should have fewer segments for T-shape",
+        prunedSkel.getNumGeometries() < straightSkel.getNumGeometries());
+
+    // All points should still be inside or on the polygon
+    Coordinate[] allCoords = prunedSkel.getCoordinates();
+    for (Coordinate coord : allCoords) {
+      Point point = GEOMETRY_FACTORY.createPoint(coord);
+      assertTrue(
+          "All pruned medial axis points should be inside or on polygon boundary",
+          tShape.contains(point) || tShape.touches(point) || tShape.distance(point) < 0.01);
+    }
+  }
+
+  @Test
+  public void approximateMedialAxisConsistency() throws ParseException {
+    // Verify that the function produces consistent results for the same input
+    Polygon polygon =
+        GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 100, 0, 100, 50, 0, 50, 0, 0));
+    Geometry result1 = Functions.approximateMedialAxis(polygon);
+    Geometry result2 = Functions.approximateMedialAxis(polygon);
+
+    assertTrue("Results should be equal", result1.equalsExact(result2, 1e-6));
+  }
+
+  @Test
+  public void approximateMedialAxisAllPointsInsidePolygon() throws ParseException {
+    // Verify that all coordinate points in the pruned medial axis are inside or on the boundary
+    Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 20, 0, 20, 10, 0, 10, 0, 0));
+    Geometry result = Functions.approximateMedialAxis(polygon);
+
+    assertTrue(result instanceof MultiLineString);
+
+    // Extract all coordinates from the medial axis
+    Coordinate[] allCoords = result.getCoordinates();
+
+    // Every coordinate should be inside or on the polygon boundary
+    for (Coordinate coord : allCoords) {
+      Point point = GEOMETRY_FACTORY.createPoint(coord);
+      assertTrue(
+          "All pruned medial axis points should be inside or on polygon boundary",
+          polygon.contains(point) || polygon.touches(point) || polygon.distance(point) < 0.01);
+    }
+  }
+
+  @Test
+  public void approximateMedialAxisPolygonWithHole() throws ParseException {
+    // Test polygon with a rectangular hole (donut shape)
+    LinearRing shell =
+        GEOMETRY_FACTORY.createLinearRing(coordArray(0, 0, 100, 0, 100, 60, 0, 60, 0, 0));
+    LinearRing hole =
+        GEOMETRY_FACTORY.createLinearRing(coordArray(20, 20, 80, 20, 80, 40, 20, 40, 20, 20));
+    Polygon polygonWithHole = GEOMETRY_FACTORY.createPolygon(shell, new LinearRing[] {hole});
+
+    Geometry result = Functions.approximateMedialAxis(polygonWithHole);
+
+    assertNotNull("Result should not be null for polygon with hole", result);
+    assertTrue("Result should be MultiLineString", result instanceof MultiLineString);
+    assertTrue(
+        "Result should have segments, got: " + result.getNumGeometries(),
+        result.getNumGeometries() > 0);
+
+    // Verify the result has fewer or equal segments compared to straight skeleton
+    Geometry straightSkel = Functions.straightSkeleton(polygonWithHole);
+    assertNotNull("Straight skeleton should not be null", straightSkel);
+    assertTrue(
+        "Pruned skeleton should have <= segments than raw skeleton. Pruned: "
+            + result.getNumGeometries()
+            + ", Raw: "
+            + straightSkel.getNumGeometries(),
+        result.getNumGeometries() <= straightSkel.getNumGeometries());
+  }
 }

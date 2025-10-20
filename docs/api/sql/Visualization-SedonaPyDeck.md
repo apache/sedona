@@ -41,9 +41,17 @@ Following are details on all the APIs exposed via SedonaPyDeck:
 ### **Geometry Map**
 
 ```python
-def create_geometry_map(df, fill_color="[85, 183, 177, 255]", line_color="[85, 183, 177, 255]",
-                   elevation_col=0, initial_view_state=None,
-                   map_style=None, map_provider=None, api_keys=None, stroked=True):
+def create_geometry_map(
+    df,
+    fill_color="[85, 183, 177, 255]",
+    line_color="[85, 183, 177, 255]",
+    elevation_col=0,
+    initial_view_state=None,
+    map_style=None,
+    map_provider=None,
+    api_keys=None,
+    stroked=True,
+): ...
 ```
 
 The parameter `fill_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column, and is used to color polygons or point geometries in the map
@@ -60,8 +68,17 @@ More details on the parameters and their default values can be found on the PyDe
 ### **Choropleth Map**
 
 ```python
-def create_choropleth_map(df, fill_color=None, plot_col=None, initial_view_state=None, map_style=None,
-						  map_provider=None, api_keys=None, elevation_col=0, stroked=True)
+def create_choropleth_map(
+    df,
+    fill_color=None,
+    plot_col=None,
+    initial_view_state=None,
+    map_style=None,
+    map_provider=None,
+    api_keys=None,
+    elevation_col=0,
+    stroked=True,
+): ...
 ```
 
 The parameter `fill_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column.
@@ -71,9 +88,11 @@ The parameter `stroked` determines whether to draw an outline around polygons an
 For example, all these are valid values of fill_color:
 
 ```python
-fill_color=[255, 12, 250]
-fill_color=[0, 12, 250, 255]
-fill_color='[0, 12, 240, AirportCount * 10]' ## AirportCount is a column in the passed df
+fill_color = [255, 12, 250]
+fill_color = [0, 12, 250, 255]
+fill_color = (
+    "[0, 12, 240, AirportCount * 10]"  ## AirportCount is a column in the passed df
+)
 ```
 
 Instead of giving a `fill_color` parameter, a 'plot_col' can be passed which specifies the column to decide the choropleth.
@@ -87,8 +106,18 @@ More details on the parameters and their default values can be found on the PyDe
 ### **Scatterplot**
 
 ```python
-def create_scatterplot_map(df, fill_color="[255, 140, 0]", radius_col=1, radius_min_pixels = 1, radius_max_pixels = 10, radius_scale=1, initial_view_state=None,
-                           map_style=None, map_provider=None, api_keys=None)
+def create_scatterplot_map(
+    df,
+    fill_color="[255, 140, 0]",
+    radius_col=1,
+    radius_min_pixels=1,
+    radius_max_pixels=10,
+    radius_scale=1,
+    initial_view_state=None,
+    map_style=None,
+    map_provider=None,
+    api_keys=None,
+): ...
 ```
 
 The parameter `fill_color` can be given a list of RGB/RGBA values, or a string that contains RGB/RGBA values based on a column.
@@ -107,8 +136,16 @@ More details on the parameters and their default values can be found on the PyDe
 ### **Heatmap**
 
 ```python
-def create_heatmap(df, color_range=None, weight=1, aggregation="SUM", initial_view_state=None, map_style=None,
-                map_provider=None, api_keys=None)
+def create_heatmap(
+    df,
+    color_range=None,
+    weight=1,
+    aggregation="SUM",
+    initial_view_state=None,
+    map_style=None,
+    map_provider=None,
+    api_keys=None,
+): ...
 ```
 
 The parameter `color_range` can be optionally given a list of RGB values, SedonaPyDeck by default uses `6-class YlOrRd` as color_range.

@@ -1,0 +1,445 @@
+{
+  "type": "FeatureCollection",
+  "stac_version": "1.0.0",
+  "stac_extensions": [],
+  "context": {
+    "page": 1,
+    "limit": 10,
+    "matched": 10,
+    "returned": 10
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "id": "S2A_MSIL2A_20220101T100001_N0400_R122_T33UUP_20220101T100001",
+      "properties": {
+        "datetime": "2022-01-01T10:00:01.000Z",
+        "platform": "sentinel-2a",
+        "constellation": "sentinel-2",
+        "instruments": ["msi"],
+        "gsd": 10,
+        "proj:epsg": 32633,
+        "view:sun_azimuth": 180.5,
+        "view:sun_elevation": 25.3
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [10.0, 50.0],
+            [11.0, 50.0],
+            [11.0, 51.0],
+            [10.0, 51.0],
+            [10.0, 50.0]
+          ]
+        ]
+      },
+      "bbox": [10.0, 50.0, 11.0, 51.0],
+      "assets": {
+        "thumbnail": {
+          "href": "mock-thumbnail.jpg",
+          "type": "image/jpeg",
+          "title": "Thumbnail"
+        }
+      },
+      "links": [
+        {
+          "rel": "self",
+          "href": "mock-item-1.json",
+          "type": "application/json"
+        }
+      ]
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "id": "S2A_MSIL2A_20220102T100001_N0400_R122_T33UUP_20220102T100001",
+      "properties": {
+        "datetime": "2022-01-02T10:00:01.000Z",
+        "platform": "sentinel-2a",
+        "constellation": "sentinel-2",
+        "instruments": ["msi"],
+        "gsd": 10,
+        "proj:epsg": 32633,
+        "view:sun_azimuth": 181.2,
+        "view:sun_elevation": 25.8
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [10.5, 50.5],
+            [11.5, 50.5],
+            [11.5, 51.5],
+            [10.5, 51.5],
+            [10.5, 50.5]
+          ]
+        ]
+      },
+      "bbox": [10.5, 50.5, 11.5, 51.5],
+      "assets": {
+        "thumbnail": {
+          "href": "mock-thumbnail-2.jpg",
+          "type": "image/jpeg",
+          "title": "Thumbnail"
+        }
+      },
+      "links": [
+        {
+          "rel": "self",
+          "href": "mock-item-2.json",
+          "type": "application/json"
+        }
+      ]
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "id": "S2A_MSIL2A_20220103T100001_N0400_R122_T33UUP_20220103T100001",
+      "properties": {
+        "datetime": "2022-01-03T10:00:01.000Z",
+        "platform": "sentinel-2a",
+        "constellation": "sentinel-2",
+        "instruments": ["msi"],
+        "gsd": 10,
+        "proj:epsg": 32633,
+        "view:sun_azimuth": 182.1,
+        "view:sun_elevation": 26.2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [11.0, 51.0],
+            [12.0, 51.0],
+            [12.0, 52.0],
+            [11.0, 52.0],
+            [11.0, 51.0]
+          ]
+        ]
+      },
+      "bbox": [11.0, 51.0, 12.0, 52.0],
+      "assets": {
+        "thumbnail": {
+          "href": "mock-thumbnail-3.jpg",
+          "type": "image/jpeg",
+          "title": "Thumbnail"
+        }
+      },
+      "links": [
+        {
+          "rel": "self",
+          "href": "mock-item-3.json",
+          "type": "application/json"
+        }
+      ]
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "id": "S2A_MSIL2A_20220104T100001_N0400_R122_T33UUP_20220104T100001",
+      "properties": {
+        "datetime": "2022-01-04T10:00:01.000Z",
+        "platform": "sentinel-2a",
+        "constellation": "sentinel-2",
+        "instruments": ["msi"],
+        "gsd": 10,
+        "proj:epsg": 32633,
+        "view:sun_azimuth": 183.0,
+        "view:sun_elevation": 26.7
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [11.5, 51.5],
+            [12.5, 51.5],
+            [12.5, 52.5],
+            [11.5, 52.5],
+            [11.5, 51.5]
+          ]
+        ]
+      },
+      "bbox": [11.5, 51.5, 12.5, 52.5],
+      "assets": {
+        "thumbnail": {
+          "href": "mock-thumbnail-4.jpg",
+          "type": "image/jpeg",
+          "title": "Thumbnail"
+        }
+      },
+      "links": [
+        {
+          "rel": "self",
+          "href": "mock-item-4.json",
+          "type": "application/json"
+        }
+      ]
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "id": "S2A_MSIL2A_20220105T100001_N0400_R122_T33UUP_20220105T100001",
+      "properties": {
+        "datetime": "2022-01-05T10:00:01.000Z",
+        "platform": "sentinel-2a",
+        "constellation": "sentinel-2",
+        "instruments": ["msi"],
+        "gsd": 10,
+        "proj:epsg": 32633,
+        "view:sun_azimuth": 183.8,
+        "view:sun_elevation": 27.1
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [12.0, 52.0],
+            [13.0, 52.0],
+            [13.0, 53.0],
+            [12.0, 53.0],
+            [12.0, 52.0]
+          ]
+        ]
+      },
+      "bbox": [12.0, 52.0, 13.0, 53.0],
+      "assets": {
+        "thumbnail": {
+          "href": "mock-thumbnail-5.jpg",
+          "type": "image/jpeg",
+          "title": "Thumbnail"
+        }
+      },
+      "links": [
+        {
+          "rel": "self",
+          "href": "mock-item-5.json",
+          "type": "application/json"
+        }
+      ]
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "id": "S2A_MSIL2A_20220106T100001_N0400_R122_T33UUP_20220106T100001",
+      "properties": {
+        "datetime": "2022-01-06T10:00:01.000Z",
+        "platform": "sentinel-2a",
+        "constellation": "sentinel-2",
+        "instruments": ["msi"],
+        "gsd": 10,
+        "proj:epsg": 32633,
+        "view:sun_azimuth": 184.5,
+        "view:sun_elevation": 27.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [12.5, 52.5],
+            [13.5, 52.5],
+            [13.5, 53.5],
+            [12.5, 53.5],
+            [12.5, 52.5]
+          ]
+        ]
+      },
+      "bbox": [12.5, 52.5, 13.5, 53.5],
+      "assets": {
+        "thumbnail": {
+          "href": "mock-thumbnail-6.jpg",
+          "type": "image/jpeg",
+          "title": "Thumbnail"
+        }
+      },
+      "links": [
+        {
+          "rel": "self",
+          "href": "mock-item-6.json",
+          "type": "application/json"
+        }
+      ]
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "id": "S2A_MSIL2A_20220107T100001_N0400_R122_T33UUP_20220107T100001",
+      "properties": {
+        "datetime": "2022-01-07T10:00:01.000Z",
+        "platform": "sentinel-2a",
+        "constellation": "sentinel-2",
+        "instruments": ["msi"],
+        "gsd": 10,
+        "proj:epsg": 32633,
+        "view:sun_azimuth": 185.2,
+        "view:sun_elevation": 27.9
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [13.0, 53.0],
+            [14.0, 53.0],
+            [14.0, 54.0],
+            [13.0, 54.0],
+            [13.0, 53.0]
+          ]
+        ]
+      },
+      "bbox": [13.0, 53.0, 14.0, 54.0],
+      "assets": {
+        "thumbnail": {
+          "href": "mock-thumbnail-7.jpg",
+          "type": "image/jpeg",
+          "title": "Thumbnail"
+        }
+      },
+      "links": [
+        {
+          "rel": "self",
+          "href": "mock-item-7.json",
+          "type": "application/json"
+        }
+      ]
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "id": "S2A_MSIL2A_20220108T100001_N0400_R122_T33UUP_20220108T100001",
+      "properties": {
+        "datetime": "2022-01-08T10:00:01.000Z",
+        "platform": "sentinel-2a",
+        "constellation": "sentinel-2",
+        "instruments": ["msi"],
+        "gsd": 10,
+        "proj:epsg": 32633,
+        "view:sun_azimuth": 185.9,
+        "view:sun_elevation": 28.3
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [13.5, 53.5],
+            [14.5, 53.5],
+            [14.5, 54.5],
+            [13.5, 54.5],
+            [13.5, 53.5]
+          ]
+        ]
+      },
+      "bbox": [13.5, 53.5, 14.5, 54.5],
+      "assets": {
+        "thumbnail": {
+          "href": "mock-thumbnail-8.jpg",
+          "type": "image/jpeg",
+          "title": "Thumbnail"
+        }
+      },
+      "links": [
+        {
+          "rel": "self",
+          "href": "mock-item-8.json",
+          "type": "application/json"
+        }
+      ]
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "id": "S2A_MSIL2A_20220109T100001_N0400_R122_T33UUP_20220109T100001",
+      "properties": {
+        "datetime": "2022-01-09T10:00:01.000Z",
+        "platform": "sentinel-2a",
+        "constellation": "sentinel-2",
+        "instruments": ["msi"],
+        "gsd": 10,
+        "proj:epsg": 32633,
+        "view:sun_azimuth": 186.6,
+        "view:sun_elevation": 28.7
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [14.0, 54.0],
+            [15.0, 54.0],
+            [15.0, 55.0],
+            [14.0, 55.0],
+            [14.0, 54.0]
+          ]
+        ]
+      },
+      "bbox": [14.0, 54.0, 15.0, 55.0],
+      "assets": {
+        "thumbnail": {
+          "href": "mock-thumbnail-9.jpg",
+          "type": "image/jpeg",
+          "title": "Thumbnail"
+        }
+      },
+      "links": [
+        {
+          "rel": "self",
+          "href": "mock-item-9.json",
+          "type": "application/json"
+        }
+      ]
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "id": "S2A_MSIL2A_20220110T100001_N0400_R122_T33UUP_20220110T100001",
+      "properties": {
+        "datetime": "2022-01-10T10:00:01.000Z",
+        "platform": "sentinel-2a",
+        "constellation": "sentinel-2",
+        "instruments": ["msi"],
+        "gsd": 10,
+        "proj:epsg": 32633,
+        "view:sun_azimuth": 187.3,
+        "view:sun_elevation": 29.1
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [14.5, 54.5],
+            [15.5, 54.5],
+            [15.5, 55.5],
+            [14.5, 55.5],
+            [14.5, 54.5]
+          ]
+        ]
+      },
+      "bbox": [14.5, 54.5, 15.5, 55.5],
+      "assets": {
+        "thumbnail": {
+          "href": "mock-thumbnail-10.jpg",
+          "type": "image/jpeg",
+          "title": "Thumbnail"
+        }
+      },
+      "links": [
+        {
+          "rel": "self",
+          "href": "mock-item-10.json",
+          "type": "application/json"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "rel": "self",
+      "href": "sentinel-2-items.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "root",
+      "href": "../collections/sentinel-2-pre-c1-l2a.json",
+      "type": "application/json"
+    }
+  ]
+}

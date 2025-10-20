@@ -56,10 +56,10 @@ public class WKBReaderTest {
         };
 
     WKBReader reader = new WKBReader();
-    S2Geography geo = reader.read(wkb);
+    Geography geo = reader.read(wkb);
 
     // Kind should be POINT
-    Assert.assertEquals(S2Geography.GeographyKind.POINT, geo.kind);
+    Assert.assertEquals(Geography.GeographyKind.SINGLEPOINT, geo.kind);
 
     // Extract the S2Point
     S2Point p = geo.shape(0).chain(0).get(0);
@@ -123,10 +123,10 @@ public class WKBReaderTest {
         };
 
     WKBReader reader = new WKBReader();
-    S2Geography geo = reader.read(wkb);
+    Geography geo = reader.read(wkb);
 
     // Expect a POLYLINE geometry
-    Assert.assertEquals(S2Geography.GeographyKind.POLYLINE, geo.kind);
+    Assert.assertEquals(Geography.GeographyKind.SINGLEPOLYLINE, geo.kind);
 
     // Extract the two S2Points
     List<S2Point> pts = geo.shape(0).chain(0);
@@ -321,10 +321,10 @@ public class WKBReaderTest {
         };
 
     WKBReader reader = new WKBReader();
-    S2Geography geo = reader.read(wkb);
+    Geography geo = reader.read(wkb);
 
     // Expect a POLYGON geometry
-    Assert.assertEquals(S2Geography.GeographyKind.POLYGON, geo.kind);
+    Assert.assertEquals(Geography.GeographyKind.POLYGON, geo.kind);
 
     // Outer ring: 4 points
     List<S2Point> outer = geo.shape(0).chain(0);
@@ -364,6 +364,11 @@ public class WKBReaderTest {
         "0106000020E6100000020000000103000020E61000000200000005000000000000000000000000000000000000000000000000000000000000000000244000000000000024400000000000002440000000000000244000000000000000000000000000000000000000000000000005000000000000000000F03F000000000000F03F000000000000F03F0000000000002240000000000000224000000000000022400000000000002240000000000000F03F000000000000F03F000000000000F03F0103000020E6100000010000000500000000000000000022C0000000000000000000000000000022C00000000000002440000000000000F0BF0000000000002440000000000000F0BF000000000000000000000000000022C00000000000000000";
     String multiPolygonWkt =
         "MULTIPOLYGON(((0 0,0 10,10 10,10 0,0 0),(1 1,1 9,9 9,9 1,1 1)),((-9 0,-9 10,-1 10,-1 0,-9 0)))";
+    WKBReader reader = new WKBReader();
+    Geography geo = reader.read(WKBReader.hexToBytes(hexStr));
+    // Expect a MULTIPOLYGON geometry
+    Assert.assertEquals(Geography.GeographyKind.MULTIPOLYGON, geo.kind);
+
     TestHelper.checkWKBGeography(hexStr, multiPolygonWkt);
   }
 

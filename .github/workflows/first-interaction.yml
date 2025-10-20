@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: First Interaction
-        uses: actions/first-interaction@v1
+        uses: actions/first-interaction@v3
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           issue-message: 'Thank you for your interest in Apache Sedona! We appreciate you opening your first issue. Contributions like yours help make Apache Sedona better.'

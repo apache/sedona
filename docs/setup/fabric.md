@@ -80,7 +80,7 @@ In the notebook page, select the `ApacheSedona` environment you created before.
 
 In the notebook, you can install the jars by running the following code. Please replace the `jars` with the download links of the 2 jars from the previous step.
 
-```python
+```text
 %%configure -f
 {
     "jars": ["https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.5.1-28.2/geotools-wrapper-1.5.1-28.2.jar", "https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.4_2.12/1.5.1/sedona-spark-shaded-3.4_2.12-1.5.1.jar"]
@@ -125,7 +125,7 @@ abfss://9e9d4196-870a-4901-8fa5-e24841492ab8@onelake.dfs.fabric.microsoft.com/e1
 
 If you use this option, the config files in your notebook should be
 
-```python
+```text
 %%configure -f
 {
     "conf": {

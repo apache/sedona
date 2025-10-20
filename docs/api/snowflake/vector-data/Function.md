@@ -209,6 +209,26 @@ Output:
 0.19739555984988044
 ```
 
+## ST_ApproximateMedialAxis
+
+Introduction: Computes an approximate medial axis of a polygonal geometry. The medial axis is a representation of the "centerline" or "skeleton" of the polygon. This function first computes the straight skeleton and then prunes insignificant branches to produce a cleaner result.
+
+The pruning removes small branches that represent minor penetrations into corners. A branch is pruned if its penetration depth is less than 20% of the width of the corner it bisects.
+
+This function may have significant performance limitations when processing polygons with a very large number of vertices. For very large polygons (e.g., 10,000+ vertices), applying vertex reduction or simplification is essential to achieve practical computation times.
+
+Format: `ST_ApproximateMedialAxis(geom: geometry)`
+
+SQL example:
+
+```sql
+SELECT Sedona.ST_ApproximateMedialAxis(
+  ST_GeometryFromWKT('POLYGON ((45 0, 55 0, 55 40, 70 40, 70 50, 30 50, 30 40, 45 40, 45 0))')
+)
+```
+
+Output: `MULTILINESTRING ((50 45, 50 5), (50 45, 35 45), (65 45, 50 45), (35 45, 65 45))`
+
 ## ST_Area
 
 Introduction: Return the area of A
@@ -3199,6 +3219,26 @@ SELECT ST_StartPoint(ST_GeomFromText('LINESTRING(100 150,50 60, 70 80, 160 170)'
 ```
 
 Output: `POINT(100 150)`
+
+## ST_StraightSkeleton
+
+Introduction: Computes the straight skeleton of a polygonal geometry. The straight skeleton is a method of representing a polygon by a topological skeleton, formed by a continuous shrinking process where each edge moves inward in parallel at a uniform speed.
+
+This function uses the weighted straight skeleton algorithm based on Felkel's approach.
+
+This function may have significant performance limitations when processing polygons with a very large number of vertices. For very large polygons (e.g., 10,000+ vertices), applying vertex reduction or simplification is essential to achieve practical computation times.
+
+Format: `ST_StraightSkeleton(geom: geometry)`
+
+SQL example:
+
+```sql
+SELECT Sedona.ST_StraightSkeleton(
+  ST_GeometryFromWKT('POLYGON ((45 0, 55 0, 55 40, 70 40, 70 50, 30 50, 30 40, 45 40, 45 0))')
+)
+```
+
+Output: `MULTILINESTRING ((50 5, 50 45), (50 45, 35 45), (50 45, 65 45), (35 45, 30 45), (35 45, 40 40), (65 45, 70 45), (65 45, 60 40), (50 5, 45 5), (50 5, 55 5))`
 
 ## ST_SubDivide
 

@@ -21,130 +21,70 @@ package org.apache.sedona.sql.datasources.osmpbf.iterators;
 import static org.apache.sedona.sql.datasources.osmpbf.ParseUtils.dataInputStreamBlob;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.zip.DataFormatException;
-import org.apache.sedona.sql.datasources.osmpbf.DenseNodeIterator;
+import org.apache.commons.collections4.IteratorUtils;
 import org.apache.sedona.sql.datasources.osmpbf.build.Fileformat.Blob;
 import org.apache.sedona.sql.datasources.osmpbf.build.Osmformat;
 import org.apache.sedona.sql.datasources.osmpbf.extractors.DenseNodeExtractor;
-import org.apache.sedona.sql.datasources.osmpbf.extractors.NodeExtractor;
-import org.apache.sedona.sql.datasources.osmpbf.extractors.RelationExtractor;
-import org.apache.sedona.sql.datasources.osmpbf.extractors.WaysExtractor;
 import org.apache.sedona.sql.datasources.osmpbf.model.OSMEntity;
-import org.apache.sedona.sql.datasources.osmpbf.model.OsmNode;
 
 public class BlobIterator implements Iterator<OSMEntity> {
   Blob blob;
   Osmformat.PrimitiveBlock primitiveBlock;
   int primitiveGroupIdx;
-  int osmEntityIdx;
 
-  DenseNodeIterator denseNodesIterator;
+  Iterator<OSMEntity> iterator;
 
   Osmformat.PrimitiveGroup currentPrimitiveGroup;
 
   public BlobIterator(Blob blob) throws DataFormatException, IOException {
     primitiveBlock = Osmformat.PrimitiveBlock.parseFrom(dataInputStreamBlob(blob));
     primitiveGroupIdx = 0;
-    osmEntityIdx = 0;
 
     currentPrimitiveGroup = primitiveBlock.getPrimitivegroup(primitiveGroupIdx);
+    iterator = resolveIterator();
 
     this.blob = blob;
   }
 
   @Override
   public boolean hasNext() {
-    return primitiveBlock.getPrimitivegroupList().size() != primitiveGroupIdx;
+    return primitiveGroupIdx < primitiveBlock.getPrimitivegroupList().size() - 1
+        || iterator.hasNext();
   }
 
   @Override
   public OSMEntity next() {
-    if (currentPrimitiveGroup == null) {
-      return null;
+    if (iterator.hasNext()) {
+      return iterator.next();
     }
 
-    if (!currentPrimitiveGroup.getRelationsList().isEmpty()) {
-      return extractRelationPrimitiveGroup();
-    }
-
-    if (!currentPrimitiveGroup.getNodesList().isEmpty()) {
-      return extractNodePrimitiveGroup();
-    }
-
-    if (!currentPrimitiveGroup.getWaysList().isEmpty()) {
-      return extractWayPrimitiveGroup();
-    }
-
-    if (!currentPrimitiveGroup.getChangesetsList().isEmpty()) {
-      return null;
-    }
-
-    if (currentPrimitiveGroup.getDense() != null) {
-      return extractDenseNodePrimitiveGroup();
-    }
-
-    return null;
-  }
-
-  private OSMEntity extractNodePrimitiveGroup() {
-    osmEntityIdx += 1;
-    if (currentPrimitiveGroup.getNodesList().size() == osmEntityIdx) {
-      nextEntity();
-    }
-
-    Osmformat.StringTable stringTable = primitiveBlock.getStringtable();
-
-    return new NodeExtractor(currentPrimitiveGroup, primitiveBlock)
-        .extract(osmEntityIdx, stringTable);
-  }
-
-  public OSMEntity extractDenseNodePrimitiveGroup() {
-    if (denseNodesIterator == null) {
-      denseNodesIterator =
-          new DenseNodeIterator(
-              currentPrimitiveGroup.getDense().getIdCount(),
-              primitiveBlock.getStringtable(),
-              new DenseNodeExtractor(
-                  currentPrimitiveGroup.getDense(),
-                  primitiveBlock.getLatOffset(),
-                  primitiveBlock.getLonOffset(),
-                  primitiveBlock.getGranularity()));
-    }
-
-    OsmNode node = denseNodesIterator.next();
-
-    if (!denseNodesIterator.hasNext()) {
-      denseNodesIterator = null;
-      nextEntity();
-    }
-
-    return node;
-  }
-
-  public OSMEntity extractWayPrimitiveGroup() {
-    osmEntityIdx += 1;
-    if (currentPrimitiveGroup.getWaysList().size() == osmEntityIdx) {
-      nextEntity();
-    }
-
-    return new WaysExtractor(currentPrimitiveGroup, primitiveBlock.getStringtable())
-        .extract(osmEntityIdx);
-  }
-
-  public OSMEntity extractRelationPrimitiveGroup() {
-    osmEntityIdx += 1;
-    if (currentPrimitiveGroup.getRelationsList().size() == osmEntityIdx) {
-      nextEntity();
-    }
-
-    Osmformat.StringTable stringTable = primitiveBlock.getStringtable();
-
-    return new RelationExtractor(currentPrimitiveGroup, stringTable).extract(osmEntityIdx);
-  }
-
-  public void nextEntity() {
     primitiveGroupIdx += 1;
-    osmEntityIdx = 0;
+
+    currentPrimitiveGroup = primitiveBlock.getPrimitivegroup(primitiveGroupIdx);
+
+    iterator = resolveIterator();
+
+    return iterator.next();
+  }
+
+  Iterator<OSMEntity> resolveIterator() {
+    return IteratorUtils.chainedIterator(
+        new WayIterator(currentPrimitiveGroup.getWaysList(), primitiveBlock.getStringtable()),
+        new RelationIterator(
+            currentPrimitiveGroup.getRelationsList(), primitiveBlock.getStringtable()),
+        new NodeIterator(currentPrimitiveGroup.getNodesList(), primitiveBlock),
+        currentPrimitiveGroup.getDense() != null
+            ? new DenseNodeIterator(
+                currentPrimitiveGroup.getDense().getIdCount(),
+                primitiveBlock.getStringtable(),
+                new DenseNodeExtractor(
+                    currentPrimitiveGroup.getDense(),
+                    primitiveBlock.getLatOffset(),
+                    primitiveBlock.getLonOffset(),
+                    primitiveBlock.getGranularity()))
+            : Collections.emptyIterator());
   }
 }

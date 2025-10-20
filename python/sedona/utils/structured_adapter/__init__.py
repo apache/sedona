@@ -20,7 +20,7 @@ from sedona.spark.utils.structured_adapter import StructuredAdapter
 import warnings
 
 warnings.warn(
-    "The 'sedona.utils.structured_adapter' module is deprecated and will be removed in future versions. Please use 'sedona.spark.utils.structured_adapter' instead.",
+    "Importing from 'sedona.utils.structured_adapter' is deprecated. Please use 'sedona.spark.utils.structured_adapter' instead.",
     DeprecationWarning,
     stacklevel=2,
 )
