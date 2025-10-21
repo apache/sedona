@@ -393,7 +393,7 @@ class TestGeoSeries(TestGeopandasBase):
             expected = gpd.GeoSeries(data, name="geometry")
             self.check_sgpd_equals_gpd(result, expected)
 
-        # Ensure filling with None is empty GeometryColleciton and not None
+        # Ensure filling with None is empty GeometryCollection and not None
         # Also check that inplace works
         result = GeoSeries(data, name="geometry")
         result.fillna(None, inplace=True)
