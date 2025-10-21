@@ -50,5 +50,4 @@ curl --retry 5 --retry-delay 10 --retry-connrefused https://repo1.maven.org/mave
 # Install Spark extension Python
 pip3 install pyspark-extension=="${spark_extension_version}"."${spark_compat_version}"
 
-# Download GeoTools jar
 curl --retry 5 --retry-delay 10 --retry-connrefused https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/"${geotools_wrapper_version}"/geotools-wrapper-"${geotools_wrapper_version}".jar -o "$SPARK_HOME"/jars/geotools-wrapper-"${geotools_wrapper_version}".jar
