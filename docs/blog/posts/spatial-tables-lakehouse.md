@@ -116,11 +116,14 @@ TBLPROPERTIES('format-version'='3');
 Let’s append some data to the table:
 
 ```python
-df = sedona.createDataFrame([
-    ("a", "Bob"),
-    ("b", "Mary"),
-    ("c", "Sue"),
-], ["id", "first_name"])
+df = sedona.createDataFrame(
+    [
+        ("a", "Bob"),
+        ("b", "Mary"),
+        ("c", "Sue"),
+    ],
+    ["id", "first_name"],
+)
 
 df.write.format("iceberg").mode("append").saveAsTable("local.db.customers")
 ```
@@ -157,17 +160,20 @@ Now append some spatial data with longitude/latitude coordinates to the table:
 
 ```python
 coords = [
-    (-88.110352, 24.006326), 
-    (-77.080078, 24.006326), 
-    (-77.080078, 31.503629), 
-    (-88.110352, 31.503629), 
-    (-88.110352, 24.006326)
+    (-88.110352, 24.006326),
+    (-77.080078, 24.006326),
+    (-77.080078, 31.503629),
+    (-88.110352, 31.503629),
+    (-88.110352, 24.006326),
 ]
-df = sedona.createDataFrame([
-    ("a", 10.99, Polygon(coords)),
-    ("b", 3.5, Point(1, 2)),
-    ("c", 1.95, Point(3, 4)),
-], ["id", "price", "geometry"])
+df = sedona.createDataFrame(
+    [
+        ("a", 10.99, Polygon(coords)),
+        ("b", 3.5, Point(1, 2)),
+        ("c", 1.95, Point(3, 4)),
+    ],
+    ["id", "price", "geometry"],
+)
 
 df.write.format("iceberg").mode("append").saveAsTable("local.db.customer_purchases")
 ```
@@ -210,8 +216,7 @@ Let’s query the Overture Maps Foundation buildings dataset stored in GeoParque
 
 ```python
 (
-    sedona
-    .table("open_data.overture_2025_03_19_1.buildings_building")
+    sedona.table("open_data.overture_2025_03_19_1.buildings_building")
     .withColumn("geometry", ST_GeomFromWKB(col("geometry")))
     .select("id", "geometry", "num_floors", "roof_color")
     .createOrReplaceTempView("my_fun_view")
@@ -243,12 +248,11 @@ TBLPROPERTIES('format-version'='3');
 """
 sedona.sql(sql)
 
-(df
-   .select("id", "geometry", "num_floors", "roof_color")
-   .write
-   .format("iceberg")
-   .mode("overwrite")
-   .saveAsTable("local.db.overture_2025_03_19_1_buildings_building")
+(
+    df.select("id", "geometry", "num_floors", "roof_color")
+    .write.format("iceberg")
+    .mode("overwrite")
+    .saveAsTable("local.db.overture_2025_03_19_1_buildings_building")
 )
 ```
 
@@ -284,13 +288,16 @@ TBLPROPERTIES('format-version'='3');
 Append objects `a`, `b, c, d, `and` e` to the table:
 
 ```python
-df = sedona.createDataFrame([
-    ("a", 'LINESTRING(1.0 3.0,3.0 1.0)'),
-    ("b", 'LINESTRING(2.0 5.0,6.0 1.0)'),
-    ("c", 'POLYGON((7.0 4.0,9.0 4.0,9.0 3.0,7.0 3.0,7.0 4.0))'),
-    ("d", 'LINESTRING(2.0 7.0,4.0 9.0,7.0 8.0)'),
-    ("e", 'LINESTRING(10.0 9.0,10.0 6.0)')
-], ["id", "geometry"])
+df = sedona.createDataFrame(
+    [
+        ("a", "LINESTRING(1.0 3.0,3.0 1.0)"),
+        ("b", "LINESTRING(2.0 5.0,6.0 1.0)"),
+        ("c", "POLYGON((7.0 4.0,9.0 4.0,9.0 3.0,7.0 3.0,7.0 4.0))"),
+        ("d", "LINESTRING(2.0 7.0,4.0 9.0,7.0 8.0)"),
+        ("e", "LINESTRING(10.0 9.0,10.0 6.0)"),
+    ],
+    ["id", "geometry"],
+)
 df = df.withColumn("geometry", ST_GeomFromText(col("geometry")))
 
 df.write.format("iceberg").mode("append").saveAsTable("some_catalog.matt.icegeometries")
@@ -325,10 +332,13 @@ TBLPROPERTIES('format-version'='3');
 Append objects `polygon_x `and `polygon_y` to the table:
 
 ```python
-df = sedona.createDataFrame([
-    ("polygon_x", 'POLYGON((3.0 5.0,8.0 5.0,8.0 2.0,3.0 2.0,3.0 5.0))'),
-    ("polygon_y", 'POLYGON((5.0 9.0,8.0 9.0,8.0 7.0,5.0 7.0,5.0 9.0))'),
-], ["id", "geometry"])
+df = sedona.createDataFrame(
+    [
+        ("polygon_x", "POLYGON((3.0 5.0,8.0 5.0,8.0 2.0,3.0 2.0,3.0 5.0))"),
+        ("polygon_y", "POLYGON((5.0 9.0,8.0 9.0,8.0 7.0,5.0 7.0,5.0 9.0))"),
+    ],
+    ["id", "geometry"],
+)
 df = df.withColumn("geometry", ST_GeomFromText(col("geometry")))
 
 df.write.format("iceberg").mode("append").saveAsTable("some_catalog.matt.icegeometries")
@@ -338,7 +348,7 @@ Here’s how you can delete all the linestrings that cross any polygon.
 
 ```python
 sql = f"""
-DELETE FROM some_catalog.matt.icegeometries 
+DELETE FROM some_catalog.matt.icegeometries
 WHERE ST_Intersects(geometry, ST_GeomFromWKT('{polygon}'))
 """
 sedona.sql(sql)
@@ -460,10 +470,13 @@ Iceberg supports schema enforcement, prohibiting appending data with a mismatche
 Let’s create a DataFrame with a different schema than the existing Iceberg table:
 
 ```python
-df = sedona.createDataFrame([
-    ("x", 2, 'LINESTRING(8.0 8.0,3.0 3.0)'),
-    ("y", 3, 'LINESTRING(5.0 5.0,1.0 1.0)'),
-], ["id", "num", "geometry"])
+df = sedona.createDataFrame(
+    [
+        ("x", 2, "LINESTRING(8.0 8.0,3.0 3.0)"),
+        ("y", 3, "LINESTRING(5.0 5.0,1.0 1.0)"),
+    ],
+    ["id", "num", "geometry"],
+)
 df = df.withColumn("geometry", ST_GeomFromText(col("geometry")))
 ```
 
@@ -503,8 +516,6 @@ From [the spec](https://iceberg.apache.org/spec/):
 Here’s Appendix G:
 
 > The Geometry and Geography class hierarchy and its Well-known text (WKT) and Well-known binary (WKB) serializations (ISO supporting XY, XYZ, XYM, XYZM) are defined by OpenGIS Implementation Specification for Geographic information – Simple feature access – Part 1: Common architecture, from OGC (Open Geospatial Consortium).
-
-
 > Points are always defined by the coordinates X, Y, Z (optional), and M (optional), in this order. X is the longitude/easting, Y is the latitude/northing, and Z is usually the height, or elevation. M is a fourth optional dimension, for example a linear reference value (e.g., highway milepost value), a timestamp, or some other value as defined by the CRS.
 > The version of the OGC standard first used here is 1.2.1, but future versions may also be used if the WKB representation remains wire-compatible.
 
