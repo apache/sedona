@@ -4175,7 +4175,7 @@ class functionTestScala
         JOIN
           elevation_zones_test
         ON
-          st_intersects(elevation_zones_test.zone_geom, elevation_zones_test.zone_geom)
+          st_intersects(nyc_buildings_geom_test.geom, elevation_zones_test.zone_geom)
         GROUP BY
           nyc_buildings_geom_test.PROP_ADDR, nyc_buildings_geom_test.geom
       )
