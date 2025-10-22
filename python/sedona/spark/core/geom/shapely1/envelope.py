@@ -16,7 +16,7 @@
 # under the License.
 
 import math
-import pickle
+import pickle  # nosec B403
 
 from sedona.spark.utils.decorators import require
 from shapely.geometry import Point, Polygon

@@ -16,7 +16,7 @@
 # under the License.
 
 import math
-import pickle
+import pickle  # nosec B403
 
 from shapely.geometry import Polygon, box
 from shapely.geometry.base import BaseGeometry
