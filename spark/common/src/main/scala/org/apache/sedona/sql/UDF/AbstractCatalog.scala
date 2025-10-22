@@ -20,6 +20,7 @@ package org.apache.sedona.sql.UDF
 
 import org.apache.spark.sql.{SQLContext, SparkSession, functions}
 import org.apache.spark.sql.catalyst.FunctionIdentifier
+import org.apache.spark.sql.catalyst.analysis.FunctionRegistry
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
 import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, ExpressionInfo, Literal}
 import org.apache.spark.sql.expressions.Aggregator
@@ -86,9 +87,20 @@ abstract class AbstractCatalog {
         functionIdentifier,
         expressionInfo,
         functionBuilder)
+      FunctionRegistry.builtin.registerFunction(
+        functionIdentifier,
+        expressionInfo,
+        functionBuilder)
     }
-    aggregateExpressions.foreach(f =>
-      sparkSession.udf.register(f.getClass.getSimpleName, functions.udaf(f)))
+    aggregateExpressions.foreach { f =>
+      sparkSession.udf.register(f.getClass.getSimpleName, functions.udaf(f))
+      FunctionRegistry.builtin.registerFunction(
+        FunctionIdentifier(f.getClass.getSimpleName),
+        new ExpressionInfo(f.getClass.getCanonicalName, null, f.getClass.getSimpleName),
+        (_: Seq[Expression]) =>
+          throw new UnsupportedOperationException(
+            s"Aggregate function ${f.getClass.getSimpleName} cannot be used as a regular function"))
+    }
   }
 
   def dropAll(sparkSession: SparkSession): Unit = {
