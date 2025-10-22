@@ -4182,11 +4182,6 @@ class functionTestScala
       WHERE elevation > 0
     """)
 
-    // Assert that the view was created
-    val views = sparkSession.sql("SHOW VIEWS").collect()
-    val viewExists = views.exists(row => row.getString(1) == "nyc_buildings_with_functions")
-    assert(viewExists, "View 'nyc_buildings_with_functions' should be created")
-
     // Query the view and assert results
     val result = sparkSession.sql("SELECT * FROM nyc_buildings_with_functions").collect()
     assert(result.length == 2, s"Expected 2 rows, but got ${result.length}")
@@ -4195,6 +4190,27 @@ class functionTestScala
     val buildingNames = result.map(_.getString(0)).toSet
     assert(buildingNames.contains("Building 1"), "Building 1 should be in the result")
     assert(buildingNames.contains("Building 2"), "Building 2 should be in the result")
+
+    sparkSession.sql("""
+      CREATE VIEW nyc_buildings_envelope_aggr_functions AS
+        SELECT
+          ST_Envelope_Aggr(nyc_buildings_geom_test.geom) AS building_geom_envelope
+        FROM
+          nyc_buildings_geom_test
+    """)
+
+    // Query the aggregate view and assert results
+    val result_aggr =
+      sparkSession.sql("SELECT * FROM nyc_buildings_envelope_aggr_functions").collect()
+    assert(result_aggr.length == 1, s"Expected 1 row, but got ${result_aggr.length}")
+
+    // Assert that the views were created
+    val views = sparkSession.sql("SHOW VIEWS").collect()
+    val view1Exists = views.exists(row => row.getString(1) == "nyc_buildings_with_functions")
+    assert(view1Exists, "View 'nyc_buildings_with_functions' should be created")
+    val view2Exists =
+      views.exists(row => row.getString(1) == "nyc_buildings_envelope_aggr_functions")
+    assert(view2Exists, "View 'nyc_buildings_envelope_aggr_functions' should be created")
 
     FileUtils.deleteDirectory(new File(tmpDir))
   }

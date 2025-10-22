@@ -92,8 +92,15 @@ abstract class AbstractCatalog {
         expressionInfo,
         functionBuilder)
     }
-    aggregateExpressions.foreach(f =>
-      sparkSession.udf.register(f.getClass.getSimpleName, functions.udaf(f)))
+    aggregateExpressions.foreach { f =>
+      sparkSession.udf.register(f.getClass.getSimpleName, functions.udaf(f))
+      FunctionRegistry.builtin.registerFunction(
+        FunctionIdentifier(f.getClass.getSimpleName),
+        new ExpressionInfo(f.getClass.getCanonicalName, null, f.getClass.getSimpleName),
+        (_: Seq[Expression]) =>
+          throw new UnsupportedOperationException(
+            s"Aggregate function ${f.getClass.getSimpleName} cannot be used as a regular function"))
+    }
   }
 
   def dropAll(sparkSession: SparkSession): Unit = {
