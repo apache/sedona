@@ -1,11 +1,14 @@
 var path = require('path');
 var parse = path.parse || require('path-parse'); // eslint-disable-line global-require
 
+var driveLetterRegex = /^([A-Za-z]:)/;
+var uncPathRegex = /^\\\\/;
+
 var getNodeModulesDirs = function getNodeModulesDirs(absoluteStart, modules) {
     var prefix = '/';
-    if ((/^([A-Za-z]:)/).test(absoluteStart)) {
+    if (driveLetterRegex.test(absoluteStart)) {
         prefix = '';
-    } else if ((/^\\\\/).test(absoluteStart)) {
+    } else if (uncPathRegex.test(absoluteStart)) {
         prefix = '\\\\';
     }
 

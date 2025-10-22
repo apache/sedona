@@ -10,18 +10,15 @@ exports.default = void 0;
 /** @typedef {import("../validate").SchemaUtilErrorObject} SchemaUtilErrorObject */
 
 /**
- * @param {string} message
- * @param {object} schema
- * @param {string} data
- * @returns {SchemaUtilErrorObject}
+ * @param {string} message message
+ * @param {object} schema schema
+ * @param {string} data data
+ * @returns {SchemaUtilErrorObject} error object
  */
 function errorMessage(message, schema, data) {
   return {
-    // @ts-ignore
-    // eslint-disable-next-line no-undefined
     dataPath: undefined,
-    // @ts-ignore
-    // eslint-disable-next-line no-undefined
+    // @ts-expect-error
     schemaPath: undefined,
     keyword: "absolutePath",
     params: {
@@ -33,10 +30,10 @@ function errorMessage(message, schema, data) {
 }
 
 /**
- * @param {boolean} shouldBeAbsolute
- * @param {object} schema
- * @param {string} data
- * @returns {SchemaUtilErrorObject}
+ * @param {boolean} shouldBeAbsolute true when should be absolute path, otherwise false
+ * @param {object} schema schema
+ * @param {string} data data
+ * @returns {SchemaUtilErrorObject} error object
  */
 function getErrorFor(shouldBeAbsolute, schema, data) {
   const message = shouldBeAbsolute ? `The provided value ${JSON.stringify(data)} is not an absolute path!` : `A relative path is expected. However, the provided value ${JSON.stringify(data)} is an absolute path!`;
@@ -44,9 +41,8 @@ function getErrorFor(shouldBeAbsolute, schema, data) {
 }
 
 /**
- *
- * @param {Ajv} ajv
- * @returns {Ajv}
+ * @param {Ajv} ajv ajv
+ * @returns {Ajv} configured ajv
  */
 function addAbsolutePathKeyword(ajv) {
   ajv.addKeyword({
@@ -54,9 +50,9 @@ function addAbsolutePathKeyword(ajv) {
     type: "string",
     errors: true,
     /**
-     * @param {boolean} schema
-     * @param {AnySchemaObject} parentSchema
-     * @returns {SchemaValidateFunction}
+     * @param {boolean} schema schema
+     * @param {AnySchemaObject} parentSchema parent schema
+     * @returns {SchemaValidateFunction} validate function
      */
     compile(schema, parentSchema) {
       /** @type {SchemaValidateFunction} */

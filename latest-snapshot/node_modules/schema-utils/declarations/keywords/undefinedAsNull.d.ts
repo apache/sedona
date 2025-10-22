@@ -8,8 +8,7 @@ export type ValidateFunction = import("ajv").ValidateFunction;
 /** @typedef {import("ajv").AnySchemaObject} AnySchemaObject */
 /** @typedef {import("ajv").ValidateFunction} ValidateFunction */
 /**
- *
- * @param {Ajv} ajv
- * @returns {Ajv}
+ * @param {Ajv} ajv ajv
+ * @returns {Ajv} configured ajv
  */
 declare function addUndefinedAsNullKeyword(ajv: Ajv): Ajv;

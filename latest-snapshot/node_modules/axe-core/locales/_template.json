@@ -202,7 +202,7 @@
       "help": "Heading levels should only increase by one"
     },
     "hidden-content": {
-      "description": "Informs users about hidden content.",
+      "description": "Inform users about hidden content.",
       "help": "Hidden content on the page should be analyzed"
     },
     "html-has-lang": {
@@ -342,8 +342,8 @@
       "help": "Page should contain a level-one heading"
     },
     "presentation-role-conflict": {
-      "description": "Elements marked as presentational should not have global ARIA or tabindex to ensure all screen readers ignore them",
-      "help": "Ensure elements marked as presentational are consistently ignored"
+      "description": "Ensure elements marked as presentational do not have global ARIA or tabindex so that all screen readers ignore them",
+      "help": "Elements marked as presentational should be consistently ignored"
     },
     "region": {
       "description": "Ensure all page content is contained by landmarks",
@@ -351,7 +351,7 @@
     },
     "role-img-alt": {
       "description": "Ensure [role=\"img\"] elements have alternative text",
-      "help": "[role=\"img\"] elements must have an alternative text"
+      "help": "[role=\"img\"] elements must have alternative text"
     },
     "scope-attr-valid": {
       "description": "Ensure the scope attribute is used correctly on tables",
@@ -378,8 +378,8 @@
       "help": "Summary elements must have discernible text"
     },
     "svg-img-alt": {
-      "description": "Ensure <svg> elements with an img, graphics-document or graphics-symbol role have an accessible text",
-      "help": "<svg> elements with an img role must have an alternative text"
+      "description": "Ensure <svg> elements with an img, graphics-document or graphics-symbol role have accessible text",
+      "help": "<svg> elements with an img role must have alternative text"
     },
     "tabindex": {
       "description": "Ensure tabindex attribute values are not greater than 0",
@@ -402,8 +402,8 @@
       "help": "Non-empty <td> elements in larger <table> must have an associated table header"
     },
     "td-headers-attr": {
-      "description": "Ensure that each cell in a table that uses the headers attribute refers only to other cells in that table",
-      "help": "Table cells that use the headers attribute must only refer to cells in the same table"
+      "description": "Ensure that each cell in a table that uses the headers attribute refers only to other <th> elements in that table",
+      "help": "Table cell headers attributes must refer to other <th> elements in the same table"
     },
     "th-has-data-cells": {
       "description": "Ensure that <th> elements and elements with role=columnheader/rowheader have data cells they describe",
@@ -984,6 +984,10 @@
       "pass": "Document has a non-empty <title> element",
       "fail": "Document does not have a non-empty <title> element"
     },
+    "error-occurred": {
+      "pass": "",
+      "incomplete": "Axe encountered an error; test the page for this type of problem manually"
+    },
     "exists": {
       "pass": "Element does not exist",
       "incomplete": "Element exists"
@@ -1096,9 +1100,13 @@
       "fail": "Some non-empty data cells do not have table headers"
     },
     "td-headers-attr": {
-      "pass": "The headers attribute is exclusively used to refer to other cells in the table",
+      "pass": "The headers attribute is exclusively used to refer to other header cells in the table",
       "incomplete": "The headers attribute is empty",
-      "fail": "The headers attribute is not exclusively used to refer to other cells in the table"
+      "fail": {
+        "cell-header-not-in-table": "The headers attribute is not exclusively used to refer to other header cells in the table",
+        "cell-header-not-th": "The headers attribute must refer to header cells, not data cells",
+        "header-refs-self": "The element with headers attribute refers to itself"
+      }
     },
     "th-has-data-cells": {
       "pass": "All table header cells refer to data cells",

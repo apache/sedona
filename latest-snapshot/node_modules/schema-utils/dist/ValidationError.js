@@ -51,18 +51,17 @@ const SPECIFICITY = {
 };
 
 /**
- * @param {string} value
- * @returns {value is number}
+ * @param {string} value value
+ * @returns {value is number} true when is number, otherwise false
  */
 function isNumeric(value) {
   return /^-?\d+$/.test(value);
 }
 
 /**
- *
- * @param {Array<SchemaUtilErrorObject>} array
- * @param {(item: SchemaUtilErrorObject) => number} fn
- * @returns {Array<SchemaUtilErrorObject>}
+ * @param {Array<SchemaUtilErrorObject>} array array of error objects
+ * @param {(item: SchemaUtilErrorObject) => number} fn function
+ * @returns {Array<SchemaUtilErrorObject>} filtered max
  */
 function filterMax(array, fn) {
   const evaluatedMax = array.reduce((max, item) => Math.max(max, fn(item)), 0);
@@ -70,58 +69,30 @@ function filterMax(array, fn) {
 }
 
 /**
- *
- * @param {Array<SchemaUtilErrorObject>} children
- * @returns {Array<SchemaUtilErrorObject>}
+ * @param {Array<SchemaUtilErrorObject>} children children
+ * @returns {Array<SchemaUtilErrorObject>} filtered children
  */
 function filterChildren(children) {
   let newChildren = children;
   newChildren = filterMax(newChildren,
   /**
-   *
-   * @param {SchemaUtilErrorObject} error
-   * @returns {number}
+   * @param {SchemaUtilErrorObject} error error object
+   * @returns {number} result
    */
   error => error.instancePath ? error.instancePath.length : 0);
   newChildren = filterMax(newChildren,
   /**
-   * @param {SchemaUtilErrorObject} error
-   * @returns {number}
+   * @param {SchemaUtilErrorObject} error error object
+   * @returns {number} result
    */
   error => SPECIFICITY[(/** @type {keyof typeof SPECIFICITY} */error.keyword)] || 2);
   return newChildren;
 }
 
 /**
- * Find all children errors
- * @param {Array<SchemaUtilErrorObject>} children
- * @param {Array<string>} schemaPaths
- * @return {number} returns index of first child
- */
-function findAllChildren(children, schemaPaths) {
-  let i = children.length - 1;
-  const predicate =
-  /**
-   * @param {string} schemaPath
-   * @returns {boolean}
-   */
-  schemaPath => children[i].schemaPath.indexOf(schemaPath) !== 0;
-  while (i > -1 && !schemaPaths.every(predicate)) {
-    if (children[i].keyword === "anyOf" || children[i].keyword === "oneOf") {
-      const refs = extractRefs(children[i]);
-      const childrenStart = findAllChildren(children.slice(0, i), refs.concat(children[i].schemaPath));
-      i = childrenStart - 1;
-    } else {
-      i -= 1;
-    }
-  }
-  return i + 1;
-}
-
-/**
  * Extracts all refs from schema
- * @param {SchemaUtilErrorObject} error
- * @return {Array<string>}
+ * @param {SchemaUtilErrorObject} error error object
+ * @returns {Array<string>} extracted refs
  */
 function extractRefs(error) {
   const {
@@ -132,13 +103,39 @@ function extractRefs(error) {
   }
   return schema.map(({
     $ref
-  }) => $ref).filter(s => s);
+  }) => $ref).filter(Boolean);
+}
+
+/**
+ * Find all children errors
+ * @param {Array<SchemaUtilErrorObject>} children children
+ * @param {Array<string>} schemaPaths schema paths
+ * @returns {number} returns index of first child
+ */
+function findAllChildren(children, schemaPaths) {
+  let i = children.length - 1;
+  const predicate =
+  /**
+   * @param {string} schemaPath schema path
+   * @returns {boolean} predicate
+   */
+  schemaPath => children[i].schemaPath.indexOf(schemaPath) !== 0;
+  while (i > -1 && !schemaPaths.every(predicate)) {
+    if (children[i].keyword === "anyOf" || children[i].keyword === "oneOf") {
+      const refs = extractRefs(children[i]);
+      const childrenStart = findAllChildren(children.slice(0, i), [...refs, children[i].schemaPath]);
+      i = childrenStart - 1;
+    } else {
+      i -= 1;
+    }
+  }
+  return i + 1;
 }
 
 /**
  * Groups children by their first level parent (assuming that error is root)
- * @param {Array<SchemaUtilErrorObject>} children
- * @return {Array<SchemaUtilErrorObject>}
+ * @param {Array<SchemaUtilErrorObject>} children children
+ * @returns {Array<SchemaUtilErrorObject>} grouped children
  */
 function groupChildrenByFirstChild(children) {
   const result = [];
@@ -147,11 +144,12 @@ function groupChildrenByFirstChild(children) {
     const child = children[i];
     if (child.keyword === "anyOf" || child.keyword === "oneOf") {
       const refs = extractRefs(child);
-      const childrenStart = findAllChildren(children.slice(0, i), refs.concat(child.schemaPath));
+      const childrenStart = findAllChildren(children.slice(0, i), [...refs, child.schemaPath]);
       if (childrenStart !== i) {
-        result.push(Object.assign({}, child, {
+        result.push({
+          ...child,
           children: children.slice(childrenStart, i)
-        }));
+        });
         i = childrenStart;
       } else {
         result.push(child);
@@ -168,25 +166,25 @@ function groupChildrenByFirstChild(children) {
 }
 
 /**
- * @param {string} str
- * @param {string} prefix
- * @returns {string}
+ * @param {string} str string
+ * @param {string} prefix prefix
+ * @returns {string} string with indent and prefix
  */
 function indent(str, prefix) {
   return str.replace(/\n(?!$)/g, `\n${prefix}`);
 }
 
 /**
- * @param {Schema} schema
- * @returns {schema is (Schema & {not: Schema})}
+ * @param {Schema} schema schema
+ * @returns {schema is (Schema & {not: Schema})} true when `not` in schema, otherwise false
  */
 function hasNotInSchema(schema) {
-  return !!schema.not;
+  return Boolean(schema.not);
 }
 
 /**
- * @param {Schema} schema
- * @return {Schema}
+ * @param {Schema} schema schema
+ * @returns {Schema} first typed schema
  */
 function findFirstTypedSchema(schema) {
   if (hasNotInSchema(schema)) {
@@ -196,81 +194,82 @@ function findFirstTypedSchema(schema) {
 }
 
 /**
- * @param {Schema} schema
- * @return {boolean}
- */
-function canApplyNot(schema) {
-  const typedSchema = findFirstTypedSchema(schema);
-  return likeNumber(typedSchema) || likeInteger(typedSchema) || likeString(typedSchema) || likeNull(typedSchema) || likeBoolean(typedSchema);
-}
-
-/**
- * @param {any} maybeObj
- * @returns {boolean}
- */
-function isObject(maybeObj) {
-  return typeof maybeObj === "object" && !Array.isArray(maybeObj) && maybeObj !== null;
-}
-
-/**
- * @param {Schema} schema
- * @returns {boolean}
+ * @param {Schema} schema schema
+ * @returns {boolean} true when schema type is number, otherwise false
  */
 function likeNumber(schema) {
   return schema.type === "number" || typeof schema.minimum !== "undefined" || typeof schema.exclusiveMinimum !== "undefined" || typeof schema.maximum !== "undefined" || typeof schema.exclusiveMaximum !== "undefined" || typeof schema.multipleOf !== "undefined";
 }
 
 /**
- * @param {Schema} schema
- * @returns {boolean}
+ * @param {Schema} schema schema
+ * @returns {boolean} true when schema type is integer, otherwise false
  */
 function likeInteger(schema) {
   return schema.type === "integer" || typeof schema.minimum !== "undefined" || typeof schema.exclusiveMinimum !== "undefined" || typeof schema.maximum !== "undefined" || typeof schema.exclusiveMaximum !== "undefined" || typeof schema.multipleOf !== "undefined";
 }
 
 /**
- * @param {Schema} schema
- * @returns {boolean}
+ * @param {Schema} schema schema
+ * @returns {boolean} true when schema type is string, otherwise false
  */
 function likeString(schema) {
   return schema.type === "string" || typeof schema.minLength !== "undefined" || typeof schema.maxLength !== "undefined" || typeof schema.pattern !== "undefined" || typeof schema.format !== "undefined" || typeof schema.formatMinimum !== "undefined" || typeof schema.formatMaximum !== "undefined";
 }
 
 /**
- * @param {Schema} schema
- * @returns {boolean}
- */
-function likeBoolean(schema) {
-  return schema.type === "boolean";
-}
-
-/**
- * @param {Schema} schema
- * @returns {boolean}
- */
-function likeArray(schema) {
-  return schema.type === "array" || typeof schema.minItems === "number" || typeof schema.maxItems === "number" || typeof schema.uniqueItems !== "undefined" || typeof schema.items !== "undefined" || typeof schema.additionalItems !== "undefined" || typeof schema.contains !== "undefined";
-}
-
-/**
- * @param {Schema & {patternRequired?: Array<string>}} schema
- * @returns {boolean}
- */
-function likeObject(schema) {
-  return schema.type === "object" || typeof schema.minProperties !== "undefined" || typeof schema.maxProperties !== "undefined" || typeof schema.required !== "undefined" || typeof schema.properties !== "undefined" || typeof schema.patternProperties !== "undefined" || typeof schema.additionalProperties !== "undefined" || typeof schema.dependencies !== "undefined" || typeof schema.propertyNames !== "undefined" || typeof schema.patternRequired !== "undefined";
-}
-
-/**
- * @param {Schema} schema
- * @returns {boolean}
+ * @param {Schema} schema schema
+ * @returns {boolean} true when null, otherwise false
  */
 function likeNull(schema) {
   return schema.type === "null";
 }
 
 /**
- * @param {string} type
- * @returns {string}
+ * @param {Schema} schema schema
+ * @returns {boolean} true when schema type is boolean, otherwise false
+ */
+function likeBoolean(schema) {
+  return schema.type === "boolean";
+}
+
+/**
+ * @param {Schema} schema schema
+ * @returns {boolean} true when can apply not, otherwise false
+ */
+function canApplyNot(schema) {
+  const typedSchema = findFirstTypedSchema(schema);
+  return likeNumber(typedSchema) || likeInteger(typedSchema) || likeString(typedSchema) || likeNull(typedSchema) || likeBoolean(typedSchema);
+}
+
+// eslint-disable-next-line jsdoc/no-restricted-syntax
+/**
+ * @param {any} maybeObj maybe obj
+ * @returns {boolean} true when value is object, otherwise false
+ */
+function isObject(maybeObj) {
+  return typeof maybeObj === "object" && !Array.isArray(maybeObj) && maybeObj !== null;
+}
+
+/**
+ * @param {Schema} schema schema
+ * @returns {boolean} true when schema type is array, otherwise false
+ */
+function likeArray(schema) {
+  return schema.type === "array" || typeof schema.minItems === "number" || typeof schema.maxItems === "number" || typeof schema.uniqueItems !== "undefined" || typeof schema.items !== "undefined" || typeof schema.additionalItems !== "undefined" || typeof schema.contains !== "undefined";
+}
+
+/**
+ * @param {Schema & {patternRequired?: Array<string>}} schema schema
+ * @returns {boolean} true when schema type is object, otherwise false
+ */
+function likeObject(schema) {
+  return schema.type === "object" || typeof schema.minProperties !== "undefined" || typeof schema.maxProperties !== "undefined" || typeof schema.required !== "undefined" || typeof schema.properties !== "undefined" || typeof schema.patternProperties !== "undefined" || typeof schema.additionalProperties !== "undefined" || typeof schema.dependencies !== "undefined" || typeof schema.propertyNames !== "undefined" || typeof schema.patternRequired !== "undefined";
+}
+
+/**
+ * @param {string} type type
+ * @returns {string} article
  */
 function getArticle(type) {
   if (/^[aeiou]/i.test(type)) {
@@ -280,8 +279,8 @@ function getArticle(type) {
 }
 
 /**
- * @param {Schema=} schema
- * @returns {string}
+ * @param {Schema=} schema schema
+ * @returns {string} schema non types
  */
 function getSchemaNonTypes(schema) {
   if (!schema) {
@@ -305,20 +304,18 @@ function getSchemaNonTypes(schema) {
 }
 
 /**
- * @param {Array<string>} hints
- * @returns {string}
+ * @param {Array<string>} hints hints
+ * @returns {string} formatted hints
  */
 function formatHints(hints) {
   return hints.length > 0 ? `(${hints.join(", ")})` : "";
 }
-const getUtilHints = (0, _memorize.default)(() =>
-// eslint-disable-next-line global-require
-require("./util/hints"));
+const getUtilHints = (0, _memorize.default)(() => require("./util/hints"));
 
 /**
- * @param {Schema} schema
- * @param {boolean} logic
- * @returns {string[]}
+ * @param {Schema} schema schema
+ * @param {boolean} logic logic
+ * @returns {string[]} array of hints
  */
 function getHints(schema, logic) {
   if (likeNumber(schema) || likeInteger(schema)) {
@@ -332,9 +329,9 @@ function getHints(schema, logic) {
 }
 class ValidationError extends Error {
   /**
-   * @param {Array<SchemaUtilErrorObject>} errors
-   * @param {Schema} schema
-   * @param {ValidationErrorConfiguration} configuration
+   * @param {Array<SchemaUtilErrorObject>} errors array of error objects
+   * @param {Schema} schema schema
+   * @param {ValidationErrorConfiguration} configuration configuration
    */
   constructor(errors, schema, configuration = {}) {
     super();
@@ -374,8 +371,8 @@ class ValidationError extends Error {
   }
 
   /**
-   * @param {string} path
-   * @returns {Schema}
+   * @param {string} path path
+   * @returns {Schema} schema
    */
   getSchemaPart(path) {
     const newPath = path.split("/");
@@ -391,19 +388,18 @@ class ValidationError extends Error {
   }
 
   /**
-   * @param {Schema} schema
-   * @param {boolean} logic
-   * @param {Array<Object>} prevSchemas
-   * @returns {string}
+   * @param {Schema} schema schema
+   * @param {boolean} logic logic
+   * @param {Array<object>} prevSchemas prev schemas
+   * @returns {string} formatted schema
    */
   formatSchema(schema, logic = true, prevSchemas = []) {
     let newLogic = logic;
     const formatInnerSchema =
     /**
-     *
-     * @param {Object} innerSchema
-     * @param {boolean=} addSelf
-     * @returns {string}
+     * @param {Schema} innerSchema inner schema
+     * @param {boolean=} addSelf true when need to add self
+     * @returns {string} formatted schema
      */
     (innerSchema, addSelf) => {
       if (!addSelf) {
@@ -412,7 +408,7 @@ class ValidationError extends Error {
       if (prevSchemas.includes(innerSchema)) {
         return "(recursive)";
       }
-      return this.formatSchema(innerSchema, newLogic, prevSchemas.concat(schema));
+      return this.formatSchema(innerSchema, newLogic, [...prevSchemas, schema]);
     };
     if (hasNotInSchema(schema) && !likeObject(schema)) {
       if (canApplyNot(schema.not)) {
@@ -424,19 +420,21 @@ class ValidationError extends Error {
       newLogic = !logic;
       return needApplyLogicHere ? prefix + formatInnerSchema(schema.not) : formatInnerSchema(schema.not);
     }
-    if (/** @type {Schema & {instanceof: string | Array<string>}} */schema.instanceof) {
+    if (/** @type {Schema & {instanceof: string | Array<string>}} */
+    schema.instanceof) {
       const {
         instanceof: value
       } = /** @type {Schema & {instanceof: string | Array<string>}} */schema;
       const values = !Array.isArray(value) ? [value] : value;
       return values.map(
       /**
-       * @param {string} item
-       * @returns {string}
+       * @param {string} item item
+       * @returns {string} result
        */
       item => item === "Function" ? "function" : item).join(" | ");
     }
     if (schema.enum) {
+      // eslint-disable-next-line jsdoc/no-restricted-syntax
       const enumValues = /** @type {Array<any>} */schema.enum.map(item => {
         if (item === null && schema.undefinedAsNull) {
           return `${JSON.stringify(item)} | undefined`;
@@ -463,7 +461,7 @@ class ValidationError extends Error {
         then: thenValue,
         else: elseValue
       } = /** @type {JSONSchema7} */schema;
-      return `${ifValue ? `if ${formatInnerSchema(ifValue)}` : ""}${thenValue ? ` then ${formatInnerSchema(thenValue)}` : ""}${elseValue ? ` else ${formatInnerSchema(elseValue)}` : ""}`;
+      return `${ifValue ? `if ${ifValue === true ? "true" : formatInnerSchema(ifValue)}` : ""}${thenValue ? ` then ${thenValue === true ? "true" : formatInnerSchema(thenValue)}` : ""}${elseValue ? ` else ${elseValue === true ? "true" : formatInnerSchema(elseValue)}` : ""}`;
     }
     if (schema.$ref) {
       return formatInnerSchema(this.getSchemaPart(schema.$ref), true);
@@ -499,12 +497,10 @@ class ValidationError extends Error {
       if (schema.items) {
         if (Array.isArray(schema.items) && schema.items.length > 0) {
           items = `${/** @type {Array<Schema>} */schema.items.map(item => formatInnerSchema(item)).join(", ")}`;
-          if (hasAdditionalItems) {
-            if (schema.additionalItems && isObject(schema.additionalItems) && Object.keys(schema.additionalItems).length > 0) {
-              hints.push(`additional items should be ${formatInnerSchema(schema.additionalItems)}`);
-            }
+          if (hasAdditionalItems && schema.additionalItems && isObject(schema.additionalItems) && Object.keys(schema.additionalItems).length > 0) {
+            hints.push(`additional items should be ${schema.additionalItems === true ? "added" : formatInnerSchema(schema.additionalItems)}`);
           }
-        } else if (schema.items && Object.keys(schema.items).length > 0) {
+        } else if (schema.items && Object.keys(schema.items).length > 0 && schema.items !== true) {
           // "additionalItems" is ignored
           items = `${formatInnerSchema(schema.items)}`;
         } else {
@@ -535,31 +531,30 @@ class ValidationError extends Error {
         hints.push(`additional property names should match pattern${patternProperties.length > 1 ? "s" : ""} ${patternProperties.map(pattern => JSON.stringify(pattern)).join(" | ")}`);
       }
       const properties = schema.properties ? Object.keys(schema.properties) : [];
-      /** @type {Array<string>} */
-      // @ts-ignore
-      const required = schema.required ? schema.required : [];
-      const allProperties = [...new Set(/** @type {Array<string>} */[].concat(required).concat(properties))];
-      const objectStructure = allProperties.map(property => {
+      const required = /** @type {string[]} */
+      schema.required ? schema.required : [];
+      const allProperties = [...new Set(/** @type {Array<string>} */[...required, ...properties])];
+      const objectStructure = [...allProperties.map(property => {
         const isRequired = required.includes(property);
 
         // Some properties need quotes, maybe we should add check
         // Maybe we should output type of property (`foo: string`), but it is looks very unreadable
         return `${property}${isRequired ? "" : "?"}`;
-      }).concat(typeof schema.additionalProperties === "undefined" || Boolean(schema.additionalProperties) ? schema.additionalProperties && isObject(schema.additionalProperties) ? [`<key>: ${formatInnerSchema(schema.additionalProperties)}`] : ["…"] : []).join(", ");
+      }), ...(typeof schema.additionalProperties === "undefined" || Boolean(schema.additionalProperties) ? schema.additionalProperties && isObject(schema.additionalProperties) && schema.additionalProperties !== true ? [`<key>: ${formatInnerSchema(schema.additionalProperties)}`] : ["…"] : [])].join(", ");
       const {
         dependencies,
         propertyNames,
         patternRequired
       } = /** @type {Schema & {patternRequired?: Array<string>;}} */schema;
       if (dependencies) {
-        Object.keys(dependencies).forEach(dependencyName => {
+        for (const dependencyName of Object.keys(dependencies)) {
           const dependency = dependencies[dependencyName];
           if (Array.isArray(dependency)) {
             hints.push(`should have ${dependency.length > 1 ? "properties" : "property"} ${dependency.map(dep => `'${dep}'`).join(", ")} when property '${dependencyName}' is present`);
           } else {
-            hints.push(`should be valid according to the schema ${formatInnerSchema(dependency)} when property '${dependencyName}' is present`);
+            hints.push(`should be valid according to the schema ${typeof dependency === "boolean" ? `${dependency}` : formatInnerSchema(dependency)} when property '${dependencyName}' is present`);
           }
-        });
+        }
       }
       if (propertyNames && Object.keys(propertyNames).length > 0) {
         hints.push(`each property name should match format ${JSON.stringify(schema.propertyNames.format)}`);
@@ -567,8 +562,8 @@ class ValidationError extends Error {
       if (patternRequired && patternRequired.length > 0) {
         hints.push(`should have property matching pattern ${patternRequired.map(
         /**
-         * @param {string} item
-         * @returns {string}
+         * @param {string} item item
+         * @returns {string} stringified item
          */
         item => JSON.stringify(item))}`);
       }
@@ -589,11 +584,11 @@ class ValidationError extends Error {
   }
 
   /**
-   * @param {Schema=} schemaPart
-   * @param {(boolean | Array<string>)=} additionalPath
-   * @param {boolean=} needDot
-   * @param {boolean=} logic
-   * @returns {string}
+   * @param {Schema=} schemaPart schema part
+   * @param {(boolean | Array<string>)=} additionalPath additional path
+   * @param {boolean=} needDot true when need dot
+   * @param {boolean=} logic logic
+   * @returns {string} schema part text
    */
   getSchemaPartText(schemaPart, additionalPath, needDot = false, logic = true) {
     if (!schemaPart) {
@@ -604,7 +599,6 @@ class ValidationError extends Error {
         /** @type {Schema | undefined} */
         const inner = schemaPart[(/** @type {keyof Schema} */additionalPath[i])];
         if (inner) {
-          // eslint-disable-next-line no-param-reassign
           schemaPart = inner;
         } else {
           break;
@@ -612,7 +606,6 @@ class ValidationError extends Error {
       }
     }
     while (schemaPart.$ref) {
-      // eslint-disable-next-line no-param-reassign
       schemaPart = this.getSchemaPart(schemaPart.$ref);
     }
     let schemaText = `${this.formatSchema(schemaPart, logic)}${needDot ? "." : ""}`;
@@ -626,15 +619,14 @@ class ValidationError extends Error {
   }
 
   /**
-   * @param {Schema=} schemaPart
-   * @returns {string}
+   * @param {Schema=} schemaPart schema part
+   * @returns {string} schema part description
    */
   getSchemaPartDescription(schemaPart) {
     if (!schemaPart) {
       return "";
     }
     while (schemaPart.$ref) {
-      // eslint-disable-next-line no-param-reassign
       schemaPart = this.getSchemaPart(schemaPart.$ref);
     }
     let schemaText = "";
@@ -648,8 +640,8 @@ class ValidationError extends Error {
   }
 
   /**
-   * @param {SchemaUtilErrorObject} error
-   * @returns {string}
+   * @param {SchemaUtilErrorObject} error error object
+   * @returns {string} formatted error object
    */
   formatValidationError(error) {
     const {
@@ -875,7 +867,9 @@ class ValidationError extends Error {
           const {
             i
           } = params;
-          return `${instancePath} should not contain the item '${/** @type {{ data: Array<any> }} **/
+          return `${instancePath} should not contain the item '${
+          // eslint-disable-next-line jsdoc/no-restricted-syntax
+          /** @type {{ data: Array<any> }} * */
           error.data[i]}' twice${getSchemaNonTypes(parentSchema)}.${this.getSchemaPartDescription(parentSchema)}`;
         }
       case "additionalItems":
@@ -931,8 +925,8 @@ class ValidationError extends Error {
           } = params;
           const dependencies = deps.split(",").map(
           /**
-           * @param {string} dep
-           * @returns {string}
+           * @param {string} dep dependency
+           * @returns {string} normalized dependency
            */
           dep => `'${dep.trim()}'`).join(", ");
           return `${instancePath} should have properties ${dependencies} when property '${property}' is present${getSchemaNonTypes(parentSchema)}.${this.getSchemaPartDescription(parentSchema)}`;
@@ -991,11 +985,15 @@ class ValidationError extends Error {
           if (children && children.length > 0) {
             if (error.schema.length === 1) {
               const lastChild = children[children.length - 1];
-              const remainingChildren = children.slice(0, children.length - 1);
-              return this.formatValidationError(Object.assign({}, lastChild, {
+              const remainingChildren = children.slice(0, -1);
+              return this.formatValidationError({
+                ...lastChild,
                 children: remainingChildren,
-                parentSchema: Object.assign({}, parentSchema, lastChild.parentSchema)
-              }));
+                parentSchema: {
+                  ...parentSchema,
+                  ...lastChild.parentSchema
+                }
+              });
             }
             let filteredChildren = filterChildren(children);
             if (filteredChildren.length === 1) {
@@ -1004,8 +1002,8 @@ class ValidationError extends Error {
             filteredChildren = groupChildrenByFirstChild(filteredChildren);
             return `${instancePath} should be one of these:\n${this.getSchemaPartText(parentSchema)}\nDetails:\n${filteredChildren.map(
             /**
-             * @param {SchemaUtilErrorObject} nestedError
-             * @returns {string}
+             * @param {SchemaUtilErrorObject} nestedError nested error
+             * @returns {string} formatted errors
              */
             nestedError => ` * ${indent(this.formatValidationError(nestedError), "   ")}`).join("\n")}`;
           }
@@ -1047,8 +1045,8 @@ class ValidationError extends Error {
   }
 
   /**
-   * @param {Array<SchemaUtilErrorObject>} errors
-   * @returns {string}
+   * @param {Array<SchemaUtilErrorObject>} errors errors
+   * @returns {string} formatted errors
    */
   formatValidationErrors(errors) {
     return errors.map(error => {

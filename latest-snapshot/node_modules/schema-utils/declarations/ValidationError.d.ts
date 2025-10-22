@@ -8,14 +8,14 @@ export type PostFormatter = import("./validate").PostFormatter;
 export type SchemaUtilErrorObject = import("./validate").SchemaUtilErrorObject;
 declare class ValidationError extends Error {
   /**
-   * @param {Array<SchemaUtilErrorObject>} errors
-   * @param {Schema} schema
-   * @param {ValidationErrorConfiguration} configuration
+   * @param {Array<SchemaUtilErrorObject>} errors array of error objects
+   * @param {Schema} schema schema
+   * @param {ValidationErrorConfiguration} configuration configuration
    */
   constructor(
     errors: Array<SchemaUtilErrorObject>,
     schema: Schema,
-    configuration?: ValidationErrorConfiguration
+    configuration?: ValidationErrorConfiguration,
   );
   /** @type {Array<SchemaUtilErrorObject>} */
   errors: Array<SchemaUtilErrorObject>;
@@ -28,47 +28,47 @@ declare class ValidationError extends Error {
   /** @type {PostFormatter | null} */
   postFormatter: PostFormatter | null;
   /**
-   * @param {string} path
-   * @returns {Schema}
+   * @param {string} path path
+   * @returns {Schema} schema
    */
   getSchemaPart(path: string): Schema;
   /**
-   * @param {Schema} schema
-   * @param {boolean} logic
-   * @param {Array<Object>} prevSchemas
-   * @returns {string}
+   * @param {Schema} schema schema
+   * @param {boolean} logic logic
+   * @param {Array<object>} prevSchemas prev schemas
+   * @returns {string} formatted schema
    */
   formatSchema(
     schema: Schema,
     logic?: boolean,
-    prevSchemas?: Array<Object>
+    prevSchemas?: Array<object>,
   ): string;
   /**
-   * @param {Schema=} schemaPart
-   * @param {(boolean | Array<string>)=} additionalPath
-   * @param {boolean=} needDot
-   * @param {boolean=} logic
-   * @returns {string}
+   * @param {Schema=} schemaPart schema part
+   * @param {(boolean | Array<string>)=} additionalPath additional path
+   * @param {boolean=} needDot true when need dot
+   * @param {boolean=} logic logic
+   * @returns {string} schema part text
    */
   getSchemaPartText(
     schemaPart?: Schema | undefined,
     additionalPath?: (boolean | Array<string>) | undefined,
     needDot?: boolean | undefined,
-    logic?: boolean | undefined
+    logic?: boolean | undefined,
   ): string;
   /**
-   * @param {Schema=} schemaPart
-   * @returns {string}
+   * @param {Schema=} schemaPart schema part
+   * @returns {string} schema part description
    */
   getSchemaPartDescription(schemaPart?: Schema | undefined): string;
   /**
-   * @param {SchemaUtilErrorObject} error
-   * @returns {string}
+   * @param {SchemaUtilErrorObject} error error object
+   * @returns {string} formatted error object
    */
   formatValidationError(error: SchemaUtilErrorObject): string;
   /**
-   * @param {Array<SchemaUtilErrorObject>} errors
-   * @returns {string}
+   * @param {Array<SchemaUtilErrorObject>} errors errors
+   * @returns {string} formatted errors
    */
   formatValidationErrors(errors: Array<SchemaUtilErrorObject>): string;
 }

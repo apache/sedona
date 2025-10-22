@@ -1,7 +1,12 @@
 export default memoize;
+export type FunctionReturning<T> = () => T;
 /**
  * @template T
- * @param fn {(function(): any) | undefined}
- * @returns {function(): T}
+ * @typedef {() => T} FunctionReturning
  */
-declare function memoize<T>(fn: (() => any) | undefined): () => T;
+/**
+ * @template T
+ * @param {FunctionReturning<T>} fn memorized function
+ * @returns {FunctionReturning<T>} new function
+ */
+declare function memoize<T>(fn: FunctionReturning<T>): FunctionReturning<T>;

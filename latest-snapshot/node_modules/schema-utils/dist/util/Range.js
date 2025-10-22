@@ -12,9 +12,9 @@
 
 class Range {
   /**
-   * @param {"left" | "right"} side
-   * @param {boolean} exclusive
-   * @returns {">" | ">=" | "<" | "<="}
+   * @param {"left" | "right"} side side
+   * @param {boolean} exclusive exclusive
+   * @returns {">" | ">=" | "<" | "<="} operator
    */
   static getOperator(side, exclusive) {
     if (side === "left") {
@@ -24,10 +24,10 @@ class Range {
   }
 
   /**
-   * @param {number} value
+   * @param {number} value value
    * @param {boolean} logic is not logic applied
    * @param {boolean} exclusive is range exclusive
-   * @returns {string}
+   * @returns {string} formatted right
    */
   static formatRight(value, logic, exclusive) {
     if (logic === false) {
@@ -37,10 +37,10 @@ class Range {
   }
 
   /**
-   * @param {number} value
+   * @param {number} value value
    * @param {boolean} logic is not logic applied
    * @param {boolean} exclusive is range exclusive
-   * @returns {string}
+   * @returns {string} formatted left
    */
   static formatLeft(value, logic, exclusive) {
     if (logic === false) {
@@ -55,7 +55,7 @@ class Range {
    * @param {boolean} startExclusive is range exclusive from left side
    * @param {boolean} endExclusive is range exclusive from right side
    * @param {boolean} logic is not logic applied
-   * @returns {string}
+   * @returns {string} formatted range
    */
   static formatRange(start, end, startExclusive, endExclusive, logic) {
     let result = "should be";
@@ -66,9 +66,9 @@ class Range {
   }
 
   /**
-   * @param {Array<RangeValue>} values
+   * @param {Array<RangeValue>} values values
    * @param {boolean} logic is not logic applied
-   * @return {RangeValue} computed value and it's exclusive flag
+   * @returns {RangeValue} computed value and it's exclusive flag
    */
   static getRangeValue(values, logic) {
     let minMax = logic ? Infinity : -Infinity;
@@ -95,16 +95,16 @@ class Range {
   }
 
   /**
-   * @param {number} value
-   * @param {boolean=} exclusive
+   * @param {number} value value
+   * @param {boolean=} exclusive true when exclusive, otherwise false
    */
   left(value, exclusive = false) {
     this._left.push([value, exclusive]);
   }
 
   /**
-   * @param {number} value
-   * @param {boolean=} exclusive
+   * @param {number} value value
+   * @param {boolean=} exclusive true when exclusive, otherwise false
    */
   right(value, exclusive = false) {
     this._right.push([value, exclusive]);
@@ -112,7 +112,7 @@ class Range {
 
   /**
    * @param {boolean} logic is not logic applied
-   * @return {string} "smart" range string representation
+   * @returns {string} "smart" range string representation
    */
   format(logic = true) {
     const [start, leftExclusive] = Range.getRangeValue(this._left, logic);

@@ -8,6 +8,10 @@ var normalizeOptions = require('./normalize-options');
 
 var realpathFS = process.platform !== 'win32' && fs.realpathSync && typeof fs.realpathSync.native === 'function' ? fs.realpathSync.native : fs.realpathSync;
 
+var relativePathRegex = /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[/\\])/;
+var windowsDriveRegex = /^\w:[/\\]*$/;
+var nodeModulesRegex = /[/\\]node_modules[/\\]*$/;
+
 var homedir = getHomedir();
 var defaultPaths = function () {
     return [
@@ -96,7 +100,7 @@ module.exports = function resolveSync(x, options) {
     // ensure that `basedir` is an absolute path at this point, resolving against the process' current working directory
     var absoluteStart = maybeRealpathSync(realpathSync, path.resolve(basedir), opts);
 
-    if ((/^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[/\\])/).test(x)) {
+    if (relativePathRegex.test(x)) {
         var res = path.resolve(absoluteStart, x);
         if (x === '.' || x === '..' || x.slice(-1) === '/') res += '/';
         var m = loadAsFileSync(res) || loadAsDirectorySync(res);
@@ -137,10 +141,10 @@ module.exports = function resolveSync(x, options) {
 
     function loadpkg(dir) {
         if (dir === '' || dir === '/') return;
-        if (process.platform === 'win32' && (/^\w:[/\\]*$/).test(dir)) {
+        if (process.platform === 'win32' && windowsDriveRegex.test(dir)) {
             return;
         }
-        if ((/[/\\]node_modules[/\\]*$/).test(dir)) return;
+        if (nodeModulesRegex.test(dir)) return;
 
         var pkgfile = path.join(maybeRealpathSync(realpathSync, dir, opts), 'package.json');
 

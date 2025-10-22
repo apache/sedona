@@ -1,3 +1,5 @@
+import { AbortSignal } from 'bare-abort-controller'
+
 interface EventMap {
   [event: string | symbol]: unknown[]
 }

@@ -5,9 +5,9 @@ const Range = require("./Range");
 /** @typedef {import("../validate").Schema} Schema */
 
 /**
- * @param {Schema} schema
- * @param {boolean} logic
- * @return {string[]}
+ * @param {Schema} schema schema
+ * @param {boolean} logic logic
+ * @returns {string[]} array of hints
  */
 module.exports.stringHints = function stringHints(schema, logic) {
   const hints = [];
@@ -51,13 +51,13 @@ module.exports.stringHints = function stringHints(schema, logic) {
   if (currentSchema.formatMaximum) {
     hints.push(`should be ${currentSchema.formatExclusiveMaximum ? "<" : "<="} ${JSON.stringify(currentSchema.formatMaximum)}`);
   }
-  return [type].concat(hints);
+  return [type, ...hints];
 };
 
 /**
- * @param {Schema} schema
- * @param {boolean} logic
- * @return {string[]}
+ * @param {Schema} schema schema
+ * @param {boolean} logic logic
+ * @returns {string[]} array of hints
  */
 module.exports.numberHints = function numberHints(schema, logic) {
   const hints = [schema.type === "integer" ? "integer" : "number"];

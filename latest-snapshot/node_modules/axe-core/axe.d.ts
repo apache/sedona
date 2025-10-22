@@ -155,7 +155,7 @@ declare namespace axe {
     toolOptions: RunOptions;
     passes: Result[];
     violations: Result[];
-    incomplete: Result[];
+    incomplete: IncompleteResult[];
     inapplicable: Result[];
   }
   interface Result {
@@ -166,6 +166,9 @@ declare namespace axe {
     impact?: ImpactValue;
     tags: TagValue[];
     nodes: NodeResult[];
+  }
+  interface IncompleteResult extends Result {
+    error?: Omit<RuleError, 'errorNode'>;
   }
   interface NodeResult {
     html: string;
@@ -203,6 +206,21 @@ declare namespace axe {
     pass: string | { [key: string]: string };
     fail: string | { [key: string]: string };
     incomplete?: string | { [key: string]: string };
+  }
+  interface RuleError {
+    name: string;
+    message: string;
+    stack: string;
+    ruleId?: string;
+    method?: string;
+    cause?: SerialError;
+    errorNode?: SerialDqElement;
+  }
+  interface SerialError {
+    message: string;
+    stack: string;
+    name: string;
+    cause?: SerialError;
   }
   interface CheckLocale {
     [key: string]: CheckMessages;
@@ -342,6 +360,9 @@ declare namespace axe {
   interface DqElement extends SerialDqElement {
     element: Element;
     toJSON(): SerialDqElement;
+  }
+  interface DqElementConstructor {
+    new (elm: Element, options?: { absolutePaths?: boolean }): DqElement;
     mergeSpecs(
       childSpec: SerialDqElement,
       parentSpec: SerialDqElement
@@ -365,23 +386,25 @@ declare namespace axe {
     frameContext: FrameContextObject;
   }
 
-  interface RawCheckResult extends Omit<CheckResult, 'relatedNodes'> {
+  interface RawCheckResult
+    extends Omit<CheckResult, 'relatedNodes' | 'impact'> {
     relatedNodes?: Array<SerialDqElement | DqElement>;
+    impact?: ImpactValue;
   }
 
-  interface RawNodeResult<T extends 'passed' | 'failed' | 'incomplete'> {
+  interface RawNodeResult<T extends 'passed' | 'failed' | 'cantTell'> {
     node: SerialDqElement | DqElement;
     any: RawCheckResult[];
     all: RawCheckResult[];
     none: RawCheckResult[];
-    impact: ImpactValue | null;
+    impact: ImpactValue | undefined;
     result: T;
   }
 
   interface RawResult extends Omit<Result, 'nodes'> {
     inapplicable: Array<never>;
     passes: RawNodeResult<'passed'>[];
-    incomplete: RawNodeResult<'incomplete'>[];
+    incomplete: RawNodeResult<'cantTell'>[];
     violations: RawNodeResult<'failed'>[];
     pageLevel: boolean;
     result: 'failed' | 'passed' | 'incomplete' | 'inapplicable';
@@ -405,6 +428,42 @@ declare namespace axe {
     boundingClientRect: DOMRect;
   }
 
+  type GridCell = VirtualNode[];
+
+  interface Grid {
+    container: VirtualNode | null;
+    cells: unknown; // opaque implementation detail
+    boundaries?: DOMRect;
+    toGridIndex(num: number): number;
+    getCellFromPoint(point: { x: number; y: number }): GridCell;
+    loopGridPosition(
+      gridPosition: DOMRect,
+      callback: (gridCell: GridCell, pos: { row: number; col: number }) => void
+    ): void;
+    getGridPositionOfRect(
+      rect: { top: number; right: number; bottom: number; left: number },
+      margin?: number
+    ): DOMRect;
+  }
+
+  interface CustomNodeSerializer<T = SerialDqElement> {
+    toSpec: (dqElm: DqElement) => T;
+    mergeSpecs: (nodeSpec: T, parentFrameSpec: T) => T;
+  }
+
+  interface NodeSerializer {
+    update: <T>(serializer: CustomNodeSerializer<T>) => void;
+    toSpec: (node: Element | VirtualNode) => SerialDqElement;
+    dqElmToSpec: (
+      dqElm: DqElement | SerialDqElement,
+      options?: RunOptions
+    ) => SerialDqElement;
+    mergeSpecs: (
+      nodeSpec: SerialDqElement,
+      parentFrameSpec: SerialDqElement
+    ) => SerialDqElement;
+  }
+
   interface Utils {
     getFrameContexts: (
       context?: ElementContext,
@@ -422,16 +481,20 @@ declare namespace axe {
     isLabelledShadowDomSelector: (
       selector: unknown
     ) => selector is LabelledShadowDomSelector;
-
-    DqElement: new (
-      elm: Element,
-      options?: { absolutePaths?: boolean }
-    ) => DqElement;
+    RuleError: new (options: {
+      error: Error;
+      ruleId?: string;
+      method?: string;
+      errorNode?: SerialDqElement;
+    }) => RuleError;
+    serializeError: (error: Error) => SerialError;
+    DqElement: DqElementConstructor;
     uuid: (
       options?: { random?: Uint8Array | Array<number> },
       buf?: Uint8Array | Array<number>,
       offset?: number
     ) => string | Uint8Array | Array<number>;
+    nodeSerializer: NodeSerializer;
   }
 
   interface Aria {
@@ -441,6 +504,7 @@ declare namespace axe {
   interface Dom {
     isFocusable: (node: Element | VirtualNode) => boolean;
     isNativelyFocusable: (node: Element | VirtualNode) => boolean;
+    getNodeGrid: (node: Node | VirtualNode) => Grid;
   }
 
   type AccessibleTextOptions = {

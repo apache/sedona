@@ -8,7 +8,7 @@ export type KeywordErrorDefinition = import("ajv").KeywordErrorDefinition;
 /** @typedef {import("ajv").Name} Name */
 /** @typedef {import("ajv").KeywordErrorDefinition} KeywordErrorDefinition */
 /**
- * @param {Ajv} ajv
- * @returns {Ajv}
+ * @param {Ajv} ajv ajv
+ * @returns {Ajv} ajv with limit keyword
  */
 declare function addLimitKeyword(ajv: Ajv): Ajv;

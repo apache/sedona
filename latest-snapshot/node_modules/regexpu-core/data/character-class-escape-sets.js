@@ -2,7 +2,7 @@
 'use strict';
 
 const regenerate = require('regenerate');
-const UNICODE_IV_SET = require('./all-characters.js').UNICODE_IV_SET
+const UNICODE_IV_SET = require('./all-characters.js').UNICODE_IV_SET;
 
 exports.REGULAR = new Map([
 	['d', regenerate()

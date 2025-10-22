@@ -9,26 +9,26 @@ export = Range;
  */
 declare class Range {
   /**
-   * @param {"left" | "right"} side
-   * @param {boolean} exclusive
-   * @returns {">" | ">=" | "<" | "<="}
+   * @param {"left" | "right"} side side
+   * @param {boolean} exclusive exclusive
+   * @returns {">" | ">=" | "<" | "<="} operator
    */
   static getOperator(
     side: "left" | "right",
-    exclusive: boolean
+    exclusive: boolean,
   ): ">" | ">=" | "<" | "<=";
   /**
-   * @param {number} value
+   * @param {number} value value
    * @param {boolean} logic is not logic applied
    * @param {boolean} exclusive is range exclusive
-   * @returns {string}
+   * @returns {string} formatted right
    */
   static formatRight(value: number, logic: boolean, exclusive: boolean): string;
   /**
-   * @param {number} value
+   * @param {number} value value
    * @param {boolean} logic is not logic applied
    * @param {boolean} exclusive is range exclusive
-   * @returns {string}
+   * @returns {string} formatted left
    */
   static formatLeft(value: number, logic: boolean, exclusive: boolean): string;
   /**
@@ -37,19 +37,19 @@ declare class Range {
    * @param {boolean} startExclusive is range exclusive from left side
    * @param {boolean} endExclusive is range exclusive from right side
    * @param {boolean} logic is not logic applied
-   * @returns {string}
+   * @returns {string} formatted range
    */
   static formatRange(
     start: number,
     end: number,
     startExclusive: boolean,
     endExclusive: boolean,
-    logic: boolean
+    logic: boolean,
   ): string;
   /**
-   * @param {Array<RangeValue>} values
+   * @param {Array<RangeValue>} values values
    * @param {boolean} logic is not logic applied
-   * @return {RangeValue} computed value and it's exclusive flag
+   * @returns {RangeValue} computed value and it's exclusive flag
    */
   static getRangeValue(values: Array<RangeValue>, logic: boolean): RangeValue;
   /** @type {Array<RangeValue>} */
@@ -57,18 +57,18 @@ declare class Range {
   /** @type {Array<RangeValue>} */
   _right: Array<RangeValue>;
   /**
-   * @param {number} value
-   * @param {boolean=} exclusive
+   * @param {number} value value
+   * @param {boolean=} exclusive true when exclusive, otherwise false
    */
   left(value: number, exclusive?: boolean | undefined): void;
   /**
-   * @param {number} value
-   * @param {boolean=} exclusive
+   * @param {number} value value
+   * @param {boolean=} exclusive true when exclusive, otherwise false
    */
   right(value: number, exclusive?: boolean | undefined): void;
   /**
    * @param {boolean} logic is not logic applied
-   * @return {string} "smart" range string representation
+   * @returns {string} "smart" range string representation
    */
   format(logic?: boolean): string;
 }

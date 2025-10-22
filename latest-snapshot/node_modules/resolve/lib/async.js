@@ -8,6 +8,10 @@ var isCore = require('is-core-module');
 
 var realpathFS = process.platform !== 'win32' && fs.realpath && typeof fs.realpath.native === 'function' ? fs.realpath.native : fs.realpath;
 
+var relativePathRegex = /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[/\\])/;
+var windowsDriveRegex = /^\w:[/\\]*$/;
+var nodeModulesRegex = /[/\\]node_modules[/\\]*$/;
+
 var homedir = getHomedir();
 var defaultPaths = function () {
     return [
@@ -124,10 +128,10 @@ module.exports = function resolve(x, options, callback) {
 
     var res;
     function init(basedir) {
-        if ((/^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[/\\])/).test(x)) {
+        if (relativePathRegex.test(x)) {
             res = path.resolve(basedir, x);
             if (x === '.' || x === '..' || x.slice(-1) === '/') res += '/';
-            if ((/\/$/).test(x) && res === basedir) {
+            if (x.slice(-1) === '/' && res === basedir) {
                 loadAsDirectory(res, opts.package, onfile);
             } else loadAsFile(res, opts.package, onfile);
         } else if (includeCoreModules && isCore(x)) {
@@ -215,10 +219,10 @@ module.exports = function resolve(x, options, callback) {
 
     function loadpkg(dir, cb) {
         if (dir === '' || dir === '/') return cb(null);
-        if (process.platform === 'win32' && (/^\w:[/\\]*$/).test(dir)) {
+        if (process.platform === 'win32' && windowsDriveRegex.test(dir)) {
             return cb(null);
         }
-        if ((/[/\\]node_modules[/\\]*$/).test(dir)) return cb(null);
+        if (nodeModulesRegex.test(dir)) return cb(null);
 
         maybeRealpath(realpath, dir, opts, function (unwrapErr, pkgdir) {
             if (unwrapErr) return loadpkg(path.dirname(dir), cb);

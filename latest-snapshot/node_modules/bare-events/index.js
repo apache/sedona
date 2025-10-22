@@ -56,7 +56,7 @@ class EventListener {
 
       if (l[1] === true) this.remove(ctx, name, l[0])
 
-      l[0].call(ctx, ...args)
+      Reflect.apply(l[0], ctx, args)
     }
 
     return list.length > 0
