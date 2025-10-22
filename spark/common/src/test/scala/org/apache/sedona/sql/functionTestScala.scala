@@ -19,6 +19,7 @@
 package org.apache.sedona.sql
 
 import org.apache.commons.codec.binary.Hex
+import org.apache.commons.io.FileUtils
 import org.apache.sedona.common.FunctionsGeoTools
 import org.apache.sedona.sql.implicits._
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
@@ -35,7 +36,8 @@ import org.geotools.api.referencing.FactoryException
 import org.scalatest.{GivenWhenThen, Matchers}
 import org.xml.sax.InputSource
 
-import java.io.StringReader
+import java.io.{File, StringReader}
+import java.nio.file.Files
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.xpath.XPathFactory
 
@@ -4129,5 +4131,71 @@ class functionTestScala
     val simplifiedMedialAxis =
       squareWithTwoHolesSimplified.first().getAs[org.locationtech.jts.geom.Geometry](0)
     assert(simplifiedMedialAxis != null, "Simplified medial axis should not be null")
+  }
+
+  it("Test that CREATE VIEW fails with multiple temporary Sedona functions") {
+    val timestamp = System.currentTimeMillis()
+    val tmpDir: String =
+      Files.createTempDirectory("sedona_geoparquet_test_").toFile.getAbsolutePath
+
+    val buildings = sparkSession.sql("""
+      SELECT
+        ST_GeomFromWKT('POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))') as geom,
+        'Building 1' as PROP_ADDR
+      UNION ALL
+      SELECT
+        ST_GeomFromWKT('POLYGON((2 2, 3 2, 3 3, 2 3, 2 2))') as geom,
+        'Building 2' as PROP_ADDR
+    """)
+    buildings.write
+      .mode("overwrite")
+      .option("path", s"$tmpDir/sedona_test_${timestamp}_buildings")
+      .saveAsTable("nyc_buildings_geom_test")
+
+    val zones = sparkSession.sql("""
+      SELECT
+        ST_GeomFromWKT('POLYGON((0 0, 5 0, 5 5, 0 5, 0 0))') as zone_geom,
+        100.0 as elevation
+    """)
+    zones.write
+      .mode("overwrite")
+      .option("path", s"$tmpDir/sedona_test_${timestamp}_zones")
+      .saveAsTable("elevation_zones_test")
+
+    // Attempt to create a permanent VIEW with multiple Sedona functions
+    sparkSession.sql("""
+      CREATE VIEW nyc_buildings_with_functions AS
+      SELECT * FROM (
+        SELECT
+          nyc_buildings_geom_test.PROP_ADDR AS name,
+          nyc_buildings_geom_test.geom AS building_geom,
+          avg(elevation_zones_test.elevation) AS elevation
+        FROM
+          nyc_buildings_geom_test
+        JOIN
+          elevation_zones_test
+        ON
+          st_intersects(elevation_zones_test.zone_geom, elevation_zones_test.zone_geom)
+        GROUP BY
+          nyc_buildings_geom_test.PROP_ADDR, nyc_buildings_geom_test.geom
+      )
+      WHERE elevation > 0
+    """)
+
+    // Assert that the view was created
+    val views = sparkSession.sql("SHOW VIEWS").collect()
+    val viewExists = views.exists(row => row.getString(1) == "nyc_buildings_with_functions")
+    assert(viewExists, "View 'nyc_buildings_with_functions' should be created")
+
+    // Query the view and assert results
+    val result = sparkSession.sql("SELECT * FROM nyc_buildings_with_functions").collect()
+    assert(result.length == 2, s"Expected 2 rows, but got ${result.length}")
+
+    // Assert both buildings are in the result
+    val buildingNames = result.map(_.getString(0)).toSet
+    assert(buildingNames.contains("Building 1"), "Building 1 should be in the result")
+    assert(buildingNames.contains("Building 2"), "Building 2 should be in the result")
+
+    FileUtils.deleteDirectory(new File(tmpDir))
   }
 }
