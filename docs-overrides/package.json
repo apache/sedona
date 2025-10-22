@@ -17,8 +17,8 @@
   },
   "devDependencies": {
     "@fancyapps/ui": "^5.0.36",
-    "@wordpress/dom-ready": "^4.11.0",
-    "@wordpress/eslint-plugin": "^21.4.0",
+    "@wordpress/dom-ready": "^4.30.0",
+    "@wordpress/eslint-plugin": "^21.6.0",
     "autoprefixer": "^10.4.20",
     "bootstrap": "^5.3.3",
     "browser-sync": "^3.0.3",
