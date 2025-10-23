@@ -157,6 +157,16 @@ repos:
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
       - id: insert-license
+        name: add license for all XML files
+        files: \.xml$
+        exclude: scalastyle_config\.xml$|^docker/zeppelin/conf/zeppelin-site\.xml$|^spark/common/src/test/resources/.*$
+        args:
+          - --comment-style
+          - '<!--||-->'
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
+      - id: insert-license
         name: add license for all YAML files
         files: \.ya?ml$
         args:
