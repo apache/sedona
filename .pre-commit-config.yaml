@@ -176,7 +176,7 @@ repos:
           - --fuzzy-match-generates-todo
       - id: insert-license
         name: add license for all other files
-        files: ^\.(editorconfig|gitattributes|prettierignore|prettierrc|shellcheckrc)$|^.*/\.gitignore$
+        files: ^\.(editorconfig|gitattributes|prettierignore|prettierrc|shellcheckrc)$|^.*/\.gitignore$|^tools/maven/scalafmt\.conf$
         args:
           - --comment-style
           - '|#|'
