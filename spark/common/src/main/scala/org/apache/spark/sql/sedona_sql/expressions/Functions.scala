@@ -18,27 +18,27 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
-import org.apache.sedona.common.{Functions, FunctionsGeoTools}
+import com.mapzen.jpostal.{AddressExpander, AddressParser}
+import org.apache.sedona.common.S2Geography.Geography
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
 import org.apache.sedona.common.utils.{InscribedCircle, ValidDetail}
+import org.apache.sedona.common.{Functions, FunctionsApacheSIS, FunctionsGeoTools}
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.sql.catalyst.expressions.codegen.Block.BlockHelper
 import org.apache.spark.sql.catalyst.expressions.codegen.{CodegenContext, CodegenFallback, ExprCode}
 import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, Generator, ImplicitCastInputTypes, Nondeterministic, UnaryExpression}
 import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.sql.sedona_sql.expressions.implicits._
-import org.apache.spark.sql.types._
-import org.locationtech.jts.algorithm.MinimumBoundingCircle
-import org.locationtech.jts.geom._
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.sql.sedona_sql.expressions.LibPostalUtils.{getExpanderFromConf, getParserFromConf}
+import org.apache.spark.sql.sedona_sql.expressions.implicits._
+import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
 import org.apache.spark.util.Utils
-import com.mapzen.jpostal.{AddressExpander, AddressParser}
-import org.apache.sedona.common.S2Geography.Geography
-import org.apache.spark.sql.catalyst.expressions.codegen.Block.BlockHelper
+import org.locationtech.jts.algorithm.MinimumBoundingCircle
+import org.locationtech.jts.geom._
 
 private[apache] case class ST_LabelPoint(inputExpressions: Seq[Expression])
     extends InferredExpression(
@@ -296,6 +296,7 @@ private[apache] case class ST_Centroid(inputExpressions: Seq[Expression])
  */
 private[apache] case class ST_Transform(inputExpressions: Seq[Expression])
     extends InferredExpression(
+      inferrableFunction5(FunctionsApacheSIS.transform),
       inferrableFunction4(FunctionsGeoTools.transform),
       inferrableFunction3(FunctionsGeoTools.transform),
       inferrableFunction2(FunctionsGeoTools.transform)) {

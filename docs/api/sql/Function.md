@@ -4614,6 +4614,10 @@ PROJCS["WGS 84 / Pseudo-Mercator",
     AUTHORITY["EPSG","3857"]]
 ```
 
+**Area of Interest (AOI)**
+
+An area of interest allows a better EPSG transform to be selected. It should be specified in order longitude latitude, with longitude in range [-180,180] and latitude in range [-90,90].
+
 !!!note
     By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
 
@@ -4621,6 +4625,10 @@ PROJCS["WGS 84 / Pseudo-Mercator",
     By default, ==ST_Transform== follows the `lenient` mode which tries to fix issues by itself. You can append a boolean value at the end to enable the `strict` mode. In `strict` mode, ==ST_Transform== will throw an error if it finds any issue.
 
 Format:
+
+```
+ST_Transform (A: Geometry, SourceCRS: String, TargetCRS: String, AOI: Geometry, lenientMode: Boolean)
+```
 
 ```
 ST_Transform (A: Geometry, SourceCRS: String, TargetCRS: String, lenientMode: Boolean)

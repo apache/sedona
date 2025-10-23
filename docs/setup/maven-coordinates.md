@@ -35,6 +35,20 @@ If you are using the Scala 2.13 builds of Spark, please use the corresponding pa
 
 The optional GeoTools library is required if you want to use CRS transformation, ShapefileReader or GeoTiff reader. This wrapper library is a re-distribution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
 
+For a higher-precision CRS transformation Apache SIS can be used by providing an Area of Interest (AOI) and adding a dependency on the ApacheSIS EPSG database.  This library is a re-distribution of EPSG official jars. The only purpose of this library is to bring EPSG jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.
+
+!!! abstract "Sedona with EPSG database"
+
+	=== "EPSG database 9.8.1+"
+
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sis-embedded-data</artifactId>
+		  <version>{{ sedona.current_apachesis }}</version>
+		</dependency>
+		```
+
 !!! abstract "Sedona with Apache Spark and Scala 2.12"
 
 	=== "Spark 3.4 and Scala 2.12"
