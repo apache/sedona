@@ -66,11 +66,12 @@ The PMC also adds new PMC members. PMC members are expected to carry out PMC res
 
 Current Sedona Committers are as follows:
 
-|      Name      |   GitHub ID   |      Apache ID       |
-|:--------------:|:-------------:|:--------------------:|
-|  John Bampton  |   jbampton    |  johnbam@apache.org  |
-| Nilesh Gajwani |    iGN5117    |  nilesh@apache.org   |
-|  Pranav Toggi  |   prantogg    | prantogg@apache.org  |
+|       Name       |  GitHub ID  |        Apache ID        |
+|:----------------:|:-----------:|:-----------------------:|
+|   John Bampton   |  jbampton   |   johnbam@apache.org    |
+| Dewey Dunnington | paleolimbot | paleolimbot@apache.org  |
+|  Nilesh Gajwani  |   iGN5117   |    nilesh@apache.org    |
+|   Pranav Toggi   |  prantogg   |   prantogg@apache.org   |
 
 ## Nominate a committer or PMC member
 
