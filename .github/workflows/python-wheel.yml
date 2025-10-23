@@ -53,7 +53,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up QEMU
         if: runner.os == 'Linux'
         uses: docker/setup-qemu-action@v3
@@ -63,7 +63,7 @@ jobs:
           image: tonistiigi/binfmt:qemu-v8.1.5
           platforms: all
       - name: Build wheels
-        uses: pypa/cibuildwheel@v3.2.0
+        uses: pypa/cibuildwheel@v3.2.1
         env:
           CIBW_SKIP: 'pp* *musl*'
           CIBW_ARCHS_LINUX: 'x86_64 aarch64'
