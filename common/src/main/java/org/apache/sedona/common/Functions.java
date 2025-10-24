@@ -575,7 +575,10 @@ public class Functions {
     return geometry.getEnvelope();
   }
 
-  public static double distance(Geometry left, Geometry right) {
+  public static Double distance(Geometry left, Geometry right) {
+    if (left.isEmpty() || right.isEmpty()) {
+      return null;
+    }
     return left.distance(right);
   }
 
