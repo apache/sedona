@@ -17,28 +17,72 @@
  under the License.
  -->
 
-# How to contribute to Apache Sedona
 
-Welcome!  We'd love to have you contribute to Apache Sedona!
+# Contributing to Apache Sedona
 
-## Did you find a bug?
+Welcome! 🎉
+We’re excited that you’d like to contribute to **Apache Sedona**, an open-source project for large-scale spatial data processing.
 
-Create an issue with a reproducible example.  Please specify the Sedona version, Java version, code snippet, and error message.
+---
 
-## Did you create a PR to fix a bug?
+## 🧭 Getting Started
 
-See [here](https://sedona.apache.org/latest/community/rule/#make-a-pull-request) for instructions on how to open PRs.
+Before contributing, please make sure your development environment is set up correctly.
+Check out our guides:
 
-We appreciate bug fixes - thank you in advance!
+* [Developing Sedona (Java Guide)](./docs/community/develop.md)
+* [Building Sedona from Source (Python & Build Guide)](./docs/setup/compile.md)
 
-## Would you like to add a new feature or change existing code?
+These pages include information on environment setup, build instructions, and testing.
 
-If you would like to add a feature or change existing behavior, please make sure to create an issue/JIRA ticket and get the planned work approved by the core team first!
+---
 
-It's always better to get aligned with the core devs before writing any code.
+## 🐞 Reporting Bugs
 
-## Do you have questions about the source code?
+If you find a bug:
 
-Feel free to create an issue or join the [Discord](https://discord.gg/9A3k5dEBsY) with questions!
+1. [Open an issue](https://github.com/apache/sedona/issues) with:
 
-Thanks for reading and looking forward to collaborating with you!
+   * Sedona version
+   * Java or Python version
+   * Code snippet or reproducible example
+   * Full error message
+
+Thank you for helping us make Sedona better!
+
+---
+
+## 🧩 Fixing Bugs / Submitting PRs
+
+* Please read the [Pull Request Guidelines](https://sedona.apache.org/latest/community/rule/#make-a-pull-request).
+* Reference an existing issue in your PR title or description.
+* Include tests if your PR fixes or modifies functionality.
+
+We appreciate every contribution — thank you in advance!
+
+---
+
+## 🚀 Adding Features or Making Changes
+
+Before starting major work:
+
+1. Open a GitHub Issue or JIRA ticket.
+2. Discuss your proposal with the core team.
+
+This ensures your idea aligns with the project roadmap and avoids duplicated work.
+
+---
+
+## 💬 Need Help?
+
+Have questions or want to chat with the community?
+
+* Join our [Discord](https://discord.gg/9A3k5dEBsY)
+* Or open a discussion in [GitHub Discussions](https://github.com/apache/sedona/discussions)
+
+---
+
+**Thank you for contributing to Apache Sedona!**
+Your time and effort help grow the open-source spatial data ecosystem.
+
+---
