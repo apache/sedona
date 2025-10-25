@@ -1462,6 +1462,37 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = s.to_geoframe().crosses(s2, align=False).to_pandas()
         assert_series_equal(df_result, expected)
 
+    def test_geometry_type_with_m_dimension(self):
+        """Test that geometry type checks work correctly for M-dimension geometries."""
+        s = GeoSeries(
+            [
+                wkt.loads("POINT M (1 2 3)"),
+                wkt.loads("LINESTRING M (0 0 1, 1 1 2)"),
+                wkt.loads("POLYGON M ((0 0 1, 1 0 2, 1 1 3, 0 1 4, 0 0 1))"),
+                wkt.loads("GEOMETRYCOLLECTION M (POINT M (1 2 3))"),
+            ]
+        )
+
+        result = s.length.to_pandas()
+        assert result[0] == 0.0
+        assert result[1] > 0
+        assert result[2] > 0
+        assert result[3] > 0
+
+        boundary_result = s.boundary
+        assert boundary_result.to_pandas()[3] is None
+
+        s_with_geomcoll = GeoSeries(
+            [
+                wkt.loads("GEOMETRYCOLLECTION M (POINT M (1 2 3))"),
+                wkt.loads("LINESTRING M (0 0 1, 1 1 2)"),
+            ]
+        )
+        line = LineString([(0, 0), (1, 1)])
+        result = s_with_geomcoll.crosses(line).to_pandas()
+        assert pd.isna(result[0])
+        assert isinstance(result[1], (bool, np.bool_))
+
     def test_disjoint(self):
         pass
 
