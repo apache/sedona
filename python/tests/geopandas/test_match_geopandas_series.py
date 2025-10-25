@@ -1044,11 +1044,6 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
     def test_distance(self):
         for geom, geom2 in self.pairs:
-            if geom[0].is_empty or geom2[0].is_empty:
-                # Sedona's ST_Distance returns 0.0 instead of null
-                # when an empty geometry is involved
-                # https://github.com/apache/sedona/issues/2406
-                continue
             sgpd_result = GeoSeries(geom).distance(GeoSeries(geom2), align=True)
             gpd_result = gpd.GeoSeries(geom).distance(gpd.GeoSeries(geom2), align=True)
             self.check_pd_series_equal(sgpd_result, gpd_result)

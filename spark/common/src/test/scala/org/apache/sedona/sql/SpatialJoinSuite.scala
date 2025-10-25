@@ -268,6 +268,18 @@ class SpatialJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
         assert(resultRows.isEmpty)
       }
     }
+
+    it("ST_Distance involving empty geometries should work as a predicate") {
+      // ST_Distance returns null when either arg is an empty geometry,
+      // while this test doesn't involve an actual spatial join, it tests that
+      // a distance-based spatial join doesn't fail due to this edge case.
+      val result1 = sparkSession.sql(
+        "SELECT * FROM df1 WHERE ST_Distance(df1.geom, ST_GeomFromText('POINT EMPTY')) < 1")
+      assert(result1.count() == 0)
+      val result2 = sparkSession.sql(
+        "SELECT * FROM df2 WHERE ST_Distance(df2.geom, ST_GeomFromText('POINT EMPTY')) < 1")
+      assert(result2.count() == 0)
+    }
   }
 
   private def withOptimizationMode(mode: String)(body: => Unit): Unit = {
