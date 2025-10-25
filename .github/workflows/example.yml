@@ -51,8 +51,8 @@ jobs:
             spark-compat: '3.4'
             sedona: 1.5.1
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
           java-version: '11'
