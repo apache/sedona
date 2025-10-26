@@ -2461,6 +2461,77 @@ class GeoFrame(metaclass=ABCMeta):
     def contains_properly(self, other, align=None):
         raise NotImplementedError("This method is not implemented yet.")
 
+    def relate(self, other, align=None):
+        """Returns the DE-9IM matrix string for the relationship between each geometry and `other`.
+
+        The DE-9IM (Dimensionally Extended nine-Intersection Model) is a topological model
+        that describes the spatial relationship between two geometries. The result is a
+        9-character string describing the dimensions of the intersections between the
+        interior, boundary, and exterior of the two geometries.
+
+        The operation works on a 1-to-1 row-wise manner.
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The GeoSeries (elementwise) or geometric object to relate to.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved.
+
+        Returns
+        -------
+        Series (str)
+            A Series of DE-9IM matrix strings.
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Point, LineString, Polygon
+        >>> s = GeoSeries(
+        ...     [
+        ...         Point(0, 0),
+        ...         Point(0, 0),
+        ...         LineString([(0, 0), (1, 1)]),
+        ...     ]
+        ... )
+        >>> s2 = GeoSeries(
+        ...     [
+        ...         Point(0, 0),
+        ...         Point(1, 1),
+        ...         LineString([(0, 0), (1, 1)]),
+        ...     ]
+        ... )
+
+        >>> s.relate(s2)
+        0    0FFFFFFF2
+        1    FF0FFF0F2
+        2    1FFF0FFF2
+        dtype: object
+
+        Notes
+        -----
+        This method works in a row-wise manner. It does not check the relationship
+        of an element of one GeoSeries with *all* elements of the other one.
+
+        The DE-9IM string has 9 characters, one for each combination of:
+        - Interior/Boundary/Exterior of the first geometry
+        - Interior/Boundary/Exterior of the second geometry
+
+        Each character can be:
+        - '0': intersection is a point (dimension 0)
+        - '1': intersection is a line (dimension 1)
+        - '2': intersection is an area (dimension 2)
+        - 'F': no intersection (empty set)
+
+        See also
+        --------
+        GeoSeries.contains
+        GeoSeries.intersects
+        GeoSeries.within
+        """
+        return _delegate_to_geometry_column("relate", self, other, align)
+
     def to_parquet(self, path, **kwargs):
         raise NotImplementedError("This method is not implemented yet.")
 
