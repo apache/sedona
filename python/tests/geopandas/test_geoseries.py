@@ -1985,11 +1985,11 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         point = Point(0, 0)
         result = s.relate(point)
         expected = pd.Series(["0FFFFFFF2", "0FFFFFFF2", "FF10F0FF2"])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         result = s.relate(s2)
         expected = pd.Series(["0FFFFFFF2", "FF0FFF0F2", "1FFF0FFF2"])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
         # 2. Test with align=True (different indices)
         s3 = GeoSeries(
             [
@@ -2007,17 +2007,17 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         )
         result = s3.relate(s4, align=True)
         expected = pd.Series([None, "FF0FFF0F2", None], index=[0, 1, 2])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         # 3. Test with align=False
         result = s3.relate(s4, align=False)
         expected = pd.Series(["0FFFFFFF2", "0FFFFFFF2"], index=range(1, 3))
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         # 4. Check that GeoDataFrame works too
         df_result = s.to_geoframe().relate(s2, align=False)
         expected = pd.Series(["0FFFFFFF2", "FF0FFF0F2", "1FFF0FFF2"])
-        assert_series_equal(df_result.to_pandas(), expected)
+        self.check_pd_series_equal(df_result, expected)
 
         # 5. touching_polygons and overlapping polygon case
         touching_poly_a = Polygon(((0, 0), (1, 0), (1, 1), (0, 1), (0, 0)))
@@ -2029,7 +2029,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = s5.relate(s6)
 
         expected = pd.Series(["FF2F11212", "212101212"])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
     def test_set_crs(self):
         geo_series = sgpd.GeoSeries([Point(0, 0), Point(1, 1)], name="geometry")

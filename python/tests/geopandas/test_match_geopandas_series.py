@@ -1080,8 +1080,6 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
     def test_relate(self):
         for geom, geom2 in self.pairs:
-            if self.contains_any_geom_collection(geom, geom2):
-                continue
             sgpd_result = GeoSeries(geom).relate(GeoSeries(geom2), align=True)
             gpd_result = gpd.GeoSeries(geom).relate(gpd.GeoSeries(geom2), align=True)
             self.check_pd_series_equal(sgpd_result, gpd_result)
