@@ -89,6 +89,15 @@ repos:
         files: \.md$
         stages: [manual]
       - id: insert-license
+        name: add license for all Batch files
+        files: \.bat$
+        args:
+          - --comment-style
+          - '|REM|'
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
+      - id: insert-license
         name: add license for all .c files
         description: automatically adds a licence header to all C files that don't have a license header
         files: \.c$
