@@ -350,8 +350,8 @@ Here’s how you can delete all the linestrings that cross any polygon.
 sql = """
 DELETE FROM some_catalog.matt.icegeometries
 WHERE EXISTS (
-    SELECT 1 
-    FROM some_catalog.matt.icepolygons 
+    SELECT 1
+    FROM some_catalog.matt.icepolygons
     WHERE ST_Intersects(icegeometries.geometry, icepolygons.geometry)
 )
 """
