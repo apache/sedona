@@ -285,7 +285,7 @@ USING iceberg
 TBLPROPERTIES('format-version'='3');
 ```
 
-Append objects `a`, `b, c, d, `and` e` to the table:
+Append objects `a`, `b`, `c`, `d`, and `e` to the table:
 
 ```python
 df = sedona.createDataFrame(
@@ -329,7 +329,7 @@ USING iceberg
 TBLPROPERTIES('format-version'='3');
 ```
 
-Append objects `polygon_x `and `polygon_y` to the table:
+Append objects `polygon_x` and `polygon_y` to the table:
 
 ```python
 df = sedona.createDataFrame(
@@ -341,20 +341,24 @@ df = sedona.createDataFrame(
 )
 df = df.withColumn("geometry", ST_GeomFromText(col("geometry")))
 
-df.write.format("iceberg").mode("append").saveAsTable("some_catalog.matt.icegeometries")
+df.write.format("iceberg").mode("append").saveAsTable("some_catalog.matt.icepolygons")
 ```
 
 Here’s how you can delete all the linestrings that cross any polygon.
 
 ```python
-sql = f"""
+sql = """
 DELETE FROM some_catalog.matt.icegeometries
-WHERE ST_Intersects(geometry, ST_GeomFromWKT('{polygon}'))
+WHERE EXISTS (
+    SELECT 1 
+    FROM some_catalog.matt.icepolygons 
+    WHERE ST_Intersects(icegeometries.geometry, icepolygons.geometry)
+)
 """
 sedona.sql(sql)
 ```
 
-Check the table to see that geometries `b`, `c,` and `d` are deleted from the table.
+Check the table to see that geometries `b`, `c`, and `d` are deleted from the table.
 
 ```
 sedona.sql("SELECT * FROM some_catalog.matt.icegeometries;").show(truncate=False)
