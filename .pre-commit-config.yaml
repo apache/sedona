@@ -161,6 +161,7 @@ repos:
           - --fuzzy-match-generates-todo
       - id: insert-license
         name: add license for all Shell files
+        description: automatically adds a licence header to all Shell files that don't have a license header
         files: \.sh$
         args:
           - --comment-style
@@ -255,11 +256,14 @@ repos:
     rev: v1.10.0
     hooks:
       - id: rst-backticks
-        name: detect common mistake of using single backticks when writing rst
+        name: run rst-backticks
+        description: detect common mistake of using single backticks when writing rst
       - id: rst-directive-colons
-        name: detect mistake of rst directive not ending with double colon or space before the double colon
+        name: run rst-directive-colons
+        description: detect mistake of rst directive not ending with double colon or space before the double colon
       - id: rst-inline-touching-normal
-        name: detect mistake of inline code touching normal text in rst
+        name: run rst-inline-touching-normal
+        description: detect mistake of inline code touching normal text in rst
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
@@ -384,7 +388,7 @@ repos:
         args: [--strict, -c=.github/linters/.yaml-lint.yml]
         types: [yaml]
         files: \.ya?ml$
-  - repo: https://github.com/shssoichiro/oxipng
+  - repo: https://github.com/oxipng/oxipng
     rev: v9.1.5
     hooks:
       - id: oxipng
