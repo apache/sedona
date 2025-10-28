@@ -15,30 +15,19 @@
  KIND, either express or implied.  See the License for the
  specific language governing permissions and limitations
  under the License.
- -->
+-->
 
-# How to contribute to Apache Sedona
+# Contributing to Apache Sedona
 
-Welcome!  We'd love to have you contribute to Apache Sedona!
+Welcome! We'd love to have you contribute to Apache Sedona!
 
-## Did you find a bug?
+To set up your development environment, please refer to:
 
-Create an issue with a reproducible example.  Please specify the Sedona version, Java version, code snippet, and error message.
+- [Developing Sedona (Java Guide)](./docs/community/develop.md)
+- [Building Sedona from Source (Python Guide)](./docs/setup/compile.md)
 
-## Did you create a PR to fix a bug?
+For contribution rules and PR instructions, see the [Contributor Guide](https://sedona.apache.org/latest/community/rule/).
 
-See [here](https://sedona.apache.org/latest/community/rule/#make-a-pull-request) for instructions on how to open PRs.
+If you have questions or want to chat with the community, join our [Discord](https://discord.gg/9A3k5dEBsY).
 
-We appreciate bug fixes - thank you in advance!
-
-## Would you like to add a new feature or change existing code?
-
-If you would like to add a feature or change existing behavior, please make sure to create an issue/JIRA ticket and get the planned work approved by the core team first!
-
-It's always better to get aligned with the core devs before writing any code.
-
-## Do you have questions about the source code?
-
-Feel free to create an issue or join the [Discord](https://discord.gg/9A3k5dEBsY) with questions!
-
-Thanks for reading and looking forward to collaborating with you!
+Thank you for contributing to Apache Sedona!
