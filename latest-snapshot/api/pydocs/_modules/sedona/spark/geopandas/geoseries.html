@@ -280,6 +280,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.offset_curve"><code class="docutils literal notranslate"><span class="pre">GeoSeries.offset_curve()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.overlaps"><code class="docutils literal notranslate"><span class="pre">GeoSeries.overlaps()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.plot"><code class="docutils literal notranslate"><span class="pre">GeoSeries.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.relate"><code class="docutils literal notranslate"><span class="pre">GeoSeries.relate()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.remove_repeated_points"><code class="docutils literal notranslate"><span class="pre">GeoSeries.remove_repeated_points()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.representative_point"><code class="docutils literal notranslate"><span class="pre">GeoSeries.representative_point()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.reverse"><code class="docutils literal notranslate"><span class="pre">GeoSeries.reverse()</span></code></a></li>
@@ -526,6 +527,7 @@
         <span class="s2">&quot;is_valid_reason&quot;</span><span class="p">,</span>
         <span class="s2">&quot;length&quot;</span><span class="p">,</span>
         <span class="s2">&quot;make_valid&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;relate&quot;</span><span class="p">,</span>
         <span class="s2">&quot;set_crs&quot;</span><span class="p">,</span>
         <span class="s2">&quot;to_crs&quot;</span><span class="p">,</span>
         <span class="s2">&quot;to_geopandas&quot;</span><span class="p">,</span>
@@ -2049,6 +2051,26 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">intersection_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Implementation of the abstract method.</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
+
+
+    <span class="c1"># ============================================================================</span>
+    <span class="c1"># Binary Predicates</span>
+    <span class="c1"># ============================================================================</span>
+<div class="viewcode-block" id="GeoSeries.relate">
+<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.relate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">relate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+        <span class="n">other</span><span class="p">,</span> <span class="n">extended</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_series_of_val</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="n">align</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">extended</span> <span class="k">else</span> <span class="n">align</span>
+
+        <span class="n">spark_col</span> <span class="o">=</span> <span class="n">stp</span><span class="o">.</span><span class="n">ST_Relate</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">))</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_row_wise_operation</span><span class="p">(</span>
+            <span class="n">spark_col</span><span class="p">,</span>
+            <span class="n">other</span><span class="p">,</span>
+            <span class="n">align</span><span class="p">,</span>
+            <span class="n">returns_geom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">default_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
 
 
     <span class="c1"># ============================================================================</span>

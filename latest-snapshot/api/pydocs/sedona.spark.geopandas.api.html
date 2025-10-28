@@ -283,6 +283,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.offset_curve"><code class="docutils literal notranslate"><span class="pre">GeoSeries.offset_curve()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.overlaps"><code class="docutils literal notranslate"><span class="pre">GeoSeries.overlaps()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.plot"><code class="docutils literal notranslate"><span class="pre">GeoSeries.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.relate"><code class="docutils literal notranslate"><span class="pre">GeoSeries.relate()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.remove_repeated_points"><code class="docutils literal notranslate"><span class="pre">GeoSeries.remove_repeated_points()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.representative_point"><code class="docutils literal notranslate"><span class="pre">GeoSeries.representative_point()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.reverse"><code class="docutils literal notranslate"><span class="pre">GeoSeries.reverse()</span></code></a></li>
@@ -2969,6 +2970,73 @@ as <code class="docutils literal notranslate"><span class="pre">edgecolor</span>
 <dd class="field-odd"><p>matplotlib axes instance</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.relate">
+<span class="sig-name descname"><span class="pre">relate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">align</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.pandas/api/pyspark.pandas.Series.html#pyspark.pandas.Series" title="(in PySpark vmaster)"><span class="pre">pyspark.pandas.Series</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.relate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.relate" title="Link to this definition"></a></dt>
+<dd><p>Returns the DE-9IM matrix string for the relationship between each geometry and <cite>other</cite>.</p>
+<p>The DE-9IM (Dimensionally Extended nine-Intersection Model) is a topological model
+that describes the spatial relationship between two geometries. The result is a
+9-character string describing the dimensions of the intersections between the
+interior, boundary, and exterior of the two geometries.</p>
+<p>The operation works on a 1-to-1 row-wise manner.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries"><em>GeoSeries</em></a><em> or </em><em>geometric object</em>) – The GeoSeries (elementwise) or geometric object to relate to.</p></li>
+<li><p><strong>align</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em> | </em><em>None</em><em> (</em><em>default None</em><em>)</em>) – If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+If False, the order of elements is preserved.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A Series of DE-9IM matrix strings.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Series (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>)</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span><span class="p">,</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Polygon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">LineString</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]),</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">LineString</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]),</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">relate</span><span class="p">(</span><span class="n">s2</span><span class="p">)</span>
+<span class="go">0    0FFFFFFF2</span>
+<span class="go">1    FF0FFF0F2</span>
+<span class="go">2    1FFF0FFF2</span>
+<span class="go">dtype: object</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>This method works in a row-wise manner. It does not check the relationship
+of an element of one GeoSeries with <em>all</em> elements of the other one.</p>
+<p>The DE-9IM string has 9 characters, one for each combination of:
+- Interior/Boundary/Exterior of the first geometry
+- Interior/Boundary/Exterior of the second geometry</p>
+<p>Each character can be:
+- ‘0’: intersection is a point (dimension 0)
+- ‘1’: intersection is a line (dimension 1)
+- ‘2’: intersection is an area (dimension 2)
+- ‘F’: no intersection (empty set)</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.contains" title="sedona.spark.geopandas.GeoSeries.contains"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.contains</span></code></a>, <a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.intersects" title="sedona.spark.geopandas.GeoSeries.intersects"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.intersects</span></code></a>, <a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.within" title="sedona.spark.geopandas.GeoSeries.within"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.within</span></code></a></p>
+</div>
 </dd></dl>
 
 <dl class="py method">
