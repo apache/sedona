@@ -1073,6 +1073,19 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
     def test_contains_properly(self):
         pass
 
+    def test_relate(self):
+        for geom, geom2 in self.pairs:
+            sgpd_result = GeoSeries(geom).relate(GeoSeries(geom2), align=True)
+            gpd_result = gpd.GeoSeries(geom).relate(gpd.GeoSeries(geom2), align=True)
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).relate(GeoSeries(geom2), align=False)
+                gpd_result = gpd.GeoSeries(geom).relate(
+                    gpd.GeoSeries(geom2), align=False
+                )
+                self.check_pd_series_equal(sgpd_result, gpd_result)
+
     def test_set_crs(self):
         for geom in self.geoms:
             if isinstance(geom[0], Polygon) and geom[0] == Polygon():

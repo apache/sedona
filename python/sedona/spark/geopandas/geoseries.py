@@ -79,6 +79,7 @@ IMPLEMENTATION_STATUS = {
         "is_valid_reason",
         "length",
         "make_valid",
+        "relate",
         "set_crs",
         "to_crs",
         "to_geopandas",
@@ -1457,6 +1458,23 @@ class GeoSeries(GeoFrame, pspd.Series):
     def intersection_all(self):
         # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
+
+    # ============================================================================
+    # Binary Predicates
+    # ============================================================================
+    def relate(self, other, align=None) -> pspd.Series:
+        other, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
+        spark_col = stp.ST_Relate(F.col("L"), F.col("R"))
+        result = self._row_wise_operation(
+            spark_col,
+            other,
+            align,
+            returns_geom=False,
+            default_val=None,
+        )
+        return result
 
     # ============================================================================
     # SPATIAL PREDICATES

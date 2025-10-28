@@ -1954,6 +1954,83 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
     def test_contains_properly(self):
         pass
 
+    def test_relate(self):
+        s = GeoSeries(
+            [
+                Point(0, 0),
+                Point(0, 0),
+                LineString([(0, 0), (1, 1)]),
+            ]
+        )
+        s2 = GeoSeries(
+            [
+                Point(0, 0),
+                Point(1, 1),
+                LineString([(0, 0), (1, 1)]),
+            ]
+        )
+        # "ABCDEFGHI" DE-9 Format
+        # A Dimension of intersection
+        # B Dimension of interior intersection
+        # C Dimension of boundary intersection
+        # D Interior of first geometry intersects exterior of second
+        # E Exterior of first geometry intersects interior of second
+        # F Boundary of first geometry intersects exterior of second
+        # G Exterior of first geometry intersects boundary of second
+        # H Exterior of first geometry intersects exterior of second
+        # I Dimension of intersection for interiors
+        # 0 = false, 1 = point, 2 = line, F = area
+
+        # 1. Test with single geometry
+        point = Point(0, 0)
+        result = s.relate(point)
+        expected = pd.Series(["0FFFFFFF2", "0FFFFFFF2", "FF10F0FF2"])
+        self.check_pd_series_equal(result, expected)
+
+        result = s.relate(s2)
+        expected = pd.Series(["0FFFFFFF2", "FF0FFF0F2", "1FFF0FFF2"])
+        self.check_pd_series_equal(result, expected)
+        # 2. Test with align=True (different indices)
+        s3 = GeoSeries(
+            [
+                Point(0, 0),
+                Point(1, 1),
+            ],
+            index=range(1, 3),
+        )
+        s4 = GeoSeries(
+            [
+                Point(0, 0),
+                Point(1, 1),
+            ],
+            index=range(0, 2),
+        )
+        result = s3.relate(s4, align=True)
+        expected = pd.Series([None, "FF0FFF0F2", None], index=[0, 1, 2])
+        self.check_pd_series_equal(result, expected)
+
+        # 3. Test with align=False
+        result = s3.relate(s4, align=False)
+        expected = pd.Series(["0FFFFFFF2", "0FFFFFFF2"], index=range(1, 3))
+        self.check_pd_series_equal(result, expected)
+
+        # 4. Check that GeoDataFrame works too
+        df_result = s.to_geoframe().relate(s2, align=False)
+        expected = pd.Series(["0FFFFFFF2", "FF0FFF0F2", "1FFF0FFF2"])
+        self.check_pd_series_equal(df_result, expected)
+
+        # 5. touching_polygons and overlapping polygon case
+        touching_poly_a = Polygon(((0, 0), (1, 0), (1, 1), (0, 1), (0, 0)))
+        touching_poly_b = Polygon(((1, 0), (2, 0), (2, 1), (1, 1), (1, 0)))
+        overlapping_poly_a = Polygon(((0, 0), (2, 0), (2, 2), (0, 2), (0, 0)))
+        overlapping_poly_b = Polygon(((1, 1), (3, 1), (3, 3), (1, 3), (1, 1)))
+        s5 = GeoSeries([touching_poly_a, overlapping_poly_a])
+        s6 = GeoSeries([touching_poly_b, overlapping_poly_b])
+        result = s5.relate(s6)
+
+        expected = pd.Series(["FF2F11212", "212101212"])
+        self.check_pd_series_equal(result, expected)
+
     def test_set_crs(self):
         geo_series = sgpd.GeoSeries([Point(0, 0), Point(1, 1)], name="geometry")
         assert geo_series.crs == None
