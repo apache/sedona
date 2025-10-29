@@ -23,7 +23,7 @@ Apache Sedona extends pyspark functions which depends on libraries:
 * shapely
 * attrs
 
-You need to install necessary packages if your system does not have them installed. See ["packages" in our Pipfile](https://github.com/apache/sedona/blob/master/python/Pipfile).
+You need to install necessary packages if your system does not have them installed. Sedona now uses [uv](https://docs.astral.sh/uv/) for Python dependency management. See the dependency definitions in our [pyproject.toml](https://github.com/apache/sedona/blob/master/python/pyproject.toml).
 
 ### Install sedona
 
