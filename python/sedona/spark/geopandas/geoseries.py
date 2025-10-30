@@ -60,100 +60,6 @@ from pyspark.pandas.internal import (
 # IMPLEMENTATION STATUS TRACKING
 # ============================================================================
 
-IMPLEMENTATION_STATUS = {
-    "IMPLEMENTED": [
-        "area",
-        "buffer",
-        "bounds",
-        "centroid",
-        "contains",
-        "crs",
-        "distance",
-        "envelope",
-        "geometry",
-        "intersection",
-        "intersects",
-        "is_empty",
-        "is_simple",
-        "is_valid",
-        "is_valid_reason",
-        "length",
-        "make_valid",
-        "relate",
-        "set_crs",
-        "to_crs",
-        "to_geopandas",
-        "to_wkb",
-        "to_wkt",
-        "x",
-        "y",
-        "z",
-        "has_z",
-        "get_geometry",
-        "boundary",
-        "total_bounds",
-        "estimate_utm_crs",
-        "isna",
-        "isnull",
-        "notna",
-        "notnull",
-        "from_xy",
-        "copy",
-        "geom_type",
-        "sindex",
-    ],
-    "NOT_IMPLEMENTED": [
-        "clip",
-        "contains_properly",
-        "convex_hull",
-        "count_coordinates",
-        "count_geometries",
-        "count_interior_rings",
-        "explode",
-        "force_2d",
-        "force_3d",
-        "from_file",
-        "from_shapely",
-        "from_arrow",
-        "line_merge",
-        "reverse",
-        "segmentize",
-        "to_json",
-        "to_arrow",
-        "to_file",
-        "transform",
-        "unary_union",
-        "union_all",
-        "intersection_all",
-        "type",
-        "is_ring",
-        "is_ccw",
-        "is_closed",
-        "get_precision",
-        "concave_hull",
-        "delaunay_triangles",
-        "voronoi_polygons",
-        "minimum_rotated_rectangle",
-        "exterior",
-        "extract_unique_points",
-        "offset_curve",
-        "interiors",
-        "remove_repeated_points",
-        "set_precision",
-        "representative_point",
-        "minimum_bounding_circle",
-        "minimum_bounding_radius",
-        "minimum_clearance",
-        "normalize",
-        "m",
-    ],
-    "PARTIALLY_IMPLEMENTED": [
-        "fillna",  # Limited parameter support (no 'limit' parameter)
-        "from_wkb",
-        "from_wkt",  # Limited error handling options (only 'raise' supported)
-    ],
-}
-
 IMPLEMENTATION_PRIORITY = {
     "HIGH": [
         "contains",
@@ -281,7 +187,7 @@ class GeoSeries(GeoFrame, pspd.Series):
     - Uses Spark for distributed processing
     - Geometries are stored in WKB (Well-Known Binary) format internally
     - Some methods may have different performance characteristics
-    - Not all GeoPandas methods are implemented yet (see IMPLEMENTATION_STATUS)
+    - Not all GeoPandas methods are implemented yet (see Sedona GeoPandas docs).
 
     Performance Considerations:
     - Operations are distributed across Spark cluster
