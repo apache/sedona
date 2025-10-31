@@ -19,7 +19,6 @@
 package org.apache.sedona.core.serde;
 
 import com.esotericsoftware.kryo.Kryo;
-import org.apache.log4j.Logger;
 import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.common.geometrySerde.GeometrySerde;
 import org.apache.sedona.common.geometrySerde.SpatialIndexSerde;
@@ -37,14 +36,10 @@ import org.locationtech.jts.index.strtree.STRtree;
 
 public class SedonaKryoRegistrator implements KryoRegistrator {
 
-  static final Logger log = Logger.getLogger(SedonaKryoRegistrator.class);
-
   @Override
   public void registerClasses(Kryo kryo) {
     GeometrySerde serializer = new GeometrySerde();
     SpatialIndexSerde indexSerializer = new SpatialIndexSerde(serializer);
-
-    log.info("Registering custom serializers for geometry types");
 
     kryo.register(Point.class, serializer);
     kryo.register(LineString.class, serializer);
