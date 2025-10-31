@@ -493,73 +493,6 @@
 <span class="c1"># IMPLEMENTATION STATUS TRACKING</span>
 <span class="c1"># ============================================================================</span>
 
-<span class="n">IMPLEMENTATION_STATUS</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;IMPLEMENTED&quot;</span><span class="p">:</span> <span class="p">[</span>
-        <span class="s2">&quot;area&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;buffer&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;crs&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;geometry&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;active_geometry_name&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;sindex&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;rename_geometry&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;copy&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;sjoin&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;to_parquet&quot;</span><span class="p">,</span>
-    <span class="p">],</span>
-    <span class="s2">&quot;NOT_IMPLEMENTED&quot;</span><span class="p">:</span> <span class="p">[</span>
-        <span class="s2">&quot;to_geopandas&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;_to_geopandas&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;geom_type&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;type&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;length&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;is_valid&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;is_valid_reason&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;is_empty&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;is_simple&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;is_ring&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;is_ccw&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;is_closed&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;has_z&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;boundary&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;centroid&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;convex_hull&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;envelope&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;exterior&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;interiors&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;unary_union&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;count_coordinates&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;count_geometries&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;count_interior_rings&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;get_precision&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;get_geometry&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;concave_hull&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;delaunay_triangles&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;voronoi_polygons&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;minimum_rotated_rectangle&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;extract_unique_points&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;offset_curve&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;remove_repeated_points&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;set_precision&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;representative_point&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;minimum_bounding_circle&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;minimum_bounding_radius&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;minimum_clearance&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;normalize&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;make_valid&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;reverse&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;segmentize&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;transform&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;force_2d&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;force_3d&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;line_merge&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;union_all&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;intersection_all&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;contains&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;contains_properly&quot;</span><span class="p">,</span>
-    <span class="p">],</span>
-    <span class="s2">&quot;PARTIALLY_IMPLEMENTED&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;set_geometry&quot;</span><span class="p">],</span>  <span class="c1"># Only drop=True case is not implemented</span>
-<span class="p">}</span>
-
 <span class="n">IMPLEMENTATION_PRIORITY</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;HIGH&quot;</span><span class="p">:</span> <span class="p">[</span>
         <span class="s2">&quot;to_geopandas&quot;</span><span class="p">,</span>
@@ -704,7 +637,7 @@
 <span class="sd">    - Uses Spark for distributed processing</span>
 <span class="sd">    - Geometries are stored in WKB (Well-Known Binary) format internally</span>
 <span class="sd">    - Some methods may have different performance characteristics</span>
-<span class="sd">    - Not all GeoPandas methods are implemented yet (see IMPLEMENTATION_STATUS)</span>
+<span class="sd">    - Not all GeoPandas methods are implemented yet (see Sedona GeoPandas docs).</span>
 
 <span class="sd">    Performance Considerations:</span>
 <span class="sd">    - Operations are distributed across Spark cluster</span>
