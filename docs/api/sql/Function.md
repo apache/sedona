@@ -2804,10 +2804,10 @@ Output:
 
 ## ST_LineMerge
 
-Introduction: Returns a LineString formed by sewing together the constituent line work of a MULTILINESTRING.
+Introduction: Returns a LineString or MultiLineString formed by sewing together the constituent line work of a MULTILINESTRING.
 
 !!!note
-    Only works for MULTILINESTRING. Using other geometry will return a GEOMETRYCOLLECTION EMPTY. If the MultiLineString can't be merged, the original MULTILINESTRING is returned.
+    Only works for MULTILINESTRING. Using other geometry will return a GEOMETRYCOLLECTION EMPTY. If no merging can be performed, the original MULTILINESTRING is returned.
 
 Format: `ST_LineMerge (A: Geometry)`
 
