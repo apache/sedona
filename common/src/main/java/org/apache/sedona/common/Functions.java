@@ -1170,7 +1170,9 @@ public class Functions {
       } else {
         // if the merger couldn't join the lines, it will contain the individual lines, so return
         // the input
-        return geometry;
+        Object[] mergedLines = merger.getMergedLineStrings().toArray(new LineString[] {});
+        multiLineString = geometry.getFactory().createMultiLineString((LineString[]) mergedLines);
+        return multiLineString;
       }
     }
     return geometry.getFactory().createGeometryCollection();
