@@ -163,7 +163,7 @@ class TestGeoSeries(TestGeopandasBase):
     def test_area(self):
         result = self.geoseries.area.to_pandas()
         expected = pd.Series([0.0, 0.0, 5.23, 5.23])
-        assert_series_equal(result, expected)
+        self.check_pd_series_equal(result, expected)
 
         # Test that GeoDataFrame.area also works
         df_result = self.geoseries.to_geoframe().area.to_pandas()
@@ -235,7 +235,7 @@ class TestGeoSeries(TestGeopandasBase):
         )
         result = geoseries.x.to_pandas()
         expected = pd.Series([0, 2.5, -1, -1])
-        assert_series_equal(result, expected)
+        self.check_pd_series_equal(result, expected)
 
     def test_y(self):
         geoseries = sgpd.GeoSeries(
@@ -243,7 +243,7 @@ class TestGeoSeries(TestGeopandasBase):
         )
         result = geoseries.y.to_pandas()
         expected = pd.Series([-1, 0, 2.5, 0])
-        assert_series_equal(result, expected)
+        self.check_pd_series_equal(result, expected)
 
     def test_z(self):
         geoseries = sgpd.GeoSeries(
@@ -251,7 +251,7 @@ class TestGeoSeries(TestGeopandasBase):
         )
         result = geoseries.z.to_pandas()
         expected = pd.Series([2.5, -1, 0, np.nan])
-        assert_series_equal(result, expected)
+        self.check_pd_series_equal(result, expected)
 
     def test_m(self):
         pass
@@ -671,7 +671,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         )
         result = geoseries.length.to_pandas()
         expected = pd.Series([0.000000, 1.414214, 3.414214, 4.828427])
-        assert_series_equal(result, expected)
+        self.check_pd_series_equal(result, expected)
 
         # Check that GeoDataFrame works too
         df_result = geoseries.to_geoframe().length.to_pandas()
@@ -716,7 +716,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
                 None,
             ]
         )
-        assert_series_equal(result, expected)
+        self.check_pd_series_equal(result, expected)
 
         # Check that GeoDataFrame works too
         df_result = s.to_geoframe().is_valid_reason().to_pandas()
