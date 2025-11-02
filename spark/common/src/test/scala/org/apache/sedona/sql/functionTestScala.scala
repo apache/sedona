@@ -207,6 +207,26 @@ class functionTestScala
       assert(functionDf.count() > 0)
     }
 
+    it("Passes ST_Envelope returns input if input is empty") {
+      var emptyGeometries = Seq(
+        ("POINT EMPTY"),
+        ("LINESTRING EMPTY"),
+        ("POLYGON EMPTY"),
+        ("MULTIPOINT EMPTY"),
+        ("MULTILINESTRING EMPTY"),
+        ("MULTIPOLYGON EMPTY"),
+        ("GEOMETRYCOLLECTION EMPTY"),
+        ("GEOMETRYCOLLECTION (GEOMETRYCOLLECTION EMPTY, LINESTRING EMPTY)")).toDF("wkt")
+
+      emptyGeometries.createOrReplaceTempView("emptyGeometries")
+      var functionDf = sparkSession.sql(
+        "SELECT ST_AsText(ST_Envelope(ST_GeomFromWKT(wkt))) FROM emptyGeometries")
+
+      val inputWkts = emptyGeometries.collect().map(_.getString(0))
+      val resultWkts = functionDf.collect().map(_.getString(0))
+      assert(resultWkts.sameElements(inputWkts))
+    }
+
     it("Passed ST_Expand") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('POLYGON ((50 50 1, 50 80 2, 80 80 3, 80 50 2, 50 50 1))') as geom")
