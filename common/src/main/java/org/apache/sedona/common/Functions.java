@@ -572,6 +572,9 @@ public class Functions {
   }
 
   public static Geometry envelope(Geometry geometry) {
+    if (geometry.isEmpty()) {
+      return geometry;
+    }
     return geometry.getEnvelope();
   }
 
