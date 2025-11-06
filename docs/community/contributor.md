@@ -71,6 +71,7 @@ Current Sedona Committers are as follows:
 |   John Bampton   |  jbampton   |   johnbam@apache.org    |
 | Dewey Dunnington | paleolimbot | paleolimbot@apache.org  |
 |  Nilesh Gajwani  |   iGN5117   |    nilesh@apache.org    |
+|   Peter Nguyen   |  petern48   |    petern@apache.org    |
 |   Pranav Toggi   |  prantogg   |   prantogg@apache.org   |
 
 ## Nominate a committer or PMC member
