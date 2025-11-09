@@ -111,7 +111,7 @@ class TestGeoSeries(TestGeopandasBase):
         crs = "EPSG:3857"
         result = GeoSeries(data, index=index, crs=crs).to_spark_pandas()
         ps_df = ps.Series(data, index=index)
-        self.check_pd_series_equal(result, ps_df)
+        self.check_pd_series_equal(result, ps_df.to_pandas())
 
     def test_sindex(self):
         s = GeoSeries([Point(x, x) for x in range(5)])
