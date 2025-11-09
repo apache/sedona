@@ -1206,7 +1206,26 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         pass
 
     def test_convex_hull(self):
-        pass
+        s = sgpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1)]),
+                LineString([(0, 0), (1, 1), (1, 0)]),
+                MultiPoint([(0, 0), (1, 1), (0, 1), (1, 0), (0.5, 0.5)]),
+                MultiPoint([(0, 0), (1, 1)]),
+                Point(0, 0),
+            ]
+        )
+        result = s.convex_hull
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (0, 1), (1, 1), (0, 0)]),
+                Polygon([(0, 0), (1, 1), (1, 0), (0, 0)]),
+                Polygon([(0, 0), (0, 1), (1, 1), (1, 0), (0, 0)]),
+                LineString([(0, 0), (1, 1)]),
+                Point(0, 0),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
 
     def test_delaunay_triangles(self):
         pass

@@ -611,9 +611,50 @@ class GeoFrame(metaclass=ABCMeta):
     # def concave_hull(self, ratio=0.0, allow_holes=False):
     #     raise NotImplementedError("This method is not implemented yet.")
 
-    # @property
-    # def convex_hull(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    @property
+    def convex_hull(self):
+        """Return a ``GeoSeries`` of geometries representing the convex hull
+        of each geometry.
+
+        The convex hull of a geometry is the smallest convex `Polygon`
+        containing all the points in each geometry, unless the number of points
+        in the geometric object is less than three. For two points, the convex
+        hull collapses to a `LineString`; for 1, a `Point`.
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, Point, MultiPoint
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
+        ...         LineString([(0, 0), (1, 1), (1, 0)]),
+        ...         MultiPoint([(0, 0), (1, 1), (0, 1), (1, 0), (0.5, 0.5)]),
+        ...         MultiPoint([(0, 0), (1, 1)]),
+        ...         Point(0, 0),
+        ...     ]
+        ... )
+        >>> s
+        0                       POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1                           LINESTRING (0 0, 1 1, 1 0)
+        2    MULTIPOINT ((0 0), (1 1), (0 1), (1 0), (0.5 0...
+        3                            MULTIPOINT ((0 0), (1 1))
+        4                                          POINT (0 0)
+        dtype: geometry
+
+        >>> s.convex_hull
+        0         POLYGON ((0 0, 0 1, 1 1, 0 0))
+        1         POLYGON ((0 0, 1 1, 1 0, 0 0))
+        2    POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))
+        3                  LINESTRING (0 0, 1 1)
+        4                            POINT (0 0)
+        dtype: geometry
+
+        See Also
+        --------
+        GeoSeries.envelope : bounding rectangle geometry
+        """
+        return _delegate_to_geometry_column("convex_hull", self)
 
     # def delaunay_triangles(self, tolerance=0.0, only_edges=False):
     #     raise NotImplementedError("This method is not implemented yet.")

@@ -968,6 +968,13 @@ class GeoSeries(GeoFrame, pspd.Series):
             returns_geom=True,
         )
 
+    def convex_hull(self) -> "GeoSeries":
+        spark_expr = stf.ST_ConvexHull(self.spark.column)
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=True,
+        )
+
     def concave_hull(self, ratio=0.0, allow_holes=False):
         # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
