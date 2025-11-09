@@ -224,9 +224,7 @@ class TestGeoSeries(TestGeopandasBase):
     def test_geometry(self):
         sgpd_geoseries = sgpd.GeoSeries([Point(0, 0), Point(1, 1)])
         assert isinstance(sgpd_geoseries.geometry, sgpd.GeoSeries)
-        self.check_pd_series_equal(
-            sgpd_geoseries.geometry, sgpd_geoseries.to_pandas()
-        )
+        self.check_pd_series_equal(sgpd_geoseries.geometry, sgpd_geoseries.to_pandas())
 
     def test_x(self):
         geoseries = sgpd.GeoSeries(
