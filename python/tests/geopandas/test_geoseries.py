@@ -166,7 +166,7 @@ class TestGeoSeries(TestGeopandasBase):
 
         # Test that GeoDataFrame.area also works
         df_result = self.geoseries.to_geoframe().area
-        self.check_pd_series_equal(result, df_result)
+        self.check_pd_series_equal(result, df_result.to_pandas())
 
     def test_buffer(self):
 
