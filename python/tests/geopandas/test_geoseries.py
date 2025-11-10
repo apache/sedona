@@ -1203,21 +1203,25 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         pass
 
     def test_convex_hull(self):
-        s = GeoSeries([
-        Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
-        LineString([(0, 0), (2, 1)]),
-        Point(0, 0),
-        None,
-    ])
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                LineString([(0, 0), (2, 1)]),
+                Point(0, 0),
+                None,
+            ]
+        )
 
         result = s.convex_hull
 
-        expected = gpd.GeoSeries([
-            Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),  # polygon hull == itself
-            LineString([(0, 0), (2, 1)]),               # NOT a polygon
-            Point(0, 0),                                # point stays point
-            None,                                       # None stays None
-        ])
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),  # polygon hull == itself
+                LineString([(0, 0), (2, 1)]),  # NOT a polygon
+                Point(0, 0),  # point stays point
+                None,  # None stays None
+            ]
+        )
         self.check_sgpd_equals_gpd(result, expected)
 
         # Check if GeoDataFrame works as well
