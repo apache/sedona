@@ -973,12 +973,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    def convex_hull(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError(
-            _not_implemented_error(
-                "convex_hull", "Computes the convex hull of each geometry."
-            )
+    def convex_hull(self) -> "GeoSeries":
+        spark_expr = stf.ST_ConvexHull(self.spark.column)
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=True,
         )
 
     def delaunay_triangles(self, tolerance=0.0, only_edges=False):

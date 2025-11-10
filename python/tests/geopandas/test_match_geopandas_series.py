@@ -728,7 +728,15 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_convex_hull(self):
-        pass
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).convex_hull
+            gpd_result = gpd.GeoSeries(geom).convex_hull
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        mixed = [self.points[1], self.linestrings[1], self.polygons[1], None]
+        sgpd_result = GeoSeries(mixed).convex_hull
+        gpd_result = gpd.GeoSeries(mixed).convex_hull
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_delaunay_triangles(self):
         pass
