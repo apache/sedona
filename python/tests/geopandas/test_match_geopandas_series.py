@@ -17,6 +17,7 @@
 import os
 import shutil
 import tempfile
+import math
 import pytest
 import pandas as pd
 import geopandas as gpd
@@ -775,7 +776,59 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_minimum_bounding_circle(self):
-        pass
+        for geom in self.geoms:
+            gs_in = GeoSeries(geom)
+            gp_in = gpd.GeoSeries(geom)
+
+            # Sedona property vs GeoPandas method
+            s_circle = gs_in.minimum_bounding_circle
+            g_circle = gp_in.minimum_bounding_circle()
+
+            # 0) empties / nulls parity
+            self.check_pd_series_equal(s_circle.is_empty, g_circle.is_empty)
+            self.check_pd_series_equal(gs_in.isna(), gp_in.isna())
+
+            # 1) geometry type parity
+            self.check_pd_series_equal(s_circle.geom_type, g_circle.geom_type)
+
+            # 2) Coverage parity — compare only where inputs are valid for both backends
+            nonnull_nonempty_ps = (gs_in.isna() == False) & (gs_in.is_empty == False)
+            nogc_ps = gs_in.geom_type != "GeometryCollection"
+            mask_ps = nonnull_nonempty_ps & nogc_ps
+
+            nonnull_nonempty_pd = gp_in.notna() & (~gp_in.is_empty)
+            nogc_pd = gp_in.geom_type != "GeometryCollection"
+            mask_pd = nonnull_nonempty_pd & nogc_pd
+
+            # Do not slice the GeoSeries (that can drop Geo ops). Instead, null-out rows and re-wrap.
+            s_circle_safe = GeoSeries(s_circle.mask(~mask_ps, None))
+            gs_in_safe = GeoSeries(gs_in.mask(~mask_ps, None))
+
+            # Compute on the masked series so Spark/JTS never evaluates GeometryCollection rows.
+            s_cov_all = s_circle_safe.covers(gs_in_safe)  # ps.Series
+            g_cov_all = g_circle.covers(gp_in)  # pd.Series
+
+            # Compare only the valid rows where both sides are comparable
+            self.check_pd_series_equal(s_cov_all[mask_ps], g_cov_all[mask_pd])
+
+            # 3) Area parity: Sedona circle polygons may differ slightly in vertex density;
+            s_area = s_circle.area
+            g_area = g_circle.area
+
+            if hasattr(s_area, "to_pandas"):
+                s_area = s_area.to_pandas()
+
+            for a, b in zip(s_area, g_area):
+                if (
+                    a is None
+                    or b is None
+                    or pd.isna(a)
+                    or pd.isna(b)
+                    or a <= 0
+                    or b <= 0
+                ):
+                    continue
+                assert math.isclose(a, b, rel_tol=1e-2, abs_tol=1e-8)
 
     def test_minimum_bounding_radius(self):
         pass

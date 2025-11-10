@@ -722,8 +722,29 @@ class GeoFrame(metaclass=ABCMeta):
     # def representative_point(self):
     #     raise NotImplementedError("This method is not implemented yet.")
 
-    # def minimum_bounding_circle(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    @property
+    def minimum_bounding_circle(self):
+        """
+        Returns a ``GeoSeries`` containing the minimum bounding circle of each geometry.
+
+        The minimum bounding circle is the smallest circle that completely encloses
+        the geometry. The result is returned as a circular polygon approximation.
+
+        Returns
+        -------
+        GeoSeries
+            A GeoSeries containing the minimum bounding circle for each geometry.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Polygon
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> gs = GeoSeries([Polygon([(0, 0), (3, 0), (3, 3), (0, 3)])])
+        >>> gs.minimum_bounding_circle
+        0    POLYGON ((...))
+        dtype: geometry
+        """
+        return _delegate_to_geometry_column("minimum_bounding_circle", self)
 
     # def minimum_bounding_radius(self):
     #     raise NotImplementedError("This method is not implemented yet.")
