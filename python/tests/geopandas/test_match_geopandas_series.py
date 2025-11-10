@@ -729,8 +729,6 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
     def test_convex_hull(self):
         for geom in self.geoms:
-            if isinstance(geom[0], LinearRing):
-                continue
             sgpd_result = GeoSeries(geom).convex_hull
             gpd_result = gpd.GeoSeries(geom).convex_hull
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
