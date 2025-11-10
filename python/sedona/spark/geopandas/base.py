@@ -611,9 +611,42 @@ class GeoFrame(metaclass=ABCMeta):
     # def concave_hull(self, ratio=0.0, allow_holes=False):
     #     raise NotImplementedError("This method is not implemented yet.")
 
-    # @property
-    # def convex_hull(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    @property
+    def convex_hull(self):
+        """
+        Return the convex hull of each geometry.
+
+        The convex hull is the smallest convex Polygon that contains
+        all the points of the geometry.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point, Polygon, LineString
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+        ...         LineString([(0, 0), (2, 1)]),
+        ...         Point(0, 0),
+        ...     ]
+        ... )
+        >>> s
+        0    POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))
+        1    LINESTRING (0 0, 2 1)
+        2                       POINT (0 0)
+        dtype: geometry
+
+        >>> s.convex_hull
+        0    POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))
+        1    POLYGON ((0 0, 2 1, 0 0))
+        2                       POINT (0 0)
+        dtype: geometry
+
+        See also
+        --------
+        GeoSeries.envelope : axis-aligned bounding rectangle
+        """
+        return _delegate_to_geometry_column("convex_hull", self)
 
     # def delaunay_triangles(self, tolerance=0.0, only_edges=False):
     #     raise NotImplementedError("This method is not implemented yet.")
