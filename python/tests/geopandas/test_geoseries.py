@@ -1413,6 +1413,22 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         expected = GeometryCollection()
         self.check_geom_equals(result, expected)
 
+    def test_intersection_all(self):
+        s = GeoSeries([box(0, 0, 2, 2), box(1, 1, 3, 3)])
+        result = s.intersection_all()
+        expected = Polygon([(1, 1), (1, 2), (2, 2), (2, 1), (1, 1)])
+        self.check_geom_equals(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().intersection_all()
+        self.check_geom_equals(df_result, expected)
+
+        # Empty GeoSeries
+        s = sgpd.GeoSeries([])
+        result = s.intersection_all()
+        expected = GeometryCollection()
+        self.check_geom_equals(result, expected)
+
     def test_row_wise_dataframe(self):
         s = GeoSeries(
             [

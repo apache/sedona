@@ -857,6 +857,22 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         gpd_result = gpd.GeoSeries([]).union_all()
         self.check_geom_equals(sgpd_result, gpd_result)
 
+    def test_intersection_all(self):
+        if parse_version(gpd.__version__) < parse_version("1.1.0"):
+            pytest.skip("geopandas intersection_all requires version 1.1.0 or higher")
+
+        # Intersection all the valid geometries
+        # Neither our nor geopandas' implementation supports invalid geometries
+        lst = [g for geom in self.geoms for g in geom if g.is_valid]
+        sgpd_result = GeoSeries(lst).intersection_all()
+        gpd_result = gpd.GeoSeries(lst).intersection_all()
+        self.check_geom_equals(sgpd_result, gpd_result)
+
+        # Ensure we have the same result for empty GeoSeries
+        sgpd_result = GeoSeries([]).intersection_all()
+        gpd_result = gpd.GeoSeries([]).intersection_all()
+        self.check_geom_equals(sgpd_result, gpd_result)
+
     def test_crosses(self):
         for geom, geom2 in self.pairs:
             if self.contains_any_geom_collection(geom, geom2):

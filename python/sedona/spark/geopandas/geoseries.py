@@ -1123,6 +1123,28 @@ class GeoSeries(GeoFrame, pspd.Series):
         geom = ps_series.iloc[0]
         return geom
 
+    def intersection_all(self, method="unary", grid_size=None) -> BaseGeometry:
+        if grid_size is not None:
+            raise NotImplementedError("Sedona does not support the grid_size argument")
+        if method != "unary":
+            import warnings
+
+            warnings.warn(
+                f"Sedona does not support manually specifying different intersection methods. Ignoring non-default method argument of {method}"
+            )
+
+        if len(self) == 0:
+            from shapely.geometry import GeometryCollection
+
+            return GeometryCollection()
+
+        spark_expr = sta.ST_Intersection_Aggr(self.spark.column)
+        tmp = self._query_geometry_column(spark_expr, returns_geom=False, is_aggr=True)
+
+        ps_series = tmp.take([0])
+        geom = ps_series.iloc[0]
+        return geom
+
     def crosses(self, other, align=None) -> pspd.Series:
         # Sedona does not support GeometryCollection (errors), so we return NULL for now to avoid error.
         other_series, extended = self._make_series_of_val(other)
