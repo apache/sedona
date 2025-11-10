@@ -633,13 +633,13 @@ class GeoFrame(metaclass=ABCMeta):
         >>> s
         0    POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))
         1    LINESTRING (0 0, 2 1)
-        2                       POINT (0 0)
+        2    POINT (0 0)
         dtype: geometry
 
         >>> s.convex_hull
         0    POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))
         1    POLYGON ((0 0, 2 1, 0 0))
-        2                       POINT (0 0)
+        2    POINT (0 0)
         dtype: geometry
 
         See also

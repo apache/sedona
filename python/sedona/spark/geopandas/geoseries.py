@@ -974,12 +974,6 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def convex_hull(self) -> "GeoSeries":
-        """
-        Return the convex hull of each geometry as a new GeoSeries.
-
-        The convex hull is the smallest convex Polygon that contains
-        all the points of the geometry.
-        """
         spark_expr = stf.ST_ConvexHull(self.spark.column)
         return self._query_geometry_column(
             spark_expr,
