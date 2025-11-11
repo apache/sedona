@@ -1283,7 +1283,30 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         pass
 
     def test_minimum_bounding_circle(self):
-        pass
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                LineString([(0, 0), (2, 0)]),
+                Point(0, 0),
+                None,
+            ]
+        )
+
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                LineString([(0, 0), (2, 0)]),
+                Point(0, 0),
+                None,
+            ]
+        ).minimum_bounding_circle()
+
+        result = s.minimum_bounding_circle()
+        self.check_sgpd_equals_gpd(result, expected)
+
+        gdf = s.to_geoframe()
+        df_result = gdf.minimum_bounding_circle()
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_minimum_bounding_radius(self):
         pass
