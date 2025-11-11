@@ -888,6 +888,28 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("union_all", self, method, grid_size)
 
+    def intersection_all(self) -> BaseGeometry:
+        """Returns a geometry containing the intersection of all geometries in
+        the ``GeoSeries``.
+
+        Returns
+        -------
+        shapely.geometry.base.BaseGeometry
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import box
+        >>> s = GeoSeries([box(0, 0, 2, 2), box(1, 1, 3, 3)])
+        >>> s
+        0    POLYGON ((2 0, 2 2, 0 2, 0 0, 2 0))
+        1    POLYGON ((3 1, 3 3, 1 3, 1 1, 3 1))
+        dtype: geometry
+        >>> s.intersection_all()
+        <POLYGON ((1 1, 1 2, 2 2, 2 1, 1 1))>
+        """
+        return _delegate_to_geometry_column("intersection_all", self)
+
     def crosses(self, other, align=None) -> ps.Series:
         """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
         each aligned geometry that cross `other`.

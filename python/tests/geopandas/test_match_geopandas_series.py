@@ -858,12 +858,10 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         self.check_geom_equals(sgpd_result, gpd_result)
 
     def test_intersection_all(self):
-        if parse_version(gpd.__version__) < parse_version("1.1.0"):
-            pytest.skip("geopandas intersection_all requires version 1.1.0 or higher")
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            pytest.skip("geopandas intersection_all requires version 1.0.0 or higher")
 
-        # Intersection all the valid geometries
-        # Neither our nor geopandas' implementation supports invalid geometries
-        lst = [g for geom in self.geoms for g in geom if g.is_valid]
+        lst = self.geoms
         sgpd_result = GeoSeries(lst).intersection_all()
         gpd_result = gpd.GeoSeries(lst).intersection_all()
         self.check_geom_equals(sgpd_result, gpd_result)
