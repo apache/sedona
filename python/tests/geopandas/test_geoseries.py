@@ -1318,45 +1318,58 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         pass
 
     def test_make_valid(self):
-        s = GeoSeries(
+        s = sgpd.GeoSeries(
             [
-                Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
-                LineString([(0, 0), (3, 0)]),
-                Point(1, 1),
-                None,
+                Polygon([(0, 0), (0, 2), (1, 1), (2, 2), (2, 0), (1, 1), (0, 0)]),
+                Polygon([(0, 2), (0, 1), (2, 0), (0, 0), (0, 2)]),
+                LineString([(0, 0), (1, 1), (1, 0)]),
+            ],
+        )
+        result = s.make_valid(method="structure")
+
+        expected = gpd.GeoSeries(
+            [
+                MultiPolygon(
+                    [
+                        Polygon([(1, 1), (0, 0), (0, 2), (1, 1)]),
+                        Polygon([(2, 0), (1, 1), (2, 2), (2, 0)]),
+                    ]
+                ),
+                Polygon([(0, 1), (2, 0), (0, 0), (0, 1)]),
+                LineString([(0, 0), (1, 1), (1, 0)]),
             ]
         )
 
-        result = s.minimum_bounding_circle
+        self.check_sgpd_equals_gpd(result, expected)
 
-        self.check_pd_series_equal(
-            result.isna(), pd.Series([False, False, False, True])
+        result = s.make_valid(method="structure", keep_collapsed=False)
+        expected = gpd.GeoSeries(
+            [
+                MultiPolygon(
+                    [
+                        Polygon([(1, 1), (0, 0), (0, 2), (1, 1)]),
+                        Polygon([(2, 0), (1, 1), (2, 2), (2, 0)]),
+                    ]
+                ),
+                Polygon([(0, 1), (2, 0), (0, 0), (0, 1)]),
+                LineString([(0, 0), (1, 1), (1, 0)]),
+            ]
         )
+        self.check_sgpd_equals_gpd(result, expected)
 
-        gpd_res = result.to_geopandas()
-        gpd_src = s.to_geopandas()
+        s = GeoSeries([Polygon([(0, 0), (1, 1), (1, 2), (1, 1), (0, 0)])])
 
-        non_null = gpd_res.notna()
+        result = s.make_valid(method="structure", keep_collapsed=True)
+        expected = gpd.GeoSeries([LineString([(0, 0), (1, 1), (1, 2), (1, 1), (0, 0)])])
+        self.check_sgpd_equals_gpd(result, expected)
 
-        got_types = gpd_res[non_null].geom_type.reset_index(drop=True)
-        exp_types = pd.Series(["Polygon", "Polygon", "Point"])
-        pd.testing.assert_series_equal(
-            got_types, exp_types, check_names=False, check_dtype=False
-        )
+        result = s.make_valid(method="structure", keep_collapsed=False)
+        expected = gpd.GeoSeries([Polygon()])
+        self.check_sgpd_equals_gpd(result, expected)
 
-        # Coverage: allow for tiny numeric tolerance on circle approximation
-        covered = (
-            gpd_res[non_null]
-            .buffer(1e-9)
-            .covers(gpd_src[non_null])
-            .reset_index(drop=True)
-        )
-        pd.testing.assert_series_equal(
-            covered, pd.Series([True, True, True]), check_names=False
-        )
-
-        df_result = s.to_geoframe().minimum_bounding_circle
-        self.check_sgpd_equals_gpd(df_result, gpd_res)
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().make_valid(method="structure", keep_collapsed=False)
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_reverse(self):
         pass
