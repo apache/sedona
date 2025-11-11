@@ -17,7 +17,6 @@
 import os
 import shutil
 import tempfile
-import math
 import pytest
 import pandas as pd
 import geopandas as gpd
