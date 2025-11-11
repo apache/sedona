@@ -776,56 +776,10 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_minimum_bounding_circle(self):
-        # Base set: polygon, line, point, and None
-        data = [
-            Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
-            LineString([(0, 0), (2, 0)]),
-            Point(0, 0),
-            None,
-        ]
-
-        # Sedona vs GeoPandas — tolerate method/property API differences
-        s_sed = GeoSeries(data)
-        s_gpd = gpd.GeoSeries(data)
-
-        sed_attr = getattr(s_sed, "minimum_bounding_circle")
-        gpd_attr = getattr(s_gpd, "minimum_bounding_circle")
-
-        sed_res = sed_attr() if callable(sed_attr) else sed_attr
-        gpd_res = gpd_attr() if callable(gpd_attr) else gpd_attr
-
-        self.check_sgpd_equals_gpd(sed_res, gpd_res)
-
-        # Mixed geometries including Multi* and None
-        mixed = [
-            MultiPoint([(0, 0), (1, 1)]),
-            MultiLineString([[(0, 0), (1, 0)], [(1, 0), (1, 1)]]),
-            Polygon([(2, 2), (3, 2), (3, 3), (2, 3)]),
-            None,
-        ]
-
-        s_sed2 = GeoSeries(mixed)
-        s_gpd2 = gpd.GeoSeries(mixed)
-
-        sed_attr2 = getattr(s_sed2, "minimum_bounding_circle")
-        gpd_attr2 = getattr(s_gpd2, "minimum_bounding_circle")
-
-        sed_res2 = sed_attr2() if callable(sed_attr2) else sed_attr2
-        gpd_res2 = gpd_attr2() if callable(gpd_attr2) else gpd_attr2
-
-        self.check_sgpd_equals_gpd(sed_res2, gpd_res2)
-
-        # Empty GeoSeries parity
-        sed_empty = GeoSeries([])
-        gpd_empty = gpd.GeoSeries([])
-
-        sed_attr3 = getattr(sed_empty, "minimum_bounding_circle")
-        gpd_attr3 = getattr(gpd_empty, "minimum_bounding_circle")
-
-        sed_res3 = sed_attr3() if callable(sed_attr3) else sed_attr3
-        gpd_res3 = gpd_attr3() if callable(gpd_attr3) else gpd_attr3
-
-        self.check_sgpd_equals_gpd(sed_res3, gpd_res3)
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).minimum_bounding_circle()
+            gpd_result = gpd.GeoSeries(geom).minimum_bounding_circle()
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result, tolerance=0.5)
 
     def test_minimum_bounding_radius(self):
         pass

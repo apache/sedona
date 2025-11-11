@@ -722,19 +722,15 @@ class GeoFrame(metaclass=ABCMeta):
     # def representative_point(self):
     #     raise NotImplementedError("This method is not implemented yet.")
 
-    @property
     def minimum_bounding_circle(self):
         """
         Returns a ``GeoSeries`` containing the minimum bounding circle of each geometry.
-
         The minimum bounding circle is the smallest circle that completely encloses
         the geometry. The result is returned as a circular polygon approximation.
-
         Returns
         -------
         GeoSeries
             A GeoSeries containing the minimum bounding circle for each geometry.
-
         Examples
         --------
         >>> from shapely.geometry import Polygon

@@ -1030,14 +1030,12 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
-    def minimum_bounding_circle(self, quadrant_segments: int = None):
-        if quadrant_segments is None:
-            spark_expr = stf.ST_MinimumBoundingCircle(self.spark.column)
-        else:
-            spark_expr = stf.ST_MinimumBoundingCircle(
-                self.spark.column, quadrant_segments
-            )
-        return self._query_geometry_column(spark_expr, returns_geom=True)
+    def minimum_bounding_circle(self) -> "GeoSeries":
+        spark_expr = stf.ST_MinimumBoundingCircle(self.spark.column)
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=True,
+        )
 
     def minimum_bounding_radius(self):
         # Implementation of the abstract method.
