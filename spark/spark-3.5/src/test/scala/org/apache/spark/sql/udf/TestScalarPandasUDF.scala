@@ -56,7 +56,7 @@ object ScalarUDF {
 
   private lazy val isPythonAvailable: Boolean = TestUtils.testCommandAvailable(pythonExec)
 
-  lazy val pythonVer: String = if (isPythonAvailable) {
+  val pythonVer: String = if (isPythonAvailable) {
     Process(
       Seq(pythonExec, "-c", "import sys; print('%d.%d' % sys.version_info[:2])"),
       None,
@@ -73,29 +73,29 @@ object ScalarUDF {
   }
 
   val additionalModule = "spark/spark-3.5/src/test/scala/org/apache/spark/sql/udf"
-
-  val geopandasGeometryToNonGeometry: Array[Byte] = {
-    var binaryPandasFunc: Array[Byte] = null
-    withTempPath { path =>
-      Process(
-        Seq(
-          pythonExec,
-          "-c",
-          f"""
-            |from pyspark.sql.types import FloatType
-            |from pyspark.serializers import CloudPickleSerializer
-            |f = open('$path', 'wb');
-            |def apply_geopandas(x):
-            |    return x.area
-            |f.write(CloudPickleSerializer().dumps((apply_geopandas, FloatType())))
-            |""".stripMargin),
-        None,
-        "PYTHONPATH" -> s"$pysparkPythonPath:$pythonPath").!!
-      binaryPandasFunc = Files.readAllBytes(path.toPath)
-    }
-    assert(binaryPandasFunc != null)
-    binaryPandasFunc
-  }
+//
+//  val geopandasGeometryToNonGeometry: Array[Byte] = {
+//    var binaryPandasFunc: Array[Byte] = null
+//    withTempPath { path =>
+//      Process(
+//        Seq(
+//          pythonExec,
+//          "-c",
+//          f"""
+//            |from pyspark.sql.types import FloatType
+//            |from pyspark.serializers import CloudPickleSerializer
+//            |f = open('$path', 'wb');
+//            |def apply_geopandas(x):
+//            |    return x.area
+//            |f.write(CloudPickleSerializer().dumps((apply_geopandas, FloatType())))
+//            |""".stripMargin),
+//        None,
+//        "PYTHONPATH" -> s"$pysparkPythonPath:$pythonPath").!!
+//      binaryPandasFunc = Files.readAllBytes(path.toPath)
+//    }
+//    assert(binaryPandasFunc != null)
+//    binaryPandasFunc
+//  }
 
   val geopandasGeometryToGeometryFunction: Array[Byte] = {
     var binaryPandasFunc: Array[Byte] = null
@@ -119,49 +119,49 @@ object ScalarUDF {
     assert(binaryPandasFunc != null)
     binaryPandasFunc
   }
-
-  val geopandasNonGeometryToGeometryFunction: Array[Byte] = {
-    var binaryPandasFunc: Array[Byte] = null
-    withTempPath { path =>
-      Process(
-        Seq(
-          pythonExec,
-          "-c",
-          f"""
-             |from sedona.sql.types import GeometryType
-             |from shapely.wkt import loads
-             |from pyspark.serializers import CloudPickleSerializer
-             |f = open('$path', 'wb');
-             |def apply_geopandas(x):
-             |    return x.apply(lambda wkt: loads(wkt).buffer(1))
-             |f.write(CloudPickleSerializer().dumps((apply_geopandas, GeometryType())))
-             |""".stripMargin),
-        None,
-        "PYTHONPATH" -> s"$pysparkPythonPath:$pythonPath").!!
-      binaryPandasFunc = Files.readAllBytes(path.toPath)
-    }
-    assert(binaryPandasFunc != null)
-    binaryPandasFunc
-  }
+//
+//  val geopandasNonGeometryToGeometryFunction: Array[Byte] = {
+//    var binaryPandasFunc: Array[Byte] = null
+//    withTempPath { path =>
+//      Process(
+//        Seq(
+//          pythonExec,
+//          "-c",
+//          f"""
+//             |from sedona.sql.types import GeometryType
+//             |from shapely.wkt import loads
+//             |from pyspark.serializers import CloudPickleSerializer
+//             |f = open('$path', 'wb');
+//             |def apply_geopandas(x):
+//             |    return x.apply(lambda wkt: loads(wkt).buffer(1))
+//             |f.write(CloudPickleSerializer().dumps((apply_geopandas, GeometryType())))
+//             |""".stripMargin),
+//        None,
+//        "PYTHONPATH" -> s"$pysparkPythonPath:$pythonPath").!!
+//      binaryPandasFunc = Files.readAllBytes(path.toPath)
+//    }
+//    assert(binaryPandasFunc != null)
+//    binaryPandasFunc
+//  }
 
   private val workerEnv = new java.util.HashMap[String, String]()
     workerEnv.put("PYTHONPATH", s"$pysparkPythonPath:$pythonPath")
     SparkEnv.get.conf.set(PYTHON_WORKER_MODULE, "sedonaworker.worker")
     SparkEnv.get.conf.set(PYTHON_USE_DAEMON, false)
-
-  val geometryToNonGeometryFunction: UserDefinedPythonFunction = UserDefinedPythonFunction(
-    name = "geospatial_udf",
-    func = SimplePythonFunction(
-      command = geopandasGeometryToNonGeometry,
-      envVars = workerEnv.clone().asInstanceOf[java.util.Map[String, String]],
-      pythonIncludes = List.empty[String].asJava,
-      pythonExec = pythonExec,
-      pythonVer = pythonVer,
-      broadcastVars = List.empty[Broadcast[PythonBroadcast]].asJava,
-      accumulator = null),
-    dataType = FloatType,
-    pythonEvalType = UDF.PythonEvalType.SQL_SCALAR_SEDONA_UDF,
-    udfDeterministic = true)
+//
+//  val geometryToNonGeometryFunction: UserDefinedPythonFunction = UserDefinedPythonFunction(
+//    name = "geospatial_udf",
+//    func = SimplePythonFunction(
+//      command = geopandasGeometryToNonGeometry,
+//      envVars = workerEnv.clone().asInstanceOf[java.util.Map[String, String]],
+//      pythonIncludes = List.empty[String].asJava,
+//      pythonExec = pythonExec,
+//      pythonVer = pythonVer,
+//      broadcastVars = List.empty[Broadcast[PythonBroadcast]].asJava,
+//      accumulator = null),
+//    dataType = FloatType,
+//    pythonEvalType = UDF.PythonEvalType.SQL_SCALAR_SEDONA_UDF,
+//    udfDeterministic = true)
 
   val geometryToGeometryFunction: UserDefinedPythonFunction = UserDefinedPythonFunction(
     name = "geospatial_udf",
@@ -176,18 +176,18 @@ object ScalarUDF {
     dataType = GeometryUDT,
     pythonEvalType = UDF.PythonEvalType.SQL_SCALAR_SEDONA_UDF,
     udfDeterministic = true)
-
-  val nonGeometryToGeometryFunction: UserDefinedPythonFunction = UserDefinedPythonFunction(
-    name = "geospatial_udf",
-    func = SimplePythonFunction(
-      command = geopandasNonGeometryToGeometryFunction,
-      envVars = workerEnv.clone().asInstanceOf[java.util.Map[String, String]],
-      pythonIncludes = List.empty[String].asJava,
-      pythonExec = pythonExec,
-      pythonVer = pythonVer,
-      broadcastVars = List.empty[Broadcast[PythonBroadcast]].asJava,
-      accumulator = null),
-    dataType = GeometryUDT,
-    pythonEvalType = UDF.PythonEvalType.SQL_SCALAR_SEDONA_UDF,
-    udfDeterministic = true)
+//
+//  val nonGeometryToGeometryFunction: UserDefinedPythonFunction = UserDefinedPythonFunction(
+//    name = "geospatial_udf",
+//    func = SimplePythonFunction(
+//      command = geopandasNonGeometryToGeometryFunction,
+//      envVars = workerEnv.clone().asInstanceOf[java.util.Map[String, String]],
+//      pythonIncludes = List.empty[String].asJava,
+//      pythonExec = pythonExec,
+//      pythonVer = pythonVer,
+//      broadcastVars = List.empty[Broadcast[PythonBroadcast]].asJava,
+//      accumulator = null),
+//    dataType = GeometryUDT,
+//    pythonEvalType = UDF.PythonEvalType.SQL_SCALAR_SEDONA_UDF,
+//    udfDeterministic = true)
 }

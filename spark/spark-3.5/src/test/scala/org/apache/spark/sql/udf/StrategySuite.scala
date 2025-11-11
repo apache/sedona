@@ -21,7 +21,7 @@ package org.apache.spark.sql.udf
 import org.apache.sedona.spark.SedonaContext
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions.{col, expr}
-import org.apache.spark.sql.udf.ScalarUDF.{geometryToGeometryFunction, geometryToNonGeometryFunction, geopandasGeometryToGeometryFunction, nonGeometryToGeometryFunction}
+import org.apache.spark.sql.udf.ScalarUDF.{geometryToGeometryFunction}
 import org.locationtech.jts.io.WKTReader
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
@@ -45,16 +45,16 @@ class StrategySuite extends AnyFunSuite with Matchers {
 
   test("sedona geospatial UDF") {
 //    spark.sql("select 1").show()
-    val df = spark.read.format("parquet")
-      .load("/Users/pawelkocinski/Desktop/projects/sedona-book/apache-sedona-book/book/chapter10/data/buildings/partitioned")
+    val df = spark.read.format("geoparquet")
+      .load("/Users/pawelkocinski/Desktop/projects/sedona-production/apache-sedona-book/data/warehouse/buildings")
       .select(
-        geometryToNonGeometryFunction(col("geometry")),
+//        geometryToNonGeometryFunction(col("geometry")),
         geometryToGeometryFunction(col("geometry")),
-        nonGeometryToGeometryFunction(expr("ST_AsText(geometry)")),
-        col("geohash")
+//        nonGeometryToGeometryFunction(expr("ST_AsText(geometry)")),
       )
 
     df.show()
+    1 shouldBe 1
 
 //    val df = Seq(
 //      (1, "value", wktReader.read("POINT(21 52)")),

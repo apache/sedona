@@ -24,7 +24,7 @@ import time
 from inspect import currentframe, getframeinfo
 import importlib
 
-from sedonaworker.serializer import SedonaArrowStreamPandasUDFSerializer
+from serializer import SedonaArrowStreamPandasUDFSerializer
 
 has_resource_module = True
 try:
