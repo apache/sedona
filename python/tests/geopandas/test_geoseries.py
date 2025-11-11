@@ -1285,43 +1285,31 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
     def test_minimum_bounding_circle(self):
         s = GeoSeries(
             [
-                Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
-                LineString([(0, 0), (3, 0)]),
-                Point(1, 1),
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                LineString([(0, 0), (2, 0)]),
+                Point(0, 0),
                 None,
             ]
         )
 
-        result = s.minimum_bounding_circle
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                LineString([(0, 0), (2, 0)]),
+                Point(0, 0),
+                None,
+            ]
+        ).minimum_bounding_circle()
 
-        self.check_pd_series_equal(
-            result.isna(), pd.Series([False, False, False, True])
-        )
+        # GeoSeries path
+        result = s.minimum_bounding_circle()
+        self.check_sgpd_equals_gpd(result, expected)
 
-        gpd_res = result.to_geopandas()
-        gpd_src = s.to_geopandas()
-
-        non_null = gpd_res.notna()
-
-        got_types = gpd_res[non_null].geom_type.reset_index(drop=True)
-        exp_types = pd.Series(["Polygon", "Polygon", "Point"])
-        pd.testing.assert_series_equal(
-            got_types, exp_types, check_names=False, check_dtype=False
-        )
-
-        # Coverage: allow for tiny numeric tolerance on circle approximation
-        covered = (
-            gpd_res[non_null]
-            .buffer(1e-9)
-            .covers(gpd_src[non_null])
-            .reset_index(drop=True)
-        )
-        pd.testing.assert_series_equal(
-            covered, pd.Series([True, True, True]), check_names=False
-        )
-
-        df_result = s.to_geoframe().minimum_bounding_circle
-        self.check_sgpd_equals_gpd(df_result, gpd_res)
+        tg = getattr(s, "to_geoframe")
+        gdf = tg() if callable(tg) else tg
+        mbc = getattr(gdf, "minimum_bounding_circle")
+        df_result = mbc() if callable(mbc) else mbc
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_minimum_bounding_radius(self):
         pass

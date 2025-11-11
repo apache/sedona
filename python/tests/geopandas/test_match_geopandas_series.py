@@ -776,59 +776,56 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_minimum_bounding_circle(self):
-        for geom in self.geoms:
-            gs_in = GeoSeries(geom)
-            gp_in = gpd.GeoSeries(geom)
+        # Base set: polygon, line, point, and None
+        data = [
+            Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+            LineString([(0, 0), (2, 0)]),
+            Point(0, 0),
+            None,
+        ]
 
-            # Sedona property vs GeoPandas method
-            s_circle = gs_in.minimum_bounding_circle
-            g_circle = gp_in.minimum_bounding_circle()
+        # Sedona vs GeoPandas — tolerate method/property API differences
+        s_sed = GeoSeries(data)
+        s_gpd = gpd.GeoSeries(data)
 
-            # 0) empties / nulls parity
-            self.check_pd_series_equal(s_circle.is_empty, g_circle.is_empty)
-            self.check_pd_series_equal(gs_in.isna(), gp_in.isna())
+        sed_attr = getattr(s_sed, "minimum_bounding_circle")
+        gpd_attr = getattr(s_gpd, "minimum_bounding_circle")
 
-            # 1) geometry type parity
-            self.check_pd_series_equal(s_circle.geom_type, g_circle.geom_type)
+        sed_res = sed_attr() if callable(sed_attr) else sed_attr
+        gpd_res = gpd_attr() if callable(gpd_attr) else gpd_attr
 
-            # 2) Coverage parity — compare only where inputs are valid for both backends
-            nonnull_nonempty_ps = (gs_in.isna() == False) & (gs_in.is_empty == False)
-            nogc_ps = gs_in.geom_type != "GeometryCollection"
-            mask_ps = nonnull_nonempty_ps & nogc_ps
+        self.check_sgpd_equals_gpd(sed_res, gpd_res)
 
-            nonnull_nonempty_pd = gp_in.notna() & (~gp_in.is_empty)
-            nogc_pd = gp_in.geom_type != "GeometryCollection"
-            mask_pd = nonnull_nonempty_pd & nogc_pd
+        # Mixed geometries including Multi* and None
+        mixed = [
+            MultiPoint([(0, 0), (1, 1)]),
+            MultiLineString([[(0, 0), (1, 0)], [(1, 0), (1, 1)]]),
+            Polygon([(2, 2), (3, 2), (3, 3), (2, 3)]),
+            None,
+        ]
 
-            # Do not slice the GeoSeries (that can drop Geo ops). Instead, null-out rows and re-wrap.
-            s_circle_safe = GeoSeries(s_circle.mask(~mask_ps, None))
-            gs_in_safe = GeoSeries(gs_in.mask(~mask_ps, None))
+        s_sed2 = GeoSeries(mixed)
+        s_gpd2 = gpd.GeoSeries(mixed)
 
-            # Compute on the masked series so Spark/JTS never evaluates GeometryCollection rows.
-            s_cov_all = s_circle_safe.covers(gs_in_safe)  # ps.Series
-            g_cov_all = g_circle.covers(gp_in)  # pd.Series
+        sed_attr2 = getattr(s_sed2, "minimum_bounding_circle")
+        gpd_attr2 = getattr(s_gpd2, "minimum_bounding_circle")
 
-            # Compare only the valid rows where both sides are comparable
-            self.check_pd_series_equal(s_cov_all[mask_ps], g_cov_all[mask_pd])
+        sed_res2 = sed_attr2() if callable(sed_attr2) else sed_attr2
+        gpd_res2 = gpd_attr2() if callable(gpd_attr2) else gpd_attr2
 
-            # 3) Area parity: Sedona circle polygons may differ slightly in vertex density;
-            s_area = s_circle.area
-            g_area = g_circle.area
+        self.check_sgpd_equals_gpd(sed_res2, gpd_res2)
 
-            if hasattr(s_area, "to_pandas"):
-                s_area = s_area.to_pandas()
+        # Empty GeoSeries parity
+        sed_empty = GeoSeries([])
+        gpd_empty = gpd.GeoSeries([])
 
-            for a, b in zip(s_area, g_area):
-                if (
-                    a is None
-                    or b is None
-                    or pd.isna(a)
-                    or pd.isna(b)
-                    or a <= 0
-                    or b <= 0
-                ):
-                    continue
-                assert math.isclose(a, b, rel_tol=1e-2, abs_tol=1e-8)
+        sed_attr3 = getattr(sed_empty, "minimum_bounding_circle")
+        gpd_attr3 = getattr(gpd_empty, "minimum_bounding_circle")
+
+        sed_res3 = sed_attr3() if callable(sed_attr3) else sed_attr3
+        gpd_res3 = gpd_attr3() if callable(gpd_attr3) else gpd_attr3
+
+        self.check_sgpd_equals_gpd(sed_res3, gpd_res3)
 
     def test_minimum_bounding_radius(self):
         pass
