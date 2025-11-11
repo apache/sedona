@@ -2398,9 +2398,6 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("union", self, other, align)
 
-    def intersection_all(self):
-        raise NotImplementedError("This method is not implemented yet.")
-
     def contains(self, other, align=None):
         """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
         each aligned geometry that contains `other`.

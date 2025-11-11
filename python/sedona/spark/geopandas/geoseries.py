@@ -1368,10 +1368,6 @@ class GeoSeries(GeoFrame, pspd.Series):
             keep_name=keep_name,
         )
 
-    def intersection_all(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
-
     # ============================================================================
     # Binary Predicates
     # ============================================================================
