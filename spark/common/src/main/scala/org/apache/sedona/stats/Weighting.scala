@@ -126,22 +126,21 @@ object Weighting {
       .select(
         col(ID_COLUMN),
         struct("f.*").alias("left_contents"),
-        when(col(ID_COLUMN).isNull, lit(null))
-          .otherwise(struct(
-            (
-              savedAttributesWithGeom match {
-                case null => struct(col("s.right.*")).dropFields(ID_COLUMN)
-                case _ =>
-                  struct(savedAttributesWithGeom.map(c => col(s"s.right.$c")): _*)
-              }
+        struct(
+          (
+            savedAttributesWithGeom match {
+              case null => struct(col("s.right.*")).dropFields(ID_COLUMN)
+              case _ =>
+                struct(savedAttributesWithGeom.map(c => col(s"s.right.$c")): _*)
+            }
             ).alias("neighbor"),
-            if (!binary)
-              pow(
-                distanceFunction(col(s"s.left.$geometryColumn"), col(s"s.right.$geometryColumn")),
-                alpha)
-                .alias("value")
-            else lit(1.0).alias("value")))
-          .alias("weight"))
+          if (!binary)
+            pow(
+              distanceFunction(col(s"s.left.$geometryColumn"), col(s"s.right.$geometryColumn")),
+              alpha)
+              .alias("value")
+          else lit(1.0).alias("value")).alias("weight")
+      )
 
     mapped
       .groupBy(ID_COLUMN)
