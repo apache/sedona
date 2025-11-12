@@ -833,7 +833,26 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_force_2d(self):
-        pass
+        # force_2d was added from geopandas 1.0.0
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            pytest.skip("geopandas force_2d requires version 1.0.0 or higher")
+        # 1) No-op on existing 2D fixtures
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).force_2d()
+            gpd_result = gpd.GeoSeries(geom).force_2d()
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # 2) Minimal 3D sample to verify Z is actually stripped
+        data = [
+            Point(0, -1, 2.5),
+            LineString([(0, 0, 1), (1, 1, 2)]),
+            Polygon([(0, 0, 1), (1, 0, 2), (1, 1, 3), (0, 0, 1)]),
+            Point(5, 5),  # already 2D
+            Polygon(),  # empty geometry
+        ]
+        sgpd_3d = GeoSeries(data).force_2d()
+        gpd_3d = gpd.GeoSeries(data).force_2d()
+        self.check_sgpd_equals_gpd(sgpd_3d, gpd_3d)
 
     def test_force_3d(self):
         pass
