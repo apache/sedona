@@ -1129,6 +1129,7 @@ class GeoSeries(GeoFrame, pspd.Series):
     def intersection_all(self) -> BaseGeometry:
         if len(self) == 0:
             from shapely.geometry import GeometryCollection
+
             return GeometryCollection()
         spark_expr = sta.ST_Intersection_Aggr(self.spark.column)
         tmp = self._query_geometry_column(spark_expr, returns_geom=False, is_aggr=True)
