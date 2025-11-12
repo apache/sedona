@@ -864,7 +864,7 @@ class GeoFrame(metaclass=ABCMeta):
     def force_2d(self):
         """
         Forces the dimensionality of each geometry to 2D.
-        Removes the Z coordinate (if present) from each geometry and returns a
+        Removes the Z and M coordinates (if present) from each geometry and returns a
         GeoSeries with 2D geometries. 2D inputs are returned unchanged.
         Returns
         -------

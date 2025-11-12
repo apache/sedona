@@ -849,6 +849,8 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             Polygon([(0, 0, 1), (1, 0, 2), (1, 1, 3), (0, 0, 1)]),
             Point(5, 5),  # already 2D
             Polygon(),  # empty geometry
+            shapely.wkt.loads("POINT M (1 2 3)"),
+            shapely.wkt.loads("LINESTRING ZM (1 2 3 4, 5 6 7 8)"),
         ]
         sgpd_3d = GeoSeries(data).force_2d()
         gpd_3d = gpd.GeoSeries(data).force_2d()

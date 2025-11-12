@@ -1417,6 +1417,8 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
                 Point(5, 5),  # already 2D
                 Polygon(),  # empty geometry
                 None,  # None preserved
+                shapely.wkt.loads("POINT M (1 2 3)"),
+                shapely.wkt.loads("LINESTRING ZM (1 2 3 4, 5 6 7 8)"),
             ]
         )
 
@@ -1430,6 +1432,8 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
                 Point(5, 5),
                 Polygon(),
                 None,
+                shapely.wkt.loads("POINT (1 2)"),
+                shapely.wkt.loads("LINESTRING (1 2, 5 6)"),
             ]
         )
 
