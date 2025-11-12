@@ -57,6 +57,7 @@
 - [Join the community](#join-the-community)
 - [What is Apache Sedona?](#what-is-apache-sedona)
   - [Features](#features)
+- [Quick Start](#quick-start)
 - [Apache Sedona subprojects](#apache-sedona-subprojects)
 - [When to use Sedona?](#when-to-use-sedona)
   - [Use Cases:](#use-cases)
@@ -110,6 +111,143 @@ Some of the key features of Apache Sedona include:
 * Flexible deployment options, including standalone, local, and cluster modes.
 
 These are some of the key features of Apache Sedona, but it may offer additional capabilities depending on the specific version and configuration.
+
+## Quick Start
+
+Get started with Apache Sedona in under 5 minutes. Choose your language:
+
+<details open>
+<summary><b>Python</b></summary> <a name="python"></a>
+
+**Install**
+
+```bash
+pip install apache-sedona
+```
+
+**Hello Sedona**
+
+```python
+from sedona.spark import *
+
+# Initialize Sedona
+sedona = SedonaContext.builder().getOrCreate()
+
+# Load a simple GeoJSON string
+geojson = '{"type":"Point","coordinates":[-118.2437,34.0522]}'
+df = sedona.sql(f"SELECT ST_GeomFromGeoJSON('{geojson}') AS geometry")
+
+# Perform a basic spatial function
+result = df.selectExpr("ST_AsText(geometry) AS location")
+result.show()
+
+# Output: POINT (-118.2437 34.0522)
+```
+
+[Detailed Python Setup Guide →](https://sedona.apache.org/latest/setup/install-python/)
+
+</details>
+
+<details>
+
+<summary><b>Scala/Java</b></summary><a name="scala/java"></a>
+
+**Install (Maven)**
+
+```xml
+<dependency>
+    <groupId>org.apache.sedona</groupId>
+    <artifactId>sedona-spark-3.4_2.12</artifactId>
+    <version>1.6.0</version>
+</dependency>
+
+
+**Install (Gradle)**
+
+```gradle
+implementation 'org.apache.sedona:sedona-spark-3.4_2.12:1.6.0'
+```
+
+**Scala**
+
+**Hello Sedona**
+
+```scala
+import org.apache.sedona.spark.SedonaContext
+
+// Initialize Sedona
+val sedona = SedonaContext.builder().getOrCreate()
+
+// Load a simple GeoJSON string
+val geojson = """{"type":"Point","coordinates":[-118.2437,34.0522]}"""
+val df = sedona.sql(s"SELECT ST_GeomFromGeoJSON('$geojson') AS geometry")
+
+// Perform a basic spatial function
+val result = df.selectExpr("ST_AsText(geometry) AS location")
+result.show()
+
+// Output: POINT (-118.2437 34.0522)
+```
+
+**Java**
+
+**Hello Sedona**
+
+```java
+import org.apache.sedona.spark.SedonaContext;
+import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+
+// Initialize Sedona
+SparkSession sedona = SedonaContext.builder().getOrCreate();
+
+// Load a simple GeoJSON string
+String geojson = "{\"type\":\"Point\",\"coordinates\":[-118.2437,34.0522]}";
+Dataset<Row> df = sedona.sql("SELECT ST_GeomFromGeoJSON('" + geojson + "') AS geometry");
+
+// Perform a basic spatial function
+Dataset<Row> result = df.selectExpr("ST_AsText(geometry) AS location");
+result.show();
+
+// Output: POINT (-118.2437 34.0522)
+```
+
+[Detailed Scala/Java Setup Guide →](https://sedona.apache.org/latest/setup/install-scala/)
+
+</details>
+
+<details>
+<summary><b>R</b></summary><a name="r"></a>
+
+**Install**
+
+```r
+install.packages("apache.sedona")
+```
+
+**Hello Sedona**
+
+```r
+library(apache.sedona)
+library(sparklyr)
+
+# Initialize Sedona
+sc <- spark_connect(master = "local")
+
+# Load a simple GeoJSON string
+geojson <- '{"type":"Point","coordinates":[-118.2437,34.0522]}'
+df <- sdf_sql(sc, paste0("SELECT ST_GeomFromGeoJSON('", geojson, "') AS geometry"))
+
+# Perform a basic spatial function
+result <- sdf_sql(sc, "SELECT ST_AsText(geometry) AS location FROM df")
+result %>% collect()
+
+# Output: POINT (-118.2437 34.0522)
+```
+
+[Detailed R Setup Guide →](https://sedona.apache.org/latest/api/rdocs/)
+</details>
 
 ## Apache Sedona subprojects
 
