@@ -1030,9 +1030,12 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
-    def minimum_bounding_circle(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+    def minimum_bounding_circle(self) -> "GeoSeries":
+        spark_expr = stf.ST_MinimumBoundingCircle(self.spark.column)
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=True,
+        )
 
     def minimum_bounding_radius(self):
         # Implementation of the abstract method.
@@ -1078,9 +1081,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
-    def force_2d(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+    def force_2d(self) -> "GeoSeries":
+        spark_expr = stf.ST_Force_2D(self.spark.column)
+        return self._query_geometry_column(spark_expr, returns_geom=True)
 
     def force_3d(self, z=0):
         # Implementation of the abstract method.

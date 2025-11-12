@@ -722,8 +722,25 @@ class GeoFrame(metaclass=ABCMeta):
     # def representative_point(self):
     #     raise NotImplementedError("This method is not implemented yet.")
 
-    # def minimum_bounding_circle(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    def minimum_bounding_circle(self):
+        """
+        Returns a ``GeoSeries`` containing the minimum bounding circle of each geometry.
+        The minimum bounding circle is the smallest circle that completely encloses
+        the geometry. The result is returned as a circular polygon approximation.
+        Returns
+        -------
+        GeoSeries
+            A GeoSeries containing the minimum bounding circle for each geometry.
+        Examples
+        --------
+        >>> from shapely.geometry import Polygon
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> gs = GeoSeries([Polygon([(0, 0), (3, 0), (3, 3), (0, 3)])])
+        >>> gs.minimum_bounding_circle
+        0    POLYGON ((...))
+        dtype: geometry
+        """
+        return _delegate_to_geometry_column("minimum_bounding_circle", self)
 
     # def minimum_bounding_radius(self):
     #     raise NotImplementedError("This method is not implemented yet.")
@@ -844,8 +861,41 @@ class GeoFrame(metaclass=ABCMeta):
     # def transform(self, transformation, include_z=False):
     #     raise NotImplementedError("This method is not implemented yet.")
 
-    # def force_2d(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    def force_2d(self):
+        """
+        Forces the dimensionality of each geometry to 2D.
+
+        Removes the Z coordinate (if present) from each geometry and returns a
+        GeoSeries with 2D geometries. 2D inputs are returned unchanged.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from shapely import Polygon, LineString, Point
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> s = GeoSeries(
+        ...     [
+        ...         Point(0.5, 2.5, 0),
+        ...         LineString([(1, 1, 1), (0, 1, 3), (1, 0, 2)]),
+        ...         Polygon([(0, 0, 0), (0, 10, 0), (10, 10, 0)]),
+        ...     ]
+        ... )
+        >>> s
+        0                            POINT Z (0.5 2.5 0)
+        1             LINESTRING Z (1 1 1, 0 1 3, 1 0 2)
+        2    POLYGON Z ((0 0 0, 0 10 0, 10 10 0, 0 0 0))
+        dtype: geometry
+
+        >>> s.force_2d()
+        0                      POINT (0.5 2.5)
+        1           LINESTRING (1 1, 0 1, 1 0)
+        2    POLYGON ((0 0, 0 10, 10 10, 0 0))
+        dtype: geometry
+        """
+        return _delegate_to_geometry_column("force_2d", self)
 
     # def force_3d(self, z=0):
     #     raise NotImplementedError("This method is not implemented yet.")
