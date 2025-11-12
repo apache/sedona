@@ -833,6 +833,9 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_force_2d(self):
+        # force_2d was added from geopandas 1.0.0
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            pytest.skip("geopandas force_2d requires version 1.0.0 or higher")
         # 1) No-op on existing 2D fixtures
         for geom in self.geoms:
             sgpd_result = GeoSeries(geom).force_2d()
