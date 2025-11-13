@@ -410,7 +410,7 @@ sedona_render_choropleth_map(
 It will create a scatter plot, and then overlay it on top of a
 choropleth map, as shown below:
 
-<img src="choropleth-map.png" width=800 />
+<img src="choropleth-map.png" width=800 alt="Choropleth map visualization" />
 
 See `?apache.sedona::sedona_render_scatter_plot`,
 `?apache.sedona::sedona_render_heatmap`, and
