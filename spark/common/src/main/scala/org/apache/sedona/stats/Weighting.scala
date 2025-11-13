@@ -109,30 +109,40 @@ object Weighting {
 
     val formattedDataFrame = dataframe.withColumn(ID_COLUMN, sha2(to_json(struct("*")), 256))
 
-    formattedDataFrame
+    val spatiallyJoined = formattedDataFrame
       .alias("l")
       .join(
         formattedDataFrame.alias("r"),
-        joinCondition && col(s"l.$ID_COLUMN") =!= col(
-          s"r.$ID_COLUMN"
-        ), // we will add self back later if self.includeSelf
+        joinCondition && col(s"l.$ID_COLUMN") =!= col(s"r.$ID_COLUMN"),
+        "inner")
+      .select(struct("l.*").alias("left"), struct("r.*").alias("right"))
+
+    val mapped = formattedDataFrame
+      .alias("f")
+      .join(
+        spatiallyJoined.alias("s"),
+        col(s"s.left.$ID_COLUMN") === col(s"f.$ID_COLUMN"),
         "left")
       .select(
-        col(s"l.$ID_COLUMN"),
-        struct("l.*").alias("left_contents"),
+        col(ID_COLUMN),
+        struct("f.*").alias("left_contents"),
         struct(
           (
             savedAttributesWithGeom match {
-              case null => struct(col("r.*")).dropFields(ID_COLUMN)
+              case null => struct(col("s.right.*")).dropFields(ID_COLUMN)
               case _ =>
-                struct(savedAttributesWithGeom.map(c => col(s"r.$c")): _*)
+                struct(savedAttributesWithGeom.map(c => col(s"s.right.$c")): _*)
             }
           ).alias("neighbor"),
           if (!binary)
-            pow(distanceFunction(col(s"l.$geometryColumn"), col(s"r.$geometryColumn")), alpha)
+            pow(
+              distanceFunction(col(s"s.left.$geometryColumn"), col(s"s.right.$geometryColumn")),
+              alpha)
               .alias("value")
           else lit(1.0).alias("value")).alias("weight"))
-      .groupBy(s"l.$ID_COLUMN")
+
+    mapped
+      .groupBy(ID_COLUMN)
       .agg(
         first("left_contents").alias("left_contents"),
         concat(
