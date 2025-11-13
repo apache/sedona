@@ -19,44 +19,44 @@ authors:
   kelly:
     name: Kelly-Ann Dolor
     description: Staff Technical Writer, Apache Sedona
-    avatar: https://media.licdn.com/dms/image/v2/C4D03AQHKr_fPpGdNGw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1516866211726?e=2147483647&v=beta&t=p4PcyFNjZhvAIX8e1qZt4i3HbH5yOIXuEs8MTNoYZ3Y
+    avatar: assets/authors/kelly.jpeg
   matt_powers:
     name: Matthew Powers
     description: Staff Developer Relations Engineer, Apache Sedona
-    avatar: https://media.licdn.com/dms/image/v2/C4E03AQHL3oztZlTr2w/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1517751981945?e=2147483647&v=beta&t=66hsE-PF25_Uc1EbjnljUOmqjl3NwJ0lHAcZkusxnO0
+    avatar: assets/authors/powers.jpeg
   matt_forrest:
     name: Matthew Forrest
     description: Director of Customer Engineering & Product Led Growth, Wherobots
-    avatar: https://media.licdn.com/dms/image/v2/D4E03AQHxYTrEgc53_g/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1722352936567?e=2147483647&v=beta&t=X10Z02O2UX8IRmbypcw-m-jbIDeNsPWWL-YOPX_v1XQ
+    avatar: assets/authors/forrest.jpeg
   jia:
     name: Jia Yu
     description: Apache Sedona PMC chair
-    avatar: https://media.licdn.com/dms/image/v2/D5603AQEez8EVYH82LQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1719619666312?e=1761782400&v=beta&t=4xYyTp1peAtupNdaPfbWEYbdMjMMbcdHWEbqO7Y-2dw
+    avatar: assets/authors/jia.jpeg
   dewey:
     name: Dewey Dunnington
     description: Apache Sedona Contributor, Apache Arrow PMC member
-    avatar: https://media.licdn.com/dms/image/v2/C5603AQEQpLYQ6u-a8Q/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1630000445999?e=1761782400&v=beta&t=dR8biUFIxB_KL1nYXTibNrjaRzTAkfc3LO6FSfRPREE
+    avatar: assets/authors/dewey.jpeg
   kristin:
     name: Kristin Cowalcijk
     description: Apache Sedona PMC member
-    avatar: https://avatars.githubusercontent.com/u/5501374?v=4
+    avatar: assets/authors/kristin.jpeg
   feng:
     name: Feng Zhang
     description: Apache Sedona Committer
-    avatar: https://media.licdn.com/dms/image/v2/C5603AQEuI_xKhOjapA/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1645716542340?e=1761782400&v=beta&t=6vDu04f9Mun3LXoQaTs-C9DVSSZcH1LaasulqWqpliw
+    avatar: assets/authors/feng.jpeg
   james:
     name: James Willis
     description: Apache Sedona Contributor
-    avatar: https://media.licdn.com/dms/image/v2/C4E03AQETRcdZDZNlRg/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1516810351294?e=1761782400&v=beta&t=AlPGe5RqTMd6gfh4qEILx9XsivRWnIM5KIdVSx7AzFE
+    avatar: assets/authors/james.jpeg
   pranav:
     name: Pranav Toggi
     description: Apache Sedona Committer
-    avatar: https://media.licdn.com/dms/image/v2/D4E03AQE1XVwinur7-w/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1729284611733?e=1761782400&v=beta&t=B1SOzUOz9CW0J0LEVICMLztKFLAwDg3okem5p-VE--4
+    avatar: assets/authors/pranav.jpeg
   jess:
     name: Jess Pavlin
     description: Apache Sedona Contributor
-    avatar: https://avatars.githubusercontent.com/u/202656197?v=4
+    avatar: assets/authors/jess.jpeg
   peter:
     name: Peter Nguyen
     description: Apache Sedona Contributor
-    avatar: https://avatars.githubusercontent.com/u/115442597?v=4
+    avatar: assets/authors/peter.jpeg
