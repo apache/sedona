@@ -1409,7 +1409,38 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         pass
 
     def test_force_2d(self):
-        pass
+        s = sgpd.GeoSeries(
+            [
+                Point(0, -1, 2.5),  # 3D point
+                LineString([(0, 0, 1), (1, 1, 2)]),  # 3D line
+                Polygon([(0, 0, 1), (1, 0, 2), (1, 1, 3), (0, 0, 1)]),  # 3D polygon
+                Point(5, 5),  # already 2D
+                Polygon(),  # empty geometry
+                None,  # None preserved
+                shapely.wkt.loads("POINT M (1 2 3)"),
+                shapely.wkt.loads("LINESTRING ZM (1 2 3 4, 5 6 7 8)"),
+            ]
+        )
+
+        result = s.force_2d()
+
+        expected = gpd.GeoSeries(
+            [
+                Point(0, -1),
+                LineString([(0, 0), (1, 1)]),
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 0)]),
+                Point(5, 5),
+                Polygon(),
+                None,
+                shapely.wkt.loads("POINT (1 2)"),
+                shapely.wkt.loads("LINESTRING (1 2, 5 6)"),
+            ]
+        )
+
+        self.check_sgpd_equals_gpd(result, expected)
+
+        df_result = s.to_geoframe().force_2d()
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_force_3d(self):
         pass
