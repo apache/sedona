@@ -188,7 +188,7 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">Catalog</span><span class="result"> extends <a href="AbstractCatalog.html" class="extype" name="org.apache.sedona.sql.UDF.AbstractCatalog">AbstractCatalog</a></span>
+        <span class="name">Catalog</span><span class="result"> extends <a href="AbstractCatalog.html" class="extype" name="org.apache.sedona.sql.UDF.AbstractCatalog">AbstractCatalog</a> with <span class="extype" name="org.apache.spark.internal.Logging">Logging</span></span>
       </span>
       </h4>
 
@@ -197,7 +197,7 @@
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="AbstractCatalog.html" class="extype" name="org.apache.sedona.sql.UDF.AbstractCatalog">AbstractCatalog</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="org.apache.spark.internal.Logging">Logging</span>, <a href="AbstractCatalog.html" class="extype" name="org.apache.sedona.sql.UDF.AbstractCatalog">AbstractCatalog</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -223,7 +223,7 @@
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="org.apache.sedona.sql.UDF.Catalog"><span>Catalog</span></li><li class="in" name="org.apache.sedona.sql.UDF.AbstractCatalog"><span>AbstractCatalog</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="org.apache.sedona.sql.UDF.Catalog"><span>Catalog</span></li><li class="in" name="org.apache.spark.internal.Logging"><span>Logging</span></li><li class="in" name="org.apache.sedona.sql.UDF.AbstractCatalog"><span>AbstractCatalog</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -497,6 +497,38 @@
                 <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="org.apache.spark.internal.Logging#initializeLogIfNecessary" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="initializeLogIfNecessary(isInterpreter:Boolean,silent:Boolean):Boolean"></a><a id="initializeLogIfNecessary(Boolean,Boolean):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#initializeLogIfNecessary(isInterpreter:Boolean,silent:Boolean):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">initializeLogIfNecessary</span><span class="params">(<span name="isInterpreter">isInterpreter: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="silent">silent: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Logging</dd></dl></div>
+    </li><li name="org.apache.spark.internal.Logging#initializeLogIfNecessary" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="initializeLogIfNecessary(isInterpreter:Boolean):Unit"></a><a id="initializeLogIfNecessary(Boolean):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#initializeLogIfNecessary(isInterpreter:Boolean):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">initializeLogIfNecessary</span><span class="params">(<span name="isInterpreter">isInterpreter: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Logging</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -513,6 +545,214 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="org.apache.spark.internal.Logging#isTraceEnabled" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isTraceEnabled():Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#isTraceEnabled():Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isTraceEnabled</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Logging</dd></dl></div>
+    </li><li name="org.apache.spark.internal.Logging#log" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="log:org.slf4j.Logger"></a><a id="log:Logger"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#log:org.slf4j.Logger" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">log</span><span class="result">: <span class="extype" name="org.slf4j.Logger">Logger</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Logging</dd></dl></div>
+    </li><li name="org.apache.spark.internal.Logging#logDebug" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="logDebug(msg:=&gt;String,throwable:Throwable):Unit"></a><a id="logDebug(⇒String,Throwable):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#logDebug(msg:=&gt;String,throwable:Throwable):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">logDebug</span><span class="params">(<span name="msg">msg: ⇒ <span class="extype" name="scala.Predef.String">String</span></span>, <span name="throwable">throwable: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Logging</dd></dl></div>
+    </li><li name="org.apache.spark.internal.Logging#logDebug" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="logDebug(msg:=&gt;String):Unit"></a><a id="logDebug(⇒String):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#logDebug(msg:=&gt;String):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">logDebug</span><span class="params">(<span name="msg">msg: ⇒ <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Logging</dd></dl></div>
+    </li><li name="org.apache.spark.internal.Logging#logError" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="logError(msg:=&gt;String,throwable:Throwable):Unit"></a><a id="logError(⇒String,Throwable):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#logError(msg:=&gt;String,throwable:Throwable):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">logError</span><span class="params">(<span name="msg">msg: ⇒ <span class="extype" name="scala.Predef.String">String</span></span>, <span name="throwable">throwable: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Logging</dd></dl></div>
+    </li><li name="org.apache.spark.internal.Logging#logError" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="logError(msg:=&gt;String):Unit"></a><a id="logError(⇒String):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#logError(msg:=&gt;String):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">logError</span><span class="params">(<span name="msg">msg: ⇒ <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Logging</dd></dl></div>
+    </li><li name="org.apache.spark.internal.Logging#logInfo" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="logInfo(msg:=&gt;String,throwable:Throwable):Unit"></a><a id="logInfo(⇒String,Throwable):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#logInfo(msg:=&gt;String,throwable:Throwable):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">logInfo</span><span class="params">(<span name="msg">msg: ⇒ <span class="extype" name="scala.Predef.String">String</span></span>, <span name="throwable">throwable: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Logging</dd></dl></div>
+    </li><li name="org.apache.spark.internal.Logging#logInfo" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="logInfo(msg:=&gt;String):Unit"></a><a id="logInfo(⇒String):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#logInfo(msg:=&gt;String):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">logInfo</span><span class="params">(<span name="msg">msg: ⇒ <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Logging</dd></dl></div>
+    </li><li name="org.apache.spark.internal.Logging#logName" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="logName:String"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#logName:String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">logName</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Logging</dd></dl></div>
+    </li><li name="org.apache.spark.internal.Logging#logTrace" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="logTrace(msg:=&gt;String,throwable:Throwable):Unit"></a><a id="logTrace(⇒String,Throwable):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#logTrace(msg:=&gt;String,throwable:Throwable):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">logTrace</span><span class="params">(<span name="msg">msg: ⇒ <span class="extype" name="scala.Predef.String">String</span></span>, <span name="throwable">throwable: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Logging</dd></dl></div>
+    </li><li name="org.apache.spark.internal.Logging#logTrace" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="logTrace(msg:=&gt;String):Unit"></a><a id="logTrace(⇒String):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#logTrace(msg:=&gt;String):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">logTrace</span><span class="params">(<span name="msg">msg: ⇒ <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Logging</dd></dl></div>
+    </li><li name="org.apache.spark.internal.Logging#logWarning" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="logWarning(msg:=&gt;String,throwable:Throwable):Unit"></a><a id="logWarning(⇒String,Throwable):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#logWarning(msg:=&gt;String,throwable:Throwable):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">logWarning</span><span class="params">(<span name="msg">msg: ⇒ <span class="extype" name="scala.Predef.String">String</span></span>, <span name="throwable">throwable: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Logging</dd></dl></div>
+    </li><li name="org.apache.spark.internal.Logging#logWarning" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="logWarning(msg:=&gt;String):Unit"></a><a id="logWarning(⇒String):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#logWarning(msg:=&gt;String):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">logWarning</span><span class="params">(<span name="msg">msg: ⇒ <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Logging</dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -740,7 +980,9 @@
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="org.apache.sedona.sql.UDF.AbstractCatalog">
+        <div class="parent" name="org.apache.spark.internal.Logging">
+              <h3>Inherited from <span class="extype" name="org.apache.spark.internal.Logging">Logging</span></h3>
+            </div><div class="parent" name="org.apache.sedona.sql.UDF.AbstractCatalog">
               <h3>Inherited from <a href="AbstractCatalog.html" class="extype" name="org.apache.sedona.sql.UDF.AbstractCatalog">AbstractCatalog</a></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
