@@ -1471,12 +1471,11 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">convex_hull</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method.</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-            <span class="n">_not_implemented_error</span><span class="p">(</span>
-                <span class="s2">&quot;convex_hull&quot;</span><span class="p">,</span> <span class="s2">&quot;Computes the convex hull of each geometry.&quot;</span>
-            <span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">convex_hull</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeoSeries&quot;</span><span class="p">:</span>
+        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_ConvexHull</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
+            <span class="n">spark_expr</span><span class="p">,</span>
+            <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
 
 <div class="viewcode-block" id="GeoSeries.delaunay_triangles">
@@ -1555,9 +1554,12 @@
 
 <div class="viewcode-block" id="GeoSeries.minimum_bounding_circle">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.minimum_bounding_circle">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">minimum_bounding_circle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method.</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">minimum_bounding_circle</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeoSeries&quot;</span><span class="p">:</span>
+        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_MinimumBoundingCircle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
+            <span class="n">spark_expr</span><span class="p">,</span>
+            <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="GeoSeries.minimum_bounding_radius">
@@ -1627,9 +1629,9 @@
 
 <div class="viewcode-block" id="GeoSeries.force_2d">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.force_2d">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">force_2d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method.</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">force_2d</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeoSeries&quot;</span><span class="p">:</span>
+        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_Force_2D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span><span class="n">spark_expr</span><span class="p">,</span> <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="GeoSeries.force_3d">
@@ -1675,6 +1677,21 @@
             <span class="k">return</span> <span class="n">GeometryCollection</span><span class="p">()</span>
 
         <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">sta</span><span class="o">.</span><span class="n">ST_Union_Aggr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">)</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span><span class="n">spark_expr</span><span class="p">,</span> <span class="n">returns_geom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_aggr</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">ps_series</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">take</span><span class="p">([</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">geom</span> <span class="o">=</span> <span class="n">ps_series</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">geom</span></div>
+
+
+<div class="viewcode-block" id="GeoSeries.intersection_all">
+<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.intersection_all">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">intersection_all</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseGeometry</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryCollection</span>
+
+            <span class="k">return</span> <span class="n">GeometryCollection</span><span class="p">()</span>
+        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">sta</span><span class="o">.</span><span class="n">ST_Intersection_Aggr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">)</span>
         <span class="n">tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span><span class="n">spark_expr</span><span class="p">,</span> <span class="n">returns_geom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_aggr</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="n">ps_series</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">take</span><span class="p">([</span><span class="mi">0</span><span class="p">])</span>
@@ -1951,13 +1968,6 @@
             <span class="n">returns_geom</span><span class="o">=</span><span class="n">returns_geom</span><span class="p">,</span>
             <span class="n">keep_name</span><span class="o">=</span><span class="n">keep_name</span><span class="p">,</span>
         <span class="p">)</span>
-
-<div class="viewcode-block" id="GeoSeries.intersection_all">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.intersection_all">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">intersection_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method.</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
-
 
     <span class="c1"># ============================================================================</span>
     <span class="c1"># Binary Predicates</span>
