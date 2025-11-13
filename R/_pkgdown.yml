@@ -16,7 +16,8 @@
 # under the License.
 
 url: ~
-build_llm_docs: false
+pandoc:
+  to: markdown
 template:
   bootstrap: 5
   # bootswatch: cosmo
