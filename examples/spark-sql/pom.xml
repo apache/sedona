@@ -23,7 +23,7 @@
 
     <groupId>org.apache.sedona</groupId>
     <artifactId>sedona-spark-example</artifactId>
-    <version>1.6.0</version>
+    <version>1.8.0</version>
     <name>Sedona : Examples : Spark</name>
     <description>Maven Example for SedonaDB</description>
     <packaging>jar</packaging>
@@ -34,13 +34,13 @@
         <sedona.scope>compile</sedona.scope>
         <geotools.scope>compile</geotools.scope>
 
-        <geotools.version>28.2</geotools.version>
+        <geotools.version>33.1</geotools.version>
         <jt-jiffle.version>1.1.24</jt-jiffle.version>
-        <spark.version>3.4.0</spark.version>
-        <spark.compat.version>3.4</spark.compat.version>
-        <scala.compat.version>2.12</scala.compat.version>
-        <sedona.version>1.5.1</sedona.version>
-        <hadoop.version>3.3.4</hadoop.version>
+        <spark.version>4.0.1</spark.version>
+        <spark.compat.version>4.0</spark.compat.version>
+        <scala.compat.version>2.13</scala.compat.version>
+        <sedona.version>1.8.0</sedona.version>
+        <hadoop.version>3.4.2</hadoop.version>
     </properties>
 
     <dependencies>
@@ -172,7 +172,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>4.13.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
