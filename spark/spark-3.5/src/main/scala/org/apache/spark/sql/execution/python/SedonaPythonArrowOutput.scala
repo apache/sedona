@@ -121,7 +121,15 @@ private[python] trait SedonaPythonArrowOutput[OUT <: AnyRef] { self: SedonaBaseP
                 null.asInstanceOf[OUT]
             }
           }
-        } catch handleException
+        } catch {
+          case e: Exception =>
+            // If an exception happens, make sure to close the reader to release resources.
+            if (reader != null) {
+              reader.close(false)
+            }
+            allocator.close()
+            throw e
+        }
       }
     }
   }
