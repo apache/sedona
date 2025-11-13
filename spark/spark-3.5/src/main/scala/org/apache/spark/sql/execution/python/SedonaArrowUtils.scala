@@ -21,70 +21,15 @@ import java.util.concurrent.atomic.AtomicInteger
 import scala.collection.JavaConverters._
 import org.apache.arrow.memory.RootAllocator
 import org.apache.arrow.vector.complex.MapVector
-import org.apache.arrow.vector.types.{DateUnit, FloatingPointPrecision, IntervalUnit, TimeUnit}
 import org.apache.arrow.vector.types.pojo.{ArrowType, Field, FieldType, Schema}
 import org.apache.spark.sql.errors.ExecutionErrors
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
+import org.apache.spark.sql.util.ArrowUtils.{fromArrowType, toArrowType}
 
 private[sql] object SedonaArrowUtils {
 
   val rootAllocator = new RootAllocator(Long.MaxValue)
-
-  // todo: support more types.
-
-  /** Maps data type from Spark to Arrow. NOTE: timeZoneId required for TimestampTypes */
-  def toArrowType(
-                   dt: DataType, timeZoneId: String, largeVarTypes: Boolean = false): ArrowType = dt match {
-    case BooleanType => ArrowType.Bool.INSTANCE
-    case ByteType => new ArrowType.Int(8, true)
-    case ShortType => new ArrowType.Int(8 * 2, true)
-    case IntegerType => new ArrowType.Int(8 * 4, true)
-    case LongType => new ArrowType.Int(8 * 8, true)
-    case FloatType => new ArrowType.FloatingPoint(FloatingPointPrecision.SINGLE)
-    case DoubleType => new ArrowType.FloatingPoint(FloatingPointPrecision.DOUBLE)
-    case StringType if !largeVarTypes => ArrowType.Utf8.INSTANCE
-    case BinaryType if !largeVarTypes => ArrowType.Binary.INSTANCE
-    case StringType if largeVarTypes => ArrowType.LargeUtf8.INSTANCE
-    case BinaryType if largeVarTypes => ArrowType.LargeBinary.INSTANCE
-    case DecimalType.Fixed(precision, scale) => new ArrowType.Decimal(precision, scale)
-    case DateType => new ArrowType.Date(DateUnit.DAY)
-    case TimestampType if timeZoneId == null =>
-      throw new IllegalStateException("Missing timezoneId where it is mandatory.")
-    case TimestampType => new ArrowType.Timestamp(TimeUnit.MICROSECOND, timeZoneId)
-    case TimestampNTZType =>
-      new ArrowType.Timestamp(TimeUnit.MICROSECOND, null)
-    case NullType => ArrowType.Null.INSTANCE
-    case _: YearMonthIntervalType => new ArrowType.Interval(IntervalUnit.YEAR_MONTH)
-    case _: DayTimeIntervalType => new ArrowType.Duration(TimeUnit.MICROSECOND)
-    case _ =>
-      throw ExecutionErrors.unsupportedDataTypeError(dt)
-  }
-
-  def fromArrowType(dt: ArrowType): DataType = dt match {
-    case ArrowType.Bool.INSTANCE => BooleanType
-    case int: ArrowType.Int if int.getIsSigned && int.getBitWidth == 8 => ByteType
-    case int: ArrowType.Int if int.getIsSigned && int.getBitWidth == 8 * 2 => ShortType
-    case int: ArrowType.Int if int.getIsSigned && int.getBitWidth == 8 * 4 => IntegerType
-    case int: ArrowType.Int if int.getIsSigned && int.getBitWidth == 8 * 8 => LongType
-    case float: ArrowType.FloatingPoint
-      if float.getPrecision() == FloatingPointPrecision.SINGLE => FloatType
-    case float: ArrowType.FloatingPoint
-      if float.getPrecision() == FloatingPointPrecision.DOUBLE => DoubleType
-    case ArrowType.Utf8.INSTANCE => StringType
-    case ArrowType.Binary.INSTANCE => BinaryType
-    case ArrowType.LargeUtf8.INSTANCE => StringType
-    case ArrowType.LargeBinary.INSTANCE => BinaryType
-    case d: ArrowType.Decimal => DecimalType(d.getPrecision, d.getScale)
-    case date: ArrowType.Date if date.getUnit == DateUnit.DAY => DateType
-    case ts: ArrowType.Timestamp
-      if ts.getUnit == TimeUnit.MICROSECOND && ts.getTimezone == null => TimestampNTZType
-    case ts: ArrowType.Timestamp if ts.getUnit == TimeUnit.MICROSECOND => TimestampType
-    case ArrowType.Null.INSTANCE => NullType
-    case yi: ArrowType.Interval if yi.getUnit == IntervalUnit.YEAR_MONTH => YearMonthIntervalType()
-    case di: ArrowType.Duration if di.getUnit == TimeUnit.MICROSECOND => DayTimeIntervalType()
-    case _ => throw ExecutionErrors.unsupportedArrowTypeError(dt)
-  }
 
   /** Maps field from Spark to Arrow. NOTE: timeZoneId required for TimestampType */
   def toArrowField(
@@ -170,13 +115,6 @@ private[sql] object SedonaArrowUtils {
         timeZoneId,
         largeVarTypes)
     }.asJava)
-  }
-
-  def fromArrowSchema(schema: Schema): StructType = {
-    StructType(schema.getFields.asScala.map { field =>
-      val dt = fromArrowField(field)
-      StructField(field.getName, dt, field.isNullable)
-    }.toArray)
   }
 
   private def deduplicateFieldNames(

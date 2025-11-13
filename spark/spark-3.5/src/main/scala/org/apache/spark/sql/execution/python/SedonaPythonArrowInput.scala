@@ -26,6 +26,7 @@ import org.apache.spark.sql.execution.arrow.ArrowWriter
 import org.apache.spark.sql.execution.metric.SQLMetric
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.ArrowUtils
+import org.apache.spark.sql.util.ArrowUtils.toArrowSchema
 import org.apache.spark.util.Utils
 import org.apache.spark.{SparkEnv, TaskContext}
 
