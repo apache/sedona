@@ -1608,7 +1608,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         line = LineString([(0, 0), (1, 1)])
         result = s.crosses(line)
         expected = pd.Series([None, False])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
     def test_disjoint(self):
         pass
