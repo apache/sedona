@@ -1484,7 +1484,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = s.to_geoframe().crosses(s2, align=False).to_pandas()
         assert_series_equal(df_result, expected)
 
-        # Test with M-dimension GeometryCollection
+        # Sedona ST_Crosses doesn't support GeometryCollection, so it returns NULL for now.
+        # https://github.com/apache/sedona/issues/2417
+        # Once this is resolved, we can update the expected result of this test.
+        # Ensure M-dimension doesn't break things.
         m_geoseries = GeoSeries(
             [
                 wkt.loads("GEOMETRYCOLLECTION M (POINT M (1 2 3))"),
@@ -1492,9 +1495,9 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             ]
         )
         line = LineString([(0, 0), (1, 1)])
-        m_result = m_geoseries.crosses(line).to_pandas()
-        assert pd.isna(m_result[0])
-        assert isinstance(m_result[1], (bool, np.bool_))
+        result = m_geoseries.crosses(line)
+        expected = pd.Series([None, False])
+        assert_series_equal(result.to_pandas(), expected)
 
     def test_disjoint(self):
         pass
