@@ -868,37 +868,48 @@ of one GeoSeries <code class="docutils literal notranslate"><span class="pre">co
 <dl class="py property">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.convex_hull">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convex_hull</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.geoseries.GeoSeries"><span class="pre">GeoSeries</span></a></em><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.convex_hull" title="Link to this definition"></a></dt>
-<dd><p>Return the convex hull of each geometry.</p>
-<p>The convex hull is the smallest convex Polygon that contains
-all the points of the geometry.</p>
+<dd><p>Return a <code class="docutils literal notranslate"><span class="pre">GeoSeries</span></code> of geometries representing the convex hull
+of each geometry.</p>
+<p>The convex hull of a geometry is the smallest convex <cite>Polygon</cite>
+containing all the points in each geometry, unless the number of points
+in the geometric object is less than three. For two points, the convex
+hull collapses to a <cite>LineString</cite>; for 1, a <cite>Point</cite>.</p>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">LineString</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Point</span><span class="p">,</span> <span class="n">MultiPoint</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="p">[</span>
-<span class="gp">... </span>        <span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]),</span>
-<span class="gp">... </span>        <span class="n">LineString</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]),</span>
+<span class="gp">... </span>        <span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]),</span>
+<span class="gp">... </span>        <span class="n">LineString</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]),</span>
+<span class="gp">... </span>        <span class="n">MultiPoint</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)]),</span>
+<span class="gp">... </span>        <span class="n">MultiPoint</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]),</span>
 <span class="gp">... </span>        <span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
 <span class="gp">... </span>    <span class="p">]</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span>
-<span class="go">0    POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))</span>
-<span class="go">1    LINESTRING (0 0, 2 1)</span>
-<span class="go">2    POINT (0 0)</span>
+<span class="go">0                       POLYGON ((0 0, 1 1, 0 1, 0 0))</span>
+<span class="go">1                           LINESTRING (0 0, 1 1, 1 0)</span>
+<span class="go">2    MULTIPOINT ((0 0), (1 1), (0 1), (1 0), (0.5 0...</span>
+<span class="go">3                            MULTIPOINT ((0 0), (1 1))</span>
+<span class="go">4                                          POINT (0 0)</span>
 <span class="go">dtype: geometry</span>
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">convex_hull</span>
-<span class="go">0    POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))</span>
-<span class="go">1    POLYGON ((0 0, 2 1, 0 0))</span>
-<span class="go">2    POINT (0 0)</span>
+<span class="go">0         POLYGON ((0 0, 0 1, 1 1, 0 0))</span>
+<span class="go">1         POLYGON ((0 0, 1 1, 1 0, 0 0))</span>
+<span class="go">2    POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))</span>
+<span class="go">3                  LINESTRING (0 0, 1 1)</span>
+<span class="go">4                            POINT (0 0)</span>
 <span class="go">dtype: geometry</span>
 </pre></div>
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.envelope" title="sedona.spark.geopandas.GeoSeries.envelope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.envelope</span></code></a></dt><dd><p>axis-aligned bounding rectangle</p>
+<dt><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.concave_hull" title="sedona.spark.geopandas.GeoSeries.concave_hull"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.concave_hull</span></code></a></dt><dd><p>concave hull geometry</p>
+</dd>
+<dt><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.envelope" title="sedona.spark.geopandas.GeoSeries.envelope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.envelope</span></code></a></dt><dd><p>bounding rectangle geometry</p>
 </dd>
 </dl>
 </div>
@@ -1789,26 +1800,31 @@ where NaNs will be filled. Must be greater than 0 if not None.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.force_2d">
 <span class="sig-name descname"><span class="pre">force_2d</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.geoseries.GeoSeries"><span class="pre">GeoSeries</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.force_2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.force_2d" title="Link to this definition"></a></dt>
-<dd><p>Forces the dimensionality of each geometry to 2D.
-Removes the Z and M coordinates (if present) from each geometry and returns a
-GeoSeries with 2D geometries. 2D inputs are returned unchanged.
-:rtype: GeoSeries</p>
+<dd><p>Force the dimensionality of a geometry to 2D.</p>
+<p>Removes the additional Z and M coordinate dimension from all geometries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries">GeoSeries</a></p>
+</dd>
+</dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely</span><span class="w"> </span><span class="kn">import</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Point</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely</span><span class="w"> </span><span class="kn">import</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Point</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="p">[</span>
 <span class="gp">... </span>        <span class="n">Point</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
 <span class="gp">... </span>        <span class="n">LineString</span><span class="p">([(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]),</span>
 <span class="gp">... </span>        <span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]),</span>
-<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span>    <span class="p">],</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span>
 <span class="go">0                            POINT Z (0.5 2.5 0)</span>
 <span class="go">1             LINESTRING Z (1 1 1, 0 1 3, 1 0 2)</span>
 <span class="go">2    POLYGON Z ((0 0 0, 0 10 0, 10 10 0, 0 0 0))</span>
 <span class="go">dtype: geometry</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">force_2d</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">force_2d</span><span class="p">()</span>
 <span class="go">0                      POINT (0.5 2.5)</span>
 <span class="go">1           LINESTRING (1 1, 0 1, 1 0)</span>
 <span class="go">2    POLYGON ((0 0, 0 10, 10 10, 0 0))</span>
@@ -2843,26 +2859,78 @@ collapsing to a line, or a line collapsing to a point.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.minimum_bounding_circle">
 <span class="sig-name descname"><span class="pre">minimum_bounding_circle</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.geoseries.GeoSeries"><span class="pre">GeoSeries</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.minimum_bounding_circle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.minimum_bounding_circle" title="Link to this definition"></a></dt>
-<dd><p>Returns a <code class="docutils literal notranslate"><span class="pre">GeoSeries</span></code> containing the minimum bounding circle of each geometry.
-The minimum bounding circle is the smallest circle that completely encloses
-the geometry. The result is returned as a circular polygon approximation.
-:returns: A GeoSeries containing the minimum bounding circle for each geometry.
-:rtype: GeoSeries</p>
+<dd><p>Return a <code class="docutils literal notranslate"><span class="pre">GeoSeries</span></code> of geometries representing the minimum bounding
+circle that encloses each geometry.</p>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Polygon</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">gs</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">([</span><span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)])])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">gs</span><span class="o">.</span><span class="n">minimum_bounding_circle</span>
-<span class="go">0    POLYGON ((...))</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Point</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]),</span>
+<span class="gp">... </span>        <span class="n">LineString</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]),</span>
+<span class="gp">... </span>        <span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span>
+<span class="go">0    POLYGON ((0 0, 1 1, 0 1, 0 0))</span>
+<span class="go">1        LINESTRING (0 0, 1 1, 1 0)</span>
+<span class="go">2                       POINT (0 0)</span>
 <span class="go">dtype: geometry</span>
 </pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">minimum_bounding_circle</span><span class="p">()</span>
+<span class="go">0    POLYGON ((1.20711 0.5, 1.19352 0.36205, 1.1532...</span>
+<span class="go">1    POLYGON ((1.20711 0.5, 1.19352 0.36205, 1.1532...</span>
+<span class="go">2                                          POINT (0 0)</span>
+<span class="go">dtype: geometry</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.convex_hull" title="sedona.spark.geopandas.GeoSeries.convex_hull"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.convex_hull</span></code></a></dt><dd><p>convex hull geometry</p>
+</dd>
+</dl>
 </div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.minimum_bounding_radius">
-<span class="sig-name descname"><span class="pre">minimum_bounding_radius</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.minimum_bounding_radius"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.minimum_bounding_radius" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">minimum_bounding_radius</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.pandas/api/pyspark.pandas.Series.html#pyspark.pandas.Series" title="(in PySpark vmaster)"><span class="pre">pyspark.pandas.Series</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.minimum_bounding_radius"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.minimum_bounding_radius" title="Link to this definition"></a></dt>
+<dd><p>Return a <cite>Series</cite> of the radii of the minimum bounding circles
+that enclose each geometry.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span><span class="p">,</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Polygon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]),</span>
+<span class="gp">... </span>        <span class="n">LineString</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]),</span>
+<span class="gp">... </span>        <span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span>
+<span class="go">0    POLYGON ((0 0, 1 1, 0 1, 0 0))</span>
+<span class="go">1        LINESTRING (0 0, 1 1, 1 0)</span>
+<span class="go">2                       POINT (0 0)</span>
+<span class="go">dtype: geometry</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">minimum_bounding_radius</span><span class="p">()</span>
+<span class="go">0    0.707107</span>
+<span class="go">1    0.707107</span>
+<span class="go">2    0.000000</span>
+<span class="go">dtype: float64</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.minumum_bounding_circle</span></code></dt><dd><p>minimum bounding circle (geometry)</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.minimum_clearance">

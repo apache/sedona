@@ -1564,9 +1564,13 @@
 
 <div class="viewcode-block" id="GeoSeries.minimum_bounding_radius">
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.minimum_bounding_radius">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">minimum_bounding_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method.</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">minimum_bounding_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+        <span class="n">spark_struct</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_MinimumBoundingRadius</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">)</span>
+        <span class="n">spark_radius</span> <span class="o">=</span> <span class="n">spark_struct</span><span class="o">.</span><span class="n">getField</span><span class="p">(</span><span class="s2">&quot;radius&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
+            <span class="n">spark_radius</span><span class="p">,</span>
+            <span class="n">returns_geom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="GeoSeries.minimum_clearance">
