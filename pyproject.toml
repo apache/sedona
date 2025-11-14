@@ -50,3 +50,7 @@ docs = [
   "sphinx_rtd_theme",
   "sphinx-autobuild",
 ]
+dev = [
+    "pre-commit",
+    "pyyaml"
+]
