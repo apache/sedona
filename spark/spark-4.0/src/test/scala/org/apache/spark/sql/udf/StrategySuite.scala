@@ -18,32 +18,24 @@
  */
 package org.apache.spark.sql.udf
 
-import org.apache.sedona.spark.SedonaContext
+import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.udf.ScalarUDF.geoPandasScalaFunction
 import org.locationtech.jts.io.WKTReader
-import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
-class StrategySuite extends AnyFunSuite with Matchers {
+class StrategySuite extends TestBaseScala with Matchers {
   val wktReader = new WKTReader()
 
   val spark: SparkSession = {
-    val builder = SedonaContext
-      .builder()
-      .master("local[*]")
-      .appName("sedonasqlScalaTest")
-
-    val spark = SedonaContext.create(builder.getOrCreate())
-
-    spark.sparkContext.setLogLevel("ALL")
-    spark
+    sparkSession.sparkContext.setLogLevel("ALL")
+    sparkSession
   }
 
   import spark.implicits._
 
-  test("sedona geospatial UDF") {
+  it("sedona geospatial UDF") {
     val df = Seq(
       (1, "value", wktReader.read("POINT(21 52)")),
       (2, "value1", wktReader.read("POINT(20 50)")),

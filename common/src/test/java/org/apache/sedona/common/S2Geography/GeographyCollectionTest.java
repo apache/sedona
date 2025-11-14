@@ -45,7 +45,7 @@ public class GeographyCollectionTest {
     // Single point geography
     S2Point p = S2LatLng.fromDegrees(10, 20).toPoint();
     PointGeography pointGeo = new PointGeography(Arrays.asList(p));
-    List<S2Geography> features = Arrays.<S2Geography>asList(pointGeo);
+    List<Geography> features = Arrays.<Geography>asList(pointGeo);
     GeographyCollection coll = new GeographyCollection(features);
 
     assertEquals("Collection numShapes", 1, coll.numShapes());
@@ -74,7 +74,7 @@ public class GeographyCollectionTest {
     S2Polyline polyline = new S2Polyline(linePts);
     PolylineGeography polyGeo = new PolylineGeography(polyline);
 
-    List<S2Geography> features = Arrays.<S2Geography>asList(pg1, pg2, polyGeo);
+    List<Geography> features = Arrays.<Geography>asList(pg1, pg2, polyGeo);
     GeographyCollection coll = new GeographyCollection(features);
 
     assertEquals("Collection numShapes", 3, coll.numShapes());
@@ -90,7 +90,7 @@ public class GeographyCollectionTest {
     S2Point p2 = S2LatLng.fromDegrees(30, 40).toPoint();
     PointGeography pg1 = new PointGeography(Arrays.asList(p1));
     PointGeography pg2 = new PointGeography(Arrays.asList(p2));
-    GeographyCollection original = new GeographyCollection(List.<S2Geography>of(pg1, pg2));
+    GeographyCollection original = new GeographyCollection(List.<Geography>of(pg1, pg2));
 
     // encode/decode round trip via TestHelper
     EncodeOptions opts = new EncodeOptions();
@@ -104,7 +104,7 @@ public class GeographyCollectionTest {
     S2Point b = S2LatLng.fromDegrees(10, 10).toPoint();
     PointGeography pg1 = new PointGeography(List.of(a));
     PointGeography pg2 = new PointGeography(List.of(b));
-    GeographyCollection coll = new GeographyCollection(Arrays.<S2Geography>asList(pg1, pg2));
+    GeographyCollection coll = new GeographyCollection(Arrays.<Geography>asList(pg1, pg2));
 
     List<S2CellId> cover = new ArrayList<>();
     coll.getCellUnionBound(cover);

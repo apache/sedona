@@ -38,10 +38,10 @@ import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.CloseableIterator;
+import org.apache.sedona.common.jts2geojson.GeoJSONWriter;
 import org.apache.sedona.flink.expressions.Constructors;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.WKTReader;
-import org.wololo.jts2geojson.GeoJSONWriter;
 
 public class TestBase {
   protected static StreamExecutionEnvironment env;

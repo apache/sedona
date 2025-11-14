@@ -87,6 +87,11 @@ public class Rasterization {
       boolean allTouched)
       throws FactoryException {
 
+    // For instances where sub geometry is completely outside raster
+    if (geomExtent == null) {
+      return;
+    }
+
     switch (geom.getGeometryType()) {
       case "GeometryCollection":
       case "MultiPolygon":
@@ -303,9 +308,24 @@ public class Rasterization {
     return x >= minX && x <= maxX && y >= minY && y <= maxY;
   }
 
-  protected static ReferencedEnvelope rasterizeGeomExtent(
+  static ReferencedEnvelope rasterizeGeomExtent(
       Geometry geom, GridCoverage2D raster, double[] metadata, boolean allTouched) {
 
+    validateRasterMetadata(metadata);
+
+    // Always enable allTouched for MultiLineString and MultiPoint.
+    //
+    // Rationale:
+    // - Points and lines cannot be rasterized using "pixel-center inside geometry" logic
+    //   because they have no area. For these geometry types, we must use "any touch"
+    //   semantics to mark pixels they intersect/touch.
+    // - Single Point/LineString cases are already safeguarded by the zero-envelope
+    //   expansion logic at lines 367:373 (ensuring a non-degenerate search window).
+    // - For Polygons, whether we expand the snapped extent depends on the caller’s
+    //   allTouched setting (center-based vs any-intersection semantics).
+    //
+    // Enabling allTouched here guarantees correct handling for multi-part point/line
+    // geometries whose parts may sit exactly on pixel boundaries.
     if (Objects.equals(geom.getGeometryType(), "MultiLineString")) {
       allTouched = true;
     }
@@ -313,57 +333,45 @@ public class Rasterization {
       allTouched = true;
     }
 
-    ReferencedEnvelope rasterExtent =
+    ReferencedEnvelope geomExtent =
         new ReferencedEnvelope(geom.getEnvelopeInternal(), raster.getCoordinateReferenceSystem2D());
 
     // Using BigDecimal to avoid floating point errors
-    BigDecimal upperLeftX = BigDecimal.valueOf(metadata[0]);
-    BigDecimal upperLeftY = BigDecimal.valueOf(metadata[1]);
-    BigDecimal scaleX = BigDecimal.valueOf(metadata[4]);
-    BigDecimal scaleY = BigDecimal.valueOf(metadata[5]);
+    double upperLeftX = metadata[0];
+    double upperLeftY = metadata[1];
+    double scaleX = metadata[4];
+    double scaleY = metadata[5];
 
     // Compute the aligned min/max values
     double alignedMinX =
-        (scaleX
-                .multiply(
-                    BigDecimal.valueOf(
-                        Math.floor((rasterExtent.getMinX() + metadata[0]) / metadata[4])))
-                .subtract(upperLeftX))
-            .doubleValue();
-
+        toWorldCoordinate(
+            toPixelIndex(geomExtent.getMinX(), scaleX, upperLeftX, true), scaleX, upperLeftX);
     double alignedMinY =
-        (scaleY
-                .multiply(
-                    BigDecimal.valueOf(
-                        Math.ceil((rasterExtent.getMinY() + metadata[1]) / metadata[5])))
-                .subtract(upperLeftY))
-            .doubleValue();
-
+        toWorldCoordinate(
+            toPixelIndex(geomExtent.getMinY(), scaleY, upperLeftY, true), scaleY, upperLeftY);
     double alignedMaxX =
-        (scaleX
-                .multiply(
-                    BigDecimal.valueOf(
-                        Math.ceil((rasterExtent.getMaxX() + metadata[0]) / metadata[4])))
-                .subtract(upperLeftX))
-            .doubleValue();
-
+        toWorldCoordinate(
+            toPixelIndex(geomExtent.getMaxX(), scaleX, upperLeftX, false), scaleX, upperLeftX);
     double alignedMaxY =
-        (scaleY
-                .multiply(
-                    BigDecimal.valueOf(
-                        Math.floor((rasterExtent.getMaxY() + metadata[1]) / metadata[5])))
-                .subtract(upperLeftY))
-            .doubleValue();
+        toWorldCoordinate(
+            toPixelIndex(geomExtent.getMaxY(), scaleY, upperLeftY, false), scaleY, upperLeftY);
 
-    // For points and LineStrings at intersection of 2 or more pixels,
-    // extend search grid by 1 pixel in each direction
+    // Ensure the snapped AOI window is at least one pixel wide/tall.
+    // After snapping the continuous bbox to pixel edges, a point or thin line can
+    // collapse to min == max along an axis (i.e., a degenerate 0-width/0-height window).
+    // That would produce an empty search region and skip rasterization entirely.
+    //
+    // We grow the aligned window by exactly one pixel on each side, using the
+    // pixel size (scaleX > 0, scaleY < 0 for north-up). This yields at least a
+    // 1-pixel-wide/1-pixel-tall search window and guarantees we visit the pixel(s)
+    // the geometry lies in.
     if (alignedMaxX == alignedMinX) {
-      alignedMinX -= metadata[4];
-      alignedMaxX += metadata[4];
+      alignedMinX -= scaleX;
+      alignedMaxX += scaleX;
     }
     if (alignedMaxY == alignedMinY) {
-      alignedMinY += metadata[5];
-      alignedMaxY -= metadata[5];
+      alignedMinY += scaleY;
+      alignedMaxY -= scaleY;
     }
 
     // Get the extent of the original raster
@@ -372,15 +380,37 @@ public class Rasterization {
     double originalMaxX = raster.getEnvelope().getMaximum(0);
     double originalMaxY = raster.getEnvelope().getMaximum(1);
 
-    // Extend the aligned extent by 1 pixel if allTouched is true and if any geometry extent meets
-    // the aligned extent
-    if (allTouched) {
-      alignedMinX -= (rasterExtent.getMinX() == alignedMinX) ? metadata[4] : 0;
-      alignedMinY += (rasterExtent.getMinY() == alignedMinY) ? metadata[5] : 0;
-      alignedMaxX += (rasterExtent.getMaxX() == alignedMaxX) ? metadata[4] : 0;
-      alignedMaxY -= (rasterExtent.getMaxY() == alignedMaxY) ? metadata[5] : 0;
+    // Quick bbox intersection test for when rasterizeGeomExtent gets called independently
+    // return null if they do not intersect
+    if (alignedMinX >= originalMaxX
+        || alignedMaxX <= originalMinX
+        || alignedMinY >= originalMaxY
+        || alignedMaxY <= originalMinY) {
+      return null;
     }
 
+    // Handle "allTouched" behavior when geometry edges line up exactly with pixel boundaries.
+    //
+    // Normally, each pixel is considered only if its *center* falls inside the geometry.
+    // But if an edge of the geometry sits exactly on a pixel boundary, the geometry
+    // might "touch" neighboring pixels without covering their centers — and those pixels
+    // would be skipped.
+    //
+    // When allTouched = true, we expand the aligned bounding box outward by one pixel
+    // on any side where the geometry’s edge exactly matches a pixel boundary.
+    // This guarantees we include those neighboring pixels that the geometry merely touches.
+    //
+    // We only expand sides that line up perfectly with grid lines (equal coordinates).
+    // The scaleX / scaleY values (which already encode pixel size and direction) ensure
+    // this expansion moves exactly one pixel outward in each direction.
+    if (allTouched) {
+      alignedMinX -= (geomExtent.getMinX() == alignedMinX) ? scaleX : 0;
+      alignedMinY += (geomExtent.getMinY() == alignedMinY) ? scaleY : 0;
+      alignedMaxX += (geomExtent.getMaxX() == alignedMaxX) ? scaleX : 0;
+      alignedMaxY -= (geomExtent.getMaxY() == alignedMaxY) ? scaleY : 0;
+    }
+
+    // Clamp the aligned extent to the original raster extent
     alignedMinX = Math.max(alignedMinX, originalMinX);
     alignedMinY = Math.max(alignedMinY, originalMinY);
     alignedMaxX = Math.min(alignedMaxX, originalMaxX);
@@ -388,14 +418,36 @@ public class Rasterization {
 
     // Create the aligned raster extent
     ReferencedEnvelope alignedRasterExtent =
-        ReferencedEnvelope.rect(
+        new ReferencedEnvelope(
             alignedMinX,
+            alignedMaxX,
             alignedMinY,
-            alignedMaxX - alignedMinX,
-            alignedMaxY - alignedMinY,
-            rasterExtent.getCoordinateReferenceSystem());
+            alignedMaxY,
+            geomExtent.getCoordinateReferenceSystem());
 
     return alignedRasterExtent;
+  }
+
+  private static double toPixelIndex(double coord, double scale, double upperLeft, boolean isMin) {
+    BigDecimal rel = BigDecimal.valueOf(coord).subtract(BigDecimal.valueOf(upperLeft));
+
+    BigDecimal px = rel.divide(BigDecimal.valueOf(scale), 16, RoundingMode.FLOOR);
+    if (scale > 0) {
+      return isMin
+          ? px.setScale(0, RoundingMode.FLOOR).doubleValue()
+          : px.setScale(0, RoundingMode.CEILING).doubleValue();
+    } else {
+      return isMin
+          ? px.setScale(0, RoundingMode.CEILING).doubleValue()
+          : px.setScale(0, RoundingMode.FLOOR).doubleValue();
+    }
+  }
+
+  private static double toWorldCoordinate(double pixelIndex, double scale, double upperLeft) {
+    return BigDecimal.valueOf(pixelIndex)
+        .multiply(BigDecimal.valueOf(scale))
+        .add(BigDecimal.valueOf(upperLeft))
+        .doubleValue();
   }
 
   private static RasterizationParams calculateRasterizationParams(
@@ -574,7 +626,7 @@ public class Rasterization {
           // calculating slope
           for (double y = yStart; y >= yEnd; y--) {
             double xIntercept = p1X; // Vertical line, xIntercept is constant
-            if (xIntercept < 0 || xIntercept >= params.writableRaster.getWidth()) {
+            if (xIntercept < 0 || xIntercept > params.writableRaster.getWidth()) {
               continue; // Skip xIntercepts outside geomExtent
             }
             scanlineIntersections.computeIfAbsent(y, k -> new TreeSet<>()).add(xIntercept);
@@ -583,6 +635,7 @@ public class Rasterization {
           double slope = (worldP2.y - worldP1.y) / (worldP2.x - worldP1.x);
           double xMin = (geomExtent.getMinX() - params.upperLeftX) / params.scaleX;
           double xMax = (geomExtent.getMaxX() - params.upperLeftX) / params.scaleX;
+
           for (double y = yStart; y >= yEnd; y--) {
             double xIntercept = p1X + ((p1Y - y) / slope);
             if ((xIntercept < xMin) || (xIntercept >= xMax)) {

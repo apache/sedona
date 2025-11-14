@@ -251,6 +251,32 @@ Output:
 0.19739555984988044
 ```
 
+## ST_ApproximateMedialAxis
+
+Introduction: Computes an approximate medial axis of a polygonal geometry. The medial axis is a representation of the "centerline" or "skeleton" of the polygon. This function first computes the straight skeleton and then prunes insignificant branches to produce a cleaner result.
+
+The pruning removes small branches that represent minor penetrations into corners. A branch is pruned if its penetration depth is less than 20% of the width of the corner it bisects.
+
+This function may have significant performance limitations when processing polygons with a very large number of vertices. For very large polygons (e.g., 10,000+ vertices), applying vertex reduction or simplification is essential to achieve practical computation times.
+
+Format: `ST_ApproximateMedialAxis(geom: Geometry)`
+
+Since: `v1.8.0`
+
+Example:
+
+```sql
+SELECT ST_ApproximateMedialAxis(
+  ST_GeomFromWKT('POLYGON ((45 0, 55 0, 55 40, 70 40, 70 50, 30 50, 30 40, 45 40, 45 0))')
+)
+```
+
+Output:
+
+```
+MULTILINESTRING ((50 45, 50 5), (50 45, 35 45), (65 45, 50 45), (35 45, 65 45))
+```
+
 ## ST_Area
 
 Introduction: Return the area of A
@@ -714,7 +740,7 @@ The optional forth parameter controls the buffer accuracy and style. Buffer accu
 - `endcap=round|flat|square` : End cap style (default is `round`). `butt` is an accepted synonym for `flat`.
 - `join=round|mitre|bevel` : Join style (default is `round`). `miter` is an accepted synonym for `mitre`.
 - `mitre_limit=#.#` : mitre ratio limit and it only affects mitred join style. `miter_limit` is an accepted synonym for `mitre_limit`.
-- `side=both|left|right` : The option `left` or `right` enables a single-sided buffer operation on the geometry, with the buffered side aligned according to the direction of the line. This functionality is specific to LINESTRING geometry and has no impact on POINT or POLYGON geometries. By default, square end caps are applied.
+- `side=both|left|right` : Defaults to `both`. Setting `left` or `right` enables a single-sided buffer operation on the geometry, with the buffered side aligned according to the direction of the line. This functionality is specific to LINESTRING geometry and has no impact on POINT or POLYGON geometries. By default, square end caps are applied when `left` or `right` are specified.
 
 !!!note
     `ST_Buffer` throws an `IllegalArgumentException` if the correct format, parameters, or options are not provided.
@@ -2590,10 +2616,10 @@ Output:
 
 ## ST_LineMerge
 
-Introduction: Returns a LineString formed by sewing together the constituent line work of a MULTILINESTRING.
+Introduction: Returns a LineString or MultiLineString formed by sewing together the constituent line work of a MULTILINESTRING.
 
 !!!note
-    Only works for MULTILINESTRING. Using other geometry will return a GEOMETRYCOLLECTION EMPTY. If the MultiLineString can't be merged, the original MULTILINESTRING is returned.
+    Only works for MULTILINESTRING. Using other geometry will return a GEOMETRYCOLLECTION EMPTY. If no merging can be performed, the original MULTILINESTRING is returned.
 
 Format: `ST_LineMerge (A: Geometry)`
 
@@ -3785,6 +3811,41 @@ Output:
 POLYGON ((-2 -2, -2 1, 2.5 1, 2.5 -2, -2 -2))
 ```
 
+## ST_Segmentize
+
+Introduction: Returns a modified geometry having no segment longer than the given max_segment_length.
+
+The length calculation is performed in 2D. When a segment is longer than the specified maximum length, it is split into multiple, equal-length subsegments.
+
+Format: `ST_Segmentize(geom: Geometry, max_segment_length: Double)`
+
+Since: v1.8.0
+
+SQL Example
+Long segments are split evenly into subsegments no longer than the specified length. Shorter segments are not modified.
+
+```sql
+SELECT ST_AsText(ST_Segmentize(ST_GeomFromText('MULTILINESTRING((0 0, 0 1, 0 9),(1 10, 1 18))'), 5));
+```
+
+Output:
+
+```
+MULTILINESTRING((0 0,0 1,0 5,0 9),(1 10,1 14,1 18))
+```
+
+SQL Example
+
+```sql
+SELECT ST_AsText(ST_Segmentize(ST_GeomFromText('POLYGON((0 0, 0 8, 30 0, 0 0))'), 10));
+```
+
+Output:
+
+```
+POLYGON((0 0,0 8,7.5 6,15 4,22.5 2,30 0,20 0,10 0,0 0))
+```
+
 ## ST_SetPoint
 
 Introduction: Replace Nth point of linestring with given point. Index is 0-based. Negative index are counted backwards, e.g., -1 is last point.
@@ -4035,6 +4096,32 @@ Output:
 
 ```
 POINT(100 150)
+```
+
+## ST_StraightSkeleton
+
+Introduction: Computes the straight skeleton of a polygonal geometry. The straight skeleton is a method of representing a polygon by a topological skeleton, formed by a continuous shrinking process where each edge moves inward in parallel at a uniform speed.
+
+This function uses the weighted straight skeleton algorithm based on Felkel's approach.
+
+This function may have significant performance limitations when processing polygons with a very large number of vertices. For very large polygons (e.g., 10,000+ vertices), applying vertex reduction or simplification is essential to achieve practical computation times.
+
+Format: `ST_StraightSkeleton(geom: Geometry)`
+
+Since: `v1.8.0`
+
+Example:
+
+```sql
+SELECT ST_StraightSkeleton(
+  ST_GeomFromWKT('POLYGON ((45 0, 55 0, 55 40, 70 40, 70 50, 30 50, 30 40, 45 40, 45 0))')
+)
+```
+
+Output:
+
+```
+MULTILINESTRING ((50 5, 50 45), (50 45, 35 45), (50 45, 65 45), (35 45, 30 45), (35 45, 40 40), (65 45, 70 45), (65 45, 60 40), (50 5, 45 5), (50 5, 55 5))
 ```
 
 ## ST_SubDivide

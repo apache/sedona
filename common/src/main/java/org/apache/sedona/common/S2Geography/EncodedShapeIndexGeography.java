@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class EncodedShapeIndexGeography extends S2Geography {
+public class EncodedShapeIndexGeography extends Geography {
   private static final Logger logger = Logger.getLogger(EncodedShapeIndexGeography.class.getName());
 
   public S2ShapeIndex shapeIndex;
@@ -63,7 +63,7 @@ public class EncodedShapeIndexGeography extends S2Geography {
    *
    * @return the last shapeId assigned.
    */
-  public int addIndex(S2Geography geog) {
+  public int addIndex(Geography geog) {
     int lastId = -1;
     for (int i = 0, n = geog.numShapes(); i < n; i++) {
       shapeIndex.add(geog.shape(i));
@@ -80,7 +80,7 @@ public class EncodedShapeIndexGeography extends S2Geography {
   }
 
   @Override
-  protected void encode(UnsafeOutput os, EncodeOptions opts) throws IOException {
+  public void encode(UnsafeOutput os, EncodeOptions opts) throws IOException {
     throw new IOException("Encode() not implemented for EncodedShapeIndexGeography()");
   }
   // decode

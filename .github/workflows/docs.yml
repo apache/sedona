@@ -49,10 +49,27 @@ jobs:
         run: mvn -q clean install -DskipTests && mkdir -p docs/api/javadoc/spark && cp -r spark/common/target/apidocs/* docs/api/javadoc/spark/
       - name: Compile ScalaDoc
         run: mvn generate-sources scala:doc -pl !common,!snowflake,!flink && mkdir -p docs/api/scaladoc/spark && cp -r spark/common/target/site/scaladocs/* docs/api/scaladoc/spark
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'docs-overrides/package-lock.json'
+      - name: Install docs-overrides dependencies
+        run: |
+          cd docs-overrides
+          npm ci
+      - name: Build docs-overrides assets
+        run: |
+          cd docs-overrides
+          npx gulp build
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.x
-      - run: pip install -r requirements-docs.txt
+          python-version: '3.11'
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+      - name: Sync doc environment
+        run: uv sync --group docs
       - run: sudo apt update
       - uses: r-lib/actions/setup-r@v2.11.3
         with:
@@ -66,19 +83,37 @@ jobs:
             any::pkgdown
           working-directory: './R'
       - run: Rscript -e 'pkgdown::build_site(pkg = "./R", preview = FALSE, override = list(destination = "../docs/api/rdocs"))'
+      - name: Install Python documentation dependencies
+        run: |
+          # Get Spark version from pom.xml
+          SPARK_VERSION=$(mvn help:evaluate -Dexpression=spark.version -q -DforceStdout)
+
+          # Install pyspark matching Spark version (other deps handled by uv sync)
+          uv pip install pyspark==$SPARK_VERSION
+
+          # Install sedona with all optional dependencies for complete documentation
+          uv pip install -e python/.[all]
+      - name: Build Python API documentation with Sphinx
+        env:
+          CI: true
+        run: |
+          # Use uv run so sphinx-build from the virtual environment is on PATH
+          uv run bash -c 'cd python/sedona/doc && make clean && make html'
+          mkdir -p docs/api/pydocs
+          cp -r python/sedona/doc/_build/html/* docs/api/pydocs/
       - run: git config --global user.name = "GitHub Action"
       - run: git config --global user.email = "test@abc.com"
-      - run: mkdocs build
+      - run: uv run mkdocs build
       - name: Deploy the doc to the website branch
         if: ${{ github.event_name != 'pull_request' && github.repository == 'apache/sedona' }}
         run: |
           if [[ "${GITHUB_REF##*/}" == "master" ]]; then
             git fetch origin website --depth=1
-            mike deploy latest-snapshot -b website -p
+            uv run mike deploy latest-snapshot -b website -p
           elif [[ "${GITHUB_REF##*/}" =~ ^branch-[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             git fetch origin website --depth=1
             version="${GITHUB_REF##*/branch-}"
-            mike deploy --update-aliases "$version" latest -b website -p
+            uv run mike deploy --update-aliases "$version" latest -b website -p
           fi
       - run: mkdir staging
       - run: cp -r site/* staging/
@@ -99,3 +134,10 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+      - name: Cache Node modules
+        uses: actions/cache@v4
+        with:
+          path: docs-overrides/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('docs-overrides/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-

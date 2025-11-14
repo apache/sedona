@@ -33,7 +33,7 @@ import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PointGeography extends S2Geography {
+public class PointGeography extends Geography {
   private static final Logger logger = LoggerFactory.getLogger(PointGeography.class.getName());
 
   private static final int BUFFER_SIZE = 4 * 1024;
@@ -46,8 +46,13 @@ public class PointGeography extends S2Geography {
   }
 
   /** Constructs especially for CELL_CENTER */
-  private PointGeography(GeographyKind kind, S2Point point) {
+  PointGeography(GeographyKind kind, S2Point point) {
     super(kind); // can be POINT or CELL_CENTER
+    if (kind != GeographyKind.POINT
+        && kind != GeographyKind.SINGLEPOINT
+        && kind != GeographyKind.CELL_CENTER) {
+      throw new IllegalArgumentException("Invalid GeographyKind for PointGeography: " + kind);
+    }
     points.add(point);
   }
 
@@ -134,6 +139,7 @@ public class PointGeography extends S2Geography {
         tag.setCoveringSize((byte) 1);
         tag.encode(out);
         out.writeLong(cid.id());
+        out.writeInt(getSRID()); // write the SRID
         out.flush();
         return;
       }
@@ -143,7 +149,7 @@ public class PointGeography extends S2Geography {
   }
 
   @Override
-  protected void encode(UnsafeOutput out, EncodeOptions opts) throws IOException {
+  public void encode(UnsafeOutput out, EncodeOptions opts) throws IOException {
     // now the *payload* must go into its own buffer:
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     Output tmpOut = new Output(baos);
@@ -166,7 +172,6 @@ public class PointGeography extends S2Geography {
     // use writeInt(len, false) so it's exactly 4 bytes
     out.writeInt(payload.length, /* optimizePositive= */ false);
     out.writeBytes(payload);
-
     out.flush();
   }
 
@@ -237,6 +242,10 @@ public class PointGeography extends S2Geography {
       pts = S2Point.Shape.COMPACT_CODER.decode(bytes, cursor);
     } else {
       pts = S2Point.Shape.FAST_CODER.decode(bytes, cursor);
+    }
+
+    if (tag.getKind() == GeographyKind.SINGLEPOINT) {
+      return new SinglePointGeography(pts.get(0));
     }
 
     geo.points.addAll(pts);

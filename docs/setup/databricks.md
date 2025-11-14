@@ -33,8 +33,6 @@ For example, one Databricks Runtime 16.4 depends on Scala 2.12 and Spark 3.5.  H
 
 If you use a Databricks Runtime compiled with Spark 3.5 and Scala 2.12, then you should use a Sedona version compiled with Spark 3.5 and Scala 2.12.  You need to make sure the Scala versions are aligned, even if you’re using the Python or SQL APIs.
 
-Only some Sedona functions work when Databricks Photon acceleration is enabled, so you can consider disabling Photon when using Sedona for better compatibility.
-
 ## Install the Sedona library in Databricks
 
 Download the required Sedona packages by executing the following commands:
@@ -50,11 +48,11 @@ curl -o /Workspace/Shared/sedona/{{ sedona.current_version }}/geotools-wrapper-{
 curl -o /Workspace/Shared/sedona/{{ sedona.current_version }}/sedona-spark-shaded-3.5_2.12-{{ sedona.current_version }}.jar "https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/{{ sedona.current_version }}/sedona-spark-shaded-3.5_2.12-{{ sedona.current_version }}.jar"
 ```
 
-Here are the software versions used to compile `sedona-spark-shaded-3.5_2.12-1.7.1.jar`:
+Here are the software versions used to compile `sedona-spark-shaded-3.5_2.12-{{ sedona.current_version }}.jar`:
 
 * Spark 3.5
 * Scala 2.12
-* Sedona 1.7.1
+* Sedona {{ sedona.current_version }}
 
 Ensure that you use a Databricks Runtime with versions compatible with this jar.
 
@@ -78,7 +76,7 @@ cat > /Workspace/Shared/sedona/sedona-init.sh <<'EOF'
 #
 # On cluster startup, this script will copy the Sedona jars to the cluster's default jar directory.
 
-cp /Workspace/Shared/sedona/1.7.1/*.jar /databricks/jars
+cp /Workspace/Shared/sedona/{{ sedona.current_version }}/*.jar /databricks/jars
 
 EOF
 ```
@@ -86,8 +84,6 @@ EOF
 ## Create a Databricks cluster
 
 You need to create a Databricks cluster compatible with the Sedona JAR files.  If you use Sedona JAR files compiled with Scala 2.12, you must use a Databricks cluster that runs Scala 2.12.
-
-Databricks Photon is only partially compatible with Apache Sedona, so you will have better compatibility if you unselect the Photon button when configuring the cluster.
 
 Go to the compute tab and configure the cluster:
 
@@ -133,6 +129,14 @@ Create a Databricks notebook and connect it to the cluster.  Verify that you can
 
 ![Python computation](../image/databricks/image1.png)
 
+If you want to use Sedona Python functions such as [DataFrame APIs](../api/sql/DataFrameAPI.md) or [StructuredAdapter](../tutorial/sql.md#spatialrdd-to-dataframe-with-spatial-partitioning), you need to initialize Sedona as follows:
+
+```python
+from sedona.spark import *
+
+sedona = SedonaContext.create(spark)
+```
+
 You can also use the SQL API as follows:
 
 ![SQL computation](../image/databricks/image8.png)
@@ -142,11 +146,14 @@ You can also use the SQL API as follows:
 Here’s how to create a Sedona DataFrame with a geometry column
 
 ```python
-df = sedona.createDataFrame([
-    ('a', 'POLYGON((1.0 1.0,1.0 3.0,2.0 3.0,2.0 1.0,1.0 1.0))'),
-    ('b', 'LINESTRING(4.0 1.0,4.0 2.0,6.0 4.0)'),
-    ('c', 'POINT(9.0 2.0)'),
-], ["id", "geometry"])
+df = sedona.createDataFrame(
+    [
+        ("a", "POLYGON((1.0 1.0,1.0 3.0,2.0 3.0,2.0 1.0,1.0 1.0))"),
+        ("b", "LINESTRING(4.0 1.0,4.0 2.0,6.0 4.0)"),
+        ("c", "POINT(9.0 2.0)"),
+    ],
+    ["id", "geometry"],
+)
 df = df.withColumn("geometry", expr("ST_GeomFromWKT(geometry)"))
 ```
 

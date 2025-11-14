@@ -18,11 +18,11 @@
  */
 package org.apache.sedona.sql
 
-import io.minio.{MakeBucketArgs, MinioClient, PutObjectArgs}
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import io.minio.{MakeBucketArgs, MinioClient}
+import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.expr
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.sql.types.{BinaryType, BooleanType, DateType, DoubleType, IntegerType, StringType, StructField, StructType, TimestampType}
+import org.apache.spark.sql.types._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.testcontainers.containers.MinIOContainer
@@ -168,6 +168,50 @@ class GeoPackageReaderTest extends TestBaseScala with Matchers {
         df.count() shouldEqual expectedCount
       }
     }
+
+    it("should handle datetime fields without timezone information") {
+      // This test verifies the fix for DateTimeParseException when reading
+      // GeoPackage files with datetime fields that don't include timezone info
+      val testFilePath = resourceFolder + "geopackage/test_datetime_issue.gpkg"
+
+      // Test reading the test_features table with problematic datetime formats
+      val df = sparkSession.read
+        .format("geopackage")
+        .option("tableName", "test_features")
+        .load(testFilePath)
+
+      // The test should not throw DateTimeParseException when reading datetime fields
+      noException should be thrownBy {
+        df.select("created_at", "updated_at").collect()
+      }
+
+      // Verify that datetime fields are properly parsed as TimestampType
+      df.schema.fields.find(_.name == "created_at").get.dataType shouldEqual TimestampType
+      df.schema.fields.find(_.name == "updated_at").get.dataType shouldEqual TimestampType
+
+      // Verify that we can read the datetime values
+      val datetimeValues = df.select("created_at", "updated_at").collect()
+      datetimeValues should not be empty
+
+      // Verify that datetime values are valid timestamps
+      datetimeValues.foreach { row =>
+        val createdTimestamp = row.getAs[Timestamp]("created_at")
+        val updatedTimestamp = row.getAs[Timestamp]("updated_at")
+        createdTimestamp should not be null
+        updatedTimestamp should not be null
+        createdTimestamp.getTime should be > 0L
+        updatedTimestamp.getTime should be > 0L
+      }
+
+      // Test showMetadata option with the same file
+      noException should be thrownBy {
+        val metadataDf = sparkSession.read
+          .format("geopackage")
+          .option("showMetadata", "true")
+          .load(testFilePath)
+        metadataDf.select("last_change").collect()
+      }
+    }
   }
 
   describe("GeoPackage Raster Data Test") {
@@ -257,7 +301,7 @@ class GeoPackageReaderTest extends TestBaseScala with Matchers {
         .load(inputPath)
         .count shouldEqual 34
 
-      val df = sparkSessionMinio.read
+      val df = sparkSession.read
         .format("geopackage")
         .option("tableName", "point1")
         .load(inputPath)

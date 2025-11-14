@@ -25,9 +25,9 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang.NullArgumentException;
 import org.apache.log4j.Logger;
 import org.apache.sedona.common.FunctionsGeoTools;
+import org.apache.sedona.common.jts2geojson.GeoJSONWriter;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
@@ -56,7 +56,6 @@ import org.locationtech.jts.index.strtree.STRtree;
 import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.WKTWriter;
 import org.wololo.geojson.Feature;
-import org.wololo.jts2geojson.GeoJSONWriter;
 import scala.Tuple2;
 
 // TODO: Auto-generated Javadoc
@@ -542,14 +541,14 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
    */
   public void saveAsWKB(String outputLocation) {
     if (this.rawSpatialRDD == null) {
-      throw new NullArgumentException("save as WKB cannot operate on null RDD");
+      throw new IllegalArgumentException("save as WKB cannot operate on null RDD");
     }
     this.rawSpatialRDD
         .mapPartitions(
             new FlatMapFunction<Iterator<T>, String>() {
               @Override
               public Iterator<String> call(Iterator<T> iterator) throws Exception {
-                WKBWriter writer = new WKBWriter(3, true);
+                WKBWriter writer = GeomUtils.createWKBWriter(3, true);
                 ArrayList<String> wkbs = new ArrayList<>();
 
                 while (iterator.hasNext()) {
@@ -571,7 +570,7 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
   /** Save as WKT */
   public void saveAsWKT(String outputLocation) {
     if (this.rawSpatialRDD == null) {
-      throw new NullArgumentException("save as WKT cannot operate on null RDD");
+      throw new IllegalArgumentException("save as WKT cannot operate on null RDD");
     }
     this.rawSpatialRDD
         .mapPartitions(

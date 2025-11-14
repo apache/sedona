@@ -18,6 +18,11 @@
  */
 package org.apache.sedona.common.utils;
 
+import com.google.common.geometry.*;
+import java.io.IOException;
+import java.util.List;
+import org.apache.sedona.common.S2Geography.Geography;
+import org.apache.sedona.common.S2Geography.PolygonGeography;
 import org.locationtech.jts.geom.Geometry;
 
 public class GeoHashDecoder {
@@ -32,6 +37,27 @@ public class GeoHashDecoder {
 
   public static Geometry decode(String geohash, Integer precision) throws InvalidGeoHashException {
     return decodeGeoHashBBox(geohash, precision).getBbox().toPolygon();
+  }
+
+  public static Geography decodeGeog(String geohash, Integer precision)
+      throws InvalidGeoHashException, IOException {
+    BBox box = decodeGeoHashBBox(geohash, precision).getBbox(); // west,east,south,north
+    double south = box.startLat, north = box.endLat;
+    double west = box.startLon, east = box.endLon;
+
+    // 4 corners (lat, lon) in CCW order: SW → SE → NE → NW
+    S2Point SW = S2LatLng.fromDegrees(south, west).toPoint();
+    S2Point SE = S2LatLng.fromDegrees(south, east).toPoint();
+    S2Point NE = S2LatLng.fromDegrees(north, east).toPoint();
+    S2Point NW = S2LatLng.fromDegrees(north, west).toPoint();
+
+    S2Loop shell = new S2Loop(List.of(SW, SE, NE, NW));
+    shell.normalize(); // ensure CCW & smaller-area orientation (safe even if already CCW)
+
+    S2Polygon s2poly = new S2Polygon(shell);
+    Geography geog = new PolygonGeography(s2poly);
+    geog.setSRID(4326);
+    return geog;
   }
 
   private static class LatLon {

@@ -14,3 +14,25 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import warnings
+from sedona.spark import sql
+
+
+def __getattr__(name):
+    if hasattr(sql, name):
+        warnings.warn(
+            f"Importing '{name}' from 'sedona.sql' is deprecated. Please use 'sedona.spark.sql.{name}' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return getattr(sql, name)
+    raise AttributeError(f"module 'sedona.sql' has no attribute '{name}'")
+
+
+warnings.warn(
+    "Importing from 'sedona.sql' is deprecated. Please use 'sedona.spark.sql' instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
+__all__ = sql.__all__

@@ -16,12 +16,14 @@
 # under the License.
 
 import collections.abc
+from unittest.mock import patch
 
 from pyspark.sql import DataFrame
 from sedona.spark.stac.client import Client
 from sedona.spark.stac.collection_client import CollectionClient
 
 from tests.test_base import TestBase
+from tests.stac.test_mock_fixtures import MockClient, MockCollectionClient
 
 STAC_URLS = {
     "PLANETARY-COMPUTER": "https://planetarycomputer.microsoft.com/api/stac/v1"
@@ -29,21 +31,30 @@ STAC_URLS = {
 
 
 class TestStacReader(TestBase):
-    def test_collection_client(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_collection_client(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         collection = client.get_collection("aster-l1t")
 
-        assert isinstance(collection, CollectionClient)
+        assert isinstance(collection, MockCollectionClient)
         assert str(collection) == "<CollectionClient id=aster-l1t>"
 
-    def test_get_dataframe_no_filters(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_get_dataframe_no_filters(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         collection = client.get_collection("aster-l1t")
         df = collection.get_dataframe()
         assert df is not None
         assert isinstance(df, DataFrame)
 
-    def test_get_dataframe_with_spatial_extent(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_get_dataframe_with_spatial_extent(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         collection = client.get_collection("aster-l1t")
         bbox = [[-180.0, -90.0, 180.0, 90.0]]
@@ -51,7 +62,10 @@ class TestStacReader(TestBase):
         assert df is not None
         assert isinstance(df, DataFrame)
 
-    def test_get_dataframe_with_temporal_extent(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_get_dataframe_with_temporal_extent(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         collection = client.get_collection("aster-l1t")
         datetime = [["2006-01-01T00:00:00Z", "2007-01-01T00:00:00Z"]]
@@ -59,7 +73,10 @@ class TestStacReader(TestBase):
         assert df is not None
         assert isinstance(df, DataFrame)
 
-    def test_get_dataframe_with_both_extents(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_get_dataframe_with_both_extents(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         collection = client.get_collection("aster-l1t")
         bbox = [[-180.0, -90.0, 180.0, 90.0]]
@@ -68,21 +85,30 @@ class TestStacReader(TestBase):
         assert df is not None
         assert isinstance(df, DataFrame)
 
-    def test_get_items_with_spatial_extent(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_get_items_with_spatial_extent(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         collection = client.get_collection("aster-l1t")
         bbox = [[-100.0, -72.0, 105.0, -69.0]]
         items = list(collection.get_items(bbox=bbox))
         assert items is not None
 
-    def test_get_items_with_temporal_extent(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_get_items_with_temporal_extent(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         collection = client.get_collection("aster-l1t")
         datetime = [["2006-12-01T00:00:00Z", "2006-12-27T02:00:00Z"]]
         items = list(collection.get_items(datetime=datetime))
         assert items is not None
 
-    def test_get_items_with_both_extents(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_get_items_with_both_extents(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         collection = client.get_collection("aster-l1t")
         bbox = [[90, -73, 105, -69]]
@@ -90,7 +116,10 @@ class TestStacReader(TestBase):
         items = list(collection.get_items(bbox=bbox, datetime=datetime))
         assert items is not None
 
-    def test_get_items_with_multiple_bboxes_and_interval(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_get_items_with_multiple_bboxes_and_interval(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         collection = client.get_collection("aster-l1t")
         bbox = [
@@ -112,20 +141,29 @@ class TestStacReader(TestBase):
         items = list(collection.get_items(bbox=bbox, datetime=datetime))
         assert items is not None
 
-    def test_get_items_with_ids(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_get_items_with_ids(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         collection = client.get_collection("aster-l1t")
         ids = ["AST_L1T_00312272006020322_20150518201805", "item2", "item3"]
         items = list(collection.get_items(*ids))
         assert items is not None
 
-    def test_get_items_with_id(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_get_items_with_id(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         collection = client.get_collection("aster-l1t")
         items = list(collection.get_items("AST_L1T_00312272006020322_20150518201805"))
         assert items is not None
 
-    def test_get_items_with_bbox_and_non_overlapping_intervals(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_get_items_with_bbox_and_non_overlapping_intervals(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         collection = client.get_collection("aster-l1t")
         bbox = [[-180.0, -90.0, 180.0, 90.0]]
@@ -136,7 +174,10 @@ class TestStacReader(TestBase):
         items = list(collection.get_items(bbox=bbox, datetime=datetime))
         assert items is not None
 
-    def test_get_items_with_bbox_and_interval(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_get_items_with_bbox_and_interval(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         collection = client.get_collection("aster-l1t")
         bbox = [-180.0, -90.0, 180.0, 90.0]
@@ -144,7 +185,10 @@ class TestStacReader(TestBase):
         items = list(collection.get_items(bbox=bbox, datetime=interval))
         assert items is not None
 
-    def test_get_dataframe_with_bbox_and_interval(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_get_dataframe_with_bbox_and_interval(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         collection = client.get_collection("aster-l1t")
         bbox = [-180.0, -90.0, 180.0, 90.0]
@@ -152,7 +196,10 @@ class TestStacReader(TestBase):
         df = collection.get_dataframe(bbox=bbox, datetime=interval)
         assert df is not None
 
-    def test_save_to_geoparquet(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_save_to_geoparquet(self, mock_open) -> None:
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         collection = client.get_collection("aster-l1t")
 
@@ -176,8 +223,11 @@ class TestStacReader(TestBase):
 
             assert os.path.exists(output_path), "GeoParquet file was not created"
 
-    def test_get_items_with_wkt_geometry(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_get_items_with_wkt_geometry(self, mock_open) -> None:
         """Test that WKT geometry strings are properly handled for spatial filtering."""
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         collection = client.get_collection("aster-l1t")
 
@@ -188,9 +238,12 @@ class TestStacReader(TestBase):
         # Both should return similar number of items (may not be exactly same due to geometry differences)
         assert items_with_wkt is not None
 
-    def test_get_dataframe_with_shapely_geometry(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_get_dataframe_with_shapely_geometry(self, mock_open) -> None:
         """Test that Shapely geometry objects are properly handled for spatial filtering."""
         from shapely.geometry import Polygon
+
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
 
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         collection = client.get_collection("aster-l1t")
@@ -204,9 +257,12 @@ class TestStacReader(TestBase):
         # Both should return similar number of items
         assert df_with_shapely is not None
 
-    def test_get_items_with_geometry_list(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_get_items_with_geometry_list(self, mock_open) -> None:
         """Test that lists of geometry objects are properly handled."""
         from shapely.geometry import Polygon
+
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
 
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         collection = client.get_collection("aster-l1t")
@@ -223,9 +279,12 @@ class TestStacReader(TestBase):
         # Should return items from both geometries
         assert items_with_geom_list is not None
 
-    def test_geometry_takes_precedence_over_bbox(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_geometry_takes_precedence_over_bbox(self, mock_open) -> None:
         """Test that geometry parameter takes precedence over bbox when both are provided."""
         from shapely.geometry import Polygon
+
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
 
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         collection = client.get_collection("aster-l1t")
@@ -244,9 +303,12 @@ class TestStacReader(TestBase):
         assert items_with_both is not None
         assert items_with_geom_only is not None
 
-    def test_get_dataframe_with_geometry_and_datetime(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_get_dataframe_with_geometry_and_datetime(self, mock_open) -> None:
         """Test that geometry and datetime filters work together."""
         from shapely.geometry import Polygon
+
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
 
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         collection = client.get_collection("aster-l1t")
@@ -264,11 +326,14 @@ class TestStacReader(TestBase):
         assert df_with_both is not None
         assert df_with_geom_only is not None
 
-    def test_save_to_geoparquet_with_geometry(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_save_to_geoparquet_with_geometry(self, mock_open) -> None:
         """Test saving to GeoParquet with geometry parameter."""
         from shapely.geometry import Polygon
         import tempfile
         import os
+
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
 
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         collection = client.get_collection("aster-l1t")
@@ -291,8 +356,11 @@ class TestStacReader(TestBase):
             # Check if the file was created
             assert os.path.exists(output_path), "GeoParquet file was not created"
 
-    def test_get_items_with_tuple_datetime(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_get_items_with_tuple_datetime(self, mock_open) -> None:
         """Test that tuples are properly handled as datetime input (same as lists)."""
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         collection = client.get_collection("aster-l1t")
 
@@ -308,8 +376,11 @@ class TestStacReader(TestBase):
         assert items_with_tuple is not None
         assert items_with_list is not None
 
-    def test_get_dataframe_with_tuple_datetime(self) -> None:
+    @patch("sedona.spark.stac.client.Client.open")
+    def test_get_dataframe_with_tuple_datetime(self, mock_open) -> None:
         """Test that tuples are properly handled as datetime input for dataframes."""
+        mock_open.return_value = MockClient(STAC_URLS["PLANETARY-COMPUTER"])
+
         client = Client.open(STAC_URLS["PLANETARY-COMPUTER"])
         collection = client.get_collection("aster-l1t")
 

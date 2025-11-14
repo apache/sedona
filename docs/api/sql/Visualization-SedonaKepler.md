@@ -38,7 +38,9 @@ Following are details on all the APIs exposed via SedonaKepler:
 SedonaKepler exposes a create_map API with the following signature:
 
 ```python
-create_map(df: SedonaDataFrame=None, name: str='unnamed', config: dict=None) -> map
+def create_map(
+    df: SedonaDataFrame = None, name: str = "unnamed", config: dict = None
+) -> map: ...
 ```
 
 The parameter 'name' is used to associate the passed SedonaDataFrame in the map object and any config applied to the map is linked to this name. It is recommended you pass a unique identifier to the dataframe here.
@@ -63,7 +65,7 @@ A map config can be passed optionally to apply pre-apply customizations to the m
 SedonaKepler exposes an add_df API with the following signature:
 
 ```python
-add_df(map, df: SedonaDataFrame, name: str='unnamed')
+def add_df(map, df: SedonaDataFrame, name: str = "unnamed"): ...
 ```
 
 This API can be used to add a SedonaDataFrame to an already created map object. The map object passed is directly mutated and nothing is returned.

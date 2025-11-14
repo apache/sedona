@@ -1,0 +1,60 @@
+{
+  "name": "it-stater",
+  "version": "3.0.0",
+  "description": "Starter theme for WordPress development",
+  "license": "GPL-2.0",
+  "repository": {
+    "type": "git"
+  },
+  "main": "index.js",
+  "scripts": {
+    "start": "mkdocs serve --livereload --watch-theme",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "js-lint": "./node_modules/.bin/eslint",
+    "js-fix": "./node_modules/.bin/eslint --fix",
+    "enforce-lf": "sudo find . -type d \\( -path './node_modules' -o -path './vendor' \\) -prune -o -type f -exec dos2unix {} +",
+    "rm-extra-files": "find . -type f -name \"*.Identifier\" -print0 | xargs -0 rm -v"
+  },
+  "devDependencies": {
+    "@fancyapps/ui": "^5.0.36",
+    "@wordpress/dom-ready": "^4.11.0",
+    "@wordpress/eslint-plugin": "^21.4.0",
+    "autoprefixer": "^10.4.20",
+    "bootstrap": "^5.3.3",
+    "browser-sync": "^3.0.3",
+    "fancy-log": "^2.0.0",
+    "gulp": "^5.0.0",
+    "gulp-if": "^3.0.0",
+    "gulp-notify": "^5.0.0",
+    "gulp-plumber": "^1.2.1",
+    "gulp-postcss": "^10.0.0",
+    "gulp-rename": "^2.0.0",
+    "gulp-replace": "^1.1.4",
+    "gulp-rimraf": "^1.0.0",
+    "gulp-sass": "^5.1.0",
+    "gulp-sass-glob": "^1.1.0",
+    "gulp-sourcemaps": "^2.6.5",
+    "gulp-uglify": "^3.0.2",
+    "sass": "~1.77.6",
+    "swiper": "^11.2.8",
+    "through2": "^4.0.2",
+    "vinyl-named": "^1.1.0",
+    "webpack": "^5.96.1",
+    "webpack-stream": "^7.0.0"
+  },
+  "dependencies": {
+    "get-scrollbar-width": "^1.0.5",
+    "highlight.js": "^11.11.1",
+    "scroll-lock": "^2.1.5",
+    "typeit": "^8.8.7",
+    "typewriter-effect": "^2.22.0"
+  },
+  "browserslist": [
+    "last 5 versions",
+    "> 1%",
+    "not dead"
+  ],
+  "overrides": {
+    "@babel/runtime": "^7.26.10"
+  }
+}

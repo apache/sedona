@@ -99,8 +99,6 @@ jobs:
             python: '3.8'
             shapely: '1'
 
-    env:
-      VENV_PATH: /home/runner/.local/share/virtualenvs/python-${{ matrix.python }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -110,6 +108,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
       - name: Cache Maven packages
         uses: actions/cache@v4
         with:
@@ -122,71 +122,65 @@ jobs:
         run: |
           SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
           mvn -q clean install -DskipTests -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dgeotools
-      - run: sudo apt-get -y install python3-pip python-dev-is-python3
-      - run: sudo pip3 install -U setuptools
-      - run: sudo pip3 install -U wheel
-      - run: sudo pip3 install -U virtualenvwrapper
-      - run: python3 -m pip install pipenv
-      - run: cd python; python3 setup.py build_ext --inplace
-      - env:
+      - name: Setup Python build environment
+        env:
           SPARK_VERSION: ${{ matrix.spark }}
-          PYTHON_VERSION: ${{ matrix.python }}
           SHAPELY_VERSION: ${{ matrix.shapely }}
-          PANDAS_VERSION: ${{ matrix.pandas }}
         run: |
           cd python
+
+          # Conditional shapely version adjustments
           if [ "${SHAPELY_VERSION}" == "1" ]; then
-            echo "Patching Pipfile to use Shapely 1.x"
-            sed -i 's/^shapely.*$/shapely="<2.0.0"/g' Pipfile
+            uv add "shapely<2.0.0"
           fi
-          if [ "${PANDAS_VERSION}" == "1" ]; then
-            echo "Patching Pipfile to use Pandas 1.x"
-            sed -i 's/^pandas.*$/pandas="<2.0.0"/g' Pipfile
+
+          if [ "${SPARK_VERSION:0:1}" == "4" ]; then
+            # Spark 4.0 requires Python 3.9+, and we remove flink since it conflicts with pyspark 4.0
+            uv remove apache-flink --optional flink
+            uv add "pyspark==4.0.0; python_version >= '3.9'"
+          else
+            # Install specific pyspark version matching matrix
+            uv add pyspark==${SPARK_VERSION}
           fi
-          export PIPENV_CUSTOM_VENV_NAME=python-${PYTHON_VERSION}
-          pipenv --python ${PYTHON_VERSION}
-          pipenv install pyspark==${SPARK_VERSION}
-          pipenv install --dev
-          pipenv graph
-      - env:
-          PYTHON_VERSION: ${{ matrix.python }}
+
+          uv sync
+
+          uv run python -c "import pyspark,sys;print('Using pyspark', pyspark.__version__)"
+      - name: Install sedona package
+        run: cd python; uv pip install -e .
+      - name: Prepare Sedona Spark Dependencies
         run: |
           wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_core/${JAI_CORE_VERSION}/jai_core-${JAI_CORE_VERSION}.jar
           wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_codec/${JAI_CODEC_VERSION}/jai_codec-${JAI_CODEC_VERSION}.jar
           wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=15 --tries=5 https://repo.osgeo.org/repository/release/javax/media/jai_imageio/${JAI_IMAGEIO_VERSION}/jai_imageio-${JAI_IMAGEIO_VERSION}.jar
-          mv -v jai_core-${JAI_CORE_VERSION}.jar ${VENV_PATH}/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars
-          mv -v jai_codec-${JAI_CODEC_VERSION}.jar ${VENV_PATH}/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars
-          mv -v jai_imageio-${JAI_IMAGEIO_VERSION}.jar ${VENV_PATH}/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars
-      - env:
-          PYTHON_VERSION: ${{ matrix.python }}
-        run: find spark-shaded/target -name sedona-*.jar -exec cp {} ${VENV_PATH}/lib/python${PYTHON_VERSION}/site-packages/pyspark/jars/ \;
+
+          PY_SITE=$(cd python; uv run python -c "import site; print(site.getsitepackages()[0])")
+          echo "Python site-packages: $PY_SITE"
+          mv -v jai_core-${JAI_CORE_VERSION}.jar ${PY_SITE}/pyspark/jars
+          mv -v jai_codec-${JAI_CODEC_VERSION}.jar ${PY_SITE}/pyspark/jars
+          mv -v jai_imageio-${JAI_IMAGEIO_VERSION}.jar ${PY_SITE}/pyspark/jars
+      - name: Copy Sedona Spark JARs
+        run: |
+          PY_SITE=$(cd python; uv run python -c "import site; print(site.getsitepackages()[0])")
+          find spark-shaded/target -name sedona-*.jar -exec cp {} ${PY_SITE}/pyspark/jars/ \;
       - name: Run tests
-        env:
-          PYTHON_VERSION: ${{ matrix.python }}
         run: |
-          export SPARK_HOME=${VENV_PATH}/lib/python${PYTHON_VERSION}/site-packages/pyspark
           cd python
-          source ${VENV_PATH}/bin/activate
-          pytest -v tests
+          export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
+          uv run pytest -v tests
       - name: Run basic tests without rasterio
-        env:
-          PYTHON_VERSION: ${{ matrix.python }}
         run: |
-          export SPARK_HOME=${VENV_PATH}/lib/python${PYTHON_VERSION}/site-packages/pyspark
           cd python
-          source ${VENV_PATH}/bin/activate
-          pip uninstall -y rasterio
-          pytest -v tests/core/test_rdd.py tests/sql/test_dataframe_api.py
+          export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
+          uv remove rasterio --optional all
+          uv remove rasterio --dev
+          uv sync
+          uv run pytest -v tests/core/test_rdd.py tests/sql/test_dataframe_api.py
       - name: Run Spark Connect tests
-        env:
-          PYTHON_VERSION: ${{ matrix.python }}
-          SPARK_VERSION: ${{ matrix.spark }}
         if: ${{ matrix.spark >= '3.4.0' }}
         run: |
-          export SPARK_HOME=${VENV_PATH}/lib/python${PYTHON_VERSION}/site-packages/pyspark
-          export SPARK_REMOTE=local
-
           cd python
-          source ${VENV_PATH}/bin/activate
-          pip install "pyspark[connect]==${SPARK_VERSION}"
-          pytest -v tests/sql/test_dataframe_api.py
+          export SPARK_REMOTE=local
+          export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
+          uv pip install "pyspark[connect]==${{ matrix.spark }}" --reinstall
+          uv run pytest -v tests/sql/test_dataframe_api.py

@@ -18,14 +18,16 @@
  */
 package org.apache.sedona.sql.UDF
 
+import org.apache.spark.internal.Logging
 import org.apache.spark.sql.expressions.Aggregator
 import org.apache.spark.sql.sedona_sql.expressions.collect.ST_Collect
 import org.apache.spark.sql.sedona_sql.expressions.raster._
 import org.apache.spark.sql.sedona_sql.expressions._
+import org.apache.spark.sql.sedona_sql.expressions.geography.{ST_GeogCollFromText, ST_GeogFromEWKB, ST_GeogFromEWKT, ST_GeogFromGeoHash, ST_GeogFromText, ST_GeogFromWKB, ST_GeogFromWKT, ST_GeogToGeometry, ST_GeomToGeography}
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.operation.buffer.BufferParameters
 
-object Catalog extends AbstractCatalog {
+object Catalog extends AbstractCatalog with Logging {
 
   override val expressions: Seq[FunctionDescription] = Seq(
     // Expression for vectors
@@ -43,6 +45,10 @@ object Catalog extends AbstractCatalog {
     function[ST_GeometryFromText](0),
     function[ST_LineFromText](),
     function[ST_GeogFromWKT](0),
+    function[ST_GeogFromText](0),
+    function[ST_GeogFromWKB](0),
+    function[ST_GeogFromEWKB](0),
+    function[ST_GeogFromEWKT](),
     function[ST_GeomFromWKT](0),
     function[ST_GeomFromEWKT](),
     function[ST_GeomFromWKB](),
@@ -173,6 +179,7 @@ object Catalog extends AbstractCatalog {
     function[ST_LongestLine](),
     function[ST_SubDivideExplode](),
     function[ST_SubDivide](),
+    function[ST_Segmentize](),
     function[ST_MakeLine](),
     function[ST_Polygon](),
     function[ST_Polygonize](),
@@ -182,6 +189,7 @@ object Catalog extends AbstractCatalog {
     function[ST_GeoHash](),
     function[ST_GeomFromGeoHash](null),
     function[ST_PointFromGeoHash](null),
+    function[ST_GeogFromGeoHash](null),
     function[ST_Collect](),
     function[ST_Multi](),
     function[ST_PointOnSurface](),
@@ -207,6 +215,8 @@ object Catalog extends AbstractCatalog {
     function[ST_MPolyFromText](0),
     function[ST_MLineFromText](0),
     function[ST_GeomCollFromText](0),
+    function[ST_GeogCollFromText](0),
+    function[ST_GeomFromMySQL](),
     function[ST_Split](),
     function[ST_S2CellIDs](),
     function[ST_S2ToGeom](),
@@ -240,6 +250,9 @@ object Catalog extends AbstractCatalog {
     function[ST_Rotate](),
     function[ST_RotateX](),
     function[ST_RotateY](),
+    function[ST_StraightSkeleton](),
+    function[ST_ApproximateMedialAxis](),
+    function[Barrier](),
     // Expression for rasters
     function[RS_NormalizedDifference](),
     function[RS_Mean](),
@@ -338,13 +351,30 @@ object Catalog extends AbstractCatalog {
     function[RS_ReprojectMatch]("nearestneighbor"),
     function[RS_FromNetCDF](),
     function[RS_NetCDFInfo](),
-    // geostats functions
-    function[ST_DBSCAN](),
-    function[ST_LocalOutlierFactor](),
-    function[ST_GLocal](),
-    function[ST_BinaryDistanceBandColumn](),
-    function[ST_WeightedDistanceBandColumn]())
+    // geom <-> geog conversion functions
+    function[ST_GeogToGeometry](),
+    function[ST_GeomToGeography]()) ++ geoStatsFunctions()
 
   val aggregateExpressions: Seq[Aggregator[Geometry, _, _]] =
     Seq(new ST_Envelope_Aggr, new ST_Intersection_Aggr, new ST_Union_Aggr())
+
+  private def geoStatsFunctions(): Seq[FunctionDescription] = {
+    // Try loading geostats functions. Return a seq of geo-stats functions. If any error occurs,
+    // return an empty seq to skip registering these functions.
+    // This is for fixing a compatibility issue with DBR 17.3 LTS. See https://github.com/apache/sedona/issues/2472
+    try {
+      Seq(
+        function[ST_DBSCAN](),
+        function[ST_LocalOutlierFactor](),
+        function[ST_GLocal](),
+        function[ST_BinaryDistanceBandColumn](),
+        function[ST_WeightedDistanceBandColumn]())
+    } catch {
+      case e: Throwable =>
+        log.warn(
+          "GEO stats functions are not available due to Spark/DBR compatibility issues.",
+          e)
+        Seq.empty
+    }
+  }
 }

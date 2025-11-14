@@ -22,7 +22,6 @@ from typing import Optional
 import datetime as python_datetime
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import dt
-from pystac import Item as PyStacItem
 from shapely.geometry.base import BaseGeometry
 
 
@@ -33,15 +32,15 @@ def get_collection_url(url: str, collection_id: Optional[str] = None) -> str:
     If the collection ID is provided and the URL starts with 'http' or 'https', the collection ID
     is appended to the URL. Otherwise, an exception is raised.
 
-    Parameters:
-    - url (str): The base URL of the STAC collection.
-    - collection_id (Optional[str]): The optional collection ID to append to the URL.
+    Args:
+        url (str): The base URL of the STAC collection.
+        collection_id (Optional[str]): The optional collection ID to append to the URL.
 
     Returns:
-    - str: The constructed collection URL.
+        str: The constructed collection URL.
 
     Raises:
-    - ValueError: If the URL does not start with 'http' or 'https' and a collection ID is provided.
+        ValueError: If the URL does not start with 'http' or 'https' and a collection ID is provided.
     """
     if not collection_id:
         return url
@@ -68,11 +67,11 @@ class CollectionClient:
         This method ensures that certain attributes are nested under the 'properties' key
         in the item dictionary. If the 'properties' key does not exist, it is initialized.
 
-        Parameters:
-        - item_dict (dict): The dictionary representation of a STAC item.
+        Args:
+            item_dict (dict): The dictionary representation of a STAC item.
 
         Returns:
-        - dict: The updated item dictionary with specified attributes moved to 'properties'.
+            dict: The updated item dictionary with specified attributes moved to 'properties'.
         """
         # List of attributes to move to 'properties'
         attributes_to_move = [
@@ -105,67 +104,166 @@ class CollectionClient:
         df: DataFrame, bbox=None, geometry=None, datetime=None
     ) -> DataFrame:
         """
-        This function applies spatial and temporal filters to a Spark DataFrame.
+        This function applies spatial and temporal filters to a Spark DataFrame using safe parameterized operations.
 
-        Parameters:
-        - df (DataFrame): The input Spark DataFrame to be filtered.
-        - bbox (Optional[list]): A list of bounding boxes for filtering the items.
-          Each bounding box is represented as a list of four float values: [min_lon, min_lat, max_lon, max_lat].
-          Example: [[-180.0, -90.0, 180.0, 90.0]]  # This bounding box covers the entire world.
-        - geometry (Optional[list]): A list of geometry objects (Shapely or WKT) for spatial filtering.
-          If both bbox and geometry are provided, geometry takes precedence.
-        - datetime (Optional[list]): A list of date-time ranges for filtering the items.
-          Each date-time range is represented as a list of two strings in ISO 8601 format: [start_datetime, end_datetime].
-          Example: [["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]  # This interval covers the entire year of 2020.
+        Args:
+            df (DataFrame): The input Spark DataFrame to be filtered.
+            bbox (Optional[list]): A list of bounding boxes for filtering the items.
+                Each bounding box is represented as a list of four float values: [min_lon, min_lat, max_lon, max_lat].
+                Example: [[-180.0, -90.0, 180.0, 90.0]]  # This bounding box covers the entire world.
+            geometry (Optional[list]): A list of geometry objects (Shapely or WKT) for spatial filtering.
+                If both bbox and geometry are provided, geometry takes precedence.
+            datetime (Optional[list]): A list of date-time ranges for filtering the items.
+                Each date-time range is represented as a list of two strings in ISO 8601 format: [start_datetime, end_datetime].
+                Example: [["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]  # This interval covers the entire year of 2020.
 
         Returns:
-        - DataFrame: The filtered Spark DataFrame.
+            DataFrame: The filtered Spark DataFrame.
 
-        The function constructs SQL conditions for spatial and temporal filters and applies them to the DataFrame.
-        If geometry is provided, it takes precedence over bbox for spatial filtering.
-        If bbox is provided (and no geometry), it constructs spatial conditions using st_intersects and ST_GeomFromText.
-        If datetime is provided, it constructs temporal conditions using the datetime column.
-        The conditions are combined using OR logic.
+        The function uses Spark SQL column operations and functions instead of string concatenation
+        to prevent SQL injection vulnerabilities. Spatial and temporal conditions are combined using OR logic.
         """
+        from pyspark.sql import functions as F
+        from pyspark.sql.functions import col, lit
+
         # Geometry takes precedence over bbox
         if geometry:
             geometry_conditions = []
             for geom in geometry:
-                if isinstance(geom, str):
-                    # Assume it's WKT
-                    geom_wkt = geom
-                elif hasattr(geom, "wkt"):
-                    # Shapely geometry object
-                    geom_wkt = geom.wkt
-                else:
-                    # Try to convert to string (fallback)
-                    geom_wkt = str(geom)
-                geometry_conditions.append(
-                    f"st_intersects(ST_GeomFromText('{geom_wkt}'), geometry)"
-                )
-            geometry_sql_condition = " OR ".join(geometry_conditions)
-            df = df.filter(geometry_sql_condition)
+                try:
+                    # Validate and sanitize geometry input
+                    if isinstance(geom, str):
+                        # Validate WKT format basic structure
+                        if not geom.strip() or any(
+                            char in geom for char in ["'", '"', ";", "--", "/*", "*/"]
+                        ):
+                            raise ValueError("Invalid WKT geometry string")
+                        geom_wkt = geom.strip()
+                    elif hasattr(geom, "wkt"):
+                        # Shapely geometry object
+                        geom_wkt = geom.wkt
+                    else:
+                        # Try to convert to string (fallback)
+                        geom_str = str(geom)
+                        if not geom_str.strip() or any(
+                            char in geom_str
+                            for char in ["'", '"', ";", "--", "/*", "*/"]
+                        ):
+                            raise ValueError("Invalid geometry string")
+                        geom_wkt = geom_str.strip()
+
+                    # Use Spark SQL functions with safe literal values
+                    from pyspark.sql.functions import expr
+
+                    geometry_conditions.append(
+                        expr(
+                            "st_intersects(ST_GeomFromText('{}'), geometry)".format(
+                                geom_wkt.replace("'", "''")
+                            )
+                        )
+                    )
+                except (ValueError, TypeError, AttributeError):
+                    # Skip invalid geometries rather than failing
+                    continue
+
+            if geometry_conditions:
+                # Combine conditions with OR using reduce
+                from functools import reduce
+
+                combined_condition = reduce(lambda a, b: a | b, geometry_conditions)
+                df = df.filter(combined_condition)
+
         elif bbox:
             bbox_conditions = []
             for bbox_item in bbox:
-                polygon_wkt = (
-                    f"POLYGON(({bbox_item[0]} {bbox_item[1]}, {bbox_item[2]} {bbox_item[1]}, "
-                    f"{bbox_item[2]} {bbox_item[3]}, {bbox_item[0]} {bbox_item[3]}, {bbox_item[0]} {bbox_item[1]}))"
-                )
-                bbox_conditions.append(
-                    f"st_intersects(ST_GeomFromText('{polygon_wkt}'), geometry)"
-                )
-            bbox_sql_condition = " OR ".join(bbox_conditions)
-            df = df.filter(bbox_sql_condition)
+                try:
+                    # Validate bbox parameters are numeric
+                    if len(bbox_item) != 4:
+                        continue
+
+                    min_lon, min_lat, max_lon, max_lat = bbox_item
+
+                    # Validate numeric values and reasonable ranges
+                    for coord in [min_lon, min_lat, max_lon, max_lat]:
+                        if (
+                            not isinstance(coord, (int, float)) or coord != coord
+                        ):  # NaN check
+                            raise ValueError("Invalid coordinate")
+
+                    # Validate longitude/latitude ranges
+                    if not (-180 <= min_lon <= 180 and -180 <= max_lon <= 180):
+                        continue
+                    if not (-90 <= min_lat <= 90 and -90 <= max_lat <= 90):
+                        continue
+
+                    # Create polygon using validated numeric values
+                    polygon_wkt = "POLYGON(({} {}, {} {}, {} {}, {} {}, {} {}))".format(
+                        float(min_lon),
+                        float(min_lat),
+                        float(max_lon),
+                        float(min_lat),
+                        float(max_lon),
+                        float(max_lat),
+                        float(min_lon),
+                        float(max_lat),
+                        float(min_lon),
+                        float(min_lat),
+                    )
+
+                    bbox_conditions.append(
+                        F.expr(
+                            f"st_intersects(ST_GeomFromText('{polygon_wkt}'), geometry)"
+                        )
+                    )
+
+                except (ValueError, TypeError, IndexError):
+                    # Skip invalid bbox items rather than failing
+                    continue
+
+            if bbox_conditions:
+                # Combine conditions with OR using reduce
+                from functools import reduce
+
+                combined_condition = reduce(lambda a, b: a | b, bbox_conditions)
+                df = df.filter(combined_condition)
 
         if datetime:
             interval_conditions = []
             for interval in datetime:
-                interval_conditions.append(
-                    f"datetime BETWEEN '{interval[0]}' AND '{interval[1]}'"
-                )
-            interval_sql_condition = " OR ".join(interval_conditions)
-            df = df.filter(interval_sql_condition)
+                try:
+                    if len(interval) != 2:
+                        continue
+
+                    start_time, end_time = interval
+
+                    # Validate datetime strings (basic ISO format check)
+                    if not isinstance(start_time, str) or not isinstance(end_time, str):
+                        continue
+
+                    # Check for SQL injection patterns
+                    for time_str in [start_time, end_time]:
+                        if any(
+                            char in time_str
+                            for char in ["'", '"', ";", "--", "/*", "*/", chr(0)]
+                        ):
+                            raise ValueError("Invalid datetime string")
+
+                    # Use Spark column operations instead of string concatenation
+                    condition = (col("datetime") >= lit(start_time)) & (
+                        col("datetime") <= lit(end_time)
+                    )
+                    interval_conditions.append(condition)
+
+                except (ValueError, TypeError, IndexError):
+                    # Skip invalid datetime intervals rather than failing
+                    continue
+
+            if interval_conditions:
+                # Combine conditions with OR using reduce
+                from functools import reduce
+
+                combined_condition = reduce(lambda a, b: a | b, interval_conditions)
+                df = df.filter(combined_condition)
 
         return df
 
@@ -182,14 +280,14 @@ class CollectionClient:
 
         It then expands the date string to cover the entire time period for that date.
 
-        Parameters:
-        - date_str (str): The date string to expand.
+        Args:
+            date_str (str): The date string to expand.
 
         Returns:
-        - list: A list containing the start and end datetime strings in ISO 8601 format.
+            list: A list containing the start and end datetime strings in ISO 8601 format.
 
         Raises:
-        - ValueError: If the date string format is invalid.
+            ValueError: If the date string format is invalid.
 
         Examples:
         - "2017" expands to ["2017-01-01T00:00:00Z", "2017-12-31T23:59:59Z"]
@@ -221,31 +319,36 @@ class CollectionClient:
         ] = None,
         datetime: Optional[Union[str, python_datetime.datetime, list]] = None,
         max_items: Optional[int] = None,
-    ) -> Iterator[PyStacItem]:
+    ) -> Iterator:
         """
         Returns an iterator of items. Each item has the supplied item ID and/or optional spatial and temporal extents.
 
         This method loads the collection data from the specified collection URL and applies
-        optional filters to the data. The filters include:
-        - IDs: A list of item IDs to filter the items. If not provided, no ID filtering is applied.
-        - bbox (Optional[list]): A list of bounding boxes for filtering the items.
-        - geometry (Optional[Union[str, BaseGeometry, List[Union[str, BaseGeometry]]]]): Shapely geometry object(s) or WKT string(s) for spatial filtering.
-          Can be a single geometry, WKT string, or a list of geometries/WKT strings.
-          If both bbox and geometry are provided, geometry takes precedence.
-        - datetime (Optional[Union[str, python_datetime.datetime, list]]): A single datetime, RFC 3339-compliant timestamp,
-          or a list of date-time ranges for filtering the items.
-        - max_items (Optional[int]): The maximum number of items to return from the search, even if there are more matching results.
+        optional filters to the data.
 
-        Returns:
-        - Iterator[PyStacItem]: An iterator of PyStacItem objects that match the specified filters.
-          If no filters are provided, the iterator contains all items in the collection.
-
-        Raises:
-        - RuntimeError: If there is an error loading the data or applying the filters, a RuntimeError
-          is raised with a message indicating the failure.
+        :param ids: A list of item IDs to filter the items. If not provided, no ID filtering is applied.
+        :param bbox: A list of bounding boxes for filtering the items.
+        :param geometry: Shapely geometry object(s) or WKT string(s) for spatial filtering.
+            Can be a single geometry, WKT string, or a list of geometries/WKT strings.
+            If both bbox and geometry are provided, geometry takes precedence.
+        :param datetime: A single datetime, RFC 3339-compliant timestamp,
+            or a list of date-time ranges for filtering the items.
+        :param max_items: The maximum number of items to return from the search, even if there are more matching results.
+        :return: An iterator of PyStacItem objects that match the specified filters.
+            If no filters are provided, the iterator contains all items in the collection.
+        :raises RuntimeError: If there is an error loading the data or applying the filters, a RuntimeError
+            is raised with a message indicating the failure.
         """
         try:
             df = self.load_items_df(bbox, geometry, datetime, ids, max_items)
+
+            # Import pystac only when needed
+            try:
+                from pystac import Item as PyStacItem
+            except ImportError as e:
+                raise ImportError(
+                    "STAC functionality requires pystac. Please install pystac: pip install pystac"
+                ) from e
 
             # Collect the filtered rows and convert them to PyStacItem objects
             items = []
@@ -278,25 +381,23 @@ class CollectionClient:
         optional spatial and temporal filters to the data. The spatial filter is applied using
         a bounding box, and the temporal filter is applied using a date-time range.
 
-        Parameters:
-        - bbox (Optional[list]): A list of bounding boxes for filtering the items.
-          Each bounding box is represented as a list of four float values: [min_lon, min_lat, max_lon, max_lat].
-          Example: [[-180.0, -90.0, 180.0, 90.0]]  # This bounding box covers the entire world.
-        - geometry (Optional[Union[str, BaseGeometry, List[Union[str, BaseGeometry]]]]): Shapely geometry object(s) or WKT string(s) for spatial filtering.
-          Can be a single geometry, WKT string, or a list of geometries/WKT strings.
-          If both bbox and geometry are provided, geometry takes precedence.
-          Example: Polygon(...) or "POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))" or [Polygon(...), Polygon(...)]
-        - datetime (Optional[Union[str, python_datetime.datetime, list]]): A single datetime, RFC 3339-compliant timestamp,
-          or a list of date-time ranges for filtering the items.
-          Example: "2020-01-01T00:00:00Z" or python_datetime.datetime(2020, 1, 1) or [["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]
-
-        Returns:
-        - DataFrame: A Spark DataFrame containing the filtered items. If no filters are provided,
-          the DataFrame contains all items in the collection.
-
-        Raises:
-        - RuntimeError: If there is an error loading the data or applying the filters, a RuntimeError
-          is raised with a message indicating the failure.
+        :param ids: A variable number of item IDs to filter the items.
+            Example: "item_id1" or ["item_id1", "item_id2"]
+        :param bbox: A list of bounding boxes for filtering the items.
+            Each bounding box is represented as a list of four float values: [min_lon, min_lat, max_lon, max_lat].
+            Example: [[-180.0, -90.0, 180.0, 90.0]]  # This bounding box covers the entire world.
+        :param geometry: Shapely geometry object(s) or WKT string(s) for spatial filtering.
+            Can be a single geometry, WKT string, or a list of geometries/WKT strings.
+            If both bbox and geometry are provided, geometry takes precedence.
+            Example: Polygon(...) or "POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))" or [Polygon(...), Polygon(...)]
+        :param datetime: A single datetime, RFC 3339-compliant timestamp,
+            or a list of date-time ranges for filtering the items.
+            Example: "2020-01-01T00:00:00Z" or python_datetime.datetime(2020, 1, 1) or [["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]
+        :param max_items: The maximum number of items to return from the search.
+        :return: A Spark DataFrame containing the filtered items. If no filters are provided,
+            the DataFrame contains all items in the collection.
+        :raises RuntimeError: If there is an error loading the data or applying the filters, a RuntimeError
+            is raised with a message indicating the failure.
         """
         try:
             df = self.load_items_df(bbox, geometry, datetime, ids, max_items)
@@ -323,18 +424,17 @@ class CollectionClient:
         optional spatial and temporal filters to the data. The filtered data is then saved
         to the specified output path in Parquet format.
 
-        Parameters:
-        - output_path (str): The path where the Parquet file will be saved.
-        - spatial_extent (Optional[SpatialExtent]): A spatial extent object that defines the
-          bounding box for filtering the items. If not provided, no spatial filtering is applied.
-        - temporal_extent (Optional[TemporalExtent]): A temporal extent object that defines the
-          date-time range for filtering the items. If not provided, no temporal filtering is applied.
-          To match a single datetime, you can set the start and end datetime to the same value in the datetime.
-          Here is an example:  [["2020-01-01T00:00:00Z", "2020-01-01T00:00:00Z"]]
-
-        Raises:
-        - RuntimeError: If there is an error loading the data, applying the filters, or saving the
-          DataFrame to Parquet format, a RuntimeError is raised with a message indicating the failure.
+        :param ids: A list of item IDs to filter the items. If not provided, no ID filtering is applied.
+        :param output_path: The path where the Parquet file will be saved.
+        :param bbox: A bounding box for filtering the items. If not provided, no spatial filtering is applied.
+        :param geometry: Shapely geometry object(s) or WKT string(s) for spatial filtering.
+            If both bbox and geometry are provided, geometry takes precedence.
+        :param datetime: A temporal extent that defines the
+            date-time range for filtering the items. If not provided, no temporal filtering is applied.
+            To match a single datetime, you can set the start and end datetime to the same value in the datetime.
+            Example: [["2020-01-01T00:00:00Z", "2020-01-01T00:00:00Z"]]
+        :raises RuntimeError: If there is an error loading the data, applying the filters, or saving the
+            DataFrame to Parquet format, a RuntimeError is raised with a message indicating the failure.
         """
         try:
             df = self.get_dataframe(
@@ -358,11 +458,11 @@ class CollectionClient:
         The expected input schema of the loaded dataframe (df) can be found here:
         https://sedona.apache.org/latest-snapshot/api/sql/Stac/#usage
 
-        Parameters:
-        - df (DataFrame): The input DataFrame with an assets column.
+        Args:
+            df (DataFrame): The input DataFrame with an assets column.
 
         Returns:
-        - DataFrame: The DataFrame with a consistent schema for the assets column.
+            DataFrame: The DataFrame with a consistent schema for the assets column.
         """
         from pyspark.sql.functions import col, explode, struct
 

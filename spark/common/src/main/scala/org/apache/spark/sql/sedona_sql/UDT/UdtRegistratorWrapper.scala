@@ -18,9 +18,9 @@
  */
 package org.apache.spark.sql.sedona_sql.UDT
 
+import org.apache.sedona.common.S2Geography.Geography
 import org.apache.spark.sql.types.UDTRegistration
 import org.locationtech.jts.geom.Geometry
-import org.apache.sedona.common.geometryObjects.Geography;
 import org.locationtech.jts.index.SpatialIndex
 
 object UdtRegistratorWrapper {

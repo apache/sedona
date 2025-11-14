@@ -1,0 +1,11 @@
+Everything inside of this directory are copied from Apache Spark 3.5.6 with minor modifications.
+This is for avoid depending on rapidly changing internal Spark APIs related to ParquetFileFormat.
+GeoParquetFileFormat used to depend on the ParquetFileFormat class of Spark and it has caused lots
+of problems on Databricks, so we have to copy the code here to avoid the dependency.
+
+See related issues:
+
+- https://github.com/apache/sedona/issues/2250
+- https://github.com/apache/sedona/issues/1905
+- https://github.com/apache/sedona/issues/1869
+- https://github.com/apache/sedona/issues/996

@@ -1,5 +1,6 @@
 actualy
 afterall
+allEdges
 atmost
 celle
 checkin

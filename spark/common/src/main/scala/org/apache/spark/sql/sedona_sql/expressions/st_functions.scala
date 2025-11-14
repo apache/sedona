@@ -108,6 +108,15 @@ object st_functions {
   def ST_Azimuth(pointA: String, pointB: String): Column =
     wrapExpression[ST_Azimuth](pointA, pointB)
 
+  def ST_ApproximateMedialAxis(geometry: Column): Column =
+    wrapExpression[ST_ApproximateMedialAxis](geometry)
+  def ST_ApproximateMedialAxis(geometry: String): Column =
+    wrapExpression[ST_ApproximateMedialAxis](geometry)
+  def ST_ApproximateMedialAxis(geometry: Column, maxVertices: Column): Column =
+    wrapExpression[ST_ApproximateMedialAxis](geometry, maxVertices)
+  def ST_ApproximateMedialAxis(geometry: String, maxVertices: Int): Column =
+    wrapExpression[ST_ApproximateMedialAxis](geometry, maxVertices)
+
   def ST_Boundary(geometry: Column): Column = wrapExpression[ST_Boundary](geometry)
   def ST_Boundary(geometry: String): Column = wrapExpression[ST_Boundary](geometry)
 
@@ -195,6 +204,11 @@ object st_functions {
 
   def ST_Envelope(geometry: Column): Column = wrapExpression[ST_Envelope](geometry)
   def ST_Envelope(geometry: String): Column = wrapExpression[ST_Envelope](geometry)
+
+  def ST_Envelope(geography: Column, split: Boolean): Column =
+    wrapExpression[ST_Envelope](geography, split)
+  def ST_Envelope(geography: String, split: Boolean): Column =
+    wrapExpression[ST_Envelope](geography, split)
 
   def ST_Expand(geometry: Column, uniformDelta: Column) =
     wrapExpression[ST_Expand](geometry, uniformDelta)
@@ -620,6 +634,15 @@ object st_functions {
   def ST_StartPoint(lineString: Column): Column = wrapExpression[ST_StartPoint](lineString)
   def ST_StartPoint(lineString: String): Column = wrapExpression[ST_StartPoint](lineString)
 
+  def ST_StraightSkeleton(geometry: Column): Column =
+    wrapExpression[ST_StraightSkeleton](geometry)
+  def ST_StraightSkeleton(geometry: String): Column =
+    wrapExpression[ST_StraightSkeleton](geometry)
+  def ST_StraightSkeleton(geometry: Column, maxVertices: Column): Column =
+    wrapExpression[ST_StraightSkeleton](geometry, maxVertices)
+  def ST_StraightSkeleton(geometry: String, maxVertices: Int): Column =
+    wrapExpression[ST_StraightSkeleton](geometry, maxVertices)
+
   def ST_Snap(input: Column, reference: Column, tolerance: Column): Column =
     wrapExpression[ST_Snap](input, reference, tolerance)
   def ST_Snap(input: String, reference: String, tolerance: Double): Column =
@@ -634,6 +657,11 @@ object st_functions {
     wrapExpression[ST_SubDivideExplode](geometry, maxVertices)
   def ST_SubDivideExplode(geometry: String, maxVertices: Int): Column =
     wrapExpression[ST_SubDivideExplode](geometry, maxVertices)
+
+  def ST_Segmentize(geometry: Column, maxSegmentLength: Column): Column =
+    wrapExpression[ST_Segmentize](geometry, maxSegmentLength)
+  def ST_Segmentize(geometry: String, maxSegmentLength: Double): Column =
+    wrapExpression[ST_Segmentize](geometry, maxSegmentLength)
 
   def ST_SimplifyPreserveTopology(geometry: Column, distanceTolerance: Column): Column =
     wrapExpression[ST_SimplifyPreserveTopology](geometry, distanceTolerance)
@@ -1028,4 +1056,13 @@ object st_functions {
       selfWeight,
       useSpheroid,
       attributes)
+
+  def barrier(expression: Column, args: Column*): Column = {
+    val allArgs = expression +: args
+    wrapExpression[Barrier](allArgs: _*)
+  }
+  def barrier(expression: String, args: Any*): Column = {
+    val allArgs = expression +: args
+    wrapExpression[Barrier](allArgs: _*)
+  }
 }

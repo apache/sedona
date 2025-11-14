@@ -1,0 +1,63 @@
+{
+  "id": "vegetation-collection",
+  "type": "Collection",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/raster/v1.1.0/schema.json"
+  ],
+  "stac_version": "1.0.0",
+  "description": "Mock vegetation collection for testing",
+  "title": "Mock Vegetation Collection",
+  "keywords": [
+    "vegetation",
+    "canopy",
+    "height"
+  ],
+  "providers": [
+    {
+      "name": "Mock CFO",
+      "description": "Mock California Forest Observatory",
+      "roles": [
+        "producer"
+      ],
+      "url": "http://mock-cfo.example.com"
+    }
+  ],
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -124.4096,
+          32.5342,
+          -114.1308,
+          42.0095
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2016-01-01T00:00:00Z",
+          "2016-12-31T23:59:59Z"
+        ]
+      ]
+    }
+  },
+  "license": "CC-BY-4.0",
+  "links": [
+    {
+      "rel": "root",
+      "href": "collection.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "self",
+      "href": "collection.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "California-Vegetation-CanopyBaseHeight-2016-Summer-00010m.json",
+      "type": "application/json"
+    }
+  ]
+}

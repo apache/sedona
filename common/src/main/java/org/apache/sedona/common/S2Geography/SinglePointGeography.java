@@ -22,7 +22,7 @@ import com.google.common.geometry.S2Point;
 
 public class SinglePointGeography extends PointGeography {
   public SinglePointGeography(S2Point p) {
-    super(p);
+    super(GeographyKind.SINGLEPOINT, p);
   }
 
   public SinglePointGeography() {

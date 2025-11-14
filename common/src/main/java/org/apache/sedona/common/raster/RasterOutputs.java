@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
 import java.util.Base64;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
@@ -37,6 +38,7 @@ import javax.media.jai.JAI;
 import javax.media.jai.RenderedOp;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.coverage.grid.GridCoverageWriter;
+import org.geotools.api.metadata.spatial.PixelOrientation;
 import org.geotools.api.parameter.GeneralParameterValue;
 import org.geotools.api.parameter.ParameterValueGroup;
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -45,6 +47,7 @@ import org.geotools.gce.arcgrid.ArcGridWriteParams;
 import org.geotools.gce.arcgrid.ArcGridWriter;
 import org.geotools.gce.geotiff.GeoTiffWriteParams;
 import org.geotools.gce.geotiff.GeoTiffWriter;
+import org.geotools.referencing.operation.transform.AffineTransform2D;
 
 public class RasterOutputs {
   public static byte[] asGeoTiff(
@@ -292,6 +295,89 @@ public class RasterOutputs {
   public static String asBase64(GridCoverage2D raster) throws IOException {
     byte[] png = asPNG(raster, -1);
     return Base64.getEncoder().encodeToString(png);
+  }
+
+  public static String asMatrixPretty(GridCoverage2D raster, int band, int precision) {
+    try {
+      RasterUtils.ensureBand(raster, band);
+      RenderedImage img = raster.getRenderedImage();
+      Raster r = RasterUtils.getRaster(img);
+
+      final int minX = img.getMinX();
+      final int minY = img.getMinY();
+      final int width = r.getWidth();
+      final int height = r.getHeight();
+      final int bandIdx = band - 1;
+
+      // Affine transform (upper-left corners)
+      AffineTransform2D at = RasterUtils.getAffineTransform(raster, PixelOrientation.UPPER_LEFT);
+      final double a = at.getScaleX(), b = at.getShearX(), d = at.getShearY(), e = at.getScaleY();
+      final double tx = at.getTranslateX(), ty = at.getTranslateY();
+
+      final boolean integral = RasterUtils.isDataTypeIntegral(r.getDataBuffer().getDataType());
+      final String numPat = precision <= 0 ? "0" : "0." + "#".repeat(precision);
+      final DecimalFormat df = new DecimalFormat(numPat);
+
+      String[][] cells = new String[height + 1][width + 1];
+      cells[0][0] = "y\\x";
+
+      // Header: use upper-left corner (no +0.5)
+      for (int x = 0; x < width; x++) {
+        double xc = minX + x;
+        double yc = minY;
+        double worldX = a * xc + b * yc + tx;
+        cells[0][x + 1] = "[" + (minX + x) + ", " + df.format(worldX) + "]";
+      }
+
+      // Rows
+      for (int y = 0; y < height; y++) {
+        double yc = minY + y;
+        double xc = minX;
+        double worldY = d * xc + e * yc + ty;
+        cells[y + 1][0] = "[" + (minY + y) + ", " + df.format(worldY) + "]";
+
+        if (integral) {
+          int[] vals = r.getSamples(0, y, width, 1, bandIdx, (int[]) null);
+          for (int x = 0; x < width; x++) cells[y + 1][x + 1] = String.valueOf(vals[x]);
+        } else {
+          double[] vals = r.getSamples(0, y, width, 1, bandIdx, (double[]) null);
+          for (int x = 0; x < width; x++) cells[y + 1][x + 1] = df.format(vals[x]);
+        }
+      }
+
+      // --- Pretty print ---
+      int rows = height + 1, cols = width + 1;
+      int[] colWidths = new int[cols];
+      for (int c = 0; c < cols; c++) {
+        int max = 0;
+        for (int rIdx = 0; rIdx < rows; rIdx++) max = Math.max(max, cells[rIdx][c].length());
+        colWidths[c] = max;
+      }
+
+      StringBuilder out = new StringBuilder();
+      String sep = "+";
+      for (int c = 0; c < cols; c++) sep += "-".repeat(colWidths[c] + 2) + "+";
+      sep += "\n";
+
+      out.append(sep);
+      for (int rIdx = 0; rIdx < rows; rIdx++) {
+        out.append("| ");
+        for (int c = 0; c < cols; c++) {
+          String val = cells[rIdx][c];
+          boolean leftAlign = (c == 0 || rIdx == 0);
+          if (leftAlign) out.append(String.format("%-" + colWidths[c] + "s", val));
+          else out.append(String.format("%" + colWidths[c] + "s", val));
+          out.append(" | ");
+        }
+        out.append("\n");
+        if (rIdx == 0) out.append(sep);
+      }
+      out.append(sep);
+      return out.toString();
+
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to format raster matrix", e);
+    }
   }
 
   public static String asMatrix(GridCoverage2D raster, int band, int postDecimalPrecision) {

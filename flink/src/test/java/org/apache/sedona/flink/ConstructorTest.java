@@ -34,6 +34,7 @@ import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.types.Row;
+import org.apache.sedona.common.jts2geojson.GeoJSONReader;
 import org.apache.sedona.flink.expressions.Constructors;
 import org.apache.sedona.flink.expressions.Functions;
 import org.junit.BeforeClass;
@@ -43,7 +44,6 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
-import org.wololo.jts2geojson.GeoJSONReader;
 
 public class ConstructorTest extends TestBase {
 

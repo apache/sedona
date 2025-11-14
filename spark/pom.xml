@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.apache.sedona</groupId>
         <artifactId>sedona-parent</artifactId>
-        <version>1.8.0-SNAPSHOT</version>
+        <version>1.8.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>sedona-spark-parent-${spark.compat.version}_${scala.compat.version}</artifactId>
@@ -48,8 +48,8 @@
         <profile>
             <id>enable-all-submodules</id>
             <modules>
-                <module>spark-3.4</module>
                 <module>spark-3.5</module>
+                <module>spark-4.0</module>
             </modules>
         </profile>
     </profiles>
@@ -90,6 +90,11 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
+                <groupId>io.graphframes</groupId>
+                <artifactId>graphframes-spark${spark.major.version}_${scala.compat.version}</artifactId>
+                <version>${graphframes.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.scala-lang</groupId>
                 <artifactId>scala-library</artifactId>
                 <version>${scala.version}</version>
@@ -103,6 +108,18 @@
                 <groupId>org.scalatest</groupId>
                 <artifactId>scalatest_${scala.compat.version}</artifactId>
                 <version>${scalatest.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.minio</groupId>
+                <artifactId>minio</artifactId>
+                <version>8.6.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>4.9.3</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>

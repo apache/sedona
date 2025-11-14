@@ -32,7 +32,7 @@ public class PointGeographyTest {
   public void testEncodeTag() throws IOException {
     // 1) Create an empty geography
     PointGeography geog = new PointGeography();
-    assertEquals(S2Geography.GeographyKind.POINT, geog.kind);
+    assertEquals(Geography.GeographyKind.POINT, geog.kind);
     assertEquals(0, geog.numShapes());
     // Java returns -1 for no shapes; if yours returns 0, adjust accordingly
     assertEquals(-1, geog.dimension());
@@ -42,7 +42,7 @@ public class PointGeographyTest {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     geog.encodeTagged(baos, new EncodeOptions());
     byte[] data = baos.toByteArray();
-    assertEquals(4, data.length);
+    assertEquals(8, data.length);
 
     // 2) Create a single-point geography at lat=45°, lng=-64°
     S2Point pt = S2LatLng.fromDegrees(45, -64).toPoint();

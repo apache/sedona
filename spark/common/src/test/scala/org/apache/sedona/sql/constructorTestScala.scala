@@ -18,13 +18,15 @@
  */
 package org.apache.sedona.sql
 
-import org.apache.sedona.common.geometryObjects.Geography
 import org.apache.sedona.core.formatMapper.GeoJsonReader
 import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader
 import org.apache.sedona.sql.utils.Adapter
+import org.apache.spark.sql.Row
 import org.locationtech.jts.geom.{Geometry, LineString}
+import org.scalatest.matchers.should.Matchers
+import org.testcontainers.containers.MySQLContainer
 
-class constructorTestScala extends TestBaseScala {
+class constructorTestScala extends TestBaseScala with Matchers {
 
   import sparkSession.implicits._
 
@@ -262,14 +264,6 @@ class constructorTestScala extends TestBaseScala {
       assert(thrown.getMessage.contains("ST_GeomFromEWKT"))
       assert(thrown.getMessage.contains("not wkt"))
       assert(thrown.getMessage.contains("Unknown geometry type"))
-    }
-
-    it("Passed ST_GeogFromWKT") {
-      val wkt = "LINESTRING (1 2, 3 4, 5 6)"
-      val row = sparkSession.sql(s"SELECT ST_GeogFromWKT('$wkt') AS geog").first()
-      val geog = row.get(0)
-      assert(geog.isInstanceOf[Geography])
-      assert(geog.asInstanceOf[Geography].getGeometry.toText == wkt)
     }
 
     it("Passed ST_LineFromText") {
@@ -634,6 +628,50 @@ class constructorTestScala extends TestBaseScala {
       assert(expected.equals(actual))
       val actualSrid = actualGeom.getSRID
       assert(4326 == actualSrid)
+    }
+
+    it("should properly read data from MySQL") {
+      val runTest = (jdbcURL: String) => {
+        val tableName = "points"
+        val properties = new java.util.Properties()
+        properties.setProperty("user", "sedona")
+        properties.setProperty("password", "sedona")
+
+        sparkSession.read
+          .jdbc(jdbcURL, tableName, properties)
+          .selectExpr(
+            "ST_GeomFromMySQL(location) as geom",
+            "ST_SRID(ST_GeomFromMySQL(location)) AS srid")
+          .show
+
+        val elements = sparkSession.read
+          .jdbc(jdbcURL, tableName, properties)
+          .selectExpr(
+            "ST_GeomFromMySQL(location) as geom",
+            "ST_SRID(ST_GeomFromMySQL(location)) AS srid")
+          .selectExpr("ST_AsText(geom) as geom", "srid")
+          .collect()
+
+        elements.length shouldBe 3
+        elements should contain theSameElementsAs Seq(
+          Row("POINT (20 10)", 4326),
+          Row("POINT (40 30)", 4326),
+          Row("POINT (60 50)", 4326))
+      }
+
+      val mysql = new MySQLContainer("mysql:8.4.0")
+      mysql.withInitScript("mysql/init_mysql.sql")
+      mysql.withUsername("sedona")
+      mysql.withPassword("sedona")
+      mysql.withDatabaseName("sedona")
+
+      mysql.start()
+
+      try {
+        runTest(mysql.getJdbcUrl)
+      } finally {
+        mysql.stop()
+      }
     }
   }
 }

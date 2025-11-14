@@ -6,5 +6,5 @@ Module contents
 
 .. automodule:: sedona.utils.structured_adapter
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

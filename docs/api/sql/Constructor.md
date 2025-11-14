@@ -842,3 +842,32 @@ Output:
 ```
 POLYGON ((-74.0428197 40.6867969, -74.0421975 40.6921336, -74.050802 40.6912794, -74.0428197 40.6867969))
 ```
+
+## ST_GeomFromMySQL
+
+Introduction: Construct a Geometry from MySQL Geometry binary.
+
+Format: `ST_GeomFromMySQL (binary: Binary)`
+
+Since: `v1.8.0`
+
+SQL Example
+
+```sql
+SELECT
+    ST_GeomFromMySQL(geomWKB) AS geom,
+    ST_SRID(ST_GeomFromMySQL(geomWKB)) AS srid
+FROM mysql_table
+```
+
+Output:
+
+```
++-------------+----+
+|         geom|srid|
++-------------+----+
+|POINT (20 10)|4326|
+|POINT (40 30)|4326|
+|POINT (60 50)|4326|
++-------------+----+
+```

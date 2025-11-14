@@ -1,0 +1,64 @@
+{
+  "id": "naip",
+  "type": "Collection",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/eo/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/raster/v1.1.0/schema.json"
+  ],
+  "stac_version": "1.0.0",
+  "description": "Mock NAIP (National Agriculture Imagery Program) collection for testing",
+  "title": "Mock NAIP: National Agriculture Imagery Program",
+  "keywords": [
+    "naip",
+    "aerial",
+    "imagery"
+  ],
+  "providers": [
+    {
+      "name": "Mock Planetary Computer",
+      "description": "Mock Microsoft Planetary Computer",
+      "roles": [
+        "host"
+      ],
+      "url": "http://mock-planetarycomputer.example.com"
+    }
+  ],
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -160.0,
+          18.0,
+          -64.0,
+          50.0
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2009-01-01T00:00:00Z",
+          "2022-12-31T23:59:59Z"
+        ]
+      ]
+    }
+  },
+  "license": "proprietary",
+  "links": [
+    {
+      "rel": "root",
+      "href": "collection.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "self",
+      "href": "collection.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "mock-naip-item.json",
+      "type": "application/json"
+    }
+  ]
+}

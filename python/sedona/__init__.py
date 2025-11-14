@@ -14,13 +14,6 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-import warnings
-
-warnings.warn(
-    "The 'sedona' package structure has been reorganized. Please update your imports to use 'sedona.spark' prefix instead.",
-    DeprecationWarning,
-    stacklevel=2,
-)
 from .version import version
 
 __all__ = ["version"]

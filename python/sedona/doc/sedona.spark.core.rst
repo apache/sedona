@@ -22,13 +22,13 @@ sedona.spark.core.utils module
 
 .. automodule:: sedona.spark.core.utils
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: sedona.spark.core
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

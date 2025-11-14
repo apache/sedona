@@ -17,45 +17,45 @@ sedona.geopandas.base module
 
 .. automodule:: sedona.geopandas.base
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 sedona.geopandas.geodataframe module
 ------------------------------------
 
 .. automodule:: sedona.geopandas.geodataframe
    :members:
-   :undoc-members:
    :show-inheritance:
-
-sedona.geopandas.geoindex module
---------------------------------
-
-.. automodule:: sedona.geopandas.geoindex
-   :members:
    :undoc-members:
-   :show-inheritance:
 
 sedona.geopandas.geoseries module
 ---------------------------------
 
 .. automodule:: sedona.geopandas.geoseries
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
-sedona.geopandas.internal module
---------------------------------
+sedona.geopandas.io module
+--------------------------
 
-.. automodule:: sedona.geopandas.internal
+.. automodule:: sedona.geopandas.io
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
+
+sedona.geopandas.sindex module
+------------------------------
+
+.. automodule:: sedona.geopandas.sindex
+   :members:
+   :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: sedona.geopandas
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

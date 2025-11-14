@@ -22,17 +22,24 @@ default_language_version:
   # force all unspecified Python hooks to run python3
   python: python3
   # force all unspecified Node hooks to run Node.js v22.17.0 LTS
-  node: 22.17.0
+  node: 22.20.0
 minimum_pre_commit_version: '3.2.0'
 repos:
   - repo: meta
     hooks:
       - id: identity
         name: run identity check
-        description: checks to see if your identity is set
+        description: check you have set your git identity
       - id: check-hooks-apply
         name: run check hooks apply
-        description: makes sure all hooks apply to the repository
+        description: check that all the hooks apply to the repository
+  - repo: https://github.com/thlorenz/doctoc.git
+    rev: v2.2.0
+    hooks:
+      - id: doctoc
+        name: add TOC for Markdown files
+        description: automatically keeps your table of contents up to date
+        files: ^README\.md$
   - repo: local
     hooks:
       - id: create-pre-commit-docs
@@ -50,11 +57,57 @@ repos:
         files: \.(js|ya?ml)$
         language: node
         additional_dependencies: ['prettier@3.6.2']
+      - id: maven-spotless-apply
+        name: maven spotless apply
+        description: automatically formats Java and Scala code using mvn spotless:apply.
+        entry: mvn spotless:apply
+        language: system # Indicates that the 'entry' command should be run directly as a system command.
+        types: [java, scala] # Specifies that this hook should run on Java and Scala files.
+        pass_filenames:
+          false # Crucial: tells pre-commit NOT to pass filenames as arguments to 'mvn spotless:apply'.
+          # Spotless typically scans the whole project based on its configuration.
+        always_run:
+          true # Ensures this hook runs even if no Java files are changed.
+          # This is useful for spotless:apply which might affect files not staged.
+        stages: [manual]
+      - id: check-zip-file-is-not-committed
+        name: check no zip files are committed
+        description: Zip files are not allowed in the repository
+        language: fail
+        entry: |
+          Zip files are not allowed in the repository as they are hard to
+          track and have security implications. Please remove the zip file from the repository.
+        files: (?i)\.zip$
+      - id: check-makefiles-tabs
+        name: check Makefiles files for tabs
+        description: ensures that Makefiles are indented with tabs
+        entry: ./scripts/pre-commit/check_makefiles_for_tabs.sh # Path to your script
+        language: system
+        files: '(?i)makefile$'
+        pass_filenames: true # <-- Crucial change: pass filenames to the script
+        types: [file] # Ensure only regular files are passed, not directories
+        stages: [manual]
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
+      - id: chmod
+        name: set file permissions
+        description: manual hook to be run by macOS or Linux users for a full repository clean up
+        args: ['644']
+        files: \.md$
+        stages: [manual]
+      - id: insert-license
+        name: add license for all Batch files
+        files: \.bat$
+        args:
+          - --comment-style
+          - '|REM|'
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
       - id: insert-license
         name: add license for all .c files
+        description: automatically adds a licence header to all C files that don't have a license header
         files: \.c$
         args:
           - --comment-style
@@ -64,6 +117,7 @@ repos:
           - --fuzzy-match-generates-todo
       - id: insert-license
         name: add license for all .h files
+        description: automatically adds a licence header to all header files that don't have a license header
         files: \.h$
         args:
           - --comment-style
@@ -73,6 +127,7 @@ repos:
           - --fuzzy-match-generates-todo
       - id: insert-license
         name: add license for all Java files
+        description: automatically adds a licence header to all Java files that don't have a license header
         files: \.java$
         args:
           - --comment-style
@@ -82,6 +137,7 @@ repos:
           - --fuzzy-match-generates-todo
       - id: insert-license
         name: add license for all Markdown files
+        description: automatically adds a licence header to all Markdown files that don't have a license header
         files: \.md$
         args:
           - --comment-style
@@ -92,6 +148,7 @@ repos:
         exclude: ^docs/index\.md$|^\.github/pull_request_template\.md$|\.github/issue_template\.md$|^docs/blog/.*\.md$
       - id: insert-license
         name: add license for all Makefile files
+        description: automatically adds a licence header to all Makefiles that don't have a license header
         files: ^Makefile$
         args:
           - --comment-style
@@ -101,6 +158,7 @@ repos:
           - --fuzzy-match-generates-todo
       - id: insert-license
         name: add license for all R files
+        description: automatically adds a licence header to all R files that don't have a license header
         files: \.R$
         args:
           - --comment-style
@@ -110,6 +168,7 @@ repos:
           - --fuzzy-match-generates-todo
       - id: insert-license
         name: add license for all Scala files
+        description: automatically adds a licence header to all Scala files that don't have a license header
         files: \.scala$
         args:
           - --comment-style
@@ -118,7 +177,18 @@ repos:
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
       - id: insert-license
+        name: add license for all Shell files
+        description: automatically adds a licence header to all Shell files that don't have a license header
+        files: \.sh$
+        args:
+          - --comment-style
+          - '|#|'
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
+      - id: insert-license
         name: add license for all TOML files
+        description: automatically adds a licence header to all TOML files that don't have a license header
         files: \.toml$
         args:
           - --comment-style
@@ -128,6 +198,7 @@ repos:
           - --fuzzy-match-generates-todo
       - id: insert-license
         name: add license for all YAML files
+        description: automatically adds a licence header to all YAML files that don't have a license header
         files: \.ya?ml$
         args:
           - --comment-style
@@ -137,6 +208,7 @@ repos:
           - --fuzzy-match-generates-todo
       - id: insert-license
         name: add license for all Python files
+        description: automatically adds a licence header to all Python files that don't have a license header
         files: \.py$
         args:
           - --comment-style
@@ -146,7 +218,8 @@ repos:
           - --fuzzy-match-generates-todo
       - id: insert-license
         name: add license for all other files
-        files: ^\.(editorconfig|gitattributes|prettierignore|prettierrc|shellcheckrc)$|^.*/\.gitignore$
+        description: automatically adds a licence header to all other files that don't have a license header
+        files: ^\.(editorconfig|gitattributes|prettierignore|prettierrc|shellcheckrc)$|^.*/\.gitignore$|^tools/maven/scalafmt\.conf$
         args:
           - --comment-style
           - '|#|'
@@ -154,12 +227,14 @@ repos:
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.20.0
+    rev: v3.21.0
     hooks:
       - id: pyupgrade
+        name: run pyupgrade
+        description: a tool (and pre-commit hook) to automatically upgrade syntax for newer versions of the language
         args: [--py37-plus]
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 25.1.0
+    rev: 25.9.0
     hooks:
       - id: black-jupyter
         name: run black-jupyter
@@ -187,15 +262,27 @@ repos:
         name: run codespell
         description: check spelling with codespell
         args: [--ignore-words=.github/linters/codespell.txt]
-        exclude: ^docs/image|^spark/common/src/test/resources|^docs/usecases|^tools/maven/scalafmt|osmpbf/build|^docker/zeppelin
+        exclude: ^docs/image|^spark/common/src/test/resources|^docs/usecases|^tools/maven/scalafmt|osmpbf/build|^docker/zeppelin|^docs-overrides
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.27.2
+    rev: v8.28.0
     hooks:
       - id: gitleaks
         name: run gitleaks
         description: check for secrets with gitleaks
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+      - id: rst-backticks
+        name: run rst-backticks
+        description: detect common mistake of using single backticks when writing rst
+      - id: rst-directive-colons
+        name: run rst-directive-colons
+        description: detect mistake of rst directive not ending with double colon or space before the double colon
+      - id: rst-inline-touching-normal
+        name: run rst-inline-touching-normal
+        description: detect mistake of inline code touching normal text in rst
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-ast
         name: run check-ast
@@ -229,24 +316,50 @@ repos:
         name: run check-toml
         description: check TOML files for syntax errors
       - id: check-vcs-permalinks
+        name: run check-vcs-permalinks
+        description: ensures that links to vcs websites are permalinks
       - id: check-xml
+        name: run check-xml
+        description: attempts to load all xml files to verify syntax
       - id: check-yaml
+        name: run check-yaml
+        description: attempts to load all yaml files to verify syntax
         exclude: ^mkdocs\.yml$
       - id: debug-statements
+        name: run debug-statements
+        description: check for debugger imports and py37+ `breakpoint()` calls in python source.
       - id: destroyed-symlinks
+        name: run destroyed-symlinks
+        description: detects symlinks which are changed to regular files with a content of a path which that symlink was pointing to
       - id: detect-aws-credentials
+        name: run detect-aws-credentials
+        description: checks for the existence of AWS secrets that you have set up with the AWS CLI
         args: [--allow-missing-credentials]
       - id: detect-private-key
+        name: run detect-private-key
+        description: checks for the existence of private keys
       - id: end-of-file-fixer
+        name: run end-of-file-fixer
+        description: makes sure files end in a newline and only a newline
         exclude: \.svg$|^docs/image|^spark/common/src/test/resources
       - id: file-contents-sorter
+        name: run file-contents-sorter
+        description: sort the lines in specified files (defaults to alphabetical)
         args: [--unique]
         files: ^\.github/linters/codespell\.txt$
       - id: fix-byte-order-marker
+        name: run fix-byte-order-marker
+        description: removes UTF-8 byte order marker
       - id: forbid-submodules
+        name: run forbid-submodules
+        description: forbids any submodules in the repository
       - id: mixed-line-ending
+        name: run mixed-line-ending
+        description: replaces or checks mixed line ending
         exclude: \.csv$
       - id: name-tests-test
+        name: run name-tests-test
+        description: verifies that test files are named correctly
         args: [--pytest-test-first]
         exclude: |
           (?x)^(
@@ -259,8 +372,12 @@ repos:
               python/tests/tools\.py
           )$
       - id: requirements-txt-fixer
-        files: ^docker/requirements\.txt$|^requirements-docs\.txt$
+        name: run requirements-txt-fixer
+        description: sorts entries in the Python requirements files and removes incorrect entry for pkg-resources==0.0.0
+        files: ^docker/requirements\.txt$
       - id: trailing-whitespace
+        name: run trailing-whitespace
+        description: trims trailing whitespace
         args: [--markdown-linebreak-ext=md]
         exclude: ^docs-overrides/main\.html$|\.Rd$
   - repo: https://github.com/igorshubovych/markdownlint-cli
@@ -274,7 +391,7 @@ repos:
         types: [markdown]
         files: \.(md|mdown|markdown)$
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.10.0.1
+    rev: v0.11.0.1
     hooks:
       - id: shellcheck
         name: run shellcheck
@@ -288,10 +405,18 @@ repos:
         args: [--strict, -c=.github/linters/.yaml-lint.yml]
         types: [yaml]
         files: \.ya?ml$
-  - repo: https://github.com/shssoichiro/oxipng
+  - repo: https://github.com/oxipng/oxipng
     rev: v9.1.5
     hooks:
       - id: oxipng
         name: run oxipng
         description: check PNG files with oxipng
         args: ['--fix', '-o', '4', '--strip', 'safe', '--alpha']
+        stages: [manual]
+  - repo: https://github.com/adamchainz/blacken-docs
+    rev: 1.20.0
+    hooks:
+      - id: blacken-docs
+        name: run blacken-docs
+        description: run `black` on python code blocks in documentation files
+        additional_dependencies: [black==25.1.0]

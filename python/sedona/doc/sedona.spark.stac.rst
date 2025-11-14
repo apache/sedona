@@ -9,21 +9,21 @@ sedona.spark.stac.client module
 
 .. automodule:: sedona.spark.stac.client
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 sedona.spark.stac.collection\_client module
 -------------------------------------------
 
 .. automodule:: sedona.spark.stac.collection_client
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: sedona.spark.stac
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

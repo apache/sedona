@@ -33,21 +33,16 @@ Sedona Python has implemented serializers and deserializers which allows to conv
 Loading the data from shapefile using geopandas read_file method and create Spark DataFrame based on GeoDataFrame:
 
 ```python
-
 import geopandas as gpd
 from sedona.spark import *
 
-config = SedonaContext.builder().\
-      getOrCreate()
+config = SedonaContext.builder().getOrCreate()
 
 sedona = SedonaContext.create(config)
 
 gdf = gpd.read_file("gis_osm_pois_free_1.shp")
 
-sedona.createDataFrame(
-  gdf
-).show()
-
+sedona.createDataFrame(gdf).show()
 ```
 
 This query will show the following outputs:
@@ -71,7 +66,9 @@ To leverage Arrow optimization and speed up the conversion, you can use the `cre
 that takes a SparkSession and GeoDataFrame as parameters and returns a Sedona DataFrame.
 
 ```python
-def create_spatial_dataframe(spark: SparkSession, gdf: gpd.GeoDataFrame) -> DataFrame
+def create_spatial_dataframe(
+    spark: SparkSession, gdf: gpd.GeoDataFrame
+) -> DataFrame: ...
 ```
 
 - spark: SparkSession
@@ -91,26 +88,20 @@ create_spatial_dataframe(spark, gdf)
 Reading data with Spark and converting to GeoPandas
 
 ```python
-
 import geopandas as gpd
 from sedona.spark import *
 
-config = SedonaContext.builder().
-	getOrCreate()
+config = SedonaContext.builder().getOrCreate()
 
 sedona = SedonaContext.create(config)
 
-counties = sedona.\
-    read.\
-    option("delimiter", "|").\
-    option("header", "true").\
-    csv("counties.csv")
+counties = (
+    sedona.read.option("delimiter", "|").option("header", "true").csv("counties.csv")
+)
 
 counties.createOrReplaceTempView("county")
 
-counties_geom = sedona.sql(
-    "SELECT *, st_geomFromWKT(geom) as geometry from county"
-)
+counties_geom = sedona.sql("SELECT *, st_geomFromWKT(geom) as geometry from county")
 
 df = counties_geom.toPandas()
 gdf = gpd.GeoDataFrame(df, geometry="geometry")
@@ -119,11 +110,10 @@ gdf.plot(
     figsize=(10, 8),
     column="value",
     legend=True,
-    cmap='YlOrBr',
-    scheme='quantiles',
-    edgecolor='lightgray'
+    cmap="YlOrBr",
+    scheme="quantiles",
+    edgecolor="lightgray",
 )
-
 ```
 
 <br>
@@ -141,8 +131,7 @@ significantly faster for large results (requires geopandas >= 1.0).
 import geopandas as gpd
 from sedona.spark import dataframe_to_arrow
 
-config = SedonaContext.builder().
-	getOrCreate()
+config = SedonaContext.builder().getOrCreate()
 
 sedona = SedonaContext.create(config)
 
@@ -173,7 +162,6 @@ To create Spark DataFrame based on mentioned Geometry types, please use <b> Geom
 Schema for target table with integer id and geometry type can be defined as follows:
 
 ```python
-
 from pyspark.sql.types import IntegerType, StructField, StructType
 
 from sedona.spark import *
@@ -181,10 +169,9 @@ from sedona.spark import *
 schema = StructType(
     [
         StructField("id", IntegerType(), False),
-        StructField("geom", GeometryType(), False)
+        StructField("geom", GeometryType(), False),
     ]
 )
-
 ```
 
 Also, Spark DataFrame with geometry type can be converted to list of shapely objects with <b> collect </b> method.
@@ -194,20 +181,12 @@ Also, Spark DataFrame with geometry type can be converted to list of shapely obj
 ```python
 from shapely.geometry import Point
 
-data = [
-    [1, Point(21.0, 52.0)],
-    [1, Point(23.0, 42.0)],
-    [1, Point(26.0, 32.0)]
-]
+data = [[1, Point(21.0, 52.0)], [1, Point(23.0, 42.0)], [1, Point(26.0, 32.0)]]
 
 
-gdf = sedona.createDataFrame(
-    data,
-    schema
-)
+gdf = sedona.createDataFrame(data, schema)
 
 gdf.show()
-
 ```
 
 ```
@@ -233,18 +212,11 @@ root
 ### MultiPoint example
 
 ```python3
-
 from shapely.geometry import MultiPoint
 
-data = [
-    [1, MultiPoint([[19.511463, 51.765158], [19.446408, 51.779752]])]
-]
+data = [[1, MultiPoint([[19.511463, 51.765158], [19.446408, 51.779752]])]]
 
-gdf = sedona.createDataFrame(
-    data,
-    schema
-).show(1, False)
-
+gdf = sedona.createDataFrame(data, schema).show(1, False)
 ```
 
 ```
@@ -261,22 +233,15 @@ gdf = sedona.createDataFrame(
 ### LineString example
 
 ```python3
-
 from shapely.geometry import LineString
 
 line = [(40, 40), (30, 30), (40, 20), (30, 10)]
 
-data = [
-    [1, LineString(line)]
-]
+data = [[1, LineString(line)]]
 
-gdf = sedona.createDataFrame(
-    data,
-    schema
-)
+gdf = sedona.createDataFrame(data, schema)
 
 gdf.show(1, False)
-
 ```
 
 ```
@@ -292,23 +257,16 @@ gdf.show(1, False)
 ### MultiLineString example
 
 ```python3
-
 from shapely.geometry import MultiLineString
 
 line1 = [(10, 10), (20, 20), (10, 40)]
 line2 = [(40, 40), (30, 30), (40, 20), (30, 10)]
 
-data = [
-    [1, MultiLineString([line1, line2])]
-]
+data = [[1, MultiLineString([line1, line2])]]
 
-gdf = sedona.createDataFrame(
-    data,
-    schema
-)
+gdf = sedona.createDataFrame(data, schema)
 
 gdf.show(1, False)
-
 ```
 
 ```
@@ -324,30 +282,23 @@ gdf.show(1, False)
 ### Polygon example
 
 ```python3
-
 from shapely.geometry import Polygon
 
 polygon = Polygon(
     [
-         [19.51121, 51.76426],
-         [19.51056, 51.76583],
-         [19.51216, 51.76599],
-         [19.51280, 51.76448],
-         [19.51121, 51.76426]
+        [19.51121, 51.76426],
+        [19.51056, 51.76583],
+        [19.51216, 51.76599],
+        [19.51280, 51.76448],
+        [19.51121, 51.76426],
     ]
 )
 
-data = [
-    [1, polygon]
-]
+data = [[1, polygon]]
 
-gdf = sedona.createDataFrame(
-    data,
-    schema
-)
+gdf = sedona.createDataFrame(data, schema)
 
 gdf.show(1, False)
-
 ```
 
 ```
@@ -363,7 +314,6 @@ gdf.show(1, False)
 ### MultiPolygon example
 
 ```python3
-
 from shapely.geometry import MultiPolygon
 
 exterior_p1 = [(0, 0), (0, 2), (2, 2), (2, 0), (0, 0)]
@@ -371,22 +321,13 @@ interior_p1 = [(1, 1), (1, 1.5), (1.5, 1.5), (1.5, 1), (1, 1)]
 
 exterior_p2 = [(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)]
 
-polygons = [
-    Polygon(exterior_p1, [interior_p1]),
-    Polygon(exterior_p2)
-]
+polygons = [Polygon(exterior_p1, [interior_p1]), Polygon(exterior_p2)]
 
-data = [
-    [1, MultiPolygon(polygons)]
-]
+data = [[1, MultiPolygon(polygons)]]
 
-gdf = sedona.createDataFrame(
-    data,
-    schema
-)
+gdf = sedona.createDataFrame(data, schema)
 
 gdf.show(1, False)
-
 ```
 
 ```
@@ -402,7 +343,6 @@ gdf.show(1, False)
 ### GeometryCollection example
 
 ```python3
-
 from shapely.geometry import GeometryCollection, Point, LineString, Polygon
 
 exterior_p1 = [(0, 0), (0, 2), (2, 2), (2, 0), (0, 0)]
@@ -413,17 +353,12 @@ geoms = [
     Polygon(exterior_p1, [interior_p1]),
     Polygon(exterior_p2),
     Point(1, 1),
-    LineString([(0, 0), (1, 1), (2, 2)])
+    LineString([(0, 0), (1, 1), (2, 2)]),
 ]
 
-data = [
-    [1, GeometryCollection(geoms)]
-]
+data = [[1, GeometryCollection(geoms)]]
 
-gdf = sedona.createDataFrame(
-    data,
-    schema
-)
+gdf = sedona.createDataFrame(data, schema)
 
 gdf.show(1, False)
 ```

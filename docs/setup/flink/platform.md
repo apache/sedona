@@ -17,4 +17,11 @@
  under the License.
  -->
 
-Sedona Flink binary releases are compiled by Java 1.8 and Scala 2.12, and tested with Flink 1.12 - 1.19.
+Sedona Flink binary releases are compiled by Java 11/17 and Scala 2.12, and tested with Flink 1.12 - 1.19.
+
+**Java Requirements:**
+
+- Flink 1.12 - 1.18: Java 11
+- Flink 1.19+: Java 17
+
+**Note:** Java 8 support is dropped since Sedona 1.8.0.

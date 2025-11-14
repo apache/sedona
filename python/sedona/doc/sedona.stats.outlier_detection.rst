@@ -14,5 +14,5 @@ Module contents
 
 .. automodule:: sedona.stats.outlier_detection
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

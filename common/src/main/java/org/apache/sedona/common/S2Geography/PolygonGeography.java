@@ -33,7 +33,7 @@ import org.locationtech.jts.geom.CoordinateSequence;
 import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 
-public class PolygonGeography extends S2Geography {
+public class PolygonGeography extends Geography {
   private static final Logger logger = Logger.getLogger(PolygonGeography.class.getName());
 
   public final S2Polygon polygon;
@@ -103,7 +103,6 @@ public class PolygonGeography extends S2Geography {
 
     S2Polygon poly = S2Polygon.decode(in);
     geo = new PolygonGeography(poly);
-
     return geo;
   }
 

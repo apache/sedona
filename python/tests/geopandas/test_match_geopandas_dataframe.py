@@ -31,7 +31,7 @@ from shapely.geometry import (
 )
 
 from packaging.version import parse as parse_version
-from sedona.geopandas import GeoDataFrame, GeoSeries
+from sedona.spark.geopandas import GeoDataFrame, GeoSeries
 import geopandas as gpd
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 import pyspark.pandas as ps
@@ -132,8 +132,7 @@ class TestMatchGeopandasDataFrame(TestGeopandasBase):
         sgpd_df = GeoDataFrame(self.geometries)
         gpd_df = gpd.GeoDataFrame(self.geometries)
 
-        with self.ps_allow_diff_frames():
-            sgpd_df = sgpd_df.set_geometry("points")
+        sgpd_df = sgpd_df.set_geometry("points")
         gpd_df = gpd_df.set_geometry("points")
         assert sgpd_df.geometry.name == gpd_df.geometry.name
 
@@ -146,8 +145,7 @@ class TestMatchGeopandasDataFrame(TestGeopandasBase):
         sgpd_df = GeoDataFrame(self.geometries)
         gpd_df = gpd.GeoDataFrame(self.geometries)
 
-        with self.ps_allow_diff_frames():
-            sgpd_df = sgpd_df.set_geometry("polygons")
+        sgpd_df = sgpd_df.set_geometry("polygons")
         gpd_df = gpd_df.set_geometry("polygons")
         assert sgpd_df.geometry.name == gpd_df.geometry.name
         assert (
@@ -160,20 +158,17 @@ class TestMatchGeopandasDataFrame(TestGeopandasBase):
         sgpd_df = GeoDataFrame(self.geometries)
         gpd_df = gpd.GeoDataFrame(self.geometries)
 
-        with self.ps_allow_diff_frames():
-            sgpd_df = sgpd_df.set_geometry("polygons")
+        sgpd_df = sgpd_df.set_geometry("polygons")
         gpd_df = gpd_df.set_geometry("polygons")
         assert sgpd_df.geometry.name == gpd_df.geometry.name
 
         # test inplace
-        with self.ps_allow_diff_frames():
-            sgpd_df.rename_geometry("random", inplace=True)
+        sgpd_df.rename_geometry("random", inplace=True)
         gpd_df.rename_geometry("random", inplace=True)
         assert sgpd_df.geometry.name == gpd_df.geometry.name
 
         # Ensure the names are different when we rename to different names
-        with self.ps_allow_diff_frames():
-            sgpd_df = sgpd_df.rename_geometry("name1")
+        sgpd_df = sgpd_df.rename_geometry("name1")
         gpd_df = gpd_df.rename_geometry("name2")
         assert sgpd_df.geometry.name != gpd_df.geometry.name
 
@@ -205,9 +200,7 @@ class TestMatchGeopandasDataFrame(TestGeopandasBase):
         ]
 
         for data in tests:
-            # TODO: Try to optimize this with self.ps_allow_diff_frames() away
-            with self.ps_allow_diff_frames():
-                sgpd_result = GeoDataFrame(data).to_json()
+            sgpd_result = GeoDataFrame(data).to_json()
             gpd_result = gpd.GeoDataFrame(data).to_json()
             assert sgpd_result == gpd_result
 
@@ -226,8 +219,8 @@ class TestMatchGeopandasDataFrame(TestGeopandasBase):
             {"na": "drop", "show_bbox": True, "drop_id": True, "to_wgs84": True},
         ]
         for kwargs in tests:
-            # TODO: Try to optimize this with self.ps_allow_diff_frames() away
-            with self.ps_allow_diff_frames():
+            # TODO: Try to optimize this 'with ps.option_context("compute.ops_on_diff_frames", True)' away
+            with ps.option_context("compute.ops_on_diff_frames", True):
                 sgpd_result = GeoDataFrame(data, crs="EPSG:3857").to_json(**kwargs)
             gpd_result = gpd.GeoDataFrame(data, crs="EPSG:3857").to_json(**kwargs)
             assert sgpd_result == gpd_result
@@ -250,9 +243,7 @@ class TestMatchGeopandasDataFrame(TestGeopandasBase):
             }
         )
 
-        # TODO: optimize this away
-        with self.ps_allow_diff_frames():
-            sgpd_result = GeoDataFrame.from_arrow(gdf.to_arrow())
+        sgpd_result = GeoDataFrame.from_arrow(gdf.to_arrow())
         gpd_result = gpd.GeoDataFrame.from_arrow(gdf.to_arrow())
         self.check_sgpd_df_equals_gpd_df(sgpd_result, gpd_result)
 
@@ -269,20 +260,16 @@ class TestMatchGeopandasDataFrame(TestGeopandasBase):
             "geometry": [Point(1, 2), Point(2, 1), LineString([(0, 0), (1, 1)])],
         }
 
-        # TODO: Try to optimize this with self.ps_allow_diff_frames() away
-        with self.ps_allow_diff_frames():
-            sgpd_result = pa.table(GeoDataFrame(data).to_arrow(index=False))
+        sgpd_result = pa.table(GeoDataFrame(data).to_arrow(index=False))
         gpd_result = pa.table(gpd.GeoDataFrame(data).to_arrow(index=False))
 
         assert sgpd_result.equals(gpd_result)
 
-        # TODO: Try to optimize this with self.ps_allow_diff_frames() away
-        with self.ps_allow_diff_frames():
-            sgpd_result = pa.table(
-                GeoDataFrame(
-                    data, index=pd.RangeIndex(start=0, stop=3, step=1)
-                ).to_arrow(index=True)
+        sgpd_result = pa.table(
+            GeoDataFrame(data, index=pd.RangeIndex(start=0, stop=3, step=1)).to_arrow(
+                index=True
             )
+        )
         gpd_result = pa.table(
             gpd.GeoDataFrame(
                 data, index=pd.RangeIndex(start=0, stop=3, step=1)

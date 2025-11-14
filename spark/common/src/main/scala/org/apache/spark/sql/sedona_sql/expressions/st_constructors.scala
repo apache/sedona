@@ -18,10 +18,9 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
-import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.Column
-
-import org.apache.spark.sql.sedona_sql.DataFrameShims._
+import org.apache.spark.sql.sedona_sql.DataFrameShims.{wrapExpression, _}
+import org.apache.spark.sql.sedona_sql.expressions.geography.{ST_GeogCollFromText, ST_GeogFromEWKB, ST_GeogFromEWKT, ST_GeogFromGeoHash, ST_GeogFromText, ST_GeogFromWKB, ST_GeogFromWKT, ST_GeogToGeometry, ST_GeomToGeography}
 
 object st_constructors {
   def ST_GeomFromGeoHash(geohash: Column, precision: Column): Column =
@@ -34,6 +33,17 @@ object st_constructors {
 
   def ST_GeomFromGeoHash(geohash: String): Column =
     wrapExpression[ST_GeomFromGeoHash](geohash, null)
+
+  def ST_GeogFromGeoHash(geohash: Column, precision: Column): Column =
+    wrapExpression[ST_GeogFromGeoHash](geohash, precision)
+  def ST_GeogFromGeoHash(geohash: String, precision: Int): Column =
+    wrapExpression[ST_GeogFromGeoHash](geohash, precision)
+
+  def ST_GeogFromGeoHash(geohash: Column): Column =
+    wrapExpression[ST_GeogFromGeoHash](geohash, null)
+
+  def ST_GeogFromGeoHash(geohash: String): Column =
+    wrapExpression[ST_GeogFromGeoHash](geohash, null)
 
   def ST_PointFromGeoHash(geohash: Column, precision: Column): Column =
     wrapExpression[ST_PointFromGeoHash](geohash, precision)
@@ -96,6 +106,24 @@ object st_constructors {
   def ST_GeogFromWKT(wkt: Column, srid: Column): Column =
     wrapExpression[ST_GeogFromWKT](wkt, srid)
   def ST_GeogFromWKT(wkt: String, srid: Int): Column = wrapExpression[ST_GeogFromWKT](wkt, srid)
+
+  def ST_GeogFromEWKT(wkt: Column): Column = wrapExpression[ST_GeogFromEWKT](wkt)
+  def ST_GeogFromEWKT(wkt: String): Column = wrapExpression[ST_GeogFromEWKT](wkt)
+
+  def ST_GeogFromText(wkt: Column): Column = wrapExpression[ST_GeogFromText](wkt, 0)
+  def ST_GeogFromText(wkt: String): Column = wrapExpression[ST_GeogFromText](wkt, 0)
+  def ST_GeogFromText(wkt: Column, srid: Column): Column =
+    wrapExpression[ST_GeogFromText](wkt, srid)
+  def ST_GeogFromText(wkt: String, srid: Int): Column = wrapExpression[ST_GeogFromText](wkt, srid)
+
+  def ST_GeogFromWKB(wkb: Column): Column = wrapExpression[ST_GeogFromWKB](wkb, 0)
+  def ST_GeogFromWKB(wkb: String): Column = wrapExpression[ST_GeogFromWKB](wkb, 0)
+  def ST_GeogFromWKB(wkb: Column, srid: Column): Column =
+    wrapExpression[ST_GeogFromWKB](wkb, srid)
+  def ST_GeogFromWKB(wkb: String, srid: Int): Column = wrapExpression[ST_GeogFromWKB](wkb, srid)
+
+  def ST_GeogFromEWKB(wkb: Column): Column = wrapExpression[ST_GeogFromEWKB](wkb)
+  def ST_GeogFromEWKB(wkb: String): Column = wrapExpression[ST_GeogFromEWKB](wkb)
 
   def ST_LineFromText(wkt: Column): Column = wrapExpression[ST_LineFromText](wkt)
   def ST_LineFromText(wkt: String): Column = wrapExpression[ST_LineFromText](wkt)
@@ -261,10 +289,23 @@ object st_constructors {
   def ST_GeomCollFromText(wkt: String, srid: Int): Column =
     wrapExpression[ST_GeomCollFromText](wkt, srid)
 
+  def ST_GeogCollFromText(wkt: Column): Column = wrapExpression[ST_GeogCollFromText](wkt, 0)
+  def ST_GeogCollFromText(wkt: String): Column = wrapExpression[ST_GeogCollFromText](wkt, 0)
+  def ST_GeogCollFromText(wkt: Column, srid: Column): Column =
+    wrapExpression[ST_GeogCollFromText](wkt, srid)
+  def ST_GeogCollFromText(wkt: String, srid: Int): Column =
+    wrapExpression[ST_GeogCollFromText](wkt, srid)
+
   def ST_MPointFromText(wkt: Column): Column = wrapExpression[ST_MPointFromText](wkt, 0)
   def ST_MPointFromText(wkt: String): Column = wrapExpression[ST_MPointFromText](wkt, 0)
   def ST_MPointFromText(wkt: Column, srid: Column): Column =
     wrapExpression[ST_MPointFromText](wkt, srid)
   def ST_MPointFromText(wkt: String, srid: Int): Column =
     wrapExpression[ST_MPointFromText](wkt, srid)
+
+  def ST_GeogToGeometry(geog: Column): Column = wrapExpression[ST_GeogToGeometry](geog)
+  def ST_GeogToGeometry(geog: String): Column = wrapExpression[ST_GeogToGeometry](geog)
+
+  def ST_GeomToGeography(geom: Column): Column = wrapExpression[ST_GeomToGeography](geom)
+  def ST_GeomToGeography(geom: String): Column = wrapExpression[ST_GeomToGeography](geom)
 }

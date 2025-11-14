@@ -113,7 +113,3 @@ class RasterType(UserDefinedType):
     @classmethod
     def scalaUDT(cls):
         return "org.apache.spark.sql.sedona_sql.UDT.RasterUDT"
-
-
-if SedonaRaster is not None:
-    SedonaRaster.__UDT__ = RasterType()

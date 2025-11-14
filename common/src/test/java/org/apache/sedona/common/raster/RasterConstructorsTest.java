@@ -612,7 +612,7 @@ public class RasterConstructorsTest extends RasterTestBase {
         if (offsetX + x < width && offsetY + y < height) {
           float[] expectedValues = gridCoverage2D.evaluate(gridCoord, (float[]) null);
           if (bandIndices == null) {
-            Assert.assertArrayEquals(expectedValues, values, 1e-6f);
+            assertArrayEquals(expectedValues, values, 1e-6f);
           } else {
             Assert.assertEquals(bandIndices.length, values.length);
             for (int j = 0; j < bandIndices.length; j++) {

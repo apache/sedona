@@ -1,143 +1,702 @@
 {#-
-  This file was automatically generated - do not edit
+This file was automatically generated - do not edit
 -#}
 {% extends "base.html" %}
 
 {% block outdated %}
-  You're not viewing the latest stable version.
-  <a href="{{ '../' ~ base_url }}">
-    <strong>Click here to go to the latest stable version.</strong>
-  </a>
+You're not viewing the latest stable version.
+<a href="{{ '../' ~ base_url }}">
+  <strong>Click here to go to the latest stable version.</strong>
+</a>
 {% endblock %}
 
 {% block extrahead %}
-  {{ super() }}
-  <meta name="google-site-verification" content="o2riomKLozYKc2IQivWGsrI2unuyQs7hXiAD4kGMCTQ" />
+{{ super() }}
+<meta name="google-site-verification" content="o2riomKLozYKc2IQivWGsrI2unuyQs7hXiAD4kGMCTQ" />
 {% endblock %}
 
-{% block content %}
-  {% if page.is_homepage %}
-  <!-- {{ super() }} -->
-  <style>
-    .md-header{position:initial}.md-main__inner{margin-left:5%}.md-content{display:display}@media screen and (min-width:60em){.md-sidebar--secondary{display:display}}@media screen and (min-width:76.25em){.md-sidebar--primary{display:none}}
-    .br {
-            display: block;
-            margin-bottom: 14em;
-        }
-    .responsive-container {
-      display: grid;
-      grid-template-columns: 44% 56%;
-      grid-gap: 20px;
-    }
-    .responsive-text {
-      grid-column: 1;
-    }
-    .responsive-img {
-     grid-column: 2;
-    }
+{% block header %}
+  <div style="background: #CA463A; color: white; text-align: center; padding: 0.5rem;">
+    <a href="blog/2025/09/24/introducing-sedonadb-a-single-node-analytical-database-engine-with-geospatial-as-a-first-class-citizen/" title="Announcement">📢 Introducing SedonaDB: A single-node analytical database engine with geospatial as a first-class citizen.</a>
+  </div>
+  {{ super() }} {# This renders the original header below your test bar #}
+{% endblock %}
 
-    @media (max-width: 490px) {
-      .responsive-container {
-        grid-template-columns: 100%;
-      }
-      .responsive-text , .responsive-img {
-        grid-column: 1;
-      }
-    }
-</style>
-    <section class="tx-container">
-      <div class="md-grid md-typeset">
-        <div class="tx-hero">
-          <div class="tx-hero__image">
-            <img src="image/sedona_logo.png" width="500">
+{% block container %}
+    {% if page.is_homepage %}
+    <div class="page-home">
+
+      <!-- Section Hero -->
+      <section class="section-hero">
+        <div class="container">
+
+          <div class="logo-wrap">
+            <img src="image/home/hero/logo.svg" alt="" class="logo">
+            <h1 class="page-title">Apache Sedona</h1>
           </div>
-          <div class="tx-hero__content">
-            <p>{{ config.site_description }}</p>
-            <p>Set up Scala and Java API in 5 minutes with Maven and SBT.</p>
-            <p>Python and R API are also available on PyPI and CRAN.</p>
-            <a href="{{ page.next_page.url | url }}" title="{{ page.next_page.title | striptags }}" class="md-button md-button--primary">
-              Get started
+
+          <div class="section-description editor">
+            Apache Sedona™ makes it easy to process spatial datasets of any scale.
+          </div>
+
+          <div class="btn-group">
+            <a href="{{ page.next_page.url | url }}" title="{{ page.next_page.title | striptags }}" class="btn btn-black">
+              Get Started
             </a>
-            <a href="{{ config.repo_url }}" title="{{ lang.t('source.link.title') }}" class="md-button">
-              Go to GitHub
-            </a>
-            <p>
-            <a href="community/contact/#discord-server" target="_blank">
-              <img src="https://dcbadge.limes.pink/api/server/https://discord.gg/9A3k5dEBsY" alt="Apache Sedona Discord server">
-            </a>
-            </p>
-
           </div>
-
-          <br><br><br>
-
-          <div class="tx-hero__content">
-            <h1>Sedona Ecosystem</h1>
-            <div style="width: 100%;">
-              <img src="image/sedona-ecosystem.png" width="800">
-            </div>
-          </div>
-
-          <br><br><br><br>
-
-          <div class="tx-hero__content">
-            <h1>High Speed</h1>
-            <div class="responsive-container">
-              <div class="responsive-text">
-                According to <a href="./community/publication/">our benchmark and third-party research papers</a>, Sedona runs 2X - 10X faster than other Spark-based geospatial data systems on computation-intensive query workloads.
-              </div>
-              <div class="responsive-img">
-                <figure>
-                    <img src="image/jointime.png" width="350">
-                    <figcaption>Execution time of spatial join with polygons</figcaption>
-                </figure>
-              </div>
-            </div>
-          </div>
-
-          <br><br><br><br>
-
-          <div class="tx-hero__content">
-            <h1>Low Memory Consumption</h1>
-            <div class="responsive-container">
-              <div class="responsive-text">
-                According to <a href="./community/publication/">our benchmark and third-party research papers</a>, Sedona has 50% less peak memory consumption than other Spark-based geospatial data systems for large-scale in-memory query processing.
-              </div>
-              <div class="responsive-img">
-                <figure>
-                    <img src="image/joinmem.png" width="350">
-                    <figcaption>Peak memory consumption of spatial join with polygons</figcaption>
-                </figure>
-              </div>
-            </div>
-          </div>
-
-          <br><br><br><br>
-
-          <div class="tx-hero__content">
-            <h1>Ease of Use</h1>
-            <div class="responsive-container">
-              <div class="responsive-text">
-                Sedona offers Scala, Java, Spatial SQL, Python, and R APIs and integrates them into underlying system kernels with care. You can simply create spatial analytics and data mining applications and run them in any cloud environments.
-              </div>
-              <div class="responsive-img">
-<pre class="hljs" style="display: block; overflow-x: auto; background: rgb(235, 248, 255); color: rgb(81, 109, 123); padding: 0.5em;"><span class="hljs-keyword" style="color: rgb(107, 107, 184);">SELECT</span> superhero.name
-<span class="hljs-keyword" style="color: rgb(107, 107, 184);">FROM</span> city, superhero
-<span class="hljs-keyword" style="color: rgb(107, 107, 184);">WHERE</span> ST_Contains(city.geom, superhero.geom)
-<span class="hljs-keyword" style="color: rgb(107, 107, 184);">AND</span> city.name = <span class="hljs-string" style="color: rgb(86, 140, 59);">'Gotham'</span></pre>
-              </div>
-            </div>
-          </div>
-
-          <br><br><br><br>
-
-          <span class="br"></span>
 
         </div>
-      </div>
-    </section>
 
-  {% else %}
+        <div class="img-bg-wrap">
+          <img src="image/home/hero/mountains-desktop.svg" alt="" class="img-bg">
+        </div>
+      </section>
+
+      <!-- Section Global Scale -->
+      <section class="section-global-scale">
+        <div class="container">
+          <div class="section-row">
+
+            <div class="col-left">
+              <div class="section-title">
+                <div>QUERY and JOIN</div>
+
+                <p class="typed-wrap"><span class="typed"></span></p>
+                <div class="typed-strings">
+                  <p>GPS points</p>
+                  <p>buildings</p>
+                  <p>parcels</p>
+                  <p>trips</p>
+                  <p>places</p>
+                  <p>businesses</p>
+                  <p>land</p>
+                  <p>vegetation</p>
+                  <p>rasters</p>
+                  <p>vectors</p>
+                  <p>tabular tables</p>
+                </div>
+
+                <div>from local to global scale</div>
+              </div>
+              <div class="section-description editor"></div>
+            </div>
+
+            <div class="col-right">
+              <div class="hljs-snippet" data-initial="python">
+                <div class="hljs-snippet__tabs" role="tablist" aria-label="Code tabs">
+                  <button class="hljs-snippet__tab is-active" role="tab" aria-selected="true" data-lang="sql">SQL</button>
+                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="python">SedonaSpark</button>
+                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="bash">SedonaDB</button>
+                </div>
+                <div class="hljs-snippet__body">
+
+                  <button class="hljs-snippet__copy" aria-label="Copy code">
+                    <span class="btn-inner">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M13.125 11.8749C13.125 12.0406 13.0592 12.1996 12.9419 12.3168C12.8247 12.434 12.6658 12.4999 12.5 12.4999H7.5C7.33424 12.4999 7.17527 12.434 7.05806 12.3168C6.94085 12.1996 6.875 12.0406 6.875 11.8749C6.875 11.7091 6.94085 11.5502 7.05806 11.4329C7.17527 11.3157 7.33424 11.2499 7.5 11.2499H12.5C12.6658 11.2499 12.8247 11.3157 12.9419 11.4329C13.0592 11.5502 13.125 11.7091 13.125 11.8749ZM12.5 8.74989H7.5C7.33424 8.74989 7.17527 8.81573 7.05806 8.93295C6.94085 9.05016 6.875 9.20913 6.875 9.37489C6.875 9.54065 6.94085 9.69962 7.05806 9.81683C7.17527 9.93404 7.33424 9.99989 7.5 9.99989H12.5C12.6658 9.99989 12.8247 9.93404 12.9419 9.81683C13.0592 9.69962 13.125 9.54065 13.125 9.37489C13.125 9.20913 13.0592 9.05016 12.9419 8.93295C12.8247 8.81573 12.6658 8.74989 12.5 8.74989ZM16.875 3.74989V16.8749C16.875 17.2064 16.7433 17.5243 16.5089 17.7588C16.2745 17.9932 15.9565 18.1249 15.625 18.1249H4.375C4.04348 18.1249 3.72554 17.9932 3.49112 17.7588C3.2567 17.5243 3.125 17.2064 3.125 16.8749V3.74989C3.125 3.41837 3.2567 3.10042 3.49112 2.866C3.72554 2.63158 4.04348 2.49989 4.375 2.49989H7.20781C7.55899 2.1067 7.98924 1.79212 8.47041 1.57673C8.95158 1.36134 9.47282 1.25 10 1.25C10.5272 1.25 11.0484 1.36134 11.5296 1.57673C12.0108 1.79212 12.441 2.1067 12.7922 2.49989H15.625C15.9565 2.49989 16.2745 2.63158 16.5089 2.866C16.7433 3.10042 16.875 3.41837 16.875 3.74989ZM7.5 4.99989H12.5C12.5 4.33685 12.2366 3.70096 11.7678 3.23212C11.2989 2.76328 10.663 2.49989 10 2.49989C9.33696 2.49989 8.70107 2.76328 8.23223 3.23212C7.76339 3.70096 7.5 4.33685 7.5 4.99989ZM15.625 3.74989H13.5352C13.6773 4.15131 13.75 4.57403 13.75 4.99989V5.62489C13.75 5.79065 13.6842 5.94962 13.5669 6.06683C13.4497 6.18404 13.2908 6.24989 13.125 6.24989H6.875C6.70924 6.24989 6.55027 6.18404 6.43306 6.06683C6.31585 5.94962 6.25 5.79065 6.25 5.62489V4.99989C6.25001 4.57403 6.32267 4.15131 6.46484 3.74989H4.375V16.8749H15.625V3.74989Z"
+                        fill="white" />
+                    </svg>
+                      <span class="active-state">✅</span>
+                    </span>
+                  </button>
+
+                  <pre class="hljs-snippet__panel" data-lang="sql"><code class="language-sql"><pre><code class="language-sql">SELECT superhero.name
+FROM city, superhero
+WHERE ST_Contains(city.geom, superhero.geom)
+AND city.name = 'Gotham'</code></pre>
+    </code></pre>
+                  <pre class="hljs-snippet__panel" data-lang="python" hidden><code class="language-python">sedona.sql("""
+SELECT superhero.name
+FROM city, superhero
+WHERE ST_Contains(city.geom, superhero.geom)
+AND city.name = 'Gotham'
+""")</code></pre>
+                  <pre class="hljs-snippet__panel" data-lang="bash" hidden><code class="language-bash">sd.sql("""
+SELECT superhero.name
+FROM city, superhero
+WHERE ST_Contains(city.geom, superhero.geom)
+AND city.name = 'Gotham'
+""")</code></pre>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Get Started in  -->
+      <section class="section-get-started-in-seconds">
+        <div class="container">
+          <div class="section-row">
+            <div class="col-left">
+              <div class="hljs-snippet" data-initial="pyspark">
+                <div class="hljs-snippet__tabs" role="tablist" aria-label="Code tabs">
+                  <button class="hljs-snippet__tab is-active" role="tab" aria-selected="true" data-lang="pyspark">SedonaSpark</button>
+                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="python">SedonaDB</button>
+                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="bash">SedonaSpark in Docker</button>
+                </div>
+                <div class="hljs-snippet__body">
+
+                  <button class="hljs-snippet__copy" aria-label="Copy code">
+                    <span class="btn-inner">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M13.125 11.8749C13.125 12.0406 13.0592 12.1996 12.9419 12.3168C12.8247 12.434 12.6658 12.4999 12.5 12.4999H7.5C7.33424 12.4999 7.17527 12.434 7.05806 12.3168C6.94085 12.1996 6.875 12.0406 6.875 11.8749C6.875 11.7091 6.94085 11.5502 7.05806 11.4329C7.17527 11.3157 7.33424 11.2499 7.5 11.2499H12.5C12.6658 11.2499 12.8247 11.3157 12.9419 11.4329C13.0592 11.5502 13.125 11.7091 13.125 11.8749ZM12.5 8.74989H7.5C7.33424 8.74989 7.17527 8.81573 7.05806 8.93295C6.94085 9.05016 6.875 9.20913 6.875 9.37489C6.875 9.54065 6.94085 9.69962 7.05806 9.81683C7.17527 9.93404 7.33424 9.99989 7.5 9.99989H12.5C12.6658 9.99989 12.8247 9.93404 12.9419 9.81683C13.0592 9.69962 13.125 9.54065 13.125 9.37489C13.125 9.20913 13.0592 9.05016 12.9419 8.93295C12.8247 8.81573 12.6658 8.74989 12.5 8.74989ZM16.875 3.74989V16.8749C16.875 17.2064 16.7433 17.5243 16.5089 17.7588C16.2745 17.9932 15.9565 18.1249 15.625 18.1249H4.375C4.04348 18.1249 3.72554 17.9932 3.49112 17.7588C3.2567 17.5243 3.125 17.2064 3.125 16.8749V3.74989C3.125 3.41837 3.2567 3.10042 3.49112 2.866C3.72554 2.63158 4.04348 2.49989 4.375 2.49989H7.20781C7.55899 2.1067 7.98924 1.79212 8.47041 1.57673C8.95158 1.36134 9.47282 1.25 10 1.25C10.5272 1.25 11.0484 1.36134 11.5296 1.57673C12.0108 1.79212 12.441 2.1067 12.7922 2.49989H15.625C15.9565 2.49989 16.2745 2.63158 16.5089 2.866C16.7433 3.10042 16.875 3.41837 16.875 3.74989ZM7.5 4.99989H12.5C12.5 4.33685 12.2366 3.70096 11.7678 3.23212C11.2989 2.76328 10.663 2.49989 10 2.49989C9.33696 2.49989 8.70107 2.76328 8.23223 3.23212C7.76339 3.70096 7.5 4.33685 7.5 4.99989ZM15.625 3.74989H13.5352C13.6773 4.15131 13.75 4.57403 13.75 4.99989V5.62489C13.75 5.79065 13.6842 5.94962 13.5669 6.06683C13.4497 6.18404 13.2908 6.24989 13.125 6.24989H6.875C6.70924 6.24989 6.55027 6.18404 6.43306 6.06683C6.31585 5.94962 6.25 5.79065 6.25 5.62489V4.99989C6.25001 4.57403 6.32267 4.15131 6.46484 3.74989H4.375V16.8749H15.625V3.74989Z"
+                        fill="white" />
+                    </svg>
+                      <span class="active-state">✅</span>
+                    </span>
+                  </button>
+                  <pre class="hljs-snippet__panel" data-lang="pyspark" hidden><code class="language-python">pip install apache-sedona</code></pre>
+                  <pre class="hljs-snippet__panel" data-lang="python" hidden><code class="language-python">pip install "apache-sedona[db]"</code></pre>
+                  <pre class="hljs-snippet__panel" data-lang="bash" hidden><code class="language-bash">docker pull apache/sedona:latest
+docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
+                  </code></pre>
+                </div>
+              </div>
+            </div>
+            <div class="col-right">
+              <h2 class="section-title">
+                Get started in seconds
+              </h2>
+              <div class="section-description editor">
+                Install SedonaDB, or run Sedona on distributed systems when you need additional scale.
+              </div>
+              <div class="bth-group">
+                <a href="https://github.com/apache/sedona-db" class="btn btn-red">
+                     <span class="caption">
+                   Install SedonaDB
+                  </span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Industries Tabs -->
+      <section class="section-industries-tabs">
+        <div class="container">
+          <div class="content-box">
+
+            <h2 class="section-title">Want to share your Sedona use case?</h2>
+
+            <div class="section__subtitle editor">
+              Join our Discord or create a GitHub Discussion so we can collaborate.
+            </div>
+
+            <div class="industries-tabs">
+
+              <div class="industries-tabs__head-wrap">
+                <div class="industries-tabs__head">
+                  <div class="industries-tabs__head-item active">
+                    Mobility
+                  </div>
+                  <div class="industries-tabs__head-item ">
+                    Telecom
+                  </div>
+                  <div class="industries-tabs__head-item">
+                    Data and map production
+                  </div>
+                  <div class="industries-tabs__head-item">
+                    Logistics
+                  </div>
+                  <div class="industries-tabs__head-item">
+                    Energy
+                  </div>
+                  <div class="industries-tabs__head-item">
+                    Finance
+                  </div>
+                </div>
+              </div>
+
+              <div class="industries-tabs__body">
+
+                <div data-tab="Mobility" class="industries-tabs__body-item active">
+                  <div class="industries-grid">
+                    <div class="grid-item">
+                      <img src="image/home/industries/bmw.svg" alt="" class="">
+                    </div>
+                    <div class="grid-item">
+                      <img src="image/home/industries/gm.svg" alt="" class="">
+                    </div>
+                    <div class="grid-item">
+                      <img src="image/home/industries/placer-ai.svg" alt="" class="">
+                    </div>
+                    <div class="grid-item">
+                      <img src="image/home/industries/arity.svg" alt="" class="">
+                    </div>
+                  </div>
+                </div>
+
+                <div data-tab="Telecom" class="industries-tabs__body-item">
+                  <div class="industries-grid">
+                    <div class="grid-item"><img src="image/home/industries/comcast.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/at&t.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/telus.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/t-mobile.svg" alt="" class=""></div>
+                  </div>
+                </div>
+
+                <div data-tab="Data and map production" class="industries-tabs__body-item">
+                  <div class="industries-grid">
+                    <div class="grid-item"><img src="image/home/industries/space-x.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/maxar.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/mapbox.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/tom-tom.svg" alt="" class=""></div>
+                  </div>
+                </div>
+
+                <div data-tab="Logistics" class="industries-tabs__body-item">
+                  <div class="industries-grid">
+                    <div class="grid-item"><img src="image/home/industries/instacart.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/uber.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/UnitedAirlines.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/Boeing.svg" alt="" class=""></div>
+                  </div>
+                </div>
+
+                <div data-tab="Energy" class="industries-tabs__body-item">
+                  <div class="industries-grid">
+                    <div class="grid-item"><img src="image/home/industries/shell.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/DukeEnergy.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/PG&E.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/Southern_Company.svg" alt="" class=""></div>
+                  </div>
+                </div>
+
+                <div data-tab="Finance" class="industries-tabs__body-item">
+                  <div class="industries-grid">
+                    <div class="grid-item"><img src="image/home/industries/Allstate.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/CapitalOne.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/cigna.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/JPMorganChase.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="image/home/industries/StateFarm.svg" alt="" class=""></div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!--<div class="btn-group">
+              <a href="#" class="btn btn-red">Showcase your use case</a>
+              <a href="#" class="btn btn-light-red">
+                <span class="caption">See All Cases</span>
+                <span class="icon">
+                  <svg width="15" height="12" viewBox="0 0 15 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M1.25 6H13.75M13.75 6L9.0625 1M13.75 6L9.0625 11" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>
+
+                </span>
+              </a>
+            </div>-->
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Features -->
+      <section class="section-features">
+        <div class="container">
+          <h2 class="section-title">Apache Sedona at a glance</h2>
+          <div class="section-description editor">Core features that define Sedona’s geospatial performance</div>
+          <div class="features-grid">
+
+            <div class="feature-item">
+              <div class="feature-item__icon">
+                <img src="image/home/features/scalable.svg" alt="" class="">
+              </div>
+              <h3 class="feature-item__title">Scalable</h3>
+              <div class="feature-item__description editor">Works with small or large datasets with Spark, Flink, or locally.</div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-item__icon">
+                <img src="image/home/features/waves.svg" alt="" class="">
+              </div>
+              <h3 class="feature-item__title">Feature Complete</h3>
+              <div class="feature-item__description editor">300+ spatial functions, support for spatial file formats, and compatible with lakehouses and databases.</div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-item__icon">
+                <img src="image/home/features/picture.svg" alt="" class="">
+              </div>
+              <h3 class="feature-item__title">Raster and Vector Support</h3>
+              <div class="feature-item__description editor">Analyze both raster and vector datasets.</div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-item__icon">
+                <img src="image/home/features/cloud.svg" alt="" class="">
+              </div>
+              <h3 class="feature-item__title">Portable</h3>
+              <div class="feature-item__description editor">Easy to run locally, in the cloud, or with any data platform.</div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-item__icon">
+                <img src="image/home/features/rocket.svg" alt="" class="">
+              </div>
+              <h3 class="feature-item__title">Fast</h3>
+              <div class="feature-item__description editor">Optimized execution for single node or distribute cluster environments.</div>
+              <div class="feature-item__cta">
+                <a href="https://github.com/apache/sedona-spatialbench" class="btn-link">
+                  <span class="caption">See the benchmarks</span>
+                  <span class="icon">
+                        <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3.95831 9.5H15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M9.5 3.95825L15.0417 9.49992L9.5 15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+                      </span>
+                </a>
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-item__icon">
+                <img src="image/home/features/code.svg" alt="" class="">
+              </div>
+              <h3 class="feature-item__title">Familiar</h3>
+              <div class="feature-item__description editor">Supports many programming languages and runnable in the environment where you feel most comfortable.</div>
+            </div>
+
+
+          </div>
+        </div>
+      </section>
+
+      <!-- Section GIF -->
+      <!--
+      <section  hidden="hidden" class="section-img-wrap">
+        <div class="container">
+          <div class="img-wrap">
+            <img src="" alt="" class="">
+          </div>
+        </div>
+      </section>
+      -->
+
+      <!-- Section Deploy -->
+      <section class="section-deploy">
+        <div class="container">
+          <h2 class="section-title">Deploy Sedona where you need it</h2>
+          <div class="section-description editor">Choose the right runtime for your infrastructure, from local setups to distributed and cloud-native systems.</div>
+          <div class="info-grid">
+
+            <div class="info-item">
+              <div class="info-item__tag">
+                <img src="image/home/deploy/desktop.svg" alt="" class="">
+                <div class="caption">
+                  Local
+                </div>
+              </div>
+              <h3 class="info-item__title">SedonaDB</h3>
+              <div class="info-item__description editor">Standalone runtime for local processing and development.</div>
+              <div class="info-item__cta">
+                <a href="https://github.com/apache/sedona-db" class="btn-link">
+                  <span class="caption">SedonaDB</span>
+                  <span class="icon">
+                        <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3.95831 9.5H15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M9.5 3.95825L15.0417 9.49992L9.5 15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+                      </span>
+                </a>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-item__tag">
+                <img src="image/home/deploy/database.svg" alt="" class="">
+                <div class="caption">
+                  Batch
+                </div>
+              </div>
+              <h3 class="info-item__title">SedonaSpark</h3>
+              <div class="info-item__description editor">Distributed batch processing on Apache Spark clusters.</div>
+              <div class="info-item__cta">
+                <a href="setup/overview/" class="btn-link">
+                  <span class="caption">SedonaSpark</span>
+                  <span class="icon">
+                        <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3.95831 9.5H15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M9.5 3.95825L15.0417 9.49992L9.5 15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+                      </span>
+                </a>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-item__tag">
+                <img src="image/home/deploy/signal.svg" alt="" class="">
+                <div class="caption">
+                  Streaming
+                </div>
+              </div>
+              <h3 class="info-item__title">SedonaFlink</h3>
+              <div class="info-item__description editor">Real-time spatial analytics using Apache Flink.</div>
+              <div class="info-item__cta">
+                <a href="setup/flink/install-scala/" class="btn-link">
+                  <span class="caption">SedonaFlink</span>
+                  <span class="icon">
+                        <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3.95831 9.5H15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M9.5 3.95825L15.0417 9.49992L9.5 15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+                      </span>
+                </a>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-item__tag">
+                <img src="image/home/deploy/snowflake.svg" alt="" class="">
+                <div class="caption">
+                    Batch
+                </div>
+              </div>
+              <h3 class="info-item__title">SedonaSnow</h3>
+              <div class="info-item__description editor">
+                Native spatial support inside Snowflake environments.
+              </div>
+              <div class="info-item__cta">
+                <a href="setup/snowflake/install/" class="btn-link">
+                  <span class="caption">SedonaSnow</span>
+                  <span class="icon">
+                        <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3.95831 9.5H15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M9.5 3.95825L15.0417 9.49992L9.5 15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+                      </span>
+                </a>
+              </div>
+            </div>
+
+            <div class="info-item info-item--wide">
+              <div class="info-item__tag">
+                <img src="image/home/deploy/cloud.svg" alt="" class="">
+                <div class="caption">
+                  Cloud
+                </div>
+              </div>
+              <h3 class="info-item__title">Sedona in the Cloud</h3>
+              <div class="info-item__description editor">Integrated spatial support in your preferred cloud environment</div>
+              <div class="info-item__cta">
+                <a href="setup/overview/" class="btn-link">
+                  <span class="caption">Explore the ecosystem</span>
+                  <span class="icon">
+                        <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3.95831 9.5H15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M9.5 3.95825L15.0417 9.49992L9.5 15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+                      </span>
+                </a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Community -->
+      <section class="section-community">
+        <div class="container">
+          <h2 class="section-title">Join the community</h2>
+          <div class="section-description editor">Discover what our community has to say about their Apache Sedona experience.</div>
+          <div class="btn-group">
+            <a href="https://github.com/apache/sedona/discussions" class="btn btn-light-red">
+                  <span class="caption">
+                    GitHub Discussions
+                  </span>
+              <span class="icon icon-lg">
+    <svg width="17" height="18" viewBox="0 0 17 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M8.5 16.5C12.6421 16.5 16 13.1421 16 9C16 4.85786 12.6421 1.5 8.5 1.5C4.35786 1.5 1 4.85786 1 9C1 10.1998 1.28171 11.3337 1.7826 12.3394C2.16071 13.0985 1.63606 14.1228 1.43613 14.87C1.24222 15.5947 1.90526 16.2578 2.63001 16.0639C3.37722 15.8639 4.4015 15.3393 5.16065 15.7174C6.16627 16.2183 7.30024 16.5 8.5 16.5Z"
+      stroke="#CA463A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+
+                  </span>
+            </a>
+            <a href="https://discord.gg/9A3k5dEBsY" class="btn btn-light-red">
+              <span class="caption">Discord</span>
+              <span class="icon  icon-lg">
+                     <svg width="17" height="18" viewBox="0 0 17 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M8.5 16.5C12.6421 16.5 16 13.1421 16 9C16 4.85786 12.6421 1.5 8.5 1.5C4.35786 1.5 1 4.85786 1 9C1 10.1998 1.28171 11.3337 1.7826 12.3394C2.16071 13.0985 1.63606 14.1228 1.43613 14.87C1.24222 15.5947 1.90526 16.2578 2.63001 16.0639C3.37722 15.8639 4.4015 15.3393 5.16065 15.7174C6.16627 16.2183 7.30024 16.5 8.5 16.5Z"
+      stroke="#CA463A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+
+
+                    </span>
+            </a>
+          </div>
+
+          <!--
+          <div hidden="hidden" class="community-cards">
+
+            <div class="community-card">
+              <div class="community-card__author">
+                <div class="author-avatar">
+                  <img src="image/home/community/author.jpg" alt="" class="">
+                </div>
+                <div class="author-info">
+                  <div class="author-name">Sean Rose</div>
+                  <div class="author-tag">@seanrose</div>
+                </div>
+              </div>
+              <div class="community-card__text editor">
+                Really, really liking @apachesedona so far. It's just the right amount of simple/fast for.
+              </div>
+            </div>
+            <div class="community-card">
+              <div class="community-card__author">
+                <div class="author-avatar">
+                  <img src="image/home/community/author.jpg" alt="" class="">
+                </div>
+                <div class="author-info">
+                  <div class="author-name">Sean Rose</div>
+                  <div class="author-tag">@seanrose</div>
+                </div>
+              </div>
+              <div class="community-card__text editor">
+                Really, really liking @apachesedona so far. It's just the right amount of simple/fast for.
+              </div>
+            </div>
+            <div class="community-card">
+              <div class="community-card__author">
+                <div class="author-avatar">
+                  <img src="image/home/community/author.jpg" alt="" class="">
+                </div>
+                <div class="author-info">
+                  <div class="author-name">Sean Rose</div>
+                  <div class="author-tag">@seanrose</div>
+                </div>
+              </div>
+              <div class="community-card__text editor">
+                Really, really liking @apachesedona so far. It's just the right amount of simple/fast for.
+              </div>
+            </div>
+            <div class="community-card">
+              <div class="community-card__author">
+                <div class="author-avatar">
+                  <img src="image/home/community/author.jpg" alt="" class="">
+                </div>
+                <div class="author-info">
+                  <div class="author-name">Sean Rose</div>
+                  <div class="author-tag">@seanrose</div>
+                </div>
+              </div>
+              <div class="community-card__text editor">
+                Really, really liking @apachesedona so far. It's just the right amount of simple/fast for.
+              </div>
+            </div>
+            <div class="community-card">
+              <div class="community-card__author">
+                <div class="author-avatar">
+                  <img src="image/home/community/author.jpg" alt="" class="">
+                </div>
+                <div class="author-info">
+                  <div class="author-name">Sean Rose</div>
+                  <div class="author-tag">@seanrose</div>
+                </div>
+              </div>
+              <div class="community-card__text editor">
+                Really, really liking @apachesedona so far. It's just the right amount of simple/fast for.
+              </div>
+            </div>
+
+
+          </div>
+           -->
+
+        </div>
+      </section>
+
+      <!-- Section Events -->
+      <section class="section-events">
+        <div class="container">
+          <div class="content-box">
+            <div class="content-box__inner">
+              <h2 class="section-title">
+                Monthly community meetings and programming conferences
+              </h2>
+              <div class="btn-group">
+                <a href="community/contact/" class="btn btn-red">
+                     <span class="caption">
+                    Find Events
+                  </span>
+                </a>
+              </div>
+            </div>
+            <img src="image/home/events/corner-mountains.svg" alt="" class="corner-img">
+            <div class="events-line">
+              <div>Sedona <strong>Events</strong></div>
+              <div>Sedona <strong>Events</strong></div>
+              <div>Sedona <strong>Events</strong></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Get Started -->
+      <!-- <section class="section-get-started">
+        <div class="container">
+
+          <h2 class="section-title">
+            Start using SedonaDB in minutes
+          </h2>
+
+          <div class="section-description editor">
+            Install SedonaDB, or run Sedona on distributed systems when you need additional scale.
+          </div>
+
+          <div class="hljs-snippet" data-initial="powershell">
+            <div class="hljs-snippet__tabs" role="tablist" aria-label="Code tabs">
+              <button class="hljs-snippet__tab is-active" role="tab" aria-selected="true" data-lang="powershell">Command line</button>
+              <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="python">PySpark</button>
+              <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="java">Java</button>
+            </div>
+            <div class="hljs-snippet__body">
+
+              <button class="hljs-snippet__copy" aria-label="Copy code">
+                    <span class="btn-inner">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M13.125 11.8749C13.125 12.0406 13.0592 12.1996 12.9419 12.3168C12.8247 12.434 12.6658 12.4999 12.5 12.4999H7.5C7.33424 12.4999 7.17527 12.434 7.05806 12.3168C6.94085 12.1996 6.875 12.0406 6.875 11.8749C6.875 11.7091 6.94085 11.5502 7.05806 11.4329C7.17527 11.3157 7.33424 11.2499 7.5 11.2499H12.5C12.6658 11.2499 12.8247 11.3157 12.9419 11.4329C13.0592 11.5502 13.125 11.7091 13.125 11.8749ZM12.5 8.74989H7.5C7.33424 8.74989 7.17527 8.81573 7.05806 8.93295C6.94085 9.05016 6.875 9.20913 6.875 9.37489C6.875 9.54065 6.94085 9.69962 7.05806 9.81683C7.17527 9.93404 7.33424 9.99989 7.5 9.99989H12.5C12.6658 9.99989 12.8247 9.93404 12.9419 9.81683C13.0592 9.69962 13.125 9.54065 13.125 9.37489C13.125 9.20913 13.0592 9.05016 12.9419 8.93295C12.8247 8.81573 12.6658 8.74989 12.5 8.74989ZM16.875 3.74989V16.8749C16.875 17.2064 16.7433 17.5243 16.5089 17.7588C16.2745 17.9932 15.9565 18.1249 15.625 18.1249H4.375C4.04348 18.1249 3.72554 17.9932 3.49112 17.7588C3.2567 17.5243 3.125 17.2064 3.125 16.8749V3.74989C3.125 3.41837 3.2567 3.10042 3.49112 2.866C3.72554 2.63158 4.04348 2.49989 4.375 2.49989H7.20781C7.55899 2.1067 7.98924 1.79212 8.47041 1.57673C8.95158 1.36134 9.47282 1.25 10 1.25C10.5272 1.25 11.0484 1.36134 11.5296 1.57673C12.0108 1.79212 12.441 2.1067 12.7922 2.49989H15.625C15.9565 2.49989 16.2745 2.63158 16.5089 2.866C16.7433 3.10042 16.875 3.41837 16.875 3.74989ZM7.5 4.99989H12.5C12.5 4.33685 12.2366 3.70096 11.7678 3.23212C11.2989 2.76328 10.663 2.49989 10 2.49989C9.33696 2.49989 8.70107 2.76328 8.23223 3.23212C7.76339 3.70096 7.5 4.33685 7.5 4.99989ZM15.625 3.74989H13.5352C13.6773 4.15131 13.75 4.57403 13.75 4.99989V5.62489C13.75 5.79065 13.6842 5.94962 13.5669 6.06683C13.4497 6.18404 13.2908 6.24989 13.125 6.24989H6.875C6.70924 6.24989 6.55027 6.18404 6.43306 6.06683C6.31585 5.94962 6.25 5.79065 6.25 5.62489V4.99989C6.25001 4.57403 6.32267 4.15131 6.46484 3.74989H4.375V16.8749H15.625V3.74989Z"
+                        fill="white" />
+                    </svg>
+                      <span class="active-state">✅</span>
+                    </span>
+              </button>
+
+              <pre class="hljs-snippet__panel" data-lang="powershell"><code class="language-powershell">curl https://install.sedona.apache.org | sh    </code></pre>
+              <pre class="hljs-snippet__panel" data-lang="python" hidden><code class="language-python">print(&quot;Hello from PySpark!&quot;)
+    # from pyspark.sql import SparkSession
+    # spark = SparkSession.builder.getOrCreate()</code></pre>
+              <pre class="hljs-snippet__panel" data-lang="java" hidden><code class="language-java">public class Main {
+      public static void main(String[] args) {
+        System.out.println(&quot;Hello Java&quot;);
+      }
+    }</code></pre>
+            </div>
+          </div>
+
+          <div class="bth-group">
+            <a href="#" class="btn btn-red">
+                     <span class="caption">
+                   Install SedonaDB
+                  </span>
+            </a>
+          </div>
+
+        </div>
+      </section> -->
+
+    </div>
+    {% else %}
     {{ super() }}
-  {% endif %}
+    {% endif %}
 {% endblock %}

@@ -9,29 +9,29 @@ sedona.spark.maps.SedonaKepler module
 
 .. automodule:: sedona.spark.maps.SedonaKepler
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 sedona.spark.maps.SedonaMapUtils module
 ---------------------------------------
 
 .. automodule:: sedona.spark.maps.SedonaMapUtils
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 sedona.spark.maps.SedonaPyDeck module
 -------------------------------------
 
 .. automodule:: sedona.spark.maps.SedonaPyDeck
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: sedona.spark.maps
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

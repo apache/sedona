@@ -327,7 +327,7 @@ FROM pointdf, pointdf2
 WHERE SEDONA.ST_Distance(pointdf.pointshape,pointdf2.pointshape) <= sqrt(0.5)
 ```
 
-The l2 distance between two polygons that are not disjoint is 0, so the following returns the single polygon pair  
+The l2 distance between two polygons that are not disjoint is 0, so the following returns the single polygon pair
 
 ```sql
 SELECT *
@@ -494,7 +494,7 @@ lefts_s2 AS (
 rights_s2 AS (
     SELECT * FROM rights, TABLE(FLATTEN(SEDONA.ST_S2CellIDs(ST_GeogFromText(rights.wkt), 10)))
 )
--- merge on s2 index (int) and group by to retrieve the original polygons rather the the s2 cells
+-- merge on s2 index (int) and group by to retrieve the original polygons rather than the s2 cells
 -- add the spatial predicate to be exact and omit if speed is more important
 -- expect all queries except the 5th to match
 -- expected result: 1 (touches) + 1 (contained) + 2 (intersect both) + 2 (contains both) = 6 rows total

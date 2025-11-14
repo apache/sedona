@@ -24,7 +24,7 @@ import org.apache.spark.sql.catalyst.plans.logical.{Filter, GlobalLimit, LocalLi
 import org.apache.spark.sql.connector.catalog.CatalogV2Implicits.parseColumnPath
 import org.apache.spark.sql.execution.datasource.stac.TemporalFilter
 import org.apache.spark.sql.execution.datasource.stac.TemporalFilter.{AndFilter => TemporalAndFilter}
-import org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter.{AndFilter => SpatialAndFilter}
+import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.{AndFilter => SpatialAndFilter}
 import org.apache.spark.sql.execution.datasources.v2.DataSourceV2ScanRelation
 import org.apache.spark.sql.execution.datasources.{DataSourceStrategy, PushableColumn, PushableColumnBase}
 import org.apache.spark.sql.sedona_sql.io.stac.StacScan

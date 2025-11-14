@@ -1,0 +1,63 @@
+{
+  "id": "copernicus-dem",
+  "type": "Collection",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/raster/v1.1.0/schema.json"
+  ],
+  "stac_version": "1.0.0",
+  "description": "Mock Copernicus DEM collection for testing",
+  "title": "Mock Copernicus Digital Elevation Model",
+  "keywords": [
+    "copernicus",
+    "dem",
+    "elevation"
+  ],
+  "providers": [
+    {
+      "name": "Mock Earth Data Hub",
+      "description": "Mock Copernicus Earth Data Hub",
+      "roles": [
+        "producer"
+      ],
+      "url": "http://mock-earthdatahub.example.com"
+    }
+  ],
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -180.0,
+          -90.0,
+          180.0,
+          90.0
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2021-01-01T00:00:00Z",
+          "2021-12-31T23:59:59Z"
+        ]
+      ]
+    }
+  },
+  "license": "proprietary",
+  "links": [
+    {
+      "rel": "root",
+      "href": "collection.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "self",
+      "href": "collection.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "item",
+      "href": "mock-dem-item.json",
+      "type": "application/json"
+    }
+  ]
+}

@@ -14,5 +14,5 @@ Module contents
 
 .. automodule:: sedona.stats.clustering
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

@@ -59,11 +59,14 @@ from sedona.spark.sql.types import GeometryType, GeographyType, RasterType
 from sedona.spark.stac import Client
 from sedona.spark.stac.collection_client import CollectionClient
 from sedona.spark.stats.clustering.dbscan import dbscan
-from sedona.spark.stats.hotspot_detection.getis_ord import g_local
-from sedona.spark.stats.weighting import (
-    add_distance_band_column,
-    add_binary_distance_band_column,
+from sedona.spark.stats.outlier_detection.local_outlier_factor import (
+    local_outlier_factor,
 )
+from sedona.spark.stats.autocorrelation.moran import MoranResult, Moran
+from sedona.spark.stats.hotspot_detection.getis_ord import g_local
+from sedona.spark.stats.weighting import add_distance_band_column
+from sedona.spark.stats.weighting import add_binary_distance_band_column
+from sedona.spark.stats.weighting import add_weighted_distance_band_column
 from sedona.spark.utils import KryoSerializer, SedonaKryoRegistrator
 from sedona.spark.utils.adapter import Adapter
 from sedona.spark.utils.spatial_rdd_parser import GeoData

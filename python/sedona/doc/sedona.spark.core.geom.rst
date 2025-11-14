@@ -18,29 +18,29 @@ sedona.spark.core.geom.circle module
 
 .. automodule:: sedona.spark.core.geom.circle
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 sedona.spark.core.geom.envelope module
 --------------------------------------
 
 .. automodule:: sedona.spark.core.geom.envelope
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 sedona.spark.core.geom.geography module
 ---------------------------------------
 
 .. automodule:: sedona.spark.core.geom.geography
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: sedona.spark.core.geom
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

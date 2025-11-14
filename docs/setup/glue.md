@@ -25,6 +25,9 @@ In the tutorial, we use
 Sedona {{ sedona.current_version }} and [Glue 4.0](https://docs.aws.amazon.com/glue/latest/dg/release-notes.html) which runs on Spark 3.3.0, Java 8, Scala 2.12,
 and Python 3.10. We recommend Sedona-1.3.1-incubating and above for Glue.
 
+!!!warning
+    **Important:** Since Sedona 1.8.0, Java 8 support is dropped and Spark 3.3 support is dropped. For Sedona 1.8.0+, you need to use Glue 5.0+ which supports Java 11 and Spark 3.4+.
+
 ## Gather Maven Links
 
 You will need to point your glue job to the Sedona and Geotools jars. We recommend using the jars available from maven. The links below are those intended for Glue 4.0
@@ -50,7 +53,7 @@ package. How you do this varies slightly between the notebook and the script job
 Add the following cell magics before starting your sparkContext or glueContext. The first points to the jars,
 and the second installs the Sedona Python package directly from pip.
 
-```python
+```text
 # Sedona Config
 %extra_jars https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.3_2.12/{{ sedona.current_version }}/sedona-spark-shaded-3.3_2.12-{{ sedona.current_version }}.jar, https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/{{ sedona.current_geotools }}/geotools-wrapper-{{ sedona.current_geotools }}.jar
 %additional_python_modules apache-sedona=={{ sedona.current_version }}
@@ -58,7 +61,7 @@ and the second installs the Sedona Python package directly from pip.
 
 If you are using the example notebook from glue, the first cell should now look like this:
 
-```python
+```text
 %idle_timeout 2880
 %glue_version 4.0
 %worker_type G.1X

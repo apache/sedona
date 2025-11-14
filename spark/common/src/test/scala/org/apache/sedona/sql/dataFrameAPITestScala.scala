@@ -19,16 +19,16 @@
 package org.apache.sedona.sql
 
 import org.apache.commons.codec.binary.Hex
-import org.apache.sedona.common.geometryObjects.Geography
+import org.apache.sedona.common.S2Geography.Geography
 import org.apache.spark.sql.Row
-import org.apache.spark.sql.functions.{col, element_at, expr, lit, radians}
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.sedona_sql.expressions.InferredExpressionException
 import org.apache.spark.sql.sedona_sql.expressions.st_aggregates._
 import org.apache.spark.sql.sedona_sql.expressions.st_constructors._
 import org.apache.spark.sql.sedona_sql.expressions.st_functions._
 import org.apache.spark.sql.sedona_sql.expressions.st_predicates._
 import org.junit.Assert.{assertEquals, assertFalse, assertTrue}
-import org.locationtech.jts.geom.{Geometry, Point, Polygon}
+import org.locationtech.jts.geom.{Geometry, Polygon, PrecisionModel}
 import org.locationtech.jts.io.WKTWriter
 import org.locationtech.jts.operation.buffer.BufferParameters
 
@@ -226,7 +226,11 @@ class dataFrameAPITestScala extends TestBaseScala {
 
     it("passed st_geogfromwkt") {
       val df = sparkSession.sql("SELECT 'POINT(0.0 1.0)' AS wkt").select(ST_GeogFromWKT("wkt"))
-      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geography].toString
+      val actualResult = df
+        .take(1)(0)
+        .get(0)
+        .asInstanceOf[Geography]
+        .toString(new PrecisionModel(PrecisionModel.FIXED))
       val expectedResult = "POINT (0 1)"
       assert(actualResult == expectedResult)
     }
@@ -235,8 +239,8 @@ class dataFrameAPITestScala extends TestBaseScala {
       val df =
         sparkSession.sql("SELECT 'POINT(0.0 1.0)' AS wkt").select(ST_GeogFromWKT("wkt", 4326))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geography]
-      assert(actualResult.toString == "POINT (0 1)")
-      assert(actualResult.getGeometry.getSRID == 4326)
+      assert(actualResult.toString(new PrecisionModel(PrecisionModel.FIXED)) == "POINT (0 1)")
+      assert(actualResult.getSRID == 4326)
     }
 
     it("passed st_geomfromewkt") {
@@ -1352,6 +1356,27 @@ class dataFrameAPITestScala extends TestBaseScala {
       val expectedResult = Array[String]("LINESTRING (0 0, 2.5 0)", "LINESTRING (2.5 0, 5 0)")
       assert(actualResults(0) == expectedResult(0))
       assert(actualResults(1) == expectedResult(1))
+    }
+
+    it("Passed ST_Segmentize") {
+      var baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING EMPTY') AS geom")
+      var df = baseDf.select(ST_Segmentize("geom", 0.5))
+      var actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      var expectedResult = "LINESTRING EMPTY"
+      assert(actualResult == expectedResult)
+
+      baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('MULTILINESTRING((0 0, 0 1, 0 9),(1 10, 1 18))') AS geom")
+      df = baseDf.select(ST_Segmentize("geom", 5))
+      actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      expectedResult = "MULTILINESTRING ((0 0, 0 1, 0 5, 0 9), (1 10, 1 14, 1 18))"
+      assert(actualResult == expectedResult)
+
+      baseDf = sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON((0 0, 0 8, 30 0, 0 0))') AS geom")
+      df = baseDf.select(ST_Segmentize("geom", 10))
+      actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      expectedResult = "POLYGON ((0 0, 0 8, 7.5 6, 15 4, 22.5 2, 30 0, 20 0, 10 0, 0 0))"
+      assert(actualResult == expectedResult)
     }
 
     it("Passed ST_NumGeometries") {
@@ -2509,6 +2534,47 @@ class dataFrameAPITestScala extends TestBaseScala {
           val expected = row.getAs[Double]("expectedResult")
           assert(actual == expected, s"Expected $expected but got $actual")
         }
+    }
+
+    it("Passed ST_StraightSkeleton") {
+      val baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 0.5 0.5, 1 1, 0 1, 0 0))') as poly")
+      val result = baseDf.select(ST_StraightSkeleton(col("poly"))).first().get(0)
+      assert(result != null)
+      val skeleton = result.asInstanceOf[Geometry]
+      assert(skeleton.getGeometryType == "MultiLineString")
+      assert(skeleton.getNumGeometries > 0)
+    }
+
+    it("Passed ST_StraightSkeleton with maxVertices") {
+      val baseDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 0.5 0.5, 1 1, 0 1, 0 0))') as poly")
+      val result = baseDf.select(ST_StraightSkeleton(col("poly"), lit(100))).first().get(0)
+      assert(result != null)
+      val skeleton = result.asInstanceOf[Geometry]
+      assert(skeleton.getGeometryType == "MultiLineString")
+    }
+
+    it("Passed ST_ApproximateMedialAxis") {
+      val baseDf =
+        sparkSession.sql(
+          "SELECT ST_GeomFromWKT('POLYGON ((0 0, 100 0, 100 40, 40 40, 40 100, 0 100, 0 0))') as poly")
+      val result = baseDf.select(ST_ApproximateMedialAxis(col("poly"))).first().get(0)
+      assert(result != null)
+      val medialAxis = result.asInstanceOf[Geometry]
+      assert(medialAxis.getGeometryType == "MultiLineString")
+      // L-shaped polygon should have interior edges
+      assert(medialAxis.getNumGeometries > 0)
+    }
+
+    it("Passed ST_ApproximateMedialAxis with maxVertices") {
+      val baseDf =
+        sparkSession.sql(
+          "SELECT ST_GeomFromWKT('POLYGON ((0 0, 100 0, 100 40, 40 40, 40 100, 0 100, 0 0))') as poly")
+      val result = baseDf.select(ST_ApproximateMedialAxis(col("poly"), lit(100))).first().get(0)
+      assert(result != null)
+      val medialAxis = result.asInstanceOf[Geometry]
+      assert(medialAxis.getGeometryType == "MultiLineString")
     }
   }
 }

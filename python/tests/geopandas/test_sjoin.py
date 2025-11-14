@@ -18,10 +18,12 @@ import shutil
 import tempfile
 import pytest
 import shapely
+import pandas as pd
+import geopandas as gpd
 
 from shapely.geometry import Polygon, Point, LineString
-from sedona.geopandas import GeoSeries, GeoDataFrame, sjoin
-from tests.test_base import TestBase
+from sedona.spark.geopandas import GeoDataFrame, sjoin
+from tests.geopandas.test_geopandas_base import TestGeopandasBase
 from packaging.version import parse as parse_version
 
 
@@ -29,7 +31,7 @@ from packaging.version import parse as parse_version
     parse_version(shapely.__version__) < parse_version("2.0.0"),
     reason=f"Tests require shapely>=2.0.0, but found v{shapely.__version__}",
 )
-class TestSpatialJoin(TestBase):
+class TestSpatialJoin(TestGeopandasBase):
     def setup_method(self):
         self.tempdir = tempfile.mkdtemp()
 
@@ -40,12 +42,6 @@ class TestSpatialJoin(TestBase):
         self.point1 = Point(0.5, 0.5)
         self.point2 = Point(1.5, 1.5)
         self.line1 = LineString([(0, 0), (1, 1)])
-
-        # GeoSeries for testing
-        self.g1 = GeoSeries([self.t1, self.t2])
-        self.g2 = GeoSeries([self.sq, self.t1])
-        self.g3 = GeoSeries([self.t1, self.t2], crs="epsg:4326")
-        self.g4 = GeoSeries([self.t2, self.t1])
 
         # GeoDataFrames for testing
         self.gdf1 = GeoDataFrame(
@@ -78,24 +74,6 @@ class TestSpatialJoin(TestBase):
     def teardown_method(self):
         shutil.rmtree(self.tempdir)
 
-    def test_sjoin_method1(self):
-        """Test basic sjoin functionality with GeoSeries"""
-        left = self.g1
-        right = self.g2
-        joined = sjoin(left, right)
-        assert joined is not None
-        assert type(joined) is GeoSeries
-        assert joined.count() == 4
-
-    def test_sjoin_method2(self):
-        """Test GeoSeries.sjoin method"""
-        left = self.g1
-        right = self.g2
-        joined = left.sjoin(right)
-        assert joined is not None
-        assert type(joined) is GeoSeries
-        assert joined.count() == 4
-
     def test_sjoin_geodataframe_basic(self):
         """Test basic sjoin with GeoDataFrame"""
         joined = sjoin(self.gdf1, self.gdf2)
@@ -110,9 +88,25 @@ class TestSpatialJoin(TestBase):
     def test_sjoin_geodataframe_method(self):
         """Test GeoDataFrame.sjoin method"""
         joined = self.gdf1.sjoin(self.gdf2)
-        assert joined is not None
-        assert type(joined) is GeoDataFrame
-        assert "geometry" in joined.columns
+        expected = gpd.GeoDataFrame(
+            {
+                "geometry": [
+                    Polygon([(0, 0), (1, 0), (1, 1), (0, 0)]),
+                    Polygon([(0, 0), (1, 0), (1, 1), (0, 0)]),
+                    Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+                    Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+                ],
+                "id_left": [1, 1, 2, 2],
+                "name": ["poly1", "poly1", "poly2", "poly2"],
+                "index_right": [0, 1, 0, 1],
+                "id_right": [3, 4, 3, 4],
+                "category": ["square", "triangle", "square", "triangle"],
+            },
+            index=pd.Index([0, 0, 1, 1]),
+        )
+        # Sedona's join does not preserve key order, so we sort by index for testing exact results
+        joined.sort_index(inplace=True)
+        self.check_sgpd_df_equals_gpd_df(joined, expected)
 
     def test_sjoin_predicates(self):
         """Test different spatial predicates"""
@@ -123,13 +117,18 @@ class TestSpatialJoin(TestBase):
             "touches",
             "crosses",
             "overlaps",
+            "covers",
+            "covered_by",
+            # "contains_properly",  # not supported by Sedona yet
         ]
 
         for predicate in predicates:
             try:
                 joined = sjoin(self.gdf1, self.gdf2, predicate=predicate)
-                assert joined is not None
-                assert type(joined) is GeoDataFrame
+                gpd_joined = self.gdf1.to_geopandas().sjoin(
+                    self.gdf2.to_geopandas(), predicate=predicate
+                )
+                self.check_sgpd_df_equals_gpd_df(joined, gpd_joined)
             except Exception as e:
                 # Some predicates might not return results for our test data
                 # but the function should not raise errors for valid predicates
@@ -148,17 +147,26 @@ class TestSpatialJoin(TestBase):
 
     def test_sjoin_column_suffixes(self):
         """Test column suffix handling"""
-        joined = sjoin(self.gdf1, self.gdf2, lsuffix="_left", rsuffix="_right")
-        assert joined is not None
-        assert type(joined) is GeoDataFrame
+        joined = sjoin(self.gdf1, self.gdf2, lsuffix="L", rsuffix="R")
+        expected = ["geometry", "id_L", "name", "index_R", "id_R", "category"]
+        assert list(joined.columns) == expected
 
-        # Check that suffixes are applied to overlapping columns
-        columns = joined.columns
-        if "id_left" in columns and "id_right" in columns:
-            # Both datasets have 'id' column, so suffixes should be applied
-            assert "id_left" in columns
-            assert "id_right" in columns
-            assert "id" not in columns  # Original column should not exist
+        # Specify only one side
+        joined = sjoin(self.gdf1, self.gdf2, lsuffix="L")
+        expected = ["geometry", "id_L", "name", "index_right", "id_right", "category"]
+        assert list(joined.columns) == expected
+
+        # Use mixed suffixes
+        joined = sjoin(self.gdf1, self.gdf2, lsuffix="LEFT", rsuffix="random")
+        expected = [
+            "geometry",
+            "id_LEFT",
+            "name",
+            "index_random",
+            "id_random",
+            "category",
+        ]
+        assert list(joined.columns) == expected
 
     def test_sjoin_dwithin_distance(self):
         """Test dwithin predicate with distance parameter"""

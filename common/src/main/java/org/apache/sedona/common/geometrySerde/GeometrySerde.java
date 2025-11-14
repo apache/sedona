@@ -23,9 +23,11 @@ import com.esotericsoftware.kryo.Registration;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import java.io.IOException;
 import java.io.Serializable;
+import org.apache.sedona.common.S2Geography.Geography;
+import org.apache.sedona.common.S2Geography.GeographySerializer;
 import org.apache.sedona.common.geometryObjects.Circle;
-import org.apache.sedona.common.geometryObjects.Geography;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -66,7 +68,11 @@ public class GeometrySerde extends Serializer implements Serializable {
       out.writeDouble(envelope.getMaxY());
     } else if (object instanceof Geography) {
       writeType(out, Type.GEOGRAPHY);
-      writeGeometry(kryo, out, ((Geography) object).getGeometry());
+      try {
+        writeGeography(out, (Geography) object);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
     } else {
       throw new UnsupportedOperationException(
           "Cannot serialize object of type " + object.getClass().getName());
@@ -82,6 +88,12 @@ public class GeometrySerde extends Serializer implements Serializable {
     out.writeInt(data.length);
     out.write(data, 0, data.length);
     writeUserData(kryo, out, geometry);
+  }
+
+  private void writeGeography(Output out, Geography geography) throws IOException {
+    byte[] data = GeographySerializer.serialize(geography);
+    out.writeInt(data.length);
+    out.write(data, 0, data.length);
   }
 
   private void writeUserData(Kryo kryo, Output out, Geometry geometry) {
@@ -124,7 +136,11 @@ public class GeometrySerde extends Serializer implements Serializable {
         }
       case GEOGRAPHY:
         {
-          return new Geography(readGeometry(kryo, input));
+          try {
+            return readGeography(input);
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          }
         }
       default:
         throw new UnsupportedOperationException(
@@ -148,6 +164,14 @@ public class GeometrySerde extends Serializer implements Serializable {
     Geometry geometry = GeometrySerializer.deserialize(bytes);
     geometry.setUserData(readUserData(kryo, input));
     return geometry;
+  }
+
+  private Geography readGeography(Input input) throws IOException {
+    int length = input.readInt();
+    byte[] bytes = new byte[length];
+    input.readBytes(bytes);
+    Geography geography = GeographySerializer.deserialize(bytes);
+    return geography;
   }
 
   private enum Type {

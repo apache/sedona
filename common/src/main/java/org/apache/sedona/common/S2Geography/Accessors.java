@@ -24,9 +24,9 @@ public class Accessors {
 
   public Accessors() {}
 
-  public static boolean S2_isEmpty(S2Geography s2Geography) {
-    for (int i = 0; i < s2Geography.numShapes(); i++) {
-      S2Shape shape = s2Geography.shape(i);
+  public static boolean S2_isEmpty(Geography geography) {
+    for (int i = 0; i < geography.numShapes(); i++) {
+      S2Shape shape = geography.shape(i);
       if (!shape.isEmpty()) return false;
     }
     return true;
@@ -47,7 +47,7 @@ public class Accessors {
    * Returns true if `geog` is a “collection” (i.e. multi‐point, multi‐linestring, or multi‐polygon)
    * rather than a single simple feature.
    */
-  public boolean S2_isCollection(S2Geography geog) {
+  public boolean S2_isCollection(Geography geog) {
     int dim = S2_dimension(geog);
     if (dim == -1) {
       return false;
@@ -79,21 +79,21 @@ public class Accessors {
     }
   }
 
-  public static int S2_dimension(S2Geography s2Geography) {
-    int dimension = s2Geography.dimension();
+  public static int S2_dimension(Geography geography) {
+    int dimension = geography.dimension();
     if (dimension != -1) return dimension;
 
-    for (int i = 0; i < s2Geography.numShapes(); i++) {
-      S2Shape shape = s2Geography.shape(i);
+    for (int i = 0; i < geography.numShapes(); i++) {
+      S2Shape shape = geography.shape(i);
       if (shape.dimension() > dimension) dimension = shape.dimension();
     }
     return dimension;
   }
 
-  public static int S2_numPoints(S2Geography s2Geography) {
+  public static int S2_numPoints(Geography geography) {
     int numPoints = 0;
-    for (int i = 0; i < s2Geography.numShapes(); i++) {
-      S2Shape shape = s2Geography.shape(i);
+    for (int i = 0; i < geography.numShapes(); i++) {
+      S2Shape shape = geography.shape(i);
       switch (shape.dimension()) {
         case 0:
         case 2:
@@ -107,7 +107,7 @@ public class Accessors {
     return numPoints;
   }
 
-  double S2_area(S2Geography geog) {
+  double S2_area(Geography geog) {
     if (S2_dimension(geog) != 2) return 0;
     switch (geog.kind) {
       case POLYGON:
@@ -121,7 +121,7 @@ public class Accessors {
 
   public double S2_area(GeographyCollection geographyCollection) {
     double area = 0;
-    for (S2Geography geography : geographyCollection.features) {
+    for (Geography geography : geographyCollection.features) {
       area += S2_area(geography);
     }
     return area;
@@ -131,7 +131,7 @@ public class Accessors {
     return polygonGeography.polygon.getArea();
   }
 
-  public double s2_length(S2Geography geog) {
+  public double s2_length(Geography geog) {
     double length = 0.0;
     if (S2_dimension(geog) == 1) {
       for (int i = 0, n = geog.numShapes(); i < n; ++i) {
@@ -148,7 +148,7 @@ public class Accessors {
     return length;
   }
 
-  public double s2_perimeter(S2Geography geog) {
+  public double s2_perimeter(Geography geog) {
     double perimeter = 0.0;
     if (S2_dimension(geog) == 2) {
       for (int i = 0, n = geog.numShapes(); i < n; ++i) {
@@ -165,7 +165,7 @@ public class Accessors {
     return perimeter;
   }
 
-  public static double s2_X(S2Geography geog) {
+  public static double s2_X(Geography geog) {
     double out = Double.NaN;
     for (int i = 0, n = geog.numShapes(); i < n; ++i) {
       S2Shape shape = geog.shape(i);
@@ -187,7 +187,7 @@ public class Accessors {
    * Extract the Y coordinate (latitude in degrees) if this is exactly one point; otherwise returns
    * NaN.
    */
-  public static double s2_Y(S2Geography geog) {
+  public static double s2_Y(Geography geog) {
     double out = Double.NaN;
     for (int i = 0, n = geog.numShapes(); i < n; ++i) {
       S2Shape shape = geog.shape(i);
@@ -224,7 +224,7 @@ public class Accessors {
 
   /** Runs S2 validation on each member of a GeographyCollection. */
   public static boolean s2FindValidationError(GeographyCollection geog, S2Error error) {
-    for (S2Geography feature : geog.getFeatures()) {
+    for (Geography feature : geog.getFeatures()) {
       if (s2FindValidationError(feature, error)) {
         return true;
       }
@@ -237,7 +237,7 @@ public class Accessors {
    * C++ logic: 0-dim → always OK 1-dim → polyline path 2-dim → polygon path else → treat as
    * collection of polygons
    */
-  public static boolean s2FindValidationError(S2Geography geog, S2Error error) {
+  public static boolean s2FindValidationError(Geography geog, S2Error error) {
     int dim = geog.dimension();
     switch (dim) {
       case 0:

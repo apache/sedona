@@ -17,8 +17,6 @@
 
 PYTHON := $(shell command -v python || command -v python3 || echo python)
 PIP := $(PYTHON) -m pip
-MKDOCS := mkdocs
-MIKE := mike
 
 .PHONY: check checkinstall checkupdate install docsinstall docsbuild clean test
 
@@ -41,24 +39,18 @@ checkupdate: checkinstall
 	@echo "Updating pre-commit hooks..."
 	pre-commit autoupdate
 
-install:
-	@echo "Installing dependencies..."
-	@if [ -f requirements-dev.txt ]; then \
-		$(PIP) install -r requirements-dev.txt; \
-	else \
-		echo "Error: requirements-dev.txt not found."; \
-		exit 1; \
-	fi
+install: checkinstall
 
 docsinstall:
 	@echo "Installing documentation dependencies..."
-	$(PIP) install -r requirements-docs.txt
+	@command -v uv >/dev/null 2>&1 || (echo 'uv not found, install via: curl -LsSf https://astral.sh/uv/install.sh | sh' && exit 1)
+	uv sync --group docs
 
 docsbuild: docsinstall
 	@echo "Building documentation..."
-	$(MKDOCS) build
-	$(MIKE) deploy --update-aliases latest-snapshot -b website -p
-	$(MIKE) serve
+	uv run mkdocs build
+	uv run mike deploy --update-aliases latest-snapshot -b website -p
+	uv run mike serve
 
 clean:
 	@echo "Cleaning up generated files... (TODO)"

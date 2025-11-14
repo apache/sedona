@@ -18,12 +18,13 @@
 from sedona.spark.stats.weighting import (
     add_distance_band_column,
     add_binary_distance_band_column,
+    add_weighted_distance_band_column,
 )
 
 import warnings
 
 warnings.warn(
-    "The 'sedona.stats.weighting' module is deprecated and will be removed in future versions. Please use 'sedona.spark.stats' instead.",
+    "Importing from 'sedona.stats.weighting' is deprecated. Please use 'sedona.spark.stats.weighting' instead.",
     DeprecationWarning,
     stacklevel=2,
 )
@@ -31,4 +32,5 @@ warnings.warn(
 __all__ = [
     "add_distance_band_column",
     "add_binary_distance_band_column",
+    "add_weighted_distance_band_column",
 ]

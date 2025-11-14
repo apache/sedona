@@ -138,25 +138,47 @@ If you want to test changes with different Spark/Scala versions, you can select 
 
 We recommend [PyCharm](https://www.jetbrains.com/pycharm/).
 
-### Run Python tests
+### Run tests
 
 #### Run all Python tests
 
 To run all Python test cases, follow steps mentioned [here](../setup/compile.md#run-python-test).
 
-#### Run all Python tests in a single test file
+Once the environment is set up, you can run all tests using the following command in python directory:
 
-To run a particular Python test file, specify the path of the `.py` file to `pipenv`.
-
-For example, to run all tests in `test_function.py` located in `python/tests/sql/`, use: `pipenv run pytest tests/sql/test_function.py`.
+```bash
+cd python
+uv run pytest -v tests
+```
 
 #### Run a single test
 
+To run a particular Python test file, specify the path of the `.py`.
+
+For example, to run all tests in `test_function.py` located in `python/tests/sql/`, use:
+
+```bash
+cd python
+uv run pytest -v tests/sql/test_function.py
+```
+
 To run a particular test in a particular `.py` test file, specify `file_name::class_name::test_name` to the `pytest` command.
 
-For example, to run the test on `ST_Contains` function located in `sql/test_predicate.py`, use: `pipenv run pytest tests/sql/test_predicate.py::TestPredicate::test_st_contains`
+For example, to run the test on `ST_Contains` function located in `sql/test_predicate.py`, use:
 
-### Import the project
+```bash
+cd python
+uv run pytest -v tests/sql/test_predicate.py::TestPredicate::test_st_contains
+```
+
+### Build packages
+
+The following command will build the sdist and whl packages in the `dist` folder.
+
+```bash
+cd python
+uv build
+```
 
 ## R developers
 

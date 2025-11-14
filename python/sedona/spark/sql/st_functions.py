@@ -296,6 +296,46 @@ def ST_Azimuth(point_a: ColumnOrName, point_b: ColumnOrName) -> Column:
 
 
 @validate_argument_types
+def ST_ApproximateMedialAxis(
+    geometry: ColumnOrName, max_vertices: Optional[Union[ColumnOrName, int]] = None
+) -> Column:
+    """Compute an approximate medial axis of an areal geometry by computing the straight skeleton
+    and filtering to keep only interior edges. The medial axis provides a centerline representation
+    of polygons that is useful for various spatial analysis tasks.
+
+    :param geometry: Polygon or MultiPolygon geometry column to compute the medial axis for.
+    :type geometry: ColumnOrName
+    :param max_vertices: Optional maximum number of vertices to keep in the input geometry before computing.
+        If the geometry has more vertices, it will be simplified. This improves performance for complex geometries.
+    :type max_vertices: Optional[Union[ColumnOrName, int]]
+    :return: MultiLineString representing the approximate medial axis as a geometry column.
+    :rtype: Column
+    """
+    if max_vertices is not None:
+        return _call_st_function("ST_ApproximateMedialAxis", (geometry, max_vertices))
+    return _call_st_function("ST_ApproximateMedialAxis", geometry)
+
+
+@validate_argument_types
+def barrier(expression: ColumnOrName, *args) -> Column:
+    """Prevent filter pushdown and control predicate evaluation order in complex spatial joins.
+    This function creates an optimization barrier by evaluating boolean expressions at runtime.
+
+    :param expression: Boolean expression string to evaluate
+    :type expression: ColumnOrName
+    :param args: Variable name and value pairs (var_name1, var_value1, var_name2, var_value2, ...)
+    :return: Boolean result of the expression evaluation
+    :rtype: Column
+
+    Example:
+        df.where(barrier('rating > 4.0 AND stars >= 4',
+                        'rating', col('r.rating'),
+                        'stars', col('h.stars')))
+    """
+    return _call_st_function("barrier", (expression,) + args)
+
+
+@validate_argument_types
 def ST_BestSRID(geometry: ColumnOrName) -> Column:
     """Estimates the best SRID (EPSG code) of the geometry.
 
@@ -335,7 +375,7 @@ def ST_Boundary(geometry: ColumnOrName) -> Column:
 def ST_Buffer(
     geometry: ColumnOrName,
     buffer: ColumnOrNameOrNumber,
-    useSpheroid: Optional[Union[ColumnOrName, bool]] = None,
+    useSpheroid: Optional[Union[ColumnOrName, bool]] = False,
     parameters: Optional[Union[ColumnOrName, str]] = None,
 ) -> Column:
     """Calculate a geometry that represents all points whose distance from the
@@ -1764,6 +1804,27 @@ def ST_StartPoint(line_string: ColumnOrName) -> Column:
 
 
 @validate_argument_types
+def ST_StraightSkeleton(
+    geometry: ColumnOrName, max_vertices: Optional[Union[ColumnOrName, int]] = None
+) -> Column:
+    """Compute the straight skeleton of an areal geometry. The straight skeleton is a method
+    of representing a polygon by a topological skeleton formed by a continuous shrinking process
+    where each edge moves inward in parallel at a uniform speed.
+
+    :param geometry: Polygon or MultiPolygon geometry column to compute the straight skeleton for.
+    :type geometry: ColumnOrName
+    :param max_vertices: Optional maximum number of vertices to keep in the input geometry before computing.
+        If the geometry has more vertices, it will be simplified. This improves performance for complex geometries.
+    :type max_vertices: Optional[Union[ColumnOrName, int]]
+    :return: MultiLineString representing the straight skeleton as a geometry column.
+    :rtype: Column
+    """
+    if max_vertices is not None:
+        return _call_st_function("ST_StraightSkeleton", (geometry, max_vertices))
+    return _call_st_function("ST_StraightSkeleton", geometry)
+
+
+@validate_argument_types
 def ST_SubDivide(
     geometry: ColumnOrName, max_vertices: Union[ColumnOrName, int]
 ) -> Column:
@@ -1793,6 +1854,19 @@ def ST_SubDivideExplode(
     :rtype: Column
     """
     return _call_st_function("ST_SubDivideExplode", (geometry, max_vertices))
+
+
+@validate_argument_types
+def ST_Segmentize(
+    geometry: ColumnOrName, maxSegmentLength: Union[ColumnOrName, float]
+) -> Column:
+    """Returns a modified geometry/geography having no segment longer than max_segment_length. Length is computed in 2D. Segments are always split into equal-length subsegments.
+
+    :param geometry: Geometry column to segmentize.
+    :param maxSegmentLength: Maximum segment length
+    :return: Column
+    """
+    return _call_st_function("ST_Segmentize", (geometry, maxSegmentLength))
 
 
 @validate_argument_types
@@ -2326,13 +2400,16 @@ def ST_Angle(
 ) -> Column:
     """
     Returns the computed angle between vectors formed by given geometries in radian. Range of result is between 0 and 2 * pi.
+
     3 Variants:
-        Angle(Point1, Point2, Point3, Point4)
-            Computes angle formed by vectors formed by Point1-Point2 and Point3-Point4
-        Angle(Point1, Point2, Point3)
-            Computes angle formed by angle Point1-Point2-Point3
-        Angle(Line1, Line2)
-            Computes angle between vectors formed by S1-E1 and S2-E2, where S and E are start and endpoints.
+
+    - Angle(Point1, Point2, Point3, Point4)
+        Computes angle formed by vectors formed by Point1-Point2 and Point3-Point4
+    - Angle(Point1, Point2, Point3)
+        Computes angle formed by angle Point1-Point2-Point3
+    - Angle(Line1, Line2)
+        Computes angle between vectors formed by S1-E1 and S2-E2, where S and E are start and endpoints.
+
     :param g1: Point or Line
     :param g2: Point or Line
     :param g3: Point or None
@@ -2679,16 +2756,15 @@ def ST_WeightedDistanceBandColumn(
 
     Weights will be distance^alpha.
 
-
-    @param geometry: name of the geometry column
-    @param threshold: Distance threshold for considering neighbors
-    @param alpha: alpha to use for inverse distance weights. Computation is dist^alpha. Default is -1.0
-    @param include_zero_distance_neighbors: whether to include neighbors that are 0 distance. If 0 distance neighbors are
+    :param geometry: name of the geometry column
+    :param threshold: Distance threshold for considering neighbors
+    :param alpha: alpha to use for inverse distance weights. Computation is dist^alpha. Default is -1.0
+    :param include_zero_distance_neighbors: whether to include neighbors that are 0 distance. If 0 distance neighbors are
         included, values are infinity as per the floating point spec (divide by 0)
-    @param include_self: whether to include self in the list of neighbors
-    @param self_weight: the value to use for the self weight. Default is 1.0
-    @param use_spheroid: whether to use a cartesian or spheroidal distance calculation. Default is false
-    @param attributes: the attributes to save in the neighbor column.
+    :param include_self: whether to include self in the list of neighbors
+    :param self_weight: the value to use for the self weight. Default is 1.0
+    :param use_spheroid: whether to use a cartesian or spheroidal distance calculation. Default is false
+    :param attributes: the attributes to save in the neighbor column.
 
     """
     if isinstance(alpha, float):

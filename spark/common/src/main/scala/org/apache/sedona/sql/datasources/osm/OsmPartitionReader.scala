@@ -53,7 +53,9 @@ case class OsmPartitionReader(
     f.seek(file.start + offset)
 
     new PbfIterator(new StartEndStream(f, (file.length - offset) + HEADER_SIZE_LENGTH)).map(
-      record => resolveEntity(record, requiredSchema))
+      record => {
+        resolveEntity(record, requiredSchema)
+      })
   }
 
   def findOffset(fs: FileSystem, status: FileStatus, start: Long): Long = {

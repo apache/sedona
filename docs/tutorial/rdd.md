@@ -184,9 +184,13 @@ Assume you now have a SpatialRDD (typed or generic). You can use the following c
     from sedona.spark import Adapter
 
     range_query_window = Envelope(-90.01, -80.01, 30.01, 40.01)
-    consider_boundary_intersection = False  ## Only return gemeotries fully covered by the window
+    consider_boundary_intersection = (
+        False  ## Only return gemeotries fully covered by the window
+    )
     using_index = False
-    query_result = RangeQueryRaw.SpatialRangeQuery(spatial_rdd, range_query_window, consider_boundary_intersection, using_index)
+    query_result = RangeQueryRaw.SpatialRangeQuery(
+        spatial_rdd, range_query_window, consider_boundary_intersection, using_index
+    )
     gdf = StructuredAdapter.toDf(query_result, spark, ["col1", ..., "coln"])
     ```
 
@@ -679,22 +683,26 @@ The index should be built on either one of two SpatialRDDs. In general, you shou
     from sedona.spark import CircleRDD
     from sedona.spark import GridType
     from sedona.spark import JoinQueryRaw
-	from sedona.spark import StructuredAdapter
+    from sedona.spark import StructuredAdapter
 
     object_rdd.analyze()
 
-    circle_rdd = CircleRDD(object_rdd, 0.1) ## Create a CircleRDD using the given distance
+    circle_rdd = CircleRDD(object_rdd, 0.1)  ## Create a CircleRDD using the given distance
     circle_rdd.analyze()
 
     circle_rdd.spatialPartitioning(GridType.KDBTREE)
     spatial_rdd.spatialPartitioning(circle_rdd.getPartitioner())
 
-    consider_boundary_intersection = False ## Only return gemeotries fully covered by each query window in queryWindowRDD
+    consider_boundary_intersection = False  ## Only return gemeotries fully covered by each query window in queryWindowRDD
     using_index = False
 
-    result = JoinQueryRaw.DistanceJoinQueryFlat(spatial_rdd, circle_rdd, using_index, consider_boundary_intersection)
+    result = JoinQueryRaw.DistanceJoinQueryFlat(
+        spatial_rdd, circle_rdd, using_index, consider_boundary_intersection
+    )
 
-    gdf = StructuredAdapter.toDf(result, ["left_col1", ..., "lefcoln"], ["rightcol1", ..., "rightcol2"], spark)
+    gdf = StructuredAdapter.toDf(
+        result, ["left_col1", ..., "lefcoln"], ["rightcol1", ..., "rightcol2"], spark
+    )
     ```
 
 ## Write a Distance Join Query

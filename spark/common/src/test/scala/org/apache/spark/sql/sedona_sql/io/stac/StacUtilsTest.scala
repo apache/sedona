@@ -24,7 +24,7 @@ import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.sedona.core.spatialOperator.SpatialPredicate
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.execution.datasource.stac.TemporalFilter
-import org.apache.spark.sql.execution.datasources.parquet.GeoParquetSpatialFilter
+import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter
 import org.apache.spark.sql.sedona_sql.io.stac.StacUtils.{getFilterBBox, getFilterTemporal, getNumPartitions}
 import org.locationtech.jts.geom.{Envelope, GeometryFactory, Polygon}
 import org.locationtech.jts.io.WKTReader
