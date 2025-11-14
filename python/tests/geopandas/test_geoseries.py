@@ -677,18 +677,20 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = geoseries.to_geoframe().length.to_pandas()
         assert_series_equal(df_result, expected)
 
-        # Test with M-dimension geometries
-        m_geoseries = GeoSeries(
+        # Ensure M-dimension doesn't break things.
+        s = GeoSeries(
             [
-                wkt.loads("POINT M (1 2 3)"),
-                wkt.loads("LINESTRING M (0 0 1, 1 1 2)"),
-                wkt.loads("POLYGON M ((0 0 1, 1 0 2, 1 1 3, 0 1 4, 0 0 1))"),
+                wkt.loads("POINT M (0 0 0)"),
+                wkt.loads("LINESTRING M (0 0 0, 1 1 0)"),
+                wkt.loads("POLYGON M ((0 0 0, 1 0 0, 1 1 0, 0 0 0))"),
+                wkt.loads(
+                    "GEOMETRYCOLLECTION M (POINT M (0 0 0), LINESTRING M (0 0 0, 1 1 0), POLYGON M ((0 0 0, 1 0 0, 1 1 0, 0 0 0)))"
+                ),
             ]
         )
-        m_result = m_geoseries.length.to_pandas()
-        assert m_result[0] == 0.0
-        assert m_result[1] > 0
-        assert m_result[2] > 0
+        result = s.length.to_pandas()
+        expected = pd.Series([0.000000, 1.414214, 3.414214, 4.828427])
+        assert_series_equal(result, expected)
 
     def test_is_valid(self):
         geoseries = sgpd.GeoSeries(
@@ -1197,14 +1199,19 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = s.to_geoframe().boundary
         self.check_sgpd_equals_gpd(df_result, expected)
 
-        # Test with M-dimension GeometryCollection
-        m_geoseries = sgpd.GeoSeries(
+        # Ensure M-dimension doesn't break things.
+        s = GeoSeries(
             [
                 wkt.loads("GEOMETRYCOLLECTION M (POINT M (1 2 3))"),
             ]
         )
-        m_result = m_geoseries.boundary.to_pandas()
-        assert m_result[0] is None
+        result = s.boundary
+        expected = gpd.GeoSeries(
+            [
+                None,
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
 
     def test_centroid(self):
         s = sgpd.GeoSeries(
@@ -1488,14 +1495,14 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         # https://github.com/apache/sedona/issues/2417
         # Once this is resolved, we can update the expected result of this test.
         # Ensure M-dimension doesn't break things.
-        m_geoseries = GeoSeries(
+        s = GeoSeries(
             [
                 wkt.loads("GEOMETRYCOLLECTION M (POINT M (1 2 3))"),
                 wkt.loads("LINESTRING M (0 0 1, 1 1 2)"),
             ]
         )
         line = LineString([(0, 0), (1, 1)])
-        result = m_geoseries.crosses(line)
+        result = s.crosses(line)
         expected = pd.Series([None, False])
         assert_series_equal(result.to_pandas(), expected)
 
