@@ -39,8 +39,7 @@
 
       <div class="section-desc"><p>Functions for reading and writing Spark DataFrames.</p></div>
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -51,13 +50,15 @@
           <span class="badge lifecycle lifecycle-deprecated">deprecated</span>
         </dt>
         <dd>Read geospatial data into a Spark DataFrame.</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="spark_write_geojson.html">spark_write_geojson()</a></code> <code><a href="spark_write_geojson.html">spark_write_geoparquet()</a></code> <code><a href="spark_write_geojson.html">spark_write_raster()</a></code>
           <span class="badge lifecycle lifecycle-deprecated">deprecated</span>
         </dt>
         <dd>Write geospatial data from a Spark DataFrame.</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="sedona_save_spatial_rdd.html">sedona_save_spatial_rdd()</a></code>
 
@@ -68,8 +69,7 @@
 
       <div class="section-desc"><p>Functions for reading and writing Spatial RDDs.</p></div>
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -80,19 +80,22 @@
 
         </dt>
         <dd>Create a typed SpatialRDD from a delimiter-separated values data source.</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="sedona_read_geojson.html">sedona_read_geojson()</a></code> <code><a href="sedona_read_geojson.html">sedona_read_wkb()</a></code> <code><a href="sedona_read_geojson.html">sedona_read_wkt()</a></code> <code><a href="sedona_read_geojson.html">sedona_read_shapefile()</a></code>
 
         </dt>
         <dd>Read geospatial data into a Spatial RDD</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="sedona_read_shapefile_to_typed_rdd.html">sedona_read_shapefile_to_typed_rdd()</a></code> <code><a href="sedona_read_shapefile_to_typed_rdd.html">sedona_read_geojson_to_typed_rdd()</a></code>
           <span class="badge lifecycle lifecycle-deprecated">deprecated</span>
         </dt>
         <dd>(Deprecated) Create a typed SpatialRDD from a shapefile or geojson data source.</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="sedona_write_wkb.html">sedona_write_wkb()</a></code> <code><a href="sedona_write_wkb.html">sedona_write_wkt()</a></code> <code><a href="sedona_write_wkb.html">sedona_write_geojson()</a></code>
 
@@ -103,8 +106,7 @@
 
       <div class="section-desc"><p>Functions to convert between Spark DataFrames and Spatial RDDs.</p></div>
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -115,7 +117,8 @@
 
         </dt>
         <dd>Import data from a spatial RDD into a Spark Dataframe.</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="to_spatial_rdd.html">to_spatial_rdd()</a></code>
 
@@ -126,14 +129,12 @@
 
 
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
       <h3 id="visualization">Visualization<a class="anchor" aria-label="anchor" href="#visualization"></a></h3>
 
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -144,13 +145,15 @@
 
         </dt>
         <dd>Visualize a Sedona spatial RDD using a choropleth map.</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="sedona_render_heatmap.html">sedona_render_heatmap()</a></code>
 
         </dt>
         <dd>Visualize a Sedona spatial RDD using a heatmap.</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="sedona_render_scatter_plot.html">sedona_render_scatter_plot()</a></code>
 
@@ -161,8 +164,7 @@
       <h3 id="joins">Joins<a class="anchor" aria-label="anchor" href="#joins"></a></h3>
 
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -173,7 +175,8 @@
 
         </dt>
         <dd>Perform a spatial join operation on two Sedona spatial RDDs.</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="sedona_spatial_join_count_by_key.html">sedona_spatial_join_count_by_key()</a></code>
 
@@ -184,8 +187,7 @@
       <h3 id="query">Query<a class="anchor" aria-label="anchor" href="#query"></a></h3>
 
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -196,7 +198,8 @@
 
         </dt>
         <dd>Query the k nearest spatial objects.</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="sedona_range_query.html">sedona_range_query()</a></code>
 
@@ -207,8 +210,7 @@
       <h3 id="others">Others<a class="anchor" aria-label="anchor" href="#others"></a></h3>
 
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -219,31 +221,36 @@
 
         </dt>
         <dd>Apply a spatial partitioner to a Sedona spatial RDD.</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="sedona_build_index.html">sedona_build_index()</a></code>
 
         </dt>
         <dd>Build an index on a Sedona spatial RDD.</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="approx_count.html">approx_count()</a></code>
 
         </dt>
         <dd>Find the approximate total number of records within a Spatial RDD.</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="crs_transform.html">crs_transform()</a></code>
 
         </dt>
         <dd>Perform a CRS transformation.</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="minimum_bounding_box.html">minimum_bounding_box()</a></code>
 
         </dt>
         <dd>Find the minimal bounding box of a geometry.</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="new_bounding_box.html">new_bounding_box()</a></code>
 
@@ -259,7 +266,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>
