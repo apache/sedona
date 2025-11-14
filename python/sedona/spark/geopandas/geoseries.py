@@ -1037,9 +1037,13 @@ class GeoSeries(GeoFrame, pspd.Series):
             returns_geom=True,
         )
 
-    def minimum_bounding_radius(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+    def minimum_bounding_radius(self) -> pspd.Series:
+        spark_struct = stf.ST_MinimumBoundingRadius(self.spark.column)
+        spark_radius = spark_struct.getField("radius")
+        return self._query_geometry_column(
+            spark_radius,
+            returns_geom=False,
+        )
 
     def minimum_clearance(self):
         # Implementation of the abstract method.

@@ -742,8 +742,39 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("minimum_bounding_circle", self)
 
-    # def minimum_bounding_radius(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    def minimum_bounding_radius(self):
+        """
+        Returns a ``Series`` containing the radius of the minimum bounding circle
+        of each geometry.
+
+        The minimum bounding circle is the smallest circle that completely encloses
+        the geometry. This method returns only the radius of that circle, expressed
+        in the units of the GeoSeries' coordinate reference system.
+
+        Returns
+        -------
+        Series
+            A Series containing the radius of the minimum bounding circle
+            for each geometry.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point, Polygon, LineString
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> s = GeoSeries(
+        ...     [
+        ...         Point(0, 0),
+        ...         LineString([(0, 0), (1, 1)]),
+        ...         Polygon([(0, 0), (3, 0), (3, 3), (0, 3)]),
+        ...     ]
+        ... )
+        >>> s.minimum_bounding_radius()
+        0    0.000000
+        1    ...
+        2    ...
+        dtype: float64
+        """
+        return _delegate_to_geometry_column("minimum_bounding_radius", self)
 
     # def minimum_clearance(self):
     #     raise NotImplementedError("This method is not implemented yet.")
