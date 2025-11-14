@@ -685,9 +685,9 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
                 ),
             ]
         )
-        result = s.length.to_pandas()
+        result = s.length
         expected = pd.Series([0.000000, 1.414214, 3.414214, 4.828427])
-        assert_series_equal(result, expected)
+        self.check_pd_series_equal(result, expected)
 
     def test_is_valid(self):
         geoseries = sgpd.GeoSeries(
