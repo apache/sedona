@@ -36,7 +36,6 @@ from shapely.geometry import (
     LinearRing,
     box,
 )
-from pandas.testing import assert_series_equal
 import pytest
 from packaging.version import parse as parse_version
 
@@ -112,7 +111,7 @@ class TestGeoSeries(TestGeopandasBase):
         crs = "EPSG:3857"
         result = GeoSeries(data, index=index, crs=crs).to_spark_pandas()
         ps_df = ps.Series(data, index=index)
-        assert_series_equal(result.to_pandas(), ps_df.to_pandas())
+        self.check_pd_series_equal(result, ps_df.to_pandas())
 
     def test_sindex(self):
         s = GeoSeries([Point(x, x) for x in range(5)])
@@ -161,13 +160,13 @@ class TestGeoSeries(TestGeopandasBase):
         self.geoseries.plot()
 
     def test_area(self):
-        result = self.geoseries.area.to_pandas()
+        result = self.geoseries.area
         expected = pd.Series([0.0, 0.0, 5.23, 5.23])
-        assert_series_equal(result, expected)
+        self.check_pd_series_equal(result, expected)
 
         # Test that GeoDataFrame.area also works
-        df_result = self.geoseries.to_geoframe().area.to_pandas()
-        assert_series_equal(result, df_result)
+        df_result = self.geoseries.to_geoframe().area
+        self.check_pd_series_equal(result, df_result.to_pandas())
 
     def test_buffer(self):
 
@@ -225,33 +224,31 @@ class TestGeoSeries(TestGeopandasBase):
     def test_geometry(self):
         sgpd_geoseries = sgpd.GeoSeries([Point(0, 0), Point(1, 1)])
         assert isinstance(sgpd_geoseries.geometry, sgpd.GeoSeries)
-        assert_series_equal(
-            sgpd_geoseries.geometry.to_pandas(), sgpd_geoseries.to_pandas()
-        )
+        self.check_pd_series_equal(sgpd_geoseries.geometry, sgpd_geoseries.to_pandas())
 
     def test_x(self):
         geoseries = sgpd.GeoSeries(
             [Point(0, -1, 2.5), Point(2.5, 0, -1), Point(-1, 2.5, 0), Point(-1, 0)]
         )
-        result = geoseries.x.to_pandas()
+        result = geoseries.x
         expected = pd.Series([0, 2.5, -1, -1])
-        assert_series_equal(result, expected)
+        self.check_pd_series_equal(result, expected)
 
     def test_y(self):
         geoseries = sgpd.GeoSeries(
             [Point(0, -1, 2.5), Point(2.5, 0, -1), Point(-1, 2.5, 0), Point(-1, 0)]
         )
-        result = geoseries.y.to_pandas()
+        result = geoseries.y
         expected = pd.Series([-1, 0, 2.5, 0])
-        assert_series_equal(result, expected)
+        self.check_pd_series_equal(result, expected)
 
     def test_z(self):
         geoseries = sgpd.GeoSeries(
             [Point(0, -1, 2.5), Point(2.5, 0, -1), Point(-1, 2.5, 0), Point(-1, 0)]
         )
-        result = geoseries.z.to_pandas()
+        result = geoseries.z
         expected = pd.Series([2.5, -1, 0, np.nan])
-        assert_series_equal(result, expected)
+        self.check_pd_series_equal(result, expected)
 
     def test_m(self):
         pass
@@ -329,14 +326,14 @@ class TestGeoSeries(TestGeopandasBase):
         geoseries = GeoSeries([Polygon([(0, 0), (1, 1), (0, 1)]), None, Polygon([])])
         result = getattr(geoseries, fun)()
         expected = pd.Series([False, True, False])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
     @pytest.mark.parametrize("fun", ["notna", "notnull"])
     def test_notna(self, fun):
         geoseries = GeoSeries([Polygon([(0, 0), (1, 1), (0, 1)]), None, Polygon([])])
         result = getattr(geoseries, fun)()
         expected = pd.Series([True, False, True])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
     def test_fillna(self):
         s = sgpd.GeoSeries(
@@ -393,7 +390,7 @@ class TestGeoSeries(TestGeopandasBase):
             expected = gpd.GeoSeries(data, name="geometry")
             self.check_sgpd_equals_gpd(result, expected)
 
-        # Ensure filling with None is empty GeometryColleciton and not None
+        # Ensure filling with None is empty GeometryCollection and not None
         # Also check that inplace works
         result = GeoSeries(data, name="geometry")
         result.fillna(None, inplace=True)
@@ -646,10 +643,10 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
                 "LineString",  # Note: Sedona returns LineString instead of LinearRing
             ]
         )
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         df_result = geoseries.to_geoframe().geom_type
-        assert_series_equal(df_result.to_pandas(), expected)
+        self.check_pd_series_equal(df_result, expected)
 
     def test_type(self):
         pass
@@ -669,13 +666,13 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
                 ),
             ]
         )
-        result = geoseries.length.to_pandas()
+        result = geoseries.length
         expected = pd.Series([0.000000, 1.414214, 3.414214, 4.828427])
-        assert_series_equal(result, expected)
+        self.check_pd_series_equal(result, expected)
 
         # Check that GeoDataFrame works too
-        df_result = geoseries.to_geoframe().length.to_pandas()
-        assert_series_equal(df_result, expected)
+        df_result = geoseries.to_geoframe().length
+        self.check_pd_series_equal(df_result, expected)
 
         # Ensure M-dimension doesn't break things.
         s = GeoSeries(
@@ -703,11 +700,11 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         )
         result = geoseries.is_valid
         expected = pd.Series([True, False, True, False])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         # Check that GeoDataFrame works too
-        df_result = geoseries.to_geoframe().is_valid.to_pandas()
-        assert_series_equal(df_result, expected)
+        df_result = geoseries.to_geoframe().is_valid
+        self.check_pd_series_equal(df_result, expected)
 
     def test_is_valid_reason(self):
         s = sgpd.GeoSeries(
@@ -721,7 +718,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
                 None,
             ]
         )
-        result = s.is_valid_reason().to_pandas()
+        result = s.is_valid_reason()
         expected = pd.Series(
             [
                 "Valid Geometry",
@@ -731,11 +728,11 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
                 None,
             ]
         )
-        assert_series_equal(result, expected)
+        self.check_pd_series_equal(result, expected)
 
         # Check that GeoDataFrame works too
-        df_result = s.to_geoframe().is_valid_reason().to_pandas()
-        assert_series_equal(df_result, expected)
+        df_result = s.to_geoframe().is_valid_reason()
+        self.check_pd_series_equal(df_result, expected)
 
     def test_is_empty(self):
         geoseries = sgpd.GeoSeries(
@@ -744,11 +741,11 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         result = geoseries.is_empty
         expected = pd.Series([True, False, False, False])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         # Check that GeoDataFrame works too
-        df_result = geoseries.to_geoframe().is_empty.to_pandas()
-        assert_series_equal(df_result, expected)
+        df_result = geoseries.to_geoframe().is_empty
+        self.check_pd_series_equal(df_result, expected)
 
     def test_count_coordinates(self):
         pass
@@ -781,18 +778,18 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         result = s2.dwithin(Point(0, 1), 1.8)
         expected = pd.Series([True, False, False, True], index=range(1, 5))
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         result = s.dwithin(s2, distance=1, align=True)
         expected = pd.Series([False, True, False, False, False])
 
         result = s.dwithin(s2, distance=1, align=False)
         expected = pd.Series([True, False, False, True])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         # Check that GeoDataFrame works too
-        df_result = s.to_geoframe().dwithin(s2, distance=1, align=False).to_pandas()
-        assert_series_equal(df_result, expected)
+        df_result = s.to_geoframe().dwithin(s2, distance=1, align=False)
+        self.check_pd_series_equal(df_result, expected)
 
     def test_difference(self):
         s = GeoSeries(
@@ -1065,11 +1062,11 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         )
         result = s.is_simple
         expected = pd.Series([False, True, False, True])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         # Check that GeoDataFrame works too
-        df_result = s.to_geoframe().is_simple.to_pandas()
-        assert_series_equal(df_result, expected)
+        df_result = s.to_geoframe().is_simple
+        self.check_pd_series_equal(df_result, expected)
 
     def test_is_ring(self):
         s = GeoSeries(
@@ -1126,11 +1123,11 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         )
         result = s.has_z
         expected = pd.Series([False, True, True, False])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         # Check that GeoDataFrame works too
-        df_result = s.to_geoframe().has_z.to_pandas()
-        assert_series_equal(df_result, expected)
+        df_result = s.to_geoframe().has_z
+        self.check_pd_series_equal(df_result, expected)
 
     def test_get_precision(self):
         pass
@@ -1244,7 +1241,30 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         pass
 
     def test_convex_hull(self):
-        pass
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                LineString([(0, 0), (2, 1)]),
+                Point(0, 0),
+                None,
+            ]
+        )
+
+        result = s.convex_hull
+
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),  # polygon hull == itself
+                LineString([(0, 0), (2, 1)]),  # NOT a polygon
+                Point(0, 0),  # point stays point
+                None,  # None stays None
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Check if GeoDataFrame works as well
+        df_result = s.to_geoframe().convex_hull
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_delaunay_triangles(self):
         pass
@@ -1301,10 +1321,54 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         pass
 
     def test_minimum_bounding_circle(self):
-        pass
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                LineString([(0, 0), (2, 0)]),
+                Point(0, 0),
+                None,
+            ]
+        )
+
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                LineString([(0, 0), (2, 0)]),
+                Point(0, 0),
+                None,
+            ]
+        ).minimum_bounding_circle()
+
+        result = s.minimum_bounding_circle()
+        self.check_sgpd_equals_gpd(result, expected)
+
+        gdf = s.to_geoframe()
+        df_result = gdf.minimum_bounding_circle()
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_minimum_bounding_radius(self):
-        pass
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+                LineString([(0, 0), (1, 1), (1, 0)]),
+                Point(0, 0),
+            ]
+        )
+
+        expected = pd.Series(
+            [
+                0.707107,  # radius for the square
+                0.707107,  # radius for the line
+                0.000000,  # radius for the point
+            ]
+        )
+
+        result = s.minimum_bounding_radius()
+        self.check_pd_series_equal(result, expected)
+
+        gdf = s.to_geoframe()
+        df_result = gdf.minimum_bounding_radius()
+        self.check_pd_series_equal(df_result, expected)
 
     def test_minimum_clearance(self):
         pass
@@ -1404,7 +1468,38 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         pass
 
     def test_force_2d(self):
-        pass
+        s = sgpd.GeoSeries(
+            [
+                Point(0, -1, 2.5),  # 3D point
+                LineString([(0, 0, 1), (1, 1, 2)]),  # 3D line
+                Polygon([(0, 0, 1), (1, 0, 2), (1, 1, 3), (0, 0, 1)]),  # 3D polygon
+                Point(5, 5),  # already 2D
+                Polygon(),  # empty geometry
+                None,  # None preserved
+                shapely.wkt.loads("POINT M (1 2 3)"),
+                shapely.wkt.loads("LINESTRING ZM (1 2 3 4, 5 6 7 8)"),
+            ]
+        )
+
+        result = s.force_2d()
+
+        expected = gpd.GeoSeries(
+            [
+                Point(0, -1),
+                LineString([(0, 0), (1, 1)]),
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 0)]),
+                Point(5, 5),
+                Polygon(),
+                None,
+                shapely.wkt.loads("POINT (1 2)"),
+                shapely.wkt.loads("LINESTRING (1 2, 5 6)"),
+            ]
+        )
+
+        self.check_sgpd_equals_gpd(result, expected)
+
+        df_result = s.to_geoframe().force_2d()
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_force_3d(self):
         pass
@@ -1448,7 +1543,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         # self: GeoDataFrame, other: GeoDataFrame
         result = s.to_geoframe().distance(s2.to_geoframe())
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         # Same but for overlay
         expected = gpd.GeoSeries(
@@ -1486,19 +1581,19 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         line = LineString([(-1, 1), (3, 1)])
         result = s.crosses(line)
         expected = pd.Series([True, True, True, False])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         result = s.crosses(s2, align=True)
         expected = pd.Series([False, True, False, False, False])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         result = s.crosses(s2, align=False)
         expected = pd.Series([True, True, False, False])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         # Check that GeoDataFrame works too
-        df_result = s.to_geoframe().crosses(s2, align=False).to_pandas()
-        assert_series_equal(df_result, expected)
+        df_result = s.to_geoframe().crosses(s2, align=False)
+        self.check_pd_series_equal(df_result, expected)
 
         # Sedona ST_Crosses doesn't support GeometryCollection, so it returns NULL for now.
         # https://github.com/apache/sedona/issues/2417
@@ -1538,12 +1633,12 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         result = s.intersects(s2)
         expected = pd.Series([True, True, True, False])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         line = LineString([(-1, 1), (3, 1)])
         result = s.intersects(line)
         expected = pd.Series([True, True, True, True])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         # from the original doc string
         s2 = sgpd.GeoSeries(
@@ -1563,8 +1658,8 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         expected = pd.Series([True, True, True, True])
 
         # Check that GeoDataFrame works too
-        df_result = s.to_geoframe().intersects(s2, align=False).to_pandas()
-        assert_series_equal(df_result, expected)
+        df_result = s.to_geoframe().intersects(s2, align=False)
+        self.check_pd_series_equal(df_result, expected)
 
     def test_overlaps(self):
         s = GeoSeries(
@@ -1588,19 +1683,19 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         polygon = Polygon([(0, 0), (1, 0), (1, 1), (0, 1)])
         result = s.overlaps(polygon)
         expected = pd.Series([True, True, False, False])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         result = s.overlaps(s2, align=True)
         expected = pd.Series([False, True, False, False, False])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         result = s.overlaps(s2, align=False)
         expected = pd.Series([True, False, True, False])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         # Check that GeoDataFrame works too
         df_result = s.to_geoframe().overlaps(s2, align=False)
-        assert_series_equal(df_result.to_pandas(), expected)
+        self.check_pd_series_equal(df_result, expected)
 
     def test_touches(self):
         s = GeoSeries(
@@ -1623,19 +1718,19 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         line = LineString([(0, 0), (-1, -2)])
         result = s.touches(line)
         expected = pd.Series([True, True, True, True])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         result = s.touches(s2, align=True)
         expected = pd.Series([False, True, True, False, False])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         result = s.touches(s2, align=False)
         expected = pd.Series([True, False, True, False])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         # Check that GeoDataFrame works too
         df_result = s.to_geoframe().touches(s2, align=False)
-        assert_series_equal(df_result.to_pandas(), expected)
+        self.check_pd_series_equal(df_result, expected)
 
     def test_within(self):
         s = GeoSeries(
@@ -1659,25 +1754,25 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         polygon = Polygon([(0, 0), (2, 2), (0, 2)])
         result = s.within(polygon)
         expected = pd.Series([True, True, False, False])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         result = s2.within(s, align=True)
         expected = pd.Series([False, False, True, False, False])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         result = s2.within(s, align=False)
         expected = pd.Series([True, False, True, True], index=range(1, 5))
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         # Ensure we return False if either geometries are empty
         s = GeoSeries([Point(), Point(), Polygon(), Point(0, 1)])
         result = s.within(s2, align=False)
         expected = pd.Series([False, False, False, True])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         # Check that GeoDataFrame works too
         df_result = s.to_geoframe().within(s2, align=False)
-        assert_series_equal(df_result.to_pandas(), expected)
+        self.check_pd_series_equal(df_result, expected)
 
     def test_covers(self):
         s = GeoSeries(
@@ -1701,25 +1796,25 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         poly = Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])
         result = s.covers(poly)
         expected = pd.Series([True, False, False, False])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         result = s.covers(s2, align=True)
         expected = pd.Series([False, False, False, False, False])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         result = s.covers(s2, align=False)
         expected = pd.Series([True, False, True, True])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         # Ensure we return False if either geometries are empty
         s = GeoSeries([Point(), Point(), Polygon(), Point(0, 0)])
         result = s.covers(s2, align=False)
         expected = pd.Series([False, False, False, True])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         # Check that GeoDataFrame works too
         df_result = s.to_geoframe().covers(s2, align=False)
-        assert_series_equal(df_result.to_pandas(), expected)
+        self.check_pd_series_equal(df_result, expected)
 
     def test_covered_by(self):
         s = GeoSeries(
@@ -1743,19 +1838,19 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         poly = Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])
         result = s.covered_by(poly)
         expected = pd.Series([True, True, True, True])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         result = s.covered_by(s2, align=True)
         expected = pd.Series([False, True, True, True, False])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         result = s.covered_by(s2, align=False)
         expected = pd.Series([True, False, True, True])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         # Check that GeoDataFrame works too
         df_result = s.to_geoframe().covered_by(s2, align=False)
-        assert_series_equal(df_result.to_pandas(), expected)
+        self.check_pd_series_equal(df_result, expected)
 
     def test_distance(self):
         s = GeoSeries(
@@ -1778,19 +1873,19 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         point = Point(-1, 0)
         result = s.distance(point)
         expected = pd.Series([1.0, 0.0, 1.0, 1.0])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         result = s.distance(s2, align=True)
         expected = pd.Series([np.nan, 0.707107, 2.000000, 1.000000, np.nan])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         result = s.distance(s2, align=False)
         expected = pd.Series([0.000000, 3.162278, 0.707107, 1.000000])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         # Check that GeoDataFrame works too
         df_result = s.to_geoframe().distance(s2, align=False)
-        assert_series_equal(df_result.to_pandas(), expected)
+        self.check_pd_series_equal(df_result, expected)
 
     def test_intersection(self):
         s = sgpd.GeoSeries(
@@ -1965,7 +2060,20 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_intersection_all(self):
-        pass
+        s = GeoSeries([box(0, 0, 2, 2), box(1, 1, 3, 3)])
+        result = s.intersection_all()
+        expected = Polygon([(1, 1), (1, 2), (2, 2), (2, 1), (1, 1)])
+        self.check_geom_equals(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().intersection_all()
+        self.check_geom_equals(df_result, expected)
+
+        # Empty GeoSeries
+        s = sgpd.GeoSeries([])
+        result = s.intersection_all()
+        expected = GeometryCollection()
+        self.check_geom_equals(result, expected)
 
     def test_contains(self):
         s = GeoSeries(
@@ -1990,22 +2098,99 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         point = Point(0, 1)
         result = s.contains(point)
         expected = pd.Series([False, True, False, True])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         result = s2.contains(s, align=True)
         expected = pd.Series([False, False, False, True, False])
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         result = s2.contains(s, align=False)
         expected = pd.Series([True, False, True, True], index=range(1, 5))
-        assert_series_equal(result.to_pandas(), expected)
+        self.check_pd_series_equal(result, expected)
 
         # Check that GeoDataFrame works too
         df_result = s2.to_geoframe().contains(s, align=False)
-        assert_series_equal(df_result.to_pandas(), expected)
+        self.check_pd_series_equal(df_result, expected)
 
     def test_contains_properly(self):
         pass
+
+    def test_relate(self):
+        s = GeoSeries(
+            [
+                Point(0, 0),
+                Point(0, 0),
+                LineString([(0, 0), (1, 1)]),
+            ]
+        )
+        s2 = GeoSeries(
+            [
+                Point(0, 0),
+                Point(1, 1),
+                LineString([(0, 0), (1, 1)]),
+            ]
+        )
+        # "ABCDEFGHI" DE-9 Format
+        # A Dimension of intersection
+        # B Dimension of interior intersection
+        # C Dimension of boundary intersection
+        # D Interior of first geometry intersects exterior of second
+        # E Exterior of first geometry intersects interior of second
+        # F Boundary of first geometry intersects exterior of second
+        # G Exterior of first geometry intersects boundary of second
+        # H Exterior of first geometry intersects exterior of second
+        # I Dimension of intersection for interiors
+        # 0 = false, 1 = point, 2 = line, F = area
+
+        # 1. Test with single geometry
+        point = Point(0, 0)
+        result = s.relate(point)
+        expected = pd.Series(["0FFFFFFF2", "0FFFFFFF2", "FF10F0FF2"])
+        self.check_pd_series_equal(result, expected)
+
+        result = s.relate(s2)
+        expected = pd.Series(["0FFFFFFF2", "FF0FFF0F2", "1FFF0FFF2"])
+        self.check_pd_series_equal(result, expected)
+        # 2. Test with align=True (different indices)
+        s3 = GeoSeries(
+            [
+                Point(0, 0),
+                Point(1, 1),
+            ],
+            index=range(1, 3),
+        )
+        s4 = GeoSeries(
+            [
+                Point(0, 0),
+                Point(1, 1),
+            ],
+            index=range(0, 2),
+        )
+        result = s3.relate(s4, align=True)
+        expected = pd.Series([None, "FF0FFF0F2", None], index=[0, 1, 2])
+        self.check_pd_series_equal(result, expected)
+
+        # 3. Test with align=False
+        result = s3.relate(s4, align=False)
+        expected = pd.Series(["0FFFFFFF2", "0FFFFFFF2"], index=range(1, 3))
+        self.check_pd_series_equal(result, expected)
+
+        # 4. Check that GeoDataFrame works too
+        df_result = s.to_geoframe().relate(s2, align=False)
+        expected = pd.Series(["0FFFFFFF2", "FF0FFF0F2", "1FFF0FFF2"])
+        self.check_pd_series_equal(df_result, expected)
+
+        # 5. touching_polygons and overlapping polygon case
+        touching_poly_a = Polygon(((0, 0), (1, 0), (1, 1), (0, 1), (0, 0)))
+        touching_poly_b = Polygon(((1, 0), (2, 0), (2, 1), (1, 1), (1, 0)))
+        overlapping_poly_a = Polygon(((0, 0), (2, 0), (2, 2), (0, 2), (0, 0)))
+        overlapping_poly_b = Polygon(((1, 1), (3, 1), (3, 3), (1, 3), (1, 1)))
+        s5 = GeoSeries([touching_poly_a, overlapping_poly_a])
+        s6 = GeoSeries([touching_poly_b, overlapping_poly_b])
+        result = s5.relate(s6)
+
+        expected = pd.Series(["FF2F11212", "212101212"])
+        self.check_pd_series_equal(result, expected)
 
     def test_set_crs(self):
         geo_series = sgpd.GeoSeries([Point(0, 0), Point(1, 1)], name="geometry")

@@ -19,6 +19,7 @@
 package org.apache.spark.sql.udf
 
 import org.apache.sedona.sql.UDF.PythonEvalType
+import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.expressions.{AttributeReference, Expression, ExpressionSet, PythonUDF}
 import org.apache.spark.sql.catalyst.plans.logical.{LogicalPlan, Project, Subquery}
 import org.apache.spark.sql.catalyst.rules.Rule
@@ -28,7 +29,7 @@ import scala.collection.mutable
 
 // That rule extracts scalar Python UDFs, currently Apache Spark has
 // assert on types which blocks using the vectorized udfs with geometry type
-class ExtractSedonaUDFRule extends Rule[LogicalPlan] {
+class ExtractSedonaUDFRule extends Rule[LogicalPlan] with Logging {
 
   private def hasScalarPythonUDF(e: Expression): Boolean = {
     e.exists(PythonUDF.isScalarPythonUDF)
@@ -73,14 +74,30 @@ class ExtractSedonaUDFRule extends Rule[LogicalPlan] {
     expressions.flatMap(collectEvaluableUDFs)
   }
 
+  private var hasFailedBefore: Boolean = false
+
   def apply(plan: LogicalPlan): LogicalPlan = plan match {
     case s: Subquery if s.correlated => plan
 
     case _ =>
-      plan.transformUpWithPruning(_.containsPattern(PYTHON_UDF)) {
-        case p: SedonaArrowEvalPython => p
+      try {
+        plan.transformUpWithPruning(_.containsPattern(PYTHON_UDF)) {
+          case p: SedonaArrowEvalPython => p
 
-        case plan: LogicalPlan => extract(plan)
+          case plan: LogicalPlan => extract(plan)
+        }
+      } catch {
+        case e: Throwable =>
+          if (!hasFailedBefore) {
+            log.warn(
+              s"Vectorized UDF feature won't be available due to plan transformation error.")
+            log.warn(
+              s"Failed to extract Sedona UDFs from plan: ${plan.treeString}\n" +
+                s"Exception: ${e.getMessage}",
+              e)
+            hasFailedBefore = true
+          }
+          plan
       }
   }
 

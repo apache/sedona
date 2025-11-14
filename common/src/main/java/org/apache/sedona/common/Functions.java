@@ -572,10 +572,16 @@ public class Functions {
   }
 
   public static Geometry envelope(Geometry geometry) {
+    if (geometry.isEmpty()) {
+      return geometry;
+    }
     return geometry.getEnvelope();
   }
 
-  public static double distance(Geometry left, Geometry right) {
+  public static Double distance(Geometry left, Geometry right) {
+    if (left.isEmpty() || right.isEmpty()) {
+      return null;
+    }
     return left.distance(right);
   }
 
@@ -1167,7 +1173,9 @@ public class Functions {
       } else {
         // if the merger couldn't join the lines, it will contain the individual lines, so return
         // the input
-        return geometry;
+        Object[] mergedLines = merger.getMergedLineStrings().toArray(new LineString[] {});
+        multiLineString = geometry.getFactory().createMultiLineString((LineString[]) mergedLines);
+        return multiLineString;
       }
     }
     return geometry.getFactory().createGeometryCollection();

@@ -16,7 +16,8 @@
 # under the License.
 
 [tool.bandit]
-skips = ["B101", "B403", "B405", "B608"]
+exclude_dirs = ["python/tests"]
+skips = ["B101"]
 
 [tool.codespell]
 ignore-words = '.github/linters/codespell.txt'
@@ -47,4 +48,5 @@ docs = [
   "blacken-docs",
   "sphinx",
   "sphinx_rtd_theme",
+  "sphinx-autobuild",
 ]

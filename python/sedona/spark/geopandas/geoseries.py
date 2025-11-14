@@ -60,99 +60,6 @@ from pyspark.pandas.internal import (
 # IMPLEMENTATION STATUS TRACKING
 # ============================================================================
 
-IMPLEMENTATION_STATUS = {
-    "IMPLEMENTED": [
-        "area",
-        "buffer",
-        "bounds",
-        "centroid",
-        "contains",
-        "crs",
-        "distance",
-        "envelope",
-        "geometry",
-        "intersection",
-        "intersects",
-        "is_empty",
-        "is_simple",
-        "is_valid",
-        "is_valid_reason",
-        "length",
-        "make_valid",
-        "set_crs",
-        "to_crs",
-        "to_geopandas",
-        "to_wkb",
-        "to_wkt",
-        "x",
-        "y",
-        "z",
-        "has_z",
-        "get_geometry",
-        "boundary",
-        "total_bounds",
-        "estimate_utm_crs",
-        "isna",
-        "isnull",
-        "notna",
-        "notnull",
-        "from_xy",
-        "copy",
-        "geom_type",
-        "sindex",
-    ],
-    "NOT_IMPLEMENTED": [
-        "clip",
-        "contains_properly",
-        "convex_hull",
-        "count_coordinates",
-        "count_geometries",
-        "count_interior_rings",
-        "explode",
-        "force_2d",
-        "force_3d",
-        "from_file",
-        "from_shapely",
-        "from_arrow",
-        "line_merge",
-        "reverse",
-        "segmentize",
-        "to_json",
-        "to_arrow",
-        "to_file",
-        "transform",
-        "unary_union",
-        "union_all",
-        "intersection_all",
-        "type",
-        "is_ring",
-        "is_ccw",
-        "is_closed",
-        "get_precision",
-        "concave_hull",
-        "delaunay_triangles",
-        "voronoi_polygons",
-        "minimum_rotated_rectangle",
-        "exterior",
-        "extract_unique_points",
-        "offset_curve",
-        "interiors",
-        "remove_repeated_points",
-        "set_precision",
-        "representative_point",
-        "minimum_bounding_circle",
-        "minimum_bounding_radius",
-        "minimum_clearance",
-        "normalize",
-        "m",
-    ],
-    "PARTIALLY_IMPLEMENTED": [
-        "fillna",  # Limited parameter support (no 'limit' parameter)
-        "from_wkb",
-        "from_wkt",  # Limited error handling options (only 'raise' supported)
-    ],
-}
-
 IMPLEMENTATION_PRIORITY = {
     "HIGH": [
         "contains",
@@ -280,7 +187,7 @@ class GeoSeries(GeoFrame, pspd.Series):
     - Uses Spark for distributed processing
     - Geometries are stored in WKB (Well-Known Binary) format internally
     - Some methods may have different performance characteristics
-    - Not all GeoPandas methods are implemented yet (see IMPLEMENTATION_STATUS)
+    - Not all GeoPandas methods are implemented yet (see Sedona GeoPandas docs).
 
     Performance Considerations:
     - Operations are distributed across Spark cluster
@@ -1070,12 +977,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("This method is not implemented yet.")
 
     @property
-    def convex_hull(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError(
-            _not_implemented_error(
-                "convex_hull", "Computes the convex hull of each geometry."
-            )
+    def convex_hull(self) -> "GeoSeries":
+        spark_expr = stf.ST_ConvexHull(self.spark.column)
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=True,
         )
 
     def delaunay_triangles(self, tolerance=0.0, only_edges=False):
@@ -1128,13 +1034,20 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
-    def minimum_bounding_circle(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+    def minimum_bounding_circle(self) -> "GeoSeries":
+        spark_expr = stf.ST_MinimumBoundingCircle(self.spark.column)
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=True,
+        )
 
-    def minimum_bounding_radius(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+    def minimum_bounding_radius(self) -> pspd.Series:
+        spark_struct = stf.ST_MinimumBoundingRadius(self.spark.column)
+        spark_radius = spark_struct.getField("radius")
+        return self._query_geometry_column(
+            spark_radius,
+            returns_geom=False,
+        )
 
     def minimum_clearance(self):
         # Implementation of the abstract method.
@@ -1176,9 +1089,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
-    def force_2d(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+    def force_2d(self) -> "GeoSeries":
+        spark_expr = stf.ST_Force_2D(self.spark.column)
+        return self._query_geometry_column(spark_expr, returns_geom=True)
 
     def force_3d(self, z=0):
         # Implementation of the abstract method.
@@ -1215,6 +1128,18 @@ class GeoSeries(GeoFrame, pspd.Series):
             return GeometryCollection()
 
         spark_expr = sta.ST_Union_Aggr(self.spark.column)
+        tmp = self._query_geometry_column(spark_expr, returns_geom=False, is_aggr=True)
+
+        ps_series = tmp.take([0])
+        geom = ps_series.iloc[0]
+        return geom
+
+    def intersection_all(self) -> BaseGeometry:
+        if len(self) == 0:
+            from shapely.geometry import GeometryCollection
+
+            return GeometryCollection()
+        spark_expr = sta.ST_Intersection_Aggr(self.spark.column)
         tmp = self._query_geometry_column(spark_expr, returns_geom=False, is_aggr=True)
 
         ps_series = tmp.take([0])
@@ -1458,9 +1383,22 @@ class GeoSeries(GeoFrame, pspd.Series):
             keep_name=keep_name,
         )
 
-    def intersection_all(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+    # ============================================================================
+    # Binary Predicates
+    # ============================================================================
+    def relate(self, other, align=None) -> pspd.Series:
+        other, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
+        spark_col = stp.ST_Relate(F.col("L"), F.col("R"))
+        result = self._row_wise_operation(
+            spark_col,
+            other,
+            align,
+            returns_geom=False,
+            default_val=None,
+        )
+        return result
 
     # ============================================================================
     # SPATIAL PREDICATES

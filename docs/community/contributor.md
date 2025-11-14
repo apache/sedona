@@ -44,6 +44,7 @@ Current Sedona PMC members are as follows:
 |     Sachio Wakai     |   SW186000   |    swakai@apache.org    |
 |      Jinxuan Wu      |   jinxuan    |   jinxuanw@apache.org   |
 |        Jia Yu        |   jiayuasu   |    jiayu@apache.org     |
+|      Feng Zhang      | zhangfengcdt |  fengzhang@apache.org   |
 |     Zongsi Zhang     | zongsizhang  | zongsizhang@apache.org  |
 |     Felix Cheung     |              | felixcheung@apache.org  |
 |     Von Gosling      |              |  vongosling@apache.org  |
@@ -65,12 +66,13 @@ The PMC also adds new PMC members. PMC members are expected to carry out PMC res
 
 Current Sedona Committers are as follows:
 
-|      Name      |   GitHub ID   |      Apache ID       |
-|:--------------:|:-------------:|:--------------------:|
-|  John Bampton  |   jbampton    |  johnbam@apache.org  |
-| Nilesh Gajwani |    iGN5117    |  nilesh@apache.org   |
-|  Pranav Toggi  |   prantogg    | prantogg@apache.org  |
-|   Feng Zhang   | zhangfengcdt  | fengzhang@apache.org |
+|       Name       |  GitHub ID  |        Apache ID        |
+|:----------------:|:-----------:|:-----------------------:|
+|   John Bampton   |  jbampton   |   johnbam@apache.org    |
+| Dewey Dunnington | paleolimbot | paleolimbot@apache.org  |
+|  Nilesh Gajwani  |   iGN5117   |    nilesh@apache.org    |
+|   Peter Nguyen   |  petern48   |    petern@apache.org    |
+|   Pranav Toggi   |  prantogg   |   prantogg@apache.org   |
 
 ## Nominate a committer or PMC member
 

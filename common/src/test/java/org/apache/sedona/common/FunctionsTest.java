@@ -1473,6 +1473,19 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void distance_empty_geometries() throws ParseException {
+    Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(90, 0));
+    LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 0, 90));
+
+    // Ensure operations involving empty geometries return null
+    Geometry emptyGeom1 = GEOMETRY_FACTORY.createPoint();
+    Geometry emptyGeom2 = GEOMETRY_FACTORY.createGeometryCollection();
+    assertNull(Functions.distance(emptyGeom1, emptyGeom2));
+    assertNull(Functions.distance(point, emptyGeom1));
+    assertNull(Functions.distance(emptyGeom1, lineString));
+  }
+
+  @Test
   public void haversineDistance() {
     // Basic check
     Point p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(90, 0));

@@ -19,6 +19,7 @@
 package org.apache.sedona.sql
 
 import org.apache.commons.codec.binary.Hex
+import org.apache.commons.io.FileUtils
 import org.apache.sedona.common.FunctionsGeoTools
 import org.apache.sedona.sql.implicits._
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
@@ -35,7 +36,8 @@ import org.geotools.api.referencing.FactoryException
 import org.scalatest.{GivenWhenThen, Matchers}
 import org.xml.sax.InputSource
 
-import java.io.StringReader
+import java.io.{File, StringReader}
+import java.nio.file.Files
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.xpath.XPathFactory
 
@@ -203,6 +205,26 @@ class functionTestScala
       var functionDf =
         sparkSession.sql("select ST_Envelope(polygondf.countyshape) from polygondf")
       assert(functionDf.count() > 0)
+    }
+
+    it("Passes ST_Envelope returns input if input is empty") {
+      var emptyGeometries = Seq(
+        ("POINT EMPTY"),
+        ("LINESTRING EMPTY"),
+        ("POLYGON EMPTY"),
+        ("MULTIPOINT EMPTY"),
+        ("MULTILINESTRING EMPTY"),
+        ("MULTIPOLYGON EMPTY"),
+        ("GEOMETRYCOLLECTION EMPTY"),
+        ("GEOMETRYCOLLECTION (GEOMETRYCOLLECTION EMPTY, LINESTRING EMPTY)")).toDF("wkt")
+
+      emptyGeometries.createOrReplaceTempView("emptyGeometries")
+      var functionDf = sparkSession.sql(
+        "SELECT ST_AsText(ST_Envelope(ST_GeomFromWKT(wkt))) FROM emptyGeometries")
+
+      val inputWkts = emptyGeometries.collect().map(_.getString(0))
+      val resultWkts = functionDf.collect().map(_.getString(0))
+      assert(resultWkts.sameElements(inputWkts))
     }
 
     it("Passed ST_Expand") {
@@ -2210,8 +2232,9 @@ class functionTestScala
     val testData = Seq(
       ("MULTILINESTRING ((-29 -27, -30 -29.7, -45 -33), (-45 -33, -46 -32))"),
       ("MULTILINESTRING ((-29 -27, -30 -29.7, -36 -31, -45 -33), (-45.2 -33.2, -46 -32))"),
-      ("POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))")).toDF(
-      "Geometry")
+      ("POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))"),
+      ("MULTILINESTRING ((10 160, 60 120), (120 140, 60 120), (120 140, 180 120), (100 180, 120 140))"))
+      .toDF("Geometry")
 
     When("Using ST_LineMerge")
     val testDF = testData.selectExpr("ST_LineMerge(ST_GeomFromText(Geometry)) as geom")
@@ -2223,8 +2246,9 @@ class functionTestScala
       .collect() should contain theSameElementsAs
       List(
         "LINESTRING (-29 -27, -30 -29.7, -45 -33, -46 -32)",
-        "MULTILINESTRING ((-29 -27, -30 -29.7, -36 -31, -45 -33), (-45.2 -33.2, -46 -32))",
-        "GEOMETRYCOLLECTION EMPTY")
+        "MULTILINESTRING ((-45.2 -33.2, -46 -32), (-29 -27, -30 -29.7, -36 -31, -45 -33))",
+        "GEOMETRYCOLLECTION EMPTY",
+        "MULTILINESTRING ((10 160, 60 120, 120 140), (100 180, 120 140), (120 140, 180 120))")
   }
 
   it("Should pass ST_LocateAlong") {
@@ -4129,5 +4153,87 @@ class functionTestScala
     val simplifiedMedialAxis =
       squareWithTwoHolesSimplified.first().getAs[org.locationtech.jts.geom.Geometry](0)
     assert(simplifiedMedialAxis != null, "Simplified medial axis should not be null")
+  }
+
+  it("Test that CREATE VIEW fails with multiple temporary Sedona functions") {
+    val timestamp = System.currentTimeMillis()
+    val tmpDir: String =
+      Files.createTempDirectory("sedona_geoparquet_test_").toFile.getAbsolutePath
+
+    val buildings = sparkSession.sql("""
+      SELECT
+        ST_GeomFromWKT('POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))') as geom,
+        'Building 1' as PROP_ADDR
+      UNION ALL
+      SELECT
+        ST_GeomFromWKT('POLYGON((2 2, 3 2, 3 3, 2 3, 2 2))') as geom,
+        'Building 2' as PROP_ADDR
+    """)
+    buildings.write
+      .mode("overwrite")
+      .option("path", s"$tmpDir/sedona_test_${timestamp}_buildings")
+      .saveAsTable("nyc_buildings_geom_test")
+
+    val zones = sparkSession.sql("""
+      SELECT
+        ST_GeomFromWKT('POLYGON((0 0, 5 0, 5 5, 0 5, 0 0))') as zone_geom,
+        100.0 as elevation
+    """)
+    zones.write
+      .mode("overwrite")
+      .option("path", s"$tmpDir/sedona_test_${timestamp}_zones")
+      .saveAsTable("elevation_zones_test")
+
+    // Attempt to create a permanent VIEW with multiple Sedona functions
+    sparkSession.sql("""
+      CREATE VIEW nyc_buildings_with_functions AS
+      SELECT * FROM (
+        SELECT
+          nyc_buildings_geom_test.PROP_ADDR AS name,
+          nyc_buildings_geom_test.geom AS building_geom,
+          avg(elevation_zones_test.elevation) AS elevation
+        FROM
+          nyc_buildings_geom_test
+        JOIN
+          elevation_zones_test
+        ON
+          st_intersects(nyc_buildings_geom_test.geom, elevation_zones_test.zone_geom)
+        GROUP BY
+          nyc_buildings_geom_test.PROP_ADDR, nyc_buildings_geom_test.geom
+      )
+      WHERE elevation > 0
+    """)
+
+    // Query the view and assert results
+    val result = sparkSession.sql("SELECT * FROM nyc_buildings_with_functions").collect()
+    assert(result.length == 2, s"Expected 2 rows, but got ${result.length}")
+
+    // Assert both buildings are in the result
+    val buildingNames = result.map(_.getString(0)).toSet
+    assert(buildingNames.contains("Building 1"), "Building 1 should be in the result")
+    assert(buildingNames.contains("Building 2"), "Building 2 should be in the result")
+
+    sparkSession.sql("""
+      CREATE VIEW nyc_buildings_envelope_aggr_functions AS
+        SELECT
+          ST_Envelope_Aggr(nyc_buildings_geom_test.geom) AS building_geom_envelope
+        FROM
+          nyc_buildings_geom_test
+    """)
+
+    // Query the aggregate view and assert results
+    val result_aggr =
+      sparkSession.sql("SELECT * FROM nyc_buildings_envelope_aggr_functions").collect()
+    assert(result_aggr.length == 1, s"Expected 1 row, but got ${result_aggr.length}")
+
+    // Assert that the views were created
+    val views = sparkSession.sql("SHOW VIEWS").collect()
+    val view1Exists = views.exists(row => row.getString(1) == "nyc_buildings_with_functions")
+    assert(view1Exists, "View 'nyc_buildings_with_functions' should be created")
+    val view2Exists =
+      views.exists(row => row.getString(1) == "nyc_buildings_envelope_aggr_functions")
+    assert(view2Exists, "View 'nyc_buildings_envelope_aggr_functions' should be created")
+
+    FileUtils.deleteDirectory(new File(tmpDir))
   }
 }
