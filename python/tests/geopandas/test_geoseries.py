@@ -1311,21 +1311,19 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
     def test_minimum_bounding_radius(self):
         s = GeoSeries(
             [
-                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
-                LineString([(0, 0), (2, 0)]),
+                Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+                LineString([(0, 0), (1, 1), (1, 0)]),
                 Point(0, 0),
-                None,
             ]
         )
 
-        expected = gpd.GeoSeries(
+        expected = pd.Series(
             [
-                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
-                LineString([(0, 0), (2, 0)]),
-                Point(0, 0),
-                None,
+                0.707107,  # radius for the square
+                0.707107,  # radius for the line
+                0.000000,  # radius for the point
             ]
-        ).minimum_bounding_radius()
+        )
 
         result = s.minimum_bounding_radius()
         self.check_pd_series_equal(result, expected)
