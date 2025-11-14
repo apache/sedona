@@ -781,7 +781,10 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result, tolerance=0.5)
 
     def test_minimum_bounding_radius(self):
-        pass
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).minimum_bounding_radius()
+            gpd_result = gpd.GeoSeries(geom).minimum_bounding_radius()
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_minimum_clearance(self):
         pass
