@@ -1617,7 +1617,7 @@
 <a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.segmentize">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">segmentize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_segment_length</span><span class="p">):</span>
         <span class="n">other_series</span><span class="p">,</span> <span class="n">extended</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_series_of_val</span><span class="p">(</span><span class="n">max_segment_length</span><span class="p">)</span>
-        <span class="n">align</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">extended</span> <span class="k">else</span> <span class="n">align</span>
+        <span class="n">align</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">extended</span>
 
         <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_Segmentize</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_row_wise_operation</span><span class="p">(</span>
@@ -3508,11 +3508,13 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            tuple[pspd.Series, bool]:</span>
 <span class="sd">                - The series of the value</span>
-<span class="sd">                - Whether returned value was a single object extended into a series (useful for row-wise &#39;align&#39; parameter)</span>
+<span class="sd">                - Whether returned value was a extended into a series (useful for row-wise &#39;align&#39; parameter)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># generator instead of a in-memory list</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">GeoDataFrame</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="kc">False</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="kc">True</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
             <span class="n">lst</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))]</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">BaseGeometry</span><span class="p">):</span>
