@@ -1464,6 +1464,24 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = s.to_geoframe().segmentize(5)
         self.check_sgpd_equals_gpd(df_result, expected)
 
+        # Test array-like input
+        result = s.segmentize(ps.Series([5, 10]))
+        expected = gpd.GeoSeries(
+            [
+                LineString([(0, 0), (0, 5), (0, 10)]),
+                Polygon(
+                    [
+                        (0, 0),
+                        (10, 0),
+                        (10, 10),
+                        (0, 10),
+                        (0, 0),
+                    ]
+                ),
+            ],
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
     def test_transform(self):
         pass
 
