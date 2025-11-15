@@ -1075,7 +1075,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     def segmentize(self, max_segment_length):
         other_series, extended = self._make_series_of_val(max_segment_length)
-        align = False if extended else align
+        align = False if extended else True
 
         spark_expr = stf.ST_Segmentize(F.col("L"), F.col("R"))
         return self._row_wise_operation(
