@@ -2833,11 +2833,13 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         Returns:
             tuple[pspd.Series, bool]:
                 - The series of the value
-                - Whether returned value was a single object extended into a series (useful for row-wise 'align' parameter)
+                - Whether returned value was a extended into a series (useful for row-wise 'align' parameter)
         """
         # generator instead of a in-memory list
         if isinstance(value, GeoDataFrame):
             return value.geometry, False
+        elif isinstance(value, (list, np.ndarray)):
+            return pspd.Series(value), True
         elif not isinstance(value, pspd.Series):
             lst = [value for _ in range(len(self))]
             if isinstance(value, BaseGeometry):
