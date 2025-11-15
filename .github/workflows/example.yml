@@ -44,18 +44,41 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - spark: 4.0.1
+            spark-compat: '4.0'
+            sedona: 1.8.0
+            hadoop: 3.4.2
           - spark: 3.5.0
             spark-compat: '3.5'
-            sedona: 1.5.1
+            sedona: 1.8.0
+            hadoop: 3.3.4
           - spark: 3.4.2
             spark-compat: '3.4'
-            sedona: 1.5.1
+            sedona: 1.8.0
+            hadoop: 3.3.4
+    env:
+      JAVA_TOOL_OPTIONS: >-
+        -XX:+IgnoreUnrecognizedVMOptions
+        --add-opens=java.base/java.lang=ALL-UNNAMED
+        --add-opens=java.base/java.lang.invoke=ALL-UNNAMED
+        --add-opens=java.base/java.lang.reflect=ALL-UNNAMED
+        --add-opens=java.base/java.io=ALL-UNNAMED
+        --add-opens=java.base/java.net=ALL-UNNAMED
+        --add-opens=java.base/java.nio=ALL-UNNAMED
+        --add-opens=java.base/java.util=ALL-UNNAMED
+        --add-opens=java.base/java.util.concurrent=ALL-UNNAMED
+        --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED
+        --add-opens=java.base/sun.nio.ch=ALL-UNNAMED
+        --add-opens=java.base/sun.nio.cs=ALL-UNNAMED
+        --add-opens=java.base/sun.security.action=ALL-UNNAMED
+        --add-opens=java.base/sun.util.calendar=ALL-UNNAMED
+        -Djdk.reflect.useDirectMethodHandle=false
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '11'
+          java-version: '17'
       - run: sudo apt-get remove scala-library scala
       - run: sudo wget www.scala-lang.org/files/archive/scala-2.12.11.deb
       - run: sudo dpkg -i scala-2.12.11.deb
@@ -82,5 +105,20 @@ jobs:
           SPARK_LOCAL_IP: 127.0.0.1
           SPARK_COMPAT_VERSION: ${{ matrix.spark-compat }}
           SEDONA_VERSION: ${{ matrix.sedona }}
-        run: (cd examples/spark-sql;mvn clean install -Dspark.version=${SPARK_VERSION} -Dspark.compat.version=${SPARK_COMPAT_VERSION} -Dsedona.version=${SEDONA_VERSION};java -jar target/sedona-spark-example-1.6.0.jar)
-      - run: (cd examples/flink-sql;mvn clean install;java -jar target/sedona-flink-example-1.6.0.jar)
+          HADOOP_VERSION: ${{ matrix.hadoop }}
+        run: |
+          cd examples/spark-sql
+          mvn versions:set -DnewVersion=${SEDONA_VERSION} -DgenerateBackupPoms=false
+          mvn clean install \
+            -Dspark.version=${SPARK_VERSION} \
+            -Dspark.compat.version=${SPARK_COMPAT_VERSION} \
+            -Dsedona.version=${SEDONA_VERSION} \
+            -Dhadoop.version=${HADOOP_VERSION}
+          java -jar target/sedona-spark-example-${SEDONA_VERSION}.jar
+      - env:
+          SEDONA_VERSION: ${{ matrix.sedona }}
+        run: |
+          cd examples/flink-sql
+          mvn versions:set -DnewVersion=${SEDONA_VERSION} -DgenerateBackupPoms=false
+          mvn clean install
+          java -jar target/sedona-flink-example-${SEDONA_VERSION}.jar

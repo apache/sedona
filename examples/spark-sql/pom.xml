@@ -23,7 +23,7 @@
 
     <groupId>org.apache.sedona</groupId>
     <artifactId>sedona-spark-example</artifactId>
-    <version>1.6.0</version>
+    <version>1.8.0</version>
     <name>Sedona : Examples : Spark</name>
     <description>Maven Example for SedonaDB</description>
     <packaging>jar</packaging>
@@ -34,13 +34,31 @@
         <sedona.scope>compile</sedona.scope>
         <geotools.scope>compile</geotools.scope>
 
-        <geotools.version>28.2</geotools.version>
+        <geotools.version>33.1</geotools.version>
         <jt-jiffle.version>1.1.24</jt-jiffle.version>
-        <spark.version>3.4.0</spark.version>
-        <spark.compat.version>3.4</spark.compat.version>
-        <scala.compat.version>2.12</scala.compat.version>
-        <sedona.version>1.5.1</sedona.version>
-        <hadoop.version>3.3.4</hadoop.version>
+        <spark.version>4.0.1</spark.version>
+        <spark.compat.version>4.0</spark.compat.version>
+        <scala.compat.version>2.13</scala.compat.version>
+        <hadoop.version>3.4.2</hadoop.version>
+
+        <!-- For JDK-17 and above -->
+        <extraJavaArgs>
+            -XX:+IgnoreUnrecognizedVMOptions
+            --add-opens=java.base/java.lang=ALL-UNNAMED
+            --add-opens=java.base/java.lang.invoke=ALL-UNNAMED
+            --add-opens=java.base/java.lang.reflect=ALL-UNNAMED
+            --add-opens=java.base/java.io=ALL-UNNAMED
+            --add-opens=java.base/java.net=ALL-UNNAMED
+            --add-opens=java.base/java.nio=ALL-UNNAMED
+            --add-opens=java.base/java.util=ALL-UNNAMED
+            --add-opens=java.base/java.util.concurrent=ALL-UNNAMED
+            --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED
+            --add-opens=java.base/sun.nio.ch=ALL-UNNAMED
+            --add-opens=java.base/sun.nio.cs=ALL-UNNAMED
+            --add-opens=java.base/sun.security.action=ALL-UNNAMED
+            --add-opens=java.base/sun.util.calendar=ALL-UNNAMED
+            -Djdk.reflect.useDirectMethodHandle=false
+        </extraJavaArgs>
     </properties>
 
     <dependencies>
@@ -59,7 +77,7 @@
         <dependency>
             <groupId>org.apache.sedona</groupId>
             <artifactId>sedona-spark-${spark.compat.version}_${scala.compat.version}</artifactId>
-            <version>${sedona.version}</version>
+            <version>${project.version}</version>
             <scope>${sedona.scope}</scope>
         </dependency>
         <!--The following GeoTools dependencies use GNU Lesser General Public License and thus are excluded from the binary distribution-->
@@ -172,7 +190,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>4.13.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -273,7 +291,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>2.1</version>
+                <version>3.5.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -291,6 +309,7 @@
                                 </transformer>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>Main</mainClass>
                                     <manifestEntries>
                                         <Specification-Title>Java Advanced Imaging Image I/O Tools</Specification-Title>
                                         <Specification-Version>1.1</Specification-Version>
@@ -316,6 +335,25 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <mainClass>Main</mainClass>
+                    <arguments>
+                        <argument>${extraJavaArgs}</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
+                <configuration>
+                    <argLine>${extraJavaArgs}</argLine>
+                </configuration>
             </plugin>
         </plugins>
         <resources>
