@@ -674,6 +674,21 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = geoseries.to_geoframe().length
         self.check_pd_series_equal(df_result, expected)
 
+        # Ensure M-dimension doesn't break things.
+        s = GeoSeries(
+            [
+                wkt.loads("POINT M (0 0 0)"),
+                wkt.loads("LINESTRING M (0 0 0, 1 1 0)"),
+                wkt.loads("POLYGON M ((0 0 0, 1 0 0, 1 1 0, 0 0 0))"),
+                wkt.loads(
+                    "GEOMETRYCOLLECTION M (POINT M (0 0 0), LINESTRING M (0 0 0, 1 1 0), POLYGON M ((0 0 0, 1 0 0, 1 1 0, 0 0 0)))"
+                ),
+            ]
+        )
+        result = s.length
+        expected = pd.Series([0.000000, 1.414214, 3.414214, 4.828427])
+        self.check_pd_series_equal(result, expected)
+
     def test_is_valid(self):
         geoseries = sgpd.GeoSeries(
             [
@@ -1088,6 +1103,15 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = s.to_geoframe().is_closed
         self.check_pd_series_equal(result, expected)
 
+        s = GeoSeries(
+            [
+                wkt.loads("LINESTRING M (0 0 0, 1 1 0, 1 -1 0, 0 0 0)"),
+            ]
+        )
+        result = s.is_closed
+        expected = pd.Series([True])
+        self.check_pd_series_equal(result, expected)
+
     def test_has_z(self):
         s = sgpd.GeoSeries(
             [
@@ -1180,6 +1204,20 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         # Check that GeoDataFrame works too
         df_result = s.to_geoframe().boundary
         self.check_sgpd_equals_gpd(df_result, expected)
+
+        # Ensure M-dimension doesn't break things.
+        s = GeoSeries(
+            [
+                wkt.loads("GEOMETRYCOLLECTION M (POINT M (1 2 3))"),
+            ]
+        )
+        result = s.boundary
+        expected = gpd.GeoSeries(
+            [
+                None,
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
 
     def test_centroid(self):
         s = sgpd.GeoSeries(
@@ -1556,6 +1594,21 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         # Check that GeoDataFrame works too
         df_result = s.to_geoframe().crosses(s2, align=False)
         self.check_pd_series_equal(df_result, expected)
+
+        # Sedona ST_Crosses doesn't support GeometryCollection, so it returns NULL for now.
+        # https://github.com/apache/sedona/issues/2417
+        # Once this is resolved, we can update the expected result of this test.
+        # Ensure M-dimension doesn't break things.
+        s = GeoSeries(
+            [
+                wkt.loads("GEOMETRYCOLLECTION M (POINT M (1 2 3))"),
+                wkt.loads("LINESTRING M (0 0 1, 1 1 2)"),
+            ]
+        )
+        line = LineString([(0, 0), (1, 1)])
+        result = s.crosses(line)
+        expected = pd.Series([None, False])
+        self.check_pd_series_equal(result, expected)
 
     def test_disjoint(self):
         pass

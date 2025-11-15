@@ -740,21 +740,25 @@ class GeoSeries(GeoFrame, pspd.Series):
     def length(self) -> pspd.Series:
         spark_expr = (
             F.when(
-                stf.GeometryType(self.spark.column).isin(
-                    ["LINESTRING", "MULTILINESTRING"]
+                stf.ST_GeometryType(self.spark.column).isin(
+                    ["ST_LineString", "ST_MultiLineString"]
                 ),
                 stf.ST_Length(self.spark.column),
             )
             .when(
-                stf.GeometryType(self.spark.column).isin(["POLYGON", "MULTIPOLYGON"]),
+                stf.ST_GeometryType(self.spark.column).isin(
+                    ["ST_Polygon", "ST_MultiPolygon"]
+                ),
                 stf.ST_Perimeter(self.spark.column),
             )
             .when(
-                stf.GeometryType(self.spark.column).isin(["POINT", "MULTIPOINT"]),
+                stf.ST_GeometryType(self.spark.column).isin(
+                    ["ST_Point", "ST_MultiPoint"]
+                ),
                 0.0,
             )
             .when(
-                stf.GeometryType(self.spark.column).isin(["GEOMETRYCOLLECTION"]),
+                stf.ST_GeometryType(self.spark.column).isin(["ST_GeometryCollection"]),
                 stf.ST_Length(self.spark.column) + stf.ST_Perimeter(self.spark.column),
             )
         )
@@ -953,7 +957,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Geopandas and shapely return NULL for GeometryCollections, so we handle it separately
         # https://shapely.readthedocs.io/en/stable/reference/shapely.boundary.html
         spark_expr = F.when(
-            stf.GeometryType(self.spark.column).isin(["GEOMETRYCOLLECTION"]),
+            stf.ST_GeometryType(self.spark.column).isin(["ST_GeometryCollection"]),
             None,
         ).otherwise(stf.ST_Boundary(self.spark.column))
         return self._query_geometry_column(
@@ -1148,8 +1152,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         align = False if extended else align
 
         spark_expr = F.when(
-            (stf.GeometryType(F.col("L")) == "GEOMETRYCOLLECTION")
-            | (stf.GeometryType(F.col("R")) == "GEOMETRYCOLLECTION"),
+            (stf.ST_GeometryType(F.col("L")) == "ST_GeometryCollection")
+            | (stf.ST_GeometryType(F.col("R")) == "ST_GeometryCollection"),
             None,
         ).otherwise(stp.ST_Crosses(F.col("L"), F.col("R")))
         result = self._row_wise_operation(
