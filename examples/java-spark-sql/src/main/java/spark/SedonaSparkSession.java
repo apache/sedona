@@ -16,36 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package spark;
 
 import org.apache.sedona.spark.SedonaContext;
 import org.apache.spark.sql.SparkSession;
 
-
 public class SedonaSparkSession {
 
-    public SparkSession session;
+  public SparkSession session;
 
-    public SedonaSparkSession() {
+  public SedonaSparkSession() {
 
-        //Set configuration for localhost spark cluster. Intended to be run from IDE or similar.
-        //Use SedonaContext builder to create SparkSession with Sedona extensions
-        SparkSession config = SedonaContext.builder()
-                                   .appName(this.getClass().getSimpleName())
-                                   .master("local[*]")
-                                   .config("spark.ui.enabled", "false")
-                                   .config("spark.driver.extraJavaOptions",
-                                        "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED")
-                                   .getOrCreate();
+    // Set configuration for localhost spark cluster. Intended to be run from IDE or similar.
+    // Use SedonaContext builder to create SparkSession with Sedona extensions
+    SparkSession config =
+        SedonaContext.builder()
+            .appName(this.getClass().getSimpleName())
+            .master("local[*]")
+            .config("spark.ui.enabled", "false")
+            .config(
+                "spark.driver.extraJavaOptions",
+                "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED")
+            .getOrCreate();
 
-        //Create Sedona-enabled SparkSession
-        this.session = SedonaContext.create(config);
-    }
+    // Create Sedona-enabled SparkSession
+    this.session = SedonaContext.create(config);
+  }
 
-    public SparkSession getSession() {
-        // Access SparkSession object
-        return this.session;
-    }
-
+  public SparkSession getSession() {
+    // Access SparkSession object
+    return this.session;
+  }
 }
