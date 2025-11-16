@@ -19,6 +19,8 @@
 
 package spark;
 
+import org.apache.sedona.core.spatialOperator.RangeQuery;
+import org.apache.sedona.core.spatialOperator.SpatialPredicate;
 import org.apache.sedona.core.spatialRDD.SpatialRDD;
 import org.apache.sedona.sql.utils.Adapter;
 import org.apache.spark.sql.Dataset;
@@ -28,14 +30,12 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
-import org.apache.sedona.core.spatialOperator.SpatialPredicate;
-import org.apache.sedona.core.spatialOperator.RangeQuery;
 
 import java.util.List;
 
 
 public class GeoParquetAccessor {
-    
+
     private final SparkSession session;
     private String parquetPath;
 
@@ -43,7 +43,7 @@ public class GeoParquetAccessor {
         this.session = new SedonaSparkSession().getSession();
         this.parquetPath = "";
     }
-    
+
     //Overload with constructor that has Spark session provided
     //Use to avoid error - can't have two SparkContext objects on one JVM
     public GeoParquetAccessor(SparkSession session, String parquetPath) {
@@ -53,7 +53,7 @@ public class GeoParquetAccessor {
 
     public List<Geometry> selectFeaturesByPolygon(double xmin, double ymax,
                                                   double xmax, double ymin,
-                                                  String geometryColumn) {        
+                                                  String geometryColumn) {
 
         //Read the GeoParquet file into a DataFrame
         Dataset<Row> insarDF = session.read().format("geoparquet").load(parquetPath);
@@ -86,5 +86,5 @@ public class GeoParquetAccessor {
         // Collect the results back to the driver
         return resultRDD.getRawSpatialRDD().collect();
     }
-    
+
 }

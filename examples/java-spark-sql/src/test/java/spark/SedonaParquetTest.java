@@ -19,56 +19,55 @@
 
 package spark;
 
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 import java.util.Properties;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class SedonaParquetTest {
-    
-    
+
+
     protected static Properties properties;
-    protected static String parquetPath;    
+    protected static String parquetPath;
     protected static SedonaSparkSession session;
-    
+
     public SedonaParquetTest() {
     }
-    
+
     @BeforeAll
     public static void setUpClass() throws IOException {
 
         session = new SedonaSparkSession();
         //Get parquetPath and any other application.properties
-        try { 
+        try {
             ClassLoader loader = Thread.currentThread().getContextClassLoader();
             Properties properties = new Properties();
             InputStream is = loader.getResourceAsStream("application.properties");
-            properties.load(is); 
+            properties.load(is);
             parquetPath = properties.getProperty("parquet.path");
         } catch (IOException e) {
             e.printStackTrace();
             parquetPath = "";
         }
-        
+
     }
-    
+
     @AfterAll
     public static void tearDownClass() {
     }
-    
+
     @BeforeEach
     public void setUp() {
     }
@@ -76,7 +75,7 @@ public class SedonaParquetTest {
     @AfterEach
     public void tearDown() {
     }
-    
+
     @Test
     public void connects() {
         assertNotNull(session, "SparkSedonaSession not initialized correctly.");
@@ -101,5 +100,3 @@ public class SedonaParquetTest {
     }
 
 }
-
-    

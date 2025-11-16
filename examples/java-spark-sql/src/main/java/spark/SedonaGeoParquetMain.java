@@ -21,7 +21,7 @@ package spark;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
-import java.io.File;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -30,18 +30,18 @@ import java.util.Properties;
 public class SedonaGeoParquetMain {
 
     protected static Properties properties;
-    protected static String parquetPath;    
+    protected static String parquetPath;
     protected static SedonaSparkSession session;
 
     public static void main(String args[]) {
 
         session = new SedonaSparkSession();
         //Get parquetPath and any other application.properties
-        try { 
+        try {
             ClassLoader loader = Thread.currentThread().getContextClassLoader();
             Properties properties = new Properties();
             InputStream is = loader.getResourceAsStream("application.properties");
-            properties.load(is); 
+            properties.load(is);
             parquetPath = properties.getProperty("parquet.path");
         } catch (IOException e) {
             e.printStackTrace();

@@ -60,7 +60,7 @@ To run the jar in this way, you need to:
 
 We highly suggest you use IDEs to run template projects on your local machine. For Scala, we recommend IntelliJ IDEA with Scala plug-in. For Java, we recommend IntelliJ IDEA and Eclipse. With the help of IDEs, **you don't have to prepare anything** (even don't need to download and set up Spark!). As long as you have Scala and Java, everything works properly!
 
-* In the case of the java-spark-sql template, execute `mvn test` to run JUnit tests using sample GeoParquet file. 
+* In the case of the java-spark-sql template, execute `mvn test` to run JUnit tests using sample GeoParquet file.
 
 ### Scala
 

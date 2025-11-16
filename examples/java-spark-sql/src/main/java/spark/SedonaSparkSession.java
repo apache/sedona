@@ -19,38 +19,33 @@
 
 package spark;
 
+import org.apache.sedona.spark.SedonaContext;
 import org.apache.spark.sql.SparkSession;
-import org.apache.sedona.sql.utils.SedonaSQLRegistrator;
-import org.apache.spark.SparkConf;
-import org.apache.spark.sql.RuntimeConfig;
 
 
 public class SedonaSparkSession {
-    
-    private SparkConf conf;
-    private RuntimeConfig config;
+
     public SparkSession session;
 
     public SedonaSparkSession() {
 
-        //Set configuration for localhost spark cluster. Intended ot be run from IDE or similar.
-        this.conf = new SparkConf().setAppName(this.getClass().getSimpleName())
-                                   .setMaster("local[*]")
-                                   .set("spark.ui.enabled", "false") 
-                                   .set("spark.driver.extraJavaOptions",
-                                        "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED");
-        this.session = SparkSession.builder()
-                                    .config(this.conf)
-                                    .getOrCreate();
-        //Configure Saprk session to execute with Sedona
-        SedonaSQLRegistrator.registerAll(this.session);
-        this.config = this.session.conf();
+        //Set configuration for localhost spark cluster. Intended to be run from IDE or similar.
+        //Use SedonaContext builder to create SparkSession with Sedona extensions
+        SparkSession config = SedonaContext.builder()
+                                   .appName(this.getClass().getSimpleName())
+                                   .master("local[*]")
+                                   .config("spark.ui.enabled", "false")
+                                   .config("spark.driver.extraJavaOptions",
+                                        "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED")
+                                   .getOrCreate();
+
+        //Create Sedona-enabled SparkSession
+        this.session = SedonaContext.create(config);
     }
 
     public SparkSession getSession() {
-        // Access SparkSession object 
+        // Access SparkSession object
         return this.session;
     }
-    
-}
 
+}
