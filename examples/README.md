@@ -29,6 +29,7 @@ The folder structure of this repository is as follows.
 
 * spark-sql: a Scala template shows how to use Sedona RDD, DataFrame and SQL API
 * flink-sql: a Java template show how to use Sedona SQL via Flink Table APIs
+* java-spark-sql: a pure Java template implementation and use case for Sedona RDD, DataFrame and SQL API
 
 ## Compile and package
 
@@ -58,6 +59,8 @@ To run the jar in this way, you need to:
 ## Run template projects locally
 
 We highly suggest you use IDEs to run template projects on your local machine. For Scala, we recommend IntelliJ IDEA with Scala plug-in. For Java, we recommend IntelliJ IDEA and Eclipse. With the help of IDEs, **you don't have to prepare anything** (even don't need to download and set up Spark!). As long as you have Scala and Java, everything works properly!
+
+* In the case of the java-spark-sql template, execute `mvn test` to run JUnit tests using sample GeoParquet file.
 
 ### Scala
 
