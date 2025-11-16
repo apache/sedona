@@ -26,6 +26,15 @@ import org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator
 import org.apache.sedona.viz.sql.utils.SedonaVizRegistrator
 
 
+/**
+ * Main entry point for running Sedona SQL, RDD, and Visualization examples.
+ * Demonstrates various spatial operations including:
+ * - SQL-based spatial queries and joins
+ * - GeoParquet I/O operations
+ * - Shapefile and raster data handling
+ * - RDD-based spatial analysis
+ * - Spatial visualization techniques
+ */
 object Main extends App {
   Logger.getRootLogger().setLevel(Level.WARN)
 
@@ -39,20 +48,31 @@ object Main extends App {
 
 	val resourceFolder = System.getProperty("user.dir")+"/src/test/resources/"
 
+  // SQL-based spatial operations
+  println("=== Running SQL Examples ===")
   testPredicatePushdownAndRangeJonQuery(sedona)
   testDistanceJoinQuery(sedona)
   testAggregateFunction(sedona)
   testShapefileConstructor(sedona)
   testRasterIOAndMapAlgebra(sedona)
 
+  // GeoParquet operations
+  println("\n=== Running GeoParquet Examples ===")
+  testGeoParquetWriter(sedona)
+  testGeoParquetReader(sedona)
+
+  // RDD-based spatial analysis
+  println("\n=== Running RDD Examples ===")
   visualizeSpatialColocation(sedona)
   calculateSpatialColocation(sedona)
 
+  // Visualization examples
+  println("\n=== Running Visualization Examples ===")
   buildScatterPlot(sedona)
   buildHeatMap(sedona)
   buildChoroplethMap(sedona)
   parallelFilterRenderNoStitch(sedona)
   sqlApiVisualization(sedona)
-  System.out.println("All SedonaSQL DEMOs passed!")
 
+  println("\n✅ All Sedona examples completed successfully!")
 }

@@ -16,87 +16,71 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package spark;
 
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 public class SedonaParquetTest {
 
+  protected static Properties properties;
+  protected static String parquetPath;
+  protected static SedonaSparkSession session;
 
-    protected static Properties properties;
-    protected static String parquetPath;
-    protected static SedonaSparkSession session;
+  public SedonaParquetTest() {}
 
-    public SedonaParquetTest() {
+  @BeforeClass
+  public static void setUpClass() throws IOException {
+
+    session = new SedonaSparkSession();
+    // Get parquetPath and any other application.properties
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      Properties properties = new Properties();
+      InputStream is = loader.getResourceAsStream("application.properties");
+      properties.load(is);
+      parquetPath = properties.getProperty("parquet.path");
+    } catch (IOException e) {
+      e.printStackTrace();
+      parquetPath = "";
     }
+  }
 
-    @BeforeAll
-    public static void setUpClass() throws IOException {
+  @AfterClass
+  public static void tearDownClass() {}
 
-        session = new SedonaSparkSession();
-        //Get parquetPath and any other application.properties
-        try {
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
-            Properties properties = new Properties();
-            InputStream is = loader.getResourceAsStream("application.properties");
-            properties.load(is);
-            parquetPath = properties.getProperty("parquet.path");
-        } catch (IOException e) {
-            e.printStackTrace();
-            parquetPath = "";
-        }
+  @Before
+  public void setUp() {}
 
-    }
+  @Test
+  public void connects() {
+    assertNotNull("SparkSedonaSession not initialized correctly.", session);
+    assertNotNull("Spark session not initialized inside SparkSedonaSession.", session.session);
+  }
 
-    @AfterAll
-    public static void tearDownClass() {
-    }
+  @Test
+  public void parquetAccessible() {
+    File file = new File(parquetPath);
+    assertTrue("Parquet file does not exist.", file.exists());
+    assertTrue("Can't read geoparquet file on record.", file.canRead());
+  }
 
-    @BeforeEach
-    public void setUp() {
-    }
-
-    @AfterEach
-    public void tearDown() {
-    }
-
-    @Test
-    public void connects() {
-        assertNotNull(session, "SparkSedonaSession not initialized correctly.");
-        assertNotNull(session.session, "Spark session not initialized inside SparkSedonaSession.");
-    }
-
-    @Test
-    public void parquetAccessible() {
-        File file = new File(parquetPath);
-        assertTrue(file.exists(), "Parquet file does not exist.");
-        assertTrue(file.canRead(), "Can't read geoparquet file on record.");
-    }
-
-    @Test
-    public void canLoadRDD() {
-        assertNotNull(session, "Session is null.");
-        Dataset<Row> insarDF = session.session.read()
-                .format("geoparquet")
-                .load(parquetPath);
-        assertNotNull(insarDF, "Dataset was not created.");
-        assertTrue(insarDF.count() > 0, "Dataset is empty.");
-    }
-
+  @Test
+  public void canLoadRDD() {
+    assertNotNull("Session is null.", session);
+    Dataset<Row> insarDF = session.session.read().format("geoparquet").load(parquetPath);
+    assertNotNull("Dataset was not created.", insarDF);
+    assertTrue("Dataset is empty.", insarDF.count() > 0);
+  }
 }
