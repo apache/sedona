@@ -1094,8 +1094,16 @@ class GeoSeries(GeoFrame, pspd.Series):
         return self._query_geometry_column(spark_expr, returns_geom=True)
 
     def force_3d(self, z=0):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+        other_series, extended = self._make_series_of_val(z)
+        align = not extended
+
+        spark_expr = stf.ST_Force3D(F.col("L"), F.col("R"))
+        return self._row_wise_operation(
+            spark_expr,
+            other_series,
+            align=align,
+            returns_geom=True,
+        )
 
     def line_merge(self, directed=False):
         # Implementation of the abstract method.
