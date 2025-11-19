@@ -18,6 +18,7 @@ import os
 import shutil
 import tempfile
 import pytest
+import numpy as np
 import pandas as pd
 import geopandas as gpd
 import pyspark.pandas as ps
@@ -387,7 +388,6 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
         # Ensure filling with np.nan or pd.NA returns None
         # but filling None return empty geometry
-        import numpy as np
 
         for fill_val in [np.nan, pd.NA, None]:
             sgpd_result = GeoSeries(data).fillna(fill_val)
@@ -419,8 +419,6 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             )
 
     def test_total_bounds(self):
-        import numpy as np
-
         for geom in self.geoms:
             sgpd_result = GeoSeries(geom).total_bounds
             gpd_result = gpd.GeoSeries(geom).total_bounds
@@ -831,6 +829,26 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             sgpd_result = GeoSeries(geom).segmentize(2.5)
             gpd_result = gpd.GeoSeries(geom).segmentize(2.5)
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # Test array-like inputs
+        geoms = self.polygons
+        lst = list(range(1, len(geoms) + 1))
+
+        # Traditional python list
+        sgpd_result = GeoSeries(geoms).segmentize(lst)
+        gpd_result = gpd.GeoSeries(geoms).segmentize(lst)
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        np_array = np.array(lst)
+        sgpd_result = GeoSeries(geoms).segmentize(np_array)
+        gpd_result = gpd.GeoSeries(geoms).segmentize(np_array)
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # pandas series
+        psser = ps.Series(lst)
+        sgpd_result = GeoSeries(geoms).segmentize(psser)
+        gpd_result = gpd.GeoSeries(geoms).segmentize(psser.to_pandas())
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_transform(self):
         pass

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import Main.resourceFolder
 import org.apache.sedona.core.enums.{GridType, IndexType}
 import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader
 import org.apache.sedona.core.spatialOperator.JoinQuery
@@ -34,6 +33,8 @@ import java.awt.Color
 
 object RddExample {
 
+  val resourceFolder = System.getProperty("user.dir")+"/src/test/resources/"
+
   // Data link (in shapefile): https://geo.nyu.edu/catalog/nyu_2451_34514
   val nycArealandmarkShapefileLocation = resourceFolder+"nyc-area-landmark-shapefile"
 
@@ -42,16 +43,25 @@ object RddExample {
 
   val colocationMapLocation = System.getProperty("user.dir")+"/colocationMap"
 
+  /**
+   * Visualizes spatial co-location between NYC landmarks and taxi pickup points.
+   * Creates an overlay visualization with landmarks (scatter plot) and taxi trips (heat map).
+   *
+   * Note: This function uses RDD API to demonstrate low-level spatial operations.
+   * For DataFrame-based approach, see SqlExample.
+   *
+   * @param sedona SparkSession with Sedona extensions enabled
+   */
   def visualizeSpatialColocation(sedona: SparkSession): Unit =
   {
     // Prepare NYC area landmarks which includes airports, museums, colleges, hospitals
-    var arealmRDD = ShapefileReader.readToPolygonRDD(sedona.sparkContext, nycArealandmarkShapefileLocation)
+    val arealmRDD = ShapefileReader.readToPolygonRDD(sedona.sparkContext, nycArealandmarkShapefileLocation)
 
     // Prepare NYC taxi trips. Only use the taxi trips' pickup points
-    var tripDf = sedona.read.format("csv").option("delimiter",",").option("header","false").load(nyctripCSVLocation)
+    val tripDf = sedona.read.format("csv").option("delimiter",",").option("header","false").load(nyctripCSVLocation)
     // Convert from DataFrame to RDD. This can also be done directly through Sedona RDD API.
     tripDf.createOrReplaceTempView("tripdf")
-    var tripRDD = Adapter.toSpatialRdd(sedona.sql("select ST_Point(cast(tripdf._c0 as Decimal(24, 14)), cast(tripdf._c1 as Decimal(24, 14))) as point from tripdf")
+    val tripRDD = Adapter.toSpatialRdd(sedona.sql("select ST_Point(cast(tripdf._c0 as Decimal(24, 14)), cast(tripdf._c1 as Decimal(24, 14))) as point from tripdf")
       , "point")
 
     // Convert the Coordinate Reference System from degree-based to meter-based. This returns the accurate distance calculate.
@@ -79,6 +89,16 @@ object RddExample {
     imageGenerator.SaveRasterImageAsLocalFile(overlayOperator.backRasterImage, colocationMapLocation, ImageType.PNG)
   }
 
+  /**
+   * Calculates spatial co-location using Ripley's K function.
+   * Analyzes whether taxi trips are clustered around NYC landmarks at various distance thresholds.
+   * Uses distance join queries to compute co-location statistics.
+   *
+   * The Ripley's K function tests for spatial clustering/dispersion by comparing
+   * observed vs expected point patterns at increasing distance bands.
+   *
+   * @param sedona SparkSession with Sedona extensions enabled
+   */
   def calculateSpatialColocation(sedona: SparkSession): Unit =
   {
 
@@ -88,22 +108,22 @@ object RddExample {
     // Use the center point of area landmarks to check co-location. This is required by Ripley's K function.
     arealmRDD.rawSpatialRDD = arealmRDD.rawSpatialRDD.rdd.map[Geometry](f=>
     {
-      var geom = f.getCentroid
+      val geom = f.getCentroid
       // Copy non-spatial attributes
       geom.setUserData(f.getUserData)
       geom
     })
 
     // The following two lines are optional. The purpose is to show the structure of the shapefile.
-    var arealmDf = Adapter.toDf(arealmRDD, sedona)
+    val arealmDf = Adapter.toDf(arealmRDD, sedona)
     arealmDf.show()
 
     // Prepare NYC taxi trips. Only use the taxi trips' pickup points
-    var tripDf = sedona.read.format("csv").option("delimiter",",").option("header","false").load(nyctripCSVLocation)
+    val tripDf = sedona.read.format("csv").option("delimiter",",").option("header","false").load(nyctripCSVLocation)
     tripDf.show() // Optional
     // Convert from DataFrame to RDD. This can also be done directly through Sedona RDD API.
     tripDf.createOrReplaceTempView("tripdf")
-    var tripRDD = Adapter.toSpatialRdd(sedona.sql("select ST_Point(cast(tripdf._c0 as Decimal(24, 14)), cast(tripdf._c1 as Decimal(24, 14))) as point, 'def' as trip_attr from tripdf")
+    val tripRDD = Adapter.toSpatialRdd(sedona.sql("select ST_Point(cast(tripdf._c0 as Decimal(24, 14)), cast(tripdf._c1 as Decimal(24, 14))) as point, 'def' as trip_attr from tripdf")
       , "point")
 
     // Convert the Coordinate Reference System from degree-based to meter-based. This returns the accurate distance calculate.
@@ -127,27 +147,27 @@ object RddExample {
     val beginDistance = 0.0
     var currentDistance = 0.0
 
-    // Start the iteration
+    // Start the iteration - test multiple distance bands
     println("distance(meter),observedL,difference,coLocationStatus")
     for (i <- 1 to iterationTimes)
     {
       currentDistance = beginDistance + i*distanceIncrement
 
-      var bufferedArealmRDD = new CircleRDD(arealmRDD,currentDistance)
+      val bufferedArealmRDD = new CircleRDD(arealmRDD,currentDistance)
       bufferedArealmRDD.spatialPartitioning(tripRDD.getPartitioner)
       //    Run Sedona Distance Join Query
-      var adjacentMatrix = JoinQuery.DistanceJoinQueryFlat(tripRDD, bufferedArealmRDD,true,true)
+      val adjacentMatrix = JoinQuery.DistanceJoinQueryFlat(tripRDD, bufferedArealmRDD,true,true)
 
       //      Uncomment the following two lines if you want to see what the join result looks like in SparkSQL
       //      import scala.collection.JavaConversions._
-      //      var adjacentMatrixDf = Adapter.toDf(adjacentMatrix, arealmRDD.fieldNames, tripRDD.fieldNames, sparkSession)
+      //      val adjacentMatrixDf = Adapter.toDf(adjacentMatrix, arealmRDD.fieldNames, tripRDD.fieldNames, sparkSession)
       //      adjacentMatrixDf.show()
 
-      var observedK = adjacentMatrix.count()*area*1.0/(arealmRDD.approximateTotalCount*tripRDD.approximateTotalCount)
-      var observedL = Math.sqrt(observedK/Math.PI)
-      var expectedL = currentDistance
-      var colocationDifference = observedL  - expectedL
-      var colocationStatus = {if (colocationDifference>0) "Co-located" else "Dispersed"}
+      val observedK = adjacentMatrix.count()*area*1.0/(arealmRDD.approximateTotalCount*tripRDD.approximateTotalCount)
+      val observedL = Math.sqrt(observedK/Math.PI)
+      val expectedL = currentDistance
+      val colocationDifference = observedL  - expectedL
+      val colocationStatus = {if (colocationDifference>0) "Co-located" else "Dispersed"}
 
       println(s"""$currentDistance,$observedL,$colocationDifference,$colocationStatus""")
     }

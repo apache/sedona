@@ -1075,7 +1075,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     def segmentize(self, max_segment_length):
         other_series, extended = self._make_series_of_val(max_segment_length)
-        align = False if extended else align
+        align = not extended
 
         spark_expr = stf.ST_Segmentize(F.col("L"), F.col("R"))
         return self._row_wise_operation(
@@ -2833,11 +2833,13 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         Returns:
             tuple[pspd.Series, bool]:
                 - The series of the value
-                - Whether returned value was a single object extended into a series (useful for row-wise 'align' parameter)
+                - Whether returned value was a extended into a series (useful for row-wise 'align' parameter)
         """
         # generator instead of a in-memory list
         if isinstance(value, GeoDataFrame):
             return value.geometry, False
+        elif isinstance(value, (list, np.ndarray)):
+            return pspd.Series(value), True
         elif not isinstance(value, pspd.Series):
             lst = [value for _ in range(len(self))]
             if isinstance(value, BaseGeometry):
