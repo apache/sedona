@@ -49,5 +49,5 @@ jobs:
           key: pre-commit|${{ env.PY }}|${{ hashFiles('.pre-commit-config.yaml') }}
       - name: Run pre-commit
         run: pre-commit run --color=always --all-files
-            - name: Run manual pre-commit hooks
+      - name: Run manual pre-commit hooks
         run: SKIP=checkstyle pre-commit run --all-files --hook-stage manual
