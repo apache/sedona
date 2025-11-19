@@ -62,6 +62,15 @@ repos:
           true # Ensures this hook runs even if no Java files are changed.
           # This is useful for spotless:apply which might affect files not staged.
         stages: [manual]
+      - id: checkstyle
+        name: run checkstyle
+        description: check Java code style with Checkstyle
+        entry: mvn checkstyle:check
+        language: system
+        types: [java]
+        pass_filenames: false
+        always_run: true
+        stages: [manual]
       - id: check-zip-file-is-not-committed
         name: check no zip files are committed
         description: Zip files are not allowed in the repository
