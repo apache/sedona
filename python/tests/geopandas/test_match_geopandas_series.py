@@ -881,10 +881,10 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         # force_3d was added from geopandas 1.0.0
         if parse_version(gpd.__version__) < parse_version("1.0.0"):
             pytest.skip("geopandas force_3d requires version 1.0.0 or higher")
-        # 1) Promote 2D to 3D with default z=0.0
+        # 1) Promote 2D to 3D with z = 4
         for geom in self.geoms:
-            sgpd_result = GeoSeries(geom).force_3d()
-            gpd_result = gpd.GeoSeries(geom).force_3d()
+            sgpd_result = GeoSeries(geom).force_3d(4)
+            gpd_result = gpd.GeoSeries(geom).force_3d(4)
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
         # 2) Minimal sample for various geometry types with custom z=7.5

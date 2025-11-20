@@ -1525,8 +1525,15 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             [
                 Point(1, 2),
                 Point(0.5, 2.5, 2),
+                Point(1, 1, np.nan),
                 LineString([(1, 1), (0, 1), (1, 0)]),
                 Polygon([(0, 0), (0, 10), (10, 10)]),
+                GeometryCollection(
+                    [
+                        Point(1, 1),
+                        LineString([(1, 1), (0, 1), (1, 0)]),
+                    ]
+                ),
             ]
         )
         # Promote 2D to 3D with z=0, keep 3D as is
@@ -1534,8 +1541,15 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             [
                 Point(1, 2, 0),
                 Point(0.5, 2.5, 2),
+                Point(1, 1, 0),
                 LineString([(1, 1, 0), (0, 1, 0), (1, 0, 0)]),
                 Polygon([(0, 0, 0), (0, 10, 0), (10, 10, 0), (0, 0, 0)]),
+                GeometryCollection(
+                    [
+                        Point(1, 1, 0),
+                        LineString([(1, 1, 0), (0, 1, 0), (1, 0, 0)]),
+                    ]
+                ),
             ]
         )
         result = s.force_3d()
@@ -1546,21 +1560,35 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             [
                 Point(1, 2, 4),
                 Point(0.5, 2.5, 2),
+                Point(1, 1, 4),
                 LineString([(1, 1, 4), (0, 1, 4), (1, 0, 4)]),
                 Polygon([(0, 0, 4), (0, 10, 4), (10, 10, 4), (0, 0, 4)]),
+                GeometryCollection(
+                    [
+                        Point(1, 1, 4),
+                        LineString([(1, 1, 4), (0, 1, 4), (1, 0, 4)]),
+                    ]
+                ),
             ]
         )
         result = s.force_3d(4)
         self.check_sgpd_equals_gpd(result, expected)
 
         # 3. Array-like z: use ps.Series
-        z = [0, 2, 2, 3]
+        z = [0, 2, 2, 3, 4, 5]
         expected = gpd.GeoSeries(
             [
                 Point(1, 2, 0),
                 Point(0.5, 2.5, 2),
+                Point(1, 1, 2),
                 LineString([(1, 1, 2), (0, 1, 2), (1, 0, 2)]),
                 Polygon([(0, 0, 3), (0, 10, 3), (10, 10, 3), (0, 0, 3)]),
+                GeometryCollection(
+                    [
+                        Point(1, 1, 5),
+                        LineString([(1, 1, 5), (0, 1, 5), (1, 0, 5)]),
+                    ]
+                ),
             ]
         )
         result = s.force_3d(z)
