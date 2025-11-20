@@ -949,14 +949,11 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("force_2d", self)
 
-    def force_3d(self, z=0):
+    def force_3d(self, z=0.0):
         """Force the dimensionality of a geometry to 3D.
 
         2D geometries will get the provided Z coordinate; 3D geometries
         are unchanged (unless their Z coordinate is ``np.nan``).
-
-        Note that for empty geometries, 3D is only supported since GEOS 3.9 and then
-        still only for simple geometries (non-collections).
 
         Parameters
         ----------
@@ -970,7 +967,8 @@ class GeoFrame(metaclass=ABCMeta):
         Examples
         --------
         >>> from shapely import Polygon, LineString, Point
-        >>> s = geopandas.GeoSeries(
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> s = GeoSeries(
         ...     [
         ...         Point(1, 2),
         ...         Point(0.5, 2.5, 2),
