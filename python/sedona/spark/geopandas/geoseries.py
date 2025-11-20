@@ -1093,7 +1093,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         spark_expr = stf.ST_Force_2D(self.spark.column)
         return self._query_geometry_column(spark_expr, returns_geom=True)
 
-    def force_3d(self, z=0):
+    def force_3d(self, z=0.0) -> "GeoSeries":
         other_series, extended = self._make_series_of_val(z)
         align = not extended
 
