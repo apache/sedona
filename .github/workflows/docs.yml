@@ -46,7 +46,7 @@ jobs:
           distribution: 'zulu'
           java-version: '11'
       - name: Compile JavaDoc
-        run: mvn -q clean install -DskipTests && mkdir -p docs/api/javadoc/spark && cp -r spark/common/target/apidocs/* docs/api/javadoc/spark/
+        run: mvn -q clean install -DskipTests && mkdir -p docs/api/javadoc/common docs/api/javadoc/spark && cp -r common/target/apidocs/* docs/api/javadoc/common/ && cp -r spark/common/target/apidocs/* docs/api/javadoc/spark/
       - name: Compile ScalaDoc
         run: mvn generate-sources scala:doc -pl !common,!snowflake,!flink && mkdir -p docs/api/scaladoc/spark && cp -r spark/common/target/site/scaladocs/* docs/api/scaladoc/spark
       - name: Set up Node.js
