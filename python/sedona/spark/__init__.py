@@ -71,3 +71,23 @@ from sedona.spark.utils import KryoSerializer, SedonaKryoRegistrator
 from sedona.spark.utils.adapter import Adapter
 from sedona.spark.utils.spatial_rdd_parser import GeoData
 from sedona.spark.utils.structured_adapter import StructuredAdapter
+
+from pyspark.sql import DataFrame
+
+def to_sedonadb(self, connection=None):
+    """
+    Converts a SedonaSpark DataFrame to a SedonaDB DataFrame.
+    :param connection: Optional SedonaDB connection object. If None, a new connection will be created.
+    :return: SedonaDB DataFrame
+    """
+    try:
+        import sedona.db
+    except ImportError:
+        raise ImportError("SedonaDB is not installed. Please install it using `pip install sedona-db`.")
+
+    if connection is None:
+        connection = sedona.db.connect()
+
+    return connection.create_data_frame(dataframe_to_arrow(self))
+
+DataFrame.to_sedonadb = to_sedonadb
