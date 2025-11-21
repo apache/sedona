@@ -74,6 +74,7 @@ from sedona.spark.utils.structured_adapter import StructuredAdapter
 
 from pyspark.sql import DataFrame
 
+
 def to_sedonadb(self, connection=None):
     """
     Converts a SedonaSpark DataFrame to a SedonaDB DataFrame.
@@ -83,11 +84,14 @@ def to_sedonadb(self, connection=None):
     try:
         import sedona.db
     except ImportError:
-        raise ImportError("SedonaDB is not installed. Please install it using `pip install sedona-db`.")
+        raise ImportError(
+            "SedonaDB is not installed. Please install it using `pip install sedona-db`."
+        )
 
     if connection is None:
         connection = sedona.db.connect()
 
     return connection.create_data_frame(dataframe_to_arrow(self))
+
 
 DataFrame.to_sedonadb = to_sedonadb
