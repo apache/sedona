@@ -135,7 +135,6 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
                partitionIndex: Int,
                context: TaskContext): Iterator[OUT] = {
     val startTime = System.currentTimeMillis
-    val sedonaEnv = SedonaSparkEnv.get
     val env = SparkEnv.get
 
     // Get the executor cores and pyspark memory, they are passed via the local properties when
@@ -310,7 +309,7 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
                   val requestMethod = input.readInt()
                   // The BarrierTaskContext function may wait infinitely, socket shall not timeout
                   // before the function finishes.
-                  sock.setSoTimeout(0)
+                  sock.setSoTimeout(10000)
                   requestMethod match {
                     case BarrierTaskContextMessageProtocol.BARRIER_FUNCTION =>
                       barrierAndServe(requestMethod, sock)

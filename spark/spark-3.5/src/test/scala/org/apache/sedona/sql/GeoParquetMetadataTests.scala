@@ -18,19 +18,157 @@
  */
 package org.apache.sedona.sql
 
+import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types.{IntegerType, StructField, StructType}
+import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.io.WKTReader
 import org.scalatest.BeforeAndAfterAll
 
 import java.util.Collections
 import scala.collection.JavaConverters._
 
+case class GeoDataHex(id: Int, geometry_hex: String)
+case class GeoData(id: Int, geometry: Geometry)
+
 class GeoParquetMetadataTests extends TestBaseScala with BeforeAndAfterAll {
   val geoparquetdatalocation: String = resourceFolder + "geoparquet/"
   val geoparquetoutputlocation: String = resourceFolder + "geoparquet/geoparquet_output/"
 
+  import sparkSession.implicits._
+
   describe("GeoParquet Metadata tests") {
+    it("reading and writing GeoParquet files") {
+//           'POINT(30.0123 10.2131)', \
+      //                    'POINT(-20 20)', \
+      //                    'POINT(10 30)', \
+      //                    'POINT(40 -40)' \
+
+//      [0] = {u8} 18
+//[1] = {u8} 0
+//[2] = {u8} 0
+//[3] = {u8} 0
+//[4] = {u8} 1
+//[5] = {u8} 165
+//[6] = {u8} 189
+//[7] = {u8} 193
+//[8] = {u8} 23
+//[9] = {u8} 38
+//[10] = {u8} 3
+//[11] = {u8} 62
+//[12] = {u8} 64
+//[13] = {u8} 34
+//[14] = {u8} 142
+//[15] = {u8} 117
+//[16] = {u8} 113
+//[17] = {u8} 27
+//[18] = {u8} 109
+//[19] = {u8} 36
+//[20] = {u8} 64
+      val byteArray = Array[Int](
+        18, 0, 0, 0, 1,
+        165, 189, 193, 23, 38, 3, 62, 64, 34, 142, 117, 113, 27, 109, 36, 64
+      )
+        .map(_.toByte)
+
+//      [ 18, 0, 0, 0, 1, -91, -67, -63, 23, 38, 3, 62, 64, 34, -114, 117, 113, 27, 109, 36, 64 ]
+
+//      GeometrySerializer.deserialize(byteArray)
+//        [18, 0, 0, 0, 1, -91, -67, -63, 23, 38, 3, 62, 64, 34, -114, 117, 113, 27, 109, 36, 64]
+//    18 18
+//    0 0
+//    0 0
+//    0 0
+//    1 1
+//    0
+//    0
+//    0
+//    -91 -91
+//    -67 -67
+//    -63 -63
+//    23 23
+//    38 38
+//    3 3
+//    62 62
+//    64 64
+//    34 34
+//    -114 -114
+//    117 117
+//    113 113
+//    27 27
+//    109 109
+//    36 36
+//    64 64
+
+//      val wktReader = new WKTReader()
+//      val pointWKT = "POINT(30.0123 10.2131)"
+//      val point = wktReader.read(pointWKT)
+//      val serializedBytes = GeometrySerializer.serialize(point)
+//      serializedBytes.foreach(
+//        byte => println(byte)
+//      )
+//
+      def hexToBytes(hex: String): Array[Byte] =
+        hex.grouped(2).map(Integer.parseInt(_, 16).toByte).toArray
+//
+      def bytesToHex(bytes: Array[Byte]): String =
+        bytes.map("%02x".format(_)).mkString
+
+//      Seq(
+//        (1, "POINT(30.0123 10.2131)"),
+////        (2, "POINT(-20 20)"),
+////        (3, "POINT(10 30)"),
+////        (4, "POINT(40 -40)")
+//      ).toDF("id", "wkt")
+//        .selectExpr("id", "ST_GeomFromWKT(wkt) AS geometry")
+//        .as[GeoData]
+//        .map(
+//          row => (row.id, bytesToHex(GeometrySerializer.serialize(row.geometry)))
+//        ).show(4, false)
+
+
+//
+//      val data = Seq(
+//        (1, "1200000001000000a5bdc11726033e40228e75711b6d2440"),
+//      )
+//        .toDF("id", "geometry_hex")
+//        .as[GeoDataHex]
+//
+//      data.map(
+//        row => GeoData(row.id, GeometrySerializer.deserialize(hexToBytes(row.geometry_hex)))
+//      ).show
+
+      val wkt = "LINESTRING (  20.9972017 52.1696936,   20.9971687 52.1696659,   20.997156 52.169644,   20.9971487 52.1696213 ) "
+      val reader = new WKTReader()
+      val geometry = reader.read(wkt)
+      val serialized = GeometrySerializer.serialize(geometry)
+
+      Seq(
+        (1, serialized)
+      ).toDF("id", "geometry_bytes")
+        .show(1, false)
+
+//      println(bytesToHex(serialized))
+
+//
+//      val binaryData = "1200000001000000bb9d61f7b6c92c40f1ba168a85"
+//      val binaryData2 = "120000000100000046b6f3fdd4083e404e62105839342440"
+//      val value = new GeometryUDT().deserialize(hexToBytes(binaryData))
+//      val value3 = new GeometryUDT().deserialize(hexToBytes(binaryData2))
+//      println(value)
+//      println(value3)
+//
+//      val reader = new WKTReader()
+//      val geometryPoint = "POINT (30.0345 10.1020)"
+//      val point = reader.read(geometryPoint)
+//      val result = new GeometryUDT().serialize(point)
+//
+//      val value2 = new GeometryUDT().deserialize(result)
+//      println(bytesToHex(result))
+//      println(value2)
+//      println("ssss")
+    }
     it("Reading GeoParquet Metadata") {
       val df = sparkSession.read.format("geoparquet.metadata").load(geoparquetdatalocation)
       val metadataArray = df.collect()

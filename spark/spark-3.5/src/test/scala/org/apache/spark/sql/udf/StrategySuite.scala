@@ -47,14 +47,16 @@ class StrategySuite extends AnyFunSuite with Matchers {
 //    spark.sql("select 1").show()
     val df = spark.read.format("geoparquet")
       .load("/Users/pawelkocinski/Desktop/projects/sedona-production/apache-sedona-book/data/warehouse/buildings")
-      .limit(10)
+      .selectExpr("ST_Centroid(geometry) AS geometry")
+
+      df
       .select(
 //        geometryToNonGeometryFunction(col("geometry")),
         geometryToGeometryFunction(col("geometry")),
 //        nonGeometryToGeometryFunction(expr("ST_AsText(geometry)")),
-      )
+      ).show(10, false)
 
-    df.show()
+//    df.show()
     1 shouldBe 1
 
 //    val df = Seq(

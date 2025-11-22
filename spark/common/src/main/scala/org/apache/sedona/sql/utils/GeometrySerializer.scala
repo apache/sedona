@@ -36,8 +36,6 @@ object GeometrySerializer {
    */
   def serialize(geometry: Geometry): Array[Byte] = {
     val serialized = geometrySerde.GeometrySerializer.serialize(geometry)
-
-    println(serialized.map(el => if (el < 0) el + 256 else el ).mkString(","))
     serialized
   }
 

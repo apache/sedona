@@ -105,12 +105,24 @@ object ScalarUDF {
           pythonExec,
           "-c",
           f"""
+             |import pyarrow as pa
+             |import shapely
+             |import geoarrow.pyarrow as ga
+             |from sedonadb import udf
              |from sedona.sql.types import GeometryType
              |from pyspark.serializers import CloudPickleSerializer
+             |
+             |@udf.arrow_udf(ga.wkb(), [udf.GEOMETRY, udf.NUMERIC])
+             |def shapely_udf(geom, distance):
+             |    geom_wkb = pa.array(geom.storage.to_array())
+             |    distance = pa.array(distance.to_array())
+             |    geom = shapely.from_wkb(geom_wkb)
+             |    result_shapely = shapely.buffer(geom, distance)
+             |
+             |    return pa.array(shapely.to_wkb(result_shapely))
+             |
              |f = open('$path', 'wb');
-             |def apply_geopandas(x):
-             |    return x.buffer(1)
-             |f.write(CloudPickleSerializer().dumps((apply_geopandas, GeometryType())))
+             |f.write(CloudPickleSerializer().dumps((shapely_udf, GeometryType())))
              |""".stripMargin),
         None,
         "PYTHONPATH" -> s"$pysparkPythonPath:$pythonPath").!!
