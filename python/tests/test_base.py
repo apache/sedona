@@ -125,6 +125,13 @@ class TestBase:
         right_geom: Union[str, BaseGeometry],
         tolerance=1e-6,
     ):
+        """
+        Assert that two geometries are almost equal.
+
+        Note: this function will only check Z and M dimensions for shapely >= 2.1.0 (python >= 3.10)
+
+        When comparing geometries with Z or M dimensions, this function will ignore `tolerance` and check for exact equality.
+        """
         expected_geom = (
             wkt.loads(left_geom) if isinstance(left_geom, str) else left_geom
         )
