@@ -20,6 +20,7 @@ site_url: https://sedona.apache.org
 site_description: Apache Sedona is a cluster computing system for processing large-scale spatial data. Sedona extends existing cluster computing systems, such as Apache Spark, Apache Flink, and Snowflake, with a set of out-of-the-box distributed Spatial Datasets and Spatial SQL that efficiently load, process, and analyze large-scale spatial data across machines.
 nav:
   - Home: index.md
+  - SedonaDB: 'https://sedona.apache.org/sedonadb/'
   - SedonaSpark:
         - Home: sedonaspark.md
         - Install:
@@ -153,7 +154,6 @@ nav:
 #           - Install Sedona SQL: setup/snowflake/install.md
 #       - Release notes: setup/release-notes.md
 #   - Download: download.md
-  - SedonaDB: 'https://sedona.apache.org/sedonadb/'
   - SpatialBench: 'https://sedona.apache.org/spatialbench/'
   - Blog: blog/index.md
   - Community:
