@@ -80,7 +80,7 @@ if [ "$SEDONA_VERSION" = "latest" ]; then
     echo "Using latest geotools-wrapper version: $GEOTOOLS_WRAPPER_VERSION"
 
     # The compilation must take place outside Docker to avoid unnecessary maven packages
-    mvn clean install -DskipTests -Dspark="${SEDONA_SPARK_VERSION}" -Dscala=2.12
+    mvn clean install -DskipTests -Dspark="${SEDONA_SPARK_VERSION}" -Dscala=2.13
 fi
 
 # -- Building the image
