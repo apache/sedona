@@ -37,6 +37,10 @@ nav:
           - Install on Microsoft Fabric: setup/fabric.md
           - Set up Spark cluster manually: setup/cluster.md
           - Install on Azure Synapse Analytics: setup/azure-synapse-analytics.md
+          - Overview: setup/overview.md
+          - Modules: setup/modules.md
+          - Language wrappers: setup/platform.md
+          - Maven Central coordinate: setup/maven-coordinates.md
       - Programming Guide:
           - Spatial DataFrame / SQL app: tutorial/sql.md
           - Raster DataFrame / SQL app: tutorial/raster.md
@@ -110,6 +114,8 @@ nav:
       - Install:
           - Install Sedona Scala/Java: setup/flink/install-scala.md
           - Install Sedona Python: setup/flink/install-python.md
+          - Modules: setup/flink/modules.md
+          - Language wrappers: setup/flink/platform.md
       - Programming Guides:
           - Sedona with Apache Flink:
               - Spatial SQL app (Flink): tutorial/flink/sql.md
@@ -128,7 +134,9 @@ nav:
   - SedonaSnow:
       - Home: sedonasnow.md
       - Install:
+          - Install Sedona SQL: setup/snowflake/install.md
           - Spatial SQL app (Snowflake): tutorial/snowflake/sql.md
+          - Modules: setup/snowflake/modules.md
       - API:
           - SQL:
               - Overview (Snowflake): api/snowflake/vector-data/Overview.md
@@ -136,27 +144,11 @@ nav:
               - Function (Snowflake): api/snowflake/vector-data/Function.md
               - Aggregate Function (Snowflake): api/snowflake/vector-data/AggregateFunction.md
               - Predicate (Snowflake): api/snowflake/vector-data/Predicate.md
-
-  #   - Setup:
-  #       - Overview: setup/overview.md
-  #       - Supported platforms:
-  #           - Sedona with Apache Spark:
-  #               - Modules: setup/modules.md
-  #               - Language wrappers: setup/platform.md
-  #           - Sedona with Apache Flink:
-  #               - Modules: setup/flink/modules.md
-  #               - Language wrappers: setup/flink/platform.md
-  #           - Sedona with Snowflake:
-  #               - Modules: setup/snowflake/modules.md
-  #       - Maven Central coordinate: setup/maven-coordinates.md
-
-  #       - Install with Snowflake:
-  #           - Install Sedona SQL: setup/snowflake/install.md
-  #       - Release notes: setup/release-notes.md
-  #   - Download: download.md
   - SpatialBench: 'https://sedona.apache.org/spatialbench/'
   - Blog: blog/index.md
   - Community:
+      - Download: download.md
+      - Release notes: setup/release-notes.md
       - Compile the code: setup/compile.md
       - Community: community/contact.md
       - Contributor Guide:
