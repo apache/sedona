@@ -23,7 +23,6 @@ set -e
 spark_version=$1
 hadoop_s3_version=$2
 aws_sdk_version=$3
-spark_xml_version=$4
 
 # Download Spark jar and set up PySpark
 curl --retry 5 --retry-delay 10 --retry-connrefused https://archive.apache.org/dist/spark/spark-"${spark_version}"/spark-"${spark_version}"-bin-hadoop3.tgz -o spark.tgz
@@ -32,10 +31,9 @@ rm spark.tgz && rm -rf spark-"${spark_version}"-bin-hadoop3
 
 # Add S3 jars
 curl --retry 5 --retry-delay 10 --retry-connrefused https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/"${hadoop_s3_version}"/hadoop-aws-"${hadoop_s3_version}".jar -o "${SPARK_HOME}"/jars/hadoop-aws-"${hadoop_s3_version}".jar
-curl --retry 5 --retry-delay 10 --retry-connrefused https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/"${aws_sdk_version}"/aws-java-sdk-bundle-"${aws_sdk_version}".jar -o "${SPARK_HOME}"/jars/aws-java-sdk-bundle-"${aws_sdk_version}".jar
 
-# Add spark-xml jar
-curl --retry 5 --retry-delay 10 --retry-connrefused https://repo1.maven.org/maven2/com/databricks/spark-xml_2.12/"${spark_xml_version}"/spark-xml_2.12-"${spark_xml_version}".jar -o "${SPARK_HOME}"/jars/spark-xml_2.12-"${spark_xml_version}".jar
+# Add AWS SDK v2 bundle (required by spark-extension 2.14.2+)
+curl --retry 5 --retry-delay 10 --retry-connrefused https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/"${aws_sdk_version}"/bundle-"${aws_sdk_version}".jar -o "${SPARK_HOME}"/jars/aws-sdk-v2-bundle-"${aws_sdk_version}".jar
 
 # Set up master IP address and executor memory
 cp "${SPARK_HOME}"/conf/spark-defaults.conf.template "${SPARK_HOME}"/conf/spark-defaults.conf

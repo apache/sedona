@@ -35,21 +35,21 @@ fi
 if [ "$sedona_version" = "latest" ]; then
   # Code to execute when SEDONA_VERSION is "latest"
   cp "${SEDONA_HOME}"/spark-shaded/target/sedona-spark-shaded-*.jar "${SPARK_HOME}"/jars/
-  cd "${SEDONA_HOME}"/python;pip3 install .
+  cd "${SEDONA_HOME}"/python;pip3 install . --break-system-packages
 else
   # Code to execute when SEDONA_VERSION is not "latest"
   # Download Sedona
-  curl --retry 5 --retry-delay 10 --retry-connrefused https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-"${sedona_spark_version}"_2.12/"${sedona_version}"/sedona-spark-shaded-"${sedona_spark_version}"_2.12-"${sedona_version}".jar -o "$SPARK_HOME"/jars/sedona-spark-shaded-"${sedona_spark_version}"_2.12-"${sedona_version}".jar
+  curl --retry 5 --retry-delay 10 --retry-connrefused https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-"${sedona_spark_version}"_2.13/"${sedona_version}"/sedona-spark-shaded-"${sedona_spark_version}"_2.13-"${sedona_version}".jar -o "$SPARK_HOME"/jars/sedona-spark-shaded-"${sedona_spark_version}"_2.13-"${sedona_version}".jar
 
   # Install Sedona Python
-  pip3 install apache-sedona=="${sedona_version}"
+  pip3 install apache-sedona=="${sedona_version}" --break-system-packages
 fi
 
 # Download gresearch spark extension
-curl --retry 5 --retry-delay 10 --retry-connrefused https://repo1.maven.org/maven2/uk/co/gresearch/spark/spark-extension_2.12/"${spark_extension_version}"-"${spark_compat_version}"/spark-extension_2.12-"${spark_extension_version}"-"${spark_compat_version}".jar -o "$SPARK_HOME"/jars/spark-extension_2.12-"${spark_extension_version}"-"${spark_compat_version}".jar
+curl --retry 5 --retry-delay 10 --retry-connrefused https://repo1.maven.org/maven2/uk/co/gresearch/spark/spark-extension_2.13/"${spark_extension_version}"-"${spark_compat_version}"/spark-extension_2.13-"${spark_extension_version}"-"${spark_compat_version}".jar -o "$SPARK_HOME"/jars/spark-extension_2.13-"${spark_extension_version}"-"${spark_compat_version}".jar
 
 # Install Spark extension Python
-pip3 install pyspark-extension=="${spark_extension_version}"."${spark_compat_version}"
+pip3 install pyspark-extension=="${spark_extension_version}"."${spark_compat_version}" --break-system-packages
 
 # Download GeoTools jar
 curl --retry 5 --retry-delay 10 --retry-connrefused https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/"${geotools_wrapper_version}"/geotools-wrapper-"${geotools_wrapper_version}".jar -o "$SPARK_HOME"/jars/geotools-wrapper-"${geotools_wrapper_version}".jar
