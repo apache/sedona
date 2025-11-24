@@ -80,7 +80,9 @@ class TestStacAuthentication(TestBase):
 
     def test_method_chaining(self):
         """Test that authentication methods support chaining."""
-        client = Client.open("https://example.com/stac/v1").with_bearer_token("token123")
+        client = Client.open("https://example.com/stac/v1").with_bearer_token(
+            "token123"
+        )
 
         assert client.headers["Authorization"] == "Bearer token123"
 
@@ -125,7 +127,7 @@ class TestStacAuthentication(TestBase):
         headers = {
             "Authorization": "Bearer token",
             "X-API-Key": "key123",
-            "User-Agent": "CustomClient/1.0"
+            "User-Agent": "CustomClient/1.0",
         }
         client = Client.open("https://example.com/stac/v1", headers=headers)
 
@@ -145,9 +147,7 @@ class TestStacAuthentication(TestBase):
         """Test CollectionClient can be initialized with headers directly."""
         headers = {"Authorization": "Bearer test_token"}
         collection_client = CollectionClient(
-            "https://example.com/stac/v1",
-            "test-collection",
-            headers=headers
+            "https://example.com/stac/v1", "test-collection", headers=headers
         )
 
         assert collection_client.headers == headers
@@ -156,8 +156,7 @@ class TestStacAuthentication(TestBase):
     def test_collection_client_without_headers(self):
         """Test CollectionClient backward compatibility without headers."""
         collection_client = CollectionClient(
-            "https://example.com/stac/v1",
-            "test-collection"
+            "https://example.com/stac/v1", "test-collection"
         )
 
         assert collection_client.headers == {}

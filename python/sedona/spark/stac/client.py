@@ -91,7 +91,7 @@ class Client:
 
         userpass = f"{username}:{password}"
         b64_userpass = base64.b64encode(userpass.encode()).decode()
-        self.headers['Authorization'] = f"Basic {b64_userpass}"
+        self.headers["Authorization"] = f"Basic {b64_userpass}"
         return self
 
     def with_bearer_token(self, token: str):
@@ -112,7 +112,7 @@ class Client:
             # Method chaining
             df = Client.open(url).with_bearer_token(token).search(collection_id="test")
         """
-        self.headers['Authorization'] = f"Bearer {token}"
+        self.headers["Authorization"] = f"Bearer {token}"
         return self
 
     def get_collection(self, collection_id: str):

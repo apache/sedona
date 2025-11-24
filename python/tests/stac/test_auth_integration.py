@@ -41,11 +41,11 @@ class TestAuthIntegration:
 
     @pytest.mark.skipif(
         not os.getenv("RUN_AUTH_TESTS"),
-        reason="Set RUN_AUTH_TESTS=1 to run integration tests"
+        reason="Set RUN_AUTH_TESTS=1 to run integration tests",
     )
     @pytest.mark.skipif(
         not os.getenv("PL_API_KEY"),
-        reason="PL_API_KEY not set - cannot test Planet authentication"
+        reason="PL_API_KEY not set - cannot test Planet authentication",
     )
     def test_planet_basic_auth_real(self):
         """
@@ -65,7 +65,7 @@ class TestAuthIntegration:
                 collection_id="PSScene",
                 bbox=[-122.5, 37.7, -122.3, 37.9],
                 datetime="2024-01",
-                max_items=1
+                max_items=1,
             )
 
             assert df is not None
@@ -76,7 +76,7 @@ class TestAuthIntegration:
 
     @pytest.mark.skipif(
         not os.getenv("RUN_AUTH_TESTS"),
-        reason="Set RUN_AUTH_TESTS=1 to run integration tests"
+        reason="Set RUN_AUTH_TESTS=1 to run integration tests",
     )
     def test_planetary_computer_no_auth(self):
         """
@@ -92,7 +92,7 @@ class TestAuthIntegration:
                 collection_id="naip",
                 bbox=[-122.5, 37.7, -122.3, 37.9],
                 datetime="2020",
-                max_items=1
+                max_items=1,
             )
 
             assert df is not None
@@ -124,20 +124,3 @@ class TestAuthIntegration:
         decoded = base64.b64decode(encoded_part).decode()
         assert decoded == "testuser:testpass"
         print("✓ Basic auth encoding correct")
-
-
-# Example usage documentation
-"""
-To run these tests locally:
-
-1. For all unit tests (no credentials needed):
-   pytest tests/stac/test_auth_integration.py
-
-2. To test with real services, set environment variables:
-   export PL_API_KEY="your_planet_api_key"
-   export RUN_AUTH_TESTS=1
-   pytest tests/stac/test_auth_integration.py
-
-3. Or run specific tests:
-   pytest tests/stac/test_auth_integration.py::TestAuthIntegration::test_planet_basic_auth_real -v
-"""

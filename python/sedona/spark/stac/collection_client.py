@@ -53,7 +53,12 @@ def get_collection_url(url: str, collection_id: Optional[str] = None) -> str:
 
 
 class CollectionClient:
-    def __init__(self, url: str, collection_id: Optional[str] = None, headers: Optional[dict] = None):
+    def __init__(
+        self,
+        url: str,
+        collection_id: Optional[str] = None,
+        headers: Optional[dict] = None,
+    ):
         """
         Initializes a collection client for a STAC collection.
 
