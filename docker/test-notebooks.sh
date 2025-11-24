@@ -56,7 +56,7 @@ if [ -z "$NOTEBOOK_FILES" ]; then
     exit 0
 fi
 
-NOTEBOOK_COUNT=$(echo "$NOTEBOOK_FILES" | grep -c . || echo "0")
+NOTEBOOK_COUNT=$(echo "$NOTEBOOK_FILES" | wc -l)
 echo "Found $NOTEBOOK_COUNT notebook file(s) to test (root level only, excluding subdirectories)"
 echo ""
 
