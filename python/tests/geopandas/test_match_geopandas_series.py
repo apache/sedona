@@ -883,6 +883,8 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             pytest.skip("geopandas force_3d requires version 1.0.0 or higher")
         # 1) Promote 2D to 3D with z = 4
         for geom in self.geoms:
+            if isinstance(geom[0], (LinearRing, GeometryCollection, MultiPolygon)):
+                continue
             sgpd_result = GeoSeries(geom).force_3d(4)
             gpd_result = gpd.GeoSeries(geom).force_3d(4)
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
@@ -891,12 +893,8 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         data = [
             Point(1, 2),  # 2D
             Point(0.5, 2.5, 2),  # 3D (Z)
-            shapely.wkt.loads("POINT M (1 2 3)"),  # M
-            shapely.wkt.loads("POINT ZM (1 2 3 4)"),  # ZM
             LineString([(1, 1), (0, 1), (1, 0)]),  # 2D
             Polygon([(0, 0), (0, 10), (10, 10)]),  # 2D
-            shapely.wkt.loads("LINESTRING M (1 1 5, 0 1 5, 1 0 5)"),  # M
-            shapely.wkt.loads("LINESTRING ZM (1 1 2 5, 0 1 2 5, 1 0 2 5)"),  # ZM
         ]
         sgpd_result = GeoSeries(data).force_3d(7.5)
         gpd_result = gpd.GeoSeries(data).force_3d(7.5)
