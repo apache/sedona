@@ -65,6 +65,9 @@ case class StacBatch(
 
   val mapper = new ObjectMapper()
 
+  // Parse headers from options for authenticated requests
+  private val headers: Map[String, String] = StacUtils.parseHeaders(opts)
+
   /**
    * Sets the maximum number of items left to process.
    *
@@ -168,7 +171,7 @@ case class StacBatch(
       var nextUrl: Option[String] = Some(itemUrl)
       breakable {
         while (nextUrl.isDefined) {
-          val itemJson = StacUtils.loadStacCollectionToJson(nextUrl.get)
+          val itemJson = StacUtils.loadStacCollectionToJson(nextUrl.get, headers)
           val itemRootNode = mapper.readTree(itemJson)
           // Check if there exists a "next" link
           val itemLinksNode = itemRootNode.get("links")
@@ -252,7 +255,7 @@ case class StacBatch(
           collectionBasePath + href
         }
         // Recursively process the linked collection
-        val linkedCollectionJson = StacUtils.loadStacCollectionToJson(childUrl)
+        val linkedCollectionJson = StacUtils.loadStacCollectionToJson(childUrl, headers)
         val nestedCollectionBasePath = StacUtils.getStacCollectionBasePath(childUrl)
         val collectionFiltered =
           filterCollection(linkedCollectionJson, spatialFilter, temporalFilter)
