@@ -31,7 +31,9 @@ rm spark.tgz && rm -rf spark-"${spark_version}"-bin-hadoop3
 
 # Add S3 jars
 curl --retry 5 --retry-delay 10 --retry-connrefused https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/"${hadoop_s3_version}"/hadoop-aws-"${hadoop_s3_version}".jar -o "${SPARK_HOME}"/jars/hadoop-aws-"${hadoop_s3_version}".jar
-curl --retry 5 --retry-delay 10 --retry-connrefused https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/"${aws_sdk_version}"/aws-java-sdk-bundle-"${aws_sdk_version}".jar -o "${SPARK_HOME}"/jars/aws-java-sdk-bundle-"${aws_sdk_version}".jar
+
+# Add AWS SDK v2 bundle (required by spark-extension 2.14.2+)
+curl --retry 5 --retry-delay 10 --retry-connrefused https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/"${aws_sdk_version}"/bundle-"${aws_sdk_version}".jar -o "${SPARK_HOME}"/jars/aws-sdk-v2-bundle-"${aws_sdk_version}".jar
 
 # Set up master IP address and executor memory
 cp "${SPARK_HOME}"/conf/spark-defaults.conf.template "${SPARK_HOME}"/conf/spark-defaults.conf

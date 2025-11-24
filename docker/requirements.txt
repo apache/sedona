@@ -10,6 +10,7 @@ keplergl==0.3.7
 matplotlib
 numpy==1.26.4
 pandas==2.3.3
+py4j==0.10.9.9
 pydeck==0.9.1
 rasterio==1.4.3
 shapely==2.1.2

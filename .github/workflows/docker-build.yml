@@ -90,5 +90,5 @@ jobs:
           chmod +x docker/test-notebooks.sh
           docker run --rm \
             -v ${{ github.workspace }}/docker/test-notebooks.sh:/opt/test-notebooks.sh:ro \
-            apache/sedona:${SEDONA_VERSION} \
+            apache/sedona:${{ matrix.sedona }} \
             /bin/bash /opt/test-notebooks.sh

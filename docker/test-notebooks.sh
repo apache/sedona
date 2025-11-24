@@ -98,24 +98,114 @@ for NOTEBOOK in $NOTEBOOK_FILES; do
     # Also handle absolute paths
     sed -i 's|/opt/workspace/data/|/opt/workspace/examples/data/|g' "$PYTHON_FILE"
 
-    # Run the Python file with pyspark
-    echo "  Running Python script..."
-    # Change to workspace directory so relative paths work correctly
+    # Remove IPython magic commands that don't work in plain Python
+    # Use Python to properly extract code from get_ipython().run_cell_magic() calls
+    PYTHON_FILE_PATH="$PYTHON_FILE" python3 << 'PYTHON_CLEANUP'
+import re
+import os
+import ast
+
+file_path = os.environ['PYTHON_FILE_PATH']
+with open(file_path, 'r') as f:
+    lines = f.readlines()
+
+output_lines = []
+i = 0
+while i < len(lines):
+    line = lines[i]
+    if 'get_ipython().run_cell_magic' in line:
+        # Try to parse this line as Python code to extract the string argument
+        try:
+            # Use AST to parse the call and extract the third argument
+            tree = ast.parse(line.strip())
+            if isinstance(tree.body[0], ast.Expr) and isinstance(tree.body[0].value, ast.Call):
+                call = tree.body[0].value
+                if (isinstance(call.func, ast.Attribute) and
+                    isinstance(call.func.value, ast.Call) and
+                    call.func.attr == 'run_cell_magic' and
+                    len(call.args) >= 3):
+                    # Third argument is the code string
+                    code_node = call.args[2]
+                    if isinstance(code_node, ast.Constant):
+                        code = code_node.value
+                    elif isinstance(code_node, ast.Str):  # Python < 3.8
+                        code = code_node.s
+                    else:
+                        code = ast.literal_eval(code_node)
+                    # Add the extracted code as separate lines
+                    output_lines.append(code)
+                    i += 1
+                    continue
+        except:
+            # If AST parsing fails, try regex fallback
+            # Match: run_cell_magic('...', '...', 'CODE')
+            # This regex handles strings with escaped characters
+            match = re.search(r"run_cell_magic\([^,]+,\s*[^,]+,\s*('(?:[^'\\\\]|\\\\.)*'|\"(?:[^\"\\\\]|\\\\.)*\")\)", line)
+            if match:
+                code_str = match.group(1)
+                try:
+                    code = ast.literal_eval(code_str)
+                    output_lines.append(code)
+                    i += 1
+                    continue
+                except:
+                    pass
+        # If all else fails, skip this line
+        i += 1
+        continue
+    elif 'get_ipython()' in line:
+        # Skip other get_ipython() calls
+        i += 1
+        continue
+    else:
+        output_lines.append(line)
+        i += 1
+
+content = ''.join(output_lines)
+
+# Remove IPython cell markers
+content = re.sub(r'# In\[\d+\]:\s*\n', '', content)
+
+with open(file_path, 'w') as f:
+    f.write(content)
+PYTHON_CLEANUP
+
+    # Validate Python syntax first
+    echo "  Validating Python syntax..."
+    if ! python3 -m py_compile "$PYTHON_FILE" >/dev/null 2>/dev/null; then
+        echo "  ✗ Python syntax validation failed"
+        FAILED_TESTS=$((FAILED_TESTS + 1))
+        echo ""
+        continue
+    fi
+
+    # Run the full Python script with timeout (600 seconds = 10 minutes)
+    echo "  Running Python script (600 second timeout)..."
     cd "$EXAMPLES_DIR/.."
-    # Use timeout to prevent hanging tests (10 minutes max per test)
-    # Use absolute path to the Python file
-    if timeout 600 python3 "$PYTHON_FILE" 2>&1; then
-        echo "  ✓ Test passed"
+
+    # Use timeout with progress reporting
+    START_TIME=$(date +%s)
+    if timeout 600 python3 "$PYTHON_FILE" | tee /tmp/notebook_output_$$.log; then
+        END_TIME=$(date +%s)
+        ELAPSED=$((END_TIME - START_TIME))
+        echo "  ✓ Test passed (completed in ${ELAPSED}s)"
         PASSED_TESTS=$((PASSED_TESTS + 1))
     else
         EXIT_CODE=$?
+        END_TIME=$(date +%s)
+        ELAPSED=$((END_TIME - START_TIME))
         if [ $EXIT_CODE -eq 124 ]; then
-            echo "  ✗ Test timed out (exceeded 10 minutes)"
+            echo "  ✗ Test timed out (exceeded 600 seconds, ran for ${ELAPSED}s)"
+            echo "  Last 20 lines of output:"
+            tail -20 /tmp/notebook_output_$$.log 2>/dev/null || echo "  (no output captured)"
         else
-            echo "  ✗ Test failed with exit code $EXIT_CODE"
+            echo "  ✗ Test failed with exit code $EXIT_CODE (ran for ${ELAPSED}s)"
+            echo "  Last 20 lines of output:"
+            tail -20 /tmp/notebook_output_$$.log 2>/dev/null || echo "  (no output captured)"
         fi
         FAILED_TESTS=$((FAILED_TESTS + 1))
     fi
+    rm -f /tmp/notebook_output_$$.log
 
     echo ""
 done
