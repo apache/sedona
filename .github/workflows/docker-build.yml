@@ -85,3 +85,10 @@ jobs:
           SEDONA_VERSION: ${{ matrix.sedona }}
           GEOTOOLS_VERSION: ${{ matrix.geotools }}
         run: ./docker/build.sh ${SPARK_VERSION} ${SEDONA_VERSION} local ${GEOTOOLS_VERSION}
+      - name: Test notebooks
+        run: |
+          chmod +x docker/test-notebooks.sh
+          docker run --rm \
+            -v ${{ github.workspace }}/docker/test-notebooks.sh:/opt/test-notebooks.sh:ro \
+            apache/sedona:${SEDONA_VERSION} \
+            /bin/bash /opt/test-notebooks.sh
