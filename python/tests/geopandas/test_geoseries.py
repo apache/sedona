@@ -1581,8 +1581,8 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
                 Point(1, 2, 0),
                 Point(0.5, 2.5, 2),
                 Point(1, 1, 2),
-                LineString([(1, 1, 2), (0, 1, 2), (1, 0, 2)]),
-                Polygon([(0, 0, 3), (0, 10, 3), (10, 10, 3), (0, 0, 3)]),
+                LineString([(1, 1, 3), (0, 1, 3), (1, 0, 3)]),
+                Polygon([(0, 0, 4), (0, 10, 4), (10, 10, 4), (0, 0, 4)]),
                 GeometryCollection(
                     [
                         Point(1, 1, 5),
