@@ -722,6 +722,10 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             gpd_result = gpd.GeoSeries(geom).centroid
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
+    @pytest.mark.skipif(
+        parse_version(gpd.__version__) < parse_version("0.14.0"),
+        reason="geopandas concave_hull requires version 0.14.0 or higher",
+    )
     def test_concave_hull(self):
         for geom in self.geoms:
             sgpd_result = GeoSeries(geom).concave_hull()
