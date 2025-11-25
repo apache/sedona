@@ -15,7 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-context("spatial RDD aggregation functions")
 
 sc <- testthat_spark_connection()
 pt_rdd <- read_point_rdd_with_non_spatial_attrs(repartition = 11)
