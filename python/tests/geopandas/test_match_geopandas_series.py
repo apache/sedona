@@ -723,7 +723,20 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_concave_hull(self):
-        pass
+        for geom in self.geoms:
+            for ratio, allow_holes in [(0.0, False), (0.5, True), (1.0, False)]:
+                sgpd_result = GeoSeries(geom).concave_hull(
+                    ratio=ratio, allow_holes=allow_holes
+                )
+                gpd_result = gpd.GeoSeries(geom).concave_hull(
+                    ratio=ratio, allow_holes=allow_holes
+                )
+                self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        mixed = [self.points[1], self.linestrings[1], self.polygons[1], None]
+        sgpd_result = GeoSeries(mixed).concave_hull()
+        gpd_result = gpd.GeoSeries(mixed).concave_hull()
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_convex_hull(self):
         for geom in self.geoms:
