@@ -49,4 +49,16 @@ public class GeometryForce3DTransformer extends GeometryTransformer {
     GeometryForce3DTransformer transformer = new GeometryForce3DTransformer(zValue);
     return transformer.transform(geometry);
   }
+
+  protected Geometry transformMultiPolygon(MultiPolygon geom, Geometry parent) {
+    // Transform each polygon individually to avoid recursion
+    Polygon[] transformedPolygons = new Polygon[geom.getNumGeometries()];
+    for (int i = 0; i < geom.getNumGeometries(); i++) {
+      Polygon polygon = (Polygon) geom.getGeometryN(i);
+      Geometry transformed = super.transform(polygon);
+      transformedPolygons[i] = (Polygon) transformed;
+    }
+    // Always return as MultiPolygon, even if there's only one polygon
+    return geom.getFactory().createMultiPolygon(transformedPolygons);
+  }
 }
