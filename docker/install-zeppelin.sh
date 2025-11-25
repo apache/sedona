@@ -61,9 +61,21 @@ download_with_progress() {
 }
 
 # Download and extract Zeppelin
-echo "Downloading Zeppelin ${ZEPPELIN_VERSION}..."
+# Download from Lyra Hosting mirror (faster) but verify checksum from Apache archive
 zeppelin_filename="zeppelin-${ZEPPELIN_VERSION}-bin-netinst.tgz"
-download_with_progress "https://archive.apache.org/dist/zeppelin/zeppelin-${ZEPPELIN_VERSION}/${zeppelin_filename}" "${zeppelin_filename}" "Downloading Zeppelin"
+zeppelin_download_url="https://mirror.lyrahosting.com/apache/zeppelin/zeppelin-${ZEPPELIN_VERSION}/${zeppelin_filename}"
+checksum_url="https://archive.apache.org/dist/zeppelin/zeppelin-${ZEPPELIN_VERSION}/${zeppelin_filename}.sha512"
+
+echo "Downloading Zeppelin ${ZEPPELIN_VERSION} from Lyra Hosting mirror..."
+download_with_progress "${zeppelin_download_url}" "${zeppelin_filename}" "Downloading Zeppelin"
+
+echo "Downloading checksum from Apache archive..."
+curl --silent --show-error --retry 5 --retry-delay 10 --retry-connrefused "${checksum_url}" -o "${zeppelin_filename}.sha512"
+
+echo "Verifying checksum..."
+sha512sum -c "${zeppelin_filename}.sha512" || (echo "Checksum verification failed!" && exit 1)
+
+echo "Checksum verified successfully. Extracting Zeppelin..."
 tar -xzf "${zeppelin_filename}" -C "${TARGET_DIR}"
 mv "${TARGET_DIR}"/zeppelin-"${ZEPPELIN_VERSION}"-bin-netinst "${ZEPPELIN_HOME}"
-rm "${zeppelin_filename}"
+rm "${zeppelin_filename}" "${zeppelin_filename}.sha512"
