@@ -23,9 +23,47 @@ set -e
 ZEPPELIN_VERSION=${1:-0.9.0}
 TARGET_DIR=${2:-/opt}
 
-# Download and extract Zeppelin using curl
-curl -L --retry 5 --retry-delay 10 --retry-connrefused https://archive.apache.org/dist/zeppelin/zeppelin-"${ZEPPELIN_VERSION}"/zeppelin-"${ZEPPELIN_VERSION}"-bin-netinst.tgz \
-    -o zeppelin-"${ZEPPELIN_VERSION}"-bin-netinst.tgz
-tar -xzf zeppelin-"${ZEPPELIN_VERSION}"-bin-netinst.tgz -C "${TARGET_DIR}"
+# Helper function to download with throttled progress updates (every 5 seconds)
+download_with_progress() {
+    local url=$1
+    local output=$2
+    local description=${3:-"Downloading"}
+
+    # Start download in background
+    curl -L --silent --show-error --retry 5 --retry-delay 10 --retry-connrefused "${url}" -o "${output}" &
+    local curl_pid=$!
+
+    # Monitor progress every 5 seconds
+    while kill -0 $curl_pid 2>/dev/null; do
+        sleep 5
+        if [ -f "${output}" ]; then
+            # Use stat for portability (works on both Linux and macOS)
+            local size=$(stat -c%s "${output}" 2>/dev/null || stat -f%z "${output}" 2>/dev/null || echo 0)
+            local size_mb=$((size / 1024 / 1024))
+            echo "${description}... ${size_mb} MB downloaded"
+        fi
+    done
+
+    # Wait for curl to finish
+    wait $curl_pid
+    local exit_code=$?
+    if [ $exit_code -ne 0 ]; then
+        echo "Download failed with exit code $exit_code"
+        return $exit_code
+    fi
+
+    # Show final size
+    if [ -f "${output}" ]; then
+        local final_size=$(stat -c%s "${output}" 2>/dev/null || stat -f%z "${output}" 2>/dev/null || echo 0)
+        local final_size_mb=$((final_size / 1024 / 1024))
+        echo "${description} completed: ${final_size_mb} MB"
+    fi
+}
+
+# Download and extract Zeppelin
+echo "Downloading Zeppelin ${ZEPPELIN_VERSION}..."
+zeppelin_filename="zeppelin-${ZEPPELIN_VERSION}-bin-netinst.tgz"
+download_with_progress "https://archive.apache.org/dist/zeppelin/zeppelin-${ZEPPELIN_VERSION}/${zeppelin_filename}" "${zeppelin_filename}" "Downloading Zeppelin"
+tar -xzf "${zeppelin_filename}" -C "${TARGET_DIR}"
 mv "${TARGET_DIR}"/zeppelin-"${ZEPPELIN_VERSION}"-bin-netinst "${ZEPPELIN_HOME}"
-rm zeppelin-"${ZEPPELIN_VERSION}"-bin-netinst.tgz
+rm "${zeppelin_filename}"
