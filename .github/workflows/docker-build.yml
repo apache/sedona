@@ -45,7 +45,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: ['ubuntu-latest']
+        os: ['ubuntu-latest', 'ubuntu-24.04-arm']
         spark: ['4.0.1']
         include:
           - spark: 4.0.1
