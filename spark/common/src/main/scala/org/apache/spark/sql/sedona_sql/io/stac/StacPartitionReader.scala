@@ -51,6 +51,7 @@ class StacPartitionReader(
   private var currentFile: File = _
   private var featureIterator: Iterator[InternalRow] = Iterator.empty
   private val mapper = new ObjectMapper()
+  private val headers = StacUtils.parseHeaders(opts)
 
   override def next(): Boolean = {
     if (featureIterator.hasNext) {
@@ -159,7 +160,20 @@ class StacPartitionReader(
 
     while (attempt < maxRetries && !success) {
       try {
-        fileContent = Source.fromURL(url).mkString
+        if (headers.isEmpty) {
+          fileContent = Source.fromURL(url).mkString
+        } else {
+          val connection = url.openConnection()
+          headers.foreach { case (key, value) =>
+            connection.setRequestProperty(key, value)
+          }
+          val source = Source.fromInputStream(connection.getInputStream)
+          try {
+            fileContent = source.mkString
+          } finally {
+            source.close()
+          }
+        }
         success = true
       } catch {
         case e: Exception =>

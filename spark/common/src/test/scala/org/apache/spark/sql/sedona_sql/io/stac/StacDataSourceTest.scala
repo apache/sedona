@@ -163,6 +163,139 @@ class StacDataSourceTest extends TestBaseScala {
     assert(rowCount == 0)
   }
 
+  it("should load STAC data with public service without authentication") {
+    // This test verifies backward compatibility with public STAC services
+    // Set STAC_PUBLIC_URL environment variable to test (e.g., Microsoft Planetary Computer)
+    // Example: https://planetarycomputer.microsoft.com/api/stac/v1/collections/naip
+    val publicUrl = sys.env.get("STAC_PUBLIC_URL")
+
+    if (publicUrl.isDefined) {
+      val dfStac = sparkSession.read
+        .format("stac")
+        .load(publicUrl.get)
+        .limit(10)
+
+      // Verify we can load data
+      assert(dfStac.count() >= 0, "Failed to load data from public STAC service")
+    } else {
+      // Skip test if environment variable is not set
+      cancel(
+        "Skipping public STAC service test - set STAC_PUBLIC_URL to run (e.g., https://planetarycomputer.microsoft.com/api/stac/v1/collections/naip)")
+    }
+  }
+
+  // Authentication tests for remote services
+  it("should load STAC data with bearer token authentication") {
+    // NOTE: Planet Labs API requires Basic Auth (not Bearer token) for collections
+    // Bearer token authentication works with other STAC services
+    // Set STAC_AUTH_URL and STAC_BEARER_TOKEN environment variables to test with a service that supports Bearer tokens
+    val authUrl = sys.env.get("STAC_AUTH_URL")
+    val bearerToken = sys.env.get("STAC_BEARER_TOKEN")
+
+    if (authUrl.isDefined && bearerToken.isDefined) {
+      val headersJson = s"""{"Authorization":"Bearer ${bearerToken.get}"}"""
+
+      val dfStac = sparkSession.read
+        .format("stac")
+        .option("headers", headersJson)
+        .load(authUrl.get)
+        .limit(10)
+
+      // Verify we can load data
+      assert(dfStac.count() >= 0, "Failed to load data with bearer token authentication")
+    } else {
+      // Skip test if environment variables are not set
+      cancel(
+        "Skipping bearer token authentication test - set STAC_AUTH_URL and STAC_BEARER_TOKEN to run")
+    }
+  }
+
+  it("should load STAC data with basic authentication") {
+    // This test requires environment variables to be set:
+    // STAC_AUTH_URL - The URL of the authenticated STAC service
+    // STAC_USERNAME - Username or API key
+    // STAC_PASSWORD - Password (can be empty for API keys)
+    val authUrl = sys.env.get("STAC_AUTH_URL")
+    val username = sys.env.get("STAC_USERNAME")
+    val password = sys.env.get("STAC_PASSWORD").getOrElse("")
+
+    if (authUrl.isDefined && username.isDefined) {
+      // Encode credentials as Base64
+      val credentials = s"${username.get}:$password"
+      val base64Credentials =
+        java.util.Base64.getEncoder.encodeToString(credentials.getBytes("UTF-8"))
+      val headersJson = s"""{"Authorization":"Basic $base64Credentials"}"""
+
+      val dfStac = sparkSession.read
+        .format("stac")
+        .option("headers", headersJson)
+        .load(authUrl.get)
+        .limit(10)
+
+      // Verify we can load data
+      assert(dfStac.count() >= 0, "Failed to load data with basic authentication")
+      assertSchema(dfStac.schema)
+    } else {
+      // Skip test if environment variables are not set
+      cancel("Skipping basic authentication test - set STAC_AUTH_URL and STAC_USERNAME to run")
+    }
+  }
+
+  it("should fail gracefully when authentication is required but not provided") {
+    // This test verifies that we get a proper error when accessing
+    // an authenticated endpoint without credentials
+    val authUrl = sys.env.get("STAC_AUTH_URL_REQUIRE_AUTH")
+
+    if (authUrl.isDefined) {
+      val exception = intercept[Exception] {
+        val dfStac = sparkSession.read
+          .format("stac")
+          .load(authUrl.get)
+          .limit(10)
+        dfStac.count()
+      }
+
+      // Verify we get an authentication-related error
+      val errorMessage = exception.getMessage.toLowerCase
+      assert(
+        errorMessage.contains("401") ||
+          errorMessage.contains("unauthorized") ||
+          errorMessage.contains("403") ||
+          errorMessage.contains("forbidden"),
+        s"Expected authentication error, but got: ${exception.getMessage}")
+    } else {
+      cancel("Skipping authentication failure test - set STAC_AUTH_URL_REQUIRE_AUTH to run")
+    }
+  }
+
+  it("should parse headers JSON correctly") {
+    // Test that headers are correctly parsed from JSON
+    val headersJson = """{"Authorization":"Bearer test_token","X-Custom":"value"}"""
+    val headers = StacUtils.parseHeaders(Map("headers" -> headersJson))
+
+    assert(headers.size == 2, "Headers should contain 2 entries")
+    assert(headers("Authorization") == "Bearer test_token", "Authorization header should match")
+    assert(headers("X-Custom") == "value", "Custom header should match")
+  }
+
+  it("should handle empty headers JSON") {
+    val headersJson = """{}"""
+    val headers = StacUtils.parseHeaders(Map("headers" -> headersJson))
+    assert(headers.isEmpty, "Empty JSON should result in empty headers map")
+  }
+
+  it("should handle missing headers option") {
+    val headers = StacUtils.parseHeaders(Map.empty[String, String])
+    assert(headers.isEmpty, "Missing headers option should result in empty headers map")
+  }
+
+  it("should throw error for invalid headers JSON") {
+    val invalidJson = """{"Authorization":"Bearer token", invalid}"""
+    assertThrows[IllegalArgumentException] {
+      StacUtils.parseHeaders(Map("headers" -> invalidJson))
+    }
+  }
+
   def assertSchema(actualSchema: StructType): Unit = {
     // Base STAC fields that should always be present
     val baseFields = Seq(
