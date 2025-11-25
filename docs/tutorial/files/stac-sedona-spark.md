@@ -169,6 +169,8 @@ Below are reader options that can be set to control the behavior of the STAC rea
 
 - **itemsLimitPerRequest**: This option specifies the maximum number of items to be requested in a single API call. It helps in controlling the size of each request. The default value is set to 10.
 
+- **headers**: This option specifies HTTP headers to include in STAC API requests. It should be a JSON-encoded string containing a dictionary of header key-value pairs. This is useful for authentication and custom headers. Example: `{"Authorization": "Basic <base64_credentials>"}`
+
 These configurations can be combined into a single `Map[String, String]` and passed to the STAC reader as shown below:
 
 ```scala
@@ -269,18 +271,164 @@ client.get_collection("aster-l1t").save_to_geoparquet(
 
 These examples demonstrate how to use the Client class to search for items in a STAC collection with various filters and return the results as either an iterator of PyStacItem objects or a Spark DataFrame.
 
+### Authentication
+
+Many STAC services require authentication to access their data. The STAC client supports multiple authentication methods including HTTP Basic Authentication, Bearer Token Authentication, and custom headers.
+
+#### Basic Authentication
+
+Basic authentication is commonly used with API keys or username/password combinations. Many services (like Planet Labs) use API keys as the username with an empty password.
+
+```python
+from sedona.spark.stac import Client
+
+# Example 1: Using an API key (common pattern)
+client = Client.open("https://api.example.com/stac/v1")
+client.with_basic_auth("your_api_key_here", "")
+
+# Search for items with authentication
+df = client.search(collection_id="example-collection", max_items=10)
+df.show()
+
+# Example 2: Using username and password
+client = Client.open("https://api.example.com/stac/v1")
+client.with_basic_auth("username", "password")
+
+df = client.search(collection_id="example-collection", max_items=10)
+df.show()
+
+# Example 3: Method chaining
+df = (
+    Client.open("https://api.example.com/stac/v1")
+    .with_basic_auth("your_api_key", "")
+    .search(collection_id="example-collection", max_items=10)
+)
+df.show()
+```
+
+#### Bearer Token Authentication
+
+Bearer token authentication is used with OAuth2 tokens and JWT tokens. Note that some services may only support specific authentication methods.
+
+```python
+from sedona.spark.stac import Client
+
+# Using a bearer token
+client = Client.open("https://api.example.com/stac/v1")
+client.with_bearer_token("your_access_token_here")
+
+df = client.search(collection_id="example-collection", max_items=10)
+df.show()
+
+# Method chaining
+df = (
+    Client.open("https://api.example.com/stac/v1")
+    .with_bearer_token("your_token")
+    .search(collection_id="example-collection", max_items=10)
+)
+df.show()
+```
+
+#### Custom Headers
+
+You can also pass custom headers directly when creating the client, which is useful for services with non-standard authentication requirements.
+
+```python
+from sedona.spark.stac import Client
+
+# Using custom headers
+headers = {"Authorization": "Bearer your_token_here", "X-Custom-Header": "custom_value"}
+client = Client.open("https://api.example.com/stac/v1", headers=headers)
+
+df = client.search(collection_id="example-collection", max_items=10)
+df.show()
+```
+
+#### Authentication with Scala DataSource
+
+When using the STAC data source directly in Scala or through Spark SQL, you can pass authentication headers as a JSON-encoded option:
+
+```python
+import json
+from pyspark.sql import SparkSession
+
+# Prepare authentication headers
+headers = {"Authorization": "Basic <base64_encoded_credentials>"}
+headers_json = json.dumps(headers)
+
+# Load STAC data with authentication
+df = (
+    spark.read.format("stac")
+    .option("headers", headers_json)
+    .load("https://api.example.com/stac/v1/collections/example-collection")
+)
+
+df.show()
+```
+
+```scala
+// Scala example
+val headersJson = """{"Authorization":"Basic <base64_encoded_credentials>"}"""
+
+val df = sparkSession.read
+  .format("stac")
+  .option("headers", headersJson)
+  .load("https://api.example.com/stac/v1/collections/example-collection")
+
+df.show()
+```
+
+#### Important Notes
+
+- **Authentication methods are mutually exclusive**: Setting a new authentication method will overwrite any previously set Authorization header.
+- **Headers are propagated**: Headers set on the Client are automatically passed to all collection and item requests.
+- **Service-specific requirements**: Different STAC services may require different authentication methods.
+- **Backward compatibility**: All authentication parameters are optional. Existing code that accesses public STAC services without authentication will continue to work unchanged.
+
 ### Methods
 
-**`open(url: str) -> Client`**
+**`open(url: str, headers: Optional[dict] = None) -> Client`**
 Opens a connection to the specified STAC API URL.
 
 Parameters:
 
 * `url` (*str*): The URL of the STAC API to connect to. Example: `"https://planetarycomputer.microsoft.com/api/stac/v1"`
+* `headers` (*Optional[dict]*): Optional dictionary of HTTP headers for authentication or custom headers. Example: `{"Authorization": "Bearer token123"}`
 
 Returns:
 
 * `Client`: An instance of the `Client` class connected to the specified URL.
+
+---
+
+**`with_basic_auth(username: str, password: str) -> Client`**
+Adds HTTP Basic Authentication to the client.
+
+This method encodes the username and password using Base64 and adds the appropriate Authorization header for HTTP Basic Authentication.
+
+Parameters:
+
+* `username` (*str*): The username for authentication. For API keys, this is typically the API key itself. Example: `"your_api_key"`
+* `password` (*str*): The password for authentication. For API keys, this is often left empty. Example: `""`
+
+Returns:
+
+* `Client`: Returns self for method chaining.
+
+---
+
+**`with_bearer_token(token: str) -> Client`**
+Adds Bearer Token Authentication to the client.
+
+This method adds the appropriate Authorization header for Bearer Token authentication, commonly used with OAuth2 and API tokens.
+
+Parameters:
+
+* `token` (*str*): The bearer token for authentication. Example: `"your_access_token_here"`
+
+Returns:
+
+* `Client`: Returns self for method chaining.
 
 ---
 
