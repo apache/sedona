@@ -24,7 +24,7 @@ import pyspark.pandas as ps
 import sedona.spark.geopandas as sgpd
 from sedona.spark.geopandas import GeoSeries, GeoDataFrame
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
-from shapely import wkt
+from shapely import points, wkt
 from shapely.geometry import (
     Point,
     LineString,
