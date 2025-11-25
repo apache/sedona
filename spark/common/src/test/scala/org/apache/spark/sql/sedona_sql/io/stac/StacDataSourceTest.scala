@@ -186,9 +186,9 @@ class StacDataSourceTest extends TestBaseScala {
 
   // Authentication tests for remote services
   it("should load STAC data with bearer token authentication") {
-    // NOTE: Planet Labs API requires Basic Auth (not Bearer token) for collections
-    // Bearer token authentication works with other STAC services
-    // Set STAC_AUTH_URL and STAC_BEARER_TOKEN environment variables to test with a service that supports Bearer tokens
+    // This test verifies loading STAC data from services that support Bearer token authentication.
+    // Set STAC_AUTH_URL and STAC_BEARER_TOKEN environment variables to test with a compatible service.
+    // Note: Not all STAC services support Bearer tokens; some may require other authentication methods.
     val authUrl = sys.env.get("STAC_AUTH_URL")
     val bearerToken = sys.env.get("STAC_BEARER_TOKEN")
 
@@ -211,7 +211,9 @@ class StacDataSourceTest extends TestBaseScala {
   }
 
   it("should load STAC data with basic authentication") {
-    // This test requires environment variables to be set:
+    // This test works with services that support HTTP Basic Authentication.
+    // For example, Planet Labs API uses API key as username with an empty password.
+    // Environment variables required:
     // STAC_AUTH_URL - The URL of the authenticated STAC service
     // STAC_USERNAME - Username or API key
     // STAC_PASSWORD - Password (can be empty for API keys)

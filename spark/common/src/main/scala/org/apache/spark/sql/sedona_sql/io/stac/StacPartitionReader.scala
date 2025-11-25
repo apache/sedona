@@ -164,14 +164,33 @@ class StacPartitionReader(
           fileContent = Source.fromURL(url).mkString
         } else {
           val connection = url.openConnection()
-          headers.foreach { case (key, value) =>
-            connection.setRequestProperty(key, value)
-          }
-          val source = Source.fromInputStream(connection.getInputStream)
+          var inputStream: java.io.InputStream = null
+          var source: Source = null
+
           try {
+            headers.foreach { case (key, value) =>
+              connection.setRequestProperty(key, value)
+            }
+            inputStream = connection.getInputStream
+            source = Source.fromInputStream(inputStream)
             fileContent = source.mkString
           } finally {
-            source.close()
+            // Close resources in reverse order
+            if (source != null) {
+              try source.close()
+              catch { case _: Throwable => }
+            }
+            if (inputStream != null) {
+              try inputStream.close()
+              catch { case _: Throwable => }
+            }
+            // Disconnect HTTP connection if applicable
+            connection match {
+              case httpConn: java.net.HttpURLConnection =>
+                try httpConn.disconnect()
+                catch { case _: Throwable => }
+              case _ =>
+            }
           }
         }
         success = true

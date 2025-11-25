@@ -33,6 +33,13 @@ import scala.io.Source
 
 object StacUtils {
 
+  // Reusable ObjectMapper instance to avoid expensive creation on each parseHeaders call
+  private val objectMapper: ObjectMapper = {
+    val mapper = new ObjectMapper()
+    mapper.registerModule(DefaultScalaModule)
+    mapper
+  }
+
   // Function to load JSON from URL or service
   def loadStacCollectionToJson(opts: Map[String, String]): String = {
     val urlFull: String = getFullCollectionUrl(opts)
@@ -55,10 +62,7 @@ object StacUtils {
     opts.get("headers") match {
       case Some(headersJson) =>
         try {
-          val mapper = new ObjectMapper()
-          mapper.registerModule(DefaultScalaModule)
-          val headersMap = mapper.readValue(headersJson, classOf[Map[String, String]])
-          headersMap
+          objectMapper.readValue(headersJson, classOf[Map[String, String]])
         } catch {
           case e: Exception =>
             throw new IllegalArgumentException(
@@ -99,18 +103,36 @@ object StacUtils {
         } else {
           // Headers provided - use URLConnection to set custom headers
           val connection = new java.net.URL(url).openConnection()
+          var inputStream: java.io.InputStream = null
+          var source: Source = null
 
-          // Set all custom headers
-          headers.foreach { case (key, value) =>
-            connection.setRequestProperty(key, value)
-          }
-
-          // Read the response
-          val source = Source.fromInputStream(connection.getInputStream)
           try {
+            // Set all custom headers
+            headers.foreach { case (key, value) =>
+              connection.setRequestProperty(key, value)
+            }
+
+            // Read the response
+            inputStream = connection.getInputStream
+            source = Source.fromInputStream(inputStream)
             source.mkString
           } finally {
-            source.close()
+            // Close resources in reverse order
+            if (source != null) {
+              try source.close()
+              catch { case _: Throwable => }
+            }
+            if (inputStream != null) {
+              try inputStream.close()
+              catch { case _: Throwable => }
+            }
+            // Disconnect HTTP connection if applicable
+            connection match {
+              case httpConn: java.net.HttpURLConnection =>
+                try httpConn.disconnect()
+                catch { case _: Throwable => }
+              case _ =>
+            }
           }
         }
         success = true

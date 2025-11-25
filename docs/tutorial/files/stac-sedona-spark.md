@@ -380,9 +380,9 @@ df.show()
 
 #### Important Notes
 
-- **Authentication methods are mutually exclusive**: Setting a new authentication method will overwrite any previously set Authorization header.
+- **Authentication methods are mutually exclusive**: Setting a new authentication method will overwrite any previously set Authorization header, but other custom headers remain unchanged.
 - **Headers are propagated**: Headers set on the Client are automatically passed to all collection and item requests.
-- **Service-specific requirements**: Different STAC services may require different authentication methods.
+- **Service-specific requirements**: Different STAC services may require different authentication methods. For example, Planet Labs requires Basic Authentication rather than Bearer tokens for collection access.
 - **Backward compatibility**: All authentication parameters are optional. Existing code that accesses public STAC services without authentication will continue to work unchanged.
 
 ### Methods
