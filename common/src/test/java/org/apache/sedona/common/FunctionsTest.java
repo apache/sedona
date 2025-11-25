@@ -2461,6 +2461,24 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void force3DMultiPolygonWithSinglePolygon() {
+    // Test that a MultiPolygon with a single polygon remains a MultiPolygon after force3D
+    Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 10, 0, 10, 10, 0, 10, 0, 0));
+    MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon});
+
+    Geometry forced = Functions.force3D(multiPolygon, 5.0);
+
+    assertTrue(forced instanceof MultiPolygon);
+    assertEquals(1, ((MultiPolygon) forced).getNumGeometries());
+
+    Polygon forcedPolygon = (Polygon) ((MultiPolygon) forced).getGeometryN(0);
+    Coordinate[] coords = forcedPolygon.getCoordinates();
+    for (Coordinate coord : coords) {
+      assertEquals(5.0, coord.getZ(), 0.0001);
+    }
+  }
+
+  @Test
   public void makeLine() {
     Point point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
     Point point2 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
