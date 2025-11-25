@@ -70,10 +70,10 @@ echo "Downloading Zeppelin ${ZEPPELIN_VERSION} from Lyra Hosting mirror..."
 download_with_progress "${zeppelin_download_url}" "${zeppelin_filename}" "Downloading Zeppelin"
 
 echo "Downloading checksum from Apache archive..."
-curl --silent --show-error --retry 5 --retry-delay 10 --retry-connrefused "${checksum_url}" -o "${zeppelin_filename}.sha512"
+curl -L --silent --show-error --retry 5 --retry-delay 10 --retry-connrefused "${checksum_url}" -o "${zeppelin_filename}.sha512"
 
 echo "Verifying checksum..."
-sha512sum -c "${zeppelin_filename}.sha512" || (echo "Checksum verification failed!" && exit 1)
+sha512sum -c "${zeppelin_filename}.sha512" || { echo "Checksum verification failed!"; exit 1; }
 
 echo "Checksum verified successfully. Extracting Zeppelin..."
 tar -xzf "${zeppelin_filename}" -C "${TARGET_DIR}"

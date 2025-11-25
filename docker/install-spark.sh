@@ -31,7 +31,7 @@ download_with_progress() {
     local description=${3:-"Downloading"}
 
     # Start download in background, redirect progress to /dev/null
-    curl --silent --show-error --retry 5 --retry-delay 10 --retry-connrefused "${url}" -o "${output}" &
+    curl -L --silent --show-error --retry 5 --retry-delay 10 --retry-connrefused "${url}" -o "${output}" &
     local curl_pid=$!
 
     # Monitor progress every 5 seconds
@@ -71,10 +71,10 @@ echo "Downloading Spark ${spark_version} from Lyra Hosting mirror..."
 download_with_progress "${spark_download_url}" "${spark_filename}" "Downloading Spark"
 
 echo "Downloading checksum from Apache archive..."
-curl --silent --show-error --retry 5 --retry-delay 10 --retry-connrefused "${checksum_url}" -o "${spark_filename}.sha512"
+curl -L --silent --show-error --retry 5 --retry-delay 10 --retry-connrefused "${checksum_url}" -o "${spark_filename}.sha512"
 
 echo "Verifying checksum..."
-sha512sum -c "${spark_filename}.sha512" || (echo "Checksum verification failed!" && exit 1)
+sha512sum -c "${spark_filename}.sha512" || { echo "Checksum verification failed!"; exit 1; }
 
 echo "Checksum verified successfully. Extracting Spark..."
 tar -xf "${spark_filename}" && mv spark-"${spark_version}"-bin-hadoop3/* "${SPARK_HOME}"/
