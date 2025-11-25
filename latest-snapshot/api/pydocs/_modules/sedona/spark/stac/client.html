@@ -477,23 +477,104 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Client</span><span class="p">:</span>
 <div class="viewcode-block" id="Client.__init__">
 <a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">headers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes a STAC client with optional authentication headers.</span>
+
+<span class="sd">        :param url: The URL of the STAC API to connect to.</span>
+<span class="sd">        :param headers: Optional dictionary of HTTP headers to include in requests.</span>
+<span class="sd">            Can be used for authentication or custom headers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="n">headers</span> <span class="k">if</span> <span class="n">headers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span></div>
 
 
 <div class="viewcode-block" id="Client.open">
 <a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.open">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">open</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">open</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">headers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Opens a connection to the specified STAC API URL.</span>
 
-<span class="sd">        This class method creates an instance of the Client class with the given URL.</span>
+<span class="sd">        This class method creates an instance of the Client class with the given URL</span>
+<span class="sd">        and optional authentication headers.</span>
 
 <span class="sd">        :param url: The URL of the STAC API to connect to. Example: &quot;https://planetarycomputer.microsoft.com/api/stac/v1&quot;</span>
+<span class="sd">        :param headers: Optional dictionary of HTTP headers for authentication.</span>
+<span class="sd">            Example: {&quot;Authorization&quot;: &quot;Bearer token123&quot;}</span>
 <span class="sd">        :return: An instance of the Client class connected to the specified URL.</span>
+
+<span class="sd">        Example usage:</span>
+<span class="sd">            # Without authentication</span>
+<span class="sd">            client = Client.open(&quot;https://planetarycomputer.microsoft.com/api/stac/v1&quot;)</span>
+
+<span class="sd">            # With custom headers</span>
+<span class="sd">            client = Client.open(</span>
+<span class="sd">                &quot;https://example.com/stac/v1&quot;,</span>
+<span class="sd">                headers={&quot;Authorization&quot;: &quot;Bearer token123&quot;}</span>
+<span class="sd">            )</span>
+
+<span class="sd">            # Using convenience methods</span>
+<span class="sd">            client = Client.open(&quot;https://example.com/stac/v1&quot;)</span>
+<span class="sd">            client.with_basic_auth(&quot;username&quot;, &quot;password&quot;)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">url</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Client.with_basic_auth">
+<a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.with_basic_auth">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">with_basic_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">password</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds HTTP Basic Authentication to the client.</span>
+
+<span class="sd">        This method encodes the username and password using Base64 and adds</span>
+<span class="sd">        the appropriate Authorization header for HTTP Basic Authentication.</span>
+
+<span class="sd">        :param username: The username for authentication. For API keys, this is typically the API key itself.</span>
+<span class="sd">        :param password: The password for authentication. For API keys, this is often left empty.</span>
+<span class="sd">        :return: Self for method chaining.</span>
+
+<span class="sd">        Example usage:</span>
+<span class="sd">            # Standard basic auth</span>
+<span class="sd">            client = Client.open(&quot;https://example.com/stac/v1&quot;)</span>
+<span class="sd">            client.with_basic_auth(&quot;user&quot;, &quot;pass&quot;)</span>
+
+<span class="sd">            # API key as username (common pattern)</span>
+<span class="sd">            client.with_basic_auth(&quot;api_key_xyz&quot;, &quot;&quot;)</span>
+
+<span class="sd">            # Method chaining</span>
+<span class="sd">            df = Client.open(url).with_basic_auth(api_key, &quot;&quot;).search(collection_id=&quot;test&quot;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">base64</span>
+
+        <span class="n">userpass</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">password</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">b64_userpass</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">userpass</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;Authorization&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Basic </span><span class="si">{</span><span class="n">b64_userpass</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="Client.with_bearer_token">
+<a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.with_bearer_token">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">with_bearer_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds Bearer Token Authentication to the client.</span>
+
+<span class="sd">        This method adds the appropriate Authorization header for Bearer Token</span>
+<span class="sd">        authentication, commonly used with OAuth2 and API tokens.</span>
+
+<span class="sd">        :param token: The bearer token for authentication.</span>
+<span class="sd">        :return: Self for method chaining.</span>
+
+<span class="sd">        Example usage:</span>
+<span class="sd">            # Bearer token auth</span>
+<span class="sd">            client = Client.open(&quot;https://example.com/stac/v1&quot;)</span>
+<span class="sd">            client.with_bearer_token(&quot;your_access_token_here&quot;)</span>
+
+<span class="sd">            # Method chaining</span>
+<span class="sd">            df = Client.open(url).with_bearer_token(token).search(collection_id=&quot;test&quot;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;Authorization&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
 
 
 <div class="viewcode-block" id="Client.get_collection">
@@ -508,7 +589,7 @@
 <span class="sd">        :param collection_id: The ID of the collection to retrieve. Example: &quot;aster-l1t&quot;</span>
 <span class="sd">        :return: An instance of the CollectionClient class for the specified collection.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">CollectionClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">collection_id</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">CollectionClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">collection_id</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Client.get_collection_from_catalog">
@@ -523,7 +604,7 @@
 <span class="sd">            dict: The root catalog of the STAC API.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Implement logic to fetch and return the root catalog</span>
-        <span class="k">return</span> <span class="n">CollectionClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">CollectionClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Client.search">

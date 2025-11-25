@@ -656,7 +656,23 @@ from this GeoJson file.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">loadStacCollectionToJson</span><span class="params">(<span name="url">url: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="maxRetries">maxRetries: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">3</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+        <span class="name">loadStacCollectionToJson</span><span class="params">(<span name="url">url: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="maxRetries">maxRetries: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacUtils#loadStacCollectionToJson" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="loadStacCollectionToJson(url:String,headers:Map[String,String],maxRetries:Int):String"></a><a id="loadStacCollectionToJson(String,Map[String,String],Int):String"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacUtils$.html#loadStacCollectionToJson(url:String,headers:Map[String,String],maxRetries:Int):String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">loadStacCollectionToJson</span><span class="params">(<span name="url">url: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="headers">headers: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">Map.empty</span></span>, <span name="maxRetries">maxRetries: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">3</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
       
@@ -734,6 +750,25 @@ from this GeoJson file.
                 <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacUtils#parseHeaders" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="parseHeaders(opts:Map[String,String]):Map[String,String]"></a><a id="parseHeaders(Map[String,String]):Map[String,String]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacUtils$.html#parseHeaders(opts:Map[String,String]):Map[String,String]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">parseHeaders</span><span class="params">(<span name="opts">opts: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Parse headers from the options map.</p><div class="fullcomment"><div class="comment cmt"><p>Parse headers from the options map.</p><p>Headers can be provided as a JSON string in the &quot;headers&quot; option.
+</p></div><dl class="paramcmts block"><dt class="param">opts</dt><dd class="cmt"><p>
+  The options map that may contain a &quot;headers&quot; key with JSON-encoded headers</p></dd><dt>returns</dt><dd class="cmt"><p>
+  Map of header names to values</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacUtils#promotePropertiesToTop" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="promotePropertiesToTop(row:org.apache.spark.sql.catalyst.InternalRow,schema:org.apache.spark.sql.types.StructType):org.apache.spark.sql.catalyst.InternalRow"></a><a id="promotePropertiesToTop(InternalRow,StructType):InternalRow"></a>
       <span class="permalink">

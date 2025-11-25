@@ -508,10 +508,23 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">CollectionClient</span><span class="p">:</span>
 <div class="viewcode-block" id="CollectionClient.__init__">
 <a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.collection_client.CollectionClient.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">collection_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">collection_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">headers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes a collection client for a STAC collection.</span>
+
+<span class="sd">        :param url: The base URL of the STAC API.</span>
+<span class="sd">        :param collection_id: The ID of the collection to access. If None, accesses the catalog root.</span>
+<span class="sd">        :param headers: Optional dictionary of HTTP headers for authentication.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">collection_id</span> <span class="o">=</span> <span class="n">collection_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">collection_url</span> <span class="o">=</span> <span class="n">get_collection_url</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">collection_id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="n">headers</span> <span class="k">if</span> <span class="n">headers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">getActiveSession</span><span class="p">()</span></div>
 
 
@@ -950,6 +963,22 @@
 <div class="viewcode-block" id="CollectionClient.load_items_df">
 <a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.collection_client.CollectionClient.load_items_df">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_items_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bbox</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">max_items</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Loads items from the STAC collection as a Spark DataFrame.</span>
+
+<span class="sd">        This method handles the conversion of headers to Spark options and</span>
+<span class="sd">        applies various filters to the data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+        <span class="c1"># Prepare Spark DataFrameReader with headers if present</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;stac&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Encode headers as JSON string for passing to Spark</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">:</span>
+            <span class="n">headers_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
+            <span class="n">reader</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;headers&quot;</span><span class="p">,</span> <span class="n">headers_json</span><span class="p">)</span>
+
         <span class="c1"># Load the collection data from the specified collection URL</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="ow">not</span> <span class="n">ids</span>
@@ -958,13 +987,9 @@
             <span class="ow">and</span> <span class="ow">not</span> <span class="n">datetime</span>
             <span class="ow">and</span> <span class="n">max_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="p">):</span>
-            <span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;stac&quot;</span><span class="p">)</span>
-                <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;itemsLimitMax&quot;</span><span class="p">,</span> <span class="n">max_items</span><span class="p">)</span>
-                <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_url</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;itemsLimitMax&quot;</span><span class="p">,</span> <span class="n">max_items</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_url</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;stac&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_url</span><span class="p">)</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_url</span><span class="p">)</span>
             <span class="c1"># Apply ID filters if provided</span>
             <span class="k">if</span> <span class="n">ids</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>

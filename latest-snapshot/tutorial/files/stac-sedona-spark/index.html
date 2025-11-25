@@ -2437,6 +2437,17 @@ You're not viewing the latest stable version.
 </li>
         
           <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#methods" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6237,6 +6248,17 @@ You're not viewing the latest stable version.
 </li>
         
           <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#methods" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6431,6 +6453,9 @@ You're not viewing the latest stable version.
 <li>
 <p><strong>itemsLimitPerRequest</strong>: This option specifies the maximum number of items to be requested in a single API call. It helps in controlling the size of each request. The default value is set to 10.</p>
 </li>
+<li>
+<p><strong>headers</strong>: This option specifies HTTP headers to include in STAC API requests. It should be a JSON-encoded string containing a dictionary of header key-value pairs. This is useful for authentication and custom headers. Example: <code>{"Authorization": "Basic &lt;base64_credentials&gt;"}</code></p>
+</li>
 </ul>
 <p>These configurations can be combined into a single <code>Map[String, String]</code> and passed to the STAC reader as shown below:</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="k">def</span><span class="w"> </span><span class="nf">defaultSparkConfig</span><span class="p">:</span><span class="w"> </span><span class="nc">Map</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span><span class="w"> </span><span class="nc">String</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Map</span><span class="p">(</span>
@@ -6503,16 +6528,136 @@ You're not viewing the latest stable version.
 <span class="p">)</span>
 </code></pre></div>
 <p>These examples demonstrate how to use the Client class to search for items in a STAC collection with various filters and return the results as either an iterator of PyStacItem objects or a Spark DataFrame.</p>
+<h3 id="authentication">Authentication<a class="headerlink" href="#authentication" title="Permanent link">&para;</a></h3>
+<p>Many STAC services require authentication to access their data. The STAC client supports multiple authentication methods including HTTP Basic Authentication, Bearer Token Authentication, and custom headers.</p>
+<h4 id="basic-authentication">Basic Authentication<a class="headerlink" href="#basic-authentication" title="Permanent link">&para;</a></h4>
+<p>Basic authentication is commonly used with API keys or username/password combinations. Many services (like Planet Labs) use API keys as the username with an empty password.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.stac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Client</span>
+
+<span class="c1"># Example 1: Using an API key (common pattern)</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;https://api.example.com/stac/v1&quot;</span><span class="p">)</span>
+<span class="n">client</span><span class="o">.</span><span class="n">with_basic_auth</span><span class="p">(</span><span class="s2">&quot;your_api_key_here&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+<span class="c1"># Search for items with authentication</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collection_id</span><span class="o">=</span><span class="s2">&quot;example-collection&quot;</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># Example 2: Using username and password</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;https://api.example.com/stac/v1&quot;</span><span class="p">)</span>
+<span class="n">client</span><span class="o">.</span><span class="n">with_basic_auth</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">,</span> <span class="s2">&quot;password&quot;</span><span class="p">)</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collection_id</span><span class="o">=</span><span class="s2">&quot;example-collection&quot;</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># Example 3: Method chaining</span>
+<span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;https://api.example.com/stac/v1&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">with_basic_auth</span><span class="p">(</span><span class="s2">&quot;your_api_key&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collection_id</span><span class="o">=</span><span class="s2">&quot;example-collection&quot;</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<h4 id="bearer-token-authentication">Bearer Token Authentication<a class="headerlink" href="#bearer-token-authentication" title="Permanent link">&para;</a></h4>
+<p>Bearer token authentication is used with OAuth2 tokens and JWT tokens. Note that some services may only support specific authentication methods.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.stac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Client</span>
+
+<span class="c1"># Using a bearer token</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;https://api.example.com/stac/v1&quot;</span><span class="p">)</span>
+<span class="n">client</span><span class="o">.</span><span class="n">with_bearer_token</span><span class="p">(</span><span class="s2">&quot;your_access_token_here&quot;</span><span class="p">)</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collection_id</span><span class="o">=</span><span class="s2">&quot;example-collection&quot;</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># Method chaining</span>
+<span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;https://api.example.com/stac/v1&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">with_bearer_token</span><span class="p">(</span><span class="s2">&quot;your_token&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collection_id</span><span class="o">=</span><span class="s2">&quot;example-collection&quot;</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<h4 id="custom-headers">Custom Headers<a class="headerlink" href="#custom-headers" title="Permanent link">&para;</a></h4>
+<p>You can also pass custom headers directly when creating the client, which is useful for services with non-standard authentication requirements.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.stac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Client</span>
+
+<span class="c1"># Using custom headers</span>
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="s2">&quot;Bearer your_token_here&quot;</span><span class="p">,</span> <span class="s2">&quot;X-Custom-Header&quot;</span><span class="p">:</span> <span class="s2">&quot;custom_value&quot;</span><span class="p">}</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;https://api.example.com/stac/v1&quot;</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collection_id</span><span class="o">=</span><span class="s2">&quot;example-collection&quot;</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<h4 id="authentication-with-scala-datasource">Authentication with Scala DataSource<a class="headerlink" href="#authentication-with-scala-datasource" title="Permanent link">&para;</a></h4>
+<p>When using the STAC data source directly in Scala or through Spark SQL, you can pass authentication headers as a JSON-encoded option:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparkSession</span>
+
+<span class="c1"># Prepare authentication headers</span>
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="s2">&quot;Basic &lt;base64_encoded_credentials&gt;&quot;</span><span class="p">}</span>
+<span class="n">headers_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">headers</span><span class="p">)</span>
+
+<span class="c1"># Load STAC data with authentication</span>
+<span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;stac&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;headers&quot;</span><span class="p">,</span> <span class="n">headers_json</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;https://api.example.com/stac/v1/collections/example-collection&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="c1">// Scala example</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">headersJson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;&quot;{&quot;Authorization&quot;:&quot;Basic &lt;base64_encoded_credentials&gt;&quot;}&quot;&quot;&quot;</span>
+
+<span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sparkSession</span><span class="p">.</span><span class="n">read</span>
+<span class="w">  </span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;stac&quot;</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;headers&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">headersJson</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;https://api.example.com/stac/v1/collections/example-collection&quot;</span><span class="p">)</span>
+
+<span class="n">df</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<h4 id="important-notes">Important Notes<a class="headerlink" href="#important-notes" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Authentication methods are mutually exclusive</strong>: Setting a new authentication method will overwrite any previously set Authorization header, but other custom headers remain unchanged.</li>
+<li><strong>Headers are propagated</strong>: Headers set on the Client are automatically passed to all collection and item requests.</li>
+<li><strong>Service-specific requirements</strong>: Different STAC services may require different authentication methods. For example, Planet Labs requires Basic Authentication rather than Bearer tokens for collection access.</li>
+<li><strong>Backward compatibility</strong>: All authentication parameters are optional. Existing code that accesses public STAC services without authentication will continue to work unchanged.</li>
+</ul>
 <h3 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">&para;</a></h3>
-<p><strong><code>open(url: str) -&gt; Client</code></strong>
+<p><strong><code>open(url: str, headers: Optional[dict] = None) -&gt; Client</code></strong>
 Opens a connection to the specified STAC API URL.</p>
 <p>Parameters:</p>
 <ul>
 <li><code>url</code> (<em>str</em>): The URL of the STAC API to connect to. Example: <code>"https://planetarycomputer.microsoft.com/api/stac/v1"</code></li>
+<li><code>headers</code> (<em>Optional[dict]</em>): Optional dictionary of HTTP headers for authentication or custom headers. Example: <code>{"Authorization": "Bearer token123"}</code></li>
 </ul>
 <p>Returns:</p>
 <ul>
 <li><code>Client</code>: An instance of the <code>Client</code> class connected to the specified URL.</li>
+</ul>
+<hr />
+<p><strong><code>with_basic_auth(username: str, password: str) -&gt; Client</code></strong>
+Adds HTTP Basic Authentication to the client.</p>
+<p>This method encodes the username and password using Base64 and adds the appropriate Authorization header for HTTP Basic Authentication.</p>
+<p>Parameters:</p>
+<ul>
+<li><code>username</code> (<em>str</em>): The username for authentication. For API keys, this is typically the API key itself. Example: <code>"your_api_key"</code></li>
+<li><code>password</code> (<em>str</em>): The password for authentication. For API keys, this is often left empty. Example: <code>""</code></li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li><code>Client</code>: Returns self for method chaining.</li>
+</ul>
+<hr />
+<p><strong><code>with_bearer_token(token: str) -&gt; Client</code></strong>
+Adds Bearer Token Authentication to the client.</p>
+<p>This method adds the appropriate Authorization header for Bearer Token authentication, commonly used with OAuth2 and API tokens.</p>
+<p>Parameters:</p>
+<ul>
+<li><code>token</code> (<em>str</em>): The bearer token for authentication. Example: <code>"your_access_token_here"</code></li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li><code>Client</code>: Returns self for method chaining.</li>
 </ul>
 <hr />
 <p><strong><code>get_collection(collection_id: str) -&gt; CollectionClient</code></strong>
@@ -6573,7 +6718,7 @@ Searches for items in the specified collection with optional filters.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="May 3, 2025 19:30:21 UTC">May 3, 2025 19:30:21</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="November 25, 2025 20:30:00 UTC">November 25, 2025 20:30:00</span>
   </span>
 
     
