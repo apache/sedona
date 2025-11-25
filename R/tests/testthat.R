@@ -30,10 +30,6 @@ if (identical(Sys.getenv("NOT_CRAN"), "true")) {
   filter <- Sys.getenv("TESTTHAT_FILTER", unset = "")
   if (identical(filter, "")) filter <- NULL
 
-  reporter <- MultiReporter$new(reporters = list(
-    ProgressReporter$new(show_praise = FALSE),
-    CheckReporter$new(),
-    SummaryReporter$new(show_praise = FALSE)
-  ))
-  test_check("apache.sedona", filter = filter, reporter = reporter)
+  # Use default reporter to avoid compatibility issues with testthat 3.3.0
+  test_check("apache.sedona", filter = filter)
 }
