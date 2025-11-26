@@ -1,5 +1,5 @@
 <test>
-	<testName>testReadToGeometryRDD</testName>
-	<fileName>map1</fileName>
-	<desc>additional file</desc>
+    <testName>testReadToGeometryRDD</testName>
+    <fileName>map1</fileName>
+    <desc>additional file</desc>
 </test>
