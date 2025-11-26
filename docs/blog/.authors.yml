@@ -34,7 +34,7 @@ authors:
     avatar: assets/authors/jia.jpeg
   dewey:
     name: Dewey Dunnington
-    description: Apache Sedona Contributor, Apache Arrow PMC member
+    description: Apache Sedona Committer, Apache Arrow PMC member
     avatar: assets/authors/dewey.jpeg
   kristin:
     name: Kristin Cowalcijk
@@ -42,7 +42,7 @@ authors:
     avatar: assets/authors/kristin.jpeg
   feng:
     name: Feng Zhang
-    description: Apache Sedona Committer
+    description: Apache Sedona PMC member
     avatar: assets/authors/feng.jpeg
   james:
     name: James Willis
