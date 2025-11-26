@@ -16,6 +16,7 @@
 # under the License.
 
 url: ~
+llm-docs: false
 template:
   bootstrap: 5
   # bootswatch: cosmo

@@ -15,7 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-context("build index")
 
 sc <- testthat_spark_connection()
 

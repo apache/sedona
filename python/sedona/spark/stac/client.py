@@ -25,20 +25,95 @@ from pyspark.sql import DataFrame
 
 
 class Client:
-    def __init__(self, url: str):
+    def __init__(self, url: str, headers: Optional[dict] = None):
+        """
+        Initializes a STAC client with optional authentication headers.
+
+        :param url: The URL of the STAC API to connect to.
+        :param headers: Optional dictionary of HTTP headers to include in requests.
+            Can be used for authentication or custom headers.
+        """
         self.url = url
+        self.headers = headers if headers is not None else {}
 
     @classmethod
-    def open(cls, url: str):
+    def open(cls, url: str, headers: Optional[dict] = None):
         """
         Opens a connection to the specified STAC API URL.
 
-        This class method creates an instance of the Client class with the given URL.
+        This class method creates an instance of the Client class with the given URL
+        and optional authentication headers.
 
         :param url: The URL of the STAC API to connect to. Example: "https://planetarycomputer.microsoft.com/api/stac/v1"
+        :param headers: Optional dictionary of HTTP headers for authentication.
+            Example: {"Authorization": "Bearer token123"}
         :return: An instance of the Client class connected to the specified URL.
+
+        Example usage:
+            # Without authentication
+            client = Client.open("https://planetarycomputer.microsoft.com/api/stac/v1")
+
+            # With custom headers
+            client = Client.open(
+                "https://example.com/stac/v1",
+                headers={"Authorization": "Bearer token123"}
+            )
+
+            # Using convenience methods
+            client = Client.open("https://example.com/stac/v1")
+            client.with_basic_auth("username", "password")
         """
-        return cls(url)
+        return cls(url, headers)
+
+    def with_basic_auth(self, username: str, password: str):
+        """
+        Adds HTTP Basic Authentication to the client.
+
+        This method encodes the username and password using Base64 and adds
+        the appropriate Authorization header for HTTP Basic Authentication.
+
+        :param username: The username for authentication. For API keys, this is typically the API key itself.
+        :param password: The password for authentication. For API keys, this is often left empty.
+        :return: Self for method chaining.
+
+        Example usage:
+            # Standard basic auth
+            client = Client.open("https://example.com/stac/v1")
+            client.with_basic_auth("user", "pass")
+
+            # API key as username (common pattern)
+            client.with_basic_auth("api_key_xyz", "")
+
+            # Method chaining
+            df = Client.open(url).with_basic_auth(api_key, "").search(collection_id="test")
+        """
+        import base64
+
+        userpass = f"{username}:{password}"
+        b64_userpass = base64.b64encode(userpass.encode()).decode()
+        self.headers["Authorization"] = f"Basic {b64_userpass}"
+        return self
+
+    def with_bearer_token(self, token: str):
+        """
+        Adds Bearer Token Authentication to the client.
+
+        This method adds the appropriate Authorization header for Bearer Token
+        authentication, commonly used with OAuth2 and API tokens.
+
+        :param token: The bearer token for authentication.
+        :return: Self for method chaining.
+
+        Example usage:
+            # Bearer token auth
+            client = Client.open("https://example.com/stac/v1")
+            client.with_bearer_token("your_access_token_here")
+
+            # Method chaining
+            df = Client.open(url).with_bearer_token(token).search(collection_id="test")
+        """
+        self.headers["Authorization"] = f"Bearer {token}"
+        return self
 
     def get_collection(self, collection_id: str):
         """
@@ -50,7 +125,7 @@ class Client:
         :param collection_id: The ID of the collection to retrieve. Example: "aster-l1t"
         :return: An instance of the CollectionClient class for the specified collection.
         """
-        return CollectionClient(self.url, collection_id)
+        return CollectionClient(self.url, collection_id, headers=self.headers)
 
     def get_collection_from_catalog(self):
         """
@@ -62,7 +137,7 @@ class Client:
             dict: The root catalog of the STAC API.
         """
         # Implement logic to fetch and return the root catalog
-        return CollectionClient(self.url, None)
+        return CollectionClient(self.url, None, headers=self.headers)
 
     def search(
         self,

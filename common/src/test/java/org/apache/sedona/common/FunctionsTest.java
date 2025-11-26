@@ -1473,6 +1473,19 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void distance_empty_geometries() throws ParseException {
+    Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(90, 0));
+    LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 0, 90));
+
+    // Ensure operations involving empty geometries return null
+    Geometry emptyGeom1 = GEOMETRY_FACTORY.createPoint();
+    Geometry emptyGeom2 = GEOMETRY_FACTORY.createGeometryCollection();
+    assertNull(Functions.distance(emptyGeom1, emptyGeom2));
+    assertNull(Functions.distance(point, emptyGeom1));
+    assertNull(Functions.distance(emptyGeom1, lineString));
+  }
+
+  @Test
   public void haversineDistance() {
     // Basic check
     Point p1 = GEOMETRY_FACTORY.createPoint(new Coordinate(90, 0));
@@ -2445,6 +2458,24 @@ public class FunctionsTest extends TestBase {
     assertEquals(
         wktWriter3D.write(expectedLineString3D),
         wktWriter3D.write(actualGeometryCollection.getGeometryN(0).getGeometryN(2)));
+  }
+
+  @Test
+  public void force3DMultiPolygonWithSinglePolygon() {
+    // Test that a MultiPolygon with a single polygon remains a MultiPolygon after force3D
+    Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 10, 0, 10, 10, 0, 10, 0, 0));
+    MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon});
+
+    Geometry forced = Functions.force3D(multiPolygon, 5.0);
+
+    assertTrue(forced instanceof MultiPolygon);
+    assertEquals(1, ((MultiPolygon) forced).getNumGeometries());
+
+    Polygon forcedPolygon = (Polygon) ((MultiPolygon) forced).getGeometryN(0);
+    Coordinate[] coords = forcedPolygon.getCoordinates();
+    for (Coordinate coord : coords) {
+      assertEquals(5.0, coord.getZ(), 0.0001);
+    }
   }
 
   @Test

@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql.UDF
 
+import org.apache.spark.internal.Logging
 import org.apache.spark.sql.expressions.Aggregator
 import org.apache.spark.sql.sedona_sql.expressions.collect.ST_Collect
 import org.apache.spark.sql.sedona_sql.expressions.raster._
@@ -26,7 +27,7 @@ import org.apache.spark.sql.sedona_sql.expressions.geography.{ST_GeogCollFromTex
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.operation.buffer.BufferParameters
 
-object Catalog extends AbstractCatalog {
+object Catalog extends AbstractCatalog with Logging {
 
   override val expressions: Seq[FunctionDescription] = Seq(
     // Expression for vectors
@@ -350,15 +351,30 @@ object Catalog extends AbstractCatalog {
     function[RS_ReprojectMatch]("nearestneighbor"),
     function[RS_FromNetCDF](),
     function[RS_NetCDFInfo](),
-    // geostats functions
-    function[ST_DBSCAN](),
-    function[ST_LocalOutlierFactor](),
-    function[ST_GLocal](),
-    function[ST_BinaryDistanceBandColumn](),
-    function[ST_WeightedDistanceBandColumn](),
+    // geom <-> geog conversion functions
     function[ST_GeogToGeometry](),
-    function[ST_GeomToGeography]())
+    function[ST_GeomToGeography]()) ++ geoStatsFunctions()
 
   val aggregateExpressions: Seq[Aggregator[Geometry, _, _]] =
     Seq(new ST_Envelope_Aggr, new ST_Intersection_Aggr, new ST_Union_Aggr())
+
+  private def geoStatsFunctions(): Seq[FunctionDescription] = {
+    // Try loading geostats functions. Return a seq of geo-stats functions. If any error occurs,
+    // return an empty seq to skip registering these functions.
+    // This is for fixing a compatibility issue with DBR 17.3 LTS. See https://github.com/apache/sedona/issues/2472
+    try {
+      Seq(
+        function[ST_DBSCAN](),
+        function[ST_LocalOutlierFactor](),
+        function[ST_GLocal](),
+        function[ST_BinaryDistanceBandColumn](),
+        function[ST_WeightedDistanceBandColumn]())
+    } catch {
+      case e: Throwable =>
+        log.warn(
+          "GEO stats functions are not available due to Spark/DBR compatibility issues.",
+          e)
+        Seq.empty
+    }
+  }
 }

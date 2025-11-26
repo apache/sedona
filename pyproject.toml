@@ -48,4 +48,5 @@ docs = [
   "blacken-docs",
   "sphinx",
   "sphinx_rtd_theme",
+  "sphinx-autobuild",
 ]

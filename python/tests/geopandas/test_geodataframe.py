@@ -37,7 +37,7 @@ import pandas as pd
 import geopandas as gpd
 import sedona.spark.geopandas as sgpd
 import pytest
-from pandas.testing import assert_frame_equal, assert_series_equal
+from pandas.testing import assert_frame_equal
 from packaging.version import parse as parse_version
 
 

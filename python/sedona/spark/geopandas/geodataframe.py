@@ -45,73 +45,6 @@ register_extension_dtype(GeometryDtype)
 # IMPLEMENTATION STATUS TRACKING
 # ============================================================================
 
-IMPLEMENTATION_STATUS = {
-    "IMPLEMENTED": [
-        "area",
-        "buffer",
-        "crs",
-        "geometry",
-        "active_geometry_name",
-        "sindex",
-        "rename_geometry",
-        "copy",
-        "sjoin",
-        "to_parquet",
-    ],
-    "NOT_IMPLEMENTED": [
-        "to_geopandas",
-        "_to_geopandas",
-        "geom_type",
-        "type",
-        "length",
-        "is_valid",
-        "is_valid_reason",
-        "is_empty",
-        "is_simple",
-        "is_ring",
-        "is_ccw",
-        "is_closed",
-        "has_z",
-        "boundary",
-        "centroid",
-        "convex_hull",
-        "envelope",
-        "exterior",
-        "interiors",
-        "unary_union",
-        "count_coordinates",
-        "count_geometries",
-        "count_interior_rings",
-        "get_precision",
-        "get_geometry",
-        "concave_hull",
-        "delaunay_triangles",
-        "voronoi_polygons",
-        "minimum_rotated_rectangle",
-        "extract_unique_points",
-        "offset_curve",
-        "remove_repeated_points",
-        "set_precision",
-        "representative_point",
-        "minimum_bounding_circle",
-        "minimum_bounding_radius",
-        "minimum_clearance",
-        "normalize",
-        "make_valid",
-        "reverse",
-        "segmentize",
-        "transform",
-        "force_2d",
-        "force_3d",
-        "line_merge",
-        "union_all",
-        "intersection_all",
-        "contains",
-        "contains_properly",
-    ],
-    "PARTIALLY_IMPLEMENTED": ["set_geometry"],  # Only drop=True case is not implemented
-}
-
 IMPLEMENTATION_PRIORITY = {
     "HIGH": [
         "to_geopandas",
@@ -254,7 +187,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
     - Uses Spark for distributed processing
     - Geometries are stored in WKB (Well-Known Binary) format internally
     - Some methods may have different performance characteristics
-    - Not all GeoPandas methods are implemented yet (see IMPLEMENTATION_STATUS)
+    - Not all GeoPandas methods are implemented yet (see Sedona GeoPandas docs).
 
     Performance Considerations:
     - Operations are distributed across Spark cluster

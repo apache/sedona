@@ -19,14 +19,12 @@
 package org.apache.sedona.viz.core.Serde;
 
 import com.esotericsoftware.kryo.Kryo;
-import org.apache.log4j.Logger;
 import org.apache.sedona.core.serde.SedonaKryoRegistrator;
 import org.apache.sedona.viz.core.ImageSerializableWrapper;
 import org.apache.sedona.viz.utils.Pixel;
 import org.apache.spark.serializer.KryoRegistrator;
 
 public class SedonaVizKryoRegistrator implements KryoRegistrator {
-  static final Logger log = Logger.getLogger(SedonaVizKryoRegistrator.class);
 
   @Override
   public void registerClasses(Kryo kryo) {
@@ -34,7 +32,7 @@ public class SedonaVizKryoRegistrator implements KryoRegistrator {
     ImageWrapperSerializer imageWrapperSerializer = new ImageWrapperSerializer();
     PixelSerializer pixelSerializer = new PixelSerializer();
     sedonaKryoRegistrator.registerClasses(kryo);
-    log.info("Registering custom serializers for visualization related types");
+
     kryo.register(ImageSerializableWrapper.class, imageWrapperSerializer);
     kryo.register(Pixel.class, pixelSerializer);
   }

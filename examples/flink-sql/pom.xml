@@ -23,7 +23,7 @@
 
     <groupId>org.apache.sedona</groupId>
     <artifactId>sedona-flink-example</artifactId>
-    <version>1.6.0</version>
+    <version>1.8.0</version>
     <name>Sedona : Examples : Flink</name>
     <packaging>jar</packaging>
 
@@ -31,10 +31,29 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <geotools.scope>compile</geotools.scope>
         <flink.version>1.19.0</flink.version>
-        <flink.scope>compile</flink.scope>
+        <flink.scope>provided</flink.scope>
         <scala.compat.version>2.12</scala.compat.version>
-        <geotools.version>28.2</geotools.version>
+        <geotools.version>33.1</geotools.version>
         <log4j.version>2.17.2</log4j.version>
+
+        <!-- For JDK-17 and above -->
+        <extraJavaArgs>
+            -XX:+IgnoreUnrecognizedVMOptions
+            --add-opens=java.base/java.lang=ALL-UNNAMED
+            --add-opens=java.base/java.lang.invoke=ALL-UNNAMED
+            --add-opens=java.base/java.lang.reflect=ALL-UNNAMED
+            --add-opens=java.base/java.io=ALL-UNNAMED
+            --add-opens=java.base/java.net=ALL-UNNAMED
+            --add-opens=java.base/java.nio=ALL-UNNAMED
+            --add-opens=java.base/java.util=ALL-UNNAMED
+            --add-opens=java.base/java.util.concurrent=ALL-UNNAMED
+            --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED
+            --add-opens=java.base/sun.nio.ch=ALL-UNNAMED
+            --add-opens=java.base/sun.nio.cs=ALL-UNNAMED
+            --add-opens=java.base/sun.security.action=ALL-UNNAMED
+            --add-opens=java.base/sun.util.calendar=ALL-UNNAMED
+            -Djdk.reflect.useDirectMethodHandle=false
+        </extraJavaArgs>
     </properties>
 
     <dependencies>
@@ -139,7 +158,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>4.13.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -209,27 +228,6 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <transformers>
-                                <!--  use transformer to handle merge of META-INF/services - see http://java.net/jira/browse/JERSEY-440?focusedCommentId=14822&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#action_14822 -->
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>reference.conf</resource>
-                                </transformer>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <manifestEntries>
-                                        <Specification-Title>Java Advanced Imaging Image I/O Tools</Specification-Title>
-                                        <Specification-Version>1.1</Specification-Version>
-                                        <Specification-Vendor>Sun Microsystems, Inc.</Specification-Vendor>
-                                        <Implementation-Title>com.sun.media.imageio</Implementation-Title>
-                                        <Implementation-Version>1.1</Implementation-Version>
-                                        <Implementation-Vendor>Sun Microsystems, Inc.</Implementation-Vendor>
-                                        <Extension-Name>com.sun.media.imageio</Extension-Name>
-                                    </manifestEntries>
-                                </transformer>
-                            </transformers>
                             <filters>
                                 <!--  filter to address "Invalid signature file" issue - see http://stackoverflow.com/a/6743609/589215-->
                                 <filter>
@@ -241,9 +239,27 @@
                                     </excludes>
                                 </filter>
                             </filters>
+                            <transformers>
+                                <!-- Merge service files -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
+                <configuration>
+                    <argLine>
+                        --add-opens=java.base/sun.nio.ch=ALL-UNNAMED
+                        --add-opens=java.base/java.nio=ALL-UNNAMED
+                        --add-opens=java.base/java.lang=ALL-UNNAMED
+                        --add-opens=java.base/java.lang.invoke=ALL-UNNAMED
+                        --add-opens=java.base/java.util=ALL-UNNAMED
+                    </argLine>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -261,6 +277,29 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>2.35.0</version>
+                <configuration>
+                    <java>
+                        <googleJavaFormat>
+                            <version>1.15.0</version>
+                        </googleJavaFormat>
+                        <licenseHeader>
+                            <file>../../tools/maven/license-header.txt</file>
+                        </licenseHeader>
+                    </java>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <phase>compile</phase>
                     </execution>
                 </executions>
             </plugin>

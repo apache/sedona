@@ -33,11 +33,44 @@ import scala.io.Source
 
 object StacUtils {
 
+  // Reusable ObjectMapper instance to avoid expensive creation on each parseHeaders call
+  private val objectMapper: ObjectMapper = {
+    val mapper = new ObjectMapper()
+    mapper.registerModule(DefaultScalaModule)
+    mapper
+  }
+
   // Function to load JSON from URL or service
   def loadStacCollectionToJson(opts: Map[String, String]): String = {
     val urlFull: String = getFullCollectionUrl(opts)
+    val headers: Map[String, String] = parseHeaders(opts)
 
-    loadStacCollectionToJson(urlFull)
+    loadStacCollectionToJson(urlFull, headers)
+  }
+
+  /**
+   * Parse headers from the options map.
+   *
+   * Headers can be provided as a JSON string in the "headers" option.
+   *
+   * @param opts
+   *   The options map that may contain a "headers" key with JSON-encoded headers
+   * @return
+   *   Map of header names to values
+   */
+  def parseHeaders(opts: Map[String, String]): Map[String, String] = {
+    opts.get("headers") match {
+      case Some(headersJson) =>
+        try {
+          objectMapper.readValue(headersJson, classOf[Map[String, String]])
+        } catch {
+          case e: Exception =>
+            throw new IllegalArgumentException(
+              s"Failed to parse headers JSON: ${e.getMessage}",
+              e)
+        }
+      case None => Map.empty[String, String]
+    }
   }
 
   def getFullCollectionUrl(opts: Map[String, String]) = {
@@ -50,8 +83,11 @@ object StacUtils {
     urlFinal
   }
 
-  // Function to load JSON from URL or service
-  def loadStacCollectionToJson(url: String, maxRetries: Int = 3): String = {
+  // Function to load JSON from URL or service with optional headers
+  def loadStacCollectionToJson(
+      url: String,
+      headers: Map[String, String] = Map.empty,
+      maxRetries: Int = 3): String = {
     var retries = 0
     var success = false
     var result: String = ""
@@ -59,9 +95,45 @@ object StacUtils {
     while (retries < maxRetries && !success) {
       try {
         result = if (url.startsWith("s3://") || url.startsWith("s3a://")) {
+          // S3 URLs are handled by Spark
           SparkSession.active.read.textFile(url).collect().mkString("\n")
-        } else {
+        } else if (headers.isEmpty) {
+          // No headers - use the simple Source.fromURL approach for backward compatibility
           Source.fromURL(url).mkString
+        } else {
+          // Headers provided - use URLConnection to set custom headers
+          val connection = new java.net.URL(url).openConnection()
+          var inputStream: java.io.InputStream = null
+          var source: Source = null
+
+          try {
+            // Set all custom headers
+            headers.foreach { case (key, value) =>
+              connection.setRequestProperty(key, value)
+            }
+
+            // Read the response
+            inputStream = connection.getInputStream
+            source = Source.fromInputStream(inputStream)
+            source.mkString
+          } finally {
+            // Close resources in reverse order
+            if (source != null) {
+              try source.close()
+              catch { case _: Throwable => }
+            }
+            if (inputStream != null) {
+              try inputStream.close()
+              catch { case _: Throwable => }
+            }
+            // Disconnect HTTP connection if applicable
+            connection match {
+              case httpConn: java.net.HttpURLConnection =>
+                try httpConn.disconnect()
+                catch { case _: Throwable => }
+              case _ =>
+            }
+          }
         }
         success = true
       } catch {
@@ -76,6 +148,11 @@ object StacUtils {
     }
 
     result
+  }
+
+  // Overloaded version for backward compatibility
+  def loadStacCollectionToJson(url: String, maxRetries: Int): String = {
+    loadStacCollectionToJson(url, Map.empty[String, String], maxRetries)
   }
 
   // Function to get the base URL from the collection URL or service
