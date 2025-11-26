@@ -30,7 +30,7 @@ docs:
               - docs-overrides/**/*
               - README.md
 
-github-actions:
+github_actions:
   - any:
       - changed-files:
           - any-glob-to-any-file:
