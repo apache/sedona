@@ -50,4 +50,4 @@ jobs:
       - name: Run pre-commit
         run: pre-commit run --color=always --all-files
       - name: Run manual pre-commit hooks
-        run: SKIP=checkstyle pre-commit run --all-files --hook-stage manual
+        run: pre-commit run --color=always --all-files --hook-stage manual
