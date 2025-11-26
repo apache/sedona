@@ -222,7 +222,17 @@ repos:
       - id: insert-license
         name: add license for all other files
         description: automatically adds a licence header to all other files that don't have a license header
-        files: ^\.(editorconfig|gitattributes|prettierignore|prettierrc|shellcheckrc)$|^.*/\.gitignore$|^tools/maven/scalafmt\.conf$
+        files: |
+          (?x)^(
+            \.editorconfig|
+            \.gitattributes|
+            \.prettierignore|
+            \.prettierrc|
+            \.shellcheckrc|
+            \.github/CODEOWNERS|
+            .*/\.gitignore|
+            tools/maven/scalafmt\.conf
+          )$
         args:
           - --comment-style
           - '|#|'
