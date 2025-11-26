@@ -28,6 +28,7 @@
 /.project
 /.scala-build
 /.settings/
+/.venv/
 /.vscode/
 /bin/
 /conf/
@@ -51,3 +52,5 @@ target
 
 # Ignore node_modules in docs-overrides
 docs-overrides/node_modules/
+
+uv.lock
