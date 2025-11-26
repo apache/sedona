@@ -205,10 +205,15 @@ public class Accessors {
   }
 
   /**
-   * Runs S2 validation on a PolylineGeography, writing into the provided S2Error and returning true
-   * if an error was found.
+   * Runs S2 validation on a PolylineGeography, writing into the provided
+   * S2Error and returning true if an error was found.
+   *
+   * @param geog the PolylineGeography to validate
+   * @param error the S2Error instance to hold the error details
+   * @return true if a validation error is found, false otherwise
    */
-  public static boolean s2FindValidationError(PolylineGeography geog, S2Error error) {
+  public static boolean s2FindValidationError(
+      final PolylineGeography geog, final S2Error error) {
     for (S2Polyline polyline : geog.getPolylines()) {
       if (polyline.findValidationError(error)) {
         return true;
@@ -217,13 +222,27 @@ public class Accessors {
     return false;
   }
 
-  /** Runs S2 validation on a PolygonGeography. */
-  public static boolean s2FindValidationError(PolygonGeography geog, S2Error error) {
+  /**
+   * Runs S2 validation on a PolygonGeography.
+   *
+   * @param geog the PolygonGeography to validate
+   * @param error the S2Error instance to hold the error details
+   * @return true if a validation error is found, false otherwise
+   */
+  public static boolean s2FindValidationError(
+      final PolygonGeography geog, final S2Error error) {
     return geog.polygon.findValidationError(error);
   }
 
-  /** Runs S2 validation on each member of a GeographyCollection. */
-  public static boolean s2FindValidationError(GeographyCollection geog, S2Error error) {
+  /**
+   * Runs S2 validation on each member of a GeographyCollection.
+   *
+   * @param geog the GeographyCollection to validate
+   * @param error the S2Error instance to hold the error details
+   * @return true if a validation error is found, false otherwise
+   */
+  public static boolean s2FindValidationError(
+      final GeographyCollection geog, final S2Error error) {
     for (Geography feature : geog.getFeatures()) {
       if (s2FindValidationError(feature, error)) {
         return true;
@@ -233,11 +252,16 @@ public class Accessors {
   }
 
   /**
-   * Master dispatch for any Geography type: points, lines, polygons, or collections. Follows your
-   * C++ logic: 0-dim → always OK 1-dim → polyline path 2-dim → polygon path else → treat as
-   * collection of polygons
+   * Master dispatch for any Geography type: points, lines, polygons, or
+   * collections. Follows your C++ logic: 0-dim → always OK 1-dim → polyline
+   * path 2-dim → polygon path else → treat as collection of polygons
+   *
+   * @param geog the Geography to validate
+   * @param error the S2Error instance to hold the error details
+   * @return true if a validation error is found, false otherwise
    */
-  public static boolean s2FindValidationError(Geography geog, S2Error error) {
+  public static boolean s2FindValidationError(
+      final Geography geog, final S2Error error) {
     int dim = geog.dimension();
     switch (dim) {
       case 0:
@@ -249,19 +273,22 @@ public class Accessors {
           return s2FindValidationError((PolylineGeography) geog, error);
         }
         throw new IllegalArgumentException(
-            "Expected PolylineGeography for dimension 1, but got: " + geog.getClass().getName());
+            "Expected PolylineGeography for dimension 1, but got: "
+            + geog.getClass().getName());
       case 2:
         if (geog instanceof PolygonGeography) {
           return s2FindValidationError((PolygonGeography) geog, error);
         }
         throw new IllegalArgumentException(
-            "Expected PolygonGeography for dimension 2, but got: " + geog.getClass().getName());
+            "Expected PolygonGeography for dimension 2, but got: "
+            + geog.getClass().getName());
       default:
         if (geog instanceof GeographyCollection) {
           return s2FindValidationError((GeographyCollection) geog, error);
         }
         throw new IllegalArgumentException(
-            "Unsupported geography type for validation: " + geog.getClass().getName());
+            "Unsupported geography type for validation: "
+            + geog.getClass().getName());
     }
   }
 }
