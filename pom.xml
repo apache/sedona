@@ -682,6 +682,17 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.6.0</version>
+                <configuration>
+                    <configLocation>tools/maven/checkstyle.xml</configLocation>
+                    <suppressionsLocation>tools/maven/checkstyle-suppressions.xml</suppressionsLocation>
+                    <failOnViolation>true</failOnViolation>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <profiles>
