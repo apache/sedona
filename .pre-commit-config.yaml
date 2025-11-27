@@ -285,6 +285,19 @@ repos:
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0
     hooks:
+      - id: python-check-mock-methods
+        name: run check for not-real mock methods
+        description: Prevent common mistakes of assert mck.not_called(), assert mck.called_once_with(...) and mck.assert_called
+      - id: python-no-eval
+        name: run check for eval()
+        description: A quick check for the eval() built-in function
+        exclude: ^python/tests/flink/test_flink_registration\.py$
+      - id: python-no-log-warn
+        name: run check for use logger.warning(
+        description: A quick check for the deprecated .warn() method of python loggers
+      - id: python-use-type-annotations
+        name: run check for type annotations not comments
+        description: Enforce that python3.6+ type annotations are used instead of type comments
       - id: rst-backticks
         name: run rst-backticks
         description: detect common mistake of using single backticks when writing rst
@@ -294,6 +307,9 @@ repos:
       - id: rst-inline-touching-normal
         name: run rst-inline-touching-normal
         description: detect mistake of inline code touching normal text in rst
+      - id: text-unicode-replacement-char
+        name: run check for no unicode replacement char
+        description: Forbid files which have a UTF-8 Unicode replacement character
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
