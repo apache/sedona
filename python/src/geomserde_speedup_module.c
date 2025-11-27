@@ -39,8 +39,8 @@ PyDoc_STRVAR(module_doc, "Geometry serialization/deserialization module.");
 #error Cannot define thread_local
 #endif
 
-static PyObject *load_libgeos_c(PyObject *self, PyObject *args) {
-  PyObject *obj;
+static PyObject* load_libgeos_c(PyObject* self, PyObject* args) {
+  PyObject* obj;
   char err_msg[ERR_MSG_BUF_SIZE];
   if (!PyArg_ParseTuple(args, "O", &obj)) {
     return NULL;
@@ -48,14 +48,13 @@ static PyObject *load_libgeos_c(PyObject *self, PyObject *args) {
 
   if (PyLong_Check(obj)) {
     unsigned long long handle = PyLong_AsUnsignedLongLong(obj);
-    if (load_geos_c_from_handle((void *)handle, err_msg, sizeof(err_msg)) !=
-        0) {
+    if (load_geos_c_from_handle((void*)handle, err_msg, sizeof(err_msg)) != 0) {
       PyErr_Format(PyExc_RuntimeError, "Failed to find libgeos_c functions: %s",
                    err_msg);
       return NULL;
     }
   } else if (PyUnicode_Check(obj)) {
-    const char *libname = PyUnicode_AsUTF8(obj);
+    const char* libname = PyUnicode_AsUTF8(obj);
     if (load_geos_c_library(libname, err_msg, sizeof(err_msg)) != 0) {
       PyErr_Format(PyExc_RuntimeError, "Failed to find libgeos_c functions: %s",
                    err_msg);
@@ -72,9 +71,9 @@ static PyObject *load_libgeos_c(PyObject *self, PyObject *args) {
 }
 
 static thread_local GEOSContextHandle_t handle;
-static thread_local char *geos_err_msg;
+static thread_local char* geos_err_msg;
 
-static void geos_msg_handler(const char *fmt, ...) {
+static void geos_msg_handler(const char* fmt, ...) {
   if (geos_err_msg == NULL) return;
   va_list ap;
   va_start(ap, fmt);
@@ -120,21 +119,21 @@ oom_failure:
 }
 
 static void handle_geomserde_error(SedonaErrorCode err) {
-  const char *errmsg = sedona_get_error_message(err);
+  const char* errmsg = sedona_get_error_message(err);
   if (err == SEDONA_ALLOC_ERROR) {
     PyErr_NoMemory();
   } else if (err == SEDONA_INTERNAL_ERROR) {
     PyErr_Format(PyExc_RuntimeError, "%s", errmsg);
   } else if (err == SEDONA_GEOS_ERROR) {
-    const char *errmsg = sedona_get_error_message(err);
+    const char* errmsg = sedona_get_error_message(err);
     PyErr_Format(PyExc_RuntimeError, "%s: %s", errmsg, geos_err_msg);
   } else {
-    const char *errmsg = sedona_get_error_message(err);
+    const char* errmsg = sedona_get_error_message(err);
     PyErr_Format(PyExc_ValueError, "%s", errmsg);
   }
 }
 
-static PyObject *do_serialize(GEOSGeometry *geos_geom) {
+static PyObject* do_serialize(GEOSGeometry* geos_geom) {
   if (geos_geom == NULL) {
     Py_INCREF(Py_None);
     return Py_None;
@@ -145,7 +144,7 @@ static PyObject *do_serialize(GEOSGeometry *geos_geom) {
     return NULL;
   }
 
-  char *buf = NULL;
+  char* buf = NULL;
   int buf_size = 0;
   SedonaErrorCode err =
       sedona_serialize_geom(handle, geos_geom, &buf, &buf_size);
@@ -154,14 +153,14 @@ static PyObject *do_serialize(GEOSGeometry *geos_geom) {
     return NULL;
   }
 
-  PyObject *bytearray = PyByteArray_FromStringAndSize(buf, buf_size);
+  PyObject* bytearray = PyByteArray_FromStringAndSize(buf, buf_size);
   free(buf);
   return bytearray;
 }
 
-static GEOSGeometry *do_deserialize(PyObject *args,
-                                    GEOSContextHandle_t *out_handle,
-                                    int *p_bytes_read) {
+static GEOSGeometry* do_deserialize(PyObject* args,
+                                    GEOSContextHandle_t* out_handle,
+                                    int* p_bytes_read) {
   Py_buffer view;
   if (!PyArg_ParseTuple(args, "y*", &view)) {
     return NULL;
@@ -174,9 +173,9 @@ static GEOSGeometry *do_deserialize(PyObject *args,
 
   /* The Py_buffer filled by PyArg_ParseTuple is guaranteed to be C-contiguous,
    * so we can simply proceed with view.buf and view.len */
-  const char *buf = view.buf;
+  const char* buf = view.buf;
   int buf_size = view.len;
-  GEOSGeometry *geom = NULL;
+  GEOSGeometry* geom = NULL;
   SedonaErrorCode err =
       sedona_deserialize_geom(handle, buf, buf_size, &geom, p_bytes_read);
   PyBuffer_Release(&view);
@@ -191,25 +190,25 @@ static GEOSGeometry *do_deserialize(PyObject *args,
 
 /* serialize/deserialize functions for Shapely 2.x */
 
-static PyObject *serialize(PyObject *self, PyObject *args) {
-  PyObject *pygeos_geom = NULL;
+static PyObject* serialize(PyObject* self, PyObject* args) {
+  PyObject* pygeos_geom = NULL;
   if (!PyArg_ParseTuple(args, "O", &pygeos_geom)) {
     return NULL;  // Argument parsing failed; error already set by
                   // PyArg_ParseTuple
   }
 
-  GEOSGeometry *geos_geom = NULL;
+  GEOSGeometry* geos_geom = NULL;
   char success = PyGEOS_GetGEOSGeometry(pygeos_geom, &geos_geom);
   if (success == 0) {
     // Retrieve the type of the supplied object
-    PyObject *type = (PyObject *)Py_TYPE(pygeos_geom);
-    PyObject *type_name = PyObject_GetAttrString(type, "__name__");
+    PyObject* type = (PyObject*)Py_TYPE(pygeos_geom);
+    PyObject* type_name = PyObject_GetAttrString(type, "__name__");
     if (type_name == NULL) {
       // Fallback error if we can't get the type name
       PyErr_SetString(PyExc_TypeError, "Argument is of incorrect type.");
     } else {
       // Construct the error message with the type name
-      const char *type_str = PyUnicode_AsUTF8(type_name);
+      const char* type_str = PyUnicode_AsUTF8(type_name);
       char error_msg[256];
       snprintf(error_msg, sizeof(error_msg),
                "Argument is of incorrect type: '%s'. Please provide only "
@@ -225,31 +224,31 @@ static PyObject *serialize(PyObject *self, PyObject *args) {
   return do_serialize(geos_geom);
 }
 
-static PyObject *deserialize(PyObject *self, PyObject *args) {
+static PyObject* deserialize(PyObject* self, PyObject* args) {
   GEOSContextHandle_t handle = NULL;
   int length = 0;
-  GEOSGeometry *geom = do_deserialize(args, &handle, &length);
+  GEOSGeometry* geom = do_deserialize(args, &handle, &length);
   if (geom == NULL) {
     return NULL;
   }
-  PyObject *pygeom = PyGEOS_CreateGeometry(geom, handle);
+  PyObject* pygeom = PyGEOS_CreateGeometry(geom, handle);
   return Py_BuildValue("(Ni)", pygeom, length);
 }
 
 /* serialize/deserialize functions for Shapely 1.x */
 
-static PyObject *serialize_1(PyObject *self, PyObject *args) {
-  GEOSGeometry *geos_geom = NULL;
+static PyObject* serialize_1(PyObject* self, PyObject* args) {
+  GEOSGeometry* geos_geom = NULL;
   if (!PyArg_ParseTuple(args, "K", &geos_geom)) {
     return NULL;
   }
   return do_serialize(geos_geom);
 }
 
-static PyObject *deserialize_1(PyObject *self, PyObject *args) {
+static PyObject* deserialize_1(PyObject* self, PyObject* args) {
   GEOSContextHandle_t handle = NULL;
   int length = 0;
-  GEOSGeometry *geom = do_deserialize(args, &handle, &length);
+  GEOSGeometry* geom = do_deserialize(args, &handle, &length);
   if (geom == NULL) {
     return NULL;
   }
