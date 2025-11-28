@@ -11,7 +11,7 @@ authors:
   - jess
   - jia
   - matt_powers
-title: "SedonaDB 0.2.0 release"
+title: "SedonaDB 0.2.0 Release"
 ---
 
 <!--
@@ -35,7 +35,7 @@ title: "SedonaDB 0.2.0 release"
 
 The Apache Sedona community is excited to announce the release of [SedonaDB](https://sedona.apache.org/sedonadb) version 0.2.0!
 
-SedonaDB is the first open-source, single-node analytical database engine that treats spatial data as a first-class citizen. It is developed as a subproject of Apache Sedona. This release consists of [136 resolved issues](https://github.com/apache/sedona-db/milestone/1?closed=1) from 17 contributors.
+SedonaDB is the first open-source, single-node analytical database engine that treats spatial data as a first-class citizen. It is developed as a subproject of Apache Sedona. This release consists of [136 resolved issues](https://github.com/apache/sedona-db/milestone/1?closed=1) including 40 new functions from 17 contributors.
 
 Apache Sedona powers large-scale geospatial processing on distributed engines like Spark (SedonaSpark), Flink (SedonaFlink), and Snowflake (SedonaSnow). SedonaDB extends the Sedona ecosystem with a single-node engine optimized for small-to-medium data analytics, delivering the simplicity and speed that distributed systems often cannot.
 
@@ -90,22 +90,72 @@ sd.read_pyogrio(url).to_parquet("water_point.parquet", geoparquet_version="1.1")
 
 ## Python User-Defined Function Support
 
-TODO
+User-defined functions (UDFs) are essential components of many workflows in modern DataFrame engines like Spark, DataFusion, and DuckDB to capture user-specific logic that is difficult or impossible to implement by simply composing existing functions. Just as [SedonaSpark provides a vectorized UDF framework for geometry types](https://sedona.apache.org/latest/tutorial/sql/#spatial-vectorized-udfs-python-only), SedonaDB 0.2.0 exposes a framework that allows user-specific logic (including but not limited to those involving geometry!) to be referenced from SQL workflows. For example, a UDF implementation of `ST_Buffer()` could be written as:
+
+```python
+import pyarrow as pa
+import sedona.db
+from sedonadb import udf
+import shapely
+import geoarrow.pyarrow as ga
+
+sd = sedona.db.connect()
+
+
+@udf.arrow_udf(ga.wkb(), [udf.GEOMETRY, udf.NUMERIC])
+def shapely_udf(geom, distance):
+    geom_wkb = pa.array(geom.storage.to_array())
+    distance = pa.array(distance.to_array())
+    geom = shapely.from_wkb(geom_wkb)
+    result_shapely = shapely.buffer(geom, distance)
+    return pa.array(shapely.to_wkb(result_shapely))
+
+
+sd.register_udf(shapely_udf)
+sd.sql("SELECT shapely_udf(ST_Point(0, 0), 2.0) as col").show()
+#> ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+#> │                                                col                                               │
+#> │                                             geometry                                             │
+#> ╞══════════════════════════════════════════════════════════════════════════════════════════════════╡
+#> │ POLYGON((2 0,1.9615705608064609 -0.3901806440322565,1.8477590650225735 -0.7653668647301796,1.66… │
+#> └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+See the [documentation page for `arrow_udf()`](https://sedona.apache.org/sedonadb/latest/reference/python/#sedonadb.udf.arrow_udf) for more examples and documentation.
 
 ## Initial Raster data type implementation
 
-TODO
+The [raster data type support in Sedona Spark](https://sedona.apache.org/latest/tutorial/raster) is a popular feature and in SedonaDB 0.2.0 we are pleased to offer a raster data type and a few basic functions!
+
+```python
+import sedona.db
+
+sd = sedona.db.connect()
+
+sd.sql("SELECT RS_Width(RS_Example()) as width").show()
+#> ┌────────┐
+#> │  width │
+#> │ uint64 │
+#> ╞════════╡
+#> │     64 │
+#> └────────┘
+```
+
+For more information or to get involved see the [raster support umbrella issue](https://github.com/apache/sedona-db/issues/246). Thank you to [jesspav](https://github.com/jesspav) for driving this work!
 
 ## Release on `crates.io`
 
+Because our initial development of SedonaDB was closely tied to improvements we were experimenting with in some of our dependency crates from the GeoRust ecosystem, our first release of SedonaDB contained git dependencies and references to the forks we had used in our experiments. While the first release *could* be used in Rust projects via a git dependency, this prevented any downstream project from releasing to crates.io themselves and did not make clear that we do expose a public Rust API that can be used alongside any DataFusion-based project! Rust projects can use the components we provide or use the pre-assembled `SedonaContext`.
+
+SedonaDB 0.2.0, in addition to being [released to crates.io](https://crates.io/crates/sedona) includes [a Rust example](https://github.com/apache/sedona-db/tree/main/examples/sedonadb-rust) to get interested Rust projects started:
+
 ```toml
 [package]
-name = "sedonadb-rust-example"
 # ...
 
 [dependencies]
 datafusion = { version = "50.2.0"}
-sedona = { version = "0.2" }
+sedona = { version = "0.2.0" }
 # ...
 ```
 
@@ -127,9 +177,15 @@ async fn main() -> Result<()> {
 }
 ```
 
+We're still learning about how or if downstream projects are interested in using components from Rust, so feel free to [open an issue](https://github.com/apache/sedona-db/issues/new) with ideas or questions.
+
+Special thanks to [kylebarron](https://github.com/kylebarron) for reviewing our PRs upstream into the [geo-index](https://github.com/kylebarron/geo-index) and [wkb](https://github.com/georust/wkb) crates!
+
 ## Build System Improvements
 
-TODO
+Build system improvements are some of the least glorious but most important tasks included in the SedonaDB 0.2.0 release; however, we are pleased to be able to release SedonaDB 0.2.0 Python binaries with support for PROJ, GEOS, and S2Geography on MacOS, Windows, and Linux (Python 3.9 to 3.14, including free-threaded variants of Python 3.13 and 3.14). [SedonaDB 0.2.0 for R may be installed via R-Universe](https://apache.r-universe.dev/sedonadb), which now includes pre-built binaries for MacOS and Windows users. Support for PROJ on Windows and S2Geography on all R platforms is a work in progress and will hopefully be included in the next release.
+
+Special thanks to [yutannihilation](https://github.com/yutannihilation) for contributing fixes to the R build system!
 
 ## Contributors
 
