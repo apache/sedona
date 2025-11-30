@@ -59,6 +59,6 @@ jobs:
           key: pre-commit-3|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
 
       - name: Run pre-commit
-        run: uv run pre-commit run --show-diff-on-failure --color=always --all-files
+        run: uv run prek run --show-diff-on-failure --color=always --all-files
       - name: Run manual pre-commit hooks
-        run: uv run pre-commit run --show-diff-on-failure --color=always --all-files --hook-stage manual
+        run: uv run prek run --show-diff-on-failure --color=always --all-files --hook-stage manual
