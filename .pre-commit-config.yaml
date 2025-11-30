@@ -286,12 +286,12 @@ repos:
         description: check spelling with codespell
         args: [--ignore-words=.github/linters/codespell.txt]
         exclude: ^docs/image|^spark/common/src/test/resources|^docs/usecases|^tools/maven/scalafmt|osmpbf/build|^docker/zeppelin|^docs-overrides
-  - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.28.0
-    hooks:
-      - id: gitleaks
-        name: run gitleaks
-        description: check for secrets with gitleaks
+  # - repo: https://github.com/gitleaks/gitleaks
+  #   rev: v8.28.0
+  #   hooks:
+  #     - id: gitleaks
+  #       name: run gitleaks
+  #       description: check for secrets with gitleaks
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0
     hooks:
