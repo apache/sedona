@@ -200,7 +200,7 @@ repos:
       - id: insert-license
         name: add license for all XML files
         files: \.xml$
-        exclude: scalastyle_config\.xml$|^docker/zeppelin/conf/zeppelin-site\.xml$|^spark/common/src/test/resources/.*$
+        exclude: scalastyle_config\.xml$|^docker/zeppelin/conf/zeppelin-site\.xml$|^spark/common/src/test/resources/.*$|^tools/maven/checkstyle.*\.xml$
         args:
           - --comment-style
           - '<!--||-->'
