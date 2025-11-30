@@ -54,6 +54,7 @@ public class ShapefileRDD implements Serializable {
 
   /** The geometry factory. */
   public static GeometryFactory geometryFactory = new GeometryFactory();
+
   /** The Constant PrimitiveToShape. */
   private static final Function<Tuple2<ShapeKey, PrimitiveShape>, Geometry> PrimitiveToShape =
       new Function<Tuple2<ShapeKey, PrimitiveShape>, Geometry>() {
@@ -71,6 +72,7 @@ public class ShapefileRDD implements Serializable {
           }
         }
       };
+
   /** The Print shape. */
   private final VoidFunction<Geometry> PrintShape =
       new VoidFunction<Geometry>() {
@@ -78,8 +80,10 @@ public class ShapefileRDD implements Serializable {
           System.out.println(shape.toText());
         }
       };
+
   /** shape collection. */
   private JavaRDD<Geometry> shapeRDD = null;
+
   /** bounding box. */
   private BoundBox boundBox = null;
 

@@ -87,14 +87,18 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
   public List<String> fieldNames;
 
   public StructType schema;
+
   /** The CR stransformation. */
   protected boolean CRStransformation = false;
+
   /** The source epsg code. */
   protected String sourceEpsgCode = "";
+
   /** The target epgsg code. */
   protected String targetEpgsgCode = "";
 
   private SpatialPartitioner partitioner;
+
   /** The sample number. */
   private int sampleNumber = -1;
 

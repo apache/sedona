@@ -83,6 +83,7 @@ public class EncodedShapeIndexGeography extends Geography {
   public void encode(UnsafeOutput os, EncodeOptions opts) throws IOException {
     throw new IOException("Encode() not implemented for EncodedShapeIndexGeography()");
   }
+
   // decode
   /** This is what decodeTagged() actually calls */
   public static EncodedShapeIndexGeography decode(Input in, EncodeTag tag) throws IOException {

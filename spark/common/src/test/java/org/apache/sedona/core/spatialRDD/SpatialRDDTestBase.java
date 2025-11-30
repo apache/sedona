@@ -30,10 +30,13 @@ import org.locationtech.jts.geom.Envelope;
 public class SpatialRDDTestBase extends TestBase {
   protected static long inputCount;
   protected static Envelope inputBoundary;
+
   /** The prop. */
   static Properties prop;
+
   /** The input. */
   static InputStream input;
+
   /** The Input location. */
   static String InputLocation;
 

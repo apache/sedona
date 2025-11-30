@@ -31,6 +31,7 @@ import org.apache.log4j.Logger;
 /** The Class ImageSerializableWrapper. */
 public class ImageSerializableWrapper implements Serializable {
   static final Logger log = Logger.getLogger(ImageSerializableWrapper.class);
+
   /** The image. */
   protected transient BufferedImage image;
 

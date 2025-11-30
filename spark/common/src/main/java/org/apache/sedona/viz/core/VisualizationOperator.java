@@ -97,28 +97,39 @@ public abstract class VisualizationOperator implements Serializable {
 
   /** The Constant logger. */
   static final Logger logger = Logger.getLogger(VisualizationOperator.class);
+
   /** The raster image. */
   public BufferedImage rasterImage = null;
+
   /** The distributed raster image. */
   public JavaPairRDD<Integer, ImageSerializableWrapper> distributedRasterImage = null;
+
   /** The vector image. */
   public List<String> vectorImage = null;
+
   /** The distributed vector image. */
   // This pair RDD only contains three distinct keys: 0, 1, 2. 0 is the SVG file header, 1 is SVG
   // file body, 2 is SVG file footer.
   public JavaPairRDD<Integer, String> distributedVectorImage = null;
+
   /** The colorize option. */
   protected ColorizeOption colorizeOption = ColorizeOption.NORMAL;
+
   /** The max pixel count. */
   protected Double maxPixelCount = -1.0;
+
   /** The reverse spatial coordinate. */
   protected boolean reverseSpatialCoordinate; // Switch the x and y when draw the final image
+
   /** The resolution X. */
   protected int resolutionX;
+
   /** The resolution Y. */
   protected int resolutionY;
+
   /** The dataset boundary. */
   protected Envelope datasetBoundary;
+
   /** The red. */
   protected int red = 255;
 
@@ -127,43 +138,58 @@ public abstract class VisualizationOperator implements Serializable {
    */
   /** The green. */
   protected int green = 255;
+
   /** The blue. */
   protected int blue = 255;
+
   /** The color alpha. */
   protected int colorAlpha = 0;
+
   /** The control color channel. */
   protected Color controlColorChannel = Color.green;
+
   /** The use inverse ratio for control color channel. */
   protected boolean useInverseRatioForControlColorChannel = true;
+
   /** The distributed raster count matrix. */
   protected JavaPairRDD<Pixel, Double> distributedRasterCountMatrix;
+
   /** The distributed raster color matrix. */
   protected JavaPairRDD<Pixel, Integer> distributedRasterColorMatrix;
+
   /** The distributed vector objects. */
   /*
    * Parameters determine vector image
    */
   protected JavaPairRDD<Object, Double> distributedVectorObjects;
+
   /** The distributed vector colors. */
   protected JavaPairRDD<Object, Color> distributedVectorColors;
+
   /** The only draw outline. */
   protected boolean onlyDrawOutline = true;
+
   /** The Photo filter convolution matrix. */
   /*
    * Parameters controls Photo Filter
    */
   protected Double[][] PhotoFilterConvolutionMatrix = null;
+
   /** The photo filter radius. */
   protected int photoFilterRadius;
+
   /** The partition X. */
   /*
    * Parameter controls spatial partitioning
    */
   protected int partitionX;
+
   /** The partition Y. */
   protected int partitionY;
+
   /** The partition interval X. */
   protected int partitionIntervalX;
+
   /** The partition interval Y. */
   protected int partitionIntervalY;
 
@@ -172,6 +198,7 @@ public abstract class VisualizationOperator implements Serializable {
    */
   /** The has been spatial partitioned. */
   protected boolean hasBeenSpatialPartitioned = false;
+
   /** The parallel photo filter. */
   protected boolean parallelPhotoFilter = false;
 

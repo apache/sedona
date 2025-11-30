@@ -207,6 +207,7 @@ public class PolygonRDDTest extends SpatialRDDTestBase {
     List<Polygon> result = rectangleRDD.rawSpatialRDD.collect();
     assert result.size() > -1;
   }
+
   /*
   @Test
   public void testPolygonUnion()

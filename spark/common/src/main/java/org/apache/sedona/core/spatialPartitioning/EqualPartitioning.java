@@ -51,6 +51,7 @@ public class EqualPartitioning implements Serializable {
   public EqualPartitioning(List<Envelope> grids) {
     this(grids, true);
   }
+
   /**
    * Instantiates a new equal partitioning.
    *

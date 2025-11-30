@@ -37,6 +37,7 @@ public class DbfParseUtil implements ShapeFileConst {
 
   /** number of records already read. Records that is ignored also counted in */
   public int numRecordRead;
+
   /** fieldDescriptors of current .dbf file */
   private List<FieldDescriptor> fieldDescriptors = null;
 

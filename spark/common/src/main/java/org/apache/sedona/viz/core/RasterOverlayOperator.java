@@ -33,10 +33,13 @@ public class RasterOverlayOperator {
 
   /** The Constant logger. */
   static final Logger logger = Logger.getLogger(RasterOverlayOperator.class);
+
   /** The back raster image. */
   public BufferedImage backRasterImage = null;
+
   /** The distributed back raster image. */
   public JavaPairRDD<Integer, ImageSerializableWrapper> distributedBackRasterImage = null;
+
   /** The generate distributed image. */
   public boolean generateDistributedImage = false;
 

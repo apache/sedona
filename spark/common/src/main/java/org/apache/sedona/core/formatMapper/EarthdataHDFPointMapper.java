@@ -37,30 +37,43 @@ public class EarthdataHDFPointMapper implements FlatMapFunction<Iterator<String>
 
   /** The geolocation field. */
   private final String geolocationField = "Geolocation_Fields";
+
   /** The longitude name. */
   private final String longitudeName = "Longitude";
+
   /** The latitude name. */
   private final String latitudeName = "Latitude";
+
   /** The data field name. */
   private final String dataFieldName = "Data_Fields";
+
   /** The data variable list. */
   private final String[] dataVariableList;
+
   /** The data path list. */
   private final String[] dataPathList;
+
   /** The offset. */
   private int offset = 0;
+
   /** The increment. */
   private int increment = 1;
+
   /** The root group name. */
   private String rootGroupName = "MOD_Swath_LST";
+
   /** The data variable name. */
   private String dataVariableName = "LST";
+
   /** The longitude path. */
   private String longitudePath = "";
+
   /** The latitude path. */
   private String latitudePath = "";
+
   /** The data path. */
   private String dataPath = "";
+
   /** The switch coordinate XY. By default, longitude is X, latitude is Y */
   private boolean switchCoordinateXY = false;
 

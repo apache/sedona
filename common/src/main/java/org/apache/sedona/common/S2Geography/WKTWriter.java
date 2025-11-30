@@ -289,6 +289,7 @@ public class WKTWriter {
     // Append the WKT
     appendGeometryTaggedText(geography, seq, useFormatting, 0, writer, formatter);
   }
+
   /**
    * Converts a <code>Geometry</code> to &lt;Geometry Tagged Text&gt; format, then appends it to the
    * writer.
@@ -392,6 +393,7 @@ public class WKTWriter {
       writer.write(' ');
     }
   }
+
   /**
    * Converts a <code>Coordinate</code> to &lt;Point Tagged Text&gt; format, then appends it to the
    * writer.
@@ -456,6 +458,7 @@ public class WKTWriter {
         writer,
         formatter);
   }
+
   /**
    * Converts a <code>Polygon</code> to &lt;Polygon Tagged Text&gt; format, then appends it to the
    * writer.

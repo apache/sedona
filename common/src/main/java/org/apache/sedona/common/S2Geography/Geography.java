@@ -79,6 +79,7 @@ public abstract class Geography {
     public int getKind() {
       return kind;
     }
+
     /**
      * Look up the enum by its integer tag.
      *

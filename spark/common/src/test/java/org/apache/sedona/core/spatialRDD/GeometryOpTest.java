@@ -29,6 +29,7 @@ public class GeometryOpTest extends SpatialRDDTestBase {
   private static String InputLocationGeojson;
   private static String InputLocationWkt;
   private static String InputLocationWkb;
+
   /** Once executed before all. */
   @BeforeClass
   public static void onceExecutedBeforeAll() {

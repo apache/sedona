@@ -69,6 +69,7 @@ public class BigBufferedImage extends BufferedImage {
 
   /** The Constant MAX_PIXELS_IN_MEMORY. */
   public static final int MAX_PIXELS_IN_MEMORY = 1024 * 1024;
+
   /** The Constant TMP_DIR. */
   private static final String TMP_DIR = System.getProperty("java.io.tmpdir");
 

@@ -32,10 +32,13 @@ public class VectorOverlayOperator {
 
   /** The Constant logger. */
   static final Logger logger = Logger.getLogger(VectorOverlayOperator.class);
+
   /** The back vector image. */
   public List<String> backVectorImage = null;
+
   /** The distributed back vector image. */
   public JavaPairRDD<Integer, String> distributedBackVectorImage = null;
+
   /** The generate distributed image. */
   public boolean generateDistributedImage = false;
 

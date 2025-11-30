@@ -118,6 +118,7 @@ public class GeomUtils {
           }
         });
   }
+
   /*
    * Returns a POINT that is guaranteed to lie on the surface.
    */

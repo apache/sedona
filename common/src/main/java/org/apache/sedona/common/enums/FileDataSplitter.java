@@ -78,6 +78,7 @@ public enum FileDataSplitter implements Serializable {
       lookup.put(f.name().toUpperCase(), f);
     }
   }
+
   /**
    * Instantiates a new file data splitter.
    *

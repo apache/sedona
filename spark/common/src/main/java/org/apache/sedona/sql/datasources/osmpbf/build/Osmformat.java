@@ -16232,8 +16232,10 @@ public final class Osmformat {
 
       /** <code>NODE = 0;</code> */
       public static final int NODE_VALUE = 0;
+
       /** <code>WAY = 1;</code> */
       public static final int WAY_VALUE = 1;
+
       /** <code>RELATION = 2;</code> */
       public static final int RELATION_VALUE = 2;
 

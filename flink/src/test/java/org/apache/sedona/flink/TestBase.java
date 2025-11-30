@@ -418,6 +418,7 @@ public class TestBase {
             $(multipolygonColNames[2]),
             $(multipolygonColNames[3]));
   }
+
   // createPolygonTextOverlapping
 
   Table createPolygonOverlappingTable(int size) {

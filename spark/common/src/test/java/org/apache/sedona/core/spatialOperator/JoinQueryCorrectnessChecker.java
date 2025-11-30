@@ -52,24 +52,34 @@ import scala.Tuple2;
 public class JoinQueryCorrectnessChecker extends TestBase {
 
   private static final GeometryFactory geometryFactory = new GeometryFactory();
+
   /** The test polygon window set. */
   public static List<Polygon> testPolygonWindowSet;
+
   /** The test inside polygon set. */
   public static List<Polygon> testInsidePolygonSet;
+
   /** The test overlapped polygon set. */
   public static List<Polygon> testOverlappedPolygonSet;
+
   /** The test outside polygon set. */
   public static List<Polygon> testOutsidePolygonSet;
+
   /** The test inside line string set. */
   public static List<LineString> testInsideLineStringSet;
+
   /** The test overlapped line string set. */
   public static List<LineString> testOverlappedLineStringSet;
+
   /** The test outside line string set. */
   public static List<LineString> testOutsideLineStringSet;
+
   /** The test inside point set. */
   public static List<Point> testInsidePointSet;
+
   /** The test on boundary point set. */
   public static List<Point> testOnBoundaryPointSet;
+
   /** The test outside point set. */
   public static List<Point> testOutsidePointSet;
 

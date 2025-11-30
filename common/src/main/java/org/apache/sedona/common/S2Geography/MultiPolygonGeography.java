@@ -31,6 +31,7 @@ import java.util.logging.Logger;
 
 public class MultiPolygonGeography extends GeographyCollection {
   private static final Logger logger = Logger.getLogger(MultiPolygonGeography.class.getName());
+
   /**
    * Wrap each raw S2Polygon in a PolygonGeography, then hand it off to GeographyCollection to do
    * the rest (including serialization).

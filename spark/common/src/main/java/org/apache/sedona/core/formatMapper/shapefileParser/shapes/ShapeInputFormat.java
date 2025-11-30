@@ -36,8 +36,10 @@ import org.apache.hadoop.mapreduce.lib.input.CombineFileSplit;
 public class ShapeInputFormat extends CombineFileInputFormat<ShapeKey, PrimitiveShape> {
   /** suffix of attribute file */
   private static final String DBF_SUFFIX = "dbf";
+
   /** suffix of shape record file */
   private static final String SHP_SUFFIX = "shp";
+
   /** suffix of index file */
   private static final String SHX_SUFFIX = "shx";
 

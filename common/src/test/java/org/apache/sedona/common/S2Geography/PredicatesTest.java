@@ -102,7 +102,7 @@ public class PredicatesTest {
         S2LatLngRect.fromPointPair(S2LatLng.fromDegrees(0.5, 0.5), S2LatLng.fromDegrees(1.5, 1.5));
     boolean doesHit =
         pred.S2_intersectsBox(
-            container, hitRect, new S2BooleanOperation.Options(), /*tolerance=*/ 0.1);
+            container, hitRect, new S2BooleanOperation.Options(), /* tolerance= */ 0.1);
     assertTrue("Rect overlapping the square should intersect", doesHit);
 
     // rectangle completely outside: lat 2–3, lon 2–3
@@ -110,7 +110,7 @@ public class PredicatesTest {
         S2LatLngRect.fromPointPair(S2LatLng.fromDegrees(2, 2), S2LatLng.fromDegrees(3, 3));
     boolean doesMiss =
         pred.S2_intersectsBox(
-            container, missRect, new S2BooleanOperation.Options(), /*tolerance=*/ 0.1);
+            container, missRect, new S2BooleanOperation.Options(), /* tolerance= */ 0.1);
     assertFalse("Rect far away from square should not intersect", doesMiss);
   }
 }

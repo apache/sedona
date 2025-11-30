@@ -34,6 +34,7 @@ import org.locationtech.jts.geom.Envelope;
 
 public class VizTestBase {
   protected static SparkConf conf;
+
   /** The spark context. */
   protected static JavaSparkContext sparkContext;
 

@@ -30,8 +30,10 @@ import scala.Tuple2;
 public abstract class PartitioningUtils {
   // Check the geom against the partition tree to find the ids of overlapping grids
   public abstract Iterator<Tuple2<Integer, Geometry>> placeObject(Geometry geometry);
+
   // Check the geom against the partition tree to find the ids of overlapping grids. Only return IDs
   public abstract Set<Integer> getKeys(Geometry geometry);
+
   // Traverse the partition tree and fetch the grids
   public abstract List<Envelope> fetchLeafZones();
 

@@ -97,11 +97,13 @@ public class VectorizedParquetRecordReader extends SpecificParquetRecordReaderBa
 
   /** The mode of rebasing date/timestamp from Julian to Proleptic Gregorian calendar. */
   private final String datetimeRebaseMode;
+
   // The time zone Id in which rebasing of date/timestamp is performed
   private final String datetimeRebaseTz;
 
   /** The mode of rebasing INT96 timestamp from Julian to Proleptic Gregorian calendar. */
   private final String int96RebaseMode;
+
   // The time zone Id in which rebasing of INT96 is performed
   private final String int96RebaseTz;
 

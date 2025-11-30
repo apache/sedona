@@ -283,7 +283,10 @@ public class RasterBandEditorsTest extends RasterTestBase {
 
   @Test
   public void testClip()
-      throws IOException, FactoryException, TransformException, ParseException,
+      throws IOException,
+          FactoryException,
+          TransformException,
+          ParseException,
           ClassNotFoundException {
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");

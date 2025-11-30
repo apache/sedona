@@ -39,26 +39,34 @@ import org.wololo.geojson.GeoJSONFactory;
 /** This format mapper is isolated on purpose for the sake of sharing across Spark and Flink */
 public class FormatUtils<T extends Geometry> implements Serializable {
   static final Logger logger = LoggerFactory.getLogger(FormatUtils.class);
+
   /** The start offset. */
   protected final int startOffset;
+
   /** The end offset. */
   /* If the initial value is negative, Sedona will consider each field as a spatial attribute if the target object is LineString or Polygon. */
   protected final int endOffset;
+
   /** The splitter. */
   protected final FileDataSplitter splitter;
+
   /** The carry input data. */
   protected final boolean carryInputData;
+
   /** Non-spatial attributes in each input row will be concatenated to a tab separated string */
   protected String otherAttributes = "";
 
   protected GeometryType geometryType = null;
+
   /** The factory. */
   protected transient GeometryFactory factory = new GeometryFactory();
 
   protected transient GeoJSONReader geoJSONReader = new GeoJSONReader();
   protected transient WKTReader wktReader = new WKTReader();
+
   /** Allow mapping of invalid geometries. */
   public boolean allowTopologicallyInvalidGeometries;
+
   // For some unknown reasons, the wkb reader cannot be used in transient variable like the wkt
   // reader.
   /** Crash on syntactically invalid geometries or skip them. */

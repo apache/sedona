@@ -34,24 +34,34 @@ public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
 
   /** debug logger */
   private static final Logger logger = LoggerFactory.getLogger(CombineShapeReader.class);
+
   /** suffix of attribute file */
   private static final String DBF_SUFFIX = "dbf";
+
   /** suffix of shape record file */
   private static final String SHP_SUFFIX = "shp";
+
   /** suffix of index file */
   private static final String SHX_SUFFIX = "shx";
+
   /** id of input path of .shp file */
   private FileSplit shpSplit = null;
+
   /** id of input path of .shx file */
   private FileSplit shxSplit = null;
+
   /** id of input path of .dbf file */
   private FileSplit dbfSplit = null;
+
   /** RecordReader for .shp file */
   private ShapeFileReader shapeFileReader = null;
+
   /** RecordReader for .dbf file */
   private DbfFileReader dbfFileReader = null;
+
   /** flag of whether .dbf exists */
   private boolean hasDbf = false;
+
   /** flag of whether having next .dbf record */
   private boolean hasNextDbf = false;
 

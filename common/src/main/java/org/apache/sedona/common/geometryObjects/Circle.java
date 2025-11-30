@@ -39,10 +39,13 @@ public class Circle extends Geometry {
 
   /** The center. */
   private final Geometry centerGeometry;
+
   /** The center point. */
   private final Coordinate centerPoint;
+
   /** The radius. */
   private Double radius;
+
   /** The mbr. */
   private Envelope MBR;
 

@@ -33,12 +33,16 @@ public class ShapeFileReader extends RecordReader<ShapeKey, ShpRecord> {
 
   /** file parser */
   ShpFileParser parser = null;
+
   /** record id */
   private ShapeKey recordKey = null;
+
   /** primitive bytes value */
   private ShpRecord recordContent = null;
+
   /** input stream for .shp file */
   private FSDataInputStream shpInputStream = null;
+
   /** Iterator of indexes of records */
   private int[] indexes;
 

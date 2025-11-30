@@ -41,6 +41,7 @@ public class UDFAnnotations {
   public static @interface ParamMeta {
     // Arg names are always required
     String[] argNames();
+
     // Arg types are optional. If not specified, Reflection is used to get the type name
     // This is required for Snowflake Geometry type which is serialized as a Java String type when
     // UDF
@@ -48,6 +49,7 @@ public class UDFAnnotations {
     // If specified, the length of argTypes must match the length of argNames
     // If specified, the type name must be one of the keys in Constants.snowflakeTypeMap
     String[] argTypes() default {};
+
     // Return types are optional. If not specified, Reflection is used to get the type name
     // This is required for Snowflake Geometry type which is serialized as a Java String type when
     // UDF

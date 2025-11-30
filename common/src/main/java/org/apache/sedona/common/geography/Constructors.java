@@ -219,7 +219,7 @@ public class Constructors {
         holesPerShell.add(new ArrayList<>());
         shellStack.add(new int[] {shells.size() - 1, depth});
       } else {
-        ring = ensureOrientation(ring, /*wantCCW=*/ false, gf);
+        ring = ensureOrientation(ring, /* wantCCW= */ false, gf);
         // Attach hole to nearest even-depth ancestor shell
         if (!shellStack.isEmpty()) {
           int[] shellContainer = shellStack.get(shellStack.size() - 1);

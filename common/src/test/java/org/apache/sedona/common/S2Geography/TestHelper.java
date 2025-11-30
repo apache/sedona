@@ -132,6 +132,7 @@ public class TestHelper {
     S2LatLng ll = new S2LatLng(p);
     return String.format("POINT (%.6f %.6f)", ll.lng().degrees(), ll.lat().degrees());
   }
+
   /** Converts an S2Polyline into a 0-decimal-place WKT LINESTRING string. */
   public static String toPolylineWkt(S2Polyline pl) {
     StringBuilder sb = new StringBuilder("LINESTRING (");
@@ -143,6 +144,7 @@ public class TestHelper {
     sb.append(")");
     return sb.toString();
   }
+
   /** Converts an S2Polygon (single-loop) into a 0-decimal-place WKT POLYGON string. */
   public static String toPolygonWkt(S2Polygon polygon) {
     // Assumes a single outer loop

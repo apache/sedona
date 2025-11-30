@@ -43,6 +43,7 @@ public class GeographyIndex {
       values.add(shapeId, value);
     }
   }
+
   /** Returns the stored value for a given shape ID. */
   public int value(int shapeId) {
     return values.get(shapeId);

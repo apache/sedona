@@ -69,6 +69,7 @@ public class ShapeIndexGeography extends Geography {
   public S2Region region() {
     return new S2ShapeIndexRegion(shapeIndex);
   }
+
   /** Index every S2Shape from the given Geography. */
   public void addIndex(Geography geog) {
     for (int i = 0, n = geog.numShapes(); i < n; i++) {

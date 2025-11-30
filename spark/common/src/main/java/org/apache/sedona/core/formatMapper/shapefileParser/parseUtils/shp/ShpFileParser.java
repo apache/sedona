@@ -29,8 +29,10 @@ public class ShpFileParser implements Serializable, ShapeFileConst {
 
   /** input reader */
   private final SafeReader reader;
+
   /** length of file in bytes */
   private long fileLength = 0;
+
   /** remain length of bytes to parse */
   private long remainLength = 0;
 

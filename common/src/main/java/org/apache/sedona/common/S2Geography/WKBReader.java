@@ -81,6 +81,7 @@ public class WKBReader {
   private PrecisionModel precisionModel;
   // default dimension - will be set on read
   private int inputDimension = 2;
+
   /**
    * true if structurally invalid input should be reported rather than repaired. At some point this
    * could be made client-controllable.

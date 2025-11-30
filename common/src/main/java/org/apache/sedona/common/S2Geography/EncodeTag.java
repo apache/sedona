@@ -36,23 +36,28 @@ public class EncodeTag {
    * byte (represented as an int in Java, range 0–255).
    */
   private GeographyKind kind = GeographyKind.UNINITIALIZED;
+
   /**
    * Flags for encoding metadata. one flag {@code kFlagEmpty} is supported, which is set if and only
    * if the geography contains zero shapes. second flag {@code FlagCompact}, which is set if user
    * set COMPACT encoding type
    */
   private byte flags = 0;
+
   // ——— Bit‐masks for our one‐byte flags field ———————————————————
   /** set if geography has zero shapes */
   public static final byte FLAG_EMPTY = 1 << 0;
+
   /** set if using COMPACT coding; if clear, we’ll treat as FAST */
   public static final byte FLAG_COMPACT = 1 << 1;
+
   // bits 2–7 are still unused (formerly “reserved”)
   /**
    * Number of S2CellId entries that follow this tag. A value of zero (i.e., an empty covering)
    * means no covering was written, but this does not imply that the geography itself is empty.
    */
   private byte coveringSize = 0;
+
   /** Reserved byte for future use. Must be set to 0. */
   private byte reserved = 0;
 
@@ -64,6 +69,7 @@ public class EncodeTag {
       flags |= FLAG_COMPACT;
     }
   }
+
   /** Write exactly 4 bytes: [kind|flags|coveringSize|reserved]. */
   public void encode(Output out) throws IOException {
     out.writeByte(kind.getKind());
@@ -71,6 +77,7 @@ public class EncodeTag {
     out.writeByte(coveringSize);
     out.writeByte(reserved);
   }
+
   // ——— Read it back ————————————————————————————————————————————————
 
   /** Reads exactly 4 bytes (in the same order) from the stream. */

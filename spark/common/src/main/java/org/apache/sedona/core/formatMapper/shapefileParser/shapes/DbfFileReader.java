@@ -33,12 +33,16 @@ public class DbfFileReader extends org.apache.hadoop.mapreduce.RecordReader<Shap
 
   /** Dbf parser */
   DbfParseUtil dbfParser = null;
+
   /** inputstream of .dbf file */
   private FSDataInputStream inputStream = null;
+
   /** primitive bytes array of one row */
   private List<byte[]> value = null;
+
   /** key value of current row */
   private ShapeKey key = null;
+
   /** generated id of current row */
   private int id = 0;
 

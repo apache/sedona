@@ -43,6 +43,7 @@ public class SedonaFlinkRegistrator {
         .forEach(
             func -> tblEnv.createTemporarySystemFunction(func.getClass().getSimpleName(), func));
   }
+
   /**
    * @deprecated use {@link SedonaContext#create(StreamExecutionEnvironment,
    *     StreamTableEnvironment)}

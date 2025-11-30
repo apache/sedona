@@ -54,6 +54,7 @@ public final class Fileformat {
      * @return Whether the raw field is set.
      */
     boolean hasRaw();
+
     /**
      *
      *
@@ -79,6 +80,7 @@ public final class Fileformat {
      * @return Whether the rawSize field is set.
      */
     boolean hasRawSize();
+
     /**
      *
      *
@@ -104,6 +106,7 @@ public final class Fileformat {
      * @return Whether the zlibData field is set.
      */
     boolean hasZlibData();
+
     /**
      *
      *
@@ -129,6 +132,7 @@ public final class Fileformat {
      * @return Whether the lzmaData field is set.
      */
     boolean hasLzmaData();
+
     /**
      *
      *
@@ -157,6 +161,7 @@ public final class Fileformat {
      */
     @Deprecated
     boolean hasOBSOLETEBzip2Data();
+
     /**
      *
      *
@@ -173,6 +178,7 @@ public final class Fileformat {
     @Deprecated
     proto4.ByteString getOBSOLETEBzip2Data();
   }
+
   /** Protobuf type {@code Blob} */
   public static final class Blob extends proto4.GeneratedMessage
       implements
@@ -189,6 +195,7 @@ public final class Fileformat {
           /* suffix= */ "",
           Blob.class.getName());
     }
+
     // Use Blob.newBuilder() to construct.
     private Blob(proto4.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -214,6 +221,7 @@ public final class Fileformat {
     private int bitField0_;
     public static final int RAW_FIELD_NUMBER = 1;
     private proto4.ByteString raw_ = proto4.ByteString.EMPTY;
+
     /**
      *
      *
@@ -229,6 +237,7 @@ public final class Fileformat {
     public boolean hasRaw() {
       return ((bitField0_ & 0x00000001) != 0);
     }
+
     /**
      *
      *
@@ -247,6 +256,7 @@ public final class Fileformat {
 
     public static final int RAW_SIZE_FIELD_NUMBER = 2;
     private int rawSize_ = 0;
+
     /**
      *
      *
@@ -262,6 +272,7 @@ public final class Fileformat {
     public boolean hasRawSize() {
       return ((bitField0_ & 0x00000002) != 0);
     }
+
     /**
      *
      *
@@ -280,6 +291,7 @@ public final class Fileformat {
 
     public static final int ZLIB_DATA_FIELD_NUMBER = 3;
     private proto4.ByteString zlibData_ = proto4.ByteString.EMPTY;
+
     /**
      *
      *
@@ -295,6 +307,7 @@ public final class Fileformat {
     public boolean hasZlibData() {
       return ((bitField0_ & 0x00000004) != 0);
     }
+
     /**
      *
      *
@@ -313,6 +326,7 @@ public final class Fileformat {
 
     public static final int LZMA_DATA_FIELD_NUMBER = 4;
     private proto4.ByteString lzmaData_ = proto4.ByteString.EMPTY;
+
     /**
      *
      *
@@ -328,6 +342,7 @@ public final class Fileformat {
     public boolean hasLzmaData() {
       return ((bitField0_ & 0x00000008) != 0);
     }
+
     /**
      *
      *
@@ -346,6 +361,7 @@ public final class Fileformat {
 
     public static final int OBSOLETE_BZIP2_DATA_FIELD_NUMBER = 5;
     private proto4.ByteString oBSOLETEBzip2Data_ = proto4.ByteString.EMPTY;
+
     /**
      *
      *
@@ -364,6 +380,7 @@ public final class Fileformat {
     public boolean hasOBSOLETEBzip2Data() {
       return ((bitField0_ & 0x00000010) != 0);
     }
+
     /**
      *
      *
@@ -596,6 +613,7 @@ public final class Fileformat {
       Builder builder = new Builder(parent);
       return builder;
     }
+
     /** Protobuf type {@code Blob} */
     public static final class Builder extends proto4.GeneratedMessage.Builder<Builder>
         implements
@@ -787,6 +805,7 @@ public final class Fileformat {
       private int bitField0_;
 
       private proto4.ByteString raw_ = proto4.ByteString.EMPTY;
+
       /**
        *
        *
@@ -802,6 +821,7 @@ public final class Fileformat {
       public boolean hasRaw() {
         return ((bitField0_ & 0x00000001) != 0);
       }
+
       /**
        *
        *
@@ -817,6 +837,7 @@ public final class Fileformat {
       public proto4.ByteString getRaw() {
         return raw_;
       }
+
       /**
        *
        *
@@ -838,6 +859,7 @@ public final class Fileformat {
         onChanged();
         return this;
       }
+
       /**
        *
        *
@@ -857,6 +879,7 @@ public final class Fileformat {
       }
 
       private int rawSize_;
+
       /**
        *
        *
@@ -872,6 +895,7 @@ public final class Fileformat {
       public boolean hasRawSize() {
         return ((bitField0_ & 0x00000002) != 0);
       }
+
       /**
        *
        *
@@ -887,6 +911,7 @@ public final class Fileformat {
       public int getRawSize() {
         return rawSize_;
       }
+
       /**
        *
        *
@@ -906,6 +931,7 @@ public final class Fileformat {
         onChanged();
         return this;
       }
+
       /**
        *
        *
@@ -925,6 +951,7 @@ public final class Fileformat {
       }
 
       private proto4.ByteString zlibData_ = proto4.ByteString.EMPTY;
+
       /**
        *
        *
@@ -940,6 +967,7 @@ public final class Fileformat {
       public boolean hasZlibData() {
         return ((bitField0_ & 0x00000004) != 0);
       }
+
       /**
        *
        *
@@ -955,6 +983,7 @@ public final class Fileformat {
       public proto4.ByteString getZlibData() {
         return zlibData_;
       }
+
       /**
        *
        *
@@ -976,6 +1005,7 @@ public final class Fileformat {
         onChanged();
         return this;
       }
+
       /**
        *
        *
@@ -995,6 +1025,7 @@ public final class Fileformat {
       }
 
       private proto4.ByteString lzmaData_ = proto4.ByteString.EMPTY;
+
       /**
        *
        *
@@ -1010,6 +1041,7 @@ public final class Fileformat {
       public boolean hasLzmaData() {
         return ((bitField0_ & 0x00000008) != 0);
       }
+
       /**
        *
        *
@@ -1025,6 +1057,7 @@ public final class Fileformat {
       public proto4.ByteString getLzmaData() {
         return lzmaData_;
       }
+
       /**
        *
        *
@@ -1046,6 +1079,7 @@ public final class Fileformat {
         onChanged();
         return this;
       }
+
       /**
        *
        *
@@ -1065,6 +1099,7 @@ public final class Fileformat {
       }
 
       private proto4.ByteString oBSOLETEBzip2Data_ = proto4.ByteString.EMPTY;
+
       /**
        *
        *
@@ -1083,6 +1118,7 @@ public final class Fileformat {
       public boolean hasOBSOLETEBzip2Data() {
         return ((bitField0_ & 0x00000010) != 0);
       }
+
       /**
        *
        *
@@ -1101,6 +1137,7 @@ public final class Fileformat {
       public proto4.ByteString getOBSOLETEBzip2Data() {
         return oBSOLETEBzip2Data_;
       }
+
       /**
        *
        *
@@ -1123,6 +1160,7 @@ public final class Fileformat {
         onChanged();
         return this;
       }
+
       /**
        *
        *
@@ -1204,12 +1242,14 @@ public final class Fileformat {
      * @return Whether the type field is set.
      */
     boolean hasType();
+
     /**
      * <code>required string type = 1;</code>
      *
      * @return The type.
      */
     String getType();
+
     /**
      * <code>required string type = 1;</code>
      *
@@ -1223,6 +1263,7 @@ public final class Fileformat {
      * @return Whether the indexdata field is set.
      */
     boolean hasIndexdata();
+
     /**
      * <code>optional bytes indexdata = 2;</code>
      *
@@ -1236,6 +1277,7 @@ public final class Fileformat {
      * @return Whether the datasize field is set.
      */
     boolean hasDatasize();
+
     /**
      * <code>required int32 datasize = 3;</code>
      *
@@ -1243,6 +1285,7 @@ public final class Fileformat {
      */
     int getDatasize();
   }
+
   /** Protobuf type {@code BlobHeader} */
   public static final class BlobHeader extends proto4.GeneratedMessage
       implements
@@ -1259,6 +1302,7 @@ public final class Fileformat {
           /* suffix= */ "",
           BlobHeader.class.getName());
     }
+
     // Use BlobHeader.newBuilder() to construct.
     private BlobHeader(proto4.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -1285,6 +1329,7 @@ public final class Fileformat {
 
     @SuppressWarnings("serial")
     private volatile Object type_ = "";
+
     /**
      * <code>required string type = 1;</code>
      *
@@ -1294,6 +1339,7 @@ public final class Fileformat {
     public boolean hasType() {
       return ((bitField0_ & 0x00000001) != 0);
     }
+
     /**
      * <code>required string type = 1;</code>
      *
@@ -1313,6 +1359,7 @@ public final class Fileformat {
         return s;
       }
     }
+
     /**
      * <code>required string type = 1;</code>
      *
@@ -1332,6 +1379,7 @@ public final class Fileformat {
 
     public static final int INDEXDATA_FIELD_NUMBER = 2;
     private proto4.ByteString indexdata_ = proto4.ByteString.EMPTY;
+
     /**
      * <code>optional bytes indexdata = 2;</code>
      *
@@ -1341,6 +1389,7 @@ public final class Fileformat {
     public boolean hasIndexdata() {
       return ((bitField0_ & 0x00000002) != 0);
     }
+
     /**
      * <code>optional bytes indexdata = 2;</code>
      *
@@ -1353,6 +1402,7 @@ public final class Fileformat {
 
     public static final int DATASIZE_FIELD_NUMBER = 3;
     private int datasize_ = 0;
+
     /**
      * <code>required int32 datasize = 3;</code>
      *
@@ -1362,6 +1412,7 @@ public final class Fileformat {
     public boolean hasDatasize() {
       return ((bitField0_ & 0x00000004) != 0);
     }
+
     /**
      * <code>required int32 datasize = 3;</code>
      *
@@ -1566,6 +1617,7 @@ public final class Fileformat {
       Builder builder = new Builder(parent);
       return builder;
     }
+
     /** Protobuf type {@code BlobHeader} */
     public static final class Builder extends proto4.GeneratedMessage.Builder<Builder>
         implements
@@ -1738,6 +1790,7 @@ public final class Fileformat {
       private int bitField0_;
 
       private Object type_ = "";
+
       /**
        * <code>required string type = 1;</code>
        *
@@ -1746,6 +1799,7 @@ public final class Fileformat {
       public boolean hasType() {
         return ((bitField0_ & 0x00000001) != 0);
       }
+
       /**
        * <code>required string type = 1;</code>
        *
@@ -1764,6 +1818,7 @@ public final class Fileformat {
           return (String) ref;
         }
       }
+
       /**
        * <code>required string type = 1;</code>
        *
@@ -1779,6 +1834,7 @@ public final class Fileformat {
           return (proto4.ByteString) ref;
         }
       }
+
       /**
        * <code>required string type = 1;</code>
        *
@@ -1794,6 +1850,7 @@ public final class Fileformat {
         onChanged();
         return this;
       }
+
       /**
        * <code>required string type = 1;</code>
        *
@@ -1805,6 +1862,7 @@ public final class Fileformat {
         onChanged();
         return this;
       }
+
       /**
        * <code>required string type = 1;</code>
        *
@@ -1822,6 +1880,7 @@ public final class Fileformat {
       }
 
       private proto4.ByteString indexdata_ = proto4.ByteString.EMPTY;
+
       /**
        * <code>optional bytes indexdata = 2;</code>
        *
@@ -1831,6 +1890,7 @@ public final class Fileformat {
       public boolean hasIndexdata() {
         return ((bitField0_ & 0x00000002) != 0);
       }
+
       /**
        * <code>optional bytes indexdata = 2;</code>
        *
@@ -1840,6 +1900,7 @@ public final class Fileformat {
       public proto4.ByteString getIndexdata() {
         return indexdata_;
       }
+
       /**
        * <code>optional bytes indexdata = 2;</code>
        *
@@ -1855,6 +1916,7 @@ public final class Fileformat {
         onChanged();
         return this;
       }
+
       /**
        * <code>optional bytes indexdata = 2;</code>
        *
@@ -1868,6 +1930,7 @@ public final class Fileformat {
       }
 
       private int datasize_;
+
       /**
        * <code>required int32 datasize = 3;</code>
        *
@@ -1877,6 +1940,7 @@ public final class Fileformat {
       public boolean hasDatasize() {
         return ((bitField0_ & 0x00000004) != 0);
       }
+
       /**
        * <code>required int32 datasize = 3;</code>
        *
@@ -1886,6 +1950,7 @@ public final class Fileformat {
       public int getDatasize() {
         return datasize_;
       }
+
       /**
        * <code>required int32 datasize = 3;</code>
        *
@@ -1899,6 +1964,7 @@ public final class Fileformat {
         onChanged();
         return this;
       }
+
       /**
        * <code>required int32 datasize = 3;</code>
        *

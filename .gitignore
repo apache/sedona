@@ -51,3 +51,4 @@ target
 
 # Ignore node_modules in docs-overrides
 docs-overrides/node_modules/
+checkstyle_output*.txt
