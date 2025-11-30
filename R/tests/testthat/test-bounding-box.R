@@ -15,7 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-context("bounding box")
 
 test_that("bounding box object works as expected", {
   sc <- testthat_spark_connection()

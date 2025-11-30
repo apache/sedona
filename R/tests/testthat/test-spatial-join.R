@@ -15,7 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-context("spatial join")
 
 sc <- testthat_spark_connection()
 

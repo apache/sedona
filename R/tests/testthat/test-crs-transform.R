@@ -15,7 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-context("CRS transform")
 
 test_that("crs_transform() works as expected", {
   sc <- testthat_spark_connection()

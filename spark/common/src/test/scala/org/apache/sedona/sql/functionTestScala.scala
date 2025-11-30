@@ -3033,6 +3033,17 @@ class functionTestScala
     }
   }
 
+  it("should pass ST_Force3D with MultiPolygon containing single polygon") {
+    // Test that a MultiPolygon with a single polygon remains a MultiPolygon after force3D
+    val df = sparkSession.sql(
+      "SELECT ST_AsText(ST_Force3D(ST_GeomFromWKT('MULTIPOLYGON (((0 0, 10 0, 10 10, 0 10, 0 0)))'), 5.0)) AS geom")
+    val actual = df.take(1)(0).get(0).asInstanceOf[String]
+    // Should still be MULTIPOLYGON, not POLYGON
+    assertTrue(actual.startsWith("MULTIPOLYGON"))
+    assertTrue(actual.contains("Z"))
+    assertTrue(actual.contains("5"))
+  }
+
   it("Should pass ST_Force3DZ") {
     val geomTestCases = Map(
       ("'LINESTRING (0 1, 1 0, 2 0)'") -> ("'LINESTRING Z(0 1 1, 1 0 1, 2 0 1)'", "'LINESTRING Z(0 1 0, 1 0 0, 2 0 0)'"),
