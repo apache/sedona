@@ -28,6 +28,9 @@ permissions:
   contents: read
   security-events: write
 
+env:
+  UV_VERSION: '0.7.12'
+
 jobs:
   codeql:
     name: CodeQL
@@ -41,6 +44,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@85856786d1ce8acfbcc2f13a5f3fbd6b938f9f41
+        with:
+          version: ${{ env.UV_VERSION }}
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
