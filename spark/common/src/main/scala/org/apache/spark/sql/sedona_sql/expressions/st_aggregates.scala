@@ -52,4 +52,14 @@ object st_aggregates {
     val aggrFunc = udaf(new ST_Union_Aggr)
     aggrFunc(col(geometry))
   }
+
+  def ST_Collect_Aggr(geometry: Column): Column = {
+    val aggrFunc = udaf(new ST_Collect_Aggr)
+    aggrFunc(geometry)
+  }
+
+  def ST_Collect_Aggr(geometry: String): Column = {
+    val aggrFunc = udaf(new ST_Collect_Aggr)
+    aggrFunc(col(geometry))
+  }
 }

@@ -1223,6 +1223,13 @@ test_configurations = [
         "",
         "POLYGON ((0 0, 0 1, 1 1, 2 1, 2 0, 1 0, 0 0))",
     ),
+    (
+        sta.ST_Collect_Aggr,
+        ("geom",),
+        "exploded_points",
+        "",
+        "MULTIPOINT ((0 0), (1 1))",
+    ),
 ]
 
 wrong_type_configurations = [

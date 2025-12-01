@@ -71,3 +71,77 @@ class TestConstructors(TestBase):
         )
 
         assert union.take(1)[0][0].area == 10100
+
+    def test_st_collect_aggr_points(self):
+        self.spark.sql(
+            """
+            SELECT explode(array(
+              ST_GeomFromWKT('POINT(1 2)'),
+              ST_GeomFromWKT('POINT(3 4)'),
+              ST_GeomFromWKT('POINT(5 6)')
+            )) AS geom
+            """
+        ).createOrReplaceTempView("points_table")
+
+        result = self.spark.sql("SELECT ST_Collect_Aggr(geom) FROM points_table").take(
+            1
+        )[0][0]
+
+        assert result.geom_type == "MultiPoint"
+        assert len(result.geoms) == 3
+
+    def test_st_collect_aggr_polygons(self):
+        self.spark.sql(
+            """
+            SELECT explode(array(
+              ST_GeomFromWKT('POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))'),
+              ST_GeomFromWKT('POLYGON((2 2, 3 2, 3 3, 2 3, 2 2))')
+            )) AS geom
+            """
+        ).createOrReplaceTempView("polygons_table")
+
+        result = self.spark.sql(
+            "SELECT ST_Collect_Aggr(geom) FROM polygons_table"
+        ).take(1)[0][0]
+
+        assert result.geom_type == "MultiPolygon"
+        assert len(result.geoms) == 2
+        assert result.area == 2.0
+
+    def test_st_collect_aggr_mixed_types(self):
+        self.spark.sql(
+            """
+            SELECT explode(array(
+              ST_GeomFromWKT('POINT(1 2)'),
+              ST_GeomFromWKT('LINESTRING(0 0, 1 1)'),
+              ST_GeomFromWKT('POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))')
+            )) AS geom
+            """
+        ).createOrReplaceTempView("mixed_geom_table")
+
+        result = self.spark.sql(
+            "SELECT ST_Collect_Aggr(geom) FROM mixed_geom_table"
+        ).take(1)[0][0]
+
+        assert result.geom_type == "GeometryCollection"
+        assert len(result.geoms) == 3
+
+    def test_st_collect_aggr_preserves_duplicates(self):
+        # Test that ST_Collect_Aggr keeps duplicate geometries (unlike ST_Union_Aggr)
+        self.spark.sql(
+            """
+            SELECT explode(array(
+              ST_GeomFromWKT('POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))'),
+              ST_GeomFromWKT('POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))')
+            )) AS geom
+            """
+        ).createOrReplaceTempView("duplicate_polygons_table")
+
+        result = self.spark.sql(
+            "SELECT ST_Collect_Aggr(geom) FROM duplicate_polygons_table"
+        ).take(1)[0][0]
+
+        # ST_Collect_Aggr should preserve both polygons
+        assert len(result.geoms) == 2
+        # Area should be 2 because it doesn't merge overlapping areas
+        assert result.area == 2.0

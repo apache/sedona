@@ -17,6 +17,38 @@
  under the License.
  -->
 
+## ST_Collect_Aggr
+
+Introduction: Collects all geometries in a geometry column into a single multi-geometry (MultiPoint, MultiLineString, MultiPolygon, or GeometryCollection). Unlike `ST_Union_Aggr`, this function does not dissolve boundaries between geometries - it simply collects them into a multi-geometry.
+
+Format: `ST_Collect_Aggr (A: geometryColumn)`
+
+Since: `v1.7.0`
+
+SQL Example
+
+```sql
+SELECT ST_Collect_Aggr(geom) FROM (
+  SELECT ST_GeomFromWKT('POINT(1 2)') AS geom
+  UNION ALL
+  SELECT ST_GeomFromWKT('POINT(3 4)') AS geom
+  UNION ALL
+  SELECT ST_GeomFromWKT('POINT(5 6)') AS geom
+)
+```
+
+Output:
+
+```
+MULTIPOINT ((1 2), (3 4), (5 6))
+```
+
+SQL Example with GROUP BY
+
+```sql
+SELECT category, ST_Collect_Aggr(geom) FROM geometries GROUP BY category
+```
+
 ## ST_Envelope_Aggr
 
 Introduction: Return the entire envelope boundary of all geometries in A
