@@ -74,6 +74,26 @@ sd.read_pyogrio(url).to_pandas().plot()
 
 This works for local files, `https://` urls (via `/vsicurl/`), and zipped files (via `/vsizip/`). Globs (i.e., `sd.read_pyogrio("path/to/*.gpkg")`) resolving to 1 or more local files are also supported.
 
+Like SedonaDB's GeoParquet support, spatial filters like `ST_Intersects()` are translated into the GDAL/OGR scan where possible to take advantage of embedded spatial indexes in formats like GeoPackage, FlatGeoBuf, and Shapefile. For example, we can query small areas of a [huge FlatGeoBuf file hosted elsewhere](https://flatgeobuf.org/examples/maplibre/large.html) without scanning the entire file:
+
+```python
+# 12 GB file
+url = "https://flatgeobuf.septima.dk/population_areas.fgb"
+sd.read_pyogrio(url).to_view("population_areas")
+
+wkt = "POLYGON ((-73.978329 40.767412, -73.950005 40.767412, -73.950005 40.795098, -73.978329 40.795098, -73.978329 40.767412))"
+sd.sql(f"""
+SELECT sum(population::INTEGER) FROM population_areas
+WHERE ST_Intersects(wkb_geometry, ST_SetSRID(ST_GeomFromWKT('{wkt}'), 4326))
+""").show()
+#> ┌──────────────────────────────────┐
+#> │ sum(population_areas.population) │
+#> │               int64              │
+#> ╞══════════════════════════════════╡
+#> │                           256251 │
+#> └──────────────────────────────────┘
+```
+
 ## GeoParquet 1.1 Write Support
 
 Whereas the initial version of SedonaDB launched with basic write support for GeoParquet files, the latest version of the specification that enables readers to read small portions of the resulting Parquet file was not supported. With the latest release, `DataFrame.to_parquet("path/to/parquet", geoparquet_version="1.1")` will add a `bbox` column enabling functions like `sd.read_parquet()` with a `WHERE ST_Intersects()` query to read only a portion of the input file.
@@ -86,6 +106,19 @@ sd = sedona.db.connect()
 url = "https://github.com/geoarrow/geoarrow-data/releases/download/v0.2.0/ns-water_water-point.fgb"
 
 sd.read_pyogrio(url).to_parquet("water_point.parquet", geoparquet_version="1.1")
+```
+
+Shrinking the default row group size to ~100,000 and applying a spatial sort may improve read performance by ensuring that row groups contain related features.
+
+```python
+sd.sql("SET datafusion.execution.parquet.max_row_group_size = 100000")
+
+sd.read_parquet(url).to_view("water_point")
+
+sd.sql("""
+SELECT * FROM water_point
+ORDER BY sd_order(geometry)
+""").to_parquet("water_point.parquet", geoparquet_version="1.1")
 ```
 
 ## Python User-Defined Function Support
