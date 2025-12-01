@@ -4,11 +4,11 @@ fiona==1.10.1
 geopandas==1.1.1
 ipykernel
 ipywidgets
-jupyterlab==4.4.9
-jupyterlab-widgets==3.0.13
+jupyterlab==4.5.0
+jupyterlab-widgets==3.0.16
 keplergl==0.3.7
 matplotlib
-numpy==1.26.4
+numpy==2.3.5
 pandas==2.3.3
 py4j==0.10.9.9
 pydeck==0.9.1
