@@ -100,9 +100,9 @@ class TestConstructors(TestBase):
             """
         ).createOrReplaceTempView("polygons_table")
 
-        result = self.spark.sql(
-            "SELECT ST_Collect_Agg(geom) FROM polygons_table"
-        ).take(1)[0][0]
+        result = self.spark.sql("SELECT ST_Collect_Agg(geom) FROM polygons_table").take(
+            1
+        )[0][0]
 
         assert result.geom_type == "MultiPolygon"
         assert len(result.geoms) == 2
