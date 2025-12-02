@@ -83,7 +83,7 @@ class TestConstructors(TestBase):
             """
         ).createOrReplaceTempView("points_table")
 
-        result = self.spark.sql("SELECT ST_Collect_Aggr(geom) FROM points_table").take(
+        result = self.spark.sql("SELECT ST_Collect_Agg(geom) FROM points_table").take(
             1
         )[0][0]
 
@@ -101,7 +101,7 @@ class TestConstructors(TestBase):
         ).createOrReplaceTempView("polygons_table")
 
         result = self.spark.sql(
-            "SELECT ST_Collect_Aggr(geom) FROM polygons_table"
+            "SELECT ST_Collect_Agg(geom) FROM polygons_table"
         ).take(1)[0][0]
 
         assert result.geom_type == "MultiPolygon"
@@ -120,14 +120,14 @@ class TestConstructors(TestBase):
         ).createOrReplaceTempView("mixed_geom_table")
 
         result = self.spark.sql(
-            "SELECT ST_Collect_Aggr(geom) FROM mixed_geom_table"
+            "SELECT ST_Collect_Agg(geom) FROM mixed_geom_table"
         ).take(1)[0][0]
 
         assert result.geom_type == "GeometryCollection"
         assert len(result.geoms) == 3
 
     def test_st_collect_aggr_preserves_duplicates(self):
-        # Test that ST_Collect_Aggr keeps duplicate geometries (unlike ST_Union_Aggr)
+        # Test that ST_Collect_Agg keeps duplicate geometries (unlike ST_Union_Aggr)
         self.spark.sql(
             """
             SELECT explode(array(
@@ -138,10 +138,10 @@ class TestConstructors(TestBase):
         ).createOrReplaceTempView("duplicate_polygons_table")
 
         result = self.spark.sql(
-            "SELECT ST_Collect_Aggr(geom) FROM duplicate_polygons_table"
+            "SELECT ST_Collect_Agg(geom) FROM duplicate_polygons_table"
         ).take(1)[0][0]
 
-        # ST_Collect_Aggr should preserve both polygons
+        # ST_Collect_Agg should preserve both polygons
         assert len(result.geoms) == 2
         # Area should be 2 because it doesn't merge overlapping areas
         assert result.area == 2.0

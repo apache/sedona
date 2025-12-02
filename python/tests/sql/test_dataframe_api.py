@@ -1224,7 +1224,7 @@ test_configurations = [
         "POLYGON ((0 0, 0 1, 1 1, 2 1, 2 0, 1 0, 0 0))",
     ),
     (
-        sta.ST_Collect_Aggr,
+        sta.ST_Collect_Agg,
         ("geom",),
         "exploded_points",
         "",

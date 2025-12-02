@@ -129,7 +129,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
       assertResult(0.0)(intersectionDF.take(1)(0).get(0).asInstanceOf[Geometry].getArea)
     }
 
-    it("Passed ST_Collect_Aggr with points") {
+    it("Passed ST_Collect_Agg with points") {
       sparkSession
         .sql("""
           |SELECT explode(array(
@@ -140,14 +140,14 @@ class aggregateFunctionTestScala extends TestBaseScala {
         """.stripMargin)
         .createOrReplaceTempView("points_table")
 
-      val collectDF = sparkSession.sql("SELECT ST_Collect_Aggr(geom) FROM points_table")
+      val collectDF = sparkSession.sql("SELECT ST_Collect_Agg(geom) FROM points_table")
       val result = collectDF.take(1)(0).get(0).asInstanceOf[Geometry]
 
       assert(result.getGeometryType == "MultiPoint")
       assert(result.getNumGeometries == 3)
     }
 
-    it("Passed ST_Collect_Aggr with polygons") {
+    it("Passed ST_Collect_Agg with polygons") {
       sparkSession
         .sql("""
           |SELECT explode(array(
@@ -157,7 +157,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
         """.stripMargin)
         .createOrReplaceTempView("polygons_table")
 
-      val collectDF = sparkSession.sql("SELECT ST_Collect_Aggr(geom) FROM polygons_table")
+      val collectDF = sparkSession.sql("SELECT ST_Collect_Agg(geom) FROM polygons_table")
       val result = collectDF.take(1)(0).get(0).asInstanceOf[Geometry]
 
       assert(result.getGeometryType == "MultiPolygon")
@@ -166,7 +166,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
       assert(result.getArea == 2.0)
     }
 
-    it("Passed ST_Collect_Aggr with mixed geometry types") {
+    it("Passed ST_Collect_Agg with mixed geometry types") {
       sparkSession
         .sql("""
           |SELECT explode(array(
@@ -177,14 +177,14 @@ class aggregateFunctionTestScala extends TestBaseScala {
         """.stripMargin)
         .createOrReplaceTempView("mixed_geom_table")
 
-      val collectDF = sparkSession.sql("SELECT ST_Collect_Aggr(geom) FROM mixed_geom_table")
+      val collectDF = sparkSession.sql("SELECT ST_Collect_Agg(geom) FROM mixed_geom_table")
       val result = collectDF.take(1)(0).get(0).asInstanceOf[Geometry]
 
       assert(result.getGeometryType == "GeometryCollection")
       assert(result.getNumGeometries == 3)
     }
 
-    it("Passed ST_Collect_Aggr with GROUP BY") {
+    it("Passed ST_Collect_Agg with GROUP BY") {
       sparkSession
         .sql("""
           |SELECT * FROM (VALUES
@@ -198,7 +198,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
         .createOrReplaceTempView("grouped_points_table")
 
       val collectDF = sparkSession.sql(
-        "SELECT group_id, ST_Collect_Aggr(geom) as collected FROM grouped_points_table GROUP BY group_id ORDER BY group_id")
+        "SELECT group_id, ST_Collect_Agg(geom) as collected FROM grouped_points_table GROUP BY group_id ORDER BY group_id")
       val results = collectDF.collect()
 
       // Group 1 should have 2 points
@@ -207,8 +207,8 @@ class aggregateFunctionTestScala extends TestBaseScala {
       assert(results(1).getAs[Geometry]("collected").getNumGeometries == 3)
     }
 
-    it("Passed ST_Collect_Aggr preserves duplicates unlike ST_Union_Aggr") {
-      // Test that ST_Collect_Aggr keeps duplicate geometries (unlike ST_Union_Aggr which merges them)
+    it("Passed ST_Collect_Agg preserves duplicates unlike ST_Union_Aggr") {
+      // Test that ST_Collect_Agg keeps duplicate geometries (unlike ST_Union_Aggr which merges them)
       sparkSession
         .sql("""
           |SELECT explode(array(
@@ -219,16 +219,16 @@ class aggregateFunctionTestScala extends TestBaseScala {
         .createOrReplaceTempView("duplicate_polygons_table")
 
       val collectDF =
-        sparkSession.sql("SELECT ST_Collect_Aggr(geom) FROM duplicate_polygons_table")
+        sparkSession.sql("SELECT ST_Collect_Agg(geom) FROM duplicate_polygons_table")
       val result = collectDF.take(1)(0).get(0).asInstanceOf[Geometry]
 
-      // ST_Collect_Aggr should preserve both polygons
+      // ST_Collect_Agg should preserve both polygons
       assert(result.getNumGeometries == 2)
       // Area should be 2 because it doesn't merge overlapping areas
       assert(result.getArea == 2.0)
     }
 
-    it("Passed ST_Collect_Aggr with null values") {
+    it("Passed ST_Collect_Agg with null values") {
       sparkSession
         .sql("""
           |SELECT explode(array(
@@ -239,7 +239,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
         """.stripMargin)
         .createOrReplaceTempView("points_with_null_table")
 
-      val collectDF = sparkSession.sql("SELECT ST_Collect_Aggr(geom) FROM points_with_null_table")
+      val collectDF = sparkSession.sql("SELECT ST_Collect_Agg(geom) FROM points_with_null_table")
       val result = collectDF.take(1)(0).get(0).asInstanceOf[Geometry]
 
       // Should only have 2 points (nulls are skipped)

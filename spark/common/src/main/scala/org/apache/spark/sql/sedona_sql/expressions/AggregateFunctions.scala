@@ -197,7 +197,7 @@ private[apache] class ST_Intersection_Aggr
  * Return a multi-geometry collection of all geometries in the given column. Unlike ST_Union_Aggr,
  * this function does not dissolve boundaries between geometries.
  */
-private[apache] class ST_Collect_Aggr
+private[apache] class ST_Collect_Agg
     extends Aggregator[Geometry, ListBuffer[Geometry], Geometry] {
 
   val serde = ExpressionEncoder[Geometry]()

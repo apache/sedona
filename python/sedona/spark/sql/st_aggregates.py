@@ -66,7 +66,7 @@ def ST_Union_Aggr(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
-def ST_Collect_Aggr(geometry: ColumnOrName) -> Column:
+def ST_Collect_Agg(geometry: ColumnOrName) -> Column:
     """Aggregate Function: Collect all geometries into a multi-geometry.
 
     Unlike ST_Union_Aggr, this function does not dissolve boundaries between geometries.
@@ -78,7 +78,7 @@ def ST_Collect_Aggr(geometry: ColumnOrName) -> Column:
     :return: Multi-geometry representing the collection of all geometries in the column.
     :rtype: Column
     """
-    return _call_aggregate_function("ST_Collect_Aggr", geometry)
+    return _call_aggregate_function("ST_Collect_Agg", geometry)
 
 
 # Automatically populate __all__
