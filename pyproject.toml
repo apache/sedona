@@ -46,7 +46,7 @@ docs = [
   "pymdown-extensions",
   "mike",
   "blacken-docs",
-  "sphinx",
-  "sphinx_rtd_theme",
+  "sphinx>=7.0.0,<8.0.0",
+  "sphinx_rtd_theme>=2.0.0",
   "sphinx-autobuild",
 ]
