@@ -883,7 +883,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             pytest.skip("geopandas force_3d requires version 1.0.0 or higher")
         # 1) Promote 2D to 3D with z = 4
         for geom in self.geoms:
-            if isinstance(geom[0], (LinearRing, GeometryCollection, MultiPolygon)):
+            if isinstance(geom[0], (LinearRing)):
                 continue
             sgpd_result = GeoSeries(geom).force_3d(4)
             gpd_result = gpd.GeoSeries(geom).force_3d(4)

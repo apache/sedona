@@ -955,6 +955,10 @@ class GeoFrame(metaclass=ABCMeta):
         2D geometries will get the provided Z coordinate; 3D geometries
         are unchanged (unless their Z coordinate is ``np.nan``).
 
+        Note: Sedona's behavior may differ from Geopandas' for M and ZM geometries.
+        For M geometries, Sedona will replace the M coordinate and add the Z coordinate.
+        For ZM geometries, Sedona will drop the M coordinate and retain the Z coordinate.
+
         Parameters
         ----------
         z : float | array_like (default 0)

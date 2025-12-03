@@ -1594,6 +1594,22 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = s.force_3d(z)
         self.check_sgpd_equals_gpd(result, expected)
 
+        # 4. Ensure M and ZM geometries are handled correctly
+        s = sgpd.GeoSeries(
+            [
+                shapely.wkt.loads("POINT M (1 2 3)"),
+                shapely.wkt.loads("POINT ZM (1 2 3 4)"),
+            ]
+        )
+        result = s.force_3d(7.5)
+        expected = gpd.GeoSeries(
+            [
+                shapely.wkt.loads("POINT Z (1 2 7.5)"),
+                shapely.wkt.loads("POINT Z (1 2 3)"),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
     def test_line_merge(self):
         pass
 
