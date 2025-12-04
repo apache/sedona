@@ -949,8 +949,70 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("force_2d", self)
 
-    # def force_3d(self, z=0):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    def force_3d(self, z=0.0):
+        """Force the dimensionality of a geometry to 3D.
+
+        2D geometries will get the provided Z coordinate; 3D geometries
+        are unchanged (unless their Z coordinate is ``np.nan``).
+
+        Note: Sedona's behavior may differ from Geopandas' for M and ZM geometries.
+        For M geometries, Sedona will replace the M coordinate and add the Z coordinate.
+        For ZM geometries, Sedona will drop the M coordinate and retain the Z coordinate.
+
+        Parameters
+        ----------
+        z : float | array_like (default 0)
+            Z coordinate to be assigned
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from shapely import Polygon, LineString, Point
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> s = GeoSeries(
+        ...     [
+        ...         Point(1, 2),
+        ...         Point(0.5, 2.5, 2),
+        ...         LineString([(1, 1), (0, 1), (1, 0)]),
+        ...         Polygon([(0, 0), (0, 10), (10, 10)]),
+        ...     ],
+        ... )
+        >>> s
+        0                          POINT (1 2)
+        1                  POINT Z (0.5 2.5 2)
+        2           LINESTRING (1 1, 0 1, 1 0)
+        3    POLYGON ((0 0, 0 10, 10 10, 0 0))
+        dtype: geometry
+
+        >>> s.force_3d()
+        0                                POINT Z (1 2 0)
+        1                            POINT Z (0.5 2.5 2)
+        2             LINESTRING Z (1 1 0, 0 1 0, 1 0 0)
+        3    POLYGON Z ((0 0 0, 0 10 0, 10 10 0, 0 0 0))
+        dtype: geometry
+
+        Z coordinate can be specified as scalar:
+
+        >>> s.force_3d(4)
+        0                                POINT Z (1 2 4)
+        1                            POINT Z (0.5 2.5 2)
+        2             LINESTRING Z (1 1 4, 0 1 4, 1 0 4)
+        3    POLYGON Z ((0 0 4, 0 10 4, 10 10 4, 0 0 4))
+        dtype: geometry
+
+        Or as an array-like (one value per geometry):
+
+        >>> s.force_3d(range(4))
+        0                                POINT Z (1 2 0)
+        1                            POINT Z (0.5 2.5 2)
+        2             LINESTRING Z (1 1 2, 0 1 2, 1 0 2)
+        3    POLYGON Z ((0 0 3, 0 10 3, 10 10 3, 0 0 3))
+        dtype: geometry
+        """
+        return _delegate_to_geometry_column("force_3d", self, z)
 
     # def line_merge(self, directed=False):
     #     raise NotImplementedError("This method is not implemented yet.")
