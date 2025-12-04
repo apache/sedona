@@ -46,7 +46,9 @@ docs = [
   "pymdown-extensions",
   "mike",
   "blacken-docs",
-  "sphinx>=7.0.0,<8.0.0",
-  "sphinx_rtd_theme>=2.0.0",
+  # TODO: sphinx_rtd_theme only supports Sphinx < 9.0, consider migrating to a different theme or wait for sphinx_rtd_theme to support Sphinx 9+
+  # Using Sphinx 6.2.1 as it's the latest version supporting Python >= 3.8 (Sphinx 7+ requires Python >= 3.9, Sphinx 8+ requires Python >= 3.11)
+  "sphinx==6.2.1",
+  "sphinx_rtd_theme==3.0.2",
   "sphinx-autobuild",
 ]
