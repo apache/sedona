@@ -23,7 +23,7 @@ Introduction: Collects all geometries in a geometry column into a single multi-g
 
 Format: `ST_Collect_Agg (A: geometryColumn)`
 
-Since: `v1.7.0`
+Since: `v1.8.1`
 
 SQL Example
 
