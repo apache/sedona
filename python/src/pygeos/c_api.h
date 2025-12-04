@@ -44,7 +44,7 @@
 /* PyObject* PyGEOS_CreateGeometry(GEOSGeometry *ptr, GEOSContextHandle_t ctx)
  */
 #define PyGEOS_CreateGeometry_NUM 0
-#define PyGEOS_CreateGeometry_RETURN PyObject *
+#define PyGEOS_CreateGeometry_RETURN PyObject*
 #define PyGEOS_CreateGeometry_PROTO \
   (GEOSGeometry * ptr, GEOSContextHandle_t ctx)
 
@@ -56,9 +56,9 @@
 /* GEOSCoordSequence* PyGEOS_CoordSeq_FromBuffer(GEOSContextHandle_t ctx, const
    double* buf, unsigned int size, unsigned int dims, char ring_closure)*/
 #define PyGEOS_CoordSeq_FromBuffer_NUM 2
-#define PyGEOS_CoordSeq_FromBuffer_RETURN GEOSCoordSequence *
+#define PyGEOS_CoordSeq_FromBuffer_RETURN GEOSCoordSequence*
 #define PyGEOS_CoordSeq_FromBuffer_PROTO                          \
-  (GEOSContextHandle_t ctx, const double *buf, unsigned int size, \
+  (GEOSContextHandle_t ctx, const double* buf, unsigned int size, \
    unsigned int dims, char ring_closure)
 
 /* Total number of C API pointers */
@@ -82,7 +82,7 @@ extern PyGEOS_CoordSeq_FromBuffer_RETURN PyGEOS_CoordSeq_FromBuffer
  * define statement.
  */
 
-static void **PyGEOS_API;
+static void** PyGEOS_API;
 
 #define PyGEOS_CreateGeometry        \
   (*(PyGEOS_CreateGeometry_RETURN(*) \
@@ -104,7 +104,7 @@ static void **PyGEOS_API;
  * PyCapsule_Import will set an exception on error.
  */
 static int import_shapely_c_api(void) {
-  PyGEOS_API = (void **)PyCapsule_Import("shapely.lib._C_API", 0);
+  PyGEOS_API = (void**)PyCapsule_Import("shapely.lib._C_API", 0);
   return (PyGEOS_API == NULL) ? -1 : 0;
 }
 

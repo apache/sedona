@@ -37,14 +37,14 @@
 #include "geos_c_dyn_funcs.h"
 #undef GEOS_FP_QUALIFIER
 
-#define LOAD_GEOS_FUNCTION(func)                                               \
-  if (load_geos_c_symbol(handle, #func, (void **)&dyn_##func, err_msg, len) != \
-      0) {                                                                     \
-    return -1;                                                                 \
+#define LOAD_GEOS_FUNCTION(func)                                              \
+  if (load_geos_c_symbol(handle, #func, (void**)&dyn_##func, err_msg, len) != \
+      0) {                                                                    \
+    return -1;                                                                \
   }
 
 #ifdef TARGETING_WINDOWS
-static void win32_get_last_error(char *err_msg, int len) {
+static void win32_get_last_error(char* err_msg, int len) {
   wchar_t info[256];
   unsigned int error_code = GetLastError();
   int info_length = FormatMessageW(
@@ -62,7 +62,7 @@ static void win32_get_last_error(char *err_msg, int len) {
 }
 #endif
 
-static void *try_load_geos_c_symbol(void *handle, const char *func_name) {
+static void* try_load_geos_c_symbol(void* handle, const char* func_name) {
 #ifndef TARGETING_WINDOWS
   return dlsym(handle, func_name);
 #else
@@ -70,9 +70,9 @@ static void *try_load_geos_c_symbol(void *handle, const char *func_name) {
 #endif
 }
 
-static int load_geos_c_symbol(void *handle, const char *func_name,
-                              void **p_func, char *err_msg, int len) {
-  void *func = try_load_geos_c_symbol(handle, func_name);
+static int load_geos_c_symbol(void* handle, const char* func_name,
+                              void** p_func, char* err_msg, int len) {
+  void* func = try_load_geos_c_symbol(handle, func_name);
   if (func == NULL) {
 #ifndef TARGETING_WINDOWS
     snprintf(err_msg, len, "%s", dlerror());
@@ -85,16 +85,16 @@ static int load_geos_c_symbol(void *handle, const char *func_name,
   return 0;
 }
 
-int load_geos_c_library(const char *path, char *err_msg, int len) {
+int load_geos_c_library(const char* path, char* err_msg, int len) {
 #ifndef TARGETING_WINDOWS
-  void *handle = dlopen(path, RTLD_LOCAL | RTLD_NOW);
+  void* handle = dlopen(path, RTLD_LOCAL | RTLD_NOW);
   if (handle == NULL) {
     snprintf(err_msg, len, "%s", dlerror());
     return -1;
   }
 #else
   int num_chars = MultiByteToWideChar(CP_UTF8, 0, path, -1, NULL, 0);
-  wchar_t *wpath = calloc(num_chars, sizeof(wchar_t));
+  wchar_t* wpath = calloc(num_chars, sizeof(wchar_t));
   if (wpath == NULL) {
     snprintf(err_msg, len, "%s", "Cannot allocate memory for wpath");
     return -1;
@@ -106,14 +106,14 @@ int load_geos_c_library(const char *path, char *err_msg, int len) {
     win32_get_last_error(err_msg, len);
     return -1;
   }
-  void *handle = module;
+  void* handle = module;
 #endif
   return load_geos_c_from_handle(handle, err_msg, len);
 }
 
 int is_geos_c_loaded() { return (dyn_GEOS_init_r != NULL) ? 1 : 0; }
 
-int load_geos_c_from_handle(void *handle, char *err_msg, int len) {
+int load_geos_c_from_handle(void* handle, char* err_msg, int len) {
   LOAD_GEOS_FUNCTION(GEOS_finish_r);
   LOAD_GEOS_FUNCTION(GEOSContext_setErrorHandler_r);
   LOAD_GEOS_FUNCTION(GEOSGeomTypeId_r);

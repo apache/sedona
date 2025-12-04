@@ -30,10 +30,10 @@ struct GEOSContextHandle;
 
 typedef struct GEOSGeom_t GEOSGeometry;
 typedef struct GEOSPrepGeom_t GEOSPreparedGeometry;
-typedef struct GEOSContextHandle *GEOSContextHandle_t;
+typedef struct GEOSContextHandle* GEOSContextHandle_t;
 typedef struct GEOSCoordSeq_t GEOSCoordSequence;
 
-typedef void (*GEOSMessageHandler)(const char *fmt, ...);
+typedef void (*GEOSMessageHandler)(const char* fmt, ...);
 
 /**
  * Check if GEOS C was loaded
@@ -56,7 +56,7 @@ int is_geos_c_loaded();
  * @return 0 when GEOS functions were loaded correctly, otherwise returns a
  * non-zero value
  */
-int load_geos_c_library(const char *path, char *err_msg, int len);
+int load_geos_c_library(const char* path, char* err_msg, int len);
 
 /**
  * Load GEOS C functions from specified (platform-specific) library handle
@@ -70,7 +70,7 @@ int load_geos_c_library(const char *path, char *err_msg, int len);
  * @return 0 when GEOS functions were loaded correctly, otherwise returns a
  * non-zero value
  */
-int load_geos_c_from_handle(void *handle, char *err_msg, int len);
+int load_geos_c_from_handle(void* handle, char* err_msg, int len);
 
 #define GEOS_FP_QUALIFIER extern
 #include "geos_c_dyn_funcs.h"
