@@ -1,21 +1,21 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geoarrow.geoarrow &mdash; Apache Sedona Python Documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=08a75d8b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
 
   
-      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=908dc885"></script>
-      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/jquery.js"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+      <script src="../../../../_static/doctools.js"></script>
+      <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -484,9 +484,7 @@
     <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
 
 
-<div class="viewcode-block" id="dataframe_to_arrow">
-<a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.dataframe_to_arrow">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">dataframe_to_arrow</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="dataframe_to_arrow"><a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.dataframe_to_arrow">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">dataframe_to_arrow</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Collect a DataFrame as a PyArrow Table</span>
 
@@ -551,10 +549,7 @@
         <span class="k">return</span> <span class="n">table</span><span class="o">.</span><span class="n">from_arrays</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">pa</span><span class="o">.</span><span class="n">schema</span><span class="p">(</span><span class="n">new_fields</span><span class="p">))</span></div>
 
 
-
-<div class="viewcode-block" id="dataframe_to_arrow_raw">
-<a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.dataframe_to_arrow_raw">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">dataframe_to_arrow_raw</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+<div class="viewcode-block" id="dataframe_to_arrow_raw"><a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.dataframe_to_arrow_raw">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">dataframe_to_arrow_raw</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Backport of toArrow() (available in Spark 4.0)&quot;&quot;&quot;</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.dataframe</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span>
 
@@ -588,10 +583,7 @@
     <span class="k">return</span> <span class="n">table</span></div>
 
 
-
-<div class="viewcode-block" id="wrap_geoarrow_extension">
-<a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.wrap_geoarrow_extension">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">wrap_geoarrow_extension</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">crs</span><span class="p">):</span>
+<div class="viewcode-block" id="wrap_geoarrow_extension"><a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.wrap_geoarrow_extension">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">wrap_geoarrow_extension</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">crs</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">crs</span> <span class="o">=</span> <span class="n">unique_srid_from_ewkb</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
     <span class="k">elif</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="s2">&quot;to_json&quot;</span><span class="p">):</span>
@@ -602,10 +594,7 @@
     <span class="k">return</span> <span class="n">spec</span><span class="o">.</span><span class="n">override</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span><span class="o">.</span><span class="n">to_pyarrow</span><span class="p">()</span><span class="o">.</span><span class="n">wrap_array</span><span class="p">(</span><span class="n">col</span><span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="wrap_geoarrow_field">
-<a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.wrap_geoarrow_field">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">wrap_geoarrow_field</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">crs</span><span class="p">):</span>
+<div class="viewcode-block" id="wrap_geoarrow_field"><a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.wrap_geoarrow_field">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">wrap_geoarrow_field</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">crs</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">crs</span> <span class="o">=</span> <span class="n">unique_srid_from_ewkb</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
 
@@ -622,10 +611,7 @@
     <span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="crs_to_json">
-<a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.crs_to_json">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">crs_to_json</span><span class="p">(</span><span class="n">crs</span><span class="p">):</span>
+<div class="viewcode-block" id="crs_to_json"><a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.crs_to_json">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">crs_to_json</span><span class="p">(</span><span class="n">crs</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="s2">&quot;to_json&quot;</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">crs</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
@@ -634,10 +620,7 @@
         <span class="k">return</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span></div>
 
 
-
-<div class="viewcode-block" id="try_register_extension_types">
-<a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.try_register_extension_types">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">try_register_extension_types</span><span class="p">():</span>
+<div class="viewcode-block" id="try_register_extension_types"><a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.try_register_extension_types">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">try_register_extension_types</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Try to register extension types using geoarrow-types</span>
 
 <span class="sd">    Do this defensively, because it can fail if the extension type was</span>
@@ -652,10 +635,7 @@
         <span class="k">pass</span></div>
 
 
-
-<div class="viewcode-block" id="unique_srid_from_ewkb">
-<a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.unique_srid_from_ewkb">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">unique_srid_from_ewkb</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+<div class="viewcode-block" id="unique_srid_from_ewkb"><a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.unique_srid_from_ewkb">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">unique_srid_from_ewkb</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow.compute</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pc</span>
 
@@ -691,7 +671,6 @@
     <span class="kn">import</span><span class="w"> </span><span class="nn">pyproj</span>
 
     <span class="k">return</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;EPSG:</span><span class="si">{</span><span class="n">epsg_code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
-
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_dedup_names</span><span class="p">(</span><span class="n">names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
@@ -743,9 +722,7 @@
         <span class="k">return</span> <span class="n">dt</span>
 
 
-<div class="viewcode-block" id="infer_schema">
-<a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.infer_schema">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">infer_schema</span><span class="p">(</span><span class="n">gdf</span><span class="p">:</span> <span class="s2">&quot;gpd.GeoDataFrame&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructType</span><span class="p">:</span>
+<div class="viewcode-block" id="infer_schema"><a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.infer_schema">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">infer_schema</span><span class="p">(</span><span class="n">gdf</span><span class="p">:</span> <span class="s2">&quot;gpd.GeoDataFrame&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructType</span><span class="p">:</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
 
     <span class="n">fields</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
@@ -778,12 +755,9 @@
     <span class="k">return</span> <span class="n">StructType</span><span class="p">(</span><span class="n">spark_schema</span><span class="p">)</span></div>
 
 
-
 <span class="c1"># Modified backport from Spark 4.0</span>
 <span class="c1"># https://github.com/apache/spark/blob/3515b207c41d78194d11933cd04bddc21f8418dd/python/pyspark/sql/pandas/conversion.py#L632</span>
-<div class="viewcode-block" id="create_spatial_dataframe">
-<a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.create_spatial_dataframe">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">create_spatial_dataframe</span><span class="p">(</span><span class="n">spark</span><span class="p">:</span> <span class="n">SparkSession</span><span class="p">,</span> <span class="n">gdf</span><span class="p">:</span> <span class="s2">&quot;gpd.GeoDataFrame&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="create_spatial_dataframe"><a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.create_spatial_dataframe">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">create_spatial_dataframe</span><span class="p">(</span><span class="n">spark</span><span class="p">:</span> <span class="n">SparkSession</span><span class="p">,</span> <span class="n">gdf</span><span class="p">:</span> <span class="s2">&quot;gpd.GeoDataFrame&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.pandas.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
         <span class="n">to_arrow_type</span><span class="p">,</span>
     <span class="p">)</span>
@@ -823,7 +797,6 @@
     <span class="n">df</span><span class="o">.</span><span class="n">_schema</span> <span class="o">=</span> <span class="n">schema</span>
 
     <span class="k">return</span> <span class="n">df</span></div>
-
 </pre></div>
 
            </div>

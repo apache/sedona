@@ -1,21 +1,21 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geodataframe &mdash; Apache Sedona Python Documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=08a75d8b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
 
   
-      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=908dc885"></script>
-      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/jquery.js"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+      <script src="../../../../_static/doctools.js"></script>
+      <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -565,9 +565,7 @@
     <span class="k">return</span> <span class="n">base_message</span> <span class="o">+</span> <span class="n">workaround</span>
 
 
-<div class="viewcode-block" id="GeoDataFrame">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">GeoDataFrame</span><span class="p">(</span><span class="n">GeoFrame</span><span class="p">,</span> <span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+<div class="viewcode-block" id="GeoDataFrame"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">GeoDataFrame</span><span class="p">(</span><span class="n">GeoFrame</span><span class="p">,</span> <span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A pandas-on-Spark DataFrame for geospatial data with geometry columns.</span>
 
@@ -709,9 +707,7 @@
     <span class="c1"># CONSTRUCTION AND INITIALIZATION</span>
     <span class="c1"># ============================================================================</span>
 
-<div class="viewcode-block" id="GeoDataFrame.__init__">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="GeoDataFrame.__init__"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -814,7 +810,6 @@
                 <span class="s2">&quot;or by providing a DataFrame with column name &#39;geometry&#39;&quot;</span><span class="p">,</span>
             <span class="p">)</span></div>
 
-
     <span class="c1"># ============================================================================</span>
     <span class="c1"># GEOMETRY COLUMN MANAGEMENT</span>
     <span class="c1"># ============================================================================</span>
@@ -881,9 +876,7 @@
         <span class="n">crs</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeoDataFrame</span><span class="p">:</span> <span class="o">...</span>
 
-<div class="viewcode-block" id="GeoDataFrame.set_geometry">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.set_geometry">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">set_geometry</span><span class="p">(</span>
+<div class="viewcode-block" id="GeoDataFrame.set_geometry"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.set_geometry">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">set_geometry</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">col</span><span class="p">,</span>
         <span class="n">drop</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1049,7 +1042,6 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">inplace</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">frame</span></div>
 
-
     <span class="nd">@typing</span><span class="o">.</span><span class="n">overload</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">rename_geometry</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -1064,9 +1056,7 @@
         <span class="n">inplace</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeoDataFrame</span><span class="p">:</span> <span class="o">...</span>
 
-<div class="viewcode-block" id="GeoDataFrame.rename_geometry">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.rename_geometry">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">rename_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeoDataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="GeoDataFrame.rename_geometry"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.rename_geometry">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">rename_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeoDataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Renames the GeoDataFrame geometry column to</span>
 <span class="sd">        the specified name. By default yields a new object.</span>
@@ -1114,7 +1104,6 @@
             <span class="n">df</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">df</span></div>
 
-
     <span class="c1"># ============================================================================</span>
     <span class="c1"># PROPERTIES AND ATTRIBUTES</span>
     <span class="c1"># ============================================================================</span>
@@ -1143,9 +1132,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_column_name</span>
 
-<div class="viewcode-block" id="GeoDataFrame.to_geopandas">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_geopandas">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">to_geopandas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="GeoDataFrame.to_geopandas"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_geopandas">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_geopandas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Note: Unlike in pandas and geopandas, Sedona will always return a general Index.</span>
 <span class="sd">        This differs from pandas and geopandas, which will return a RangeIndex by default.</span>
@@ -1158,7 +1145,6 @@
             <span class="s2">&quot;It should only be used if the resulting geopandas GeoSeries is expected to be small.&quot;</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_geopandas</span><span class="p">()</span></div>
-
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_to_geopandas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
         <span class="n">pd_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">to_pandas_frame</span>
@@ -1173,18 +1159,13 @@
 
         <span class="k">return</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">pd_df</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_geometry_column_name</span><span class="p">)</span>
 
-<div class="viewcode-block" id="GeoDataFrame.to_spark_pandas">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_spark_pandas">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">to_spark_pandas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="GeoDataFrame.to_spark_pandas"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_spark_pandas">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_spark_pandas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert the GeoDataFrame to a Spark Pandas DataFrame.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="GeoDataFrame.copy">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.copy">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeoDataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="GeoDataFrame.copy"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.copy">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeoDataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make a copy of this GeoDataFrame object.</span>
 
@@ -1214,7 +1195,6 @@
             <span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">copy</span><span class="p">()),</span> <span class="n">geometry</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">active_geometry_name</span>
         <span class="p">)</span></div>
 
-
     <span class="k">def</span><span class="w"> </span><span class="nf">_safe_get_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Helper method for getting the CRS of the GeoDataFrame safely.</span>
@@ -1242,9 +1222,7 @@
         <span class="c1"># Since PySpark DataFrames are immutable, we can&#39;t modify in place, so we create the new GeoSeries and replace it.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
-<div class="viewcode-block" id="GeoDataFrame.set_crs">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.set_crs">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">set_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allow_override</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="GeoDataFrame.set_crs"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.set_crs">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">set_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allow_override</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the Coordinate Reference System (CRS) of the ``GeoDataFrame``.</span>
 
@@ -1329,10 +1307,7 @@
             <span class="n">df</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="n">new_geometry</span>
             <span class="k">return</span> <span class="n">df</span></div>
 
-
-<div class="viewcode-block" id="GeoDataFrame.to_crs">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_crs">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">to_crs</span><span class="p">(</span>
+<div class="viewcode-block" id="GeoDataFrame.to_crs"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_crs">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_crs</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">crs</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">epsg</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1424,10 +1399,7 @@
             <span class="n">df</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="n">new_geometry</span>
             <span class="k">return</span> <span class="n">df</span></div>
 
-
-<div class="viewcode-block" id="GeoDataFrame.from_dict">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_dict">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="GeoDataFrame.from_dict"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_dict">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
@@ -1437,19 +1409,13 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeoDataFrame</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;from_dict() is not implemented yet.&quot;</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="GeoDataFrame.from_features">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_features">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="GeoDataFrame.from_features"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_features">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_features</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">crs</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">columns</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeoDataFrame</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;from_features() is not implemented yet.&quot;</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="GeoDataFrame.from_postgis">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_postgis">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="GeoDataFrame.from_postgis"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_postgis">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_postgis</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">sql</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">sqlalchemy</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
@@ -1464,10 +1430,7 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeoDataFrame</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;from_postgis() is not implemented yet.&quot;</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="GeoDataFrame.from_arrow">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_arrow">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="GeoDataFrame.from_arrow"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_arrow">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_arrow</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">geometry</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">to_pandas_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">):</span>
@@ -1537,10 +1500,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">gpd_df</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="GeoDataFrame.to_json">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_json">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">to_json</span><span class="p">(</span>
+<div class="viewcode-block" id="GeoDataFrame.to_json"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_json">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_json</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">na</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;null&quot;</span><span class="p">,</span> <span class="s2">&quot;drop&quot;</span><span class="p">,</span> <span class="s2">&quot;keep&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;null&quot;</span><span class="p">,</span>
         <span class="n">show_bbox</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -1605,42 +1565,27 @@
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_geopandas</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">na</span><span class="p">,</span> <span class="n">show_bbox</span><span class="p">,</span> <span class="n">drop_id</span><span class="p">,</span> <span class="n">to_wgs84</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__geo_interface__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;__geo_interface__() is not implemented yet.&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="GeoDataFrame.iterfeatures">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.iterfeatures">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">iterfeatures</span><span class="p">(</span>
+<div class="viewcode-block" id="GeoDataFrame.iterfeatures"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.iterfeatures">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">iterfeatures</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">na</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;null&quot;</span><span class="p">,</span> <span class="n">show_bbox</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">drop_id</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Generator</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;iterfeatures() is not implemented yet.&quot;</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="GeoDataFrame.to_geo_dict">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_geo_dict">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">to_geo_dict</span><span class="p">(</span>
+<div class="viewcode-block" id="GeoDataFrame.to_geo_dict"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_geo_dict">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_geo_dict</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">na</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;null&quot;</span><span class="p">,</span> <span class="n">show_bbox</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">drop_id</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;to_geo_dict() is not implemented yet.&quot;</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="GeoDataFrame.to_wkb">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_wkb">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">to_wkb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">hex</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="GeoDataFrame.to_wkb"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_wkb">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_wkb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">hex</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;to_wkb() is not implemented yet.&quot;</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="GeoDataFrame.to_wkt">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_wkt">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">to_wkt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="GeoDataFrame.to_wkt"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_wkt">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_wkt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;to_wkt() is not implemented yet.&quot;</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="GeoDataFrame.to_arrow">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_arrow">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">to_arrow</span><span class="p">(</span>
+<div class="viewcode-block" id="GeoDataFrame.to_arrow"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_arrow">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_arrow</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">index</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1728,10 +1673,7 @@
             <span class="n">include_z</span><span class="o">=</span><span class="n">include_z</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="GeoDataFrame.to_feather">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_feather">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">to_feather</span><span class="p">(</span>
+<div class="viewcode-block" id="GeoDataFrame.to_feather"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_feather">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_feather</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">path</span><span class="p">,</span>
         <span class="n">index</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1741,7 +1683,6 @@
     <span class="p">):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;to_feather() is not implemented yet.&quot;</span><span class="p">)</span></div>
 
-
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Implementation of the abstract method</span>
@@ -1749,9 +1690,7 @@
             <span class="n">_not_implemented_error</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;Returns numeric geometry type codes.&quot;</span><span class="p">)</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="GeoDataFrame.plot">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.plot">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="GeoDataFrame.plot"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.plot">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot a GeoDataFrame.</span>
 
@@ -1883,14 +1822,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_geopandas</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-
     <span class="c1"># ============================================================================</span>
     <span class="c1"># SPATIAL OPERATIONS</span>
     <span class="c1"># ============================================================================</span>
 
-<div class="viewcode-block" id="GeoDataFrame.sjoin">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.sjoin">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">sjoin</span><span class="p">(</span>
+<div class="viewcode-block" id="GeoDataFrame.sjoin"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.sjoin">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">sjoin</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">other</span><span class="p">,</span>
         <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span>
@@ -1964,14 +1900,11 @@
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-
     <span class="c1"># ============================================================================</span>
     <span class="c1"># I/O OPERATIONS</span>
     <span class="c1"># ============================================================================</span>
 
-<div class="viewcode-block" id="GeoDataFrame.from_file">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_file">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="GeoDataFrame.from_file"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_file">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_file</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeoDataFrame</span><span class="p">:</span>
@@ -2004,10 +1937,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">sgpd</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="GeoDataFrame.to_file">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_file">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">to_file</span><span class="p">(</span>
+<div class="viewcode-block" id="GeoDataFrame.to_file"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_file">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_file</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">driver</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -2083,10 +2013,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">sgpd</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">_to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">driver</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="GeoDataFrame.to_parquet">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_parquet">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">to_parquet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="GeoDataFrame.to_parquet"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_parquet">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_parquet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write the GeoDataFrame to a GeoParquet file.</span>
 
@@ -2104,9 +2031,7 @@
 <span class="sd">        &gt;&gt;&gt; gdf = GeoDataFrame({&quot;geometry&quot;: [Point(0, 0), Point(1, 1)], &quot;value&quot;: [1, 2]})</span>
 <span class="sd">        &gt;&gt;&gt; gdf.to_parquet(&quot;output.parquet&quot;)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;geoparquet&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
-</div>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;geoparquet&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 
 
 <span class="c1"># -----------------------------------------------------------------------------</span>

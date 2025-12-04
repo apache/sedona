@@ -1,21 +1,21 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.core.SpatialRDD.spatial_rdd &mdash; Apache Sedona Python Documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/custom.css?v=08a75d8b" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/custom.css" />
 
   
-      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../../_static/documentation_options.js?v=908dc885"></script>
-      <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../../_static/jquery.js"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+      <script src="../../../../../_static/doctools.js"></script>
+      <script src="../../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
@@ -485,16 +485,12 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.utils.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">crs</span>
 
 
-<div class="viewcode-block" id="SpatialPartitioner">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialPartitioner">[docs]</a>
-<span class="nd">@attr</span><span class="o">.</span><span class="n">s</span>
+<div class="viewcode-block" id="SpatialPartitioner"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialPartitioner">[docs]</a><span class="nd">@attr</span><span class="o">.</span><span class="n">s</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SpatialPartitioner</span><span class="p">:</span>
     <span class="n">name</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">()</span>
     <span class="n">jvm_partitioner</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">()</span>
 
-<div class="viewcode-block" id="SpatialPartitioner.from_java_class_name">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialPartitioner.from_java_class_name">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="SpatialPartitioner.from_java_class_name"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialPartitioner.from_java_class_name">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_java_class_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">jvm_partitioner</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;SpatialPartitioner&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">jvm_partitioner</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">jvm_full_name</span> <span class="o">=</span> <span class="n">jvm_partitioner</span><span class="o">.</span><span class="n">toString</span><span class="p">()</span>
@@ -505,83 +501,52 @@
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">partitioner</span><span class="p">,</span> <span class="n">jvm_partitioner</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="SpatialPartitioner.getGrids">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialPartitioner.getGrids">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">getGrids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Envelope</span><span class="p">]:</span>
+<div class="viewcode-block" id="SpatialPartitioner.getGrids"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialPartitioner.getGrids">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getGrids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Envelope</span><span class="p">]:</span>
         <span class="n">jvm_grids</span> <span class="o">=</span> <span class="n">get_method</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jvm_partitioner</span><span class="p">,</span> <span class="s2">&quot;getGrids&quot;</span><span class="p">)()</span>
         <span class="n">number_of_grids</span> <span class="o">=</span> <span class="n">jvm_grids</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
         <span class="n">envelopes</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">Envelope</span><span class="o">.</span><span class="n">from_jvm_instance</span><span class="p">(</span><span class="n">jvm_grids</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
             <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_grids</span><span class="p">)</span>
         <span class="p">]</span>
-        <span class="k">return</span> <span class="n">envelopes</span></div>
-</div>
+        <span class="k">return</span> <span class="n">envelopes</span></div></div>
 
 
-
-<div class="viewcode-block" id="JvmSpatialRDD">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.JvmSpatialRDD">[docs]</a>
-<span class="nd">@attr</span><span class="o">.</span><span class="n">s</span>
+<div class="viewcode-block" id="JvmSpatialRDD"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.JvmSpatialRDD">[docs]</a><span class="nd">@attr</span><span class="o">.</span><span class="n">s</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">JvmSpatialRDD</span><span class="p">:</span>
     <span class="n">jsrdd</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">()</span>
     <span class="n">sc</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">SparkContext</span><span class="p">)</span>
     <span class="n">tp</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">SpatialType</span><span class="p">)</span>
 
-<div class="viewcode-block" id="JvmSpatialRDD.saveAsObjectFile">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.JvmSpatialRDD.saveAsObjectFile">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">saveAsObjectFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="JvmSpatialRDD.saveAsObjectFile"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.JvmSpatialRDD.saveAsObjectFile">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">saveAsObjectFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">jsrdd</span><span class="o">.</span><span class="n">saveAsObjectFile</span><span class="p">(</span><span class="n">location</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="JvmSpatialRDD.persist">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.JvmSpatialRDD.persist">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">persist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">storage_level</span><span class="p">:</span> <span class="n">StorageLevel</span><span class="p">):</span>
+<div class="viewcode-block" id="JvmSpatialRDD.persist"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.JvmSpatialRDD.persist">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">persist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">storage_level</span><span class="p">:</span> <span class="n">StorageLevel</span><span class="p">):</span>
         <span class="n">new_jsrdd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jsrdd</span><span class="o">.</span><span class="n">persist</span><span class="p">(</span>
             <span class="n">JvmStorageLevel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sc</span><span class="o">.</span><span class="n">_jvm</span><span class="p">,</span> <span class="n">storage_level</span><span class="p">)</span><span class="o">.</span><span class="n">jvm_instance</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">jsrdd</span> <span class="o">=</span> <span class="n">new_jsrdd</span></div>
 
-
-<div class="viewcode-block" id="JvmSpatialRDD.count">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.JvmSpatialRDD.count">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="JvmSpatialRDD.count"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.JvmSpatialRDD.count">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">jsrdd</span><span class="o">.</span><span class="n">count</span><span class="p">()</span></div>
 
-
-<div class="viewcode-block" id="JvmSpatialRDD.cache">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.JvmSpatialRDD.cache">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="JvmSpatialRDD.cache"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.JvmSpatialRDD.cache">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">persist</span><span class="p">(</span><span class="n">StorageLevel</span><span class="o">.</span><span class="n">MEMORY_ONLY</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="JvmSpatialRDD.unpersist">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.JvmSpatialRDD.unpersist">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">unpersist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">jsrdd</span><span class="o">.</span><span class="n">unpersist</span><span class="p">()</span></div>
-</div>
+<div class="viewcode-block" id="JvmSpatialRDD.unpersist"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.JvmSpatialRDD.unpersist">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">unpersist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">jsrdd</span><span class="o">.</span><span class="n">unpersist</span><span class="p">()</span></div></div>
 
 
-
-<div class="viewcode-block" id="JvmGrids">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.JvmGrids">[docs]</a>
-<span class="nd">@attr</span><span class="o">.</span><span class="n">s</span>
+<div class="viewcode-block" id="JvmGrids"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.JvmGrids">[docs]</a><span class="nd">@attr</span><span class="o">.</span><span class="n">s</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">JvmGrids</span><span class="p">:</span>
     <span class="n">jgrid</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">()</span>
     <span class="n">sc</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">SparkContext</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="SpatialRDD"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SpatialRDD</span><span class="p">:</span>
 
-<div class="viewcode-block" id="SpatialRDD">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SpatialRDD</span><span class="p">:</span>
-
-<div class="viewcode-block" id="SpatialRDD.__init__">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sc</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SparkContext</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="SpatialRDD.__init__"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sc</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SparkContext</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_do_init</span><span class="p">(</span><span class="n">sc</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm_spatial_rdd</span><span class="p">()</span></div>
-
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_do_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sc</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SparkContext</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">sc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -596,9 +561,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_spatial_partitioned</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_analyzed</span> <span class="o">=</span> <span class="kc">False</span>
 
-<div class="viewcode-block" id="SpatialRDD.analyze">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.analyze">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">analyze</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<div class="viewcode-block" id="SpatialRDD.analyze"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.analyze">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">analyze</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Analyze SpatialRDD</span>
 <span class="sd">        :return: bool,</span>
@@ -607,10 +570,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_analyzed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_analyzed</span></div>
 
-
-<div class="viewcode-block" id="SpatialRDD.CRSTransform">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.CRSTransform">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">CRSTransform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sourceEpsgCRSCode</span><span class="p">:</span> <span class="n">crs</span><span class="p">,</span> <span class="n">targetEpsgCRSCode</span><span class="p">:</span> <span class="n">crs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<div class="viewcode-block" id="SpatialRDD.CRSTransform"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.CRSTransform">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">CRSTransform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sourceEpsgCRSCode</span><span class="p">:</span> <span class="n">crs</span><span class="p">,</span> <span class="n">targetEpsgCRSCode</span><span class="p">:</span> <span class="n">crs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Function transforms coordinates from one crs to another one</span>
 <span class="sd">        :param sourceEpsgCRSCode: crs,  Coordinate Reference System to transform from</span>
@@ -619,18 +579,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">CRSTransform</span><span class="p">(</span><span class="n">sourceEpsgCRSCode</span><span class="p">,</span> <span class="n">targetEpsgCRSCode</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="SpatialRDD.flipCoordinates">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.flipCoordinates">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">flipCoordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SpatialRDD.flipCoordinates"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.flipCoordinates">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">flipCoordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">flipCoordinates</span><span class="p">()</span></div>
 
-
-<div class="viewcode-block" id="SpatialRDD.MinimumBoundingRectangle">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.MinimumBoundingRectangle">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">MinimumBoundingRectangle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SpatialRDD.MinimumBoundingRectangle"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.MinimumBoundingRectangle">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">MinimumBoundingRectangle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">approximateTotalCount</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
@@ -640,9 +593,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">get_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="p">,</span> <span class="s2">&quot;approximateTotalCount&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SpatialRDD.boundary">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.boundary">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">boundary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Envelope</span><span class="p">:</span>
+<div class="viewcode-block" id="SpatialRDD.boundary"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.boundary">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">boundary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Envelope</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :return:</span>
@@ -652,7 +603,6 @@
 
         <span class="n">envelope</span> <span class="o">=</span> <span class="n">Envelope</span><span class="o">.</span><span class="n">from_jvm_instance</span><span class="p">(</span><span class="n">jvm_boundary</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">envelope</span></div>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">boundaryEnvelope</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Envelope</span><span class="p">:</span>
@@ -665,9 +615,7 @@
         <span class="n">java_boundary_envelope</span> <span class="o">=</span> <span class="n">get_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="p">,</span> <span class="s2">&quot;boundaryEnvelope&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Envelope</span><span class="o">.</span><span class="n">from_jvm_instance</span><span class="p">(</span><span class="n">java_boundary_envelope</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SpatialRDD.buildIndex">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.buildIndex">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">buildIndex</span><span class="p">(</span>
+<div class="viewcode-block" id="SpatialRDD.buildIndex"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.buildIndex">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">buildIndex</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">indexType</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">IndexType</span><span class="p">],</span> <span class="n">buildIndexOnSpatialPartitionedRDD</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -690,26 +638,19 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Please run spatial partitioning before&quot;</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="SpatialRDD.countWithoutDuplicates">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.countWithoutDuplicates">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">countWithoutDuplicates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<div class="viewcode-block" id="SpatialRDD.countWithoutDuplicates"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.countWithoutDuplicates">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">countWithoutDuplicates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">countWithoutDuplicates</span><span class="p">()</span></div>
 
-
-<div class="viewcode-block" id="SpatialRDD.countWithoutDuplicatesSPRDD">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.countWithoutDuplicatesSPRDD">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">countWithoutDuplicatesSPRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<div class="viewcode-block" id="SpatialRDD.countWithoutDuplicatesSPRDD"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.countWithoutDuplicatesSPRDD">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">countWithoutDuplicatesSPRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">countWithoutDuplicatesSPRDD</span><span class="p">()</span></div>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">fieldNames</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
@@ -723,25 +664,19 @@
             <span class="n">field_names</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">return</span> <span class="n">field_names</span>
 
-<div class="viewcode-block" id="SpatialRDD.getCRStransformation">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getCRStransformation">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">getCRStransformation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SpatialRDD.getCRStransformation"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getCRStransformation">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getCRStransformation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">getCRStransformation</span><span class="p">()</span></div>
 
-
-<div class="viewcode-block" id="SpatialRDD.getPartitioner">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getPartitioner">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">getPartitioner</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SpatialPartitioner</span><span class="p">:</span>
+<div class="viewcode-block" id="SpatialRDD.getPartitioner"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getPartitioner">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getPartitioner</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SpatialPartitioner</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">SpatialPartitioner</span><span class="o">.</span><span class="n">from_java_class_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">getPartitioner</span><span class="p">())</span></div>
-
 
     <span class="nd">@require</span><span class="p">([</span><span class="s2">&quot;GeoSerializerData&quot;</span><span class="p">])</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">getRawSpatialRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -766,35 +701,26 @@
 
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_raw_spatial_rdd&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SpatialRDD.getSampleNumber">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getSampleNumber">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">getSampleNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<div class="viewcode-block" id="SpatialRDD.getSampleNumber"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getSampleNumber">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getSampleNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">getSampleNumber</span><span class="p">()</span></div>
 
-
-<div class="viewcode-block" id="SpatialRDD.getSourceEpsgCode">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getSourceEpsgCode">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">getSourceEpsgCode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="SpatialRDD.getSourceEpsgCode"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getSourceEpsgCode">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getSourceEpsgCode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Function which returns source EPSG code when it is assigned. If not an empty String is returned.</span>
 <span class="sd">        :return: str, source epsg code.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">getSourceEpsgCode</span><span class="p">()</span></div>
 
-
-<div class="viewcode-block" id="SpatialRDD.getTargetEpsgCode">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getTargetEpsgCode">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">getTargetEpsgCode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="SpatialRDD.getTargetEpsgCode"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getTargetEpsgCode">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getTargetEpsgCode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Function which returns target EPSG code when it is assigned. If not an empty String is returned.</span>
 <span class="sd">        :return: str, target epsg code.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">getTargetEpgsgCode</span><span class="p">()</span></div>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">grids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Envelope</span><span class="p">]]:</span>
@@ -888,9 +814,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">setRawSpatialRDD</span><span class="p">(</span><span class="n">spatial_rdd</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SpatialRDD.saveAsGeoJSON">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.saveAsGeoJSON">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">saveAsGeoJSON</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="SpatialRDD.saveAsGeoJSON"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.saveAsGeoJSON">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">saveAsGeoJSON</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :param path:</span>
@@ -898,10 +822,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">saveAsGeoJSON</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="SpatialRDD.saveAsWKB">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.saveAsWKB">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">saveAsWKB</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="SpatialRDD.saveAsWKB"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.saveAsWKB">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">saveAsWKB</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :param path:</span>
@@ -909,10 +830,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">saveAsWKB</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="SpatialRDD.saveAsWKT">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.saveAsWKT">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">saveAsWKT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="SpatialRDD.saveAsWKT"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.saveAsWKT">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">saveAsWKT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :param path:</span>
@@ -920,26 +838,19 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">saveAsWKT</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="SpatialRDD.setRawSpatialRDD">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.setRawSpatialRDD">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">setRawSpatialRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jrdd</span><span class="p">):</span>
+<div class="viewcode-block" id="SpatialRDD.setRawSpatialRDD"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.setRawSpatialRDD">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">setRawSpatialRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jrdd</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">setRawSpatialRDD</span><span class="p">(</span><span class="n">jrdd</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="SpatialRDD.setSampleNumber">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.setSampleNumber">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">setSampleNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sampleNumber</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<div class="viewcode-block" id="SpatialRDD.setSampleNumber"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.setSampleNumber">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">setSampleNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sampleNumber</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">setSampleNumber</span><span class="p">(</span><span class="n">sampleNumber</span><span class="p">)</span></div>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">spatialPartitionedRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -966,9 +877,7 @@
 
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_spatial_partitioned_rdd&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SpatialRDD.spatialPartitioning">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.spatialPartitioning">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">spatialPartitioning</span><span class="p">(</span>
+<div class="viewcode-block" id="SpatialRDD.spatialPartitioning"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.spatialPartitioning">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">spatialPartitioning</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">partitioning</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">GridType</span><span class="p">,</span> <span class="n">SpatialPartitioner</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Envelope</span><span class="p">]],</span>
         <span class="n">num_partitions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -987,10 +896,7 @@
             <span class="n">partitioning</span><span class="p">,</span> <span class="n">num_partitions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">spatialPartitioning</span>
         <span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="SpatialRDD.spatialPartitioningWithoutDuplicates">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.spatialPartitioningWithoutDuplicates">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">spatialPartitioningWithoutDuplicates</span><span class="p">(</span>
+<div class="viewcode-block" id="SpatialRDD.spatialPartitioningWithoutDuplicates"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.spatialPartitioningWithoutDuplicates">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">spatialPartitioningWithoutDuplicates</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">partitioning</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">GridType</span><span class="p">,</span> <span class="n">SpatialPartitioner</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Envelope</span><span class="p">]],</span>
         <span class="n">num_partitions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1013,7 +919,6 @@
             <span class="n">num_partitions</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">spatialPartitioningWithoutDuplicates</span><span class="p">,</span>
         <span class="p">)</span></div>
-
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_spatial_partitioning_impl</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -1044,27 +949,18 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">java_method</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SpatialRDD.set_srdd">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.set_srdd">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">set_srdd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">srdd</span><span class="p">):</span>
+<div class="viewcode-block" id="SpatialRDD.set_srdd"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.set_srdd">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">set_srdd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">srdd</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span> <span class="o">=</span> <span class="n">srdd</span></div>
 
-
-<div class="viewcode-block" id="SpatialRDD.get_srdd">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.get_srdd">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_srdd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SpatialRDD.get_srdd"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.get_srdd">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_srdd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span></div>
 
-
-<div class="viewcode-block" id="SpatialRDD.getRawJvmSpatialRDD">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getRawJvmSpatialRDD">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">getRawJvmSpatialRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JvmSpatialRDD</span><span class="p">:</span>
+<div class="viewcode-block" id="SpatialRDD.getRawJvmSpatialRDD"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getRawJvmSpatialRDD">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getRawJvmSpatialRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JvmSpatialRDD</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">JvmSpatialRDD</span><span class="p">(</span>
             <span class="n">jsrdd</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">getRawSpatialRDD</span><span class="p">(),</span>
             <span class="n">sc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sc</span><span class="p">,</span>
             <span class="n">tp</span><span class="o">=</span><span class="n">SpatialType</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
         <span class="p">)</span></div>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">rawJvmSpatialRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JvmSpatialRDD</span><span class="p">:</span>
@@ -1082,15 +978,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_jsc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sc</span><span class="o">.</span><span class="n">_jsc</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setRawSpatialRDD</span><span class="p">(</span><span class="n">jsrdd_p</span><span class="o">.</span><span class="n">jsrdd</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SpatialRDD.getJvmSpatialPartitionedRDD">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getJvmSpatialPartitionedRDD">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">getJvmSpatialPartitionedRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JvmSpatialRDD</span><span class="p">:</span>
+<div class="viewcode-block" id="SpatialRDD.getJvmSpatialPartitionedRDD"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getJvmSpatialPartitionedRDD">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getJvmSpatialPartitionedRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JvmSpatialRDD</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">JvmSpatialRDD</span><span class="p">(</span>
             <span class="n">jsrdd</span><span class="o">=</span><span class="n">get_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="p">,</span> <span class="s2">&quot;spatialPartitionedRDD&quot;</span><span class="p">),</span>
             <span class="n">sc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sc</span><span class="p">,</span>
             <span class="n">tp</span><span class="o">=</span><span class="n">SpatialType</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
         <span class="p">)</span></div>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">jvmSpatialPartitionedRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JvmSpatialRDD</span><span class="p">:</span>
@@ -1117,7 +1010,6 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_jvm_spatial_rdd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">spatial_factory</span> <span class="o">=</span> <span class="n">SpatialRDDFactory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sc</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">spatial_factory</span><span class="o">.</span><span class="n">create_spatial_rdd</span><span class="p">()</span></div>
-
 </pre></div>
 
            </div>

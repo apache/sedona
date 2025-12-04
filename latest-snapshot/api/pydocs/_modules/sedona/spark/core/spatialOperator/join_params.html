@@ -1,21 +1,21 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.core.spatialOperator.join_params &mdash; Apache Sedona Python Documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/custom.css?v=08a75d8b" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/custom.css" />
 
   
-      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../../_static/documentation_options.js?v=908dc885"></script>
-      <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../../_static/jquery.js"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+      <script src="../../../../../_static/doctools.js"></script>
+      <script src="../../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
@@ -470,32 +470,24 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.jvm.abstract</span><span class="w"> </span><span class="kn">import</span> <span class="n">JvmObject</span>
 
 
-<div class="viewcode-block" id="JoinParams">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_params.JoinParams">[docs]</a>
-<span class="nd">@attr</span><span class="o">.</span><span class="n">s</span>
+<div class="viewcode-block" id="JoinParams"><a class="viewcode-back" href="../../../../../sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_params.JoinParams">[docs]</a><span class="nd">@attr</span><span class="o">.</span><span class="n">s</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">JoinParams</span><span class="p">:</span>
     <span class="n">useIndex</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="nb">bool</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">considerBoundaryIntersection</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="nb">bool</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">indexType</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">IndexType</span><span class="o">.</span><span class="n">RTREE</span><span class="p">)</span>
     <span class="n">joinBuildSide</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">JoinBuildSide</span><span class="o">.</span><span class="n">LEFT</span><span class="p">)</span>
 
-<div class="viewcode-block" id="JoinParams.jvm_instance">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_params.JoinParams.jvm_instance">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">jvm_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jvm</span><span class="p">):</span>
+<div class="viewcode-block" id="JoinParams.jvm_instance"><a class="viewcode-back" href="../../../../../sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_params.JoinParams.jvm_instance">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">jvm_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jvm</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">JvmJoinParams</span><span class="p">(</span>
             <span class="n">jvm</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">useIndex</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">considerBoundaryIntersection</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">indexType</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">joinBuildSide</span><span class="p">,</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">jvm_instance</span></div>
-</div>
+        <span class="p">)</span><span class="o">.</span><span class="n">jvm_instance</span></div></div>
 
 
-
-<div class="viewcode-block" id="JvmJoinParams">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_params.JvmJoinParams">[docs]</a>
-<span class="nd">@attr</span><span class="o">.</span><span class="n">s</span>
+<div class="viewcode-block" id="JvmJoinParams"><a class="viewcode-back" href="../../../../../sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_params.JvmJoinParams">[docs]</a><span class="nd">@attr</span><span class="o">.</span><span class="n">s</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">JvmJoinParams</span><span class="p">(</span><span class="n">JvmObject</span><span class="p">):</span>
     <span class="n">useIndex</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="nb">bool</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">considerBoundaryIntersection</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="nb">bool</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -513,7 +505,6 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">jvm_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">jvm</span><span class="o">.</span><span class="n">JoinParamsAdapter</span><span class="o">.</span><span class="n">createJoinParams</span></div>
-
 </pre></div>
 
            </div>

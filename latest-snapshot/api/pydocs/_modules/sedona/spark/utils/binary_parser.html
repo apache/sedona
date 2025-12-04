@@ -1,21 +1,21 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.utils.binary_parser &mdash; Apache Sedona Python Documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=08a75d8b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
 
   
-      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=908dc885"></script>
-      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/jquery.js"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+      <script src="../../../../_static/doctools.js"></script>
+      <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -485,9 +485,7 @@
 <span class="p">}</span>
 
 
-<div class="viewcode-block" id="BinaryParser">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser">[docs]</a>
-<span class="nd">@attr</span><span class="o">.</span><span class="n">s</span>
+<div class="viewcode-block" id="BinaryParser"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser">[docs]</a><span class="nd">@attr</span><span class="o">.</span><span class="n">s</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">BinaryParser</span><span class="p">:</span>
     <span class="nb">bytes</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">Union</span><span class="p">[</span><span class="nb">bytearray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]])</span>
     <span class="n">current_index</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -496,9 +494,7 @@
         <span class="n">no_negatives</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_negatives</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bytes</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bytes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_to_binary_array</span><span class="p">(</span><span class="n">no_negatives</span><span class="p">)</span>
 
-<div class="viewcode-block" id="BinaryParser.read_geometry">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.read_geometry">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<div class="viewcode-block" id="BinaryParser.read_geometry"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.read_geometry">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">read_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
         <span class="n">geom_bytes</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="p">[</span>
                 <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">el</span><span class="p">)</span> <span class="k">if</span> <span class="n">el</span> <span class="o">&lt;</span> <span class="mi">128</span> <span class="k">else</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">el</span> <span class="o">-</span> <span class="mi">256</span><span class="p">)</span>
@@ -509,58 +505,37 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">+=</span> <span class="n">length</span>
         <span class="k">return</span> <span class="n">geom</span></div>
 
-
-<div class="viewcode-block" id="BinaryParser.read_double">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.read_double">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read_double</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BinaryParser.read_double"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.read_double">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">read_double</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bytes</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">+</span> <span class="n">DOUBLE_SIZE</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
-
-<div class="viewcode-block" id="BinaryParser.read_double_reverse">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.read_double_reverse">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read_double_reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BinaryParser.read_double_reverse"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.read_double_reverse">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">read_double_reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack_reverse</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bytes</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">+</span> <span class="n">DOUBLE_SIZE</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
-
-<div class="viewcode-block" id="BinaryParser.read_int">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.read_int">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read_int</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BinaryParser.read_int"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.read_int">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">read_int</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;i&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bytes</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">+</span> <span class="n">INT_SIZE</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
-
-<div class="viewcode-block" id="BinaryParser.read_byte">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.read_byte">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read_byte</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BinaryParser.read_byte"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.read_byte">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">read_byte</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bytes</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">+</span> <span class="n">BYTE_SIZE</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
-
-<div class="viewcode-block" id="BinaryParser.read_char">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.read_char">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read_char</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BinaryParser.read_char"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.read_char">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">read_char</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bytes</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">+</span> <span class="n">CHAR_SIZE</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
-
-<div class="viewcode-block" id="BinaryParser.read_boolean">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.read_boolean">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read_boolean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BinaryParser.read_boolean"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.read_boolean">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">read_boolean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;?&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bytes</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">+</span> <span class="n">BOOLEAN_SIZE</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
-
-<div class="viewcode-block" id="BinaryParser.read_string">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.read_string">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">encoding</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;utf8&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="BinaryParser.read_string"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.read_string">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">read_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">encoding</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;utf8&quot;</span><span class="p">):</span>
         <span class="n">string</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bytes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">+</span> <span class="n">length</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">+=</span> <span class="n">length</span>
 
@@ -570,10 +545,7 @@
             <span class="k">raise</span> <span class="ne">UnicodeEncodeError</span>
         <span class="k">return</span> <span class="n">encoded_string</span></div>
 
-
-<div class="viewcode-block" id="BinaryParser.read_kryo_string">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.read_kryo_string">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read_kryo_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">sc</span><span class="p">:</span> <span class="n">SparkContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="BinaryParser.read_kryo_string"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.read_kryo_string">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">read_kryo_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">sc</span><span class="p">:</span> <span class="n">SparkContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">array_length</span> <span class="o">=</span> <span class="n">length</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span>
         <span class="n">byte_array</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">_gateway</span><span class="o">.</span><span class="n">new_array</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">Byte</span><span class="p">,</span> <span class="n">array_length</span><span class="p">)</span>
 
@@ -585,18 +557,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">=</span> <span class="n">length</span>
         <span class="k">return</span> <span class="n">decoded_string</span></div>
 
-
-<div class="viewcode-block" id="BinaryParser.unpack">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.unpack">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tp</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">:</span> <span class="nb">bytearray</span><span class="p">):</span>
+<div class="viewcode-block" id="BinaryParser.unpack"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.unpack">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tp</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">:</span> <span class="nb">bytearray</span><span class="p">):</span>
         <span class="n">max_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">+</span> <span class="n">size_dict</span><span class="p">[</span><span class="n">tp</span><span class="p">]</span>
         <span class="nb">bytes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_to_binary_array</span><span class="p">(</span><span class="nb">bytes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="p">:</span> <span class="n">max_index</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
 
-
-<div class="viewcode-block" id="BinaryParser.unpack_reverse">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.unpack_reverse">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">unpack_reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tp</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">:</span> <span class="nb">bytearray</span><span class="p">):</span>
+<div class="viewcode-block" id="BinaryParser.unpack_reverse"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.unpack_reverse">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">unpack_reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tp</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">:</span> <span class="nb">bytearray</span><span class="p">):</span>
         <span class="n">max_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_index</span> <span class="o">+</span> <span class="n">size_dict</span><span class="p">[</span><span class="n">tp</span><span class="p">]</span>
         <span class="nb">bytes</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span>
             <span class="nb">reversed</span><span class="p">(</span>
@@ -605,21 +571,14 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
 
-
-<div class="viewcode-block" id="BinaryParser.remove_negatives">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.remove_negatives">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="BinaryParser.remove_negatives"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.remove_negatives">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">remove_negatives</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="bp">cls</span><span class="o">.</span><span class="n">remove_negative</span><span class="p">(</span><span class="n">bt</span><span class="p">)</span> <span class="k">for</span> <span class="n">bt</span> <span class="ow">in</span> <span class="nb">bytes</span><span class="p">]</span></div>
 
-
-<div class="viewcode-block" id="BinaryParser.remove_negative">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.remove_negative">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="BinaryParser.remove_negative"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.remove_negative">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">remove_negative</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">byte</span><span class="p">):</span>
         <span class="n">bt_pos</span> <span class="o">=</span> <span class="n">byte</span> <span class="k">if</span> <span class="n">byte</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">byte</span> <span class="o">+</span> <span class="mi">256</span>
         <span class="k">return</span> <span class="n">bt_pos</span></div>
-
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_convert_to_binary_array</span><span class="p">(</span><span class="nb">bytes</span><span class="p">):</span>
@@ -628,43 +587,25 @@
         <span class="k">return</span> <span class="nb">bytes</span></div>
 
 
+<div class="viewcode-block" id="BinaryBuffer"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryBuffer">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BinaryBuffer</span><span class="p">:</span>
 
-<div class="viewcode-block" id="BinaryBuffer">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryBuffer">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">BinaryBuffer</span><span class="p">:</span>
-
-<div class="viewcode-block" id="BinaryBuffer.__init__">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryBuffer.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BinaryBuffer.__init__"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryBuffer.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="p">[]</span></div>
 
-
-<div class="viewcode-block" id="BinaryBuffer.put_double">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryBuffer.put_double">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">put_double</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<div class="viewcode-block" id="BinaryBuffer.put_double"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryBuffer.put_double">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">put_double</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="nb">bytes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pack</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__extend_buffer</span><span class="p">(</span><span class="nb">bytes</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="BinaryBuffer.put_int">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryBuffer.put_int">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">put_int</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<div class="viewcode-block" id="BinaryBuffer.put_int"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryBuffer.put_int">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">put_int</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="nb">bytes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pack</span><span class="p">(</span><span class="s2">&quot;i&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__extend_buffer</span><span class="p">(</span><span class="nb">bytes</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="BinaryBuffer.put_byte">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryBuffer.put_byte">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">put_byte</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<div class="viewcode-block" id="BinaryBuffer.put_byte"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryBuffer.put_byte">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">put_byte</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="nb">bytes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pack</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__extend_buffer</span><span class="p">(</span><span class="nb">bytes</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="BinaryBuffer.put">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryBuffer.put">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<div class="viewcode-block" id="BinaryBuffer.put"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryBuffer.put">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__extend_buffer</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
-
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__pack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
@@ -675,9 +616,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">__translate_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">el</span> <span class="k">if</span> <span class="n">el</span> <span class="o">&lt;</span> <span class="mi">128</span> <span class="k">else</span> <span class="n">el</span> <span class="o">-</span> <span class="mi">256</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">values</span><span class="p">]</span>
 
-<div class="viewcode-block" id="BinaryBuffer.add_empty_bytes">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryBuffer.add_empty_bytes">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_empty_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tp</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">number_of_empty</span><span class="p">):</span>
+<div class="viewcode-block" id="BinaryBuffer.add_empty_bytes"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryBuffer.add_empty_bytes">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">add_empty_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tp</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">number_of_empty</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">tp</span> <span class="o">==</span> <span class="s2">&quot;double&quot;</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_empty</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">put_double</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
@@ -690,11 +629,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Passed </span><span class="si">{</span><span class="n">tp</span><span class="si">}</span><span class="s2"> is not available&quot;</span><span class="p">)</span></div>
 
-
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">byte_array</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__translate_values</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="p">)</span></div>
-
 </pre></div>
 
            </div>

@@ -1,21 +1,21 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.utils.geometry_serde_general &mdash; Apache Sedona Python Documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=08a75d8b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
 
   
-      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=908dc885"></script>
-      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/jquery.js"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+      <script src="../../../../_static/doctools.js"></script>
+      <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -495,9 +495,7 @@
 <span class="n">GET_COORDS_NUMPY_THRESHOLD</span> <span class="o">=</span> <span class="mi">50</span>
 
 
-<div class="viewcode-block" id="GeometryTypeID">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryTypeID">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">GeometryTypeID</span><span class="p">:</span>
+<div class="viewcode-block" id="GeometryTypeID"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryTypeID">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">GeometryTypeID</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constants used to identify the geometry type in the serialized bytearray of geometry.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -511,10 +509,7 @@
     <span class="n">GEOMETRYCOLLECTION</span> <span class="o">=</span> <span class="mi">7</span></div>
 
 
-
-<div class="viewcode-block" id="CoordinateType">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.CoordinateType">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">CoordinateType</span><span class="p">:</span>
+<div class="viewcode-block" id="CoordinateType"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.CoordinateType">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">CoordinateType</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constants used to identify geometry dimensions in the serialized bytearray of geometry.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -528,9 +523,7 @@
     <span class="n">NUM_COORD_COMPONENTS</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
     <span class="n">UNPACK_FORMAT</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;dd&quot;</span><span class="p">,</span> <span class="s2">&quot;ddd&quot;</span><span class="p">,</span> <span class="s2">&quot;ddxxxxxxxx&quot;</span><span class="p">,</span> <span class="s2">&quot;dddxxxxxxxx&quot;</span><span class="p">]</span>
 
-<div class="viewcode-block" id="CoordinateType.type_of">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.CoordinateType.type_of">[docs]</a>
-    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="CoordinateType.type_of"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.CoordinateType.type_of">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">type_of</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">geom</span><span class="o">.</span><span class="n">_ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">CoordinateType</span><span class="o">.</span><span class="n">XY</span>
@@ -539,33 +532,20 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid coordinate dimension: </span><span class="si">{</span><span class="n">geom</span><span class="o">.</span><span class="n">_ndim</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="CoordinateType.bytes_per_coord">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.CoordinateType.bytes_per_coord">[docs]</a>
-    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="CoordinateType.bytes_per_coord"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.CoordinateType.bytes_per_coord">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">bytes_per_coord</span><span class="p">(</span><span class="n">coord_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">CoordinateType</span><span class="o">.</span><span class="n">BYTES_PER_COORDINATE</span><span class="p">[</span><span class="n">coord_type</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span></div>
 
-
-<div class="viewcode-block" id="CoordinateType.components_per_coord">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.CoordinateType.components_per_coord">[docs]</a>
-    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="CoordinateType.components_per_coord"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.CoordinateType.components_per_coord">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">components_per_coord</span><span class="p">(</span><span class="n">coord_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">CoordinateType</span><span class="o">.</span><span class="n">NUM_COORD_COMPONENTS</span><span class="p">[</span><span class="n">coord_type</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span></div>
 
-
-<div class="viewcode-block" id="CoordinateType.unpack_format">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.CoordinateType.unpack_format">[docs]</a>
-    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="CoordinateType.unpack_format"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.CoordinateType.unpack_format">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">unpack_format</span><span class="p">(</span><span class="n">coord_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">CoordinateType</span><span class="o">.</span><span class="n">UNPACK_FORMAT</span><span class="p">[</span><span class="n">coord_type</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span></div>
-</div>
+        <span class="k">return</span> <span class="n">CoordinateType</span><span class="o">.</span><span class="n">UNPACK_FORMAT</span><span class="p">[</span><span class="n">coord_type</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span></div></div>
 
 
-
-<div class="viewcode-block" id="GeometryBuffer">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">GeometryBuffer</span><span class="p">:</span>
+<div class="viewcode-block" id="GeometryBuffer"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">GeometryBuffer</span><span class="p">:</span>
     <span class="n">buffer</span><span class="p">:</span> <span class="nb">bytearray</span>
     <span class="n">coord_type</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">bytes_per_coord</span><span class="p">:</span> <span class="nb">int</span>
@@ -573,9 +553,7 @@
     <span class="n">coords_offset</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">ints_offset</span><span class="p">:</span> <span class="nb">int</span>
 
-<div class="viewcode-block" id="GeometryBuffer.__init__">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="GeometryBuffer.__init__"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="nb">bytearray</span><span class="p">,</span> <span class="n">coord_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">coords_offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_coords</span><span class="p">:</span> <span class="nb">int</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span> <span class="o">=</span> <span class="n">buffer</span>
@@ -585,24 +563,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">coords_offset</span> <span class="o">=</span> <span class="n">coords_offset</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ints_offset</span> <span class="o">=</span> <span class="n">coords_offset</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">bytes_per_coord</span> <span class="o">*</span> <span class="n">num_coords</span></div>
 
-
-<div class="viewcode-block" id="GeometryBuffer.read_linestring">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer.read_linestring">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read_linestring</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LineString</span><span class="p">:</span>
+<div class="viewcode-block" id="GeometryBuffer.read_linestring"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer.read_linestring">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">read_linestring</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LineString</span><span class="p">:</span>
         <span class="n">num_points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_int</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">LineString</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_coordinates</span><span class="p">(</span><span class="n">num_points</span><span class="p">))</span></div>
 
-
-<div class="viewcode-block" id="GeometryBuffer.read_linearring">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer.read_linearring">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read_linearring</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LineString</span><span class="p">:</span>
+<div class="viewcode-block" id="GeometryBuffer.read_linearring"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer.read_linearring">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">read_linearring</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LineString</span><span class="p">:</span>
         <span class="n">num_points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_int</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">LinearRing</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_coordinates</span><span class="p">(</span><span class="n">num_points</span><span class="p">))</span></div>
 
-
-<div class="viewcode-block" id="GeometryBuffer.read_polygon">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer.read_polygon">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read_polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Polygon</span><span class="p">:</span>
+<div class="viewcode-block" id="GeometryBuffer.read_polygon"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer.read_polygon">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">read_polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Polygon</span><span class="p">:</span>
         <span class="n">num_rings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_int</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">num_rings</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -612,20 +581,14 @@
 
         <span class="k">return</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">rings</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rings</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span></div>
 
-
-<div class="viewcode-block" id="GeometryBuffer.write_linestring">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer.write_linestring">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">write_linestring</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span> <span class="n">LineString</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="GeometryBuffer.write_linestring"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer.write_linestring">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">write_linestring</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span> <span class="n">LineString</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">coords</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">write_int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coords_offset</span> <span class="o">=</span> <span class="n">put_coordinates</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords_offset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coord_type</span><span class="p">,</span> <span class="n">coords</span>
         <span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="GeometryBuffer.write_polygon">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer.write_polygon">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">write_polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polygon</span><span class="p">:</span> <span class="n">Polygon</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="GeometryBuffer.write_polygon"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer.write_polygon">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">write_polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polygon</span><span class="p">:</span> <span class="n">Polygon</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">exterior</span> <span class="o">=</span> <span class="n">polygon</span><span class="o">.</span><span class="n">exterior</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">write_int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -635,47 +598,31 @@
         <span class="k">for</span> <span class="n">interior</span> <span class="ow">in</span> <span class="n">polygon</span><span class="o">.</span><span class="n">interiors</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">write_linestring</span><span class="p">(</span><span class="n">interior</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="GeometryBuffer.read_coordinates">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer.read_coordinates">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_coords</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ListCoordType</span><span class="p">:</span>
+<div class="viewcode-block" id="GeometryBuffer.read_coordinates"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer.read_coordinates">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">read_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_coords</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ListCoordType</span><span class="p">:</span>
         <span class="n">coords</span> <span class="o">=</span> <span class="n">get_coordinates</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords_offset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coord_type</span><span class="p">,</span> <span class="n">num_coords</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coords_offset</span> <span class="o">+=</span> <span class="n">num_coords</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">bytes_per_coord</span>
         <span class="k">return</span> <span class="n">coords</span></div>
 
-
-<div class="viewcode-block" id="GeometryBuffer.read_coordinate">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer.read_coordinate">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read_coordinate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CoordType</span><span class="p">:</span>
+<div class="viewcode-block" id="GeometryBuffer.read_coordinate"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer.read_coordinate">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">read_coordinate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CoordType</span><span class="p">:</span>
         <span class="n">coord</span> <span class="o">=</span> <span class="n">get_coordinate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords_offset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coord_type</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coords_offset</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bytes_per_coord</span>
         <span class="k">return</span> <span class="n">coord</span></div>
 
-
-<div class="viewcode-block" id="GeometryBuffer.read_int">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer.read_int">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read_int</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<div class="viewcode-block" id="GeometryBuffer.read_int"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer.read_int">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">read_int</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s2">&quot;i&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ints_offset</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unexpected large integer in structural data&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ints_offset</span> <span class="o">+=</span> <span class="mi">4</span>
         <span class="k">return</span> <span class="n">value</span></div>
 
-
-<div class="viewcode-block" id="GeometryBuffer.write_int">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer.write_int">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">write_int</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="GeometryBuffer.write_int"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer.write_int">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">write_int</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">struct</span><span class="o">.</span><span class="n">pack_into</span><span class="p">(</span><span class="s2">&quot;i&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ints_offset</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ints_offset</span> <span class="o">+=</span> <span class="mi">4</span></div>
-</div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ints_offset</span> <span class="o">+=</span> <span class="mi">4</span></div></div>
 
 
-
-<div class="viewcode-block" id="serialize">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.serialize">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">BaseGeometry</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">]]:</span>
+<div class="viewcode-block" id="serialize"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.serialize">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">BaseGeometry</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Serialize a shapely geometry object to the internal representation of GeometryUDT.</span>
 <span class="sd">    :param geom: shapely geometry object</span>
@@ -704,10 +651,7 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported geometry type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="deserialize">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.deserialize">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">deserialize</span><span class="p">(</span><span class="n">buffer</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BaseGeometry</span><span class="p">]:</span>
+<div class="viewcode-block" id="deserialize"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.deserialize">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">deserialize</span><span class="p">(</span><span class="n">buffer</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BaseGeometry</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Deserialize a shapely geometry object from the internal representation of GeometryUDT.</span>
 <span class="sd">    :param buffer: internal representation of GeometryUDT</span>
@@ -741,10 +685,7 @@
     <span class="k">return</span> <span class="n">geom</span><span class="p">,</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">ints_offset</span></div>
 
 
-
-<div class="viewcode-block" id="create_buffer_for_geom">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.create_buffer_for_geom">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">create_buffer_for_geom</span><span class="p">(</span>
+<div class="viewcode-block" id="create_buffer_for_geom"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.create_buffer_for_geom">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">create_buffer_for_geom</span><span class="p">(</span>
     <span class="n">geom_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">coord_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_coords</span><span class="p">:</span> <span class="nb">int</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytearray</span><span class="p">:</span>
     <span class="n">buffer</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
@@ -754,18 +695,12 @@
     <span class="k">return</span> <span class="n">buffer</span></div>
 
 
-
-<div class="viewcode-block" id="generate_header_bytes">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.generate_header_bytes">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">generate_header_bytes</span><span class="p">(</span><span class="n">geom_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">coord_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_coords</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+<div class="viewcode-block" id="generate_header_bytes"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.generate_header_bytes">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">generate_header_bytes</span><span class="p">(</span><span class="n">geom_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">coord_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_coords</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
     <span class="n">preamble_byte</span> <span class="o">=</span> <span class="p">(</span><span class="n">geom_type</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">coord_type</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;BBBBi&quot;</span><span class="p">,</span> <span class="n">preamble_byte</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">num_coords</span><span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="put_coordinates">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.put_coordinates">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">put_coordinates</span><span class="p">(</span>
+<div class="viewcode-block" id="put_coordinates"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.put_coordinates">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">put_coordinates</span><span class="p">(</span>
     <span class="n">buffer</span><span class="p">:</span> <span class="nb">bytearray</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">coord_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="n">ListCoordType</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">:</span>
@@ -776,10 +711,7 @@
     <span class="k">return</span> <span class="n">offset</span></div>
 
 
-
-<div class="viewcode-block" id="put_coordinate">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.put_coordinate">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">put_coordinate</span><span class="p">(</span>
+<div class="viewcode-block" id="put_coordinate"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.put_coordinate">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">put_coordinate</span><span class="p">(</span>
     <span class="n">buffer</span><span class="p">:</span> <span class="nb">bytearray</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">coord_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">coord</span><span class="p">:</span> <span class="n">CoordType</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="n">struct</span><span class="o">.</span><span class="n">pack_into</span><span class="p">(</span><span class="n">CoordinateType</span><span class="o">.</span><span class="n">unpack_format</span><span class="p">(</span><span class="n">coord_type</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="o">*</span><span class="n">coord</span><span class="p">))</span>
@@ -787,10 +719,7 @@
     <span class="k">return</span> <span class="n">offset</span></div>
 
 
-
-<div class="viewcode-block" id="get_coordinates">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.get_coordinates">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_coordinates</span><span class="p">(</span>
+<div class="viewcode-block" id="get_coordinates"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.get_coordinates">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">get_coordinates</span><span class="p">(</span>
     <span class="n">buffer</span><span class="p">:</span> <span class="nb">bytearray</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">coord_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_coords</span><span class="p">:</span> <span class="nb">int</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ListCoordType</span><span class="p">]:</span>
     <span class="k">if</span> <span class="n">num_coords</span> <span class="o">&lt;</span> <span class="n">GET_COORDS_NUMPY_THRESHOLD</span><span class="p">:</span>
@@ -811,24 +740,15 @@
     <span class="k">return</span> <span class="n">coords</span></div>
 
 
-
-<div class="viewcode-block" id="get_coordinate">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.get_coordinate">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_coordinate</span><span class="p">(</span><span class="n">buffer</span><span class="p">:</span> <span class="nb">bytearray</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">coord_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CoordType</span><span class="p">:</span>
+<div class="viewcode-block" id="get_coordinate"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.get_coordinate">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">get_coordinate</span><span class="p">(</span><span class="n">buffer</span><span class="p">:</span> <span class="nb">bytearray</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">coord_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CoordType</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="n">CoordinateType</span><span class="o">.</span><span class="n">unpack_format</span><span class="p">(</span><span class="n">coord_type</span><span class="p">),</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="aligned_offset">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.aligned_offset">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">aligned_offset</span><span class="p">(</span><span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<div class="viewcode-block" id="aligned_offset"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.aligned_offset">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">aligned_offset</span><span class="p">(</span><span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">~</span><span class="mi">7</span></div>
 
 
-
-<div class="viewcode-block" id="serialize_point">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.serialize_point">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">serialize_point</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">Point</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+<div class="viewcode-block" id="serialize_point"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.serialize_point">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">serialize_point</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">Point</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
     <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">geom</span><span class="o">.</span><span class="n">coords</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">coords</span><span class="p">:</span>
         <span class="c1"># FIXME this does not handle M yet, but geom.has_z is extremely slow</span>
@@ -841,10 +761,7 @@
         <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;BBBBi&quot;</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="deserialize_point">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.deserialize_point">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">deserialize_point</span><span class="p">(</span><span class="n">geom_buffer</span><span class="p">:</span> <span class="n">GeometryBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Point</span><span class="p">:</span>
+<div class="viewcode-block" id="deserialize_point"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.deserialize_point">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">deserialize_point</span><span class="p">(</span><span class="n">geom_buffer</span><span class="p">:</span> <span class="n">GeometryBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Point</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">num_coords</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="c1"># Here we don&#39;t call Point() directly since it would create an empty GeometryCollection</span>
         <span class="c1"># in shapely 1.x. You&#39;ll find similar code for creating empty geometries in other</span>
@@ -854,10 +771,7 @@
     <span class="k">return</span> <span class="n">Point</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="serialize_multi_point">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.serialize_multi_point">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">serialize_multi_point</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">MultiPoint</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+<div class="viewcode-block" id="serialize_multi_point"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.serialize_multi_point">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">serialize_multi_point</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">MultiPoint</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
     <span class="n">points</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">geom</span><span class="o">.</span><span class="n">geoms</span><span class="p">)</span>
     <span class="n">num_points</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">num_points</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -879,10 +793,7 @@
     <span class="k">return</span> <span class="n">header</span> <span class="o">+</span> <span class="n">body</span></div>
 
 
-
-<div class="viewcode-block" id="deserialize_multi_point">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.deserialize_multi_point">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">deserialize_multi_point</span><span class="p">(</span><span class="n">geom_buffer</span><span class="p">:</span> <span class="n">GeometryBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiPoint</span><span class="p">:</span>
+<div class="viewcode-block" id="deserialize_multi_point"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.deserialize_multi_point">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">deserialize_multi_point</span><span class="p">(</span><span class="n">geom_buffer</span><span class="p">:</span> <span class="n">GeometryBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiPoint</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">num_coords</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">wkt_loads</span><span class="p">(</span><span class="s2">&quot;MULTIPOINT EMPTY&quot;</span><span class="p">)</span>
     <span class="n">coords</span> <span class="o">=</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">read_coordinates</span><span class="p">(</span><span class="n">geom_buffer</span><span class="o">.</span><span class="n">num_coords</span><span class="p">)</span>
@@ -896,10 +807,7 @@
     <span class="k">return</span> <span class="n">MultiPoint</span><span class="p">(</span><span class="n">points</span><span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="serialize_linestring">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.serialize_linestring">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">serialize_linestring</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">LineString</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+<div class="viewcode-block" id="serialize_linestring"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.serialize_linestring">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">serialize_linestring</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">LineString</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
     <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">geom</span><span class="o">.</span><span class="n">coords</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">coords</span><span class="p">:</span>
         <span class="n">coord_type</span> <span class="o">=</span> <span class="n">CoordinateType</span><span class="o">.</span><span class="n">type_of</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
@@ -911,20 +819,14 @@
         <span class="k">return</span> <span class="n">generate_header_bytes</span><span class="p">(</span><span class="n">GeometryTypeID</span><span class="o">.</span><span class="n">LINESTRING</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="deserialize_linestring">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.deserialize_linestring">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">deserialize_linestring</span><span class="p">(</span><span class="n">geom_buffer</span><span class="p">:</span> <span class="n">GeometryBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LineString</span><span class="p">:</span>
+<div class="viewcode-block" id="deserialize_linestring"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.deserialize_linestring">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">deserialize_linestring</span><span class="p">(</span><span class="n">geom_buffer</span><span class="p">:</span> <span class="n">GeometryBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LineString</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">num_coords</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">wkt_loads</span><span class="p">(</span><span class="s2">&quot;LINESTRING EMPTY&quot;</span><span class="p">)</span>
     <span class="n">coords</span> <span class="o">=</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">read_coordinates</span><span class="p">(</span><span class="n">geom_buffer</span><span class="o">.</span><span class="n">num_coords</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">LineString</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="serialize_multi_linestring">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.serialize_multi_linestring">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">serialize_multi_linestring</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">MultiLineString</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+<div class="viewcode-block" id="serialize_multi_linestring"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.serialize_multi_linestring">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">serialize_multi_linestring</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">MultiLineString</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
     <span class="n">linestrings</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">geom</span><span class="o">.</span><span class="n">geoms</span><span class="p">)</span>
 
     <span class="n">coord_type</span> <span class="o">=</span> <span class="n">CoordinateType</span><span class="o">.</span><span class="n">type_of</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
@@ -946,10 +848,7 @@
     <span class="k">return</span> <span class="n">result</span></div>
 
 
-
-<div class="viewcode-block" id="deserialize_multi_linestring">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.deserialize_multi_linestring">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">deserialize_multi_linestring</span><span class="p">(</span><span class="n">geom_buffer</span><span class="p">:</span> <span class="n">GeometryBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiLineString</span><span class="p">:</span>
+<div class="viewcode-block" id="deserialize_multi_linestring"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.deserialize_multi_linestring">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">deserialize_multi_linestring</span><span class="p">(</span><span class="n">geom_buffer</span><span class="p">:</span> <span class="n">GeometryBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiLineString</span><span class="p">:</span>
     <span class="n">num_linestrings</span> <span class="o">=</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">read_int</span><span class="p">()</span>
     <span class="n">linestrings</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_linestrings</span><span class="p">):</span>
@@ -961,10 +860,7 @@
     <span class="k">return</span> <span class="n">MultiLineString</span><span class="p">(</span><span class="n">linestrings</span><span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="serialize_polygon">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.serialize_polygon">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">serialize_polygon</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">Polygon</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+<div class="viewcode-block" id="serialize_polygon"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.serialize_polygon">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">serialize_polygon</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">Polygon</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
     <span class="c1"># it may seem odd, but dumping to wkb and parsing proved to be the fastest here</span>
     <span class="n">wkb_string</span> <span class="o">=</span> <span class="n">wkb_dumps</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
 
@@ -997,19 +893,13 @@
     <span class="k">return</span> <span class="n">header</span> <span class="o">+</span> <span class="n">coord_bytes</span> <span class="o">+</span> <span class="n">structure_data_bytes</span></div>
 
 
-
-<div class="viewcode-block" id="deserialize_polygon">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.deserialize_polygon">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">deserialize_polygon</span><span class="p">(</span><span class="n">geom_buffer</span><span class="p">:</span> <span class="n">GeometryBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Polygon</span><span class="p">:</span>
+<div class="viewcode-block" id="deserialize_polygon"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.deserialize_polygon">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">deserialize_polygon</span><span class="p">(</span><span class="n">geom_buffer</span><span class="p">:</span> <span class="n">GeometryBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Polygon</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">num_coords</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">wkt_loads</span><span class="p">(</span><span class="s2">&quot;POLYGON EMPTY&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">read_polygon</span><span class="p">()</span></div>
 
 
-
-<div class="viewcode-block" id="serialize_multi_polygon">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.serialize_multi_polygon">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">serialize_multi_polygon</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">MultiPolygon</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+<div class="viewcode-block" id="serialize_multi_polygon"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.serialize_multi_polygon">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">serialize_multi_polygon</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">MultiPolygon</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
     <span class="n">coords_for</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">[</span><span class="n">y</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span>
     <span class="n">polygons</span> <span class="o">=</span> <span class="p">[</span>
         <span class="p">[</span><span class="n">coords_for</span><span class="p">(</span><span class="n">polygon</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">)]</span>
@@ -1047,10 +937,7 @@
     <span class="k">return</span> <span class="n">result</span></div>
 
 
-
-<div class="viewcode-block" id="deserialize_multi_polygon">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.deserialize_multi_polygon">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">deserialize_multi_polygon</span><span class="p">(</span><span class="n">geom_buffer</span><span class="p">:</span> <span class="n">GeometryBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiPolygon</span><span class="p">:</span>
+<div class="viewcode-block" id="deserialize_multi_polygon"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.deserialize_multi_polygon">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">deserialize_multi_polygon</span><span class="p">(</span><span class="n">geom_buffer</span><span class="p">:</span> <span class="n">GeometryBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiPolygon</span><span class="p">:</span>
     <span class="n">num_polygons</span> <span class="o">=</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">read_int</span><span class="p">()</span>
     <span class="n">polygons</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_polygons</span><span class="p">):</span>
@@ -1062,10 +949,7 @@
     <span class="k">return</span> <span class="n">MultiPolygon</span><span class="p">(</span><span class="n">polygons</span><span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="serialize_geometry_collection">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.serialize_geometry_collection">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">serialize_geometry_collection</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">GeometryCollection</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytearray</span><span class="p">:</span>
+<div class="viewcode-block" id="serialize_geometry_collection"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.serialize_geometry_collection">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">serialize_geometry_collection</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">GeometryCollection</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytearray</span><span class="p">:</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">GeometryCollection</span><span class="p">):</span>
         <span class="c1"># In shapely 1.x, Empty geometries such as empty points, empty polygons etc.</span>
         <span class="c1"># have geom_type property evaluated to &#39;GeometryCollection&#39;. Such geometries are not</span>
@@ -1093,10 +977,7 @@
     <span class="k">return</span> <span class="n">buffer</span></div>
 
 
-
-<div class="viewcode-block" id="serialize_shapely_1_empty_geom">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.serialize_shapely_1_empty_geom">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">serialize_shapely_1_empty_geom</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">BaseGeometry</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytearray</span><span class="p">:</span>
+<div class="viewcode-block" id="serialize_shapely_1_empty_geom"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.serialize_shapely_1_empty_geom">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">serialize_shapely_1_empty_geom</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">BaseGeometry</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytearray</span><span class="p">:</span>
     <span class="n">total_size</span> <span class="o">=</span> <span class="mi">8</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">Point</span><span class="p">):</span>
         <span class="n">geom_type</span> <span class="o">=</span> <span class="n">GeometryTypeID</span><span class="o">.</span><span class="n">POINT</span>
@@ -1117,10 +998,7 @@
     <span class="k">return</span> <span class="n">create_buffer_for_geom</span><span class="p">(</span><span class="n">geom_type</span><span class="p">,</span> <span class="n">CoordinateType</span><span class="o">.</span><span class="n">XY</span><span class="p">,</span> <span class="n">total_size</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="deserialize_geometry_collection">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.deserialize_geometry_collection">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">deserialize_geometry_collection</span><span class="p">(</span><span class="n">geom_buffer</span><span class="p">:</span> <span class="n">GeometryBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeometryCollection</span><span class="p">:</span>
+<div class="viewcode-block" id="deserialize_geometry_collection"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.deserialize_geometry_collection">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">deserialize_geometry_collection</span><span class="p">(</span><span class="n">geom_buffer</span><span class="p">:</span> <span class="n">GeometryBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeometryCollection</span><span class="p">:</span>
     <span class="n">num_geometries</span> <span class="o">=</span> <span class="n">geom_buffer</span><span class="o">.</span><span class="n">num_coords</span>
     <span class="k">if</span> <span class="n">num_geometries</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">wkt_loads</span><span class="p">(</span><span class="s2">&quot;GEOMETRYCOLLECTION EMPTY&quot;</span><span class="p">)</span>
@@ -1135,7 +1013,6 @@
         <span class="n">geom_end_offset</span> <span class="o">+=</span> <span class="n">offset</span>
     <span class="n">geom_buffer</span><span class="o">.</span><span class="n">ints_offset</span> <span class="o">=</span> <span class="n">geom_end_offset</span>
     <span class="k">return</span> <span class="n">GeometryCollection</span><span class="p">(</span><span class="n">geometries</span><span class="p">)</span></div>
-
 </pre></div>
 
            </div>

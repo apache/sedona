@@ -1,21 +1,21 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.dataframe_api &mdash; Apache Sedona Python Documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=08a75d8b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
 
   
-      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=908dc885"></script>
-      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/jquery.js"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+      <script src="../../../../_static/doctools.js"></script>
+      <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -478,17 +478,11 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_remote</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="c1"># be backwards compatible with Spark &lt; 3.4</span>
-<div class="viewcode-block" id="is_remote">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.dataframe_api.is_remote">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">is_remote</span><span class="p">():</span>
+<div class="viewcode-block" id="is_remote"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.dataframe_api.is_remote">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">is_remote</span><span class="p">():</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 
-
-<div class="viewcode-block" id="ConnectColumn">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.dataframe_api.ConnectColumn">[docs]</a>
-    <span class="k">class</span><span class="w"> </span><span class="nc">ConnectColumn</span><span class="p">:</span>
+<div class="viewcode-block" id="ConnectColumn"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.dataframe_api.ConnectColumn">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">ConnectColumn</span><span class="p">:</span>
         <span class="k">pass</span></div>
-
 
 <span class="k">else</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.connect</span><span class="w"> </span><span class="kn">import</span> <span class="n">call_sedona_function_connect</span>
@@ -509,9 +503,7 @@
         <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span><span class="o">.</span><span class="n">_jc</span>
 
 
-<div class="viewcode-block" id="call_sedona_function">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.dataframe_api.call_sedona_function">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">call_sedona_function</span><span class="p">(</span>
+<div class="viewcode-block" id="call_sedona_function"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.dataframe_api.call_sedona_function">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">call_sedona_function</span><span class="p">(</span>
     <span class="n">object_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">function_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
     <span class="c1"># apparently a Column is an Iterable so we need to check for it explicitly</span>
@@ -536,7 +528,6 @@
 
     <span class="n">jc</span> <span class="o">=</span> <span class="n">jfunc</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">Column</span><span class="p">(</span><span class="n">jc</span><span class="p">)</span></div>
-
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_type_list</span><span class="p">(</span><span class="n">annotated_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
@@ -617,9 +608,7 @@
             <span class="p">)</span>
 
 
-<div class="viewcode-block" id="validate_argument_types">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.dataframe_api.validate_argument_types">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">validate_argument_types</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<div class="viewcode-block" id="validate_argument_types"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.dataframe_api.validate_argument_types">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">validate_argument_types</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Validates types of arguments passed to a dataframe API style function.</span>
 <span class="sd">    Arguments will need to be either strings, columns, or match the typehints of f.</span>
 <span class="sd">    This function is meant to be used a decorator.</span>
@@ -645,7 +634,6 @@
         <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">update_wrapper</span><span class="p">(</span><span class="n">validated_function</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span></div>
-
 </pre></div>
 
            </div>

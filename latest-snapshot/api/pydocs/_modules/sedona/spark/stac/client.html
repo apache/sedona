@@ -1,21 +1,21 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.stac.client &mdash; Apache Sedona Python Documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=08a75d8b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
 
   
-      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=908dc885"></script>
-      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/jquery.js"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+      <script src="../../../../_static/doctools.js"></script>
+      <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -472,12 +472,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span>
 
 
-<div class="viewcode-block" id="Client">
-<a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Client</span><span class="p">:</span>
-<div class="viewcode-block" id="Client.__init__">
-<a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">headers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Client"><a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Client</span><span class="p">:</span>
+<div class="viewcode-block" id="Client.__init__"><a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">headers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes a STAC client with optional authentication headers.</span>
 
@@ -488,10 +484,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="n">headers</span> <span class="k">if</span> <span class="n">headers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span></div>
 
-
-<div class="viewcode-block" id="Client.open">
-<a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.open">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Client.open"><a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.open">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">open</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">headers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Opens a connection to the specified STAC API URL.</span>
@@ -520,10 +513,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="Client.with_basic_auth">
-<a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.with_basic_auth">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">with_basic_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">password</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.with_basic_auth"><a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.with_basic_auth">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">with_basic_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">password</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds HTTP Basic Authentication to the client.</span>
 
@@ -552,10 +542,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;Authorization&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Basic </span><span class="si">{</span><span class="n">b64_userpass</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
-
-<div class="viewcode-block" id="Client.with_bearer_token">
-<a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.with_bearer_token">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">with_bearer_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.with_bearer_token"><a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.with_bearer_token">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">with_bearer_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds Bearer Token Authentication to the client.</span>
 
@@ -576,10 +563,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;Authorization&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
-
-<div class="viewcode-block" id="Client.get_collection">
-<a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.get_collection">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_collection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.get_collection"><a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.get_collection">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_collection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieves a collection client for the specified collection ID.</span>
 
@@ -591,10 +575,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">CollectionClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">collection_id</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="Client.get_collection_from_catalog">
-<a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.get_collection_from_catalog">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_collection_from_catalog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Client.get_collection_from_catalog"><a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.get_collection_from_catalog">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_collection_from_catalog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieves the catalog from the STAC API.</span>
 
@@ -606,10 +587,7 @@
         <span class="c1"># Implement logic to fetch and return the root catalog</span>
         <span class="k">return</span> <span class="n">CollectionClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="Client.search">
-<a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.search">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">search</span><span class="p">(</span>
+<div class="viewcode-block" id="Client.search"><a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.search">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">search</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="n">ids</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
         <span class="n">collection_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -670,9 +648,7 @@
                 <span class="n">geometry</span><span class="o">=</span><span class="n">geometry</span><span class="p">,</span>
                 <span class="n">datetime</span><span class="o">=</span><span class="n">datetime</span><span class="p">,</span>
                 <span class="n">max_items</span><span class="o">=</span><span class="n">max_items</span><span class="p">,</span>
-            <span class="p">)</span></div>
-</div>
-
+            <span class="p">)</span></div></div>
 </pre></div>
 
            </div>

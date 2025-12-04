@@ -1,21 +1,21 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.functions &mdash; Apache Sedona Python Documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=08a75d8b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
 
   
-      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=908dc885"></script>
-      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/jquery.js"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+      <script src="../../../../_static/doctools.js"></script>
+      <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -480,19 +480,13 @@
 <span class="n">SEDONA_PANDAS_ARROW_NAME</span> <span class="o">=</span> <span class="s2">&quot;SedonaPandasArrowUDF&quot;</span>
 
 
-<div class="viewcode-block" id="SedonaUDFType">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.functions.SedonaUDFType">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SedonaUDFType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<div class="viewcode-block" id="SedonaUDFType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.functions.SedonaUDFType">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SedonaUDFType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
     <span class="n">SHAPELY_SCALAR</span> <span class="o">=</span> <span class="s2">&quot;ShapelyScalar&quot;</span>
     <span class="n">GEO_SERIES</span> <span class="o">=</span> <span class="s2">&quot;GeoSeries&quot;</span></div>
 
 
-
-<div class="viewcode-block" id="InvalidSedonaUDFType">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.functions.InvalidSedonaUDFType">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">InvalidSedonaUDFType</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="InvalidSedonaUDFType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.functions.InvalidSedonaUDFType">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">InvalidSedonaUDFType</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="k">pass</span></div>
-
 
 
 <span class="n">sedona_udf_to_eval_type</span> <span class="o">=</span> <span class="p">{</span>
@@ -501,9 +495,7 @@
 <span class="p">}</span>
 
 
-<div class="viewcode-block" id="sedona_vectorized_udf">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.functions.sedona_vectorized_udf">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">sedona_vectorized_udf</span><span class="p">(</span>
+<div class="viewcode-block" id="sedona_vectorized_udf"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.functions.sedona_vectorized_udf">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">sedona_vectorized_udf</span><span class="p">(</span>
     <span class="n">return_type</span><span class="p">:</span> <span class="n">DataType</span><span class="p">,</span> <span class="n">udf_type</span><span class="p">:</span> <span class="n">SedonaUDFType</span> <span class="o">=</span> <span class="n">SedonaUDFType</span><span class="o">.</span><span class="n">SHAPELY_SCALAR</span>
 <span class="p">):</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
@@ -542,7 +534,6 @@
         <span class="k">raise</span> <span class="n">InvalidSedonaUDFType</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid UDF type: </span><span class="si">{</span><span class="n">udf_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">apply_fn</span></div>
-
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_apply_shapely_series_udf</span><span class="p">(</span>
@@ -587,24 +578,18 @@
     <span class="p">)</span>
 
 
-<div class="viewcode-block" id="deserialize_geometry_if_geom">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.functions.deserialize_geometry_if_geom">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">deserialize_geometry_if_geom</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="deserialize_geometry_if_geom"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.functions.deserialize_geometry_if_geom">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">deserialize_geometry_if_geom</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">BaseGeometry</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">geometry_serde</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">data</span></div>
 
 
-
-<div class="viewcode-block" id="serialize_to_geometry_if_geom">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.functions.serialize_to_geometry_if_geom">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">serialize_to_geometry_if_geom</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">return_type</span><span class="p">:</span> <span class="n">DataType</span><span class="p">):</span>
+<div class="viewcode-block" id="serialize_to_geometry_if_geom"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.functions.serialize_to_geometry_if_geom">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">serialize_to_geometry_if_geom</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">return_type</span><span class="p">:</span> <span class="n">DataType</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">return_type</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">geometry_serde</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">data</span></div>
-
 </pre></div>
 
            </div>

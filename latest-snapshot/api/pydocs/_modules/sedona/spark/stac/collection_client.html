@@ -1,21 +1,21 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.stac.collection_client &mdash; Apache Sedona Python Documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=08a75d8b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
 
   
-      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=908dc885"></script>
-      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/jquery.js"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+      <script src="../../../../_static/doctools.js"></script>
+      <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -473,9 +473,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseGeometry</span>
 
 
-<div class="viewcode-block" id="get_collection_url">
-<a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.collection_client.get_collection_url">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_collection_url</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">collection_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="get_collection_url"><a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.collection_client.get_collection_url">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">get_collection_url</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">collection_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructs the collection URL based on the provided base URL and optional collection ID.</span>
 
@@ -502,13 +500,8 @@
         <span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="CollectionClient">
-<a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.collection_client.CollectionClient">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">CollectionClient</span><span class="p">:</span>
-<div class="viewcode-block" id="CollectionClient.__init__">
-<a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.collection_client.CollectionClient.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="CollectionClient"><a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.collection_client.CollectionClient">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">CollectionClient</span><span class="p">:</span>
+<div class="viewcode-block" id="CollectionClient.__init__"><a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.collection_client.CollectionClient.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">collection_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -526,7 +519,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">collection_url</span> <span class="o">=</span> <span class="n">get_collection_url</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">collection_id</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="n">headers</span> <span class="k">if</span> <span class="n">headers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">getActiveSession</span><span class="p">()</span></div>
-
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_move_attributes_to_properties</span><span class="p">(</span><span class="n">item_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
@@ -779,9 +771,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid date format&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="CollectionClient.get_items">
-<a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.collection_client.CollectionClient.get_items">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_items</span><span class="p">(</span>
+<div class="viewcode-block" id="CollectionClient.get_items"><a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.collection_client.CollectionClient.get_items">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_items</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="n">ids</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
         <span class="n">bbox</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -835,10 +825,7 @@
             <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error getting items: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Failed to get items&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span></div>
 
-
-<div class="viewcode-block" id="CollectionClient.get_dataframe">
-<a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.collection_client.CollectionClient.get_dataframe">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_dataframe</span><span class="p">(</span>
+<div class="viewcode-block" id="CollectionClient.get_dataframe"><a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.collection_client.CollectionClient.get_dataframe">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_dataframe</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="n">ids</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
         <span class="n">bbox</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -881,10 +868,7 @@
             <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error getting filtered dataframe: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Failed to get filtered dataframe&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span></div>
 
-
-<div class="viewcode-block" id="CollectionClient.save_to_geoparquet">
-<a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.collection_client.CollectionClient.save_to_geoparquet">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">save_to_geoparquet</span><span class="p">(</span>
+<div class="viewcode-block" id="CollectionClient.save_to_geoparquet"><a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.collection_client.CollectionClient.save_to_geoparquet">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">save_to_geoparquet</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="n">ids</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
         <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -924,7 +908,6 @@
             <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error saving DataFrame to GeoParquet: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Failed to save DataFrame to GeoParquet&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span></div>
 
-
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_convert_assets_schema</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -960,9 +943,7 @@
 
         <span class="k">return</span> <span class="n">df</span>
 
-<div class="viewcode-block" id="CollectionClient.load_items_df">
-<a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.collection_client.CollectionClient.load_items_df">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_items_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bbox</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">max_items</span><span class="p">):</span>
+<div class="viewcode-block" id="CollectionClient.load_items_df"><a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.collection_client.CollectionClient.load_items_df">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">load_items_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bbox</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">max_items</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Loads items from the STAC collection as a Spark DataFrame.</span>
 
@@ -1019,10 +1000,8 @@
             <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="n">max_items</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">df</span></div>
 
-
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;CollectionClient id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_id</span><span class="si">}</span><span class="s2">&gt;&quot;</span></div>
-
 </pre></div>
 
            </div>

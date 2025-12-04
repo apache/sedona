@@ -1,21 +1,21 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.core.jvm.translate &mdash; Apache Sedona Python Documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/custom.css?v=08a75d8b" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/custom.css" />
 
   
-      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../../_static/documentation_options.js?v=908dc885"></script>
-      <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../../_static/jquery.js"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+      <script src="../../../../../_static/doctools.js"></script>
+      <script src="../../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
@@ -466,241 +466,127 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
 
 
-<div class="viewcode-block" id="JvmSedonaPythonConverter">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSedonaPythonConverter">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">JvmSedonaPythonConverter</span><span class="p">:</span>
+<div class="viewcode-block" id="JvmSedonaPythonConverter"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSedonaPythonConverter">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">JvmSedonaPythonConverter</span><span class="p">:</span>
 
-<div class="viewcode-block" id="JvmSedonaPythonConverter.__init__">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSedonaPythonConverter.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jvm</span><span class="p">):</span>
+<div class="viewcode-block" id="JvmSedonaPythonConverter.__init__"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSedonaPythonConverter.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jvm</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span> <span class="o">=</span> <span class="n">jvm</span></div>
 
-
-<div class="viewcode-block" id="JvmSedonaPythonConverter.translate_spatial_rdd_to_python">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSedonaPythonConverter.translate_spatial_rdd_to_python">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">translate_spatial_rdd_to_python</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spatial_rdd</span><span class="p">):</span>
+<div class="viewcode-block" id="JvmSedonaPythonConverter.translate_spatial_rdd_to_python"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSedonaPythonConverter.translate_spatial_rdd_to_python">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">translate_spatial_rdd_to_python</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spatial_rdd</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">PythonConverter</span><span class="o">.</span><span class="n">translateSpatialRDDToPython</span><span class="p">(</span><span class="n">spatial_rdd</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="JvmSedonaPythonConverter.translate_spatial_pair_rdd_to_python">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSedonaPythonConverter.translate_spatial_pair_rdd_to_python">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">translate_spatial_pair_rdd_to_python</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spatial_rdd</span><span class="p">):</span>
+<div class="viewcode-block" id="JvmSedonaPythonConverter.translate_spatial_pair_rdd_to_python"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSedonaPythonConverter.translate_spatial_pair_rdd_to_python">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">translate_spatial_pair_rdd_to_python</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spatial_rdd</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">PythonConverter</span><span class="o">.</span><span class="n">translateSpatialPairRDDToPython</span><span class="p">(</span><span class="n">spatial_rdd</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="JvmSedonaPythonConverter.translate_spatial_pair_rdd_with_list_to_python">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSedonaPythonConverter.translate_spatial_pair_rdd_with_list_to_python">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">translate_spatial_pair_rdd_with_list_to_python</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spatial_rdd</span><span class="p">):</span>
+<div class="viewcode-block" id="JvmSedonaPythonConverter.translate_spatial_pair_rdd_with_list_to_python"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSedonaPythonConverter.translate_spatial_pair_rdd_with_list_to_python">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">translate_spatial_pair_rdd_with_list_to_python</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spatial_rdd</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">PythonConverter</span><span class="o">.</span><span class="n">translateSpatialPairRDDWithListToPython</span><span class="p">(</span>
             <span class="n">spatial_rdd</span>
         <span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="JvmSedonaPythonConverter.translate_python_rdd_to_java">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSedonaPythonConverter.translate_python_rdd_to_java">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">translate_python_rdd_to_java</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">java_rdd</span><span class="p">):</span>
+<div class="viewcode-block" id="JvmSedonaPythonConverter.translate_python_rdd_to_java"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSedonaPythonConverter.translate_python_rdd_to_java">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">translate_python_rdd_to_java</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">java_rdd</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">PythonConverter</span><span class="o">.</span><span class="n">translatePythonRDDToJava</span><span class="p">(</span><span class="n">java_rdd</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="JvmSedonaPythonConverter.translate_geometry_seq_to_python">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSedonaPythonConverter.translate_geometry_seq_to_python">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">translate_geometry_seq_to_python</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometry_seq</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">PythonConverter</span><span class="o">.</span><span class="n">translateGeometrySeqToPython</span><span class="p">(</span><span class="n">geometry_seq</span><span class="p">)</span></div>
-</div>
+<div class="viewcode-block" id="JvmSedonaPythonConverter.translate_geometry_seq_to_python"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSedonaPythonConverter.translate_geometry_seq_to_python">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">translate_geometry_seq_to_python</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometry_seq</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">PythonConverter</span><span class="o">.</span><span class="n">translateGeometrySeqToPython</span><span class="p">(</span><span class="n">geometry_seq</span><span class="p">)</span></div></div>
 
 
+<div class="viewcode-block" id="JvmJoinParamsAdapter"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmJoinParamsAdapter">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">JvmJoinParamsAdapter</span><span class="p">:</span>
 
-<div class="viewcode-block" id="JvmJoinParamsAdapter">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmJoinParamsAdapter">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">JvmJoinParamsAdapter</span><span class="p">:</span>
-
-<div class="viewcode-block" id="JvmJoinParamsAdapter.__init__">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmJoinParamsAdapter.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jvm</span><span class="p">):</span>
+<div class="viewcode-block" id="JvmJoinParamsAdapter.__init__"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmJoinParamsAdapter.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jvm</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span> <span class="o">=</span> <span class="n">jvm</span></div>
 
-
-<div class="viewcode-block" id="JvmJoinParamsAdapter.adapt">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmJoinParamsAdapter.adapt">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">adapt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">useIndex</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">indexType</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">joinBuildSide</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">createJoinParams</span><span class="p">(</span><span class="n">useIndex</span><span class="p">,</span> <span class="n">indexType</span><span class="p">,</span> <span class="n">joinBuildSide</span><span class="p">)</span></div>
-</div>
+<div class="viewcode-block" id="JvmJoinParamsAdapter.adapt"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmJoinParamsAdapter.adapt">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">adapt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">useIndex</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">indexType</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">joinBuildSide</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">createJoinParams</span><span class="p">(</span><span class="n">useIndex</span><span class="p">,</span> <span class="n">indexType</span><span class="p">,</span> <span class="n">joinBuildSide</span><span class="p">)</span></div></div>
 
 
+<div class="viewcode-block" id="JvmRawJvmIndexRDDAdapter"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmRawJvmIndexRDDAdapter">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">JvmRawJvmIndexRDDAdapter</span><span class="p">:</span>
 
-<div class="viewcode-block" id="JvmRawJvmIndexRDDAdapter">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmRawJvmIndexRDDAdapter">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">JvmRawJvmIndexRDDAdapter</span><span class="p">:</span>
-
-<div class="viewcode-block" id="JvmRawJvmIndexRDDAdapter.__init__">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmRawJvmIndexRDDAdapter.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jvm</span><span class="p">):</span>
+<div class="viewcode-block" id="JvmRawJvmIndexRDDAdapter.__init__"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmRawJvmIndexRDDAdapter.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jvm</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span> <span class="o">=</span> <span class="n">jvm</span></div>
 
-
-<div class="viewcode-block" id="JvmRawJvmIndexRDDAdapter.setRawIndexRDD">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmRawJvmIndexRDDAdapter.setRawIndexRDD">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">setRawIndexRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spatial_rdd</span><span class="p">,</span> <span class="n">index_rdd</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">RawJvmIndexAdapter</span><span class="o">.</span><span class="n">setRawIndexRDD</span><span class="p">(</span><span class="n">spatial_rdd</span><span class="p">,</span> <span class="n">index_rdd</span><span class="p">)</span></div>
-</div>
+<div class="viewcode-block" id="JvmRawJvmIndexRDDAdapter.setRawIndexRDD"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmRawJvmIndexRDDAdapter.setRawIndexRDD">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">setRawIndexRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spatial_rdd</span><span class="p">,</span> <span class="n">index_rdd</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">RawJvmIndexAdapter</span><span class="o">.</span><span class="n">setRawIndexRDD</span><span class="p">(</span><span class="n">spatial_rdd</span><span class="p">,</span> <span class="n">index_rdd</span><span class="p">)</span></div></div>
 
 
+<div class="viewcode-block" id="JvmSpatialObjectLoaderAdapter"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSpatialObjectLoaderAdapter">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">JvmSpatialObjectLoaderAdapter</span><span class="p">:</span>
 
-<div class="viewcode-block" id="JvmSpatialObjectLoaderAdapter">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSpatialObjectLoaderAdapter">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">JvmSpatialObjectLoaderAdapter</span><span class="p">:</span>
-
-<div class="viewcode-block" id="JvmSpatialObjectLoaderAdapter.__init__">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSpatialObjectLoaderAdapter.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jvm</span><span class="p">):</span>
+<div class="viewcode-block" id="JvmSpatialObjectLoaderAdapter.__init__"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSpatialObjectLoaderAdapter.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jvm</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span> <span class="o">=</span> <span class="n">jvm</span></div>
 
-
-<div class="viewcode-block" id="JvmSpatialObjectLoaderAdapter.loadPointSpatialRDD">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSpatialObjectLoaderAdapter.loadPointSpatialRDD">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">loadPointSpatialRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jsc</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="JvmSpatialObjectLoaderAdapter.loadPointSpatialRDD"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSpatialObjectLoaderAdapter.loadPointSpatialRDD">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">loadPointSpatialRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jsc</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">SpatialObjectLoaderAdapter</span><span class="o">.</span><span class="n">loadPointSpatialRDD</span><span class="p">(</span><span class="n">jsc</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="JvmSpatialObjectLoaderAdapter.loadPolygonSpatialRDD">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSpatialObjectLoaderAdapter.loadPolygonSpatialRDD">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">loadPolygonSpatialRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jsc</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="JvmSpatialObjectLoaderAdapter.loadPolygonSpatialRDD"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSpatialObjectLoaderAdapter.loadPolygonSpatialRDD">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">loadPolygonSpatialRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jsc</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">SpatialObjectLoaderAdapter</span><span class="o">.</span><span class="n">loadPolygonSpatialRDD</span><span class="p">(</span><span class="n">jsc</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="JvmSpatialObjectLoaderAdapter.loadSpatialRDD">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSpatialObjectLoaderAdapter.loadSpatialRDD">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">loadSpatialRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jsc</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="JvmSpatialObjectLoaderAdapter.loadSpatialRDD"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSpatialObjectLoaderAdapter.loadSpatialRDD">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">loadSpatialRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jsc</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">SpatialObjectLoaderAdapter</span><span class="o">.</span><span class="n">loadSpatialRDD</span><span class="p">(</span><span class="n">jsc</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="JvmSpatialObjectLoaderAdapter.loadLineStringSpatialRDD">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSpatialObjectLoaderAdapter.loadLineStringSpatialRDD">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">loadLineStringSpatialRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jsc</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="JvmSpatialObjectLoaderAdapter.loadLineStringSpatialRDD"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSpatialObjectLoaderAdapter.loadLineStringSpatialRDD">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">loadLineStringSpatialRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jsc</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">SpatialObjectLoaderAdapter</span><span class="p">(</span><span class="n">jsc</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="JvmSpatialObjectLoaderAdapter.loadIndexRDD">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSpatialObjectLoaderAdapter.loadIndexRDD">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">loadIndexRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jsc</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">SpatialObjectLoaderAdapter</span><span class="p">(</span><span class="n">jsc</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></div>
-</div>
+<div class="viewcode-block" id="JvmSpatialObjectLoaderAdapter.loadIndexRDD"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSpatialObjectLoaderAdapter.loadIndexRDD">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">loadIndexRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jsc</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">SpatialObjectLoaderAdapter</span><span class="p">(</span><span class="n">jsc</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></div></div>
 
 
+<div class="viewcode-block" id="JvmGeometryAdapter"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmGeometryAdapter">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">JvmGeometryAdapter</span><span class="p">:</span>
 
-<div class="viewcode-block" id="JvmGeometryAdapter">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmGeometryAdapter">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">JvmGeometryAdapter</span><span class="p">:</span>
-
-<div class="viewcode-block" id="JvmGeometryAdapter.__init__">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmGeometryAdapter.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jvm</span><span class="p">):</span>
+<div class="viewcode-block" id="JvmGeometryAdapter.__init__"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmGeometryAdapter.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jvm</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span> <span class="o">=</span> <span class="n">jvm</span></div>
 
-
-<div class="viewcode-block" id="JvmGeometryAdapter.translate_to_java">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmGeometryAdapter.translate_to_java">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">translate_to_java</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+<div class="viewcode-block" id="JvmGeometryAdapter.translate_to_java"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmGeometryAdapter.translate_to_java">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">translate_to_java</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
         <span class="n">bytes_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">bytes</span><span class="p">]</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">GeometryAdapter</span><span class="o">.</span><span class="n">translateToJava</span><span class="p">(</span><span class="n">bytes_data</span><span class="p">)</span></div>
-</div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">GeometryAdapter</span><span class="o">.</span><span class="n">translateToJava</span><span class="p">(</span><span class="n">bytes_data</span><span class="p">)</span></div></div>
 
 
+<div class="viewcode-block" id="SedonaPythonConverter"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SedonaPythonConverter">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SedonaPythonConverter</span><span class="p">:</span>
 
-<div class="viewcode-block" id="SedonaPythonConverter">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SedonaPythonConverter">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SedonaPythonConverter</span><span class="p">:</span>
-
-<div class="viewcode-block" id="SedonaPythonConverter.__init__">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SedonaPythonConverter.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jvm</span><span class="p">):</span>
+<div class="viewcode-block" id="SedonaPythonConverter.__init__"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SedonaPythonConverter.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jvm</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">jvm</span> <span class="o">=</span> <span class="n">jvm</span></div>
 
-
-<div class="viewcode-block" id="SedonaPythonConverter.translate_spatial_rdd_to_python">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SedonaPythonConverter.translate_spatial_rdd_to_python">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">translate_spatial_rdd_to_python</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spatial_rdd</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">jvm</span><span class="o">.</span><span class="n">PythonConverter</span><span class="o">.</span><span class="n">translateSpatialRDDToPython</span><span class="p">(</span><span class="n">spatial_rdd</span><span class="p">)</span></div>
-</div>
+<div class="viewcode-block" id="SedonaPythonConverter.translate_spatial_rdd_to_python"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SedonaPythonConverter.translate_spatial_rdd_to_python">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">translate_spatial_rdd_to_python</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spatial_rdd</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">jvm</span><span class="o">.</span><span class="n">PythonConverter</span><span class="o">.</span><span class="n">translateSpatialRDDToPython</span><span class="p">(</span><span class="n">spatial_rdd</span><span class="p">)</span></div></div>
 
 
+<div class="viewcode-block" id="PythonRddToJavaRDDAdapter"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.PythonRddToJavaRDDAdapter">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">PythonRddToJavaRDDAdapter</span><span class="p">:</span>
 
-<div class="viewcode-block" id="PythonRddToJavaRDDAdapter">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.PythonRddToJavaRDDAdapter">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">PythonRddToJavaRDDAdapter</span><span class="p">:</span>
-
-<div class="viewcode-block" id="PythonRddToJavaRDDAdapter.__init__">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.PythonRddToJavaRDDAdapter.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jvm</span><span class="p">):</span>
+<div class="viewcode-block" id="PythonRddToJavaRDDAdapter.__init__"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.PythonRddToJavaRDDAdapter.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jvm</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span> <span class="o">=</span> <span class="n">jvm</span></div>
 
-
-<div class="viewcode-block" id="PythonRddToJavaRDDAdapter.deserialize_to_point_raw_rdd">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.PythonRddToJavaRDDAdapter.deserialize_to_point_raw_rdd">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">deserialize_to_point_raw_rdd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">java_spatial_rdd</span><span class="p">):</span>
+<div class="viewcode-block" id="PythonRddToJavaRDDAdapter.deserialize_to_point_raw_rdd"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.PythonRddToJavaRDDAdapter.deserialize_to_point_raw_rdd">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">deserialize_to_point_raw_rdd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">java_spatial_rdd</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">PythonRddToJavaRDDAdapter</span><span class="o">.</span><span class="n">deserializeToPointRawRDD</span><span class="p">(</span>
             <span class="n">java_spatial_rdd</span>
         <span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="PythonRddToJavaRDDAdapter.deserialize_to_polygon_raw_rdd">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.PythonRddToJavaRDDAdapter.deserialize_to_polygon_raw_rdd">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">deserialize_to_polygon_raw_rdd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">java_spatial_rdd</span><span class="p">):</span>
+<div class="viewcode-block" id="PythonRddToJavaRDDAdapter.deserialize_to_polygon_raw_rdd"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.PythonRddToJavaRDDAdapter.deserialize_to_polygon_raw_rdd">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">deserialize_to_polygon_raw_rdd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">java_spatial_rdd</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">PythonRddToJavaRDDAdapter</span><span class="o">.</span><span class="n">deserializeToPolygonRawRDD</span><span class="p">(</span>
             <span class="n">java_spatial_rdd</span>
         <span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="PythonRddToJavaRDDAdapter.deserialize_to_linestring_raw_rdd">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.PythonRddToJavaRDDAdapter.deserialize_to_linestring_raw_rdd">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">deserialize_to_linestring_raw_rdd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">java_spatial_rdd</span><span class="p">):</span>
+<div class="viewcode-block" id="PythonRddToJavaRDDAdapter.deserialize_to_linestring_raw_rdd"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.PythonRddToJavaRDDAdapter.deserialize_to_linestring_raw_rdd">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">deserialize_to_linestring_raw_rdd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">java_spatial_rdd</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">PythonRddToJavaRDDAdapter</span><span class="o">.</span><span class="n">deserializeToLineStringRawRDD</span><span class="p">(</span>
             <span class="n">java_spatial_rdd</span>
-        <span class="p">)</span></div>
-</div>
+        <span class="p">)</span></div></div>
 
 
+<div class="viewcode-block" id="SpatialObjectLoaderAdapter"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SpatialObjectLoaderAdapter">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SpatialObjectLoaderAdapter</span><span class="p">:</span>
 
-<div class="viewcode-block" id="SpatialObjectLoaderAdapter">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SpatialObjectLoaderAdapter">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SpatialObjectLoaderAdapter</span><span class="p">:</span>
-
-<div class="viewcode-block" id="SpatialObjectLoaderAdapter.__init__">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SpatialObjectLoaderAdapter.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jvm</span><span class="p">):</span>
+<div class="viewcode-block" id="SpatialObjectLoaderAdapter.__init__"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SpatialObjectLoaderAdapter.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jvm</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span> <span class="o">=</span> <span class="n">jvm</span></div>
 
-
-<div class="viewcode-block" id="SpatialObjectLoaderAdapter.load_point_spatial_rdd">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SpatialObjectLoaderAdapter.load_point_spatial_rdd">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_point_spatial_rdd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sc</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="SpatialObjectLoaderAdapter.load_point_spatial_rdd"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SpatialObjectLoaderAdapter.load_point_spatial_rdd">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">load_point_spatial_rdd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sc</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">SpatialObjectLoaderAdapter</span><span class="o">.</span><span class="n">loadPointSpatialRDD</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="SpatialObjectLoaderAdapter.load_polygon_spatial_rdd">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SpatialObjectLoaderAdapter.load_polygon_spatial_rdd">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_polygon_spatial_rdd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sc</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="SpatialObjectLoaderAdapter.load_polygon_spatial_rdd"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SpatialObjectLoaderAdapter.load_polygon_spatial_rdd">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">load_polygon_spatial_rdd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sc</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">SpatialObjectLoaderAdapter</span><span class="o">.</span><span class="n">loadPolygonSpatialRDD</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="SpatialObjectLoaderAdapter.load_spatial_rdd">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SpatialObjectLoaderAdapter.load_spatial_rdd">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_spatial_rdd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sc</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="SpatialObjectLoaderAdapter.load_spatial_rdd"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SpatialObjectLoaderAdapter.load_spatial_rdd">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">load_spatial_rdd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sc</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">SpatialObjectLoaderAdapter</span><span class="o">.</span><span class="n">loadSpatialRDD</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="SpatialObjectLoaderAdapter.load_line_string_spatial_rdd">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SpatialObjectLoaderAdapter.load_line_string_spatial_rdd">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_line_string_spatial_rdd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sc</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="SpatialObjectLoaderAdapter.load_line_string_spatial_rdd"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SpatialObjectLoaderAdapter.load_line_string_spatial_rdd">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">load_line_string_spatial_rdd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sc</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">SpatialObjectLoaderAdapter</span><span class="o">.</span><span class="n">loadLineStringSpatialRDD</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="SpatialObjectLoaderAdapter.load_index_rdd">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SpatialObjectLoaderAdapter.load_index_rdd">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_index_rdd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sc</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">SpatialObjectLoaderAdapter</span><span class="o">.</span><span class="n">loadIndexRDD</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></div>
-</div>
-
+<div class="viewcode-block" id="SpatialObjectLoaderAdapter.load_index_rdd"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SpatialObjectLoaderAdapter.load_index_rdd">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">load_index_rdd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sc</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">SpatialObjectLoaderAdapter</span><span class="o">.</span><span class="n">loadIndexRDD</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

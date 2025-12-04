@@ -1,21 +1,21 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.core.jvm.config &mdash; Apache Sedona Python Documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/custom.css?v=08a75d8b" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/custom.css" />
 
   
-      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../../_static/documentation_options.js?v=908dc885"></script>
-      <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../../_static/jquery.js"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+      <script src="../../../../../_static/doctools.js"></script>
+      <script src="../../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
@@ -478,9 +478,7 @@
 <span class="n">string_types</span> <span class="o">=</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="is_greater_or_equal_version">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.is_greater_or_equal_version">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">is_greater_or_equal_version</span><span class="p">(</span><span class="n">version_a</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">version_b</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<div class="viewcode-block" id="is_greater_or_equal_version"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.is_greater_or_equal_version">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">is_greater_or_equal_version</span><span class="p">(</span><span class="n">version_a</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">version_b</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">version_b</span><span class="p">,</span> <span class="n">version_a</span><span class="p">]):</span>
         <span class="n">version_numbers</span> <span class="o">=</span> <span class="n">version_a</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">),</span> <span class="n">version_b</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">version</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span> <span class="k">for</span> <span class="n">version</span> <span class="ow">in</span> <span class="n">version_numbers</span><span class="p">]):</span>
@@ -496,10 +494,7 @@
     <span class="k">return</span> <span class="kc">True</span></div>
 
 
-
-<div class="viewcode-block" id="since">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.since">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">since</span><span class="p">(</span><span class="n">version</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="since"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.since">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">since</span><span class="p">(</span><span class="n">version</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">applier</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="n">sedona_version</span> <span class="o">=</span> <span class="n">SedonaMeta</span><span class="o">.</span><span class="n">version</span>
@@ -517,10 +512,7 @@
     <span class="k">return</span> <span class="n">wrapper</span></div>
 
 
-
-<div class="viewcode-block" id="deprecated">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.deprecated">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">deprecated</span><span class="p">(</span><span class="n">reason</span><span class="p">):</span>
+<div class="viewcode-block" id="deprecated"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.deprecated">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">deprecated</span><span class="p">(</span><span class="n">reason</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This is a decorator which can be used to mark functions</span>
 <span class="sd">    as deprecated. It will result in a warning being emitted</span>
@@ -589,13 +581,8 @@
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">reason</span><span class="p">)))</span></div>
 
 
-
-<div class="viewcode-block" id="SparkJars">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.SparkJars">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SparkJars</span><span class="p">:</span>
-<div class="viewcode-block" id="SparkJars.get_used_jars">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.SparkJars.get_used_jars">[docs]</a>
-    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="SparkJars"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.SparkJars">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SparkJars</span><span class="p">:</span>
+<div class="viewcode-block" id="SparkJars.get_used_jars"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.SparkJars.get_used_jars">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_used_jars</span><span class="p">():</span>
         <span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">_instantiatedSession</span>
 
@@ -628,16 +615,13 @@
 
         <span class="k">return</span> <span class="n">used_jar_files</span></div>
 
-
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">jars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;__spark_jars&quot;</span><span class="p">):</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;__spark_jars&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_used_jars</span><span class="p">())</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;__spark_jars&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SparkJars.get_spark_java_config">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.SparkJars.get_spark_java_config">[docs]</a>
-    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="SparkJars.get_spark_java_config"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.SparkJars.get_spark_java_config">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_spark_java_config</span><span class="p">(</span>
         <span class="n">spark</span><span class="p">:</span> <span class="n">SparkSession</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
@@ -656,17 +640,11 @@
             <span class="n">error_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Didn&#39;t find the value of </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> from SparkConf&quot;</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">used_jar_files</span><span class="p">,</span> <span class="n">error_message</span></div>
-</div>
+        <span class="k">return</span> <span class="n">used_jar_files</span><span class="p">,</span> <span class="n">error_message</span></div></div>
 
 
-
-<div class="viewcode-block" id="SedonaMeta">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.SedonaMeta">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SedonaMeta</span><span class="p">:</span>
-<div class="viewcode-block" id="SedonaMeta.get_version">
-<a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.SedonaMeta.get_version">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="SedonaMeta"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.SedonaMeta">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SedonaMeta</span><span class="p">:</span>
+<div class="viewcode-block" id="SedonaMeta.get_version"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.SedonaMeta.get_version">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">spark_jars</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="c1"># Find Spark version, Scala version and Sedona version.</span>
         <span class="n">versions</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span>
@@ -680,14 +658,12 @@
             <span class="n">sedona_version</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">sedona_version</span></div>
 
-
     <span class="nd">@classproperty</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">version</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="n">spark_jars</span> <span class="o">=</span> <span class="n">SparkJars</span><span class="o">.</span><span class="n">get_used_jars</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__version&quot;</span><span class="p">):</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__version&quot;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_version</span><span class="p">(</span><span class="n">spark_jars</span><span class="p">))</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__version&quot;</span><span class="p">)</span></div>
-
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>

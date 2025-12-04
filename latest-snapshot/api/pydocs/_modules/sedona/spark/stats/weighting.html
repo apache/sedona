@@ -1,21 +1,21 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.stats.weighting &mdash; Apache Sedona Python Documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=08a75d8b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
 
   
-      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=908dc885"></script>
-      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/jquery.js"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+      <script src="../../../../_static/doctools.js"></script>
+      <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -470,9 +470,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">SparkSession</span>
 
 
-<div class="viewcode-block" id="add_distance_band_column">
-<a class="viewcode-back" href="../../../../sedona.spark.stats.html#sedona.spark.stats.weighting.add_distance_band_column">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">add_distance_band_column</span><span class="p">(</span>
+<div class="viewcode-block" id="add_distance_band_column"><a class="viewcode-back" href="../../../../sedona.spark.stats.html#sedona.spark.stats.weighting.add_distance_band_column">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">add_distance_band_column</span><span class="p">(</span>
     <span class="n">dataframe</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">binary</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -528,10 +526,7 @@
     <span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="add_binary_distance_band_column">
-<a class="viewcode-back" href="../../../../sedona.spark.stats.html#sedona.spark.stats.weighting.add_binary_distance_band_column">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">add_binary_distance_band_column</span><span class="p">(</span>
+<div class="viewcode-block" id="add_binary_distance_band_column"><a class="viewcode-back" href="../../../../sedona.spark.stats.html#sedona.spark.stats.weighting.add_binary_distance_band_column">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">add_binary_distance_band_column</span><span class="p">(</span>
     <span class="n">dataframe</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">include_zero_distance_neighbors</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -584,10 +579,7 @@
     <span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="add_weighted_distance_band_column">
-<a class="viewcode-back" href="../../../../sedona.spark.stats.html#sedona.spark.stats.weighting.add_weighted_distance_band_column">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">add_weighted_distance_band_column</span><span class="p">(</span>
+<div class="viewcode-block" id="add_weighted_distance_band_column"><a class="viewcode-back" href="../../../../sedona.spark.stats.html#sedona.spark.stats.weighting.add_weighted_distance_band_column">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">add_weighted_distance_band_column</span><span class="p">(</span>
     <span class="n">dataframe</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -642,7 +634,6 @@
         <span class="p">),</span>
         <span class="n">sedona</span><span class="p">,</span>
     <span class="p">)</span></div>
-
 </pre></div>
 
            </div>

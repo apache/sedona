@@ -1,21 +1,21 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.core.geom.shapely2.circle &mdash; Apache Sedona Python Documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../../../_static/custom.css?v=08a75d8b" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../_static/custom.css" />
 
   
-      <script src="../../../../../../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../../../_static/documentation_options.js?v=908dc885"></script>
-      <script src="../../../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../../../_static/jquery.js"></script>
+      <script src="../../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../../../" id="documentation_options" src="../../../../../../_static/documentation_options.js"></script>
+      <script src="../../../../../../_static/doctools.js"></script>
+      <script src="../../../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../../search.html" />
@@ -478,9 +478,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.geom.envelope</span><span class="w"> </span><span class="kn">import</span> <span class="n">Envelope</span>
 
 
-<div class="viewcode-block" id="Circle">
-<a class="viewcode-back" href="../../../../../../sedona.spark.core.geom.shapely2.html#sedona.spark.core.geom.shapely2.circle.Circle">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Circle</span><span class="p">(</span><span class="n">Polygon</span><span class="p">):</span>
+<div class="viewcode-block" id="Circle"><a class="viewcode-back" href="../../../../../../sedona.spark.core.geom.shapely2.html#sedona.spark.core.geom.shapely2.circle.Circle">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Circle</span><span class="p">(</span><span class="n">Polygon</span><span class="p">):</span>
 
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -504,28 +502,17 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">MBR</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getEnvelopeInternal</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Circle.getCenterGeometry">
-<a class="viewcode-back" href="../../../../../../sedona.spark.core.geom.shapely2.html#sedona.spark.core.geom.shapely2.circle.Circle.getCenterGeometry">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">getCenterGeometry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseGeometry</span><span class="p">:</span>
+<div class="viewcode-block" id="Circle.getCenterGeometry"><a class="viewcode-back" href="../../../../../../sedona.spark.core.geom.shapely2.html#sedona.spark.core.geom.shapely2.circle.Circle.getCenterGeometry">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getCenterGeometry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseGeometry</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">centroid</span></div>
 
-
-<div class="viewcode-block" id="Circle.getCenterPoint">
-<a class="viewcode-back" href="../../../../../../sedona.spark.core.geom.shapely2.html#sedona.spark.core.geom.shapely2.circle.Circle.getCenterPoint">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">getCenterPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Circle.getCenterPoint"><a class="viewcode-back" href="../../../../../../sedona.spark.core.geom.shapely2.html#sedona.spark.core.geom.shapely2.circle.Circle.getCenterPoint">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getCenterPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">centroid</span></div>
 
-
-<div class="viewcode-block" id="Circle.getRadius">
-<a class="viewcode-back" href="../../../../../../sedona.spark.core.geom.shapely2.html#sedona.spark.core.geom.shapely2.circle.Circle.getRadius">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">getRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<div class="viewcode-block" id="Circle.getRadius"><a class="viewcode-back" href="../../../../../../sedona.spark.core.geom.shapely2.html#sedona.spark.core.geom.shapely2.circle.Circle.getRadius">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getRadius</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">maxx</span> <span class="o">-</span> <span class="n">minx</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span></div>
 
-
-<div class="viewcode-block" id="Circle.covers">
-<a class="viewcode-back" href="../../../../../../sedona.spark.core.geom.shapely2.html#sedona.spark.core.geom.shapely2.circle.Circle.covers">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">covers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">BaseGeometry</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<div class="viewcode-block" id="Circle.covers"><a class="viewcode-back" href="../../../../../../sedona.spark.core.geom.shapely2.html#sedona.spark.core.geom.shapely2.circle.Circle.covers">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">covers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">BaseGeometry</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Point</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">covers_point</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">LineString</span><span class="p">):</span>
@@ -545,37 +532,24 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Not supported&quot;</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="Circle.covers_point">
-<a class="viewcode-back" href="../../../../../../sedona.spark.core.geom.shapely2.html#sedona.spark.core.geom.shapely2.circle.Circle.covers_point">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">covers_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="n">Point</span><span class="p">):</span>
+<div class="viewcode-block" id="Circle.covers_point"><a class="viewcode-back" href="../../../../../../sedona.spark.core.geom.shapely2.html#sedona.spark.core.geom.shapely2.circle.Circle.covers_point">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">covers_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="n">Point</span><span class="p">):</span>
         <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCenterPoint</span><span class="p">()</span>
         <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRadius</span><span class="p">()</span>
         <span class="n">delta_x</span> <span class="o">=</span> <span class="n">point</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">x</span>
         <span class="n">delta_y</span> <span class="o">=</span> <span class="n">point</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">y</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">delta_x</span> <span class="o">*</span> <span class="n">delta_x</span> <span class="o">+</span> <span class="n">delta_y</span> <span class="o">*</span> <span class="n">delta_y</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">r</span> <span class="o">*</span> <span class="n">r</span></div>
 
-
-<div class="viewcode-block" id="Circle.covers_linestring">
-<a class="viewcode-back" href="../../../../../../sedona.spark.core.geom.shapely2.html#sedona.spark.core.geom.shapely2.circle.Circle.covers_linestring">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">covers_linestring</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">linestring</span><span class="p">:</span> <span class="n">LineString</span><span class="p">):</span>
+<div class="viewcode-block" id="Circle.covers_linestring"><a class="viewcode-back" href="../../../../../../sedona.spark.core.geom.shapely2.html#sedona.spark.core.geom.shapely2.circle.Circle.covers_linestring">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">covers_linestring</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">linestring</span><span class="p">:</span> <span class="n">LineString</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">linestring</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">covers_point</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="o">*</span><span class="n">point</span><span class="p">)):</span>
                 <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span></div>
 
-
-<div class="viewcode-block" id="Circle.intersects">
-<a class="viewcode-back" href="../../../../../../sedona.spark.core.geom.shapely2.html#sedona.spark.core.geom.shapely2.circle.Circle.intersects">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">intersects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">BaseGeometry</span><span class="p">):</span>
+<div class="viewcode-block" id="Circle.intersects"><a class="viewcode-back" href="../../../../../../sedona.spark.core.geom.shapely2.html#sedona.spark.core.geom.shapely2.circle.Circle.intersects">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">intersects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">BaseGeometry</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="Circle.getEnvelopeInternal">
-<a class="viewcode-back" href="../../../../../../sedona.spark.core.geom.shapely2.html#sedona.spark.core.geom.shapely2.circle.Circle.getEnvelopeInternal">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">getEnvelopeInternal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Circle.getEnvelopeInternal"><a class="viewcode-back" href="../../../../../../sedona.spark.core.geom.shapely2.html#sedona.spark.core.geom.shapely2.circle.Circle.getEnvelopeInternal">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getEnvelopeInternal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_envelope_internal</span><span class="p">()</span></div>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -594,7 +568,6 @@
             <span class="o">+</span> <span class="s2">&quot; around &quot;</span>
             <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centerGeometry</span><span class="p">)</span>
         <span class="p">)</span></div>
-
 </pre></div>
 
            </div>

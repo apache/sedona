@@ -1,21 +1,21 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.utils.decorators &mdash; Apache Sedona Python Documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=08a75d8b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
 
   
-      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=908dc885"></script>
-      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/jquery.js"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+      <script src="../../../../_static/doctools.js"></script>
+      <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -468,15 +468,10 @@
 <span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="classproperty">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.decorators.classproperty">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">classproperty</span><span class="p">:</span>
+<div class="viewcode-block" id="classproperty"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.decorators.classproperty">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">classproperty</span><span class="p">:</span>
 
-<div class="viewcode-block" id="classproperty.__init__">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.decorators.classproperty.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+<div class="viewcode-block" id="classproperty.__init__"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.decorators.classproperty.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="n">f</span></div>
-
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">owner</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="n">owner</span><span class="p">)</span>
@@ -485,10 +480,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">()</span></div>
 
 
-
-<div class="viewcode-block" id="get_first_meet_criteria_element_from_iterable">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.decorators.get_first_meet_criteria_element_from_iterable">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_first_meet_criteria_element_from_iterable</span><span class="p">(</span>
+<div class="viewcode-block" id="get_first_meet_criteria_element_from_iterable"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.decorators.get_first_meet_criteria_element_from_iterable">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">get_first_meet_criteria_element_from_iterable</span><span class="p">(</span>
     <span class="n">iterable</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">T</span><span class="p">],</span> <span class="nb">int</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">iterable</span><span class="p">):</span>
@@ -497,10 +489,7 @@
     <span class="k">return</span> <span class="o">-</span><span class="mi">1</span></div>
 
 
-
-<div class="viewcode-block" id="require">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.decorators.require">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">require</span><span class="p">(</span><span class="n">library_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<div class="viewcode-block" id="require"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.decorators.require">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">require</span><span class="p">(</span><span class="n">library_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">run_function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">ImportedJvmLib</span>
@@ -521,7 +510,6 @@
         <span class="k">return</span> <span class="n">run_function</span>
 
     <span class="k">return</span> <span class="n">wrapper</span></div>
-
 </pre></div>
 
            </div>

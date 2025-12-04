@@ -1,21 +1,21 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.utils.serde &mdash; Apache Sedona Python Documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=08a75d8b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
 
   
-      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=908dc885"></script>
-      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/jquery.js"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+      <script src="../../../../_static/doctools.js"></script>
+      <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -468,34 +468,25 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.utils.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">classproperty</span>
 
 
-<div class="viewcode-block" id="Serializer">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.serde.Serializer">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Serializer</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="Serializer"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.serde.Serializer">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Serializer</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 
     <span class="nd">@classproperty</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 
-
-<div class="viewcode-block" id="KryoSerializer">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.serde.KryoSerializer">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">KryoSerializer</span><span class="p">(</span><span class="n">Serializer</span><span class="p">):</span>
+<div class="viewcode-block" id="KryoSerializer"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.serde.KryoSerializer">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">KryoSerializer</span><span class="p">(</span><span class="n">Serializer</span><span class="p">):</span>
 
     <span class="nd">@classproperty</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;org.apache.spark.serializer.KryoSerializer&quot;</span></div>
 
 
-
-<div class="viewcode-block" id="SedonaKryoRegistrator">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.serde.SedonaKryoRegistrator">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SedonaKryoRegistrator</span><span class="p">(</span><span class="n">Serializer</span><span class="p">):</span>
+<div class="viewcode-block" id="SedonaKryoRegistrator"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.serde.SedonaKryoRegistrator">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SedonaKryoRegistrator</span><span class="p">(</span><span class="n">Serializer</span><span class="p">):</span>
 
     <span class="nd">@classproperty</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;org.apache.sedona.core.serde.SedonaKryoRegistrator&quot;</span></div>
-
 </pre></div>
 
            </div>

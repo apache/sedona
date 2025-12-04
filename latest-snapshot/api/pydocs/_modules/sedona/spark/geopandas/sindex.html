@@ -1,21 +1,21 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.sindex &mdash; Apache Sedona Python Documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=08a75d8b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
 
   
-      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=908dc885"></script>
-      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/jquery.js"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+      <script src="../../../../_static/doctools.js"></script>
+      <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -475,16 +475,12 @@
 <span class="n">ALLOWED_PREDICATES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;intersects&quot;</span><span class="p">,</span> <span class="s2">&quot;contains&quot;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="SpatialIndex">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SpatialIndex</span><span class="p">:</span>
+<div class="viewcode-block" id="SpatialIndex"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SpatialIndex</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A wrapper around Sedona&#39;s spatial index functionality.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="SpatialIndex.__init__">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">index_type</span><span class="o">=</span><span class="s2">&quot;strtree&quot;</span><span class="p">,</span> <span class="n">column_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="SpatialIndex.__init__"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">index_type</span><span class="o">=</span><span class="s2">&quot;strtree&quot;</span><span class="p">,</span> <span class="n">column_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the SpatialIndex with geometry data.</span>
 
@@ -531,10 +527,7 @@
                 <span class="s2">&quot;Invalid type for `geometry`. Expected np.array, GeoSeries, or PySparkDataFrame.&quot;</span>
             <span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="SpatialIndex.query">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex.query">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometry</span><span class="p">:</span> <span class="n">BaseGeometry</span><span class="p">,</span> <span class="n">predicate</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="SpatialIndex.query"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex.query">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometry</span><span class="p">:</span> <span class="n">BaseGeometry</span><span class="p">,</span> <span class="n">predicate</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Query the spatial index for geometries that intersect the given geometry.</span>
 
@@ -624,10 +617,7 @@
 
             <span class="k">return</span> <span class="n">results</span></div>
 
-
-<div class="viewcode-block" id="SpatialIndex.nearest">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex.nearest">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">nearest</span><span class="p">(</span>
+<div class="viewcode-block" id="SpatialIndex.nearest"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex.nearest">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">nearest</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">geometry</span><span class="p">:</span> <span class="n">BaseGeometry</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">return_distance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -701,10 +691,7 @@
                 <span class="k">return</span> <span class="n">indices</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">distances</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
             <span class="k">return</span> <span class="n">indices</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span></div>
 
-
-<div class="viewcode-block" id="SpatialIndex.intersection">
-<a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex.intersection">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">intersection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
+<div class="viewcode-block" id="SpatialIndex.intersection"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex.intersection">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">intersection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find geometries that intersect the given bounding box. Similar to the Geopandas version,</span>
 <span class="sd">        this is a compatibility wrapper for rtree.index.Index.intersection, use query instead.</span>
@@ -750,7 +737,6 @@
             <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
                 <span class="c1"># Fall back to querying with a box geometry (older Shapely).</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">bbox</span><span class="p">)</span></div>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -811,7 +797,6 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Unsupported index type: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">index_type</span><span class="si">}</span><span class="s2">. Only &#39;strtree&#39; is supported for local indexing.&quot;</span>
                 <span class="p">)</span></div>
-
 </pre></div>
 
            </div>

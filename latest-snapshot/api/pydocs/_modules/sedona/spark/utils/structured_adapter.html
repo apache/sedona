@@ -1,21 +1,21 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.utils.structured_adapter &mdash; Apache Sedona Python Documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=08a75d8b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
 
   
-      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=908dc885"></script>
-      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/jquery.js"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+      <script src="../../../../_static/doctools.js"></script>
+      <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -470,9 +470,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.spatialOperator.rdd</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaPairRDD</span>
 
 
-<div class="viewcode-block" id="StructuredAdapter">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.structured_adapter.StructuredAdapter">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">StructuredAdapter</span><span class="p">:</span>
+<div class="viewcode-block" id="StructuredAdapter"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.structured_adapter.StructuredAdapter">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">StructuredAdapter</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class which allow to convert between Spark DataFrame and SpatialRDD and reverse.</span>
 <span class="sd">    This class is used to convert between PySpark DataFrame and SpatialRDD. Schema</span>
@@ -484,9 +482,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_dataframe</span><span class="p">(</span><span class="n">jdf</span><span class="p">,</span> <span class="n">sparkSession</span><span class="p">:</span> <span class="n">SparkSession</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">DataFrame</span><span class="p">(</span><span class="n">jdf</span><span class="p">,</span> <span class="n">sparkSession</span><span class="p">)</span>
 
-<div class="viewcode-block" id="StructuredAdapter.toSpatialRdd">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.structured_adapter.StructuredAdapter.toSpatialRdd">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="StructuredAdapter.toSpatialRdd"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.structured_adapter.StructuredAdapter.toSpatialRdd">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">toSpatialRdd</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span> <span class="n">dataFrame</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">geometryFieldName</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SpatialRDD</span><span class="p">:</span>
@@ -508,10 +504,7 @@
 
         <span class="k">return</span> <span class="n">spatial_rdd</span></div>
 
-
-<div class="viewcode-block" id="StructuredAdapter.toDf">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.structured_adapter.StructuredAdapter.toDf">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="StructuredAdapter.toDf"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.structured_adapter.StructuredAdapter.toDf">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">toDf</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">spatialRDD</span><span class="p">:</span> <span class="n">SpatialRDD</span><span class="p">,</span> <span class="n">sparkSession</span><span class="p">:</span> <span class="n">SparkSession</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert a SpatialRDD to a DataFrame</span>
@@ -528,10 +521,7 @@
 
         <span class="k">return</span> <span class="n">df</span></div>
 
-
-<div class="viewcode-block" id="StructuredAdapter.toSpatialPartitionedDf">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.structured_adapter.StructuredAdapter.toSpatialPartitionedDf">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="StructuredAdapter.toSpatialPartitionedDf"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.structured_adapter.StructuredAdapter.toSpatialPartitionedDf">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">toSpatialPartitionedDf</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span> <span class="n">spatialRDD</span><span class="p">:</span> <span class="n">SpatialRDD</span><span class="p">,</span> <span class="n">sparkSession</span><span class="p">:</span> <span class="n">SparkSession</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
@@ -552,10 +542,7 @@
 
         <span class="k">return</span> <span class="n">df</span></div>
 
-
-<div class="viewcode-block" id="StructuredAdapter.pairRddToDf">
-<a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.structured_adapter.StructuredAdapter.pairRddToDf">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="StructuredAdapter.pairRddToDf"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.structured_adapter.StructuredAdapter.pairRddToDf">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">pairRddToDf</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">rawPairRDD</span><span class="p">:</span> <span class="n">SedonaPairRDD</span><span class="p">,</span>
@@ -584,9 +571,7 @@
             <span class="n">sparkSession</span><span class="o">.</span><span class="n">_jsparkSession</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">StructuredAdapter</span><span class="o">.</span><span class="n">_create_dataframe</span><span class="p">(</span><span class="n">jdf</span><span class="p">,</span> <span class="n">sparkSession</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">df</span></div>
-</div>
-
+        <span class="k">return</span> <span class="n">df</span></div></div>
 </pre></div>
 
            </div>

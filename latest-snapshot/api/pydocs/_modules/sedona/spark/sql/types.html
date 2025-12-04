@@ -1,21 +1,21 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.types &mdash; Apache Sedona Python Documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=08a75d8b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
 
   
-      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=908dc885"></script>
-      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/jquery.js"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+      <script src="../../../../_static/doctools.js"></script>
+      <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -484,118 +484,66 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.geom.geography</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geography</span>
 
 
-<div class="viewcode-block" id="GeometryType">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeometryType">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">GeometryType</span><span class="p">(</span><span class="n">UserDefinedType</span><span class="p">):</span>
+<div class="viewcode-block" id="GeometryType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeometryType">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">GeometryType</span><span class="p">(</span><span class="n">UserDefinedType</span><span class="p">):</span>
 
-<div class="viewcode-block" id="GeometryType.sqlType">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeometryType.sqlType">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="GeometryType.sqlType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeometryType.sqlType">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">sqlType</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">BinaryType</span><span class="p">()</span></div>
 
-
-<div class="viewcode-block" id="GeometryType.serialize">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeometryType.serialize">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+<div class="viewcode-block" id="GeometryType.serialize"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeometryType.serialize">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">geometry_serde</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="GeometryType.deserialize">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeometryType.deserialize">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datum</span><span class="p">):</span>
+<div class="viewcode-block" id="GeometryType.deserialize"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeometryType.deserialize">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datum</span><span class="p">):</span>
         <span class="n">geom</span><span class="p">,</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">geometry_serde</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">datum</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">geom</span></div>
 
-
-<div class="viewcode-block" id="GeometryType.module">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeometryType.module">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="GeometryType.module"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeometryType.module">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">module</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;sedona.spark.sql.types&quot;</span></div>
 
-
-<div class="viewcode-block" id="GeometryType.needConversion">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeometryType.needConversion">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">needConversion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="GeometryType.needConversion"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeometryType.needConversion">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">needConversion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">True</span></div>
 
-
-<div class="viewcode-block" id="GeometryType.scalaUDT">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeometryType.scalaUDT">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="GeometryType.scalaUDT"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeometryType.scalaUDT">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">scalaUDT</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;org.apache.spark.sql.sedona_sql.UDT.GeometryUDT&quot;</span></div>
-</div>
+        <span class="k">return</span> <span class="s2">&quot;org.apache.spark.sql.sedona_sql.UDT.GeometryUDT&quot;</span></div></div>
 
 
+<div class="viewcode-block" id="GeographyType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeographyType">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">GeographyType</span><span class="p">(</span><span class="n">UserDefinedType</span><span class="p">):</span>
 
-<div class="viewcode-block" id="GeographyType">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeographyType">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">GeographyType</span><span class="p">(</span><span class="n">UserDefinedType</span><span class="p">):</span>
-
-<div class="viewcode-block" id="GeographyType.sqlType">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeographyType.sqlType">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="GeographyType.sqlType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeographyType.sqlType">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">sqlType</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">BinaryType</span><span class="p">()</span></div>
 
-
-<div class="viewcode-block" id="GeographyType.serialize">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeographyType.serialize">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+<div class="viewcode-block" id="GeographyType.serialize"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeographyType.serialize">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">geometry_serde</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="GeographyType.deserialize">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeographyType.deserialize">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datum</span><span class="p">):</span>
+<div class="viewcode-block" id="GeographyType.deserialize"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeographyType.deserialize">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datum</span><span class="p">):</span>
         <span class="n">geom</span><span class="p">,</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">geometry_serde</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">datum</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Geography</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="GeographyType.module">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeographyType.module">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="GeographyType.module"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeographyType.module">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">module</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;sedona.spark.sql.types&quot;</span></div>
 
-
-<div class="viewcode-block" id="GeographyType.needConversion">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeographyType.needConversion">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">needConversion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="GeographyType.needConversion"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeographyType.needConversion">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">needConversion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">True</span></div>
 
-
-<div class="viewcode-block" id="GeographyType.scalaUDT">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeographyType.scalaUDT">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="GeographyType.scalaUDT"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeographyType.scalaUDT">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">scalaUDT</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;org.apache.spark.sql.sedona_sql.UDT.GeographyUDT&quot;</span></div>
-</div>
+        <span class="k">return</span> <span class="s2">&quot;org.apache.spark.sql.sedona_sql.UDT.GeographyUDT&quot;</span></div></div>
 
 
+<div class="viewcode-block" id="RasterType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.RasterType">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">RasterType</span><span class="p">(</span><span class="n">UserDefinedType</span><span class="p">):</span>
 
-<div class="viewcode-block" id="RasterType">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.RasterType">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">RasterType</span><span class="p">(</span><span class="n">UserDefinedType</span><span class="p">):</span>
-
-<div class="viewcode-block" id="RasterType.sqlType">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.RasterType.sqlType">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="RasterType.sqlType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.RasterType.sqlType">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">sqlType</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">BinaryType</span><span class="p">()</span></div>
 
-
-<div class="viewcode-block" id="RasterType.serialize">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.RasterType.serialize">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+<div class="viewcode-block" id="RasterType.serialize"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.RasterType.serialize">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;RasterType.serialize is not implemented yet&quot;</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="RasterType.deserialize">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.RasterType.deserialize">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datum</span><span class="p">):</span>
+<div class="viewcode-block" id="RasterType.deserialize"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.RasterType.deserialize">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datum</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">raster_serde</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">raster_serde</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">datum</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -603,27 +551,16 @@
                 <span class="s2">&quot;rasterio is not installed. Please install it to support RasterType deserialization&quot;</span>
             <span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="RasterType.module">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.RasterType.module">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="RasterType.module"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.RasterType.module">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">module</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;sedona.spark.sql.types&quot;</span></div>
 
-
-<div class="viewcode-block" id="RasterType.needConversion">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.RasterType.needConversion">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">needConversion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="RasterType.needConversion"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.RasterType.needConversion">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">needConversion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">True</span></div>
 
-
-<div class="viewcode-block" id="RasterType.scalaUDT">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.RasterType.scalaUDT">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="RasterType.scalaUDT"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.RasterType.scalaUDT">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">scalaUDT</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;org.apache.spark.sql.sedona_sql.UDT.RasterUDT&quot;</span></div>
-</div>
-
+        <span class="k">return</span> <span class="s2">&quot;org.apache.spark.sql.sedona_sql.UDT.RasterUDT&quot;</span></div></div>
 </pre></div>
 
            </div>

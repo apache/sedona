@@ -1,21 +1,21 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.st_aggregates &mdash; Apache Sedona Python Documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=08a75d8b" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
 
   
-      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=908dc885"></script>
-      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/jquery.js"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+      <script src="../../../../_static/doctools.js"></script>
+      <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -477,9 +477,7 @@
 <span class="n">_call_aggregate_function</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">call_sedona_function</span><span class="p">,</span> <span class="s2">&quot;st_aggregates&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="ST_Envelope_Aggr">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_aggregates.ST_Envelope_Aggr">[docs]</a>
-<span class="nd">@validate_argument_types</span>
+<div class="viewcode-block" id="ST_Envelope_Aggr"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_aggregates.ST_Envelope_Aggr">[docs]</a><span class="nd">@validate_argument_types</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_Envelope_Aggr</span><span class="p">(</span><span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Aggregate Function: Get the aggregate envelope of a geometry column.</span>
 
@@ -491,10 +489,7 @@
     <span class="k">return</span> <span class="n">_call_aggregate_function</span><span class="p">(</span><span class="s2">&quot;ST_Envelope_Aggr&quot;</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="ST_Intersection_Aggr">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_aggregates.ST_Intersection_Aggr">[docs]</a>
-<span class="nd">@validate_argument_types</span>
+<div class="viewcode-block" id="ST_Intersection_Aggr"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_aggregates.ST_Intersection_Aggr">[docs]</a><span class="nd">@validate_argument_types</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_Intersection_Aggr</span><span class="p">(</span><span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Aggregate Function: Get the aggregate intersection of a geometry column.</span>
 
@@ -506,10 +501,7 @@
     <span class="k">return</span> <span class="n">_call_aggregate_function</span><span class="p">(</span><span class="s2">&quot;ST_Intersection_Aggr&quot;</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="ST_Union_Aggr">
-<a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_aggregates.ST_Union_Aggr">[docs]</a>
-<span class="nd">@validate_argument_types</span>
+<div class="viewcode-block" id="ST_Union_Aggr"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_aggregates.ST_Union_Aggr">[docs]</a><span class="nd">@validate_argument_types</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_Union_Aggr</span><span class="p">(</span><span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Aggregate Function: Get the aggregate union of a geometry column.</span>
 
@@ -519,7 +511,6 @@
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_call_aggregate_function</span><span class="p">(</span><span class="s2">&quot;ST_Union_Aggr&quot;</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span></div>
-
 
 
 <span class="c1"># Automatically populate __all__</span>
