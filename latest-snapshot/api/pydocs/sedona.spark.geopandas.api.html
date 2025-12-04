@@ -1835,8 +1835,67 @@ where NaNs will be filled. Must be greater than 0 if not None.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.force_3d">
-<span class="sig-name descname"><span class="pre">force_3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.force_3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.force_3d" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">force_3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.geoseries.GeoSeries"><span class="pre">GeoSeries</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.force_3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.force_3d" title="Permalink to this definition"></a></dt>
+<dd><p>Force the dimensionality of a geometry to 3D.</p>
+<p>2D geometries will get the provided Z coordinate; 3D geometries
+are unchanged (unless their Z coordinate is <code class="docutils literal notranslate"><span class="pre">np.nan</span></code>).</p>
+<p>Note: Sedona’s behavior may differ from Geopandas’ for M and ZM geometries.
+For M geometries, Sedona will replace the M coordinate and add the Z coordinate.
+For ZM geometries, Sedona will drop the M coordinate and retain the Z coordinate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>z</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> | </em><em>array_like</em><em> (</em><em>default 0</em><em>)</em>) – Z coordinate to be assigned</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries">GeoSeries</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely</span><span class="w"> </span><span class="kn">import</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Point</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">Point</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">LineString</span><span class="p">([(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]),</span>
+<span class="gp">... </span>        <span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)]),</span>
+<span class="gp">... </span>    <span class="p">],</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span>
+<span class="go">0                          POINT (1 2)</span>
+<span class="go">1                  POINT Z (0.5 2.5 2)</span>
+<span class="go">2           LINESTRING (1 1, 0 1, 1 0)</span>
+<span class="go">3    POLYGON ((0 0, 0 10, 10 10, 0 0))</span>
+<span class="go">dtype: geometry</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">force_3d</span><span class="p">()</span>
+<span class="go">0                                POINT Z (1 2 0)</span>
+<span class="go">1                            POINT Z (0.5 2.5 2)</span>
+<span class="go">2             LINESTRING Z (1 1 0, 0 1 0, 1 0 0)</span>
+<span class="go">3    POLYGON Z ((0 0 0, 0 10 0, 10 10 0, 0 0 0))</span>
+<span class="go">dtype: geometry</span>
+</pre></div>
+</div>
+<p>Z coordinate can be specified as scalar:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">force_3d</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">0                                POINT Z (1 2 4)</span>
+<span class="go">1                            POINT Z (0.5 2.5 2)</span>
+<span class="go">2             LINESTRING Z (1 1 4, 0 1 4, 1 0 4)</span>
+<span class="go">3    POLYGON Z ((0 0 4, 0 10 4, 10 10 4, 0 0 4))</span>
+<span class="go">dtype: geometry</span>
+</pre></div>
+</div>
+<p>Or as an array-like (one value per geometry):</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">force_3d</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="go">0                                POINT Z (1 2 0)</span>
+<span class="go">1                            POINT Z (0.5 2.5 2)</span>
+<span class="go">2             LINESTRING Z (1 1 2, 0 1 2, 1 0 2)</span>
+<span class="go">3    POLYGON Z ((0 0 3, 0 10 3, 10 10 3, 0 0 3))</span>
+<span class="go">dtype: geometry</span>
+</pre></div>
+</div>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.from_arrow">
