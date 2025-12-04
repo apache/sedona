@@ -82,16 +82,18 @@ url = "https://flatgeobuf.septima.dk/population_areas.fgb"
 sd.read_pyogrio(url).to_view("population_areas")
 
 wkt = "POLYGON ((-73.978329 40.767412, -73.950005 40.767412, -73.950005 40.795098, -73.978329 40.795098, -73.978329 40.767412))"
-sd.sql(f"""
+sd.sql(
+    f"""
 SELECT sum(population::INTEGER) FROM population_areas
 WHERE ST_Intersects(wkb_geometry, ST_SetSRID(ST_GeomFromWKT('{wkt}'), 4326))
-""").show()
-#> ┌──────────────────────────────────┐
-#> │ sum(population_areas.population) │
-#> │               int64              │
-#> ╞══════════════════════════════════╡
-#> │                           256251 │
-#> └──────────────────────────────────┘
+"""
+).show()
+# > ┌──────────────────────────────────┐
+# > │ sum(population_areas.population) │
+# > │               int64              │
+# > ╞══════════════════════════════════╡
+# > │                           256251 │
+# > └──────────────────────────────────┘
 ```
 
 ## GeoParquet 1.1 Write Support
@@ -115,10 +117,12 @@ sd.sql("SET datafusion.execution.parquet.max_row_group_size = 100000")
 
 sd.read_parquet(url).to_view("water_point")
 
-sd.sql("""
+sd.sql(
+    """
 SELECT * FROM water_point
 ORDER BY sd_order(geometry)
-""").to_parquet("water_point.parquet", geoparquet_version="1.1")
+"""
+).to_parquet("water_point.parquet", geoparquet_version="1.1")
 ```
 
 ## Python User-Defined Function Support
@@ -146,12 +150,12 @@ def shapely_udf(geom, distance):
 
 sd.register_udf(shapely_udf)
 sd.sql("SELECT shapely_udf(ST_Point(0, 0), 2.0) as col").show()
-#> ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-#> │                                                col                                               │
-#> │                                             geometry                                             │
-#> ╞══════════════════════════════════════════════════════════════════════════════════════════════════╡
-#> │ POLYGON((2 0,1.9615705608064609 -0.3901806440322565,1.8477590650225735 -0.7653668647301796,1.66… │
-#> └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+# > ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+# > │                                                col                                               │
+# > │                                             geometry                                             │
+# > ╞══════════════════════════════════════════════════════════════════════════════════════════════════╡
+# > │ POLYGON((2 0,1.9615705608064609 -0.3901806440322565,1.8477590650225735 -0.7653668647301796,1.66… │
+# > └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 See the [documentation page for `arrow_udf()`](https://sedona.apache.org/sedonadb/latest/reference/python/#sedonadb.udf.arrow_udf) for more examples and documentation.
@@ -166,12 +170,12 @@ import sedona.db
 sd = sedona.db.connect()
 
 sd.sql("SELECT RS_Width(RS_Example()) as width").show()
-#> ┌────────┐
-#> │  width │
-#> │ uint64 │
-#> ╞════════╡
-#> │     64 │
-#> └────────┘
+# > ┌────────┐
+# > │  width │
+# > │ uint64 │
+# > ╞════════╡
+# > │     64 │
+# > └────────┘
 ```
 
 For more information or to get involved see the [raster support umbrella issue](https://github.com/apache/sedona-db/issues/246). Thank you to [jesspav](https://github.com/jesspav) for driving this work!
