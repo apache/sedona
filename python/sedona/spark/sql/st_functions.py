@@ -1596,6 +1596,18 @@ def ST_NumInteriorRing(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
+def ST_OrientedEnvelope(geometry: ColumnOrName) -> Column:
+    """Return the minimum rotated rectangle enclosing a geometry.
+
+    :param geometry: Geometry column to compute oriented envelope for.
+    :type geometry: ColumnOrName
+    :return: Minimum area rotated rectangle as a geometry column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_OrientedEnvelope", geometry)
+
+
+@validate_argument_types
 def ST_PointN(geometry: ColumnOrName, n: Union[ColumnOrName, int]) -> Column:
     """Get the n-th point (starts at 1) for a geometry.
 
