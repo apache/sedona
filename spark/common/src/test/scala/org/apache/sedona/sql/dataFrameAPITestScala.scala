@@ -1814,6 +1814,15 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_Collect_Agg") {
+      val baseDf = sparkSession.sql(
+        "SELECT explode(array(ST_GeomFromWKT('POINT (1 2)'), ST_GeomFromWKT('POINT (3 4)'), ST_GeomFromWKT('POINT (5 6)'))) AS geom")
+      val df = baseDf.select(ST_Collect_Agg("geom"))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry]
+      assert(actualResult.getGeometryType == "MultiPoint")
+      assert(actualResult.getNumGeometries == 3)
+    }
+
     it("Passed ST_LineFromMultiPoint") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('MULTIPOINT((10 40), (40 30), (20 20), (30 10))') AS multipoint")
