@@ -565,6 +565,26 @@ This function is meant to be used a decorator.</p>
 <section id="module-sedona.spark.sql.st_aggregates">
 <span id="sedona-spark-sql-st-aggregates-module"></span><h2>sedona.spark.sql.st_aggregates module<a class="headerlink" href="#module-sedona.spark.sql.st_aggregates" title="Permalink to this heading"></a></h2>
 <dl class="py function">
+<dt class="sig sig-object py" id="sedona.spark.sql.st_aggregates.ST_Collect_Agg">
+<span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_aggregates.</span></span><span class="sig-name descname"><span class="pre">ST_Collect_Agg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_aggregates.html#ST_Collect_Agg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_aggregates.ST_Collect_Agg" title="Permalink to this definition"></a></dt>
+<dd><p>Aggregate Function: Collect all geometries into a multi-geometry.</p>
+<p>Unlike ST_Union_Aggr, this function does not dissolve boundaries between geometries.
+It simply collects all geometries into a MultiPoint, MultiLineString, MultiPolygon,
+or GeometryCollection based on the input geometry types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>geometry</strong> (<em>ColumnOrName</em>) – Geometry column to aggregate.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Multi-geometry representing the collection of all geometries in the column.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="sedona.spark.sql.st_aggregates.ST_Envelope_Aggr">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_aggregates.</span></span><span class="sig-name descname"><span class="pre">ST_Envelope_Aggr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_aggregates.html#ST_Envelope_Aggr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_aggregates.ST_Envelope_Aggr" title="Permalink to this definition"></a></dt>
 <dd><p>Aggregate Function: Get the aggregate envelope of a geometry column.</p>

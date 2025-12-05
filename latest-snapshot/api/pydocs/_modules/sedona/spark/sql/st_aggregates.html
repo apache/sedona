@@ -513,6 +513,22 @@
     <span class="k">return</span> <span class="n">_call_aggregate_function</span><span class="p">(</span><span class="s2">&quot;ST_Union_Aggr&quot;</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="ST_Collect_Agg"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_aggregates.ST_Collect_Agg">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_Collect_Agg</span><span class="p">(</span><span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Aggregate Function: Collect all geometries into a multi-geometry.</span>
+
+<span class="sd">    Unlike ST_Union_Aggr, this function does not dissolve boundaries between geometries.</span>
+<span class="sd">    It simply collects all geometries into a MultiPoint, MultiLineString, MultiPolygon,</span>
+<span class="sd">    or GeometryCollection based on the input geometry types.</span>
+
+<span class="sd">    :param geometry: Geometry column to aggregate.</span>
+<span class="sd">    :type geometry: ColumnOrName</span>
+<span class="sd">    :return: Multi-geometry representing the collection of all geometries in the column.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_call_aggregate_function</span><span class="p">(</span><span class="s2">&quot;ST_Collect_Agg&quot;</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span></div>
+
+
 <span class="c1"># Automatically populate __all__</span>
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">name</span>
