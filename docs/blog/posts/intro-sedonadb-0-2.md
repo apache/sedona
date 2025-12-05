@@ -61,7 +61,7 @@ Thank you to [Abeeujah](https://github.com/Abeeujah), [ayushjariyal](https://git
 
 ## GDAL/OGR spatial file format read support
 
-Whereas SedonaDB 0.1.0 launched with GeoParquet read support and GeoPandas interoperatiblity, support for file formats like GeoPackage, Shapefile, FlatGeoBuf inherited the limitations of GeoPandas (notably, the materialization of an entire layer in memory as a Pandas dataframe). The package powering GeoPandas read support ([pyogrio](https://github.com/geopandas/pyogrio)) also exposes the [underlying provider's (GDAL/OGR) native Arrow interface](https://gdal.org/en/stable/development/rfc/rfc86_column_oriented_api.html), which is the exact format that SedonaDB uses under the hood! This allowed us to add support for dozens of vector formats at once wired directly in to DataFusion's flexible `FileFormat` API. Users can now read from spatial file formats just as they can from Parquet:
+Whereas SedonaDB 0.1.0 launched with GeoParquet read support and GeoPandas interoperability, support for file formats like GeoPackage, Shapefile, FlatGeoBuf inherited the limitations of GeoPandas (notably, the materialization of an entire layer in memory as a Pandas dataframe). The package powering GeoPandas read support ([pyogrio](https://github.com/geopandas/pyogrio)) also exposes the [underlying provider's (GDAL/OGR) native Arrow interface](https://gdal.org/en/stable/development/rfc/rfc86_column_oriented_api.html), which is the exact format that SedonaDB uses under the hood! This allowed us to add support for dozens of vector formats at once wired directly in to DataFusion's flexible `FileFormat` API. Users can now read from spatial file formats just as they can from Parquet:
 
 ```python
 # pip install "apache-sedona[db]"
