@@ -3490,6 +3490,26 @@ Output:
 3
 ```
 
+## ST_OrientedEnvelope
+
+Introduction: Returns the minimum-area rotated rectangle enclosing a geometry. The rectangle may be rotated relative to the coordinate axes. Degenerate inputs may result in a Point or LineString being returned.
+
+Format: `ST_OrientedEnvelope(geom: Geometry)`
+
+Since: `v1.8.x`
+
+SQL Example
+
+```sql
+SELECT ST_OrientedEnvelope(ST_GeomFromWKT('POLYGON ((0 0, 1 0, 5 4, 4 4, 0 0))'))
+```
+
+Output:
+
+```
+POLYGON ((0 0, 4.5 4.5, 5 4, 0.5 -0.5, 0 0))
+```
+
 ## ST_Perimeter
 
 Introduction: This function calculates the 2D perimeter of a given geometry. It supports Polygon, MultiPolygon, and GeometryCollection geometries (as long as the GeometryCollection contains polygonal geometries). For other types, it returns 0. To measure lines, use [ST_Length](#st_length).
