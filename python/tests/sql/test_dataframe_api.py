@@ -867,7 +867,13 @@ test_configurations = [
     (stf.ST_NumInteriorRings, ("geom",), "geom_with_hole", "", 1),
     (stf.ST_NumInteriorRing, ("geom",), "geom_with_hole", "", 1),
     (stf.ST_NumPoints, ("line",), "linestring_geom", "", 6),
-    (stf.ST_OrientedEnvelope, ("geom",), "diagonal_geom", "", "POLYGON ((0 0, 4.5 4.5, 5 4, 0.5 -0.5, 0 0))"),
+    (
+        stf.ST_OrientedEnvelope,
+        ("geom",),
+        "diagonal_geom",
+        "",
+        "POLYGON ((0 0, 4.5 4.5, 5 4, 0.5 -0.5, 0 0))",
+    ),
     (stf.ST_PointN, ("line", 2), "linestring_geom", "", "POINT (1 0)"),
     (stf.ST_PointOnSurface, ("line",), "linestring_geom", "", "POINT (2 0)"),
     (
