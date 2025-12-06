@@ -208,6 +208,7 @@ object Catalog extends AbstractCatalog with Logging {
     function[ST_XMin](),
     function[ST_BuildArea](),
     function[ST_OrderingEquals](),
+    function[ST_OrientedEnvelope](),
     function[ST_CollectionExtract](defaultArgs = null),
     function[ST_Normalize](),
     function[ST_LineFromMultiPoint](),

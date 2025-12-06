@@ -392,6 +392,14 @@ public class TestFunctions extends TestBase {
   }
 
   @Test
+  public void test_ST_OrientedEnvelope() {
+    registerUDF("ST_OrientedEnvelope", byte[].class);
+    verifySqlSingleRes(
+        "select sedona.ST_AsText(sedona.ST_OrientedEnvelope(sedona.ST_GeomFromText('POLYGON ((0 0, 1 0, 5 4, 4 4, 0 0))')))",
+        "POLYGON ((0 0, 4.5 4.5, 5 4, 0.5 -0.5, 0 0))");
+  }
+
+  @Test
   public void test_ST_Expand() {
     registerUDF("ST_Expand", byte[].class, double.class);
     verifySqlSingleRes(

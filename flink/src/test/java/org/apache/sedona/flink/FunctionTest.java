@@ -410,6 +410,16 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testOrientedEnvelope() {
+    Table polygonTable =
+        tableEnv.sqlQuery("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 5 4, 4 4, 0 0))') as geom");
+    Table resultTable =
+        polygonTable.select(call(Functions.ST_OrientedEnvelope.class.getSimpleName(), $("geom")));
+    Geometry result = (Geometry) first(resultTable).getField(0);
+    assertEquals("POLYGON ((0 0, 4.5 4.5, 5 4, 0.5 -0.5, 0 0))", result.toString());
+  }
+
+  @Test
   public void testExpand() {
     Table baseTable =
         tableEnv.sqlQuery(

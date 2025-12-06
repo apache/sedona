@@ -701,6 +701,14 @@ private[apache] case class ST_MinimumBoundingCircle(inputExpressions: Seq[Expres
   }
 }
 
+private[apache] case class ST_OrientedEnvelope(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.orientedEnvelope _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 private[apache] case class ST_HasZ(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.hasZ _) {
 

@@ -373,6 +373,11 @@ public class UDFs {
     return GeometrySerde.serialize(Functions.envelope(GeometrySerde.deserialize(geometry)));
   }
 
+  @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+  public static byte[] ST_OrientedEnvelope(byte[] geometry) {
+    return GeometrySerde.serialize(Functions.orientedEnvelope(GeometrySerde.deserialize(geometry)));
+  }
+
   @UDFAnnotations.ParamMeta(argNames = {"geometry", "uniformDelta"})
   public static byte[] ST_Expand(byte[] geometry, double uniformDelta) {
     return GeometrySerde.serialize(
