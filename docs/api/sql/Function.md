@@ -3496,7 +3496,7 @@ Introduction: Returns the minimum-area rotated rectangle enclosing a geometry. T
 
 Format: `ST_OrientedEnvelope(geom: Geometry)`
 
-Since: `v1.8.x`
+Since: `v1.8.1`
 
 SQL Example
 
