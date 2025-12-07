@@ -1491,6 +1491,15 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualRadius == expectedRadius)
     }
 
+    it("Passed ST_OrientedEnvelope") {
+      val baseDf =
+        sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 5 4, 4 4, 0 0))') AS geom")
+      val df = baseDf.select(ST_OrientedEnvelope("geom"))
+      val actual = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      val expected = "POLYGON ((0 0, 4.5 4.5, 5 4, 0.5 -0.5, 0 0))"
+      assertEquals(expected, actual)
+    }
+
     it("Passed ST_LineSegments") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('LINESTRING(120 140, 60 120, 30 20)') AS line, ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 0, 0 0))') AS poly")
