@@ -2043,6 +2043,18 @@
     <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_NumInteriorRing&quot;</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="ST_OrientedEnvelope"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_OrientedEnvelope">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_OrientedEnvelope</span><span class="p">(</span><span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the minimum rotated rectangle enclosing a geometry.</span>
+
+<span class="sd">    :param geometry: Geometry column to compute oriented envelope for.</span>
+<span class="sd">    :type geometry: ColumnOrName</span>
+<span class="sd">    :return: Minimum area rotated rectangle as a geometry column.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_OrientedEnvelope&quot;</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="ST_PointN"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_PointN">[docs]</a><span class="nd">@validate_argument_types</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_PointN</span><span class="p">(</span><span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the n-th point (starts at 1) for a geometry.</span>
