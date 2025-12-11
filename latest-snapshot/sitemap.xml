@@ -9,6 +9,18 @@
          <lastmod>2025-12-11</lastmod>
     </url>
     <url>
+         <loc>https://sedona.apache.org/latest/sedonaflink/</loc>
+         <lastmod>2025-12-11</lastmod>
+    </url>
+    <url>
+         <loc>https://sedona.apache.org/latest/sedonasnow/</loc>
+         <lastmod>2025-12-11</lastmod>
+    </url>
+    <url>
+         <loc>https://sedona.apache.org/latest/sedonaspark/</loc>
+         <lastmod>2025-12-11</lastmod>
+    </url>
+    <url>
          <loc>https://sedona.apache.org/latest/api/java-api/</loc>
          <lastmod>2025-12-11</lastmod>
     </url>
