@@ -1491,6 +1491,15 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualRadius == expectedRadius)
     }
 
+    it("Passed ST_OrientedEnvelope") {
+      val baseDf =
+        sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 5 4, 4 4, 0 0))') AS geom")
+      val df = baseDf.select(ST_OrientedEnvelope("geom"))
+      val actual = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      val expected = "POLYGON ((0 0, 4.5 4.5, 5 4, 0.5 -0.5, 0 0))"
+      assertEquals(expected, actual)
+    }
+
     it("Passed ST_LineSegments") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('LINESTRING(120 140, 60 120, 30 20)') AS line, ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 0, 0 0))') AS poly")
@@ -1812,6 +1821,15 @@ class dataFrameAPITestScala extends TestBaseScala {
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       val expectedResult = "POLYGON ((2 0, 1 0, 1 1, 2 1, 2 0))"
       assert(actualResult == expectedResult)
+    }
+
+    it("Passed ST_Collect_Agg") {
+      val baseDf = sparkSession.sql(
+        "SELECT explode(array(ST_GeomFromWKT('POINT (1 2)'), ST_GeomFromWKT('POINT (3 4)'), ST_GeomFromWKT('POINT (5 6)'))) AS geom")
+      val df = baseDf.select(ST_Collect_Agg("geom"))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry]
+      assert(actualResult.getGeometryType == "MultiPoint")
+      assert(actualResult.getNumGeometries == 3)
     }
 
     it("Passed ST_LineFromMultiPoint") {

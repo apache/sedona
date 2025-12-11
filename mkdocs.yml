@@ -20,19 +20,10 @@ site_url: https://sedona.apache.org
 site_description: Apache Sedona is a cluster computing system for processing large-scale spatial data. Sedona extends existing cluster computing systems, such as Apache Spark, Apache Flink, and Snowflake, with a set of out-of-the-box distributed Spatial Datasets and Spatial SQL that efficiently load, process, and analyze large-scale spatial data across machines.
 nav:
   - Home: index.md
-  - Setup:
-      - Overview: setup/overview.md
-      - Supported platforms:
-          - Sedona with Apache Spark:
-              - Modules: setup/modules.md
-              - Language wrappers: setup/platform.md
-          - Sedona with Apache Flink:
-              - Modules: setup/flink/modules.md
-              - Language wrappers: setup/flink/platform.md
-          - Sedona with Snowflake:
-              - Modules: setup/snowflake/modules.md
-      - Maven Central coordinate: setup/maven-coordinates.md
-      - Install with Apache Spark:
+  - SedonaDB: 'https://sedona.apache.org/sedonadb/'
+  - SedonaSpark:
+      - Home: sedonaspark.md
+      - Install:
           - Install Sedona Scala/Java: setup/install-scala.md
           - Install Sedona Python: setup/install-python.md
           - Install Sedona R: api/rdocs
@@ -46,15 +37,11 @@ nav:
           - Install on Microsoft Fabric: setup/fabric.md
           - Set up Spark cluster manually: setup/cluster.md
           - Install on Azure Synapse Analytics: setup/azure-synapse-analytics.md
-      - Install with Apache Flink:
-          - Install Sedona Scala/Java: setup/flink/install-scala.md
-          - Install Sedona Python: setup/flink/install-python.md
-      - Install with Snowflake:
-          - Install Sedona SQL: setup/snowflake/install.md
-      - Release notes: setup/release-notes.md
-  - Download: download.md
-  - Programming Guides:
-      - Sedona with Apache Spark:
+          - Overview: setup/overview.md
+          - Modules: setup/modules.md
+          - Language wrappers: setup/platform.md
+          - Maven Central coordinate: setup/maven-coordinates.md
+      - Programming Guide:
           - Spatial DataFrame / SQL app: tutorial/sql.md
           - Raster DataFrame / SQL app: tutorial/raster.md
           - Pure SQL environment: tutorial/sql-pure-sql.md
@@ -81,16 +68,7 @@ nav:
               - Benchmark: tutorial/benchmark.md
               - Tune RDD application: tutorial/Advanced-Tutorial-Tune-your-Application.md
               - Storing large raster geometries in Parquet files: tutorial/storing-blobs-in-parquet.md
-      - Sedona with Apache Flink:
-          - Spatial SQL app (Flink): tutorial/flink/sql.md
-          - Spatial SQL app (PyFlink): tutorial/flink/pyflink-sql.md
-      - Sedona with Snowflake:
-          - Spatial SQL app (Snowflake): tutorial/snowflake/sql.md
-      - Examples:
-          - Scala/Java: tutorial/demo.md
-          - Python: tutorial/jupyter-notebook.md
-  - API Docs:
-      - Sedona with Apache Spark:
+      - API:
           - SQL:
               - Quick start: api/sql/Overview.md
               - Vector data:
@@ -130,24 +108,47 @@ nav:
               - RDD: api/viz/java-api.md
           - Sedona R: api/rdocs
           - Sedona Python: api/pydocs
-      - Sedona with Apache Flink:
+
+  - SedonaFlink:
+      - Home: sedonaflink.md
+      - Install:
+          - Install Sedona Scala/Java: setup/flink/install-scala.md
+          - Install Sedona Python: setup/flink/install-python.md
+          - Modules: setup/flink/modules.md
+          - Language wrappers: setup/flink/platform.md
+      - Programming Guides:
+          - Sedona with Apache Flink:
+              - Spatial SQL app (Flink): tutorial/flink/sql.md
+              - Spatial SQL app (PyFlink): tutorial/flink/pyflink-sql.md
+          - Examples:
+              - Scala/Java: tutorial/demo.md
+              - Python: tutorial/jupyter-notebook.md
+      - API:
           - SQL:
               - Overview (Flink): api/flink/Overview.md
               - Constructor (Flink): api/flink/Constructor.md
               - Function (Flink): api/flink/Function.md
               - Aggregator (Flink): api/flink/Aggregator.md
               - Predicate (Flink): api/flink/Predicate.md
-      - Sedona with Snowflake:
+
+  - SedonaSnow:
+      - Home: sedonasnow.md
+      - Install:
+          - Install Sedona SQL: setup/snowflake/install.md
+          - Spatial SQL app (Snowflake): tutorial/snowflake/sql.md
+          - Modules: setup/snowflake/modules.md
+      - API:
           - SQL:
               - Overview (Snowflake): api/snowflake/vector-data/Overview.md
               - Constructor (Snowflake): api/snowflake/vector-data/Constructor.md
               - Function (Snowflake): api/snowflake/vector-data/Function.md
               - Aggregate Function (Snowflake): api/snowflake/vector-data/AggregateFunction.md
               - Predicate (Snowflake): api/snowflake/vector-data/Predicate.md
-  - SedonaDB: 'https://sedona.apache.org/sedonadb/'
   - SpatialBench: 'https://sedona.apache.org/spatialbench/'
   - Blog: blog/index.md
   - Community:
+      - Download: download.md
+      - Release notes: setup/release-notes.md
       - Compile the code: setup/compile.md
       - Community: community/contact.md
       - Contributor Guide:

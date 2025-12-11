@@ -19,10 +19,8 @@
 # https://pre-commit.com/#installation
 default_stages: [pre-commit, pre-push]
 default_language_version:
-  # force all unspecified Python hooks to run python3
   python: python3
-  # force all unspecified Node hooks to run Node.js v22.17.0 LTS
-  node: 22.20.0
+  node: 24.12.0
 minimum_pre_commit_version: '3.2.0'
 repos:
   - repo: meta
@@ -48,7 +46,7 @@ repos:
         entry: prettier --write '**/*.js' '**/*.yaml' '**/*.yml'
         files: \.(js|ya?ml)$
         language: node
-        additional_dependencies: ['prettier@3.6.2']
+        additional_dependencies: ['prettier@3.7.4']
       - id: maven-spotless-apply
         name: maven spotless apply
         description: automatically formats Java and Scala code using mvn spotless:apply.
@@ -137,7 +135,13 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-        exclude: ^docs/index\.md$|^\.github/pull_request_template\.md$|\.github/issue_template\.md$|^docs/blog/.*\.md$
+        exclude: |
+          (?x)^(
+            \.github/issue_template\.md|
+            \.github/pull_request_template\.md|
+            docs/blog/.*\.md|
+            docs/index\.md
+          )$
       - id: insert-license
         name: add license for all Makefile files
         description: automatically adds a licence header to all Makefiles that don't have a license header
@@ -191,7 +195,12 @@ repos:
       - id: insert-license
         name: add license for all XML files
         files: \.xml$
-        exclude: scalastyle_config\.xml$|^docker/zeppelin/conf/zeppelin-site\.xml$|^spark/common/src/test/resources/.*$
+        exclude: |
+          (?x)(
+            scalastyle_config\.xml|
+            ^docker/zeppelin/conf/zeppelin-site\.xml|
+            ^spark/common/src/test/resources/.*
+          )$
         args:
           - --comment-style
           - '<!--||-->'
@@ -250,28 +259,27 @@ repos:
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.21.0
+    rev: v3.21.2
     hooks:
       - id: pyupgrade
         name: run pyupgrade
         description: a tool (and pre-commit hook) to automatically upgrade syntax for newer versions of the language
         args: [--py37-plus]
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 25.9.0
+    rev: 25.12.0
     hooks:
       - id: black-jupyter
         name: run black-jupyter
         description: format Python files and Jupyter Notebooks with black
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v20.1.7
+    rev: v21.1.7
     hooks:
       - id: clang-format
         name: run clang-format
         description: format C files with clang-format
-        args: [--style=Google]
         types_or: [c]
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.8.6
+    rev: 1.9.2
     hooks:
       - id: bandit
         name: run bandit
@@ -285,9 +293,18 @@ repos:
         name: run codespell
         description: check spelling with codespell
         args: [--ignore-words=.github/linters/codespell.txt]
-        exclude: ^docs/image|^spark/common/src/test/resources|^docs/usecases|^tools/maven/scalafmt|osmpbf/build|^docker/zeppelin|^docs-overrides
+        exclude: |
+          (?x)(
+            ^docker/zeppelin|
+            ^docs/image|
+            ^docs/usecases|
+            ^docs-overrides|
+            ^spark/common/src/test/resources|
+            ^tools/maven/scalafmt|
+            osmpbf/build
+          )
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.28.0
+    rev: v8.30.0
     hooks:
       - id: gitleaks
         name: run gitleaks
@@ -402,13 +419,13 @@ repos:
         args: [--pytest-test-first]
         exclude: |
           (?x)^(
-              python/tests/properties/crs_transform\.py|
-              python/tests/properties/linestring_properties\.py|
-              python/tests/properties/point_properties\.py|
-              python/tests/properties/polygon_properties\.py|
-              python/tests/sql/resource/sample_data\.py|
-              python/tests/streaming/spark/cases_builder\.py|
-              python/tests/tools\.py
+            python/tests/properties/crs_transform\.py|
+            python/tests/properties/linestring_properties\.py|
+            python/tests/properties/point_properties\.py|
+            python/tests/properties/polygon_properties\.py|
+            python/tests/sql/resource/sample_data\.py|
+            python/tests/streaming/spark/cases_builder\.py|
+            python/tests/tools\.py
           )$
       - id: requirements-txt-fixer
         name: run requirements-txt-fixer
@@ -420,7 +437,7 @@ repos:
         args: [--markdown-linebreak-ext=md]
         exclude: ^docs-overrides/main\.html$|\.Rd$
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.45.0
+    rev: v0.47.0
     hooks:
       - id: markdownlint
         name: run markdownlint
@@ -428,7 +445,7 @@ repos:
         args: [--config=.github/linters/.markdown-lint.yml]
         exclude: ^\.github/.*$
         types: [markdown]
-        files: \.(md|mdown|markdown)$
+        files: \.md$
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: v0.11.0.1
     hooks:
@@ -445,7 +462,7 @@ repos:
         types: [yaml]
         files: \.ya?ml$
   - repo: https://github.com/oxipng/oxipng
-    rev: v9.1.5
+    rev: v10.0.0
     hooks:
       - id: oxipng
         name: run oxipng
@@ -458,4 +475,4 @@ repos:
       - id: blacken-docs
         name: run blacken-docs
         description: run `black` on python code blocks in documentation files
-        additional_dependencies: [black==25.1.0]
+        additional_dependencies: [black==25.12.0]

@@ -18,6 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
+import org.apache.sedona.common.Functions
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.expressions.Aggregator
 import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory}
@@ -190,4 +191,43 @@ private[apache] class ST_Intersection_Aggr
     else if (buffer2.equalsExact(initialGeometry)) buffer1
     else buffer1.intersection(buffer2)
   }
+}
+
+/**
+ * Return a multi-geometry collection of all geometries in the given column. Unlike ST_Union_Aggr,
+ * this function does not dissolve boundaries between geometries.
+ */
+private[apache] class ST_Collect_Agg
+    extends Aggregator[Geometry, ListBuffer[Geometry], Geometry] {
+
+  val serde = ExpressionEncoder[Geometry]()
+  val bufferSerde = ExpressionEncoder[ListBuffer[Geometry]]()
+
+  override def reduce(buffer: ListBuffer[Geometry], input: Geometry): ListBuffer[Geometry] = {
+    if (input != null) {
+      buffer += input
+    }
+    buffer
+  }
+
+  override def merge(
+      buffer1: ListBuffer[Geometry],
+      buffer2: ListBuffer[Geometry]): ListBuffer[Geometry] = {
+    buffer1 ++= buffer2
+    buffer1
+  }
+
+  override def finish(reduction: ListBuffer[Geometry]): Geometry = {
+    if (reduction.isEmpty) {
+      new GeometryFactory().createGeometryCollection()
+    } else {
+      Functions.createMultiGeometry(reduction.toArray)
+    }
+  }
+
+  def bufferEncoder: ExpressionEncoder[ListBuffer[Geometry]] = bufferSerde
+
+  def outputEncoder: ExpressionEncoder[Geometry] = serde
+
+  override def zero: ListBuffer[Geometry] = ListBuffer.empty
 }
