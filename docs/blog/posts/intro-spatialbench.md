@@ -92,7 +92,7 @@ Engines not designed to work with spatial data may not support `ST_DWithin` or m
 
 Running aggregations and reports on data within a specified distance of a point is a typical spatial workflow, so this query is representative of an engine's spatial capabilities.
 
-You can see all of the SpatialBench queries within [the SpatialBench project](https://sedona.apache.org/spatialbench/queries/). 
+You can see all of the SpatialBench queries within [the SpatialBench project](https://sedona.apache.org/spatialbench/queries/).
 
 ## Importance of representative queries
 
@@ -106,7 +106,7 @@ You must also run the queries on high-quality, representative data to ensure acc
 
 ## Importance of reliable data
 
-The SpatialBench queries use synthetic datasets that anyone can generate with the spatialbench-cli tool.  Synthetic datasets are easy to reproduce, but they’re also dangerous because they may not represent real-world data. Learn about the current open datasets and generators [within the project](https://sedona.apache.org/spatialbench/datasets-generators/). 
+The SpatialBench queries use synthetic datasets that anyone can generate with the spatialbench-cli tool.  Synthetic datasets are easy to reproduce, but they’re also dangerous because they may not represent real-world data. Learn about the current open datasets and generators [within the project](https://sedona.apache.org/spatialbench/datasets-generators/).
 
 For example, the query we examined above identifies all trips that originated within 15 kilometers of Sedona, Arizona.  Here are different ways the data could provide misleading results for this particular query:
 
@@ -129,8 +129,8 @@ Importantly, these distributions are also configurable. Users can choose from mu
 * Diagonal
 * Bit
 * Sierpinski
-* Thomas 
-* Hierarchical Thomas 
+* Thomas
+* Hierarchical Thomas
 
 You can also tune the parameters for each distribution (e.g., number of clusters, spread, skew) to fit the benchmarking scenario.
 
