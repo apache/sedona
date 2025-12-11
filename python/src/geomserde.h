@@ -43,7 +43,7 @@ typedef enum SedonaErrorCode {
  * @param err error code
  * @return error message
  */
-extern const char* sedona_get_error_message(int err);
+extern const char *sedona_get_error_message(int err);
 
 /**
  * Serializes a GEOS geometry object as a binary buffer
@@ -55,8 +55,8 @@ extern const char* sedona_get_error_message(int err);
  * @return error code
  */
 SedonaErrorCode sedona_serialize_geom(GEOSContextHandle_t handle,
-                                      const GEOSGeometry* geom, char** p_buf,
-                                      int* p_buf_size);
+                                      const GEOSGeometry *geom, char **p_buf,
+                                      int *p_buf_size);
 
 /**
  * Deserializes a serialized geometry to a GEOS geometry object
@@ -69,8 +69,8 @@ SedonaErrorCode sedona_serialize_geom(GEOSContextHandle_t handle,
  * @return error code
  */
 SedonaErrorCode sedona_deserialize_geom(GEOSContextHandle_t handle,
-                                        const char* buf, int buf_size,
-                                        GEOSGeometry** p_geom,
-                                        int* p_bytes_read);
+                                        const char *buf, int buf_size,
+                                        GEOSGeometry **p_geom,
+                                        int *p_bytes_read);
 
 #endif /* GEOM_SERDE */

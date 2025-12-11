@@ -277,7 +277,6 @@ repos:
       - id: clang-format
         name: run clang-format
         description: format C files with clang-format
-        args: [--style=Google]
         types_or: [c]
   - repo: https://github.com/PyCQA/bandit
     rev: 1.9.2
