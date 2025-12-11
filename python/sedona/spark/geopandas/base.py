@@ -794,7 +794,7 @@ class GeoFrame(metaclass=ABCMeta):
 
         See Also
         --------
-        GeoSeries.minumum_bounding_circle : minimum bounding circle (geometry)
+        GeoSeries.minimum_bounding_circle : minimum bounding circle (geometry)
 
         """
         return _delegate_to_geometry_column("minimum_bounding_radius", self)
