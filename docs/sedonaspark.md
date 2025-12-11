@@ -87,44 +87,6 @@ SedonaSpark extends Apache Spark with a rich set of out-of-the-box distributed S
 * **Open source**: Apache Sedona is an open-source project managed in accordance with the Apache Software Foundation's guidelines.
 * Extra functionality like [nearest neighbor searching](https://sedona.apache.org/latest/api/sql/NearestNeighbourSearching/) and geostats like [DBSCAN](https://sedona.apache.org/latest/tutorial/sql/#cluster-with-dbscan)
 
-## Installation
-
-Here’s how to install SedonaSpark with various build tools:
-
-=== "pip"
-
-    ```bash
-    pip install apache-sedona
-    ```
-
-=== "SBT"
-
-    ```
-    libraryDependencies += "org.apache.sedona" % "sedona-common" % "{{ sedona.current_version }}"
-    ```
-
-=== "Gradle"
-
-    ```
-    implementation("org.apache.sedona:sedona-common:{{ sedona.current_version }}")
-    ```
-
-=== "Maven"
-
-    ```
-    <dependency>
-        <groupId>org.apache.sedona</groupId>
-        <artifactId>sedona-common</artifactId>
-        <version>{{ sedona.current_version }}</version>
-    </dependency>
-    ```
-
-=== "R"
-
-    ```r
-    install.packages("apache.sedona")
-    ```
-
 ## Portability
 
 It’s easy to run SedonaSpark locally, with Docker, or on any popular cloud.
