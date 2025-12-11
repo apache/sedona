@@ -878,7 +878,48 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         self.check_sgpd_equals_gpd(sgpd_3d, gpd_3d)
 
     def test_force_3d(self):
-        pass
+        # force_3d was added from geopandas 1.0.0
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            pytest.skip("geopandas force_3d requires version 1.0.0 or higher")
+        # 1) Promote 2D to 3D with z = 4
+        for geom in self.geoms:
+            if isinstance(geom[0], (LinearRing)):
+                continue
+            sgpd_result = GeoSeries(geom).force_3d(4)
+            gpd_result = gpd.GeoSeries(geom).force_3d(4)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # 2) Minimal sample for various geometry types with custom z=7.5
+        data = [
+            Point(1, 2),  # 2D
+            Point(0.5, 2.5, 2),  # 3D (Z)
+            LineString([(1, 1), (0, 1), (1, 0)]),  # 2D
+            Polygon([(0, 0), (0, 10), (10, 10)]),  # 2D
+        ]
+        sgpd_result = GeoSeries(data).force_3d(7.5)
+        gpd_result = gpd.GeoSeries(data).force_3d(7.5)
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # 3) Array-like z tests
+        geoms = self.polygons
+        lst = list(range(1, len(geoms) + 1))
+
+        # Traditional python list
+        sgpd_result = GeoSeries(geoms).force_3d(lst)
+        gpd_result = gpd.GeoSeries(geoms).force_3d(lst)
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # numpy array
+        np_array = np.array(lst)
+        sgpd_result = GeoSeries(geoms).force_3d(np_array)
+        gpd_result = gpd.GeoSeries(geoms).force_3d(np_array)
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # pandas-on-Spark Series
+        psser = ps.Series(lst)
+        sgpd_result = GeoSeries(geoms).force_3d(psser)
+        gpd_result = gpd.GeoSeries(geoms).force_3d(psser.to_pandas())
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_line_merge(self):
         pass

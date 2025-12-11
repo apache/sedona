@@ -128,6 +128,123 @@ class aggregateFunctionTestScala extends TestBaseScala {
 
       assertResult(0.0)(intersectionDF.take(1)(0).get(0).asInstanceOf[Geometry].getArea)
     }
+
+    it("Passed ST_Collect_Agg with points") {
+      sparkSession
+        .sql("""
+          |SELECT explode(array(
+          |  ST_GeomFromWKT('POINT(1 2)'),
+          |  ST_GeomFromWKT('POINT(3 4)'),
+          |  ST_GeomFromWKT('POINT(5 6)')
+          |)) AS geom
+        """.stripMargin)
+        .createOrReplaceTempView("points_table")
+
+      val collectDF = sparkSession.sql("SELECT ST_Collect_Agg(geom) FROM points_table")
+      val result = collectDF.take(1)(0).get(0).asInstanceOf[Geometry]
+
+      assert(result.getGeometryType == "MultiPoint")
+      assert(result.getNumGeometries == 3)
+    }
+
+    it("Passed ST_Collect_Agg with polygons") {
+      sparkSession
+        .sql("""
+          |SELECT explode(array(
+          |  ST_GeomFromWKT('POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))'),
+          |  ST_GeomFromWKT('POLYGON((2 2, 3 2, 3 3, 2 3, 2 2))')
+          |)) AS geom
+        """.stripMargin)
+        .createOrReplaceTempView("polygons_table")
+
+      val collectDF = sparkSession.sql("SELECT ST_Collect_Agg(geom) FROM polygons_table")
+      val result = collectDF.take(1)(0).get(0).asInstanceOf[Geometry]
+
+      assert(result.getGeometryType == "MultiPolygon")
+      assert(result.getNumGeometries == 2)
+      // Total area should be 2 (each polygon has area 1)
+      assert(result.getArea == 2.0)
+    }
+
+    it("Passed ST_Collect_Agg with mixed geometry types") {
+      sparkSession
+        .sql("""
+          |SELECT explode(array(
+          |  ST_GeomFromWKT('POINT(1 2)'),
+          |  ST_GeomFromWKT('LINESTRING(0 0, 1 1)'),
+          |  ST_GeomFromWKT('POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))')
+          |)) AS geom
+        """.stripMargin)
+        .createOrReplaceTempView("mixed_geom_table")
+
+      val collectDF = sparkSession.sql("SELECT ST_Collect_Agg(geom) FROM mixed_geom_table")
+      val result = collectDF.take(1)(0).get(0).asInstanceOf[Geometry]
+
+      assert(result.getGeometryType == "GeometryCollection")
+      assert(result.getNumGeometries == 3)
+    }
+
+    it("Passed ST_Collect_Agg with GROUP BY") {
+      sparkSession
+        .sql("""
+          |SELECT * FROM (VALUES
+          |  (1, ST_GeomFromWKT('POINT(1 2)')),
+          |  (1, ST_GeomFromWKT('POINT(3 4)')),
+          |  (2, ST_GeomFromWKT('POINT(5 6)')),
+          |  (2, ST_GeomFromWKT('POINT(7 8)')),
+          |  (2, ST_GeomFromWKT('POINT(9 10)'))
+          |) AS t(group_id, geom)
+        """.stripMargin)
+        .createOrReplaceTempView("grouped_points_table")
+
+      val collectDF = sparkSession.sql(
+        "SELECT group_id, ST_Collect_Agg(geom) as collected FROM grouped_points_table GROUP BY group_id ORDER BY group_id")
+      val results = collectDF.collect()
+
+      // Group 1 should have 2 points
+      assert(results(0).getAs[Geometry]("collected").getNumGeometries == 2)
+      // Group 2 should have 3 points
+      assert(results(1).getAs[Geometry]("collected").getNumGeometries == 3)
+    }
+
+    it("Passed ST_Collect_Agg preserves duplicates unlike ST_Union_Aggr") {
+      // Test that ST_Collect_Agg keeps duplicate geometries (unlike ST_Union_Aggr which merges them)
+      sparkSession
+        .sql("""
+          |SELECT explode(array(
+          |  ST_GeomFromWKT('POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))'),
+          |  ST_GeomFromWKT('POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))')
+          |)) AS geom
+        """.stripMargin)
+        .createOrReplaceTempView("duplicate_polygons_table")
+
+      val collectDF =
+        sparkSession.sql("SELECT ST_Collect_Agg(geom) FROM duplicate_polygons_table")
+      val result = collectDF.take(1)(0).get(0).asInstanceOf[Geometry]
+
+      // ST_Collect_Agg should preserve both polygons
+      assert(result.getNumGeometries == 2)
+      // Area should be 2 because it doesn't merge overlapping areas
+      assert(result.getArea == 2.0)
+    }
+
+    it("Passed ST_Collect_Agg with null values") {
+      sparkSession
+        .sql("""
+          |SELECT explode(array(
+          |  ST_GeomFromWKT('POINT(1 2)'),
+          |  ST_GeomFromWKT(NULL),
+          |  ST_GeomFromWKT('POINT(3 4)')
+          |)) AS geom
+        """.stripMargin)
+        .createOrReplaceTempView("points_with_null_table")
+
+      val collectDF = sparkSession.sql("SELECT ST_Collect_Agg(geom) FROM points_with_null_table")
+      val result = collectDF.take(1)(0).get(0).asInstanceOf[Geometry]
+
+      // Should only have 2 points (nulls are skipped)
+      assert(result.getNumGeometries == 2)
+    }
   }
 
   def generateRandomPolygon(index: Int): String = {

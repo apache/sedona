@@ -208,6 +208,7 @@ object Catalog extends AbstractCatalog with Logging {
     function[ST_XMin](),
     function[ST_BuildArea](),
     function[ST_OrderingEquals](),
+    function[ST_OrientedEnvelope](),
     function[ST_CollectionExtract](defaultArgs = null),
     function[ST_Normalize](),
     function[ST_LineFromMultiPoint](),
@@ -356,7 +357,7 @@ object Catalog extends AbstractCatalog with Logging {
     function[ST_GeomToGeography]()) ++ geoStatsFunctions()
 
   val aggregateExpressions: Seq[Aggregator[Geometry, _, _]] =
-    Seq(new ST_Envelope_Aggr, new ST_Intersection_Aggr, new ST_Union_Aggr())
+    Seq(new ST_Envelope_Aggr, new ST_Intersection_Aggr, new ST_Union_Aggr(), new ST_Collect_Agg())
 
   private def geoStatsFunctions(): Seq[FunctionDescription] = {
     // Try loading geostats functions. Return a seq of geo-stats functions. If any error occurs,

@@ -36,6 +36,7 @@ import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.subDivide.GeometrySubDivider;
 import org.apache.sedona.common.utils.*;
 import org.locationtech.jts.algorithm.Angle;
+import org.locationtech.jts.algorithm.MinimumAreaRectangle;
 import org.locationtech.jts.algorithm.MinimumBoundingCircle;
 import org.locationtech.jts.algorithm.Orientation;
 import org.locationtech.jts.algorithm.construct.LargestEmptyCircle;
@@ -1225,6 +1226,10 @@ public class Functions {
       }
     }
     return circle;
+  }
+
+  public static Geometry orientedEnvelope(Geometry geometry) {
+    return MinimumAreaRectangle.getMinimumRectangle(geometry);
   }
 
   public static InscribedCircle maximumInscribedCircle(Geometry geometry) {

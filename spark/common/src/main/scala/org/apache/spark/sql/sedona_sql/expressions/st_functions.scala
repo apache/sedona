@@ -504,6 +504,11 @@ object st_functions {
   def ST_MinimumBoundingRadius(geometry: String): Column =
     wrapExpression[ST_MinimumBoundingRadius](geometry)
 
+  def ST_OrientedEnvelope(geometry: Column): Column =
+    wrapExpression[ST_OrientedEnvelope](geometry)
+  def ST_OrientedEnvelope(geometry: String): Column =
+    wrapExpression[ST_OrientedEnvelope](geometry)
+
   def ST_IsPolygonCCW(geometry: Column): Column = wrapExpression[ST_IsPolygonCCW](geometry)
   def ST_IsPolygonCCW(geometry: String): Column = wrapExpression[ST_IsPolygonCCW](geometry)
 

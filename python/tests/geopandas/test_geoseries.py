@@ -1520,7 +1520,95 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_force_3d(self):
-        pass
+        # 1. 2D geometries promoted to 3D with default z=0.0
+        s = sgpd.GeoSeries(
+            [
+                Point(1, 2),
+                Point(0.5, 2.5, 2),
+                Point(1, 1, np.nan),
+                LineString([(1, 1), (0, 1), (1, 0)]),
+                Polygon([(0, 0), (0, 10), (10, 10)]),
+                GeometryCollection(
+                    [
+                        Point(1, 1),
+                        LineString([(1, 1), (0, 1), (1, 0)]),
+                    ]
+                ),
+            ]
+        )
+        # Promote 2D to 3D with z=0, keep 3D as is
+        expected = gpd.GeoSeries(
+            [
+                Point(1, 2, 0),
+                Point(0.5, 2.5, 2),
+                Point(1, 1, 0),
+                LineString([(1, 1, 0), (0, 1, 0), (1, 0, 0)]),
+                Polygon([(0, 0, 0), (0, 10, 0), (10, 10, 0), (0, 0, 0)]),
+                GeometryCollection(
+                    [
+                        Point(1, 1, 0),
+                        LineString([(1, 1, 0), (0, 1, 0), (1, 0, 0)]),
+                    ]
+                ),
+            ]
+        )
+        result = s.force_3d()
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # 2. 2D geometries promoted to 3D with scalar z
+        expected = gpd.GeoSeries(
+            [
+                Point(1, 2, 4),
+                Point(0.5, 2.5, 2),
+                Point(1, 1, 4),
+                LineString([(1, 1, 4), (0, 1, 4), (1, 0, 4)]),
+                Polygon([(0, 0, 4), (0, 10, 4), (10, 10, 4), (0, 0, 4)]),
+                GeometryCollection(
+                    [
+                        Point(1, 1, 4),
+                        LineString([(1, 1, 4), (0, 1, 4), (1, 0, 4)]),
+                    ]
+                ),
+            ]
+        )
+        result = s.force_3d(4)
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # 3. Array-like z: use ps.Series
+        z = [0, 2, 2, 3, 4, 5]
+        expected = gpd.GeoSeries(
+            [
+                Point(1, 2, 0),
+                Point(0.5, 2.5, 2),
+                Point(1, 1, 2),
+                LineString([(1, 1, 3), (0, 1, 3), (1, 0, 3)]),
+                Polygon([(0, 0, 4), (0, 10, 4), (10, 10, 4), (0, 0, 4)]),
+                GeometryCollection(
+                    [
+                        Point(1, 1, 5),
+                        LineString([(1, 1, 5), (0, 1, 5), (1, 0, 5)]),
+                    ]
+                ),
+            ]
+        )
+        result = s.force_3d(z)
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # 4. Ensure M and ZM geometries are handled correctly
+        s = sgpd.GeoSeries(
+            [
+                shapely.wkt.loads("POINT M (1 2 3)"),
+                shapely.wkt.loads("POINT ZM (1 2 3 4)"),
+            ]
+        )
+        result = s.force_3d(7.5)
+        expected = gpd.GeoSeries(
+            [
+                shapely.wkt.loads("POINT Z (1 2 7.5)"),
+                shapely.wkt.loads("POINT Z (1 2 3)"),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
 
     def test_line_merge(self):
         pass
