@@ -51,3 +51,5 @@ jobs:
         run: pre-commit run --color=always --all-files
       - name: Run manual pre-commit hooks
         run: pre-commit run --color=always --all-files --hook-stage manual
+      - name: Run Docker pre-commit hooks
+        run: pre-commit run --color=always --all-files --config .pre-commit-docker.yaml
