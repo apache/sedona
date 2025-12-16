@@ -2715,6 +2715,17 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
+  <a href="#spatial-left-join" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Spatial Left Join
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#broadcast-index-join" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5911,6 +5922,17 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
+  <a href="#spatial-left-join" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Spatial Left Join
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#broadcast-index-join" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6167,12 +6189,12 @@ DistanceJoin pointshape1#12: geometry, pointshape2#33: geometry, 2.0, true
 <p>If you use planar euclidean distance functions like <code>ST_Distance</code>, <code>ST_HausdorffDistance</code> or <code>ST_FrechetDistance</code> as the predicate, Sedona doesn't control the distance's unit (degree or meter). It is same with the geometry. If your coordinates are in the longitude and latitude system, the unit of <code>distance</code> should be degree instead of meter or mile. To change the geometry's unit, please either transform the coordinate reference system to a meter-based system. See <a href="../Function/#st_transform">ST_Transform</a>. If you don't want to transform your data, please consider using <code>ST_DistanceSpheroid</code> or <code>ST_DistanceSphere</code>.</p>
 </div>
 <p>Spark SQL Example for meter-based geodesic distance <code>ST_DistanceSpheroid</code> (works for <code>ST_DistanceSphere</code> too):</p>
-<p><em>Less than a certain distance==</em></p>
+<p><em><mark>Less than a certain distance</mark></em></p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">pointdf1</span><span class="p">,</span><span class="w"> </span><span class="n">pointdf2</span>
 <span class="k">WHERE</span><span class="w"> </span><span class="n">ST_DistanceSpheroid</span><span class="p">(</span><span class="n">pointdf1</span><span class="p">.</span><span class="n">pointshape1</span><span class="p">,</span><span class="n">pointdf2</span><span class="p">.</span><span class="n">pointshape2</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">2</span>
 </code></pre></div>
-<p><em>Less than or equal to a certain distance==</em></p>
+<p><em><mark>Less than or equal to a certain distance</mark></em></p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">pointdf1</span><span class="p">,</span><span class="w"> </span><span class="n">pointdf2</span>
 <span class="k">WHERE</span><span class="w"> </span><span class="n">ST_DistanceSpheroid</span><span class="p">(</span><span class="n">pointdf1</span><span class="p">.</span><span class="n">pointshape1</span><span class="p">,</span><span class="n">pointdf2</span><span class="p">.</span><span class="n">pointshape2</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">2</span>
@@ -6180,6 +6202,40 @@ DistanceJoin pointshape1#12: geometry, pointshape2#33: geometry, 2.0, true
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>If you use <code>ST_DistanceSpheroid</code> or <code>ST_DistanceSphere</code> as the predicate, the unit of the distance is meter. Currently, distance join with geodesic distance calculators work best for point data. For non-point data, it only considers their centroids.</p>
+</div>
+<h2 id="spatial-left-join">Spatial Left Join<a class="headerlink" href="#spatial-left-join" title="Permanent link">&para;</a></h2>
+<p>Introduction: Perform a left join using the spatial performance of a range or distance join.
+This allows to find geometries from A and B matching the join criteria while also keeping those entries from A that do not match any geometry in B.</p>
+<p>Range and distance joins <mark>do not support</mark> a LEFT JOIN as below:</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">a</span>
+<span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">ST_INTERSECTS</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">geometry</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">geometry</span><span class="p">)</span>
+</code></pre></div>
+<p>This will lead to a <strong>BroadcastIndexJoin</strong> which can become very inefficient with two large datasets.
+Otherwise, the <strong>BroadcastNestedLoopJoin</strong> is triggered which is the slowest option.</p>
+<p>In order to make use of Sedona's spatial join performance, it is possible to produce the result of a left join by combining an INNER JOIN with a LEFT JOIN.</p>
+<ol>
+<li>With the inner join, we collect the ID from the left side and all the required columns from the right side (consider the result as <strong>A'</strong>)</li>
+<li>In the second step, we combine the left side A with the result of the inner join <strong>A'</strong>.
+   All the entries of A are kept as they are, while the entries of right side B are forwarded through <strong>A'</strong>.</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="k">WITH</span><span class="w"> </span><span class="n">inner_join</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="k">SELECT</span>
+<span class="w">        </span><span class="n">dfA</span><span class="p">.</span><span class="n">a_id</span>
+<span class="w">        </span><span class="p">,</span><span class="w"> </span><span class="n">dfB</span><span class="p">.</span><span class="n">b_id</span>
+<span class="w">    </span><span class="k">FROM</span><span class="w"> </span><span class="n">dfA</span><span class="p">,</span><span class="w"> </span><span class="n">dfB</span>
+<span class="w">    </span><span class="k">WHERE</span><span class="w"> </span><span class="n">ST_INTERSECTS</span><span class="p">(</span><span class="n">dfA</span><span class="p">.</span><span class="n">geometry</span><span class="p">,</span><span class="w"> </span><span class="n">dfB</span><span class="p">.</span><span class="n">geometry</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="k">SELECT</span>
+<span class="w">    </span><span class="n">dfA</span><span class="p">.</span><span class="o">*</span><span class="p">,</span>
+<span class="w">    </span><span class="n">inner_join</span><span class="p">.</span><span class="n">b_id</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">dfA</span>
+<span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">inner_join</span>
+<span class="w">   </span><span class="k">ON</span><span class="w"> </span><span class="n">dfA</span><span class="p">.</span><span class="n">a_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">inner_join</span><span class="p">.</span><span class="n">a_id</span><span class="p">;</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>One can define this strategy as stored procedure or a DBT macro to simplify the repeated code.</p>
 </div>
 <h2 id="broadcast-index-join">Broadcast index join<a class="headerlink" href="#broadcast-index-join" title="Permanent link">&para;</a></h2>
 <p>Introduction: Perform a range join or distance join but broadcast one of the sides of the join. This maintains the partitioning of the non-broadcast side and doesn't require a shuffle.</p>
@@ -6352,7 +6408,7 @@ answer queries such as <code>SELECT * FROM geoparquet_dataset WHERE ST_Intersect
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="December 4, 2024 07:01:47 UTC">December 4, 2024 07:01:47</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="December 16, 2025 18:44:23 UTC">December 16, 2025 18:44:23</span>
   </span>
 
     
