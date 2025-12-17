@@ -62,4 +62,17 @@ object st_aggregates {
     val aggrFunc = udaf(new ST_Collect_Agg)
     aggrFunc(col(geometry))
   }
+
+  // Aliases for *_Aggr functions with *_Agg suffix
+  def ST_Envelope_Agg(geometry: Column): Column = ST_Envelope_Aggr(geometry)
+
+  def ST_Envelope_Agg(geometry: String): Column = ST_Envelope_Aggr(geometry)
+
+  def ST_Intersection_Agg(geometry: Column): Column = ST_Intersection_Aggr(geometry)
+
+  def ST_Intersection_Agg(geometry: String): Column = ST_Intersection_Aggr(geometry)
+
+  def ST_Union_Agg(geometry: Column): Column = ST_Union_Aggr(geometry)
+
+  def ST_Union_Agg(geometry: String): Column = ST_Union_Aggr(geometry)
 }

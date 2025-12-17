@@ -145,3 +145,72 @@ class TestConstructors(TestBase):
         assert len(result.geoms) == 2
         # Area should be 2 because it doesn't merge overlapping areas
         assert result.area == 2.0
+
+    # Test aliases for *_Aggr functions with *_Agg suffix
+    def test_st_envelope_agg_alias(self):
+        point_csv_df = (
+            self.spark.read.format("csv")
+            .option("delimiter", ",")
+            .option("header", "false")
+            .load(csv_point_input_location)
+        )
+
+        point_csv_df.createOrReplaceTempView("pointtable_alias")
+        point_df = self.spark.sql(
+            "select ST_Point(cast(pointtable_alias._c0 as Decimal(24,20)), cast(pointtable_alias._c1 as Decimal(24,20))) as arealandmark from pointtable_alias"
+        )
+        point_df.createOrReplaceTempView("pointdf_alias")
+        boundary = self.spark.sql(
+            "select ST_Envelope_Agg(pointdf_alias.arealandmark) from pointdf_alias"
+        )
+
+        coordinates = [
+            (1.1, 101.1),
+            (1.1, 1100.1),
+            (1000.1, 1100.1),
+            (1000.1, 101.1),
+            (1.1, 101.1),
+        ]
+
+        polygon = Polygon(coordinates)
+        assert boundary.take(1)[0][0].equals(polygon)
+
+    def test_st_intersection_agg_alias(self):
+        polygon_wkt_df = (
+            self.spark.read.format("csv")
+            .option("delimiter", "\t")
+            .option("header", "false")
+            .load(union_polygon_input_location)
+        )
+
+        polygon_wkt_df.createOrReplaceTempView("polygontable_alias")
+        polygon_df = self.spark.sql(
+            "select ST_GeomFromWKT(polygontable_alias._c0) as countyshape from polygontable_alias"
+        )
+        polygon_df.createOrReplaceTempView("polygondf_alias")
+        intersection = self.spark.sql(
+            "select ST_Intersection_Agg(polygondf_alias.countyshape) from polygondf_alias"
+        )
+
+        result = intersection.take(1)[0][0]
+        assert result.area > 0
+
+    def test_st_union_agg_alias(self):
+        polygon_wkt_df = (
+            self.spark.read.format("csv")
+            .option("delimiter", "\t")
+            .option("header", "false")
+            .load(union_polygon_input_location)
+        )
+
+        polygon_wkt_df.createOrReplaceTempView("polygontable_union_alias")
+        polygon_df = self.spark.sql(
+            "select ST_GeomFromWKT(polygontable_union_alias._c0) as countyshape from polygontable_union_alias"
+        )
+        polygon_df.createOrReplaceTempView("polygondf_union_alias")
+        union = self.spark.sql(
+            "select ST_Union_Agg(polygondf_union_alias.countyshape) from polygondf_union_alias"
+        )
+
+        result = union.take(1)[0][0]
+        assert result.area > 0
