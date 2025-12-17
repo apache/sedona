@@ -20,24 +20,39 @@ package org.apache.sedona.flink.expressions;
 
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.functions.ScalarFunction;
+import org.apache.sedona.flink.GeometryTypeSerializer;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.operation.TransformException;
 import org.locationtech.jts.geom.Geometry;
 
 public class FunctionsGeoTools {
   public static class ST_Transform extends ScalarFunction {
-    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    @DataTypeHint(
+        value = "RAW",
+        rawSerializer = GeometryTypeSerializer.class,
+        bridgedTo = Geometry.class)
     public Geometry eval(
-        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class) Object o,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object o,
         @DataTypeHint("String") String targetCRS)
         throws FactoryException, TransformException {
       Geometry geom = (Geometry) o;
       return org.apache.sedona.common.FunctionsGeoTools.transform(geom, targetCRS);
     }
 
-    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    @DataTypeHint(
+        value = "RAW",
+        rawSerializer = GeometryTypeSerializer.class,
+        bridgedTo = Geometry.class)
     public Geometry eval(
-        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class) Object o,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object o,
         @DataTypeHint("String") String sourceCRS,
         @DataTypeHint("String") String targetCRS)
         throws FactoryException, TransformException {
@@ -45,9 +60,16 @@ public class FunctionsGeoTools {
       return org.apache.sedona.common.FunctionsGeoTools.transform(geom, sourceCRS, targetCRS);
     }
 
-    @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
+    @DataTypeHint(
+        value = "RAW",
+        rawSerializer = GeometryTypeSerializer.class,
+        bridgedTo = Geometry.class)
     public Geometry eval(
-        @DataTypeHint(value = "RAW", bridgedTo = Geometry.class) Object o,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object o,
         @DataTypeHint("String") String sourceCRS,
         @DataTypeHint("String") String targetCRS,
         @DataTypeHint("Boolean") Boolean lenient)

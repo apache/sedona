@@ -20,6 +20,7 @@ package org.apache.sedona.flink.expressions;
 
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.functions.ScalarFunction;
+import org.apache.sedona.flink.GeometryTypeSerializer;
 import org.locationtech.jts.geom.Geometry;
 
 public class Predicates {
@@ -30,9 +31,15 @@ public class Predicates {
 
     @DataTypeHint("Boolean")
     public Boolean eval(
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o1,
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o2) {
       Geometry geom1 = (Geometry) o1;
       Geometry geom2 = (Geometry) o2;
@@ -47,9 +54,15 @@ public class Predicates {
 
     @DataTypeHint("Boolean")
     public Boolean eval(
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o1,
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o2) {
       Geometry geom1 = (Geometry) o1;
       Geometry geom2 = (Geometry) o2;
@@ -63,9 +76,15 @@ public class Predicates {
 
     @DataTypeHint("Boolean")
     public Boolean eval(
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o1,
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o2) {
       Geometry geom1 = (Geometry) o1;
       Geometry geom2 = (Geometry) o2;
@@ -80,9 +99,15 @@ public class Predicates {
 
     @DataTypeHint("Boolean")
     public Boolean eval(
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o1,
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o2) {
       Geometry geom1 = (Geometry) o1;
       Geometry geom2 = (Geometry) o2;
@@ -97,9 +122,15 @@ public class Predicates {
 
     @DataTypeHint("Boolean")
     public Boolean eval(
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o1,
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o2) {
       Geometry geom1 = (Geometry) o1;
       Geometry geom2 = (Geometry) o2;
@@ -113,9 +144,15 @@ public class Predicates {
 
     @DataTypeHint("Boolean")
     public Boolean eval(
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o1,
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o2) {
       Geometry geom1 = (Geometry) o1;
       Geometry geom2 = (Geometry) o2;
@@ -130,9 +167,15 @@ public class Predicates {
 
     @DataTypeHint("Boolean")
     public Boolean eval(
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o1,
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o2) {
       Geometry geom1 = (Geometry) o1;
       Geometry geom2 = (Geometry) o2;
@@ -147,9 +190,15 @@ public class Predicates {
 
     @DataTypeHint("Boolean")
     public Boolean eval(
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o1,
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o2) {
       Geometry geom1 = (Geometry) o1;
       Geometry geom2 = (Geometry) o2;
@@ -164,9 +213,15 @@ public class Predicates {
 
     @DataTypeHint("Boolean")
     public Boolean eval(
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o1,
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o2) {
       Geometry geom1 = (Geometry) o1;
       Geometry geom2 = (Geometry) o2;
@@ -181,9 +236,15 @@ public class Predicates {
 
     @DataTypeHint("Boolean")
     public Boolean eval(
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o1,
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o2) {
       Geometry geom1 = (Geometry) o1;
       Geometry geom2 = (Geometry) o2;
@@ -197,9 +258,15 @@ public class Predicates {
 
     @DataTypeHint("String")
     public String eval(
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o1,
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o2) {
       Geometry geom1 = (Geometry) o1;
       Geometry geom2 = (Geometry) o2;
@@ -208,9 +275,15 @@ public class Predicates {
 
     @DataTypeHint("Boolean")
     public Boolean eval(
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o1,
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o2,
         @DataTypeHint("String") String IM) {
       Geometry geom1 = (Geometry) o1;
@@ -237,9 +310,15 @@ public class Predicates {
 
     @DataTypeHint("Boolean")
     public Boolean eval(
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o1,
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o2) {
       Geometry geom1 = (Geometry) o1;
       Geometry geom2 = (Geometry) o2;
@@ -253,9 +332,15 @@ public class Predicates {
 
     @DataTypeHint("Boolean")
     public Boolean eval(
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o1,
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o2,
         @DataTypeHint("Double") Double distance) {
       Geometry geom1 = (Geometry) o1;
@@ -265,9 +350,15 @@ public class Predicates {
 
     @DataTypeHint("Boolean")
     public Boolean eval(
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o1,
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
             Object o2,
         @DataTypeHint("Double") Double distance,
         @DataTypeHint("Boolean") Boolean useSphere) {
