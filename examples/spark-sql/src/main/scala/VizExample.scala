@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import Main.resourceFolder
 import org.apache.sedona.common.enums.FileDataSplitter
 import org.apache.sedona.core.enums.{GridType, IndexType}
 import org.apache.sedona.core.spatialOperator.JoinQuery
@@ -32,6 +31,8 @@ import java.awt.Color
 
 
 object VizExample {
+
+  val resourceFolder = System.getProperty("user.dir")+"/src/test/resources/"
 
   val demoOutputPath = "target/demo"
 
@@ -55,27 +56,42 @@ object VizExample {
   val PolygonNumPartitions = 5
   val USMainLandBoundary = new Envelope(-126.790180, -64.630926, 24.863836, 50.000)
 
-  def buildScatterPlot(sedona: SparkSession): Boolean = {
+  /**
+   * Creates a scatter plot visualization of polygon data.
+   * Generates a PNG image showing spatial distribution of polygons.
+   *
+   * @param sedona SparkSession with Sedona extensions enabled
+   */
+  def buildScatterPlot(sedona: SparkSession): Unit = {
     val spatialRDD = new PolygonRDD(sedona.sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions)
-    var visualizationOperator = new ScatterPlot(1000, 600, USMainLandBoundary, false)
+    val visualizationOperator = new ScatterPlot(1000, 600, USMainLandBoundary, false)
     visualizationOperator.CustomizeColor(255, 255, 255, 255, Color.GREEN, true)
     visualizationOperator.Visualize(sedona.sparkContext, spatialRDD)
-    var imageGenerator = new ImageGenerator
+    val imageGenerator = new ImageGenerator
     imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, scatterPlotOutputPath, ImageType.PNG)
-    true
   }
 
-  def buildHeatMap(sedona: SparkSession): Boolean = {
+  /**
+   * Creates a heat map visualization showing density of rectangle geometries.
+   * Generates a PNG image with heat intensity based on spatial clustering.
+   *
+   * @param sedona SparkSession with Sedona extensions enabled
+   */
+  def buildHeatMap(sedona: SparkSession): Unit = {
     val spatialRDD = new RectangleRDD(sedona.sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions)
     val visualizationOperator = new HeatMap(1000, 600, USMainLandBoundary, false, 2)
     visualizationOperator.Visualize(sedona.sparkContext, spatialRDD)
     val imageGenerator = new ImageGenerator
     imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.rasterImage, heatMapOutputPath, ImageType.PNG)
-    true
   }
 
-
-  def buildChoroplethMap(sedona: SparkSession): Boolean = {
+  /**
+   * Creates a choropleth map by performing spatial join and visualizing join counts.
+   * Combines heat map with polygon overlay to show spatial relationships.
+   *
+   * @param sedona SparkSession with Sedona extensions enabled
+   */
+  def buildChoroplethMap(sedona: SparkSession): Unit = {
     val spatialRDD = new PointRDD(sedona.sparkContext, PointInputLocation, PointOffset, PointSplitter, false, PointNumPartitions)
     val queryRDD = new PolygonRDD(sedona.sparkContext, PolygonInputLocation, PolygonSplitter, false, PolygonNumPartitions)
     spatialRDD.spatialPartitioning(GridType.KDBTREE)
@@ -92,20 +108,30 @@ object VizExample {
     overlayOperator.JoinImage(frontImage.rasterImage)
     val imageGenerator = new ImageGenerator
     imageGenerator.SaveRasterImageAsLocalFile(overlayOperator.backRasterImage, choroplethMapOutputPath, ImageType.PNG)
-    true
   }
 
-  def parallelFilterRenderNoStitch(sedona: SparkSession): Boolean = {
+  /**
+   * Demonstrates parallel rendering without image stitching.
+   * Creates tiled heat map images for distributed rendering.
+   *
+   * @param sedona SparkSession with Sedona extensions enabled
+   */
+  def parallelFilterRenderNoStitch(sedona: SparkSession): Unit = {
     val spatialRDD = new RectangleRDD(sedona.sparkContext, RectangleInputLocation, RectangleSplitter, false, RectangleNumPartitions)
     val visualizationOperator = new HeatMap(1000, 600, USMainLandBoundary, false, 2, 4, 4, true, true)
     visualizationOperator.Visualize(sedona.sparkContext, spatialRDD)
     val imageGenerator = new ImageGenerator
     imageGenerator.SaveRasterImageAsLocalFile(visualizationOperator.distributedRasterImage, parallelFilterRenderOutputPath, ImageType.PNG)
-    true
   }
 
-  def sqlApiVisualization(sedona: SparkSession): Boolean = {
-    var pointDf = sedona.read.format("csv").option("delimiter", ",").option("header", "false").load(PointInputLocation)
+  /**
+   * Demonstrates visualization using Sedona SQL API with pixelization and rendering.
+   * Creates heat map using SQL functions for rasterization and colorization.
+   *
+   * @param sedona SparkSession with Sedona extensions enabled
+   */
+  def sqlApiVisualization(sedona: SparkSession): Unit = {
+    val pointDf = sedona.read.format("csv").option("delimiter", ",").option("header", "false").load(PointInputLocation)
     pointDf.selectExpr("ST_Point(cast(_c0 as Decimal(24,20)),cast(_c1 as Decimal(24,20))) as shape")
       .filter("ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)").createOrReplaceTempView("pointtable")
     sedona.sql(
@@ -127,8 +153,8 @@ object VizExample {
 				|SELECT ST_Render(pixel, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates), 'red')) AS image
 				|FROM pixelaggregates
 			""".stripMargin)
-    var image = sedona.table("images").take(1)(0)(0).asInstanceOf[ImageSerializableWrapper].getImage
-    var imageGenerator = new ImageGenerator
+    val image = sedona.table("images").take(1)(0)(0).asInstanceOf[ImageSerializableWrapper].getImage
+    val imageGenerator = new ImageGenerator
     imageGenerator.SaveRasterImageAsLocalFile(image, sqlApiOutputPath, ImageType.PNG)
     sedona.sql(
       """
@@ -137,7 +163,6 @@ object VizExample {
 				|FROM images
 			""".stripMargin)
     sedona.table("imagestring").show()
-    true
   }
 
 }

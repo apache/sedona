@@ -28,8 +28,11 @@ from sedona.spark.utils.decorators import classproperty
 SPARK_REMOTE = os.getenv("SPARK_REMOTE")
 EXTRA_JARS = os.getenv("SEDONA_PYTHON_EXTRA_JARS")
 
+import shapely
 from shapely import wkt
 from shapely.geometry.base import BaseGeometry
+
+SHAPELY_GE_210 = shapely.__version__ >= "2.1.0"
 
 
 class TestBase:
@@ -122,6 +125,13 @@ class TestBase:
         right_geom: Union[str, BaseGeometry],
         tolerance=1e-6,
     ):
+        """
+        Assert that two geometries are almost equal.
+
+        Note: this function will only check Z and M dimensions for shapely >= 2.1.0 (python >= 3.10)
+
+        When comparing geometries with Z or M dimensions, this function will ignore `tolerance` and check for exact equality.
+        """
         expected_geom = (
             wkt.loads(left_geom) if isinstance(left_geom, str) else left_geom
         )
@@ -129,7 +139,17 @@ class TestBase:
             wkt.loads(right_geom) if isinstance(right_geom, str) else right_geom
         )
 
-        if not actual_geom.equals_exact(expected_geom, tolerance=tolerance):
+        # Note: only shapely >= 2.1.0 supports Z and M dimensions
+        # If has Z or M dimension, use equals_identical to check the equality
+        if SHAPELY_GE_210 and (has_zm(actual_geom) or has_zm(expected_geom)):
+            if not shapely.equals_identical(actual_geom, expected_geom):
+                raise ValueError(
+                    f"Geometry equality check failed for {left_geom} and {right_geom}"
+                )
+
+        # Comparison for XY geometries
+        # Note: equals_exact doesn't check for Z or M dimensions
+        elif not actual_geom.equals_exact(expected_geom, tolerance=tolerance):
             # If the exact equals check fails, perform a buffer check with tolerance
             if (
                 actual_geom.is_valid
@@ -143,3 +163,66 @@ class TestBase:
                 raise ValueError(
                     f"Geometry equality check failed for {left_geom} and {right_geom}"
                 )
+
+
+def has_zm(geom: BaseGeometry):
+    return geom.has_z or geom.has_m
+
+
+def test_assert_geometry_almost_equal():
+    import pytest
+
+    TestBase.assert_geometry_almost_equal("POINT (1 1)", "POINT (1 1)")
+    TestBase.assert_geometry_almost_equal("POINT (1 1)", "POINT (1.000001 1)")
+    TestBase.assert_geometry_almost_equal("POINT (1 1)", "POINT (1.000001 1)")
+
+    with pytest.raises(ValueError):
+        TestBase.assert_geometry_almost_equal("POINT (1 1)", "POINT (2 2)")
+
+    with pytest.raises(ValueError):
+        TestBase.assert_geometry_almost_equal("POINT (1 1)", "POINT (2 2)")
+
+    # Check Z and M dimension compatibility (requires shapely >= 2.1.0)
+    if SHAPELY_GE_210:
+        # 2D vs 3D should fail
+        with pytest.raises(ValueError):
+            TestBase.assert_geometry_almost_equal("POINT (1 1)", "POINT (1 1 0)")
+
+        with pytest.raises(ValueError):
+            TestBase.assert_geometry_almost_equal("POINT (1 1 0)", "POINT (1 1)")
+
+        # Different 3D should fail
+        with pytest.raises(ValueError):
+            TestBase.assert_geometry_almost_equal("POINT (1 1 1)", "POINT (1 1 2)")
+
+        with pytest.raises(ValueError):
+            TestBase.assert_geometry_almost_equal("POINT (1 1 2)", "POINT (1 1 1)")
+
+        # Z vs M dimension should fail
+        with pytest.raises(ValueError):
+            TestBase.assert_geometry_almost_equal("POINT Z (1 1 1)", "POINT M (1 1 1)")
+
+        with pytest.raises(ValueError):
+            TestBase.assert_geometry_almost_equal("POINT M (1 1 1)", "POINT Z (1 1 1)")
+
+        # 3D vs 4D should fail
+        with pytest.raises(ValueError):
+            TestBase.assert_geometry_almost_equal(
+                "POINT Z (1 1 1)", "POINT ZM (1 1 1 1)"
+            )
+
+        with pytest.raises(ValueError):
+            TestBase.assert_geometry_almost_equal(
+                "POINT ZM (1 1 1 1)", "POINT Z (1 1 1)"
+            )
+
+        # Different 4D should fail
+        with pytest.raises(ValueError):
+            TestBase.assert_geometry_almost_equal(
+                "POINT ZM (1 1 1 1)", "POINT ZM (1 1 1 2)"
+            )
+
+        with pytest.raises(ValueError):
+            TestBase.assert_geometry_almost_equal(
+                "POINT ZM (1 1 1 2)", "POINT ZM (1 1 1 1)"
+            )

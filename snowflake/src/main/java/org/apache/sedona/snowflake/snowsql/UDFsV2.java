@@ -520,6 +520,15 @@ public class UDFsV2 {
   }
 
   @UDFAnnotations.ParamMeta(
+      argNames = {"geometry"},
+      argTypes = {"Geometry"},
+      returnTypes = "Geometry")
+  public static String ST_OrientedEnvelope(String geometry) {
+    return GeometrySerde.serGeoJson(
+        Functions.orientedEnvelope(GeometrySerde.deserGeoJson(geometry)));
+  }
+
+  @UDFAnnotations.ParamMeta(
       argNames = {"geometry", "uniformDelta"},
       argTypes = {"Geometry", "double"},
       returnTypes = "Geometry")

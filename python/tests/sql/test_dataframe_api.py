@@ -867,6 +867,13 @@ test_configurations = [
     (stf.ST_NumInteriorRings, ("geom",), "geom_with_hole", "", 1),
     (stf.ST_NumInteriorRing, ("geom",), "geom_with_hole", "", 1),
     (stf.ST_NumPoints, ("line",), "linestring_geom", "", 6),
+    (
+        stf.ST_OrientedEnvelope,
+        ("geom",),
+        "diagonal_geom",
+        "",
+        "POLYGON ((0 0, 4.5 4.5, 5 4, 0.5 -0.5, 0 0))",
+    ),
     (stf.ST_PointN, ("line", 2), "linestring_geom", "", "POINT (1 0)"),
     (stf.ST_PointOnSurface, ("line",), "linestring_geom", "", "POINT (2 0)"),
     (
@@ -916,7 +923,7 @@ test_configurations = [
         ("line", 10.0),
         "4D_line",
         "ST_ReducePrecision(geom, 2)",
-        "LINESTRING Z (1 -0.3 -1.383092639965822, 2 -0.59 -2.766185279931644, 3 -0.89 -4.149277919897466, -1 0.3 1.383092639965822)",
+        "LINESTRING ZM (1 -0.3 -1.383092639965822 1, 2 -0.59 -2.766185279931644 2, 3 -0.89 -4.149277919897466 3, -1 0.3 1.383092639965822 -1)",
     ),
     (
         stf.ST_RotateY,
@@ -1223,6 +1230,13 @@ test_configurations = [
         "",
         "POLYGON ((0 0, 0 1, 1 1, 2 1, 2 0, 1 0, 0 0))",
     ),
+    (
+        sta.ST_Collect_Agg,
+        ("geom",),
+        "exploded_points",
+        "",
+        "MULTIPOINT ((0 0), (1 1))",
+    ),
 ]
 
 wrong_type_configurations = [
@@ -1371,6 +1385,7 @@ wrong_type_configurations = [
     (stf.ST_MinimumClearanceLine, (None,)),
     (stf.ST_MinimumBoundingCircle, (None,)),
     (stf.ST_MinimumBoundingRadius, (None,)),
+    (stf.ST_OrientedEnvelope, (None,)),
     (stf.ST_Multi, (None,)),
     (stf.ST_Normalize, (None,)),
     (stf.ST_NPoints, (None,)),
@@ -1621,6 +1636,10 @@ class TestDataFrameAPI(TestBase):
         elif request.param == "square_geom":
             return TestDataFrameAPI.spark.sql(
                 "SELECT ST_GeomFromWKT('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))') AS geom"
+            )
+        elif request.param == "diagonal_geom":
+            return TestDataFrameAPI.spark.sql(
+                "SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 5 4, 4 4, 0 0))') AS geom"
             )
         elif request.param == "four_points":
             return TestDataFrameAPI.spark.sql(

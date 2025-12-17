@@ -36,6 +36,7 @@ import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.subDivide.GeometrySubDivider;
 import org.apache.sedona.common.utils.*;
 import org.locationtech.jts.algorithm.Angle;
+import org.locationtech.jts.algorithm.MinimumAreaRectangle;
 import org.locationtech.jts.algorithm.MinimumBoundingCircle;
 import org.locationtech.jts.algorithm.Orientation;
 import org.locationtech.jts.algorithm.construct.LargestEmptyCircle;
@@ -572,6 +573,9 @@ public class Functions {
   }
 
   public static Geometry envelope(Geometry geometry) {
+    if (geometry.isEmpty()) {
+      return geometry;
+    }
     return geometry.getEnvelope();
   }
 
@@ -1170,7 +1174,9 @@ public class Functions {
       } else {
         // if the merger couldn't join the lines, it will contain the individual lines, so return
         // the input
-        return geometry;
+        Object[] mergedLines = merger.getMergedLineStrings().toArray(new LineString[] {});
+        multiLineString = geometry.getFactory().createMultiLineString((LineString[]) mergedLines);
+        return multiLineString;
       }
     }
     return geometry.getFactory().createGeometryCollection();
@@ -1220,6 +1226,10 @@ public class Functions {
       }
     }
     return circle;
+  }
+
+  public static Geometry orientedEnvelope(Geometry geometry) {
+    return MinimumAreaRectangle.getMinimumRectangle(geometry);
   }
 
   public static InscribedCircle maximumInscribedCircle(Geometry geometry) {

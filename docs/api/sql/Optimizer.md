@@ -132,7 +132,7 @@ DistanceJoin pointshape1#12: geometry, pointshape2#33: geometry, 2.0, true
 
 Spark SQL Example for meter-based geodesic distance `ST_DistanceSpheroid` (works for `ST_DistanceSphere` too):
 
-*Less than a certain distance==*
+*==Less than a certain distance==*
 
 ```sql
 SELECT *
@@ -140,7 +140,7 @@ FROM pointdf1, pointdf2
 WHERE ST_DistanceSpheroid(pointdf1.pointshape1,pointdf2.pointshape2) < 2
 ```
 
-*Less than or equal to a certain distance==*
+*==Less than or equal to a certain distance==*
 
 ```sql
 SELECT *
@@ -150,6 +150,47 @@ WHERE ST_DistanceSpheroid(pointdf1.pointshape1,pointdf2.pointshape2) <= 2
 
 !!!warning
 	If you use `ST_DistanceSpheroid` or `ST_DistanceSphere` as the predicate, the unit of the distance is meter. Currently, distance join with geodesic distance calculators work best for point data. For non-point data, it only considers their centroids.
+
+## Spatial Left Join
+
+Introduction: Perform a left join using the spatial performance of a range or distance join.
+This allows to find geometries from A and B matching the join criteria while also keeping those entries from A that do not match any geometry in B.
+
+Range and distance joins ==do not support== a LEFT JOIN as below:
+
+```sql
+SELECT a.*, b.* FROM a
+LEFT JOIN b ON ST_INTERSECTS(a.geometry, b.geometry)
+```
+
+This will lead to a **BroadcastIndexJoin** which can become very inefficient with two large datasets.
+Otherwise, the **BroadcastNestedLoopJoin** is triggered which is the slowest option.
+
+In order to make use of Sedona's spatial join performance, it is possible to produce the result of a left join by combining an INNER JOIN with a LEFT JOIN.
+
+1. With the inner join, we collect the ID from the left side and all the required columns from the right side (consider the result as **A'**)
+2. In the second step, we combine the left side A with the result of the inner join **A'**.
+   All the entries of A are kept as they are, while the entries of right side B are forwarded through **A'**.
+
+```sql
+WITH inner_join AS (
+    SELECT
+        dfA.a_id
+        , dfB.b_id
+    FROM dfA, dfB
+    WHERE ST_INTERSECTS(dfA.geometry, dfB.geometry)
+)
+
+SELECT
+    dfA.*,
+    inner_join.b_id
+FROM dfA
+LEFT JOIN inner_join
+   ON dfA.a_id = inner_join.a_id;
+```
+
+!!!note
+	One can define this strategy as stored procedure or a DBT macro to simplify the repeated code.
 
 ## Broadcast index join
 

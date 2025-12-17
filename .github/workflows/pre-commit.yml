@@ -32,8 +32,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout ${{ github.ref }} ( ${{ github.sha }} )'
-        uses: actions/checkout@v4
-      - uses: actions/setup-python@v5 # https://www.python.org/
+        uses: actions/checkout@v6
+      - uses: actions/setup-python@v6 # https://www.python.org/
         with:
           python-version: '3.10' # Version range or exact version of a Python version to use, using SemVer's version range syntax
           architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
@@ -48,6 +48,6 @@ jobs:
           path: ~/.cache/pre-commit
           key: pre-commit|${{ env.PY }}|${{ hashFiles('.pre-commit-config.yaml') }}
       - name: Run pre-commit
-        run: pre-commit run --all-files
+        run: pre-commit run --color=always --all-files
       - name: Run manual pre-commit hooks
-        run: pre-commit run --all-files --hook-stage manual
+        run: pre-commit run --color=always --all-files --hook-stage manual

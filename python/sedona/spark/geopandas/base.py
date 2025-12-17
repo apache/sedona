@@ -611,9 +611,52 @@ class GeoFrame(metaclass=ABCMeta):
     # def concave_hull(self, ratio=0.0, allow_holes=False):
     #     raise NotImplementedError("This method is not implemented yet.")
 
-    # @property
-    # def convex_hull(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    @property
+    def convex_hull(self):
+        """Return a ``GeoSeries`` of geometries representing the convex hull
+        of each geometry.
+
+        The convex hull of a geometry is the smallest convex `Polygon`
+        containing all the points in each geometry, unless the number of points
+        in the geometric object is less than three. For two points, the convex
+        hull collapses to a `LineString`; for 1, a `Point`.
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, Point, MultiPoint
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
+        ...         LineString([(0, 0), (1, 1), (1, 0)]),
+        ...         MultiPoint([(0, 0), (1, 1), (0, 1), (1, 0), (0.5, 0.5)]),
+        ...         MultiPoint([(0, 0), (1, 1)]),
+        ...         Point(0, 0),
+        ...     ]
+        ... )
+        >>> s
+        0                       POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1                           LINESTRING (0 0, 1 1, 1 0)
+        2    MULTIPOINT ((0 0), (1 1), (0 1), (1 0), (0.5 0...
+        3                            MULTIPOINT ((0 0), (1 1))
+        4                                          POINT (0 0)
+        dtype: geometry
+
+        >>> s.convex_hull
+        0         POLYGON ((0 0, 0 1, 1 1, 0 0))
+        1         POLYGON ((0 0, 1 1, 1 0, 0 0))
+        2    POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))
+        3                  LINESTRING (0 0, 1 1)
+        4                            POINT (0 0)
+        dtype: geometry
+
+        See Also
+        --------
+        GeoSeries.concave_hull : concave hull geometry
+        GeoSeries.envelope : bounding rectangle geometry
+
+        """
+        return _delegate_to_geometry_column("convex_hull", self)
 
     # def delaunay_triangles(self, tolerance=0.0, only_edges=False):
     #     raise NotImplementedError("This method is not implemented yet.")
@@ -689,11 +732,72 @@ class GeoFrame(metaclass=ABCMeta):
     # def representative_point(self):
     #     raise NotImplementedError("This method is not implemented yet.")
 
-    # def minimum_bounding_circle(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    def minimum_bounding_circle(self):
+        """Return a ``GeoSeries`` of geometries representing the minimum bounding
+        circle that encloses each geometry.
 
-    # def minimum_bounding_radius(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+        ...         LineString([(0, 0), (1, 1), (1, 0)]),
+        ...         Point(0, 0),
+        ...     ]
+        ... )
+        >>> s
+        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1        LINESTRING (0 0, 1 1, 1 0)
+        2                       POINT (0 0)
+        dtype: geometry
+
+        >>> s.minimum_bounding_circle()
+        0    POLYGON ((1.20711 0.5, 1.19352 0.36205, 1.1532...
+        1    POLYGON ((1.20711 0.5, 1.19352 0.36205, 1.1532...
+        2                                          POINT (0 0)
+        dtype: geometry
+
+        See Also
+        --------
+        GeoSeries.convex_hull : convex hull geometry
+        """
+        return _delegate_to_geometry_column("minimum_bounding_circle", self)
+
+    def minimum_bounding_radius(self):
+        """Return a `Series` of the radii of the minimum bounding circles
+        that enclose each geometry.
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Point, LineString, Polygon
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+        ...         LineString([(0, 0), (1, 1), (1, 0)]),
+        ...         Point(0,0),
+        ...     ]
+        ... )
+        >>> s
+        0    POLYGON ((0 0, 1 1, 0 1, 0 0))
+        1        LINESTRING (0 0, 1 1, 1 0)
+        2                       POINT (0 0)
+        dtype: geometry
+
+        >>> s.minimum_bounding_radius()
+        0    0.707107
+        1    0.707107
+        2    0.000000
+        dtype: float64
+
+        See Also
+        --------
+        GeoSeries.minimum_bounding_circle : minimum bounding circle (geometry)
+
+        """
+        return _delegate_to_geometry_column("minimum_bounding_radius", self)
 
     # def minimum_clearance(self):
     #     raise NotImplementedError("This method is not implemented yet.")
@@ -811,11 +915,104 @@ class GeoFrame(metaclass=ABCMeta):
     # def transform(self, transformation, include_z=False):
     #     raise NotImplementedError("This method is not implemented yet.")
 
-    # def force_2d(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    def force_2d(self):
+        """Force the dimensionality of a geometry to 2D.
 
-    # def force_3d(self, z=0):
-    #     raise NotImplementedError("This method is not implemented yet.")
+        Removes the additional Z and M coordinate dimension from all geometries.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Point(0.5, 2.5, 0),
+        ...         LineString([(1, 1, 1), (0, 1, 3), (1, 0, 2)]),
+        ...         Polygon([(0, 0, 0), (0, 10, 0), (10, 10, 0)]),
+        ...     ],
+        ... )
+        >>> s
+        0                            POINT Z (0.5 2.5 0)
+        1             LINESTRING Z (1 1 1, 0 1 3, 1 0 2)
+        2    POLYGON Z ((0 0 0, 0 10 0, 10 10 0, 0 0 0))
+        dtype: geometry
+
+        >>> s.force_2d()
+        0                      POINT (0.5 2.5)
+        1           LINESTRING (1 1, 0 1, 1 0)
+        2    POLYGON ((0 0, 0 10, 10 10, 0 0))
+        dtype: geometry
+        """
+        return _delegate_to_geometry_column("force_2d", self)
+
+    def force_3d(self, z=0.0):
+        """Force the dimensionality of a geometry to 3D.
+
+        2D geometries will get the provided Z coordinate; 3D geometries
+        are unchanged (unless their Z coordinate is ``np.nan``).
+
+        Note: Sedona's behavior may differ from Geopandas' for M and ZM geometries.
+        For M geometries, Sedona will replace the M coordinate and add the Z coordinate.
+        For ZM geometries, Sedona will drop the M coordinate and retain the Z coordinate.
+
+        Parameters
+        ----------
+        z : float | array_like (default 0)
+            Z coordinate to be assigned
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from shapely import Polygon, LineString, Point
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> s = GeoSeries(
+        ...     [
+        ...         Point(1, 2),
+        ...         Point(0.5, 2.5, 2),
+        ...         LineString([(1, 1), (0, 1), (1, 0)]),
+        ...         Polygon([(0, 0), (0, 10), (10, 10)]),
+        ...     ],
+        ... )
+        >>> s
+        0                          POINT (1 2)
+        1                  POINT Z (0.5 2.5 2)
+        2           LINESTRING (1 1, 0 1, 1 0)
+        3    POLYGON ((0 0, 0 10, 10 10, 0 0))
+        dtype: geometry
+
+        >>> s.force_3d()
+        0                                POINT Z (1 2 0)
+        1                            POINT Z (0.5 2.5 2)
+        2             LINESTRING Z (1 1 0, 0 1 0, 1 0 0)
+        3    POLYGON Z ((0 0 0, 0 10 0, 10 10 0, 0 0 0))
+        dtype: geometry
+
+        Z coordinate can be specified as scalar:
+
+        >>> s.force_3d(4)
+        0                                POINT Z (1 2 4)
+        1                            POINT Z (0.5 2.5 2)
+        2             LINESTRING Z (1 1 4, 0 1 4, 1 0 4)
+        3    POLYGON Z ((0 0 4, 0 10 4, 10 10 4, 0 0 4))
+        dtype: geometry
+
+        Or as an array-like (one value per geometry):
+
+        >>> s.force_3d(range(4))
+        0                                POINT Z (1 2 0)
+        1                            POINT Z (0.5 2.5 2)
+        2             LINESTRING Z (1 1 2, 0 1 2, 1 0 2)
+        3    POLYGON Z ((0 0 3, 0 10 3, 10 10 3, 0 0 3))
+        dtype: geometry
+        """
+        return _delegate_to_geometry_column("force_3d", self, z)
 
     # def line_merge(self, directed=False):
     #     raise NotImplementedError("This method is not implemented yet.")
@@ -854,6 +1051,28 @@ class GeoFrame(metaclass=ABCMeta):
         <POLYGON ((0 1, 0 2, 2 2, 2 0, 1 0, 0 0, 0 1))>
         """
         return _delegate_to_geometry_column("union_all", self, method, grid_size)
+
+    def intersection_all(self) -> BaseGeometry:
+        """Returns a geometry containing the intersection of all geometries in
+        the ``GeoSeries``.
+
+        Returns
+        -------
+        shapely.geometry.base.BaseGeometry
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import box
+        >>> s = GeoSeries([box(0, 0, 2, 2), box(1, 1, 3, 3)])
+        >>> s
+        0    POLYGON ((2 0, 2 2, 0 2, 0 0, 2 0))
+        1    POLYGON ((3 1, 3 3, 1 3, 1 1, 3 1))
+        dtype: geometry
+        >>> s.intersection_all()
+        <POLYGON ((1 1, 1 2, 2 2, 2 1, 1 1))>
+        """
+        return _delegate_to_geometry_column("intersection_all", self)
 
     def crosses(self, other, align=None) -> ps.Series:
         """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
@@ -2343,9 +2562,6 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("union", self, other, align)
 
-    def intersection_all(self):
-        raise NotImplementedError("This method is not implemented yet.")
-
     def contains(self, other, align=None):
         """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
         each aligned geometry that contains `other`.
@@ -2460,6 +2676,77 @@ class GeoFrame(metaclass=ABCMeta):
 
     def contains_properly(self, other, align=None):
         raise NotImplementedError("This method is not implemented yet.")
+
+    def relate(self, other, align=None):
+        """Returns the DE-9IM matrix string for the relationship between each geometry and `other`.
+
+        The DE-9IM (Dimensionally Extended nine-Intersection Model) is a topological model
+        that describes the spatial relationship between two geometries. The result is a
+        9-character string describing the dimensions of the intersections between the
+        interior, boundary, and exterior of the two geometries.
+
+        The operation works on a 1-to-1 row-wise manner.
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The GeoSeries (elementwise) or geometric object to relate to.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved.
+
+        Returns
+        -------
+        Series (str)
+            A Series of DE-9IM matrix strings.
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Point, LineString, Polygon
+        >>> s = GeoSeries(
+        ...     [
+        ...         Point(0, 0),
+        ...         Point(0, 0),
+        ...         LineString([(0, 0), (1, 1)]),
+        ...     ]
+        ... )
+        >>> s2 = GeoSeries(
+        ...     [
+        ...         Point(0, 0),
+        ...         Point(1, 1),
+        ...         LineString([(0, 0), (1, 1)]),
+        ...     ]
+        ... )
+
+        >>> s.relate(s2)
+        0    0FFFFFFF2
+        1    FF0FFF0F2
+        2    1FFF0FFF2
+        dtype: object
+
+        Notes
+        -----
+        This method works in a row-wise manner. It does not check the relationship
+        of an element of one GeoSeries with *all* elements of the other one.
+
+        The DE-9IM string has 9 characters, one for each combination of:
+        - Interior/Boundary/Exterior of the first geometry
+        - Interior/Boundary/Exterior of the second geometry
+
+        Each character can be:
+        - '0': intersection is a point (dimension 0)
+        - '1': intersection is a line (dimension 1)
+        - '2': intersection is an area (dimension 2)
+        - 'F': no intersection (empty set)
+
+        See also
+        --------
+        GeoSeries.contains
+        GeoSeries.intersects
+        GeoSeries.within
+        """
+        return _delegate_to_geometry_column("relate", self, other, align)
 
     def to_parquet(self, path, **kwargs):
         raise NotImplementedError("This method is not implemented yet.")

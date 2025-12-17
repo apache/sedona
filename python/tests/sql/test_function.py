@@ -2529,3 +2529,14 @@ class TestPredicateJoin(TestBase):
         actual_with_max = actual_df_with_max.take(1)[0][0]
         assert actual_with_max is not None
         assert actual_with_max.geom_type == "MultiLineString"
+
+    def test_st_oriented_envelope(self):
+        actual = self.spark.sql(
+            "SELECT ST_AsText(ST_OrientedEnvelope(ST_GeomFromText('POLYGON ((0 0, 1 0, 5 4, 4 4, 0 0))')))"
+        ).take(1)[0][0]
+        assert actual == "POLYGON ((0 0, 4.5 4.5, 5 4, 0.5 -0.5, 0 0))"
+
+        actual = self.spark.sql(
+            "SELECT ST_AsText(ST_OrientedEnvelope(ST_GeomFromText('POINT (1 2)')))"
+        ).take(1)[0][0]
+        assert actual == "POINT (1 2)"

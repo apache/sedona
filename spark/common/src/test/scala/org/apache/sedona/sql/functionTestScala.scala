@@ -207,6 +207,26 @@ class functionTestScala
       assert(functionDf.count() > 0)
     }
 
+    it("Passes ST_Envelope returns input if input is empty") {
+      var emptyGeometries = Seq(
+        ("POINT EMPTY"),
+        ("LINESTRING EMPTY"),
+        ("POLYGON EMPTY"),
+        ("MULTIPOINT EMPTY"),
+        ("MULTILINESTRING EMPTY"),
+        ("MULTIPOLYGON EMPTY"),
+        ("GEOMETRYCOLLECTION EMPTY"),
+        ("GEOMETRYCOLLECTION (GEOMETRYCOLLECTION EMPTY, LINESTRING EMPTY)")).toDF("wkt")
+
+      emptyGeometries.createOrReplaceTempView("emptyGeometries")
+      var functionDf = sparkSession.sql(
+        "SELECT ST_AsText(ST_Envelope(ST_GeomFromWKT(wkt))) FROM emptyGeometries")
+
+      val inputWkts = emptyGeometries.collect().map(_.getString(0))
+      val resultWkts = functionDf.collect().map(_.getString(0))
+      assert(resultWkts.sameElements(inputWkts))
+    }
+
     it("Passed ST_Expand") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('POLYGON ((50 50 1, 50 80 2, 80 80 3, 80 50 2, 50 50 1))') as geom")
@@ -2212,8 +2232,9 @@ class functionTestScala
     val testData = Seq(
       ("MULTILINESTRING ((-29 -27, -30 -29.7, -45 -33), (-45 -33, -46 -32))"),
       ("MULTILINESTRING ((-29 -27, -30 -29.7, -36 -31, -45 -33), (-45.2 -33.2, -46 -32))"),
-      ("POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))")).toDF(
-      "Geometry")
+      ("POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))"),
+      ("MULTILINESTRING ((10 160, 60 120), (120 140, 60 120), (120 140, 180 120), (100 180, 120 140))"))
+      .toDF("Geometry")
 
     When("Using ST_LineMerge")
     val testDF = testData.selectExpr("ST_LineMerge(ST_GeomFromText(Geometry)) as geom")
@@ -2225,8 +2246,9 @@ class functionTestScala
       .collect() should contain theSameElementsAs
       List(
         "LINESTRING (-29 -27, -30 -29.7, -45 -33, -46 -32)",
-        "MULTILINESTRING ((-29 -27, -30 -29.7, -36 -31, -45 -33), (-45.2 -33.2, -46 -32))",
-        "GEOMETRYCOLLECTION EMPTY")
+        "MULTILINESTRING ((-45.2 -33.2, -46 -32), (-29 -27, -30 -29.7, -36 -31, -45 -33))",
+        "GEOMETRYCOLLECTION EMPTY",
+        "MULTILINESTRING ((10 160, 60 120, 120 140), (100 180, 120 140), (120 140, 180 120))")
   }
 
   it("Should pass ST_LocateAlong") {
@@ -2349,6 +2371,21 @@ class functionTestScala
       .as[Double]
       .collect()
       .toList should contain theSameElementsAs List(0, 1, 1)
+  }
+
+  it("Should pass ST_OrientedEnvelope") {
+    val testCases = Seq(
+      ("POLYGON ((0 0, 4 0, 4 2, 0 2, 0 0))", "POLYGON ((0 0, 0 2, 4 2, 4 0, 0 0))"),
+      ("POLYGON ((0 0, 1 0, 5 4, 4 4, 0 0))", "POLYGON ((0 0, 4.5 4.5, 5 4, 0.5 -0.5, 0 0))"),
+      ("POINT (1 2)", "POINT (1 2)"))
+
+    testCases.foreach { case (input, expected) =>
+      val actual = sparkSession
+        .sql(s"SELECT ST_AsText(ST_OrientedEnvelope(ST_GeomFromWKT('$input')))")
+        .first()
+        .getString(0)
+      assert(expected.equals(actual), s"Input: $input, Expected: $expected, Actual: $actual")
+    }
   }
 
   it("Should pass ST_LineSegments") {
@@ -2711,6 +2748,8 @@ class functionTestScala
     assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_MinimumBoundingRadius(null)")
     assert(functionDf.first().get(0) == null)
+    functionDf = sparkSession.sql("select ST_OrientedEnvelope(null)")
+    assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_LineSubstring(null, 0, 0)")
     assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_LineInterpolatePoint(null, 0)")
@@ -3009,6 +3048,17 @@ class functionTestScala
       assertEquals(expected, actual)
       assertEquals(expectedDefaultValue, actualDefaultValue)
     }
+  }
+
+  it("should pass ST_Force3D with MultiPolygon containing single polygon") {
+    // Test that a MultiPolygon with a single polygon remains a MultiPolygon after force3D
+    val df = sparkSession.sql(
+      "SELECT ST_AsText(ST_Force3D(ST_GeomFromWKT('MULTIPOLYGON (((0 0, 10 0, 10 10, 0 10, 0 0)))'), 5.0)) AS geom")
+    val actual = df.take(1)(0).get(0).asInstanceOf[String]
+    // Should still be MULTIPOLYGON, not POLYGON
+    assertTrue(actual.startsWith("MULTIPOLYGON"))
+    assertTrue(actual.contains("Z"))
+    assertTrue(actual.contains("5"))
   }
 
   it("Should pass ST_Force3DZ") {

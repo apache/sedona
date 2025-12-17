@@ -18,11 +18,11 @@ import os
 import shutil
 import tempfile
 import pytest
+import numpy as np
 import pandas as pd
 import geopandas as gpd
 import pyspark.pandas as ps
 import pyspark
-from pandas.testing import assert_series_equal
 import shapely
 from shapely.geometry import (
     Point,
@@ -388,7 +388,6 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
         # Ensure filling with np.nan or pd.NA returns None
         # but filling None return empty geometry
-        import numpy as np
 
         for fill_val in [np.nan, pd.NA, None]:
             sgpd_result = GeoSeries(data).fillna(fill_val)
@@ -420,8 +419,6 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             )
 
     def test_total_bounds(self):
-        import numpy as np
-
         for geom in self.geoms:
             sgpd_result = GeoSeries(geom).total_bounds
             gpd_result = gpd.GeoSeries(geom).total_bounds
@@ -729,7 +726,15 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_convex_hull(self):
-        pass
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).convex_hull
+            gpd_result = gpd.GeoSeries(geom).convex_hull
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        mixed = [self.points[1], self.linestrings[1], self.polygons[1], None]
+        sgpd_result = GeoSeries(mixed).convex_hull
+        gpd_result = gpd.GeoSeries(mixed).convex_hull
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_delaunay_triangles(self):
         pass
@@ -768,10 +773,16 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_minimum_bounding_circle(self):
-        pass
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).minimum_bounding_circle()
+            gpd_result = gpd.GeoSeries(geom).minimum_bounding_circle()
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result, tolerance=0.5)
 
     def test_minimum_bounding_radius(self):
-        pass
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).minimum_bounding_radius()
+            gpd_result = gpd.GeoSeries(geom).minimum_bounding_radius()
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_minimum_clearance(self):
         pass
@@ -819,14 +830,96 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             gpd_result = gpd.GeoSeries(geom).segmentize(2.5)
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
+        # Test array-like inputs
+        geoms = self.polygons
+        lst = list(range(1, len(geoms) + 1))
+
+        # Traditional python list
+        sgpd_result = GeoSeries(geoms).segmentize(lst)
+        gpd_result = gpd.GeoSeries(geoms).segmentize(lst)
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        np_array = np.array(lst)
+        sgpd_result = GeoSeries(geoms).segmentize(np_array)
+        gpd_result = gpd.GeoSeries(geoms).segmentize(np_array)
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # pandas series
+        psser = ps.Series(lst)
+        sgpd_result = GeoSeries(geoms).segmentize(psser)
+        gpd_result = gpd.GeoSeries(geoms).segmentize(psser.to_pandas())
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
     def test_transform(self):
         pass
 
     def test_force_2d(self):
-        pass
+        # force_2d was added from geopandas 1.0.0
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            pytest.skip("geopandas force_2d requires version 1.0.0 or higher")
+        # 1) No-op on existing 2D fixtures
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).force_2d()
+            gpd_result = gpd.GeoSeries(geom).force_2d()
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # 2) Minimal 3D sample to verify Z is actually stripped
+        data = [
+            Point(0, -1, 2.5),
+            LineString([(0, 0, 1), (1, 1, 2)]),
+            Polygon([(0, 0, 1), (1, 0, 2), (1, 1, 3), (0, 0, 1)]),
+            Point(5, 5),  # already 2D
+            Polygon(),  # empty geometry
+            shapely.wkt.loads("POINT M (1 2 3)"),
+            shapely.wkt.loads("LINESTRING ZM (1 2 3 4, 5 6 7 8)"),
+        ]
+        sgpd_3d = GeoSeries(data).force_2d()
+        gpd_3d = gpd.GeoSeries(data).force_2d()
+        self.check_sgpd_equals_gpd(sgpd_3d, gpd_3d)
 
     def test_force_3d(self):
-        pass
+        # force_3d was added from geopandas 1.0.0
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            pytest.skip("geopandas force_3d requires version 1.0.0 or higher")
+        # 1) Promote 2D to 3D with z = 4
+        for geom in self.geoms:
+            if isinstance(geom[0], (LinearRing)):
+                continue
+            sgpd_result = GeoSeries(geom).force_3d(4)
+            gpd_result = gpd.GeoSeries(geom).force_3d(4)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # 2) Minimal sample for various geometry types with custom z=7.5
+        data = [
+            Point(1, 2),  # 2D
+            Point(0.5, 2.5, 2),  # 3D (Z)
+            LineString([(1, 1), (0, 1), (1, 0)]),  # 2D
+            Polygon([(0, 0), (0, 10), (10, 10)]),  # 2D
+        ]
+        sgpd_result = GeoSeries(data).force_3d(7.5)
+        gpd_result = gpd.GeoSeries(data).force_3d(7.5)
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # 3) Array-like z tests
+        geoms = self.polygons
+        lst = list(range(1, len(geoms) + 1))
+
+        # Traditional python list
+        sgpd_result = GeoSeries(geoms).force_3d(lst)
+        gpd_result = gpd.GeoSeries(geoms).force_3d(lst)
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # numpy array
+        np_array = np.array(lst)
+        sgpd_result = GeoSeries(geoms).force_3d(np_array)
+        gpd_result = gpd.GeoSeries(geoms).force_3d(np_array)
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # pandas-on-Spark Series
+        psser = ps.Series(lst)
+        sgpd_result = GeoSeries(geoms).force_3d(psser)
+        gpd_result = gpd.GeoSeries(geoms).force_3d(psser.to_pandas())
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_line_merge(self):
         pass
@@ -848,6 +941,20 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         # Ensure we have the same result for empty GeoSeries
         sgpd_result = GeoSeries([]).union_all()
         gpd_result = gpd.GeoSeries([]).union_all()
+        self.check_geom_equals(sgpd_result, gpd_result)
+
+    def test_intersection_all(self):
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            pytest.skip("geopandas intersection_all requires version 1.0.0 or higher")
+
+        lst = self.geoms
+        sgpd_result = GeoSeries(lst).intersection_all()
+        gpd_result = gpd.GeoSeries(lst).intersection_all()
+        self.check_geom_equals(sgpd_result, gpd_result)
+
+        # Ensure we have the same result for empty GeoSeries
+        sgpd_result = GeoSeries([]).intersection_all()
+        gpd_result = gpd.GeoSeries([]).intersection_all()
         self.check_geom_equals(sgpd_result, gpd_result)
 
     def test_crosses(self):
@@ -1072,6 +1179,19 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
     def test_contains_properly(self):
         pass
+
+    def test_relate(self):
+        for geom, geom2 in self.pairs:
+            sgpd_result = GeoSeries(geom).relate(GeoSeries(geom2), align=True)
+            gpd_result = gpd.GeoSeries(geom).relate(gpd.GeoSeries(geom2), align=True)
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).relate(GeoSeries(geom2), align=False)
+                gpd_result = gpd.GeoSeries(geom).relate(
+                    gpd.GeoSeries(geom2), align=False
+                )
+                self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_set_crs(self):
         for geom in self.geoms:

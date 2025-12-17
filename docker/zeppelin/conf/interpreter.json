@@ -1638,11 +1638,11 @@
       ],
       "dependencies": [
         {
-          "groupArtifactVersion": "/opt/spark/jars/sedona-spark-shaded-3.5_2.12-1.7.1.jar",
+          "groupArtifactVersion": "/opt/spark/jars/sedona-spark-shaded-4.0_2.13-1.8.0.jar",
           "local": false
         },
         {
-          "groupArtifactVersion": "/opt/spark/jars/geotools-wrapper-1.7.1-28.5.jar",
+          "groupArtifactVersion": "/opt/spark/jars/geotools-wrapper-1.8.0-33.1.jar",
           "local": false
         }
       ],

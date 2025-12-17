@@ -1040,6 +1040,20 @@ SELECT ST_Envelope(polygondf.countyshape)
 FROM polygondf
 ```
 
+## ST_OrientedEnvelope
+
+Introduction: Returns the minimum-area rotated rectangle enclosing a geometry. The rectangle may be rotated relative to the coordinate axes. Degenerate inputs may result in a Point or LineString being returned.
+
+Format: `ST_OrientedEnvelope(geometry: Geometry)`
+
+SQL example:
+
+```sql
+SELECT ST_OrientedEnvelope(ST_GeomFromWKT('POLYGON ((0 0, 1 0, 5 4, 4 4, 0 0))'))
+```
+
+Output: `POLYGON ((0 0, 4.5 4.5, 5 4, 0.5 -0.5, 0 0))`
+
 ## ST_Expand
 
 Introduction: Returns a geometry expanded from the bounding box of the input. The expansion can be specified in two ways:
@@ -1958,10 +1972,10 @@ Output:
 
 ## ST_LineMerge
 
-Introduction: Returns a LineString formed by sewing together the constituent line work of a MULTILINESTRING.
+Introduction: Returns a LineString or MultiLineString formed by sewing together the constituent line work of a MULTILINESTRING.
 
 !!!note
-    Only works for MULTILINESTRING. Using other geometry will return a GEOMETRYCOLLECTION EMPTY. If the MultiLineString can't be merged, the original MULTILINESTRING is returned.
+    Only works for MULTILINESTRING. Using other geometry will return a GEOMETRYCOLLECTION EMPTY. If no merging can be performed, the original MULTILINESTRING is returned.
 
 Format: `ST_LineMerge (A:geometry)`
 

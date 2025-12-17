@@ -83,13 +83,13 @@ jobs:
         run: |
           sudo apt-get -y remove --purge default-jdk adoptopenjdk-11-hotspot || :
         shell: bash
-      - uses: actions/checkout@v4
-      - uses: r-lib/actions/setup-r@v2.11.3
+      - uses: actions/checkout@v6
+      - uses: r-lib/actions/setup-r@v2.11.4
         with:
           r-version: ${{ matrix.r }}
           use-public-rspm: true
       - name: Query R dependencies
-        uses: r-lib/actions/setup-r-dependencies@v2.11.3
+        uses: r-lib/actions/setup-r-dependencies@v2.11.4
         with:
           cache: true
           extra-packages: |
@@ -97,7 +97,7 @@ jobs:
             any::rcmdcheck
           working-directory: './R'
       - name: Build and check R package
-        uses: r-lib/actions/check-r-package@v2.11.3
+        uses: r-lib/actions/check-r-package@v2.11.4
         with:
           build_args: 'c("--no-build-vignettes", "--no-manual")'
           args: 'c("--no-build-vignettes", "--no-manual", "--no-tests")'
@@ -107,12 +107,12 @@ jobs:
           _R_CHECK_FORCE_SUGGESTS_: false
       - name: Install apache.sedona from source
         run: Rscript -e 'install.packages("./R/", repos = NULL, type = "source")'
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '11'
           cache: 'maven'
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
       - name: Install PySpark
@@ -157,7 +157,7 @@ jobs:
           NOT_CRAN='true' Rscript testthat.R
         shell: bash
         timeout-minutes: 30
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: failure()
         with:
           name: Worker logs

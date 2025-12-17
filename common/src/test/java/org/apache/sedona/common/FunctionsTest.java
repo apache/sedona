@@ -757,6 +757,76 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void orientedEnvelope() throws ParseException {
+    Geometry axisAlignedRect = Constructors.geomFromWKT("POLYGON ((0 0, 4 0, 4 2, 0 2, 0 0))", 0);
+    String actual = Functions.asWKT(Functions.orientedEnvelope(axisAlignedRect));
+    String expected = "POLYGON ((0 0, 0 2, 4 2, 4 0, 0 0))";
+    assertEquals(expected, actual);
+
+    Geometry rotatedSquare = Constructors.geomFromWKT("POLYGON ((1 0, 2 1, 1 2, 0 1, 1 0))", 0);
+    actual = Functions.asWKT(Functions.orientedEnvelope(rotatedSquare));
+    expected = "POLYGON ((1 0, 0 1, 1 2, 2 1, 1 0))";
+    assertEquals(expected, actual);
+
+    Geometry diagonalPolygon = Constructors.geomFromWKT("POLYGON ((0 0, 1 0, 5 4, 4 4, 0 0))", 0);
+    actual = Functions.asWKT(Functions.orientedEnvelope(diagonalPolygon));
+    expected = "POLYGON ((0 0, 4.5 4.5, 5 4, 0.5 -0.5, 0 0))";
+    assertEquals(expected, actual);
+
+    Geometry narrowRect = Constructors.geomFromWKT("POLYGON ((0 0, 10 0, 10 1, 0 1, 0 0))", 0);
+    actual = Functions.asWKT(Functions.orientedEnvelope(narrowRect));
+    expected = "POLYGON ((0 0, 0 1, 10 1, 10 0, 0 0))";
+    assertEquals(expected, actual);
+
+    Geometry triangle = Constructors.geomFromWKT("POLYGON ((0 0, 4 0, 2 3, 0 0))", 0);
+    actual = Functions.asWKT(Functions.orientedEnvelope(triangle));
+    expected = "POLYGON ((4 0, 0 0, 0 3, 4 3, 4 0))";
+    assertEquals(expected, actual);
+
+    Geometry irregularPolygon =
+        Constructors.geomFromWKT("POLYGON ((0 0, 3 1, 5 0, 4 4, 1 3, 0 0))", 0);
+    actual =
+        Functions.asWKT(Functions.reducePrecision(Functions.orientedEnvelope(irregularPolygon), 2));
+    expected = "POLYGON ((5 0, 0.29 -1.18, -0.71 2.82, 4 4, 5 0))";
+    assertEquals(expected, actual);
+
+    Geometry point = Constructors.geomFromWKT("POINT (1 2)", 0);
+    actual = Functions.asWKT(Functions.orientedEnvelope(point));
+    expected = "POINT (1 2)";
+    assertEquals(expected, actual);
+
+    Geometry line = Constructors.geomFromWKT("LINESTRING (0 0, 10 0)", 0);
+    actual = Functions.asWKT(Functions.orientedEnvelope(line));
+    expected = "LINESTRING (0 0, 10 0)";
+    assertEquals(expected, actual);
+
+    Geometry diagonalLine = Constructors.geomFromWKT("LINESTRING (0 0, 5 5)", 0);
+    actual = Functions.asWKT(Functions.orientedEnvelope(diagonalLine));
+    expected = "LINESTRING (0 0, 5 5)";
+    assertEquals(expected, actual);
+
+    Geometry empty = Constructors.geomFromWKT("POLYGON EMPTY", 0);
+    Geometry orientedEmpty = Functions.orientedEnvelope(empty);
+    assertTrue(orientedEmpty.isEmpty());
+
+    Geometry geomWithSRID = Constructors.geomFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    Geometry orientedWithSRID = Functions.orientedEnvelope(geomWithSRID);
+    assertEquals(4326, orientedWithSRID.getSRID());
+
+    Geometry multiPoint = Constructors.geomFromWKT("MULTIPOINT ((0 0), (-1 -1), (3 2))", 0);
+    actual = Functions.asWKT(Functions.reducePrecision(Functions.orientedEnvelope(multiPoint), 2));
+    expected = "POLYGON ((-1 -1, -1.12 -0.84, 2.88 2.16, 3 2, -1 -1))";
+    assertEquals(expected, actual);
+
+    Geometry linestring = Constructors.geomFromWKT("LINESTRING (55 75, 125 150)", 0);
+    Geometry pointGeom = Constructors.geomFromWKT("POINT (20 80)", 0);
+    Geometry collection = linestring.union(pointGeom);
+    actual = Functions.asWKT(Functions.reducePrecision(Functions.orientedEnvelope(collection), 2));
+    expected = "POLYGON ((125 150, 138.08 130.38, 33.08 60.38, 20 80, 125 150))";
+    assertEquals(expected, actual);
+  }
+
+  @Test
   public void getGoogleS2CellIDsPoint() {
     Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 2));
     Long[] cid = Functions.s2CellIDs(point, 30);
@@ -2458,6 +2528,24 @@ public class FunctionsTest extends TestBase {
     assertEquals(
         wktWriter3D.write(expectedLineString3D),
         wktWriter3D.write(actualGeometryCollection.getGeometryN(0).getGeometryN(2)));
+  }
+
+  @Test
+  public void force3DMultiPolygonWithSinglePolygon() {
+    // Test that a MultiPolygon with a single polygon remains a MultiPolygon after force3D
+    Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 10, 0, 10, 10, 0, 10, 0, 0));
+    MultiPolygon multiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {polygon});
+
+    Geometry forced = Functions.force3D(multiPolygon, 5.0);
+
+    assertTrue(forced instanceof MultiPolygon);
+    assertEquals(1, ((MultiPolygon) forced).getNumGeometries());
+
+    Polygon forcedPolygon = (Polygon) ((MultiPolygon) forced).getGeometryN(0);
+    Coordinate[] coords = forcedPolygon.getCoordinates();
+    for (Coordinate coord : coords) {
+      assertEquals(5.0, coord.getZ(), 0.0001);
+    }
   }
 
   @Test
