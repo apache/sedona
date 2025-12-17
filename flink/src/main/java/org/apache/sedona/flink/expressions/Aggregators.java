@@ -28,7 +28,10 @@ import org.locationtech.jts.geom.GeometryFactory;
 
 public class Aggregators {
   // Compute the rectangular boundary of a number of geometries
-  @DataTypeHint(value = "RAW", rawSerializer = GeometryTypeSerializer.class)
+  @DataTypeHint(
+      value = "RAW",
+      rawSerializer = GeometryTypeSerializer.class,
+      bridgedTo = Geometry.class)
   public static class ST_Envelope_Aggr extends AggregateFunction<Geometry, Accumulators.Envelope> {
 
     Geometry createPolygon(double minX, double minY, double maxX, double maxY) {
@@ -48,14 +51,21 @@ public class Aggregators {
     }
 
     @Override
-    @DataTypeHint(value = "RAW", rawSerializer = GeometryTypeSerializer.class)
+    @DataTypeHint(
+        value = "RAW",
+        rawSerializer = GeometryTypeSerializer.class,
+        bridgedTo = Geometry.class)
     public Geometry getValue(Accumulators.Envelope acc) {
       return createPolygon(acc.minX, acc.minY, acc.maxX, acc.maxY);
     }
 
     public void accumulate(
         Accumulators.Envelope acc,
-        @DataTypeHint(value = "RAW", rawSerializer = GeometryTypeSerializer.class) Object o) {
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object o) {
       Envelope envelope = ((Geometry) o).getEnvelopeInternal();
       acc.minX = Math.min(acc.minX, envelope.getMinX());
       acc.minY = Math.min(acc.minY, envelope.getMinY());
@@ -71,7 +81,11 @@ public class Aggregators {
      */
     public void retract(
         Accumulators.Envelope acc,
-        @DataTypeHint(value = "RAW", rawSerializer = GeometryTypeSerializer.class) Object o) {
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object o) {
       Geometry geometry = (Geometry) o;
       assert (false);
     }
@@ -92,7 +106,10 @@ public class Aggregators {
 
   // Compute the Union boundary of numbers of geometries
   //
-  @DataTypeHint(value = "RAW", rawSerializer = GeometryTypeSerializer.class)
+  @DataTypeHint(
+      value = "RAW",
+      rawSerializer = GeometryTypeSerializer.class,
+      bridgedTo = Geometry.class)
   public static class ST_Intersection_Aggr
       extends AggregateFunction<Geometry, Accumulators.AccGeometry> {
 
@@ -102,14 +119,21 @@ public class Aggregators {
     }
 
     @Override
-    @DataTypeHint(value = "RAW", rawSerializer = GeometryTypeSerializer.class)
+    @DataTypeHint(
+        value = "RAW",
+        rawSerializer = GeometryTypeSerializer.class,
+        bridgedTo = Geometry.class)
     public Geometry getValue(Accumulators.AccGeometry acc) {
       return acc.geom;
     }
 
     public void accumulate(
         Accumulators.AccGeometry acc,
-        @DataTypeHint(value = "RAW", rawSerializer = GeometryTypeSerializer.class) Object o) {
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object o) {
       if (acc.geom == null) {
         acc.geom = (Geometry) o;
       } else {
@@ -125,7 +149,11 @@ public class Aggregators {
      */
     public void retract(
         Accumulators.AccGeometry acc,
-        @DataTypeHint(value = "RAW", rawSerializer = GeometryTypeSerializer.class) Object o) {
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object o) {
       Geometry geometry = (Geometry) o;
       assert (false);
     }
@@ -148,7 +176,10 @@ public class Aggregators {
 
   // Compute the Union boundary of numbers of geometries
   //
-  @DataTypeHint(value = "RAW", rawSerializer = GeometryTypeSerializer.class)
+  @DataTypeHint(
+      value = "RAW",
+      rawSerializer = GeometryTypeSerializer.class,
+      bridgedTo = Geometry.class)
   public static class ST_Union_Aggr extends AggregateFunction<Geometry, Accumulators.AccGeometry> {
 
     @Override
@@ -157,14 +188,21 @@ public class Aggregators {
     }
 
     @Override
-    @DataTypeHint(value = "RAW", rawSerializer = GeometryTypeSerializer.class)
+    @DataTypeHint(
+        value = "RAW",
+        rawSerializer = GeometryTypeSerializer.class,
+        bridgedTo = Geometry.class)
     public Geometry getValue(Accumulators.AccGeometry acc) {
       return acc.geom;
     }
 
     public void accumulate(
         Accumulators.AccGeometry acc,
-        @DataTypeHint(value = "RAW", rawSerializer = GeometryTypeSerializer.class) Object o) {
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object o) {
       if (acc.geom == null) {
         acc.geom = (Geometry) o;
       } else {
@@ -180,7 +218,11 @@ public class Aggregators {
      */
     public void retract(
         Accumulators.AccGeometry acc,
-        @DataTypeHint(value = "RAW", rawSerializer = GeometryTypeSerializer.class) Object o) {
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object o) {
       Geometry geometry = (Geometry) o;
       assert (false);
     }

@@ -40,7 +40,10 @@ public class Accumulators {
   }
 
   public static class AccGeometry {
-    @DataTypeHint(value = "RAW", rawSerializer = GeometryTypeSerializer.class)
+    @DataTypeHint(
+        value = "RAW",
+        rawSerializer = GeometryTypeSerializer.class,
+        bridgedTo = Geometry.class)
     public Geometry geom;
   }
 

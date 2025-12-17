@@ -31,7 +31,7 @@ public class GeometryArrayTypeSerializer extends TypeSerializer<Geometry[]> {
 
   public static final GeometryArrayTypeSerializer INSTANCE = new GeometryArrayTypeSerializer();
 
-  private GeometryArrayTypeSerializer() {}
+  public GeometryArrayTypeSerializer() {}
 
   @Override
   public boolean isImmutableType() {
