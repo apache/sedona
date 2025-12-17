@@ -449,9 +449,15 @@ public class Functions {
   }
 
   public static class ST_OrientedEnvelope extends ScalarFunction {
-    @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+    @DataTypeHint(
+        value = "RAW",
+        rawSerializer = GeometryTypeSerializer.class,
+        bridgedTo = org.locationtech.jts.geom.Geometry.class)
     public Geometry eval(
-        @DataTypeHint(value = "RAW", bridgedTo = org.locationtech.jts.geom.Geometry.class)
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = org.locationtech.jts.geom.Geometry.class)
             Object o) {
       Geometry geom = (Geometry) o;
       return org.apache.sedona.common.Functions.orientedEnvelope(geom);
