@@ -92,35 +92,76 @@ private[apache] class ST_Union_Aggr(bufferSize: Int = 1000)
 }
 
 /**
+ * A helper class to store envelope boundary during aggregation. We use this custom case class
+ * instead of JTS Envelope to work with the Spark Encoder.
+ */
+case class EnvelopeBuffer(minX: Double, maxX: Double, minY: Double, maxY: Double) {
+  def isNull: Boolean = minX > maxX
+
+  def toEnvelope: Envelope = {
+    if (isNull) {
+      new Envelope()
+    } else {
+      new Envelope(minX, maxX, minY, maxY)
+    }
+  }
+
+  def merge(other: EnvelopeBuffer): EnvelopeBuffer = {
+    if (this.isNull) {
+      other
+    } else if (other.isNull) {
+      this
+    } else {
+      EnvelopeBuffer(
+        math.min(this.minX, other.minX),
+        math.max(this.maxX, other.maxX),
+        math.min(this.minY, other.minY),
+        math.max(this.maxY, other.maxY))
+    }
+  }
+}
+
+/**
  * Return the envelope boundary of the entire column
  */
-private[apache] class ST_Envelope_Aggr extends Aggregator[Geometry, Envelope, Geometry] {
+private[apache] class ST_Envelope_Aggr
+    extends Aggregator[Geometry, Option[EnvelopeBuffer], Geometry] {
 
-  def reduce(buffer: Envelope, input: Geometry): Envelope = {
-    if (input != null) {
-      buffer.expandToInclude(input.getEnvelopeInternal)
-    }
-    buffer
-  }
+  val serde = ExpressionEncoder[Geometry]()
 
-  def merge(buffer1: Envelope, buffer2: Envelope): Envelope = {
-    buffer1.expandToInclude(buffer2)
-    buffer1
-  }
-
-  def finish(reduction: Envelope): Geometry = {
-    if (reduction.isNull) {
-      null
-    } else {
-      new GeometryFactory().toGeometry(reduction)
+  def reduce(buffer: Option[EnvelopeBuffer], input: Geometry): Option[EnvelopeBuffer] = {
+    if (input == null) return buffer
+    val env = input.getEnvelopeInternal
+    val envBuffer = EnvelopeBuffer(env.getMinX, env.getMaxX, env.getMinY, env.getMaxY)
+    buffer match {
+      case Some(b) => Some(b.merge(envBuffer))
+      case None => Some(envBuffer)
     }
   }
 
-  def bufferEncoder: Encoder[Envelope] = Encoders.javaSerialization(classOf[Envelope])
+  def merge(
+      buffer1: Option[EnvelopeBuffer],
+      buffer2: Option[EnvelopeBuffer]): Option[EnvelopeBuffer] = {
+    (buffer1, buffer2) match {
+      case (Some(b1), Some(b2)) => Some(b1.merge(b2))
+      case (Some(_), None) => buffer1
+      case (None, Some(_)) => buffer2
+      case (None, None) => None
+    }
+  }
 
-  def outputEncoder: ExpressionEncoder[Geometry] = ExpressionEncoder[Geometry]()
+  def finish(reduction: Option[EnvelopeBuffer]): Geometry = {
+    reduction match {
+      case Some(b) => new GeometryFactory().toGeometry(b.toEnvelope)
+      case None => null
+    }
+  }
 
-  def zero: Envelope = new Envelope()
+  def bufferEncoder: Encoder[Option[EnvelopeBuffer]] = Encoders.product[Option[EnvelopeBuffer]]
+
+  def outputEncoder: ExpressionEncoder[Geometry] = serde
+
+  def zero: Option[EnvelopeBuffer] = None
 }
 
 /**

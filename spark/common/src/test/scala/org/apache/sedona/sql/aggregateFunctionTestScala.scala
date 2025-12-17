@@ -372,6 +372,28 @@ class aggregateFunctionTestScala extends TestBaseScala {
 
       assert(result == null)
     }
+
+    it(
+      "ST_Envelope_Aggr should return empty geometry if inputs are mixed with null and empty geometries") {
+      sparkSession
+        .sql("""
+          |SELECT explode(array(
+          |  NULL,
+          |  NULL,
+          |  ST_GeomFromWKT('POINT EMPTY'),
+          |  NULL,
+          |  ST_GeomFromWKT('POLYGON EMPTY')
+          |)) AS geom
+        """.stripMargin)
+        .createOrReplaceTempView("mixed_null_empty_envelope")
+
+      val envelopeDF =
+        sparkSession.sql("SELECT ST_Envelope_Aggr(geom) FROM mixed_null_empty_envelope")
+      val result = envelopeDF.take(1)(0).get(0)
+
+      assert(result != null)
+      assert(result.asInstanceOf[Geometry].isEmpty)
+    }
   }
 
   def generateRandomPolygon(index: Int): String = {
