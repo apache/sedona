@@ -3,9 +3,9 @@
         <head>
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-          <title>org.apache.sedona:sedona-spark-common-3.4_2.12 1.8.1-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.expressions.InferredTypes</title>
-          <meta name="description" content="org.apache.sedona sedona - spark - common - 3.4 2.12 1.8.1 - SNAPSHOT API - org.apache.spark.sql.sedona sql.expressions.InferredTypes" />
-          <meta name="keywords" content="org.apache.sedona sedona spark common 3.4 2.12 1.8.1 SNAPSHOT API org.apache.spark.sql.sedona sql.expressions.InferredTypes" />
+          <title>org.apache.sedona:sedona-spark-common-3.4_2.12 1.8.1-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.expressions.EnvelopeBuffer</title>
+          <meta name="description" content="org.apache.sedona sedona - spark - common - 3.4 2.12 1.8.1 - SNAPSHOT API - org.apache.spark.sql.sedona sql.expressions.EnvelopeBuffer" />
+          <meta name="keywords" content="org.apache.sedona sedona spark common 3.4 2.12 1.8.1 SNAPSHOT API org.apache.spark.sql.sedona sql.expressions.EnvelopeBuffer" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       
@@ -187,8 +187,8 @@
                         <a href="DataframePhysicalFunction.html" title="DataframePhysicalFunctions are Functions that will be replaced with a Physical Node for their evaluation.">DataframePhysicalFunction</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
-                        <a class="class" href="EnvelopeBuffer.html" title="A helper class to store envelope boundary during aggregation."></a>
-                        <a href="EnvelopeBuffer.html" title="A helper class to store envelope boundary during aggregation.">EnvelopeBuffer</a>
+                        <a class="class" href="" title="A helper class to store envelope boundary during aggregation."></a>
+                        <a href="" title="A helper class to store envelope boundary during aggregation.">EnvelopeBuffer</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="trait" href="FoldableExpression.html" title="Make expression foldable by constant folding optimizer."></a>
@@ -227,8 +227,8 @@
                         <a href="InferredRasterExpression$.html" title="">InferredRasterExpression</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
-                        <a class="object" href="" title=""></a>
-                        <a href="" title="">InferredTypes</a>
+                        <a class="object" href="InferredTypes$.html" title=""></a>
+                        <a href="InferredTypes$.html" title="">InferredTypes</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="object" href="LibPostalUtils$.html" title=""></a>
@@ -278,12 +278,12 @@
             </div>
           </div>
           <div id="content">
-            <body class="object value">
+            <body class="class type">
       <div id="definition">
-        <div class="big-circle object">o</div>
+        <div class="big-circle class">c</div>
         <p id="owner"><a href="../../../../../index.html" class="extype" name="org">org</a>.<a href="../../../../index.html" class="extype" name="org.apache">apache</a>.<a href="../../../index.html" class="extype" name="org.apache.spark">spark</a>.<a href="../../index.html" class="extype" name="org.apache.spark.sql">sql</a>.<a href="../index.html" class="extype" name="org.apache.spark.sql.sedona_sql">sedona_sql</a>.<a href="index.html" class="extype" name="org.apache.spark.sql.sedona_sql.expressions">expressions</a></p>
-        <h1>InferredTypes<span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferredTypes$.html" title="Permalink">
+        <h1>EnvelopeBuffer<span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
@@ -293,19 +293,21 @@
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">object</span>
+        <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">InferredTypes</span>
+        <span class="name">EnvelopeBuffer</span><span class="params">(<span name="minX">minX: <span class="extype" name="scala.Double">Double</span></span>, <span name="maxX">maxX: <span class="extype" name="scala.Double">Double</span></span>, <span name="minY">minY: <span class="extype" name="scala.Double">Double</span></span>, <span name="maxY">maxY: <span class="extype" name="scala.Double">Double</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A helper class to store envelope boundary during aggregation. We use this custom case class
+instead of JTS Envelope to work with the Spark Encoder.
+</p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -331,7 +333,7 @@
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="org.apache.spark.sql.sedona_sql.expressions.InferredTypes"><span>InferredTypes</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="org.apache.spark.sql.sedona_sql.expressions.EnvelopeBuffer"><span>EnvelopeBuffer</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -349,7 +351,26 @@
 
       <div id="template">
         <div id="allMembers">
-        
+        <div id="constructors" class="members">
+              <h3>Instance Constructors</h3>
+              <ol><li name="org.apache.spark.sql.sedona_sql.expressions.EnvelopeBuffer#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(minX:Double,maxX:Double,minY:Double,maxY:Double):org.apache.spark.sql.sedona_sql.expressions.EnvelopeBuffer"></a><a id="&lt;init&gt;:EnvelopeBuffer"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html#&lt;init&gt;(minX:Double,maxX:Double,minY:Double,maxY:Double):org.apache.spark.sql.sedona_sql.expressions.EnvelopeBuffer" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">EnvelopeBuffer</span><span class="params">(<span name="minX">minX: <span class="extype" name="scala.Double">Double</span></span>, <span name="maxX">maxX: <span class="extype" name="scala.Double">Double</span></span>, <span name="minY">minY: <span class="extype" name="scala.Double">Double</span></span>, <span name="maxY">maxY: <span class="extype" name="scala.Double">Double</span></span>)</span>
+      </span>
+      
+      
+    </li></ol>
+            </div>
 
         
 
@@ -361,7 +382,7 @@
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferredTypes$.html#!=(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html#!=(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -377,7 +398,7 @@
     </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferredTypes$.html###():Int" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html###():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -393,7 +414,7 @@
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferredTypes$.html#==(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html#==(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -409,7 +430,7 @@
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferredTypes$.html#asInstanceOf[T0]:T0" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html#asInstanceOf[T0]:T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -422,42 +443,10 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.InferredTypes#buildArgumentExtractor" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="buildArgumentExtractor(t:reflect.runtime.universe.Type):org.apache.spark.sql.catalyst.expressions.Expression=&gt;(org.apache.spark.sql.catalyst.InternalRow=&gt;Any)"></a><a id="buildArgumentExtractor(scala.reflect.api.JavaUniverse.Type):(Expression)⇒(InternalRow)⇒Any"></a>
-      <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferredTypes$.html#buildArgumentExtractor(t:reflect.runtime.universe.Type):org.apache.spark.sql.catalyst.expressions.Expression=&gt;(org.apache.spark.sql.catalyst.InternalRow=&gt;Any)" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">buildArgumentExtractor</span><span class="params">(<span name="t">t: <span class="extype" name="scala.reflect.api.Types.Type">scala.reflect.api.JavaUniverse.Type</span></span>)</span><span class="result">: (<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>) ⇒ (<span class="extype" name="org.apache.spark.sql.catalyst.InternalRow">InternalRow</span>) ⇒ <span class="extype" name="scala.Any">Any</span></span>
-      </span>
-      
-      
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.InferredTypes#buildSerializer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="buildSerializer(t:reflect.runtime.universe.Type):Any=&gt;Any"></a><a id="buildSerializer(scala.reflect.api.JavaUniverse.Type):(Any)⇒Any"></a>
-      <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferredTypes$.html#buildSerializer(t:reflect.runtime.universe.Type):Any=&gt;Any" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">buildSerializer</span><span class="params">(<span name="t">t: <span class="extype" name="scala.reflect.api.Types.Type">scala.reflect.api.JavaUniverse.Type</span></span>)</span><span class="result">: (<span class="extype" name="scala.Any">Any</span>) ⇒ <span class="extype" name="scala.Any">Any</span></span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferredTypes$.html#clone():Object" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html#clone():Object" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -483,7 +472,7 @@
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferredTypes$.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html#eq(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -496,26 +485,10 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
-      <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferredTypes$.html#equals(x$1:Any):Boolean" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferredTypes$.html#getClass():Class[_]" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html#getClass():Class[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -533,47 +506,10 @@
                 <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="hashCode():Int"></a>
-      <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferredTypes$.html#hashCode():Int" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
-                <span class="name">@native</span><span class="args">()</span>
-              
-                <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
-              
-        </dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.expressions.InferredTypes#inferSparkType" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="inferSparkType(t:reflect.runtime.universe.Type):org.apache.spark.sql.types.DataType"></a><a id="inferSparkType(scala.reflect.api.JavaUniverse.Type):DataType"></a>
-      <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferredTypes$.html#inferSparkType(t:reflect.runtime.universe.Type):org.apache.spark.sql.types.DataType" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">inferSparkType</span><span class="params">(<span name="t">t: <span class="extype" name="scala.reflect.api.Types.Type">scala.reflect.api.JavaUniverse.Type</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.types.DataType">DataType</span></span>
-      </span>
-      
-      
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferredTypes$.html#isInstanceOf[T0]:Boolean" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html#isInstanceOf[T0]:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -586,10 +522,106 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.EnvelopeBuffer#isNull" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="isNull:Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html#isNull:Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isNull</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.EnvelopeBuffer#maxX" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="maxX:Double"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html#maxX:Double" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">maxX</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.EnvelopeBuffer#maxY" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="maxY:Double"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html#maxY:Double" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">maxY</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.EnvelopeBuffer#merge" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="merge(other:org.apache.spark.sql.sedona_sql.expressions.EnvelopeBuffer):org.apache.spark.sql.sedona_sql.expressions.EnvelopeBuffer"></a><a id="merge(EnvelopeBuffer):EnvelopeBuffer"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html#merge(other:org.apache.spark.sql.sedona_sql.expressions.EnvelopeBuffer):org.apache.spark.sql.sedona_sql.expressions.EnvelopeBuffer" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">merge</span><span class="params">(<span name="other">other: <a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.EnvelopeBuffer">EnvelopeBuffer</a></span>)</span><span class="result">: <a href="" class="extype" name="org.apache.spark.sql.sedona_sql.expressions.EnvelopeBuffer">EnvelopeBuffer</a></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.EnvelopeBuffer#minX" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="minX:Double"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html#minX:Double" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">minX</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.EnvelopeBuffer#minY" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="minY:Double"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html#minY:Double" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">minY</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferredTypes$.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html#ne(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -605,7 +637,7 @@
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferredTypes$.html#notify():Unit" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html#notify():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -626,7 +658,7 @@
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferredTypes$.html#notifyAll():Unit" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html#notifyAll():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -647,7 +679,7 @@
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferredTypes$.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -660,10 +692,10 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="toString():String"></a>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.EnvelopeBuffer#toEnvelope" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="toEnvelope:org.locationtech.jts.geom.Envelope"></a><a id="toEnvelope:Envelope"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferredTypes$.html#toString():String" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html#toEnvelope:org.locationtech.jts.geom.Envelope" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -672,14 +704,14 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+        <span class="name">toEnvelope</span><span class="result">: <span class="extype" name="org.locationtech.jts.geom.Envelope">Envelope</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+      
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferredTypes$.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -701,7 +733,7 @@
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferredTypes$.html#wait(x$1:Long):Unit" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html#wait(x$1:Long):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -725,7 +757,7 @@
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferredTypes$.html#wait():Unit" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html#wait():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -755,7 +787,7 @@
               <ol><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/InferredTypes$.html#finalize():Unit" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html#finalize():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -781,7 +813,15 @@
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.AnyRef">
+        <div class="parent" name="scala.Serializable">
+              <h3>Inherited from <span class="extype" name="scala.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="java.io.Serializable">
+              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="scala.Product">
+              <h3>Inherited from <span class="extype" name="scala.Product">Product</span></h3>
+            </div><div class="parent" name="scala.Equals">
+              <h3>Inherited from <span class="extype" name="scala.Equals">Equals</span></h3>
+            </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>

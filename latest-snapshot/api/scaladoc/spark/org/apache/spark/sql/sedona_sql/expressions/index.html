@@ -235,6 +235,10 @@
                         <a href="DataframePhysicalFunction.html" title="DataframePhysicalFunctions are Functions that will be replaced with a Physical Node for their evaluation.">DataframePhysicalFunction</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="class" href="EnvelopeBuffer.html" title="A helper class to store envelope boundary during aggregation."></a>
+                        <a href="EnvelopeBuffer.html" title="A helper class to store envelope boundary during aggregation.">EnvelopeBuffer</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="trait" href="FoldableExpression.html" title="Make expression foldable by constant folding optimizer."></a>
                         <a href="FoldableExpression.html" title="Make expression foldable by constant folding optimizer.">FoldableExpression</a>
                       </li><li class="current-entities indented6">
@@ -481,6 +485,24 @@ evaluation.</p><p>The physical node will transform the input dataframe into the 
 conversion of the RDD[InternalRow] to a DataFrame and back. Each DataframePhysicalFunction
 should implement transformDataframe. The output dataframe should have the same schema as the
 input dataframe, except for the resultAttrs which should be added to the output dataframe.
+</p></div></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.EnvelopeBuffer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="EnvelopeBufferextendsProductwithSerializable"></a><a id="EnvelopeBuffer:EnvelopeBuffer"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/EnvelopeBuffer.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="A helper class to store envelope boundary during aggregation." href="EnvelopeBuffer.html"><span class="name">EnvelopeBuffer</span></a><span class="params">(<span name="minX">minX: <span class="extype" name="scala.Double">Double</span></span>, <span name="maxX">maxX: <span class="extype" name="scala.Double">Double</span></span>, <span name="minY">minY: <span class="extype" name="scala.Double">Double</span></span>, <span name="maxY">maxY: <span class="extype" name="scala.Double">Double</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A helper class to store envelope boundary during aggregation.</p><div class="fullcomment"><div class="comment cmt"><p>A helper class to store envelope boundary during aggregation. We use this custom case class
+instead of JTS Envelope to work with the Spark Encoder.
 </p></div></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.FoldableExpression" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="FoldableExpressionextendsExpression"></a><a id="FoldableExpression:FoldableExpression"></a>
