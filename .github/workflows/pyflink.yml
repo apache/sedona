@@ -48,8 +48,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        include:
-          - python: '3.10'
+        python: ['3.11', '3.10']
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-java@v5
