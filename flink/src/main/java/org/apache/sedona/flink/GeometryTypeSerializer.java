@@ -33,11 +33,9 @@ public class GeometryTypeSerializer extends TypeSerializer<org.locationtech.jts.
 
   public static final GeometryTypeSerializer INSTANCE = new GeometryTypeSerializer();
 
-  private final GeometryFactory geometryFactory;
+  private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
 
-  public GeometryTypeSerializer() {
-    this.geometryFactory = new GeometryFactory();
-  }
+  public GeometryTypeSerializer() {}
 
   @Override
   public boolean isImmutableType() {
@@ -51,7 +49,7 @@ public class GeometryTypeSerializer extends TypeSerializer<org.locationtech.jts.
 
   @Override
   public Geometry createInstance() {
-    return geometryFactory.createPoint();
+    return GEOMETRY_FACTORY.createPoint();
   }
 
   @Override
