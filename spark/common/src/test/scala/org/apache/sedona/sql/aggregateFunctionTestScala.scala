@@ -295,6 +295,155 @@ class aggregateFunctionTestScala extends TestBaseScala {
       val result = unionDF.take(1)(0).get(0).asInstanceOf[Geometry]
       assert(result.getArea > 0)
     }
+
+    it("ST_Union_Aggr should handle null values") {
+      sparkSession
+        .sql("""
+          |SELECT explode(array(
+          |  ST_GeomFromWKT('POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))'),
+          |  ST_GeomFromWKT(NULL),
+          |  ST_GeomFromWKT('POLYGON((2 2, 3 2, 3 3, 2 3, 2 2))')
+          |)) AS geom
+        """.stripMargin)
+        .createOrReplaceTempView("polygons_with_null_for_union")
+
+      val unionDF =
+        sparkSession.sql("SELECT ST_Union_Aggr(geom) FROM polygons_with_null_for_union")
+      val result = unionDF.take(1)(0).get(0).asInstanceOf[Geometry]
+
+      // Should union the 2 non-null polygons (total area = 2.0)
+      assert(result.getArea == 2.0)
+    }
+
+    it("ST_Envelope_Aggr should handle null values") {
+      sparkSession
+        .sql("""
+          |SELECT explode(array(
+          |  ST_GeomFromWKT('POINT(1 2)'),
+          |  ST_GeomFromWKT(NULL),
+          |  ST_GeomFromWKT('POINT(3 4)')
+          |)) AS geom
+        """.stripMargin)
+        .createOrReplaceTempView("points_with_null_for_envelope")
+
+      val envelopeDF =
+        sparkSession.sql("SELECT ST_Envelope_Aggr(geom) FROM points_with_null_for_envelope")
+      val result = envelopeDF.take(1)(0).get(0).asInstanceOf[Geometry]
+
+      // Should create envelope from the 2 non-null points
+      assert(result.getGeometryType == "Polygon")
+      val envelope = result.getEnvelopeInternal
+      assert(envelope.getMinX == 1.0)
+      assert(envelope.getMinY == 2.0)
+      assert(envelope.getMaxX == 3.0)
+      assert(envelope.getMaxY == 4.0)
+    }
+
+    it("ST_Intersection_Aggr should handle null values") {
+      sparkSession
+        .sql("""
+          |SELECT explode(array(
+          |  ST_GeomFromWKT('POLYGON((0 0, 4 0, 4 4, 0 4, 0 0))'),
+          |  ST_GeomFromWKT(NULL),
+          |  ST_GeomFromWKT('POLYGON((2 2, 6 2, 6 6, 2 6, 2 2))')
+          |)) AS geom
+        """.stripMargin)
+        .createOrReplaceTempView("polygons_with_null_for_intersection")
+
+      val intersectionDF = sparkSession.sql(
+        "SELECT ST_Intersection_Aggr(geom) FROM polygons_with_null_for_intersection")
+      val result = intersectionDF.take(1)(0).get(0).asInstanceOf[Geometry]
+
+      // Should intersect the 2 non-null polygons (intersection area = 4.0)
+      assert(result.getArea == 4.0)
+    }
+
+    it("ST_Union_Aggr should return null if all inputs are null") {
+      sparkSession
+        .sql("""
+          |SELECT explode(array(
+          |  ST_GeomFromWKT(NULL),
+          |  ST_GeomFromWKT(NULL)
+          |)) AS geom
+        """.stripMargin)
+        .createOrReplaceTempView("all_null_union")
+
+      val unionDF = sparkSession.sql("SELECT ST_Union_Aggr(geom) FROM all_null_union")
+      val result = unionDF.take(1)(0).get(0)
+
+      assert(result == null)
+    }
+
+    it("ST_Envelope_Aggr should return null if all inputs are null") {
+      sparkSession
+        .sql("""
+          |SELECT explode(array(
+          |  ST_GeomFromWKT(NULL),
+          |  ST_GeomFromWKT(NULL)
+          |)) AS geom
+        """.stripMargin)
+        .createOrReplaceTempView("all_null_envelope")
+
+      val envelopeDF = sparkSession.sql("SELECT ST_Envelope_Aggr(geom) FROM all_null_envelope")
+      val result = envelopeDF.take(1)(0).get(0)
+
+      assert(result == null)
+    }
+
+    it("ST_Intersection_Aggr should return null if all inputs are null") {
+      sparkSession
+        .sql("""
+          |SELECT explode(array(
+          |  ST_GeomFromWKT(NULL),
+          |  ST_GeomFromWKT(NULL)
+          |)) AS geom
+        """.stripMargin)
+        .createOrReplaceTempView("all_null_intersection")
+
+      val intersectionDF =
+        sparkSession.sql("SELECT ST_Intersection_Aggr(geom) FROM all_null_intersection")
+      val result = intersectionDF.take(1)(0).get(0)
+
+      assert(result == null)
+    }
+
+    it("ST_Collect_Agg should return null if all inputs are null") {
+      sparkSession
+        .sql("""
+          |SELECT explode(array(
+          |  ST_GeomFromWKT(NULL),
+          |  ST_GeomFromWKT(NULL)
+          |)) AS geom
+        """.stripMargin)
+        .createOrReplaceTempView("all_null_collect")
+
+      val collectDF = sparkSession.sql("SELECT ST_Collect_Agg(geom) FROM all_null_collect")
+      val result = collectDF.take(1)(0).get(0)
+
+      assert(result == null)
+    }
+
+    it(
+      "ST_Envelope_Aggr should return empty geometry if inputs are mixed with null and empty geometries") {
+      sparkSession
+        .sql("""
+          |SELECT explode(array(
+          |  NULL,
+          |  NULL,
+          |  ST_GeomFromWKT('POINT EMPTY'),
+          |  NULL,
+          |  ST_GeomFromWKT('POLYGON EMPTY')
+          |)) AS geom
+        """.stripMargin)
+        .createOrReplaceTempView("mixed_null_empty_envelope")
+
+      val envelopeDF =
+        sparkSession.sql("SELECT ST_Envelope_Aggr(geom) FROM mixed_null_empty_envelope")
+      val result = envelopeDF.take(1)(0).get(0)
+
+      assert(result != null)
+      assert(result.asInstanceOf[Geometry].isEmpty)
+    }
   }
 
   def generateRandomPolygon(index: Int): String = {
