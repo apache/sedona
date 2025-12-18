@@ -93,4 +93,38 @@ public class AggregatorTest extends TestBase {
     Row last = last(result);
     assertEquals(1001, ((Polygon) last.getField(0)).getArea(), 0);
   }
+
+  // Test aliases for *_Aggr functions with *_Agg suffix
+  @Test
+  public void testEnvelop_Agg_Alias() {
+    Table pointTable = createPointTable(testDataSize);
+    Table result = pointTable.select(call("ST_Envelope_Agg", $(pointColNames[0])));
+    Row last = last(result);
+    assertEquals(
+        String.format(
+            "POLYGON ((0 0, 0 %s, %s %s, %s 0, 0 0))",
+            testDataSize - 1, testDataSize - 1, testDataSize - 1, testDataSize - 1),
+        last.getField(0).toString());
+  }
+
+  @Test
+  public void testIntersection_Agg_Alias() {
+    Table polygonTable = createPolygonOverlappingTable(testDataSize);
+    Table result = polygonTable.select(call("ST_Intersection_Agg", $(polygonColNames[0])));
+    Row last = last(result);
+    assertEquals("LINESTRING EMPTY", last.getField(0).toString());
+
+    polygonTable = createPolygonOverlappingTable(3);
+    result = polygonTable.select(call("ST_Intersection_Agg", $(polygonColNames[0])));
+    last = last(result);
+    assertEquals("LINESTRING (1 1, 1 0)", last.getField(0).toString());
+  }
+
+  @Test
+  public void testUnion_Agg_Alias() {
+    Table polygonTable = createPolygonOverlappingTable(testDataSize);
+    Table result = polygonTable.select(call("ST_Union_Agg", $(polygonColNames[0])));
+    Row last = last(result);
+    assertEquals(1001, ((Polygon) last.getField(0)).getArea(), 0);
+  }
 }

@@ -1832,6 +1832,34 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult.getNumGeometries == 3)
     }
 
+    // Test aliases for *_Aggr functions with *_Agg suffix
+    it("Passed ST_Envelope_Agg alias") {
+      val baseDf =
+        sparkSession.sql("SELECT explode(array(ST_Point(0.0, 0.0), ST_Point(1.0, 1.0))) AS geom")
+      val df = baseDf.select(ST_Envelope_Agg("geom"))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      val expectedResult = "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"
+      assert(actualResult == expectedResult)
+    }
+
+    it("Passed ST_Union_Agg alias") {
+      val baseDf = sparkSession.sql(
+        "SELECT explode(array(ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))'), ST_GeomFromWKT('POLYGON ((1 0, 2 0, 2 1, 1 1, 1 0))'))) AS geom")
+      val df = baseDf.select(ST_Union_Agg("geom"))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      val expectedResult = "POLYGON ((0 0, 0 1, 1 1, 2 1, 2 0, 1 0, 0 0))"
+      assert(actualResult == expectedResult)
+    }
+
+    it("Passed ST_Intersection_Agg alias") {
+      val baseDf = sparkSession.sql(
+        "SELECT explode(array(ST_GeomFromWKT('POLYGON ((0 0, 2 0, 2 1, 0 1, 0 0))'), ST_GeomFromWKT('POLYGON ((1 0, 3 0, 3 1, 1 1, 1 0))'))) AS geom")
+      val df = baseDf.select(ST_Intersection_Agg("geom"))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      val expectedResult = "POLYGON ((2 0, 1 0, 1 1, 2 1, 2 0))"
+      assert(actualResult == expectedResult)
+    }
+
     it("Passed ST_LineFromMultiPoint") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('MULTIPOINT((10 40), (40 30), (20 20), (30 10))') AS multipoint")

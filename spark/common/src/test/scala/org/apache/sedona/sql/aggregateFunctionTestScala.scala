@@ -246,6 +246,56 @@ class aggregateFunctionTestScala extends TestBaseScala {
       assert(result.getNumGeometries == 2)
     }
 
+    // Test aliases for *_Aggr functions with *_Agg suffix
+    it("Passed ST_Envelope_Agg alias") {
+      var pointCsvDF = sparkSession.read
+        .format("csv")
+        .option("delimiter", ",")
+        .option("header", "false")
+        .load(csvPointInputLocation)
+      pointCsvDF.createOrReplaceTempView("pointtable_alias")
+      var pointDf = sparkSession.sql(
+        "select ST_Point(cast(pointtable_alias._c0 as Decimal(24,20)), cast(pointtable_alias._c1 as Decimal(24,20))) as arealandmark from pointtable_alias")
+      pointDf.createOrReplaceTempView("pointdf_alias")
+      var boundary =
+        sparkSession.sql("select ST_Envelope_Agg(pointdf_alias.arealandmark) from pointdf_alias")
+      val coordinates: Array[Coordinate] = new Array[Coordinate](5)
+      coordinates(0) = new Coordinate(1.1, 101.1)
+      coordinates(1) = new Coordinate(1.1, 1100.1)
+      coordinates(2) = new Coordinate(1000.1, 1100.1)
+      coordinates(3) = new Coordinate(1000.1, 101.1)
+      coordinates(4) = coordinates(0)
+      val geometryFactory = new GeometryFactory()
+      geometryFactory.createPolygon(coordinates)
+      assert(boundary.take(1)(0).get(0) == geometryFactory.createPolygon(coordinates))
+    }
+
+    it("Passed ST_Intersection_Agg alias") {
+      sparkSession
+        .sql("""
+          |SELECT explode(array(
+          |  ST_GeomFromWKT('POLYGON ((0 0, 0 2, 2 2, 2 0, 0 0))'),
+          |  ST_GeomFromWKT('POLYGON ((1 1, 1 3, 3 3, 3 1, 1 1))')
+          |)) AS geom
+        """.stripMargin)
+        .createOrReplaceTempView("intersecting_polygons")
+
+      val intersectionDF =
+        sparkSession.sql("SELECT ST_Intersection_Agg(geom) FROM intersecting_polygons")
+      val result = intersectionDF.take(1)(0).get(0).asInstanceOf[Geometry]
+
+      // The intersection of the two squares should be a 1x1 square with area 1.0
+      assertResult(1.0)(result.getArea)
+    }
+
+    it("Passed ST_Union_Agg alias") {
+      val polygonDf = createPolygonDataFrame(100)
+      polygonDf.createOrReplaceTempView("polygondf_union_alias")
+      val unionDF = sparkSession.sql("SELECT ST_Union_Agg(geom) FROM polygondf_union_alias")
+      val result = unionDF.take(1)(0).get(0).asInstanceOf[Geometry]
+      assert(result.getArea > 0)
+    }
+
     it("ST_Union_Aggr should handle null values") {
       sparkSession
         .sql("""

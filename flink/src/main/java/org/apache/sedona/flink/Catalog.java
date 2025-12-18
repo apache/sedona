@@ -27,6 +27,10 @@ public class Catalog {
       new Aggregators.ST_Envelope_Aggr(),
       new Aggregators.ST_Intersection_Aggr(),
       new Aggregators.ST_Union_Aggr(),
+      // Aliases for *_Aggr functions with *_Agg suffix
+      new Aggregators.ST_Envelope_Agg(),
+      new Aggregators.ST_Intersection_Agg(),
+      new Aggregators.ST_Union_Agg(),
       new Constructors.ST_Point(),
       new Constructors.ST_PointZ(),
       new Constructors.ST_PointM(),

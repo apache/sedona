@@ -242,4 +242,23 @@ public class Aggregators {
       acc.geom = null;
     }
   }
+
+  // Aliases for *_Aggr functions with *_Agg suffix
+  @DataTypeHint(
+      value = "RAW",
+      rawSerializer = GeometryTypeSerializer.class,
+      bridgedTo = Geometry.class)
+  public static class ST_Envelope_Agg extends ST_Envelope_Aggr {}
+
+  @DataTypeHint(
+      value = "RAW",
+      rawSerializer = GeometryTypeSerializer.class,
+      bridgedTo = Geometry.class)
+  public static class ST_Intersection_Agg extends ST_Intersection_Aggr {}
+
+  @DataTypeHint(
+      value = "RAW",
+      rawSerializer = GeometryTypeSerializer.class,
+      bridgedTo = Geometry.class)
+  public static class ST_Union_Agg extends ST_Union_Aggr {}
 }
