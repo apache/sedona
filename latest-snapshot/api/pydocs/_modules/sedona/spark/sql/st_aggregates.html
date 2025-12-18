@@ -529,6 +529,49 @@
     <span class="k">return</span> <span class="n">_call_aggregate_function</span><span class="p">(</span><span class="s2">&quot;ST_Collect_Agg&quot;</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span></div>
 
 
+<span class="c1"># Aliases for *_Aggr functions with *_Agg suffix</span>
+<div class="viewcode-block" id="ST_Envelope_Agg"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_aggregates.ST_Envelope_Agg">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_Envelope_Agg</span><span class="p">(</span><span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Aggregate Function: Get the aggregate envelope of a geometry column.</span>
+
+<span class="sd">    This is an alias for ST_Envelope_Aggr.</span>
+
+<span class="sd">    :param geometry: Geometry column to aggregate.</span>
+<span class="sd">    :type geometry: ColumnOrName</span>
+<span class="sd">    :return: Geometry representing the aggregate envelope of the geometry column.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">ST_Envelope_Aggr</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ST_Intersection_Agg"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_aggregates.ST_Intersection_Agg">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_Intersection_Agg</span><span class="p">(</span><span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Aggregate Function: Get the aggregate intersection of a geometry column.</span>
+
+<span class="sd">    This is an alias for ST_Intersection_Aggr.</span>
+
+<span class="sd">    :param geometry: Geometry column to aggregate.</span>
+<span class="sd">    :type geometry: ColumnOrName</span>
+<span class="sd">    :return: Geometry representing the aggregate intersection of the geometry column.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">ST_Intersection_Aggr</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ST_Union_Agg"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_aggregates.ST_Union_Agg">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_Union_Agg</span><span class="p">(</span><span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Aggregate Function: Get the aggregate union of a geometry column.</span>
+
+<span class="sd">    This is an alias for ST_Union_Aggr.</span>
+
+<span class="sd">    :param geometry: Geometry column to aggregate.</span>
+<span class="sd">    :type geometry: ColumnOrName</span>
+<span class="sd">    :return: Geometry representing the aggregate union of the geometry column.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">ST_Union_Aggr</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span></div>
+
+
 <span class="c1"># Automatically populate __all__</span>
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">name</span>

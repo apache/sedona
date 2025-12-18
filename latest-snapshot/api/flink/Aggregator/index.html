@@ -75,7 +75,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#st_envelope_aggr" class="md-skip">
+        <a href="#st_envelope_agg" class="md-skip">
           Skip to content
         </a>
       
@@ -4290,10 +4290,10 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#st_envelope_aggr" class="md-nav__link">
+  <a href="#st_envelope_agg" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ST_Envelope_Aggr
+        ST_Envelope_Agg
       
     </span>
   </a>
@@ -4301,10 +4301,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#st_intersection_aggr" class="md-nav__link">
+  <a href="#st_intersection_agg" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ST_Intersection_Aggr
+        ST_Intersection_Agg
       
     </span>
   </a>
@@ -4312,10 +4312,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#st_union_aggr" class="md-nav__link">
+  <a href="#st_union_agg" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ST_Union_Aggr
+        ST_Union_Agg
       
     </span>
   </a>
@@ -5771,10 +5771,10 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#st_envelope_aggr" class="md-nav__link">
+  <a href="#st_envelope_agg" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ST_Envelope_Aggr
+        ST_Envelope_Agg
       
     </span>
   </a>
@@ -5782,10 +5782,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#st_intersection_aggr" class="md-nav__link">
+  <a href="#st_intersection_agg" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ST_Intersection_Aggr
+        ST_Intersection_Agg
       
     </span>
   </a>
@@ -5793,10 +5793,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#st_union_aggr" class="md-nav__link">
+  <a href="#st_union_agg" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ST_Union_Aggr
+        ST_Union_Agg
       
     </span>
   </a>
@@ -5851,32 +5851,44 @@ You're not viewing the latest stable version.
  under the License.
  -->
 
-<h2 id="st_envelope_aggr">ST_Envelope_Aggr<a class="headerlink" href="#st_envelope_aggr" title="Permanent link">&para;</a></h2>
+<h2 id="st_envelope_agg">ST_Envelope_Agg<a class="headerlink" href="#st_envelope_agg" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the entire envelope boundary of all geometries in A</p>
-<p>Format: <code>ST_Envelope_Aggr (A: geometryColumn)</code></p>
+<p>Format: <code>ST_Envelope_Agg (A: geometryColumn)</code></p>
 <p>Since: <code>v1.3.0</code></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function was previously named <code>ST_Envelope_Aggr</code>, which is deprecated since <code>v1.8.1</code>.</p>
+</div>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Envelope_Aggr</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;MULTIPOINT(1.1 101.1,2.1 102.1,3.1 103.1,4.1 104.1,5.1 105.1,6.1 106.1,7.1 107.1,8.1 108.1,9.1 109.1,10.1 110.1)&#39;</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Envelope_Agg</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;MULTIPOINT(1.1 101.1,2.1 102.1,3.1 103.1,4.1 104.1,5.1 105.1,6.1 106.1,7.1 107.1,8.1 108.1,9.1 109.1,10.1 110.1)&#39;</span><span class="p">))</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>POLYGON ((1.1 101.1, 1.1 120.1, 20.1 120.1, 20.1 101.1, 1.1 101.1))
 </code></pre></div>
-<h2 id="st_intersection_aggr">ST_Intersection_Aggr<a class="headerlink" href="#st_intersection_aggr" title="Permanent link">&para;</a></h2>
+<h2 id="st_intersection_agg">ST_Intersection_Agg<a class="headerlink" href="#st_intersection_agg" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the polygon intersection of all polygons in A</p>
-<p>Format: <code>ST_Intersection_Aggr (A: geometryColumn)</code></p>
+<p>Format: <code>ST_Intersection_Agg (A: geometryColumn)</code></p>
 <p>Since: <code>v1.5.0</code></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function was previously named <code>ST_Intersection_Aggr</code>, which is deprecated since <code>v1.8.1</code>.</p>
+</div>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Intersection_Aggr</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;MULTIPOINT(1.1 101.1,2.1 102.1,3.1 103.1,4.1 104.1,5.1 105.1,6.1 106.1,7.1 107.1,8.1 108.1,9.1 109.1,10.1 110.1)&#39;</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Intersection_Agg</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;MULTIPOINT(1.1 101.1,2.1 102.1,3.1 103.1,4.1 104.1,5.1 105.1,6.1 106.1,7.1 107.1,8.1 108.1,9.1 109.1,10.1 110.1)&#39;</span><span class="p">))</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>MULTIPOINT ((1.1 101.1), (2.1 102.1), (3.1 103.1), (4.1 104.1), (5.1 105.1), (6.1 106.1), (7.1 107.1), (8.1 108.1), (9.1 109.1), (10.1 110.1))
 </code></pre></div>
-<h2 id="st_union_aggr">ST_Union_Aggr<a class="headerlink" href="#st_union_aggr" title="Permanent link">&para;</a></h2>
+<h2 id="st_union_agg">ST_Union_Agg<a class="headerlink" href="#st_union_agg" title="Permanent link">&para;</a></h2>
 <p>Introduction: Return the polygon union of all polygons in A. All inputs must be polygons.</p>
-<p>Format: <code>ST_Union_Aggr (A: geometryColumn)</code></p>
+<p>Format: <code>ST_Union_Agg (A: geometryColumn)</code></p>
 <p>Since: <code>v1.3.0</code></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function was previously named <code>ST_Union_Aggr</code>, which is deprecated since <code>v1.8.1</code>.</p>
+</div>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Union_Aggr</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;MULTIPOINT(1.1 101.1,2.1 102.1,3.1 103.1,4.1 104.1,5.1 105.1,6.1 106.1,7.1 107.1,8.1 108.1,9.1 109.1,10.1 110.1)&#39;</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Union_Agg</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;MULTIPOINT(1.1 101.1,2.1 102.1,3.1 103.1,4.1 104.1,5.1 105.1,6.1 106.1,7.1 107.1,8.1 108.1,9.1 109.1,10.1 110.1)&#39;</span><span class="p">))</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>MULTIPOINT ((1.1 101.1), (2.1 102.1), (3.1 103.1), (4.1 104.1), (5.1 105.1), (6.1 106.1), (7.1 107.1), (8.1 108.1), (9.1 109.1), (10.1 110.1))
@@ -5901,7 +5913,7 @@ You're not viewing the latest stable version.
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="December 4, 2024 07:01:47 UTC">December 4, 2024 07:01:47</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="December 18, 2025 06:37:59 UTC">December 18, 2025 06:37:59</span>
   </span>
 
     
