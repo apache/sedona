@@ -271,12 +271,21 @@ class aggregateFunctionTestScala extends TestBaseScala {
     }
 
     it("Passed ST_Intersection_Agg alias") {
-      val polygonDf = createPolygonDataFrame(100)
-      polygonDf.createOrReplaceTempView("polygondf_alias")
+      sparkSession
+        .sql("""
+          |SELECT explode(array(
+          |  ST_GeomFromWKT('POLYGON ((0 0, 0 2, 2 2, 2 0, 0 0))'),
+          |  ST_GeomFromWKT('POLYGON ((1 1, 1 3, 3 3, 3 1, 1 1))')
+          |)) AS geom
+        """.stripMargin)
+        .createOrReplaceTempView("intersecting_polygons")
+
       val intersectionDF =
-        sparkSession.sql("SELECT ST_Intersection_Agg(geom) FROM polygondf_alias")
-      val result = intersectionDF.take(1)(0).get(0).asInstanceOf[Polygon]
-      assert(result.getArea > 0)
+        sparkSession.sql("SELECT ST_Intersection_Agg(geom) FROM intersecting_polygons")
+      val result = intersectionDF.take(1)(0).get(0).asInstanceOf[Geometry]
+
+      // The intersection of the two squares should be a 1x1 square with area 1.0
+      assertResult(1.0)(result.getArea)
     }
 
     it("Passed ST_Union_Agg alias") {
