@@ -277,6 +277,99 @@ class GeoPackageReaderTest extends TestBaseScala with Matchers {
 
   }
 
+  describe("check the binary format") {
+    it("should read binary format correctly") {
+//      sparkSession.sql(
+//        "SELECT ST_SetSRID(ST_GeomFromText('POINT (1 1)'), 4326) AS geometry"
+//      ).show
+
+//      sparkSession.sql(
+//        "SELECT ST_GeomFromText('POINT EMPTY') AS geometry"
+//      ).show
+
+//      sparkSession.sql(
+//        "SELECT ST_GeomFromText('GEOMETRYCOLLECTION EMPTY') AS geometry"
+//      ).show
+
+      sparkSession.sql(
+        """SELECT ST_GeomFromText('
+          |POLYGON (
+          |  (
+          |    12.345678901234 45.678901234567,
+          |    23.456789012345 67.890123456789,
+          |    34.567890123456 56.789012345678,
+          |    45.678901234567 34.567890123456,
+          |    29.876543210987 22.345678901234,
+          |    12.345678901234 45.678901234567
+          |  ),
+          |  (
+          |    25.123456789012 45.987654321098,
+          |    30.987654321098 50.123456789012,
+          |    35.456789012345 45.456789012345,
+          |    30.234567890123 40.987654321098,
+          |    25.123456789012 45.987654321098
+          |  )
+          |)
+          |'
+          |)""".stripMargin
+      ).show
+
+//      sparkSession.sql(
+//        "SELECT ST_GeomFromText('MULTILINESTRING((1 1, 2 2), (4 5, 6 7))') AS geometry"
+//      ).show
+//
+//      sparkSession.sql(
+//        """
+//          |SELECT ST_GeomFromText('
+//          |MULTIPOLYGON (
+//          |  (
+//          |    (1 1, 10 1, 10 10, 1 10, 1 1),
+//          |    (2 2, 4 2, 4 4, 2 4, 2 2),
+//          |    (6 6, 8 6, 8 8, 6 8, 6 6)
+//          |  ),
+//          |  (
+//          |    (12 1, 20 1, 20 9, 12 9, 12 1),
+//          |    (13 2, 15 2, 15 4, 13 4, 13 2),
+//          |    (17 5, 19 5, 19 7, 17 7, 17 5)
+//          |  )
+//          |)
+//          |')
+//          |
+//          |""".stripMargin
+//      ).show
+
+//      sparkSession.sql(
+//        "SELECT ST_GeomFromText('GEOMETRYCOLLECTION(POINT(4 6),LINESTRING(4 6,7 10), POLYGON((4 6,7 10,4 10,4 6)), MULTIPOINT((1 2),(3 4)))') AS geometry"
+//      ).show()
+
+//      sparkSession.sql(
+//        """
+//          |SELECT ST_GeomFromText('
+//          |GEOMETRYCOLLECTION (
+//          |  POINT (1 1),
+//          |  GEOMETRYCOLLECTION (
+//          |    LINESTRING (0 0, 1 1),
+//          |    POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))
+//          |  )
+//          |)')
+//          |
+//          |
+//          |""".stripMargin
+//      ).show()
+
+
+//    sparkSession.sql(
+//      "SELECT ST_GeomFromText('MULTIPOINT((1 1), (2 2), (4 5))') AS geometry"
+//    ).show
+//
+//      sparkSession.sql(
+//        "SELECT ST_GeomFromText('LINESTRING (0 0, 1 1, 2 2)') AS geometry"
+//      ).show
+
+    }
+
+  }
+
   describe("Reading from S3") {
     it("should be able to read files from S3") {
       val container = new MinIOContainer("minio/minio:latest")
