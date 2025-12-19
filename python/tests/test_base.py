@@ -22,7 +22,7 @@ from typing import Iterable, Union
 import pyspark
 from pyspark.sql import DataFrame
 
-from sedona.spark import *
+from sedona.spark import SedonaContext
 from sedona.spark.utils.decorators import classproperty
 
 SPARK_REMOTE = os.getenv("SPARK_REMOTE")

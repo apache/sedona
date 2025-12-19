@@ -46,6 +46,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     // We need to be explicit about broadcasting in tests.
     .config("sedona.join.autoBroadcastJoinThreshold", "-1")
     .config("spark.sql.extensions", "org.apache.sedona.sql.SedonaSqlExtensions")
+    .config("sedona.python.worker.udf.module", "sedonaworker.worker")
     .config(keyParserExtension, ThreadLocalRandom.current().nextBoolean())
     .getOrCreate()
 
