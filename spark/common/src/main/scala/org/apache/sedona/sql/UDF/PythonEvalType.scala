@@ -23,7 +23,14 @@ object PythonEvalType {
   val SQL_SCALAR_SEDONA_UDF = 5200
   val SEDONA_UDF_TYPE_CONSTANT = 5000
 
+  // sedona db eval types
+  val SQL_SCALAR_SEDONA_DB_UDF = 6200
+  val SEDONA_DB_UDF_TYPE_CONSTANT = 6000
+
   def toString(pythonEvalType: Int): String = pythonEvalType match {
     case SQL_SCALAR_SEDONA_UDF => "SQL_SCALAR_GEO_UDF"
+    case SQL_SCALAR_SEDONA_DB_UDF => "SQL_SCALAR_SEDONA_DB_UDF"
   }
+
+  def evals(): Set[Int] = Set(SQL_SCALAR_SEDONA_UDF, SQL_SCALAR_SEDONA_DB_UDF)
 }

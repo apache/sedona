@@ -21,11 +21,14 @@ from enum import Enum
 
 import pandas as pd
 
-from sedona.spark.sql.types import GeometryType
 from sedona.spark.utils import geometry_serde
-from pyspark.sql.udf import UserDefinedFunction
-from pyspark.sql.types import DataType
 from shapely.geometry.base import BaseGeometry
+from pyspark.sql.udf import UserDefinedFunction
+import pyarrow as pa
+import geoarrow.pyarrow as ga
+from sedonadb import udf as sedona_udf_module
+from sedona.spark.sql.types import GeometryType
+from pyspark.sql.types import DataType, FloatType, DoubleType, IntegerType, StringType
 
 
 SEDONA_SCALAR_EVAL_TYPE = 5200
@@ -142,3 +145,58 @@ def serialize_to_geometry_if_geom(data, return_type: DataType):
         return geometry_serde.serialize(data)
 
     return data
+
+
+def infer_pa_type(spark_type: DataType):
+    if isinstance(spark_type, GeometryType):
+        return ga.wkb()
+    elif isinstance(spark_type, FloatType):
+        return pa.float32()
+    elif isinstance(spark_type, DoubleType):
+        return pa.float64()
+    elif isinstance(spark_type, IntegerType):
+        return pa.int32()
+    elif isinstance(spark_type, StringType):
+        return pa.string()
+    else:
+        raise NotImplementedError(f"Type {spark_type} is not supported yet.")
+
+def infer_input_type(spark_type: DataType):
+    if isinstance(spark_type, GeometryType):
+        return sedona_udf_module.GEOMETRY
+    elif isinstance(spark_type, FloatType) or isinstance(spark_type, DoubleType) or isinstance(spark_type, IntegerType):
+        return sedona_udf_module.NUMERIC
+    elif isinstance(spark_type, StringType):
+        return sedona_udf_module.STRING
+    else:
+        raise NotImplementedError(f"Type {spark_type} is not supported yet.")
+
+def infer_input_types(spark_types: list[DataType]):
+    pa_types = []
+    for spark_type in spark_types:
+        pa_type = infer_input_type(spark_type)
+        pa_types.append(pa_type)
+
+    return pa_types
+
+
+def sedona_db_vectorized_udf(
+        return_type: DataType,
+        input_types: list[DataType]
+):
+    def apply_fn(fn):
+        out_type = infer_pa_type(return_type)
+        input_types_sedona_db = infer_input_types(input_types)
+
+        @sedona_udf_module.arrow_udf(out_type, input_types=input_types_sedona_db)
+        def shapely_udf(*args, **kwargs):
+            return fn(*args, **kwargs)
+
+        udf = UserDefinedFunction(
+            lambda: shapely_udf, return_type, "SedonaPandasArrowUDF", evalType=6200
+        )
+
+        return udf
+
+
+    return apply_fn

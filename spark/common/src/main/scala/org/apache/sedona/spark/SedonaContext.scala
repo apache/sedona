@@ -41,7 +41,6 @@ class InternalApi(
     extends StaticAnnotation
 
 object SedonaContext {
-
   private def customOptimizationsWithSession(sparkSession: SparkSession) =
     Seq(
       new TransformNestedUDTParquet(sparkSession),
@@ -72,7 +71,7 @@ object SedonaContext {
 
     val sedonaArrowStrategy = Try(
       Class
-        .forName("org.apache.spark.sql.udf.SedonaArrowStrategy")
+        .forName("org.apache.spark.sql.execution.python.SedonaArrowStrategy")
         .getDeclaredConstructor()
         .newInstance()
         .asInstanceOf[SparkStrategy])
