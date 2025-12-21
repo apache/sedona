@@ -27,6 +27,7 @@ import org.apache.spark.sql.execution.arrow.ArrowWriter
 import org.apache.spark.sql.execution.metric.SQLMetric
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types.StructType
+import org.apache.spark.sql.util.ArrowUtils
 import org.apache.spark.util.Utils
 import org.apache.spark.{SparkEnv, TaskContext}
 
@@ -93,9 +94,9 @@ private[python] trait SedonaPythonArrowInput[IN] extends PythonArrowInput[IN] { 
       }
 
       protected override def writeIteratorToStream(dataOut: DataOutputStream): Unit = {
-        val arrowSchema = SedonaArrowUtils.toArrowSchema(
+        val arrowSchema = ArrowUtils.toArrowSchema(
           schema, timeZoneId, errorOnDuplicatedFieldNames, largeVarTypes)
-        val allocator = SedonaArrowUtils.rootAllocator.newChildAllocator(
+        val allocator = ArrowUtils.rootAllocator.newChildAllocator(
           s"stdout writer for $pythonExec", 0, Long.MaxValue)
         val root = VectorSchemaRoot.create(arrowSchema, allocator)
 
