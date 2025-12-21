@@ -20,8 +20,8 @@ package org.apache.spark.sql.udf
 
 import org.apache.sedona.spark.SedonaContext
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions.{col, expr}
-import org.apache.spark.sql.udf.ScalarUDF.{geometryToGeometryFunction}
+import org.apache.spark.sql.functions.{col, expr, lit}
+import org.apache.spark.sql.udf.ScalarUDF.geometryToGeometryFunction
 import org.locationtech.jts.io.WKTReader
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
@@ -47,14 +47,29 @@ class StrategySuite extends AnyFunSuite with Matchers {
 //    spark.sql("select 1").show()
     val df = spark.read.format("geoparquet")
       .load("/Users/pawelkocinski/Desktop/projects/sedona-production/apache-sedona-book/data/warehouse/buildings")
-      .selectExpr("ST_Centroid(geometry) AS geometry")
+      .withColumn("geometry", expr("ST_SetSRID(geometry, '4326')"))
+
+    df.show()
 
       df
       .select(
+        col("id"),
+        col("version"),
+        col("bbox"),
 //        geometryToNonGeometryFunction(col("geometry")),
-        geometryToGeometryFunction(col("geometry")),
+        geometryToGeometryFunction(col("geometry"), lit(1)).alias("geom"),
 //        nonGeometryToGeometryFunction(expr("ST_AsText(geometry)")),
-      ).show(10, false)
+      ).show(10)
+
+    println(df
+      .select(
+        col("id"),
+        col("version"),
+        col("bbox"),
+        //        geometryToNonGeometryFunction(col("geometry")),
+        geometryToGeometryFunction(col("geometry"), lit(1)).alias("geom"),
+        //        nonGeometryToGeometryFunction(expr("ST_AsText(geometry)")),
+      ).count())
 
 //    df.show()
     1 shouldBe 1

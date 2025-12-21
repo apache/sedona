@@ -77,6 +77,8 @@ private[python] trait SedonaPythonArrowInput[IN] { self: SedonaBasePythonRunner[
                                           inputIterator: Iterator[IN],
                                           partitionIndex: Int,
                                           context: TaskContext): WriterThread = {
+//    createWorkerThread(env, worker, inputIterator, partitionIndex, context, schema)
+
     new WriterThread(env, worker, inputIterator, partitionIndex, context) {
 
       protected override def writeCommand(dataOut: DataOutputStream): Unit = {

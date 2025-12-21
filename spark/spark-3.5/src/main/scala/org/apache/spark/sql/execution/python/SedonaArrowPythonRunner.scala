@@ -38,7 +38,7 @@ class SedonaArrowPythonRunner(
                          val pythonMetrics: Map[String, SQLMetric],
                          jobArtifactUUID: Option[String])
   extends SedonaBasePythonRunner[Iterator[InternalRow], ColumnarBatch](
-    funcs, evalType, argOffsets, jobArtifactUUID)
+    funcs, evalType, argOffsets, jobArtifactUUID, schema)
     with SedonaBasicPythonArrowInput
     with SedonaBasicPythonArrowOutput {
 

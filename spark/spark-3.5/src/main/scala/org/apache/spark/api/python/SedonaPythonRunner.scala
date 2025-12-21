@@ -17,6 +17,7 @@ package org.apache.spark.api.python
  * limitations under the License.
  */
 
+import org.apache.sedona.common.geometrySerde.CoordinateType
 import org.apache.spark._
 import org.apache.spark.SedonaSparkEnv
 import org.apache.spark.internal.Logging
@@ -24,6 +25,7 @@ import org.apache.spark.internal.config.Python._
 import org.apache.spark.internal.config.{BUFFER_SIZE, EXECUTOR_CORES}
 import org.apache.spark.resource.ResourceProfile.{EXECUTOR_CORES_LOCAL_PROPERTY, PYSPARK_MEMORY_LOCAL_PROPERTY}
 import org.apache.spark.security.SocketAuthHelper
+import org.apache.spark.sql.execution.python.{ArrowPythonRunner, BatchIterator}
 import org.apache.spark.util._
 
 import java.io._
@@ -34,47 +36,10 @@ import java.nio.file.{Path, Files => JavaFiles}
 import java.util.concurrent.atomic.AtomicBoolean
 import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
+import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
+import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
+import org.apache.spark.sql.types.StructType
 
-
-/**
- * Enumerate the type of command that will be sent to the Python worker
- */
-private[spark] object PythonEvalType {
-  val NON_UDF = 0
-
-  val SQL_BATCHED_UDF = 100
-  val SQL_ARROW_BATCHED_UDF = 101
-
-  val SQL_SCALAR_PANDAS_UDF = 200
-  val SQL_GROUPED_MAP_PANDAS_UDF = 201
-  val SQL_GROUPED_AGG_PANDAS_UDF = 202
-  val SQL_WINDOW_AGG_PANDAS_UDF = 203
-  val SQL_SCALAR_PANDAS_ITER_UDF = 204
-  val SQL_MAP_PANDAS_ITER_UDF = 205
-  val SQL_COGROUPED_MAP_PANDAS_UDF = 206
-  val SQL_MAP_ARROW_ITER_UDF = 207
-  val SQL_GROUPED_MAP_PANDAS_UDF_WITH_STATE = 208
-
-  val SQL_TABLE_UDF = 300
-  val SQL_ARROW_TABLE_UDF = 301
-
-  def toString(pythonEvalType: Int): String = pythonEvalType match {
-    case NON_UDF => "NON_UDF"
-    case SQL_BATCHED_UDF => "SQL_BATCHED_UDF"
-    case SQL_ARROW_BATCHED_UDF => "SQL_ARROW_BATCHED_UDF"
-    case SQL_SCALAR_PANDAS_UDF => "SQL_SCALAR_PANDAS_UDF"
-    case SQL_GROUPED_MAP_PANDAS_UDF => "SQL_GROUPED_MAP_PANDAS_UDF"
-    case SQL_GROUPED_AGG_PANDAS_UDF => "SQL_GROUPED_AGG_PANDAS_UDF"
-    case SQL_WINDOW_AGG_PANDAS_UDF => "SQL_WINDOW_AGG_PANDAS_UDF"
-    case SQL_SCALAR_PANDAS_ITER_UDF => "SQL_SCALAR_PANDAS_ITER_UDF"
-    case SQL_MAP_PANDAS_ITER_UDF => "SQL_MAP_PANDAS_ITER_UDF"
-    case SQL_COGROUPED_MAP_PANDAS_UDF => "SQL_COGROUPED_MAP_PANDAS_UDF"
-    case SQL_MAP_ARROW_ITER_UDF => "SQL_MAP_ARROW_ITER_UDF"
-    case SQL_GROUPED_MAP_PANDAS_UDF_WITH_STATE => "SQL_GROUPED_MAP_PANDAS_UDF_WITH_STATE"
-    case SQL_TABLE_UDF => "SQL_TABLE_UDF"
-    case SQL_ARROW_TABLE_UDF => "SQL_ARROW_TABLE_UDF"
-  }
-}
 
 private object SedonaBasePythonRunner {
 
@@ -92,10 +57,11 @@ private object SedonaBasePythonRunner {
  * functions (from bottom to top).
  */
 private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
-                                                         protected val funcs: Seq[ChainedPythonFunctions],
-                                                         protected val evalType: Int,
-                                                         protected val argOffsets: Array[Array[Int]],
-                                                         protected val jobArtifactUUID: Option[String])
+                                                               protected val funcs: Seq[ChainedPythonFunctions],
+                                                               protected val evalType: Int,
+                                                               protected val argOffsets: Array[Array[Int]],
+                                                               protected val jobArtifactUUID: Option[String],
+                                                               schema: StructType)
   extends Logging {
 
   require(funcs.length == argOffsets.length, "argOffsets should have the same length as funcs")
@@ -279,9 +245,43 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
 
     override def run(): Unit = Utils.logUncaughtExceptions {
       try {
+        println("ssss")
+        val toReadCRS = inputIterator.buffered.headOption.flatMap(
+          el => el.asInstanceOf[Iterator[IN]].buffered.headOption
+        )
+
+        val row = toReadCRS match {
+          case Some(value) => value match {
+            case row: GenericInternalRow =>
+              Some(row)
+          }
+          case None => None
+        }
+
+        val geometryFields = schema.zipWithIndex.filter {
+          case (field, index) => field.dataType == GeometryUDT
+        }.map {
+          case (field, index) =>
+            if (row.isEmpty || row.get.values(index) == null) (index, 0) else {
+              val geom = row.get.get(index, GeometryUDT).asInstanceOf[Array[Byte]]
+              val preambleByte = geom(0) & 0xFF
+              val hasSrid = (preambleByte & 0x01) != 0
+
+              var srid = 0
+              if (hasSrid) {
+                val srid2 = (geom(1) & 0xFF) << 16
+                val srid1 = (geom(2) & 0xFF) << 8
+                val srid0 = geom(3) & 0xFF
+                srid = srid2 | srid1 | srid0
+              }
+              (index, srid)
+            }
+        }
+
         TaskContext.setTaskContext(context)
         val stream = new BufferedOutputStream(worker.getOutputStream, bufferSize)
         val dataOut = new DataOutputStream(stream)
+
         // Partition index
         dataOut.writeInt(partitionIndex)
         // Python version of driver
@@ -401,6 +401,7 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
         val needsDecryptionServer = env.serializerManager.encryptionEnabled && addedBids.nonEmpty
         dataOut.writeBoolean(needsDecryptionServer)
         dataOut.writeInt(cnt)
+
         def sendBidsToRemove(): Unit = {
           for (bid <- toRemove) {
             // remove the broadcast from worker
@@ -408,6 +409,7 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
             oldBids.remove(bid)
           }
         }
+
         if (needsDecryptionServer) {
           // if there is encryption, we setup a server which reads the encrypted files, and sends
           // the decrypted data to python
@@ -447,6 +449,15 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
 
         dataOut.writeInt(evalType)
         writeCommand(dataOut)
+
+        // write number of geometry fields
+        dataOut.writeInt(geometryFields.length)
+        // write geometry field indices and their SRIDs
+        geometryFields.foreach { case (index, srid) =>
+          dataOut.writeInt(index)
+          dataOut.writeInt(srid)
+        }
+
         writeIteratorToStream(dataOut)
 
         dataOut.writeInt(SpecialLengths.END_OF_STREAM)
