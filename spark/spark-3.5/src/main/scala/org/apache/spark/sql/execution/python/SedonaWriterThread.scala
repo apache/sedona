@@ -4,7 +4,7 @@ package org.apache.spark.sql.execution.python
 import org.apache.sedona.common.geometrySerde.CoordinateType
 import org.apache.spark._
 import org.apache.spark.SedonaSparkEnv
-import org.apache.spark.api.python.{BarrierTaskContextMessageProtocol, BasePythonRunner, ChainedPythonFunctions, EncryptedPythonBroadcastServer, PythonRDD, SedonaBasePythonRunner, SpecialLengths}
+import org.apache.spark.api.python.{BarrierTaskContextMessageProtocol, BasePythonRunner, ChainedPythonFunctions, EncryptedPythonBroadcastServer, PythonRDD, SpecialLengths}
 import org.apache.spark.internal.Logging
 import org.apache.spark.internal.config.Python._
 import org.apache.spark.internal.config.{BUFFER_SIZE, EXECUTOR_CORES}

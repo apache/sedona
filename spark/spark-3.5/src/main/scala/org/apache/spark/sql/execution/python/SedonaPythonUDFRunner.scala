@@ -34,8 +34,8 @@ abstract class SedonaBasePythonUDFRunner(
                                     argOffsets: Array[Array[Int]],
                                     pythonMetrics: Map[String, SQLMetric],
                                     jobArtifactUUID: Option[String])
-  extends SedonaBasePythonRunner[Array[Byte], Array[Byte]](
-    funcs, evalType, argOffsets, jobArtifactUUID, null) {
+  extends BasePythonRunner[Array[Byte], Array[Byte]](
+    funcs, evalType, argOffsets, jobArtifactUUID) {
 
   override val pythonExec: String =
     SQLConf.get.pysparkWorkerPythonExecutable.getOrElse(

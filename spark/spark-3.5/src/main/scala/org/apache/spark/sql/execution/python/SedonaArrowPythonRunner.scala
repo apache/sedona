@@ -37,10 +37,10 @@ class SedonaArrowPythonRunner(
                          protected override val workerConf: Map[String, String],
                          val pythonMetrics: Map[String, SQLMetric],
                          jobArtifactUUID: Option[String])
-  extends SedonaBasePythonRunner[Iterator[InternalRow], ColumnarBatch](
-    funcs, evalType, argOffsets, jobArtifactUUID, schema)
+  extends BasePythonRunner[Iterator[InternalRow], ColumnarBatch](
+    funcs, evalType, argOffsets, jobArtifactUUID)
     with SedonaBasicPythonArrowInput
-    with SedonaBasicPythonArrowOutput {
+    with BasicPythonArrowOutput {
 
   override val pythonExec: String =
     SQLConf.get.pysparkWorkerPythonExecutable.getOrElse(

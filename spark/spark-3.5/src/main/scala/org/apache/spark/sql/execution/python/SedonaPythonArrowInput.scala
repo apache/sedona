@@ -20,10 +20,12 @@ package org.apache.spark.sql.execution.python
 import org.apache.arrow.vector.VectorSchemaRoot
 import org.apache.arrow.vector.ipc.ArrowStreamWriter
 import org.apache.spark.api.python
-import org.apache.spark.api.python.{BasePythonRunner, ChainedPythonFunctions, PythonRDD, SedonaBasePythonRunner}
+import org.apache.spark.api.python.{BasePythonRunner, ChainedPythonFunctions, PythonRDD}
 import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
 import org.apache.spark.sql.execution.arrow.ArrowWriter
 import org.apache.spark.sql.execution.metric.SQLMetric
+import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.ArrowUtils
 import org.apache.spark.sql.util.ArrowUtils.toArrowSchema
@@ -37,7 +39,7 @@ import java.net.Socket
  * A trait that can be mixed-in with [[python.BasePythonRunner]]. It implements the logic from
  * JVM (an iterator of internal rows + additional data if required) to Python (Arrow).
  */
-private[python] trait SedonaPythonArrowInput[IN] { self: SedonaBasePythonRunner[IN, _] =>
+private[python] trait SedonaPythonArrowInput[IN] { self: BasePythonRunner[IN, _] =>
   protected val workerConf: Map[String, String]
 
   protected val schema: StructType
@@ -84,6 +86,46 @@ private[python] trait SedonaPythonArrowInput[IN] { self: SedonaBasePythonRunner[
       protected override def writeCommand(dataOut: DataOutputStream): Unit = {
         handleMetadataBeforeExec(dataOut)
         writeUDF(dataOut, funcs, argOffsets)
+
+        val toReadCRS = inputIterator.buffered.headOption.flatMap(
+          el => el.asInstanceOf[Iterator[IN]].buffered.headOption
+        )
+
+        val row = toReadCRS match {
+          case Some(value) => value match {
+            case row: GenericInternalRow =>
+              Some(row)
+          }
+          case None => None
+        }
+
+        val geometryFields = schema.zipWithIndex.filter {
+          case (field, index) => field.dataType == GeometryUDT
+        }.map {
+          case (field, index) =>
+            if (row.isEmpty || row.get.values(index) == null) (index, 0) else {
+              val geom = row.get.get(index, GeometryUDT).asInstanceOf[Array[Byte]]
+              val preambleByte = geom(0) & 0xFF
+              val hasSrid = (preambleByte & 0x01) != 0
+
+              var srid = 0
+              if (hasSrid) {
+                val srid2 = (geom(1) & 0xFF) << 16
+                val srid1 = (geom(2) & 0xFF) << 8
+                val srid0 = geom(3) & 0xFF
+                srid = srid2 | srid1 | srid0
+              }
+              (index, srid)
+            }
+        }
+
+        // write number of geometry fields
+        dataOut.writeInt(geometryFields.length)
+        // write geometry field indices and their SRIDs
+        geometryFields.foreach { case (index, srid) =>
+          dataOut.writeInt(index)
+          dataOut.writeInt(srid)
+        }
       }
 
       protected override def writeIteratorToStream(dataOut: DataOutputStream): Unit = {
@@ -124,7 +166,7 @@ private[python] trait SedonaPythonArrowInput[IN] { self: SedonaBasePythonRunner[
 
 
 private[python] trait SedonaBasicPythonArrowInput extends SedonaPythonArrowInput[Iterator[InternalRow]] {
-  self: SedonaBasePythonRunner[Iterator[InternalRow], _] =>
+  self: BasePythonRunner[Iterator[InternalRow], _] =>
 
   protected def writeIteratorToArrowStream(
                                             root: VectorSchemaRoot,
