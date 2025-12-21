@@ -27,8 +27,6 @@ import org.apache.spark.sql.execution.arrow.ArrowWriter
 import org.apache.spark.sql.execution.metric.SQLMetric
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types.StructType
-import org.apache.spark.sql.util.ArrowUtils
-import org.apache.spark.sql.util.ArrowUtils.toArrowSchema
 import org.apache.spark.util.Utils
 import org.apache.spark.{SparkEnv, TaskContext}
 
@@ -39,39 +37,7 @@ import java.net.Socket
  * A trait that can be mixed-in with [[python.BasePythonRunner]]. It implements the logic from
  * JVM (an iterator of internal rows + additional data if required) to Python (Arrow).
  */
-private[python] trait SedonaPythonArrowInput[IN] { self: BasePythonRunner[IN, _] =>
-  protected val workerConf: Map[String, String]
-
-  protected val schema: StructType
-
-  protected val timeZoneId: String
-
-  protected val errorOnDuplicatedFieldNames: Boolean
-
-  protected val largeVarTypes: Boolean
-
-  protected def pythonMetrics: Map[String, SQLMetric]
-
-  protected def writeIteratorToArrowStream(
-                                            root: VectorSchemaRoot,
-                                            writer: ArrowStreamWriter,
-                                            dataOut: DataOutputStream,
-                                            inputIterator: Iterator[IN]): Unit
-
-  protected def writeUDF(
-                          dataOut: DataOutputStream,
-                          funcs: Seq[ChainedPythonFunctions],
-                          argOffsets: Array[Array[Int]]): Unit =
-    SedonaPythonUDFRunner.writeUDFs(dataOut, funcs, argOffsets)
-
-  protected def handleMetadataBeforeExec(stream: DataOutputStream): Unit = {
-    // Write config for the worker as a number of key -> value pairs of strings
-    stream.writeInt(workerConf.size)
-    for ((k, v) <- workerConf) {
-      PythonRDD.writeUTF(k, stream)
-      PythonRDD.writeUTF(v, stream)
-    }
-  }
+private[python] trait SedonaPythonArrowInput[IN] extends PythonArrowInput[IN] { self: BasePythonRunner[IN, _] =>
 
   protected override def newWriterThread(
                                           env: SparkEnv,
@@ -79,8 +45,6 @@ private[python] trait SedonaPythonArrowInput[IN] { self: BasePythonRunner[IN, _]
                                           inputIterator: Iterator[IN],
                                           partitionIndex: Int,
                                           context: TaskContext): WriterThread = {
-//    createWorkerThread(env, worker, inputIterator, partitionIndex, context, schema)
-
     new WriterThread(env, worker, inputIterator, partitionIndex, context) {
 
       protected override def writeCommand(dataOut: DataOutputStream): Unit = {
