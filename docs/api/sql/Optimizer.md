@@ -211,6 +211,17 @@ The supported join type - broadcast side combinations are:
 pointDf.alias("pointDf").join(broadcast(polygonDf).alias("polygonDf"), expr("ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"))
 ```
 
+To specify a broadcast hint in SQL, use the following syntax:
+
+```sql
+SELECT /*+ BROADCAST(polygonDf) */
+  pointDf.*,
+  polygonDf.*
+FROM pointDf
+JOIN polygonDf
+  ON ST_Contains(polygonDf.polygonshape, pointDf.pointshape);
+```
+
 Spark SQL Physical plan:
 
 ```
