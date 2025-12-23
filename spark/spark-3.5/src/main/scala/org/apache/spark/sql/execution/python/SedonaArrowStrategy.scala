@@ -19,19 +19,17 @@
 package org.apache.spark.sql.execution.python
 
 import org.apache.sedona.sql.UDF.PythonEvalType
+import org.apache.sedona.sql.UDF.PythonEvalType.{SQL_SCALAR_SEDONA_DB_UDF, SQL_SCALAR_SEDONA_UDF}
 import org.apache.spark.api.python.ChainedPythonFunctions
 import org.apache.spark.sql.Strategy
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.BindReferences.bindReferences
-import org.apache.spark.sql.catalyst.expressions.UnsafeProjection
-import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeProjection
 import org.apache.spark.sql.catalyst.expressions.{Attribute, Expression, PythonUDF}
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.execution.SparkPlan
-import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.udf.SedonaArrowEvalPython
 import org.apache.spark.{JobArtifactSet, TaskContext}
+
 import scala.collection.JavaConverters.asScalaIteratorConverter
 
 // We use custom Strategy to avoid Apache Spark assert on types, we
@@ -71,19 +69,38 @@ case class SedonaArrowEvalPythonExec(
 
     val batchIter = if (batchSize > 0) new BatchIterator(iter, batchSize) else Iterator(iter)
 
-    val columnarBatchIter = new SedonaArrowPythonRunner(
-      funcs,
-      evalType - PythonEvalType.SEDONA_UDF_TYPE_CONSTANT,
-      argOffsets,
-      schema,
-      sessionLocalTimeZone,
-      largeVarTypes,
-      pythonRunnerConf,
-      pythonMetrics,
-      jobArtifactUUID).compute(batchIter, context.partitionId(), context)
+    evalType match {
+      case SQL_SCALAR_SEDONA_DB_UDF =>
+        val columnarBatchIter = new SedonaArrowPythonRunner(
+          funcs,
+          evalType - PythonEvalType.SEDONA_DB_UDF_TYPE_CONSTANT,
+          argOffsets,
+          schema,
+          sessionLocalTimeZone,
+          largeVarTypes,
+          pythonRunnerConf,
+          pythonMetrics,
+          jobArtifactUUID).compute(batchIter, context.partitionId(), context)
 
-    columnarBatchIter.flatMap { batch =>
-      batch.rowIterator.asScala
+        columnarBatchIter.flatMap { batch =>
+          batch.rowIterator.asScala
+        }
+
+      case SQL_SCALAR_SEDONA_UDF =>
+        val columnarBatchIter = new ArrowPythonRunner(
+          funcs,
+          evalType - PythonEvalType.SEDONA_UDF_TYPE_CONSTANT,
+          argOffsets,
+          schema,
+          sessionLocalTimeZone,
+          largeVarTypes,
+          pythonRunnerConf,
+          pythonMetrics,
+          jobArtifactUUID).compute(batchIter, context.partitionId(), context)
+
+        columnarBatchIter.flatMap { batch =>
+          batch.rowIterator.asScala
+        }
     }
   }
 

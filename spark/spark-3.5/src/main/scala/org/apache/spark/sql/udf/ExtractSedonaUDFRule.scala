@@ -44,9 +44,7 @@ class ExtractSedonaUDFRule extends Rule[LogicalPlan] with Logging {
   }
 
   def isScalarPythonUDF(e: Expression): Boolean = {
-    e.isInstanceOf[PythonUDF] && e
-      .asInstanceOf[PythonUDF]
-      .evalType == PythonEvalType.SQL_SCALAR_SEDONA_UDF
+    e.isInstanceOf[PythonUDF] && PythonEvalType.evals.contains(e.asInstanceOf[PythonUDF].evalType)
   }
 
   private def collectEvaluableUDFsFromExpressions(
@@ -168,12 +166,11 @@ class ExtractSedonaUDFRule extends Rule[LogicalPlan] with Logging {
               evalTypes.mkString(","))
         }
         val evalType = evalTypes.head
-        val evaluation = evalType match {
-          case PythonEvalType.SQL_SCALAR_SEDONA_UDF =>
-            SedonaArrowEvalPython(validUdfs, resultAttrs, child, evalType)
-          case _ =>
-            throw new IllegalStateException("Unexpected UDF evalType")
+        if (!PythonEvalType.evals().contains(evalType)) {
+          throw new IllegalStateException(s"Unexpected UDF evalType: $evalType")
         }
+
+        val evaluation = SedonaArrowEvalPython(validUdfs, resultAttrs, child, evalType)
 
         attributeMap ++= validUdfs.map(canonicalizeDeterministic).zip(resultAttrs)
         evaluation

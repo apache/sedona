@@ -16,21 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sedona.sql.UDF
+package org.apache.spark.sql.execution.python
 
-// We use constant 5000 for Sedona UDFs, 200 is Apache Spark scalar UDF
-object PythonEvalType {
-  val SQL_SCALAR_SEDONA_UDF = 5200
-  val SEDONA_UDF_TYPE_CONSTANT = 5000
+import java.net.Socket
+import scala.collection.mutable
 
-  // sedona db eval types
-  val SQL_SCALAR_SEDONA_DB_UDF = 6200
-  val SEDONA_DB_UDF_TYPE_CONSTANT = 6000
+object WorkerContext {
 
-  def toString(pythonEvalType: Int): String = pythonEvalType match {
-    case SQL_SCALAR_SEDONA_UDF => "SQL_SCALAR_GEO_UDF"
-    case SQL_SCALAR_SEDONA_DB_UDF => "SQL_SCALAR_SEDONA_DB_UDF"
+  def createPythonWorker(
+      pythonExec: String,
+      envVars: Map[String, String]): (java.net.Socket, Option[Int]) = {
+    synchronized {
+      val key = (pythonExec, envVars)
+      pythonWorkers.getOrElseUpdate(key, new SedonaDBWorkerFactory(pythonExec, envVars)).create()
+    }
   }
 
-  def evals(): Set[Int] = Set(SQL_SCALAR_SEDONA_UDF, SQL_SCALAR_SEDONA_DB_UDF)
+  private[spark] def destroyPythonWorker(
+      pythonExec: String,
+      envVars: Map[String, String],
+      worker: Socket): Unit = {
+    synchronized {
+      val key = (pythonExec, envVars)
+      pythonWorkers.get(key).foreach(_.stopWorker(worker))
+    }
+  }
+
+  private val pythonWorkers =
+    mutable.HashMap[(String, Map[String, String]), SedonaDBWorkerFactory]()
+
 }
