@@ -167,8 +167,7 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
       pid,
       releasedOrClosed,
       context)
-//    new InterruptibleIterator(context, stdoutIterator)
-    stdoutIterator
+    new InterruptibleIterator(context, stdoutIterator)
   }
 
   private class SedonaMonitorThread(
