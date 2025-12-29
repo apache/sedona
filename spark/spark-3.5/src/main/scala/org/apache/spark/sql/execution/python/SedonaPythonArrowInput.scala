@@ -46,7 +46,7 @@ import org.apache.spark.sql.util.ArrowUtils
 import org.apache.spark.util.Utils
 import org.apache.spark.{SparkEnv, TaskContext}
 
-import java.io.DataOutputStream
+import java.io.{DataOutputStream, FileOutputStream}
 import java.net.Socket
 
 /**
@@ -67,50 +67,56 @@ private[python] trait SedonaPythonArrowInput[IN] extends PythonArrowInput[IN] {
         handleMetadataBeforeExec(dataOut)
         writeUDF(dataOut, funcs, argOffsets)
 
-        val toReadCRS = inputIterator.buffered.headOption.flatMap(el =>
-          el.asInstanceOf[Iterator[IN]].buffered.headOption)
+//        val toReadCRS = inputIterator.buffered.headOption.flatMap(el =>
+//          el.asInstanceOf[Iterator[IN]].buffered.headOption)
 
-        val row = toReadCRS match {
-          case Some(value) =>
-            value match {
-              case row: GenericInternalRow =>
-                Some(row)
-            }
-          case None => None
-        }
+//        val row = toReadCRS match {
+//          case Some(value) =>
+//            value match {
+//              case row: GenericInternalRow =>
+//                Some(row)
+//            }
+//          case None => None
+//        }
 
-        val geometryFields = schema.zipWithIndex
-          .filter { case (field, index) =>
-            field.dataType == GeometryUDT
-          }
-          .map { case (field, index) =>
-            if (row.isEmpty || row.get.values(index) == null) (index, 0)
-            else {
-              val geom = row.get.get(index, GeometryUDT).asInstanceOf[Array[Byte]]
-              val preambleByte = geom(0) & 0xff
-              val hasSrid = (preambleByte & 0x01) != 0
-
-              var srid = 0
-              if (hasSrid) {
-                val srid2 = (geom(1) & 0xff) << 16
-                val srid1 = (geom(2) & 0xff) << 8
-                val srid0 = geom(3) & 0xff
-                srid = srid2 | srid1 | srid0
-              }
-              (index, srid)
-            }
-          }
+//        val geometryFields = schema.zipWithIndex
+//          .filter { case (field, index) =>
+//            field.dataType == GeometryUDT
+//          }
+//          .map { case (field, index) =>
+//            if (row.isEmpty || row.get.values(index) == null) (index, 0)
+//            else {
+//              val geom = row.get.get(index, GeometryUDT).asInstanceOf[Array[Byte]]
+//              val preambleByte = geom(0) & 0xff
+//              val hasSrid = (preambleByte & 0x01) != 0
+//
+//              var srid = 0
+//              if (hasSrid) {
+//                val srid2 = (geom(1) & 0xff) << 16
+//                val srid1 = (geom(2) & 0xff) << 8
+//                val srid0 = geom(3) & 0xff
+//                srid = srid2 | srid1 | srid0
+//              }
+//              (index, srid)
+//            }
+//          }
 
         // write number of geometry fields
-        dataOut.writeInt(geometryFields.length)
+//        dataOut.writeInt(geometryFields.length)
+        dataOut.writeInt(0)
         // write geometry field indices and their SRIDs
-        geometryFields.foreach { case (index, srid) =>
-          dataOut.writeInt(index)
-          dataOut.writeInt(srid)
-        }
+//        geometryFields.foreach { case (index, srid) =>
+//          dataOut.writeInt(index)
+//          dataOut.writeInt(srid)
+//        }
       }
 
       protected override def writeIteratorToStream(dataOut: DataOutputStream): Unit = {
+//        val fileOut = new FileOutputStream("/Users/pawelkocinski/Desktop/projects/sedona_java_11/sedona/spark/spark-3.5/src/main/scala/org/apache/spark/sql/execution/python/output.dat")
+
+        // 2. Wrap it with DataOutputStream
+//        val dataOut = new DataOutputStream(fileOut)
+
         val arrowSchema =
           ArrowUtils.toArrowSchema(schema, timeZoneId, errorOnDuplicatedFieldNames, largeVarTypes)
         val allocator = ArrowUtils.rootAllocator.newChildAllocator(
@@ -122,6 +128,37 @@ private[python] trait SedonaPythonArrowInput[IN] extends PythonArrowInput[IN] {
         Utils.tryWithSafeFinally {
           val writer = new ArrowStreamWriter(root, null, dataOut)
           writer.start()
+//          val buffered = inputIterator.buffered
+//          var allValues = 0
+//          while (buffered.hasNext) {
+//            val value = buffered.next()
+//            val itenralRow = value.asInstanceOf[Iterator[InternalRow]]
+//
+//            val bufferedAll = itenralRow.buffered
+//            while (bufferedAll.hasNext) {
+//              val row = bufferedAll.next()
+//              allValues += 1
+//            }
+//          }
+//
+//          println("Total number of values: " + allValues)
+//          println("ssss")
+//
+//          for (i <- 0 until inputIterator.length) {
+//            val value = inputIterator.next()
+//            val itenralRow = value.asInstanceOf[Iterator[InternalRow]]
+//            val firstElement = itenralRow.next()
+//            for (j <- 0 until value.asInstanceOf[Iterator[InternalRow]].length) {
+//              val row = value.asInstanceOf[Iterator[InternalRow]].next()
+//              val vector = root.getVector(i)
+//              println(s"Vector $i: ${vector.getClass.getSimpleName}, name: ${vector.getName}")
+//              println(s"Row $j: ${row}")
+//            }
+//            println("sss")
+////            println(value)
+////            val vector = root.getVector(i)
+////            println(s"Vector $i: ${vector.getClass.getSimpleName}, name: ${vector.getName}")
+//          }
 
           writeIteratorToArrowStream(root, writer, dataOut, inputIterator)
 
@@ -158,6 +195,7 @@ private[python] trait SedonaBasicPythonArrowInput
       dataOut: DataOutputStream,
       inputIterator: Iterator[Iterator[InternalRow]]): Unit = {
     val arrowWriter = ArrowWriter.create(root)
+    var record = 0
 
     while (inputIterator.hasNext) {
       val startData = dataOut.size()
@@ -172,6 +210,8 @@ private[python] trait SedonaBasicPythonArrowInput
       arrowWriter.reset()
       val deltaData = dataOut.size() - startData
       pythonMetrics("pythonDataSent") += deltaData
+      record += 1
+      println("Written batch number: " + record)
     }
   }
 }

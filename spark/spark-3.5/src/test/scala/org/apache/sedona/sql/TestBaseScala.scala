@@ -40,7 +40,7 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   val warehouseLocation = System.getProperty("user.dir") + "/target/"
   val sparkSession = SedonaContext
     .builder()
-    .master("local[*]")
+    .master("local[1]")
     .appName("sedonasqlScalaTest")
     .config("spark.sql.warehouse.dir", warehouseLocation)
     // We need to be explicit about broadcasting in tests.

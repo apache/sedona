@@ -89,9 +89,9 @@ class SedonaDBWorkerFactory(pythonExec: String, envVars: Map[String, String])
         if (pid < 0) {
           throw new IllegalStateException("Python failed to launch worker with code " + pid)
         }
-        self.synchronized {
-          simpleWorkers.put(socket, worker)
-        }
+//        self.synchronized {
+//          simpleWorkers.put(socket, worker)
+//        }
         return (socket, Some(pid))
       } catch {
         case e: Exception =>

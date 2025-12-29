@@ -29,6 +29,9 @@ import org.apache.spark.sql.execution.SparkPlan
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.udf.SedonaArrowEvalPython
 import org.apache.spark.{JobArtifactSet, TaskContext}
+import org.apache.spark.sql.vectorized.ColumnarBatch
+import org.apache.spark.sql.vectorized.ColumnarBatch
+import org.apache.spark.sql.catalyst.InternalRow
 
 import scala.collection.JavaConverters.asScalaIteratorConverter
 
@@ -67,6 +70,8 @@ case class SedonaArrowEvalPythonExec(
       schema: StructType,
       context: TaskContext): Iterator[InternalRow] = {
 
+    val outputTypes = output.drop(child.output.length).map(_.dataType)
+
     val batchIter = if (batchSize > 0) new BatchIterator(iter, batchSize) else Iterator(iter)
 
     evalType match {
@@ -82,9 +87,45 @@ case class SedonaArrowEvalPythonExec(
           pythonMetrics,
           jobArtifactUUID).compute(batchIter, context.partitionId(), context)
 
-        columnarBatchIter.flatMap { batch =>
+//        val size = columnarBatchIter.size
+//        val iter = columnarBatchIter.foreach { batch =>
+//          processBatch(batch)
+//        }
+//
+//        println("sss")
+//        val data = columnarBatchIter.flatMap { batch =>
+//          batch.rowIterator.asScala
+//        }
+//
+//        val seqData = data.toSeq
+//
+//        val seqDataSize = seqData.size
+//        val seqDataLength = seqData.length
+//        println("ssss")
+
+//        columnarBatchIter.flatMap { batch =>
+//          batch.rowIterator.asScala
+//        }
+
+        val result = columnarBatchIter.flatMap { batch =>
+//          val actualDataTypes = (0 until batch.numCols()).map(i => batch.column(i).dataType())
+//          assert(outputTypes == actualDataTypes, "Invalid schema from pandas_udf: " +
+//            s"expected ${outputTypes.mkString(", ")}, got ${actualDataTypes.mkString(", ")}")
           batch.rowIterator.asScala
         }
+//
+//        try{
+//          val first = result.next().toSeq(schema)
+//        } catch {
+//          case e: Exception => {
+//            println("No data returned from Sedona DB UDF")
+//          }
+//        }
+//
+//        val first = result.next().toSeq(schema)
+
+        println("ssss")
+        return result
 
       case SQL_SCALAR_SEDONA_UDF =>
         val columnarBatchIter = new ArrowPythonRunner(
@@ -98,12 +139,26 @@ case class SedonaArrowEvalPythonExec(
           pythonMetrics,
           jobArtifactUUID).compute(batchIter, context.partitionId(), context)
 
-        columnarBatchIter.flatMap { batch =>
+        val iter = columnarBatchIter.flatMap { batch =>
           batch.rowIterator.asScala
         }
+//
+//        iter.map(
+//          row => {
+//            processBatch(row)
+//          }
+//        )
+//
+//        val seqData = iter.toList
+//        println(seqData.head.getClass)
+
+        println("SedonaArrowEvalPythonExec: Executing Sedona DB UDF")
+//        iter
+        iter
     }
   }
 
   override protected def withNewChildInternal(newChild: SparkPlan): SparkPlan =
     copy(child = newChild)
 }
+

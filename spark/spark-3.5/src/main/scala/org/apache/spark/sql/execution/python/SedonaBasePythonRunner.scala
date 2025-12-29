@@ -31,6 +31,8 @@ import org.apache.spark.internal.Logging
 import org.apache.spark.internal.config.EXECUTOR_CORES
 import org.apache.spark.internal.config.Python._
 import org.apache.spark.resource.ResourceProfile.{EXECUTOR_CORES_LOCAL_PROPERTY, PYSPARK_MEMORY_LOCAL_PROPERTY}
+import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.sql.vectorized.ColumnarBatch
 import org.apache.spark.util._
 
 private object SedonaBasePythonRunner {
@@ -66,6 +68,8 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
     mem.map(_ / cores)
   }
 
+  import java.io._
+
   override def compute(
       inputIterator: Iterator[IN],
       partitionIndex: Int,
@@ -85,7 +89,7 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
     }
     envVars.put("SPARK_LOCAL_DIRS", localdir) // it's also used in monitor thread
     if (reuseWorker) {
-      envVars.put("SPARK_REUSE_WORKER", "1")
+      envVars.put("SPARK_REUSE_WORKER", "-1")
     }
     if (simplifiedTraceback) {
       envVars.put("SPARK_SIMPLIFIED_TRACEBACK", "1")
@@ -105,15 +109,18 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
 
     envVars.put("SPARK_JOB_ARTIFACT_UUID", jobArtifactUUID.getOrElse("default"))
 
-    val (worker: Socket, pid: Option[Int]) =
+    val (worker: Socket, pid: Option[Int]) = {
       WorkerContext.createPythonWorker(pythonExec, envVars.asScala.toMap)
+    }
+
+    println("Sedona worker port: " + worker.getPort())
     // Whether is the worker released into idle pool or closed. When any codes try to release or
     // close a worker, they should use `releasedOrClosed.compareAndSet` to flip the state to make
     // sure there is only one winner that is going to release or close the worker.
     val releasedOrClosed = new AtomicBoolean(false)
 
     // Start a thread to feed the process input from our parent's iterator
-    val writerThread = newWriterThread(env, worker, inputIterator, partitionIndex, context)
+      val writerThread = newWriterThread(env, worker, inputIterator, partitionIndex, context)
 
     context.addTaskCompletionListener[Unit] { _ =>
       writerThread.shutdownOnTaskCompletion()
@@ -128,21 +135,29 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
     }
 
     writerThread.start()
-    new SedonaMonitorThread(SparkEnv.get, worker, writerThread, context).start()
-    if (reuseWorker) {
-      val key = (worker, context.taskAttemptId)
-      // SPARK-35009: avoid creating multiple monitor threads for the same python worker
-      // and task context
-      if (PythonRunner.runningMonitorThreads.add(key)) {
-        new MonitorThread(SparkEnv.get, worker, context).start()
-      }
-    } else {
-      new MonitorThread(SparkEnv.get, worker, context).start()
-    }
+//    305996
+//    305997
+//    new SedonaMonitorThread(SparkEnv.get, worker, writerThread, context).start()
+//    if (reuseWorker) {
+//      val key = (worker, context.taskAttemptId)
+//      // SPARK-35009: avoid creating multiple monitor threads for the same python worker
+//      // and task context
+//      if (PythonRunner.runningMonitorThreads.add(key)) {
+//        new MonitorThread(SparkEnv.get, worker, context).start()
+//      }
+//    } else {
+//      new MonitorThread(SparkEnv.get, worker, context).start()
+//    }
 
     // Return an iterator that read lines from the process's stdout
-    val stream = new DataInputStream(new BufferedInputStream(worker.getInputStream, bufferSize))
+//    if (writerThread.isAlive) {
+//
+//    }
 
+    val stream = new DataInputStream(new BufferedInputStream(worker.getInputStream, bufferSize))
+//    println("worker is closed : " + worker.isClosed)
+    // write to a file  for debug
+//    writeDataInputStreamToFile(stream, s"/Users/pawelkocinski/Desktop/projects/sedona_java_11/sedona/spark/spark-3.5/src/main/scala/org/apache/spark/sql/execution/python/sedona_python_output_${context.taskAttemptId}.bin")
     val stdoutIterator = newReaderIterator(
       stream,
       writerThread,
@@ -152,7 +167,8 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
       pid,
       releasedOrClosed,
       context)
-    new InterruptibleIterator(context, stdoutIterator)
+//    new InterruptibleIterator(context, stdoutIterator)
+    stdoutIterator
   }
 
   private class SedonaMonitorThread(
