@@ -108,12 +108,15 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
     }
 
     envVars.put("SPARK_JOB_ARTIFACT_UUID", jobArtifactUUID.getOrElse("default"))
+//
+//    val (worker: Socket, pid: Option[Int]) = {
+//      WorkerContext.createPythonWorker(pythonExec, envVars.asScala.toMap)
+//    }
 
-    val (worker: Socket, pid: Option[Int]) = {
-      WorkerContext.createPythonWorker(pythonExec, envVars.asScala.toMap)
-    }
+    val (worker: Socket, pid: Option[Int]) = env.createPythonWorker(
+      pythonExec, envVars.asScala.toMap)
 
-    println("Sedona worker port: " + worker.getPort())
+//    println("Sedona worker port: " + worker.getPort())
     // Whether is the worker released into idle pool or closed. When any codes try to release or
     // close a worker, they should use `releasedOrClosed.compareAndSet` to flip the state to make
     // sure there is only one winner that is going to release or close the worker.
@@ -153,6 +156,12 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
 //    if (writerThread.isAlive) {
 //
 //    }
+
+//    val path = "/Users/pawelkocinski/Desktop/projects/sedonaworker/out_socket_worker_5"
+//      val openedFile = new File(path)
+//      val fileStream = new FileInputStream(openedFile)
+//      val stream = new DataInputStream(new BufferedInputStream(fileStream, bufferSize))
+//
 
     val stream = new DataInputStream(new BufferedInputStream(worker.getInputStream, bufferSize))
 //    println("worker is closed : " + worker.isClosed)

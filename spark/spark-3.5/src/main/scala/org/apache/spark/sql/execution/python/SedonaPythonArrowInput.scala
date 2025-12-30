@@ -112,53 +112,15 @@ private[python] trait SedonaPythonArrowInput[IN] extends PythonArrowInput[IN] {
       }
 
       protected override def writeIteratorToStream(dataOut: DataOutputStream): Unit = {
-//        val fileOut = new FileOutputStream("/Users/pawelkocinski/Desktop/projects/sedona_java_11/sedona/spark/spark-3.5/src/main/scala/org/apache/spark/sql/execution/python/output.dat")
-
-        // 2. Wrap it with DataOutputStream
-//        val dataOut = new DataOutputStream(fileOut)
-
-        val arrowSchema =
-          ArrowUtils.toArrowSchema(schema, timeZoneId, errorOnDuplicatedFieldNames, largeVarTypes)
+        val arrowSchema = ArrowUtils.toArrowSchema(
+          schema, timeZoneId, errorOnDuplicatedFieldNames, largeVarTypes)
         val allocator = ArrowUtils.rootAllocator.newChildAllocator(
-          s"stdout writer for $pythonExec",
-          0,
-          Long.MaxValue)
+          s"stdout writer for $pythonExec", 0, Long.MaxValue)
         val root = VectorSchemaRoot.create(arrowSchema, allocator)
 
         Utils.tryWithSafeFinally {
           val writer = new ArrowStreamWriter(root, null, dataOut)
           writer.start()
-//          val buffered = inputIterator.buffered
-//          var allValues = 0
-//          while (buffered.hasNext) {
-//            val value = buffered.next()
-//            val itenralRow = value.asInstanceOf[Iterator[InternalRow]]
-//
-//            val bufferedAll = itenralRow.buffered
-//            while (bufferedAll.hasNext) {
-//              val row = bufferedAll.next()
-//              allValues += 1
-//            }
-//          }
-//
-//          println("Total number of values: " + allValues)
-//          println("ssss")
-//
-//          for (i <- 0 until inputIterator.length) {
-//            val value = inputIterator.next()
-//            val itenralRow = value.asInstanceOf[Iterator[InternalRow]]
-//            val firstElement = itenralRow.next()
-//            for (j <- 0 until value.asInstanceOf[Iterator[InternalRow]].length) {
-//              val row = value.asInstanceOf[Iterator[InternalRow]].next()
-//              val vector = root.getVector(i)
-//              println(s"Vector $i: ${vector.getClass.getSimpleName}, name: ${vector.getName}")
-//              println(s"Row $j: ${row}")
-//            }
-//            println("sss")
-////            println(value)
-////            val vector = root.getVector(i)
-////            println(s"Vector $i: ${vector.getClass.getSimpleName}, name: ${vector.getName}")
-//          }
 
           writeIteratorToArrowStream(root, writer, dataOut, inputIterator)
 

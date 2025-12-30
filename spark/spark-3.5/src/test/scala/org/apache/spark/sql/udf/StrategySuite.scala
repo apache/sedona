@@ -96,6 +96,7 @@ class StrategySuite extends TestBaseScala with Matchers {
       .format("geoparquet")
       .load("/Users/pawelkocinski/Desktop/projects/sedona-production/apache-sedona-book/data/warehouse/buildings_2")
       .select("geometry")
+      .limit(1000)
 
     df.cache()
     df.count()

@@ -46,7 +46,7 @@ object ScalarUDF {
   }
 
   SparkEnv.get.conf.set(PYTHON_USE_DAEMON, false)
-//  SparkEnv.get.conf.set(PYTHON_WORKER_MODULE, "org.apache.sedona.python.SedonaPythonWorker")
+  SparkEnv.get.conf.set(PYTHON_WORKER_MODULE, "sedonaworker.work")
 
   private[spark] lazy val pythonPath = sys.env.getOrElse("PYTHONPATH", "")
   protected lazy val sparkHome: String = {

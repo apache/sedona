@@ -37,34 +37,178 @@ import org.apache.spark.sql.vectorized.{ArrowColumnVector, ColumnVector, Columna
  * A trait that can be mixed-in with [[BasePythonRunner]]. It implements the logic from
  * Python (Arrow) to JVM (output type being deserialized from ColumnarBatch).
  */
+//private[python] trait SedonaPythonArrowOutput[OUT <: AnyRef] { self: BasePythonRunner[_, OUT] =>
+//
+//  protected def pythonMetrics: Map[String, SQLMetric]
+//
+//  val openedFile = new File("/Users/pawelkocinski/Desktop/projects/sedonaworker/sedonaworker/output_batch_data.arrow")
+//  val stream2 = new FileInputStream(openedFile)
+//  protected def handleMetadataAfterExec(stream: DataInputStream): Unit = { }
+//
+//  protected def deserializeColumnarBatch(batch: ColumnarBatch, schema: StructType): OUT
+//  var numberOfReads = 0
+//  var numberOfReadsData = 1
+//
+//  def writeToFile(in: DataInputStream, file: File): Unit = {
+//    val out = new FileOutputStream(file)
+//    try {
+//      val buffer = new Array[Byte](8192)
+//      var bytesRead = 0
+//      while ({
+//        bytesRead = in.read(buffer)
+//        bytesRead != -1
+//      }) {
+//        out.write(buffer, 0, bytesRead)
+//      }
+//    } finally {
+//      out.close()
+//      in.close()
+//    }
+//  }
+//
+//  protected def newReaderIterator(
+//                                   stream: DataInputStream,
+//                                   writerThread: WriterThread,
+//                                   startTime: Long,
+//                                   env: SparkEnv,
+//                                   worker: Socket,
+//                                   pid: Option[Int],
+//                                   releasedOrClosed: AtomicBoolean,
+//                                   context: TaskContext): Iterator[OUT] = {
+//
+//    new ReaderIterator(
+//      stream, writerThread, startTime, env, worker, pid, releasedOrClosed, context) {
+//
+//      private val allocator = ArrowUtils.rootAllocator.newChildAllocator(
+//        s"stdin reader for $pythonExec", 0, Long.MaxValue)
+//
+//      private var reader: ArrowStreamReader = _
+//      private var root: VectorSchemaRoot = _
+//      private var schema: StructType = _
+//      private var vectors: Array[ColumnVector] = _
+//      private var totalNumberOfRows: Long = 0L
+//
+//      context.addTaskCompletionListener[Unit] { _ =>
+//        if (reader != null) {
+//          reader.close(false)
+//        }
+//        allocator.close()
+//      }
+//
+//      private var batchLoaded = true
+//
+//      protected override def handleEndOfDataSection(): Unit = {
+////        handleMetadataAfterExec(stream)
+////        super.handleEndOfDataSection()
+////        worker.close()
+//        WorkerContext.destroyPythonWorker(pythonExec = pythonExec, envVars = envVars.asScala.toMap, worker = worker)
+//      }
+//
+//      override def hasNext: Boolean = {
+//        val value = numberOfReadsData
+//
+//        numberOfReadsData -= 1
+//        value > 0
+//      }
+//
+//      override def next(): OUT = {
+//        val result = read()
+//        if (result == null) {
+//          throw new NoSuchElementException("End of stream")
+//        }
+//        result
+//      }
+//
+//      protected def read2(): Unit = {
+//        reader = new ArrowStreamReader(stream2, allocator)
+//        root = reader.getVectorSchemaRoot()
+//        schema = ArrowUtils.fromArrowSchema(root.getSchema())
+//        vectors = root.getFieldVectors().asScala.map { vector =>
+//          new ArrowColumnVector(vector)
+//        }.toArray[ColumnVector]
+//
+//        val bytesReadStart = reader.bytesRead()
+//        batchLoaded = reader.loadNextBatch()
+//        val batch = new ColumnarBatch(vectors)
+//        val rowCount = root.getRowCount
+//        //        totalNumberOfRows += rowCount
+//        println("Total number of rows: " + totalNumberOfRows)
+//        batch.setNumRows(root.getRowCount)
+//
+//        val out = deserializeColumnarBatch(batch, schema)
+//
+//        //        reader.close(false)
+//        //        worker.close()
+//        //        reader.s
+//        return out
+//      }
+//
+//      protected override def read(): OUT = {
+//        try {
+//          if (reader != null && batchLoaded) {
+//            val bytesReadStart = reader.bytesRead()
+//            batchLoaded = reader.loadNextBatch()
+//            println("ssss")
+//
+//            if (batchLoaded) {
+//              val batch = new ColumnarBatch(vectors)
+//              val rowCount = root.getRowCount
+//              totalNumberOfRows += rowCount
+//              println("Total number of rows: " + totalNumberOfRows)
+//              batch.setNumRows(root.getRowCount)
+//              val bytesReadEnd = reader.bytesRead()
+//              // 1_571_296
+//              // 24_133_432
+//              // 48 264 788
+//              // 48 264 720
+//              // 41076056
+//
+//              pythonMetrics("pythonNumRowsReceived") += rowCount
+//              pythonMetrics("pythonDataReceived") += bytesReadEnd - bytesReadStart
+//              val out = deserializeColumnarBatch(batch, schema)
+//              out
+//            } else {
+//              reader.close(false)
+//              allocator.close()
+//              // Reach end of stream. Call `read()` again to read control data.
+//              read()
+//            }
+//          } else {
+//            stream.readInt() match {
+//              case SpecialLengths.START_ARROW_STREAM =>
+//                reader = new ArrowStreamReader(stream, allocator)
+//                root = reader.getVectorSchemaRoot()
+//                schema = ArrowUtils.fromArrowSchema(root.getSchema())
+//                vectors = root.getFieldVectors().asScala.map { vector =>
+//                  new ArrowColumnVector(vector)
+//                }.toArray[ColumnVector]
+//                read()
+//              case SpecialLengths.TIMING_DATA =>
+//                handleTimingData()
+//                read()
+//              case SpecialLengths.PYTHON_EXCEPTION_THROWN =>
+//                throw handlePythonException()
+//              case SpecialLengths.END_OF_DATA_SECTION =>
+//                handleEndOfDataSection()
+//                null.asInstanceOf[OUT]
+//              case _ =>
+//                handleEndOfDataSection()
+//                null.asInstanceOf[OUT]
+//            }
+//          }
+//        }
+//      }
+//    }
+//  }
+//}
+
 private[python] trait SedonaPythonArrowOutput[OUT <: AnyRef] { self: BasePythonRunner[_, OUT] =>
 
   protected def pythonMetrics: Map[String, SQLMetric]
 
-  val openedFile = new File("/Users/pawelkocinski/Desktop/projects/sedonaworker/sedonaworker/output_batch_data.arrow")
-  val stream2 = new FileInputStream(openedFile)
   protected def handleMetadataAfterExec(stream: DataInputStream): Unit = { }
 
   protected def deserializeColumnarBatch(batch: ColumnarBatch, schema: StructType): OUT
-  var numberOfReads = 0
-  var numberOfReadsData = 1
-
-  def writeToFile(in: DataInputStream, file: File): Unit = {
-    val out = new FileOutputStream(file)
-    try {
-      val buffer = new Array[Byte](8192)
-      var bytesRead = 0
-      while ({
-        bytesRead = in.read(buffer)
-        bytesRead != -1
-      }) {
-        out.write(buffer, 0, bytesRead)
-      }
-    } finally {
-      out.close()
-      in.close()
-    }
-  }
 
   protected def newReaderIterator(
                                    stream: DataInputStream,
@@ -86,7 +230,6 @@ private[python] trait SedonaPythonArrowOutput[OUT <: AnyRef] { self: BasePythonR
       private var root: VectorSchemaRoot = _
       private var schema: StructType = _
       private var vectors: Array[ColumnVector] = _
-      private var totalNumberOfRows: Long = 0L
 
       context.addTaskCompletionListener[Unit] { _ =>
         if (reader != null) {
@@ -98,70 +241,11 @@ private[python] trait SedonaPythonArrowOutput[OUT <: AnyRef] { self: BasePythonR
       private var batchLoaded = true
 
       protected override def handleEndOfDataSection(): Unit = {
-//        handleMetadataAfterExec(stream)
-//        super.handleEndOfDataSection()
-//        worker.close()
-        WorkerContext.destroyPythonWorker(pythonExec = pythonExec, envVars = envVars.asScala.toMap, worker = worker)
-      }
-
-      override def hasNext: Boolean = {
-        val value = numberOfReadsData
-
-        numberOfReadsData -= 1
-        value > 0
-      }
-
-      override def next(): OUT = {
-        val result = read()
-        if (result == null) {
-          throw new NoSuchElementException("End of stream")
-        }
-        result
+        handleMetadataAfterExec(stream)
+        super.handleEndOfDataSection()
       }
 
       protected override def read(): OUT = {
-        println("sssss")
-        reader = new ArrowStreamReader(stream2, allocator)
-        root = reader.getVectorSchemaRoot()
-        schema = ArrowUtils.fromArrowSchema(root.getSchema())
-        vectors = root.getFieldVectors().asScala.map { vector =>
-          new ArrowColumnVector(vector)
-        }.toArray[ColumnVector]
-
-        val bytesReadStart = reader.bytesRead()
-        batchLoaded = reader.loadNextBatch()
-        val batch = new ColumnarBatch(vectors)
-        val rowCount = root.getRowCount
-//        totalNumberOfRows += rowCount
-        println("Total number of rows: " + totalNumberOfRows)
-        batch.setNumRows(root.getRowCount)
-
-        val out = deserializeColumnarBatch(batch, schema)
-
-//        reader.close(false)
-//        worker.close()
-//        reader.s
-        return out
-
-        numberOfReads += 1
-        if (numberOfReads > 5) {
-          handleEndOfDataSection()
-          return null.asInstanceOf[OUT]
-        }
-        println("worker is closed : " + worker.isInputShutdown)
-//        while (writerThread.isAlive) {
-//          Thread.sleep(10)
-//          println("waiting for writer to finish...")
-//        }
-//
-//        while (stream.available() == 0) {
-//          Thread.sleep(10)
-//          println("waiting for data...")
-//        }
-//
-//        println(stream.available())
-//
-//        return null.asInstanceOf[OUT]
         if (writerThread.exception.isDefined) {
           throw writerThread.exception.get
         }
@@ -169,25 +253,14 @@ private[python] trait SedonaPythonArrowOutput[OUT <: AnyRef] { self: BasePythonR
           if (reader != null && batchLoaded) {
             val bytesReadStart = reader.bytesRead()
             batchLoaded = reader.loadNextBatch()
-            println("ssss")
-
             if (batchLoaded) {
               val batch = new ColumnarBatch(vectors)
               val rowCount = root.getRowCount
-              totalNumberOfRows += rowCount
-              println("Total number of rows: " + totalNumberOfRows)
               batch.setNumRows(root.getRowCount)
               val bytesReadEnd = reader.bytesRead()
-              // 1_571_296
-              // 24_133_432
-              // 48 264 788
-              // 48 264 720
-              // 41076056
-
               pythonMetrics("pythonNumRowsReceived") += rowCount
               pythonMetrics("pythonDataReceived") += bytesReadEnd - bytesReadStart
-              val out = deserializeColumnarBatch(batch, schema)
-              out
+              deserializeColumnarBatch(batch, schema)
             } else {
               reader.close(false)
               allocator.close()
@@ -195,47 +268,27 @@ private[python] trait SedonaPythonArrowOutput[OUT <: AnyRef] { self: BasePythonR
               read()
             }
           } else {
-//            if (stream.available() == 0) {
-//              println("ssss")
-//              throw handleException
-//              return null.asInstanceOf[OUT]
-//            }
-            val streamType = try {
-              stream.readInt()
-            } catch {
-              case e: Throwable =>
-                SpecialLengths.END_OF_DATA_SECTION
-            }
-
-            streamType match {
+            stream.readInt() match {
               case SpecialLengths.START_ARROW_STREAM =>
-//                file input stream
-                if (numberOfReads > 2) {
-                  return null.asInstanceOf[OUT]
-                }
-
-                val stream2 = new FileInputStream(new File("/Users/pawelkocinski/Desktop/projects/sedonaworker/sedonaworker/output_batch_data.arrow"))
-                reader = new ArrowStreamReader(stream2, allocator)
+                reader = new ArrowStreamReader(stream, allocator)
                 root = reader.getVectorSchemaRoot()
                 schema = ArrowUtils.fromArrowSchema(root.getSchema())
                 vectors = root.getFieldVectors().asScala.map { vector =>
                   new ArrowColumnVector(vector)
                 }.toArray[ColumnVector]
+
                 read()
-//              case SpecialLengths.TIMING_DATA =>
-//                handleTimingData()
-//                read()
-//              case SpecialLengths.PYTHON_EXCEPTION_THROWN =>
-//                throw handlePythonException()
+              case SpecialLengths.TIMING_DATA =>
+                handleTimingData()
+                read()
+              case SpecialLengths.PYTHON_EXCEPTION_THROWN =>
+                throw handlePythonException()
               case SpecialLengths.END_OF_DATA_SECTION =>
-                handleEndOfDataSection()
-                null.asInstanceOf[OUT]
-              case _ =>
                 handleEndOfDataSection()
                 null.asInstanceOf[OUT]
             }
           }
-        }
+        } catch handleException
       }
     }
   }
