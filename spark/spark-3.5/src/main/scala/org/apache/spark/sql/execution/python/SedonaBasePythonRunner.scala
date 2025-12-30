@@ -108,13 +108,13 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
     }
 
     envVars.put("SPARK_JOB_ARTIFACT_UUID", jobArtifactUUID.getOrElse("default"))
-//
-//    val (worker: Socket, pid: Option[Int]) = {
-//      WorkerContext.createPythonWorker(pythonExec, envVars.asScala.toMap)
-//    }
 
-    val (worker: Socket, pid: Option[Int]) = env.createPythonWorker(
-      pythonExec, envVars.asScala.toMap)
+    val (worker: Socket, pid: Option[Int]) = {
+      WorkerContext.createPythonWorker(pythonExec, envVars.asScala.toMap)
+    }
+
+//    val (worker: Socket, pid: Option[Int]) = env.createPythonWorker(
+//      pythonExec, envVars.asScala.toMap)
 
 //    println("Sedona worker port: " + worker.getPort())
     // Whether is the worker released into idle pool or closed. When any codes try to release or

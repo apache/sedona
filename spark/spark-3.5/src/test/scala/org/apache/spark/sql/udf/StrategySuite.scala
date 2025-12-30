@@ -94,9 +94,8 @@ class StrategySuite extends TestBaseScala with Matchers {
 //      .save("/Users/pawelkocinski/Desktop/projects/sedona-production/apache-sedona-book/data/warehouse/buildings_2")
     val df = spark.read
       .format("geoparquet")
-      .load("/Users/pawelkocinski/Desktop/projects/sedona-production/apache-sedona-book/data/warehouse/buildings_2")
+      .load("/Users/pawelkocinski/Desktop/projects/sedona-production/apache-sedona-book/data/warehouse/buildings")
       .select("geometry")
-      .limit(1000)
 
     df.cache()
     df.count()
@@ -119,7 +118,8 @@ class StrategySuite extends TestBaseScala with Matchers {
 //        nonGeometryVectorizedUDF(col("id")).alias("id_increased"),
       )
 
-    dfVectorized.show()
+//    dfVectorized.show()
+    dfVectorized.selectExpr("ST_X(ST_Centroid(geom)) AS x").selectExpr("sum(x)").show()
 //    dfVectorized.selectExpr("ST_X(ST_Centroid(geom)) AS x").selectExpr("sum(x)").show()
 //    val processingContext = df.queryExecution.explainString(mode = ExplainMode.fromString("extended"))
 

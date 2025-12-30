@@ -237,6 +237,6 @@ object ScalarUDF {
       accumulator = null),
     dataType = GeometryUDT,
     pythonEvalType = UDF.PythonEvalType.SQL_SCALAR_SEDONA_DB_UDF,
-    udfDeterministic = false)
+    udfDeterministic = true)
 
 }

@@ -53,9 +53,9 @@ class SedonaArrowPythonRunner(
 
   override val simplifiedTraceback: Boolean = SQLConf.get.pysparkSimplifiedTraceback
 
-//  override val bufferSize: Int = SQLConf.get.pandasUDFBufferSize
-//  require(
-//    bufferSize >= 4,
-//    "Pandas execution requires more than 4 bytes. Please set higher buffer. " +
-//      s"Please change '${SQLConf.PANDAS_UDF_BUFFER_SIZE.key}'.")
+  override val bufferSize: Int = SQLConf.get.pandasUDFBufferSize
+  require(
+    bufferSize >= 4,
+    "Pandas execution requires more than 4 bytes. Please set higher buffer. " +
+      s"Please change '${SQLConf.PANDAS_UDF_BUFFER_SIZE.key}'.")
 }

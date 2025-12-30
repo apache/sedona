@@ -230,6 +230,8 @@ private[python] trait SedonaPythonArrowOutput[OUT <: AnyRef] { self: BasePythonR
       private var root: VectorSchemaRoot = _
       private var schema: StructType = _
       private var vectors: Array[ColumnVector] = _
+      private var eos = false
+      private var nextObj: OUT = _
 
       context.addTaskCompletionListener[Unit] { _ =>
         if (reader != null) {
@@ -240,10 +242,39 @@ private[python] trait SedonaPythonArrowOutput[OUT <: AnyRef] { self: BasePythonR
 
       private var batchLoaded = true
 
+      def handleEndOfDataSectionSedona (): Unit = {
+        if (stream.readInt() == SpecialLengths.END_OF_STREAM) {
+
+        }
+
+        eos = true
+      }
+
       protected override def handleEndOfDataSection(): Unit = {
         handleMetadataAfterExec(stream)
-        super.handleEndOfDataSection()
+        handleEndOfDataSectionSedona()
       }
+
+      override def hasNext: Boolean = nextObj != null || {
+        if (!eos) {
+          nextObj = read()
+          hasNext
+        } else {
+          false
+        }
+      }
+
+      override def next(): OUT = {
+        if (hasNext) {
+          val obj = nextObj
+          nextObj = null.asInstanceOf[OUT]
+          obj
+        } else {
+          Iterator.empty.next()
+        }
+      }
+
+
 
       protected override def read(): OUT = {
         if (writerThread.exception.isDefined) {
@@ -268,7 +299,9 @@ private[python] trait SedonaPythonArrowOutput[OUT <: AnyRef] { self: BasePythonR
               read()
             }
           } else {
-            stream.readInt() match {
+            val specialSign = stream.readInt()
+
+            specialSign match {
               case SpecialLengths.START_ARROW_STREAM =>
                 reader = new ArrowStreamReader(stream, allocator)
                 root = reader.getVectorSchemaRoot()

@@ -38,9 +38,10 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
 
   val keyParserExtension = "spark.sedona.enableParserExtension"
   val warehouseLocation = System.getProperty("user.dir") + "/target/"
+//  4425302.491982245
   val sparkSession = SedonaContext
     .builder()
-    .master("local[1]")
+    .master("local[*]")
     .appName("sedonasqlScalaTest")
     .config("spark.sql.warehouse.dir", warehouseLocation)
     // We need to be explicit about broadcasting in tests.
