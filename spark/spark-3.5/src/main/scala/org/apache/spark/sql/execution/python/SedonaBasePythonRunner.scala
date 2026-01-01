@@ -38,10 +38,6 @@ import org.apache.spark.util._
 private object SedonaBasePythonRunner {
 
   private lazy val faultHandlerLogDir = Utils.createTempDir(namePrefix = "faulthandler")
-
-  private def faultHandlerLogPath(pid: Int): Path = {
-    new File(faultHandlerLogDir, pid.toString).toPath
-  }
 }
 
 /**
@@ -113,13 +109,6 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
       WorkerContext.createPythonWorker(pythonExec, envVars.asScala.toMap)
     }
 
-//    val (worker: Socket, pid: Option[Int]) = env.createPythonWorker(
-//      pythonExec, envVars.asScala.toMap)
-
-//    println("Sedona worker port: " + worker.getPort())
-    // Whether is the worker released into idle pool or closed. When any codes try to release or
-    // close a worker, they should use `releasedOrClosed.compareAndSet` to flip the state to make
-    // sure there is only one winner that is going to release or close the worker.
     val releasedOrClosed = new AtomicBoolean(false)
 
     // Start a thread to feed the process input from our parent's iterator
@@ -138,35 +127,9 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
     }
 
     writerThread.start()
-//    305996
-//    305997
-//    new SedonaMonitorThread(SparkEnv.get, worker, writerThread, context).start()
-//    if (reuseWorker) {
-//      val key = (worker, context.taskAttemptId)
-//      // SPARK-35009: avoid creating multiple monitor threads for the same python worker
-//      // and task context
-//      if (PythonRunner.runningMonitorThreads.add(key)) {
-//        new MonitorThread(SparkEnv.get, worker, context).start()
-//      }
-//    } else {
-//      new MonitorThread(SparkEnv.get, worker, context).start()
-//    }
-
-    // Return an iterator that read lines from the process's stdout
-//    if (writerThread.isAlive) {
-//
-//    }
-
-//    val path = "/Users/pawelkocinski/Desktop/projects/sedonaworker/out_socket_worker_5"
-//      val openedFile = new File(path)
-//      val fileStream = new FileInputStream(openedFile)
-//      val stream = new DataInputStream(new BufferedInputStream(fileStream, bufferSize))
-//
 
     val stream = new DataInputStream(new BufferedInputStream(worker.getInputStream, bufferSize))
-//    println("worker is closed : " + worker.isClosed)
-    // write to a file  for debug
-//    writeDataInputStreamToFile(stream, s"/Users/pawelkocinski/Desktop/projects/sedona_java_11/sedona/spark/spark-3.5/src/main/scala/org/apache/spark/sql/execution/python/sedona_python_output_${context.taskAttemptId}.bin")
+
     val stdoutIterator = newReaderIterator(
       stream,
       writerThread,

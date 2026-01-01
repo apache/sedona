@@ -23,15 +23,13 @@ import org.apache.sedona.sql.UDF.PythonEvalType.{SQL_SCALAR_SEDONA_DB_UDF, SQL_S
 import org.apache.spark.api.python.ChainedPythonFunctions
 import org.apache.spark.sql.Strategy
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{Attribute, Expression, PythonUDF}
+import org.apache.spark.sql.catalyst.expressions.{Attribute, PythonUDF}
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.execution.SparkPlan
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.udf.SedonaArrowEvalPython
 import org.apache.spark.{JobArtifactSet, TaskContext}
-import org.apache.spark.sql.vectorized.ColumnarBatch
-import org.apache.spark.sql.vectorized.ColumnarBatch
-import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.sql.internal.SQLConf
 
 import scala.collection.JavaConverters.asScalaIteratorConverter
 
@@ -60,7 +58,9 @@ case class SedonaArrowEvalPythonExec(
   private val batchSize = conf.arrowMaxRecordsPerBatch
   private val sessionLocalTimeZone = conf.sessionLocalTimeZone
   private val largeVarTypes = conf.arrowUseLargeVarTypes
-  private val pythonRunnerConf = ArrowPythonRunner.getPythonRunnerConfMap(conf)
+  private val pythonRunnerConf = Map[String, String](
+    SQLConf.SESSION_LOCAL_TIMEZONE.key -> conf.sessionLocalTimeZone
+  )
   private[this] val jobArtifactUUID = JobArtifactSet.getCurrentJobArtifactState.map(_.uuid)
 
   protected override def evaluate(
@@ -87,45 +87,11 @@ case class SedonaArrowEvalPythonExec(
           pythonMetrics,
           jobArtifactUUID).compute(batchIter, context.partitionId(), context)
 
-//        val size = columnarBatchIter.size
-//        val iter = columnarBatchIter.foreach { batch =>
-//          processBatch(batch)
-//        }
-//
-//        println("sss")
-//        val data = columnarBatchIter.flatMap { batch =>
-//          batch.rowIterator.asScala
-//        }
-//
-//        val seqData = data.toSeq
-//
-//        val seqDataSize = seqData.size
-//        val seqDataLength = seqData.length
-//        println("ssss")
-
-//        columnarBatchIter.flatMap { batch =>
-//          batch.rowIterator.asScala
-//        }
-
         val result = columnarBatchIter.flatMap { batch =>
-//          val actualDataTypes = (0 until batch.numCols()).map(i => batch.column(i).dataType())
-//          assert(outputTypes == actualDataTypes, "Invalid schema from pandas_udf: " +
-//            s"expected ${outputTypes.mkString(", ")}, got ${actualDataTypes.mkString(", ")}")
           batch.rowIterator.asScala
         }
-//
-//        try{
-//          val first = result.next().toSeq(schema)
-//        } catch {
-//          case e: Exception => {
-//            println("No data returned from Sedona DB UDF")
-//          }
-//        }
-//
-//        val first = result.next().toSeq(schema)
 
-        println("ssss")
-        return result
+        result
 
       case SQL_SCALAR_SEDONA_UDF =>
         val columnarBatchIter = new ArrowPythonRunner(
@@ -142,18 +108,7 @@ case class SedonaArrowEvalPythonExec(
         val iter = columnarBatchIter.flatMap { batch =>
           batch.rowIterator.asScala
         }
-//
-//        iter.map(
-//          row => {
-//            processBatch(row)
-//          }
-//        )
-//
-//        val seqData = iter.toList
-//        println(seqData.head.getClass)
 
-        println("SedonaArrowEvalPythonExec: Executing Sedona DB UDF")
-//        iter
         iter
     }
   }

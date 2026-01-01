@@ -37,11 +37,11 @@ object WorkerContext {
       envVars: Map[String, String],
       worker: Socket): Unit = {
     synchronized {
-      worker.close()
-//      val key = (pythonExec, envVars)
-//      pythonWorkers.get(key).foreach(workerFactory => {
-//        workerFactory.stopWorker(worker)
-//      })
+//      worker.close()
+      val key = (pythonExec, envVars)
+      pythonWorkers.get(key).foreach(workerFactory => {
+        workerFactory.stopWorker(worker)
+      })
     }
   }
 

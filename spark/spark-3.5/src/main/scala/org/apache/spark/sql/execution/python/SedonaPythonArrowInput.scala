@@ -46,7 +46,7 @@ import org.apache.spark.sql.util.ArrowUtils
 import org.apache.spark.util.Utils
 import org.apache.spark.{SparkEnv, TaskContext}
 
-import java.io.{DataOutputStream, FileOutputStream}
+import java.io.{DataOutputStream, File, FileOutputStream}
 import java.net.Socket
 
 /**
@@ -62,6 +62,10 @@ private[python] trait SedonaPythonArrowInput[IN] extends PythonArrowInput[IN] {
       partitionIndex: Int,
       context: TaskContext): WriterThread = {
     new WriterThread(env, worker, inputIterator, partitionIndex, context) {
+
+      val dataOutFile = s"/tmp/sedona_python_arrow_input_${context.taskAttemptId()}.bin"
+      val dataOutStream = new FileOutputStream(new File(dataOutFile))
+      val dataOut2 = new DataOutputStream(dataOutStream)
 
       protected override def writeCommand(dataOut: DataOutputStream): Unit = {
         handleMetadataBeforeExec(dataOut)

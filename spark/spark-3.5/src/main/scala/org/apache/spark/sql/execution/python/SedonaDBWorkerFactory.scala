@@ -36,7 +36,7 @@ class SedonaDBWorkerFactory(pythonExec: String, envVars: Map[String, String])
     extends PythonWorkerFactory(pythonExec, envVars) {
   self =>
 
-  private val sedonaWorkerModule = "sedonaworker.work"
+  private val sedonaWorkerModule = "sedonaworker.reader"
 
   private val simpleWorkers = new mutable.WeakHashMap[Socket, Process]()
   private val authHelper = new SocketAuthHelper(SparkEnv.get.conf)
@@ -92,7 +92,8 @@ class SedonaDBWorkerFactory(pythonExec: String, envVars: Map[String, String])
         self.synchronized {
           simpleWorkers.put(socket, worker)
         }
-        return (socket, Some(pid))
+
+        (socket, Some(pid))
       } catch {
         case e: Exception =>
           throw new SparkException("Python worker failed to connect back.", e)

@@ -22,7 +22,7 @@ import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.SparkEnv
 import org.apache.spark.security.SocketAuthHelper
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions.{col, expr}
+import org.apache.spark.sql.functions.{col, expr, lit}
 import org.apache.spark.sql.udf.ScalarUDF.{geoPandasScalaFunction, nonGeometryVectorizedUDF, sedonaDBGeometryToGeometryFunction}
 import org.locationtech.jts.io.WKTReader
 import org.scalatest.matchers.should.Matchers
@@ -97,8 +97,8 @@ class StrategySuite extends TestBaseScala with Matchers {
       .load("/Users/pawelkocinski/Desktop/projects/sedona-production/apache-sedona-book/data/warehouse/buildings")
       .select("geometry")
 
-    df.cache()
-    df.count()
+//    df.cache()
+//    df.count()
 //      .limit(100)
 
 
@@ -114,7 +114,7 @@ class StrategySuite extends TestBaseScala with Matchers {
 //        col("id"),
 //        col("version"),
 //        col("bbox"),
-        sedonaDBGeometryToGeometryFunction(col("geometry")).alias("geom"),
+        sedonaDBGeometryToGeometryFunction(col("geometry"), lit(100)).alias("geom"),
 //        nonGeometryVectorizedUDF(col("id")).alias("id_increased"),
       )
 
