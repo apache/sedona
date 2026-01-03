@@ -37,12 +37,14 @@ class SedonaArrowPythonRunner(
     protected override val largeVarTypes: Boolean,
     protected override val workerConf: Map[String, String],
     val pythonMetrics: Map[String, SQLMetric],
-    jobArtifactUUID: Option[String])
+    jobArtifactUUID: Option[String],
+    geometryFields: Seq[(Int, Int)])
     extends SedonaBasePythonRunner[Iterator[InternalRow], ColumnarBatch](
       funcs,
       evalType,
       argOffsets,
-      jobArtifactUUID)
+      jobArtifactUUID,
+      geometryFields)
     with SedonaBasicPythonArrowInput
     with SedonaBasicPythonArrowOutput {
 

@@ -23,13 +23,14 @@ import org.apache.sedona.sql.UDF.PythonEvalType.{SQL_SCALAR_SEDONA_DB_UDF, SQL_S
 import org.apache.spark.api.python.ChainedPythonFunctions
 import org.apache.spark.sql.Strategy
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.catalyst.expressions.{Attribute, PythonUDF}
+import org.apache.spark.sql.catalyst.expressions.{Attribute, GenericInternalRow, PythonUDF}
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.execution.SparkPlan
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.udf.SedonaArrowEvalPython
 import org.apache.spark.{JobArtifactSet, TaskContext}
 import org.apache.spark.sql.internal.SQLConf
+import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 
 import scala.collection.JavaConverters.asScalaIteratorConverter
 
@@ -58,10 +59,49 @@ case class SedonaArrowEvalPythonExec(
   private val batchSize = conf.arrowMaxRecordsPerBatch
   private val sessionLocalTimeZone = conf.sessionLocalTimeZone
   private val largeVarTypes = conf.arrowUseLargeVarTypes
-  private val pythonRunnerConf = Map[String, String](
-    SQLConf.SESSION_LOCAL_TIMEZONE.key -> conf.sessionLocalTimeZone
-  )
+  private val pythonRunnerConf =
+    Map[String, String](SQLConf.SESSION_LOCAL_TIMEZONE.key -> conf.sessionLocalTimeZone)
   private[this] val jobArtifactUUID = JobArtifactSet.getCurrentJobArtifactState.map(_.uuid)
+
+  private def inferCRS(iterator: Iterator[InternalRow], schema: StructType): Seq[(Int, Int)] = {
+    // this triggers the iterator
+    if (!iterator.hasNext) {
+      return Seq.empty
+    }
+
+    // TODO think of running it multiple times if the needed geometry is null, it's worth
+    // considering making this parameter based
+    val row = iterator.next()
+
+    val rowMatched = row match {
+      case generic: GenericInternalRow =>
+        Some(row.asInstanceOf[GenericInternalRow])
+      case _ => None
+    }
+
+    schema.zipWithIndex
+      .filter { case (field, index) =>
+        field.dataType == GeometryUDT
+      }
+      .map { case (field, index) =>
+        if (rowMatched.isEmpty || rowMatched.get.values(index) == null) (index, 0)
+        else {
+          val geom = rowMatched.get.get(index, GeometryUDT).asInstanceOf[Array[Byte]]
+          val preambleByte = geom(0) & 0xff
+          val hasSrid = (preambleByte & 0x01) != 0
+
+          var srid = 0
+          if (hasSrid) {
+            val srid2 = (geom(1) & 0xff) << 16
+            val srid1 = (geom(2) & 0xff) << 8
+            val srid0 = geom(3) & 0xff
+            srid = srid2 | srid1 | srid0
+          }
+
+          (index, srid)
+        }
+      }
+  }
 
   protected override def evaluate(
       funcs: Seq[ChainedPythonFunctions],
@@ -69,10 +109,15 @@ case class SedonaArrowEvalPythonExec(
       iter: Iterator[InternalRow],
       schema: StructType,
       context: TaskContext): Iterator[InternalRow] = {
+    val (probe, full) = iter.duplicate
+
+    val geometryFields = inferCRS(probe, schema)
+//    val geometryFields = Seq()
+    //    val firstRow = probe.buffered
 
     val outputTypes = output.drop(child.output.length).map(_.dataType)
 
-    val batchIter = if (batchSize > 0) new BatchIterator(iter, batchSize) else Iterator(iter)
+    val batchIter = if (batchSize > 0) new BatchIterator(full, batchSize) else Iterator(full)
 
     evalType match {
       case SQL_SCALAR_SEDONA_DB_UDF =>
@@ -85,7 +130,8 @@ case class SedonaArrowEvalPythonExec(
           largeVarTypes,
           pythonRunnerConf,
           pythonMetrics,
-          jobArtifactUUID).compute(batchIter, context.partitionId(), context)
+          jobArtifactUUID,
+          geometryFields).compute(batchIter, context.partitionId(), context)
 
         val result = columnarBatchIter.flatMap { batch =>
           batch.rowIterator.asScala
@@ -116,4 +162,3 @@ case class SedonaArrowEvalPythonExec(
   override protected def withNewChildInternal(newChild: SparkPlan): SparkPlan =
     copy(child = newChild)
 }
-

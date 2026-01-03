@@ -50,7 +50,8 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
     funcs: Seq[ChainedPythonFunctions],
     evalType: Int,
     argOffsets: Array[Array[Int]],
-    jobArtifactUUID: Option[String])
+    jobArtifactUUID: Option[String],
+    val geometryFields: Seq[(Int, Int)] = Seq.empty)
     extends BasePythonRunner[IN, OUT](funcs, evalType, argOffsets, jobArtifactUUID)
     with Logging {
 
@@ -112,7 +113,7 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
     val releasedOrClosed = new AtomicBoolean(false)
 
     // Start a thread to feed the process input from our parent's iterator
-      val writerThread = newWriterThread(env, worker, inputIterator, partitionIndex, context)
+    val writerThread = newWriterThread(env, worker, inputIterator, partitionIndex, context)
 
     context.addTaskCompletionListener[Unit] { _ =>
       writerThread.shutdownOnTaskCompletion()

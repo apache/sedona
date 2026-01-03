@@ -63,63 +63,25 @@ private[python] trait SedonaPythonArrowInput[IN] extends PythonArrowInput[IN] {
       context: TaskContext): WriterThread = {
     new WriterThread(env, worker, inputIterator, partitionIndex, context) {
 
-      val dataOutFile = s"/tmp/sedona_python_arrow_input_${context.taskAttemptId()}.bin"
-      val dataOutStream = new FileOutputStream(new File(dataOutFile))
-      val dataOut2 = new DataOutputStream(dataOutStream)
-
       protected override def writeCommand(dataOut: DataOutputStream): Unit = {
         handleMetadataBeforeExec(dataOut)
         writeUDF(dataOut, funcs, argOffsets)
 
-//        val toReadCRS = inputIterator.buffered.headOption.flatMap(el =>
-//          el.asInstanceOf[Iterator[IN]].buffered.headOption)
-
-//        val row = toReadCRS match {
-//          case Some(value) =>
-//            value match {
-//              case row: GenericInternalRow =>
-//                Some(row)
-//            }
-//          case None => None
-//        }
-
-//        val geometryFields = schema.zipWithIndex
-//          .filter { case (field, index) =>
-//            field.dataType == GeometryUDT
-//          }
-//          .map { case (field, index) =>
-//            if (row.isEmpty || row.get.values(index) == null) (index, 0)
-//            else {
-//              val geom = row.get.get(index, GeometryUDT).asInstanceOf[Array[Byte]]
-//              val preambleByte = geom(0) & 0xff
-//              val hasSrid = (preambleByte & 0x01) != 0
-//
-//              var srid = 0
-//              if (hasSrid) {
-//                val srid2 = (geom(1) & 0xff) << 16
-//                val srid1 = (geom(2) & 0xff) << 8
-//                val srid0 = geom(3) & 0xff
-//                srid = srid2 | srid1 | srid0
-//              }
-//              (index, srid)
-//            }
-//          }
-
-        // write number of geometry fields
-//        dataOut.writeInt(geometryFields.length)
-        dataOut.writeInt(0)
+        dataOut.writeInt(self.geometryFields.length)
         // write geometry field indices and their SRIDs
-//        geometryFields.foreach { case (index, srid) =>
-//          dataOut.writeInt(index)
-//          dataOut.writeInt(srid)
-//        }
+        geometryFields.foreach { case (index, srid) =>
+          dataOut.writeInt(index)
+          dataOut.writeInt(srid)
+        }
       }
 
       protected override def writeIteratorToStream(dataOut: DataOutputStream): Unit = {
-        val arrowSchema = ArrowUtils.toArrowSchema(
-          schema, timeZoneId, errorOnDuplicatedFieldNames, largeVarTypes)
+        val arrowSchema =
+          ArrowUtils.toArrowSchema(schema, timeZoneId, errorOnDuplicatedFieldNames, largeVarTypes)
         val allocator = ArrowUtils.rootAllocator.newChildAllocator(
-          s"stdout writer for $pythonExec", 0, Long.MaxValue)
+          s"stdout writer for $pythonExec",
+          0,
+          Long.MaxValue)
         val root = VectorSchemaRoot.create(arrowSchema, allocator)
 
         Utils.tryWithSafeFinally {
@@ -161,8 +123,6 @@ private[python] trait SedonaBasicPythonArrowInput
       dataOut: DataOutputStream,
       inputIterator: Iterator[Iterator[InternalRow]]): Unit = {
     val arrowWriter = ArrowWriter.create(root)
-    var record = 0
-
     while (inputIterator.hasNext) {
       val startData = dataOut.size()
       val nextBatch = inputIterator.next()
@@ -176,8 +136,6 @@ private[python] trait SedonaBasicPythonArrowInput
       arrowWriter.reset()
       val deltaData = dataOut.size() - startData
       pythonMetrics("pythonDataSent") += deltaData
-      record += 1
-      println("Written batch number: " + record)
     }
   }
 }

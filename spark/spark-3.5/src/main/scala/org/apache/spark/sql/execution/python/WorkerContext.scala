@@ -39,9 +39,11 @@ object WorkerContext {
     synchronized {
 //      worker.close()
       val key = (pythonExec, envVars)
-      pythonWorkers.get(key).foreach(workerFactory => {
-        workerFactory.stopWorker(worker)
-      })
+      pythonWorkers
+        .get(key)
+        .foreach(workerFactory => {
+          workerFactory.stopWorker(worker)
+        })
     }
   }
 

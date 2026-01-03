@@ -16,7 +16,7 @@
 # under the License.
 
 [build-system]
-requires = ["setuptools>=69", "wheel"]
+requires = ["setuptools>=80.9.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -26,13 +26,19 @@ description = "Apache Sedona is a cluster computing system for processing large-
 readme = "README.md"
 license = { text = "Apache-2.0" }
 authors = [ { name = "Apache Sedona", email = "dev@sedona.apache.org" } ]
-requires-python = ">=3.8"
+requires-python = ">=3.12"
 classifiers = [
   "Programming Language :: Python :: 3",
   "License :: OSI Approved :: Apache Software License",
 ]
 dependencies = [
   "attrs",
+  "geoarrow-c>=0.3.1",
+  "geoarrow-pyarrow>=0.2.0",
+  "geopandas>=1.1.2",
+  "pyarrow>=16.1.0",
+  "pyspark==3.5.4",
+  "sedonadb",
   "shapely>=1.7.0",
 ]
 
@@ -43,38 +49,16 @@ kepler-map = ["geopandas", "keplergl==0.3.2"]
 flink = ["apache-flink>=1.19.0"]
 db = ["sedonadb[geopandas]; python_version >= '3.9'"]
 all = [
-  "pyspark>=3.4.0,<4.1.0",
-  "geopandas",
-  "pydeck==0.8.0",
-  "keplergl==0.3.2",
-  "rasterio>=1.2.10",
+#  "pyspark>=3.4.0,<4.1.0",
+#  "geopandas",
+#  "pydeck==0.8.0",
+#  "keplergl==0.3.2",
+#  "rasterio>=1.2.10",
 ]
 
 [dependency-groups]
 dev = [
-  "pytest",
-  "pytest-cov",
-  "notebook==6.4.12",
-  "jupyter",
-  "mkdocs",
-  "scikit-learn",
-  "esda",
-  "libpysal",
-  "matplotlib",  # implicit dependency of esda
-  # prevent incompatibility with pysal 4.7.0, which is what is resolved to when shapely >2 is specified
-  "scipy<=1.10.0",
-  "pandas>=2.0.0",
-  "numpy<2",
-  "geopandas",
-  # https://stackoverflow.com/questions/78949093/how-to-resolve-attributeerror-module-fiona-has-no-attribute-path
-  # cannot set geopandas>=0.14.4 since it doesn't support python 3.8, so we pin fiona to <1.10.0
-  "fiona<1.10.0",
-  "pyarrow",
-  "pyspark>=3.4.0,<4.1.0",
-  "keplergl==0.3.2",
-  "pydeck==0.8.0",
-  "pystac==1.5.0",
-  "rasterio>=1.2.10",
+    "pytest>=9.0.2",
 ]
 
 [project.urls]
@@ -99,3 +83,11 @@ sources = [
   "src/geom_buf.c",
   "src/geos_c_dyn.c",
 ]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=9.0.2",
+]
+
+[tool.uv.sources]
+sedonadb = { path = "../../../sedona-db/target/wheels/sedonadb-0.3.0-cp312-cp312-macosx_11_0_arm64.whl" }

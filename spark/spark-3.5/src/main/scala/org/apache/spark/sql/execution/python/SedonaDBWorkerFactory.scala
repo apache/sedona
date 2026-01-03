@@ -36,7 +36,8 @@ class SedonaDBWorkerFactory(pythonExec: String, envVars: Map[String, String])
     extends PythonWorkerFactory(pythonExec, envVars) {
   self =>
 
-  private val sedonaWorkerModule = "sedonaworker.reader"
+  private val sedonaWorkerModule = "sedona.spark.worker.worker"
+//  private val sedonaWorkerModule = "sedonaworker.reader"
 
   private val simpleWorkers = new mutable.WeakHashMap[Socket, Process]()
   private val authHelper = new SocketAuthHelper(SparkEnv.get.conf)
