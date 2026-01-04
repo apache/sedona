@@ -15,4 +15,4 @@
 # specific language governing permissions and limitations
 # under the License.
 
-version = "1.8.0"
+version = "1.8.1"
