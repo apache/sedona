@@ -5,6 +5,7 @@ import shapely
 from sedona.sql import GeometryType
 from pyspark.sql.functions import expr, lit
 from pyspark.sql.types import DoubleType, IntegerType
+from sedona.spark.sql import ST_X
 
 
 class TestSedonaDBArrowFunction(TestBase):
@@ -28,7 +29,7 @@ class TestSedonaDBArrowFunction(TestBase):
             ["id", "wkt"],
         ).withColumn("wkt", expr("ST_GeomFromWKT(wkt)"))
 
-        df.select(my_own_function(df.wkt, lit(100)).alias("geom")).show()
+        df.select(ST_X(my_own_function(df.wkt, lit(100)).alias("geom"))).show()
 
     def test_geometry_to_double(self):
         @sedona_db_vectorized_udf(return_type=DoubleType(), input_types=[GeometryType()])
