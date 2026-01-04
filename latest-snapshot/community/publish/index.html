@@ -6202,7 +6202,7 @@ rm<span class="w"> </span>-rf<span class="w"> </span>sedona-src
 rm<span class="w"> </span>report.txt
 </code></pre></div>
 <h2 id="2-update-sedona-python-r-and-zeppelin-versions">2. Update Sedona Python, R and Zeppelin versions<a class="headerlink" href="#2-update-sedona-python-r-and-zeppelin-versions" title="Permanent link">&para;</a></h2>
-<p>Make sure the Sedona version in the following files are 1.8.0.</p>
+<p>Make sure the Sedona version in the following files are 1.8.1.</p>
 <ol>
 <li><a href="https://github.com/apache/sedona/blob/master/python/sedona/version.py">https://github.com/apache/sedona/blob/master/python/sedona/version.py</a></li>
 <li><a href="https://github.com/apache/sedona/blob/master/R/DESCRIPTION">https://github.com/apache/sedona/blob/master/R/DESCRIPTION</a></li>
@@ -6232,7 +6232,7 @@ rm<span class="w"> </span>-f<span class="w"> </span>pom.xml.*
 
 <span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;*****Step 1. Stage the Release Candidate to GitHub.&quot;</span>
 
-mvn<span class="w"> </span>-q<span class="w"> </span>-B<span class="w"> </span>clean<span class="w"> </span>release:prepare<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.0-rc1<span class="w"> </span>-DreleaseVersion<span class="o">=</span><span class="m">1</span>.8.0<span class="w"> </span>-DdevelopmentVersion<span class="o">=</span><span class="m">1</span>.8.1-SNAPSHOT<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Penable-all-submodules<span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests&quot;</span>
+mvn<span class="w"> </span>-q<span class="w"> </span>-B<span class="w"> </span>clean<span class="w"> </span>release:prepare<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.1-rc1<span class="w"> </span>-DreleaseVersion<span class="o">=</span><span class="m">1</span>.8.1<span class="w"> </span>-DdevelopmentVersion<span class="o">=</span><span class="m">1</span>.9.0-SNAPSHOT<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Penable-all-submodules<span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests&quot;</span>
 mvn<span class="w"> </span>-q<span class="w"> </span>-B<span class="w"> </span>release:clean<span class="w"> </span>-Penable-all-submodules
 
 <span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;*****Step 2: Upload the Release Candidate to https://repository.apache.org.&quot;</span>
@@ -6247,8 +6247,8 @@ mvn<span class="w"> </span>-q<span class="w"> </span>-B<span class="w"> </span>r
 
 <span class="c1"># Define repository details</span>
 <span class="nv">REPO_URL</span><span class="o">=</span><span class="s2">&quot;https://github.com/apache/sedona.git&quot;</span>
-<span class="nv">RC_VERSION</span><span class="o">=</span><span class="s2">&quot;1.8.0-rc1&quot;</span>
-<span class="nv">SEDONA_VERSION</span><span class="o">=</span><span class="s2">&quot;1.8.0&quot;</span>
+<span class="nv">RC_VERSION</span><span class="o">=</span><span class="s2">&quot;1.8.1-rc1&quot;</span>
+<span class="nv">SEDONA_VERSION</span><span class="o">=</span><span class="s2">&quot;1.8.1&quot;</span>
 <span class="nv">TAG</span><span class="o">=</span><span class="s2">&quot;sedona-</span><span class="si">${</span><span class="nv">RC_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
 <span class="nv">LOCAL_DIR</span><span class="o">=</span><span class="s2">&quot;sedona-release&quot;</span>
 
@@ -6580,26 +6580,26 @@ rm<span class="w"> </span>-rf<span class="w"> </span>apache-sedona-<span class="
 <h2 id="5-vote-in-dev-sedonaapacheorg">5. Vote in dev sedona.apache.org<a class="headerlink" href="#5-vote-in-dev-sedonaapacheorg" title="Permanent link">&para;</a></h2>
 <h3 id="vote-email">Vote email<a class="headerlink" href="#vote-email" title="Permanent link">&para;</a></h3>
 <p>Please add changes at the end if needed:</p>
-<div class="highlight"><pre><span></span><code>Subject: [VOTE] Release Apache Sedona 1.8.0-rc1
+<div class="highlight"><pre><span></span><code>Subject: [VOTE] Release Apache Sedona 1.8.1-rc1
 
 Hi all,
 
-This is a call for vote on Apache Sedona 1.8.0-rc1. Please refer to the changes listed at the bottom of this email.
+This is a call for vote on Apache Sedona 1.8.1-rc1. Please refer to the changes listed at the bottom of this email.
 
 Release notes:
-https://github.com/apache/sedona/blob/sedona-1.8.0-rc1/docs/setup/release-notes.md
+https://github.com/apache/sedona/blob/sedona-1.8.1-rc1/docs/setup/release-notes.md
 
 Build instructions:
-https://github.com/apache/sedona/blob/sedona-1.8.0-rc1/docs/setup/compile.md
+https://github.com/apache/sedona/blob/sedona-1.8.1-rc1/docs/setup/compile.md
 
 GitHub tag:
-https://github.com/apache/sedona/releases/tag/sedona-1.8.0-rc1
+https://github.com/apache/sedona/releases/tag/sedona-1.8.1-rc1
 
 GPG public key to verify the Release:
 https://downloads.apache.org/sedona/KEYS
 
 Source code and binaries:
-https://dist.apache.org/repos/dist/dev/sedona/1.8.0-rc1/
+https://dist.apache.org/repos/dist/dev/sedona/1.8.1-rc1/
 
 The vote will be open for at least 72 hours or until at least 3 &quot;+1&quot; PMC votes are cast
 
@@ -6634,7 +6634,7 @@ Original comment (Permalink from https://lists.apache.org/list.html):
 </code></pre></div>
 <h3 id="pass-email">Pass email<a class="headerlink" href="#pass-email" title="Permanent link">&para;</a></h3>
 <p>Please count the votes and add the Permalink of the vote thread at the end.</p>
-<div class="highlight"><pre><span></span><code>Subject: [RESULT][VOTE] Release Apache Sedona 1.8.0-rc1
+<div class="highlight"><pre><span></span><code>Subject: [RESULT][VOTE] Release Apache Sedona 1.8.1-rc1
 
 Dear all,
 
@@ -6654,11 +6654,11 @@ I will make an announcement soon.
 <li>Please add the permalink of the vote thread</li>
 <li>Please add the permalink of the vote result thread</li>
 </ol>
-<div class="highlight"><pre><span></span><code>Subject: [ANNOUNCE] Apache Sedona 1.8.0 released
+<div class="highlight"><pre><span></span><code>Subject: [ANNOUNCE] Apache Sedona 1.8.1 released
 
 Dear all,
 
-We are happy to report that we have released Apache Sedona 1.8.0. Thank you again for your help.
+We are happy to report that we have released Apache Sedona 1.8.1. Thank you again for your help.
 
 Apache Sedona is a cluster computing system for processing large-scale spatial data.
 
@@ -6673,10 +6673,10 @@ Website:
 http://sedona.apache.org/
 
 Release notes:
-https://github.com/apache/sedona/blob/sedona-1.8.0/docs/setup/release-notes.md
+https://github.com/apache/sedona/blob/sedona-1.8.1/docs/setup/release-notes.md
 
 Download links:
-https://github.com/apache/sedona/releases/tag/sedona-1.8.0
+https://github.com/apache/sedona/releases/tag/sedona-1.8.1
 
 Additional resources:
 Mailing list: dev@sedona.apache.org
@@ -6690,32 +6690,32 @@ Apache Sedona Team
 <p>If a vote failed, do the following:</p>
 <ol>
 <li>In the vote email, say that we will create another release candidate.</li>
-<li>Restart from Step 3 <code>Update mkdocs.yml</code>. Please increment the release candidate ID (e.g., <code>1.8.0-rc2</code>) and update <code>sedona_create_release.current_rc</code> and <code>sedona_create_release.current_git_tag</code> in <code>mkdocs.yml</code> to generate the script listed on this webpage.</li>
+<li>Restart from Step 3 <code>Update mkdocs.yml</code>. Please increment the release candidate ID (e.g., <code>1.8.1-rc2</code>) and update <code>sedona_create_release.current_rc</code> and <code>sedona_create_release.current_git_tag</code> in <code>mkdocs.yml</code> to generate the script listed on this webpage.</li>
 </ol>
 <h2 id="8-release-source-code-and-maven-package">8. Release source code and Maven package<a class="headerlink" href="#8-release-source-code-and-maven-package" title="Permanent link">&para;</a></h2>
 <h3 id="upload-releases">Upload releases<a class="headerlink" href="#upload-releases" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
 
 <span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Move all files in https://dist.apache.org/repos/dist/dev/sedona to https://dist.apache.org/repos/dist/release/sedona, using svn&quot;</span>
-svn<span class="w"> </span>mkdir<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding folder&quot;</span><span class="w"> </span>https://dist.apache.org/repos/dist/release/sedona/1.8.0
-wget<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/1.8.0-rc1/apache-sedona-1.8.0-src.tar.gz
-wget<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/1.8.0-rc1/apache-sedona-1.8.0-src.tar.gz.asc
-wget<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/1.8.0-rc1/apache-sedona-1.8.0-src.tar.gz.sha512
-wget<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/1.8.0-rc1/apache-sedona-1.8.0-bin.tar.gz
-wget<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/1.8.0-rc1/apache-sedona-1.8.0-bin.tar.gz.asc
-wget<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/1.8.0-rc1/apache-sedona-1.8.0-bin.tar.gz.sha512
-svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-1.8.0-src.tar.gz<span class="w"> </span>https://dist.apache.org/repos/dist/release/sedona/1.8.0/apache-sedona-1.8.0-src.tar.gz
-svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-1.8.0-src.tar.gz.asc<span class="w"> </span>https://dist.apache.org/repos/dist/release/sedona/1.8.0/apache-sedona-1.8.0-src.tar.gz.asc
-svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-1.8.0-src.tar.gz.sha512<span class="w"> </span>https://dist.apache.org/repos/dist/release/sedona/1.8.0/apache-sedona-1.8.0-src.tar.gz.sha512
-svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-1.8.0-bin.tar.gz<span class="w"> </span>https://dist.apache.org/repos/dist/release/sedona/1.8.0/apache-sedona-1.8.0-bin.tar.gz
-svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-1.8.0-bin.tar.gz.asc<span class="w"> </span>https://dist.apache.org/repos/dist/release/sedona/1.8.0/apache-sedona-1.8.0-bin.tar.gz.asc
-svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-1.8.0-bin.tar.gz.sha512<span class="w"> </span>https://dist.apache.org/repos/dist/release/sedona/1.8.0/apache-sedona-1.8.0-bin.tar.gz.sha512
-rm<span class="w"> </span>apache-sedona-1.8.0-src.tar.gz
-rm<span class="w"> </span>apache-sedona-1.8.0-src.tar.gz.asc
-rm<span class="w"> </span>apache-sedona-1.8.0-src.tar.gz.sha512
-rm<span class="w"> </span>apache-sedona-1.8.0-bin.tar.gz
-rm<span class="w"> </span>apache-sedona-1.8.0-bin.tar.gz.asc
-rm<span class="w"> </span>apache-sedona-1.8.0-bin.tar.gz.sha512
+svn<span class="w"> </span>mkdir<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding folder&quot;</span><span class="w"> </span>https://dist.apache.org/repos/dist/release/sedona/1.8.1
+wget<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/1.8.1-rc1/apache-sedona-1.8.1-src.tar.gz
+wget<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/1.8.1-rc1/apache-sedona-1.8.1-src.tar.gz.asc
+wget<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/1.8.1-rc1/apache-sedona-1.8.1-src.tar.gz.sha512
+wget<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/1.8.1-rc1/apache-sedona-1.8.1-bin.tar.gz
+wget<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/1.8.1-rc1/apache-sedona-1.8.1-bin.tar.gz.asc
+wget<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/1.8.1-rc1/apache-sedona-1.8.1-bin.tar.gz.sha512
+svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-1.8.1-src.tar.gz<span class="w"> </span>https://dist.apache.org/repos/dist/release/sedona/1.8.1/apache-sedona-1.8.1-src.tar.gz
+svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-1.8.1-src.tar.gz.asc<span class="w"> </span>https://dist.apache.org/repos/dist/release/sedona/1.8.1/apache-sedona-1.8.1-src.tar.gz.asc
+svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-1.8.1-src.tar.gz.sha512<span class="w"> </span>https://dist.apache.org/repos/dist/release/sedona/1.8.1/apache-sedona-1.8.1-src.tar.gz.sha512
+svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-1.8.1-bin.tar.gz<span class="w"> </span>https://dist.apache.org/repos/dist/release/sedona/1.8.1/apache-sedona-1.8.1-bin.tar.gz
+svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-1.8.1-bin.tar.gz.asc<span class="w"> </span>https://dist.apache.org/repos/dist/release/sedona/1.8.1/apache-sedona-1.8.1-bin.tar.gz.asc
+svn<span class="w"> </span>import<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Adding file&quot;</span><span class="w"> </span>apache-sedona-1.8.1-bin.tar.gz.sha512<span class="w"> </span>https://dist.apache.org/repos/dist/release/sedona/1.8.1/apache-sedona-1.8.1-bin.tar.gz.sha512
+rm<span class="w"> </span>apache-sedona-1.8.1-src.tar.gz
+rm<span class="w"> </span>apache-sedona-1.8.1-src.tar.gz.asc
+rm<span class="w"> </span>apache-sedona-1.8.1-src.tar.gz.sha512
+rm<span class="w"> </span>apache-sedona-1.8.1-bin.tar.gz
+rm<span class="w"> </span>apache-sedona-1.8.1-bin.tar.gz.asc
+rm<span class="w"> </span>apache-sedona-1.8.1-bin.tar.gz.sha512
 </code></pre></div>
 <h3 id="manually-close-and-release-the-package">Manually close and release the package<a class="headerlink" href="#manually-close-and-release-the-package" title="Permanent link">&para;</a></h3>
 <ol>
@@ -6782,39 +6782,39 @@ set_java_home<span class="o">()</span><span class="w"> </span><span class="o">{<
 <span class="c1"># For Spark 3.4 and Scala 2.12 (Java 11)</span>
 <span class="nv">JAVA_VERSION</span><span class="o">=</span><span class="k">$(</span>get_java_version<span class="w"> </span><span class="s2">&quot;3.4&quot;</span><span class="k">)</span>
 set_java_home<span class="w"> </span><span class="nv">$JAVA_VERSION</span>
-mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.0-rc1<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.4 -Dscala=2.12&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.4<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.12
+mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.1-rc1<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.4 -Dscala=2.12&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.4<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.12
 
 <span class="c1"># For Spark 3.4 and Scala 2.13 (Java 11)</span>
-mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.0-rc1<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.4 -Dscala=2.13&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.4<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13
+mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.1-rc1<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.4 -Dscala=2.13&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.4<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13
 
 <span class="c1"># For Spark 3.5 and Scala 2.12 (Java 11)</span>
 <span class="nv">JAVA_VERSION</span><span class="o">=</span><span class="k">$(</span>get_java_version<span class="w"> </span><span class="s2">&quot;3.5&quot;</span><span class="k">)</span>
 set_java_home<span class="w"> </span><span class="nv">$JAVA_VERSION</span>
-mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.0-rc1<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.5 -Dscala=2.12&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.5<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.12
+mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.1-rc1<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.5 -Dscala=2.12&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.5<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.12
 
 <span class="c1"># For Spark 3.5 and Scala 2.13 (Java 11)</span>
-mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.0-rc1<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.5 -Dscala=2.13&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.5<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13
+mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.1-rc1<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.5 -Dscala=2.13&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.5<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13
 
 <span class="c1"># For Spark 4.0 and Scala 2.13 (Java 17)</span>
 <span class="c1"># Note: Spark 4.0 + Scala 2.12 is not supported, so we skip it</span>
 <span class="nv">JAVA_VERSION</span><span class="o">=</span><span class="k">$(</span>get_java_version<span class="w"> </span><span class="s2">&quot;4.0&quot;</span><span class="k">)</span>
 set_java_home<span class="w"> </span><span class="nv">$JAVA_VERSION</span>
-mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.0-rc1<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=4.0 -Dscala=2.13&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">4</span>.0<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13
+mvn<span class="w"> </span>-q<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.1-rc1<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=4.0 -Dscala=2.13&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">4</span>.0<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13
 </code></pre></div>
 <h2 id="9-release-sedona-python-and-zeppelin">9. Release Sedona Python and Zeppelin<a class="headerlink" href="#9-release-sedona-python-and-zeppelin" title="Permanent link">&para;</a></h2>
 <p>You must have the maintainer privilege of <code>https://pypi.org/project/apache-sedona/</code> and <code>https://www.npmjs.com/package/apache-sedona</code></p>
 <p>To publish Sedona pythons, you have to use GitHub actions since we release wheels for different platforms. Please use this repo: <a href="https://github.com/jiayuasu/sedona-publish-python">https://github.com/jiayuasu/sedona-publish-python</a></p>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
 
-wget<span class="w"> </span>https://github.com/apache/sedona/archive/refs/tags/sedona-1.8.0-rc1.tar.gz
-tar<span class="w"> </span>-xvf<span class="w"> </span>sedona-1.8.0-rc1.tar.gz
-mkdir<span class="w"> </span>apache-sedona-1.8.0-src
-cp<span class="w"> </span>-r<span class="w"> </span>sedona-sedona-1.8.0-rc1/*<span class="w"> </span>apache-sedona-1.8.0-src/
+wget<span class="w"> </span>https://github.com/apache/sedona/archive/refs/tags/sedona-1.8.1-rc1.tar.gz
+tar<span class="w"> </span>-xvf<span class="w"> </span>sedona-1.8.1-rc1.tar.gz
+mkdir<span class="w"> </span>apache-sedona-1.8.1-src
+cp<span class="w"> </span>-r<span class="w"> </span>sedona-sedona-1.8.1-rc1/*<span class="w"> </span>apache-sedona-1.8.1-src/
 
-rm<span class="w"> </span>-rf<span class="w"> </span>apache-sedona-1.8.0-rc1
+rm<span class="w"> </span>-rf<span class="w"> </span>apache-sedona-1.8.1-rc1
 
-<span class="nb">cd</span><span class="w"> </span>apache-sedona-1.8.0-src/zeppelin<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>npm<span class="w"> </span>publish<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>..
-rm<span class="w"> </span>-rf<span class="w"> </span>apache-sedona-1.8.0-src
+<span class="nb">cd</span><span class="w"> </span>apache-sedona-1.8.1-src/zeppelin<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>npm<span class="w"> </span>publish<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>..
+rm<span class="w"> </span>-rf<span class="w"> </span>apache-sedona-1.8.1-src
 </code></pre></div>
 <h2 id="10-release-sedona-r-to-cran">10. Release Sedona R to CRAN.<a class="headerlink" href="#10-release-sedona-r-to-cran" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
@@ -6824,7 +6824,7 @@ R<span class="w"> </span>CMD<span class="w"> </span>check<span class="w"> </span
 <p>Then submit to CRAN using this <a href="https://xmpalantir.wu.ac.at/cransubmit/">web form</a>.</p>
 <h2 id="11-publish-the-doc-website">11. Publish the doc website<a class="headerlink" href="#11-publish-the-doc-website" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Check out the 1.8.0 Git tag on your local repo to a branch namely <code>branch-1.8.0</code></li>
+<li>Check out the 1.8.1 Git tag on your local repo to a branch namely <code>branch-1.8.1</code></li>
 <li>Add the download link to <a href="../../download/">Download page</a>.</li>
 <li>Add the news to <code>docs/index.md</code>.</li>
 <li>Push the changes to this branch on GitHub.</li>
@@ -6939,7 +6939,7 @@ R<span class="w"> </span>CMD<span class="w"> </span>check<span class="w"> </span
     <div class="footer__bot">
       <div class="md-copyright">
   
-      Copyright © 2025 The Apache Software Foundation. Apache Sedona, Sedona, Apache, the Apache feather logo, and the Apache Sedona project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries. All other marks mentioned may be trademarks or registered trademarks of their respective owners. Please visit <a href="https://www.apache.org/">Apache Software Foundation</a> for more details.<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=f3e121f6-c909-4592-8be6-5bd345768cba" /><img referrerpolicy="no-referrer-when-downgrade" src="https://analytics.apache.org/matomo.php?idsite=74&rec=1" />
+      Copyright © 2026 The Apache Software Foundation. Apache Sedona, Sedona, Apache, the Apache feather logo, and the Apache Sedona project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries. All other marks mentioned may be trademarks or registered trademarks of their respective owners. Please visit <a href="https://www.apache.org/">Apache Software Foundation</a> for more details.<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=f3e121f6-c909-4592-8be6-5bd345768cba" /><img referrerpolicy="no-referrer-when-downgrade" src="https://analytics.apache.org/matomo.php?idsite=74&rec=1" />
   
   
     Made with
