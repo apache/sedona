@@ -104,7 +104,6 @@ def resolve_python_path(utf_serde: UTF8Deserializer, infile):
             sys.path.insert(1, path)
 
     spark_files_dir = utf_serde.loads(infile)
-    # _accumulatorRegistry.clear()
 
     SparkFiles._root_directory = spark_files_dir
     SparkFiles._is_running_on_worker = True
@@ -165,26 +164,6 @@ def read_udf(infile, pickle_ser) -> UDFInfo:
         geom_offsets=[0]
     )
 
-# def read_single_udf(pickleSer, infile, eval_type, runner_conf, udf_index):
-#     num_arg = read_int(infile)
-#     arg_offsets = [read_int(infile) for i in range(num_arg)]
-#     chained_func = None
-#     for i in range(read_int(infile)):
-#         f, return_type = read_command(pickleSer, infile)
-#         if chained_func is None:
-#             chained_func = f
-#         else:
-#             chained_func = chain(chained_func, f)
-#
-#     func = chained_func
-#
-#     # the last returnType will be the return type of UDF
-#     if eval_type == PythonEvalType.SQL_SCALAR_PANDAS_UDF:
-#         return arg_offsets, func, return_type
-#     else:
-#         raise ValueError("Unknown eval type: {}".format(eval_type))
-#
-
 def register_sedona_db_udf(infile, pickle_ser) -> UDFInfo:
     num_udfs = read_int(infile)
 
@@ -211,11 +190,7 @@ def write_statistics(infile, outfile, boot_time, init_time) -> None:
     write_long(shuffle.MemoryBytesSpilled, outfile)
     write_long(shuffle.DiskBytesSpilled, outfile)
 
-    # Mark the beginning of the accumulators section of the output
     write_int(SpecialLengths.END_OF_DATA_SECTION, outfile)
-    # write_int(len(_accumulatorRegistry), outfile)
-    # for (aid, accum) in _accumulatorRegistry.items():
-    #     pickleSer._write_with_length((aid, accum._value), outfile)
 
     if read_int(infile) == SpecialLengths.END_OF_STREAM:
         write_int(SpecialLengths.END_OF_STREAM, outfile)
