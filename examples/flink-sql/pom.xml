@@ -34,7 +34,7 @@
         <flink.scope>provided</flink.scope>
         <scala.compat.version>2.12</scala.compat.version>
         <geotools.version>33.1</geotools.version>
-        <log4j.version>2.17.2</log4j.version>
+        <log4j.version>2.25.3</log4j.version>
 
         <!-- For JDK-17 and above -->
         <extraJavaArgs>
