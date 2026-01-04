@@ -25,7 +25,7 @@ spark_dependencies <- function(spark_version, scala_version, ...) {
   }
 
   packages <- c(
-    "org.datasyslab:geotools-wrapper:1.8.0-33.1"
+    "org.datasyslab:geotools-wrapper:1.8.1-33.1"
   )
   jars <- NULL
 
@@ -38,7 +38,7 @@ spark_dependencies <- function(spark_version, scala_version, ...) {
       paste0(
         "org.apache.sedona:sedona-",
         c("spark-shaded"),
-        sprintf("-%s_%s:1.8.0", spark_version, scala_version)
+        sprintf("-%s_%s:1.8.1", spark_version, scala_version)
       ),
       packages
     )

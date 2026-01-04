@@ -21,7 +21,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "apache-sedona"
-version = "1.8.0"
+version = "1.8.1"
 description = "Apache Sedona is a cluster computing system for processing large-scale spatial data"
 readme = "README.md"
 license = { text = "Apache-2.0" }
