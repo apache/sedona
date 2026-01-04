@@ -170,8 +170,6 @@ def register_sedona_db_udf(infile, pickle_ser) -> UDFInfo:
     udf = None
     for _ in range(num_udfs):
         udf = read_udf(infile, pickle_ser)
-        # Here we would register the UDF with SedonaDB's internal context
-
 
     return udf
 
