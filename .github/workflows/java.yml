@@ -94,7 +94,7 @@ jobs:
         with:
           python-version: '3.10'
       - name: Cache Maven packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
@@ -116,7 +116,7 @@ jobs:
       - run: cp spark-shaded/target/sedona-*.jar staging
       - run: |
           [ -d "flink-shaded/target/" ] && cp flink-shaded/target/sedona-*.jar staging 2>/dev/null || true
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: generated-jars_spark-${{ matrix.spark }}_scala-${{ matrix.scala }}_jdk-${{ matrix.jdk }}
           path: staging
