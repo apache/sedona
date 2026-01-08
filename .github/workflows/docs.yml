@@ -117,25 +117,25 @@ jobs:
           fi
       - run: mkdir staging
       - run: cp -r site/* staging/
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: generated-docs
           path: staging
       - name: Cache Python packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
       - name: Cache Maven packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Cache Node modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: docs-overrides/node_modules
           key: ${{ runner.os }}-node-${{ hashFiles('docs-overrides/package-lock.json') }}
