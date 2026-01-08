@@ -151,4 +151,4 @@ SpatialBench provides a repeatable standard for measuring and communicating spat
 
 If you want to utilize these benchmarking results verbatim, we recommend that you map your existing queries to the SpatialBench queries to support your decision making.
 
-Apache Sedona 1.8.0 will be available soon which includes support for Spark 4.0 and the latest DBR runtimes. Once it's live, we will extend and share the same benchmark for Sedona 1.8.0 on the latest stable DBR version that supports Spark 4.0.
+Apache Sedona 1.8.1 will be available soon which includes support for Spark 4.0 and the latest DBR runtimes. Once it's live, we will extend and share the same benchmark for Sedona 1.8.1 on the latest stable DBR version that supports Spark 4.0.
