@@ -15,18 +15,15 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# https://github.com/actions/labeler
-name: Pull Request Labeler
-on:
-  - pull_request_target # zizmor: ignore[dangerous-triggers]
-jobs:
-  triage:
-    permissions:
-      contents: read
-      pull-requests: write
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/labeler@v6
-        with:
-          repo-token: '${{ secrets.GITHUB_TOKEN }}'
-          sync-labels: true
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        actions/*: any
+        astral-sh/setup-uv: any
+        docker/setup-qemu-action: any
+        github/*: any
+        pypa/cibuildwheel: any
+        r-lib/actions/check-r-package: any
+        r-lib/actions/setup-r: any
+        r-lib/actions/setup-r-dependencies: any
