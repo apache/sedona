@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-name: Python build wheels
+name: Python build and publish wheels
 
 on:
   push:
@@ -38,6 +38,9 @@ on:
       - 'pom.xml'
       - 'python/**'
       - '.github/workflows/python-wheel.yml'
+  release:
+    types:
+      - published
 
 permissions:
   contents: read
@@ -47,7 +50,8 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 jobs:
-  build:
+  build_wheels:
+    name: Build wheels on ${{ matrix.os }}
     strategy:
       matrix:
         os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
@@ -68,7 +72,7 @@ jobs:
           image: tonistiigi/binfmt:qemu-v8.1.5
           platforms: all
       - name: Build wheels
-        uses: pypa/cibuildwheel@v3.3.0
+        uses: pypa/cibuildwheel@v3.3.1
         env:
           CIBW_SKIP: 'pp* *musl*'
           CIBW_ARCHS_LINUX: 'x86_64 aarch64'
@@ -80,3 +84,48 @@ jobs:
         with:
           name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
+
+  build_sdist:
+    name: Build source distribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Build sdist
+        run: cd python && uv build --sdist
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: cibw-sdist
+          path: python/dist/*.tar.gz
+
+  upload_pypi:
+    needs: [build_wheels, build_sdist]
+    runs-on: ubuntu-latest
+    # publish when a GitHub Release is created
+    if: github.event_name == 'release' && github.event.action == 'published'
+    environment: pypi
+    permissions:
+      id-token: write # IMPORTANT: mandatory for Trusted Publishing
+    steps:
+      - uses: actions/download-artifact@v6
+        with:
+          # unpacks wheel files into artifacts
+          pattern: cibw-*
+          merge-multiple: false
+          path: artifacts
+      - name: Copy everything to the dist folder
+        run: |
+          mkdir -p dist
+          for pattern in artifacts/cibw-sdist/* artifacts/cibw-wheels-macos-*/* artifacts/cibw-wheels-ubuntu-*/* artifacts/cibw-wheels-windows-*/*; do
+              cp -r $pattern dist 2>/dev/null || echo "No files matched $pattern"
+          done
+          echo "Content copied to dist."
+      - name: Publish package to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        # repository_url: https://test.pypi.org/legacy/ # to test
