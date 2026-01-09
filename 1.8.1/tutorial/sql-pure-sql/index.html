@@ -5896,13 +5896,13 @@ You're not viewing the latest stable version.
 <p>Starting from <mark>Sedona v1.0.1</mark>, you can use Sedona in a pure Spark SQL environment. The example code is written in SQL.</p>
 <p>SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. Detailed SedonaSQL APIs are available here: <a href="../../api/sql/Overview/">SedonaSQL API</a></p>
 <h2 id="initiate-session">Initiate Session<a class="headerlink" href="#initiate-session" title="Permanent link">&para;</a></h2>
-<p>Start <code>spark-sql</code> as following (replace <code>&lt;VERSION&gt;</code> with actual version like <code>1.8.0</code>):</p>
+<p>Start <code>spark-sql</code> as following (replace <code>&lt;VERSION&gt;</code> with actual version like <code>1.8.1</code>):</p>
 <div class="admonition abstract">
 <p class="admonition-title">Run spark-sql with Apache Sedona</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:1"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Spark 3.3+ and Scala 2.12</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>spark-sql<span class="w"> </span>--packages<span class="w"> </span>org.apache.sedona:sedona-spark-shaded-3.3_2.12:&lt;VERSION&gt;,org.datasyslab:geotools-wrapper:1.8.0-33.1<span class="w"> </span><span class="se">\</span>
+<div class="highlight"><pre><span></span><code>spark-sql<span class="w"> </span>--packages<span class="w"> </span>org.apache.sedona:sedona-spark-shaded-3.3_2.12:&lt;VERSION&gt;,org.datasyslab:geotools-wrapper:1.8.1-33.1<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--conf<span class="w"> </span>spark.serializer<span class="o">=</span>org.apache.spark.serializer.KryoSerializer<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--conf<span class="w"> </span>spark.kryo.registrator<span class="o">=</span>org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--conf<span class="w"> </span>spark.sql.extensions<span class="o">=</span>org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions

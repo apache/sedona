@@ -6121,7 +6121,7 @@ You're not viewing the latest stable version.
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>apache/sedona:latest
 </code></pre></div>
 <p>Example 2: Pull the image of a specific Sedona release</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>apache/sedona:1.8.0
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>apache/sedona:1.8.1
 </code></pre></div>
 <h3 id="start-the-container">Start the container<a class="headerlink" href="#start-the-container" title="Permanent link">&para;</a></h3>
 <p>Format:</p>
@@ -6134,9 +6134,9 @@ You're not viewing the latest stable version.
 <p>This command will start a container with 6GB RAM for the driver and 8GB RAM for the executor and use the latest Sedona image. The container will run in detached mode.</p>
 <p>This command will bind the container's ports 8888, 8080, 8081, 4040, 8085 to the host's ports 8888, 8080, 8081, 4040, 8085 respectively.</p>
 <p>Example 2:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-e<span class="w"> </span>-p<span class="w"> </span><span class="m">8888</span>:8888<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span>-p<span class="w"> </span><span class="m">8081</span>:8081<span class="w"> </span>-p<span class="w"> </span><span class="m">4040</span>:4040<span class="w"> </span>-p<span class="w"> </span><span class="m">8085</span>:8085<span class="w"> </span>apache/sedona:1.8.0
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-e<span class="w"> </span>-p<span class="w"> </span><span class="m">8888</span>:8888<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span>-p<span class="w"> </span><span class="m">8081</span>:8081<span class="w"> </span>-p<span class="w"> </span><span class="m">4040</span>:4040<span class="w"> </span>-p<span class="w"> </span><span class="m">8085</span>:8085<span class="w"> </span>apache/sedona:1.8.1
 </code></pre></div>
-<p>This command will start a container with 4GB RAM for the driver and 4GB RAM for the executor and use Sedona 1.8.0 image.</p>
+<p>This command will start a container with 4GB RAM for the driver and 4GB RAM for the executor and use Sedona 1.8.1 image.</p>
 <p>This command will bind the container's ports 8888, 8080, 8081, 4040, 8085 to the host's ports 8888, 8080, 8081, 4040, 8085 respectively.</p>
 <p>Example 3: Persisting <code>/opt</code> (Jupyter &amp; Zeppelin Data) with Docker Volume</p>
 <p>To ensure that <strong>Jupyter workspace, Zeppelin notebooks, and configurations persist</strong>, mount <code>/opt</code> as a <strong>Docker volume</strong>:</p>
@@ -6164,7 +6164,7 @@ You're not viewing the latest stable version.
 <div class="highlight"><pre><span></span><code>./docker/build.sh<span class="w"> </span>&lt;spark_version&gt;<span class="w"> </span>&lt;sedona_version&gt;<span class="w"> </span>&lt;build_mode&gt;
 </code></pre></div>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code>./docker/build.sh<span class="w"> </span><span class="m">3</span>.4.1<span class="w"> </span><span class="m">1</span>.8.0
+<div class="highlight"><pre><span></span><code>./docker/build.sh<span class="w"> </span><span class="m">3</span>.4.1<span class="w"> </span><span class="m">1</span>.8.1
 </code></pre></div>
 <p><code>build_mode</code> is optional. If its value is not given or is <code>local</code>, the script will build the image locally. Otherwise, it will start a cross-platform compilation and push images directly to DockerHub.</p>
 <h3 id="build-the-image-against-the-latest-sedona-master">Build the image against the latest Sedona master<a class="headerlink" href="#build-the-image-against-the-latest-sedona-master" title="Permanent link">&para;</a></h3>
@@ -6203,7 +6203,7 @@ You're not viewing the latest stable version.
 </code></pre></div>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>login
-./docker/build.sh<span class="w"> </span><span class="m">3</span>.4.1<span class="w"> </span><span class="m">1</span>.8.0<span class="w"> </span>release
+./docker/build.sh<span class="w"> </span><span class="m">3</span>.4.1<span class="w"> </span><span class="m">1</span>.8.1<span class="w"> </span>release
 </code></pre></div>
 
 

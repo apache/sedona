@@ -5863,10 +5863,10 @@ You're not viewing the latest stable version.
 sudo<span class="w"> </span>mkdir<span class="w"> </span>/jars
 
 <span class="c1"># Download Sedona jar</span>
-sudo<span class="w"> </span>curl<span class="w"> </span>-o<span class="w"> </span>/jars/sedona-spark-shaded-3.3_2.12-1.8.0.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.3_2.12/1.8.0/sedona-spark-shaded-3.3_2.12-1.8.0.jar&quot;</span>
+sudo<span class="w"> </span>curl<span class="w"> </span>-o<span class="w"> </span>/jars/sedona-spark-shaded-3.3_2.12-1.8.1.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.3_2.12/1.8.1/sedona-spark-shaded-3.3_2.12-1.8.1.jar&quot;</span>
 
 <span class="c1"># Download GeoTools jar</span>
-sudo<span class="w"> </span>curl<span class="w"> </span>-o<span class="w"> </span>/jars/geotools-wrapper-1.8.0-33.1.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.8.0-33.1/geotools-wrapper-1.8.0-33.1.jar&quot;</span>
+sudo<span class="w"> </span>curl<span class="w"> </span>-o<span class="w"> </span>/jars/geotools-wrapper-1.8.1-33.1.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.8.1-33.1/geotools-wrapper-1.8.1-33.1.jar&quot;</span>
 
 <span class="c1"># Install necessary python libraries</span>
 sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>pandas
@@ -5874,7 +5874,7 @@ sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </
 sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>geopandas
 sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span><span class="nv">keplergl</span><span class="o">==</span><span class="m">0</span>.3.2
 sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span><span class="nv">pydeck</span><span class="o">==</span><span class="m">0</span>.8.0
-sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>attrs<span class="w"> </span>matplotlib<span class="w"> </span>descartes<span class="w"> </span>apache-sedona<span class="o">==</span><span class="m">1</span>.8.0
+sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>attrs<span class="w"> </span>matplotlib<span class="w"> </span>descartes<span class="w"> </span>apache-sedona<span class="o">==</span><span class="m">1</span>.8.1
 </code></pre></div>
 <p>When you create an EMR cluster, in the <code>bootstrap action</code>, specify the location of this script.</p>
 <h2 id="add-software-configuration">Add software configuration<a class="headerlink" href="#add-software-configuration" title="Permanent link">&para;</a></h2>
@@ -5883,7 +5883,7 @@ sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </
 <span class="w">  </span><span class="o">{</span>
 <span class="w">    </span><span class="s2">&quot;Classification&quot;</span>:<span class="s2">&quot;spark-defaults&quot;</span>,
 <span class="w">    </span><span class="s2">&quot;Properties&quot;</span>:<span class="o">{</span>
-<span class="w">      </span><span class="s2">&quot;spark.yarn.dist.jars&quot;</span>:<span class="w"> </span><span class="s2">&quot;/jars/sedona-spark-shaded-3.3_2.12-1.8.0.jar,/jars/geotools-wrapper-1.8.0-33.1.jar&quot;</span>,
+<span class="w">      </span><span class="s2">&quot;spark.yarn.dist.jars&quot;</span>:<span class="w"> </span><span class="s2">&quot;/jars/sedona-spark-shaded-3.3_2.12-1.8.1.jar,/jars/geotools-wrapper-1.8.1-33.1.jar&quot;</span>,
 <span class="w">      </span><span class="s2">&quot;spark.serializer&quot;</span>:<span class="w"> </span><span class="s2">&quot;org.apache.spark.serializer.KryoSerializer&quot;</span>,
 <span class="w">      </span><span class="s2">&quot;spark.kryo.registrator&quot;</span>:<span class="w"> </span><span class="s2">&quot;org.apache.sedona.core.serde.SedonaKryoRegistrator&quot;</span>,
 <span class="w">      </span><span class="s2">&quot;spark.sql.extensions&quot;</span>:<span class="w"> </span><span class="s2">&quot;org.apache.sedona.viz.sql.SedonaVizExtensions,org.apache.sedona.sql.SedonaSqlExtensions&quot;</span>
