@@ -212,8 +212,8 @@ extra:
     - icon: fontawesome/brands/discord
       link: 'https://discord.gg/9A3k5dEBsY'
   sedona:
-    current_version: 1.8.0
-    current_geotools: 1.8.0-33.1
+    current_version: 1.8.1
+    current_geotools: 1.8.1-33.1
   sedona_create_release:
     current_version: 1.8.1
     current_git_tag: sedona-1.8.1-rc2
