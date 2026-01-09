@@ -70,6 +70,8 @@ class TestBase:
                     "spark.sedona.stac.load.itemsLimitMax",
                     "20",
                 )
+                .config("spark.executor.memory", "10G") \
+                .config("spark.driver.memory", "10G") \
                 # Pandas on PySpark doesn't work with ANSI mode, which is enabled by default
                 # in Spark 4
                 .config("spark.sql.ansi.enabled", "false")

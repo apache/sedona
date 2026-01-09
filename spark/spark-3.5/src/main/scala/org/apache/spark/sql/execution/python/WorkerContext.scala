@@ -24,25 +24,27 @@ import scala.collection.mutable
 object WorkerContext {
 
   def createPythonWorker(
-      pythonExec: String,
-      envVars: Map[String, String]): (java.net.Socket, Option[Int]) = {
+                          pythonExec: String,
+                          envVars: Map[String, String]): (java.net.Socket, Option[Int]) = {
     synchronized {
       val key = (pythonExec, envVars)
       pythonWorkers.getOrElseUpdate(key, new SedonaDBWorkerFactory(pythonExec, envVars)).create()
     }
   }
 
-  private[spark] def destroyPythonWorker(
-      pythonExec: String,
-      envVars: Map[String, String],
-      worker: Socket): Unit = {
+  def destroyPythonWorker(pythonExec: String,
+                          envVars: Map[String, String], worker: Socket): Unit = {
     synchronized {
       val key = (pythonExec, envVars)
-      pythonWorkers
-        .get(key)
-        .foreach(workerFactory => {
-          workerFactory.stopWorker(worker)
-        })
+      pythonWorkers.get(key).foreach(_.stopWorker(worker))
+    }
+  }
+
+  def releasePythonWorker(pythonExec: String,
+                          envVars: Map[String, String], worker: Socket): Unit = {
+    synchronized {
+      val key = (pythonExec, envVars)
+      pythonWorkers.get(key).foreach(_.releaseWorker(worker))
     }
   }
 

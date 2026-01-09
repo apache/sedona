@@ -26,12 +26,15 @@ import org.apache.arrow.vector.VectorSchemaRoot
 import org.apache.arrow.vector.ipc.ArrowStreamReader
 import org.apache.spark.{SparkEnv, TaskContext}
 import org.apache.spark.api.python.{BasePythonRunner, SpecialLengths}
+import org.apache.spark.internal.config.Python.PYTHON_WORKER_REUSE
 import org.apache.spark.sql.execution.metric.SQLMetric
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.ArrowUtils
 import org.apache.spark.sql.vectorized.{ArrowColumnVector, ColumnVector, ColumnarBatch}
 
 private[python] trait SedonaPythonArrowOutput[OUT <: AnyRef] { self: BasePythonRunner[_, OUT] =>
+
+  private val reuseWorker = SparkEnv.get.conf.getBoolean(PYTHON_WORKER_REUSE.key, PYTHON_WORKER_REUSE.defaultValue.get)
 
   protected def pythonMetrics: Map[String, SQLMetric]
 
@@ -78,11 +81,28 @@ private[python] trait SedonaPythonArrowOutput[OUT <: AnyRef] { self: BasePythonR
 
       private var batchLoaded = true
 
-      def handleEndOfDataSectionSedona(): Unit = {
-        if (stream.readInt() == SpecialLengths.END_OF_STREAM) {}
-
+      protected def handleEndOfDataSectionSedona(): Unit = {
+        // We've finished the data section of the output, but we can still
+        // read some accumulator updates:
+//        val numAccumulatorUpdates = stream.readInt()
+//        (1 to numAccumulatorUpdates).foreach { _ =>
+//          val updateLen = stream.readInt()
+//          val update = new Array[Byte](updateLen)
+//          stream.readFully(update)
+//        }
+        // Check whether the worker is ready to be re-used.
+        if (stream.readInt() == SpecialLengths.END_OF_STREAM) {
+          if (reuseWorker && releasedOrClosed.compareAndSet(false, true)) {
+            WorkerContext.releasePythonWorker(pythonExec, envVars.asScala.toMap, worker)
+          }
+        }
         eos = true
       }
+//      def handleEndOfDataSectionSedona(): Unit = {
+//        if (stream.readInt() == SpecialLengths.END_OF_STREAM) {}
+//
+//        eos = true
+//      }
 
       protected override def handleEndOfDataSection(): Unit = {
         handleEndOfDataSectionSedona()

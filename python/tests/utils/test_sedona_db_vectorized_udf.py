@@ -93,3 +93,44 @@ class TestSedonaDBArrowFunction(TestBase):
         crs_list = result_df.selectExpr("ST_SRID(geom)").rdd.flatMap(lambda x: x).collect()
 
         assert crs_list == [3857, 3857, 3857]
+
+    def test_geometry_to_geometry(self):
+        @sedona_db_vectorized_udf(return_type=GeometryType(), input_types=[GeometryType()])
+        def buffer_geometry(geom):
+            geom_wkb = pa.array(geom.storage.to_array())
+            geom = shapely.from_wkb(geom_wkb)
+
+            result_shapely = shapely.buffer(geom, 10)
+
+            return pa.array(shapely.to_wkb(result_shapely))
+
+        df = self.spark.read.\
+            format("geoparquet").\
+            load("/Users/pawelkocinski/Desktop/projects/sedona-production/apache-sedona-book/data/warehouse/buildings_large_3")
+        # 18 24
+        # df.union(df).union(df).union(df).union(df).union(df).union(df).\
+        #     write.format("geoparquet").mode("overwrite").save("/Users/pawelkocinski/Desktop/projects/sedona-production/apache-sedona-book/data/warehouse/buildings_large_3")
+
+        values = df.select(buffer_geometry(df.geometry).alias("geometry")).\
+            selectExpr("ST_Area(geometry) as area").\
+            selectExpr("Sum(area) as total_area")
+
+        values.show()
+
+    def test_geometry_to_geometry_normal_udf(self):
+        from pyspark.sql.functions import udf
+
+        def create_buffer(geom):
+            return geom.buffer(10)
+
+        create_buffer_udf = udf(create_buffer, GeometryType())
+
+        df = self.spark.read. \
+            format("geoparquet"). \
+            load("/Users/pawelkocinski/Desktop/projects/sedona-production/apache-sedona-book/data/warehouse/buildings_large_3")
+
+        values = df.select(create_buffer_udf(df.geometry).alias("geometry")). \
+            selectExpr("ST_Area(geometry) as area"). \
+            selectExpr("Sum(area) as total_area")
+
+        values.show()

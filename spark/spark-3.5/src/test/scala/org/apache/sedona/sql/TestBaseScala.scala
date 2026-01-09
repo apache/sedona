@@ -30,13 +30,13 @@ import java.io.FileInputStream
 import java.util.concurrent.ThreadLocalRandom
 
 trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
-  Logger.getRootLogger().setLevel(Level.WARN)
-  Logger.getLogger("org.apache").setLevel(Level.WARN)
-  Logger.getLogger("com").setLevel(Level.WARN)
-  Logger.getLogger("akka").setLevel(Level.WARN)
-  Logger.getLogger("org.apache.sedona.core").setLevel(Level.WARN)
+//  Logger.getRootLogger().setLevel(Level.WARN)
+//  Logger.getLogger("org.apache").setLevel(Level.WARN)
+//  Logger.getLogger("com").setLevel(Level.WARN)
+//  Logger.getLogger("akka").setLevel(Level.WARN)
+//  Logger.getLogger("org.apache.sedona.core").setLevel(Level.WARN)
 
-  val keyParserExtension = "spark.sedona.enableParserExtension"
+//  val keyParserExtension = "spark.sedona.enableParserExtension"
   val warehouseLocation = System.getProperty("user.dir") + "/target/"
   val sparkSession = SedonaContext
     .builder()
@@ -47,9 +47,19 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     .config("sedona.join.autoBroadcastJoinThreshold", "-1")
     .config("spark.sql.extensions", "org.apache.sedona.sql.SedonaSqlExtensions")
     .config("sedona.python.worker.udf.module", "sedonaworker.worker")
-    .config(keyParserExtension, ThreadLocalRandom.current().nextBoolean())
+    .config("sedona.python.worker.udf.daemon.module", "sedonaworker.daemon")
+    .config("sedona.python.worker.daemon.enabled", "true")
+//    .config(keyParserExtension, ThreadLocalRandom.current().nextBoolean())
     .getOrCreate()
 
+//    private val useDaemon: Boolean =
+//    SparkEnv.get.conf.getBoolean("sedona.python.worker.daemon.enabled", false)
+//
+//  private val sedonaUDFWorkerModule =
+//    SparkEnv.get.conf.get("sedona.python.worker.udf.module", "sedona.spark.worker.worker")
+//
+//  private val sedonaDaemonModule =
+//    SparkEnv.get.conf.get("sedona.python.worker.udf.daemon.module", "sedona.spark.worker.daemon")
   val sparkSessionMinio = SedonaContext
     .builder()
     .master("local[*]")

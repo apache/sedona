@@ -61,21 +61,36 @@ class StrategySuite extends TestBaseScala with Matchers {
   }
 
   it("sedona geospatial UDF - sedona db") {
-    val df = Seq(
-      (1, "value", wktReader.read("POINT(21 52)")),
-      (2, "value1", wktReader.read("POINT(20 50)")),
-      (3, "value2", wktReader.read("POINT(20 49)")),
-      (4, "value3", wktReader.read("POINT(20 48)")),
-      (5, "value4", wktReader.read("POINT(20 47)")))
-      .toDF("id", "value", "geom")
+//    val df = Seq(
+//      (1, "value", wktReader.read("POINT(21 52)")),
+//      (2, "value1", wktReader.read("POINT(20 50)")),
+//      (3, "value2", wktReader.read("POINT(20 49)")),
+//      (4, "value3", wktReader.read("POINT(20 48)")),
+//      (5, "value4", wktReader.read("POINT(20 47)")))
+//      .toDF("id", "value", "geom")
+//
+//    val dfVectorized = df
+//      .withColumn("geometry", expr("ST_SetSRID(geom, '4326')"))
+//      .select(sedonaDBGeometryToGeometryFunction(col("geometry"), lit(100)).alias("geom"))
 
-    val dfVectorized = df
-      .withColumn("geometry", expr("ST_SetSRID(geom, '4326')"))
-      .select(sedonaDBGeometryToGeometryFunction(col("geometry"), lit(100)).alias("geom"))
+//    dfVectorized.selectExpr("ST_X(ST_Centroid(geom)) AS x")
+//      .selectExpr("sum(x)")
+//      .as[Double]
+//      .collect().head shouldEqual 101
 
-    dfVectorized.selectExpr("ST_X(ST_Centroid(geom)) AS x")
-      .selectExpr("sum(x)")
-      .as[Double]
-      .collect().head shouldEqual 101
+    val dfCopied = sparkSession.read
+      .format("geoparquet")
+      .load("/Users/pawelkocinski/Desktop/projects/sedona-production/apache-sedona-book/book/source_data/transportation_barcelona/barcelona.geoparquet")
+
+    val values = dfCopied.unionAll(dfCopied)
+      .unionAll(dfCopied)
+//      .unionAll(dfCopied)
+//      .unionAll(dfCopied)
+//      .unionAll(dfCopied)
+      .select(sedonaDBGeometryToGeometryFunction(col("geometry"), lit(10)).alias("geom"))
+      .selectExpr("ST_Area(geom) as area")
+      .selectExpr("Sum(area) as total_area")
+
+    values.show()
   }
 }

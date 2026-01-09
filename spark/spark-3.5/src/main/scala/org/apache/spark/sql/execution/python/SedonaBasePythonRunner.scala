@@ -46,6 +46,7 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
   require(funcs.length == argOffsets.length, "argOffsets should have the same length as funcs")
 
   private val conf = SparkEnv.get.conf
+  private val reuseWorker = conf.getBoolean(PYTHON_WORKER_REUSE.key, PYTHON_WORKER_REUSE.defaultValue.get)
   private val faultHandlerEnabled = conf.get(PYTHON_WORKER_FAULTHANLDER_ENABLED)
 
   private def getWorkerMemoryMb(mem: Option[Long], cores: Int): Option[Long] = {
@@ -82,6 +83,7 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
 
     envVars.put("SPARK_JOB_ARTIFACT_UUID", jobArtifactUUID.getOrElse("default"))
 
+    println("running the compute for SedonaBasePythonRunner and partition index: " + partitionIndex)
     val (worker: Socket, pid: Option[Int]) = {
       WorkerContext.createPythonWorker(pythonExec, envVars.asScala.toMap)
     }
@@ -93,8 +95,10 @@ private[spark] abstract class SedonaBasePythonRunner[IN, OUT](
 
     context.addTaskCompletionListener[Unit] { _ =>
       writerThread.shutdownOnTaskCompletion()
-      if (releasedOrClosed.compareAndSet(false, true)) {
+
+      if (!reuseWorker || releasedOrClosed.compareAndSet(false, true)) {
         try {
+          logInfo("Shutting down worker socket")
           worker.close()
         } catch {
           case e: Exception =>
