@@ -6,6 +6,7 @@ links:
 authors:
   - jia
   - james
+  - pranav
 title: "Spatial Query Benchmarking on Databricks with SpatialBench"
 slug: spatial-query-benchmarking-databricks
 ---
