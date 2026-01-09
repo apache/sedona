@@ -1,0 +1,863 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+          <title>org.apache.sedona:sedona-spark-common-3.4_2.12 1.8.1 API  - org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement</title>
+          <meta name="description" content="org.apache.sedona sedona - spark - common - 3.4 2.12 1.8.1 API - org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement" />
+          <meta name="keywords" content="org.apache.sedona sedona spark common 3.4 2.12 1.8.1 API org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      
+      <link href="../../../../../lib/index.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../../lib/jquery.min.js"></script>
+      <script type="text/javascript" src="../../../../../lib/jquery.panzoom.min.js"></script>
+      <script type="text/javascript" src="../../../../../lib/jquery.mousewheel.min.js"></script>
+      <script type="text/javascript" src="../../../../../lib/index.js"></script>
+      <script type="text/javascript" src="../../../../../index.js"></script>
+      <script type="text/javascript" src="../../../../../lib/scheduler.js"></script>
+      <script type="text/javascript" src="../../../../../lib/template.js"></script>
+      
+      <script type="text/javascript">
+        /* this variable can be used by the JS to determine the path to the root document */
+        var toRoot = '../../../../../';
+      </script>
+    
+        </head>
+        <body>
+      <div id="search">
+        <span id="doc-title">org.apache.sedona:sedona-spark-common-3.4_2.12 1.8.1 API<span id="doc-version"></span></span>
+        <span class="close-results"><span class="left">&lt;</span> Back</span>
+        <div id="textfilter">
+          <span class="input">
+            <input autocapitalize="none" placeholder="Search" id="index-input" type="text" accesskey="/" />
+            <i class="clear material-icons"></i>
+            <i id="search-icon" class="material-icons"></i>
+          </span>
+        </div>
+    </div>
+      <div id="search-results">
+        <div id="search-progress">
+          <div id="progress-fill"></div>
+        </div>
+        <div id="results-content">
+          <div id="entity-results"></div>
+          <div id="member-results"></div>
+        </div>
+      </div>
+      <div id="content-scroll-container" style="-webkit-overflow-scrolling: touch;">
+        <div id="content-container" style="-webkit-overflow-scrolling: touch;">
+          <div id="subpackage-spacer">
+            <div id="packages">
+              <h1>Packages</h1>
+              <ul>
+                <li name="_root_.root" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_root_"></a><a id="root:_root_"></a>
+      <span class="permalink">
+      <a href="../../../../../index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../../../index.html"><span class="name">root</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="_root_.org" visbl="pub" class="indented1 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="org"></a><a id="org:org"></a>
+      <span class="permalink">
+      <a href="../../../../../org/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../../index.html"><span class="name">org</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="org.apache" visbl="pub" class="indented2 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="apache"></a><a id="apache:apache"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../index.html"><span class="name">apache</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../index.html" class="extype" name="org">org</a></dd></dl></div>
+    </li><li name="org.apache.sedona" visbl="pub" class="indented3 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sedona"></a><a id="sedona:sedona"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../index.html"><span class="name">sedona</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="org.apache">apache</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="core"></a><a id="core:core"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../index.html"><span class="name">core</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="org.apache.sedona">sedona</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.joinJudgement" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="joinJudgement"></a><a id="joinJudgement:joinJudgement"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="index.html"><span class="name">joinJudgement</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="DedupParams.html" title="Contains information necessary to activate de-dup logic in subclasses of JudgementBase."></a>
+                        <a href="DedupParams.html" title="Contains information necessary to activate de-dup logic in subclasses of JudgementBase.">DedupParams</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="DuplicatesFilter.html" title="Provides optional de-dup logic."></a>
+                        <a href="DuplicatesFilter.html" title="Provides optional de-dup logic.">DuplicatesFilter</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="DynamicIndexLookupJudgement.html" title=""></a>
+                        <a href="DynamicIndexLookupJudgement.html" title="">DynamicIndexLookupJudgement</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="InMemoryKNNJoinIterator.html" title=""></a>
+                        <a href="InMemoryKNNJoinIterator.html" title="">InMemoryKNNJoinIterator</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="" title="This class is responsible for performing a K-nearest neighbors (KNN) join operation using a spatial index."></a>
+                        <a href="" title="This class is responsible for performing a K-nearest neighbors (KNN) join operation using a spatial index.">KnnJoinIndexJudgement</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="LeftIndexLookupJudgement.html" title=""></a>
+                        <a href="LeftIndexLookupJudgement.html" title="">LeftIndexLookupJudgement</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="NestedLoopJudgement.html" title=""></a>
+                        <a href="NestedLoopJudgement.html" title="">NestedLoopJudgement</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="RightIndexLookupJudgement.html" title=""></a>
+                        <a href="RightIndexLookupJudgement.html" title="">RightIndexLookupJudgement</a>
+                      </li>
+              </ul>
+            </div>
+          </div>
+          <div id="content">
+            <body class="class type">
+      <div id="definition">
+        <div class="big-circle class">c</div>
+        <p id="owner"><a href="../../../../index.html" class="extype" name="org">org</a>.<a href="../../../index.html" class="extype" name="org.apache">apache</a>.<a href="../../index.html" class="extype" name="org.apache.sedona">sedona</a>.<a href="../index.html" class="extype" name="org.apache.sedona.core">core</a>.<a href="index.html" class="extype" name="org.apache.sedona.core.joinJudgement">joinJudgement</a></p>
+        <h1>KnnJoinIndexJudgement<span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span></h1>
+        <h3><span class="morelinks"></span></h3>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">KnnJoinIndexJudgement</span><span class="tparams">[<span name="T">T &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>, <span name="U">U &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>]</span><span class="result"> extends <span class="extype" name="org.apache.sedona.core.joinJudgement.JudgementBase">JudgementBase</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>] with <span class="extype" name="org.apache.spark.api.java.function.FlatMapFunction2">FlatMapFunction2</span>[<span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>], <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>], <span class="extype" name="org.apache.commons.lang3.tuple.Pair">Pair</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>]] with <span class="extype" name="java.io.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+
+      
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>This class is responsible for performing a K-nearest neighbors (KNN) join operation using a
+spatial index. It extends the JudgementBase class and implements the FlatMapFunction2 interface.
+</p></div><div class="toggleContainer block">
+          <span class="toggle">
+            Linear Supertypes
+          </span>
+          <div class="superTypes hiddenContent"><span class="extype" name="org.apache.spark.api.java.function.FlatMapFunction2">FlatMapFunction2</span>[<span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>], <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>], <span class="extype" name="org.apache.commons.lang3.tuple.Pair">Pair</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>]], <span class="extype" name="org.apache.sedona.core.joinJudgement.JudgementBase">JudgementBase</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>], <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div class="toggle"></div>
+        <div id="memberfilter">
+          <i class="material-icons arrow"></i>
+          <span class="input">
+            <input id="mbrsel-input" placeholder="Filter all members" type="text" accesskey="/" />
+          </span>
+          <i class="clear material-icons"></i>
+        </div>
+        <div id="filterby">
+          <div id="order">
+            <span class="filtertype">Ordering</span>
+            <ol>
+              
+              <li class="alpha in"><span>Alphabetic</span></li>
+              <li class="inherit out"><span>By Inheritance</span></li>
+            </ol>
+          </div>
+          <div class="ancestors">
+                  <span class="filtertype">Inherited<br />
+                  </span>
+                  <ol id="linearization">
+                    <li class="in" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement"><span>KnnJoinIndexJudgement</span></li><li class="in" name="org.apache.spark.api.java.function.FlatMapFunction2"><span>FlatMapFunction2</span></li><li class="in" name="org.apache.sedona.core.joinJudgement.JudgementBase"><span>JudgementBase</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  </ol>
+                </div><div class="ancestors">
+              <span class="filtertype"></span>
+              <ol>
+                <li class="hideall out"><span>Hide All</span></li>
+                <li class="showall in"><span>Show All</span></li>
+              </ol>
+            </div>
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+            </div>
+        </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        <div id="constructors" class="members">
+              <h3>Instance Constructors</h3>
+              <ol><li name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(k:Int,distanceMetric:org.apache.sedona.core.enums.DistanceMetric,includeTies:Boolean,broadcastQueryObjects:org.apache.spark.broadcast.Broadcast[java.util.List[T]],broadcastObjectsTreeIndex:org.apache.spark.broadcast.Broadcast[org.locationtech.jts.index.strtree.STRtree],buildCount:org.apache.spark.util.LongAccumulator,streamCount:org.apache.spark.util.LongAccumulator,resultCount:org.apache.spark.util.LongAccumulator,candidateCount:org.apache.spark.util.LongAccumulator):org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement[T,U]"></a><a id="&lt;init&gt;:KnnJoinIndexJudgement[T,U]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#&lt;init&gt;(k:Int,distanceMetric:org.apache.sedona.core.enums.DistanceMetric,includeTies:Boolean,broadcastQueryObjects:org.apache.spark.broadcast.Broadcast[java.util.List[T]],broadcastObjectsTreeIndex:org.apache.spark.broadcast.Broadcast[org.locationtech.jts.index.strtree.STRtree],buildCount:org.apache.spark.util.LongAccumulator,streamCount:org.apache.spark.util.LongAccumulator,resultCount:org.apache.spark.util.LongAccumulator,candidateCount:org.apache.spark.util.LongAccumulator):org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement[T,U]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">KnnJoinIndexJudgement</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="distanceMetric">distanceMetric: <a href="../enums/DistanceMetric.html" class="extype" name="org.apache.sedona.core.enums.DistanceMetric">DistanceMetric</a></span>, <span name="includeTies">includeTies: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="broadcastQueryObjects">broadcastQueryObjects: <span class="extype" name="org.apache.spark.broadcast.Broadcast">Broadcast</span>[<span class="extype" name="java.util.List">List</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>]]</span>, <span name="broadcastObjectsTreeIndex">broadcastObjectsTreeIndex: <span class="extype" name="org.apache.spark.broadcast.Broadcast">Broadcast</span>[<span class="extype" name="org.locationtech.jts.index.strtree.STRtree">STRtree</span>]</span>, <span name="buildCount">buildCount: <span class="extype" name="org.apache.spark.util.LongAccumulator">LongAccumulator</span></span>, <span name="streamCount">streamCount: <span class="extype" name="org.apache.spark.util.LongAccumulator">LongAccumulator</span></span>, <span name="resultCount">resultCount: <span class="extype" name="org.apache.spark.util.LongAccumulator">LongAccumulator</span></span>, <span name="candidateCount">candidateCount: <span class="extype" name="org.apache.spark.util.LongAccumulator">LongAccumulator</span></span>)</span>
+      </span>
+      
+      <p class="shortcomment cmt"></p>
+    </li></ol>
+            </div>
+
+        
+
+        
+
+        <div class="values members">
+              <h3>Value Members</h3>
+              <ol>
+                <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#!=(x$1:Any):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html###():Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#==(x$1:Any):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#asInstanceOf[T0]:T0" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement#call" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="call(queryShapes:java.util.Iterator[T],objectShapes:java.util.Iterator[U]):java.util.Iterator[org.apache.commons.lang3.tuple.Pair[T,U]]"></a><a id="call(Iterator[T],Iterator[U]):Iterator[Pair[T,U]]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#call(queryShapes:java.util.Iterator[T],objectShapes:java.util.Iterator[U]):java.util.Iterator[org.apache.commons.lang3.tuple.Pair[T,U]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">call</span><span class="params">(<span name="queryShapes">queryShapes: <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>]</span>, <span name="objectShapes">objectShapes: <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>]</span>)</span><span class="result">: <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.commons.lang3.tuple.Pair">Pair</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">This method performs the KNN join operation.</p><div class="fullcomment"><div class="comment cmt"><p>This method performs the KNN join operation. It iterates over the geometries in the stream side
+and uses the spatial index to find the k nearest neighbors for each geometry. The method
+returns an iterator over the join results.
+</p></div><dl class="paramcmts block"><dt class="param">queryShapes</dt><dd class="cmt"><p>iterator over the geometries in the query side</p></dd><dt class="param">objectShapes</dt><dd class="cmt"><p>iterator over the geometries in the object side</p></dd><dt>returns</dt><dd class="cmt"><p>an iterator over the join results</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement">KnnJoinIndexJudgement</a> → FlatMapFunction2</dd><dt>Annotations</dt><dd>
+                <span class="name">@Override</span><span class="args">()</span>
+              
+        </dd><dt>Exceptions thrown</dt><dd><span class="cmt"><p><span class="extype" name="Exception"><code>Exception</code></span> if the spatial index is not of type STRtree</p></span></dd></dl></div>
+    </li><li name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement#callUsingBroadcastObjectIndex" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="callUsingBroadcastObjectIndex(queryShapes:java.util.Iterator[T]):java.util.Iterator[org.apache.commons.lang3.tuple.Pair[T,U]]"></a><a id="callUsingBroadcastObjectIndex(Iterator[T]):Iterator[Pair[T,U]]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#callUsingBroadcastObjectIndex(queryShapes:java.util.Iterator[T]):java.util.Iterator[org.apache.commons.lang3.tuple.Pair[T,U]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">callUsingBroadcastObjectIndex</span><span class="params">(<span name="queryShapes">queryShapes: <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.commons.lang3.tuple.Pair">Pair</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">This method performs the KNN join operation using the broadcast spatial index built using all
+geometries in the object side.</p><div class="fullcomment"><div class="comment cmt"><p>This method performs the KNN join operation using the broadcast spatial index built using all
+geometries in the object side.
+</p></div><dl class="paramcmts block"><dt class="param">queryShapes</dt><dd class="cmt"><p>iterator over the geometries in the query side</p></dd><dt>returns</dt><dd class="cmt"><p>an iterator over the join results</p></dd></dl></div>
+    </li><li name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement#callUsingBroadcastQueryList" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="callUsingBroadcastQueryList(objectShapes:java.util.Iterator[U]):java.util.Iterator[org.apache.commons.lang3.tuple.Pair[T,U]]"></a><a id="callUsingBroadcastQueryList(Iterator[U]):Iterator[Pair[T,U]]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#callUsingBroadcastQueryList(objectShapes:java.util.Iterator[U]):java.util.Iterator[org.apache.commons.lang3.tuple.Pair[T,U]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">callUsingBroadcastQueryList</span><span class="params">(<span name="objectShapes">objectShapes: <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>]</span>)</span><span class="result">: <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.commons.lang3.tuple.Pair">Pair</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">This method performs the KNN join operation using the broadcast query geometries.</p><div class="fullcomment"><div class="comment cmt"><p>This method performs the KNN join operation using the broadcast query geometries.
+</p></div><dl class="paramcmts block"><dt class="param">objectShapes</dt><dd class="cmt"><p>iterator over the geometries in the object side</p></dd><dt>returns</dt><dd class="cmt"><p>an iterator over the join results</p></dd></dl></div>
+    </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a><a id="clone():AnyRef"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#clone():Object" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<span class="extype" name="java.lang">lang</span>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
+    </span>)</span>
+              
+                <span class="name">@native</span><span class="args">()</span>
+              
+                <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#equals(x$1:Any):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#getClass():Class[_]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
+                <span class="name">@native</span><span class="args">()</span>
+              
+                <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="org.apache.sedona.core.joinJudgement.JudgementBase#hasNextBase" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hasNextBase(buildShapes:java.util.List[_&lt;:org.locationtech.jts.geom.Geometry],streamShapes:java.util.Iterator[_&lt;:org.locationtech.jts.geom.Geometry]):Boolean"></a><a id="hasNextBase(List[_&lt;:Geometry],Iterator[_&lt;:Geometry]):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#hasNextBase(buildShapes:java.util.List[_&lt;:org.locationtech.jts.geom.Geometry],streamShapes:java.util.Iterator[_&lt;:org.locationtech.jts.geom.Geometry]):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hasNextBase</span><span class="params">(<span name="buildShapes">buildShapes: <span class="extype" name="java.util.List">List</span>[_ &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>, <span name="streamShapes">streamShapes: <span class="extype" name="java.util.Iterator">Iterator</span>[_ &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Iterator model for the nest loop join.</p><div class="fullcomment"><div class="comment cmt"><p>Iterator model for the nest loop join. It checks if there is a next match and populate it to
+the result.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="index.html" class="extype" name="org.apache.sedona.core.joinJudgement">joinJudgement</a>] </dd><dt>Definition Classes</dt><dd>JudgementBase</dd></dl></div>
+    </li><li name="org.apache.sedona.core.joinJudgement.JudgementBase#hasNextBase" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hasNextBase(spatialIndex:org.locationtech.jts.index.SpatialIndex,streamShapes:java.util.Iterator[_&lt;:org.locationtech.jts.geom.Geometry],buildLeft:Boolean):Boolean"></a><a id="hasNextBase(SpatialIndex,Iterator[_&lt;:Geometry],Boolean):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#hasNextBase(spatialIndex:org.locationtech.jts.index.SpatialIndex,streamShapes:java.util.Iterator[_&lt;:org.locationtech.jts.geom.Geometry],buildLeft:Boolean):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hasNextBase</span><span class="params">(<span name="spatialIndex">spatialIndex: <span class="extype" name="org.locationtech.jts.index.SpatialIndex">SpatialIndex</span></span>, <span name="streamShapes">streamShapes: <span class="extype" name="java.util.Iterator">Iterator</span>[_ &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>, <span name="buildLeft">buildLeft: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Iterator model for the index-based join.</p><div class="fullcomment"><div class="comment cmt"><p>Iterator model for the index-based join. It checks if there is a next match and populate it to
+the result.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="index.html" class="extype" name="org.apache.sedona.core.joinJudgement">joinJudgement</a>] </dd><dt>Definition Classes</dt><dd>JudgementBase</dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#hashCode():Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
+                <span class="name">@native</span><span class="args">()</span>
+              
+                <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="org.apache.sedona.core.joinJudgement.JudgementBase#initPartition" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="initPartition():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#initPartition():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">initPartition</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Looks up the extent of the current partition.</p><div class="fullcomment"><div class="comment cmt"><p>Looks up the extent of the current partition. If found, <code>match</code> method will activate the logic
+to avoid emitting duplicate join results from multiple partitions.</p><p>Must be called before processing a partition. Must be called from the same instance that
+will be used to process the partition.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="index.html" class="extype" name="org.apache.sedona.core.joinJudgement">joinJudgement</a>] </dd><dt>Definition Classes</dt><dd>JudgementBase</dd></dl></div>
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#isInstanceOf[T0]:Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="org.apache.sedona.core.joinJudgement.JudgementBase#log" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="log(message:String,params:Object*):Unit"></a><a id="log(String,&lt;repeated...&gt;[AnyRef]):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#log(message:String,params:Object*):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">log</span><span class="params">(<span name="message">message: <span class="extype" name="java.lang.String">String</span></span>, <span name="params">params: <span class="extype" name="scala.&lt;repeated...&gt;">&lt;repeated...&gt;</span>[<span class="extype" name="scala.AnyRef">AnyRef</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="index.html" class="extype" name="org.apache.sedona.core.joinJudgement">joinJudgement</a>] </dd><dt>Definition Classes</dt><dd>JudgementBase</dd></dl></div>
+    </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="org.apache.sedona.core.joinJudgement.JudgementBase#nextBase" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="nextBase(buildShapes:java.util.List[_&lt;:org.locationtech.jts.geom.Geometry],streamShapes:java.util.Iterator[_&lt;:org.locationtech.jts.geom.Geometry]):org.apache.commons.lang3.tuple.Pair[U,T]"></a><a id="nextBase(List[_&lt;:Geometry],Iterator[_&lt;:Geometry]):Pair[U,T]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#nextBase(buildShapes:java.util.List[_&lt;:org.locationtech.jts.geom.Geometry],streamShapes:java.util.Iterator[_&lt;:org.locationtech.jts.geom.Geometry]):org.apache.commons.lang3.tuple.Pair[U,T]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">nextBase</span><span class="params">(<span name="buildShapes">buildShapes: <span class="extype" name="java.util.List">List</span>[_ &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>, <span name="streamShapes">streamShapes: <span class="extype" name="java.util.Iterator">Iterator</span>[_ &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>)</span><span class="result">: <span class="extype" name="org.apache.commons.lang3.tuple.Pair">Pair</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Iterator model for the nest loop join.</p><div class="fullcomment"><div class="comment cmt"><p>Iterator model for the nest loop join. It returns 1 pair in the current batch. Each batch
+contains a list of pairs of geometries that satisfy the join condition. The current batch is
+the result of the current stream shape against all the build shapes.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="index.html" class="extype" name="org.apache.sedona.core.joinJudgement">joinJudgement</a>] </dd><dt>Definition Classes</dt><dd>JudgementBase</dd></dl></div>
+    </li><li name="org.apache.sedona.core.joinJudgement.JudgementBase#nextBase" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="nextBase(spatialIndex:org.locationtech.jts.index.SpatialIndex,streamShapes:java.util.Iterator[_&lt;:org.locationtech.jts.geom.Geometry],buildLeft:Boolean):org.apache.commons.lang3.tuple.Pair[U,T]"></a><a id="nextBase(SpatialIndex,Iterator[_&lt;:Geometry],Boolean):Pair[U,T]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#nextBase(spatialIndex:org.locationtech.jts.index.SpatialIndex,streamShapes:java.util.Iterator[_&lt;:org.locationtech.jts.geom.Geometry],buildLeft:Boolean):org.apache.commons.lang3.tuple.Pair[U,T]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">nextBase</span><span class="params">(<span name="spatialIndex">spatialIndex: <span class="extype" name="org.locationtech.jts.index.SpatialIndex">SpatialIndex</span></span>, <span name="streamShapes">streamShapes: <span class="extype" name="java.util.Iterator">Iterator</span>[_ &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>, <span name="buildLeft">buildLeft: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="org.apache.commons.lang3.tuple.Pair">Pair</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Iterator model for the index-based join.</p><div class="fullcomment"><div class="comment cmt"><p>Iterator model for the index-based join. It returns 1 pair in the current batch. Each batch
+contains a list of pairs of geometries that satisfy the join condition. The current batch is
+the result of the current stream shape against all the build shapes.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="index.html" class="extype" name="org.apache.sedona.core.joinJudgement">joinJudgement</a>] </dd><dt>Definition Classes</dt><dd>JudgementBase</dd></dl></div>
+    </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#notify():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@native</span><span class="args">()</span>
+              
+                <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#notifyAll():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@native</span><span class="args">()</span>
+              
+                <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#toString():String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#wait(x$1:Long):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+                <span class="name">@native</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#wait():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li>
+              </ol>
+            </div>
+
+        
+
+        <div class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/KnnJoinIndexJudgement.html#finalize():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: ">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<span class="extype" name="java.lang">lang</span>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
+              
+                <span class="name">@Deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"></dd></dl></div>
+    </li></ol>
+            </div>
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="org.apache.spark.api.java.function.FlatMapFunction2">
+              <h3>Inherited from <span class="extype" name="org.apache.spark.api.java.function.FlatMapFunction2">FlatMapFunction2</span>[<span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>], <span class="extype" name="java.util.Iterator">Iterator</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>], <span class="extype" name="org.apache.commons.lang3.tuple.Pair">Pair</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>]]</h3>
+            </div><div class="parent" name="org.apache.sedona.core.joinJudgement.JudgementBase">
+              <h3>Inherited from <span class="extype" name="org.apache.sedona.core.joinJudgement.JudgementBase">JudgementBase</span>[<span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.T">T</span>, <span class="extype" name="org.apache.sedona.core.joinJudgement.KnnJoinIndexJudgement.U">U</span>]</h3>
+            </div><div class="parent" name="java.io.Serializable">
+              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+    </body>
+          </div>
+        </div>
+      </div>
+    </body>
+      </html>

@@ -1,0 +1,10 @@
+@import "import/*"; // must_be_fix, this comment stripped
+@import "import/*"; /* Start multiline comment
+*/
+@import "import/*"; /*
+Start 2 multiline comment
+*/
+/* And this */@import "import/*";
+/* begin comment */@import "import/*"; /* end comment */
+// @import "import/*" - ignore this
+// end //

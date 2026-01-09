@@ -1,0 +1,1338 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+          <title>org.apache.sedona:sedona-spark-common-3.4_2.12 1.8.1 API  - org.apache.spark.sql.execution.datasources.geoparquet.internal</title>
+          <meta name="description" content="org.apache.sedona sedona - spark - common - 3.4 2.12 1.8.1 API - org.apache.spark.sql.execution.datasources.geoparquet.internal" />
+          <meta name="keywords" content="org.apache.sedona sedona spark common 3.4 2.12 1.8.1 API org.apache.spark.sql.execution.datasources.geoparquet.internal" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      
+      <link href="../../../../../../../../lib/index.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../../../../../lib/jquery.min.js"></script>
+      <script type="text/javascript" src="../../../../../../../../lib/jquery.panzoom.min.js"></script>
+      <script type="text/javascript" src="../../../../../../../../lib/jquery.mousewheel.min.js"></script>
+      <script type="text/javascript" src="../../../../../../../../lib/index.js"></script>
+      <script type="text/javascript" src="../../../../../../../../index.js"></script>
+      <script type="text/javascript" src="../../../../../../../../lib/scheduler.js"></script>
+      <script type="text/javascript" src="../../../../../../../../lib/template.js"></script>
+      
+      <script type="text/javascript">
+        /* this variable can be used by the JS to determine the path to the root document */
+        var toRoot = '../../../../../../../../';
+      </script>
+    
+        </head>
+        <body>
+      <div id="search">
+        <span id="doc-title">org.apache.sedona:sedona-spark-common-3.4_2.12 1.8.1 API<span id="doc-version"></span></span>
+        <span class="close-results"><span class="left">&lt;</span> Back</span>
+        <div id="textfilter">
+          <span class="input">
+            <input autocapitalize="none" placeholder="Search" id="index-input" type="text" accesskey="/" />
+            <i class="clear material-icons"></i>
+            <i id="search-icon" class="material-icons"></i>
+          </span>
+        </div>
+    </div>
+      <div id="search-results">
+        <div id="search-progress">
+          <div id="progress-fill"></div>
+        </div>
+        <div id="results-content">
+          <div id="entity-results"></div>
+          <div id="member-results"></div>
+        </div>
+      </div>
+      <div id="content-scroll-container" style="-webkit-overflow-scrolling: touch;">
+        <div id="content-container" style="-webkit-overflow-scrolling: touch;">
+          <div id="subpackage-spacer">
+            <div id="packages">
+              <h1>Packages</h1>
+              <ul>
+                <li name="_root_.root" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_root_"></a><a id="root:_root_"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../../../../../../index.html"><span class="name">root</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../../../../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="_root_.org" visbl="pub" class="indented1 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="org"></a><a id="org:org"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../../../../../index.html"><span class="name">org</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../../../../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="org.apache" visbl="pub" class="indented2 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="apache"></a><a id="apache:apache"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../../../../index.html"><span class="name">apache</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../../../../index.html" class="extype" name="org">org</a></dd></dl></div>
+    </li><li name="org.apache.spark" visbl="pub" class="indented3 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="spark"></a><a id="spark:spark"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../../../index.html"><span class="name">spark</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../../../index.html" class="extype" name="org.apache">apache</a></dd></dl></div>
+    </li><li name="org.apache.spark.sql" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sql"></a><a id="sql:sql"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../../index.html"><span class="name">sql</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../../index.html" class="extype" name="org.apache.spark">spark</a></dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="execution"></a><a id="execution:execution"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../index.html"><span class="name">execution</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../index.html" class="extype" name="org.apache.spark.sql">sql</a></dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources" visbl="pub" class="indented6 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="datasources"></a><a id="datasources:datasources"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../index.html"><span class="name">datasources</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="org.apache.spark.sql.execution">execution</a></dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet" visbl="pub" class="indented7 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="geoparquet"></a><a id="geoparquet:geoparquet"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../index.html"><span class="name">geoparquet</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="org.apache.spark.sql.execution.datasources">datasources</a></dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal" visbl="pub" class="indented8 current" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="internal"></a><a id="internal:internal"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">internal</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet">geoparquet</a></dd></dl></div>
+    </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="ConfigBuilder.html" title=""></a>
+                        <a href="ConfigBuilder.html" title="">ConfigBuilder</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="object" href="DataSourceUtils$.html" title=""></a>
+                        <a href="DataSourceUtils$.html" title="">DataSourceUtils</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="object" href="DataTypeUtils$.html" title=""></a>
+                        <a href="DataTypeUtils$.html" title="">DataTypeUtils</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="trait" href="HasParentContainerUpdater.html" title=""></a>
+                        <a href="HasParentContainerUpdater.html" title="">HasParentContainerUpdater</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="object" href="LegacyBehaviorPolicy$.html" title=""></a>
+                        <a href="LegacyBehaviorPolicy$.html" title="">LegacyBehaviorPolicy</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="trait" href="ParentContainerUpdater.html" title="A ParentContainerUpdater is used by a Parquet converter to set converted values to some corresponding parent container."></a>
+                        <a href="ParentContainerUpdater.html" title="A ParentContainerUpdater is used by a Parquet converter to set converted values to some corresponding parent container.">ParentContainerUpdater</a>
+                      </li><li class="current-entities indented8">
+                        <a class="object" href="ParquetColumn$.html" title=""></a>
+                        <a class="class" href="ParquetColumn.html" title="Rich information for a Parquet column together with its SparkSQL type."></a>
+                        <a href="ParquetColumn.html" title="Rich information for a Parquet column together with its SparkSQL type.">ParquetColumn</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="ParquetDictionary.html" title=""></a>
+                        <a href="ParquetDictionary.html" title="">ParquetDictionary</a>
+                      </li><li class="current-entities indented8">
+                        <a class="object" href="ParquetFileFormat$.html" title=""></a>
+                        <a class="class" href="ParquetFileFormat.html" title=""></a>
+                        <a href="ParquetFileFormat.html" title="">ParquetFileFormat</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="ParquetFilters.html" title="Some utility function to convert Spark data source filters to Parquet filters."></a>
+                        <a href="ParquetFilters.html" title="Some utility function to convert Spark data source filters to Parquet filters.">ParquetFilters</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="ParquetFooterReader.html" title="ParquetFooterReader is a util class which encapsulates the helper methods of reading parquet file footer"></a>
+                        <a href="ParquetFooterReader.html" title="ParquetFooterReader is a util class which encapsulates the helper methods of reading parquet file footer">ParquetFooterReader</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="ParquetGroupConverter.html" title="A convenient converter class for Parquet group types with a HasParentContainerUpdater."></a>
+                        <a href="ParquetGroupConverter.html" title="A convenient converter class for Parquet group types with a HasParentContainerUpdater.">ParquetGroupConverter</a>
+                      </li><li class="current-entities indented8">
+                        <a class="object" href="ParquetOptions$.html" title=""></a>
+                        <a class="class" href="ParquetOptions.html" title="Options for the Parquet data source."></a>
+                        <a href="ParquetOptions.html" title="Options for the Parquet data source.">ParquetOptions</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="ParquetOutputWriter.html" title=""></a>
+                        <a href="ParquetOutputWriter.html" title="">ParquetOutputWriter</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="ParquetPrimitiveConverter.html" title="Parquet converter for Parquet primitive types."></a>
+                        <a href="ParquetPrimitiveConverter.html" title="Parquet converter for Parquet primitive types.">ParquetPrimitiveConverter</a>
+                      </li><li class="current-entities indented8">
+                        <a class="object" href="ParquetReadSupport$.html" title=""></a>
+                        <a class="class" href="ParquetReadSupport.html" title="A Parquet ReadSupport implementation for reading Parquet records as Catalyst InternalRows."></a>
+                        <a href="ParquetReadSupport.html" title="A Parquet ReadSupport implementation for reading Parquet records as Catalyst InternalRows.">ParquetReadSupport</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="object" href="ParquetRowConverter$.html" title=""></a>
+                        <a href="ParquetRowConverter$.html" title="">ParquetRowConverter</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="object" href="ParquetRowIndexUtil$.html" title=""></a>
+                        <a href="ParquetRowIndexUtil$.html" title="">ParquetRowIndexUtil</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="ParquetToSparkSchemaConverter.html" title="This converter class is used to convert Parquet MessageType to Spark SQL StructType (via the convert method) as well as ParquetColumn (via the convertParquetColumn method)."></a>
+                        <a href="ParquetToSparkSchemaConverter.html" title="This converter class is used to convert Parquet MessageType to Spark SQL StructType (via the convert method) as well as ParquetColumn (via the convertParquetColumn method).">ParquetToSparkSchemaConverter</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="object" href="ParquetUtils$.html" title=""></a>
+                        <a href="ParquetUtils$.html" title="">ParquetUtils</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="trait" href="ParquetVectorUpdater.html" title=""></a>
+                        <a href="ParquetVectorUpdater.html" title="">ParquetVectorUpdater</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="ParquetVectorUpdaterFactory.html" title=""></a>
+                        <a href="ParquetVectorUpdaterFactory.html" title="">ParquetVectorUpdaterFactory</a>
+                      </li><li class="current-entities indented8">
+                        <a class="object" href="ParquetWriteSupport$.html" title=""></a>
+                        <a class="class" href="ParquetWriteSupport.html" title="A Parquet WriteSupport implementation that writes Catalyst InternalRows as Parquet messages."></a>
+                        <a href="ParquetWriteSupport.html" title="A Parquet WriteSupport implementation that writes Catalyst InternalRows as Parquet messages.">ParquetWriteSupport</a>
+                      </li><li class="current-entities indented8">
+                        <a class="object" href="PortableSQLConf$.html" title="A more portable SQLConf that works for both Apache Spark and Databricks Runtime."></a>
+                        <a class="class" href="PortableSQLConf.html" title=""></a>
+                        <a href="PortableSQLConf.html" title="">PortableSQLConf</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="object" href="QueryCompilationErrors$.html" title=""></a>
+                        <a href="QueryCompilationErrors$.html" title="">QueryCompilationErrors</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="object" href="QueryExecutionErrors$.html" title=""></a>
+                        <a href="QueryExecutionErrors$.html" title="">QueryExecutionErrors</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="RebaseSpec.html" title=""></a>
+                        <a href="RebaseSpec.html" title="">RebaseSpec</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="object" href="ResolveDefaultColumns$.html" title="This object contains fields to help process DEFAULT columns."></a>
+                        <a href="ResolveDefaultColumns$.html" title="This object contains fields to help process DEFAULT columns.">ResolveDefaultColumns</a>
+                      </li><li class="current-entities indented8">
+                        <a class="object" href="ResolveDefaultColumnsUtils$.html" title=""></a>
+                        <a class="trait" href="ResolveDefaultColumnsUtils.html" title=""></a>
+                        <a href="ResolveDefaultColumnsUtils.html" title="">ResolveDefaultColumnsUtils</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="object" href="SchemaMergeUtils$.html" title=""></a>
+                        <a href="SchemaMergeUtils$.html" title="">SchemaMergeUtils</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="SparkToParquetSchemaConverter.html" title="This converter class is used to convert Spark SQL StructType to Parquet MessageType."></a>
+                        <a href="SparkToParquetSchemaConverter.html" title="This converter class is used to convert Spark SQL StructType to Parquet MessageType.">SparkToParquetSchemaConverter</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="SpecificParquetRecordReaderBase.html" title="Base class for custom RecordReaders for Parquet that directly materialize to T."></a>
+                        <a href="SpecificParquetRecordReaderBase.html" title="Base class for custom RecordReaders for Parquet that directly materialize to T.">SpecificParquetRecordReaderBase</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="TypedConfig.html" title=""></a>
+                        <a href="TypedConfig.html" title="">TypedConfig</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="TypedConfigBuilder.html" title=""></a>
+                        <a href="TypedConfigBuilder.html" title="">TypedConfigBuilder</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="VectorizedColumnReader.html" title="Decoder to return values from a single column."></a>
+                        <a href="VectorizedColumnReader.html" title="Decoder to return values from a single column.">VectorizedColumnReader</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="VectorizedDeltaBinaryPackedReader.html" title="An implementation of the Parquet DELTA_BINARY_PACKED decoder that supports the vectorized interface."></a>
+                        <a href="VectorizedDeltaBinaryPackedReader.html" title="An implementation of the Parquet DELTA_BINARY_PACKED decoder that supports the vectorized interface.">VectorizedDeltaBinaryPackedReader</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="VectorizedDeltaByteArrayReader.html" title="An implementation of the Parquet DELTA_BYTE_ARRAY decoder that supports the vectorized interface."></a>
+                        <a href="VectorizedDeltaByteArrayReader.html" title="An implementation of the Parquet DELTA_BYTE_ARRAY decoder that supports the vectorized interface.">VectorizedDeltaByteArrayReader</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="VectorizedDeltaLengthByteArrayReader.html" title="An implementation of the Parquet DELTA_LENGTH_BYTE_ARRAY decoder that supports the vectorized interface."></a>
+                        <a href="VectorizedDeltaLengthByteArrayReader.html" title="An implementation of the Parquet DELTA_LENGTH_BYTE_ARRAY decoder that supports the vectorized interface.">VectorizedDeltaLengthByteArrayReader</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="VectorizedParquetRecordReader.html" title="A specialized RecordReader that reads into InternalRows or ColumnarBatches directly using the Parquet column APIs."></a>
+                        <a href="VectorizedParquetRecordReader.html" title="A specialized RecordReader that reads into InternalRows or ColumnarBatches directly using the Parquet column APIs.">VectorizedParquetRecordReader</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="VectorizedPlainValuesReader.html" title="An implementation of the Parquet PLAIN decoder that supports the vectorized interface."></a>
+                        <a href="VectorizedPlainValuesReader.html" title="An implementation of the Parquet PLAIN decoder that supports the vectorized interface.">VectorizedPlainValuesReader</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="VectorizedReaderBase.html" title="Base class for implementations of VectorizedValuesReader."></a>
+                        <a href="VectorizedReaderBase.html" title="Base class for implementations of VectorizedValuesReader.">VectorizedReaderBase</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="VectorizedRleValuesReader.html" title="A values reader for Parquet's run-length encoded data."></a>
+                        <a href="VectorizedRleValuesReader.html" title="A values reader for Parquet's run-length encoded data.">VectorizedRleValuesReader</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="trait" href="VectorizedValuesReader.html" title="Interface for value decoding that supports vectorized (aka batched) decoding."></a>
+                        <a href="VectorizedValuesReader.html" title="Interface for value decoding that supports vectorized (aka batched) decoding.">VectorizedValuesReader</a>
+                      </li>
+              </ul>
+            </div>
+          </div>
+          <div id="content">
+            <body class="package value">
+      <div id="definition">
+        <div class="big-circle package">p</div>
+        <p id="owner"><a href="../../../../../../../index.html" class="extype" name="org">org</a>.<a href="../../../../../../index.html" class="extype" name="org.apache">apache</a>.<a href="../../../../../index.html" class="extype" name="org.apache.spark">spark</a>.<a href="../../../../index.html" class="extype" name="org.apache.spark.sql">sql</a>.<a href="../../../index.html" class="extype" name="org.apache.spark.sql.execution">execution</a>.<a href="../../index.html" class="extype" name="org.apache.spark.sql.execution.datasources">datasources</a>.<a href="../index.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet">geoparquet</a></p>
+        <h1>internal<span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span></h1>
+        
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">internal</span>
+      </span>
+      </h4>
+
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      <div id="mbrsel">
+        <div class="toggle"></div>
+        <div id="memberfilter">
+          <i class="material-icons arrow"></i>
+          <span class="input">
+            <input id="mbrsel-input" placeholder="Filter all members" type="text" accesskey="/" />
+          </span>
+          <i class="clear material-icons"></i>
+        </div>
+        <div id="filterby">
+          <div id="order">
+            <span class="filtertype">Ordering</span>
+            <ol>
+              
+              <li class="alpha in"><span>Alphabetic</span></li>
+              
+            </ol>
+          </div>
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+            </div>
+        </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ConfigBuilder" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ConfigBuilderextendsAnyRef"></a><a id="ConfigBuilder:ConfigBuilder"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ConfigBuilder.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ConfigBuilder.html"><span class="name">ConfigBuilder</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.HasParentContainerUpdater" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="HasParentContainerUpdaterextendsAnyRef"></a><a id="HasParentContainerUpdater:HasParentContainerUpdater"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/HasParentContainerUpdater.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="HasParentContainerUpdater.html"><span class="name">HasParentContainerUpdater</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParentContainerUpdater" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ParentContainerUpdaterextendsAnyRef"></a><a id="ParentContainerUpdater:ParentContainerUpdater"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ParentContainerUpdater.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="A ParentContainerUpdater is used by a Parquet converter to set converted values to some corresponding parent container." href="ParentContainerUpdater.html"><span class="name">ParentContainerUpdater</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A <a href="ParentContainerUpdater.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParentContainerUpdater">ParentContainerUpdater</a> is used by a Parquet converter to set converted values to some
+corresponding parent container.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="ParentContainerUpdater.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParentContainerUpdater">ParentContainerUpdater</a> is used by a Parquet converter to set converted values to some
+corresponding parent container. For example, a converter for a <code>StructType</code> field may set
+converted values to a <span class="extype" name="InternalRow">InternalRow</span>; or a converter for array elements may append converted
+values to an <span class="extype" name="ArrayBuffer">ArrayBuffer</span>.
+</p></div></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetColumn" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParquetColumnextendsProductwithSerializable"></a><a id="ParquetColumn:ParquetColumn"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ParquetColumn.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Rich information for a Parquet column together with its SparkSQL type." href="ParquetColumn.html"><span class="name">ParquetColumn</span></a><span class="params">(<span name="sparkType">sparkType: <span class="extype" name="org.apache.spark.sql.types.DataType">DataType</span></span>, <span name="descriptor">descriptor: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.parquet.column.ColumnDescriptor">ColumnDescriptor</span>]</span>, <span name="repetitionLevel">repetitionLevel: <span class="extype" name="scala.Int">Int</span></span>, <span name="definitionLevel">definitionLevel: <span class="extype" name="scala.Int">Int</span></span>, <span name="required">required: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="path">path: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="children">children: <span class="extype" name="scala.Seq">Seq</span>[<a href="ParquetColumn.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetColumn">ParquetColumn</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Rich information for a Parquet column together with its SparkSQL type.</p>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetDictionary" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParquetDictionaryextendsDictionary"></a><a id="ParquetDictionary:ParquetDictionary"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ParquetDictionary.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ParquetDictionary.html"><span class="name">ParquetDictionary</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.sql.execution.vectorized.Dictionary">Dictionary</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetFileFormat" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParquetFileFormatextendsFileFormatwithDataSourceRegisterwithLoggingwithSerializable"></a><a id="ParquetFileFormat:ParquetFileFormat"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ParquetFileFormat.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ParquetFileFormat.html"><span class="name">ParquetFileFormat</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.sql.execution.datasources.FileFormat">FileFormat</span> with <span class="extype" name="org.apache.spark.sql.sources.DataSourceRegister">DataSourceRegister</span> with <span class="extype" name="org.apache.spark.internal.Logging">Logging</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetFilters" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParquetFiltersextendsAnyRef"></a><a id="ParquetFilters:ParquetFilters"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ParquetFilters.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Some utility function to convert Spark data source filters to Parquet filters." href="ParquetFilters.html"><span class="name">ParquetFilters</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Some utility function to convert Spark data source filters to Parquet filters.</p>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetFooterReader" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParquetFooterReaderextendsObject"></a><a id="ParquetFooterReader:ParquetFooterReader"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ParquetFooterReader.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="ParquetFooterReader is a util class which encapsulates the helper methods of reading parquet file footer" href="ParquetFooterReader.html"><span class="name">ParquetFooterReader</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt"><code>ParquetFooterReader</code> is a util class which encapsulates the helper methods of reading parquet
+file footer
+</p>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetGroupConverter" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ParquetGroupConverterextendsGroupConverterwithHasParentContainerUpdater"></a><a id="ParquetGroupConverter:ParquetGroupConverter"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ParquetGroupConverter.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A convenient converter class for Parquet group types with a HasParentContainerUpdater." href="ParquetGroupConverter.html"><span class="name">ParquetGroupConverter</span></a><span class="result"> extends <span class="extype" name="org.apache.parquet.io.api.GroupConverter">GroupConverter</span> with <a href="HasParentContainerUpdater.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.HasParentContainerUpdater">HasParentContainerUpdater</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A convenient converter class for Parquet group types with a <a href="HasParentContainerUpdater.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.HasParentContainerUpdater">HasParentContainerUpdater</a>.</p>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetOptions" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParquetOptionsextendsLogging"></a><a id="ParquetOptions:ParquetOptions"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ParquetOptions.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Options for the Parquet data source." href="ParquetOptions.html"><span class="name">ParquetOptions</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.internal.Logging">Logging</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Options for the Parquet data source.</p>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetOutputWriter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParquetOutputWriterextendsOutputWriter"></a><a id="ParquetOutputWriter:ParquetOutputWriter"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ParquetOutputWriter.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ParquetOutputWriter.html"><span class="name">ParquetOutputWriter</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.sql.execution.datasources.OutputWriter">OutputWriter</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetPrimitiveConverter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ParquetPrimitiveConverterextendsPrimitiveConverterwithHasParentContainerUpdater"></a><a id="ParquetPrimitiveConverter:ParquetPrimitiveConverter"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ParquetPrimitiveConverter.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Parquet converter for Parquet primitive types." href="ParquetPrimitiveConverter.html"><span class="name">ParquetPrimitiveConverter</span></a><span class="result"> extends <span class="extype" name="org.apache.parquet.io.api.PrimitiveConverter">PrimitiveConverter</span> with <a href="HasParentContainerUpdater.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.HasParentContainerUpdater">HasParentContainerUpdater</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Parquet converter for Parquet primitive types.</p><div class="fullcomment"><div class="comment cmt"><p>Parquet converter for Parquet primitive types. Note that not all Spark SQL atomic types are
+handled by this converter. Parquet primitive types are only a subset of those of Spark SQL. For
+example, BYTE, SHORT, and INT in Spark SQL are all covered by INT32 in Parquet.
+</p></div></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetReadSupport" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ParquetReadSupportextendsReadSupport[org.apache.spark.sql.catalyst.InternalRow]withLogging"></a><a id="ParquetReadSupport:ParquetReadSupport"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ParquetReadSupport.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A Parquet ReadSupport implementation for reading Parquet records as Catalyst InternalRows." href="ParquetReadSupport.html"><span class="name">ParquetReadSupport</span></a><span class="result"> extends <span class="extype" name="org.apache.parquet.hadoop.api.ReadSupport">ReadSupport</span>[<span class="extype" name="org.apache.spark.sql.catalyst.InternalRow">InternalRow</span>] with <span class="extype" name="org.apache.spark.internal.Logging">Logging</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A Parquet <span class="extype" name="ReadSupport">ReadSupport</span> implementation for reading Parquet records as Catalyst
+<span class="extype" name="InternalRow">InternalRow</span>s.</p><div class="fullcomment"><div class="comment cmt"><p>A Parquet <span class="extype" name="ReadSupport">ReadSupport</span> implementation for reading Parquet records as Catalyst
+<span class="extype" name="InternalRow">InternalRow</span>s.</p><p>The API interface of <span class="extype" name="ReadSupport">ReadSupport</span> is a little bit over complicated because of historical
+reasons. In older versions of parquet-mr (say 1.6.0rc3 and prior), <span class="extype" name="ReadSupport">ReadSupport</span> need to be
+instantiated and initialized twice on both driver side and executor side. The <span class="extype" name="init()">init()</span> method
+is for driver side initialization, while <span class="extype" name="prepareForRead()">prepareForRead()</span> is for executor side. However,
+starting from parquet-mr 1.6.0, it's no longer the case, and <span class="extype" name="ReadSupport">ReadSupport</span> is only
+instantiated and initialized on executor side. So, theoretically, now it's totally fine to
+combine these two methods into a single initialization method. The only reason (I could think
+of) to still have them here is for parquet-mr API backwards-compatibility.</p><p>Due to this reason, we no longer rely on <span class="extype" name="ReadContext">ReadContext</span> to pass requested schema from
+<span class="extype" name="init()">init()</span> to <span class="extype" name="prepareForRead()">prepareForRead()</span>, but use a private <code>var</code> for simplicity.
+</p></div></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetToSparkSchemaConverter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ParquetToSparkSchemaConverterextendsAnyRef"></a><a id="ParquetToSparkSchemaConverter:ParquetToSparkSchemaConverter"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ParquetToSparkSchemaConverter.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="This converter class is used to convert Parquet MessageType to Spark SQL StructType (via the convert method) as well as ParquetColumn (via the convertParquetColumn method)." href="ParquetToSparkSchemaConverter.html"><span class="name">ParquetToSparkSchemaConverter</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">This converter class is used to convert Parquet <span class="extype" name="MessageType">MessageType</span> to Spark SQL <span class="extype" name="StructType">StructType</span>
+(via the <code>convert</code> method) as well as <a href="ParquetColumn.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetColumn">ParquetColumn</a> (via the <code>convertParquetColumn</code>
+method).</p><div class="fullcomment"><div class="comment cmt"><p>This converter class is used to convert Parquet <span class="extype" name="MessageType">MessageType</span> to Spark SQL <span class="extype" name="StructType">StructType</span>
+(via the <code>convert</code> method) as well as <a href="ParquetColumn.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetColumn">ParquetColumn</a> (via the <code>convertParquetColumn</code>
+method). The latter contains richer information about the Parquet type, including its
+associated repetition &amp; definition level, column path, column descriptor etc.</p><p>Parquet format backwards-compatibility rules are respected when converting Parquet
+<span class="extype" name="MessageType">MessageType</span> schemas.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>
+  https://github.com/apache/parquet-format/blob/master/LogicalTypes.md</p></span></dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetVectorUpdater" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ParquetVectorUpdaterextendsObject"></a><a id="ParquetVectorUpdater:ParquetVectorUpdater"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ParquetVectorUpdater.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ParquetVectorUpdater.html"><span class="name">ParquetVectorUpdater</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetVectorUpdaterFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParquetVectorUpdaterFactoryextendsObject"></a><a id="ParquetVectorUpdaterFactory:ParquetVectorUpdaterFactory"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ParquetVectorUpdaterFactory.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ParquetVectorUpdaterFactory.html"><span class="name">ParquetVectorUpdaterFactory</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetWriteSupport" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ParquetWriteSupportextendsWriteSupport[org.apache.spark.sql.catalyst.InternalRow]withLogging"></a><a id="ParquetWriteSupport:ParquetWriteSupport"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ParquetWriteSupport.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A Parquet WriteSupport implementation that writes Catalyst InternalRows as Parquet messages." href="ParquetWriteSupport.html"><span class="name">ParquetWriteSupport</span></a><span class="result"> extends <span class="extype" name="org.apache.parquet.hadoop.api.WriteSupport">WriteSupport</span>[<span class="extype" name="org.apache.spark.sql.catalyst.InternalRow">InternalRow</span>] with <span class="extype" name="org.apache.spark.internal.Logging">Logging</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A Parquet <span class="extype" name="WriteSupport">WriteSupport</span> implementation that writes Catalyst <span class="extype" name="InternalRow">InternalRow</span>s as Parquet
+messages.</p><div class="fullcomment"><div class="comment cmt"><p>A Parquet <span class="extype" name="WriteSupport">WriteSupport</span> implementation that writes Catalyst <span class="extype" name="InternalRow">InternalRow</span>s as Parquet
+messages. This class can write Parquet data in two modes:</p><ul><li>Standard mode: Parquet data are written in standard format defined in parquet-format spec.</li><li>Legacy mode: Parquet data are written in legacy format compatible with Spark 1.4 and prior.</li></ul><p>This behavior can be controlled by SQL option <code>spark.sql.parquet.writeLegacyFormat</code>. The value
+of this option is propagated to this class by the <code>init()</code> method and its Hadoop configuration
+argument.
+</p></div></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.PortableSQLConf" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PortableSQLConfextendsAnyRef"></a><a id="PortableSQLConf:PortableSQLConf"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/PortableSQLConf.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="PortableSQLConf.html"><span class="name">PortableSQLConf</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.RebaseSpec" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RebaseSpecextendsProductwithSerializable"></a><a id="RebaseSpec:RebaseSpec"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/RebaseSpec.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="RebaseSpec.html"><span class="name">RebaseSpec</span></a><span class="params">(<span name="mode">mode: <a href="LegacyBehaviorPolicy$.html#ValueextendsOrdered[Enumeration.this.Value]withSerializable" class="extmbr" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.LegacyBehaviorPolicy.Value">LegacyBehaviorPolicy.Value</a></span>, <span name="originTimeZone">originTimeZone: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ResolveDefaultColumnsUtils" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ResolveDefaultColumnsUtilsextendsAnyRef"></a><a id="ResolveDefaultColumnsUtils:ResolveDefaultColumnsUtils"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ResolveDefaultColumnsUtils.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ResolveDefaultColumnsUtils.html"><span class="name">ResolveDefaultColumnsUtils</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.SparkToParquetSchemaConverter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SparkToParquetSchemaConverterextendsAnyRef"></a><a id="SparkToParquetSchemaConverter:SparkToParquetSchemaConverter"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/SparkToParquetSchemaConverter.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="This converter class is used to convert Spark SQL StructType to Parquet MessageType." href="SparkToParquetSchemaConverter.html"><span class="name">SparkToParquetSchemaConverter</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">This converter class is used to convert Spark SQL <span class="extype" name="StructType">StructType</span> to Parquet <span class="extype" name="MessageType">MessageType</span>.</p>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.SpecificParquetRecordReaderBase" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="SpecificParquetRecordReaderBase[T]extendsRecordReader[Void,T]"></a><a id="SpecificParquetRecordReaderBase[T]:SpecificParquetRecordReaderBase[T]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/SpecificParquetRecordReaderBase.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Base class for custom RecordReaders for Parquet that directly materialize to T." href="SpecificParquetRecordReaderBase.html"><span class="name">SpecificParquetRecordReaderBase</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="org.apache.hadoop.mapreduce.RecordReader">RecordReader</span>[<span class="extype" name="java.lang.Void">Void</span>, <span class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.SpecificParquetRecordReaderBase.T">T</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Base class for custom RecordReaders for Parquet that directly materialize to <code>T</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Base class for custom RecordReaders for Parquet that directly materialize to <code>T</code>. This class
+handles computing row groups, filtering on them, setting up the column readers, etc. This is
+heavily based on parquet-mr's RecordReader. TODO: move this to the parquet-mr project. There are
+performance benefits of doing it this way, albeit at a higher cost to implement. This base class
+is reusable.
+</p></div></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.TypedConfig" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TypedConfig[T]extendsProductwithSerializable"></a><a id="TypedConfig[T]:TypedConfig[T]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/TypedConfig.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="TypedConfig.html"><span class="name">TypedConfig</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="alternatives">alternatives: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">Seq.empty</span></span>, <span name="valueConverter">valueConverter: (<span class="extype" name="scala.Predef.String">String</span>) ⇒ <span class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.TypedConfig.T">T</span></span>, <span name="transformer">transformer: (<span class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.TypedConfig.T">T</span>) ⇒ <span class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.TypedConfig.T">T</span> = <span class="symbol">(v: T) =&gt; v</span></span>, <span name="defaultValue">defaultValue: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.TypedConfig.T">T</span>] = <span class="symbol">None</span></span>, <span name="defaultFunction">defaultFunction: <span class="extype" name="scala.Option">Option</span>[() ⇒ <span class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.TypedConfig.T">T</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.TypedConfigBuilder" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TypedConfigBuilder[T]extendsAnyRef"></a><a id="TypedConfigBuilder[T]:TypedConfigBuilder[T]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/TypedConfigBuilder.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="TypedConfigBuilder.html"><span class="name">TypedConfigBuilder</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.VectorizedColumnReader" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="VectorizedColumnReaderextendsObject"></a><a id="VectorizedColumnReader:VectorizedColumnReader"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/VectorizedColumnReader.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Decoder to return values from a single column." href="VectorizedColumnReader.html"><span class="name">VectorizedColumnReader</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Decoder to return values from a single column.</p>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.VectorizedDeltaBinaryPackedReader" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="VectorizedDeltaBinaryPackedReaderextendsVectorizedReaderBase"></a><a id="VectorizedDeltaBinaryPackedReader:VectorizedDeltaBinaryPackedReader"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/VectorizedDeltaBinaryPackedReader.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="An implementation of the Parquet DELTA_BINARY_PACKED decoder that supports the vectorized interface." href="VectorizedDeltaBinaryPackedReader.html"><span class="name">VectorizedDeltaBinaryPackedReader</span></a><span class="result"> extends <a href="VectorizedReaderBase.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.VectorizedReaderBase">VectorizedReaderBase</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">An implementation of the Parquet DELTA_BINARY_PACKED decoder that supports the vectorized
+interface.</p><div class="fullcomment"><div class="comment cmt"><p>An implementation of the Parquet DELTA_BINARY_PACKED decoder that supports the vectorized
+interface. DELTA_BINARY_PACKED is a delta encoding for integer and long types that stores values
+as a delta between consecutive values. Delta values are themselves bit packed. Similar to RLE but
+is more effective in the case of large variation of values in the encoded column.</p><p>DELTA_BINARY_PACKED is the default encoding for integer and long columns in Parquet V2.</p><p>Supported Types: INT32, INT64</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>&lt;a
+    href=&quot;https://github.com/apache/parquet-format/blob/master/Encodings.md#delta-encoding-delta_binary_packed--5&quot;&gt;
+    Parquet format encodings: DELTA_BINARY_PACKED</a></p></span></dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.VectorizedDeltaByteArrayReader" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="VectorizedDeltaByteArrayReaderextendsVectorizedReaderBasewithVectorizedValuesReaderwithRequiresPreviousReader"></a><a id="VectorizedDeltaByteArrayReader:VectorizedDeltaByteArrayReader"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/VectorizedDeltaByteArrayReader.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="An implementation of the Parquet DELTA_BYTE_ARRAY decoder that supports the vectorized interface." href="VectorizedDeltaByteArrayReader.html"><span class="name">VectorizedDeltaByteArrayReader</span></a><span class="result"> extends <a href="VectorizedReaderBase.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.VectorizedReaderBase">VectorizedReaderBase</a> with <a href="VectorizedValuesReader.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.VectorizedValuesReader">VectorizedValuesReader</a> with <span class="extype" name="org.apache.parquet.column.values.RequiresPreviousReader">RequiresPreviousReader</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">An implementation of the Parquet DELTA_BYTE_ARRAY decoder that supports the vectorized interface.</p>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.VectorizedDeltaLengthByteArrayReader" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="VectorizedDeltaLengthByteArrayReaderextendsVectorizedReaderBasewithVectorizedValuesReader"></a><a id="VectorizedDeltaLengthByteArrayReader:VectorizedDeltaLengthByteArrayReader"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/VectorizedDeltaLengthByteArrayReader.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="An implementation of the Parquet DELTA_LENGTH_BYTE_ARRAY decoder that supports the vectorized interface." href="VectorizedDeltaLengthByteArrayReader.html"><span class="name">VectorizedDeltaLengthByteArrayReader</span></a><span class="result"> extends <a href="VectorizedReaderBase.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.VectorizedReaderBase">VectorizedReaderBase</a> with <a href="VectorizedValuesReader.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.VectorizedValuesReader">VectorizedValuesReader</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">An implementation of the Parquet DELTA_LENGTH_BYTE_ARRAY decoder that supports the vectorized
+interface.</p>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.VectorizedParquetRecordReader" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="VectorizedParquetRecordReaderextendsSpecificParquetRecordReaderBase[Object]"></a><a id="VectorizedParquetRecordReader:VectorizedParquetRecordReader"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/VectorizedParquetRecordReader.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A specialized RecordReader that reads into InternalRows or ColumnarBatches directly using the Parquet column APIs." href="VectorizedParquetRecordReader.html"><span class="name">VectorizedParquetRecordReader</span></a><span class="result"> extends <a href="SpecificParquetRecordReaderBase.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.SpecificParquetRecordReaderBase">SpecificParquetRecordReaderBase</a>[<span class="extype" name="scala.AnyRef">AnyRef</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A specialized RecordReader that reads into InternalRows or ColumnarBatches directly using the
+Parquet column APIs.</p><div class="fullcomment"><div class="comment cmt"><p>A specialized RecordReader that reads into InternalRows or ColumnarBatches directly using the
+Parquet column APIs. This is somewhat based on parquet-mr's ColumnReader.</p><p>TODO: decimal requiring more than 8 bytes, INT96. Schema mismatch. All of these can be handled
+efficiently and easily with codegen.</p><p>This class can either return InternalRows or ColumnarBatches. With whole stage codegen
+enabled, this class returns ColumnarBatches which offers significant performance gains. TODO:
+make this always return ColumnarBatches.
+</p></div></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.VectorizedPlainValuesReader" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="VectorizedPlainValuesReaderextendsValuesReaderwithVectorizedValuesReader"></a><a id="VectorizedPlainValuesReader:VectorizedPlainValuesReader"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/VectorizedPlainValuesReader.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="An implementation of the Parquet PLAIN decoder that supports the vectorized interface." href="VectorizedPlainValuesReader.html"><span class="name">VectorizedPlainValuesReader</span></a><span class="result"> extends <span class="extype" name="org.apache.parquet.column.values.ValuesReader">ValuesReader</span> with <a href="VectorizedValuesReader.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.VectorizedValuesReader">VectorizedValuesReader</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">An implementation of the Parquet PLAIN decoder that supports the vectorized interface.</p>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.VectorizedReaderBase" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="VectorizedReaderBaseextendsValuesReaderwithVectorizedValuesReader"></a><a id="VectorizedReaderBase:VectorizedReaderBase"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/VectorizedReaderBase.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Base class for implementations of VectorizedValuesReader." href="VectorizedReaderBase.html"><span class="name">VectorizedReaderBase</span></a><span class="result"> extends <span class="extype" name="org.apache.parquet.column.values.ValuesReader">ValuesReader</span> with <a href="VectorizedValuesReader.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.VectorizedValuesReader">VectorizedValuesReader</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Base class for implementations of VectorizedValuesReader.</p><div class="fullcomment"><div class="comment cmt"><p>Base class for implementations of VectorizedValuesReader. Mainly to avoid duplication of methods
+that are not supported by concrete implementations
+</p></div></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.VectorizedRleValuesReader" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="VectorizedRleValuesReaderextendsValuesReaderwithVectorizedValuesReader"></a><a id="VectorizedRleValuesReader:VectorizedRleValuesReader"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/VectorizedRleValuesReader.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A values reader for Parquet's run-length encoded data." href="VectorizedRleValuesReader.html"><span class="name">VectorizedRleValuesReader</span></a><span class="result"> extends <span class="extype" name="org.apache.parquet.column.values.ValuesReader">ValuesReader</span> with <a href="VectorizedValuesReader.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.VectorizedValuesReader">VectorizedValuesReader</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A values reader for Parquet's run-length encoded data.</p><div class="fullcomment"><div class="comment cmt"><p>A values reader for Parquet's run-length encoded data. This is based off of the version in
+parquet-mr with these changes: - Supports the vectorized interface. - Works on byte
+arrays(byte[]) instead of making byte streams.</p><p>This encoding is used in multiple places: - Definition/Repetition levels - Dictionary ids. -
+Boolean type values of Parquet DataPageV2
+</p></div></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.VectorizedValuesReader" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="VectorizedValuesReaderextendsObject"></a><a id="VectorizedValuesReader:VectorizedValuesReader"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/VectorizedValuesReader.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Interface for value decoding that supports vectorized (aka batched) decoding." href="VectorizedValuesReader.html"><span class="name">VectorizedValuesReader</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Interface for value decoding that supports vectorized (aka batched) decoding.</p><div class="fullcomment"><div class="comment cmt"><p>Interface for value decoding that supports vectorized (aka batched) decoding. TODO: merge this
+into parquet-mr.
+</p></div></div>
+    </li></ol>
+            </div>
+
+        
+
+        <div class="values members">
+              <h3>Value Members</h3>
+              <ol>
+                <li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.DataSourceUtils" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DataSourceUtils"></a><a id="DataSourceUtils:DataSourceUtils"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/DataSourceUtils$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="DataSourceUtils$.html"><span class="name">DataSourceUtils</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.expressions.PredicateHelper">PredicateHelper</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.DataTypeUtils" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DataTypeUtils"></a><a id="DataTypeUtils:DataTypeUtils"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/DataTypeUtils$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="DataTypeUtils$.html"><span class="name">DataTypeUtils</span></a>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.LegacyBehaviorPolicy" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="LegacyBehaviorPolicy"></a><a id="LegacyBehaviorPolicy:LegacyBehaviorPolicy"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/LegacyBehaviorPolicy$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="LegacyBehaviorPolicy$.html"><span class="name">LegacyBehaviorPolicy</span></a><span class="result"> extends <span class="extype" name="scala.Enumeration">Enumeration</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetColumn" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParquetColumn"></a><a id="ParquetColumn:ParquetColumn"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ParquetColumn$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ParquetColumn$.html"><span class="name">ParquetColumn</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetFileFormat" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParquetFileFormat"></a><a id="ParquetFileFormat:ParquetFileFormat"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ParquetFileFormat$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ParquetFileFormat$.html"><span class="name">ParquetFileFormat</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.internal.Logging">Logging</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetOptions" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParquetOptions"></a><a id="ParquetOptions:ParquetOptions"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ParquetOptions$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ParquetOptions$.html"><span class="name">ParquetOptions</span></a>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetReadSupport" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParquetReadSupport"></a><a id="ParquetReadSupport:ParquetReadSupport"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ParquetReadSupport$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ParquetReadSupport$.html"><span class="name">ParquetReadSupport</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.internal.Logging">Logging</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetRowConverter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParquetRowConverter"></a><a id="ParquetRowConverter:ParquetRowConverter"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ParquetRowConverter$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ParquetRowConverter$.html"><span class="name">ParquetRowConverter</span></a>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetRowIndexUtil" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParquetRowIndexUtil"></a><a id="ParquetRowIndexUtil:ParquetRowIndexUtil"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ParquetRowIndexUtil$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ParquetRowIndexUtil$.html"><span class="name">ParquetRowIndexUtil</span></a>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetUtils" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParquetUtils"></a><a id="ParquetUtils:ParquetUtils"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ParquetUtils$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ParquetUtils$.html"><span class="name">ParquetUtils</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.internal.Logging">Logging</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetWriteSupport" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParquetWriteSupport"></a><a id="ParquetWriteSupport:ParquetWriteSupport"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ParquetWriteSupport$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ParquetWriteSupport$.html"><span class="name">ParquetWriteSupport</span></a>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.PortableSQLConf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="PortableSQLConf"></a><a id="PortableSQLConf:PortableSQLConf"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/PortableSQLConf$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="A more portable SQLConf that works for both Apache Spark and Databricks Runtime." href="PortableSQLConf$.html"><span class="name">PortableSQLConf</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">A more portable SQLConf that works for both Apache Spark and Databricks Runtime.</p><div class="fullcomment"><div class="comment cmt"><p>A more portable SQLConf that works for both Apache Spark and Databricks Runtime. The whole
+point is to avoid relying on the constants and methods defined in
+org.apache.spark.sql.internal.SQLConf, since they are subject to change. We only depend on the
+getConfString method of SQLConf, which is more stable.
+</p></div></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.QueryCompilationErrors" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="QueryCompilationErrors"></a><a id="QueryCompilationErrors:QueryCompilationErrors"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/QueryCompilationErrors$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="QueryCompilationErrors$.html"><span class="name">QueryCompilationErrors</span></a>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.QueryExecutionErrors" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="QueryExecutionErrors"></a><a id="QueryExecutionErrors:QueryExecutionErrors"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/QueryExecutionErrors$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="QueryExecutionErrors$.html"><span class="name">QueryExecutionErrors</span></a>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ResolveDefaultColumns" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ResolveDefaultColumns"></a><a id="ResolveDefaultColumns:ResolveDefaultColumns"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ResolveDefaultColumns$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="This object contains fields to help process DEFAULT columns." href="ResolveDefaultColumns$.html"><span class="name">ResolveDefaultColumns</span></a><span class="result"> extends <a href="ResolveDefaultColumnsUtils.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ResolveDefaultColumnsUtils">ResolveDefaultColumnsUtils</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">This object contains fields to help process DEFAULT columns.</p>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ResolveDefaultColumnsUtils" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ResolveDefaultColumnsUtils"></a><a id="ResolveDefaultColumnsUtils:ResolveDefaultColumnsUtils"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/ResolveDefaultColumnsUtils$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ResolveDefaultColumnsUtils$.html"><span class="name">ResolveDefaultColumnsUtils</span></a><span class="result"> extends <a href="ResolveDefaultColumnsUtils.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.internal.ResolveDefaultColumnsUtils">ResolveDefaultColumnsUtils</a></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.internal.SchemaMergeUtils" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SchemaMergeUtils"></a><a id="SchemaMergeUtils:SchemaMergeUtils"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/internal/SchemaMergeUtils$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="SchemaMergeUtils$.html"><span class="name">SchemaMergeUtils</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.internal.Logging">Logging</span></span>
+      </span>
+      
+      
+    </li>
+              </ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+    </body>
+          </div>
+        </div>
+      </div>
+    </body>
+      </html>

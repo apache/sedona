@@ -1,0 +1,8 @@
+// Sidebar desktop
+@media (min-width: 1220px) {
+  .md-sidebar--primary {
+    .btn-group {
+      display: none;
+    }
+  }
+}

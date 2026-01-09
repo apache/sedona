@@ -1,0 +1,809 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+          <title>org.apache.sedona:sedona-spark-common-3.4_2.12 1.8.1 API  - org.apache.sedona.core.spatialPartitioning</title>
+          <meta name="description" content="org.apache.sedona sedona - spark - common - 3.4 2.12 1.8.1 API - org.apache.sedona.core.spatialPartitioning" />
+          <meta name="keywords" content="org.apache.sedona sedona spark common 3.4 2.12 1.8.1 API org.apache.sedona.core.spatialPartitioning" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      
+      <link href="../../../../../lib/index.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../../lib/jquery.min.js"></script>
+      <script type="text/javascript" src="../../../../../lib/jquery.panzoom.min.js"></script>
+      <script type="text/javascript" src="../../../../../lib/jquery.mousewheel.min.js"></script>
+      <script type="text/javascript" src="../../../../../lib/index.js"></script>
+      <script type="text/javascript" src="../../../../../index.js"></script>
+      <script type="text/javascript" src="../../../../../lib/scheduler.js"></script>
+      <script type="text/javascript" src="../../../../../lib/template.js"></script>
+      
+      <script type="text/javascript">
+        /* this variable can be used by the JS to determine the path to the root document */
+        var toRoot = '../../../../../';
+      </script>
+    
+        </head>
+        <body>
+      <div id="search">
+        <span id="doc-title">org.apache.sedona:sedona-spark-common-3.4_2.12 1.8.1 API<span id="doc-version"></span></span>
+        <span class="close-results"><span class="left">&lt;</span> Back</span>
+        <div id="textfilter">
+          <span class="input">
+            <input autocapitalize="none" placeholder="Search" id="index-input" type="text" accesskey="/" />
+            <i class="clear material-icons"></i>
+            <i id="search-icon" class="material-icons"></i>
+          </span>
+        </div>
+    </div>
+      <div id="search-results">
+        <div id="search-progress">
+          <div id="progress-fill"></div>
+        </div>
+        <div id="results-content">
+          <div id="entity-results"></div>
+          <div id="member-results"></div>
+        </div>
+      </div>
+      <div id="content-scroll-container" style="-webkit-overflow-scrolling: touch;">
+        <div id="content-container" style="-webkit-overflow-scrolling: touch;">
+          <div id="subpackage-spacer">
+            <div id="packages">
+              <h1>Packages</h1>
+              <ul>
+                <li name="_root_.root" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_root_"></a><a id="root:_root_"></a>
+      <span class="permalink">
+      <a href="../../../../../index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../../../index.html"><span class="name">root</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="_root_.org" visbl="pub" class="indented1 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="org"></a><a id="org:org"></a>
+      <span class="permalink">
+      <a href="../../../../../org/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../../index.html"><span class="name">org</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="org.apache" visbl="pub" class="indented2 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="apache"></a><a id="apache:apache"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../index.html"><span class="name">apache</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../index.html" class="extype" name="org">org</a></dd></dl></div>
+    </li><li name="org.apache.sedona" visbl="pub" class="indented3 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sedona"></a><a id="sedona:sedona"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../index.html"><span class="name">sedona</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="org.apache">apache</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="core"></a><a id="core:core"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../index.html"><span class="name">core</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="org.apache.sedona">sedona</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.enums" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="enums"></a><a id="enums:enums"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/enums/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../enums/index.html"><span class="name">enums</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.formatMapper" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="formatMapper"></a><a id="formatMapper:formatMapper"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/formatMapper/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../formatMapper/index.html"><span class="name">formatMapper</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.joinJudgement" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="joinJudgement"></a><a id="joinJudgement:joinJudgement"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../joinJudgement/index.html"><span class="name">joinJudgement</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.knnJudgement" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="knnJudgement"></a><a id="knnJudgement:knnJudgement"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/knnJudgement/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../knnJudgement/index.html"><span class="name">knnJudgement</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.monitoring" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="monitoring"></a><a id="monitoring:monitoring"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/monitoring/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../monitoring/index.html"><span class="name">monitoring</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.rangeJudgement" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="rangeJudgement"></a><a id="rangeJudgement:rangeJudgement"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/rangeJudgement/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../rangeJudgement/index.html"><span class="name">rangeJudgement</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.serde" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="serde"></a><a id="serde:serde"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/serde/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../serde/index.html"><span class="name">serde</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.showcase" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="showcase"></a><a id="showcase:showcase"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/showcase/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../showcase/index.html"><span class="name">showcase</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.spatialOperator" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="spatialOperator"></a><a id="spatialOperator:spatialOperator"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialOperator/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../spatialOperator/index.html"><span class="name">spatialOperator</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.spatialPartitioning" visbl="pub" class="indented5 current" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="spatialPartitioning"></a><a id="spatialPartitioning:spatialPartitioning"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">spatialPartitioning</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.spatialPartitioning.quadtree" visbl="pub" class="indented6 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="quadtree"></a><a id="quadtree:quadtree"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/quadtree/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="quadtree/index.html"><span class="name">quadtree</span></a>
+      </span>
+      
+      
+    </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="BroadcastedSpatialPartitioner.html" title="The SpatialPartitioner may contain a large number of grids, which may make the serialized tasks to be larger than 1MB and trigger a warning: &quot;WARN DAGScheduler: Broadcasting large task binary with size XXXX KB&quot;."></a>
+                        <a href="BroadcastedSpatialPartitioner.html" title="The SpatialPartitioner may contain a large number of grids, which may make the serialized tasks to be larger than 1MB and trigger a warning: &quot;WARN DAGScheduler: Broadcasting large task binary with size XXXX KB&quot;.">BroadcastedSpatialPartitioner</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="EqualPartitioning.html" title="The Class EqualPartitioning."></a>
+                        <a href="EqualPartitioning.html" title="The Class EqualPartitioning.">EqualPartitioning</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="FlatGridPartitioner.html" title="The FlatGridPartitioner is used when there is already a set of grids which the data should be partitioned into."></a>
+                        <a href="FlatGridPartitioner.html" title="The FlatGridPartitioner is used when there is already a set of grids which the data should be partitioned into.">FlatGridPartitioner</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="GenericUniquePartitioner.html" title=""></a>
+                        <a href="GenericUniquePartitioner.html" title="">GenericUniquePartitioner</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="HilbertPartitioning.html" title=""></a>
+                        <a href="HilbertPartitioning.html" title="">HilbertPartitioning</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="IndexedGridPartitioner.html" title="The IndexedGridPartitioner is used when there is already a set of grids which the data should be partitioned into."></a>
+                        <a href="IndexedGridPartitioner.html" title="The IndexedGridPartitioner is used when there is already a set of grids which the data should be partitioned into.">IndexedGridPartitioner</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="KDB.html" title="see &lt;a href=&quot;https://en.wikipedia.org/wiki/K-D-B-tree&quot;&gt;https://en.wikipedia.org/wiki/K-D-B-tree"></a>
+                        <a href="KDB.html" title="see &lt;a href=&quot;https://en.wikipedia.org/wiki/K-D-B-tree&quot;&gt;https://en.wikipedia.org/wiki/K-D-B-tree">KDB</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="KDBTreePartitioner.html" title=""></a>
+                        <a href="KDBTreePartitioner.html" title="">KDBTreePartitioner</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="PartitioningUtils.html" title=""></a>
+                        <a href="PartitioningUtils.html" title="">PartitioningUtils</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="QuadTreePartitioner.html" title=""></a>
+                        <a href="QuadTreePartitioner.html" title="">QuadTreePartitioner</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="QuadTreeRTPartitioner.html" title="This class implements spatial partitioner based on the principles outlined in:"></a>
+                        <a href="QuadTreeRTPartitioner.html" title="This class implements spatial partitioner based on the principles outlined in:">QuadTreeRTPartitioner</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="QuadTreeRTPartitioning.html" title="The class is used to build an R-tree over a random sample of another dataset and uses distance bounds to ensure efficient local kNN joins."></a>
+                        <a href="QuadTreeRTPartitioning.html" title="The class is used to build an R-tree over a random sample of another dataset and uses distance bounds to ensure efficient local kNN joins.">QuadTreeRTPartitioning</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="QuadtreePartitioning.html" title=""></a>
+                        <a href="QuadtreePartitioning.html" title="">QuadtreePartitioning</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="RtreePartitioning.html" title="The Class RtreePartitioning."></a>
+                        <a href="RtreePartitioning.html" title="The Class RtreePartitioning.">RtreePartitioning</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="SpatialPartitioner.html" title=""></a>
+                        <a href="SpatialPartitioner.html" title="">SpatialPartitioner</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="VoronoiPartitioning.html" title="The Class VoronoiPartitioning."></a>
+                        <a href="VoronoiPartitioning.html" title="The Class VoronoiPartitioning.">VoronoiPartitioning</a>
+                      </li><li name="org.apache.sedona.core.spatialRDD" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="spatialRDD"></a><a id="spatialRDD:spatialRDD"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialRDD/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../spatialRDD/index.html"><span class="name">spatialRDD</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.spatialRddTool" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="spatialRddTool"></a><a id="spatialRddTool:spatialRddTool"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialRddTool/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../spatialRddTool/index.html"><span class="name">spatialRddTool</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.utils" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="utils"></a><a id="utils:utils"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/utils/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../utils/index.html"><span class="name">utils</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.wrapper" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wrapper"></a><a id="wrapper:wrapper"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/wrapper/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../wrapper/index.html"><span class="name">wrapper</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li>
+              </ul>
+            </div>
+          </div>
+          <div id="content">
+            <body class="package value">
+      <div id="definition">
+        <div class="big-circle package">p</div>
+        <p id="owner"><a href="../../../../index.html" class="extype" name="org">org</a>.<a href="../../../index.html" class="extype" name="org.apache">apache</a>.<a href="../../index.html" class="extype" name="org.apache.sedona">sedona</a>.<a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></p>
+        <h1>spatialPartitioning<span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span></h1>
+        
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">spatialPartitioning</span>
+      </span>
+      </h4>
+
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="org.apache.sedona.core.spatialPartitioning.BroadcastedSpatialPartitioner" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="BroadcastedSpatialPartitionerextendsSpatialPartitioner"></a><a id="BroadcastedSpatialPartitioner:BroadcastedSpatialPartitioner"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/BroadcastedSpatialPartitioner.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The SpatialPartitioner may contain a large number of grids, which may make the serialized tasks to be larger than 1MB and trigger a warning: &quot;WARN DAGScheduler: Broadcasting large task binary with size XXXX KB&quot;." href="BroadcastedSpatialPartitioner.html"><span class="name">BroadcastedSpatialPartitioner</span></a><span class="result"> extends <a href="SpatialPartitioner.html" class="extype" name="org.apache.sedona.core.spatialPartitioning.SpatialPartitioner">SpatialPartitioner</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">The SpatialPartitioner may contain a large number of grids, which may make the serialized tasks
+to be larger than 1MB and trigger a warning: &quot;WARN DAGScheduler: Broadcasting large task binary
+with size XXXX KB&quot;.</p><div class="fullcomment"><div class="comment cmt"><p>The SpatialPartitioner may contain a large number of grids, which may make the serialized tasks
+to be larger than 1MB and trigger a warning: &quot;WARN DAGScheduler: Broadcasting large task binary
+with size XXXX KB&quot;. This class is a wrapper around a SpatialPartitioner that is broadcasted to
+reduce the size of serialized tasks.
+</p></div></div>
+    </li><li name="org.apache.sedona.core.spatialPartitioning.EqualPartitioning" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EqualPartitioningextendsSerializable"></a><a id="EqualPartitioning:EqualPartitioning"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/EqualPartitioning.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The Class EqualPartitioning." href="EqualPartitioning.html"><span class="name">EqualPartitioning</span></a><span class="result"> extends <span class="extype" name="java.io.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">The Class EqualPartitioning.</p>
+    </li><li name="org.apache.sedona.core.spatialPartitioning.FlatGridPartitioner" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="FlatGridPartitionerextendsSpatialPartitioner"></a><a id="FlatGridPartitioner:FlatGridPartitioner"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/FlatGridPartitioner.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The FlatGridPartitioner is used when there is already a set of grids which the data should be partitioned into." href="FlatGridPartitioner.html"><span class="name">FlatGridPartitioner</span></a><span class="result"> extends <a href="SpatialPartitioner.html" class="extype" name="org.apache.sedona.core.spatialPartitioning.SpatialPartitioner">SpatialPartitioner</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">The FlatGridPartitioner is used when there is already a set of grids which the data should be
+partitioned into.</p><div class="fullcomment"><div class="comment cmt"><p>The FlatGridPartitioner is used when there is already a set of grids which the data should be
+partitioned into. It iterates through all the grids to find the grids to place a geometry into.
+Unless you have very few objects to place, it may make more sense to use the
+IndexedGridPartitioner. If you do not have a strict requirement to use a specific set of grids,
+it may make more sense to use another partitioner that generates its own grids from a
+space-partitioning tree, e.g. the KDBTreePartitioner or the QuadTreePartitioner.
+</p></div></div>
+    </li><li name="org.apache.sedona.core.spatialPartitioning.GenericUniquePartitioner" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GenericUniquePartitionerextendsSpatialPartitioner"></a><a id="GenericUniquePartitioner:GenericUniquePartitioner"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/GenericUniquePartitioner.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="GenericUniquePartitioner.html"><span class="name">GenericUniquePartitioner</span></a><span class="result"> extends <a href="SpatialPartitioner.html" class="extype" name="org.apache.sedona.core.spatialPartitioning.SpatialPartitioner">SpatialPartitioner</a></span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.core.spatialPartitioning.HilbertPartitioning" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HilbertPartitioningextendsSerializable"></a><a id="HilbertPartitioning:HilbertPartitioning"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/HilbertPartitioning.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="HilbertPartitioning.html"><span class="name">HilbertPartitioning</span></a><span class="result"> extends <span class="extype" name="java.io.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.core.spatialPartitioning.IndexedGridPartitioner" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="IndexedGridPartitionerextendsFlatGridPartitioner"></a><a id="IndexedGridPartitioner:IndexedGridPartitioner"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/IndexedGridPartitioner.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The IndexedGridPartitioner is used when there is already a set of grids which the data should be partitioned into." href="IndexedGridPartitioner.html"><span class="name">IndexedGridPartitioner</span></a><span class="result"> extends <a href="FlatGridPartitioner.html" class="extype" name="org.apache.sedona.core.spatialPartitioning.FlatGridPartitioner">FlatGridPartitioner</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">The IndexedGridPartitioner is used when there is already a set of grids which the data should be
+partitioned into.</p><div class="fullcomment"><div class="comment cmt"><p>The IndexedGridPartitioner is used when there is already a set of grids which the data should be
+partitioned into. It leverages an STRTree to quickly find the grids to place a geometry into. If
+you have very few objects to place, it may make more sense to use the FlatGridPartitioner. If you
+do not have a strict requirement to use a specific set of grids, it may make more sense to use
+another partitioner that generates its own grids from space-partitioning tree, e.g. the
+KDBTreePartitioner or the QuadTreePartitioner.
+</p></div></div>
+    </li><li name="org.apache.sedona.core.spatialPartitioning.KDB" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="KDBextendsPartitioningUtilswithSerializable"></a><a id="KDB:KDB"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/KDB.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="see &lt;a href=&quot;https://en.wikipedia.org/wiki/K-D-B-tree&quot;&gt;https://en.wikipedia.org/wiki/K-D-B-tree" href="KDB.html"><span class="name">KDB</span></a><span class="result"> extends <a href="PartitioningUtils.html" class="extype" name="org.apache.sedona.core.spatialPartitioning.PartitioningUtils">PartitioningUtils</a> with <span class="extype" name="java.io.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">see &lt;a
+href=&quot;https://en.wikipedia.org/wiki/K-D-B-tree&quot;&gt;https://en.wikipedia.org/wiki/K-D-B-tree</a>
+</p>
+    </li><li name="org.apache.sedona.core.spatialPartitioning.KDBTreePartitioner" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="KDBTreePartitionerextendsSpatialPartitioner"></a><a id="KDBTreePartitioner:KDBTreePartitioner"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/KDBTreePartitioner.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="KDBTreePartitioner.html"><span class="name">KDBTreePartitioner</span></a><span class="result"> extends <a href="SpatialPartitioner.html" class="extype" name="org.apache.sedona.core.spatialPartitioning.SpatialPartitioner">SpatialPartitioner</a></span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.core.spatialPartitioning.PartitioningUtils" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="PartitioningUtilsextendsObject"></a><a id="PartitioningUtils:PartitioningUtils"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/PartitioningUtils.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="PartitioningUtils.html"><span class="name">PartitioningUtils</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.core.spatialPartitioning.QuadTreePartitioner" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="QuadTreePartitionerextendsSpatialPartitioner"></a><a id="QuadTreePartitioner:QuadTreePartitioner"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/QuadTreePartitioner.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="QuadTreePartitioner.html"><span class="name">QuadTreePartitioner</span></a><span class="result"> extends <a href="SpatialPartitioner.html" class="extype" name="org.apache.sedona.core.spatialPartitioning.SpatialPartitioner">SpatialPartitioner</a></span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.core.spatialPartitioning.QuadTreeRTPartitioner" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="QuadTreeRTPartitionerextendsQuadTreePartitioner"></a><a id="QuadTreeRTPartitioner:QuadTreeRTPartitioner"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/QuadTreeRTPartitioner.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="This class implements spatial partitioner based on the principles outlined in:" href="QuadTreeRTPartitioner.html"><span class="name">QuadTreeRTPartitioner</span></a><span class="result"> extends <a href="QuadTreePartitioner.html" class="extype" name="org.apache.sedona.core.spatialPartitioning.QuadTreePartitioner">QuadTreePartitioner</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">This class implements spatial partitioner based on the principles outlined in:</p><div class="fullcomment"><div class="comment cmt"><p>This class implements spatial partitioner based on the principles outlined in:</p><p>It uses the Quad-tree partitioning strategy to create balanced partitions This partitioning is
+essential for efficiently executing kNN joins. The process involves the following steps:</p><p>1. **Quad-tree Partitioning**: - Data is partitioned into partitions using the Quad-tree data
+structure. - This ensures balanced partitions and spatial locality preservation.</p><p>2. **Global R-Tree Index Construction**: - A set of random samples S' from the dataset S is
+taken. - An R-tree T is built over S' in the master node (driver program).</p><p>3. **Distance Bound Calculation**: - For each partition Ri, the distance ui from the furthest
+point in Ri to the centroid cri is calculated. - k-nearest neighbors of each centroid cri are
+found using the R-tree T. - A distance bound γi is derived for each Ri, defined as γi = 2ui +</p><p>|cri, sk|, where sk is the k-th nearest neighbor of cri.</p><p>4. **Partitioning Neighbors**: - For each partition Ri, a subset Si ⊂ S is identified such
+that for any r ∈ Ri, knn(r, S) = knn(r, Si) using a circle range query centered at cri with
+radius γi. - This guarantees that the k-nearest neighbors of any point in Ri can be found within
+the subset Si.</p><p>5. **Parallel Local kNN Joins**: - Each combined partition (Ri, Si) is processed in parallel.
+- An R-tree is built over Si, and a local kNN join is performed for each record in Ri. - The
+results from all partitions are combined to produce the final kNN join results.</p><p>Reference: Xie, Dong, et al. &quot;Simba: Efficient in-memory spatial analytics.&quot; In Proceedings of
+the 2016 ACM SIGMOD International Conference on Management of Data (SIGMOD '16), 2016, DOI:
+10.1145/2882903.2915237.
+</p></div></div>
+    </li><li name="org.apache.sedona.core.spatialPartitioning.QuadTreeRTPartitioning" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="QuadTreeRTPartitioningextendsQuadtreePartitioning"></a><a id="QuadTreeRTPartitioning:QuadTreeRTPartitioning"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/QuadTreeRTPartitioning.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The class is used to build an R-tree over a random sample of another dataset and uses distance bounds to ensure efficient local kNN joins." href="QuadTreeRTPartitioning.html"><span class="name">QuadTreeRTPartitioning</span></a><span class="result"> extends <a href="QuadtreePartitioning.html" class="extype" name="org.apache.sedona.core.spatialPartitioning.QuadtreePartitioning">QuadtreePartitioning</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">The class is used to build an R-tree over a random sample of another dataset and uses distance
+bounds to ensure efficient local kNN joins.</p><div class="fullcomment"><div class="comment cmt"><p>The class is used to build an R-tree over a random sample of another dataset and uses distance
+bounds to ensure efficient local kNN joins.</p><p>By calculating distance bounds and using circle range queries, it ensures that the subsets Si,
+containing all necessary points for accurate kNN results. The final union of local join results
+provides the complete kNN join result for the datasets R and S.</p><p>It generates List&lt;List&lt;Integer&gt;&gt; expandedPartitionedBoundaries based on the quad tree.
+</p></div></div>
+    </li><li name="org.apache.sedona.core.spatialPartitioning.QuadtreePartitioning" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="QuadtreePartitioningextendsSerializable"></a><a id="QuadtreePartitioning:QuadtreePartitioning"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/QuadtreePartitioning.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="QuadtreePartitioning.html"><span class="name">QuadtreePartitioning</span></a><span class="result"> extends <span class="extype" name="java.io.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.core.spatialPartitioning.RtreePartitioning" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RtreePartitioningextendsSerializable"></a><a id="RtreePartitioning:RtreePartitioning"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/RtreePartitioning.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The Class RtreePartitioning." href="RtreePartitioning.html"><span class="name">RtreePartitioning</span></a><span class="result"> extends <span class="extype" name="java.io.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">The Class RtreePartitioning.</p>
+    </li><li name="org.apache.sedona.core.spatialPartitioning.SpatialPartitioner" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="SpatialPartitionerextendsPartitionerwithSerializable"></a><a id="SpatialPartitioner:SpatialPartitioner"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/SpatialPartitioner.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="SpatialPartitioner.html"><span class="name">SpatialPartitioner</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.Partitioner">Partitioner</span> with <span class="extype" name="java.io.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.core.spatialPartitioning.VoronoiPartitioning" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="VoronoiPartitioningextendsSerializable"></a><a id="VoronoiPartitioning:VoronoiPartitioning"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/VoronoiPartitioning.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The Class VoronoiPartitioning." href="VoronoiPartitioning.html"><span class="name">VoronoiPartitioning</span></a><span class="result"> extends <span class="extype" name="java.io.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">The Class VoronoiPartitioning.</p>
+    </li></ol>
+            </div>
+
+        
+
+        
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+    </body>
+          </div>
+        </div>
+      </div>
+    </body>
+      </html>

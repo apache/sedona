@@ -1,0 +1,65 @@
+{
+  "name": "gulp-sourcemaps",
+  "version": "2.6.5",
+  "description": "Source map support for Gulp.js",
+  "homepage": "http://github.com/gulp-sourcemaps/gulp-sourcemaps",
+  "repository": "git://github.com/gulp-sourcemaps/gulp-sourcemaps.git",
+  "main": "index.js",
+  "scripts": {
+    "lint": "jshint ./src/**/*.js ./test/*.js",
+    "test": "npm run lint && faucet test/*.js $@",
+    "tape": "tape",
+    "cover": "istanbul cover --dir reports/coverage tape \"test/*.js\"",
+    "coveralls": "istanbul cover tape \"test/*.js\" --report lcovonly && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage",
+    "serve": "http-server",
+    "test:int": "rm -rf ./tmp && tape ./test/integration.js"
+  },
+  "keywords": [
+    "gulpplugin",
+    "gulp",
+    "source maps",
+    "sourcemaps"
+  ],
+  "author": "Florian Reiterer <me@florianreiterer.com>",
+  "license": "ISC",
+  "dependencies": {
+    "@gulp-sourcemaps/identity-map": "1.X",
+    "@gulp-sourcemaps/map-sources": "1.X",
+    "acorn": "5.X",
+    "convert-source-map": "1.X",
+    "css": "2.X",
+    "debug-fabulous": "1.X",
+    "detect-newline": "2.X",
+    "graceful-fs": "4.X",
+    "source-map": "~0.6.0",
+    "strip-bom-string": "1.X",
+    "through2": "2.X"
+  },
+  "devDependencies": {
+    "bootstrap": "3.3.7",
+    "coveralls": "2.X",
+    "faucet": "0.0.X",
+    "gulp": "3.X",
+    "gulp-concat": "2.X",
+    "gulp-if": "2.X",
+    "gulp-less": "3.X",
+    "gulp-load-plugins": "1.X",
+    "hook-std": "0.2.X",
+    "http-server": "0.10.X",
+    "istanbul": "0.X",
+    "jshint": "2.X",
+    "lodash": "4.X",
+    "mississippi": "1.X",
+    "object-assign": "4.X",
+    "tape": "4.X",
+    "vinyl": "2.X",
+    "yargs": "7.X"
+  },
+  "files": [
+    "index.js",
+    "src"
+  ],
+  "engines": {
+    "node": ">=4"
+  }
+}

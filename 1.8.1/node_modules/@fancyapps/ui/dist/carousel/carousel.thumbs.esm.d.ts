@@ -1,0 +1,1 @@
+export * from "../../types/Carousel/plugins/Thumbs/Thumbs";

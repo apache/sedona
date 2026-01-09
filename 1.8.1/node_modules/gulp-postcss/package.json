@@ -1,0 +1,61 @@
+{
+  "name": "gulp-postcss",
+  "nyc": {
+    "lines": 100,
+    "statements": 100,
+    "functions": 100,
+    "branches": 100,
+    "reporter": [
+      "lcov",
+      "text"
+    ],
+    "cache": true,
+    "all": true,
+    "check-coverage": true
+  },
+  "version": "10.0.0",
+  "description": "PostCSS gulp plugin",
+  "main": "index.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "pretest": "eslint *.js",
+    "test": "nyc mocha test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/postcss/gulp-postcss.git"
+  },
+  "keywords": [
+    "gulpplugin",
+    "postcss",
+    "postcss-runner",
+    "css"
+  ],
+  "author": "Andrey Kuzmin <unsoundscapes@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/postcss/gulp-postcss/issues"
+  },
+  "homepage": "https://github.com/postcss/gulp-postcss",
+  "dependencies": {
+    "fancy-log": "^2.0.0",
+    "plugin-error": "^2.0.1",
+    "postcss-load-config": "^5.0.0",
+    "vinyl-sourcemaps-apply": "^0.2.1"
+  },
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "gulp-sourcemaps": "^2.6.5",
+    "mocha": "^10.2.0",
+    "nyc": "^15.1.0",
+    "postcss": "^8.0.0",
+    "proxyquire": "^2.1.0",
+    "sinon": "^6.3.5",
+    "vinyl": "^2.2.0"
+  },
+  "peerDependencies": {
+    "postcss": "^8.0.0"
+  }
+}

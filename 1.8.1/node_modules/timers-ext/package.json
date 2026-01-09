@@ -1,0 +1,97 @@
+{
+	"name": "timers-ext",
+	"version": "0.1.8",
+	"description": "Timers extensions",
+	"author": "Mariusz Nowak <medyk@medikoo.com> (http://www.medikoo.com/)",
+	"repository": "medikoo/timers-ext",
+	"keywords": [
+		"timeout",
+		"delay",
+		"interval",
+		"time",
+		"timer",
+		"timers"
+	],
+	"dependencies": {
+		"es5-ext": "^0.10.64",
+		"next-tick": "^1.1.0"
+	},
+	"devDependencies": {
+		"eslint": "^8.57.0",
+		"eslint-config-medikoo": "^4.2.0",
+		"git-list-updated": "^1.2.1",
+		"github-release-from-cc-changelog": "^2.3.0",
+		"husky": "^4.3.8",
+		"lint-staged": "^15.2.5",
+		"nyc": "^15.1.0",
+		"prettier-elastic": "^3.2.5",
+		"tad": "^3.1.1"
+	},
+	"husky": {
+		"hooks": {
+			"pre-commit": "lint-staged"
+		}
+	},
+	"lint-staged": {
+		"*.js": [
+			"eslint"
+		],
+		"*.{css,html,js,json,md,yaml,yml}": [
+			"prettier -c"
+		]
+	},
+	"eslintConfig": {
+		"extends": "medikoo/es5",
+		"root": true,
+		"globals": {
+			"clearInterval": true,
+			"clearTimeout": true,
+			"setInterval": true,
+			"setTimeout": true
+		}
+	},
+	"prettier": {
+		"printWidth": 100,
+		"tabWidth": 4,
+		"trailingComma": "none",
+		"overrides": [
+			{
+				"files": [
+					"*.md",
+					"*.yml"
+				],
+				"options": {
+					"tabWidth": 2
+				}
+			}
+		]
+	},
+	"nyc": {
+		"all": true,
+		"exclude": [
+			".github",
+			"coverage/**",
+			"test/**",
+			"*.config.js"
+		],
+		"reporter": [
+			"lcov",
+			"html",
+			"text-summary"
+		]
+	},
+	"scripts": {
+		"coverage": "nyc npm test",
+		"lint": "eslint --ignore-path=.gitignore .",
+		"lint:updated": "pipe-git-updated --base=main --ext=js -- eslint --ignore-pattern '!*'",
+		"prettier-check": "prettier -c --ignore-path .gitignore \"**/*.{css,html,js,json,md,yaml,yml}\"",
+		"prettier-check:updated": "pipe-git-updated --base=main --ext=css --ext=html --ext=js --ext=json --ext=md --ext=yaml --ext=yml -- prettier -c",
+		"prettify": "prettier --write --ignore-path .gitignore \"**/*.{css,html,js,json,md,yaml,yml}\"",
+		"prettify:updated": "pipe-git-updated ---base=main -ext=css --ext=html --ext=js --ext=json --ext=md --ext=yaml --ext=yml -- prettier --write",
+		"test": "tad"
+	},
+	"engines": {
+		"node": ">=0.12"
+	},
+	"license": "ISC"
+}

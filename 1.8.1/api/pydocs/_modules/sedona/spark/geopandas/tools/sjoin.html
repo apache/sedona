@@ -1,0 +1,868 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>sedona.spark.geopandas.tools.sjoin &mdash; Apache Sedona Python Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/custom.css" />
+
+  
+      <script src="../../../../../_static/jquery.js"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+      <script src="../../../../../_static/doctools.js"></script>
+      <script src="../../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+     
+    <!-- Google Fonts for Apache Sedona styling -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Additional meta tags for better rendering -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1565c0">
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #ff5722" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            Apache Sedona Python
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../modules.html">sedona</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.html">sedona package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.core.html">sedona.core package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.flink.html">sedona.flink package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.geoarrow.html">sedona.geoarrow package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.maps.html">sedona.maps package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.raster.html">sedona.raster package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.raster_utils.html">sedona.raster_utils package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.register.html">sedona.register package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.html">sedona.spark package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.sql.html">sedona.sql package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.stac.html">sedona.stac package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.stats.html">sedona.stats package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.utils.html">sedona.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.html#module-sedona.exceptions">sedona.exceptions module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.html#sedona.exceptions.InvalidParametersException"><code class="docutils literal notranslate"><span class="pre">InvalidParametersException</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.html#module-sedona.version">sedona.version module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.html#module-sedona">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../sedona.flink.html">sedona.flink package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.flink.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.flink.html#module-sedona.flink.context">sedona.flink.context module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.flink.html#sedona.flink.context.SedonaContext"><code class="docutils literal notranslate"><span class="pre">SedonaContext</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.flink.html#sedona.flink.context.SedonaContext.create"><code class="docutils literal notranslate"><span class="pre">SedonaContext.create()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.flink.html#module-sedona.flink">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../sedona.spark.html">sedona.spark package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.spark.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.core.html">sedona.spark.core package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.core.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.core.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.core.html#module-sedona.spark.core.utils">sedona.spark.core.utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.core.html#module-sedona.spark.core">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.geoarrow.html">sedona.spark.geoarrow package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geoarrow.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geoarrow.html#module-sedona.spark.geoarrow.geoarrow">sedona.spark.geoarrow.geoarrow module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geoarrow.html#module-sedona.spark.geoarrow">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.geopandas.html">sedona.spark.geopandas package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html">sedona.spark.geopandas core</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.io.html">sedona.spark.geopandas.io</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.tools.html">sedona.spark.geopandas.tools</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.maps.html">sedona.spark.maps package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.maps.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.maps.html#module-sedona.spark.maps.SedonaKepler">sedona.spark.maps.SedonaKepler module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.maps.html#module-sedona.spark.maps.SedonaMapUtils">sedona.spark.maps.SedonaMapUtils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.maps.html#module-sedona.spark.maps.SedonaPyDeck">sedona.spark.maps.SedonaPyDeck module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.maps.html#module-sedona.spark.maps">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.raster.html">sedona.spark.raster package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#module-sedona.spark.raster.awt_raster">sedona.spark.raster.awt_raster module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#module-sedona.spark.raster.data_buffer">sedona.spark.raster.data_buffer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#module-sedona.spark.raster.meta">sedona.spark.raster.meta module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#module-sedona.spark.raster.raster_serde">sedona.spark.raster.raster_serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#module-sedona.spark.raster.sample_model">sedona.spark.raster.sample_model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#module-sedona.spark.raster.sedona_raster">sedona.spark.raster.sedona_raster module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#module-sedona.spark.raster">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.raster_utils.html">sedona.spark.raster_utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster_utils.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster_utils.html#module-sedona.spark.raster_utils.SedonaUtils">sedona.spark.raster_utils.SedonaUtils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster_utils.html#module-sedona.spark.raster_utils">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.register.html">sedona.spark.register package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.register.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.register.html#module-sedona.spark.register.geo_registrator">sedona.spark.register.geo_registrator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.register.html#module-sedona.spark.register.java_libs">sedona.spark.register.java_libs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.register.html#module-sedona.spark.register">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.sql.html">sedona.spark.sql package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#sedona-spark-sql-connect-module">sedona.spark.sql.connect module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.dataframe_api">sedona.spark.sql.dataframe_api module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.exceptions">sedona.spark.sql.exceptions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.functions">sedona.spark.sql.functions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.st_aggregates">sedona.spark.sql.st_aggregates module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.st_constructors">sedona.spark.sql.st_constructors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.st_functions">sedona.spark.sql.st_functions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.st_predicates">sedona.spark.sql.st_predicates module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.types">sedona.spark.sql.types module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.stac.html">sedona.spark.stac package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stac.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stac.html#module-sedona.spark.stac.client">sedona.spark.stac.client module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stac.html#module-sedona.spark.stac.collection_client">sedona.spark.stac.collection_client module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stac.html#module-sedona.spark.stac">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.stats.html">sedona.spark.stats package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stats.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stats.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stats.html#module-sedona.spark.stats.weighting">sedona.spark.stats.weighting module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stats.html#module-sedona.spark.stats">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.utils.html">sedona.spark.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.abstract_parser">sedona.spark.utils.abstract_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.adapter">sedona.spark.utils.adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.binary_parser">sedona.spark.utils.binary_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.decorators">sedona.spark.utils.decorators module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.geometry_adapter">sedona.spark.utils.geometry_adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.geometry_serde">sedona.spark.utils.geometry_serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.geometry_serde_general">sedona.spark.utils.geometry_serde_general module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.geomserde_speedup">sedona.spark.utils.geomserde_speedup module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.jvm">sedona.spark.utils.jvm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.meta">sedona.spark.utils.meta module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.prep">sedona.spark.utils.prep module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.serde">sedona.spark.utils.serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.spatial_rdd_parser">sedona.spark.utils.spatial_rdd_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.structured_adapter">sedona.spark.utils.structured_adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.types">sedona.spark.utils.types module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.spark.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.spark.html#module-sedona.spark.SedonaContext">sedona.spark.SedonaContext module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext"><code class="docutils literal notranslate"><span class="pre">SedonaContext</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.__init__"><code class="docutils literal notranslate"><span class="pre">SedonaContext.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.builder"><code class="docutils literal notranslate"><span class="pre">SedonaContext.builder()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.create"><code class="docutils literal notranslate"><span class="pre">SedonaContext.create()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.spark.html#module-sedona.spark">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../sedona.spark.geopandas.html">sedona.spark.geopandas package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html">sedona.spark.geopandas core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries"><code class="docutils literal notranslate"><span class="pre">GeoSeries</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.__init__"><code class="docutils literal notranslate"><span class="pre">GeoSeries.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.area"><code class="docutils literal notranslate"><span class="pre">GeoSeries.area</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.boundary"><code class="docutils literal notranslate"><span class="pre">GeoSeries.boundary</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.bounds"><code class="docutils literal notranslate"><span class="pre">GeoSeries.bounds</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.buffer"><code class="docutils literal notranslate"><span class="pre">GeoSeries.buffer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.centroid"><code class="docutils literal notranslate"><span class="pre">GeoSeries.centroid</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.clip"><code class="docutils literal notranslate"><span class="pre">GeoSeries.clip()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.concave_hull"><code class="docutils literal notranslate"><span class="pre">GeoSeries.concave_hull()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.contains"><code class="docutils literal notranslate"><span class="pre">GeoSeries.contains()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.contains_properly"><code class="docutils literal notranslate"><span class="pre">GeoSeries.contains_properly()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.convex_hull"><code class="docutils literal notranslate"><span class="pre">GeoSeries.convex_hull</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.copy"><code class="docutils literal notranslate"><span class="pre">GeoSeries.copy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.count_coordinates"><code class="docutils literal notranslate"><span class="pre">GeoSeries.count_coordinates()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.count_geometries"><code class="docutils literal notranslate"><span class="pre">GeoSeries.count_geometries()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.count_interior_rings"><code class="docutils literal notranslate"><span class="pre">GeoSeries.count_interior_rings()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.covered_by"><code class="docutils literal notranslate"><span class="pre">GeoSeries.covered_by()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.covers"><code class="docutils literal notranslate"><span class="pre">GeoSeries.covers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.crosses"><code class="docutils literal notranslate"><span class="pre">GeoSeries.crosses()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.crs"><code class="docutils literal notranslate"><span class="pre">GeoSeries.crs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.delaunay_triangles"><code class="docutils literal notranslate"><span class="pre">GeoSeries.delaunay_triangles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.difference"><code class="docutils literal notranslate"><span class="pre">GeoSeries.difference()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.disjoint"><code class="docutils literal notranslate"><span class="pre">GeoSeries.disjoint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.distance"><code class="docutils literal notranslate"><span class="pre">GeoSeries.distance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.dwithin"><code class="docutils literal notranslate"><span class="pre">GeoSeries.dwithin()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.envelope"><code class="docutils literal notranslate"><span class="pre">GeoSeries.envelope</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.estimate_utm_crs"><code class="docutils literal notranslate"><span class="pre">GeoSeries.estimate_utm_crs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.explode"><code class="docutils literal notranslate"><span class="pre">GeoSeries.explode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.exterior"><code class="docutils literal notranslate"><span class="pre">GeoSeries.exterior</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.extract_unique_points"><code class="docutils literal notranslate"><span class="pre">GeoSeries.extract_unique_points()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.fillna"><code class="docutils literal notranslate"><span class="pre">GeoSeries.fillna()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.force_2d"><code class="docutils literal notranslate"><span class="pre">GeoSeries.force_2d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.force_3d"><code class="docutils literal notranslate"><span class="pre">GeoSeries.force_3d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.from_arrow"><code class="docutils literal notranslate"><span class="pre">GeoSeries.from_arrow()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.from_file"><code class="docutils literal notranslate"><span class="pre">GeoSeries.from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.from_shapely"><code class="docutils literal notranslate"><span class="pre">GeoSeries.from_shapely()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.from_wkb"><code class="docutils literal notranslate"><span class="pre">GeoSeries.from_wkb()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.from_wkt"><code class="docutils literal notranslate"><span class="pre">GeoSeries.from_wkt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.from_xy"><code class="docutils literal notranslate"><span class="pre">GeoSeries.from_xy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.geom_type"><code class="docutils literal notranslate"><span class="pre">GeoSeries.geom_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.geometry"><code class="docutils literal notranslate"><span class="pre">GeoSeries.geometry</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.get_geometry"><code class="docutils literal notranslate"><span class="pre">GeoSeries.get_geometry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.get_precision"><code class="docutils literal notranslate"><span class="pre">GeoSeries.get_precision()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.has_sindex"><code class="docutils literal notranslate"><span class="pre">GeoSeries.has_sindex</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.has_z"><code class="docutils literal notranslate"><span class="pre">GeoSeries.has_z</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.interiors"><code class="docutils literal notranslate"><span class="pre">GeoSeries.interiors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.intersection"><code class="docutils literal notranslate"><span class="pre">GeoSeries.intersection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.intersection_all"><code class="docutils literal notranslate"><span class="pre">GeoSeries.intersection_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.intersects"><code class="docutils literal notranslate"><span class="pre">GeoSeries.intersects()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.is_ccw"><code class="docutils literal notranslate"><span class="pre">GeoSeries.is_ccw</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.is_closed"><code class="docutils literal notranslate"><span class="pre">GeoSeries.is_closed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.is_empty"><code class="docutils literal notranslate"><span class="pre">GeoSeries.is_empty</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.is_ring"><code class="docutils literal notranslate"><span class="pre">GeoSeries.is_ring</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.is_simple"><code class="docutils literal notranslate"><span class="pre">GeoSeries.is_simple</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.is_valid"><code class="docutils literal notranslate"><span class="pre">GeoSeries.is_valid</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.is_valid_reason"><code class="docutils literal notranslate"><span class="pre">GeoSeries.is_valid_reason()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.isna"><code class="docutils literal notranslate"><span class="pre">GeoSeries.isna()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.isnull"><code class="docutils literal notranslate"><span class="pre">GeoSeries.isnull()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.length"><code class="docutils literal notranslate"><span class="pre">GeoSeries.length</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.line_merge"><code class="docutils literal notranslate"><span class="pre">GeoSeries.line_merge()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.m"><code class="docutils literal notranslate"><span class="pre">GeoSeries.m</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.make_valid"><code class="docutils literal notranslate"><span class="pre">GeoSeries.make_valid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.minimum_bounding_circle"><code class="docutils literal notranslate"><span class="pre">GeoSeries.minimum_bounding_circle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.minimum_bounding_radius"><code class="docutils literal notranslate"><span class="pre">GeoSeries.minimum_bounding_radius()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.minimum_clearance"><code class="docutils literal notranslate"><span class="pre">GeoSeries.minimum_clearance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.minimum_rotated_rectangle"><code class="docutils literal notranslate"><span class="pre">GeoSeries.minimum_rotated_rectangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.normalize"><code class="docutils literal notranslate"><span class="pre">GeoSeries.normalize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.notna"><code class="docutils literal notranslate"><span class="pre">GeoSeries.notna()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.notnull"><code class="docutils literal notranslate"><span class="pre">GeoSeries.notnull()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.offset_curve"><code class="docutils literal notranslate"><span class="pre">GeoSeries.offset_curve()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.overlaps"><code class="docutils literal notranslate"><span class="pre">GeoSeries.overlaps()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.plot"><code class="docutils literal notranslate"><span class="pre">GeoSeries.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.relate"><code class="docutils literal notranslate"><span class="pre">GeoSeries.relate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.remove_repeated_points"><code class="docutils literal notranslate"><span class="pre">GeoSeries.remove_repeated_points()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.representative_point"><code class="docutils literal notranslate"><span class="pre">GeoSeries.representative_point()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.reverse"><code class="docutils literal notranslate"><span class="pre">GeoSeries.reverse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.segmentize"><code class="docutils literal notranslate"><span class="pre">GeoSeries.segmentize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.set_crs"><code class="docutils literal notranslate"><span class="pre">GeoSeries.set_crs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.set_precision"><code class="docutils literal notranslate"><span class="pre">GeoSeries.set_precision()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.simplify"><code class="docutils literal notranslate"><span class="pre">GeoSeries.simplify()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.sindex"><code class="docutils literal notranslate"><span class="pre">GeoSeries.sindex</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.snap"><code class="docutils literal notranslate"><span class="pre">GeoSeries.snap()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.symmetric_difference"><code class="docutils literal notranslate"><span class="pre">GeoSeries.symmetric_difference()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_arrow"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_arrow()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_crs"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_crs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_file"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_geoframe"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_geoframe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_geopandas"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_geopandas()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_json"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_parquet"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_parquet()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_spark_pandas"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_spark_pandas()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_wkb"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_wkb()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_wkt"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_wkt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.total_bounds"><code class="docutils literal notranslate"><span class="pre">GeoSeries.total_bounds</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.touches"><code class="docutils literal notranslate"><span class="pre">GeoSeries.touches()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.transform"><code class="docutils literal notranslate"><span class="pre">GeoSeries.transform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.type"><code class="docutils literal notranslate"><span class="pre">GeoSeries.type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.unary_union"><code class="docutils literal notranslate"><span class="pre">GeoSeries.unary_union</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.union"><code class="docutils literal notranslate"><span class="pre">GeoSeries.union()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.union_all"><code class="docutils literal notranslate"><span class="pre">GeoSeries.union_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.voronoi_polygons"><code class="docutils literal notranslate"><span class="pre">GeoSeries.voronoi_polygons()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.within"><code class="docutils literal notranslate"><span class="pre">GeoSeries.within()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.x"><code class="docutils literal notranslate"><span class="pre">GeoSeries.x</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.y"><code class="docutils literal notranslate"><span class="pre">GeoSeries.y</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.z"><code class="docutils literal notranslate"><span class="pre">GeoSeries.z</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.__init__"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.active_geometry_name"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.active_geometry_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.copy"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.copy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.crs"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.crs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_arrow"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.from_arrow()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_dict"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.from_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_features"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.from_features()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_file"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_postgis"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.from_postgis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.geometry"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.geometry</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.iterfeatures"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.iterfeatures()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.plot"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.rename_geometry"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.rename_geometry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.set_crs"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.set_crs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.set_geometry"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.set_geometry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.sjoin"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.sjoin()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_arrow"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_arrow()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_crs"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_crs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_feather"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_feather()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_file"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_geo_dict"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_geo_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_geopandas"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_geopandas()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_json"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_parquet"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_parquet()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_spark_pandas"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_spark_pandas()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_wkb"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_wkb()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_wkt"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_wkt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.type"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.type</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex"><code class="docutils literal notranslate"><span class="pre">SpatialIndex</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex.__init__"><code class="docutils literal notranslate"><span class="pre">SpatialIndex.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex.intersection"><code class="docutils literal notranslate"><span class="pre">SpatialIndex.intersection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex.is_empty"><code class="docutils literal notranslate"><span class="pre">SpatialIndex.is_empty</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex.nearest"><code class="docutils literal notranslate"><span class="pre">SpatialIndex.nearest()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex.query"><code class="docutils literal notranslate"><span class="pre">SpatialIndex.query()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex.size"><code class="docutils literal notranslate"><span class="pre">SpatialIndex.size</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.spark.geopandas.io.html">sedona.spark.geopandas.io</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.geopandas.io.html#sedona.spark.geopandas.io.read_file"><code class="docutils literal notranslate"><span class="pre">read_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.geopandas.io.html#sedona.spark.geopandas.io.read_parquet"><code class="docutils literal notranslate"><span class="pre">read_parquet()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.spark.geopandas.tools.html">sedona.spark.geopandas.tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.geopandas.tools.html#sedona.spark.geopandas.tools.sjoin.sjoin"><code class="docutils literal notranslate"><span class="pre">sjoin()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../sedona.stac.html">sedona.stac package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.stac.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.stac.html#module-sedona.stac.client">sedona.stac.client module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.stac.html#module-sedona.stac.collection_client">sedona.stac.collection_client module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.stac.html#module-sedona.stac">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../sedona.stats.html">sedona.stats package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.stats.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.stats.clustering.html">sedona.stats.clustering package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.stats.clustering.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.stats.clustering.html#module-sedona.stats.clustering">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.stats.hotspot_detection.html">sedona.stats.hotspot_detection package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.stats.hotspot_detection.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.stats.hotspot_detection.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.stats.hotspot_detection.html#module-sedona.stats.hotspot_detection.getis_ord">sedona.stats.hotspot_detection.getis_ord module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.stats.hotspot_detection.html#module-sedona.stats.hotspot_detection">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.stats.outlier_detection.html">sedona.stats.outlier_detection package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.stats.outlier_detection.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.stats.outlier_detection.html#module-sedona.stats.outlier_detection">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.stats.weighting.html">sedona.stats.weighting package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.stats.weighting.html#module-sedona.stats.weighting">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.stats.html#module-sedona.stats">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../sedona.utils.html">sedona.utils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.utils.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.utils.structured_adapter.html">sedona.utils.structured_adapter package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.utils.structured_adapter.html#module-sedona.utils.structured_adapter">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.utils.html#module-sedona.utils.adapter">sedona.utils.adapter module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.utils.html#module-sedona.utils.spatial_rdd_parser">sedona.utils.spatial_rdd_parser module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.utils.html#module-sedona.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #ff5722" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">Apache Sedona Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">sedona.spark.geopandas.tools.sjoin</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    <div class="sedona-content-wrapper">
+        
+           <div itemprop="articleBody">
+             
+  <h1>Source code for sedona.spark.geopandas.tools.sjoin</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Licensed to the Apache Software Foundation (ASF) under one</span>
+<span class="c1"># or more contributor license agreements.  See the NOTICE file</span>
+<span class="c1"># distributed with this work for additional information</span>
+<span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
+<span class="c1"># to you under the Apache License, Version 2.0 (the</span>
+<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># with the License.  You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing,</span>
+<span class="c1"># software distributed under the License is distributed on an</span>
+<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># KIND, either express or implied.  See the License for the</span>
+<span class="c1"># specific language governing permissions and limitations</span>
+<span class="c1"># under the License.</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyspark.pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ps</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.internal</span><span class="w"> </span><span class="kn">import</span> <span class="n">SPARK_DEFAULT_INDEX_NAME</span><span class="p">,</span> <span class="n">InternalFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">scol_for</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">expr</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">GeoSeries</span>
+
+<span class="c1"># Pre-compiled regex pattern for suffix validation.</span>
+<span class="n">SUFFIX_PATTERN</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^[a-zA-Z_][a-zA-Z0-9_]*$&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_frame_join</span><span class="p">(</span>
+    <span class="n">left_df</span><span class="p">:</span> <span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">right_df</span><span class="p">:</span> <span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span>
+    <span class="n">predicate</span><span class="o">=</span><span class="s2">&quot;intersects&quot;</span><span class="p">,</span>
+    <span class="n">lsuffix</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+    <span class="n">rsuffix</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span>
+    <span class="n">distance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">on_attribute</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Join the GeoDataFrames at the DataFrame level.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    left_df : GeoDataFrame</span>
+<span class="sd">        Left dataset to join</span>
+<span class="sd">    right_df : GeoDataFrame</span>
+<span class="sd">        Right dataset to join</span>
+<span class="sd">    how : str, default &#39;inner&#39;</span>
+<span class="sd">        Join type: &#39;inner&#39;, &#39;left&#39;, &#39;right&#39;</span>
+<span class="sd">    predicate : str, default &#39;intersects&#39;</span>
+<span class="sd">        Spatial predicate to use</span>
+<span class="sd">    lsuffix : str, default &#39;left&#39;</span>
+<span class="sd">        Suffix for left overlapping columns</span>
+<span class="sd">    rsuffix : str, default &#39;right&#39;</span>
+<span class="sd">        Suffix for right overlapping columns</span>
+<span class="sd">    distance : float, optional</span>
+<span class="sd">        Distance parameter for dwithin predicate</span>
+<span class="sd">    on_attribute : list, optional</span>
+<span class="sd">        Additional columns to join on</span>
+
+<span class="sd">    Note: Unlike GeoPandas, Sedona does not preserve key order for performance reasons. Consider using .sort_index() after the join, if you need to preserve the order.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    GeoDataFrame or GeoSeries</span>
+<span class="sd">        Joined result</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Predicate mapping.</span>
+    <span class="n">predicate_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;intersects&quot;</span><span class="p">:</span> <span class="s2">&quot;ST_Intersects&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;contains&quot;</span><span class="p">:</span> <span class="s2">&quot;ST_Contains&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;within&quot;</span><span class="p">:</span> <span class="s2">&quot;ST_Within&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;touches&quot;</span><span class="p">:</span> <span class="s2">&quot;ST_Touches&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;crosses&quot;</span><span class="p">:</span> <span class="s2">&quot;ST_Crosses&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;overlaps&quot;</span><span class="p">:</span> <span class="s2">&quot;ST_Overlaps&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dwithin&quot;</span><span class="p">:</span> <span class="s2">&quot;ST_DWithin&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;covers&quot;</span><span class="p">:</span> <span class="s2">&quot;ST_Covers&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;covered_by&quot;</span><span class="p">:</span> <span class="s2">&quot;ST_CoveredBy&quot;</span><span class="p">,</span>
+        <span class="c1"># &quot;contains_properly&quot;: &quot;ST_ContainsProperly&quot;,  # Not supported by Sedona yet.</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">predicate</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">predicate_map</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Predicate &#39;</span><span class="si">{</span><span class="n">predicate</span><span class="si">}</span><span class="s2">&#39; not supported. Available: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">predicate_map</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">spatial_func</span> <span class="o">=</span> <span class="n">predicate_map</span><span class="p">[</span><span class="n">predicate</span><span class="p">]</span>
+
+    <span class="c1"># Get the internal Spark DataFrames.</span>
+    <span class="n">left_sdf</span> <span class="o">=</span> <span class="n">left_df</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span>
+    <span class="n">right_sdf</span> <span class="o">=</span> <span class="n">right_df</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span>
+
+    <span class="c1"># Handle geometry columns - check if they exist and get proper column names.</span>
+    <span class="n">left_geom_col</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">right_geom_col</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># Find geometry columns in left DataFrame.</span>
+    <span class="n">left_geom_col</span> <span class="o">=</span> <span class="n">left_df</span><span class="o">.</span><span class="n">active_geometry_name</span>
+
+    <span class="c1"># Find geometry columns in right DataFrame.</span>
+    <span class="n">right_geom_col</span> <span class="o">=</span> <span class="n">right_df</span><span class="o">.</span><span class="n">active_geometry_name</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">left_geom_col</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Left DataFrame geometry column not set&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">right_geom_col</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Right DataFrame geometry column not set&quot;</span><span class="p">)</span>
+
+    <span class="n">left_geom_expr</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">left_geom_col</span><span class="si">}</span><span class="s2">` as l_geometry&quot;</span>
+    <span class="n">right_geom_expr</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">right_geom_col</span><span class="si">}</span><span class="s2">` as r_geometry&quot;</span>
+
+    <span class="c1"># Select all columns with geometry.</span>
+    <span class="n">left_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">left_geom_expr</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span>
+        <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">` as l_</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">left_sdf</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">fields</span>
+        <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">left_geom_col</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="n">right_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">right_geom_expr</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span>
+        <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">` as r_</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">right_sdf</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">fields</span>
+        <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">right_geom_col</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="n">left_geo_df</span> <span class="o">=</span> <span class="n">left_sdf</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+        <span class="o">*</span><span class="n">left_cols</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">SPARK_DEFAULT_INDEX_NAME</span><span class="si">}</span><span class="s2">` as index_</span><span class="si">{</span><span class="n">lsuffix</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+    <span class="n">right_geo_df</span> <span class="o">=</span> <span class="n">right_sdf</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+        <span class="o">*</span><span class="n">right_cols</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">SPARK_DEFAULT_INDEX_NAME</span><span class="si">}</span><span class="s2">` as index_</span><span class="si">{</span><span class="n">rsuffix</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Build spatial join condition.</span>
+    <span class="k">if</span> <span class="n">predicate</span> <span class="o">==</span> <span class="s2">&quot;dwithin&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">distance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Distance parameter is required for &#39;dwithin&#39; predicate&quot;</span><span class="p">)</span>
+        <span class="n">spatial_condition</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">spatial_func</span><span class="si">}</span><span class="s2">(l_geometry, r_geometry, </span><span class="si">{</span><span class="n">distance</span><span class="si">}</span><span class="s2">)&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">spatial_condition</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">spatial_func</span><span class="si">}</span><span class="s2">(l_geometry, r_geometry)&quot;</span>
+
+    <span class="c1"># Add attribute-based join condition if specified.</span>
+    <span class="n">join_condition</span> <span class="o">=</span> <span class="n">spatial_condition</span>
+    <span class="k">if</span> <span class="n">on_attribute</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">on_attribute</span><span class="p">:</span>
+            <span class="n">join_condition</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; AND l_</span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2"> = r_</span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="c1"># Perform spatial join based on join type.</span>
+    <span class="k">if</span> <span class="n">how</span> <span class="o">==</span> <span class="s2">&quot;inner&quot;</span><span class="p">:</span>
+        <span class="n">spatial_join_df</span> <span class="o">=</span> <span class="n">left_geo_df</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;l&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">right_geo_df</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;r&quot;</span><span class="p">),</span> <span class="n">expr</span><span class="p">(</span><span class="n">join_condition</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">how</span> <span class="o">==</span> <span class="s2">&quot;left&quot;</span><span class="p">:</span>
+        <span class="n">spatial_join_df</span> <span class="o">=</span> <span class="n">left_geo_df</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;l&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">right_geo_df</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;r&quot;</span><span class="p">),</span> <span class="n">expr</span><span class="p">(</span><span class="n">join_condition</span><span class="p">),</span> <span class="s2">&quot;left&quot;</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">how</span> <span class="o">==</span> <span class="s2">&quot;right&quot;</span><span class="p">:</span>
+        <span class="n">spatial_join_df</span> <span class="o">=</span> <span class="n">left_geo_df</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;l&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">right_geo_df</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;r&quot;</span><span class="p">),</span> <span class="n">expr</span><span class="p">(</span><span class="n">join_condition</span><span class="p">),</span> <span class="s2">&quot;right&quot;</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Join type &#39;</span><span class="si">{</span><span class="n">how</span><span class="si">}</span><span class="s2">&#39; not supported&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Pick which index to use for the resulting df&#39;s index based on &#39;how&#39;.</span>
+    <span class="n">index_col</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;index_</span><span class="si">{</span><span class="n">lsuffix</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">how</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span> <span class="s2">&quot;left&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;index_</span><span class="si">{</span><span class="n">rsuffix</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="c1"># Handle column naming with suffixes.</span>
+    <span class="n">final_columns</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Add geometry column (always from left for GeoPandas compatibility).</span>
+    <span class="n">final_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;l_geometry as geometry&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Add other columns with suffix handling.</span>
+    <span class="n">left_data_cols</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">col</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">left_geo_df</span><span class="o">.</span><span class="n">columns</span>
+        <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;l_geometry&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;index_</span><span class="si">{</span><span class="n">lsuffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+    <span class="p">]</span>
+    <span class="n">right_data_cols</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">col</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">right_geo_df</span><span class="o">.</span><span class="n">columns</span>
+        <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;r_geometry&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;index_</span><span class="si">{</span><span class="n">rsuffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+    <span class="p">]</span>
+
+    <span class="n">final_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">index_col</span><span class="si">}</span><span class="s2"> as </span><span class="si">{</span><span class="n">SPARK_DEFAULT_INDEX_NAME</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">index_col</span> <span class="o">!=</span> <span class="sa">f</span><span class="s2">&quot;index_</span><span class="si">{</span><span class="n">lsuffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span>
+        <span class="n">final_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;index_</span><span class="si">{</span><span class="n">lsuffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">left_data_cols</span><span class="p">:</span>
+        <span class="n">base_name</span> <span class="o">=</span> <span class="n">col_name</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>  <span class="c1"># Remove &quot;l_&quot; prefix</span>
+        <span class="n">right_col</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;r_</span><span class="si">{</span><span class="n">base_name</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="k">if</span> <span class="n">right_col</span> <span class="ow">in</span> <span class="n">right_data_cols</span><span class="p">:</span>
+            <span class="c1"># Column exists in both - apply suffixes.</span>
+            <span class="n">final_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">col_name</span><span class="si">}</span><span class="s2"> as </span><span class="si">{</span><span class="n">base_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">lsuffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Column only in left.</span>
+            <span class="n">final_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">col_name</span><span class="si">}</span><span class="s2"> as </span><span class="si">{</span><span class="n">base_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">index_col</span> <span class="o">!=</span> <span class="sa">f</span><span class="s2">&quot;index_</span><span class="si">{</span><span class="n">rsuffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span>
+        <span class="n">final_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;index_</span><span class="si">{</span><span class="n">rsuffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">right_data_cols</span><span class="p">:</span>
+        <span class="n">base_name</span> <span class="o">=</span> <span class="n">col_name</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>  <span class="c1"># Remove &quot;r_&quot; prefix</span>
+        <span class="n">left_col</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;l_</span><span class="si">{</span><span class="n">base_name</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="k">if</span> <span class="n">left_col</span> <span class="ow">in</span> <span class="n">left_data_cols</span><span class="p">:</span>
+            <span class="c1"># Column exists in both - apply suffixes.</span>
+            <span class="n">final_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">col_name</span><span class="si">}</span><span class="s2"> as </span><span class="si">{</span><span class="n">base_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">rsuffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Column only in right.</span>
+            <span class="n">final_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">col_name</span><span class="si">}</span><span class="s2"> as </span><span class="si">{</span><span class="n">base_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Select final columns.</span>
+    <span class="n">result_df</span> <span class="o">=</span> <span class="n">spatial_join_df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="o">*</span><span class="n">final_columns</span><span class="p">)</span>
+    <span class="c1"># Note, we do not .orderBy(SPARK_DEFAULT_INDEX_NAME) to avoid a performance hit.</span>
+
+    <span class="n">data_spark_columns</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">scol_for</span><span class="p">(</span><span class="n">result_df</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">result_df</span><span class="o">.</span><span class="n">columns</span>
+        <span class="k">if</span> <span class="n">col</span> <span class="o">!=</span> <span class="n">SPARK_DEFAULT_INDEX_NAME</span>
+    <span class="p">]</span>
+
+    <span class="n">internal</span> <span class="o">=</span> <span class="n">InternalFrame</span><span class="p">(</span>
+        <span class="n">spark_frame</span><span class="o">=</span><span class="n">result_df</span><span class="p">,</span>
+        <span class="n">index_spark_columns</span><span class="o">=</span><span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">result_df</span><span class="p">,</span> <span class="n">SPARK_DEFAULT_INDEX_NAME</span><span class="p">)],</span>
+        <span class="n">data_spark_columns</span><span class="o">=</span><span class="n">data_spark_columns</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">ps</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">internal</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="sjoin"><a class="viewcode-back" href="../../../../../sedona.spark.geopandas.tools.html#sedona.spark.geopandas.tools.sjoin.sjoin">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">sjoin</span><span class="p">(</span>
+    <span class="n">left_df</span><span class="p">:</span> <span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">right_df</span><span class="p">:</span> <span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span>
+    <span class="n">predicate</span><span class="o">=</span><span class="s2">&quot;intersects&quot;</span><span class="p">,</span>
+    <span class="n">lsuffix</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+    <span class="n">rsuffix</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span>
+    <span class="n">distance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">on_attribute</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Spatial join of two GeoDataFrames.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    left_df, right_df : GeoDataFrames</span>
+<span class="sd">    how : string, default &#39;inner&#39;</span>
+<span class="sd">        The type of join:</span>
+
+<span class="sd">        * &#39;left&#39;: use keys from left_df; retain only left_df geometry column</span>
+<span class="sd">        * &#39;right&#39;: use keys from right_df; retain only right_df geometry column</span>
+<span class="sd">        * &#39;inner&#39;: use intersection of keys from both dfs; retain only</span>
+<span class="sd">          left_df geometry column</span>
+<span class="sd">    predicate : string, default &#39;intersects&#39;</span>
+<span class="sd">        Binary predicate. Valid values are determined by the spatial index used.</span>
+<span class="sd">        You can check the valid values in left_df or right_df as</span>
+<span class="sd">        ``left_df.sindex.valid_query_predicates`` or</span>
+<span class="sd">        ``right_df.sindex.valid_query_predicates``</span>
+<span class="sd">        Replaces deprecated ``op`` parameter.</span>
+<span class="sd">    lsuffix : string, default &#39;left&#39;</span>
+<span class="sd">        Suffix to apply to overlapping column names (left GeoDataFrame).</span>
+<span class="sd">    rsuffix : string, default &#39;right&#39;</span>
+<span class="sd">        Suffix to apply to overlapping column names (right GeoDataFrame).</span>
+<span class="sd">    distance : number or array_like, optional</span>
+<span class="sd">        Distance(s) around each input geometry within which to query the tree</span>
+<span class="sd">        for the &#39;dwithin&#39; predicate. If array_like, must be</span>
+<span class="sd">        one-dimensional with length equal to length of left GeoDataFrame.</span>
+<span class="sd">        Required if ``predicate=&#39;dwithin&#39;``.</span>
+<span class="sd">    on_attribute : string, list or tuple</span>
+<span class="sd">        Column name(s) to join on as an additional join restriction on top</span>
+<span class="sd">        of the spatial predicate. These must be found in both DataFrames.</span>
+<span class="sd">        If set, observations are joined only if the predicate applies</span>
+<span class="sd">        and values in specified columns match.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    GeoDataFrame</span>
+<span class="sd">        The joined GeoDataFrame.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from sedona.spark.geopandas.tools import sjoin</span>
+<span class="sd">    &gt;&gt;&gt; groceries_w_communities = sjoin(groceries, chicago)</span>
+<span class="sd">    &gt;&gt;&gt; groceries_w_communities.head()  # doctest: +SKIP</span>
+<span class="sd">       OBJECTID       community                           geometry</span>
+<span class="sd">    0        16          UPTOWN  MULTIPOINT ((-87.65661 41.97321))</span>
+<span class="sd">    1        18     MORGAN PARK  MULTIPOINT ((-87.68136 41.69713))</span>
+<span class="sd">    2        22  NEAR WEST SIDE  MULTIPOINT ((-87.63918 41.86847))</span>
+<span class="sd">    3        23  NEAR WEST SIDE  MULTIPOINT ((-87.65495 41.87783))</span>
+<span class="sd">    4        27         CHATHAM  MULTIPOINT ((-87.62715 41.73623))</span>
+<span class="sd">    [5 rows x 95 columns]</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Every operation in GeoPandas is planar, i.e. the potential third</span>
+<span class="sd">    dimension is not taken into account.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="n">first</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sjoin() got an unexpected keyword argument &#39;</span><span class="si">{</span><span class="n">first</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+
+    <span class="n">on_attribute</span> <span class="o">=</span> <span class="n">_maybe_make_list</span><span class="p">(</span><span class="n">on_attribute</span><span class="p">)</span>
+
+    <span class="n">_basic_checks</span><span class="p">(</span><span class="n">left_df</span><span class="p">,</span> <span class="n">right_df</span><span class="p">,</span> <span class="n">how</span><span class="p">,</span> <span class="n">lsuffix</span><span class="p">,</span> <span class="n">rsuffix</span><span class="p">,</span> <span class="n">on_attribute</span><span class="o">=</span><span class="n">on_attribute</span><span class="p">)</span>
+
+    <span class="n">joined</span> <span class="o">=</span> <span class="n">_frame_join</span><span class="p">(</span>
+        <span class="n">left_df</span><span class="p">,</span>
+        <span class="n">right_df</span><span class="p">,</span>
+        <span class="n">how</span><span class="o">=</span><span class="n">how</span><span class="p">,</span>
+        <span class="n">predicate</span><span class="o">=</span><span class="n">predicate</span><span class="p">,</span>
+        <span class="n">lsuffix</span><span class="o">=</span><span class="n">lsuffix</span><span class="p">,</span>
+        <span class="n">rsuffix</span><span class="o">=</span><span class="n">rsuffix</span><span class="p">,</span>
+        <span class="n">distance</span><span class="o">=</span><span class="n">distance</span><span class="p">,</span>
+        <span class="n">on_attribute</span><span class="o">=</span><span class="n">on_attribute</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">joined</span></div>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_maybe_make_list</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">obj</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">obj</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_basic_checks</span><span class="p">(</span><span class="n">left_df</span><span class="p">,</span> <span class="n">right_df</span><span class="p">,</span> <span class="n">how</span><span class="p">,</span> <span class="n">lsuffix</span><span class="p">,</span> <span class="n">rsuffix</span><span class="p">,</span> <span class="n">on_attribute</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Checks the validity of join input parameters.</span>
+
+<span class="sd">    `how` must be one of the valid options.</span>
+<span class="sd">    `&#39;index_&#39;` concatenated with `lsuffix` or `rsuffix` must not already</span>
+<span class="sd">    exist as columns in the left or right data frames.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ------------</span>
+<span class="sd">    left_df : GeoDataFrame or GeoSeries</span>
+<span class="sd">    right_df : GeoDataFrame or GeoSeries</span>
+<span class="sd">    how : str, one of &#39;left&#39;, &#39;right&#39;, &#39;inner&#39;</span>
+<span class="sd">        join type</span>
+<span class="sd">    lsuffix : str</span>
+<span class="sd">        left index suffix</span>
+<span class="sd">    rsuffix : str</span>
+<span class="sd">        right index suffix</span>
+<span class="sd">    on_attribute : list, default None</span>
+<span class="sd">        list of column names to merge on along with geometry</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">left_df</span><span class="p">,</span> <span class="n">GeoDataFrame</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;left_df&#39; should be GeoDataFrame, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">left_df</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">right_df</span><span class="p">,</span> <span class="n">GeoDataFrame</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;right_df&#39; should be GeoDataFrame, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">right_df</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">allowed_hows</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span> <span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="s2">&quot;right&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">how</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_hows</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;`how` was &quot;</span><span class="si">{</span><span class="n">how</span><span class="si">}</span><span class="s1">&quot; but is expected to be in </span><span class="si">{</span><span class="n">allowed_hows</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Check if on_attribute columns exist in both datasets.</span>
+    <span class="k">if</span> <span class="n">on_attribute</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">on_attribute</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">left_df</span><span class="p">,</span> <span class="s2">&quot;columns&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">attr</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">left_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Column &#39;</span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2">&#39; not found in left dataset&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">right_df</span><span class="p">,</span> <span class="s2">&quot;columns&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">attr</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">right_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Column &#39;</span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2">&#39; not found in right dataset&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check for reserved column names that would conflict.</span>
+    <span class="k">if</span> <span class="n">lsuffix</span> <span class="o">==</span> <span class="n">rsuffix</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;lsuffix and rsuffix cannot be the same&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Validate suffix format (should not contain special characters that would break SQL).</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">SUFFIX_PATTERN</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">lsuffix</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;lsuffix &#39;</span><span class="si">{</span><span class="n">lsuffix</span><span class="si">}</span><span class="s2">&#39; contains invalid characters&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">SUFFIX_PATTERN</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">rsuffix</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;rsuffix &#39;</span><span class="si">{</span><span class="n">rsuffix</span><span class="si">}</span><span class="s2">&#39; contains invalid characters&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_to_geo_series</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">ps</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeoSeries</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the first Series from the DataFrame.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df : ps.Series</span>
+<span class="sd">        The input DataFrame.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    GeoSeries</span>
+<span class="sd">        The first Series from the DataFrame.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+    </div>
+
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Apache Software Foundation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

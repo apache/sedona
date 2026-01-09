@@ -1,0 +1,556 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+          <title>org.apache.sedona:sedona-spark-common-3.4_2.12 1.8.1 API  - org.apache.sedona.core.spatialRDD</title>
+          <meta name="description" content="org.apache.sedona sedona - spark - common - 3.4 2.12 1.8.1 API - org.apache.sedona.core.spatialRDD" />
+          <meta name="keywords" content="org.apache.sedona sedona spark common 3.4 2.12 1.8.1 API org.apache.sedona.core.spatialRDD" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      
+      <link href="../../../../../lib/index.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../../lib/jquery.min.js"></script>
+      <script type="text/javascript" src="../../../../../lib/jquery.panzoom.min.js"></script>
+      <script type="text/javascript" src="../../../../../lib/jquery.mousewheel.min.js"></script>
+      <script type="text/javascript" src="../../../../../lib/index.js"></script>
+      <script type="text/javascript" src="../../../../../index.js"></script>
+      <script type="text/javascript" src="../../../../../lib/scheduler.js"></script>
+      <script type="text/javascript" src="../../../../../lib/template.js"></script>
+      
+      <script type="text/javascript">
+        /* this variable can be used by the JS to determine the path to the root document */
+        var toRoot = '../../../../../';
+      </script>
+    
+        </head>
+        <body>
+      <div id="search">
+        <span id="doc-title">org.apache.sedona:sedona-spark-common-3.4_2.12 1.8.1 API<span id="doc-version"></span></span>
+        <span class="close-results"><span class="left">&lt;</span> Back</span>
+        <div id="textfilter">
+          <span class="input">
+            <input autocapitalize="none" placeholder="Search" id="index-input" type="text" accesskey="/" />
+            <i class="clear material-icons"></i>
+            <i id="search-icon" class="material-icons"></i>
+          </span>
+        </div>
+    </div>
+      <div id="search-results">
+        <div id="search-progress">
+          <div id="progress-fill"></div>
+        </div>
+        <div id="results-content">
+          <div id="entity-results"></div>
+          <div id="member-results"></div>
+        </div>
+      </div>
+      <div id="content-scroll-container" style="-webkit-overflow-scrolling: touch;">
+        <div id="content-container" style="-webkit-overflow-scrolling: touch;">
+          <div id="subpackage-spacer">
+            <div id="packages">
+              <h1>Packages</h1>
+              <ul>
+                <li name="_root_.root" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_root_"></a><a id="root:_root_"></a>
+      <span class="permalink">
+      <a href="../../../../../index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../../../index.html"><span class="name">root</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="_root_.org" visbl="pub" class="indented1 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="org"></a><a id="org:org"></a>
+      <span class="permalink">
+      <a href="../../../../../org/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../../index.html"><span class="name">org</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="org.apache" visbl="pub" class="indented2 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="apache"></a><a id="apache:apache"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../index.html"><span class="name">apache</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../index.html" class="extype" name="org">org</a></dd></dl></div>
+    </li><li name="org.apache.sedona" visbl="pub" class="indented3 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sedona"></a><a id="sedona:sedona"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../index.html"><span class="name">sedona</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="org.apache">apache</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="core"></a><a id="core:core"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../index.html"><span class="name">core</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="org.apache.sedona">sedona</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.enums" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="enums"></a><a id="enums:enums"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/enums/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../enums/index.html"><span class="name">enums</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.formatMapper" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="formatMapper"></a><a id="formatMapper:formatMapper"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/formatMapper/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../formatMapper/index.html"><span class="name">formatMapper</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.joinJudgement" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="joinJudgement"></a><a id="joinJudgement:joinJudgement"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/joinJudgement/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../joinJudgement/index.html"><span class="name">joinJudgement</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.knnJudgement" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="knnJudgement"></a><a id="knnJudgement:knnJudgement"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/knnJudgement/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../knnJudgement/index.html"><span class="name">knnJudgement</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.monitoring" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="monitoring"></a><a id="monitoring:monitoring"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/monitoring/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../monitoring/index.html"><span class="name">monitoring</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.rangeJudgement" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="rangeJudgement"></a><a id="rangeJudgement:rangeJudgement"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/rangeJudgement/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../rangeJudgement/index.html"><span class="name">rangeJudgement</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.serde" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="serde"></a><a id="serde:serde"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/serde/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../serde/index.html"><span class="name">serde</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.showcase" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="showcase"></a><a id="showcase:showcase"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/showcase/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../showcase/index.html"><span class="name">showcase</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.spatialOperator" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="spatialOperator"></a><a id="spatialOperator:spatialOperator"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialOperator/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../spatialOperator/index.html"><span class="name">spatialOperator</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.spatialPartitioning" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="spatialPartitioning"></a><a id="spatialPartitioning:spatialPartitioning"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialPartitioning/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../spatialPartitioning/index.html"><span class="name">spatialPartitioning</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.spatialRDD" visbl="pub" class="indented5 current" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="spatialRDD"></a><a id="spatialRDD:spatialRDD"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialRDD/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">spatialRDD</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="CircleRDD.html" title="The Class CircleRDD."></a>
+                        <a href="CircleRDD.html" title="The Class CircleRDD.">CircleRDD</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="LineStringRDD.html" title="The Class LineStringRDD."></a>
+                        <a href="LineStringRDD.html" title="The Class LineStringRDD.">LineStringRDD</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="PointRDD.html" title="The Class PointRDD."></a>
+                        <a href="PointRDD.html" title="The Class PointRDD.">PointRDD</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="PolygonRDD.html" title="The Class PolygonRDD."></a>
+                        <a href="PolygonRDD.html" title="The Class PolygonRDD.">PolygonRDD</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="RectangleRDD.html" title="The Class RectangleRDD."></a>
+                        <a href="RectangleRDD.html" title="The Class RectangleRDD.">RectangleRDD</a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="SpatialRDD.html" title="The Class SpatialRDD."></a>
+                        <a href="SpatialRDD.html" title="The Class SpatialRDD.">SpatialRDD</a>
+                      </li><li name="org.apache.sedona.core.spatialRddTool" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="spatialRddTool"></a><a id="spatialRddTool:spatialRddTool"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialRddTool/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../spatialRddTool/index.html"><span class="name">spatialRddTool</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.utils" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="utils"></a><a id="utils:utils"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/utils/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../utils/index.html"><span class="name">utils</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.wrapper" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wrapper"></a><a id="wrapper:wrapper"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/wrapper/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../wrapper/index.html"><span class="name">wrapper</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li>
+              </ul>
+            </div>
+          </div>
+          <div id="content">
+            <body class="package value">
+      <div id="definition">
+        <div class="big-circle package">p</div>
+        <p id="owner"><a href="../../../../index.html" class="extype" name="org">org</a>.<a href="../../../index.html" class="extype" name="org.apache">apache</a>.<a href="../../index.html" class="extype" name="org.apache.sedona">sedona</a>.<a href="../index.html" class="extype" name="org.apache.sedona.core">core</a></p>
+        <h1>spatialRDD<span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialRDD/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span></h1>
+        
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">spatialRDD</span>
+      </span>
+      </h4>
+
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="org.apache.sedona.core.spatialRDD.CircleRDD" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CircleRDDextendsSpatialRDD[org.apache.sedona.common.geometryObjects.Circle]"></a><a id="CircleRDD:CircleRDD"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialRDD/CircleRDD.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The Class CircleRDD." href="CircleRDD.html"><span class="name">CircleRDD</span></a><span class="result"> extends <a href="SpatialRDD.html" class="extype" name="org.apache.sedona.core.spatialRDD.SpatialRDD">SpatialRDD</a>[<span class="extype" name="org.apache.sedona.common.geometryObjects.Circle">Circle</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">The Class CircleRDD.</p>
+    </li><li name="org.apache.sedona.core.spatialRDD.LineStringRDD" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="LineStringRDDextendsSpatialRDD[org.locationtech.jts.geom.LineString]"></a><a id="LineStringRDD:LineStringRDD"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialRDD/LineStringRDD.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The Class LineStringRDD." href="LineStringRDD.html"><span class="name">LineStringRDD</span></a><span class="result"> extends <a href="SpatialRDD.html" class="extype" name="org.apache.sedona.core.spatialRDD.SpatialRDD">SpatialRDD</a>[<span class="extype" name="org.locationtech.jts.geom.LineString">LineString</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">The Class LineStringRDD.</p>
+    </li><li name="org.apache.sedona.core.spatialRDD.PointRDD" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PointRDDextendsSpatialRDD[org.locationtech.jts.geom.Point]"></a><a id="PointRDD:PointRDD"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialRDD/PointRDD.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The Class PointRDD." href="PointRDD.html"><span class="name">PointRDD</span></a><span class="result"> extends <a href="SpatialRDD.html" class="extype" name="org.apache.sedona.core.spatialRDD.SpatialRDD">SpatialRDD</a>[<span class="extype" name="org.locationtech.jts.geom.Point">Point</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">The Class PointRDD.</p>
+    </li><li name="org.apache.sedona.core.spatialRDD.PolygonRDD" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PolygonRDDextendsSpatialRDD[org.locationtech.jts.geom.Polygon]"></a><a id="PolygonRDD:PolygonRDD"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialRDD/PolygonRDD.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The Class PolygonRDD." href="PolygonRDD.html"><span class="name">PolygonRDD</span></a><span class="result"> extends <a href="SpatialRDD.html" class="extype" name="org.apache.sedona.core.spatialRDD.SpatialRDD">SpatialRDD</a>[<span class="extype" name="org.locationtech.jts.geom.Polygon">Polygon</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">The Class PolygonRDD.</p>
+    </li><li name="org.apache.sedona.core.spatialRDD.SpatialRDD" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SpatialRDD[T&lt;:org.locationtech.jts.geom.Geometry]extendsSerializable"></a><a id="SpatialRDD[T&lt;:Geometry]:SpatialRDD[T]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialRDD/SpatialRDD.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The Class SpatialRDD." href="SpatialRDD.html"><span class="name">SpatialRDD</span></a><span class="tparams">[<span name="T">T &lt;: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>]</span><span class="result"> extends <span class="extype" name="java.io.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">The Class SpatialRDD.</p>
+    </li><li name="org.apache.sedona.core.spatialRDD.RectangleRDD" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="RectangleRDDextendsSpatialRDD[org.locationtech.jts.geom.Polygon]"></a><a id="RectangleRDD:RectangleRDD"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/core/spatialRDD/RectangleRDD.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The Class RectangleRDD." href="RectangleRDD.html"><span class="name deprecated" title="Deprecated: ">RectangleRDD</span></a><span class="result"> extends <a href="SpatialRDD.html" class="extype" name="org.apache.sedona.core.spatialRDD.SpatialRDD">SpatialRDD</a>[<span class="extype" name="org.locationtech.jts.geom.Polygon">Polygon</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">The Class RectangleRDD.</p><div class="fullcomment"><div class="comment cmt"><p>The Class RectangleRDD.</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@Deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"></dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+    </body>
+          </div>
+        </div>
+      </div>
+    </body>
+      </html>

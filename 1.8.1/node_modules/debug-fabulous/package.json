@@ -1,0 +1,35 @@
+{
+  "name": "debug-fabulous",
+  "version": "1.1.0",
+  "description": "visionmedia debug extensions rolled into one",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint !./node_modules *.js ./**/*.js",
+    "mocha": "mocha",
+    "test": "npm run lint && mocha ./test/**/*test.js ./test/*.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://www.github.com/nmccready/debug-fabulous"
+  },
+  "keywords": [
+    "debug",
+    "lazy",
+    "lazy-eval"
+  ],
+  "author": "Nicholas McCready",
+  "license": "MIT",
+  "dependencies": {
+    "debug": "3.X",
+    "memoizee": "0.4.X",
+    "object-assign": "4.X"
+  },
+  "devDependencies": {
+    "JSONStream": "1.X",
+    "chai": "4.X",
+    "eslint": "4.X",
+    "hook-std": "0.X",
+    "memwatch-next": "0.3.X",
+    "mocha": "4.X"
+  }
+}

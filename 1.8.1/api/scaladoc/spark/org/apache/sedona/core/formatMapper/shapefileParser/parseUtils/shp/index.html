@@ -1,0 +1,539 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+          <title>org.apache.sedona:sedona-spark-common-3.4_2.12 1.8.1 API  - org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp</title>
+          <meta name="description" content="org.apache.sedona sedona - spark - common - 3.4 2.12 1.8.1 API - org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp" />
+          <meta name="keywords" content="org.apache.sedona sedona spark common 3.4 2.12 1.8.1 API org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      
+      <link href="../../../../../../../../lib/index.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../../../../../lib/jquery.min.js"></script>
+      <script type="text/javascript" src="../../../../../../../../lib/jquery.panzoom.min.js"></script>
+      <script type="text/javascript" src="../../../../../../../../lib/jquery.mousewheel.min.js"></script>
+      <script type="text/javascript" src="../../../../../../../../lib/index.js"></script>
+      <script type="text/javascript" src="../../../../../../../../index.js"></script>
+      <script type="text/javascript" src="../../../../../../../../lib/scheduler.js"></script>
+      <script type="text/javascript" src="../../../../../../../../lib/template.js"></script>
+      
+      <script type="text/javascript">
+        /* this variable can be used by the JS to determine the path to the root document */
+        var toRoot = '../../../../../../../../';
+      </script>
+    
+        </head>
+        <body>
+      <div id="search">
+        <span id="doc-title">org.apache.sedona:sedona-spark-common-3.4_2.12 1.8.1 API<span id="doc-version"></span></span>
+        <span class="close-results"><span class="left">&lt;</span> Back</span>
+        <div id="textfilter">
+          <span class="input">
+            <input autocapitalize="none" placeholder="Search" id="index-input" type="text" accesskey="/" />
+            <i class="clear material-icons"></i>
+            <i id="search-icon" class="material-icons"></i>
+          </span>
+        </div>
+    </div>
+      <div id="search-results">
+        <div id="search-progress">
+          <div id="progress-fill"></div>
+        </div>
+        <div id="results-content">
+          <div id="entity-results"></div>
+          <div id="member-results"></div>
+        </div>
+      </div>
+      <div id="content-scroll-container" style="-webkit-overflow-scrolling: touch;">
+        <div id="content-container" style="-webkit-overflow-scrolling: touch;">
+          <div id="subpackage-spacer">
+            <div id="packages">
+              <h1>Packages</h1>
+              <ul>
+                <li name="_root_.root" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_root_"></a><a id="root:_root_"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../../../../../../index.html"><span class="name">root</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../../../../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="_root_.org" visbl="pub" class="indented1 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="org"></a><a id="org:org"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../../../../../index.html"><span class="name">org</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../../../../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="org.apache" visbl="pub" class="indented2 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="apache"></a><a id="apache:apache"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../../../../index.html"><span class="name">apache</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../../../../index.html" class="extype" name="org">org</a></dd></dl></div>
+    </li><li name="org.apache.sedona" visbl="pub" class="indented3 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sedona"></a><a id="sedona:sedona"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/sedona/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../../../index.html"><span class="name">sedona</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../../../index.html" class="extype" name="org.apache">apache</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="core"></a><a id="core:core"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../../index.html"><span class="name">core</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../../index.html" class="extype" name="org.apache.sedona">sedona</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.formatMapper" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="formatMapper"></a><a id="formatMapper:formatMapper"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../index.html"><span class="name">formatMapper</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../index.html" class="extype" name="org.apache.sedona.core">core</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.formatMapper.shapefileParser" visbl="pub" class="indented6 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="shapefileParser"></a><a id="shapefileParser:shapefileParser"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../index.html"><span class="name">shapefileParser</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="org.apache.sedona.core.formatMapper">formatMapper</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils" visbl="pub" class="indented7 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="parseUtils"></a><a id="parseUtils:parseUtils"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../index.html"><span class="name">parseUtils</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser">shapefileParser</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.dbf" visbl="pub" class="indented8 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="dbf"></a><a id="dbf:dbf"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/dbf/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../dbf/index.html"><span class="name">dbf</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils">parseUtils</a></dd></dl></div>
+    </li><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp" visbl="pub" class="indented8 current" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="shp"></a><a id="shp:shp"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/shp/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">shp</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils">parseUtils</a></dd></dl></div>
+    </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="MultiPointParser.html" title=""></a>
+                        <a href="MultiPointParser.html" title="">MultiPointParser</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="PointParser.html" title=""></a>
+                        <a href="PointParser.html" title="">PointParser</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="PolyLineParser.html" title=""></a>
+                        <a href="PolyLineParser.html" title="">PolyLineParser</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="PolygonParser.html" title=""></a>
+                        <a href="PolygonParser.html" title="">PolygonParser</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="trait" href="ShapeFileConst.html" title="The Interface ShapeFileConst."></a>
+                        <a href="ShapeFileConst.html" title="The Interface ShapeFileConst.">ShapeFileConst</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="ShapeParser.html" title=""></a>
+                        <a href="ShapeParser.html" title="">ShapeParser</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="trait" href="ShapeReader.html" title=""></a>
+                        <a href="ShapeReader.html" title="">ShapeReader</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="ShapeReaderFactory.html" title=""></a>
+                        <a href="ShapeReaderFactory.html" title="">ShapeReaderFactory</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="ShapeSerde.html" title="Provides methods to efficiently serialize and deserialize geometry types using shapefile format developed by ESRI."></a>
+                        <a href="ShapeSerde.html" title="Provides methods to efficiently serialize and deserialize geometry types using shapefile format developed by ESRI.">ShapeSerde</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="ShapeType.html" title=""></a>
+                        <a href="ShapeType.html" title="">ShapeType</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="ShpFileParser.html" title=""></a>
+                        <a href="ShpFileParser.html" title="">ShpFileParser</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
+                        <a class="class" href="TypeUnknownException.html" title="The Class TypeUnknownException."></a>
+                        <a href="TypeUnknownException.html" title="The Class TypeUnknownException.">TypeUnknownException</a>
+                      </li>
+              </ul>
+            </div>
+          </div>
+          <div id="content">
+            <body class="package value">
+      <div id="definition">
+        <div class="big-circle package">p</div>
+        <p id="owner"><a href="../../../../../../../index.html" class="extype" name="org">org</a>.<a href="../../../../../../index.html" class="extype" name="org.apache">apache</a>.<a href="../../../../../index.html" class="extype" name="org.apache.sedona">sedona</a>.<a href="../../../../index.html" class="extype" name="org.apache.sedona.core">core</a>.<a href="../../../index.html" class="extype" name="org.apache.sedona.core.formatMapper">formatMapper</a>.<a href="../../index.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser">shapefileParser</a>.<a href="../index.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils">parseUtils</a></p>
+        <h1>shp<span class="permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/shp/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span></h1>
+        
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">shp</span>
+      </span>
+      </h4>
+
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.MultiPointParser" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MultiPointParserextendsShapeParser"></a><a id="MultiPointParser:MultiPointParser"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/shp/MultiPointParser.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="MultiPointParser.html"><span class="name">MultiPointParser</span></a><span class="result"> extends <a href="ShapeParser.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeParser">ShapeParser</a></span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.PointParser" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PointParserextendsShapeParser"></a><a id="PointParser:PointParser"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/shp/PointParser.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="PointParser.html"><span class="name">PointParser</span></a><span class="result"> extends <a href="ShapeParser.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeParser">ShapeParser</a></span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.PolyLineParser" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PolyLineParserextendsShapeParser"></a><a id="PolyLineParser:PolyLineParser"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/shp/PolyLineParser.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="PolyLineParser.html"><span class="name">PolyLineParser</span></a><span class="result"> extends <a href="ShapeParser.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeParser">ShapeParser</a></span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.PolygonParser" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PolygonParserextendsShapeParser"></a><a id="PolygonParser:PolygonParser"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/shp/PolygonParser.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="PolygonParser.html"><span class="name">PolygonParser</span></a><span class="result"> extends <a href="ShapeParser.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeParser">ShapeParser</a></span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeFileConst" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ShapeFileConstextendsObject"></a><a id="ShapeFileConst:ShapeFileConst"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/shp/ShapeFileConst.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="The Interface ShapeFileConst." href="ShapeFileConst.html"><span class="name">ShapeFileConst</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">The Interface ShapeFileConst.</p>
+    </li><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeParser" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ShapeParserextendsSerializable"></a><a id="ShapeParser:ShapeParser"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/shp/ShapeParser.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ShapeParser.html"><span class="name">ShapeParser</span></a><span class="result"> extends <span class="extype" name="java.io.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeReader" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ShapeReaderextendsObject"></a><a id="ShapeReader:ShapeReader"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/shp/ShapeReader.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ShapeReader.html"><span class="name">ShapeReader</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeReaderFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ShapeReaderFactoryextendsObject"></a><a id="ShapeReaderFactory:ShapeReaderFactory"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/shp/ShapeReaderFactory.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ShapeReaderFactory.html"><span class="name">ShapeReaderFactory</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeSerde" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ShapeSerdeextendsObject"></a><a id="ShapeSerde:ShapeSerde"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/shp/ShapeSerde.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Provides methods to efficiently serialize and deserialize geometry types using shapefile format developed by ESRI." href="ShapeSerde.html"><span class="name">ShapeSerde</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Provides methods to efficiently serialize and deserialize geometry types using shapefile format
+developed by ESRI.</p><div class="fullcomment"><div class="comment cmt"><p>Provides methods to efficiently serialize and deserialize geometry types using shapefile format
+developed by ESRI. Does not serialize user data attached to the geometry.</p><p>Supports Point, LineString, Polygon, MultiPoint, MultiLineString and MultiPolygon types.</p><p>Compatible with the family of <code><a href="ShapeReader.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeReader">ShapeReader</a></code> classes.</p><p>First byte contains <code><span class="extype" name="ShapeType#id">ShapeType#id</span></code>. The rest is type specific. Point: 8 bytes for X
+coordinate, followed by 8 bytes for Y coordinate. LineString is serialized as MultiLineString.
+MultiLineString: 16 bytes for envelope, 4 bytes for the number of line strings, 4 bytes for total
+number of vertices, 16 * num-vertices for XY coordinates of all the vertices. Polygons are
+serialized as MultiPolygon. MultiPolygon: 16 bytes for envelope, 4 bytes for the total number of
+exterior and interior rings of all polygons, 4 bytes for total number of vertices, 16 *
+num-vertices for XY coordinates of all the vertices. The vertices are written one polygon at a
+time, exterior ring first, followed by interior rings.
+</p></div></div>
+    </li><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeType" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ShapeTypeextendsEnum[org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeType]withSerializable"></a><a id="ShapeType:ShapeType"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/shp/ShapeType.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed abstract final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ShapeType.html"><span class="name">ShapeType</span></a><span class="result"> extends <span class="extype" name="java.lang.Enum">Enum</span>[<a href="ShapeType.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeType">ShapeType</a>] with <span class="extype" name="java.io.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShpFileParser" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ShpFileParserextendsSerializablewithShapeFileConst"></a><a id="ShpFileParser:ShpFileParser"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/shp/ShpFileParser.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ShpFileParser.html"><span class="name">ShpFileParser</span></a><span class="result"> extends <span class="extype" name="java.io.Serializable">Serializable</span> with <a href="ShapeFileConst.html" class="extype" name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.ShapeFileConst">ShapeFileConst</a></span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.core.formatMapper.shapefileParser.parseUtils.shp.TypeUnknownException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TypeUnknownExceptionextendsRuntimeException"></a><a id="TypeUnknownException:TypeUnknownException"></a>
+      <span class="permalink">
+      <a href="../../../../../../../../org/apache/sedona/core/formatMapper/shapefileParser/parseUtils/shp/TypeUnknownException.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The Class TypeUnknownException." href="TypeUnknownException.html"><span class="name">TypeUnknownException</span></a><span class="result"> extends <span class="extype" name="java.lang.RuntimeException">RuntimeException</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">The Class TypeUnknownException.</p>
+    </li></ol>
+            </div>
+
+        
+
+        
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+    </body>
+          </div>
+        </div>
+      </div>
+    </body>
+      </html>

@@ -1,0 +1,1007 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>sedona.spark.core package &mdash; Apache Sedona Python Documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+
+  
+      <script src="_static/jquery.js"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+      <script src="_static/doctools.js"></script>
+      <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="sedona.spark.core.SpatialRDD package" href="sedona.spark.core.SpatialRDD.html" />
+    <link rel="prev" title="sedona.spark package" href="sedona.spark.html" />
+     
+    <!-- Google Fonts for Apache Sedona styling -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Additional meta tags for better rendering -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1565c0">
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #ff5722" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Apache Sedona Python
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">sedona</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="sedona.html">sedona package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="sedona.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="sedona.core.html">sedona.core package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.flink.html">sedona.flink package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.geoarrow.html">sedona.geoarrow package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.maps.html">sedona.maps package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.raster.html">sedona.raster package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.raster_utils.html">sedona.raster_utils package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.register.html">sedona.register package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="sedona.spark.html">sedona.spark package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.sql.html">sedona.sql package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.stac.html">sedona.stac package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.stats.html">sedona.stats package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.utils.html">sedona.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.html#module-sedona.exceptions">sedona.exceptions module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.html#sedona.exceptions.InvalidParametersException"><code class="docutils literal notranslate"><span class="pre">InvalidParametersException</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.html#module-sedona.version">sedona.version module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.html#module-sedona">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sedona.flink.html">sedona.flink package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sedona.flink.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.flink.html#module-sedona.flink.context">sedona.flink.context module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.flink.html#sedona.flink.context.SedonaContext"><code class="docutils literal notranslate"><span class="pre">SedonaContext</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.flink.html#sedona.flink.context.SedonaContext.create"><code class="docutils literal notranslate"><span class="pre">SedonaContext.create()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.flink.html#module-sedona.flink">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="sedona.spark.html">sedona.spark package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="sedona.spark.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">sedona.spark.core package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-sedona.spark.core.utils">sedona.spark.core.utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-sedona.spark.core">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.geoarrow.html">sedona.spark.geoarrow package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geoarrow.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geoarrow.html#module-sedona.spark.geoarrow.geoarrow">sedona.spark.geoarrow.geoarrow module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geoarrow.html#module-sedona.spark.geoarrow">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.geopandas.html">sedona.spark.geopandas package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html">sedona.spark.geopandas core</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.io.html">sedona.spark.geopandas.io</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.tools.html">sedona.spark.geopandas.tools</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.maps.html">sedona.spark.maps package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.maps.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.maps.html#module-sedona.spark.maps.SedonaKepler">sedona.spark.maps.SedonaKepler module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.maps.html#module-sedona.spark.maps.SedonaMapUtils">sedona.spark.maps.SedonaMapUtils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.maps.html#module-sedona.spark.maps.SedonaPyDeck">sedona.spark.maps.SedonaPyDeck module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.maps.html#module-sedona.spark.maps">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.raster.html">sedona.spark.raster package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#module-sedona.spark.raster.awt_raster">sedona.spark.raster.awt_raster module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#module-sedona.spark.raster.data_buffer">sedona.spark.raster.data_buffer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#module-sedona.spark.raster.meta">sedona.spark.raster.meta module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#module-sedona.spark.raster.raster_serde">sedona.spark.raster.raster_serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#module-sedona.spark.raster.sample_model">sedona.spark.raster.sample_model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#module-sedona.spark.raster.sedona_raster">sedona.spark.raster.sedona_raster module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#module-sedona.spark.raster">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.raster_utils.html">sedona.spark.raster_utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster_utils.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster_utils.html#module-sedona.spark.raster_utils.SedonaUtils">sedona.spark.raster_utils.SedonaUtils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster_utils.html#module-sedona.spark.raster_utils">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.register.html">sedona.spark.register package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.register.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.register.html#module-sedona.spark.register.geo_registrator">sedona.spark.register.geo_registrator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.register.html#module-sedona.spark.register.java_libs">sedona.spark.register.java_libs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.register.html#module-sedona.spark.register">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.sql.html">sedona.spark.sql package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#sedona-spark-sql-connect-module">sedona.spark.sql.connect module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#module-sedona.spark.sql.dataframe_api">sedona.spark.sql.dataframe_api module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#module-sedona.spark.sql.exceptions">sedona.spark.sql.exceptions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#module-sedona.spark.sql.functions">sedona.spark.sql.functions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#module-sedona.spark.sql.st_aggregates">sedona.spark.sql.st_aggregates module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#module-sedona.spark.sql.st_constructors">sedona.spark.sql.st_constructors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#module-sedona.spark.sql.st_functions">sedona.spark.sql.st_functions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#module-sedona.spark.sql.st_predicates">sedona.spark.sql.st_predicates module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#module-sedona.spark.sql.types">sedona.spark.sql.types module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#module-sedona.spark.sql">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.stac.html">sedona.spark.stac package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stac.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stac.html#module-sedona.spark.stac.client">sedona.spark.stac.client module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stac.html#module-sedona.spark.stac.collection_client">sedona.spark.stac.collection_client module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stac.html#module-sedona.spark.stac">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.stats.html">sedona.spark.stats package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stats.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stats.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stats.html#module-sedona.spark.stats.weighting">sedona.spark.stats.weighting module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stats.html#module-sedona.spark.stats">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.utils.html">sedona.spark.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.abstract_parser">sedona.spark.utils.abstract_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.adapter">sedona.spark.utils.adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.binary_parser">sedona.spark.utils.binary_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.decorators">sedona.spark.utils.decorators module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.geometry_adapter">sedona.spark.utils.geometry_adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.geometry_serde">sedona.spark.utils.geometry_serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.geometry_serde_general">sedona.spark.utils.geometry_serde_general module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.geomserde_speedup">sedona.spark.utils.geomserde_speedup module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.jvm">sedona.spark.utils.jvm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.meta">sedona.spark.utils.meta module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.prep">sedona.spark.utils.prep module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.serde">sedona.spark.utils.serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.spatial_rdd_parser">sedona.spark.utils.spatial_rdd_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.structured_adapter">sedona.spark.utils.structured_adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.types">sedona.spark.utils.types module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.html#module-sedona.spark.SedonaContext">sedona.spark.SedonaContext module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.html#sedona.spark.SedonaContext.SedonaContext"><code class="docutils literal notranslate"><span class="pre">SedonaContext</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.__init__"><code class="docutils literal notranslate"><span class="pre">SedonaContext.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.builder"><code class="docutils literal notranslate"><span class="pre">SedonaContext.builder()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.create"><code class="docutils literal notranslate"><span class="pre">SedonaContext.create()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.html#module-sedona.spark">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sedona.spark.geopandas.html">sedona.spark.geopandas package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.geopandas.api.html">sedona.spark.geopandas core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries"><code class="docutils literal notranslate"><span class="pre">GeoSeries</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.__init__"><code class="docutils literal notranslate"><span class="pre">GeoSeries.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.area"><code class="docutils literal notranslate"><span class="pre">GeoSeries.area</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.boundary"><code class="docutils literal notranslate"><span class="pre">GeoSeries.boundary</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.bounds"><code class="docutils literal notranslate"><span class="pre">GeoSeries.bounds</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.buffer"><code class="docutils literal notranslate"><span class="pre">GeoSeries.buffer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.centroid"><code class="docutils literal notranslate"><span class="pre">GeoSeries.centroid</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.clip"><code class="docutils literal notranslate"><span class="pre">GeoSeries.clip()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.concave_hull"><code class="docutils literal notranslate"><span class="pre">GeoSeries.concave_hull()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.contains"><code class="docutils literal notranslate"><span class="pre">GeoSeries.contains()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.contains_properly"><code class="docutils literal notranslate"><span class="pre">GeoSeries.contains_properly()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.convex_hull"><code class="docutils literal notranslate"><span class="pre">GeoSeries.convex_hull</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.copy"><code class="docutils literal notranslate"><span class="pre">GeoSeries.copy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.count_coordinates"><code class="docutils literal notranslate"><span class="pre">GeoSeries.count_coordinates()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.count_geometries"><code class="docutils literal notranslate"><span class="pre">GeoSeries.count_geometries()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.count_interior_rings"><code class="docutils literal notranslate"><span class="pre">GeoSeries.count_interior_rings()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.covered_by"><code class="docutils literal notranslate"><span class="pre">GeoSeries.covered_by()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.covers"><code class="docutils literal notranslate"><span class="pre">GeoSeries.covers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.crosses"><code class="docutils literal notranslate"><span class="pre">GeoSeries.crosses()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.crs"><code class="docutils literal notranslate"><span class="pre">GeoSeries.crs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.delaunay_triangles"><code class="docutils literal notranslate"><span class="pre">GeoSeries.delaunay_triangles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.difference"><code class="docutils literal notranslate"><span class="pre">GeoSeries.difference()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.disjoint"><code class="docutils literal notranslate"><span class="pre">GeoSeries.disjoint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.distance"><code class="docutils literal notranslate"><span class="pre">GeoSeries.distance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.dwithin"><code class="docutils literal notranslate"><span class="pre">GeoSeries.dwithin()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.envelope"><code class="docutils literal notranslate"><span class="pre">GeoSeries.envelope</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.estimate_utm_crs"><code class="docutils literal notranslate"><span class="pre">GeoSeries.estimate_utm_crs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.explode"><code class="docutils literal notranslate"><span class="pre">GeoSeries.explode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.exterior"><code class="docutils literal notranslate"><span class="pre">GeoSeries.exterior</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.extract_unique_points"><code class="docutils literal notranslate"><span class="pre">GeoSeries.extract_unique_points()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.fillna"><code class="docutils literal notranslate"><span class="pre">GeoSeries.fillna()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.force_2d"><code class="docutils literal notranslate"><span class="pre">GeoSeries.force_2d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.force_3d"><code class="docutils literal notranslate"><span class="pre">GeoSeries.force_3d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.from_arrow"><code class="docutils literal notranslate"><span class="pre">GeoSeries.from_arrow()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.from_file"><code class="docutils literal notranslate"><span class="pre">GeoSeries.from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.from_shapely"><code class="docutils literal notranslate"><span class="pre">GeoSeries.from_shapely()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.from_wkb"><code class="docutils literal notranslate"><span class="pre">GeoSeries.from_wkb()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.from_wkt"><code class="docutils literal notranslate"><span class="pre">GeoSeries.from_wkt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.from_xy"><code class="docutils literal notranslate"><span class="pre">GeoSeries.from_xy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.geom_type"><code class="docutils literal notranslate"><span class="pre">GeoSeries.geom_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.geometry"><code class="docutils literal notranslate"><span class="pre">GeoSeries.geometry</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.get_geometry"><code class="docutils literal notranslate"><span class="pre">GeoSeries.get_geometry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.get_precision"><code class="docutils literal notranslate"><span class="pre">GeoSeries.get_precision()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.has_sindex"><code class="docutils literal notranslate"><span class="pre">GeoSeries.has_sindex</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.has_z"><code class="docutils literal notranslate"><span class="pre">GeoSeries.has_z</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.interiors"><code class="docutils literal notranslate"><span class="pre">GeoSeries.interiors</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.intersection"><code class="docutils literal notranslate"><span class="pre">GeoSeries.intersection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.intersection_all"><code class="docutils literal notranslate"><span class="pre">GeoSeries.intersection_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.intersects"><code class="docutils literal notranslate"><span class="pre">GeoSeries.intersects()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.is_ccw"><code class="docutils literal notranslate"><span class="pre">GeoSeries.is_ccw</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.is_closed"><code class="docutils literal notranslate"><span class="pre">GeoSeries.is_closed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.is_empty"><code class="docutils literal notranslate"><span class="pre">GeoSeries.is_empty</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.is_ring"><code class="docutils literal notranslate"><span class="pre">GeoSeries.is_ring</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.is_simple"><code class="docutils literal notranslate"><span class="pre">GeoSeries.is_simple</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.is_valid"><code class="docutils literal notranslate"><span class="pre">GeoSeries.is_valid</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.is_valid_reason"><code class="docutils literal notranslate"><span class="pre">GeoSeries.is_valid_reason()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.isna"><code class="docutils literal notranslate"><span class="pre">GeoSeries.isna()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.isnull"><code class="docutils literal notranslate"><span class="pre">GeoSeries.isnull()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.length"><code class="docutils literal notranslate"><span class="pre">GeoSeries.length</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.line_merge"><code class="docutils literal notranslate"><span class="pre">GeoSeries.line_merge()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.m"><code class="docutils literal notranslate"><span class="pre">GeoSeries.m</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.make_valid"><code class="docutils literal notranslate"><span class="pre">GeoSeries.make_valid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.minimum_bounding_circle"><code class="docutils literal notranslate"><span class="pre">GeoSeries.minimum_bounding_circle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.minimum_bounding_radius"><code class="docutils literal notranslate"><span class="pre">GeoSeries.minimum_bounding_radius()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.minimum_clearance"><code class="docutils literal notranslate"><span class="pre">GeoSeries.minimum_clearance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.minimum_rotated_rectangle"><code class="docutils literal notranslate"><span class="pre">GeoSeries.minimum_rotated_rectangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.normalize"><code class="docutils literal notranslate"><span class="pre">GeoSeries.normalize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.notna"><code class="docutils literal notranslate"><span class="pre">GeoSeries.notna()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.notnull"><code class="docutils literal notranslate"><span class="pre">GeoSeries.notnull()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.offset_curve"><code class="docutils literal notranslate"><span class="pre">GeoSeries.offset_curve()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.overlaps"><code class="docutils literal notranslate"><span class="pre">GeoSeries.overlaps()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.plot"><code class="docutils literal notranslate"><span class="pre">GeoSeries.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.relate"><code class="docutils literal notranslate"><span class="pre">GeoSeries.relate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.remove_repeated_points"><code class="docutils literal notranslate"><span class="pre">GeoSeries.remove_repeated_points()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.representative_point"><code class="docutils literal notranslate"><span class="pre">GeoSeries.representative_point()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.reverse"><code class="docutils literal notranslate"><span class="pre">GeoSeries.reverse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.segmentize"><code class="docutils literal notranslate"><span class="pre">GeoSeries.segmentize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.set_crs"><code class="docutils literal notranslate"><span class="pre">GeoSeries.set_crs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.set_precision"><code class="docutils literal notranslate"><span class="pre">GeoSeries.set_precision()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.simplify"><code class="docutils literal notranslate"><span class="pre">GeoSeries.simplify()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.sindex"><code class="docutils literal notranslate"><span class="pre">GeoSeries.sindex</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.snap"><code class="docutils literal notranslate"><span class="pre">GeoSeries.snap()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.symmetric_difference"><code class="docutils literal notranslate"><span class="pre">GeoSeries.symmetric_difference()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_arrow"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_arrow()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_crs"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_crs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_file"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_geoframe"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_geoframe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_geopandas"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_geopandas()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_json"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_parquet"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_parquet()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_spark_pandas"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_spark_pandas()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_wkb"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_wkb()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_wkt"><code class="docutils literal notranslate"><span class="pre">GeoSeries.to_wkt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.total_bounds"><code class="docutils literal notranslate"><span class="pre">GeoSeries.total_bounds</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.touches"><code class="docutils literal notranslate"><span class="pre">GeoSeries.touches()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.transform"><code class="docutils literal notranslate"><span class="pre">GeoSeries.transform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.type"><code class="docutils literal notranslate"><span class="pre">GeoSeries.type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.unary_union"><code class="docutils literal notranslate"><span class="pre">GeoSeries.unary_union</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.union"><code class="docutils literal notranslate"><span class="pre">GeoSeries.union()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.union_all"><code class="docutils literal notranslate"><span class="pre">GeoSeries.union_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.voronoi_polygons"><code class="docutils literal notranslate"><span class="pre">GeoSeries.voronoi_polygons()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.within"><code class="docutils literal notranslate"><span class="pre">GeoSeries.within()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.x"><code class="docutils literal notranslate"><span class="pre">GeoSeries.x</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.y"><code class="docutils literal notranslate"><span class="pre">GeoSeries.y</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.z"><code class="docutils literal notranslate"><span class="pre">GeoSeries.z</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.__init__"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.active_geometry_name"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.active_geometry_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.copy"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.copy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.crs"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.crs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_arrow"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.from_arrow()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_dict"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.from_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_features"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.from_features()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_file"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.from_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_postgis"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.from_postgis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.geometry"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.geometry</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.iterfeatures"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.iterfeatures()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.plot"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.rename_geometry"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.rename_geometry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.set_crs"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.set_crs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.set_geometry"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.set_geometry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.sjoin"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.sjoin()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_arrow"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_arrow()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_crs"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_crs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_feather"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_feather()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_file"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_geo_dict"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_geo_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_geopandas"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_geopandas()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_json"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_parquet"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_parquet()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_spark_pandas"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_spark_pandas()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_wkb"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_wkb()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_wkt"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.to_wkt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.type"><code class="docutils literal notranslate"><span class="pre">GeoDataFrame.type</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex"><code class="docutils literal notranslate"><span class="pre">SpatialIndex</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex.__init__"><code class="docutils literal notranslate"><span class="pre">SpatialIndex.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex.intersection"><code class="docutils literal notranslate"><span class="pre">SpatialIndex.intersection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex.is_empty"><code class="docutils literal notranslate"><span class="pre">SpatialIndex.is_empty</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex.nearest"><code class="docutils literal notranslate"><span class="pre">SpatialIndex.nearest()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex.query"><code class="docutils literal notranslate"><span class="pre">SpatialIndex.query()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.sindex.SpatialIndex.size"><code class="docutils literal notranslate"><span class="pre">SpatialIndex.size</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.geopandas.io.html">sedona.spark.geopandas.io</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.geopandas.io.html#sedona.spark.geopandas.io.read_file"><code class="docutils literal notranslate"><span class="pre">read_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.geopandas.io.html#sedona.spark.geopandas.io.read_parquet"><code class="docutils literal notranslate"><span class="pre">read_parquet()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.geopandas.tools.html">sedona.spark.geopandas.tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.geopandas.tools.html#sedona.spark.geopandas.tools.sjoin.sjoin"><code class="docutils literal notranslate"><span class="pre">sjoin()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sedona.stac.html">sedona.stac package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sedona.stac.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.stac.html#module-sedona.stac.client">sedona.stac.client module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.stac.html#module-sedona.stac.collection_client">sedona.stac.collection_client module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.stac.html#module-sedona.stac">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sedona.stats.html">sedona.stats package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sedona.stats.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.stats.clustering.html">sedona.stats.clustering package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.stats.clustering.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.stats.clustering.html#module-sedona.stats.clustering">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.stats.hotspot_detection.html">sedona.stats.hotspot_detection package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.stats.hotspot_detection.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.stats.hotspot_detection.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.stats.hotspot_detection.html#module-sedona.stats.hotspot_detection.getis_ord">sedona.stats.hotspot_detection.getis_ord module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.stats.hotspot_detection.html#module-sedona.stats.hotspot_detection">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.stats.outlier_detection.html">sedona.stats.outlier_detection package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.stats.outlier_detection.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.stats.outlier_detection.html#module-sedona.stats.outlier_detection">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.stats.weighting.html">sedona.stats.weighting package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.stats.weighting.html#module-sedona.stats.weighting">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.stats.html#module-sedona.stats">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sedona.utils.html">sedona.utils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sedona.utils.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.utils.structured_adapter.html">sedona.utils.structured_adapter package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.utils.structured_adapter.html#module-sedona.utils.structured_adapter">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.utils.html#module-sedona.utils.adapter">sedona.utils.adapter module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.utils.html#module-sedona.utils.spatial_rdd_parser">sedona.utils.spatial_rdd_parser module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.utils.html#module-sedona.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #ff5722" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Apache Sedona Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">sedona</a></li>
+          <li class="breadcrumb-item"><a href="sedona.html">sedona package</a></li>
+          <li class="breadcrumb-item"><a href="sedona.spark.html">sedona.spark package</a></li>
+      <li class="breadcrumb-item active">sedona.spark.core package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/sedona.spark.core.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    <div class="sedona-content-wrapper">
+        
+           <div itemprop="articleBody">
+             
+  <section id="sedona-spark-core-package">
+<h1>sedona.spark.core package<a class="headerlink" href="#sedona-spark-core-package" title="Permalink to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html">sedona.spark.core.SpatialRDD package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#module-sedona.spark.core.SpatialRDD.circle_rdd">sedona.spark.core.SpatialRDD.circle_rdd module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.circle_rdd.CircleRDD"><code class="docutils literal notranslate"><span class="pre">CircleRDD</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.circle_rdd.CircleRDD.MinimumBoundingRectangle"><code class="docutils literal notranslate"><span class="pre">CircleRDD.MinimumBoundingRectangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.circle_rdd.CircleRDD.__init__"><code class="docutils literal notranslate"><span class="pre">CircleRDD.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.circle_rdd.CircleRDD.getCenterLineStringRDDAsSpatialRDD"><code class="docutils literal notranslate"><span class="pre">CircleRDD.getCenterLineStringRDDAsSpatialRDD()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.circle_rdd.CircleRDD.getCenterPointAsSpatialRDD"><code class="docutils literal notranslate"><span class="pre">CircleRDD.getCenterPointAsSpatialRDD()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.circle_rdd.CircleRDD.getCenterPolygonAsSpatialRDD"><code class="docutils literal notranslate"><span class="pre">CircleRDD.getCenterPolygonAsSpatialRDD()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.circle_rdd.CircleRDD.getCenterRectangleRDDAsSpatialRDD"><code class="docutils literal notranslate"><span class="pre">CircleRDD.getCenterRectangleRDDAsSpatialRDD()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#module-sedona.spark.core.SpatialRDD.linestring_rdd">sedona.spark.core.SpatialRDD.linestring_rdd module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.linestring_rdd.LineStringRDD"><code class="docutils literal notranslate"><span class="pre">LineStringRDD</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.linestring_rdd.LineStringRDD.MinimumBoundingRectangle"><code class="docutils literal notranslate"><span class="pre">LineStringRDD.MinimumBoundingRectangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.linestring_rdd.LineStringRDD.__init__"><code class="docutils literal notranslate"><span class="pre">LineStringRDD.__init__</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#module-sedona.spark.core.SpatialRDD.point_rdd">sedona.spark.core.SpatialRDD.point_rdd module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.point_rdd.PointRDD"><code class="docutils literal notranslate"><span class="pre">PointRDD</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.point_rdd.PointRDD.MinimumBoundingRectangle"><code class="docutils literal notranslate"><span class="pre">PointRDD.MinimumBoundingRectangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.point_rdd.PointRDD.__init__"><code class="docutils literal notranslate"><span class="pre">PointRDD.__init__</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#module-sedona.spark.core.SpatialRDD.polygon_rdd">sedona.spark.core.SpatialRDD.polygon_rdd module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.polygon_rdd.PolygonRDD"><code class="docutils literal notranslate"><span class="pre">PolygonRDD</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.polygon_rdd.PolygonRDD.MinimumBoundingRectangle"><code class="docutils literal notranslate"><span class="pre">PolygonRDD.MinimumBoundingRectangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.polygon_rdd.PolygonRDD.__init__"><code class="docutils literal notranslate"><span class="pre">PolygonRDD.__init__</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#module-sedona.spark.core.SpatialRDD.rectangle_rdd">sedona.spark.core.SpatialRDD.rectangle_rdd module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.rectangle_rdd.RectangleRDD"><code class="docutils literal notranslate"><span class="pre">RectangleRDD</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.rectangle_rdd.RectangleRDD.MinimumBoundingRectangle"><code class="docutils literal notranslate"><span class="pre">RectangleRDD.MinimumBoundingRectangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.rectangle_rdd.RectangleRDD.__init__"><code class="docutils literal notranslate"><span class="pre">RectangleRDD.__init__</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#module-sedona.spark.core.SpatialRDD.spatial_rdd">sedona.spark.core.SpatialRDD.spatial_rdd module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.JvmGrids"><code class="docutils literal notranslate"><span class="pre">JvmGrids</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.JvmGrids.__init__"><code class="docutils literal notranslate"><span class="pre">JvmGrids.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.JvmSpatialRDD"><code class="docutils literal notranslate"><span class="pre">JvmSpatialRDD</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.JvmSpatialRDD.__init__"><code class="docutils literal notranslate"><span class="pre">JvmSpatialRDD.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.JvmSpatialRDD.cache"><code class="docutils literal notranslate"><span class="pre">JvmSpatialRDD.cache()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.JvmSpatialRDD.count"><code class="docutils literal notranslate"><span class="pre">JvmSpatialRDD.count()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.JvmSpatialRDD.persist"><code class="docutils literal notranslate"><span class="pre">JvmSpatialRDD.persist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.JvmSpatialRDD.saveAsObjectFile"><code class="docutils literal notranslate"><span class="pre">JvmSpatialRDD.saveAsObjectFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.JvmSpatialRDD.unpersist"><code class="docutils literal notranslate"><span class="pre">JvmSpatialRDD.unpersist()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialPartitioner"><code class="docutils literal notranslate"><span class="pre">SpatialPartitioner</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialPartitioner.__init__"><code class="docutils literal notranslate"><span class="pre">SpatialPartitioner.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialPartitioner.from_java_class_name"><code class="docutils literal notranslate"><span class="pre">SpatialPartitioner.from_java_class_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialPartitioner.getGrids"><code class="docutils literal notranslate"><span class="pre">SpatialPartitioner.getGrids()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD"><code class="docutils literal notranslate"><span class="pre">SpatialRDD</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.CRSTransform"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.CRSTransform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.MinimumBoundingRectangle"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.MinimumBoundingRectangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.__init__"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.analyze"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.analyze()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.approximateTotalCount"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.approximateTotalCount</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.boundary"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.boundary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.boundaryEnvelope"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.boundaryEnvelope</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.buildIndex"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.buildIndex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.countWithoutDuplicates"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.countWithoutDuplicates()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.countWithoutDuplicatesSPRDD"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.countWithoutDuplicatesSPRDD()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.fieldNames"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.fieldNames</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.flipCoordinates"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.flipCoordinates()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getCRStransformation"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.getCRStransformation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getJvmSpatialPartitionedRDD"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.getJvmSpatialPartitionedRDD()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getPartitioner"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.getPartitioner()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getRawJvmSpatialRDD"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.getRawJvmSpatialRDD()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getRawSpatialRDD"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.getRawSpatialRDD()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getSampleNumber"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.getSampleNumber()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getSourceEpsgCode"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.getSourceEpsgCode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getTargetEpsgCode"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.getTargetEpsgCode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.get_srdd"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.get_srdd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.grids"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.grids</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.indexedRDD"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.indexedRDD</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.indexedRawRDD"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.indexedRawRDD</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.jvmSpatialPartitionedRDD"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.jvmSpatialPartitionedRDD</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.jvm_grids"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.jvm_grids</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.name"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.rawJvmSpatialRDD"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.rawJvmSpatialRDD</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.rawSpatialRDD"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.rawSpatialRDD</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.saveAsGeoJSON"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.saveAsGeoJSON()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.saveAsWKB"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.saveAsWKB()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.saveAsWKT"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.saveAsWKT()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.setRawSpatialRDD"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.setRawSpatialRDD()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.setSampleNumber"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.setSampleNumber()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.set_srdd"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.set_srdd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.spatialPartitionedRDD"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.spatialPartitionedRDD</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.spatialPartitioning"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.spatialPartitioning()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.spatialPartitioningWithoutDuplicates"><code class="docutils literal notranslate"><span class="pre">SpatialRDD.spatialPartitioningWithoutDuplicates()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#module-sedona.spark.core.SpatialRDD.spatial_rdd_factory">sedona.spark.core.SpatialRDD.spatial_rdd_factory module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd_factory.SpatialRDDFactory"><code class="docutils literal notranslate"><span class="pre">SpatialRDDFactory</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd_factory.SpatialRDDFactory.__init__"><code class="docutils literal notranslate"><span class="pre">SpatialRDDFactory.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd_factory.SpatialRDDFactory.create_circle_rdd"><code class="docutils literal notranslate"><span class="pre">SpatialRDDFactory.create_circle_rdd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd_factory.SpatialRDDFactory.create_linestring_rdd"><code class="docutils literal notranslate"><span class="pre">SpatialRDDFactory.create_linestring_rdd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd_factory.SpatialRDDFactory.create_point_rdd"><code class="docutils literal notranslate"><span class="pre">SpatialRDDFactory.create_point_rdd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd_factory.SpatialRDDFactory.create_polygon_rdd"><code class="docutils literal notranslate"><span class="pre">SpatialRDDFactory.create_polygon_rdd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd_factory.SpatialRDDFactory.create_rectangle_rdd"><code class="docutils literal notranslate"><span class="pre">SpatialRDDFactory.create_rectangle_rdd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd_factory.SpatialRDDFactory.create_spatial_rdd"><code class="docutils literal notranslate"><span class="pre">SpatialRDDFactory.create_spatial_rdd()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.SpatialRDD.html#module-sedona.spark.core.SpatialRDD">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sedona.spark.core.enums.html">sedona.spark.core.enums package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.enums.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.enums.html#module-sedona.spark.core.enums.file_data_splitter">sedona.spark.core.enums.file_data_splitter module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.file_data_splitter.FileDataSplitter"><code class="docutils literal notranslate"><span class="pre">FileDataSplitter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.file_data_splitter.FileDataSplitter.COMA"><code class="docutils literal notranslate"><span class="pre">FileDataSplitter.COMA</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.file_data_splitter.FileDataSplitter.CSV"><code class="docutils literal notranslate"><span class="pre">FileDataSplitter.CSV</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.file_data_splitter.FileDataSplitter.DASH"><code class="docutils literal notranslate"><span class="pre">FileDataSplitter.DASH</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.file_data_splitter.FileDataSplitter.GEOJSON"><code class="docutils literal notranslate"><span class="pre">FileDataSplitter.GEOJSON</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.file_data_splitter.FileDataSplitter.PERCENT"><code class="docutils literal notranslate"><span class="pre">FileDataSplitter.PERCENT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.file_data_splitter.FileDataSplitter.PIPE"><code class="docutils literal notranslate"><span class="pre">FileDataSplitter.PIPE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.file_data_splitter.FileDataSplitter.QUESTIONMARK"><code class="docutils literal notranslate"><span class="pre">FileDataSplitter.QUESTIONMARK</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.file_data_splitter.FileDataSplitter.QUOTE"><code class="docutils literal notranslate"><span class="pre">FileDataSplitter.QUOTE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.file_data_splitter.FileDataSplitter.SEMICOLON"><code class="docutils literal notranslate"><span class="pre">FileDataSplitter.SEMICOLON</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.file_data_splitter.FileDataSplitter.SINGLEQUOTE"><code class="docutils literal notranslate"><span class="pre">FileDataSplitter.SINGLEQUOTE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.file_data_splitter.FileDataSplitter.TAB"><code class="docutils literal notranslate"><span class="pre">FileDataSplitter.TAB</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.file_data_splitter.FileDataSplitter.TILDE"><code class="docutils literal notranslate"><span class="pre">FileDataSplitter.TILDE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.file_data_splitter.FileDataSplitter.TSV"><code class="docutils literal notranslate"><span class="pre">FileDataSplitter.TSV</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.file_data_splitter.FileDataSplitter.UNDERSCORE"><code class="docutils literal notranslate"><span class="pre">FileDataSplitter.UNDERSCORE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.file_data_splitter.FileDataSplitter.WKB"><code class="docutils literal notranslate"><span class="pre">FileDataSplitter.WKB</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.file_data_splitter.FileDataSplitter.WKT"><code class="docutils literal notranslate"><span class="pre">FileDataSplitter.WKT</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.file_data_splitter.FileSplitterJvm"><code class="docutils literal notranslate"><span class="pre">FileSplitterJvm</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.file_data_splitter.FileSplitterJvm.__init__"><code class="docutils literal notranslate"><span class="pre">FileSplitterJvm.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.file_data_splitter.FileSplitterJvm.jvm_splitter"><code class="docutils literal notranslate"><span class="pre">FileSplitterJvm.jvm_splitter</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.enums.html#module-sedona.spark.core.enums.grid_type">sedona.spark.core.enums.grid_type module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.grid_type.GridType"><code class="docutils literal notranslate"><span class="pre">GridType</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.grid_type.GridType.KDBTREE"><code class="docutils literal notranslate"><span class="pre">GridType.KDBTREE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.grid_type.GridType.QUADTREE"><code class="docutils literal notranslate"><span class="pre">GridType.QUADTREE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.grid_type.GridType.from_str"><code class="docutils literal notranslate"><span class="pre">GridType.from_str()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.grid_type.GridTypeJvm"><code class="docutils literal notranslate"><span class="pre">GridTypeJvm</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.grid_type.GridTypeJvm.__init__"><code class="docutils literal notranslate"><span class="pre">GridTypeJvm.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.grid_type.GridTypeJvm.jvm_grid"><code class="docutils literal notranslate"><span class="pre">GridTypeJvm.jvm_grid</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.enums.html#module-sedona.spark.core.enums.index_type">sedona.spark.core.enums.index_type module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.index_type.IndexType"><code class="docutils literal notranslate"><span class="pre">IndexType</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.index_type.IndexType.QUADTREE"><code class="docutils literal notranslate"><span class="pre">IndexType.QUADTREE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.index_type.IndexType.RTREE"><code class="docutils literal notranslate"><span class="pre">IndexType.RTREE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.index_type.IndexType.from_string"><code class="docutils literal notranslate"><span class="pre">IndexType.from_string()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.index_type.IndexTypeJvm"><code class="docutils literal notranslate"><span class="pre">IndexTypeJvm</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.index_type.IndexTypeJvm.__init__"><code class="docutils literal notranslate"><span class="pre">IndexTypeJvm.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.index_type.IndexTypeJvm.jvm_index"><code class="docutils literal notranslate"><span class="pre">IndexTypeJvm.jvm_index</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.enums.html#module-sedona.spark.core.enums.join_build_side">sedona.spark.core.enums.join_build_side module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.join_build_side.JoinBuildSide"><code class="docutils literal notranslate"><span class="pre">JoinBuildSide</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.join_build_side.JoinBuildSide.LEFT"><code class="docutils literal notranslate"><span class="pre">JoinBuildSide.LEFT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.join_build_side.JoinBuildSide.RIGHT"><code class="docutils literal notranslate"><span class="pre">JoinBuildSide.RIGHT</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.enums.html#module-sedona.spark.core.enums.spatial">sedona.spark.core.enums.spatial module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.spatial.SpatialType"><code class="docutils literal notranslate"><span class="pre">SpatialType</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.spatial.SpatialType.CIRCLE"><code class="docutils literal notranslate"><span class="pre">SpatialType.CIRCLE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.spatial.SpatialType.LINESTRING"><code class="docutils literal notranslate"><span class="pre">SpatialType.LINESTRING</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.spatial.SpatialType.POINT"><code class="docutils literal notranslate"><span class="pre">SpatialType.POINT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.spatial.SpatialType.POLYGON"><code class="docutils literal notranslate"><span class="pre">SpatialType.POLYGON</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.spatial.SpatialType.RECTANGLE"><code class="docutils literal notranslate"><span class="pre">SpatialType.RECTANGLE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.spatial.SpatialType.SPATIAL"><code class="docutils literal notranslate"><span class="pre">SpatialType.SPATIAL</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.enums.html#sedona.spark.core.enums.spatial.SpatialType.from_str"><code class="docutils literal notranslate"><span class="pre">SpatialType.from_str()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.enums.html#module-sedona.spark.core.enums">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sedona.spark.core.formatMapper.html">sedona.spark.core.formatMapper package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.formatMapper.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.formatMapper.shapefileParser.html">sedona.spark.core.formatMapper.shapefileParser package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.formatMapper.shapefileParser.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.formatMapper.shapefileParser.html#module-sedona.spark.core.formatMapper.shapefileParser.shape_file_reader">sedona.spark.core.formatMapper.shapefileParser.shape_file_reader module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.formatMapper.shapefileParser.html#module-sedona.spark.core.formatMapper.shapefileParser">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.formatMapper.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.formatMapper.html#module-sedona.spark.core.formatMapper.disc_utils">sedona.spark.core.formatMapper.disc_utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.DiscLoader"><code class="docutils literal notranslate"><span class="pre">DiscLoader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.DiscLoader.load"><code class="docutils literal notranslate"><span class="pre">DiscLoader.load()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.GeoType"><code class="docutils literal notranslate"><span class="pre">GeoType</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.GeoType.GEOMETRY"><code class="docutils literal notranslate"><span class="pre">GeoType.GEOMETRY</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.GeoType.LINESTRING"><code class="docutils literal notranslate"><span class="pre">GeoType.LINESTRING</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.GeoType.POINT"><code class="docutils literal notranslate"><span class="pre">GeoType.POINT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.GeoType.POLYGON"><code class="docutils literal notranslate"><span class="pre">GeoType.POLYGON</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.IndexDiscLoader"><code class="docutils literal notranslate"><span class="pre">IndexDiscLoader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.IndexDiscLoader.load"><code class="docutils literal notranslate"><span class="pre">IndexDiscLoader.load()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.LineStringRDDDiscLoader"><code class="docutils literal notranslate"><span class="pre">LineStringRDDDiscLoader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.LineStringRDDDiscLoader.load"><code class="docutils literal notranslate"><span class="pre">LineStringRDDDiscLoader.load()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.PointRDDDiscLoader"><code class="docutils literal notranslate"><span class="pre">PointRDDDiscLoader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.PointRDDDiscLoader.load"><code class="docutils literal notranslate"><span class="pre">PointRDDDiscLoader.load()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.PolygonRDDDiscLoader"><code class="docutils literal notranslate"><span class="pre">PolygonRDDDiscLoader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.PolygonRDDDiscLoader.load"><code class="docutils literal notranslate"><span class="pre">PolygonRDDDiscLoader.load()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.SpatialRDDDiscLoader"><code class="docutils literal notranslate"><span class="pre">SpatialRDDDiscLoader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.SpatialRDDDiscLoader.load"><code class="docutils literal notranslate"><span class="pre">SpatialRDDDiscLoader.load()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.load_spatial_index_rdd_from_disc"><code class="docutils literal notranslate"><span class="pre">load_spatial_index_rdd_from_disc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.load_spatial_rdd_from_disc"><code class="docutils literal notranslate"><span class="pre">load_spatial_rdd_from_disc()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.formatMapper.html#module-sedona.spark.core.formatMapper.geo_json_reader">sedona.spark.core.formatMapper.geo_json_reader module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.geo_json_reader.GeoJsonReader"><code class="docutils literal notranslate"><span class="pre">GeoJsonReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.geo_json_reader.GeoJsonReader.readToGeometryRDD"><code class="docutils literal notranslate"><span class="pre">GeoJsonReader.readToGeometryRDD</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.formatMapper.html#module-sedona.spark.core.formatMapper.geo_reader">sedona.spark.core.formatMapper.geo_reader module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.geo_reader.GeoDataReader"><code class="docutils literal notranslate"><span class="pre">GeoDataReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.geo_reader.GeoDataReader.__init__"><code class="docutils literal notranslate"><span class="pre">GeoDataReader.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.geo_reader.GeoDataReader.readToGeometryRDD"><code class="docutils literal notranslate"><span class="pre">GeoDataReader.readToGeometryRDD()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.formatMapper.html#module-sedona.spark.core.formatMapper.wkb_reader">sedona.spark.core.formatMapper.wkb_reader module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.wkb_reader.WkbReader"><code class="docutils literal notranslate"><span class="pre">WkbReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.wkb_reader.WkbReader.readToGeometryRDD"><code class="docutils literal notranslate"><span class="pre">WkbReader.readToGeometryRDD</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.formatMapper.html#module-sedona.spark.core.formatMapper.wkt_reader">sedona.spark.core.formatMapper.wkt_reader module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.wkt_reader.WktReader"><code class="docutils literal notranslate"><span class="pre">WktReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.wkt_reader.WktReader.readToGeometryRDD"><code class="docutils literal notranslate"><span class="pre">WktReader.readToGeometryRDD</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.formatMapper.html#module-sedona.spark.core.formatMapper">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sedona.spark.core.geom.html">sedona.spark.core.geom package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.geom.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.geom.shapely1.html">sedona.spark.core.geom.shapely1 package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.geom.shapely1.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.geom.shapely1.html#module-sedona.spark.core.geom.shapely1.circle">sedona.spark.core.geom.shapely1.circle module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.geom.shapely1.html#module-sedona.spark.core.geom.shapely1.envelope">sedona.spark.core.geom.shapely1.envelope module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.geom.shapely1.html#module-sedona.spark.core.geom.shapely1">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.geom.shapely2.html">sedona.spark.core.geom.shapely2 package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.geom.shapely2.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.geom.shapely2.html#module-sedona.spark.core.geom.shapely2.circle">sedona.spark.core.geom.shapely2.circle module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.geom.shapely2.html#module-sedona.spark.core.geom.shapely2.envelope">sedona.spark.core.geom.shapely2.envelope module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.geom.shapely2.html#module-sedona.spark.core.geom.shapely2">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.geom.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.geom.html#module-sedona.spark.core.geom.circle">sedona.spark.core.geom.circle module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.geom.html#module-sedona.spark.core.geom.envelope">sedona.spark.core.geom.envelope module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.geom.html#module-sedona.spark.core.geom.geography">sedona.spark.core.geom.geography module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.geom.html#sedona.spark.core.geom.geography.Geography"><code class="docutils literal notranslate"><span class="pre">Geography</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.geom.html#sedona.spark.core.geom.geography.Geography.__init__"><code class="docutils literal notranslate"><span class="pre">Geography.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.geom.html#sedona.spark.core.geom.geography.Geography.geometry"><code class="docutils literal notranslate"><span class="pre">Geography.geometry</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.geom.html#module-sedona.spark.core.geom">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sedona.spark.core.jvm.html">sedona.spark.core.jvm package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.jvm.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.jvm.html#module-sedona.spark.core.jvm.abstract">sedona.spark.core.jvm.abstract module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.abstract.JvmObject"><code class="docutils literal notranslate"><span class="pre">JvmObject</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.abstract.JvmObject.__init__"><code class="docutils literal notranslate"><span class="pre">JvmObject.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.abstract.JvmObject.jvm_instance"><code class="docutils literal notranslate"><span class="pre">JvmObject.jvm_instance</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.jvm.html#module-sedona.spark.core.jvm.config">sedona.spark.core.jvm.config module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.SedonaMeta"><code class="docutils literal notranslate"><span class="pre">SedonaMeta</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.SedonaMeta.get_version"><code class="docutils literal notranslate"><span class="pre">SedonaMeta.get_version()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.SedonaMeta.version"><code class="docutils literal notranslate"><span class="pre">SedonaMeta.version</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.SparkJars"><code class="docutils literal notranslate"><span class="pre">SparkJars</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.SparkJars.get_spark_java_config"><code class="docutils literal notranslate"><span class="pre">SparkJars.get_spark_java_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.SparkJars.get_used_jars"><code class="docutils literal notranslate"><span class="pre">SparkJars.get_used_jars()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.SparkJars.jars"><code class="docutils literal notranslate"><span class="pre">SparkJars.jars</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.deprecated"><code class="docutils literal notranslate"><span class="pre">deprecated()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.is_greater_or_equal_version"><code class="docutils literal notranslate"><span class="pre">is_greater_or_equal_version()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.since"><code class="docutils literal notranslate"><span class="pre">since()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.jvm.html#module-sedona.spark.core.jvm.translate">sedona.spark.core.jvm.translate module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmGeometryAdapter"><code class="docutils literal notranslate"><span class="pre">JvmGeometryAdapter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmGeometryAdapter.__init__"><code class="docutils literal notranslate"><span class="pre">JvmGeometryAdapter.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmGeometryAdapter.translate_to_java"><code class="docutils literal notranslate"><span class="pre">JvmGeometryAdapter.translate_to_java()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmJoinParamsAdapter"><code class="docutils literal notranslate"><span class="pre">JvmJoinParamsAdapter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmJoinParamsAdapter.__init__"><code class="docutils literal notranslate"><span class="pre">JvmJoinParamsAdapter.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmJoinParamsAdapter.adapt"><code class="docutils literal notranslate"><span class="pre">JvmJoinParamsAdapter.adapt()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmRawJvmIndexRDDAdapter"><code class="docutils literal notranslate"><span class="pre">JvmRawJvmIndexRDDAdapter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmRawJvmIndexRDDAdapter.__init__"><code class="docutils literal notranslate"><span class="pre">JvmRawJvmIndexRDDAdapter.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmRawJvmIndexRDDAdapter.setRawIndexRDD"><code class="docutils literal notranslate"><span class="pre">JvmRawJvmIndexRDDAdapter.setRawIndexRDD()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSedonaPythonConverter"><code class="docutils literal notranslate"><span class="pre">JvmSedonaPythonConverter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSedonaPythonConverter.__init__"><code class="docutils literal notranslate"><span class="pre">JvmSedonaPythonConverter.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSedonaPythonConverter.translate_geometry_seq_to_python"><code class="docutils literal notranslate"><span class="pre">JvmSedonaPythonConverter.translate_geometry_seq_to_python()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSedonaPythonConverter.translate_python_rdd_to_java"><code class="docutils literal notranslate"><span class="pre">JvmSedonaPythonConverter.translate_python_rdd_to_java()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSedonaPythonConverter.translate_spatial_pair_rdd_to_python"><code class="docutils literal notranslate"><span class="pre">JvmSedonaPythonConverter.translate_spatial_pair_rdd_to_python()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSedonaPythonConverter.translate_spatial_pair_rdd_with_list_to_python"><code class="docutils literal notranslate"><span class="pre">JvmSedonaPythonConverter.translate_spatial_pair_rdd_with_list_to_python()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSedonaPythonConverter.translate_spatial_rdd_to_python"><code class="docutils literal notranslate"><span class="pre">JvmSedonaPythonConverter.translate_spatial_rdd_to_python()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSpatialObjectLoaderAdapter"><code class="docutils literal notranslate"><span class="pre">JvmSpatialObjectLoaderAdapter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSpatialObjectLoaderAdapter.__init__"><code class="docutils literal notranslate"><span class="pre">JvmSpatialObjectLoaderAdapter.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSpatialObjectLoaderAdapter.loadIndexRDD"><code class="docutils literal notranslate"><span class="pre">JvmSpatialObjectLoaderAdapter.loadIndexRDD()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSpatialObjectLoaderAdapter.loadLineStringSpatialRDD"><code class="docutils literal notranslate"><span class="pre">JvmSpatialObjectLoaderAdapter.loadLineStringSpatialRDD()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSpatialObjectLoaderAdapter.loadPointSpatialRDD"><code class="docutils literal notranslate"><span class="pre">JvmSpatialObjectLoaderAdapter.loadPointSpatialRDD()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSpatialObjectLoaderAdapter.loadPolygonSpatialRDD"><code class="docutils literal notranslate"><span class="pre">JvmSpatialObjectLoaderAdapter.loadPolygonSpatialRDD()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.JvmSpatialObjectLoaderAdapter.loadSpatialRDD"><code class="docutils literal notranslate"><span class="pre">JvmSpatialObjectLoaderAdapter.loadSpatialRDD()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.PythonRddToJavaRDDAdapter"><code class="docutils literal notranslate"><span class="pre">PythonRddToJavaRDDAdapter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.PythonRddToJavaRDDAdapter.__init__"><code class="docutils literal notranslate"><span class="pre">PythonRddToJavaRDDAdapter.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.PythonRddToJavaRDDAdapter.deserialize_to_linestring_raw_rdd"><code class="docutils literal notranslate"><span class="pre">PythonRddToJavaRDDAdapter.deserialize_to_linestring_raw_rdd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.PythonRddToJavaRDDAdapter.deserialize_to_point_raw_rdd"><code class="docutils literal notranslate"><span class="pre">PythonRddToJavaRDDAdapter.deserialize_to_point_raw_rdd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.PythonRddToJavaRDDAdapter.deserialize_to_polygon_raw_rdd"><code class="docutils literal notranslate"><span class="pre">PythonRddToJavaRDDAdapter.deserialize_to_polygon_raw_rdd()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SedonaPythonConverter"><code class="docutils literal notranslate"><span class="pre">SedonaPythonConverter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SedonaPythonConverter.__init__"><code class="docutils literal notranslate"><span class="pre">SedonaPythonConverter.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SedonaPythonConverter.translate_spatial_rdd_to_python"><code class="docutils literal notranslate"><span class="pre">SedonaPythonConverter.translate_spatial_rdd_to_python()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SpatialObjectLoaderAdapter"><code class="docutils literal notranslate"><span class="pre">SpatialObjectLoaderAdapter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SpatialObjectLoaderAdapter.__init__"><code class="docutils literal notranslate"><span class="pre">SpatialObjectLoaderAdapter.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SpatialObjectLoaderAdapter.load_index_rdd"><code class="docutils literal notranslate"><span class="pre">SpatialObjectLoaderAdapter.load_index_rdd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SpatialObjectLoaderAdapter.load_line_string_spatial_rdd"><code class="docutils literal notranslate"><span class="pre">SpatialObjectLoaderAdapter.load_line_string_spatial_rdd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SpatialObjectLoaderAdapter.load_point_spatial_rdd"><code class="docutils literal notranslate"><span class="pre">SpatialObjectLoaderAdapter.load_point_spatial_rdd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SpatialObjectLoaderAdapter.load_polygon_spatial_rdd"><code class="docutils literal notranslate"><span class="pre">SpatialObjectLoaderAdapter.load_polygon_spatial_rdd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.jvm.html#sedona.spark.core.jvm.translate.SpatialObjectLoaderAdapter.load_spatial_rdd"><code class="docutils literal notranslate"><span class="pre">SpatialObjectLoaderAdapter.load_spatial_rdd()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.jvm.html#module-sedona.spark.core.jvm">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sedona.spark.core.spatialOperator.html">sedona.spark.core.spatialOperator package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#module-sedona.spark.core.spatialOperator.join_params">sedona.spark.core.spatialOperator.join_params module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_params.JoinParams"><code class="docutils literal notranslate"><span class="pre">JoinParams</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_params.JoinParams.__init__"><code class="docutils literal notranslate"><span class="pre">JoinParams.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_params.JoinParams.jvm_instance"><code class="docutils literal notranslate"><span class="pre">JoinParams.jvm_instance()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_params.JvmJoinParams"><code class="docutils literal notranslate"><span class="pre">JvmJoinParams</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_params.JvmJoinParams.__init__"><code class="docutils literal notranslate"><span class="pre">JvmJoinParams.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_params.JvmJoinParams.jvm_reference"><code class="docutils literal notranslate"><span class="pre">JvmJoinParams.jvm_reference</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#module-sedona.spark.core.spatialOperator.join_query">sedona.spark.core.spatialOperator.join_query module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_query.JoinQuery"><code class="docutils literal notranslate"><span class="pre">JoinQuery</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_query.JoinQuery.DistanceJoinQuery"><code class="docutils literal notranslate"><span class="pre">JoinQuery.DistanceJoinQuery()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_query.JoinQuery.DistanceJoinQueryFlat"><code class="docutils literal notranslate"><span class="pre">JoinQuery.DistanceJoinQueryFlat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_query.JoinQuery.SpatialJoinQuery"><code class="docutils literal notranslate"><span class="pre">JoinQuery.SpatialJoinQuery()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_query.JoinQuery.SpatialJoinQueryFlat"><code class="docutils literal notranslate"><span class="pre">JoinQuery.SpatialJoinQueryFlat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_query.JoinQuery.spatialJoin"><code class="docutils literal notranslate"><span class="pre">JoinQuery.spatialJoin()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#module-sedona.spark.core.spatialOperator.join_query_raw">sedona.spark.core.spatialOperator.join_query_raw module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_query_raw.JoinQueryRaw"><code class="docutils literal notranslate"><span class="pre">JoinQueryRaw</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_query_raw.JoinQueryRaw.DistanceJoinQuery"><code class="docutils literal notranslate"><span class="pre">JoinQueryRaw.DistanceJoinQuery()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_query_raw.JoinQueryRaw.DistanceJoinQueryFlat"><code class="docutils literal notranslate"><span class="pre">JoinQueryRaw.DistanceJoinQueryFlat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_query_raw.JoinQueryRaw.SpatialJoinQuery"><code class="docutils literal notranslate"><span class="pre">JoinQueryRaw.SpatialJoinQuery()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_query_raw.JoinQueryRaw.SpatialJoinQueryFlat"><code class="docutils literal notranslate"><span class="pre">JoinQueryRaw.SpatialJoinQueryFlat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_query_raw.JoinQueryRaw.spatialJoin"><code class="docutils literal notranslate"><span class="pre">JoinQueryRaw.spatialJoin()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#module-sedona.spark.core.spatialOperator.knn_query">sedona.spark.core.spatialOperator.knn_query module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.knn_query.KNNQuery"><code class="docutils literal notranslate"><span class="pre">KNNQuery</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.knn_query.KNNQuery.SpatialKnnQuery"><code class="docutils literal notranslate"><span class="pre">KNNQuery.SpatialKnnQuery()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.knn_query.KNNQuery.__init__"><code class="docutils literal notranslate"><span class="pre">KNNQuery.__init__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#module-sedona.spark.core.spatialOperator.range_query">sedona.spark.core.spatialOperator.range_query module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.range_query.RangeQuery"><code class="docutils literal notranslate"><span class="pre">RangeQuery</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.range_query.RangeQuery.SpatialRangeQuery"><code class="docutils literal notranslate"><span class="pre">RangeQuery.SpatialRangeQuery()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#module-sedona.spark.core.spatialOperator.range_query_raw">sedona.spark.core.spatialOperator.range_query_raw module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.range_query_raw.RangeQueryRaw"><code class="docutils literal notranslate"><span class="pre">RangeQueryRaw</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.range_query_raw.RangeQueryRaw.SpatialRangeQuery"><code class="docutils literal notranslate"><span class="pre">RangeQueryRaw.SpatialRangeQuery()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#module-sedona.spark.core.spatialOperator.rdd">sedona.spark.core.spatialOperator.rdd module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.rdd.SedonaPairRDD"><code class="docutils literal notranslate"><span class="pre">SedonaPairRDD</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.rdd.SedonaPairRDD.__init__"><code class="docutils literal notranslate"><span class="pre">SedonaPairRDD.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.rdd.SedonaPairRDD.to_rdd"><code class="docutils literal notranslate"><span class="pre">SedonaPairRDD.to_rdd()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.rdd.SedonaPairRDDList"><code class="docutils literal notranslate"><span class="pre">SedonaPairRDDList</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.rdd.SedonaPairRDDList.__init__"><code class="docutils literal notranslate"><span class="pre">SedonaPairRDDList.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.rdd.SedonaPairRDDList.to_rdd"><code class="docutils literal notranslate"><span class="pre">SedonaPairRDDList.to_rdd()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.rdd.SedonaRDD"><code class="docutils literal notranslate"><span class="pre">SedonaRDD</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.rdd.SedonaRDD.__init__"><code class="docutils literal notranslate"><span class="pre">SedonaRDD.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.rdd.SedonaRDD.to_rdd"><code class="docutils literal notranslate"><span class="pre">SedonaRDD.to_rdd()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.core.spatialOperator.html#module-sedona.spark.core.spatialOperator">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-sedona.spark.core.utils">
+<span id="sedona-spark-core-utils-module"></span><h2>sedona.spark.core.utils module<a class="headerlink" href="#module-sedona.spark.core.utils" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="sedona.spark.core.utils.ImportedJvmLib">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sedona.spark.core.utils.</span></span><span class="sig-name descname"><span class="pre">ImportedJvmLib</span></span><a class="reference internal" href="_modules/sedona/spark/core/utils.html#ImportedJvmLib"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.core.utils.ImportedJvmLib" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.core.utils.ImportedJvmLib.has_library">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">has_library</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">library</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/core/utils.html#ImportedJvmLib.has_library"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.core.utils.ImportedJvmLib.has_library" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.core.utils.ImportedJvmLib.import_lib">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">import_lib</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">library</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/core/utils.html#ImportedJvmLib.import_lib"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.core.utils.ImportedJvmLib.import_lib" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-sedona.spark.core">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-sedona.spark.core" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    </div>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="sedona.spark.html" class="btn btn-neutral float-left" title="sedona.spark package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sedona.spark.core.SpatialRDD.html" class="btn btn-neutral float-right" title="sedona.spark.core.SpatialRDD package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Apache Software Foundation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
