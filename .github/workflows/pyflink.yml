@@ -39,6 +39,9 @@ on:
       - 'python/**'
       - '.github/workflows/pyflink.yml'
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -51,6 +54,8 @@ jobs:
         python: ['3.11', '3.10']
     steps:
       - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
