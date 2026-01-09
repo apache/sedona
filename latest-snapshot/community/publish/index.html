@@ -5503,10 +5503,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#9-release-sedona-python-and-zeppelin" class="md-nav__link">
+  <a href="#9-release-sedona-python" class="md-nav__link">
     <span class="md-ellipsis">
       
-        9. Release Sedona Python and Zeppelin
+        9. Release Sedona Python
       
     </span>
   </a>
@@ -5514,10 +5514,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#10-release-sedona-r-to-cran" class="md-nav__link">
+  <a href="#10-release-sedona-zeppelin" class="md-nav__link">
     <span class="md-ellipsis">
       
-        10. Release Sedona R to CRAN.
+        10. Release Sedona Zeppelin
       
     </span>
   </a>
@@ -5525,10 +5525,21 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#11-publish-the-doc-website" class="md-nav__link">
+  <a href="#11-release-sedona-r-to-cran" class="md-nav__link">
     <span class="md-ellipsis">
       
-        11. Publish the doc website
+        11. Release Sedona R to CRAN.
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-publish-the-doc-website" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Publish the doc website
       
     </span>
   </a>
@@ -6085,10 +6096,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#9-release-sedona-python-and-zeppelin" class="md-nav__link">
+  <a href="#9-release-sedona-python" class="md-nav__link">
     <span class="md-ellipsis">
       
-        9. Release Sedona Python and Zeppelin
+        9. Release Sedona Python
       
     </span>
   </a>
@@ -6096,10 +6107,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#10-release-sedona-r-to-cran" class="md-nav__link">
+  <a href="#10-release-sedona-zeppelin" class="md-nav__link">
     <span class="md-ellipsis">
       
-        10. Release Sedona R to CRAN.
+        10. Release Sedona Zeppelin
       
     </span>
   </a>
@@ -6107,10 +6118,21 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#11-publish-the-doc-website" class="md-nav__link">
+  <a href="#11-release-sedona-r-to-cran" class="md-nav__link">
     <span class="md-ellipsis">
       
-        11. Publish the doc website
+        11. Release Sedona R to CRAN.
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-publish-the-doc-website" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Publish the doc website
       
     </span>
   </a>
@@ -6722,88 +6744,9 @@ rm<span class="w"> </span>apache-sedona-1.8.1-bin.tar.gz.sha512
 <li>Click <code>Close</code> on the Sedona staging repo on <a href="https://repository.apache.org">https://repository.apache.org</a> under <code>staging repository</code></li>
 <li>Once the staging repo is closed, click <code>Release</code> on this repo.</li>
 </ol>
-<p><strong>NOTICE</strong>: The staging repo will be automatically dropped after 3 days without closing. If you find the staging repo being dropped, you can re-stage the release using the following script.</p>
-<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
-
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Re-staging releases to https://repository.apache.org&quot;</span>
-
-git<span class="w"> </span>checkout<span class="w"> </span>master
-git<span class="w"> </span>pull
-
-rm<span class="w"> </span>-f<span class="w"> </span>release.*
-rm<span class="w"> </span>-f<span class="w"> </span>pom.xml.*
-
-<span class="c1"># Function to get Java version for Spark version</span>
-get_java_version<span class="o">()</span><span class="w"> </span><span class="o">{</span>
-<span class="w">  </span><span class="nb">local</span><span class="w"> </span><span class="nv">spark_version</span><span class="o">=</span><span class="nv">$1</span>
-<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$spark_version</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;4.0&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
-<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;17&quot;</span>
-<span class="w">  </span><span class="k">else</span>
-<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;11&quot;</span>
-<span class="w">  </span><span class="k">fi</span>
-<span class="o">}</span>
-
-<span class="c1"># Function to set JAVA_HOME based on Java version</span>
-set_java_home<span class="o">()</span><span class="w"> </span><span class="o">{</span>
-<span class="w">  </span><span class="nb">local</span><span class="w"> </span><span class="nv">java_version</span><span class="o">=</span><span class="nv">$1</span>
-<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$java_version</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;17&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
-<span class="w">    </span><span class="c1"># Try to find Java 17 installation</span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nb">command</span><span class="w"> </span>-v<span class="w"> </span>/usr/libexec/java_home<span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
-<span class="w">      </span><span class="nb">export</span><span class="w"> </span><span class="nv">JAVA_HOME</span><span class="o">=</span><span class="k">$(</span>/usr/libexec/java_home<span class="w"> </span>-v<span class="w"> </span><span class="m">17</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span>/usr/libexec/java_home<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.17<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="k">)</span>
-<span class="w">    </span><span class="k">fi</span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$JAVA_HOME</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
-<span class="w">      </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Warning: Java 17 not found, using system default&quot;</span>
-<span class="w">    </span><span class="k">else</span>
-<span class="w">      </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Using Java 17: </span><span class="nv">$JAVA_HOME</span><span class="s2">&quot;</span>
-<span class="w">    </span><span class="k">fi</span>
-<span class="w">  </span><span class="k">else</span>
-<span class="w">    </span><span class="c1"># Try to find Java 11 installation</span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nb">command</span><span class="w"> </span>-v<span class="w"> </span>/usr/libexec/java_home<span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
-<span class="w">      </span><span class="nb">export</span><span class="w"> </span><span class="nv">JAVA_HOME</span><span class="o">=</span><span class="k">$(</span>/usr/libexec/java_home<span class="w"> </span>-v<span class="w"> </span><span class="m">11</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span>/usr/libexec/java_home<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.11<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="k">)</span>
-<span class="w">    </span><span class="k">fi</span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$JAVA_HOME</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
-<span class="w">      </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Warning: Java 11 not found, using system default&quot;</span>
-<span class="w">    </span><span class="k">else</span>
-<span class="w">      </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Using Java 11: </span><span class="nv">$JAVA_HOME</span><span class="s2">&quot;</span>
-<span class="w">    </span><span class="k">fi</span>
-<span class="w">  </span><span class="k">fi</span>
-
-<span class="w">  </span><span class="c1"># Verify Java version using Maven</span>
-<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Verifying Java version with Maven...&quot;</span>
-<span class="w">  </span><span class="nb">local</span><span class="w"> </span><span class="nv">mvn_java_version</span><span class="o">=</span><span class="k">$(</span>mvn<span class="w"> </span>--version<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;Java version&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/.*Java version: \([0-9]*\).*/\1/&#39;</span><span class="k">)</span>
-<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$mvn_java_version</span><span class="s2">&quot;</span><span class="w"> </span>!<span class="o">=</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$java_version</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
-<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;ERROR: Maven is using Java </span><span class="nv">$mvn_java_version</span><span class="s2">, but expected Java </span><span class="nv">$java_version</span><span class="s2">&quot;</span>
-<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Please ensure the correct Java version is installed and JAVA_HOME is set properly&quot;</span>
-<span class="w">    </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
-<span class="w">  </span><span class="k">fi</span>
-<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✓ Verified: Maven is using Java </span><span class="nv">$mvn_java_version</span><span class="s2">&quot;</span>
-<span class="o">}</span>
-
-<span class="c1"># For Spark 3.4 and Scala 2.12 (Java 11)</span>
-<span class="nv">JAVA_VERSION</span><span class="o">=</span><span class="k">$(</span>get_java_version<span class="w"> </span><span class="s2">&quot;3.4&quot;</span><span class="k">)</span>
-set_java_home<span class="w"> </span><span class="nv">$JAVA_VERSION</span>
-mvn<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.1-rc2<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.4 -Dscala=2.12&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.4<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.12
-
-<span class="c1"># For Spark 3.4 and Scala 2.13 (Java 11)</span>
-mvn<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.1-rc2<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.4 -Dscala=2.13&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.4<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13
-
-<span class="c1"># For Spark 3.5 and Scala 2.12 (Java 11)</span>
-<span class="nv">JAVA_VERSION</span><span class="o">=</span><span class="k">$(</span>get_java_version<span class="w"> </span><span class="s2">&quot;3.5&quot;</span><span class="k">)</span>
-set_java_home<span class="w"> </span><span class="nv">$JAVA_VERSION</span>
-mvn<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.1-rc2<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.5 -Dscala=2.12&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.5<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.12
-
-<span class="c1"># For Spark 3.5 and Scala 2.13 (Java 11)</span>
-mvn<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.1-rc2<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=3.5 -Dscala=2.13&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.5<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13
-
-<span class="c1"># For Spark 4.0 and Scala 2.13 (Java 17)</span>
-<span class="c1"># Note: Spark 4.0 + Scala 2.12 is not supported, so we skip it</span>
-<span class="nv">JAVA_VERSION</span><span class="o">=</span><span class="k">$(</span>get_java_version<span class="w"> </span><span class="s2">&quot;4.0&quot;</span><span class="k">)</span>
-set_java_home<span class="w"> </span><span class="nv">$JAVA_VERSION</span>
-mvn<span class="w"> </span>org.apache.maven.plugins:maven-release-plugin:2.3.2:perform<span class="w"> </span>-DconnectionUrl<span class="o">=</span>scm:git:https://github.com/apache/sedona.git<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.8.1-rc2<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests -Dspark=4.0 -Dscala=2.13&quot;</span><span class="w"> </span>-Dspark<span class="o">=</span><span class="m">4</span>.0<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13
-</code></pre></div>
-<h2 id="9-release-sedona-python-and-zeppelin">9. Release Sedona Python and Zeppelin<a class="headerlink" href="#9-release-sedona-python-and-zeppelin" title="Permanent link">&para;</a></h2>
-<p>You must have the maintainer privilege of <code>https://pypi.org/project/apache-sedona/</code> and <code>https://www.npmjs.com/package/apache-sedona</code></p>
-<p>To publish Sedona pythons, you have to use GitHub actions since we release wheels for different platforms. Please use this repo: <a href="https://github.com/jiayuasu/sedona-publish-python">https://github.com/jiayuasu/sedona-publish-python</a></p>
+<h2 id="9-release-sedona-python">9. Release Sedona Python<a class="headerlink" href="#9-release-sedona-python" title="Permanent link">&para;</a></h2>
+<p>Sedona GitHub CI will automatically publish wheel files to PyPi once a GitHub release is created.</p>
+<h2 id="10-release-sedona-zeppelin">10. Release Sedona Zeppelin<a class="headerlink" href="#10-release-sedona-zeppelin" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
 
 wget<span class="w"> </span>https://github.com/apache/sedona/archive/refs/tags/sedona-1.8.1-rc2.tar.gz
@@ -6816,13 +6759,13 @@ rm<span class="w"> </span>-rf<span class="w"> </span>apache-sedona-1.8.1-rc2
 <span class="nb">cd</span><span class="w"> </span>apache-sedona-1.8.1-src/zeppelin<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>npm<span class="w"> </span>publish<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>..
 rm<span class="w"> </span>-rf<span class="w"> </span>apache-sedona-1.8.1-src
 </code></pre></div>
-<h2 id="10-release-sedona-r-to-cran">10. Release Sedona R to CRAN.<a class="headerlink" href="#10-release-sedona-r-to-cran" title="Permanent link">&para;</a></h2>
+<h2 id="11-release-sedona-r-to-cran">11. Release Sedona R to CRAN.<a class="headerlink" href="#11-release-sedona-r-to-cran" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
 R<span class="w"> </span>CMD<span class="w"> </span>build<span class="w"> </span>.
 R<span class="w"> </span>CMD<span class="w"> </span>check<span class="w"> </span>--as-cran<span class="w"> </span>apache.sedona_*.tar.gz
 </code></pre></div>
 <p>Then submit to CRAN using this <a href="https://xmpalantir.wu.ac.at/cransubmit/">web form</a>.</p>
-<h2 id="11-publish-the-doc-website">11. Publish the doc website<a class="headerlink" href="#11-publish-the-doc-website" title="Permanent link">&para;</a></h2>
+<h2 id="12-publish-the-doc-website">12. Publish the doc website<a class="headerlink" href="#12-publish-the-doc-website" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Check out the 1.8.1 Git tag on your local repo to a branch namely <code>branch-1.8.1</code></li>
 <li>Add the download link to <a href="../../download/">Download page</a>.</li>
@@ -6851,7 +6794,7 @@ R<span class="w"> </span>CMD<span class="w"> </span>check<span class="w"> </span
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="January 5, 2026 21:55:42 UTC">January 5, 2026 21:55:42</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="January 9, 2026 07:12:21 UTC">January 9, 2026 07:12:21</span>
   </span>
 
     
