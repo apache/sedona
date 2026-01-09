@@ -47,6 +47,7 @@ repos:
         files: \.(js|ya?ml)$
         language: node
         additional_dependencies: ['prettier@3.7.4']
+        pass_filenames: false
       - id: maven-spotless-apply
         name: maven spotless apply
         description: automatically formats Java and Scala code using mvn spotless:apply.
