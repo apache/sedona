@@ -24,6 +24,7 @@ rules:
         docker/setup-qemu-action: any
         github/*: any
         pypa/cibuildwheel: any
+        pypa/gh-action-pypi-publish: any
         r-lib/actions/check-r-package: any
         r-lib/actions/setup-r: any
         r-lib/actions/setup-r-dependencies: any
