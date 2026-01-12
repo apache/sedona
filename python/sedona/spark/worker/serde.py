@@ -4,10 +4,11 @@ from pyspark.sql.pandas.serializers import ArrowStreamPandasSerializer
 from sedona.spark.worker.udf_info import UDFInfo
 
 class SedonaDBSerializer(ArrowStreamPandasSerializer):
-    def __init__(self, timezone, safecheck, db, udf_info: UDFInfo):
+    def __init__(self, timezone, safecheck, db, udf_info: UDFInfo, cast_to_wkb=False):
         super(SedonaDBSerializer, self).__init__(timezone, safecheck)
         self.db = db
         self.udf_info = udf_info
+        self.cast_to_wkb = cast_to_wkb
 
     def load_stream(self, stream):
         import pyarrow as pa
@@ -22,7 +23,7 @@ class SedonaDBSerializer(ArrowStreamPandasSerializer):
 
             df.to_view(table_name)
 
-            sql_expression = self.udf_info.sedona_db_transformation_expr(table_name)
+            sql_expression = self.udf_info.sedona_db_transformation_expr(table_name, self.cast_to_wkb)
 
             index += 1
 
@@ -37,7 +38,6 @@ class SedonaDBSerializer(ArrowStreamPandasSerializer):
                 if writer is None:
                     writer = pa.RecordBatchStreamWriter(stream, batch.schema)
                 writer.write_batch(batch)
-                # stream.flush()
         finally:
             if writer is not None:
                 writer.close()

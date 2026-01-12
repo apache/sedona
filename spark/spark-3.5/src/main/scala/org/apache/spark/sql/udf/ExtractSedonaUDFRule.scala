@@ -44,7 +44,8 @@ class ExtractSedonaUDFRule extends Rule[LogicalPlan] with Logging {
   }
 
   def isScalarPythonUDF(e: Expression): Boolean = {
-    e.isInstanceOf[PythonUDF] && PythonEvalType.evals.contains(e.asInstanceOf[PythonUDF].evalType)
+    e.isInstanceOf[PythonUDF] &&
+    PythonEvalType.evals.contains(e.asInstanceOf[PythonUDF].evalType)
   }
 
   private def collectEvaluableUDFsFromExpressions(

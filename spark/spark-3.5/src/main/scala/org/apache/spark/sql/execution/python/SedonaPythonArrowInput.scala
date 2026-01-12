@@ -60,6 +60,9 @@ private[python] trait SedonaPythonArrowInput[IN] extends PythonArrowInput[IN] {
         handleMetadataBeforeExec(dataOut)
         writeUDF(dataOut, funcs, argOffsets)
 
+        // if speedup is not available and we need to use casting
+        dataOut.writeBoolean(self.castGeometryToWKB)
+
         // write
         dataOut.writeInt(self.geometryFields.length)
         // write geometry field indices and their SRIDs

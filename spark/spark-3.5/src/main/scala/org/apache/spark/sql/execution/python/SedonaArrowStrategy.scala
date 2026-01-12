@@ -19,7 +19,7 @@
 package org.apache.spark.sql.execution.python
 
 import org.apache.sedona.sql.UDF.PythonEvalType
-import org.apache.sedona.sql.UDF.PythonEvalType.{SQL_SCALAR_SEDONA_DB_UDF, SQL_SCALAR_SEDONA_UDF}
+import org.apache.sedona.sql.UDF.PythonEvalType.{SQL_SCALAR_SEDONA_DB_NO_SPEEDUP_UDF, SQL_SCALAR_SEDONA_DB_UDF, SQL_SCALAR_SEDONA_UDF}
 import org.apache.spark.api.python.ChainedPythonFunctions
 import org.apache.spark.sql.Strategy
 import org.apache.spark.sql.catalyst.InternalRow
@@ -115,10 +115,10 @@ case class SedonaArrowEvalPythonExec(
     val batchIter = if (batchSize > 0) new BatchIterator(full, batchSize) else Iterator(full)
 
     evalType match {
-      case SQL_SCALAR_SEDONA_DB_UDF =>
+      case SQL_SCALAR_SEDONA_DB_UDF | SQL_SCALAR_SEDONA_DB_NO_SPEEDUP_UDF =>
         val columnarBatchIter = new SedonaArrowPythonRunner(
           funcs,
-          evalType - PythonEvalType.SEDONA_DB_UDF_TYPE_CONSTANT,
+          200,
           argOffsets,
           schema,
           sessionLocalTimeZone,
@@ -126,7 +126,9 @@ case class SedonaArrowEvalPythonExec(
           pythonRunnerConf,
           pythonMetrics,
           jobArtifactUUID,
-          geometryFields).compute(batchIter, context.partitionId(), context)
+          geometryFields,
+          evalType == SQL_SCALAR_SEDONA_DB_UDF)
+          .compute(batchIter, context.partitionId(), context)
 
         val result = columnarBatchIter.flatMap { batch =>
           batch.rowIterator.asScala

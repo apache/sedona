@@ -28,8 +28,9 @@ import pyarrow as pa
 import geoarrow.pyarrow as ga
 from sedonadb import udf as sedona_udf_module
 from sedona.spark.sql.types import GeometryType
-from pyspark.sql.types import DataType, FloatType, DoubleType, IntegerType, StringType
+from pyspark.sql.types import DataType, FloatType, DoubleType, IntegerType, StringType, ByteType
 
+from sedona.spark.utils.udf import has_sedona_serializer_speedup
 
 SEDONA_SCALAR_EVAL_TYPE = 5200
 SEDONA_PANDAS_ARROW_NAME = "SedonaPandasArrowUDF"
@@ -51,7 +52,7 @@ sedona_udf_to_eval_type = {
 
 
 def sedona_vectorized_udf(
-    return_type: DataType, udf_type: SedonaUDFType = SedonaUDFType.SHAPELY_SCALAR
+        return_type: DataType, udf_type: SedonaUDFType = SedonaUDFType.SHAPELY_SCALAR
 ):
     import geopandas as gpd
 
@@ -92,7 +93,7 @@ def sedona_vectorized_udf(
 
 
 def _apply_shapely_series_udf(
-    fn, return_type: DataType, serialize_geom: bool, deserialize_geom: bool
+        fn, return_type: DataType, serialize_geom: bool, deserialize_geom: bool
 ):
     def apply(series: pd.Series) -> pd.Series:
         applied = series.apply(
@@ -113,7 +114,7 @@ def _apply_shapely_series_udf(
 
 
 def _apply_geo_series_udf(
-    fn, return_type: DataType, serialize_geom: bool, deserialize_geom: bool
+        fn, return_type: DataType, serialize_geom: bool, deserialize_geom: bool
 ):
     import geopandas as gpd
 
@@ -161,6 +162,7 @@ def infer_pa_type(spark_type: DataType):
     else:
         raise NotImplementedError(f"Type {spark_type} is not supported yet.")
 
+
 def infer_input_type(spark_type: DataType):
     if isinstance(spark_type, GeometryType):
         return sedona_udf_module.GEOMETRY
@@ -168,8 +170,11 @@ def infer_input_type(spark_type: DataType):
         return sedona_udf_module.NUMERIC
     elif isinstance(spark_type, StringType):
         return sedona_udf_module.STRING
+    elif isinstance(spark_type, ByteType):
+        return sedona_udf_module.BINARY
     else:
         raise NotImplementedError(f"Type {spark_type} is not supported yet.")
+
 
 def infer_input_types(spark_types: list[DataType]):
     pa_types = []
@@ -182,8 +187,12 @@ def infer_input_types(spark_types: list[DataType]):
 
 def sedona_db_vectorized_udf(
         return_type: DataType,
-        input_types: list[DataType]
+        input_types: list[DataType],
 ):
+    eval_type = 6201
+    if has_sedona_serializer_speedup():
+        eval_type = 6200
+
     def apply_fn(fn):
         out_type = infer_pa_type(return_type)
         input_types_sedona_db = infer_input_types(input_types)
@@ -193,10 +202,9 @@ def sedona_db_vectorized_udf(
             return fn(*args, **kwargs)
 
         udf = UserDefinedFunction(
-            lambda: shapely_udf, return_type, "SedonaPandasArrowUDF", evalType=6200
+            lambda: shapely_udf, return_type, "SedonaPandasArrowUDF", evalType=eval_type
         )
 
         return udf
-
 
     return apply_fn

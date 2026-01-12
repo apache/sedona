@@ -15,16 +15,17 @@ from sedona.spark.worker.serde import SedonaDBSerializer
 from sedona.spark.worker.udf_info import UDFInfo
 
 
-def apply_iterator(db, iterator, udf_info: UDFInfo):
+def apply_iterator(db, iterator, udf_info: UDFInfo, cast_to_wkb: bool = False):
     i = 0
     for df in iterator:
         i+=1
         table_name = f"output_table_{i}"
         df.to_view(table_name)
 
-        function_call_sql = udf_info.get_function_call_sql(table_name)
+        function_call_sql = udf_info.get_function_call_sql(table_name, cast_to_wkb=cast_to_wkb)
 
         df_out = db.sql(function_call_sql)
+
         df_out.to_view(f"view_{i}")
         at = df_out.to_arrow_table()
         batches = at.combine_chunks().to_batches()
@@ -207,9 +208,9 @@ def main(infile, outfile):
     pickle_ser = CPickleSerializer()
 
     split_index = read_int(infile)
-    #
+
     check_python_version(utf8_deserializer, infile)
-    #
+
     check_barrier_flag(infile)
 
     task_context = assign_task_context(utf_serde=utf8_deserializer, infile=infile)
@@ -217,7 +218,7 @@ def main(infile, outfile):
     shuffle.DiskBytesSpilled = 0
 
     resolve_python_path(utf8_deserializer, infile)
-    #
+
     check_broadcast_variables(infile)
 
     eval_type = read_int(infile)
@@ -229,11 +230,14 @@ def main(infile, outfile):
     sedona_db.register_udf(udf.function)
     init_time = time.time()
 
+    cast_to_wkb = read_bool(infile)
+
     serde = SedonaDBSerializer(
         timezone=runner_conf.get("spark.sql.session.timeZone", "UTC"),
         safecheck=False,
         db=sedona_db,
-        udf_info=udf
+        udf_info=udf,
+        cast_to_wkb=cast_to_wkb
     )
 
     number_of_geometries = read_int(infile)
@@ -247,7 +251,7 @@ def main(infile, outfile):
     udf.geom_offsets = geom_offsets
 
     iterator = serde.load_stream(infile)
-    out_iterator = apply_iterator(db=sedona_db, iterator=iterator, udf_info=udf)
+    out_iterator = apply_iterator(db=sedona_db, iterator=iterator, udf_info=udf, cast_to_wkb=cast_to_wkb)
 
     serde.dump_stream(out_iterator, outfile)
 

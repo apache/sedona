@@ -34,7 +34,8 @@ import org.apache.spark.sql.vectorized.{ArrowColumnVector, ColumnVector, Columna
 
 private[python] trait SedonaPythonArrowOutput[OUT <: AnyRef] { self: BasePythonRunner[_, OUT] =>
 
-  private val reuseWorker = SparkEnv.get.conf.getBoolean(PYTHON_WORKER_REUSE.key, PYTHON_WORKER_REUSE.defaultValue.get)
+  private val reuseWorker =
+    SparkEnv.get.conf.getBoolean(PYTHON_WORKER_REUSE.key, PYTHON_WORKER_REUSE.defaultValue.get)
 
   protected def pythonMetrics: Map[String, SQLMetric]
 

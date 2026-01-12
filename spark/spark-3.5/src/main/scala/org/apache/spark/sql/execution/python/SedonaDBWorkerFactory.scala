@@ -34,7 +34,6 @@ import org.apache.spark.security.SocketAuthHelper
 import org.apache.spark.sql.execution.python.SedonaPythonWorkerFactory.PROCESS_WAIT_TIMEOUT_MS
 import org.apache.spark.util.RedirectThread
 
-import java.util.concurrent.TimeUnit
 import javax.annotation.concurrent.GuardedBy
 
 class SedonaDBWorkerFactory(pythonExec: String, envVars: Map[String, String]) extends Logging {
@@ -181,7 +180,6 @@ class SedonaDBWorkerFactory(pythonExec: String, envVars: Map[String, String]) ex
   }
 
   private def stopDaemon(): Unit = {
-    logError("daemon stopping called")
     self.synchronized {
       if (useDaemon) {
         cleanupIdleWorkers()
@@ -194,7 +192,6 @@ class SedonaDBWorkerFactory(pythonExec: String, envVars: Map[String, String]) ex
         daemon = null
         daemonPort = 0
       } else {
-        println("Stopping simple workers")
         simpleWorkers.mapValues(_.destroy())
       }
     }
@@ -233,11 +230,11 @@ class SedonaDBWorkerFactory(pythonExec: String, envVars: Map[String, String]) ex
           daemonPort = in.readInt()
         } catch {
           case _: EOFException if daemon.isAlive =>
-            throw SparkCoreErrors.eofExceptionWhileReadPortNumberError(
-              sedonaDaemonModule)
+            throw SparkCoreErrors.eofExceptionWhileReadPortNumberError(sedonaDaemonModule)
           case _: EOFException =>
-            throw SparkCoreErrors.
-              eofExceptionWhileReadPortNumberError(sedonaDaemonModule, Some(daemon.exitValue))
+            throw SparkCoreErrors.eofExceptionWhileReadPortNumberError(
+              sedonaDaemonModule,
+              Some(daemon.exitValue))
         }
 
         // test that the returned port number is within a valid range.
@@ -261,7 +258,6 @@ class SedonaDBWorkerFactory(pythonExec: String, envVars: Map[String, String]) ex
         redirectStreamsToStderr(in, daemon.getErrorStream)
       } catch {
         case e: Exception =>
-
           // If the daemon exists, wait for it to finish and get its stderr
           val stderr = Option(daemon)
             .flatMap { d => Utils.getStderr(d, PROCESS_WAIT_TIMEOUT_MS) }
@@ -307,7 +303,6 @@ class SedonaDBWorkerFactory(pythonExec: String, envVars: Map[String, String]) ex
 
   def releaseWorker(worker: Socket): Unit = {
     if (useDaemon) {
-      logInfo("Releasing worker back to daemon pool")
       self.synchronized {
         lastActivityNs = System.nanoTime()
         idleWorkers.enqueue(worker)
@@ -345,5 +340,4 @@ class SedonaDBWorkerFactory(pythonExec: String, envVars: Map[String, String]) ex
 
 private object SedonaPythonWorkerFactory {
   val PROCESS_WAIT_TIMEOUT_MS = 10000
-  val IDLE_WORKER_TIMEOUT_NS = TimeUnit.MINUTES.toNanos(1)  // kill idle workers after 1 minute
 }

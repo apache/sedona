@@ -72,6 +72,8 @@ class TestBase:
                 )
                 .config("spark.executor.memory", "10G") \
                 .config("spark.driver.memory", "10G") \
+                .config("sedona.python.worker.udf.daemon.module", "sedona.spark.worker.daemon") \
+                .config("sedona.python.worker.daemon.enabled", "false") \
                 # Pandas on PySpark doesn't work with ANSI mode, which is enabled by default
                 # in Spark 4
                 .config("spark.sql.ansi.enabled", "false")

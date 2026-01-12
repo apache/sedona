@@ -25,9 +25,6 @@ from shapely.geometry.base import BaseGeometry
 
 speedup_enabled = False
 
-
-# Use geomserde_speedup when available, otherwise fallback to general pure
-# python implementation.
 try:
     from . import geomserde_speedup
 
@@ -60,8 +57,9 @@ try:
         def deserialize(buf: bytearray) -> Optional[BaseGeometry]:
             if buf is None:
                 return None
-            return geomserde_speedup.deserialize(buf)
+            return geomserde_speedup.deserialize_2(buf)
 
+        # Export the from_sedona_func for use with numpy ufuncs
         speedup_enabled = True
 
     elif shapely.__version__.startswith("1."):
