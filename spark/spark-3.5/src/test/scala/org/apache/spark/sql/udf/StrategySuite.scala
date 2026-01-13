@@ -73,21 +73,11 @@ class StrategySuite extends TestBaseScala with Matchers {
       .withColumn("geometry", expr("ST_SetSRID(geom, '4326')"))
       .select(sedonaDBGeometryToGeometryFunction(col("geometry"), lit(100)).alias("geom"))
 
-    dfVectorized.selectExpr("ST_X(ST_Centroid(geom)) AS x")
+    dfVectorized
+      .selectExpr("ST_X(ST_Centroid(geom)) AS x")
       .selectExpr("sum(x)")
       .as[Double]
-      .collect().head shouldEqual 101
-//
-//    val dfCopied = sparkSession.read
-//      .format("geoparquet")
-//      .load(
-//        "/Users/pawelkocinski/Desktop/projects/sedona-production/apache-sedona-book/book/source_data/transportation_barcelona/barcelona.geoparquet")
-//
-//    val values = dfCopied
-//      .select(sedonaDBGeometryToGeometryFunction(col("geometry"), lit(10)).alias("geom"))
-//      .selectExpr("ST_Area(geom) as area")
-//      .selectExpr("Sum(area) as total_area")
-//
-//    values.show()
+      .collect()
+      .head shouldEqual 101
   }
 }

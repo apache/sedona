@@ -1,19 +1,20 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
 #
-# Licensed to the Apache Software Foundation (ASF) under one or more
-# contributor license agreements.  See the NOTICE file distributed with
-# this work for additional information regarding copyright ownership.
-# The ASF licenses this file to You under the Apache License, Version 2.0
-# (the "License"); you may not use this file except in compliance with
-# the License.  You may obtain a copy of the License at
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
 import logging
 import numbers
 import os
@@ -39,16 +40,23 @@ def compute_real_exit_code(exit_code):
     else:
         return 1
 
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-file_handler = logging.FileHandler("/Users/pawelkocinski/Desktop/projects/sedonaworker/sedonaworker/logs/worker_daemon_main.log", delay=False)
+file_handler = logging.FileHandler(
+    "/Users/pawelkocinski/Desktop/projects/sedonaworker/sedonaworker/logs/worker_daemon_main.log",
+    delay=False,
+)
 file_handler.flush = file_handler.stream.flush
 
 logger.addHandler(file_handler)
 
+
 def worker(sock, authenticated):
-    logger.info("Starting worker process with pid =" + str(os.getpid()) + " socket " + str(sock))
+    logger.info(
+        "Starting worker process with pid =" + str(os.getpid()) + " socket " + str(sock)
+    )
     """
     Called by a worker process after the fork().
     """
@@ -69,10 +77,10 @@ def worker(sock, authenticated):
     if not authenticated:
         client_secret = UTF8Deserializer().loads(infile)
         if os.environ["PYTHON_WORKER_FACTORY_SECRET"] == client_secret:
-            write_with_length("ok".encode("utf-8"), outfile)
+            write_with_length(b"ok", outfile)
             outfile.flush()
         else:
-            write_with_length("err".encode("utf-8"), outfile)
+            write_with_length(b"err", outfile)
             outfile.flush()
             sock.close()
             return 1
@@ -132,7 +140,7 @@ def manager():
         while True:
             try:
                 ready_fds = select.select([0, listen_sock], [], [], 1)[0]
-            except select.error as ex:
+            except OSError as ex:
                 if ex[0] == EINTR:
                     continue
                 else:
@@ -186,7 +194,7 @@ def manager():
                     # Therefore, here we redirects it to '/dev/null' by duplicating
                     # another file descriptor for '/dev/null' to the standard input (0).
                     # See SPARK-26175.
-                    devnull = open(os.devnull, "r")
+                    devnull = open(os.devnull)
                     os.dup2(devnull.fileno(), 0)
                     devnull.close()
 

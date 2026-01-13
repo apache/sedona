@@ -1,3 +1,20 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
 import importlib
 import os
 import sys
@@ -8,8 +25,16 @@ from pyspark import TaskContext, shuffle, SparkFiles
 from pyspark.errors import PySparkRuntimeError
 from pyspark.java_gateway import local_connect_and_auth
 from pyspark.resource import ResourceInformation
-from pyspark.serializers import read_int, UTF8Deserializer, read_bool, read_long, CPickleSerializer, write_int, \
-    write_long, SpecialLengths
+from pyspark.serializers import (
+    read_int,
+    UTF8Deserializer,
+    read_bool,
+    read_long,
+    CPickleSerializer,
+    write_int,
+    write_long,
+    SpecialLengths,
+)
 
 from sedona.spark.worker.serde import SedonaDBSerializer
 from sedona.spark.worker.udf_info import UDFInfo
@@ -18,11 +43,13 @@ from sedona.spark.worker.udf_info import UDFInfo
 def apply_iterator(db, iterator, udf_info: UDFInfo, cast_to_wkb: bool = False):
     i = 0
     for df in iterator:
-        i+=1
+        i += 1
         table_name = f"output_table_{i}"
         df.to_view(table_name)
 
-        function_call_sql = udf_info.get_function_call_sql(table_name, cast_to_wkb=cast_to_wkb)
+        function_call_sql = udf_info.get_function_call_sql(
+            table_name, cast_to_wkb=cast_to_wkb
+        )
 
         df_out = db.sql(function_call_sql)
 
@@ -30,8 +57,7 @@ def apply_iterator(db, iterator, udf_info: UDFInfo, cast_to_wkb: bool = False):
         at = df_out.to_arrow_table()
         batches = at.combine_chunks().to_batches()
 
-        for batch in batches:
-            yield batch
+        yield from batches
 
 
 def check_python_version(utf_serde: UTF8Deserializer, infile) -> str:
@@ -50,6 +76,7 @@ def check_python_version(utf_serde: UTF8Deserializer, infile) -> str:
 
     return version
 
+
 def check_barrier_flag(infile):
     is_barrier = read_bool(infile)
     bound_port = read_int(infile)
@@ -65,6 +92,7 @@ def check_barrier_flag(infile):
         )
 
     return is_barrier
+
 
 def assign_task_context(utf_serde: UTF8Deserializer, infile):
     stage_id = read_int(infile)
@@ -96,6 +124,7 @@ def assign_task_context(utf_serde: UTF8Deserializer, infile):
         task_context._localProperties[k] = v
 
     return task_context
+
 
 def resolve_python_path(utf_serde: UTF8Deserializer, infile):
     def add_path(path: str):
@@ -131,6 +160,7 @@ def check_broadcast_variables(infile):
             },
         )
 
+
 def get_runner_conf(utf_serde: UTF8Deserializer, infile):
     runner_conf = {}
     num_conf = read_int(infile)
@@ -144,6 +174,7 @@ def get_runner_conf(utf_serde: UTF8Deserializer, infile):
 def read_command(serializer, infile):
     command = serializer._read_with_length(infile)
     return command
+
 
 def read_udf(infile, pickle_ser) -> UDFInfo:
     num_arg = read_int(infile)
@@ -162,8 +193,9 @@ def read_udf(infile, pickle_ser) -> UDFInfo:
         function=sedona_db_udf_expression,
         return_type=return_type,
         name=sedona_db_udf_expression._name,
-        geom_offsets=[0]
+        geom_offsets=[0],
     )
+
 
 def register_sedona_db_udf(infile, pickle_ser) -> UDFInfo:
     num_udfs = read_int(infile)
@@ -237,7 +269,7 @@ def main(infile, outfile):
         safecheck=False,
         db=sedona_db,
         udf_info=udf,
-        cast_to_wkb=cast_to_wkb
+        cast_to_wkb=cast_to_wkb,
     )
 
     number_of_geometries = read_int(infile)
@@ -251,13 +283,13 @@ def main(infile, outfile):
     udf.geom_offsets = geom_offsets
 
     iterator = serde.load_stream(infile)
-    out_iterator = apply_iterator(db=sedona_db, iterator=iterator, udf_info=udf, cast_to_wkb=cast_to_wkb)
+    out_iterator = apply_iterator(
+        db=sedona_db, iterator=iterator, udf_info=udf, cast_to_wkb=cast_to_wkb
+    )
 
     serde.dump_stream(out_iterator, outfile)
 
-    write_statistics(
-        infile, outfile, boot_time=boot_time, init_time=init_time
-    )
+    write_statistics(infile, outfile, boot_time=boot_time, init_time=init_time)
 
 
 if __name__ == "__main__":
