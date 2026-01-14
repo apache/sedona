@@ -83,15 +83,7 @@ private[python] trait SedonaPythonArrowOutput[OUT <: AnyRef] { self: BasePythonR
       private var batchLoaded = true
 
       protected def handleEndOfDataSectionSedona(): Unit = {
-        // We've finished the data section of the output, but we can still
-        // read some accumulator updates:
-//        val numAccumulatorUpdates = stream.readInt()
-//        (1 to numAccumulatorUpdates).foreach { _ =>
-//          val updateLen = stream.readInt()
-//          val update = new Array[Byte](updateLen)
-//          stream.readFully(update)
-//        }
-        // Check whether the worker is ready to be re-used.
+        // Check whether the worker is ready to be reused.
         if (stream.readInt() == SpecialLengths.END_OF_STREAM) {
           if (reuseWorker && releasedOrClosed.compareAndSet(false, true)) {
             WorkerContext.releasePythonWorker(pythonExec, envVars.asScala.toMap, worker)

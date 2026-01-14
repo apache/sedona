@@ -117,7 +117,7 @@ def assign_task_context(utf_serde: UTF8Deserializer, infile):
             addresses.append(utf_serde.loads(infile))
         task_context._resources[key] = ResourceInformation(name, addresses)
 
-    task_context._localProperties = dict()
+    task_context._localProperties = {}
     for i in range(read_int(infile)):
         k = utf_serde.loads(infile)
         v = utf_serde.loads(infile)

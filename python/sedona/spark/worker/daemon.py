@@ -15,7 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import logging
 import numbers
 import os
 import signal
@@ -39,6 +38,7 @@ def compute_real_exit_code(exit_code):
         return exit_code
     else:
         return 1
+
 
 def worker(sock, authenticated):
     """
@@ -77,7 +77,7 @@ def worker(sock, authenticated):
     finally:
         try:
             outfile.flush()
-        except Exception:
+        except Exception:  # nosec
             pass
     return exit_code
 
@@ -198,7 +198,7 @@ def manager():
                                 try:
                                     while sock.recv(1024):
                                         pass
-                                except Exception:
+                                except Exception:  # nosec
                                     pass
                                 break
                             gc.collect()

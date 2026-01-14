@@ -288,21 +288,21 @@ static PyObject *to_sedona_func(PyObject *self, PyObject *args) {
     GEOSGeometry *geos_geom = NULL;
     char success = PyGEOS_GetGEOSGeometry(obj, &geos_geom);
     if (!success || geos_geom == NULL) {
-        PyErr_SetString(PyExc_TypeError, "Invalid GEOS geometry");
-        Py_DECREF(out);
-        return NULL;
+      PyErr_SetString(PyExc_TypeError, "Invalid GEOS geometry");
+      Py_DECREF(out);
+      return NULL;
     }
 
     PyObject *serialized = do_serialize(geos_geom);
     if (!serialized) {
-        Py_DECREF(out);
-        return NULL;
+      Py_DECREF(out);
+      return NULL;
     }
 
     if (PyArray_SETITEM(out, PyArray_GETPTR1(out, i), serialized) < 0) {
-        Py_DECREF(serialized);
-        Py_DECREF(out);
-        return NULL;
+      Py_DECREF(serialized);
+      Py_DECREF(out);
+      return NULL;
     }
     Py_DECREF(serialized);
   }
@@ -354,14 +354,14 @@ static PyObject *from_sedona_func(PyObject *self, PyObject *args) {
 
     PyObject *pygeom = PyGEOS_CreateGeometry(geom, handle);
     if (!pygeom) {
-        Py_DECREF(out);
-        return NULL;
+      Py_DECREF(out);
+      return NULL;
     }
 
-   if (PyArray_SETITEM(out, PyArray_GETPTR1(out, i), pygeom) < 0) {
-        Py_DECREF(pygeom);
-        Py_DECREF(out);
-        return NULL;
+    if (PyArray_SETITEM(out, PyArray_GETPTR1(out, i), pygeom) < 0) {
+      Py_DECREF(pygeom);
+      Py_DECREF(out);
+      return NULL;
     }
 
     Py_DECREF(pygeom);
