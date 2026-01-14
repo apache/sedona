@@ -208,8 +208,6 @@ SedonaErrorCode geom_buf_alloc(GeomBuffer *geom_buf,
   return SEDONA_SUCCESS;
 }
 
-#include <stdio.h>
-
 SedonaErrorCode read_geom_buf_header(const char *buf, int buf_size,
                                      GeomBuffer *geom_buf,
                                      CoordinateSequenceInfo *cs_info,

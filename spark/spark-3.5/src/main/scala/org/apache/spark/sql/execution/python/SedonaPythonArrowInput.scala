@@ -18,23 +18,6 @@
  */
 package org.apache.spark.sql.execution.python
 
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import org.apache.arrow.vector.VectorSchemaRoot
 import org.apache.arrow.vector.ipc.ArrowStreamWriter
 import org.apache.spark.sql.catalyst.InternalRow
@@ -87,21 +70,8 @@ private[python] trait SedonaPythonArrowInput[IN] extends PythonArrowInput[IN] {
 
           writeIteratorToArrowStream(root, writer, dataOut, inputIterator)
 
-          // end writes footer to the output stream and doesn't clean any resources.
-          // It could throw exception if the output stream is closed, so it should be
-          // in the try block.
           writer.end()
         } {
-          // If we close root and allocator in TaskCompletionListener, there could be a race
-          // condition where the writer thread keeps writing to the VectorSchemaRoot while
-          // it's being closed by the TaskCompletion listener.
-          // Closing root and allocator here is cleaner because root and allocator is owned
-          // by the writer thread and is only visible to the writer thread.
-          //
-          // If the writer thread is interrupted by TaskCompletionListener, it should either
-          // (1) in the try block, in which case it will get an InterruptedException when
-          // performing io, and goes into the finally block or (2) in the finally block,
-          // in which case it will ignore the interruption and close the resources.
           root.close()
           allocator.close()
         }

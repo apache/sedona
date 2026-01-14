@@ -47,11 +47,11 @@ class SQLSyntaxTestScala extends TestBaseScala with TableDrivenPropertyChecks {
       try {
         sparkSession.sql("CREATE TABLE T_TEST_EXPLICIT_GEOMETRY (GEO_COL GEOMETRY)")
         sparkSession.catalog.tableExists("T_TEST_EXPLICIT_GEOMETRY") should be(true)
-//        sparkSession.sparkContext.getConf.get(keyParserExtension) should be("true")
+        sparkSession.sparkContext.getConf.get(keyParserExtension) should be("true")
       } catch {
         case ex: Exception =>
           ex.getClass.getName.endsWith("ParseException") should be(true)
-//          sparkSession.sparkContext.getConf.get(keyParserExtension) should be("false")
+          sparkSession.sparkContext.getConf.get(keyParserExtension) should be("false")
       }
     }
 
@@ -61,11 +61,11 @@ class SQLSyntaxTestScala extends TestBaseScala with TableDrivenPropertyChecks {
         sparkSession.sql(
           "CREATE TABLE T_TEST_EXPLICIT_GEOMETRY_2 (INT_COL INT, GEO_COL GEOMETRY)")
         sparkSession.catalog.tableExists("T_TEST_EXPLICIT_GEOMETRY_2") should be(true)
-//        sparkSession.sparkContext.getConf.get(keyParserExtension) should be("true")
+        sparkSession.sparkContext.getConf.get(keyParserExtension) should be("true")
       } catch {
         case ex: Exception =>
           ex.getClass.getName.endsWith("ParseException") should be(true)
-//          sparkSession.sparkContext.getConf.get(keyParserExtension) should be("false")
+          sparkSession.sparkContext.getConf.get(keyParserExtension) should be("false")
       }
     }
   }

@@ -718,7 +718,6 @@ static SedonaErrorCode deserialize_geom_buf(GEOSContextHandle_t handle,
   return SEDONA_SUCCESS;
 }
 
-#include <stdio.h>
 SedonaErrorCode sedona_deserialize_geom(GEOSContextHandle_t handle,
                                         const char *buf, int buf_size,
                                         GEOSGeometry **p_geom,

@@ -99,11 +99,6 @@ private[python] trait SedonaPythonArrowOutput[OUT <: AnyRef] { self: BasePythonR
         }
         eos = true
       }
-//      def handleEndOfDataSectionSedona(): Unit = {
-//        if (stream.readInt() == SpecialLengths.END_OF_STREAM) {}
-//
-//        eos = true
-//      }
 
       protected override def handleEndOfDataSection(): Unit = {
         handleEndOfDataSectionSedona()

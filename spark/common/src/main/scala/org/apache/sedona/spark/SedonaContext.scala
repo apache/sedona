@@ -41,6 +41,7 @@ class InternalApi(
     extends StaticAnnotation
 
 object SedonaContext {
+
   private def customOptimizationsWithSession(sparkSession: SparkSession) =
     Seq(
       new TransformNestedUDTParquet(sparkSession),

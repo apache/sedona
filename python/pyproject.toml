@@ -26,7 +26,7 @@ description = "Apache Sedona is a cluster computing system for processing large-
 readme = "README.md"
 license = { text = "Apache-2.0" }
 authors = [ { name = "Apache Sedona", email = "dev@sedona.apache.org" } ]
-requires-python = ">=3.12"
+requires-python = ">=3.8"
 classifiers = [
   "Programming Language :: Python :: 3",
   "License :: OSI Approved :: Apache Software License",
@@ -50,16 +50,38 @@ kepler-map = ["geopandas", "keplergl==0.3.2"]
 flink = ["apache-flink>=1.19.0"]
 db = ["sedonadb[geopandas]; python_version >= '3.9'"]
 all = [
-#  "pyspark>=3.4.0,<4.1.0",
-#  "geopandas",
-#  "pydeck==0.8.0",
-#  "keplergl==0.3.2",
-#  "rasterio>=1.2.10",
+  "pyspark>=3.4.0,<4.1.0",
+  "geopandas",
+  "pydeck==0.8.0",
+  "keplergl==0.3.2",
+  "rasterio>=1.2.10",
 ]
 
 [dependency-groups]
 dev = [
-    "pytest>=9.0.2",
+  "pytest",
+  "pytest-cov",
+  "notebook==6.4.12",
+  "jupyter",
+  "mkdocs",
+  "scikit-learn",
+  "esda",
+  "libpysal",
+  "matplotlib",  # implicit dependency of esda
+  # prevent incompatibility with pysal 4.7.0, which is what is resolved to when shapely >2 is specified
+  "scipy<=1.10.0",
+  "pandas>=2.0.0",
+  "numpy<2",
+  "geopandas",
+  # https://stackoverflow.com/questions/78949093/how-to-resolve-attributeerror-module-fiona-has-no-attribute-path
+  # cannot set geopandas>=0.14.4 since it doesn't support python 3.8, so we pin fiona to <1.10.0
+  "fiona<1.10.0",
+  "pyarrow",
+  "pyspark>=3.4.0,<4.1.0",
+  "keplergl==0.3.2",
+  "pydeck==0.8.0",
+  "pystac==1.5.0",
+  "rasterio>=1.2.10",
 ]
 
 [project.urls]
@@ -80,20 +102,7 @@ exclude = ["*.tests", "*.tests.*", "tests", "tests.*"]
 name = "sedona.spark.utils.geomserde_speedup"
 sources = [
   "src/geomserde_speedup_module.c",
-  "src/sedonaserde_vectorized_udf_module.c",
   "src/geomserde.c",
   "src/geom_buf.c",
   "src/geos_c_dyn.c",
 ]
-
-[[tool.setuptools.ext-modules]]
-name = "sedona.spark.utils.sedonaserde_vectorized_udf_module"
-sources = [
-    "src/sedonaserde_vectorized_udf_module.c",
-    "src/geomserde.c",
-    "src/geom_buf.c",
-    "src/geos_c_dyn.c",
-]
-
-[tool.uv.sources]
-sedonadb = { path = "../../../sedona-db/target/wheels/sedonadb-0.3.0-cp312-cp312-macosx_11_0_arm64.whl" }

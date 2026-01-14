@@ -40,23 +40,7 @@ def compute_real_exit_code(exit_code):
     else:
         return 1
 
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
-file_handler = logging.FileHandler(
-    "/Users/pawelkocinski/Desktop/projects/sedonaworker/sedonaworker/logs/worker_daemon_main.log",
-    delay=False,
-)
-file_handler.flush = file_handler.stream.flush
-
-logger.addHandler(file_handler)
-
-
 def worker(sock, authenticated):
-    logger.info(
-        "Starting worker process with pid =" + str(os.getpid()) + " socket " + str(sock)
-    )
     """
     Called by a worker process after the fork().
     """
@@ -207,7 +191,6 @@ def manager():
                         authenticated = False
                         while True:
                             code = worker(sock, authenticated)
-                            logger.info("Worker exited with code %d", code)
                             if code == 0:
                                 authenticated = True
                             if not reuse or code:
