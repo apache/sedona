@@ -24,9 +24,6 @@ import pandas as pd
 from sedona.spark.utils import geometry_serde
 from shapely.geometry.base import BaseGeometry
 from pyspark.sql.udf import UserDefinedFunction
-import pyarrow as pa
-import geoarrow.pyarrow as ga
-from sedonadb import udf as sedona_udf_module
 from sedona.spark.sql.types import GeometryType
 from pyspark.sql.types import (
     DataType,
@@ -156,6 +153,9 @@ def serialize_to_geometry_if_geom(data, return_type: DataType):
 
 
 def infer_pa_type(spark_type: DataType):
+    import pyarrow as pa
+    import geoarrow.pyarrow as ga
+
     if isinstance(spark_type, GeometryType):
         return ga.wkb()
     elif isinstance(spark_type, FloatType):
@@ -200,6 +200,7 @@ def sedona_db_vectorized_udf(
     return_type: DataType,
     input_types: list[DataType],
 ):
+    from sedonadb import udf as sedona_udf_module
     eval_type = 6200
     if has_sedona_serializer_speedup():
         eval_type = 6201
