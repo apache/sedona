@@ -201,6 +201,7 @@ def sedona_db_vectorized_udf(
     input_types: list[DataType],
 ):
     from sedonadb import udf as sedona_udf_module
+
     eval_type = 6200
     if has_sedona_serializer_speedup():
         eval_type = 6201
