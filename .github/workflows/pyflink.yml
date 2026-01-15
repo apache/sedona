@@ -69,7 +69,7 @@ jobs:
       - name: Install python package + flink extra
         run: |
           cd python
-          uv add apache-flink==1.20.1
+          uv add apache-flink==2.2.0
           uv sync
       - name: Run PyFlink tests
         run: |
