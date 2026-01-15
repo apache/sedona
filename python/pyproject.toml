@@ -33,14 +33,11 @@ classifiers = [
 ]
 dependencies = [
   "attrs",
-  "geoarrow-pyarrow>=0.2.0",
-  "pyarrow>=16.1.0",
-  "sedonadb",
   "shapely>=1.7.0",
 ]
 
 [project.optional-dependencies]
-spark = ["pyspark>=3.4.0,<4.1.0"]
+spark = ["pyspark>=3.4.0,<4.1.0", "pyarrow>=16.1.0", "sedonadb", "geoarrow-pyarrow>=0.2.0"]
 pydeck-map = ["geopandas", "pydeck==0.8.0"]
 kepler-map = ["geopandas", "keplergl==0.3.2"]
 flink = ["apache-flink>=1.19.0"]
