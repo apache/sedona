@@ -32,16 +32,15 @@ classifiers = [
   "License :: OSI Approved :: Apache Software License",
 ]
 dependencies = [
-  "apache-flink>=2.2.0",
   "attrs",
   "shapely>=1.7.0",
 ]
 
 [project.optional-dependencies]
-spark = ["pyspark>=3.4.0,<4.1.0", "pyarrow>=16.1.0", "sedonadb", "geoarrow-pyarrow>=0.2.0", "pandas"]
+spark = ["pyspark>=3.4.0,<4.1.0", "sedonadb", "pandas"]
 pydeck-map = ["geopandas", "pydeck==0.8.0"]
 kepler-map = ["geopandas", "keplergl==0.3.2"]
-flink = ["apache-flink>=1.20.2"]
+flink = ["apache-flink==1.20.2"]
 db = ["sedonadb[geopandas]; python_version >= '3.9'"]
 all = [
   "pyspark>=3.4.0,<4.1.0",
