@@ -16,7 +16,7 @@
 # under the License.
 
 [build-system]
-requires = ["setuptools>=80.9.0", "wheel", "numpy"]
+requires = ["setuptools", "wheel", "numpy"]
 build-backend = "setuptools.build_meta"
 
 [project]
