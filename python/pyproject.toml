@@ -37,7 +37,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-spark = ["pyspark>=3.4.0,<4.1.0", "pyarrow>=16.1.0", "sedonadb", "geoarrow-pyarrow>=0.2.0"]
+spark = ["pyspark>=3.4.0,<4.1.0", "pyarrow>=16.1.0", "sedonadb", "geoarrow-pyarrow>=0.2.0", "pandas"]
 pydeck-map = ["geopandas", "pydeck==0.8.0"]
 kepler-map = ["geopandas", "keplergl==0.3.2"]
 flink = ["apache-flink>=1.19.0"]
@@ -61,7 +61,6 @@ dev = [
   "esda",
   "libpysal",
   "matplotlib",  # implicit dependency of esda
-  "pyarrow>=16.1.0", "sedonadb", "geoarrow-pyarrow>=0.2.0",
   # prevent incompatibility with pysal 4.7.0, which is what is resolved to when shapely >2 is specified
   "scipy<=1.10.0",
   "pandas>=2.0.0",
@@ -99,4 +98,9 @@ sources = [
   "src/geomserde.c",
   "src/geom_buf.c",
   "src/geos_c_dyn.c",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.4.2",
 ]

@@ -171,6 +171,8 @@ def infer_pa_type(spark_type: DataType):
 
 
 def infer_input_type(spark_type: DataType):
+    from sedonadb import udf as sedona_udf_module
+
     if isinstance(spark_type, GeometryType):
         return sedona_udf_module.GEOMETRY
     elif (

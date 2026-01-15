@@ -69,8 +69,7 @@ jobs:
       - name: Install python package + flink extra
         run: |
           cd python
-          uv add apache-flink==1.20.1
-          uv sync
+          uv sync --extra flink
       - name: Run PyFlink tests
         run: |
           wget -q https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.8.0-33.1-rc1/geotools-wrapper-1.8.0-33.1-rc1.jar
