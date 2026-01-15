@@ -61,6 +61,7 @@ dev = [
   "esda",
   "libpysal",
   "matplotlib",  # implicit dependency of esda
+  "pyarrow>=16.1.0", "sedonadb", "geoarrow-pyarrow>=0.2.0",
   # prevent incompatibility with pysal 4.7.0, which is what is resolved to when shapely >2 is specified
   "scipy<=1.10.0",
   "pandas>=2.0.0",
