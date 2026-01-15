@@ -35,9 +35,7 @@ dependencies = [
   "attrs",
   "geoarrow-pyarrow>=0.2.0",
   "pyarrow>=16.1.0",
-  "pyspark==3.5.4",
   "sedonadb",
-  "setuptools==80.9.0",
   "shapely>=1.7.0",
 ]
 
