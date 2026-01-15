@@ -33,6 +33,7 @@ classifiers = [
 ]
 dependencies = [
   "attrs",
+  "geoarrow-pyarrow>=0.2.0",
   "pyarrow>=16.1.0",
   "pyspark==3.5.4",
   "sedonadb",
