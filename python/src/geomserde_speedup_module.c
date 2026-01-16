@@ -280,7 +280,7 @@ static PyObject *to_sedona_func(PyObject *self, PyObject *args) {
     return NULL;
   }
 
-  npy_intp n = PyArray_SIZE(input_obj);
+  npy_intp n = PyArray_SIZE(array);
   npy_intp dims[1] = {n};
   PyArrayObject *out = (PyArrayObject *)PyArray_SimpleNew(1, dims, NPY_OBJECT);
   for (npy_intp i = 0; i < PyArray_SIZE(array); i++) {
