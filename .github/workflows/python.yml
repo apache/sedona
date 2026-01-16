@@ -135,6 +135,8 @@ jobs:
             uv add "shapely<2.0.0"
           fi
 
+          uv add sedonadb
+
           if [ "${SPARK_VERSION:0:1}" == "4" ]; then
             # Spark 4.0 requires Python 3.9+, and we remove flink since it conflicts with pyspark 4.0
             uv remove apache-flink --optional flink
