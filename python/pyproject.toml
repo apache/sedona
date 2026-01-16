@@ -99,8 +99,3 @@ sources = [
   "src/geom_buf.c",
   "src/geos_c_dyn.c",
 ]
-
-[tool.uv]
-dev-dependencies = [
-    "pytest>=8.4.2",
-]
