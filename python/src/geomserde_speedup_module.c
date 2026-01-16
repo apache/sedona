@@ -307,7 +307,7 @@ static PyObject *to_sedona_func(PyObject *self, PyObject *args) {
     Py_DECREF(serialized);
   }
 
-  return out;
+  return (PyObject *)out;
 }
 /* Module definition for Shapely 2.x */
 static PyObject *from_sedona_func(PyObject *self, PyObject *args) {
@@ -367,7 +367,7 @@ static PyObject *from_sedona_func(PyObject *self, PyObject *args) {
     Py_DECREF(pygeom);
   }
 
-  return out;
+  return (PyObject *)out;
 }
 
 static PyMethodDef geomserde_methods_shapely_2[] = {
