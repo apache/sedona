@@ -34,7 +34,7 @@ class TestSedonaDBArrowFunction(TestBase):
 
     @pytest.mark.vectorized
     @pytest.mark.skipif(
-        pyspark.__version__ >= "4.0.0",
+        pyspark.__version__ >= "4.0.0" or pyspark.__version__ < "3.5.0",
         reason="Skip for pyspark > 4.0",
     )
     def test_vectorized_udf(self):
@@ -63,7 +63,7 @@ class TestSedonaDBArrowFunction(TestBase):
 
     @pytest.mark.vectorized
     @pytest.mark.skipif(
-        pyspark.__version__ >= "4.0.0",
+        pyspark.__version__ >= "4.0.0" or pyspark.__version__ < "3.5.0",
         reason="Skip for pyspark > 4.0",
     )
     def test_geometry_to_double(self):
@@ -92,7 +92,7 @@ class TestSedonaDBArrowFunction(TestBase):
 
     @pytest.mark.vectorized
     @pytest.mark.skipif(
-        pyspark.__version__ >= "4.0.0",
+        pyspark.__version__ >= "4.0.0" or pyspark.__version__ < "3.5.0",
         reason="Skip for pyspark > 4.0",
     )
     def test_geometry_to_int(self):
@@ -120,7 +120,7 @@ class TestSedonaDBArrowFunction(TestBase):
 
     @pytest.mark.vectorized
     @pytest.mark.skipif(
-        pyspark.__version__ >= "4.0.0",
+        pyspark.__version__ >= "4.0.0" or pyspark.__version__ < "3.5.0",
         reason="Skip for pyspark > 4.0",
     )
     def test_geometry_crs_preservation(self):
