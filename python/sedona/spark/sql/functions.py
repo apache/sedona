@@ -34,8 +34,6 @@ from pyspark.sql.types import (
     ByteType,
 )
 
-from sedona.spark.utils.udf import has_sedona_serializer_speedup
-
 from sedona.spark.utils.geometry_serde import sedona_db_speedup_enabled
 
 SEDONA_SCALAR_EVAL_TYPE = 5200

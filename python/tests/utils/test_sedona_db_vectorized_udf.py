@@ -18,7 +18,7 @@
 import numpy as np
 
 from sedona.spark.sql.functions import sedona_db_vectorized_udf
-from sedona.spark.utils.udf import to_sedona, from_sedona
+from sedona.spark.utils.geometry_serde import to_sedona, from_sedona
 from tests.test_base import TestBase
 import pyarrow as pa
 import shapely
