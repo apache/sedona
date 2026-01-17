@@ -209,20 +209,6 @@ object ScalarUDF {
     pythonEvalType = UDF.PythonEvalType.SQL_SCALAR_SEDONA_UDF,
     udfDeterministic = true)
 
-  val nonGeometryVectorizedUDF: UserDefinedPythonFunction = UserDefinedPythonFunction(
-    name = "vectorized_udf",
-    func = SimplePythonFunction(
-      command = vectorizedFunction,
-      envVars = workerEnv.clone().asInstanceOf[java.util.Map[String, String]],
-      pythonIncludes = List.empty[String].asJava,
-      pythonExec = pythonExec,
-      pythonVer = pythonVer,
-      broadcastVars = List.empty[Broadcast[PythonBroadcast]].asJava,
-      accumulator = null),
-    dataType = FloatType,
-    pythonEvalType = PythonEvalType.SQL_SCALAR_PANDAS_UDF,
-    udfDeterministic = false)
-
   val sedonaDBGeometryToGeometryFunction: UserDefinedPythonFunction = UserDefinedPythonFunction(
     name = "geospatial_udf",
     func = SimplePythonFunction(

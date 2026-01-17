@@ -26,7 +26,6 @@ import org.scalatest.{BeforeAndAfterAll, FunSpec}
 import org.testcontainers.containers.MinIOContainer
 
 import java.io.FileInputStream
-
 import java.util.concurrent.ThreadLocalRandom
 
 trait TestBaseScala extends FunSpec with BeforeAndAfterAll {

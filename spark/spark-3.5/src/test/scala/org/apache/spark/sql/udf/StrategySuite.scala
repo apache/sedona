@@ -36,6 +36,10 @@ class StrategySuite extends TestBaseScala with Matchers {
   import spark.implicits._
 
   it("sedona geospatial UDF - geopandas") {
+    if (!sparkSession.version.startsWith("3.5")) {
+      cancel("spark 3.5 is supported only.")
+    }
+
     val df = Seq(
       (1, "value", wktReader.read("POINT(21 52)")),
       (2, "value1", wktReader.read("POINT(20 50)")),
@@ -61,6 +65,10 @@ class StrategySuite extends TestBaseScala with Matchers {
   }
 
   it("sedona geospatial UDF - sedona db") {
+    if (!sparkSession.version.startsWith("3.5")) {
+      cancel("spark 3.5 is supported only.")
+    }
+
     val df = Seq(
       (1, "value", wktReader.read("POINT(21 52)")),
       (2, "value1", wktReader.read("POINT(20 50)")),
