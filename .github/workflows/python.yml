@@ -170,7 +170,7 @@ jobs:
         run: |
           cd python
           export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
-          uv pip install --force-reinstall --no-deps -e
+          uv pip install --force-reinstall --no-deps -e .
           uv run pytest -m vectorized tests
           uv run pytest -m "not vectorized" -v tests
       - name: Run basic tests without rasterio
