@@ -36,6 +36,8 @@ from pyspark.sql.types import (
 
 from sedona.spark.utils.udf import has_sedona_serializer_speedup
 
+from sedona.spark.utils.geometry_serde import sedona_db_speedup_enabled
+
 SEDONA_SCALAR_EVAL_TYPE = 5200
 SEDONA_PANDAS_ARROW_NAME = "SedonaPandasArrowUDF"
 
@@ -205,7 +207,7 @@ def sedona_db_vectorized_udf(
     from sedonadb import udf as sedona_udf_module
 
     eval_type = 6200
-    if has_sedona_serializer_speedup():
+    if sedona_db_speedup_enabled:
         eval_type = 6201
 
     def apply_fn(fn):

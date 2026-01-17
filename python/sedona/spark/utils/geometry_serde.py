@@ -24,7 +24,9 @@ import shapely
 from shapely.geometry.base import BaseGeometry
 
 speedup_enabled = False
+sedona_db_speedup_enabled = False
 
+import shapely
 
 # Use geomserde_speedup when available, otherwise fallback to general pure
 # python implementation.
@@ -62,7 +64,14 @@ try:
                 return None
             return geomserde_speedup.deserialize(buf)
 
+        def to_sedona(arr):
+            return geomserde_speedup.to_sedona_func(arr)
+
+        def from_sedona(arr):
+            return geomserde_speedup.from_sedona_func(arr)
+
         speedup_enabled = True
+        sedona_db_speedup_enabled = True
 
     elif shapely.__version__.startswith("1."):
         # Shapely 1.x uses ctypes.CDLL to load geos_c library. We can obtain the
@@ -123,14 +132,43 @@ try:
             ob.__dict__["_is_empty"] = False
             return ob, bytes_read
 
+        warn(
+            f"optimized sedonadb vectorized function is only available for shapely 2.x, using fallback implementation."
+        )
+
+        def to_sedona(arr):
+            return shapely.to_wkb(arr)
+
+        def from_sedona(arr):
+            return shapely.from_wkb(arr)
+
         speedup_enabled = True
 
     else:
+
+        def to_sedona(arr):
+            return shapely.to_wkb(arr)
+
+        def from_sedona(arr):
+            return shapely.from_wkb(arr)
+
         # fallback to our general pure python implementation
         from .geometry_serde_general import deserialize, serialize
+
 
 except Exception as e:
     warn(
         f"Cannot load geomserde_speedup, fallback to general python implementation. Reason: {e}"
     )
+
+    warn(
+        f"Cannot load optimized version of sedonadb vectorized function, using fallback implementation. Reason: {e}"
+    )
+
+    def to_sedona(arr):
+        return shapely.to_wkb(arr)
+
+    def from_sedona(arr):
+        return shapely.from_wkb(arr)
+
     from .geometry_serde_general import deserialize, serialize

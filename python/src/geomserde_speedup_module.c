@@ -256,11 +256,13 @@ static PyObject *deserialize_1(PyObject *self, PyObject *args) {
   if (geom == NULL) {
     return NULL;
   }
+  2
 
-  /* These functions would be called by Shapely using ctypes when constructing
-   * a Shapely BaseGeometry object from GEOSGeometry pointer. We call them here
-   * to get rid of the extra overhead introduced by ctypes. */
-  int geom_type_id = dyn_GEOSGeomTypeId_r(handle, geom);
+      /* These functions would be called by Shapely using ctypes when
+       * constructing a Shapely BaseGeometry object from GEOSGeometry pointer.
+       * We call them here to get rid of the extra overhead introduced by
+       * ctypes. */
+      int geom_type_id = dyn_GEOSGeomTypeId_r(handle, geom);
   char has_z = dyn_GEOSHasZ_r(handle, geom);
   return Py_BuildValue("(Kibi)", geom, geom_type_id, has_z, length);
 }
