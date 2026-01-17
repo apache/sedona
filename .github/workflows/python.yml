@@ -135,8 +135,6 @@ jobs:
             uv add "shapely<2.0.0"
           fi
 
-          uv add sedonadb geoarrow-pyarrow pandas pyarrow
-
           if [ "${SPARK_VERSION:0:1}" == "4" ]; then
             # Spark 4.0 requires Python 3.9+, and we remove flink since it conflicts with pyspark 4.0
             uv remove apache-flink --optional flink
@@ -166,12 +164,18 @@ jobs:
         run: |
           PY_SITE=$(cd python; uv run python -c "import site; print(site.getsitepackages()[0])")
           find spark-shaded/target -name sedona-*.jar -exec cp {} ${PY_SITE}/pyspark/jars/ \;
-      - name: Run tests
+      - name: Run vectorized udf tests
         run: |
           cd python
           export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
           uv pip install --force-reinstall --no-deps -e .
+          uv remove apache-flink --optional flink
+          uv add sedonadb geopandas geoarrow-pyarrow
           uv run pytest -m vectorized tests
+      - name: Run tests
+        run: |
+          cd python
+          export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
           uv run pytest -m "not vectorized" -v tests
       - name: Run basic tests without rasterio
         run: |
