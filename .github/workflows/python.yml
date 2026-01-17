@@ -171,6 +171,7 @@ jobs:
           uv pip install --force-reinstall --no-deps -e .
           uv remove apache-flink --optional flink
           uv add sedonadb geopandas geoarrow-pyarrow
+          uv run pip freeze
           uv run pytest -m vectorized tests
       - name: Run tests
         run: |
