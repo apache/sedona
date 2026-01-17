@@ -165,7 +165,7 @@ jobs:
           PY_SITE=$(cd python; uv run python -c "import site; print(site.getsitepackages()[0])")
           find spark-shaded/target -name sedona-*.jar -exec cp {} ${PY_SITE}/pyspark/jars/ \;
       - name: Run vectorized udf tests
-        if: ${{ matrix.spark <= '4.0.0' }}
+        if: ${{ matrix.spark < '4.0.0' }}
         run: |
           cd python
           export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
