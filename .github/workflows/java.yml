@@ -111,6 +111,7 @@ jobs:
           if [[ "${SPARK_VERSION}" == "3.5"* ]] || [[ "${SPARK_VERSION}" == "4."* ]]; then
               pip install pyspark==$SPARK_VERSION pandas shapely apache-sedona pyarrow geoarrow-pyarrow sedonadb
               export SPARK_HOME=$(python -c "import pyspark; print(pyspark.__path__[0])")
+              (cd python; pip install --force-reinstall --no-deps -e)
           fi
 
           mvn -q clean install -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} ${SKIP_TESTS}

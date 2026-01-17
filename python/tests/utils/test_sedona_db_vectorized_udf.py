@@ -16,6 +16,7 @@
 # under the License.
 
 import numpy as np
+import pytest
 
 from sedona.spark.sql.functions import sedona_db_vectorized_udf
 from sedona.spark.utils.geometry_serde import to_sedona, from_sedona
@@ -29,6 +30,8 @@ from sedona.spark.sql import ST_X
 
 
 class TestSedonaDBArrowFunction(TestBase):
+
+    @pytest.mark.vectorized
     def test_vectorized_udf(self):
         @sedona_db_vectorized_udf(
             return_type=GeometryType(), input_types=[ByteType(), IntegerType()]
@@ -53,6 +56,7 @@ class TestSedonaDBArrowFunction(TestBase):
 
         df.select(ST_X(my_own_function(df.wkt, lit(100)).alias("geom"))).show()
 
+    @pytest.mark.vectorized
     def test_geometry_to_double(self):
         @sedona_db_vectorized_udf(return_type=DoubleType(), input_types=[ByteType()])
         def geometry_to_non_geometry_udf(geom):
@@ -77,6 +81,7 @@ class TestSedonaDBArrowFunction(TestBase):
 
         assert values_list == [1.0, 2.0, 3.0]
 
+    @pytest.mark.vectorized
     def test_geometry_to_int(self):
         @sedona_db_vectorized_udf(return_type=IntegerType(), input_types=[ByteType()])
         def geometry_to_int(geom):
@@ -100,6 +105,7 @@ class TestSedonaDBArrowFunction(TestBase):
 
         assert values_list == [0, 0, 0]
 
+    @pytest.mark.vectorized
     def test_geometry_crs_preservation(self):
         @sedona_db_vectorized_udf(return_type=GeometryType(), input_types=[ByteType()])
         def return_same_geometry(geom):

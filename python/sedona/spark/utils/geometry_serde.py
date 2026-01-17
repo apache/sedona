@@ -26,8 +26,6 @@ from shapely.geometry.base import BaseGeometry
 speedup_enabled = False
 sedona_db_speedup_enabled = False
 
-import shapely
-
 # Use geomserde_speedup when available, otherwise fallback to general pure
 # python implementation.
 try:

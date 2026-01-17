@@ -114,15 +114,16 @@ object ScalarUDF {
              |from pyspark.serializers import CloudPickleSerializer
              |from pyspark.sql.types import DoubleType, IntegerType
              |from sedonadb import udf as sedona_udf_module
+             |from sedona.spark.utils.geometry_serde import from_sedona
+             |from sedona.spark.utils.geometry_serde import to_sedona
+             |import numpy as np
              |
-             |@sedona_udf_module.arrow_udf(ga.wkb(), [udf.GEOMETRY, udf.NUMERIC])
+             |@sedona_udf_module.arrow_udf(ga.wkb(), [sedona_udf_module.BINARY, udf.NUMERIC])
              |def geometry_udf(geom, distance):
              |    geom_wkb = pa.array(geom.storage.to_array())
-             |    distance = pa.array(distance.to_array())
-             |    geom = shapely.from_wkb(geom_wkb)
-             |    result_shapely = shapely.buffer(geom, distance)
-             |
-             |    return pa.array(shapely.to_wkb(result_shapely))
+             |    geometry_array = np.asarray(geom_wkb, dtype=object)
+             |    geom = from_sedona(geometry_array)
+             |    return pa.array(to_sedona(geom))
              |
              |f = open('$path', 'wb');
              |f.write(CloudPickleSerializer().dumps((lambda: geometry_udf, GeometryType())))
@@ -233,7 +234,7 @@ object ScalarUDF {
       broadcastVars = List.empty[Broadcast[PythonBroadcast]].asJava,
       accumulator = null),
     dataType = GeometryUDT,
-    pythonEvalType = UDF.PythonEvalType.SQL_SCALAR_SEDONA_DB_UDF,
+    pythonEvalType = UDF.PythonEvalType.SQL_SCALAR_SEDONA_DB_SPEEDUP_UDF,
     udfDeterministic = true)
 
 }
