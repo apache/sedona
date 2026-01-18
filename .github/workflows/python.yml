@@ -169,6 +169,17 @@ jobs:
       #          cd python
       #          export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
       #          uv run pytest -m "not vectorized" -v tests
+      - name: Run vectorized udf tests
+        if: ${{ matrix.spark < '4.0.0' }}
+        run: |
+          cd python
+          export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
+          uv pip install --force-reinstall --no-deps -e .
+          uv remove apache-flink --optional flink
+          uv add "pyarrow>=16.0.0"
+          uv add "shapely>=2.0.0"
+          uv add sedonadb geopandas geoarrow-pyarrow
+          uv run pytest -m vectorized tests
       - name: Run basic tests without rasterio
         run: |
           cd python
@@ -185,14 +196,3 @@ jobs:
           export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
           uv pip install "pyspark[connect]==${{ matrix.spark }}" --reinstall
           uv run pytest -v tests/sql/test_dataframe_api.py
-      - name: Run vectorized udf tests
-        if: ${{ matrix.spark < '4.0.0' }}
-        run: |
-          cd python
-          export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
-          uv pip install --force-reinstall --no-deps -e .
-          uv remove apache-flink --optional flink
-          uv add "pyarrow>=16.0.0"
-          uv add "shapely>=2.0.0"
-          uv add sedonadb geopandas geoarrow-pyarrow
-          uv run pytest -m vectorized tests
