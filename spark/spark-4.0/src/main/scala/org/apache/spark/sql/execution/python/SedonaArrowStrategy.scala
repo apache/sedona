@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.udf
+package org.apache.spark.sql.execution.python
 
 import org.apache.sedona.sql.UDF.PythonEvalType
 import org.apache.spark.api.python.ChainedPythonFunctions
@@ -25,11 +25,8 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{Attribute, PythonUDF}
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.execution.{SparkPlan, SparkStrategy}
-import org.apache.spark.sql.execution.metric.SQLMetric
 import org.apache.spark.sql.execution.python.SedonaArrowEvalPythonExec
-import org.apache.spark.sql.types.StructType
-
-import scala.collection.JavaConverters.asScalaIteratorConverter
+import org.apache.spark.sql.udf.SedonaArrowEvalPython
 
 // We use custom Strategy to avoid Apache Spark assert on types, we
 // can consider extending this to support other engines working with
