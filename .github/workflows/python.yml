@@ -172,6 +172,7 @@ jobs:
           uv pip install --force-reinstall --no-deps -e .
           uv remove apache-flink --optional flink
           uv add "pyarrow>=16.0.0"
+          uv add "shapely>=2.0.0"
           uv add sedonadb geopandas geoarrow-pyarrow
           uv run pytest -m vectorized tests
       - name: Run tests
