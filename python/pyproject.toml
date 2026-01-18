@@ -37,10 +37,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-spark = ["pyspark>=3.4.0,<4.1.0", "sedonadb", "pandas"]
+spark = ["pyspark>=3.4.0,<4.1.0"]
 pydeck-map = ["geopandas", "pydeck==0.8.0"]
 kepler-map = ["geopandas", "keplergl==0.3.2"]
-flink = ["apache-flink==1.20.2"]
+flink = ["apache-flink>=1.19.0"]
 db = ["sedonadb[geopandas]; python_version >= '3.9'"]
 all = [
   "pyspark>=3.4.0,<4.1.0",
