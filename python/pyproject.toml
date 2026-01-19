@@ -56,8 +56,6 @@ dev = [
   "pytest-cov",
   "notebook==6.4.12",
   "jupyter",
-  # pywinpty 2.0.14 dropped Python 3.8 wheels; pin to avoid build failures on Windows
-  "pywinpty<2.0.14; sys_platform == 'win32' and python_version < '3.9'",
   "mkdocs",
   "scikit-learn",
   "esda",
