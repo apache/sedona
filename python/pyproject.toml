@@ -39,14 +39,14 @@ dependencies = [
 [project.optional-dependencies]
 spark = ["pyspark>=3.4.0,<4.1.0"]
 pydeck-map = ["geopandas", "pydeck==0.8.0"]
-kepler-map = ["geopandas", "keplergl==0.3.7"]
+kepler-map = ["geopandas", "keplergl==0.3.2"]
 flink = ["apache-flink>=1.19.0"]
 db = ["sedonadb[geopandas]; python_version >= '3.9'"]
 all = [
   "pyspark>=3.4.0,<4.1.0",
   "geopandas",
   "pydeck==0.8.0",
-  "keplergl==0.3.7",
+  "keplergl==0.3.2",
   "rasterio>=1.2.10",
 ]
 
@@ -56,6 +56,8 @@ dev = [
   "pytest-cov",
   "notebook==6.4.12",
   "jupyter",
+  # pywinpty 2.0.14 dropped Python 3.8 wheels; pin to avoid build failures on Windows
+  "pywinpty<2.0.14; sys_platform == 'win32' and python_version < '3.9'",
   "mkdocs",
   "scikit-learn",
   "esda",
@@ -71,7 +73,7 @@ dev = [
   "fiona<1.10.0",
   "pyarrow",
   "pyspark>=3.4.0,<4.1.0",
-  "keplergl==0.3.7",
+  "keplergl==0.3.2",
   "pydeck==0.8.0",
   "pystac==1.5.0",
   "rasterio>=1.2.10",
