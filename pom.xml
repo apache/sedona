@@ -380,7 +380,7 @@
             <dependency>
                 <groupId>org.datasyslab</groupId>
                 <artifactId>campskeleton</artifactId>
-                <version>0.0.2-20251014</version>
+                <version>0.0.2-20260118</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
