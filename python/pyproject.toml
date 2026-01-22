@@ -63,7 +63,7 @@ dev = [
   "matplotlib",  # implicit dependency of esda
   # prevent incompatibility with pysal 4.7.0, which is what is resolved to when shapely >2 is specified
   "scipy<=1.10.0",
-  "pandas>=2.0.0",
+  "pandas>=2.0.0,<3.0.0",
   "numpy<2",
   "geopandas",
   # https://stackoverflow.com/questions/78949093/how-to-resolve-attributeerror-module-fiona-has-no-attribute-path
