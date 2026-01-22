@@ -24,8 +24,6 @@ import static org.junit.Assert.*;
 
 import com.google.common.geometry.S2CellId;
 import com.google.common.math.DoubleMath;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.sedona.common.sphere.Haversine;
@@ -63,15 +61,6 @@ public class FunctionsTest extends TestBase {
           return 0;
         }
       };
-
-  private static String readResourceString(String resourcePath) throws IOException {
-    try (InputStream inputStream = FunctionsTest.class.getResourceAsStream(resourcePath)) {
-      if (inputStream == null) {
-        throw new IllegalArgumentException("Resource not found: " + resourcePath);
-      }
-      return new String(inputStream.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8).trim();
-    }
-  }
 
   private final WKTReader wktReader = new WKTReader();
 
@@ -543,7 +532,7 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
-  public void splitCircleInto2SemiCircles() throws ParseException, IOException {
+  public void splitCircleInto2SemiCircles() throws ParseException {
     String polygonWkt =
         "POLYGON ((-117.76405581088967 34.111876749328026, -117.76407506132291 34.11170068822483, "
             + "-117.76413523652074 34.111531133837936, -117.76423402376724 34.11137460199335, -117.76436762657538 34.11123710803779, "
