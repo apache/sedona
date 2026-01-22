@@ -89,12 +89,10 @@ public class SnowClient {
 
   public static SnowClient newFromEnv() throws SQLException {
     Properties prop = new Properties();
-    // check auth method
-    String authMethod = System.getenv("SNOWFLAKE_AUTH_METHOD");
-    if (authMethod.equals("BASIC")) {
-      prop.put("user", System.getenv("SNOWFLAKE_USER"));
-      prop.put("password", System.getenv("SNOWFLAKE_PASSWORD"));
-    }
+    // Use PAT (Programmatic Access Token) authentication
+    prop.put("user", System.getenv("SNOWFLAKE_USER"));
+    prop.put("authenticator", "programmatic_access_token");
+    prop.put("token", System.getenv("SNOWFLAKE_PASSWORD"));
     prop.put("schema", System.getenv("SNOWFLAKE_SCHEMA"));
     prop.put("warehouse", System.getenv("SNOWFLAKE_WAREHOUSE"));
     prop.put("role", System.getenv("SNOWFLAKE_ROLE"));
