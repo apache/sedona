@@ -262,13 +262,9 @@ public final class GeometrySplitter {
   }
 
   private Geometry generateCandidatePolygons(Geometry polygons, Geometry blade) {
-    // restrict the blade to only be within the original polygon to
-    // avoid candidate polygons that are impossible
-    Geometry bladeWithinPolygons = blade.intersection(polygons);
-
     // a union will node all the lines at intersections
     // these nodes are required for Polygonizer to work correctly
-    Geometry totalLineWork = polygons.getBoundary().union(bladeWithinPolygons);
+    Geometry totalLineWork = polygons.getBoundary().union(blade);
 
     Polygonizer polygonizer = new Polygonizer();
     polygonizer.add(totalLineWork);
@@ -281,7 +277,18 @@ public final class GeometrySplitter {
     // original geometry to ensure holes in the original geometry are excluded
     for (int i = 0; i < polygons.getNumGeometries(); i++) {
       Geometry candidateResult = polygons.getGeometryN(i);
-      if (candidateResult instanceof Polygon && original.contains(candidateResult)) {
+      if (!(candidateResult instanceof Polygon)) {
+        continue;
+      }
+
+      Point pointOnSurface = candidateResult.getInteriorPoint();
+      // getInteriorPoint() may return null for degenerate or empty polygonal geometries,
+      // so guard against null before using the point.
+      if (pointOnSurface == null) {
+        continue;
+      }
+
+      if (original.covers(pointOnSurface)) {
         list.add((Polygon) candidateResult);
       }
     }

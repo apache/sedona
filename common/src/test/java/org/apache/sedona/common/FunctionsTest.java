@@ -24,6 +24,8 @@ import static org.junit.Assert.*;
 
 import com.google.common.geometry.S2CellId;
 import com.google.common.math.DoubleMath;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.sedona.common.sphere.Haversine;
@@ -61,6 +63,15 @@ public class FunctionsTest extends TestBase {
           return 0;
         }
       };
+
+  private static String readResourceString(String resourcePath) throws IOException {
+    try (InputStream inputStream = FunctionsTest.class.getResourceAsStream(resourcePath)) {
+      if (inputStream == null) {
+        throw new IllegalArgumentException("Resource not found: " + resourcePath);
+      }
+      return new String(inputStream.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8).trim();
+    }
+  }
 
   private final WKTReader wktReader = new WKTReader();
 
@@ -529,6 +540,36 @@ public class FunctionsTest extends TestBase {
     Geometry actualResult = Functions.split(geometryCollection, lineString);
 
     assertNull(actualResult);
+  }
+
+  @Test
+  public void splitCircleInto2SemiCircles() throws ParseException, IOException {
+    String polygonWkt =
+        "POLYGON ((-117.76405581088967 34.111876749328026, -117.76407506132291 34.11170068822483, "
+            + "-117.76413523652074 34.111531133837936, -117.76423402376724 34.11137460199335, -117.76436762657538 34.11123710803779, "
+            + "-117.76453091060647 34.11112393568514, -117.76471760098879 34.11103943398174, -117.76492052345083 34.11098685019075, "
+            + "-117.76513188000408 34.1109682050154, -117.76534354858369 34.11098421495394, -117.76554739513688 34.11103426476887, "
+            + "-117.76573558617179 34.11111643112786, -117.76590088976099 34.111227556508084, -117.76603695343799 34.11136337052523, "
+            + "-117.76613854831002 34.11151865402651, -117.76620177000793 34.11168743964393, -117.76622418874936 34.111863241103265, "
+            + "-117.76620494274577 34.11203930247842, -117.76614477135817 34.11220885781403, -117.7660459867224 34.11236539113964, "
+            + "-117.76591238492807 34.11250288688306, -117.7657491001595 34.11261606105824, -117.7655624074007 34.11270056434135, "
+            + "-117.76535948128496 34.112753149228745, -117.76514812035703 34.11277179485027, -117.76493644734776 34.112755784639766, "
+            + "-117.76473259698435 34.112705733876126, -117.76454440333869 34.11262356603611, -117.76437909873567 34.11251243886801, "
+            + "-117.76424303579616 34.11237662302835, -117.76414144330062 34.112221337947354, -117.76407822525644 34.11205255123353, "
+            + "-117.76405581088967 34.111876749328026))";
+    String knifeWkt =
+        "LINESTRING (-117.7640751398563 34.111535124121441, -117.76628486838135 34.112204866513046)";
+
+    Geometry polygon = Constructors.geomFromWKT(polygonWkt, 4326);
+    Geometry knife = Constructors.geomFromWKT(knifeWkt, 4326);
+    Geometry resultPolygon = Functions.split(polygon, knife);
+    assertEquals(2, resultPolygon.getNumGeometries());
+
+    double circleArea = polygon.getArea();
+    for (int i = 0; i < resultPolygon.getNumGeometries(); i++) {
+      double actualArea = resultPolygon.getGeometryN(i).getArea();
+      assertEquals(2.0, circleArea / actualArea, 0.1);
+    }
   }
 
   @Test
