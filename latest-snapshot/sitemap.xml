@@ -2,486 +2,486 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://sedona.apache.org/latest/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/download/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/sedonaflink/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/sedonasnow/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/sedonaspark/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/java-api/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/python-api/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Aggregator/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Constructor/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Function/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Overview/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Predicate/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/javadoc/spark/legal/jquery/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/javadoc/spark/legal/jqueryUI/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/javadoc/spark/legal/jszip/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/javadoc/spark/legal/pako/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/pydocs/_static/color-scheme-info/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/AggregateFunction/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Constructor/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Function/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Overview/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Predicate/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/AggregateFunction/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Constructor/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/DataFrameAPI/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Function/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/NearestNeighbourSearching/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Optimizer/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Overview/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Parameter/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Predicate/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-affine-transformation/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-aggregate-function/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-loader/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-map-algebra/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-operators/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-visualizer/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-writer/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Reading-legacy-parquet/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spider/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Visualization-SedonaKepler/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Visualization-SedonaPyDeck/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/geography/AggregateFunction/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/geography/Constructor/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/geography/Function/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/geography/Predicate/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/stats/sql/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/viz/java-api/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/viz/sql/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/asf/asf/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/asf/telemetry/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/blog/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/blog/2025/09/05/should-you-use-h3-for-geospatial-analytics-a-deep-dive-with-apache-spark-and-sedona/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/blog/2025/12/01/sedonadb-020-release/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/blog/2025/09/24/introducing-sedonadb-a-single-node-analytical-database-engine-with-geospatial-as-a-first-class-citizen/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/blog/2025/12/11/introducing-spatialbench-performance-benchmarks-for-spatial-database-queries/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/blog/2025/07/09/welcome-to-the-apache-sedona-blog/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/blog/2026/01/11/apache-sedona-2025-year-in-review/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/blog/2026/01/08/spatial-query-benchmarking-databricks/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/blog/2025/10/21/managing-spatial-tables-in-data-lakehouses-with-iceberg/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/community/contact/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/community/contributor/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/community/develop/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/community/geopandas/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/community/publication/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/community/publish/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/community/release-manager/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/community/rule/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/community/snapshot/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/community/vote/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/azure-synapse-analytics/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/cluster/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/compile/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/databricks/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/docker/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/emr/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/fabric/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/glue/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/install-python/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/install-scala/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/maven-coordinates/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/modules/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/overview/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/platform/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/release-notes/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/wherobots/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/zeppelin/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/flink/install-python/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/flink/install-scala/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/flink/modules/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/flink/platform/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/snowflake/install/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/snowflake/modules/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/Advanced-Tutorial-Tune-your-Application/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/benchmark/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/demo/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/geopandas-api/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/geopandas-shapely/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/jupyter-notebook/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/raster/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/rdd/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/sql-pure-sql/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/sql/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/storing-blobs-in-parquet/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/viz-gallery/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/viz/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/zeppelin/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/concepts/clustering-algorithms/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/concepts/distance-spark/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/concepts/spatial-joins/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/files/csv-geometry-sedona-spark/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/files/geojson-sedona-spark/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/files/geopackage-sedona-spark/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/files/geoparquet-sedona-spark/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/files/shapefiles-sedona-spark/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/files/stac-sedona-spark/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/flink/pyflink-sql/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/flink/sql/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/snowflake/sql/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/blog/archive/2026/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/blog/archive/2025/</loc>
-         <lastmod>2026-01-22</lastmod>
+         <lastmod>2026-01-24</lastmod>
     </url>
 </urlset>
