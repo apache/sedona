@@ -40,6 +40,14 @@ repos:
         files: ^README\.md$
   - repo: local
     hooks:
+      - id: create-pre-commit-docs
+        name: create pre-commit docs
+        description: creates a Markdown file with information on the pre-commit hooks
+        entry: .github/workflows/scripts/create_pre_commit_docs.py
+        language: python
+        additional_dependencies:
+          - pyyaml
+        require_serial: true
       - id: prettier
         name: run prettier
         description: format files with prettier
