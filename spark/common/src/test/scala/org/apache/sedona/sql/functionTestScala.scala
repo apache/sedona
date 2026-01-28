@@ -423,11 +423,11 @@ class functionTestScala
       val polygon = "POLYGON ((120 60, 121 61, 122 62, 123 63, 124 64, 120 60))"
       val geometryFactory = new GeometryFactory
       val coords = new Array[Coordinate](6)
-      coords(0) = new Coordinate(1000961.4042164611, 6685590.893548286)
-      coords(1) = new Coordinate(1039394.2790044537, 6804110.988854166)
-      coords(2) = new Coordinate(1074157.4382441062, 6923060.447921266)
-      coords(3) = new Coordinate(1105199.4259604653, 7042351.1239674715)
-      coords(4) = new Coordinate(1132473.1932022288, 7161889.652860963)
+      coords(0) = new Coordinate(1000961.4045206103, 6685590.89353171)
+      coords(1) = new Coordinate(1039394.2797213441, 6804110.988844556)
+      coords(2) = new Coordinate(1074157.4397193217, 6923060.447944083)
+      coords(3) = new Coordinate(1105199.4286994014, 7042351.124075022)
+      coords(4) = new Coordinate(1132473.1978762923, 7161889.653145648)
       coords(5) = coords(0)
       val polygonExpected = geometryFactory.createPolygon(coords)
       val EPSG_TGT_CRS = CRS.decode("EPSG:32649", true)

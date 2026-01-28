@@ -21,6 +21,7 @@ package org.apache.sedona.core.utils;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.nio.file.Paths;
+import java.util.Locale;
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.enums.JoinBuildSide;
@@ -32,8 +33,54 @@ import org.apache.spark.sql.RuntimeConfig;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.util.Utils;
 import org.locationtech.jts.geom.Envelope;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SedonaConf implements Serializable {
+  static final Logger logger = LoggerFactory.getLogger(SedonaConf.class);
+
+  /**
+   * CRS transformation mode for ST_Transform function.
+   *
+   * <ul>
+   *   <li>{@link #NONE} - Use proj4sedona for all CRS transformations (raster not yet supported)
+   *   <li>{@link #RASTER} - Use proj4sedona for vector, GeoTools for raster (default)
+   *   <li>{@link #ALL} - Use GeoTools for all CRS transformations (legacy behavior)
+   * </ul>
+   *
+   * @since 1.9.0
+   */
+  public enum CRSTransformMode {
+    /** Use proj4sedona for all transformations. Raster transform not yet supported. */
+    NONE,
+    /** Use proj4sedona for vector, GeoTools for raster (default). */
+    RASTER,
+    /** Use GeoTools for all transformations (legacy behavior). */
+    ALL;
+
+    public static CRSTransformMode fromString(String value) {
+      if (value == null || value.isEmpty()) {
+        return RASTER; // default
+      }
+      try {
+        return valueOf(value.toUpperCase(Locale.ROOT));
+      } catch (IllegalArgumentException e) {
+        logger.warn(
+            "Invalid value '{}' for spark.sedona.crs.geotools, using default 'raster'", value);
+        return RASTER;
+      }
+    }
+
+    /** Returns true if GeoTools should be used for vector CRS transformations. */
+    public boolean useGeoToolsForVector() {
+      return this == ALL;
+    }
+
+    /** Returns true if GeoTools should be used for raster CRS transformations. */
+    public boolean useGeoToolsForRaster() {
+      return this == RASTER || this == ALL;
+    }
+  }
 
   // Global parameters of Sedona. All these parameters can be initialized through SparkConf.
 
@@ -68,6 +115,9 @@ public class SedonaConf implements Serializable {
   // Parameters for libpostal integration
   private String libPostalDataDir;
   private Boolean libPostalUseSenzing = false;
+
+  // Parameter for CRS transformation mode
+  private CRSTransformMode crsTransformMode;
 
   public static SedonaConf fromActiveSession() {
     return new SedonaConf(SparkSession.active().conf());
@@ -177,6 +227,13 @@ public class SedonaConf implements Serializable {
 
     this.libPostalUseSenzing =
         Boolean.parseBoolean(confGetter.get("spark.sedona.libpostal.useSenzing", "true"));
+
+    // CRS transformation mode configuration
+    // - "none": Use proj4sedona for all transformations (raster not yet supported)
+    // - "raster" (default): Use proj4sedona for vector, GeoTools for raster
+    // - "all": Use GeoTools for all transformations (legacy behavior)
+    this.crsTransformMode =
+        CRSTransformMode.fromString(confGetter.get("spark.sedona.crs.geotools", "raster"));
   }
 
   // Helper method to prioritize `sedona.*` over `spark.sedona.*`
@@ -274,5 +331,15 @@ public class SedonaConf implements Serializable {
 
   public Boolean getLibPostalUseSenzing() {
     return libPostalUseSenzing;
+  }
+
+  /**
+   * Get the CRS transformation mode for ST_Transform.
+   *
+   * @return The CRS transformation mode
+   * @since 1.9.0
+   */
+  public CRSTransformMode getCRSTransformMode() {
+    return crsTransformMode;
   }
 }

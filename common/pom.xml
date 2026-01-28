@@ -124,6 +124,11 @@
             <groupId>org.datasyslab</groupId>
             <artifactId>campskeleton</artifactId>
         </dependency>
+        <!-- proj4sedona for CRS transformation (pure Java, no LGPL dependencies) -->
+        <dependency>
+            <groupId>org.datasyslab</groupId>
+            <artifactId>proj4sedona</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>

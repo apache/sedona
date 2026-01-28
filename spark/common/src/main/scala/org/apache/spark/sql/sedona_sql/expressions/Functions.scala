@@ -18,7 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
-import org.apache.sedona.common.{Functions, FunctionsGeoTools}
+import org.apache.sedona.common.{Functions, FunctionsGeoTools, FunctionsProj4}
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
 import org.apache.sedona.common.utils.{InscribedCircle, ValidDetail}
 import org.apache.sedona.core.utils.SedonaConf
@@ -292,13 +292,53 @@ private[apache] case class ST_Centroid(inputExpressions: Seq[Expression])
  * Given a geometry, sourceEPSGcode, and targetEPSGcode, convert the geometry's Spatial Reference
  * System / Coordinate Reference System.
  *
+ * The CRS transformation backend is controlled by the `spark.sedona.crs.geotools` config:
+ *   - `none`: Use proj4sedona for all vector transformations
+ *   - `raster` (default): Use proj4sedona for vector, GeoTools for raster
+ *   - `all`: Use GeoTools for everything (legacy behavior)
+ *
+ * Note: For the 4-argument version with lenient parameter, proj4sedona ignores the lenient
+ * parameter (it always performs strict transformation). GeoTools uses the lenient parameter.
+ *
+ * The default fallback (when config cannot be read) is proj4sedona, ensuring consistent behavior
+ * during Spark's query optimization phases like constant folding.
+ *
  * @param inputExpressions
  */
 private[apache] case class ST_Transform(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction4(FunctionsGeoTools.transform),
-      inferrableFunction3(FunctionsGeoTools.transform),
-      inferrableFunction2(FunctionsGeoTools.transform)) {
+      inferrableFunction4(FunctionsProj4.transform),
+      inferrableFunction3(FunctionsProj4.transform),
+      inferrableFunction2(FunctionsProj4.transform)) {
+
+  // Define proj4sedona function overloads (2, 3, 4-arg versions)
+  // Note: 4-arg version ignores the lenient parameter
+  private lazy val proj4Functions: Seq[InferrableFunction] = Seq(
+    inferrableFunction4(FunctionsProj4.transform),
+    inferrableFunction3(FunctionsProj4.transform),
+    inferrableFunction2(FunctionsProj4.transform))
+
+  // Define GeoTools function overloads (2, 3, 4-arg versions)
+  private lazy val geoToolsFunctions: Seq[InferrableFunction] = Seq(
+    inferrableFunction4(FunctionsGeoTools.transform),
+    inferrableFunction3(FunctionsGeoTools.transform),
+    inferrableFunction2(FunctionsGeoTools.transform))
+
+  override lazy val f: InferrableFunction = {
+    // Check config to decide between proj4sedona and GeoTools
+    // Note: 4-arg lenient parameter is ignored by proj4sedona
+    val useGeoTools =
+      try {
+        SedonaConf.fromActiveSession().getCRSTransformMode.useGeoToolsForVector()
+      } catch {
+        case _: Exception =>
+          // If no active session, fall back to default (proj4sedona)
+          false
+      }
+
+    val candidateFunctions = if (useGeoTools) geoToolsFunctions else proj4Functions
+    FunctionResolver.resolveFunction(inputExpressions, candidateFunctions)
+  }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

@@ -100,3 +100,14 @@ If you set the same parameter through both `sedona` and `spark.sedona` prefixes,
 	* Enable the parser extension to parse GEOMETRY data type in SQL DDL statements
 	* Default: true
 	* Possible values: true, false
+
+## CRS Transformation
+
+* spark.sedona.crs.geotools
+	* Controls which library is used for CRS transformations in ST_Transform
+	* Default: raster
+	* Possible values:
+		* none: Use proj4sedona for all transformations
+		* raster: Use proj4sedona for vector transformations, GeoTools for raster transformations
+		* all: Use GeoTools for all transformations (legacy behavior)
+	* Since: v1.9.0

@@ -3390,13 +3390,15 @@ Introduction:
 Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS.
 For SourceCRS and TargetCRS, WKT format is also available.
 
+Since `v1.9.0`, Sedona Snowflake uses the proj4sedona library for CRS transformations, which provides better performance and broader CRS format support.
+
 !!!note
 	By default, this function uses lat/lon order. You can use ==ST_FlipCoordinates== to swap X and Y.
 
 !!!note
-	If ==ST_Transform== throws an Exception called "Bursa wolf parameters required", you need to disable the error notification in ST_Transform. You can append a boolean value at the end.
+	Since `v1.9.0`, the optional boolean parameter is accepted for API compatibility but is ignored. Transformations using proj4sedona are always strict.
 
-Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string ,[Optional] DisableError)`
+Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string ,[Optional] lenient)`
 
 SQL example (simple):
 

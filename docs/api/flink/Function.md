@@ -4277,6 +4277,8 @@ Introduction:
 
 Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS. For SourceCRS and TargetCRS, WKT format is also available since v1.3.1.
 
+Since `v1.9.0`, Sedona Flink uses the proj4sedona library for CRS transformations, which provides better performance and does not require the GeoTools dependency.
+
 **Lon/Lat Order in the input geometry**
 
 If the input geometry is in lat/lon order, it might throw an error such as `too close to pole`, `latitude or longitude exceeded limits`, or give unexpected results.
@@ -4323,7 +4325,7 @@ PROJCS["WGS 84 / Pseudo-Mercator",
     By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
 
 !!!note
-    By default, ==ST_Transform== follows the `lenient` mode which tries to fix issues by itself. You can append a boolean value at the end to enable the `strict` mode. In `strict` mode, ==ST_Transform== will throw an error if it finds any issue.
+    Since `v1.9.0`, the `lenient` parameter is accepted for API compatibility but is ignored. Transformations using proj4sedona are always strict.
 
 Format:
 

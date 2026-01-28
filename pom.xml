@@ -96,6 +96,7 @@
         <scala-collection-compat.version>2.5.0</scala-collection-compat.version>
         <geoglib.version>1.52</geoglib.version>
         <caffeine.version>2.9.2</caffeine.version>
+        <proj4sedona.version>0.0.2</proj4sedona.version>
 
         <geotools.scope>provided</geotools.scope>
         <!-- Because it's not in Maven central, make it provided by default -->
@@ -381,6 +382,12 @@
                 <groupId>org.datasyslab</groupId>
                 <artifactId>campskeleton</artifactId>
                 <version>0.0.2-20260118</version>
+            </dependency>
+            <!-- proj4sedona for CRS transformation (pure Java, no LGPL dependencies) -->
+            <dependency>
+                <groupId>org.datasyslab</groupId>
+                <artifactId>proj4sedona</artifactId>
+                <version>${proj4sedona.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

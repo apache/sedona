@@ -4650,6 +4650,14 @@ Introduction:
 
 Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS. For SourceCRS and TargetCRS, WKT format is also available since `v1.3.1`. Since `v1.5.1`, if the `SourceCRS` is not specified, CRS will be fetched from the geometry using [ST_SRID](#st_srid).
 
+**CRS Transformation Backend**
+
+Since `v1.9.0`, Sedona uses the proj4sedona library by default for vector CRS transformations, which provides better performance and does not require the GeoTools dependency. The backend can be configured using `spark.sedona.crs.geotools`:
+
+- `none`: Use proj4sedona for all transformations
+- `raster` (default): Use proj4sedona for vector, GeoTools for raster
+- `all`: Use GeoTools for all transformations (legacy behavior)
+
 **Lon/Lat Order in the input geometry**
 
 If the input geometry is in lat/lon order, it might throw an error such as `too close to pole`, `latitude or longitude exceeded limits`, or give unexpected results.
@@ -4696,7 +4704,7 @@ PROJCS["WGS 84 / Pseudo-Mercator",
     By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
 
 !!!note
-    By default, ==ST_Transform== follows the `lenient` mode which tries to fix issues by itself. You can append a boolean value at the end to enable the `strict` mode. In `strict` mode, ==ST_Transform== will throw an error if it finds any issue.
+    The `lenient` parameter controls error handling during transformation. When using the default proj4sedona backend (since `v1.9.0`), the lenient parameter is ignored and transformations are always strict. When using GeoTools (`spark.sedona.crs.geotools=all`), lenient mode (default: true) tries to fix issues automatically, while strict mode (false) throws an error if any issue is found.
 
 Format:
 
