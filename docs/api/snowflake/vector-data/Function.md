@@ -3388,34 +3388,23 @@ MULTIPOLYGON (((-2 -3, -3 -3, -3 3, -2 3, -2 -3)), ((3 -3, 3 3, 4 3, 4 -3, 3 -3)
 Introduction:
 
 Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS.
-For SourceCRS and TargetCRS, WKT format is also available.
 
-Since `v1.9.0`, Sedona Snowflake uses the proj4sedona library for CRS transformations, which provides better performance and broader CRS format support.
+Since `v1.9.0`, Sedona supports multiple CRS formats including EPSG codes, WKT1, WKT2, PROJ strings, and PROJJSON. Grid files for high-accuracy datum transformations are also supported.
+
+!!!tip
+    For comprehensive details on supported CRS formats, grid file usage, and examples, see the Spark SQL [CRS Transformation](../../sql/CRS-Transformation.md) documentation.
 
 !!!note
 	By default, this function uses lat/lon order. You can use ==ST_FlipCoordinates== to swap X and Y.
 
-!!!note
-	Since `v1.9.0`, the optional boolean parameter is accepted for API compatibility but is ignored. Transformations using proj4sedona are always strict.
+Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string)`
 
-Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string ,[Optional] lenient)`
-
-SQL example (simple):
+SQL example:
 
 ```sql
 SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857')
 FROM polygondf
 ```
-
-SQL example (with optional parameters):
-
-```sql
-SELECT ST_Transform(polygondf.countyshape, 'epsg:4326','epsg:3857', false)
-FROM polygondf
-```
-
-!!!note
-	The detailed EPSG information can be searched on [EPSG.io](https://epsg.io/).
 
 ## ST_Translate
 

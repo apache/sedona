@@ -4275,62 +4275,17 @@ MULTIPOLYGON (((-2 -3, -3 -3, -3 3, -2 3, -2 -3)), ((3 -3, 3 3, 4 3, 4 -3, 3 -3)
 
 Introduction:
 
-Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS. For SourceCRS and TargetCRS, WKT format is also available since v1.3.1.
+Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS.
 
-Since `v1.9.0`, Sedona Flink uses the proj4sedona library for CRS transformations, which provides better performance and does not require the GeoTools dependency.
+Since `v1.9.0`, Sedona supports multiple CRS formats including EPSG codes, WKT1, WKT2, PROJ strings, and PROJJSON. Grid files for high-accuracy datum transformations are also supported.
 
-**Lon/Lat Order in the input geometry**
-
-If the input geometry is in lat/lon order, it might throw an error such as `too close to pole`, `latitude or longitude exceeded limits`, or give unexpected results.
-You need to make sure that the input geometry is in lon/lat order. If the input geometry is in lat/lon order, you can use ==ST_FlipCoordinates== to swap X and Y.
-
-**Lon/Lat Order in the source and target CRS**
-
-Sedona will force the source and target CRS to be in lon/lat order. If the source CRS or target CRS is in lat/lon order, it will be swapped to lon/lat order.
-
-**CRS code**
-
-The CRS code is the code of the CRS in the official EPSG database (https://epsg.org/) in the format of `EPSG:XXXX`. A community tool [EPSG.io](https://epsg.io/) can help you quick identify a CRS code. For example, the code of WGS84 is `EPSG:4326`.
-
-**WKT format**
-
-You can also use OGC WKT v1 format to specify the source CRS and target CRS. An example OGC WKT v1 CRS of `EPGS:3857` is as follows:
-
-```
-PROJCS["WGS 84 / Pseudo-Mercator",
-    GEOGCS["WGS 84",
-        DATUM["WGS_1984",
-            SPHEROID["WGS 84",6378137,298.257223563,
-                AUTHORITY["EPSG","7030"]],
-            AUTHORITY["EPSG","6326"]],
-        PRIMEM["Greenwich",0,
-            AUTHORITY["EPSG","8901"]],
-        UNIT["degree",0.0174532925199433,
-            AUTHORITY["EPSG","9122"]],
-        AUTHORITY["EPSG","4326"]],
-    PROJECTION["Mercator_1SP"],
-    PARAMETER["central_meridian",0],
-    PARAMETER["scale_factor",1],
-    PARAMETER["false_easting",0],
-    PARAMETER["false_northing",0],
-    UNIT["metre",1,
-        AUTHORITY["EPSG","9001"]],
-    AXIS["Easting",EAST],
-    AXIS["Northing",NORTH],
-    EXTENSION["PROJ4","+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs"],
-    AUTHORITY["EPSG","3857"]]
-```
-
-!!!note
-    By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
-
-!!!note
-    Since `v1.9.0`, the `lenient` parameter is accepted for API compatibility but is ignored. Transformations using proj4sedona are always strict.
+!!!tip
+    For comprehensive details on supported CRS formats, grid file usage, and examples, see the Spark SQL [CRS Transformation](../sql/CRS-Transformation.md) documentation.
 
 Format:
 
 ```
-ST_Transform (A: Geometry, SourceCRS: String, TargetCRS: String, [Optional] lenientMode: Boolean)
+ST_Transform (A: Geometry, SourceCRS: String, TargetCRS: String)
 ```
 
 Since: `v1.2.0`
@@ -4339,10 +4294,6 @@ Example:
 
 ```sql
 SELECT ST_AsText(ST_Transform(ST_GeomFromText('POLYGON((170 50,170 72,-130 72,-130 50,170 50))'),'EPSG:4326', 'EPSG:32649'))
-```
-
-```sql
-SELECT ST_AsText(ST_Transform(ST_GeomFromText('POLYGON((170 50,170 72,-130 72,-130 50,170 50))'),'EPSG:4326', 'EPSG:32649', false))
 ```
 
 Output:
