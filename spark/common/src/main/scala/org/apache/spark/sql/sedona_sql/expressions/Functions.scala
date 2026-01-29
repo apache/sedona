@@ -304,12 +304,21 @@ private[apache] case class ST_Centroid(inputExpressions: Seq[Expression])
  * during Spark's query optimization phases like constant folding.
  *
  * @param inputExpressions
+ * @param useGeoTools
  */
-private[apache] case class ST_Transform(inputExpressions: Seq[Expression])
+private[apache] case class ST_Transform(inputExpressions: Seq[Expression], useGeoTools: Boolean)
     extends InferredExpression(
       inferrableFunction4(FunctionsProj4.transform),
       inferrableFunction3(FunctionsProj4.transform),
       inferrableFunction2(FunctionsProj4.transform)) {
+
+  def this(inputExpressions: Seq[Expression]) {
+    // We decide whether to use GeoTools based on active session config.
+    // SparkSession may not be available on executors, so we need to
+    // construct ST_Transform on driver. useGeoTools will be passed down
+    // to executors through object serialization/deserialization.
+    this(inputExpressions, ST_Transform.useGeoTools())
+  }
 
   // Define proj4sedona function overloads (2, 3, 4-arg versions)
   // Note: 4-arg version ignores the lenient parameter
@@ -327,21 +336,24 @@ private[apache] case class ST_Transform(inputExpressions: Seq[Expression])
   override lazy val f: InferrableFunction = {
     // Check config to decide between proj4sedona and GeoTools
     // Note: 4-arg lenient parameter is ignored by proj4sedona
-    val useGeoTools =
-      try {
-        SedonaConf.fromActiveSession().getCRSTransformMode.useGeoToolsForVector()
-      } catch {
-        case _: Exception =>
-          // If no active session, fall back to default (proj4sedona)
-          false
-      }
-
     val candidateFunctions = if (useGeoTools) geoToolsFunctions else proj4Functions
     FunctionResolver.resolveFunction(inputExpressions, candidateFunctions)
   }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
+  }
+}
+
+object ST_Transform {
+  private def useGeoTools(): Boolean = {
+    try {
+      SedonaConf.fromActiveSession().getCRSTransformMode.useGeoToolsForVector()
+    } catch {
+      case _: Exception =>
+        // If no active session, fall back to default (proj4sedona)
+        false
+    }
   }
 }
 

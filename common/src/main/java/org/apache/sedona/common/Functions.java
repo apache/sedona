@@ -270,9 +270,7 @@ public class Functions {
       newCoords[4] = newCoords[0];
       return geometry.getFactory().createPolygon(newCoords);
     }
-    Geometry result = Constructors.polygonFromEnvelope(minX, minY, maxX, maxY);
-    result.setSRID(geometry.getSRID());
-    return result;
+    return Constructors.polygonFromEnvelope(minX, minY, maxX, maxY, geometry.getFactory());
   }
 
   public static Geometry buffer(Geometry geometry, double radius) {

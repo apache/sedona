@@ -125,11 +125,11 @@ public class FunctionsProj4 {
     Integer sourceSRID = extractEpsgCode(effectiveSourceCRS);
     Integer targetSRID = extractEpsgCode(targetCRS);
 
-    if (sourceSRID != null && targetSRID != null && sourceSRID.equals(targetSRID)) {
+    if (sourceSRID != null && sourceSRID.equals(targetSRID)) {
       // Same CRS, just update SRID if needed
       if (geometry.getSRID() != targetSRID) {
         Geometry result = geometry.copy();
-        result.setSRID(targetSRID);
+        result = Functions.setSRID(result, targetSRID);
         result.setUserData(geometry.getUserData());
         return result;
       }
@@ -144,23 +144,25 @@ public class FunctionsProj4 {
     Geometry transformed = transformer.transform(geometry);
 
     // Set SRID on result
-    if (targetSRID != null) {
-      transformed.setSRID(targetSRID);
-    } else {
-      // Try to identify EPSG code from the target CRS
+    if (targetSRID == null) {
       try {
         Proj targetProj = new Proj(targetCRS);
         String epsgCode = CRSSerializer.toEpsgCode(targetProj);
         if (epsgCode != null) {
           Integer epsg = extractEpsgCode(epsgCode);
           if (epsg != null) {
-            transformed.setSRID(epsg);
+            targetSRID = epsg;
           }
         }
       } catch (Exception e) {
         // Could not identify EPSG code, leave SRID as 0
       }
     }
+
+    if (targetSRID == null) {
+      targetSRID = 0;
+    }
+    transformed = Functions.setSRID(transformed, targetSRID);
 
     // Preserve user data
     transformed.setUserData(geometry.getUserData());
