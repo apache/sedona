@@ -27,6 +27,7 @@ import net.sf.geographiclib.PolygonResult;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.Polygon;
 
 public class Spheroid {
@@ -151,19 +152,17 @@ public class Spheroid {
    */
   public static double area(Geometry geom) {
     String geomType = geom.getGeometryType();
-    if (geomType.equals("Polygon")) {
-      PolygonArea p = new PolygonArea(Geodesic.WGS84, false);
-      Coordinate[] coordinates = geom.getCoordinates();
-      for (int i = 0; i < coordinates.length; i++) {
-        double lon = coordinates[i].getX();
-        double lat = coordinates[i].getY();
-        p.AddPoint(lat, lon);
+    if (geomType.equals(Geometry.TYPENAME_POLYGON)) {
+      Polygon poly = (Polygon) geom;
+
+      double area = ringArea(poly.getExteriorRing());
+      for (int i = 0; i < poly.getNumInteriorRing(); i++) {
+        area -= ringArea(poly.getInteriorRingN(i));
       }
-      PolygonResult compute = p.Compute();
-      // The area is negative if the polygon is oriented clockwise
-      // We make sure that all area are positive
-      return abs(compute.area);
-    } else if (geomType.equals("MultiPolygon") || geomType.equals("GeometryCollection")) {
+
+      return Math.max(0.0, area);
+    } else if (geomType.equals(Geometry.TYPENAME_MULTIPOLYGON)
+        || geomType.equals(Geometry.TYPENAME_GEOMETRYCOLLECTION)) {
       double area = 0.0;
       for (int i = 0; i < geom.getNumGeometries(); i++) {
         area += area(geom.getGeometryN(i));
@@ -172,6 +171,18 @@ public class Spheroid {
     } else {
       return 0.0;
     }
+  }
+
+  private static double ringArea(LinearRing ring) {
+    PolygonArea p = new PolygonArea(Geodesic.WGS84, false);
+    Coordinate[] coordinates = ring.getCoordinates();
+    for (int i = 0; i < coordinates.length; i++) {
+      double lon = coordinates[i].getX();
+      double lat = coordinates[i].getY();
+      p.AddPoint(lat, lon);
+    }
+    PolygonResult compute = p.Compute();
+    return abs(compute.area);
   }
 
   public static Double angularWidth(Envelope envelope) {

@@ -35,6 +35,7 @@ import org.geotools.referencing.CRS;
 import org.geotools.referencing.operation.projection.ProjectionException;
 import org.junit.Test;
 import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 import org.locationtech.jts.io.ParseException;
@@ -1744,6 +1745,16 @@ public class FunctionsTest extends TestBase {
     GeometryCollection geometryCollection =
         GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {point, polygon2, polygon3});
     assertEquals(4.036497016235249E11, Spheroid.area(geometryCollection), 0.1);
+
+    // Polygon with hole: ensure interior rings subtract from total area
+    Polygon shell = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 0, 10, 10, 10, 10, 0, 0, 0));
+    Polygon hole = GEOMETRY_FACTORY.createPolygon(coordArray(2, 2, 2, 8, 8, 8, 8, 2, 2, 2));
+    Polygon polygonWithHole =
+        GEOMETRY_FACTORY.createPolygon(
+            (LinearRing) shell.getExteriorRing(),
+            new LinearRing[] {(LinearRing) hole.getExteriorRing()});
+    assertTrue(Spheroid.area(polygonWithHole) > 0);
+    assertTrue(Spheroid.area(polygonWithHole) < Spheroid.area(shell));
   }
 
   @Test
