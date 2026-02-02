@@ -35,6 +35,7 @@ import org.geotools.referencing.CRS;
 import org.geotools.referencing.operation.projection.ProjectionException;
 import org.junit.Test;
 import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 import org.locationtech.jts.io.ParseException;
@@ -1744,6 +1745,31 @@ public class FunctionsTest extends TestBase {
     GeometryCollection geometryCollection =
         GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {point, polygon2, polygon3});
     assertEquals(4.036497016235249E11, Spheroid.area(geometryCollection), 0.1);
+
+    // Polygon with hole: ensure interior rings subtract from total area
+    Polygon shell = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 0, 10, 10, 10, 10, 0, 0, 0));
+    Polygon hole = GEOMETRY_FACTORY.createPolygon(coordArray(2, 2, 2, 8, 8, 8, 8, 2, 2, 2));
+    Polygon polygonWithHole =
+        GEOMETRY_FACTORY.createPolygon(
+            (LinearRing) shell.getExteriorRing(),
+            new LinearRing[] {(LinearRing) hole.getExteriorRing()});
+    assertTrue(Spheroid.area(polygonWithHole) > 0);
+    assertTrue(Spheroid.area(polygonWithHole) < Spheroid.area(shell));
+  }
+
+  // Temporary regression test for https://github.com/apache/sedona/issues/2603
+  @Test
+  public void spheroidAreaRegressionGH2603() throws ParseException {
+    String wkt =
+        "POLYGON((6.8782696039776 49.2766437532092,6.87823957674903 49.2766222406843,6.87815807078698 49.2765638879958,6.87804125519739 49.2764802462174,6.87799662173375 49.2764482636995,6.87797514117841 49.2764339340827,6.87813462196488 49.2763400751467,6.87818408824614 49.2763110269219,6.87825299096468 49.2762705688469,6.87853657017451 49.2761040516002,6.8786024223574 49.2761481365701,6.87859913601082 49.2761500643444,6.87873887570276 49.2762627881616,6.87878141030736 49.2763020366733,6.8788169319621 49.2763457893589,6.87875164140889 49.2763674403031,6.87876841511752 49.2763927755128,6.87870854199672 49.276408012758,6.87863940411241 49.2764337671641,6.87857096366803 49.2764656966649,6.87848222914642 49.2765181242911,6.8782696039776 49.2766437532092),(6.87850040159497 49.2764227396398,6.87859708638203 49.2763756847604,6.87871844977398 49.2763302705537,6.87867981298025 49.276294071318,6.87863493352534 49.2762569207702,6.87858951083054 49.2762253827861,6.87855281366443 49.276201022011,6.87833112115166 49.2763319631125,6.87842939578059 49.2764016619201,6.87845249629829 49.2763878544337,6.87850040159497 49.2764227396398),(6.87812388117695 49.2764487395748,6.87822630044844 49.276523102708,6.87836942156031 49.2764375161839,6.87826604803956 49.2763642421665,6.87812388117695 49.2764487395748))";
+    double expectedPostgisArea = 1232.39;
+
+    Geometry geom = wktReader.read(wkt);
+    geom.setSRID(4326);
+
+    double actual = Spheroid.area(geom);
+    double delta = Math.max(1e-6, expectedPostgisArea * 1e-3);
+    assertEquals(expectedPostgisArea, actual, delta);
   }
 
   @Test
