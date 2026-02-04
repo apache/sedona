@@ -113,7 +113,7 @@ jobs:
     permissions:
       id-token: write # IMPORTANT: mandatory for Trusted Publishing
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           # unpacks wheel files into artifacts
           pattern: cibw-*
