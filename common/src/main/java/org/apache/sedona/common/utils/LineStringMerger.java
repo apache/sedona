@@ -32,6 +32,15 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.util.LineStringExtracter;
 
+/**
+ * Post-processes line split results to merge adjacent segments that were only split by JTS overlay
+ * noding, not by a real split point. This avoids extra line segments after {@code
+ * Geometry#difference} on linework.
+ *
+ * <p>JTS has an internal line merge capability in LineBuilder (not yet exposed/used by the overlay
+ * API). Once JTS supports it in future releases, we should rely on that directly. See
+ * https://github.com/locationtech/jts/blob/1.20.0/modules/core/src/main/java/org/locationtech/jts/operation/overlayng/LineBuilder.java#L247-L261
+ */
 public final class LineStringMerger {
   private LineStringMerger() {}
 
