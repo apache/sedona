@@ -36,12 +36,9 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.linearref.LinearGeometryBuilder;
 import org.locationtech.jts.operation.polygonize.Polygonizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** Class to split geometry by other geometry. */
 public final class GeometrySplitter {
-  static final Logger logger = LoggerFactory.getLogger(GeometrySplitter.class);
   private final GeometryFactory geometryFactory;
 
   public GeometrySplitter(GeometryFactory geometryFactory) {
@@ -149,8 +146,27 @@ public final class GeometrySplitter {
 
   private MultiLineString splitLinesByLines(Geometry inputLines, Geometry blade) {
     Geometry diff = inputLines.difference(blade);
-    if (diff instanceof MultiLineString) {
-      return (MultiLineString) diff;
+    Geometry merged =
+        LineStringMerger.mergeDifferenceSplit(diff, inputLines, blade, geometryFactory);
+    if (merged instanceof MultiLineString) {
+      return (MultiLineString) merged;
+    } else if (merged instanceof LineString) {
+      return geometryFactory.createMultiLineString(new LineString[] {(LineString) merged});
+    } else if (merged instanceof GeometryCollection) {
+      List<LineString> lineStrings = new ArrayList<>();
+      GeometryCollection gc = (GeometryCollection) merged;
+      for (int i = 0; i < gc.getNumGeometries(); i++) {
+        Geometry g = gc.getGeometryN(i);
+        if (g instanceof LineString) {
+          lineStrings.add((LineString) g);
+        } else if (g instanceof MultiLineString) {
+          MultiLineString mls = (MultiLineString) g;
+          for (int j = 0; j < mls.getNumGeometries(); j++) {
+            lineStrings.add((LineString) mls.getGeometryN(j));
+          }
+        }
+      }
+      return geometryFactory.createMultiLineString(lineStrings.toArray(new LineString[0]));
     } else {
       return geometryFactory.createMultiLineString(new LineString[] {(LineString) inputLines});
     }
