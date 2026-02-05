@@ -39,7 +39,7 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.sedona</groupId>
-            <artifactId>sedona-flink_${scala.compat.version}</artifactId>
+            <artifactId>sedona-flink</artifactId>
             <version>${project.version}</version>
         </dependency>
          <!-- Define this to be shaded since it is provided in other modules -->
