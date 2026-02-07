@@ -171,7 +171,7 @@ public class UDFs {
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"left", "right"})
-  public static double ST_Azimuth(byte[] left, byte[] right) {
+  public static Double ST_Azimuth(byte[] left, byte[] right) {
     return Functions.azimuth(GeometrySerde.deserialize(left), GeometrySerde.deserialize(right));
   }
 

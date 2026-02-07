@@ -3581,6 +3581,32 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void azimuthNorth() {
+    Point a = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+    Point b = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 1));
+    Double result = Functions.azimuth(a, b);
+    assertNotNull(result);
+    assertEquals(0.0, result, 1e-9);
+  }
+
+  @Test
+  public void azimuthSouth() {
+    Point a = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 25));
+    Point b = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+    Double result = Functions.azimuth(a, b);
+    assertNotNull(result);
+    assertEquals(Math.PI, result, 1e-9);
+  }
+
+  @Test
+  public void azimuthIdenticalPoints() {
+    Point a = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 25));
+    Point b = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 25));
+    Double result = Functions.azimuth(a, b);
+    assertNull(result);
+  }
+
+  @Test
   public void angleFourPoints() {
     Point start1 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
     Point end1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));

@@ -201,11 +201,14 @@ public class Functions {
     return Math.sqrt(closest);
   }
 
-  public static double azimuth(Geometry left, Geometry right) {
+  public static Double azimuth(Geometry left, Geometry right) {
     Coordinate leftCoordinate = left.getCoordinate();
     Coordinate rightCoordinate = right.getCoordinate();
     double deltaX = rightCoordinate.x - leftCoordinate.x;
     double deltaY = rightCoordinate.y - leftCoordinate.y;
+    if (deltaX == 0 && deltaY == 0) {
+      return null;
+    }
     double azimuth = Math.atan2(deltaX, deltaY);
     return azimuth < 0 ? azimuth + (2 * Math.PI) : azimuth;
   }

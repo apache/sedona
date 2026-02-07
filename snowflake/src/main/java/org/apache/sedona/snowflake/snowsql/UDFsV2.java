@@ -228,7 +228,7 @@ public class UDFsV2 {
   @UDFAnnotations.ParamMeta(
       argNames = {"left", "right"},
       argTypes = {"Geometry", "Geometry"})
-  public static double ST_Azimuth(String left, String right) {
+  public static Double ST_Azimuth(String left, String right) {
     return Functions.azimuth(GeometrySerde.deserGeoJson(left), GeometrySerde.deserGeoJson(right));
   }
 

@@ -1219,15 +1219,17 @@ class functionTestScala
 
     it("Passed ST_Azimuth") {
 
+      val referencePoint = samplePoints.tail.head
       val pointDataFrame = samplePoints
-        .map(point => (point, samplePoints.tail.head))
+        .filterNot(_.equalsExact(referencePoint))
+        .map(point => (point, referencePoint))
         .toDF("geomA", "geomB")
 
       pointDataFrame
         .selectExpr("ST_Azimuth(geomA, geomB)")
         .as[Double]
         .map(180 / math.Pi * _)
-        .collect() should contain theSameElementsAs List(240.0133139011053, 0.0, 270.0,
+        .collect() should contain theSameElementsAs List(240.0133139011053, 270.0,
         286.8042682202057, 315.0, 314.9543472191815, 315.0058223408927, 245.14762725688198,
         314.84984546897755, 314.8868529256147, 314.9510567053395, 314.95443984912936,
         314.89925480835245, 314.6018799143881, 314.6834083423315, 314.80689827870725,
@@ -1250,6 +1252,17 @@ class functionTestScala
         .collect()
         .toList should contain theSameElementsAs List(42.27368900609374, 222.27368900609375,
         270.00, 90.0, 180.0, 0.0)
+
+      // ST_Azimuth should return null for identical points
+      val identicalPoints = Seq(("POINT(1.0 1.0)", "POINT(1.0 1.0)"))
+        .map({ case (wktA, wktB) => (wktReader.read(wktA), wktReader.read(wktB)) })
+        .toDF("geomA", "geomB")
+
+      identicalPoints
+        .selectExpr("ST_Azimuth(geomA, geomB)")
+        .collect()
+        .head
+        .get(0) shouldBe null
     }
 
     it("Should pass ST_X") {

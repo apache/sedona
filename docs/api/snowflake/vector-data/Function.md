@@ -457,7 +457,7 @@ FROM polygondf
 
 ## ST_Azimuth
 
-Introduction: Returns Azimuth for two given points in radians null otherwise.
+Introduction: Returns Azimuth for two given points in radians. Returns null if the two points are identical.
 
 Format: `ST_Azimuth(pointA: Point, pointB: Point)`
 
