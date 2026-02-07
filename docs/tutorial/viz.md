@@ -24,7 +24,7 @@ SedonaViz provides native support for general cartographic design by extending S
 SedonaViz offers Map Visualization SQL. This gives users a more flexible way to design beautiful map visualization effects including scatter plots and heat maps. SedonaViz RDD API is also available.
 
 !!!note
-	All SedonaViz SQL/DataFrame APIs are explained in [SedonaViz API](../api/viz/sql.md). Please see [Viz example project](https://github.com/apache/sedona/tree/master/examples/spark-viz)
+	All SedonaViz SQL/DataFrame APIs are explained in [SedonaViz API](../api/viz/sql.md).
 
 ## Why scalable map visualization?
 
@@ -34,7 +34,7 @@ SedonaViz encapsulates the main steps of map visualization process, e.g., pixeli
 
 ## Visualize SpatialRDD
 
-This tutorial mainly focuses on explaining SQL/DataFrame API. SedonaViz RDD example can be found in Please see [Viz example project](https://github.com/apache/sedona/tree/master/examples/viz)
+This tutorial mainly focuses on explaining SQL/DataFrame API.
 
 ## Set up dependencies
 
