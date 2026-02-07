@@ -3071,7 +3071,7 @@ Output:
 
 ## ST_MakePolygon
 
-Introduction: Function to convert closed linestring to polygon including holes
+Introduction: Function to convert closed linestring to polygon including holes. If holes are provided, they should be fully contained within the shell. Holes outside the shell will produce an invalid polygon (matching PostGIS behavior). Use `ST_IsValid` to check the result.
 
 Format: `ST_MakePolygon(geom: Geometry, holes: ARRAY[Geometry])`
 
@@ -3081,15 +3081,15 @@ SQL Example
 
 ```sql
 SELECT ST_MakePolygon(
-        ST_GeomFromText('LINESTRING(7 -1, 7 6, 9 6, 9 1, 7 -1)'),
-        ARRAY(ST_GeomFromText('LINESTRING(6 2, 8 2, 8 1, 6 1, 6 2)'))
+        ST_GeomFromText('LINESTRING(0 0, 10 0, 10 10, 0 10, 0 0)'),
+        ARRAY(ST_GeomFromText('LINESTRING(2 2, 4 2, 4 4, 2 4, 2 2)'))
     )
 ```
 
 Output:
 
 ```
-POLYGON ((7 -1, 7 6, 9 6, 9 1, 7 -1), (6 2, 8 2, 8 1, 6 1, 6 2))
+POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (2 2, 4 2, 4 4, 2 4, 2 2))
 ```
 
 ## ST_MakeValid

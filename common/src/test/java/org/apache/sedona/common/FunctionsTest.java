@@ -1604,6 +1604,46 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void makePolygonWithValidHoles() {
+    Geometry shell =
+        GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 10, 0, 10, 10, 0, 10, 0, 0));
+    Geometry hole1 = GEOMETRY_FACTORY.createLineString(coordArray(2, 2, 4, 2, 4, 4, 2, 4, 2, 2));
+    Geometry hole2 = GEOMETRY_FACTORY.createLineString(coordArray(6, 6, 8, 6, 8, 8, 6, 8, 6, 6));
+    Geometry result = Functions.makePolygon(shell, new Geometry[] {hole1, hole2});
+    assertNotNull(result);
+    assertEquals(
+        "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (2 2, 4 2, 4 4, 2 4, 2 2), (6 6, 8 6, 8 8, 6 8, 6 6))",
+        result.toText());
+  }
+
+  @Test
+  public void makePolygonWithHolesOutsideShell() {
+    Geometry shell =
+        GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 10, 0, 10, 10, 0, 10, 0, 0));
+    Geometry hole =
+        GEOMETRY_FACTORY.createLineString(coordArray(20, 20, 30, 20, 30, 30, 20, 30, 20, 20));
+    Geometry result = Functions.makePolygon(shell, new Geometry[] {hole});
+    // Matches PostGIS behavior: polygon is created but is invalid
+    assertNotNull(result);
+    assertFalse(result.isValid());
+    assertEquals(
+        "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (20 20, 30 20, 30 30, 20 30, 20 20))",
+        result.toText());
+  }
+
+  @Test
+  public void makePolygonWithHolesPartiallyOutsideShell() {
+    Geometry shell =
+        GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 10, 0, 10, 10, 0, 10, 0, 0));
+    Geometry hole =
+        GEOMETRY_FACTORY.createLineString(coordArray(-1, -1, 5, -1, 5, 5, -1, 5, -1, -1));
+    Geometry result = Functions.makePolygon(shell, new Geometry[] {hole});
+    // Matches PostGIS behavior: polygon is created but is invalid
+    assertNotNull(result);
+    assertFalse(result.isValid());
+  }
+
+  @Test
   public void distance_empty_geometries() throws ParseException {
     Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(90, 0));
     LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 0, 90));
