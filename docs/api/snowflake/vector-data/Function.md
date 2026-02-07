@@ -1535,6 +1535,13 @@ Introduction: Return the intersection geometry of A and B
 
 Format: `ST_Intersection (A:geometry, B:geometry)`
 
+!!!note
+    If you encounter a `TopologyException` with the message "found non-noded intersection", this is a known issue with the legacy overlay implementation in JTS. The OverlayNG algorithm resolves this. To enable it, add the following JVM flag:
+
+    ```
+    -Djts.overlay=ng
+    ```
+
 SQL example:
 
 ```sql
