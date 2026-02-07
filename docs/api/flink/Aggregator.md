@@ -19,7 +19,7 @@
 
 ## ST_Envelope_Agg
 
-Introduction: Return the entire envelope boundary of all geometries in A
+Introduction: Return the entire envelope boundary of all geometries in A. Empty geometries and null values are skipped. If all inputs are empty or null, the result is null. This behavior is consistent with PostGIS's `ST_Extent`.
 
 Format: `ST_Envelope_Agg (A: geometryColumn)`
 

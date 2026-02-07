@@ -56,6 +56,7 @@ public class Aggregators {
         rawSerializer = GeometryTypeSerializer.class,
         bridgedTo = Geometry.class)
     public Geometry getValue(Accumulators.Envelope acc) {
+      if (acc.minX > acc.maxX) return null;
       return createPolygon(acc.minX, acc.minY, acc.maxX, acc.maxY);
     }
 
@@ -66,7 +67,10 @@ public class Aggregators {
                 rawSerializer = GeometryTypeSerializer.class,
                 bridgedTo = Geometry.class)
             Object o) {
-      Envelope envelope = ((Geometry) o).getEnvelopeInternal();
+      if (o == null) return;
+      Geometry geometry = (Geometry) o;
+      if (geometry.isEmpty()) return;
+      Envelope envelope = geometry.getEnvelopeInternal();
       acc.minX = Math.min(acc.minX, envelope.getMinX());
       acc.minY = Math.min(acc.minY, envelope.getMinY());
       acc.maxX = Math.max(acc.maxX, envelope.getMaxX());
