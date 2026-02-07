@@ -3581,6 +3581,36 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void boundsEmptyGeometryReturnsNull() {
+    Geometry emptyPoint = GEOMETRY_FACTORY.createPoint();
+    assertNull(Functions.xMin(emptyPoint));
+    assertNull(Functions.xMax(emptyPoint));
+    assertNull(Functions.yMin(emptyPoint));
+    assertNull(Functions.yMax(emptyPoint));
+
+    Geometry emptyPolygon = GEOMETRY_FACTORY.createPolygon();
+    assertNull(Functions.xMin(emptyPolygon));
+    assertNull(Functions.xMax(emptyPolygon));
+    assertNull(Functions.yMin(emptyPolygon));
+    assertNull(Functions.yMax(emptyPolygon));
+
+    Geometry emptyLineString = GEOMETRY_FACTORY.createLineString();
+    assertNull(Functions.xMin(emptyLineString));
+    assertNull(Functions.xMax(emptyLineString));
+    assertNull(Functions.yMin(emptyLineString));
+    assertNull(Functions.yMax(emptyLineString));
+  }
+
+  @Test
+  public void boundsNonEmptyGeometry() throws ParseException {
+    Geometry polygon = Constructors.geomFromWKT("POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))", 0);
+    assertEquals(-1.0, Functions.xMin(polygon), 1e-9);
+    assertEquals(2.0, Functions.xMax(polygon), 1e-9);
+    assertEquals(-11.0, Functions.yMin(polygon), 1e-9);
+    assertEquals(12.0, Functions.yMax(polygon), 1e-9);
+  }
+
+  @Test
   public void angleFourPoints() {
     Point start1 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
     Point end1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
