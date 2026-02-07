@@ -11439,17 +11439,17 @@ the record is an outlier.</p>
 <div class="highlight"><pre><span></span><code> LINESTRING(0 0,1 1,2 2,3 3)
 </code></pre></div>
 <h2 id="st_makepolygon">ST_MakePolygon<a class="headerlink" href="#st_makepolygon" title="Permanent link">&para;</a></h2>
-<p>Introduction: Function to convert closed linestring to polygon including holes</p>
+<p>Introduction: Function to convert closed linestring to polygon including holes. If holes are provided, they should be fully contained within the shell. Holes outside the shell will produce an invalid polygon (matching PostGIS behavior). Use <code>ST_IsValid</code> to check the result.</p>
 <p>Format: <code>ST_MakePolygon(geom: Geometry, holes: ARRAY[Geometry])</code></p>
 <p>Since: <code>v1.1.0</code></p>
 <p>SQL Example</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_MakePolygon</span><span class="p">(</span>
-<span class="w">        </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING(7 -1, 7 6, 9 6, 9 1, 7 -1)&#39;</span><span class="p">),</span>
-<span class="w">        </span><span class="nb">ARRAY</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING(6 2, 8 2, 8 1, 6 1, 6 2)&#39;</span><span class="p">))</span>
+<span class="w">        </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING(0 0, 10 0, 10 10, 0 10, 0 0)&#39;</span><span class="p">),</span>
+<span class="w">        </span><span class="nb">ARRAY</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING(2 2, 4 2, 4 4, 2 4, 2 2)&#39;</span><span class="p">))</span>
 <span class="w">    </span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
-<div class="highlight"><pre><span></span><code>POLYGON ((7 -1, 7 6, 9 6, 9 1, 7 -1), (6 2, 8 2, 8 1, 6 1, 6 2))
+<div class="highlight"><pre><span></span><code>POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (2 2, 4 2, 4 4, 2 4, 2 2))
 </code></pre></div>
 <h2 id="st_makevalid">ST_MakeValid<a class="headerlink" href="#st_makevalid" title="Permanent link">&para;</a></h2>
 <p>Introduction: Given an invalid geometry, create a valid representation of the geometry.</p>
@@ -12583,7 +12583,7 @@ If the given geometry contains sub-geometries (GEOMETRY COLLECTION, MULTI POLYGO
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="December 7, 2025 00:40:33 UTC">December 7, 2025 00:40:33</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 7, 2026 19:12:30 UTC">February 7, 2026 19:12:30</span>
   </span>
 
     
