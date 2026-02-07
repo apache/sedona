@@ -1200,7 +1200,7 @@ RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String, a
 ```
 
 ```
-RS_ZonalStats(raster: Raster, zone: Geometry, statType: String, allTouched: Boolean)
+RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String)
 ```
 
 ```
