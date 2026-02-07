@@ -466,5 +466,3 @@ Returns:
 - STAC Specification: https://stacspec.org/
 
 - STAC Browser: https://github.com/radiantearth/stac-browser
-
-- STAC YouTube Video: https://www.youtube.com/watch?v=stac-video
