@@ -3993,6 +3993,28 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void geometryTypeWithMeasuredEmpty() {
+    // Regression test for GH-2390: GeometryType fails on all EMPTY geometries
+    assertEquals("POINT", Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createEmpty(0)));
+    assertEquals(
+        "LINESTRING", Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createLineString()));
+    assertEquals(
+        "POLYGON",
+        Functions.geometryTypeWithMeasured(
+            GEOMETRY_FACTORY.createPolygon(GEOMETRY_FACTORY.createLinearRing())));
+    assertEquals(
+        "MULTIPOINT", Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createMultiPoint()));
+    assertEquals(
+        "MULTILINESTRING",
+        Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createMultiLineString()));
+    assertEquals(
+        "MULTIPOLYGON", Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createMultiPolygon()));
+    assertEquals(
+        "GEOMETRYCOLLECTION",
+        Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createGeometryCollection()));
+  }
+
+  @Test
   public void closestPoint() {
     Point point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
     LineString lineString1 =
