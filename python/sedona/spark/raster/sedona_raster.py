@@ -37,7 +37,6 @@ except:
 from .awt_raster import AWTRaster
 from .meta import AffineTransform, SampleDimension
 
-
 GDAL_VERSION = rasterio.env.GDALVersion.runtime()
 
 

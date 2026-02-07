@@ -82,12 +82,10 @@ url = "https://flatgeobuf.septima.dk/population_areas.fgb"
 sd.read_pyogrio(url).to_view("population_areas")
 
 wkt = "POLYGON ((-73.978329 40.767412, -73.950005 40.767412, -73.950005 40.795098, -73.978329 40.795098, -73.978329 40.767412))"
-sd.sql(
-    f"""
+sd.sql(f"""
 SELECT sum(population::INTEGER) FROM population_areas
 WHERE ST_Intersects(wkb_geometry, ST_SetSRID(ST_GeomFromWKT('{wkt}'), 4326))
-"""
-).show()
+""").show()
 # > ┌──────────────────────────────────┐
 # > │ sum(population_areas.population) │
 # > │               int64              │
@@ -117,12 +115,10 @@ sd.sql("SET datafusion.execution.parquet.max_row_group_size = 100000")
 
 sd.read_parquet(url).to_view("water_point")
 
-sd.sql(
-    """
+sd.sql("""
 SELECT * FROM water_point
 ORDER BY sd_order(geometry)
-"""
-).to_parquet("water_point.parquet", geoparquet_version="1.1")
+""").to_parquet("water_point.parquet", geoparquet_version="1.1")
 ```
 
 ## Python User-Defined Function Support

@@ -20,6 +20,7 @@
 It identifies groups of data where enough records are close enough to each other. This implementation leverages spark,
 sedona and graphframes to support large scale datasets and various, heterogeneous geometric feature types.
 """
+
 from typing import Optional
 
 from pyspark.sql import DataFrame, SparkSession

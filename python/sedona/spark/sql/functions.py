@@ -27,7 +27,6 @@ from pyspark.sql.udf import UserDefinedFunction
 from pyspark.sql.types import DataType
 from shapely.geometry.base import BaseGeometry
 
-
 SEDONA_SCALAR_EVAL_TYPE = 5200
 SEDONA_PANDAS_ARROW_NAME = "SedonaPandasArrowUDF"
 

@@ -164,15 +164,13 @@ Here is the content of the lines table:
 Here’s a join that matches any touching values:
 
 ```python
-sedona.sql(
-    """
+sedona.sql("""
 SELECT
     lines.id as line_id,
     polygons.id as polygon_id
 FROM lines
 LEFT JOIN polygons ON ST_Touches(lines.geometry, polygons.geometry);  
-"""
-).show()
+""").show()
 ```
 
 Here’s the result of the join:

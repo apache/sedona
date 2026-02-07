@@ -55,7 +55,6 @@ from pyspark.pandas.internal import (
     SPARK_DEFAULT_SERIES_NAME,  # '0'
 )
 
-
 # ============================================================================
 # IMPLEMENTATION STATUS TRACKING
 # ============================================================================

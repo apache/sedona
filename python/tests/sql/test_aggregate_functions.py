@@ -73,15 +73,13 @@ class TestConstructors(TestBase):
         assert union.take(1)[0][0].area == 10100
 
     def test_st_collect_aggr_points(self):
-        self.spark.sql(
-            """
+        self.spark.sql("""
             SELECT explode(array(
               ST_GeomFromWKT('POINT(1 2)'),
               ST_GeomFromWKT('POINT(3 4)'),
               ST_GeomFromWKT('POINT(5 6)')
             )) AS geom
-            """
-        ).createOrReplaceTempView("points_table")
+            """).createOrReplaceTempView("points_table")
 
         result = self.spark.sql("SELECT ST_Collect_Agg(geom) FROM points_table").take(
             1
@@ -91,14 +89,12 @@ class TestConstructors(TestBase):
         assert len(result.geoms) == 3
 
     def test_st_collect_aggr_polygons(self):
-        self.spark.sql(
-            """
+        self.spark.sql("""
             SELECT explode(array(
               ST_GeomFromWKT('POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))'),
               ST_GeomFromWKT('POLYGON((2 2, 3 2, 3 3, 2 3, 2 2))')
             )) AS geom
-            """
-        ).createOrReplaceTempView("polygons_table")
+            """).createOrReplaceTempView("polygons_table")
 
         result = self.spark.sql("SELECT ST_Collect_Agg(geom) FROM polygons_table").take(
             1
@@ -109,15 +105,13 @@ class TestConstructors(TestBase):
         assert result.area == 2.0
 
     def test_st_collect_aggr_mixed_types(self):
-        self.spark.sql(
-            """
+        self.spark.sql("""
             SELECT explode(array(
               ST_GeomFromWKT('POINT(1 2)'),
               ST_GeomFromWKT('LINESTRING(0 0, 1 1)'),
               ST_GeomFromWKT('POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))')
             )) AS geom
-            """
-        ).createOrReplaceTempView("mixed_geom_table")
+            """).createOrReplaceTempView("mixed_geom_table")
 
         result = self.spark.sql(
             "SELECT ST_Collect_Agg(geom) FROM mixed_geom_table"
@@ -128,14 +122,12 @@ class TestConstructors(TestBase):
 
     def test_st_collect_aggr_preserves_duplicates(self):
         # Test that ST_Collect_Agg keeps duplicate geometries (unlike ST_Union_Aggr)
-        self.spark.sql(
-            """
+        self.spark.sql("""
             SELECT explode(array(
               ST_GeomFromWKT('POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))'),
               ST_GeomFromWKT('POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))')
             )) AS geom
-            """
-        ).createOrReplaceTempView("duplicate_polygons_table")
+            """).createOrReplaceTempView("duplicate_polygons_table")
 
         result = self.spark.sql(
             "SELECT ST_Collect_Agg(geom) FROM duplicate_polygons_table"
@@ -148,16 +140,14 @@ class TestConstructors(TestBase):
 
     # Test aliases for *_Aggr functions with *_Agg suffix
     def test_st_envelope_agg_alias(self):
-        self.spark.sql(
-            """
+        self.spark.sql("""
             SELECT explode(array(
               ST_GeomFromWKT('POINT(1.1 101.1)'),
               ST_GeomFromWKT('POINT(1.1 1100.1)'),
               ST_GeomFromWKT('POINT(1000.1 1100.1)'),
               ST_GeomFromWKT('POINT(1000.1 101.1)')
             )) AS arealandmark
-            """
-        ).createOrReplaceTempView("pointdf_alias")
+            """).createOrReplaceTempView("pointdf_alias")
 
         boundary = self.spark.sql(
             "SELECT ST_Envelope_Agg(pointdf_alias.arealandmark) FROM pointdf_alias"
@@ -175,14 +165,12 @@ class TestConstructors(TestBase):
         assert boundary.take(1)[0][0].equals(polygon)
 
     def test_st_intersection_agg_alias(self):
-        self.spark.sql(
-            """
+        self.spark.sql("""
             SELECT explode(array(
               ST_GeomFromWKT('POLYGON((0 0, 4 0, 4 4, 0 4, 0 0))'),
               ST_GeomFromWKT('POLYGON((2 2, 6 2, 6 6, 2 6, 2 2))')
             )) AS countyshape
-            """
-        ).createOrReplaceTempView("polygondf_alias")
+            """).createOrReplaceTempView("polygondf_alias")
 
         intersection = self.spark.sql(
             "SELECT ST_Intersection_Agg(polygondf_alias.countyshape) FROM polygondf_alias"
@@ -193,14 +181,12 @@ class TestConstructors(TestBase):
         assert result.area == 4.0
 
     def test_st_union_agg_alias(self):
-        self.spark.sql(
-            """
+        self.spark.sql("""
             SELECT explode(array(
               ST_GeomFromWKT('POLYGON((0 0, 2 0, 2 2, 0 2, 0 0))'),
               ST_GeomFromWKT('POLYGON((1 1, 3 1, 3 3, 1 3, 1 1))')
             )) AS countyshape
-            """
-        ).createOrReplaceTempView("polygondf_union_alias")
+            """).createOrReplaceTempView("polygondf_union_alias")
 
         union = self.spark.sql(
             "SELECT ST_Union_Agg(polygondf_union_alias.countyshape) FROM polygondf_union_alias"

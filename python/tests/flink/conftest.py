@@ -19,7 +19,6 @@ import os
 
 import pytest
 
-
 EXTRA_JARS = os.getenv("SEDONA_PYFLINK_EXTRA_JARS")
 
 

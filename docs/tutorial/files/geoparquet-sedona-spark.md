@@ -263,13 +263,11 @@ Here is the query:
 ```python
 my_shape = "POLYGON((4.0 3.5, 4.0 6.0, 8.0 6.0, 8.0 4.5, 4.0 3.5))"
 
-res = sedona.sql(
-    f"""
+res = sedona.sql(f"""
 select *
 from points
 where st_intersects(geometry, ST_GeomFromWKT('{my_shape}'))
-"""
-)
+""")
 res.show(truncate=False)
 ```
 
