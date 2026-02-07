@@ -1262,7 +1262,7 @@ class functionTestScala
         .selectExpr("ST_Azimuth(geomA, geomB)")
         .collect()
         .head
-        .get(0) shouldBe null
+        .isNullAt(0) shouldBe true
     }
 
     it("Should pass ST_X") {

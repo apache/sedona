@@ -71,10 +71,13 @@ import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
 import org.locationtech.jts.simplify.VWSimplifier;
 import org.locationtech.jts.triangulate.DelaunayTriangulationBuilder;
 import org.locationtech.jts.triangulate.polygon.ConstrainedDelaunayTriangulator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wololo.geojson.Feature;
 import org.wololo.geojson.FeatureCollection;
 
 public class Functions {
+  private static final Logger log = LoggerFactory.getLogger(Functions.class);
   private static final double DEFAULT_TOLERANCE = 1e-6;
   private static final int DEFAULT_MAX_ITER = 1000;
   private static final int OGC_SFS_VALIDITY = 0; // Use usual OGC SFS validity semantics
@@ -668,40 +671,40 @@ public class Functions {
     return max == -Double.MAX_VALUE ? null : max;
   }
 
-  public static double xMin(Geometry geometry) {
+  public static Double xMin(Geometry geometry) {
     Coordinate[] points = geometry.getCoordinates();
     double min = Double.MAX_VALUE;
     for (int i = 0; i < points.length; i++) {
       min = Math.min(points[i].getX(), min);
     }
-    return min;
+    return min == Double.MAX_VALUE ? null : min;
   }
 
-  public static double xMax(Geometry geometry) {
+  public static Double xMax(Geometry geometry) {
     Coordinate[] points = geometry.getCoordinates();
     double max = -Double.MAX_VALUE;
     for (int i = 0; i < points.length; i++) {
       max = Math.max(points[i].getX(), max);
     }
-    return max;
+    return max == -Double.MAX_VALUE ? null : max;
   }
 
-  public static double yMin(Geometry geometry) {
+  public static Double yMin(Geometry geometry) {
     Coordinate[] points = geometry.getCoordinates();
     double min = Double.MAX_VALUE;
     for (int i = 0; i < points.length; i++) {
       min = Math.min(points[i].getY(), min);
     }
-    return min;
+    return min == Double.MAX_VALUE ? null : min;
   }
 
-  public static double yMax(Geometry geometry) {
+  public static Double yMax(Geometry geometry) {
     Coordinate[] points = geometry.getCoordinates();
     double max = -Double.MAX_VALUE;
     for (int i = 0; i < points.length; i++) {
       max = Math.max(points[i].getY(), max);
     }
-    return max;
+    return max == -Double.MAX_VALUE ? null : max;
   }
 
   public static Double zMax(Geometry geometry) {
@@ -923,7 +926,12 @@ public class Functions {
             geometry.getPrecisionModel(),
             srid,
             geometry.getFactory().getCoordinateSequenceFactory());
-    return factory.createGeometry(geometry);
+    Geometry newGeom = factory.createGeometry(geometry);
+    // Workaround for JTS bug: GeometryEditor.editPolygon returns the original
+    // empty polygon without copying it to the new factory, so the SRID is not
+    // updated for POLYGON EMPTY (and similar empty geometry types).
+    newGeom.setSRID(srid);
+    return newGeom;
   }
 
   public static int getSRID(Geometry geometry) {
@@ -1938,6 +1946,7 @@ public class Functions {
 
   public static Geometry makePolygon(Geometry shell, Geometry[] holes, GeometryFactory factory) {
     try {
+      LinearRing shellRing = factory.createLinearRing(shell.getCoordinates());
       if (holes != null) {
         LinearRing[] interiorRings =
             Arrays.stream(holes)
@@ -1950,20 +1959,17 @@ public class Functions {
                 .map(h -> factory.createLinearRing(h.getCoordinates()))
                 .toArray(LinearRing[]::new);
         if (interiorRings.length != 0) {
-          return factory.createPolygon(
-              factory.createLinearRing(shell.getCoordinates()),
-              Arrays.stream(holes)
-                  .filter(
-                      h ->
-                          h != null
-                              && !h.isEmpty()
-                              && h instanceof LineString
-                              && ((LineString) h).isClosed())
-                  .map(h -> factory.createLinearRing(h.getCoordinates()))
-                  .toArray(LinearRing[]::new));
+          Polygon shellPolygon = factory.createPolygon(shellRing);
+          for (LinearRing hole : interiorRings) {
+            Polygon holePolygon = factory.createPolygon(hole);
+            if (!shellPolygon.contains(holePolygon)) {
+              log.warn("Hole lies outside shell at or near point {}", hole.getCoordinate());
+            }
+          }
+          return factory.createPolygon(shellRing, interiorRings);
         }
       }
-      return factory.createPolygon(factory.createLinearRing(shell.getCoordinates()));
+      return factory.createPolygon(shellRing);
     } catch (IllegalArgumentException e) {
       return null;
     }

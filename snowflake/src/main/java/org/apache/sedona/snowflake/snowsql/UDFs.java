@@ -1188,12 +1188,12 @@ public class UDFs {
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
-  public static double ST_XMax(byte[] geometry) {
+  public static Double ST_XMax(byte[] geometry) {
     return Functions.xMax(GeometrySerde.deserialize(geometry));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
-  public static double ST_XMin(byte[] geometry) {
+  public static Double ST_XMin(byte[] geometry) {
     return Functions.xMin(GeometrySerde.deserialize(geometry));
   }
 
@@ -1203,12 +1203,12 @@ public class UDFs {
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
-  public static double ST_YMax(byte[] geometry) {
+  public static Double ST_YMax(byte[] geometry) {
     return Functions.yMax(GeometrySerde.deserialize(geometry));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
-  public static double ST_YMin(byte[] geometry) {
+  public static Double ST_YMin(byte[] geometry) {
     return Functions.yMin(GeometrySerde.deserialize(geometry));
   }
 

@@ -1427,14 +1427,14 @@ public class UDFsV2 {
   @UDFAnnotations.ParamMeta(
       argNames = {"geometry"},
       argTypes = {"Geometry"})
-  public static double ST_XMax(String geometry) {
+  public static Double ST_XMax(String geometry) {
     return Functions.xMax(GeometrySerde.deserGeoJson(geometry));
   }
 
   @UDFAnnotations.ParamMeta(
       argNames = {"geometry"},
       argTypes = {"Geometry"})
-  public static double ST_XMin(String geometry) {
+  public static Double ST_XMin(String geometry) {
     return Functions.xMin(GeometrySerde.deserGeoJson(geometry));
   }
 
@@ -1448,14 +1448,14 @@ public class UDFsV2 {
   @UDFAnnotations.ParamMeta(
       argNames = {"geometry"},
       argTypes = {"Geometry"})
-  public static double ST_YMax(String geometry) {
+  public static Double ST_YMax(String geometry) {
     return Functions.yMax(GeometrySerde.deserGeoJson(geometry));
   }
 
   @UDFAnnotations.ParamMeta(
       argNames = {"geometry"},
       argTypes = {"Geometry"})
-  public static double ST_YMin(String geometry) {
+  public static Double ST_YMin(String geometry) {
     return Functions.yMin(GeometrySerde.deserGeoJson(geometry));
   }
 

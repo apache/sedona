@@ -1604,6 +1604,46 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void makePolygonWithValidHoles() {
+    Geometry shell =
+        GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 10, 0, 10, 10, 0, 10, 0, 0));
+    Geometry hole1 = GEOMETRY_FACTORY.createLineString(coordArray(2, 2, 4, 2, 4, 4, 2, 4, 2, 2));
+    Geometry hole2 = GEOMETRY_FACTORY.createLineString(coordArray(6, 6, 8, 6, 8, 8, 6, 8, 6, 6));
+    Geometry result = Functions.makePolygon(shell, new Geometry[] {hole1, hole2});
+    assertNotNull(result);
+    assertEquals(
+        "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (2 2, 4 2, 4 4, 2 4, 2 2), (6 6, 8 6, 8 8, 6 8, 6 6))",
+        result.toText());
+  }
+
+  @Test
+  public void makePolygonWithHolesOutsideShell() {
+    Geometry shell =
+        GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 10, 0, 10, 10, 0, 10, 0, 0));
+    Geometry hole =
+        GEOMETRY_FACTORY.createLineString(coordArray(20, 20, 30, 20, 30, 30, 20, 30, 20, 20));
+    Geometry result = Functions.makePolygon(shell, new Geometry[] {hole});
+    // Matches PostGIS behavior: polygon is created but is invalid
+    assertNotNull(result);
+    assertFalse(result.isValid());
+    assertEquals(
+        "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (20 20, 30 20, 30 30, 20 30, 20 20))",
+        result.toText());
+  }
+
+  @Test
+  public void makePolygonWithHolesPartiallyOutsideShell() {
+    Geometry shell =
+        GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 10, 0, 10, 10, 0, 10, 0, 0));
+    Geometry hole =
+        GEOMETRY_FACTORY.createLineString(coordArray(-1, -1, 5, -1, 5, 5, -1, 5, -1, -1));
+    Geometry result = Functions.makePolygon(shell, new Geometry[] {hole});
+    // Matches PostGIS behavior: polygon is created but is invalid
+    assertNotNull(result);
+    assertFalse(result.isValid());
+  }
+
+  @Test
   public void distance_empty_geometries() throws ParseException {
     Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(90, 0));
     LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 0, 90));
@@ -3607,6 +3647,36 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void boundsEmptyGeometryReturnsNull() {
+    Geometry emptyPoint = GEOMETRY_FACTORY.createPoint();
+    assertNull(Functions.xMin(emptyPoint));
+    assertNull(Functions.xMax(emptyPoint));
+    assertNull(Functions.yMin(emptyPoint));
+    assertNull(Functions.yMax(emptyPoint));
+
+    Geometry emptyPolygon = GEOMETRY_FACTORY.createPolygon();
+    assertNull(Functions.xMin(emptyPolygon));
+    assertNull(Functions.xMax(emptyPolygon));
+    assertNull(Functions.yMin(emptyPolygon));
+    assertNull(Functions.yMax(emptyPolygon));
+
+    Geometry emptyLineString = GEOMETRY_FACTORY.createLineString();
+    assertNull(Functions.xMin(emptyLineString));
+    assertNull(Functions.xMax(emptyLineString));
+    assertNull(Functions.yMin(emptyLineString));
+    assertNull(Functions.yMax(emptyLineString));
+  }
+
+  @Test
+  public void boundsNonEmptyGeometry() throws ParseException {
+    Geometry polygon = Constructors.geomFromWKT("POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))", 0);
+    assertEquals(-1.0, Functions.xMin(polygon), 1e-9);
+    assertEquals(2.0, Functions.xMax(polygon), 1e-9);
+    assertEquals(-11.0, Functions.yMin(polygon), 1e-9);
+    assertEquals(12.0, Functions.yMax(polygon), 1e-9);
+  }
+
+  @Test
   public void angleFourPoints() {
     Point start1 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
     Point end1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
@@ -3976,6 +4046,48 @@ public class FunctionsTest extends TestBase {
         Functions.geometryTypeWithMeasured(
             GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {measuredPolygon}));
     assertEquals(expected4, actual4);
+  }
+
+  @Test
+  public void geometryTypeWithMeasuredEmpty() {
+    // Regression test for GH-2390: GeometryType fails on all EMPTY geometries
+    assertEquals("POINT", Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createEmpty(0)));
+    assertEquals(
+        "LINESTRING", Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createLineString()));
+    assertEquals(
+        "POLYGON",
+        Functions.geometryTypeWithMeasured(
+            GEOMETRY_FACTORY.createPolygon(GEOMETRY_FACTORY.createLinearRing())));
+    assertEquals(
+        "MULTIPOINT", Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createMultiPoint()));
+    assertEquals(
+        "MULTILINESTRING",
+        Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createMultiLineString()));
+    assertEquals(
+        "MULTIPOLYGON", Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createMultiPolygon()));
+    assertEquals(
+        "GEOMETRYCOLLECTION",
+        Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createGeometryCollection()));
+  }
+
+  @Test
+  public void setSRIDEmptyGeometries() throws ParseException {
+    // Regression test for GH-2403: SetSRID doesn't work on POLYGON EMPTY
+    String[] emptyWkts = {
+      "POINT EMPTY",
+      "LINESTRING EMPTY",
+      "POLYGON EMPTY",
+      "MULTIPOINT EMPTY",
+      "MULTILINESTRING EMPTY",
+      "MULTIPOLYGON EMPTY",
+      "GEOMETRYCOLLECTION EMPTY"
+    };
+    for (String wkt : emptyWkts) {
+      Geometry geom = Constructors.geomFromWKT(wkt, 0);
+      Geometry result = Functions.setSRID(geom, 4236);
+      assertEquals("SRID should be set for " + wkt, 4236, result.getSRID());
+      assertTrue("Result should be empty for " + wkt, result.isEmpty());
+    }
   }
 
   @Test
