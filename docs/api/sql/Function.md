@@ -2266,6 +2266,16 @@ Format: `ST_Intersection (A: Geometry, B: Geometry)`
 
 Since: `v1.0.0`
 
+!!!note
+    If you encounter a `TopologyException` with the message "found non-noded intersection", try enabling the OverlayNG algorithm by setting the following Spark configuration:
+
+    ```
+    spark.driver.extraJavaOptions=-Djts.overlay=ng
+    spark.executor.extraJavaOptions=-Djts.overlay=ng
+    ```
+
+    The OverlayNG algorithm is more robust than the legacy overlay implementation in JTS and handles many edge cases that would otherwise cause errors.
+
 SQL Example
 
 ```sql
