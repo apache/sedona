@@ -923,7 +923,12 @@ public class Functions {
             geometry.getPrecisionModel(),
             srid,
             geometry.getFactory().getCoordinateSequenceFactory());
-    return factory.createGeometry(geometry);
+    Geometry newGeom = factory.createGeometry(geometry);
+    // Workaround for JTS bug: GeometryEditor.editPolygon returns the original
+    // empty polygon without copying it to the new factory, so the SRID is not
+    // updated for POLYGON EMPTY (and similar empty geometry types).
+    newGeom.setSRID(srid);
+    return newGeom;
   }
 
   public static int getSRID(Geometry geometry) {
