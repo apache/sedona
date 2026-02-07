@@ -4015,6 +4015,26 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void setSRIDEmptyGeometries() throws ParseException {
+    // Regression test for GH-2403: SetSRID doesn't work on POLYGON EMPTY
+    String[] emptyWkts = {
+      "POINT EMPTY",
+      "LINESTRING EMPTY",
+      "POLYGON EMPTY",
+      "MULTIPOINT EMPTY",
+      "MULTILINESTRING EMPTY",
+      "MULTIPOLYGON EMPTY",
+      "GEOMETRYCOLLECTION EMPTY"
+    };
+    for (String wkt : emptyWkts) {
+      Geometry geom = Constructors.geomFromWKT(wkt, 0);
+      Geometry result = Functions.setSRID(geom, 4236);
+      assertEquals("SRID should be set for " + wkt, 4236, result.getSRID());
+      assertTrue("Result should be empty for " + wkt, result.isEmpty());
+    }
+  }
+
+  @Test
   public void closestPoint() {
     Point point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
     LineString lineString1 =
