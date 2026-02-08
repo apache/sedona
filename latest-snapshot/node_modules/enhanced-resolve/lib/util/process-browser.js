@@ -10,10 +10,8 @@ module.exports = {
 	 * @type {Record<string, string>}
 	 */
 	versions: {},
-	// eslint-disable-next-line jsdoc/no-restricted-syntax
-	/**
-	 * @param {Function} fn function
-	 */
+	// eslint-disable-next-line jsdoc/reject-function-type
+	/** @param {Function} fn function */
 	nextTick(fn) {
 		// eslint-disable-next-line prefer-rest-params
 		const args = Array.prototype.slice.call(arguments, 1);

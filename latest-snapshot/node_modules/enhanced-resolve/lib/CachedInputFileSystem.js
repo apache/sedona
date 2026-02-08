@@ -59,9 +59,9 @@ const runCallbacks = (callbacks, err, result) => {
 	if (error) throw error;
 };
 
-// eslint-disable-next-line jsdoc/no-restricted-syntax
+// eslint-disable-next-line jsdoc/reject-function-type
 /** @typedef {Function} EXPECTED_FUNCTION */
-// eslint-disable-next-line jsdoc/no-restricted-syntax
+// eslint-disable-next-line jsdoc/reject-any-type
 /** @typedef {any} EXPECTED_ANY */
 
 class OperationMergerBackend {

@@ -7,7 +7,7 @@
 
 /**
  * @param {string} path path
- * @returns {{paths: string[], segments: string[]}}} paths and segments
+ * @returns {{ paths: string[], segments: string[] }}} paths and segments
  */
 module.exports = function getPaths(path) {
 	if (path === "/") return { paths: ["/"], segments: [""] };
@@ -33,7 +33,7 @@ module.exports = function getPaths(path) {
 
 /**
  * @param {string} path path
- * @returns {string|null} basename or null
+ * @returns {string | null} basename or null
  */
 module.exports.basename = function basename(path) {
 	const i = path.lastIndexOf("/");

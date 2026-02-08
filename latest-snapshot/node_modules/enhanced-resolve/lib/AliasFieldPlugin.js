@@ -16,7 +16,7 @@ const getInnerRequest = require("./getInnerRequest");
 module.exports = class AliasFieldPlugin {
 	/**
 	 * @param {string | ResolveStepHook} source source
-	 * @param {string | Array<string>} field field
+	 * @param {string | string[]} field field
 	 * @param {string | ResolveStepHook} target target
 	 */
 	constructor(source, field, target) {
@@ -54,11 +54,11 @@ module.exports = class AliasFieldPlugin {
 					fieldData,
 					innerRequest,
 				)
-					? /** @type {{[Key in string]: JsonPrimitive}} */ (fieldData)[
+					? /** @type {{ [Key in string]: JsonPrimitive }} */ (fieldData)[
 							innerRequest
 						]
 					: innerRequest.startsWith("./")
-						? /** @type {{[Key in string]: JsonPrimitive}} */ (fieldData)[
+						? /** @type {{ [Key in string]: JsonPrimitive }} */ (fieldData)[
 								innerRequest.slice(2)
 							]
 						: undefined;

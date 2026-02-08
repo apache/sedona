@@ -10,7 +10,7 @@ const forEachBail = require("./forEachBail");
 /** @typedef {import("./Resolver")} Resolver */
 /** @typedef {import("./Resolver").ResolveRequest} ResolveRequest */
 /** @typedef {import("./Resolver").ResolveStepHook} ResolveStepHook */
-/** @typedef {{ alias: string|string[], extension: string }} ExtensionAliasOption */
+/** @typedef {{ alias: string | string[], extension: string }} ExtensionAliasOption */
 
 module.exports = class ExtensionAliasPlugin {
 	/**
@@ -39,7 +39,7 @@ module.exports = class ExtensionAliasPlugin {
 				const isAliasString = typeof alias === "string";
 				/**
 				 * @param {string} alias extension alias
-				 * @param {(err?: null | Error, result?: null|ResolveRequest) => void} callback callback
+				 * @param {(err?: null | Error, result?: null | ResolveRequest) => void} callback callback
 				 * @param {number=} index index
 				 * @returns {void}
 				 */

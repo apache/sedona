@@ -7,12 +7,29 @@
 const path = require("path");
 const DirectoryWatcher = require("./DirectoryWatcher");
 
+/** @typedef {import("./index").EventMap} EventMap */
+/** @typedef {import("./DirectoryWatcher").DirectoryWatcherOptions} DirectoryWatcherOptions */
+/** @typedef {import("./DirectoryWatcher").DirectoryWatcherEvents} DirectoryWatcherEvents */
+/** @typedef {import("./DirectoryWatcher").FileWatcherEvents} FileWatcherEvents */
+/**
+ * @template {EventMap} T
+ * @typedef {import("./DirectoryWatcher").Watcher<T>} Watcher
+ */
+
 class WatcherManager {
-	constructor(options) {
+	/**
+	 * @param {DirectoryWatcherOptions=} options options
+	 */
+	constructor(options = {}) {
 		this.options = options;
+		/** @type {Map<string, DirectoryWatcher>} */
 		this.directoryWatchers = new Map();
 	}
 
+	/**
+	 * @param {string} directory a directory
+	 * @returns {DirectoryWatcher} a directory watcher
+	 */
 	getDirectoryWatcher(directory) {
 		const watcher = this.directoryWatchers.get(directory);
 		if (watcher === undefined) {
@@ -26,23 +43,34 @@ class WatcherManager {
 		return watcher;
 	}
 
-	watchFile(p, startTime) {
-		const directory = path.dirname(p);
-		if (directory === p) return null;
-		return this.getDirectoryWatcher(directory).watch(p, startTime);
+	/**
+	 * @param {string} file file
+	 * @param {number=} startTime start time
+	 * @returns {Watcher<FileWatcherEvents> | null} watcher or null if file has no directory
+	 */
+	watchFile(file, startTime) {
+		const directory = path.dirname(file);
+		if (directory === file) return null;
+		return this.getDirectoryWatcher(directory).watch(file, startTime);
 	}
 
+	/**
+	 * @param {string} directory directory
+	 * @param {number=} startTime start time
+	 * @returns {Watcher<DirectoryWatcherEvents>} watcher
+	 */
 	watchDirectory(directory, startTime) {
 		return this.getDirectoryWatcher(directory).watch(directory, startTime);
 	}
 }
 
 const watcherManagers = new WeakMap();
+
 /**
- * @param {object} options options
+ * @param {DirectoryWatcherOptions} options options
  * @returns {WatcherManager} the watcher manager
  */
-module.exports = options => {
+module.exports = (options) => {
 	const watcherManager = watcherManagers.get(options);
 	if (watcherManager !== undefined) return watcherManager;
 	const newWatcherManager = new WatcherManager(options);

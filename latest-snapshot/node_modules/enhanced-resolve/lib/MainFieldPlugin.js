@@ -13,7 +13,7 @@ const DescriptionFileUtils = require("./DescriptionFileUtils");
 /** @typedef {import("./Resolver").ResolveRequest} ResolveRequest */
 /** @typedef {import("./Resolver").ResolveStepHook} ResolveStepHook */
 
-/** @typedef {{name: string|Array<string>, forceRelative: boolean}} MainFieldOptions */
+/** @typedef {{ name: string | string[], forceRelative: boolean }} MainFieldOptions */
 
 const alreadyTriedMainField = Symbol("alreadyTriedMainField");
 
@@ -48,7 +48,7 @@ module.exports = class MainFieldPlugin {
 				}
 				const filename = path.basename(request.descriptionFilePath);
 				let mainModule =
-					/** @type {string|null|undefined} */
+					/** @type {string | null | undefined} */
 					(
 						DescriptionFileUtils.getField(
 							/** @type {JsonObject} */ (request.descriptionFileData),

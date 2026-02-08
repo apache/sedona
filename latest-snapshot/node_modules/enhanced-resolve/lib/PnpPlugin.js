@@ -50,9 +50,9 @@ module.exports = class PnpPlugin {
 				const [packageName] = packageMatch;
 				const innerRequest = `.${req.slice(packageName.length)}`;
 
-				/** @type {string|undefined|null} */
+				/** @type {string | undefined | null} */
 				let resolution;
-				/** @type {string|undefined|null} */
+				/** @type {string | undefined | null} */
 				let apiResolution;
 				try {
 					resolution = this.pnpApi.resolveToUnqualified(packageName, issuer, {

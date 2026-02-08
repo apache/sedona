@@ -15,7 +15,7 @@ let source, pos, end,
   name;
 
 function addImport (ss, s, e, d) {
-  const impt = { ss, se: d === -2 ? e : d === -1 ? e + 1 : 0, s, e, d, a: -1, n: undefined };
+  const impt = { ss, se: d === -2 ? e : d === -1 ? e + 1 : 0, s, e, d, a: -1, n: undefined, at: null };
   imports.push(impt);
   return impt;
 }
@@ -608,58 +608,68 @@ function readImportString (ss, ch) {
   readName(impt);
   pos++;
   ch = commentWhitespace(false);
-  if (ch !== 97/*a*/ || !source.startsWith('ssert', pos + 1)) {
+  if (ch !== 119/*w*/ || !source.startsWith('ith', pos + 1)) {
     pos--;
     return;
   }
-  const assertIndex = pos;
+  const attrIndex = pos;
 
-  pos += 6;
+  pos += 4;
   ch = commentWhitespace(true);
   if (ch !== 123/*{*/) {
-    pos = assertIndex;
+    pos = attrIndex;
     return;
   }
-  const assertStart = pos;
+  const attrStart = pos;
+  const attrs = [];
   do {
     pos++;
     ch = commentWhitespace(true);
+    let key, keyStart, keyEnd;
     if (ch === 39/*'*/ || ch === 34/*"*/) {
+      keyStart = pos;
       stringLiteral(ch);
+      keyEnd = pos + 1;
+      key = readString(keyStart, ch);
       pos++;
       ch = commentWhitespace(true);
     }
     else {
+      keyStart = pos;
       ch = readToWsOrPunctuator(ch);
+      keyEnd = pos;
+      key = source.slice(keyStart, keyEnd);
     }
     if (ch !== 58/*:*/) {
-      pos = assertIndex;
+      pos = attrIndex;
       return;
     }
     pos++;
     ch = commentWhitespace(true);
+    let value, valueStart;
     if (ch === 39/*'*/ || ch === 34/*"*/) {
+      valueStart = pos;
       stringLiteral(ch);
+      value = readString(valueStart, ch);
     }
     else {
-      pos = assertIndex;
+      pos = attrIndex;
       return;
     }
+    attrs.push([key, value]);
     pos++;
     ch = commentWhitespace(true);
     if (ch === 44/*,*/) {
       pos++;
-      ch = commentWhitespace(true);
-      if (ch === 125/*}*/)
-        break;
       continue;
     }
     if (ch === 125/*}*/)
       break;
-    pos = assertIndex;
+    pos = attrIndex;
     return;
   } while (true);
-  impt.a = assertStart;
+  impt.a = attrStart;
+  impt.at = attrs;
   impt.se = pos + 1;
 }
 

@@ -9,9 +9,9 @@
 /** @typedef {import("./Resolver").StringCallback} StringCallback */
 /** @typedef {import("./Resolver").SyncFileSystem} SyncFileSystem */
 
-// eslint-disable-next-line jsdoc/no-restricted-syntax
+// eslint-disable-next-line jsdoc/reject-function-type
 /** @typedef {Function} SyncOrAsyncFunction */
-// eslint-disable-next-line jsdoc/no-restricted-syntax
+// eslint-disable-next-line jsdoc/reject-any-type
 /** @typedef {any} ResultOfSyncOrAsyncFunction */
 
 /**

@@ -21,7 +21,7 @@ module.exports = function getInnerRequest(resolver, request) {
 	) {
 		return request.__innerRequest;
 	}
-	/** @type {string|undefined} */
+	/** @type {string | undefined} */
 	let innerRequest;
 	if (request.request) {
 		innerRequest = request.request;

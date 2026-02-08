@@ -41,7 +41,7 @@ class RootsPlugin {
 					this.roots,
 					/**
 					 * @param {string} root root
-					 * @param {(err?: null|Error, result?: null|ResolveRequest) => void} callback callback
+					 * @param {(err?: null | Error, result?: null | ResolveRequest) => void} callback callback
 					 * @returns {void}
 					 */
 					(root, callback) => {

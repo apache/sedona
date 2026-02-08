@@ -66,7 +66,7 @@ module.exports = class ImportsFieldPlugin {
 				const remainingRequest =
 					request.request + request.query + request.fragment;
 				const importsField =
-					/** @type {ImportsField|null|undefined} */
+					/** @type {ImportsField | null | undefined} */
 					(
 						DescriptionFileUtils.getField(
 							/** @type {JsonObject} */ (request.descriptionFileData),
@@ -127,7 +127,7 @@ module.exports = class ImportsFieldPlugin {
 					paths,
 					/**
 					 * @param {string} path path
-					 * @param {(err?: null|Error, result?: null|ResolveRequest) => void} callback callback
+					 * @param {(err?: null | Error, result?: null | ResolveRequest) => void} callback callback
 					 * @param {number} i index
 					 * @returns {void}
 					 */
@@ -212,8 +212,8 @@ module.exports = class ImportsFieldPlugin {
 						}
 					},
 					/**
-					 * @param {(null|Error)=} err error
-					 * @param {(null|ResolveRequest)=} result result
+					 * @param {null | Error=} err error
+					 * @param {null | ResolveRequest=} result result
 					 * @returns {void}
 					 */
 					(err, result) => callback(err, result || null),

@@ -15,12 +15,13 @@ if (process.platform === "win32") EXPECTED_ERRORS.add("UNKNOWN");
 
 class LinkResolver {
 	constructor() {
+		/** @type {Map<string, readonly string[]>} */
 		this.cache = new Map();
 	}
 
 	/**
 	 * @param {string} file path to file or directory
-	 * @returns {string[]} array of file and all symlinks contributed in the resolving process (first item is the resolved file)
+	 * @returns {readonly string[]} array of file and all symlinks contributed in the resolving process (first item is the resolved file)
 	 */
 	resolve(file) {
 		const cacheEntry = this.cache.get(file);
@@ -65,17 +66,18 @@ class LinkResolver {
 				for (let i = 1; i < parentResolved.length; i++) {
 					resultSet.add(parentResolved[i]);
 				}
-				result = Object.freeze(Array.from(resultSet));
+				result = Object.freeze([...resultSet]);
 			} else if (parentResolved.length > 1) {
 				// we have links in the parent but not for the link content location
-				result = parentResolved.slice();
+				result = [...parentResolved];
+				// eslint-disable-next-line prefer-destructuring
 				result[0] = linkResolved[0];
 				// add the link
 				result.push(realFile);
 				Object.freeze(result);
 			} else if (linkResolved.length > 1) {
 				// we can return the link content location result
-				result = linkResolved.slice();
+				result = [...linkResolved];
 				// add the link
 				result.push(realFile);
 				Object.freeze(result);
@@ -86,17 +88,21 @@ class LinkResolver {
 					// the resolve real location
 					linkResolved[0],
 					// add the link
-					realFile
+					realFile,
 				]);
 			}
 			this.cache.set(file, result);
 			return result;
-		} catch (e) {
-			if (!EXPECTED_ERRORS.has(e.code)) {
-				throw e;
+		} catch (err) {
+			if (
+				/** @type {NodeJS.ErrnoException} */
+				(err).code &&
+				!EXPECTED_ERRORS.has(/** @type {NodeJS.ErrnoException} */ (err).code)
+			) {
+				throw err;
 			}
 			// no link
-			const result = parentResolved.slice();
+			const result = [...parentResolved];
 			result[0] = realFile;
 			Object.freeze(result);
 			this.cache.set(file, result);
@@ -104,4 +110,5 @@ class LinkResolver {
 		}
 	}
 }
+
 module.exports = LinkResolver;

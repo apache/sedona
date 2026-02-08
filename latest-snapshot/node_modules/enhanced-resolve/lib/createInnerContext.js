@@ -9,7 +9,7 @@
 
 /**
  * @param {ResolveContext} options options for inner context
- * @param {null|string} message message to log
+ * @param {null | string} message message to log
  * @returns {ResolveContext} inner context
  */
 module.exports = function createInnerContext(options, message) {

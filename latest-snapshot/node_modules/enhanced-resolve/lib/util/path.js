@@ -171,6 +171,18 @@ const join = (rootPath, request) => {
 	return posixNormalize(rootPath);
 };
 
+/**
+ * @param {string} maybePath a path
+ * @returns {string} the directory name
+ */
+const dirname = (maybePath) => {
+	switch (getType(maybePath)) {
+		case PathType.AbsoluteWin:
+			return path.win32.dirname(maybePath);
+	}
+	return path.posix.dirname(maybePath);
+};
+
 /** @type {Map<string, Map<string, string | undefined>>} */
 const joinCache = new Map();
 
@@ -194,10 +206,45 @@ const cachedJoin = (rootPath, request) => {
 	return cacheEntry;
 };
 
+/** @type {Map<string, string>} */
+const dirnameCache = new Map();
+
+/**
+ * @param {string} maybePath a path
+ * @returns {string} the directory name
+ */
+const cachedDirname = (maybePath) => {
+	const cacheEntry = dirnameCache.get(maybePath);
+	if (cacheEntry !== undefined) return cacheEntry;
+	const result = dirname(maybePath);
+	dirnameCache.set(maybePath, result);
+	return result;
+};
+
+/**
+ * Check if childPath is a subdirectory of parentPath
+ * @param {string} parentPath parent directory path
+ * @param {string} childPath child path to check
+ * @returns {boolean} true if childPath is under parentPath
+ */
+const isSubPath = (parentPath, childPath) => {
+	// Ensure parentPath ends with a separator to avoid false matches
+	// e.g., "/app" shouldn't match "/app-other"
+	const parentWithSlash =
+		parentPath.endsWith("/") || parentPath.endsWith("\\")
+			? parentPath
+			: normalize(`${parentPath}/`);
+
+	return childPath.startsWith(parentWithSlash);
+};
+
 module.exports.PathType = PathType;
+module.exports.cachedDirname = cachedDirname;
 module.exports.cachedJoin = cachedJoin;
 module.exports.deprecatedInvalidSegmentRegEx = deprecatedInvalidSegmentRegEx;
+module.exports.dirname = dirname;
 module.exports.getType = getType;
 module.exports.invalidSegmentRegEx = invalidSegmentRegEx;
+module.exports.isSubPath = isSubPath;
 module.exports.join = join;
 module.exports.normalize = normalize;

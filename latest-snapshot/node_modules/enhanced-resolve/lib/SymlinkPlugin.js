@@ -44,7 +44,7 @@ module.exports = class SymlinkPlugin {
 					paths,
 					/**
 					 * @param {string} path path
-					 * @param {(err?: null|Error, result?: null|number) => void} callback callback
+					 * @param {(err?: null | Error, result?: null | number) => void} callback callback
 					 * @returns {void}
 					 */
 					(path, callback) => {
@@ -69,8 +69,8 @@ module.exports = class SymlinkPlugin {
 						});
 					},
 					/**
-					 * @param {(null | Error)=} err error
-					 * @param {(null|number)=} idx result
+					 * @param {null | Error=} err error
+					 * @param {null | number=} idx result
 					 * @returns {void}
 					 */
 					(err, idx) => {

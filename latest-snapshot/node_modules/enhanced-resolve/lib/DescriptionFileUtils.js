@@ -22,7 +22,7 @@ const forEachBail = require("./forEachBail");
 
 /**
  * @callback ErrorFirstCallback
- * @param {Error|null=} error
+ * @param {Error | null=} error
  * @param {DescriptionFileInfo=} result
  */
 
@@ -35,7 +35,7 @@ const forEachBail = require("./forEachBail");
 
 /**
  * @param {string} directory directory
- * @returns {string|null} parent directory or null
+ * @returns {string | null} parent directory or null
  */
 function cdUp(directory) {
 	if (directory === "/") return null;
@@ -50,7 +50,7 @@ function cdUp(directory) {
  * @param {Resolver} resolver resolver
  * @param {string} directory directory
  * @param {string[]} filenames filenames
- * @param {DescriptionFileInfo|undefined} oldInfo oldInfo
+ * @param {DescriptionFileInfo | undefined} oldInfo oldInfo
  * @param {ResolveContext} resolveContext resolveContext
  * @param {ErrorFirstCallback} callback callback
  */
@@ -71,7 +71,7 @@ function loadDescriptionFile(
 			filenames,
 			/**
 			 * @param {string} filename filename
-			 * @param {(err?: null|Error, result?: null|Result) => void} callback callback
+			 * @param {(err?: null | Error, result?: null | Result) => void} callback callback
 			 * @returns {void}
 			 */
 			(filename, callback) => {
@@ -172,7 +172,7 @@ function loadDescriptionFile(
 
 /**
  * @param {JsonObject} content content
- * @param {string|string[]} field field
+ * @param {string | string[]} field field
  * @returns {JsonValue | undefined} field data
  */
 function getField(content, field) {
