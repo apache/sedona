@@ -20,6 +20,7 @@ package org.apache.sedona.flink;
 
 import static org.apache.flink.table.api.Expressions.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.apache.flink.table.api.*;
 import org.apache.flink.types.Row;
@@ -44,6 +45,18 @@ public class AggregatorTest extends TestBase {
             "POLYGON ((0 0, 0 %s, %s %s, %s 0, 0 0))",
             testDataSize - 1, testDataSize - 1, testDataSize - 1, testDataSize - 1),
         last.getField(0).toString());
+  }
+
+  @Test
+  public void testEnvelope_Aggr_EmptyGeometries() {
+    tableEnv.executeSql(
+        "CREATE OR REPLACE TEMPORARY VIEW empty_geom_view AS "
+            + "SELECT ST_GeomFromWKT(wkt) as geom FROM ("
+            + "VALUES ('POINT EMPTY'), ('LINESTRING EMPTY'), ('POLYGON EMPTY')"
+            + ") AS t(wkt)");
+    Table result = tableEnv.sqlQuery("SELECT ST_Envelope_Aggr(geom) FROM empty_geom_view");
+    Row last = last(result);
+    assertNull(last.getField(0));
   }
 
   @Test

@@ -130,7 +130,7 @@ private[apache] class ST_Envelope_Aggr
   val serde = ExpressionEncoder[Geometry]()
 
   def reduce(buffer: Option[EnvelopeBuffer], input: Geometry): Option[EnvelopeBuffer] = {
-    if (input == null) return buffer
+    if (input == null || input.isEmpty) return buffer
     val env = input.getEnvelopeInternal
     val envBuffer = EnvelopeBuffer(env.getMinX, env.getMaxX, env.getMinY, env.getMaxY)
     buffer match {

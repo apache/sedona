@@ -809,6 +809,25 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void envelopeEmptyGeometry() throws ParseException {
+    // ST_Envelope of EMPTY should return same-type EMPTY (matching PostGIS behavior)
+    Geometry emptyLineString = Constructors.geomFromWKT("LINESTRING EMPTY", 0);
+    Geometry result = Functions.envelope(emptyLineString);
+    assertTrue(result.isEmpty());
+    assertEquals("LineString", result.getGeometryType());
+
+    Geometry emptyPolygon = Constructors.geomFromWKT("POLYGON EMPTY", 0);
+    result = Functions.envelope(emptyPolygon);
+    assertTrue(result.isEmpty());
+    assertEquals("Polygon", result.getGeometryType());
+
+    Geometry emptyPoint = Constructors.geomFromWKT("POINT EMPTY", 0);
+    result = Functions.envelope(emptyPoint);
+    assertTrue(result.isEmpty());
+    assertEquals("Point", result.getGeometryType());
+  }
+
+  @Test
   public void envelopeAndCentroidSRID() throws ParseException {
     Geometry geom = Constructors.geomFromWKT("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))", 3857);
     Geometry envelope = Functions.envelope(geom);

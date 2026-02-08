@@ -50,6 +50,29 @@ class aggregateFunctionTestScala extends TestBaseScala {
       assert(boundary.take(1)(0).get(0) == geometryFactory.createPolygon(coordinates))
     }
 
+    it("Passed ST_Envelope_aggr with empty geometries returns null") {
+      val emptyDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT(wkt) as geom FROM VALUES ('POINT EMPTY'), ('LINESTRING EMPTY'), ('POLYGON EMPTY') AS t(wkt)")
+      emptyDf.createOrReplaceTempView("emptydf")
+      val result = sparkSession.sql("SELECT ST_Envelope_Aggr(emptydf.geom) FROM emptydf")
+      assert(result.take(1)(0).get(0) == null)
+    }
+
+    it("Passed ST_Envelope_aggr with mixed empty and non-empty geometries") {
+      val mixedDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT(wkt) as geom FROM VALUES ('POINT EMPTY'), ('POINT (1 2)'), ('POINT (3 4)') AS t(wkt)")
+      mixedDf.createOrReplaceTempView("mixeddf")
+      val result = sparkSession.sql("SELECT ST_Envelope_Aggr(mixeddf.geom) FROM mixeddf")
+      val envelope = result.take(1)(0).get(0).asInstanceOf[Geometry]
+      assert(envelope != null)
+      assert(!envelope.isEmpty)
+      val env = envelope.getEnvelopeInternal
+      assert(env.getMinX == 1.0)
+      assert(env.getMinY == 2.0)
+      assert(env.getMaxX == 3.0)
+      assert(env.getMaxY == 4.0)
+    }
+
     it("Passed ST_Union_aggr") {
 
       var polygonCsvDf = sparkSession.read
@@ -423,8 +446,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
       assert(result == null)
     }
 
-    it(
-      "ST_Envelope_Aggr should return empty geometry if inputs are mixed with null and empty geometries") {
+    it("ST_Envelope_Aggr should return null if inputs are mixed with null and empty geometries") {
       sparkSession
         .sql("""
           |SELECT explode(array(
@@ -441,8 +463,7 @@ class aggregateFunctionTestScala extends TestBaseScala {
         sparkSession.sql("SELECT ST_Envelope_Aggr(geom) FROM mixed_null_empty_envelope")
       val result = envelopeDF.take(1)(0).get(0)
 
-      assert(result != null)
-      assert(result.asInstanceOf[Geometry].isEmpty)
+      assert(result == null)
     }
   }
 
