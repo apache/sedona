@@ -6166,17 +6166,15 @@ You're not viewing the latest stable version.
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
 </code></pre></div>
 <p>Here’s how to perform a spatial join to compute the country of each city:</p>
-<div class="highlight"><pre><span></span><code><span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">select</span>
-<span class="sd">    cities.name as city_name,</span>
-<span class="sd">    countries.name as country_name,</span>
-<span class="sd">    continent</span>
-<span class="sd">from cities</span>
-<span class="sd">join countries</span>
-<span class="sd">where ST_Intersects(cities.geometry, countries.geometry)</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">select</span>
+<span class="s2">    cities.name as city_name,</span>
+<span class="s2">    countries.name as country_name,</span>
+<span class="s2">    continent</span>
+<span class="s2">from cities</span>
+<span class="s2">join countries</span>
+<span class="s2">where ST_Intersects(cities.geometry, countries.geometry)</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </code></pre></div>
 <p>The code utilizes <code>ST_Intersects</code> to determine if a city is contained within a given country.</p>
 <p>Here's the result of the query:</p>
@@ -6275,13 +6273,11 @@ SedonaSchema with 1 field:
 <div class="highlight"><pre><span></span><code><span class="n">buildings</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">&quot;buildings&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">vermont</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">&quot;vermont&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">select count(*) from buildings</span>
-<span class="sd">join vermont</span>
-<span class="sd">where ST_Intersects(buildings.geometry, vermont.geometry)</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">select count(*) from buildings</span>
+<span class="s2">join vermont</span>
+<span class="s2">where ST_Intersects(buildings.geometry, vermont.geometry)</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>This command correctly errors out because the tables have different CRSs.  For safety, SedonaDB errors out rather than give you the wrong answer! Here's the error message that's easy to debug:</p>
 <div class="highlight"><pre><span></span><code>SedonaError: type_coercion
@@ -6290,13 +6286,11 @@ Error during planning: Mismatched CRS arguments: ogc:crs84 vs epsg:32618
 Use ST_Transform() or ST_SetSRID() to ensure arguments are compatible.
 </code></pre></div>
 <p>Let’s rewrite the spatial join to convert the <code>vermont</code> CRS to EPSG:4326, so it’s compatible with the <code>buildings</code> CRS.</p>
-<div class="highlight"><pre><span></span><code><span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">select count(*) from buildings</span>
-<span class="sd">join vermont</span>
-<span class="sd">where ST_Intersects(buildings.geometry, ST_Transform(vermont.geometry, &#39;EPSG:4326&#39;))</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">select count(*) from buildings</span>
+<span class="s2">join vermont</span>
+<span class="s2">where ST_Intersects(buildings.geometry, ST_Transform(vermont.geometry, &#39;EPSG:4326&#39;))</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>We now get the correct result!</p>
 <div class="highlight"><pre><span></span><code>┌──────────┐
@@ -6406,7 +6400,7 @@ LIMIT 5;
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 24, 2025 15:12:40 UTC">September 24, 2025 15:12:40</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 8, 2026 06:00:14 UTC">February 8, 2026 06:00:14</span>
   </span>
 
     
