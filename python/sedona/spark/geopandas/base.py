@@ -18,6 +18,7 @@
 """
 A base class of Sedona/Spark DataFrame/Column to behave like geopandas GeoDataFrame/GeoSeries.
 """
+
 from abc import ABCMeta, abstractmethod
 from typing import (
     Any,

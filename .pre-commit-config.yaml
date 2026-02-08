@@ -20,14 +20,14 @@
 default_stages: [pre-commit, pre-push]
 default_language_version:
   python: python3
-  node: 24.12.0
+  node: 24.13.0
 minimum_pre_commit_version: '3.2.0'
 repos:
   - repo: meta
     hooks:
       - id: identity
         name: run identity check
-        description: check you have set your git identity
+        description: a simple hook which prints all arguments passed to it, useful for debugging
       - id: check-hooks-apply
         name: run check hooks apply
         description: check that all the hooks apply to the repository
@@ -46,7 +46,7 @@ repos:
         entry: prettier --write '**/*.js' '**/*.yaml' '**/*.yml'
         files: \.(js|ya?ml)$
         language: node
-        additional_dependencies: ['prettier@3.7.4']
+        additional_dependencies: ['prettier@3.8.1']
         pass_filenames: false
       - id: maven-spotless-apply
         name: maven spotless apply
@@ -79,7 +79,7 @@ repos:
         types: [file] # Ensure only regular files are passed, not directories
         stages: [manual]
   - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.5.5
+    rev: v1.5.6
     hooks:
       - id: chmod
         name: set file permissions
@@ -89,6 +89,7 @@ repos:
         stages: [manual]
       - id: insert-license
         name: add license for all Batch files
+        description: automatically adds a licence header to all Batch files that don't have a license header
         files: \.bat$
         args:
           - --comment-style
@@ -195,6 +196,7 @@ repos:
           - --fuzzy-match-generates-todo
       - id: insert-license
         name: add license for all XML files
+        description: automatically adds a licence header to all XML files that don't have a license header
         files: \.xml$
         exclude: |
           (?x)(
@@ -267,13 +269,13 @@ repos:
         description: a tool (and pre-commit hook) to automatically upgrade syntax for newer versions of the language
         args: [--py37-plus]
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 25.12.0
+    rev: 26.1.0
     hooks:
       - id: black-jupyter
         name: run black-jupyter
         description: format Python files and Jupyter Notebooks with black
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v21.1.7
+    rev: v21.1.8
     hooks:
       - id: clang-format
         name: run clang-format
@@ -281,7 +283,7 @@ repos:
         args: [--style=file:.github/linters/.clang-format]
         types_or: [c]
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.9.2
+    rev: 1.9.3
     hooks:
       - id: bandit
         name: run bandit
@@ -312,7 +314,7 @@ repos:
         name: run gitleaks
         description: check for secrets with gitleaks
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: v1.20.0
+    rev: v1.22.0
     hooks:
       - id: zizmor
         name: run zizmor
@@ -464,7 +466,7 @@ repos:
         name: run shellcheck
         description: check Shell scripts with shellcheck
   - repo: https://github.com/adrienverge/yamllint
-    rev: v1.37.1
+    rev: v1.38.0
     hooks:
       - id: yamllint
         name: run yamllint
@@ -473,7 +475,7 @@ repos:
         types: [yaml]
         files: \.ya?ml$
   - repo: https://github.com/oxipng/oxipng
-    rev: v10.0.0
+    rev: v10.1.0
     hooks:
       - id: oxipng
         name: run oxipng
@@ -486,4 +488,4 @@ repos:
       - id: blacken-docs
         name: run blacken-docs
         description: run `black` on python code blocks in documentation files
-        additional_dependencies: [black==25.12.0]
+        additional_dependencies: [black==26.1.0]

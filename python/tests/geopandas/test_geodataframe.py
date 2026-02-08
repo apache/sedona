@@ -540,11 +540,13 @@ class TestGeoDataFrame(TestGeopandasBase):
         assert obj["crs"]["type"] == "name"
         assert obj["crs"]["properties"]["name"] == "urn:ogc:def:crs:EPSG::3857"
 
-        expected = '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", \
+        expected = (
+            '{"type": "FeatureCollection", "features": [{"id": "0", "type": "Feature", \
 "properties": {"col1": "name1"}, "geometry": {"type": "Point", "coordinates": [1.0,\
  2.0]}}, {"id": "1", "type": "Feature", "properties": {"col1": "name2"}, "geometry"\
 : {"type": "Point", "coordinates": [2.0, 1.0]}}], "crs": {"type": "name", "properti\
 es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
+        )
         assert result == expected, f"Expected {expected}, but got {result}"
 
     def test_to_arrow(self):

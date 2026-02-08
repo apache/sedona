@@ -33,14 +33,12 @@ SedonaSpark extends Apache Spark with a rich set of out-of-the-box distributed S
 === "PySpark"
 
     ```python
-    sedona.sql(
-        """
+    sedona.sql("""
         SELECT superhero.name
         FROM city, superhero
         WHERE ST_Contains(city.geom, superhero.geom)
         AND city.name = 'Gotham'
-    """
-    )
+    """)
     ```
 
 === "Java"
