@@ -71,6 +71,8 @@ jobs:
       - name: Install dependencies (dev)
         run: |
           uv sync
+          # Ensure setuptools is available (provides pkg_resources needed by some dependencies)
+          uv pip install setuptools
       - name: Build extension (explicit)
         run: |
           uv pip install -e .
