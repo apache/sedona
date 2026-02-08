@@ -95,6 +95,8 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@v4
+        with:
+          version: '0.9.22'
 
       - name: Build sdist
         run: cd python && uv build --sdist
