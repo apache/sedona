@@ -1156,6 +1156,22 @@ private[apache] case class ST_GeoHash(inputExpressions: Seq[Expression])
   }
 }
 
+private[apache] case class ST_GeoHashNeighbors(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.geohashNeighbors _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_GeoHashNeighbor(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.geohashNeighbor _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 /**
  * Return the difference between geometry A and B
  *

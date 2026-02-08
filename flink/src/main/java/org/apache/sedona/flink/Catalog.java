@@ -106,6 +106,8 @@ public class Catalog {
       new FunctionsGeoTools.ST_Transform(),
       new Functions.ST_FlipCoordinates(),
       new Functions.ST_GeoHash(),
+      new Functions.ST_GeoHashNeighbors(),
+      new Functions.ST_GeoHashNeighbor(),
       new Functions.ST_Perimeter(),
       new Functions.ST_Perimeter2D(),
       new Functions.ST_PointOnSurface(),

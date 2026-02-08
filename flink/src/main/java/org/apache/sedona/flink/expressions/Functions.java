@@ -951,6 +951,20 @@ public class Functions {
     }
   }
 
+  public static class ST_GeoHashNeighbors extends ScalarFunction {
+    @DataTypeHint("ARRAY<STRING>")
+    public String[] eval(String geohash) {
+      return org.apache.sedona.common.Functions.geohashNeighbors(geohash);
+    }
+  }
+
+  public static class ST_GeoHashNeighbor extends ScalarFunction {
+    @DataTypeHint("String")
+    public String eval(String geohash, String direction) {
+      return org.apache.sedona.common.Functions.geohashNeighbor(geohash, direction);
+    }
+  }
+
   public static class ST_Perimeter extends ScalarFunction {
     @DataTypeHint(value = "Double")
     public Double eval(

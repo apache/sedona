@@ -2803,6 +2803,10 @@ class functionTestScala
     assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_GeoHash(null, 1)")
     assert(functionDf.first().get(0) == null)
+    functionDf = sparkSession.sql("select ST_GeoHashNeighbors(null)")
+    assert(functionDf.first().get(0) == null)
+    functionDf = sparkSession.sql("select ST_GeoHashNeighbor(null, 'n')")
+    assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_Difference(null, null)")
     assert(functionDf.first().get(0) == null)
     functionDf = sparkSession.sql("select ST_SymDifference(null, null)")
@@ -4276,5 +4280,34 @@ class functionTestScala
     assert(view2Exists, "View 'nyc_buildings_envelope_aggr_functions' should be created")
 
     FileUtils.deleteDirectory(new File(tmpDir))
+  }
+
+  it("Should pass ST_GeoHashNeighbors") {
+    var result = sparkSession.sql("SELECT ST_GeoHashNeighbors('u1pb')").first().getList[String](0)
+    assert(result.size() == 8)
+    assert(result.get(0) == "u1pc") // N
+    assert(result.get(2) == "u300") // E
+    assert(result.get(4) == "u0zz") // S
+    assert(result.get(6) == "u1p8") // W
+
+    result = sparkSession.sql("SELECT ST_GeoHashNeighbors('dqcjqc')").first().getList[String](0)
+    assert(result.size() == 8)
+    val expected =
+      Set("dqcjqf", "dqcjr4", "dqcjr1", "dqcjr0", "dqcjq9", "dqcjq8", "dqcjqb", "dqcjqd")
+    val actual = (0 until 8).map(result.get).toSet
+    assert(actual == expected)
+  }
+
+  it("Should pass ST_GeoHashNeighbor") {
+    var result = sparkSession.sql("SELECT ST_GeoHashNeighbor('u1pb', 'n')").first().getString(0)
+    assert(result == "u1pc")
+    result = sparkSession.sql("SELECT ST_GeoHashNeighbor('u1pb', 'e')").first().getString(0)
+    assert(result == "u300")
+    result = sparkSession.sql("SELECT ST_GeoHashNeighbor('u1pb', 's')").first().getString(0)
+    assert(result == "u0zz")
+    result = sparkSession.sql("SELECT ST_GeoHashNeighbor('u1pb', 'w')").first().getString(0)
+    assert(result == "u1p8")
+    result = sparkSession.sql("SELECT ST_GeoHashNeighbor('u1pb', 'NE')").first().getString(0)
+    assert(result == "u301")
   }
 }
