@@ -684,7 +684,11 @@ class TestPredicateJoin(TestBase):
 
     def test_st_azimuth(self):
         sample_points = create_sample_points(20)
-        sample_pair_points = [[el, sample_points[1]] for el in sample_points]
+        sample_pair_points = [
+            [el, sample_points[1]]
+            for el in sample_points
+            if not el.equals(sample_points[1])
+        ]
         schema = StructType(
             [
                 StructField("geomA", GeometryType(), True),
@@ -700,7 +704,6 @@ class TestPredicateJoin(TestBase):
 
         expected_result = [
             240.0133139011053,
-            0.0,
             270.0,
             286.8042682202057,
             315.0,
@@ -722,6 +725,12 @@ class TestPredicateJoin(TestBase):
         ]
 
         assert st_azimuth_result == expected_result
+
+        # ST_Azimuth should return null for identical points
+        identical_result = self.spark.sql(
+            "SELECT ST_Azimuth(ST_Point(1.0, 1.0), ST_Point(1.0, 1.0))"
+        ).collect()
+        assert identical_result[0][0] is None
 
         azimuth = self.spark.sql(
             """SELECT ST_Azimuth(ST_Point(25.0, 45.0), ST_Point(75.0, 100.0)) AS degA_B,
