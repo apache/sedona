@@ -622,6 +622,20 @@ public class UDFsV2 {
   }
 
   @UDFAnnotations.ParamMeta(
+      argNames = {"geohash"},
+      argTypes = {"String"})
+  public static String[] ST_GeoHashNeighbors(String geohash) {
+    return Functions.geohashNeighbors(geohash);
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geohash", "direction"},
+      argTypes = {"String", "String"})
+  public static String ST_GeoHashNeighbor(String geohash, String direction) {
+    return Functions.geohashNeighbor(geohash, direction);
+  }
+
+  @UDFAnnotations.ParamMeta(
       argNames = {"geometry", "n"},
       argTypes = {"Geometry", "int"},
       returnTypes = "Geometry")

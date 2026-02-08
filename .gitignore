@@ -54,3 +54,4 @@ target
 docs-overrides/node_modules/
 
 uv.lock
+.env
