@@ -39,7 +39,7 @@
     "swiper": "^11.2.8",
     "through2": "^4.0.2",
     "vinyl-named": "^1.1.0",
-    "webpack": "^5.96.1",
+    "webpack": "^5.105.0",
     "webpack-stream": "^7.0.0"
   },
   "dependencies": {
