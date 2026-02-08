@@ -274,6 +274,13 @@ repos:
       - id: black-jupyter
         name: run black-jupyter
         description: format Python files and Jupyter Notebooks with black
+  - repo: https://github.com/pypa/pip-audit
+    rev: v2.10.0
+    hooks:
+      - id: pip-audit
+        name: run pip-audit
+        description: audits Python environments, requirements files and dependency trees for known security vulnerabilities, and can automatically fix them
+        args: ['.']
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v21.1.8
     hooks:
