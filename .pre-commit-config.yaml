@@ -250,7 +250,7 @@ repos:
             \.gitattributes|
             \.prettierignore|
             \.prettierrc|
-            \.shellcheckrc|
+            \.github/linters/\.shellcheckrc|
             \.github/CODEOWNERS|
             .*/\.gitignore|
             tools/maven/scalafmt\.conf
@@ -472,6 +472,7 @@ repos:
       - id: shellcheck
         name: run shellcheck
         description: check Shell scripts with shellcheck
+        args: [--rcfile=.github/linters/.shellcheckrc]
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.38.0
     hooks:
