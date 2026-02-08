@@ -5302,17 +5302,51 @@ public class FunctionsTest extends TestBase {
                 "dqcjqf", "dqcjr4", "dqcjr1", "dqcjr0", "dqcjq9", "dqcjq8", "dqcjqb", "dqcjqd"));
     java.util.Set<String> actual = new java.util.HashSet<>(java.util.Arrays.asList(neighbors));
     assertEquals(expected, actual);
+
+    // Center: "u1x0dfg" (7-char precision)
+    neighbors = Functions.geohashNeighbors("u1x0dfg");
+    assertNotNull(neighbors);
+    assertEquals(8, neighbors.length);
+    expected =
+        new java.util.HashSet<>(
+            java.util.Arrays.asList(
+                "u1x0dg4", "u1x0dg5", "u1x0dgh", "u1x0dfu", "u1x0dfs", "u1x0dfe", "u1x0dfd",
+                "u1x0dff"));
+    actual = new java.util.HashSet<>(java.util.Arrays.asList(neighbors));
+    assertEquals(expected, actual);
+
+    // Center: "sp2j" (near prime meridian — neighbors cross into "ezr*" prefix)
+    neighbors = Functions.geohashNeighbors("sp2j");
+    assertNotNull(neighbors);
+    assertEquals(8, neighbors.length);
+    expected =
+        new java.util.HashSet<>(
+            java.util.Arrays.asList(
+                "ezry", "sp2n", "sp2q", "sp2m", "sp2k", "sp2h", "ezru", "ezrv"));
+    actual = new java.util.HashSet<>(java.util.Arrays.asList(neighbors));
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testGeoHashNeighborNearMeridian() {
+    // From geohash-java: GeoHashTest.testNeibouringHashesNearMeridian()
+    // "sp2j" is near the prime meridian; western neighbors cross into "ezr*" prefix
+    assertEquals("ezrv", Functions.geohashNeighbor("sp2j", "w"));
+    assertEquals("ezrt", Functions.geohashNeighbor(Functions.geohashNeighbor("sp2j", "w"), "w"));
   }
 
   @Test
   public void testGeoHashNeighborCircleMovement() {
     // Moving E -> S -> W -> N should return to the starting cell
-    String start = "u1pb";
-    String result = Functions.geohashNeighbor(start, "e");
-    result = Functions.geohashNeighbor(result, "s");
-    result = Functions.geohashNeighbor(result, "w");
-    result = Functions.geohashNeighbor(result, "n");
-    assertEquals(start, result);
+    // From geohash-java: GeoHashTest.testMovingInCircle()
+    String[] testHashes = {"u1pb", "sp2j", "ezrv", "dqcjqc", "u1x0dfg", "pbpbpbpbpbpb"};
+    for (String start : testHashes) {
+      String result = Functions.geohashNeighbor(start, "e");
+      result = Functions.geohashNeighbor(result, "s");
+      result = Functions.geohashNeighbor(result, "w");
+      result = Functions.geohashNeighbor(result, "n");
+      assertEquals("Circle movement failed for " + start, start, result);
+    }
   }
 
   @Test
