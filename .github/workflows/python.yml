@@ -161,9 +161,6 @@ jobs:
 
           uv sync
 
-          # Ensure setuptools is available (provides pkg_resources needed by some dependencies)
-          uv pip install setuptools
-
           uv run python -c "import pyspark,sys;print('Using pyspark', pyspark.__version__)"
       - name: Install sedona package
         run: cd python; uv pip install -e .
@@ -194,7 +191,6 @@ jobs:
           uv remove rasterio --optional all
           uv remove rasterio --dev
           uv sync
-          uv pip install setuptools
           uv run pytest -v tests/core/test_rdd.py tests/sql/test_dataframe_api.py
       - name: Run Spark Connect tests
         if: ${{ matrix.spark >= '3.4.0' }}

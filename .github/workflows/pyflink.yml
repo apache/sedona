@@ -73,8 +73,6 @@ jobs:
           cd python
           uv add apache-flink==1.20.1
           uv sync
-          # Ensure setuptools is available (provides pkg_resources needed by some dependencies)
-          uv pip install setuptools
       - name: Run PyFlink tests
         run: |
           wget -q https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.8.0-33.1-rc1/geotools-wrapper-1.8.0-33.1-rc1.jar

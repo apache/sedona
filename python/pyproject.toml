@@ -54,6 +54,7 @@ all = [
 dev = [
   "pytest",
   "pytest-cov",
+  "setuptools>=69",
   "notebook==6.4.12",
   "jupyter",
   "mkdocs",
