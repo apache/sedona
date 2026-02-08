@@ -1,0 +1,41 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "Apache Sedona"
+version: 1.8.0
+date-released: "2025-01-24"
+url: "https://sedona.apache.org/"
+repository-code: "https://github.com/apache/sedona"
+license: Apache-2.0
+authors:
+  - name: "The Apache Software Foundation"
+  - family-names: "Yu"
+    given-names: "Jia"
+    email: "jiayu@apache.org"
+  - family-names: "Li"
+    given-names: "Yitao"
+    email: "yitao@rstudio.com"
+    orcid: "https://orcid.org/0000-0002-1261-905X"
+abstract: "Apache Sedona is a cluster computing system for processing large-scale spatial data. It extends modern cluster computing systems such as Apache Spark and Apache Flink to support spatial data types, spatial indexes, and spatial data processing operations, enabling developers to easily analyze spatial data at scale using Spatial SQL, Spatial Python, or Spatial R."
+keywords:
+  - spatial-computing
+  - geospatial
+  - big-data
+  - apache-spark
+  - apache-flink
+  - gis
+  - spatial-analytics
+preferred-citation:
+  type: article
+  title: "Spatial Data Management in Apache Spark: The GeoSpark Perspective and Beyond"
+  authors:
+    - family-names: "Yu"
+      given-names: "Jia"
+    - family-names: "Zhang"
+      given-names: "Zongsi"
+    - family-names: "Sarwat"
+      given-names: "Mohamed"
+  doi: "10.1007/s10707-018-0330-9"
+  journal: "GeoInformatica"
+  year: 2019
+  url: "https://jiayuasu.github.io/files/paper/GeoSpark_Geoinformatica_2018.pdf"
