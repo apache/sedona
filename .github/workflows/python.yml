@@ -88,10 +88,6 @@ jobs:
           - spark: '3.5.0'
             scala: '2.12.8'
             java: '11'
-            python: '3.8'
-          - spark: '3.4.0'
-            scala: '2.12.8'
-            java: '11'
             python: '3.11'
           - spark: '3.4.0'
             scala: '2.12.8'
@@ -101,15 +97,6 @@ jobs:
             scala: '2.12.8'
             java: '11'
             python: '3.9'
-          - spark: '3.4.0'
-            scala: '2.12.8'
-            java: '11'
-            python: '3.8'
-          - spark: '3.4.0'
-            scala: '2.12.8'
-            java: '11'
-            python: '3.8'
-            shapely: '1'
 
     steps:
       - uses: actions/checkout@v6
@@ -181,7 +168,18 @@ jobs:
         run: |
           cd python
           export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
-          uv run pytest -v tests
+          uv run pytest -m "not vectorized" -v tests
+      - name: Run vectorized udf tests
+        if: ${{ matrix.spark < '4.0.0' }}
+        run: |
+          cd python
+          export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
+          uv pip install --force-reinstall --no-deps -e .
+          uv remove apache-flink --optional flink
+          uv add "pyarrow>=16.0.0"
+          uv add "shapely>=2.0.0"
+          uv add sedonadb geopandas geoarrow-pyarrow
+          uv run pytest -m vectorized tests
       - name: Run basic tests without rasterio
         run: |
           cd python

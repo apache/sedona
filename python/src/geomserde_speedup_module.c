@@ -19,6 +19,9 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
+#include <numpy/ndarraytypes.h>
+#include <numpy/npy_3kcompat.h>
+#include <numpy/ufuncobject.h>
 #include <stdio.h>
 
 #include "geomserde.h"
@@ -262,13 +265,120 @@ static PyObject *deserialize_1(PyObject *self, PyObject *args) {
   return Py_BuildValue("(Kibi)", geom, geom_type_id, has_z, length);
 }
 
+static PyObject *to_sedona_func(PyObject *self, PyObject *args) {
+  import_array();
+  PyObject *input_obj = NULL;
+  if (!PyArg_ParseTuple(args, "O", &input_obj)) {
+    return NULL;
+  };
+
+  PyArrayObject *array = (PyArrayObject *)input_obj;
+  PyObject **objs = (PyObject **)PyArray_DATA(array);
+
+  GEOSContextHandle_t handle = get_geos_context_handle();
+  if (handle == NULL) {
+    return NULL;
+  }
+
+  npy_intp n = PyArray_SIZE(array);
+  npy_intp dims[1] = {n};
+  PyArrayObject *out = (PyArrayObject *)PyArray_SimpleNew(1, dims, NPY_OBJECT);
+  for (npy_intp i = 0; i < PyArray_SIZE(array); i++) {
+    PyObject *obj = objs[i];
+    GEOSGeometry *geos_geom = NULL;
+    char success = PyGEOS_GetGEOSGeometry(obj, &geos_geom);
+    if (!success || geos_geom == NULL) {
+      PyErr_SetString(PyExc_TypeError, "Invalid GEOS geometry");
+      Py_DECREF(out);
+      return NULL;
+    }
+
+    PyObject *serialized = do_serialize(geos_geom);
+    if (!serialized) {
+      Py_DECREF(out);
+      return NULL;
+    }
+
+    if (PyArray_SETITEM(out, PyArray_GETPTR1(out, i), serialized) < 0) {
+      Py_DECREF(serialized);
+      Py_DECREF(out);
+      return NULL;
+    }
+    Py_DECREF(serialized);
+  }
+
+  return (PyObject *)out;
+}
 /* Module definition for Shapely 2.x */
+static PyObject *from_sedona_func(PyObject *self, PyObject *args) {
+  import_array();
+  PyObject *input_obj = NULL;
+  if (!PyArg_ParseTuple(args, "O", &input_obj)) {
+    return NULL;
+  };
+
+  GEOSContextHandle_t handle = get_geos_context_handle();
+
+  PyArrayObject *array = (PyArrayObject *)input_obj;
+  PyObject **objs = (PyObject **)PyArray_DATA(array);
+
+  int p_bytes_read = 0;
+
+  npy_intp n = PyArray_SIZE(array);
+
+  npy_intp dims[1] = {n};
+  PyArrayObject *out = (PyArrayObject *)PyArray_SimpleNew(1, dims, NPY_OBJECT);
+
+  for (npy_intp i = 0; i < PyArray_SIZE(array); i++) {
+    PyObject *obj = objs[i];
+    if (!PyBytes_Check(obj)) {
+      PyErr_SetString(PyExc_TypeError, "Expected bytes");
+      Py_DECREF(out);
+
+      return NULL;
+    }
+
+    char *buf = PyBytes_AS_STRING(obj);
+
+    Py_ssize_t len = PyBytes_GET_SIZE(obj);
+
+    GEOSGeometry *geom = NULL;
+
+    SedonaErrorCode err =
+        sedona_deserialize_geom(handle, buf, len, &geom, &p_bytes_read);
+    if (err != SEDONA_SUCCESS) {
+      handle_geomserde_error(err);
+      Py_DECREF(out);
+      return NULL;
+    }
+
+    PyObject *pygeom = PyGEOS_CreateGeometry(geom, handle);
+    if (!pygeom) {
+      Py_DECREF(out);
+      return NULL;
+    }
+
+    if (PyArray_SETITEM(out, PyArray_GETPTR1(out, i), pygeom) < 0) {
+      Py_DECREF(pygeom);
+      Py_DECREF(out);
+      return NULL;
+    }
+
+    Py_DECREF(pygeom);
+  }
+
+  return (PyObject *)out;
+}
 
 static PyMethodDef geomserde_methods_shapely_2[] = {
     {"load_libgeos_c", load_libgeos_c, METH_VARARGS, "Load libgeos_c."},
     {"serialize", serialize, METH_VARARGS,
      "Serialize geometry object as bytearray."},
     {"deserialize", deserialize, METH_VARARGS,
+     "Deserialize bytes-like object to geometry object."},
+    {"from_sedona_func", from_sedona_func, METH_VARARGS,
+     "Deserialize bytes-like object to geometry object."},
+    {"to_sedona_func", to_sedona_func, METH_VARARGS,
      "Deserialize bytes-like object to geometry object."},
     {NULL, NULL, 0, NULL}, /* Sentinel */
 };

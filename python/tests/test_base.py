@@ -22,7 +22,7 @@ from typing import Iterable, Union
 import pyspark
 from pyspark.sql import DataFrame
 
-from sedona.spark import *
+from sedona.spark import SedonaContext
 from sedona.spark.utils.decorators import classproperty
 
 SPARK_REMOTE = os.getenv("SPARK_REMOTE")
@@ -70,7 +70,15 @@ class TestBase:
                     "spark.sedona.stac.load.itemsLimitMax",
                     "20",
                 )
-                # Pandas on PySpark doesn't work with ANSI mode, which is enabled by default
+                .config("spark.executor.memory", "10G")
+                .config("spark.driver.memory", "10G")
+                .config(
+                    "sedona.python.worker.udf.daemon.module",
+                    "sedona.spark.worker.daemon",
+                )
+                .config(
+                    "sedona.python.worker.daemon.enabled", "true"
+                )  # Pandas on PySpark doesn't work with ANSI mode, which is enabled by default
                 # in Spark 4
                 .config("spark.sql.ansi.enabled", "false")
             )

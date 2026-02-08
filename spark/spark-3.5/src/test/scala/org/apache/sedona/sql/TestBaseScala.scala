@@ -26,7 +26,6 @@ import org.scalatest.{BeforeAndAfterAll, FunSpec}
 import org.testcontainers.containers.MinIOContainer
 
 import java.io.FileInputStream
-
 import java.util.concurrent.ThreadLocalRandom
 
 trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
@@ -46,6 +45,9 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     // We need to be explicit about broadcasting in tests.
     .config("sedona.join.autoBroadcastJoinThreshold", "-1")
     .config("spark.sql.extensions", "org.apache.sedona.sql.SedonaSqlExtensions")
+    .config("sedona.python.worker.udf.module", "sedona.spark.worker.worker")
+    .config("sedona.python.worker.udf.daemon.module", "sedonaworker.daemon")
+    .config("sedona.python.worker.daemon.enabled", "false")
     .config(keyParserExtension, ThreadLocalRandom.current().nextBoolean())
     .getOrCreate()
 
