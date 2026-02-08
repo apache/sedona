@@ -20,6 +20,5 @@
 .pre-commit-config.yaml     @jbampton @jiayuasu
 .prettierignore             @jbampton @jiayuasu
 .prettierrc                 @jbampton @jiayuasu
-.shellcheckrc               @jbampton @jiayuasu
 Makefile                    @jbampton @jiayuasu
 /.github/linters/           @jbampton @jiayuasu
