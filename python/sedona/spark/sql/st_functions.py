@@ -764,6 +764,36 @@ def ST_GeoHash(geometry: ColumnOrName, precision: Union[ColumnOrName, int]) -> C
 
 
 @validate_argument_types
+def ST_GeoHashNeighbors(geohash: ColumnOrName) -> Column:
+    """Return the 8 neighboring geohash cells of the given geohash string.
+
+    The neighbors are returned in the order: [N, NE, E, SE, S, SW, W, NW].
+
+    :param geohash: Geohash string column.
+    :type geohash: ColumnOrName
+    :return: Array of 8 neighboring geohash strings.
+    :rtype: Column
+    """
+    return _call_st_function("ST_GeoHashNeighbors", (geohash,))
+
+
+@validate_argument_types
+def ST_GeoHashNeighbor(
+    geohash: ColumnOrName, direction: Union[ColumnOrName, str]
+) -> Column:
+    """Return the neighboring geohash cell in the specified direction.
+
+    :param geohash: Geohash string column.
+    :type geohash: ColumnOrName
+    :param direction: Compass direction: 'n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'.
+    :type direction: Union[ColumnOrName, str]
+    :return: Neighboring geohash string.
+    :rtype: Column
+    """
+    return _call_st_function("ST_GeoHashNeighbor", (geohash, direction))
+
+
+@validate_argument_types
 def ST_GeometricMedian(
     geometry: ColumnOrName,
     tolerance: Optional[Union[ColumnOrName, float]] = 1e-6,

@@ -439,6 +439,16 @@ public class UDFs {
     return Functions.geohash(GeometrySerde.deserialize(geometry), precision);
   }
 
+  @UDFAnnotations.ParamMeta(argNames = {"geohash"})
+  public static String[] ST_GeoHashNeighbors(String geohash) {
+    return Functions.geohashNeighbors(geohash);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geohash", "direction"})
+  public static String ST_GeoHashNeighbor(String geohash, String direction) {
+    return Functions.geohashNeighbor(geohash, direction);
+  }
+
   @UDFAnnotations.ParamMeta(argNames = {"gml"})
   public static byte[] ST_GeomFromGML(String gml)
       throws IOException, ParserConfigurationException, SAXException {

@@ -194,6 +194,8 @@ object InferrableType {
     new InferrableType[Array[java.lang.Long]] {}
   implicit val doubleArrayInstance: InferrableType[Array[Double]] =
     new InferrableType[Array[Double]] {}
+  implicit val stringArrayInstance: InferrableType[Array[String]] =
+    new InferrableType[Array[String]] {}
   implicit val javaDoubleListInstance: InferrableType[java.util.List[java.lang.Double]] =
     new InferrableType[java.util.List[java.lang.Double]] {}
   implicit val javaGeomListInstance: InferrableType[java.util.List[Geometry]] =
@@ -220,6 +222,18 @@ object InferredTypes {
       expr.asString(input)
     } else if (t =:= typeOf[Array[Long]]) { expr => input =>
       expr.eval(input).asInstanceOf[ArrayData].toLongArray()
+    } else if (t =:= typeOf[Array[String]]) { expr => input =>
+      expr.eval(input).asInstanceOf[ArrayData] match {
+        case null => null
+        case arrayData: ArrayData =>
+          (0 until arrayData.numElements()).map { i =>
+            if (arrayData.isNullAt(i)) null
+            else {
+              val utf8 = arrayData.getUTF8String(i)
+              if (utf8 == null) null else utf8.toString
+            }
+          }.toArray
+      }
     } else if (t =:= typeOf[Array[Int]]) { expr => input =>
       expr.eval(input).asInstanceOf[ArrayData] match {
         case null => null
@@ -260,6 +274,14 @@ object InferredTypes {
       t =:= typeOf[Array[Double]]) { output =>
       if (output != null) {
         ArrayData.toArrayData(output)
+      } else {
+        null
+      }
+    } else if (t =:= typeOf[Array[String]]) { output =>
+      if (output != null) {
+        ArrayData.toArrayData(output.asInstanceOf[Array[String]].map { s =>
+          if (s != null) UTF8String.fromString(s) else null
+        })
       } else {
         null
       }
@@ -330,6 +352,8 @@ object InferredTypes {
       DataTypes.createArrayType(LongType)
     } else if (t =:= typeOf[Array[Double]] || t =:= typeOf[java.util.List[java.lang.Double]]) {
       DataTypes.createArrayType(DoubleType)
+    } else if (t =:= typeOf[Array[String]]) {
+      DataTypes.createArrayType(StringType)
     } else if (t =:= typeOf[Option[Boolean]]) {
       BooleanType
     } else if (t =:= typeOf[Boolean]) {

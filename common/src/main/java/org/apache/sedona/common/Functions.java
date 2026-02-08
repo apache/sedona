@@ -746,6 +746,14 @@ public class Functions {
     return GeometryGeoHashEncoder.calculate(geometry, precision);
   }
 
+  public static String[] geohashNeighbors(String geohash) {
+    return GeoHashNeighbor.getNeighbors(geohash);
+  }
+
+  public static String geohashNeighbor(String geohash, String direction) {
+    return GeoHashNeighbor.getNeighbor(geohash, direction);
+  }
+
   public static Geometry pointOnSurface(Geometry geometry) {
     return GeomUtils.getInteriorPoint(geometry);
   }
