@@ -1004,13 +1004,30 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#known-bugs" class="md-nav__link">
+  <a href="#known-issues" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Known bugs
+        Known issues
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Known issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#h3-function-errors-on-databricks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        H3 function errors on Databricks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -5857,13 +5874,30 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#known-bugs" class="md-nav__link">
+  <a href="#known-issues" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Known bugs
+        Known issues
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Known issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#h3-function-errors-on-databricks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        H3 function errors on Databricks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -5957,6 +5991,11 @@ cat &gt; /Workspace/Shared/sedona/sedona-init.sh &lt;&lt;&#39;EOF&#39;
 #
 # On cluster startup, this script will copy the Sedona jars to the cluster&#39;s default jar directory.
 
+# Optional: Remove Databricks&#39; bundled H3 JAR to avoid version conflicts with Sedona&#39;s H3 functions.
+# Databricks bundles H3 v3.x which is incompatible with Sedona&#39;s H3 v4.x API.
+# Uncomment the following line if you need to use Sedona&#39;s H3 functions (e.g., ST_H3CellIDs).
+# rm -f /databricks/jars/*h3*.jar
+
 cp /Workspace/Shared/sedona/1.8.0/*.jar /databricks/jars
 
 EOF
@@ -6013,8 +6052,18 @@ pydeck==0.9.1
 <p>Here’s how to read the table: <code>sedona.table("your_org.default.geotable").display()</code></p>
 <p>This is what the results look like in Databricks:</p>
 <p><img alt="Write table" src="../../image/databricks/image9.png" /></p>
-<h2 id="known-bugs">Known bugs<a class="headerlink" href="#known-bugs" title="Permanent link">&para;</a></h2>
+<h2 id="known-issues">Known issues<a class="headerlink" href="#known-issues" title="Permanent link">&para;</a></h2>
 <p>To ensure stability, we recommend using a currently supported Long-Term Support (LTS) version, such as Databricks Runtime 16.4 LTS or 15.4 LTS.  Some Databricks Runtimes, such as 16.2 (non-LTS), are not compatible with Apache Sedona, as this particular runtime introduced a change in the json4s dependency.</p>
+<h3 id="h3-function-errors-on-databricks">H3 function errors on Databricks<a class="headerlink" href="#h3-function-errors-on-databricks" title="Permanent link">&para;</a></h3>
+<p>Databricks Runtime bundles an older version of the H3 library (v3.x) which is incompatible with Sedona's H3 functions (which require H3 v4.x). If you see errors like:</p>
+<div class="highlight"><pre><span></span><code>java.lang.NoSuchMethodError: com.uber.h3core.H3Core.polygonToCells(...)
+</code></pre></div>
+<p>when calling <code>ST_H3CellIDs</code>, <code>ST_H3CellDistance</code>, <code>ST_H3KRing</code>, <code>ST_H3ToGeom</code>, or other Sedona H3 functions, it means Databricks' bundled H3 library is taking precedence over Sedona's.</p>
+<p>The init script provided above includes an optional fix: uncomment the line <code>rm -f /databricks/jars/*h3*.jar</code> to remove the Databricks-bundled H3 JAR before copying Sedona's JARs. This allows Sedona's H3 v4.x to be used instead.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Removing the Databricks-bundled H3 JAR will disable Databricks' built-in H3 SQL expressions (e.g., <code>h3_coverash3</code>, <code>h3_boundaryaswkt</code>). Sedona provides equivalent H3 functions that can be used as replacements.</p>
+</div>
 
 
 
@@ -6035,7 +6084,7 @@ pydeck==0.9.1
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 8, 2025 04:31:05 UTC">September 8, 2025 04:31:05</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 9, 2026 06:49:06 UTC">February 9, 2026 06:49:06</span>
   </span>
 
     
