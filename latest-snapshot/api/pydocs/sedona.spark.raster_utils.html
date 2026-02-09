@@ -465,7 +465,12 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.raster_utils.SedonaUtils.SedonaUtils.display_image">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">display_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/raster_utils/SedonaUtils.html#SedonaUtils.display_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.raster_utils.SedonaUtils.SedonaUtils.display_image" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Display raster images in a Jupyter notebook.</p>
+<p>Accepts DataFrames with either:
+- A raster column (GridCoverage2D) — auto-applies RS_AsImage
+- An HTML image column from RS_AsImage() — renders directly</p>
+<p>Falls back to the SedonaMapUtils HTML table path for other DataFrames.</p>
+</dd></dl>
 
 </dd></dl>
 

@@ -469,7 +469,40 @@
 <div class="viewcode-block" id="SedonaUtils"><a class="viewcode-back" href="../../../../sedona.spark.raster_utils.html#sedona.spark.raster_utils.SedonaUtils.SedonaUtils">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SedonaUtils</span><span class="p">:</span>
 <div class="viewcode-block" id="SedonaUtils.display_image"><a class="viewcode-back" href="../../../../sedona.spark.raster_utils.html#sedona.spark.raster_utils.SedonaUtils.SedonaUtils.display_image">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">display_image</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Display raster images in a Jupyter notebook.</span>
+
+<span class="sd">        Accepts DataFrames with either:</span>
+<span class="sd">        - A raster column (GridCoverage2D) — auto-applies RS_AsImage</span>
+<span class="sd">        - An HTML image column from RS_AsImage() — renders directly</span>
+
+<span class="sd">        Falls back to the SedonaMapUtils HTML table path for other DataFrames.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTML</span><span class="p">,</span> <span class="n">display</span>
+
+        <span class="n">schema</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">schema</span>
+
+        <span class="c1"># Detect raster UDT columns and auto-apply RS_AsImage.</span>
+        <span class="c1"># Without this, passing a raw raster DataFrame to the fallback path</span>
+        <span class="c1"># causes __convert_to_gdf_or_pdf__ to Arrow-serialize the full raster</span>
+        <span class="c1"># grid, which hangs for large rasters (e.g., 1400x800).</span>
+        <span class="n">raster_cols</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">fields</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">dataType</span><span class="p">,</span> <span class="s2">&quot;typeName&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="n">dataType</span><span class="o">.</span><span class="n">typeName</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;rastertype&quot;</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="n">raster_cols</span><span class="p">:</span>
+            <span class="c1"># Replace each raster column with its RS_AsImage() HTML representation,</span>
+            <span class="c1"># preserving all other columns in the DataFrame.</span>
+            <span class="n">select_exprs</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+                <span class="n">col_name_escaped</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;`&quot;</span><span class="p">,</span> <span class="s2">&quot;``&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">raster_cols</span><span class="p">:</span>
+                    <span class="n">select_exprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;RS_AsImage(`</span><span class="si">{</span><span class="n">col_name_escaped</span><span class="si">}</span><span class="s2">`) as `</span><span class="si">{</span><span class="n">col_name_escaped</span><span class="si">}</span><span class="s2">`&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">select_exprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">col_name_escaped</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="o">*</span><span class="n">select_exprs</span><span class="p">)</span>
 
         <span class="n">pdf</span> <span class="o">=</span> <span class="n">SedonaMapUtils</span><span class="o">.</span><span class="n">__convert_to_gdf_or_pdf__</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">rename</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">display</span><span class="p">(</span><span class="n">HTML</span><span class="p">(</span><span class="n">pdf</span><span class="o">.</span><span class="n">to_html</span><span class="p">(</span><span class="n">escape</span><span class="o">=</span><span class="kc">False</span><span class="p">)))</span></div></div>

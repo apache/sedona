@@ -3150,6 +3150,17 @@ You're not viewing the latest stable version.
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#display-raster-in-jupyter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Display raster in Jupyter
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -5840,6 +5851,17 @@ You're not viewing the latest stable version.
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#display-raster-in-jupyter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Display raster in Jupyter
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -5951,21 +5973,23 @@ You're not viewing the latest stable version.
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>&quot;<span class="p">&lt;</span><span class="nt">img</span> <span class="na">src</span><span class="o">=</span><span class="s">\&quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAECAAAAABjWKqcAAAAIElEQVR42mPgPfGfkYUhhfcBNw+DT1KihS6DqLKztjcATWMFp9rkkJgAAAAASUVORK5CYII=\&quot;</span> <span class="na">width</span><span class="o">=</span><span class="s">\&quot;200\&quot;</span> <span class="p">/&gt;</span>&quot;;
 </code></pre></div>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>RS_AsImage can be paired with SedonaUtils.display_image(df) wrapper inside a Jupyter notebook to directly print the raster as an image in the output, where the 'df' parameter is the dataframe containing the HTML data provided by RS_AsImage</p>
-</div>
-<p>Example:</p>
+<h3 id="display-raster-in-jupyter">Display raster in Jupyter<a class="headerlink" href="#display-raster-in-jupyter" title="Permanent link">&para;</a></h3>
+<p>Introduction: <code>SedonaUtils.display_image(df)</code> is a Python wrapper that renders raster images directly in a Jupyter notebook. It automatically detects raster columns in the DataFrame and applies <code>RS_AsImage</code> under the hood, so you don't need to call <code>RS_AsImage</code> yourself. You can also pass a DataFrame with pre-applied <code>RS_AsImage</code> HTML.</p>
+<p>Since: <code>v1.7.0</code> (auto-detection of raster columns since <code>v1.9.0</code>)</p>
+<p>Example — direct raster display (recommended):</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaUtils</span>
-
-<span class="c1"># Or from sedona.spark import *</span>
 
 <span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;binaryFile&quot;</span><span class="p">)</span>
     <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">DATA_DIR</span> <span class="o">+</span> <span class="s2">&quot;raster.tiff&quot;</span><span class="p">)</span>
     <span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;RS_FromGeoTiff(content) as raster&quot;</span><span class="p">)</span>
 <span class="p">)</span>
-<span class="n">htmlDF</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;RS_AsImage(raster, 500) as raster_image&quot;</span><span class="p">)</span>
+
+<span class="c1"># Pass the raw raster DataFrame directly — RS_AsImage is applied automatically</span>
+<span class="n">SedonaUtils</span><span class="o">.</span><span class="n">display_image</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+</code></pre></div>
+<p>Example — with explicit RS_AsImage:</p>
+<div class="highlight"><pre><span></span><code><span class="n">htmlDF</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;RS_AsImage(raster, 500) as raster_image&quot;</span><span class="p">)</span>
 <span class="n">SedonaUtils</span><span class="o">.</span><span class="n">display_image</span><span class="p">(</span><span class="n">htmlDF</span><span class="p">)</span>
 </code></pre></div>
 <p><img alt="Output" src="../../../image/DisplayImage.png" /></p>
@@ -6044,7 +6068,7 @@ RS_AsMatrix expects a raster, and optionally a band (default: 1) and postDecimal
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="May 3, 2025 19:30:21 UTC">May 3, 2025 19:30:21</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 9, 2026 10:55:04 UTC">February 9, 2026 10:55:04</span>
   </span>
 
     
