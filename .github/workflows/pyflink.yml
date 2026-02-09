@@ -78,4 +78,5 @@ jobs:
           wget -q https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.8.0-33.1-rc1/geotools-wrapper-1.8.0-33.1-rc1.jar
           export SEDONA_PYFLINK_EXTRA_JARS=${PWD}/$(find flink-shaded/target -name sedona-flink*.jar),${PWD}/geotools-wrapper-1.8.0-33.1-rc1.jar
           cd python
+          uv pip install setuptools
           PYTHONPATH=$(pwd) uv run pytest -v -s ./tests/flink
