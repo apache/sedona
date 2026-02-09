@@ -71,21 +71,30 @@ Output:
 "<img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAECAAAAABjWKqcAAAAIElEQVR42mPgPfGfkYUhhfcBNw+DT1KihS6DqLKztjcATWMFp9rkkJgAAAAASUVORK5CYII=\" width=\"200\" />";
 ```
 
-!!!Tip
-    RS_AsImage can be paired with SedonaUtils.display_image(df) wrapper inside a Jupyter notebook to directly print the raster as an image in the output, where the 'df' parameter is the dataframe containing the HTML data provided by RS_AsImage
+### Display raster in Jupyter
 
-Example:
+Introduction: `SedonaUtils.display_image(df)` is a Python wrapper that renders raster images directly in a Jupyter notebook. It automatically detects raster columns in the DataFrame and applies `RS_AsImage` under the hood, so you don't need to call `RS_AsImage` yourself. You can also pass a DataFrame with pre-applied `RS_AsImage` HTML.
+
+Since: `v1.7.0` (auto-detection of raster columns since `v1.9.0`)
+
+Example — direct raster display (recommended):
 
 ```python
 from sedona.spark import SedonaUtils
-
-# Or from sedona.spark import *
 
 df = (
     sedona.read.format("binaryFile")
     .load(DATA_DIR + "raster.tiff")
     .selectExpr("RS_FromGeoTiff(content) as raster")
 )
+
+# Pass the raw raster DataFrame directly — RS_AsImage is applied automatically
+SedonaUtils.display_image(df)
+```
+
+Example — with explicit RS_AsImage:
+
+```python
 htmlDF = df.selectExpr("RS_AsImage(raster, 500) as raster_image")
 SedonaUtils.display_image(htmlDF)
 ```

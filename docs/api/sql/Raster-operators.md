@@ -17,6 +17,9 @@
  under the License.
  -->
 
+!!!tip
+    To quickly visualize raster data in a Jupyter notebook, use `SedonaUtils.display_image(df)`. It automatically detects raster columns and renders them as images. See [Raster visualizer docs](Raster-visualizer.md#display-raster-in-jupyter) for details.
+
 ## Pixel Functions
 
 ### RS_PixelAsCentroid

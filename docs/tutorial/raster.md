@@ -472,6 +472,17 @@ The output looks like this:
 
 ![Output](../image/DisplayImage.png)
 
+!!!tip
+    In a Jupyter notebook, use `SedonaUtils.display_image` to render rasters directly — no need to call RS_AsImage manually:
+
+    ```python
+    from sedona.spark import SedonaUtils
+
+    SedonaUtils.display_image(rasterDf)
+    ```
+
+    See [Display raster in Jupyter](../api/sql/Raster-visualizer.md#display-raster-in-jupyter) for details.
+
 ### 2-D Matrix
 
 Sedona offers an API to visualize raster data that is not sufficient for the other APIs mentioned above.
@@ -530,6 +541,15 @@ Please refer to [Raster writer docs](../api/sql/Raster-writer.md) for more detai
 
 Sedona allows collecting Dataframes with raster columns and working with them locally in Python since `v1.6.0`.
 The raster objects are represented as `SedonaRaster` objects in Python, which can be used to perform raster operations.
+
+!!!tip
+    If you just want to quickly visualize a raster in Jupyter, use `SedonaUtils.display_image(df)` instead of collecting the DataFrame:
+
+    ```python
+    from sedona.spark import SedonaUtils
+
+    SedonaUtils.display_image(df_raster)
+    ```
 
 ```python
 df_raster = (
