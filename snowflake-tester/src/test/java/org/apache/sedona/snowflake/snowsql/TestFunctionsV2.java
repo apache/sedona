@@ -454,8 +454,7 @@ public class TestFunctionsV2 extends TestBase {
   @Test
   public void test_ST_GeoHashNeighbors() {
     registerUDFV2("ST_GeoHashNeighbors", String.class);
-    verifySqlSingleRes(
-        "select ARRAY_SIZE(sedona.ST_GeoHashNeighbors('u1pb'))", 8);
+    verifySqlSingleRes("select ARRAY_SIZE(sedona.ST_GeoHashNeighbors('u1pb'))", 8);
   }
 
   @Test
