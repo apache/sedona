@@ -76,7 +76,6 @@ jobs:
           uv pip install -e .
       - name: Run tests
         run: |
-          uv pip install setuptools
           uv run pytest tests/utils/test_geomserde_speedup.py
       - name: Install pip
         run: uv pip install pip

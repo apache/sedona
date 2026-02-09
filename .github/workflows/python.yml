@@ -183,7 +183,6 @@ jobs:
         run: |
           cd python
           export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
-          uv pip install setuptools
           uv run pytest -v tests
       - name: Run basic tests without rasterio
         run: |
@@ -192,7 +191,6 @@ jobs:
           uv remove rasterio --optional all
           uv remove rasterio --dev
           uv sync
-          uv pip install setuptools
           uv run pytest -v tests/core/test_rdd.py tests/sql/test_dataframe_api.py
       - name: Run Spark Connect tests
         if: ${{ matrix.spark >= '3.4.0' }}
@@ -201,5 +199,4 @@ jobs:
           export SPARK_REMOTE=local
           export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
           uv pip install "pyspark[connect]==${{ matrix.spark }}" --reinstall
-          uv pip install setuptools
           uv run pytest -v tests/sql/test_dataframe_api.py
