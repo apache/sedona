@@ -76,6 +76,11 @@ cat > /Workspace/Shared/sedona/sedona-init.sh <<'EOF'
 #
 # On cluster startup, this script will copy the Sedona jars to the cluster's default jar directory.
 
+# Optional: Remove Databricks' bundled H3 JAR to avoid version conflicts with Sedona's H3 functions.
+# Databricks bundles H3 v3.x which is incompatible with Sedona's H3 v4.x API.
+# Uncomment the following line if you need to use Sedona's H3 functions (e.g., ST_H3CellIDs).
+# rm -f /databricks/jars/*h3*.jar
+
 cp /Workspace/Shared/sedona/{{ sedona.current_version }}/*.jar /databricks/jars
 
 EOF
@@ -169,6 +174,21 @@ This is what the results look like in Databricks:
 
 ![Write table](../image/databricks/image9.png)
 
-## Known bugs
+## Known issues
 
 To ensure stability, we recommend using a currently supported Long-Term Support (LTS) version, such as Databricks Runtime 16.4 LTS or 15.4 LTS.  Some Databricks Runtimes, such as 16.2 (non-LTS), are not compatible with Apache Sedona, as this particular runtime introduced a change in the json4s dependency.
+
+### H3 function errors on Databricks
+
+Databricks Runtime bundles an older version of the H3 library (v3.x) which is incompatible with Sedona's H3 functions (which require H3 v4.x). If you see errors like:
+
+```
+java.lang.NoSuchMethodError: com.uber.h3core.H3Core.polygonToCells(...)
+```
+
+when calling `ST_H3CellIDs`, `ST_H3CellDistance`, `ST_H3KRing`, `ST_H3ToGeom`, or other Sedona H3 functions, it means Databricks' bundled H3 library is taking precedence over Sedona's.
+
+The init script provided above includes an optional fix: uncomment the line `rm -f /databricks/jars/*h3*.jar` to remove the Databricks-bundled H3 JAR before copying Sedona's JARs. This allows Sedona's H3 v4.x to be used instead.
+
+!!!note
+    Removing the Databricks-bundled H3 JAR will disable Databricks' built-in H3 SQL expressions (e.g., `h3_coverash3`, `h3_boundaryaswkt`). Sedona provides equivalent H3 functions that can be used as replacements.
