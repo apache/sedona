@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.flink.table.api.Table;
+import org.apache.flink.types.Row;
 import org.apache.sedona.flink.expressions.Functions;
 import org.apache.sedona.flink.expressions.FunctionsGeoTools;
 import org.geotools.api.referencing.FactoryException;
@@ -792,6 +793,40 @@ public class FunctionTest extends TestBase {
     Table pointTable = createPointTable(testDataSize);
     pointTable = pointTable.select(call("ST_GeoHash", $(pointColNames[0]), 5));
     assertEquals(first(pointTable).getField(0), "s0000");
+  }
+
+  @Test
+  public void testGeoHashNeighbors() {
+    Table resultTable = tableEnv.sqlQuery("SELECT ST_GeoHashNeighbors('u1pb')");
+    Row result = first(resultTable);
+    String[] neighbors = (String[]) result.getField(0);
+    assertEquals(8, neighbors.length);
+    assertEquals("u1pc", neighbors[0]); // N
+    assertEquals("u300", neighbors[2]); // E
+    assertEquals("u0zz", neighbors[4]); // S
+    assertEquals("u1p8", neighbors[6]); // W
+  }
+
+  @Test
+  public void testGeoHashNeighborsNull() {
+    Table resultTable = tableEnv.sqlQuery("SELECT ST_GeoHashNeighbors(CAST(NULL AS STRING))");
+    assertNull(first(resultTable).getField(0));
+  }
+
+  @Test
+  public void testGeoHashNeighbor() {
+    Table resultTable = tableEnv.sqlQuery("SELECT ST_GeoHashNeighbor('u1pb', 'n')");
+    assertEquals("u1pc", first(resultTable).getField(0));
+    resultTable = tableEnv.sqlQuery("SELECT ST_GeoHashNeighbor('u1pb', 'e')");
+    assertEquals("u300", first(resultTable).getField(0));
+    resultTable = tableEnv.sqlQuery("SELECT ST_GeoHashNeighbor('u1pb', 'NE')");
+    assertEquals("u301", first(resultTable).getField(0));
+  }
+
+  @Test
+  public void testGeoHashNeighborNull() {
+    Table resultTable = tableEnv.sqlQuery("SELECT ST_GeoHashNeighbor(CAST(NULL AS STRING), 'n')");
+    assertNull(first(resultTable).getField(0));
   }
 
   @Test

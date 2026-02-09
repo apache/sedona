@@ -1396,6 +1396,54 @@ Result:
 +-----------------------------+
 ```
 
+## ST_GeoHashNeighbors
+
+Introduction: Returns the 8 neighboring geohash cells of a given geohash string. The result is an array of 8 geohash strings in the order: N, NE, E, SE, S, SW, W, NW.
+
+Format: `ST_GeoHashNeighbors(geohash: String)`
+
+Example:
+
+Query:
+
+```sql
+SELECT ST_GeoHashNeighbors('u1pb')
+```
+
+Result:
+
+```
++-----------------------------+
+|geohash_neighbors            |
++-----------------------------+
+|[u1pc, u301, u300, u2bp, ...] |
++-----------------------------+
+```
+
+## ST_GeoHashNeighbor
+
+Introduction: Returns the neighbor geohash cell in the given direction. Valid directions are: `n`, `ne`, `e`, `se`, `s`, `sw`, `w`, `nw` (case-insensitive).
+
+Format: `ST_GeoHashNeighbor(geohash: String, direction: String)`
+
+Example:
+
+Query:
+
+```sql
+SELECT ST_GeoHashNeighbor('u1pb', 'n')
+```
+
+Result:
+
+```
++-----------------------------+
+|geohash_neighbor             |
++-----------------------------+
+|u1pc                         |
++-----------------------------+
+```
+
 ## ST_GeometricMedian
 
 Introduction: Computes the approximate geometric median of a MultiPoint geometry using the Weiszfeld algorithm. The geometric median provides a centrality measure that is less sensitive to outlier points than the centroid.
