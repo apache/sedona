@@ -485,7 +485,7 @@ rights AS (
           )
       )
 ),
--- compute s2 cells covering the polyons for both tables
+-- compute s2 cells covering the polygons for both tables
 -- S2 discretizes the polygons, hence higher resolution yields more accurate queries, at the cost of increased computation
 -- both tables need to be discretized at the same level - in this case 10
 lefts_s2 AS (
