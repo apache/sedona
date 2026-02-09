@@ -26,8 +26,8 @@ import org.apache.sedona.common.S2Geography.PolygonGeography;
 import org.locationtech.jts.geom.Geometry;
 
 public class GeoHashDecoder {
-  private static final int[] bits = new int[] {16, 8, 4, 2, 1};
-  private static final String base32 = "0123456789bcdefghjkmnpqrstuvwxyz";
+  private static final int[] bits = GeoHashUtils.BITS;
+  private static final String base32 = GeoHashUtils.BASE32;
 
   public static class InvalidGeoHashException extends Exception {
     public InvalidGeoHashException(String message) {

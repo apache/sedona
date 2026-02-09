@@ -5274,4 +5274,117 @@ public class FunctionsTest extends TestBase {
             + straightSkel.getNumGeometries(),
         result.getNumGeometries() <= straightSkel.getNumGeometries());
   }
+
+  @Test
+  public void testGeoHashNeighborsKnownValues() {
+    // Known values from geohash-java: GeoHashTest.testKnownNeighbouringHashes()
+    // Center: "u1pb"
+    assertEquals("u1pc", Functions.geohashNeighbor("u1pb", "n"));
+    assertEquals("u0zz", Functions.geohashNeighbor("u1pb", "s"));
+    assertEquals("u300", Functions.geohashNeighbor("u1pb", "e"));
+    assertEquals("u1p8", Functions.geohashNeighbor("u1pb", "w"));
+
+    // Double east: u1pb -> e -> u300 -> e -> u302
+    assertEquals("u302", Functions.geohashNeighbor(Functions.geohashNeighbor("u1pb", "e"), "e"));
+  }
+
+  @Test
+  public void testGeoHashNeighborsAllEight() {
+    // Known values from geohash-java: GeoHashTest.testKnownAdjacentNeighbours()
+    // Center: "dqcjqc"
+    String[] neighbors = Functions.geohashNeighbors("dqcjqc");
+    assertNotNull(neighbors);
+    assertEquals(8, neighbors.length);
+    // Verify all 8 expected values are present
+    java.util.Set<String> expected =
+        new java.util.HashSet<>(
+            java.util.Arrays.asList(
+                "dqcjqf", "dqcjr4", "dqcjr1", "dqcjr0", "dqcjq9", "dqcjq8", "dqcjqb", "dqcjqd"));
+    java.util.Set<String> actual = new java.util.HashSet<>(java.util.Arrays.asList(neighbors));
+    assertEquals(expected, actual);
+
+    // Center: "u1x0dfg" (7-char precision)
+    neighbors = Functions.geohashNeighbors("u1x0dfg");
+    assertNotNull(neighbors);
+    assertEquals(8, neighbors.length);
+    expected =
+        new java.util.HashSet<>(
+            java.util.Arrays.asList(
+                "u1x0dg4", "u1x0dg5", "u1x0dgh", "u1x0dfu", "u1x0dfs", "u1x0dfe", "u1x0dfd",
+                "u1x0dff"));
+    actual = new java.util.HashSet<>(java.util.Arrays.asList(neighbors));
+    assertEquals(expected, actual);
+
+    // Center: "sp2j" (near prime meridian — neighbors cross into "ezr*" prefix)
+    neighbors = Functions.geohashNeighbors("sp2j");
+    assertNotNull(neighbors);
+    assertEquals(8, neighbors.length);
+    expected =
+        new java.util.HashSet<>(
+            java.util.Arrays.asList(
+                "ezry", "sp2n", "sp2q", "sp2m", "sp2k", "sp2h", "ezru", "ezrv"));
+    actual = new java.util.HashSet<>(java.util.Arrays.asList(neighbors));
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testGeoHashNeighborNearMeridian() {
+    // From geohash-java: GeoHashTest.testNeibouringHashesNearMeridian()
+    // "sp2j" is near the prime meridian; western neighbors cross into "ezr*" prefix
+    assertEquals("ezrv", Functions.geohashNeighbor("sp2j", "w"));
+    assertEquals("ezrt", Functions.geohashNeighbor(Functions.geohashNeighbor("sp2j", "w"), "w"));
+  }
+
+  @Test
+  public void testGeoHashNeighborCircleMovement() {
+    // Moving E -> S -> W -> N should return to the starting cell
+    // From geohash-java: GeoHashTest.testMovingInCircle()
+    String[] testHashes = {"u1pb", "sp2j", "ezrv", "dqcjqc", "u1x0dfg", "pbpbpbpbpbpb"};
+    for (String start : testHashes) {
+      String result = Functions.geohashNeighbor(start, "e");
+      result = Functions.geohashNeighbor(result, "s");
+      result = Functions.geohashNeighbor(result, "w");
+      result = Functions.geohashNeighbor(result, "n");
+      assertEquals("Circle movement failed for " + start, start, result);
+    }
+  }
+
+  @Test
+  public void testGeoHashNeighborCaseInsensitive() {
+    assertEquals(Functions.geohashNeighbor("u1pb", "n"), Functions.geohashNeighbor("u1pb", "N"));
+    assertEquals(Functions.geohashNeighbor("u1pb", "ne"), Functions.geohashNeighbor("u1pb", "NE"));
+    assertEquals(Functions.geohashNeighbor("u1pb", "sw"), Functions.geohashNeighbor("u1pb", "SW"));
+  }
+
+  @Test
+  public void testGeoHashNeighborsNullInput() {
+    assertNull(Functions.geohashNeighbors(null));
+    assertNull(Functions.geohashNeighbor(null, "n"));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testGeoHashNeighborsEmptyInput() {
+    Functions.geohashNeighbors("");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testGeoHashNeighborInvalidDirection() {
+    Functions.geohashNeighbor("u1pb", "north");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testGeoHashNeighborNullDirection() {
+    Functions.geohashNeighbor("u1pb", null);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testGeoHashNeighborsInvalidCharacter() {
+    Functions.geohashNeighbors("u1pb!");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testGeoHashNeighborsTooLongInput() {
+    // 13 chars * 5 bits = 65 > 64 (MAX_BIT_PRECISION)
+    Functions.geohashNeighbors("0123456789abc");
+  }
 }

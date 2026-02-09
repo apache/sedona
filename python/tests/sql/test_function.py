@@ -1868,6 +1868,33 @@ class TestPredicateJoin(TestBase):
         for calculated_geohash, expected_geohash in geohash:
             assert calculated_geohash == expected_geohash
 
+    def test_st_geohash_neighbors(self):
+        result = self.spark.sql("SELECT ST_GeoHashNeighbors('u1pb')").collect()[0][0]
+
+        assert len(result) == 8
+        # Order: N, NE, E, SE, S, SW, W, NW
+        assert result[0] == "u1pc"
+        assert result[1] == "u301"
+        assert result[2] == "u300"
+        assert result[3] == "u2bp"
+        assert result[4] == "u0zz"
+        assert result[5] == "u0zx"
+        assert result[6] == "u1p8"
+        assert result[7] == "u1p9"
+
+    def test_st_geohash_neighbor(self):
+        # Test north neighbor
+        result_n = self.spark.sql("SELECT ST_GeoHashNeighbor('u1pb', 'n')").collect()[
+            0
+        ][0]
+        assert result_n == "u1pc"
+
+        # Test east neighbor
+        result_e = self.spark.sql("SELECT ST_GeoHashNeighbor('u1pb', 'e')").collect()[
+            0
+        ][0]
+        assert result_e == "u300"
+
     def test_geom_from_geohash(self):
         # Given
         geometry_df = self.spark.createDataFrame(

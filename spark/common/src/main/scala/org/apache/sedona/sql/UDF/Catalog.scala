@@ -187,6 +187,8 @@ object Catalog extends AbstractCatalog with Logging {
     function[ST_MaximumInscribedCircle](),
     function[ST_MaxDistance](),
     function[ST_GeoHash](),
+    function[ST_GeoHashNeighbors](),
+    function[ST_GeoHashNeighbor](),
     function[ST_GeomFromGeoHash](null),
     function[ST_PointFromGeoHash](null),
     function[ST_GeogFromGeoHash](null),

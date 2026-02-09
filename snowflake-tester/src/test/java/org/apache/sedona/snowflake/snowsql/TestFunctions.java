@@ -472,6 +472,19 @@ public class TestFunctions extends TestBase {
   }
 
   @Test
+  public void test_ST_GeoHashNeighbors() {
+    registerUDF("ST_GeoHashNeighbors", String.class);
+    verifySqlSingleRes("select ARRAY_SIZE(sedona.ST_GeoHashNeighbors('u1pb'))", 8);
+  }
+
+  @Test
+  public void test_ST_GeoHashNeighbor() {
+    registerUDF("ST_GeoHashNeighbor", String.class, String.class);
+    verifySqlSingleRes("select sedona.ST_GeoHashNeighbor('u1pb', 'n')", "u1pc");
+    verifySqlSingleRes("select sedona.ST_GeoHashNeighbor('u1pb', 'e')", "u300");
+  }
+
+  @Test
   public void test_ST_GeometryN() {
     registerUDF("ST_GeometryN", byte[].class, int.class);
     verifySqlSingleRes(

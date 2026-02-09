@@ -246,6 +246,20 @@ object st_functions {
   def ST_GeoHash(geometry: String, precision: Int): Column =
     wrapExpression[ST_GeoHash](geometry, precision)
 
+  def ST_GeoHashNeighbors(geohash: Column): Column =
+    wrapExpression[ST_GeoHashNeighbors](geohash)
+  def ST_GeoHashNeighbors(geohash: String): Column =
+    wrapExpression[ST_GeoHashNeighbors](geohash)
+
+  def ST_GeoHashNeighbor(geohash: Column, direction: Column): Column =
+    wrapExpression[ST_GeoHashNeighbor](geohash, direction)
+  def ST_GeoHashNeighbor(geohash: String, direction: String): Column =
+    wrapExpression[ST_GeoHashNeighbor](geohash, direction)
+  def ST_GeoHashNeighbor(geohash: Column, direction: String): Column =
+    wrapExpression[ST_GeoHashNeighbor](geohash, direction)
+  def ST_GeoHashNeighbor(geohash: String, direction: Column): Column =
+    wrapExpression[ST_GeoHashNeighbor](geohash, direction)
+
   def ST_GeometryN(multiGeometry: Column, n: Column): Column =
     wrapExpression[ST_GeometryN](multiGeometry, n)
   def ST_GeometryN(multiGeometry: String, n: Int): Column =
