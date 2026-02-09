@@ -226,13 +226,17 @@ object InferredTypes {
       expr.eval(input).asInstanceOf[ArrayData] match {
         case null => null
         case arrayData: ArrayData =>
-          (0 until arrayData.numElements()).map { i =>
-            if (arrayData.isNullAt(i)) null
-            else {
+          val n = arrayData.numElements()
+          val result = new Array[String](n)
+          var i = 0
+          while (i < n) {
+            if (!arrayData.isNullAt(i)) {
               val utf8 = arrayData.getUTF8String(i)
-              if (utf8 == null) null else utf8.toString
+              if (utf8 != null) result(i) = utf8.toString
             }
-          }.toArray
+            i += 1
+          }
+          result
       }
     } else if (t =:= typeOf[Array[Int]]) { expr => input =>
       expr.eval(input).asInstanceOf[ArrayData] match {

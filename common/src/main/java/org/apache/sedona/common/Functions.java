@@ -746,10 +746,29 @@ public class Functions {
     return GeometryGeoHashEncoder.calculate(geometry, precision);
   }
 
+  /**
+   * Returns the 8 neighbors of the given geohash in the order: [N, NE, E, SE, S, SW, W, NW].
+   *
+   * @param geohash a geohash string (1-12 characters, lowercase base32)
+   * @return an array of 8 neighbor geohash strings, or null if the input is null or empty
+   * @throws IllegalArgumentException if the geohash exceeds 12 characters
+   */
   public static String[] geohashNeighbors(String geohash) {
     return GeoHashNeighbor.getNeighbors(geohash);
   }
 
+  /**
+   * Returns a single neighbor of the given geohash in the specified direction.
+   *
+   * <p>Accepted direction values (case-insensitive): {@code "N"}, {@code "NE"}, {@code "E"}, {@code
+   * "SE"}, {@code "S"}, {@code "SW"}, {@code "W"}, {@code "NW"}.
+   *
+   * @param geohash a geohash string (1-12 characters, lowercase base32)
+   * @param direction the compass direction of the desired neighbor
+   * @return the neighbor geohash string, or null if either input is null or empty
+   * @throws IllegalArgumentException if the geohash exceeds 12 characters or the direction is
+   *     invalid
+   */
   public static String geohashNeighbor(String geohash, String direction) {
     return GeoHashNeighbor.getNeighbor(geohash, direction);
   }

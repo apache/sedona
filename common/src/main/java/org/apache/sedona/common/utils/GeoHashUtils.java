@@ -31,20 +31,25 @@ public class GeoHashUtils {
   /** The base32 alphabet used by geohash encoding (Gustavo Niemeyer's specification). */
   public static final String BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
 
-  /** Base32 character array for index-based lookup. */
-  public static final char[] BASE32_CHARS = BASE32.toCharArray();
+  /**
+   * Base32 character array for index-based lookup. Package-private to prevent external mutation.
+   */
+  static final char[] BASE32_CHARS = BASE32.toCharArray();
 
-  /** Bit masks for extracting 5-bit groups: {16, 8, 4, 2, 1}. */
-  public static final int[] BITS = new int[] {16, 8, 4, 2, 1};
+  /**
+   * Bit masks for extracting 5-bit groups: {16, 8, 4, 2, 1}. Package-private to prevent external
+   * mutation.
+   */
+  static final int[] BITS = new int[] {16, 8, 4, 2, 1};
 
   /** Number of bits per base32 character. */
   public static final int BITS_PER_CHAR = 5;
 
   /**
    * Reverse lookup array: maps a character (as int) to its base32 index. Invalid characters map to
-   * -1.
+   * -1. Package-private to prevent external mutation.
    */
-  public static final int[] DECODE_ARRAY = new int['z' + 1];
+  static final int[] DECODE_ARRAY = new int['z' + 1];
 
   static {
     Arrays.fill(DECODE_ARRAY, -1);

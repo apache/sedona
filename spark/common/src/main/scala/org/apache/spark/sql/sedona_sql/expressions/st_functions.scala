@@ -255,6 +255,10 @@ object st_functions {
     wrapExpression[ST_GeoHashNeighbor](geohash, direction)
   def ST_GeoHashNeighbor(geohash: String, direction: String): Column =
     wrapExpression[ST_GeoHashNeighbor](geohash, direction)
+  def ST_GeoHashNeighbor(geohash: Column, direction: String): Column =
+    wrapExpression[ST_GeoHashNeighbor](geohash, direction)
+  def ST_GeoHashNeighbor(geohash: String, direction: Column): Column =
+    wrapExpression[ST_GeoHashNeighbor](geohash, direction)
 
   def ST_GeometryN(multiGeometry: Column, n: Column): Column =
     wrapExpression[ST_GeometryN](multiGeometry, n)

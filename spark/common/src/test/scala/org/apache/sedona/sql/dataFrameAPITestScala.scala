@@ -432,6 +432,22 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(result == "u1pc")
     }
 
+    it("Passed ST_GeoHashNeighbor with Column geohash and String direction") {
+      val df = sparkSession
+        .sql("SELECT 'u1pb' AS geohash, 'n' AS direction")
+        .select(ST_GeoHashNeighbor(col("geohash"), "direction"))
+      val result = df.take(1)(0).getString(0)
+      assert(result == "u1pc")
+    }
+
+    it("Passed ST_GeoHashNeighbor with String geohash and Column direction") {
+      val df = sparkSession
+        .sql("SELECT 'u1pb' AS geohash, 'n' AS direction")
+        .select(ST_GeoHashNeighbor("geohash", col("direction")))
+      val result = df.take(1)(0).getString(0)
+      assert(result == "u1pc")
+    }
+
     it("passed st_geomfromgml") {
       val gmlString =
         "<gml:LineString srsName=\"EPSG:4269\"><gml:coordinates>-71.16028,42.258729 -71.160837,42.259112 -71.161143,42.25932</gml:coordinates></gml:LineString>"
