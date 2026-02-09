@@ -22,6 +22,9 @@
 
 The raster loader of Sedona leverages Spark built-in binary data source and works with several RS constructors to produce Raster type. Each raster is a row in the resulting DataFrame and stored in a `Raster` format.
 
+!!!tip
+    After loading rasters, you can quickly visualize them in a Jupyter notebook using `SedonaUtils.display_image(df)`. It automatically detects raster columns and renders them as images. See [Raster visualizer docs](Raster-visualizer.md#display-raster-in-jupyter) for details.
+
 By default, these functions uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
 
 ## Step 1: Load raster to a binary DataFrame
