@@ -2424,7 +2424,7 @@ class TestPredicateJoin(TestBase):
         actual = actualDf.selectExpr("ST_NRings(geom)").take(1)[0][0]
         assert expected == actual
 
-    def test_trangulatePolygon(self):
+    def test_triangulatePolygon(self):
         baseDf = self.spark.sql(
             "SELECT ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (5 5, 5 8, 8 8, 8 5, 5 5))') as poly"
         )
