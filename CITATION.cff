@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 type: software
 title: "Apache Sedona"
-version: 1.8.1-SNAPSHOT
+version: 1.8.1
 url: "https://sedona.apache.org/"
 repository-code: "https://github.com/apache/sedona"
 license: Apache-2.0
