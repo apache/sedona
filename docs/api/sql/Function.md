@@ -19,13 +19,19 @@
 
 ## ExpandAddress
 
-Introduction: Returns an array of expanded forms of the input address string. This is backed by the [libpostal](https://github.com/openvenues/libpostal) library's address expanding functionality.
+Introduction: Returns an array of expanded forms of the input address string. This is backed by the [libpostal](https://github.com/openvenues/libpostal) library's address expanding functionality. Jpostal requires at least 2 GB of free disk space to store the data files used for address parsing and expanding. By default, the data files are downloaded automatically to a temporary directory (`<java.io.tmpdir>/libpostal/`, e.g. `/tmp/libpostal/` on Linux/macOS) when the function is called for the first time. The version of jpostal installed with this package only supports Linux and macOS. If you are using Windows, you will need to install libjpostal and libpostal manually and ensure that they are available in your `java.library.path`.
 
-!!!Note
-    Jpostal requires at least 2 GB of free disk space to store the data files used for address parsing and expanding. The data files are downloaded automatically when the function is called for the first time.
+The data directory can be configured via `spark.sedona.libpostal.dataDir`. You can point it to a remote filesystem path (HDFS, S3, GCS, ABFS, etc.) such as `hdfs:///data/libpostal/` or `s3a://my-bucket/libpostal/`. When using a remote path, you must distribute the data to all executors before running queries by calling `sc.addFile("hdfs:///data/libpostal/", recursive=True)` (PySpark) or `sc.addFile("hdfs:///data/libpostal/", recursive = true)` (Scala). In this remote-URI mode, the automatic internet download performed by jpostal is disabled, so the remote directory must already contain the libpostal model files. For local filesystem paths, jpostal's download-if-needed behavior remains enabled.
 
-!!!Note
-    The version of jpostal installed with this package only supports Linux and MacOS. If you are using Windows, you will need to install libjpostal and libpostal manually and ensure that they are available in your `java.library.path`.
+To prepare the libpostal data for a remote filesystem, first download it to a local machine by following the [libpostal installation instructions](https://github.com/openvenues/libpostal#installation-maclinux). After installation, the data files will be in the directory you specified during setup (commonly `/tmp/libpostal/`). Then upload them to your remote storage:
+
+```bash
+# Upload to HDFS
+hdfs dfs -put /tmp/libpostal/ hdfs:///data/libpostal/
+
+# Or upload to S3
+aws s3 cp --recursive /tmp/libpostal/ s3://my-bucket/libpostal/
+```
 
 Format: `ExpandAddress (address: String)`
 
@@ -45,13 +51,19 @@ Output:
 
 ## ParseAddress
 
-Introduction: Returns an array of the components (e.g. street, postal code) of the input address string. This is backed by the [libpostal](https://github.com/openvenues/libpostal) library's address parsing functionality.
+Introduction: Returns an array of the components (e.g. street, postal code) of the input address string. This is backed by the [libpostal](https://github.com/openvenues/libpostal) library's address parsing functionality. Jpostal requires at least 2 GB of free disk space to store the data files used for address parsing and expanding. By default, the data files are downloaded automatically to a temporary directory (`<java.io.tmpdir>/libpostal/`, e.g. `/tmp/libpostal/` on Linux/macOS) when the library is initialized. The version of jpostal installed with this package only supports Linux and macOS. If you are using Windows, you will need to install libjpostal and libpostal manually and ensure that they are available in your `java.library.path`.
 
-!!!Note
-    Jpostal requires at least 2 GB of free disk space to store the data files used for address parsing and expanding. The data files are downloaded automatically when the library is initialized.
+The data directory can be configured via `spark.sedona.libpostal.dataDir`. You can point it to a remote filesystem path (HDFS, S3, GCS, ABFS, etc.) such as `hdfs:///data/libpostal/` or `s3a://my-bucket/libpostal/`. When using a remote path, you must distribute the data to all executors before running queries by calling `sc.addFile("hdfs:///data/libpostal/", recursive=True)` (PySpark) or `sc.addFile("hdfs:///data/libpostal/", recursive = true)` (Scala). In this remote-URI mode, the automatic internet download performed by jpostal is disabled, so the remote directory must already contain the libpostal model files. For local filesystem paths, jpostal's download-if-needed behavior remains enabled.
 
-!!!Note
-    The version of jpostal installed with this package only supports Linux and MacOS. If you are using Windows, you will need to install libjpostal and libpostal manually and ensure that they are available in your `java.library.path`.
+To prepare the libpostal data for a remote filesystem, first download it to a local machine by following the [libpostal installation instructions](https://github.com/openvenues/libpostal#installation-maclinux). After installation, the data files will be in the directory you specified during setup (commonly `/tmp/libpostal/`). Then upload them to your remote storage:
+
+```bash
+# Upload to HDFS
+hdfs dfs -put /tmp/libpostal/ hdfs:///data/libpostal/
+
+# Or upload to S3
+aws s3 cp --recursive /tmp/libpostal/ s3://my-bucket/libpostal/
+```
 
 Format: `ParseAddress (address: String)`
 
