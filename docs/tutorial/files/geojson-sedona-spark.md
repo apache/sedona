@@ -19,7 +19,7 @@
 
 # Apache Sedona GeoJSON with Spark
 
-This page shows how to read/write single-line GeoJSON files and multiline GeoJSON files with Apache Sedona and Spark.  
+This page shows how to read/write single-line GeoJSON files and multiline GeoJSON files with Apache Sedona and Spark.
 
 The post concludes with a summary of the benefits and drawbacks of the GeoJSON file format for spatial analyses.
 
@@ -142,7 +142,7 @@ df.show(truncate=False)
 Here’s the result:
 
 ```
-+---------------------------------------------+------+  
++---------------------------------------------+------+
 |geometry                                     |prop0 |
 +---------------------------------------------+------+
 |POINT (102 0.5)                              |value0|

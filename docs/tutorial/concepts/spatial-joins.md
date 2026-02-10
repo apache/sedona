@@ -38,7 +38,7 @@ SELECT
     points.id as point_id,
     polygons.id as polygon_id
 FROM points
-JOIN polygons ON ST_Within(points.geometry, polygons.geometry);  
+JOIN polygons ON ST_Within(points.geometry, polygons.geometry);
 ```
 
 Here’s the result:
@@ -61,7 +61,7 @@ SELECT
     points.id as point_id,
     polygons.id as polygon_id
 FROM points
-LEFT JOIN polygons ON ST_Within(points.geometry, polygons.geometry);  
+LEFT JOIN polygons ON ST_Within(points.geometry, polygons.geometry);
 ```
 
 Here’s the output:
@@ -87,7 +87,7 @@ SELECT
     points.id as point_id,
     polygons.id as polygon_id
 FROM points
-LEFT JOIN polygons ON ST_Contains(polygons.geometry, points.geometry);  
+LEFT JOIN polygons ON ST_Contains(polygons.geometry, points.geometry);
 ```
 
 Here’s the same result:
@@ -115,7 +115,7 @@ SELECT
     lines.id as line_id,
     polygons.id as polygon_id
 FROM lines
-LEFT JOIN polygons ON ST_Crosses(lines.geometry, polygons.geometry);  
+LEFT JOIN polygons ON ST_Crosses(lines.geometry, polygons.geometry);
 ```
 
 Here is the result:
@@ -169,7 +169,7 @@ SELECT
     lines.id as line_id,
     polygons.id as polygon_id
 FROM lines
-LEFT JOIN polygons ON ST_Touches(lines.geometry, polygons.geometry);  
+LEFT JOIN polygons ON ST_Touches(lines.geometry, polygons.geometry);
 """).show()
 ```
 
@@ -401,13 +401,13 @@ See this section on [additional query enhancements here](https://sedona.apache.o
 
 ## Spatial broadcast joins
 
-Sedona can run on a single node or many nodes in a cluster.  
+Sedona can run on a single node or many nodes in a cluster.
 
 As you can imagine, joining two datasets can be slower when your data is on different machines in a cluster.  That requires data shuffling, which can be slow.
 
 If one of the tables is small, you can broadcast it, which copies it to all the machines in the cluster.  Broadcasting can make the join much faster.
 
-You should generally only broadcast DataFrames that are relatively small, see [here for more information](https://sedona.apache.org/latest/api/sql/Optimizer/?h=broadcast#broadcast-index-join).  
+You should generally only broadcast DataFrames that are relatively small, see [here for more information](https://sedona.apache.org/latest/api/sql/Optimizer/?h=broadcast#broadcast-index-join).
 
 Sedona will automatically broadcast tables smaller than the threshold; [see here for more details](https://sedona.apache.org/latest/api/sql/Optimizer/#automatic-broadcast-index-join).
 
