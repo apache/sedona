@@ -46,8 +46,7 @@ class RasterUDTSuite extends TestBaseScala with BeforeAndAfter {
       // Delta and Parquet serialize the schema to JSON, then deserialize it.
       // Without a jsonValue override, the class name includes a '$' suffix
       // from the Scala case object, causing ClassNotFoundException on read.
-      val rasterDf = sparkSession.sql(
-        "SELECT RS_MakeEmptyRaster(1, 10, 10, 0, 0, 1) as raster")
+      val rasterDf = sparkSession.sql("SELECT RS_MakeEmptyRaster(1, 10, 10, 0, 0, 1) as raster")
       assert(
         DataType
           .fromJson(rasterDf.schema.json)
@@ -58,8 +57,7 @@ class RasterUDTSuite extends TestBaseScala with BeforeAndAfter {
     it("Should write and read raster DataFrame in Parquet format") {
       // Parquet also serializes schema as JSON, triggering the same bug as Delta.
       tempFolder.create()
-      val rasterDf = sparkSession.sql(
-        "SELECT RS_MakeEmptyRaster(1, 10, 10, 0, 0, 1) as raster")
+      val rasterDf = sparkSession.sql("SELECT RS_MakeEmptyRaster(1, 10, 10, 0, 0, 1) as raster")
 
       rasterDf.write.parquet(tempFolder.getRoot.getPath + "/raster_parquet")
 
@@ -76,8 +74,7 @@ class RasterUDTSuite extends TestBaseScala with BeforeAndAfter {
       // whereas InferredExpression-based functions use the case object singleton
       // whose getClass.getName includes '$'.
       tempFolder.create()
-      val rasterDf = sparkSession.sql(
-        """SELECT RS_Union_Aggr(raster) as raster FROM (
+      val rasterDf = sparkSession.sql("""SELECT RS_Union_Aggr(raster) as raster FROM (
           |  SELECT RS_MakeEmptyRaster(1, 10, 10, 0, 0, 1) as raster
           |)""".stripMargin)
 
