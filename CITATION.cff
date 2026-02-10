@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "Apache Sedona"
+version: 1.8.1
+url: "https://sedona.apache.org/"
+repository-code: "https://github.com/apache/sedona"
+license: Apache-2.0
+authors:
+  - name: "The Apache Software Foundation"
+abstract: "Apache Sedona is a cluster computing system for processing large-scale spatial data. It extends modern cluster computing systems such as Apache Spark and Apache Flink to support spatial data types, spatial indexes, and spatial data processing operations, enabling developers to easily analyze spatial data at scale using Spatial SQL, Spatial Python, or Spatial R."
+keywords:
+  - spatial-computing
+  - geospatial
+  - big-data
+  - apache-spark
+  - apache-flink
+  - gis
+  - spatial-analytics
