@@ -251,6 +251,7 @@ repos:
             \.prettierignore|
             \.prettierrc|
             \.shellcheckrc|
+            \.github/linters/\.clang-format|
             \.github/CODEOWNERS|
             .*/\.gitignore|
             tools/maven/scalafmt\.conf
