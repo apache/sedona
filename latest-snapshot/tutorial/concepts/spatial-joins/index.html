@@ -6021,7 +6021,7 @@ You're not viewing the latest stable version.
 <span class="w">    </span><span class="n">points</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">point_id</span><span class="p">,</span>
 <span class="w">    </span><span class="n">polygons</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">polygon_id</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">points</span>
-<span class="k">JOIN</span><span class="w"> </span><span class="n">polygons</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">ST_Within</span><span class="p">(</span><span class="n">points</span><span class="p">.</span><span class="n">geometry</span><span class="p">,</span><span class="w"> </span><span class="n">polygons</span><span class="p">.</span><span class="n">geometry</span><span class="p">);</span><span class="w">  </span>
+<span class="k">JOIN</span><span class="w"> </span><span class="n">polygons</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">ST_Within</span><span class="p">(</span><span class="n">points</span><span class="p">.</span><span class="n">geometry</span><span class="p">,</span><span class="w"> </span><span class="n">polygons</span><span class="p">.</span><span class="n">geometry</span><span class="p">);</span>
 </code></pre></div>
 <p>Here’s the result:</p>
 <div class="highlight"><pre><span></span><code>+--------+----------+
@@ -6037,7 +6037,7 @@ You're not viewing the latest stable version.
 <span class="w">    </span><span class="n">points</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">point_id</span><span class="p">,</span>
 <span class="w">    </span><span class="n">polygons</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">polygon_id</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">points</span>
-<span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">polygons</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">ST_Within</span><span class="p">(</span><span class="n">points</span><span class="p">.</span><span class="n">geometry</span><span class="p">,</span><span class="w"> </span><span class="n">polygons</span><span class="p">.</span><span class="n">geometry</span><span class="p">);</span><span class="w">  </span>
+<span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">polygons</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">ST_Within</span><span class="p">(</span><span class="n">points</span><span class="p">.</span><span class="n">geometry</span><span class="p">,</span><span class="w"> </span><span class="n">polygons</span><span class="p">.</span><span class="n">geometry</span><span class="p">);</span>
 </code></pre></div>
 <p>Here’s the output:</p>
 <div class="highlight"><pre><span></span><code>+--------+----------+
@@ -6055,7 +6055,7 @@ You're not viewing the latest stable version.
 <span class="w">    </span><span class="n">points</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">point_id</span><span class="p">,</span>
 <span class="w">    </span><span class="n">polygons</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">polygon_id</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">points</span>
-<span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">polygons</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">ST_Contains</span><span class="p">(</span><span class="n">polygons</span><span class="p">.</span><span class="n">geometry</span><span class="p">,</span><span class="w"> </span><span class="n">points</span><span class="p">.</span><span class="n">geometry</span><span class="p">);</span><span class="w">  </span>
+<span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">polygons</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">ST_Contains</span><span class="p">(</span><span class="n">polygons</span><span class="p">.</span><span class="n">geometry</span><span class="p">,</span><span class="w"> </span><span class="n">points</span><span class="p">.</span><span class="n">geometry</span><span class="p">);</span>
 </code></pre></div>
 <p>Here’s the same result:</p>
 <div class="highlight"><pre><span></span><code>+--------+----------+
@@ -6074,7 +6074,7 @@ You're not viewing the latest stable version.
 <span class="w">    </span><span class="n">lines</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">line_id</span><span class="p">,</span>
 <span class="w">    </span><span class="n">polygons</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">polygon_id</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">lines</span>
-<span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">polygons</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">ST_Crosses</span><span class="p">(</span><span class="n">lines</span><span class="p">.</span><span class="n">geometry</span><span class="p">,</span><span class="w"> </span><span class="n">polygons</span><span class="p">.</span><span class="n">geometry</span><span class="p">);</span><span class="w">  </span>
+<span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">polygons</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">ST_Crosses</span><span class="p">(</span><span class="n">lines</span><span class="p">.</span><span class="n">geometry</span><span class="p">,</span><span class="w"> </span><span class="n">polygons</span><span class="p">.</span><span class="n">geometry</span><span class="p">);</span>
 </code></pre></div>
 <p>Here is the result:</p>
 <div class="highlight"><pre><span></span><code>+-------+----------+
@@ -6111,7 +6111,7 @@ You're not viewing the latest stable version.
 <span class="s2">    lines.id as line_id,</span>
 <span class="s2">    polygons.id as polygon_id</span>
 <span class="s2">FROM lines</span>
-<span class="s2">LEFT JOIN polygons ON ST_Touches(lines.geometry, polygons.geometry);  </span>
+<span class="s2">LEFT JOIN polygons ON ST_Touches(lines.geometry, polygons.geometry);</span>
 <span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>Here’s the result of the join:</p>
@@ -6271,10 +6271,10 @@ ON ST_Intersects(restaurants.geometry, cities.geometry)
 <p>For example, suppose you’re performing a spatial join with two wide tables stored in GeoJSON files and don’t need all the output columns.  GeoJSON files are row-oriented and don’t support column pruning.  You can switch the data from GeoJSON to a column-oriented file format like GeoParquet to take advantage of column pruning, a vital performance enhancement.</p>
 <p>See this section on <a href="https://sedona.apache.org/latest/api/sql/Optimizer/">additional query enhancements here</a> to learn more.</p>
 <h2 id="spatial-broadcast-joins">Spatial broadcast joins<a class="headerlink" href="#spatial-broadcast-joins" title="Permanent link">&para;</a></h2>
-<p>Sedona can run on a single node or many nodes in a cluster.  </p>
+<p>Sedona can run on a single node or many nodes in a cluster.</p>
 <p>As you can imagine, joining two datasets can be slower when your data is on different machines in a cluster.  That requires data shuffling, which can be slow.</p>
 <p>If one of the tables is small, you can broadcast it, which copies it to all the machines in the cluster.  Broadcasting can make the join much faster.</p>
-<p>You should generally only broadcast DataFrames that are relatively small, see <a href="https://sedona.apache.org/latest/api/sql/Optimizer/?h=broadcast#broadcast-index-join">here for more information</a>.  </p>
+<p>You should generally only broadcast DataFrames that are relatively small, see <a href="https://sedona.apache.org/latest/api/sql/Optimizer/?h=broadcast#broadcast-index-join">here for more information</a>.</p>
 <p>Sedona will automatically broadcast tables smaller than the threshold; <a href="https://sedona.apache.org/latest/api/sql/Optimizer/#automatic-broadcast-index-join">see here for more details</a>.</p>
 <h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">&para;</a></h2>
 <p>Apache Sedona supports a variety of spatial joins.</p>
@@ -6299,7 +6299,7 @@ ON ST_Intersects(restaurants.geometry, cities.geometry)
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 8, 2026 06:00:14 UTC">February 8, 2026 06:00:14</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 11, 2026 06:33:45 UTC">February 11, 2026 06:33:45</span>
   </span>
 
     
