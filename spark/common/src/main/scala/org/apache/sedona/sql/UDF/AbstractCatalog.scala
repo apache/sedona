@@ -83,15 +83,15 @@ abstract class AbstractCatalog {
   }
 
   def registerAll(sparkSession: SparkSession): Unit = {
+    val registry = sparkSession.sessionState.functionRegistry
     expressions.foreach { case (functionIdentifier, expressionInfo, functionBuilder) =>
-      sparkSession.sessionState.functionRegistry.registerFunction(
-        functionIdentifier,
-        expressionInfo,
-        functionBuilder)
-      FunctionRegistry.builtin.registerFunction(
-        functionIdentifier,
-        expressionInfo,
-        functionBuilder)
+      if (!registry.functionExists(functionIdentifier)) {
+        registry.registerFunction(functionIdentifier, expressionInfo, functionBuilder)
+        FunctionRegistry.builtin.registerFunction(
+          functionIdentifier,
+          expressionInfo,
+          functionBuilder)
+      }
     }
     aggregateExpressions.foreach { f =>
       registerAggregateFunction(sparkSession, f.getClass.getSimpleName, f)
@@ -106,13 +106,16 @@ abstract class AbstractCatalog {
       sparkSession: SparkSession,
       functionName: String,
       aggregator: Aggregator[Geometry, _, _]): Unit = {
-    sparkSession.udf.register(functionName, functions.udaf(aggregator))
-    FunctionRegistry.builtin.registerFunction(
-      FunctionIdentifier(functionName),
-      new ExpressionInfo(aggregator.getClass.getCanonicalName, null, functionName),
-      (_: Seq[Expression]) =>
-        throw new UnsupportedOperationException(
-          s"Aggregate function $functionName cannot be used as a regular function"))
+    val functionIdentifier = FunctionIdentifier(functionName)
+    if (!sparkSession.sessionState.functionRegistry.functionExists(functionIdentifier)) {
+      sparkSession.udf.register(functionName, functions.udaf(aggregator))
+      FunctionRegistry.builtin.registerFunction(
+        functionIdentifier,
+        new ExpressionInfo(aggregator.getClass.getCanonicalName, null, functionName),
+        (_: Seq[Expression]) =>
+          throw new UnsupportedOperationException(
+            s"Aggregate function $functionName cannot be used as a regular function"))
+    }
   }
 
   def dropAll(sparkSession: SparkSession): Unit = {
