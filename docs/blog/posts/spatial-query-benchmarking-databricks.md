@@ -40,7 +40,7 @@ We found that only one of the simpler SpatialBench queries (\#2) tested on Datab
 
 You can see these results in the graph below, which represents a price-performance measurement normalized to the Sedona configuration (1x) on Databricks Jobs clusters and compares this to Serverless SQL using SpatialBench at a scale factor of 1000. We’ll dive into how these results were produced and share other results as well. Some queries are missing data points because those queries didn’t finish or errored out given the configuration and guardrails we used.
 
-![SpatialBench @ SF1000](../../image/blog/query-benchmarking-dbx/SpatialBench%20@%20SF1000%20.png)
+![SpatialBench @ SF1000](../../image/blog/query-benchmarking-dbx/SpatialBench@SF1000.png)
 
 ## What is SpatialBench?
 
@@ -104,9 +104,9 @@ Neither option finished all queries within the 10-hour timeout, and some queries
 
 The following shows query price-performance normalized against the results of Sedona (1x baseline) at both SF100 and SF1000. Missing data points match the capability matrices above, where only price-performance is shown for queries that finished. Lower is better.
 
-![SpatialBench @ SF100](../../image/blog/query-benchmarking-dbx/SpatialBench%20@%20SF100%20.png)
+![SpatialBench @ SF100](../../image/blog/query-benchmarking-dbx/SpatialBench@SF100.png)
 
-![SpatialBench @ SF1000](../../image/blog/query-benchmarking-dbx/SpatialBench%20@%20SF1000%20.png)
+![SpatialBench @ SF1000](../../image/blog/query-benchmarking-dbx/SpatialBench@SF1000.png)
 
 ### SpatialBench @ SF100: Actual Cost per Query
 
