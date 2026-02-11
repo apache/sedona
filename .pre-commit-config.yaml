@@ -497,3 +497,11 @@ repos:
         name: run blacken-docs
         description: run `black` on python code blocks in documentation files
         additional_dependencies: [black==26.1.0]
+  - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
+    rev: 3.6.0
+    hooks:
+      - id: editorconfig-checker
+        name: run editorconfig-checker
+        description: a tool to verify that your files are in harmony with your .editorconfig
+        exclude: ^docs/image/.*$|^R/man/.*\.Rd$|^spark/common/src/test/resources/.*$
+        alias: ec
