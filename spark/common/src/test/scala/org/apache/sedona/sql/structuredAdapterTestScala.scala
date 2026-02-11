@@ -126,5 +126,22 @@ class structuredAdapterTestScala extends TestBaseScala with GivenWhenThen {
       val dfPartitions: Long = partitionedDF.select(spark_partition_id).distinct().count()
       assert(dfPartitions == numSpatialPartitions)
     }
+
+    it("Should repartition by spatial key in one step") {
+      val seq = generateTestData()
+      val dfOrigin = sparkSession.createDataFrame(seq)
+      val partitionedDf =
+        StructuredAdapter.repartitionBySpatialKey(dfOrigin, "_3", GridType.KDBTREE, 4)
+      assertEquals(seq.size, partitionedDf.count())
+      assert(partitionedDf.rdd.getNumPartitions >= 4)
+    }
+
+    it("Should repartition by spatial key with auto-detected geometry column") {
+      val seq = generateTestData()
+      val dfOrigin = sparkSession.createDataFrame(seq)
+      val partitionedDf =
+        StructuredAdapter.repartitionBySpatialKey(dfOrigin, GridType.KDBTREE)
+      assertEquals(seq.size, partitionedDf.count())
+    }
   }
 }

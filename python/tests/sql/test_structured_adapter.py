@@ -210,6 +210,25 @@ class TestStructuredAdapter(TestBase):
         result_count = query_result.count()
         assert result_count > 0, f"Expected at least one result, got {result_count}"
 
+    def test_repartition_by_spatial_key(self):
+        xys = [(i, i // 100, i % 100) for i in range(1_000)]
+        df = self.spark.createDataFrame(xys, ["id", "x", "y"]).selectExpr(
+            "id", "ST_Point(x, y) AS geom"
+        )
+        partitioned_df = StructuredAdapter.repartitionBySpatialKey(
+            df, GridType.KDBTREE, "geom", 4
+        )
+        assert partitioned_df.count() == 1_000
+        assert partitioned_df.rdd.getNumPartitions() >= 4
+
+    def test_repartition_by_spatial_key_auto_detect(self):
+        xys = [(i, i // 100, i % 100) for i in range(1_000)]
+        df = self.spark.createDataFrame(xys, ["id", "x", "y"]).selectExpr(
+            "id", "ST_Point(x, y) AS geom"
+        )
+        partitioned_df = StructuredAdapter.repartitionBySpatialKey(df, GridType.KDBTREE)
+        assert partitioned_df.count() == 1_000
+
     def test_toDf_preserves_columns_with_proper_types(self):
         # Create a spatial DataFrame with various columns and types
         data = [

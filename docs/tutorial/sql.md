@@ -1383,36 +1383,60 @@ are introduced on purpose to ensure correctness when performing a spatial join;
 however, when using Sedona to prepare a dataset for distribution this is not typically
 desired.
 
-You can use `StructuredAdapter` and the `spatialRDD.spatialPartitioningWithoutDuplicates` function to obtain a Sedona DataFrame that is spatially partitioned without duplicates. This is especially useful for generating balanced GeoParquet files while preserving spatial proximity within files, which is crucial for optimizing filter pushdown performance in GeoParquet files.
+You can use `StructuredAdapter.repartitionBySpatialKey` to spatially partition a DataFrame in one step, without duplicates. This is especially useful for generating balanced GeoParquet files while preserving spatial proximity within files, which is crucial for optimizing filter pushdown performance in GeoParquet files.
 
 === "Scala"
 
 	```scala
-	spatialRDD.spatialPartitioningWithoutDuplicates(GridType.KDBTREE)
-	// Specify the desired number of partitions as 10, though the actual number may vary
-	// spatialRDD.spatialPartitioningWithoutDuplicates(GridType.KDBTREE, 10)
-	var spatialDf = StructuredAdapter.toSpatialPartitionedDf(spatialRDD, sedona)
+	import org.apache.spark.sql.sedona_sql.adapters.StructuredAdapter
+	import org.apache.sedona.core.enums.GridType
+
+	// Repartition using KDB-Tree with auto-detected geometry column
+	var spatialDf = StructuredAdapter.repartitionBySpatialKey(df, GridType.KDBTREE)
+
+	// Specify a geometry column and the desired number of partitions
+	var spatialDf = StructuredAdapter.repartitionBySpatialKey(df, "geometry", GridType.KDBTREE, 10)
+
+	// Write to GeoParquet
+	spatialDf.write.format("geoparquet").save("/path/to/output")
 	```
 
 === "Java"
 
 	```java
-	spatialRDD.spatialPartitioningWithoutDuplicates(GridType.KDBTREE)
-	// Specify the desired number of partitions as 10, though the actual number may vary
-	// spatialRDD.spatialPartitioningWithoutDuplicates(GridType.KDBTREE, 10)
-	Dataset<Row> spatialDf = StructuredAdapter.toSpatialPartitionedDf(spatialRDD, sedona)
+	import org.apache.spark.sql.sedona_sql.adapters.StructuredAdapter;
+	import org.apache.sedona.core.enums.GridType;
+
+	// Repartition using KDB-Tree with auto-detected geometry column
+	Dataset<Row> spatialDf = StructuredAdapter.repartitionBySpatialKey(df, GridType.KDBTREE);
+
+	// Specify a geometry column and the desired number of partitions
+	Dataset<Row> spatialDf = StructuredAdapter.repartitionBySpatialKey(df, "geometry", GridType.KDBTREE, 10);
+
+	// Write to GeoParquet
+	spatialDf.write().format("geoparquet").save("/path/to/output");
 	```
 
 === "Python"
 
 	```python
 	from sedona.spark import StructuredAdapter
+	from sedona.spark.core.enums.grid_type import GridType
 
-	spatialRDD.spatialPartitioningWithoutDuplicates(GridType.KDBTREE)
-	# Specify the desired number of partitions as 10, though the actual number may vary
-	# spatialRDD.spatialPartitioningWithoutDuplicates(GridType.KDBTREE, 10)
-	spatialDf = StructuredAdapter.toSpatialPartitionedDf(spatialRDD, sedona)
+	# Repartition using KDB-Tree with auto-detected geometry column
+	spatial_df = StructuredAdapter.repartitionBySpatialKey(df, GridType.KDBTREE)
+
+	# Specify a geometry column and the desired number of partitions
+	spatial_df = StructuredAdapter.repartitionBySpatialKey(
+	    df, GridType.KDBTREE, geometryFieldName="geometry", numPartitions=10
+	)
+
+	# Write to GeoParquet
+	spatial_df.write.format("geoparquet").save("/path/to/output")
 	```
+
+!!!note
+	You can also achieve spatial partitioning manually using the lower-level API. See the `spatialPartitioningWithoutDuplicates` method on `SpatialRDD` and `StructuredAdapter.toSpatialPartitionedDf` for the step-by-step approach.
 
 ### SpatialPairRDD to DataFrame
 

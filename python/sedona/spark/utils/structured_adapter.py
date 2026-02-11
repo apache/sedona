@@ -18,6 +18,7 @@
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import StructType
 
+from sedona.spark.core.enums.grid_type import GridType
 from sedona.spark.core.SpatialRDD.spatial_rdd import SpatialRDD
 from sedona.spark.core.spatialOperator.rdd import SedonaPairRDD
 
@@ -124,3 +125,50 @@ class StructuredAdapter:
         )
         df = StructuredAdapter._create_dataframe(jdf, sparkSession)
         return df
+
+    @classmethod
+    def repartitionBySpatialKey(
+        cls,
+        dataFrame: DataFrame,
+        gridType: GridType = GridType.KDBTREE,
+        geometryFieldName: str = None,
+        numPartitions: int = 0,
+    ) -> DataFrame:
+        """
+        Repartition a DataFrame using a spatial partitioning scheme (e.g., KDB-Tree).
+        This is a convenience method that wraps the multi-step process of converting a
+        DataFrame to a SpatialRDD, applying spatial partitioning without duplicates,
+        and converting back to a DataFrame.
+
+        Example usage::
+
+            partitioned_df = StructuredAdapter.repartitionBySpatialKey(df, GridType.KDBTREE, "geometry", 16)
+            partitioned_df.write.format("geoparquet").save("/path/to/output")
+
+        Args:
+            dataFrame: The input DataFrame containing a geometry column.
+            gridType: The spatial partitioning grid type (default: GridType.KDBTREE).
+            geometryFieldName: The name of the geometry column. If None, auto-detects.
+            numPartitions: The target number of partitions. If 0, uses the current number.
+
+        Returns:
+            A spatially partitioned DataFrame.
+        """
+        sc = dataFrame._sc
+        jvm = sc._jvm
+        sparkSession = dataFrame.sparkSession
+
+        jgrid_type = jvm.org.apache.sedona.core.enums.GridType.getGridType(
+            gridType.value
+        )
+
+        if geometryFieldName is not None:
+            jdf = jvm.StructuredAdapter.repartitionBySpatialKey(
+                dataFrame._jdf, geometryFieldName, jgrid_type, numPartitions
+            )
+        else:
+            jdf = jvm.StructuredAdapter.repartitionBySpatialKey(
+                dataFrame._jdf, jgrid_type, numPartitions
+            )
+
+        return StructuredAdapter._create_dataframe(jdf, sparkSession)

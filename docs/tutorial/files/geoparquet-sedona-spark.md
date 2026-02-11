@@ -244,6 +244,67 @@ ORDER BY geohash
 
 Let's look closer at how Sedona uses the GeoParquet bbox metadata to optimize queries.
 
+## Spatial Partitioning for GeoParquet
+
+When building a GeoParquet data lake, spatial partitioning can dramatically improve query performance by co-locating spatially nearby records into the same partitions. This makes GeoParquet bbox-based file skipping much more effective because each file's bounding box covers a compact spatial region instead of spanning the entire dataset.
+
+Sedona provides a one-step API — `StructuredAdapter.repartitionBySpatialKey` — that handles spatial partitioning directly on DataFrames. Under the hood it converts to a SpatialRDD, applies a partitioning scheme such as KDB-Tree, and converts back to a DataFrame — all in a single call.
+
+=== "Python"
+
+    ```python
+    from sedona.core.enums import GridType
+    from sedona.spark.adapters.structured_adapter import StructuredAdapter
+
+    df = sedona.read.format("geoparquet").load("/path/to/input")
+
+    # Repartition with explicit geometry column and partition count
+    partitioned_df = StructuredAdapter.repartitionBySpatialKey(
+        df, GridType.KDBTREE, "geometry", 16
+    )
+
+    # Or auto-detect geometry column
+    partitioned_df = StructuredAdapter.repartitionBySpatialKey(df, GridType.KDBTREE)
+
+    partitioned_df.write.format("geoparquet").save("/path/to/output")
+    ```
+
+=== "Scala"
+
+    ```scala
+    import org.apache.sedona.core.enums.GridType
+    import org.apache.spark.sql.sedona_sql.adapters.StructuredAdapter
+
+    val df = sedona.read.format("geoparquet").load("/path/to/input")
+
+    // Repartition with explicit geometry column and partition count
+    val partitionedDf = StructuredAdapter.repartitionBySpatialKey(df, "geometry", GridType.KDBTREE, 16)
+
+    // Or auto-detect geometry column
+    val partitionedDf = StructuredAdapter.repartitionBySpatialKey(df, GridType.KDBTREE)
+
+    partitionedDf.write.format("geoparquet").save("/path/to/output")
+    ```
+
+=== "Java"
+
+    ```java
+    import org.apache.sedona.core.enums.GridType;
+    import org.apache.spark.sql.sedona_sql.adapters.StructuredAdapter;
+
+    Dataset<Row> df = sedona.read().format("geoparquet").load("/path/to/input");
+
+    // Repartition with explicit geometry column and partition count
+    Dataset<Row> partitionedDf = StructuredAdapter.repartitionBySpatialKey(df, "geometry", GridType.KDBTREE, 16);
+
+    // Or auto-detect geometry column
+    Dataset<Row> partitionedDf = StructuredAdapter.repartitionBySpatialKey(df, GridType.KDBTREE);
+
+    partitionedDf.write().format("geoparquet").save("/path/to/output");
+    ```
+
+This approach is more effective than sorting by GeoHash because it uses a KDB-Tree to create balanced spatial partitions that respect the actual data distribution. Each output file will cover a compact spatial region, maximizing the effectiveness of GeoParquet's bbox-based file skipping.
+
 ## How Sedona uses GeoParquet bounding box (bbox) metadata with Spark
 
 The bounding box metadata specifies the area covered by geometric shapes in a given file.  Suppose you query points in a region not covered by the bounding box for a given file.  The engine can skip that entire file when executing the query because it’s known that it does not cover any relevant data.

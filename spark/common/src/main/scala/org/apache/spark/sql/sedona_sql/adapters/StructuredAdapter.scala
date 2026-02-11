@@ -18,6 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.adapters
 
+import org.apache.sedona.core.enums.GridType
 import org.apache.sedona.core.spatialPartitioning.GenericUniquePartitioner
 import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.sedona.sql.utils.GeometrySerializer
@@ -244,5 +245,81 @@ object StructuredAdapter {
       originalLeftSpatialRdd.schema,
       originalRightSpatialRdd.schema,
       sparkSession)
+  }
+
+  /**
+   * Repartition a DataFrame using a spatial partitioning scheme (e.g., KDB-Tree). This is a
+   * convenience method that wraps the multi-step process of converting a DataFrame to a
+   * SpatialRDD, applying spatial partitioning without duplicates, and converting back to a
+   * DataFrame.
+   *
+   * Example usage:
+   * {{{
+   * val partitionedDf = StructuredAdapter.repartitionBySpatialKey(df, "geometry", GridType.KDBTREE, 16)
+   * partitionedDf.write.format("geoparquet").save("/path/to/output")
+   * }}}
+   *
+   * @param dataFrame
+   *   The input DataFrame containing a geometry column.
+   * @param geometryFieldName
+   *   The name of the geometry column.
+   * @param gridType
+   *   The spatial partitioning grid type (e.g., GridType.KDBTREE).
+   * @param numPartitions
+   *   The target number of partitions. If 0, defaults to the current number of partitions.
+   * @return
+   *   A spatially partitioned DataFrame.
+   */
+  def repartitionBySpatialKey(
+      dataFrame: DataFrame,
+      geometryFieldName: String,
+      gridType: GridType,
+      numPartitions: Int = 0): DataFrame = {
+    val spatialRDD = toSpatialRdd(dataFrame, geometryFieldName)
+    spatialRDD.analyze()
+    val partCount =
+      if (numPartitions > 0) numPartitions
+      else dataFrame.rdd.getNumPartitions
+    spatialRDD.spatialPartitioningWithoutDuplicates(gridType, partCount)
+    toSpatialPartitionedDf(spatialRDD, dataFrame.sparkSession)
+  }
+
+  /**
+   * Repartition a DataFrame using a spatial partitioning scheme (e.g., KDB-Tree). Auto-detects
+   * the geometry column.
+   *
+   * @param dataFrame
+   *   The input DataFrame containing a geometry column.
+   * @param gridType
+   *   The spatial partitioning grid type (e.g., GridType.KDBTREE).
+   * @param numPartitions
+   *   The target number of partitions. If 0, defaults to the current number of partitions.
+   * @return
+   *   A spatially partitioned DataFrame.
+   */
+  def repartitionBySpatialKey(
+      dataFrame: DataFrame,
+      gridType: GridType,
+      numPartitions: Int): DataFrame = {
+    repartitionBySpatialKey(
+      dataFrame,
+      DfUtils.getGeometryColumnName(dataFrame.schema),
+      gridType,
+      numPartitions)
+  }
+
+  /**
+   * Repartition a DataFrame using a spatial partitioning scheme (e.g., KDB-Tree). Auto-detects
+   * the geometry column and uses the current number of partitions.
+   *
+   * @param dataFrame
+   *   The input DataFrame containing a geometry column.
+   * @param gridType
+   *   The spatial partitioning grid type (e.g., GridType.KDBTREE).
+   * @return
+   *   A spatially partitioned DataFrame.
+   */
+  def repartitionBySpatialKey(dataFrame: DataFrame, gridType: GridType): DataFrame = {
+    repartitionBySpatialKey(dataFrame, gridType, 0)
   }
 }
