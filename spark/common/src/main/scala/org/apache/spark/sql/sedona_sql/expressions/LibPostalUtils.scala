@@ -23,10 +23,17 @@ import com.mapzen.jpostal.{AddressExpander, AddressParser, Config}
 object LibPostalUtils {
 
   private def getConfig(dataDir: String, useSenzing: Boolean): Config = {
+    // Resolve the data directory: if it points to a remote filesystem (HDFS, S3, etc.),
+    // copy the data locally first since jpostal requires local filesystem access.
+    val resolvedDir = LibPostalDataLoader.resolveDataDir(dataDir)
+    val isRemote = LibPostalDataLoader.isRemotePath(dataDir)
+
     Config
       .builder()
-      .dataDir(dataDir)
-      .downloadDataIfNeeded(true)
+      .dataDir(resolvedDir)
+      // When data was fetched from a remote store, it is already fully populated;
+      // disable jpostal's built-in internet download to avoid network access on the cluster.
+      .downloadDataIfNeeded(!isRemote)
       .senzing(useSenzing)
       .build()
   }
