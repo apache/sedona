@@ -117,7 +117,7 @@ SEDONA_LISTED_SQL_FUNCTIONS = [
         .with_arguments(
             ["ST_GeomFromText('POINT(52.5 21.5)')", "'epsg:4326'", "'epsg:2180'"]
         )
-        .with_expected_result(-2501415.806893427)
+        .with_expected_result(-2501362.200396569)
         # .with_expected_result("POINT (-2501415.806893427 4119952.52325666)")
         .with_transform("ST_Y")
     ),

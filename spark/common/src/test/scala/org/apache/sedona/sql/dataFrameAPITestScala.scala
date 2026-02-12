@@ -734,7 +734,7 @@ class dataFrameAPITestScala extends TestBaseScala {
         .select(ST_Transform($"geom", lit("EPSG:4326"), lit("EPSG:32649")).as("geom"))
         .selectExpr("ST_ReducePrecision(geom, 2)")
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
-      val expectedResult = "POINT (-33741810.95 1823994.03)"
+      val expectedResult = "POINT (-10625664.38 19664344.48)"
       assertEquals(expectedResult, actualResult)
 
       pointDf = sparkSession
@@ -744,7 +744,7 @@ class dataFrameAPITestScala extends TestBaseScala {
         .select(ST_Transform($"geom", lit("EPSG:32649")).as("geom"))
         .selectExpr("ST_ReducePrecision(geom, 2)")
       val actual = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
-      val expected = "POINT (1560393.11 10364606.84)"
+      val expected = "POINT (1559798.3 10364755.11)"
       assertEquals(expected, actual)
     }
 

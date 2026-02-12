@@ -23,6 +23,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.FunctionsGeoTools;
+import org.apache.sedona.common.FunctionsProj4;
 import org.apache.sedona.common.Predicates;
 import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.common.sphere.Haversine;
@@ -1145,14 +1146,14 @@ public class UDFs {
   @UDFAnnotations.ParamMeta(argNames = {"geometry", "sourceCRS", "targetCRS"})
   public static byte[] ST_Transform(byte[] geometry, String sourceCRS, String targetCRS) {
     return GeometrySerde.serialize(
-        GeoToolsWrapper.transform(GeometrySerde.deserialize(geometry), sourceCRS, targetCRS));
+        FunctionsProj4.transform(GeometrySerde.deserialize(geometry), sourceCRS, targetCRS));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry", "sourceCRS", "targetCRS", "lenient"})
   public static byte[] ST_Transform(
       byte[] geometry, String sourceCRS, String targetCRS, boolean lenient) {
     return GeometrySerde.serialize(
-        GeoToolsWrapper.transform(
+        FunctionsProj4.transform(
             GeometrySerde.deserialize(geometry), sourceCRS, targetCRS, lenient));
   }
 

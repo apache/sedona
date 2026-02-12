@@ -1076,7 +1076,7 @@ test_configurations = [
         ("point", lambda: f.lit("EPSG:4326"), lambda: f.lit("EPSG:32649")),
         "point_geom",
         "ST_ReducePrecision(geom, 2)",
-        "POINT (-34870890.91 1919456.06)",
+        "POINT (-10300622.99 19680322.66)",
     ),
     (
         stf.ST_Translate,
@@ -1538,7 +1538,6 @@ wrong_type_configurations = [
 
 
 class TestDataFrameAPI(TestBase):
-
     @pytest.fixture
     def base_df(self, request):
         wkbLine = "0102000000020000000000000084d600c00000000080b5d6bf00000060e1eff7bf00000080075de5bf"

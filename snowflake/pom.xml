@@ -61,6 +61,11 @@
             <groupId>org.geotools</groupId>
             <artifactId>gt-referencing</artifactId>
         </dependency>
+        <!-- proj4sedona for CRS transformation (pure Java, no LGPL dependencies) -->
+        <dependency>
+            <groupId>org.datasyslab</groupId>
+            <artifactId>proj4sedona</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>

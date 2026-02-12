@@ -118,6 +118,11 @@
             <groupId>org.geotools</groupId>
             <artifactId>gt-epsg-hsql</artifactId>
         </dependency>
+        <!-- proj4sedona for CRS transformation (pure Java, no LGPL dependencies) -->
+        <dependency>
+            <groupId>org.datasyslab</groupId>
+            <artifactId>proj4sedona</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
