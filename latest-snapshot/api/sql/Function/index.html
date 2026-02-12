@@ -9721,12 +9721,14 @@ You're not viewing the latest stable version.
 <p>Introduction: Returns an array of expanded forms of the input address string. This is backed by the <a href="https://github.com/openvenues/libpostal">libpostal</a> library's address expanding functionality.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Jpostal requires at least 2 GB of free disk space to store the data files used for address parsing and expanding. The data files are downloaded automatically when the function is called for the first time.</p>
+<p>Jpostal requires at least 2 GB of free disk space to store the data files used for address parsing and expanding. By default, the data files are downloaded automatically to a temporary directory (<code>&lt;java.io.tmpdir&gt;/libpostal/</code>, e.g. <code>/tmp/libpostal/</code> on Linux/macOS) when the function is called for the first time.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The version of jpostal installed with this package only supports Linux and MacOS. If you are using Windows, you will need to install libjpostal and libpostal manually and ensure that they are available in your <code>java.library.path</code>.</p>
+<p>The version of jpostal installed with this package only supports Linux and macOS. If you are using Windows, you will need to install libjpostal and libpostal manually and ensure that they are available in your <code>java.library.path</code>.</p>
 </div>
+<p>The data directory can be configured via <code>spark.sedona.libpostal.dataDir</code>. You can point it to a remote filesystem path (HDFS, S3, GCS, ABFS, etc.) such as <code>hdfs:///data/libpostal/</code> or <code>s3a://my-bucket/libpostal/</code>. When using a remote path, you must distribute the data to all executors before running queries by calling <code>sc.addFile("hdfs:///data/libpostal/", recursive=True)</code> (PySpark) or <code>sc.addFile("hdfs:///data/libpostal/", recursive = true)</code> (Scala). In this remote-URI mode, the automatic internet download performed by jpostal is disabled, so the remote directory must already contain the libpostal model files. For local filesystem paths, jpostal's download-if-needed behavior remains enabled.</p>
+<p>To prepare the libpostal data for a remote filesystem, first download it to a local machine by following the <a href="https://github.com/openvenues/libpostal#installation-maclinux">libpostal installation instructions</a>. After installation, the data files will be in the directory you specified during setup (commonly <code>/tmp/libpostal/</code>). Then upload them to your remote storage.</p>
 <p>Format: <code>ExpandAddress (address: String)</code></p>
 <p>Since: <code>v1.8.0</code></p>
 <p>SQL Example</p>
@@ -9739,12 +9741,14 @@ You're not viewing the latest stable version.
 <p>Introduction: Returns an array of the components (e.g. street, postal code) of the input address string. This is backed by the <a href="https://github.com/openvenues/libpostal">libpostal</a> library's address parsing functionality.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Jpostal requires at least 2 GB of free disk space to store the data files used for address parsing and expanding. The data files are downloaded automatically when the library is initialized.</p>
+<p>Jpostal requires at least 2 GB of free disk space to store the data files used for address parsing and expanding. By default, the data files are downloaded automatically to a temporary directory (<code>&lt;java.io.tmpdir&gt;/libpostal/</code>, e.g. <code>/tmp/libpostal/</code> on Linux/macOS) when the library is initialized.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The version of jpostal installed with this package only supports Linux and MacOS. If you are using Windows, you will need to install libjpostal and libpostal manually and ensure that they are available in your <code>java.library.path</code>.</p>
+<p>The version of jpostal installed with this package only supports Linux and macOS. If you are using Windows, you will need to install libjpostal and libpostal manually and ensure that they are available in your <code>java.library.path</code>.</p>
 </div>
+<p>The data directory can be configured via <code>spark.sedona.libpostal.dataDir</code>. You can point it to a remote filesystem path (HDFS, S3, GCS, ABFS, etc.) such as <code>hdfs:///data/libpostal/</code> or <code>s3a://my-bucket/libpostal/</code>. When using a remote path, you must distribute the data to all executors before running queries by calling <code>sc.addFile("hdfs:///data/libpostal/", recursive=True)</code> (PySpark) or <code>sc.addFile("hdfs:///data/libpostal/", recursive = true)</code> (Scala). In this remote-URI mode, the automatic internet download performed by jpostal is disabled, so the remote directory must already contain the libpostal model files. For local filesystem paths, jpostal's download-if-needed behavior remains enabled.</p>
+<p>To prepare the libpostal data for a remote filesystem, first download it to a local machine by following the <a href="https://github.com/openvenues/libpostal#installation-maclinux">libpostal installation instructions</a>. After installation, the data files will be in the directory you specified during setup (commonly <code>/tmp/libpostal/</code>). Then upload them to your remote storage.</p>
 <p>Format: <code>ParseAddress (address: String)</code></p>
 <p>Since: <code>v1.8.0</code></p>
 <p>SQL Example</p>
@@ -12655,7 +12659,7 @@ If the given geometry contains sub-geometries (GEOMETRY COLLECTION, MULTI POLYGO
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 9, 2026 09:40:33 UTC">February 9, 2026 09:40:33</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 12, 2026 05:14:16 UTC">February 12, 2026 05:14:16</span>
   </span>
 
     
