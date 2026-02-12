@@ -264,20 +264,24 @@ public class Constructors {
   }
 
   public static Geometry polygonFromEnvelope(double minX, double minY, double maxX, double maxY) {
+    return polygonFromEnvelope(minX, minY, maxX, maxY, GEOMETRY_FACTORY);
+  }
+
+  public static Geometry polygonFromEnvelope(
+      double minX, double minY, double maxX, double maxY, GeometryFactory factory) {
     Coordinate[] coordinates = new Coordinate[5];
     coordinates[0] = new Coordinate(minX, minY);
     coordinates[1] = new Coordinate(minX, maxY);
     coordinates[2] = new Coordinate(maxX, maxY);
     coordinates[3] = new Coordinate(maxX, minY);
     coordinates[4] = coordinates[0];
-    return GEOMETRY_FACTORY.createPolygon(coordinates);
+    return factory.createPolygon(coordinates);
   }
 
   public static Geometry makeEnvelope(
       double minX, double minY, double maxX, double maxY, int srid) {
-    Geometry envelope = polygonFromEnvelope(minX, minY, maxX, maxY);
-    envelope.setSRID(srid);
-    return envelope;
+    GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), srid);
+    return polygonFromEnvelope(minX, minY, maxX, maxY, geometryFactory);
   }
 
   public static Geometry makeEnvelope(double minX, double minY, double maxX, double maxY) {
@@ -315,10 +319,6 @@ public class Constructors {
 
     buffer.get(wkb);
 
-    Geometry geom = geomFromWKB(wkb);
-
-    geom.setSRID(srid);
-
-    return geom;
+    return geomFromWKB(wkb, srid);
   }
 }
