@@ -46,13 +46,16 @@ jobs:
       fail-fast: true
       matrix:
         os: ['ubuntu-latest', 'ubuntu-24.04-arm']
-        spark: ['4.0.1']
+        spark: ['4.0.1', '4.1.0']
         include:
           - spark: 4.0.1
             sedona: 'latest'
             geotools: '33.1'
           - spark: 4.0.1
             sedona: 1.8.0
+            geotools: '33.1'
+          - spark: 4.1.0
+            sedona: 'latest'
             geotools: '33.1'
     runs-on: ${{ matrix.os }}
     defaults:

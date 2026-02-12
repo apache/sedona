@@ -84,6 +84,22 @@ The optional GeoTools library is required if you want to use raster operators. V
 		</dependency>
 		```
 
+	=== "Spark 4.1 and Scala 2.12"
+
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-spark-shaded-4.1_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
+		<dependency>
+		    <groupId>org.datasyslab</groupId>
+		    <artifactId>geotools-wrapper</artifactId>
+		    <version>{{ sedona.current_geotools }}</version>
+		</dependency>
+		```
+
 !!! abstract "Sedona with Apache Spark and Scala 2.13"
 
 	=== "Spark 3.4 and Scala 2.13"
@@ -123,6 +139,22 @@ The optional GeoTools library is required if you want to use raster operators. V
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>
 		  <artifactId>sedona-spark-shaded-4.0_2.13</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
+		<dependency>
+		    <groupId>org.datasyslab</groupId>
+		    <artifactId>geotools-wrapper</artifactId>
+		    <version>{{ sedona.current_geotools }}</version>
+		</dependency>
+		```
+
+	=== "Spark 4.1 and Scala 2.13"
+
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-spark-shaded-4.1_2.13</artifactId>
 		  <version>{{ sedona.current_version }}</version>
 		</dependency>
 		<!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper -->
@@ -223,6 +255,19 @@ The optional GeoTools library is required if you want to use raster operators. V
 		    <version>{{ sedona.current_geotools }}</version>
 		</dependency>
 		```
+	=== "Spark 4.1 and Scala 2.12"
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-spark-4.1_2.12</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.datasyslab</groupId>
+		    <artifactId>geotools-wrapper</artifactId>
+		    <version>{{ sedona.current_geotools }}</version>
+		</dependency>
+		```
 
 !!! abstract "Sedona with Apache Spark and Scala 2.13"
 
@@ -257,6 +302,19 @@ The optional GeoTools library is required if you want to use raster operators. V
 		<dependency>
 		  <groupId>org.apache.sedona</groupId>
 		  <artifactId>sedona-spark-4.0_2.13</artifactId>
+		  <version>{{ sedona.current_version }}</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.datasyslab</groupId>
+		    <artifactId>geotools-wrapper</artifactId>
+		    <version>{{ sedona.current_geotools }}</version>
+		</dependency>
+		```
+	=== "Spark 4.1 and Scala 2.13"
+		```xml
+		<dependency>
+		  <groupId>org.apache.sedona</groupId>
+		  <artifactId>sedona-spark-4.1_2.13</artifactId>
 		  <version>{{ sedona.current_version }}</version>
 		</dependency>
 		<dependency>

@@ -62,6 +62,9 @@ jobs:
       fail-fast: true
       matrix:
         include:
+          - spark: 4.1.0
+            scala: 2.13.8
+            jdk: '17'
           - spark: 4.0.0
             scala: 2.13.8
             jdk: '17'

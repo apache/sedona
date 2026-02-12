@@ -45,6 +45,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - spark: 4.1.0
+            spark-compat: '4.1'
+            sedona: 1.9.0-SNAPSHOT
+            hadoop: 3.4.2
           - spark: 4.0.1
             spark-compat: '4.0'
             sedona: 1.8.0
