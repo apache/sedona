@@ -2654,6 +2654,34 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
+      <a href="../../sql/CRS-Transformation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CRS Transformation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../sql/NearestNeighbourSearching/" class="md-nav__link">
         
   
@@ -2749,10 +2777,10 @@ You're not viewing the latest stable version.
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_2_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_2_9" >
         
           
-          <label class="md-nav__link" for="__nav_3_4_1_2_8" id="__nav_3_4_1_2_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_4_1_2_9" id="__nav_3_4_1_2_9_label" tabindex="0">
             
   
   
@@ -2770,8 +2798,8 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_3_4_1_2_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_4_1_2_8">
+        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_3_4_1_2_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4_1_2_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -11892,55 +11920,18 @@ and with the components having the same topological relationship.</p>
 </code></pre></div>
 <h2 id="st_transform">ST_Transform<a class="headerlink" href="#st_transform" title="Permanent link">&para;</a></h2>
 <p>Introduction:</p>
-<p>Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS. For SourceCRS and TargetCRS, WKT format is also available since v1.3.1.</p>
-<p><strong>Lon/Lat Order in the input geometry</strong></p>
-<p>If the input geometry is in lat/lon order, it might throw an error such as <code>too close to pole</code>, <code>latitude or longitude exceeded limits</code>, or give unexpected results.
-You need to make sure that the input geometry is in lon/lat order. If the input geometry is in lat/lon order, you can use <mark>ST_FlipCoordinates</mark> to swap X and Y.</p>
-<p><strong>Lon/Lat Order in the source and target CRS</strong></p>
-<p>Sedona will force the source and target CRS to be in lon/lat order. If the source CRS or target CRS is in lat/lon order, it will be swapped to lon/lat order.</p>
-<p><strong>CRS code</strong></p>
-<p>The CRS code is the code of the CRS in the official EPSG database (<a href="https://epsg.org/">https://epsg.org/</a>) in the format of <code>EPSG:XXXX</code>. A community tool <a href="https://epsg.io/">EPSG.io</a> can help you quick identify a CRS code. For example, the code of WGS84 is <code>EPSG:4326</code>.</p>
-<p><strong>WKT format</strong></p>
-<p>You can also use OGC WKT v1 format to specify the source CRS and target CRS. An example OGC WKT v1 CRS of <code>EPGS:3857</code> is as follows:</p>
-<div class="highlight"><pre><span></span><code>PROJCS[&quot;WGS 84 / Pseudo-Mercator&quot;,
-    GEOGCS[&quot;WGS 84&quot;,
-        DATUM[&quot;WGS_1984&quot;,
-            SPHEROID[&quot;WGS 84&quot;,6378137,298.257223563,
-                AUTHORITY[&quot;EPSG&quot;,&quot;7030&quot;]],
-            AUTHORITY[&quot;EPSG&quot;,&quot;6326&quot;]],
-        PRIMEM[&quot;Greenwich&quot;,0,
-            AUTHORITY[&quot;EPSG&quot;,&quot;8901&quot;]],
-        UNIT[&quot;degree&quot;,0.0174532925199433,
-            AUTHORITY[&quot;EPSG&quot;,&quot;9122&quot;]],
-        AUTHORITY[&quot;EPSG&quot;,&quot;4326&quot;]],
-    PROJECTION[&quot;Mercator_1SP&quot;],
-    PARAMETER[&quot;central_meridian&quot;,0],
-    PARAMETER[&quot;scale_factor&quot;,1],
-    PARAMETER[&quot;false_easting&quot;,0],
-    PARAMETER[&quot;false_northing&quot;,0],
-    UNIT[&quot;metre&quot;,1,
-        AUTHORITY[&quot;EPSG&quot;,&quot;9001&quot;]],
-    AXIS[&quot;Easting&quot;,EAST],
-    AXIS[&quot;Northing&quot;,NORTH],
-    EXTENSION[&quot;PROJ4&quot;,&quot;+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs&quot;],
-    AUTHORITY[&quot;EPSG&quot;,&quot;3857&quot;]]
-</code></pre></div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>By default, this function uses lon/lat order since <code>v1.5.0</code>. Before, it used lat/lon order.</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>By default, <mark>ST_Transform</mark> follows the <code>lenient</code> mode which tries to fix issues by itself. You can append a boolean value at the end to enable the <code>strict</code> mode. In <code>strict</code> mode, <mark>ST_Transform</mark> will throw an error if it finds any issue.</p>
+<p>Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS.</p>
+<p>Since <code>v1.9.0</code>, Sedona supports multiple CRS formats including EPSG codes, WKT1, WKT2, PROJ strings, and PROJJSON. Grid files for high-accuracy datum transformations are also supported.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>For comprehensive details on supported CRS formats, grid file usage, and examples, see the Spark SQL <a href="../../sql/CRS-Transformation/">CRS Transformation</a> documentation.</p>
 </div>
 <p>Format:</p>
-<div class="highlight"><pre><span></span><code>ST_Transform (A: Geometry, SourceCRS: String, TargetCRS: String, [Optional] lenientMode: Boolean)
+<div class="highlight"><pre><span></span><code>ST_Transform (A: Geometry, SourceCRS: String, TargetCRS: String)
 </code></pre></div>
 <p>Since: <code>v1.2.0</code></p>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">ST_Transform</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((170 50,170 72,-130 72,-130 50,170 50))&#39;</span><span class="p">),</span><span class="s1">&#39;EPSG:4326&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;EPSG:32649&#39;</span><span class="p">))</span>
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">ST_Transform</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((170 50,170 72,-130 72,-130 50,170 50))&#39;</span><span class="p">),</span><span class="s1">&#39;EPSG:4326&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;EPSG:32649&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">false</span><span class="p">))</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>POLYGON ((8766047.980342899 17809098.336766362, 5122546.516721856 18580261.912528664, 3240775.0740796793 -13688660.50985159, 4556241.924514083 -12463044.21488129, 8766047.980342899 17809098.336766362))
@@ -12156,7 +12147,7 @@ You need to make sure that the input geometry is in lon/lat order. If the input 
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 9, 2026 09:40:33 UTC">February 9, 2026 09:40:33</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 12, 2026 20:06:10 UTC">February 12, 2026 20:06:10</span>
   </span>
 
     
