@@ -53,6 +53,8 @@ class GeometryUDT extends UserDefinedType[Geometry] {
   }
 
   override def hashCode(): Int = userClass.hashCode()
+
+  override def toString: String = "GeometryUDT"
 }
 
 case object GeometryUDT

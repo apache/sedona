@@ -52,6 +52,8 @@ class GeographyUDT extends UserDefinedType[Geography] {
   }
 
   override def hashCode(): Int = userClass.hashCode()
+
+  override def toString: String = "GeographyUDT"
 }
 
 case object GeographyUDT
