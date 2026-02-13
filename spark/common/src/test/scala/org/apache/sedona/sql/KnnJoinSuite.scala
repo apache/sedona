@@ -550,7 +550,7 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
     val emptyRdd = sparkSession.sparkContext.emptyRDD[Row]
     val emptyDf = sparkSession.createDataFrame(
       emptyRdd,
-      StructType(Seq(StructField("id", IntegerType), StructField("geom", GeometryUDT))))
+      StructType(Seq(StructField("id", IntegerType), StructField("geom", GeometryUDT()))))
     emptyDf.createOrReplaceTempView("EMPTYTABLE")
 
     df1.createOrReplaceTempView("df1")

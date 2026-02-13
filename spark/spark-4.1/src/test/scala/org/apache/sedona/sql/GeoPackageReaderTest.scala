@@ -44,7 +44,7 @@ class GeoPackageReaderTest extends TestBaseScala with Matchers {
   val expectedFeatureSchema = StructType(
     Seq(
       StructField("id", IntegerType, true),
-      StructField("geometry", GeometryUDT, true),
+      StructField("geometry", GeometryUDT(), true),
       StructField("text", StringType, true),
       StructField("real", DoubleType, true),
       StructField("boolean", BooleanType, true),

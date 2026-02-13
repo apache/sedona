@@ -116,7 +116,7 @@ object ScalarUDF {
       pythonVer = pythonVer,
       broadcastVars = List.empty[Broadcast[PythonBroadcast]].asJava,
       accumulator = null),
-    dataType = GeometryUDT,
+    dataType = GeometryUDT(),
     pythonEvalType = UDF.PythonEvalType.SQL_SCALAR_SEDONA_UDF,
     udfDeterministic = true)
 }

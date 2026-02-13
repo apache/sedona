@@ -177,7 +177,7 @@ private[apache] case class ST_GeomFromWKB(inputExpressions: Seq[Expression])
     }
   }
 
-  override def dataType: DataType = GeometryUDT
+  override def dataType: DataType = GeometryUDT()
 
   override def inputTypes: Seq[AbstractDataType] = Seq(TypeCollection(StringType, BinaryType))
 
@@ -217,7 +217,7 @@ private[apache] case class ST_GeomFromEWKB(inputExpressions: Seq[Expression])
     }
   }
 
-  override def dataType: DataType = GeometryUDT
+  override def dataType: DataType = GeometryUDT()
 
   override def inputTypes: Seq[AbstractDataType] = Seq(TypeCollection(StringType, BinaryType))
 
@@ -272,7 +272,7 @@ private[apache] case class ST_LineFromWKB(inputExpressions: Seq[Expression])
     }
   }
 
-  override def dataType: DataType = GeometryUDT
+  override def dataType: DataType = GeometryUDT()
 
   override def inputTypes: Seq[AbstractDataType] =
     if (inputExpressions.length == 1) Seq(TypeCollection(StringType, BinaryType))
@@ -329,7 +329,7 @@ private[apache] case class ST_LinestringFromWKB(inputExpressions: Seq[Expression
     }
   }
 
-  override def dataType: DataType = GeometryUDT
+  override def dataType: DataType = GeometryUDT()
 
   override def inputTypes: Seq[AbstractDataType] =
     if (inputExpressions.length == 1) Seq(TypeCollection(StringType, BinaryType))
@@ -386,7 +386,7 @@ private[apache] case class ST_PointFromWKB(inputExpressions: Seq[Expression])
     }
   }
 
-  override def dataType: DataType = GeometryUDT
+  override def dataType: DataType = GeometryUDT()
 
   override def inputTypes: Seq[AbstractDataType] =
     if (inputExpressions.length == 1) Seq(TypeCollection(StringType, BinaryType))
@@ -435,7 +435,7 @@ private[apache] case class ST_GeomFromGeoJSON(inputExpressions: Seq[Expression])
     }
   }
 
-  override def dataType: DataType = GeometryUDT
+  override def dataType: DataType = GeometryUDT()
 
   override def children: Seq[Expression] = inputExpressions
 

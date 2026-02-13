@@ -308,7 +308,7 @@ class SpatialJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
     val emptyRdd = sparkSession.sparkContext.emptyRDD[Row]
     val emptyDf = sparkSession.createDataFrame(
       emptyRdd,
-      StructType(Seq(StructField("id", IntegerType), StructField("geom", GeometryUDT))))
+      StructType(Seq(StructField("id", IntegerType), StructField("geom", GeometryUDT()))))
     df1.createOrReplaceTempView("df1")
     df2.createOrReplaceTempView("df2")
     emptyDf.createOrReplaceTempView("dfEmpty")

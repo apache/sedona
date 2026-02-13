@@ -448,7 +448,7 @@ object GeoParquetFileFormat extends Logging {
     val fields = schema.fields.map { field =>
       field.dataType match {
         case _: BinaryType if geoParquetMetaData.columns.contains(field.name) =>
-          field.copy(dataType = GeometryUDT)
+          field.copy(dataType = GeometryUDT())
         case _ => field
       }
     }

@@ -319,7 +319,7 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen {
       // Tweak the column names to camelCase to ensure it also renames
       val schema = StructType(
         Array(
-          StructField("leftGeometry", GeometryUDT, nullable = true),
+          StructField("leftGeometry", GeometryUDT(), nullable = true),
           StructField("exampleText", StringType, nullable = true),
           StructField("exampleDouble", DoubleType, nullable = true),
           StructField("exampleInt", IntegerType, nullable = true)))
@@ -408,7 +408,7 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen {
       // Tweak the column names to camelCase to ensure it also renames
       val schema = StructType(
         Array(
-          StructField("leftGeometry", GeometryUDT, nullable = true),
+          StructField("leftGeometry", GeometryUDT(), nullable = true),
           StructField("exampleText", StringType, nullable = true),
           StructField("exampleFloat", FloatType, nullable = true),
           StructField("exampleDouble", DoubleType, nullable = true),
@@ -424,7 +424,7 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen {
               StructField("structText", StringType, nullable = true),
               StructField("structInt", IntegerType, nullable = true),
               StructField("structBool", BooleanType, nullable = true)))),
-          StructField("rightGeometry", GeometryUDT, nullable = true),
+          StructField("rightGeometry", GeometryUDT(), nullable = true),
           // We have to include a column for right user data (even though there is none)
           // since there is no way to distinguish between no data and nullable data
           StructField("rightUserData", StringType, nullable = true)))
@@ -493,11 +493,11 @@ class adapterTestScala extends TestBaseScala with GivenWhenThen {
       // Convert to DataFrame
       val schema = StructType(
         Array(
-          StructField("leftgeometry", GeometryUDT, nullable = true),
+          StructField("leftgeometry", GeometryUDT(), nullable = true),
           StructField("exampletext", StringType, nullable = true),
           StructField("exampledouble", StringType, nullable = true),
           StructField("exampleint", StringType, nullable = true),
-          StructField("rightgeometry", GeometryUDT, nullable = true),
+          StructField("rightgeometry", GeometryUDT(), nullable = true),
           StructField("userdata", StringType, nullable = true)))
       val joinResultDf = Adapter.toDf(joinResultPairRDD, schema, sparkSession)
       val resultWithoutSchema = Adapter.toDf(

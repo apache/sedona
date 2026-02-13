@@ -60,7 +60,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - spark: '4.1.0'
+          - spark: '4.1.1'
             scala: '2.13.8'
             java: '17'
             python: '3.11'
