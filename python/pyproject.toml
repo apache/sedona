@@ -37,13 +37,17 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-spark = ["pyspark>=3.4.0,<4.2.0"]
+spark = [
+  "pyspark>=3.4.0,<4.1.0; python_version < '3.10'",
+  "pyspark>=3.4.0,<4.2.0; python_version >= '3.10'",
+]
 pydeck-map = ["geopandas", "pydeck==0.8.0"]
 kepler-map = ["geopandas", "keplergl==0.3.2"]
 flink = ["apache-flink>=1.19.0"]
 db = ["sedonadb[geopandas]; python_version >= '3.9'"]
 all = [
-  "pyspark>=3.4.0,<4.2.0",
+  "pyspark>=3.4.0,<4.1.0; python_version < '3.10'",
+  "pyspark>=3.4.0,<4.2.0; python_version >= '3.10'",
   "geopandas",
   "pydeck==0.8.0",
   "keplergl==0.3.2",
@@ -71,7 +75,8 @@ dev = [
   # cannot set geopandas>=0.14.4 since it doesn't support python 3.8, so we pin fiona to <1.10.0
   "fiona<1.10.0",
   "pyarrow",
-  "pyspark>=3.4.0,<4.2.0",
+  "pyspark>=3.4.0,<4.1.0; python_version < '3.10'",
+  "pyspark>=3.4.0,<4.2.0; python_version >= '3.10'",
   "keplergl==0.3.2",
   "pydeck==0.8.0",
   "pystac==1.5.0",
