@@ -85,13 +85,13 @@ abstract class AbstractCatalog {
   def registerAll(sparkSession: SparkSession): Unit = {
     val registry = sparkSession.sessionState.functionRegistry
     expressions.foreach { case (functionIdentifier, expressionInfo, functionBuilder) =>
-      if (!registry.functionExists(functionIdentifier)) {
-        registry.registerFunction(functionIdentifier, expressionInfo, functionBuilder)
-        FunctionRegistry.builtin.registerFunction(
-          functionIdentifier,
-          expressionInfo,
-          functionBuilder)
-      }
+      // Always register Sedona functions, overwriting any Spark built-in functions
+      // with the same name (e.g., Spark 4.1's native ST_GeomFromWKB).
+      registry.registerFunction(functionIdentifier, expressionInfo, functionBuilder)
+      FunctionRegistry.builtin.registerFunction(
+        functionIdentifier,
+        expressionInfo,
+        functionBuilder)
     }
     aggregateExpressions.foreach { f =>
       registerAggregateFunction(sparkSession, f.getClass.getSimpleName, f)
