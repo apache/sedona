@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.sql.parser
 
-import org.apache.spark.sql.catalyst.parser.ParserInterface
+import org.apache.spark.sql.catalyst.parser.{ParameterContext, ParserInterface}
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.execution.SparkSqlParser
 
@@ -27,23 +27,40 @@ class SedonaSqlParser(delegate: ParserInterface) extends SparkSqlParser {
   // The parser builder for the Sedona SQL AST
   val parserBuilder = new SedonaSqlAstBuilder
 
+  private def sedonaFallback(sqlText: String): LogicalPlan =
+    parse(sqlText) { parser =>
+      parserBuilder.visit(parser.singleStatement())
+    }.asInstanceOf[LogicalPlan]
+
   /**
-   * Parse the SQL text and return the logical plan. This method first attempts to use the
-   * delegate parser to parse the SQL text. If the delegate parser fails (throws an exception), it
-   * falls back to using the Sedona SQL parser.
+   * Parse the SQL text with parameters and return the logical plan. In Spark 4.1+,
+   * SparkSqlParser overrides parsePlanWithParameters to bypass parsePlan, so we must override
+   * this method to intercept the parse flow.
    *
-   * @param sqlText
-   *   The SQL text to be parsed.
-   * @return
-   *   The parsed logical plan.
+   * This method first attempts to use the delegate parser. If the delegate parser fails (throws
+   * an exception), it falls back to using the Sedona SQL parser.
+   */
+  override def parsePlanWithParameters(
+      sqlText: String,
+      paramContext: ParameterContext): LogicalPlan =
+    try {
+      delegate.parsePlanWithParameters(sqlText, paramContext)
+    } catch {
+      case _: Exception =>
+        sedonaFallback(sqlText)
+    }
+
+  /**
+   * Parse the SQL text and return the logical plan. Note: in Spark 4.1+, SparkSession.sql()
+   * calls parsePlanWithParameters (overridden above), which no longer delegates to parsePlan.
+   * This override is kept as a defensive measure in case any third-party code or future Spark
+   * internals call parsePlan directly on the parser instance.
    */
   override def parsePlan(sqlText: String): LogicalPlan =
     try {
       delegate.parsePlan(sqlText)
     } catch {
       case _: Exception =>
-        parse(sqlText) { parser =>
-          parserBuilder.visit(parser.singleStatement())
-        }.asInstanceOf[LogicalPlan]
+        sedonaFallback(sqlText)
     }
 }

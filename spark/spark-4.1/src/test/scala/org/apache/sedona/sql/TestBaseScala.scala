@@ -47,6 +47,8 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
     .config("sedona.join.autoBroadcastJoinThreshold", "-1")
     .config("spark.sql.extensions", "org.apache.sedona.sql.SedonaSqlExtensions")
     .config(keyParserExtension, ThreadLocalRandom.current().nextBoolean())
+    // Disable Spark 4.1+ native geospatial functions that shadow Sedona's ST functions
+    .config("spark.sql.geospatial.enabled", "false")
     .getOrCreate()
 
   val sparkSessionMinio = SedonaContext
