@@ -33,9 +33,9 @@ class SedonaSqlParser(delegate: ParserInterface) extends SparkSqlParser {
     }.asInstanceOf[LogicalPlan]
 
   /**
-   * Parse the SQL text with parameters and return the logical plan. In Spark 4.1+,
-   * SparkSqlParser overrides parsePlanWithParameters to bypass parsePlan, so we must override
-   * this method to intercept the parse flow.
+   * Parse the SQL text with parameters and return the logical plan. In Spark 4.1+, SparkSqlParser
+   * overrides parsePlanWithParameters to bypass parsePlan, so we must override this method to
+   * intercept the parse flow.
    *
    * This method first attempts to use the delegate parser. If the delegate parser fails (throws
    * an exception), it falls back to using the Sedona SQL parser.
@@ -51,9 +51,9 @@ class SedonaSqlParser(delegate: ParserInterface) extends SparkSqlParser {
     }
 
   /**
-   * Parse the SQL text and return the logical plan. Note: in Spark 4.1+, SparkSession.sql()
-   * calls parsePlanWithParameters (overridden above), which no longer delegates to parsePlan.
-   * This override is kept as a defensive measure in case any third-party code or future Spark
+   * Parse the SQL text and return the logical plan. Note: in Spark 4.1+, SparkSession.sql() calls
+   * parsePlanWithParameters (overridden above), which no longer delegates to parsePlan. This
+   * override is kept as a defensive measure in case any third-party code or future Spark
    * internals call parsePlan directly on the parser instance.
    */
   override def parsePlan(sqlText: String): LogicalPlan =

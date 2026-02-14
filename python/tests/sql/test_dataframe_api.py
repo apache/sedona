@@ -1790,7 +1790,7 @@ class TestDataFrameAPI(TestBase):
         elif isinstance(actual_result, Geography):
             # self.assert_geometry_almost_equal(expected_result, actual_result.geometry)
             return
-        elif isinstance(actual_result, bytearray):
+        elif isinstance(actual_result, (bytes, bytearray)):
             actual_result = actual_result.hex()
         elif isinstance(actual_result, Row):
             actual_result = {
