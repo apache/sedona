@@ -119,13 +119,13 @@ rm -rf $LOCAL_DIR && git clone --depth 1 --branch $TAG $REPO_URL $LOCAL_DIR && c
 MAVEN_PLUGIN_VERSION="2.3.2"
 
 # Define Spark and Scala versions
-declare -a SPARK_VERSIONS=("3.4" "3.5" "4.0")
+declare -a SPARK_VERSIONS=("3.4" "3.5" "4.0" "4.1")
 declare -a SCALA_VERSIONS=("2.12" "2.13")
 
 # Function to get Java version for Spark version
 get_java_version() {
   local spark_version=$1
-  if [[ "$spark_version" == "4.0" ]]; then
+  if [[ "$spark_version" == "4."* ]]; then
     echo "17"
   else
     echo "11"
@@ -217,8 +217,8 @@ verify_java_version() {
 # Iterate through Spark and Scala versions
 for SPARK in "${SPARK_VERSIONS[@]}"; do
   for SCALA in "${SCALA_VERSIONS[@]}"; do
-    # Skip Spark 4.0 + Scala 2.12 combination as it's not supported
-    if [[ "$SPARK" == "4.0" && "$SCALA" == "2.12" ]]; then
+    # Skip Spark 4.0+ + Scala 2.12 combination as it's not supported
+    if [[ "$SPARK" == "4."* && "$SCALA" == "2.12" ]]; then
       echo "Skipping Spark $SPARK with Scala $SCALA (not supported)"
       continue
     fi
@@ -286,7 +286,7 @@ mkdir apache-sedona-${SEDONA_VERSION}-bin
 # Function to get Java version for Spark version
 get_java_version() {
   local spark_version=$1
-  if [[ "$spark_version" == "4.0" ]]; then
+  if [[ "$spark_version" == "4."* ]]; then
     echo "17"
   else
     echo "11"
@@ -408,6 +408,15 @@ verify_java_version $MVN_WRAPPER $JAVA_VERSION
 
 echo "Compiling for Spark 4.0 with Scala 2.13 using Java $JAVA_VERSION..."
 cd apache-sedona-${SEDONA_VERSION}-src && $MVN_WRAPPER clean && $MVN_WRAPPER install -DskipTests -Dspark=4.0 -Dscala=2.13 && cd ..
+cp apache-sedona-${SEDONA_VERSION}-src/spark-shaded/target/sedona-*${SEDONA_VERSION}.jar apache-sedona-${SEDONA_VERSION}-bin/
+
+# Compile for Spark 4.1 with Java 17
+JAVA_VERSION=$(get_java_version "4.1")
+MVN_WRAPPER=$(create_mvn_wrapper $JAVA_VERSION)
+verify_java_version $MVN_WRAPPER $JAVA_VERSION
+
+echo "Compiling for Spark 4.1 with Scala 2.13 using Java $JAVA_VERSION..."
+cd apache-sedona-${SEDONA_VERSION}-src && $MVN_WRAPPER clean && $MVN_WRAPPER install -DskipTests -Dspark=4.1 -Dscala=2.13 && cd ..
 cp apache-sedona-${SEDONA_VERSION}-src/spark-shaded/target/sedona-*${SEDONA_VERSION}.jar apache-sedona-${SEDONA_VERSION}-bin/
 
 # Clean up Maven wrappers

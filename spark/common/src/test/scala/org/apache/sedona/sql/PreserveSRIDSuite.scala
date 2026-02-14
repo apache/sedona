@@ -144,12 +144,12 @@ class PreserveSRIDSuite extends TestBaseScala with TableDrivenPropertyChecks {
 
     val schema = StructType(
       Seq(
-        StructField("geom1", GeometryUDT),
-        StructField("geom2", GeometryUDT),
-        StructField("geom3", GeometryUDT),
-        StructField("geom4", GeometryUDT),
-        StructField("geom5", GeometryUDT),
-        StructField("geom6", GeometryUDT)))
+        StructField("geom1", GeometryUDT()),
+        StructField("geom2", GeometryUDT()),
+        StructField("geom3", GeometryUDT()),
+        StructField("geom4", GeometryUDT()),
+        StructField("geom5", GeometryUDT()),
+        StructField("geom6", GeometryUDT())))
     val geom1 = Constructors.geomFromWKT("POLYGON ((0 0, 1 0, 0.5 0.5, 1 1, 0 1, 0 0))", 1000)
     val geom2 =
       Constructors.geomFromWKT("MULTILINESTRING ((0 0, 0 1), (0 1, 1 1), (1 1, 1 0))", 1000)

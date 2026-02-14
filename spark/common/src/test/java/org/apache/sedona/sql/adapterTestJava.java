@@ -55,7 +55,11 @@ public class adapterTestJava implements Serializable {
   public static void onceExecutedBeforeAll() {
     sparkSession =
         SedonaContext.create(
-            SedonaContext.builder().master("local[*]").appName("adapterTestJava").getOrCreate());
+            SedonaContext.builder()
+                .master("local[*]")
+                .appName("adapterTestJava")
+                .config("spark.sql.geospatial.enabled", "false")
+                .getOrCreate());
     Logger.getLogger("org").setLevel(Level.WARN);
     Logger.getLogger("akka").setLevel(Level.WARN);
   }

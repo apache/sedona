@@ -83,7 +83,7 @@ private[apache] case class RS_Metadata(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 
-  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT)
+  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT())
 }
 
 private[apache] case class RS_SummaryStatsAll(inputExpressions: Seq[Expression])
@@ -139,13 +139,13 @@ private[apache] case class RS_SummaryStatsAll(inputExpressions: Seq[Expression])
 
   override def inputTypes: Seq[AbstractDataType] = {
     if (inputExpressions.length == 1) {
-      Seq(RasterUDT)
+      Seq(RasterUDT())
     } else if (inputExpressions.length == 2) {
-      Seq(RasterUDT, IntegerType)
+      Seq(RasterUDT(), IntegerType)
     } else if (inputExpressions.length == 3) {
-      Seq(RasterUDT, IntegerType, BooleanType)
+      Seq(RasterUDT(), IntegerType, BooleanType)
     } else {
-      Seq(RasterUDT)
+      Seq(RasterUDT())
     }
   }
 }
@@ -220,17 +220,17 @@ private[apache] case class RS_ZonalStatsAll(inputExpressions: Seq[Expression])
 
   override def inputTypes: Seq[AbstractDataType] = {
     if (inputExpressions.length == 2) {
-      Seq(RasterUDT, GeometryUDT)
+      Seq(RasterUDT(), GeometryUDT())
     } else if (inputExpressions.length == 3) {
-      Seq(RasterUDT, GeometryUDT, IntegerType)
+      Seq(RasterUDT(), GeometryUDT(), IntegerType)
     } else if (inputExpressions.length == 4) {
-      Seq(RasterUDT, GeometryUDT, IntegerType, BooleanType)
+      Seq(RasterUDT(), GeometryUDT(), IntegerType, BooleanType)
     } else if (inputExpressions.length == 5) {
-      Seq(RasterUDT, GeometryUDT, IntegerType, BooleanType, BooleanType)
+      Seq(RasterUDT(), GeometryUDT(), IntegerType, BooleanType, BooleanType)
     } else if (inputExpressions.length >= 6) {
-      Seq(RasterUDT, GeometryUDT, IntegerType, BooleanType, BooleanType, BooleanType)
+      Seq(RasterUDT(), GeometryUDT(), IntegerType, BooleanType, BooleanType, BooleanType)
     } else {
-      Seq(RasterUDT, GeometryUDT)
+      Seq(RasterUDT(), GeometryUDT())
     }
   }
 }
@@ -276,5 +276,5 @@ private[apache] case class RS_GeoTransform(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 
-  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT)
+  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT())
 }

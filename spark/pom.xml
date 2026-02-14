@@ -50,6 +50,7 @@
             <modules>
                 <module>spark-3.5</module>
                 <module>spark-4.0</module>
+                <module>spark-4.1</module>
             </modules>
         </profile>
     </profiles>

@@ -22,7 +22,11 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import org.apache.commons.collections.IteratorUtils;
+import java.util.List;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.junit.Test;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
@@ -52,10 +56,16 @@ public class GenericUniquePartitionerTest {
         partitioner.placeObject(factory.toGeometry(definitelyHasMultiplePartitions));
     // Because the geometry is not completely contained by any of the partitions,
     // it also gets placed in the overflow partition (hence 5, not 4)
-    assertEquals(5, IteratorUtils.toList(placedWithDuplicates).size());
+    assertEquals(5, iteratorToList(placedWithDuplicates).size());
 
     Iterator<Tuple2<Integer, Geometry>> placedWithoutDuplicates =
         uniquePartitioner.placeObject(factory.toGeometry(definitelyHasMultiplePartitions));
-    assertEquals(1, IteratorUtils.toList(placedWithoutDuplicates).size());
+    assertEquals(1, iteratorToList(placedWithoutDuplicates).size());
+  }
+
+  private <T> List<T> iteratorToList(Iterator<T> iterator) {
+    return StreamSupport.stream(
+            Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), false)
+        .collect(Collectors.toList());
   }
 }

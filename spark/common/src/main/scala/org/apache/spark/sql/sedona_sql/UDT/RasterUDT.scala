@@ -56,6 +56,10 @@ class RasterUDT extends UserDefinedType[GridCoverage2D] {
   }
 
   override def hashCode(): Int = userClass.hashCode()
+
+  override def toString: String = "RasterUDT"
 }
 
-case object RasterUDT extends RasterUDT with Serializable
+case object RasterUDT extends RasterUDT with Serializable {
+  def apply(): RasterUDT = new RasterUDT()
+}

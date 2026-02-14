@@ -50,5 +50,5 @@ class SpiderTable(
 
 object SpiderTable {
   val SCHEMA: StructType = StructType(
-    Seq(StructField("id", LongType), StructField("geometry", GeometryUDT)))
+    Seq(StructField("id", LongType), StructField("geometry", GeometryUDT())))
 }

@@ -52,8 +52,12 @@ class GeographyUDT extends UserDefinedType[Geography] {
   }
 
   override def hashCode(): Int = userClass.hashCode()
+
+  override def toString: String = "GeographyUDT"
 }
 
 case object GeographyUDT
     extends org.apache.spark.sql.sedona_sql.UDT.GeographyUDT
-    with scala.Serializable
+    with scala.Serializable {
+  def apply(): GeographyUDT = new GeographyUDT()
+}

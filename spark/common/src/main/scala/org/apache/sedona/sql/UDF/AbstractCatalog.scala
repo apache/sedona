@@ -85,7 +85,14 @@ abstract class AbstractCatalog {
   def registerAll(sparkSession: SparkSession): Unit = {
     val registry = sparkSession.sessionState.functionRegistry
     expressions.foreach { case (functionIdentifier, expressionInfo, functionBuilder) =>
-      if (!registry.functionExists(functionIdentifier)) {
+      val shouldRegister = registry.lookupFunction(functionIdentifier) match {
+        case Some(existingInfo) =>
+          // Skip if Sedona already registered this function (e.g., SedonaContext.create called
+          // twice). Overwrite if it's a Spark native function (e.g., Spark 4.1's ST_GeomFromWKB).
+          !existingInfo.getClassName.startsWith("org.apache.sedona.")
+        case None => true
+      }
+      if (shouldRegister) {
         registry.registerFunction(functionIdentifier, expressionInfo, functionBuilder)
         FunctionRegistry.builtin.registerFunction(
           functionIdentifier,
