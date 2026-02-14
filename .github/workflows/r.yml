@@ -57,7 +57,7 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         spark: [3.4.0, 3.5.0]
         hadoop: [3]
