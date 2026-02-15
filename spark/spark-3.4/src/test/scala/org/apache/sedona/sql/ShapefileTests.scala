@@ -20,7 +20,7 @@ package org.apache.sedona.sql
 
 import org.apache.commons.io.FileUtils
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.sql.types.{DateType, DecimalType, LongType, StringType, StructField, StructType}
+import org.apache.spark.sql.types.{DateType, DecimalType, LongType, StringType, StructField, StructType, TimestampType}
 import org.locationtech.jts.geom.{Geometry, MultiPolygon, Point, Polygon}
 import org.locationtech.jts.io.{WKTReader, WKTWriter}
 import org.scalatest.BeforeAndAfterAll
@@ -767,6 +767,181 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
           assert(rowsMap(id).equals(geom))
         }
       }
+    }
+
+    it("should expose _metadata struct with all expected fields") {
+      val df = sparkSession.read
+        .format("shapefile")
+        .load(resourceFolder + "shapefiles/gis_osm_pois_free_1")
+      val metaDf = df.select("_metadata")
+      val metaSchema = metaDf.schema("_metadata").dataType.asInstanceOf[StructType]
+      val expectedFields =
+        Seq(
+          "file_path",
+          "file_name",
+          "file_size",
+          "file_block_start",
+          "file_block_length",
+          "file_modification_time")
+      assert(metaSchema.fieldNames.toSeq == expectedFields)
+      assert(metaSchema("file_path").dataType == StringType)
+      assert(metaSchema("file_name").dataType == StringType)
+      assert(metaSchema("file_size").dataType == LongType)
+      assert(metaSchema("file_block_start").dataType == LongType)
+      assert(metaSchema("file_block_length").dataType == LongType)
+      assert(metaSchema("file_modification_time").dataType == TimestampType)
+    }
+
+    it("should not include _metadata in select(*)") {
+      val df = sparkSession.read
+        .format("shapefile")
+        .load(resourceFolder + "shapefiles/gis_osm_pois_free_1")
+      val columns = df.columns
+      assert(!columns.contains("_metadata"))
+    }
+
+    it("should return correct file_path and file_name in _metadata") {
+      val df = sparkSession.read
+        .format("shapefile")
+        .load(resourceFolder + "shapefiles/gis_osm_pois_free_1")
+      val metaRows = df.select("_metadata.file_path", "_metadata.file_name").distinct().collect()
+      assert(metaRows.length == 1)
+      val filePath = metaRows.head.getString(0)
+      val fileName = metaRows.head.getString(1)
+      assert(filePath.endsWith("gis_osm_pois_free_1.shp"))
+      assert(fileName == "gis_osm_pois_free_1.shp")
+    }
+
+    it("should return actual file_size matching the .shp file on disk") {
+      val shpFile =
+        new File(resourceFolder + "shapefiles/gis_osm_pois_free_1/gis_osm_pois_free_1.shp")
+      val expectedSize = shpFile.length()
+      val df = sparkSession.read
+        .format("shapefile")
+        .load(resourceFolder + "shapefiles/gis_osm_pois_free_1")
+      val sizes = df.select("_metadata.file_size").distinct().collect()
+      assert(sizes.length == 1)
+      assert(sizes.head.getLong(0) == expectedSize)
+    }
+
+    it(
+      "should return file_block_start=0 and file_block_length=file_size for non-splittable shapefiles") {
+      val shpFile =
+        new File(resourceFolder + "shapefiles/gis_osm_pois_free_1/gis_osm_pois_free_1.shp")
+      val expectedSize = shpFile.length()
+      val df = sparkSession.read
+        .format("shapefile")
+        .load(resourceFolder + "shapefiles/gis_osm_pois_free_1")
+      val rows = df
+        .select("_metadata.file_block_start", "_metadata.file_block_length")
+        .distinct()
+        .collect()
+      assert(rows.length == 1)
+      assert(rows.head.getLong(0) == 0L) // file_block_start
+      assert(rows.head.getLong(1) == expectedSize) // file_block_length
+    }
+
+    it("should return file_modification_time matching the .shp file on disk") {
+      val shpFile =
+        new File(resourceFolder + "shapefiles/gis_osm_pois_free_1/gis_osm_pois_free_1.shp")
+      // File.lastModified() returns milliseconds, Spark TimestampType stores microseconds
+      val expectedModTimeMs = shpFile.lastModified()
+      val df = sparkSession.read
+        .format("shapefile")
+        .load(resourceFolder + "shapefiles/gis_osm_pois_free_1")
+      val times =
+        df.select("_metadata.file_modification_time").distinct().collect()
+      assert(times.length == 1)
+      val modTime = times.head.getTimestamp(0)
+      assert(modTime != null)
+      // Timestamp.getTime() returns milliseconds
+      assert(modTime.getTime == expectedModTimeMs)
+    }
+
+    it("should return correct metadata values per file when reading multiple shapefiles") {
+      val map1Shp =
+        new File(resourceFolder + "shapefiles/multipleshapefiles/map1.shp")
+      val map2Shp =
+        new File(resourceFolder + "shapefiles/multipleshapefiles/map2.shp")
+      val df = sparkSession.read
+        .format("shapefile")
+        .load(resourceFolder + "shapefiles/multipleshapefiles")
+      val metaRows = df
+        .select(
+          "_metadata.file_name",
+          "_metadata.file_size",
+          "_metadata.file_block_start",
+          "_metadata.file_block_length")
+        .distinct()
+        .collect()
+      assert(metaRows.length == 2)
+      val byName = metaRows.map(r => r.getString(0) -> r).toMap
+      // map1.shp
+      assert(byName("map1.shp").getLong(1) == map1Shp.length())
+      assert(byName("map1.shp").getLong(2) == 0L)
+      assert(byName("map1.shp").getLong(3) == map1Shp.length())
+      // map2.shp
+      assert(byName("map2.shp").getLong(1) == map2Shp.length())
+      assert(byName("map2.shp").getLong(2) == 0L)
+      assert(byName("map2.shp").getLong(3) == map2Shp.length())
+    }
+
+    it("should allow filtering on _metadata fields") {
+      val df = sparkSession.read
+        .format("shapefile")
+        .load(resourceFolder + "shapefiles/multipleshapefiles")
+      val totalCount = df.count()
+      val map1Df = df.filter(df("_metadata.file_name") === "map1.shp")
+      val map2Df = df.filter(df("_metadata.file_name") === "map2.shp")
+      assert(map1Df.count() > 0)
+      assert(map2Df.count() > 0)
+      assert(map1Df.count() + map2Df.count() == totalCount)
+    }
+
+    it("should select _metadata along with data columns") {
+      val df = sparkSession.read
+        .format("shapefile")
+        .load(resourceFolder + "shapefiles/gis_osm_pois_free_1")
+      val result = df.select("osm_id", "_metadata.file_name").collect()
+      assert(result.length == 12873)
+      result.foreach { row =>
+        assert(row.getString(0).nonEmpty)
+        assert(row.getString(1) == "gis_osm_pois_free_1.shp")
+      }
+    }
+
+    it("should return correct metadata for each file in multi-shapefile directory") {
+      val dt1Shp = new File(resourceFolder + "shapefiles/datatypes/datatypes1.shp")
+      val dt2Shp = new File(resourceFolder + "shapefiles/datatypes/datatypes2.shp")
+      val df = sparkSession.read
+        .format("shapefile")
+        .load(resourceFolder + "shapefiles/datatypes")
+      val result = df
+        .select(
+          "_metadata.file_path",
+          "_metadata.file_name",
+          "_metadata.file_size",
+          "_metadata.file_block_start",
+          "_metadata.file_block_length",
+          "_metadata.file_modification_time")
+        .distinct()
+        .collect()
+      assert(result.length == 2)
+      val byName = result.map(r => r.getString(1) -> r).toMap
+      // datatypes1.shp
+      val r1 = byName("datatypes1.shp")
+      assert(r1.getString(0).endsWith("datatypes1.shp"))
+      assert(r1.getLong(2) == dt1Shp.length())
+      assert(r1.getLong(3) == 0L)
+      assert(r1.getLong(4) == dt1Shp.length())
+      assert(r1.getTimestamp(5).getTime == dt1Shp.lastModified())
+      // datatypes2.shp
+      val r2 = byName("datatypes2.shp")
+      assert(r2.getString(0).endsWith("datatypes2.shp"))
+      assert(r2.getLong(2) == dt2Shp.length())
+      assert(r2.getLong(3) == 0L)
+      assert(r2.getLong(4) == dt2Shp.length())
+      assert(r2.getTimestamp(5).getTime == dt2Shp.lastModified())
     }
   }
 }

@@ -44,11 +44,21 @@ case class ShapefileScan(
     dataSchema: StructType,
     readDataSchema: StructType,
     readPartitionSchema: StructType,
+    /** The metadata fields requested by the query (e.g., fields from `_metadata`). */
+    metadataSchema: StructType,
     options: CaseInsensitiveStringMap,
     pushedFilters: Array[Filter],
     partitionFilters: Seq[Expression] = Seq.empty,
     dataFilters: Seq[Expression] = Seq.empty)
     extends FileScan {
+
+  /**
+   * Returns the complete read schema including data columns, partition columns, and any requested
+   * metadata columns. Metadata columns are appended last so the reader factory can construct a
+   * [[JoinedRow]] that appends metadata values after data and partition values.
+   */
+  override def readSchema(): StructType =
+    StructType(readDataSchema.fields ++ readPartitionSchema.fields ++ metadataSchema.fields)
 
   override def createReaderFactory(): PartitionReaderFactory = {
     val caseSensitiveMap = options.asScala.toMap
@@ -61,6 +71,7 @@ case class ShapefileScan(
       dataSchema,
       readDataSchema,
       readPartitionSchema,
+      metadataSchema,
       ShapefileReadOptions.parse(options),
       pushedFilters)
   }
