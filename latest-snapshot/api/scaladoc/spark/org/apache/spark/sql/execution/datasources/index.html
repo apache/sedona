@@ -197,7 +197,11 @@
       </span>
       
       
-    </li>
+    </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="object" href="SedonaFileIndexHelper$.html" title="Helper for creating a PartitioningAwareFileIndex without going through the org.apache.spark.sql.execution.streaming.FileStreamSink.hasMetadata check in org.apache.spark.sql.execution.datasources.v2.FileTable.fileIndex."></a>
+                        <a href="SedonaFileIndexHelper$.html" title="Helper for creating a PartitioningAwareFileIndex without going through the org.apache.spark.sql.execution.streaming.FileStreamSink.hasMetadata check in org.apache.spark.sql.execution.datasources.v2.FileTable.fileIndex.">SedonaFileIndexHelper</a>
+                      </li>
               </ul>
             </div>
           </div>
@@ -228,7 +232,31 @@
           <div id="comment" class="fullcommenttop"></div>
         
 
-      
+      <div id="mbrsel">
+        <div class="toggle"></div>
+        <div id="memberfilter">
+          <i class="material-icons arrow"></i>
+          <span class="input">
+            <input id="mbrsel-input" placeholder="Filter all members" type="text" accesskey="/" />
+          </span>
+          <i class="clear material-icons"></i>
+        </div>
+        <div id="filterby">
+          <div id="order">
+            <span class="filtertype">Ordering</span>
+            <ol>
+              
+              <li class="alpha in"><span>Alphabetic</span></li>
+              
+            </ol>
+          </div>
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+            </div>
+        </div>
+      </div>
 
       <div id="template">
         <div id="allMembers">
@@ -238,7 +266,36 @@
 
         
 
-        
+        <div class="values members">
+              <h3>Value Members</h3>
+              <ol>
+                <li name="org.apache.spark.sql.execution.datasources.SedonaFileIndexHelper" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="SedonaFileIndexHelper"></a><a id="SedonaFileIndexHelper:SedonaFileIndexHelper"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/execution/datasources/SedonaFileIndexHelper$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Helper for creating a PartitioningAwareFileIndex without going through the org.apache.spark.sql.execution.streaming.FileStreamSink.hasMetadata check in org.apache.spark.sql.execution.datasources.v2.FileTable.fileIndex." href="SedonaFileIndexHelper$.html"><span class="name">SedonaFileIndexHelper</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">Helper for creating a <span class="extype" name="PartitioningAwareFileIndex">PartitioningAwareFileIndex</span> without going through the
+<span class="extype" name="org.apache.spark.sql.execution.streaming.FileStreamSink.hasMetadata">org.apache.spark.sql.execution.streaming.FileStreamSink.hasMetadata</span> check in
+<span class="extype" name="org.apache.spark.sql.execution.datasources.v2.FileTable.fileIndex">org.apache.spark.sql.execution.datasources.v2.FileTable.fileIndex</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Helper for creating a <span class="extype" name="PartitioningAwareFileIndex">PartitioningAwareFileIndex</span> without going through the
+<span class="extype" name="org.apache.spark.sql.execution.streaming.FileStreamSink.hasMetadata">org.apache.spark.sql.execution.streaming.FileStreamSink.hasMetadata</span> check in
+<span class="extype" name="org.apache.spark.sql.execution.datasources.v2.FileTable.fileIndex">org.apache.spark.sql.execution.datasources.v2.FileTable.fileIndex</span>.</p><p>The streaming metadata check can produce spurious <span class="extype" name="java.io.FileNotFoundException">java.io.FileNotFoundException</span> warnings
+when reading from cloud storage (e.g., S3) because it attempts to stat the path as a directory.
+For non-streaming, read-only file tables such as Shapefile and GeoPackage, this check is
+unnecessary and can be safely bypassed.
+</p></div></div>
+    </li>
+              </ol>
+            </div>
 
         
 
