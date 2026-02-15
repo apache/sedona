@@ -24,7 +24,7 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.connector.catalog.{MetadataColumn, SupportsMetadataColumns, TableCapability}
 import org.apache.spark.sql.connector.read.ScanBuilder
 import org.apache.spark.sql.connector.write.{LogicalWriteInfo, WriteBuilder}
-import org.apache.spark.sql.execution.datasources.FileFormat
+import org.apache.spark.sql.execution.datasources.{FileFormat, PartitioningAwareFileIndex, SedonaFileIndexHelper}
 import org.apache.sedona.sql.datasources.shapefile.ShapefileUtils.{baseSchema, fieldDescriptorsToSchema, mergeSchemas}
 import org.apache.spark.sql.execution.datasources.v2.FileTable
 import org.apache.spark.sql.types.{DataType, LongType, StringType, StructField, StructType, TimestampType}
@@ -51,6 +51,13 @@ case class ShapefileTable(
     fallbackFileFormat: Class[_ <: FileFormat])
     extends FileTable(sparkSession, options, paths, userSpecifiedSchema)
     with SupportsMetadataColumns {
+
+  // Override fileIndex to skip the FileStreamSink.hasMetadata check that causes
+  // spurious FileNotFoundException warnings when reading from cloud storage (e.g., S3).
+  // Shapefile tables are always non-streaming batch sources, so the streaming
+  // metadata check is unnecessary.
+  override lazy val fileIndex: PartitioningAwareFileIndex =
+    SedonaFileIndexHelper.createFileIndex(sparkSession, options, paths, userSpecifiedSchema)
 
   override def formatName: String = "Shapefile"
 
