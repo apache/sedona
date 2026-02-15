@@ -19,6 +19,8 @@
 package org.apache.sedona.sql
 
 import org.apache.commons.io.FileUtils
+import org.apache.log4j.{AppenderSkeleton, Level, Logger}
+import org.apache.log4j.spi.LoggingEvent
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types.{DateType, DecimalType, LongType, StringType, StructField, StructType, TimestampType}
 import org.locationtech.jts.geom.{Geometry, MultiPolygon, Point, Polygon}
@@ -27,6 +29,7 @@ import org.scalatest.BeforeAndAfterAll
 
 import java.io.File
 import java.nio.file.Files
+import java.util.{ArrayList => JList}
 import scala.collection.mutable
 
 class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
@@ -942,6 +945,41 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
       assert(r2.getLong(3) == 0L)
       assert(r2.getLong(4) == dt2Shp.length())
       assert(r2.getTimestamp(5).getTime == dt2Shp.lastModified())
+    }
+
+    it("reading shapefile by .shp path should not produce FileStreamSink metadata warning") {
+      // GH-2650: When reading shapefiles by .shp path, ShapefileDataSource.transformPaths
+      // converts it to a glob pattern (e.g., "file.???"). Without the fix, Spark's
+      // FileTable.fileIndex calls FileStreamSink.hasMetadata which tries to stat the glob
+      // path as a directory, causing a FileNotFoundException and a spurious WARN log:
+      // "Assume no metadata directory. Error while looking for metadata directory..."
+      val capturedWarnings = new JList[String]()
+      val appender = new AppenderSkeleton {
+        override def append(event: LoggingEvent): Unit = {
+          val msg = event.getRenderedMessage
+          if (msg != null && msg.contains("Assume no metadata directory")) {
+            capturedWarnings.add(msg)
+          }
+        }
+        override def close(): Unit = {}
+        override def requiresLayout(): Boolean = false
+      }
+      appender.setThreshold(Level.WARN)
+      val rootLogger = Logger.getRootLogger
+      rootLogger.addAppender(appender)
+      try {
+        val df = sparkSession.read
+          .format("shapefile")
+          .load(resourceFolder + "shapefiles/datatypes/datatypes1.shp")
+        df.collect()
+        assert(
+          capturedWarnings.isEmpty,
+          "FileStreamSink metadata warning should not be emitted when reading shapefiles " +
+            "by .shp path. This warning is caused by FileStreamSink.hasMetadata trying to " +
+            "stat the glob path as a directory. Captured warnings: " + capturedWarnings)
+      } finally {
+        rootLogger.removeAppender(appender)
+      }
     }
   }
 }

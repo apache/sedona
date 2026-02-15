@@ -25,7 +25,7 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.connector.catalog.{MetadataColumn, SupportsMetadataColumns}
 import org.apache.spark.sql.connector.read.ScanBuilder
 import org.apache.spark.sql.connector.write.{LogicalWriteInfo, WriteBuilder}
-import org.apache.spark.sql.execution.datasources.FileFormat
+import org.apache.spark.sql.execution.datasources.{FileFormat, PartitioningAwareFileIndex, SedonaFileIndexHelper}
 import org.apache.spark.sql.execution.datasources.v2.FileTable
 import org.apache.spark.sql.types.{DataType, DoubleType, IntegerType, LongType, StringType, StructField, StructType, TimestampType}
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
@@ -43,6 +43,13 @@ case class GeoPackageTable(
     loadOptions: GeoPackageOptions)
     extends FileTable(sparkSession, options, paths, userSpecifiedSchema)
     with SupportsMetadataColumns {
+
+  // Override fileIndex to skip the FileStreamSink.hasMetadata check that causes
+  // spurious FileNotFoundException warnings when reading from cloud storage (e.g., S3).
+  // GeoPackage tables are always non-streaming batch sources, so the streaming
+  // metadata check is unnecessary.
+  override lazy val fileIndex: PartitioningAwareFileIndex =
+    SedonaFileIndexHelper.createFileIndex(sparkSession, options, paths, userSpecifiedSchema)
 
   override def inferSchema(files: Seq[FileStatus]): Option[StructType] = {
     if (loadOptions.showMetadata) {
