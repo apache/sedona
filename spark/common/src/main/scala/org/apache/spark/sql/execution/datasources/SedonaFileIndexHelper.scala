@@ -18,7 +18,6 @@
  */
 package org.apache.spark.sql.execution.datasources
 
-import org.apache.hadoop.fs.Path
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
@@ -48,7 +47,8 @@ object SedonaFileIndexHelper {
       userSpecifiedSchema: Option[StructType]): PartitioningAwareFileIndex = {
     val caseSensitiveMap = options.asCaseSensitiveMap.asScala.toMap
     val hadoopConf = sparkSession.sessionState.newHadoopConfWithOptions(caseSensitiveMap)
-    val globPathsEnabled = Option(options.get("globPaths")).map(_ == "true").getOrElse(true)
+    val globPathsEnabled =
+      Option(options.get("globPaths")).map(v => java.lang.Boolean.parseBoolean(v)).getOrElse(true)
     val rootPathsSpecified = DataSource.checkAndGlobPathIfNecessary(
       paths,
       hadoopConf,
