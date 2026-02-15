@@ -19,7 +19,7 @@
 package org.apache.sedona.sql
 
 import io.minio.{MakeBucketArgs, MinioClient, PutObjectArgs}
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions.expr
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types.{BinaryType, BooleanType, DateType, DoubleType, IntegerType, StringType, StructField, StructType, TimestampType}
@@ -318,6 +318,78 @@ class GeoPackageReaderTest extends TestBaseScala with Matchers {
       dfLarger.count shouldEqual 300 * 4
 
       container.stop()
+    }
+  }
+
+  describe("_metadata hidden column support") {
+    it("should expose _metadata struct with all expected fields") {
+      val df = readFeatureData("point1")
+      val metaDf = df.select("_metadata")
+      val metaSchema = metaDf.schema.fields.head.dataType.asInstanceOf[StructType]
+      val fieldNames = metaSchema.fieldNames.toSet
+      fieldNames should contain("file_path")
+      fieldNames should contain("file_name")
+      fieldNames should contain("file_size")
+      fieldNames should contain("file_block_start")
+      fieldNames should contain("file_block_length")
+      fieldNames should contain("file_modification_time")
+    }
+
+    it("should not include _metadata in select(*)") {
+      val df = readFeatureData("point1")
+      val starCols = df.select("*").columns.toSet
+      starCols should not contain "_metadata"
+    }
+
+    it("should return correct file_path and file_name in _metadata") {
+      val df = readFeatureData("point1")
+      val row = df.select("_metadata.file_path", "_metadata.file_name").head()
+      val filePath = row.getString(0)
+      val fileName = row.getString(1)
+      filePath should endWith("example.gpkg")
+      fileName shouldEqual "example.gpkg"
+    }
+
+    it("should return actual file_size matching the .gpkg file on disk") {
+      val df = readFeatureData("point1")
+      val metaFileSize = df.select("_metadata.file_size").head().getLong(0)
+      val actualFile = new java.io.File(path)
+      metaFileSize shouldEqual actualFile.length()
+    }
+
+    it("should return file_block_start=0 and file_block_length=file_size") {
+      val df = readFeatureData("point1")
+      val row = df
+        .select(
+          "_metadata.file_block_start",
+          "_metadata.file_block_length",
+          "_metadata.file_size")
+        .head()
+      row.getLong(0) shouldEqual 0L
+      row.getLong(1) shouldEqual row.getLong(2)
+    }
+
+    it("should return file_modification_time matching the .gpkg file on disk") {
+      val df = readFeatureData("point1")
+      val metaModTime = df.select("_metadata.file_modification_time").head().getTimestamp(0)
+      val actualFile = new java.io.File(path)
+      val expectedModTime = new java.sql.Timestamp(actualFile.lastModified())
+      metaModTime shouldEqual expectedModTime
+    }
+
+    it("should allow filtering on _metadata fields") {
+      val df = readFeatureData("point1")
+      val filtered = df.filter(df("_metadata.file_name") === "example.gpkg")
+      filtered.count() shouldEqual df.count()
+      val empty = df.filter(df("_metadata.file_name") === "nonexistent.gpkg")
+      empty.count() shouldEqual 0
+    }
+
+    it("should select _metadata along with data columns") {
+      val df = readFeatureData("point1")
+      val result = df.select("id", "_metadata.file_name").head()
+      result.getInt(0) shouldEqual 1
+      result.getString(1) shouldEqual "example.gpkg"
     }
   }
 

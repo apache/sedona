@@ -36,6 +36,18 @@ class GeoPackageScanBuilder(
     userDefinedSchema: Option[StructType] = None)
     extends FileScanBuilder(sparkSession, fileIndex, dataSchema) {
 
+  private var _requiredMetadataSchema: StructType = StructType(Seq.empty)
+
+  override def pruneColumns(requiredSchema: StructType): Unit = {
+    val resolver = sparkSession.sessionState.conf.resolver
+    val metaFields = requiredSchema.fields.filter { field =>
+      !dataSchema.fields.exists(df => resolver(df.name, field.name)) &&
+      !fileIndex.partitionSchema.fields.exists(pf => resolver(pf.name, field.name))
+    }
+    _requiredMetadataSchema = StructType(metaFields)
+    super.pruneColumns(requiredSchema)
+  }
+
   override def build(): Scan = {
     val fileIndexAdjusted =
       if (loadOptions.showMetadata)
@@ -52,6 +64,7 @@ class GeoPackageScanBuilder(
       fileIndexAdjusted,
       dataSchema,
       readPartitionSchema(),
+      _requiredMetadataSchema,
       options,
       loadOptions)
   }
