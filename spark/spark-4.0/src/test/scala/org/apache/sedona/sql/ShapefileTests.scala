@@ -20,7 +20,6 @@ package org.apache.sedona.sql
 
 import org.apache.commons.io.FileUtils
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.sql.Row
 import org.apache.spark.sql.types.{DateType, DecimalType, LongType, StringType, StructField, StructType, TimestampType}
 import org.locationtech.jts.geom.{Geometry, MultiPolygon, Point, Polygon}
 import org.locationtech.jts.io.{WKTReader, WKTWriter}
@@ -517,6 +516,18 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
         if (id > 0) {
           assert(row.getAs[String]("aUnicode") == s"测试$id")
         }
+      }
+
+      // Using partition filters
+      val filteredRows = shapefileDf.where("part = 2").collect()
+      assert(filteredRows.length == 4)
+      filteredRows.foreach { row =>
+        assert(row.getAs[Geometry]("geometry").isInstanceOf[Point])
+        assert(row.getAs[Int]("part") == 2)
+        val id = row.getAs[Long]("id")
+        assert(id > 10)
+        assert(row.getAs[Long]("aInt") == id)
+        assert(row.getAs[String]("aUnicode") == s"测试$id")
       }
     }
 

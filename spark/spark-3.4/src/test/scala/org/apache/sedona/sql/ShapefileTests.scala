@@ -20,7 +20,6 @@ package org.apache.sedona.sql
 
 import org.apache.commons.io.FileUtils
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.sql.Row
 import org.apache.spark.sql.types.{DateType, DecimalType, LongType, StringType, StructField, StructType, TimestampType}
 import org.locationtech.jts.geom.{Geometry, MultiPolygon, Point, Polygon}
 import org.locationtech.jts.io.{WKTReader, WKTWriter}
