@@ -377,9 +377,9 @@ static PyMethodDef geomserde_methods_shapely_2[] = {
     {"deserialize", deserialize, METH_VARARGS,
      "Deserialize bytes-like object to geometry object."},
     {"from_sedona_func", from_sedona_func, METH_VARARGS,
-     "Deserialize bytes-like object to geometry object."},
+     "Deserialize sedona array objects to geos geometry array object."},
     {"to_sedona_func", to_sedona_func, METH_VARARGS,
-     "Deserialize bytes-like object to geometry object."},
+     "Deserialize geos array objects to sedona array object."},
     {NULL, NULL, 0, NULL}, /* Sentinel */
 };
 
