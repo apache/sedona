@@ -15,6 +15,9 @@
 # specific language governing permissions and limitations
 # under the License.
 
+# This is one to one version with what you can find in Apache Spark, with a small change to import the worker_main function
+# from Apache Sedona implementation, from sedona.spark.worker.worker import main as worker_main
+
 import numbers
 import os
 import signal
