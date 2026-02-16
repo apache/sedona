@@ -70,8 +70,6 @@ class TestBase:
                     "spark.sedona.stac.load.itemsLimitMax",
                     "20",
                 )
-                .config("spark.executor.memory", "10G")
-                .config("spark.driver.memory", "10G")
                 .config(
                     "sedona.python.worker.udf.daemon.module",
                     "sedona.spark.worker.daemon",
