@@ -18,6 +18,8 @@
  */
 package org.apache.spark.sql.execution.datasources
 
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.Path
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
@@ -37,6 +39,61 @@ import scala.collection.JavaConverters._
 object SedonaFileIndexHelper {
 
   /**
+   * Cached reflective reference to [[DataSource.checkAndGlobPathIfNecessary]].
+   *
+   * <p>We call this method via reflection to avoid binary incompatibility between OSS Apache
+   * Spark and Databricks Runtime. On OSS Spark (3.5, 4.0, 4.1, etc.) this method has default
+   * parameter values, but on Databricks Runtime (both Spark 3.5 and 4.0) the same method has all
+   * required parameters with no defaults, and may also differ in parameter count.
+   *
+   * <p>Direct calls with named/default parameters cause the Scala compiler to generate synthetic
+   * {@code $default$N()} accessor methods in the bytecode. When these accessors do not exist at
+   * runtime (as is the case on Databricks), a {@link NoSuchMethodError} is thrown. Reflection
+   * avoids this by resolving the method at runtime.
+   */
+  private lazy val checkAndGlobMethod: java.lang.reflect.Method = {
+    DataSource.getClass.getMethods
+      .filter(_.getName == "checkAndGlobPathIfNecessary")
+      .headOption
+      .getOrElse(
+        throw new NoSuchMethodException("DataSource.checkAndGlobPathIfNecessary not found"))
+  }
+
+  private def checkAndGlobPathIfNecessary(
+      paths: Seq[String],
+      hadoopConf: Configuration,
+      checkEmptyGlobPath: Boolean,
+      checkFilesExist: Boolean,
+      enableGlobbing: Boolean): Seq[Path] = {
+    val method = checkAndGlobMethod
+    val args: Array[AnyRef] = method.getParameterCount match {
+      case 6 =>
+        // OSS Apache Spark (3.x and 4.x): 6 parameters with numThreads at position 5
+        Array(
+          paths,
+          hadoopConf,
+          java.lang.Boolean.valueOf(checkEmptyGlobPath),
+          java.lang.Boolean.valueOf(checkFilesExist),
+          Integer.valueOf(40),
+          java.lang.Boolean.valueOf(enableGlobbing))
+      case _ =>
+        // Databricks Runtime: 5 parameters (no numThreads)
+        Array(
+          paths,
+          hadoopConf,
+          java.lang.Boolean.valueOf(checkEmptyGlobPath),
+          java.lang.Boolean.valueOf(checkFilesExist),
+          java.lang.Boolean.valueOf(enableGlobbing))
+    }
+    try {
+      method.invoke(DataSource, args: _*).asInstanceOf[Seq[Path]]
+    } catch {
+      case e: java.lang.reflect.InvocationTargetException =>
+        throw e.getCause
+    }
+  }
+
+  /**
    * Build an [[InMemoryFileIndex]] for the given paths, resolving globs if necessary, without the
    * streaming metadata directory check.
    */
@@ -49,7 +106,7 @@ object SedonaFileIndexHelper {
     val hadoopConf = sparkSession.sessionState.newHadoopConfWithOptions(caseSensitiveMap)
     val globPathsEnabled =
       Option(options.get("globPaths")).map(v => java.lang.Boolean.parseBoolean(v)).getOrElse(true)
-    val rootPathsSpecified = DataSource.checkAndGlobPathIfNecessary(
+    val rootPathsSpecified = checkAndGlobPathIfNecessary(
       paths,
       hadoopConf,
       checkEmptyGlobPath = true,
