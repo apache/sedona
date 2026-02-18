@@ -608,7 +608,7 @@ public class FunctionsProj4Test extends TestBase {
       assertEquals(
           "Provider should not be duplicated", countBefore, countProvidersByName("sedona-url-crs"));
     } finally {
-      FunctionsProj4.registerUrlCrsProvider("", null, null);
+      FunctionsProj4.resetUrlCrsProviderForTest();
     }
   }
 
@@ -627,7 +627,7 @@ public class FunctionsProj4Test extends TestBase {
       assertEquals(
           org.datasyslab.proj4sedona.defs.CRSResult.Format.WKT2, findUrlCrsProvider().getFormat());
     } finally {
-      FunctionsProj4.registerUrlCrsProvider("", null, null);
+      FunctionsProj4.resetUrlCrsProviderForTest();
     }
   }
 
@@ -646,7 +646,7 @@ public class FunctionsProj4Test extends TestBase {
             "https://test.example.com", "/epsg/{code}", (String) c[0]);
         assertEquals("Format '" + c[0] + "'", c[1], findUrlCrsProvider().getFormat());
       } finally {
-        FunctionsProj4.registerUrlCrsProvider("", null, null);
+        FunctionsProj4.resetUrlCrsProviderForTest();
       }
     }
   }
@@ -663,8 +663,8 @@ public class FunctionsProj4Test extends TestBase {
             org.datasyslab.proj4sedona.defs.CRSResult.Format.PROJJSON,
             findUrlCrsProvider().getFormat());
       } finally {
-        // Use the unregister path (empty baseUrl) so registeredUrlCrsConfig is also reset
-        FunctionsProj4.registerUrlCrsProvider("", null, null);
+        // Use the test reset so registeredUrlCrsConfig is also cleared
+        FunctionsProj4.resetUrlCrsProviderForTest();
       }
     }
   }
@@ -720,7 +720,7 @@ public class FunctionsProj4Test extends TestBase {
       assertTrue("Local HTTP server should have been hit", requestCount.get() > 0);
     } finally {
       server.stop(0);
-      FunctionsProj4.registerUrlCrsProvider("", null, null);
+      FunctionsProj4.resetUrlCrsProviderForTest();
     }
   }
 
@@ -765,7 +765,7 @@ public class FunctionsProj4Test extends TestBase {
           countProvidersByName("sedona-url-crs"));
     } finally {
       pool.shutdown();
-      FunctionsProj4.registerUrlCrsProvider("", null, null);
+      FunctionsProj4.resetUrlCrsProviderForTest();
     }
   }
 

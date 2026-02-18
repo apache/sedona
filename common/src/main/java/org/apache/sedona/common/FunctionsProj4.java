@@ -78,6 +78,15 @@ public class FunctionsProj4 {
   private static final AtomicReference<String> registeredUrlCrsConfig = new AtomicReference<>(null);
 
   /**
+   * Reset the URL CRS provider state. Package-private for testing only. Removes the provider from
+   * Defs and clears the cached config key.
+   */
+  static void resetUrlCrsProviderForTest() {
+    Defs.removeProvider(URL_CRS_PROVIDER_NAME);
+    registeredUrlCrsConfig.set(null);
+  }
+
+  /**
    * Register a URL-based CRS provider with proj4sedona's Defs registry. This provider will be
    * consulted before the built-in provider when resolving EPSG codes.
    *
@@ -91,13 +100,6 @@ public class FunctionsProj4 {
    */
   public static void registerUrlCrsProvider(String baseUrl, String pathTemplate, String format) {
     if (baseUrl == null || baseUrl.isEmpty()) {
-      // Treat null/empty baseUrl as a signal to disable: unregister if previously registered.
-      synchronized (registeredUrlCrsConfig) {
-        if (registeredUrlCrsConfig.get() != null) {
-          Defs.removeProvider(URL_CRS_PROVIDER_NAME);
-          registeredUrlCrsConfig.set(null);
-        }
-      }
       return;
     }
 

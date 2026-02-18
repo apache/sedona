@@ -362,7 +362,7 @@ sedona.sql("""
 
 ### Disabling the URL provider
 
-To disable, omit `spark.sedona.crs.url.base` or set it to an empty string (the default). If a URL provider was previously registered in the current executor JVM, setting the base to empty will unregister it.
+To avoid enabling the URL provider, omit `spark.sedona.crs.url.base` or leave it as an empty string (the default). Note that once a URL provider has been registered in an executor JVM, it remains active for the lifetime of that JVM.
 
 See also: [Configuration parameters](Parameter.md#crs-transformation) for the full list of URL CRS provider settings.
 
