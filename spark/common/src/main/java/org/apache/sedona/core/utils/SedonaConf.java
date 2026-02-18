@@ -369,7 +369,7 @@ public class SedonaConf implements Serializable {
 
   /**
    * Get the path template for the URL-based CRS provider. Supports placeholders: {@code
-   * {authority}}, {@code {AUTHORITY}}, {@code {code}}.
+   * {authority}} and {@code {code}}.
    *
    * @return The path template (default: "/{authority}/{code}.json")
    * @since 1.9.0
