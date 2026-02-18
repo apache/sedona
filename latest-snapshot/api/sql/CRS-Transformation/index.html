@@ -2797,6 +2797,111 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
+  <a href="#url-crs-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        URL CRS Provider
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="URL CRS Provider">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hosting-crs-definitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hosting CRS definitions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supported-response-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported response formats
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-github-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: GitHub repository
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-self-hosted-crs-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: self-hosted CRS server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-custom-authority-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: custom authority codes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-using-geometry-srid-with-url-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: using geometry SRID with URL provider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disabling-the-url-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Disabling the URL provider
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#grid-file-support" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6001,6 +6106,111 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
+  <a href="#url-crs-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        URL CRS Provider
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="URL CRS Provider">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hosting-crs-definitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hosting CRS definitions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supported-response-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported response formats
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-github-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: GitHub repository
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-self-hosted-crs-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: self-hosted CRS server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-custom-authority-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: custom authority codes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-using-geometry-srid-with-url-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: using geometry SRID with URL provider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disabling-the-url-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Disabling the URL provider
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#grid-file-support" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6302,6 +6512,158 @@ You're not viewing the latest stable version.
 <span class="s1">    }&#39;</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed_point</span>
 </code></pre></div>
+<h2 id="url-crs-provider">URL CRS Provider<a class="headerlink" href="#url-crs-provider" title="Permanent link">&para;</a></h2>
+<p>Since v1.9.0, Sedona supports resolving CRS definitions from a remote HTTP server. This is useful when you need custom or internal CRS definitions that are not included in the built-in database, or when you want to use your own CRS definition service.</p>
+<p>When configured, the URL provider is consulted <strong>before</strong> the built-in CRS database. If the URL provider returns a valid CRS definition, it is used directly. If the URL returns a 404 or an error, Sedona falls back to the built-in definitions.</p>
+<h3 id="hosting-crs-definitions">Hosting CRS definitions<a class="headerlink" href="#hosting-crs-definitions" title="Permanent link">&para;</a></h3>
+<p>You can host your custom CRS definitions on any HTTP-accessible location. Two common approaches:</p>
+<ul>
+<li><strong>GitHub repository</strong>: Store CRS definition files in a public GitHub repo and use the raw content URL. This is the easiest way to get started — no server infrastructure required.</li>
+<li><strong>Public S3 bucket</strong>: Upload CRS definition files to an Amazon S3 bucket with public read access and use the S3 static website URL or CloudFront distribution.</li>
+</ul>
+<p>Each file should contain a single CRS definition in the format you specify via <code>spark.sedona.crs.url.format</code> (PROJJSON, PROJ string, WKT1, or WKT2).</p>
+<h3 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h3>
+<p>Set the following Spark configuration properties when creating your Sedona session:</p>
+<div class="highlight"><pre><span></span><code><span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.base&quot;</span><span class="p">,</span> <span class="s2">&quot;https://crs.example.com&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.pathTemplate&quot;</span><span class="p">,</span> <span class="s2">&quot;/</span><span class="si">{authority}</span><span class="s2">/</span><span class="si">{code}</span><span class="s2">.json&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.format&quot;</span><span class="p">,</span> <span class="s2">&quot;projjson&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+</code></pre></div>
+<p>With the default path template, resolving <code>EPSG:4326</code> will fetch:</p>
+<div class="highlight"><pre><span></span><code>https://crs.example.com/epsg/4326.json
+</code></pre></div>
+<p>Only <code>spark.sedona.crs.url.base</code> is required. The other two properties have sensible defaults (<code>/{authority}/{code}.json</code> and <code>projjson</code>).</p>
+<h3 id="supported-response-formats">Supported response formats<a class="headerlink" href="#supported-response-formats" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Format value</th>
+<th>Description</th>
+<th>Content example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>projjson</code></td>
+<td>PROJJSON (default)</td>
+<td><code>{"type": "GeographicCRS", ...}</code></td>
+</tr>
+<tr>
+<td><code>proj</code></td>
+<td>PROJ string</td>
+<td><code>+proj=longlat +datum=WGS84 +no_defs</code></td>
+</tr>
+<tr>
+<td><code>wkt1</code></td>
+<td>OGC WKT1</td>
+<td><code>GEOGCS["WGS 84", ...]</code></td>
+</tr>
+<tr>
+<td><code>wkt2</code></td>
+<td>ISO 19162 WKT2</td>
+<td><code>GEOGCRS["WGS 84", ...]</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="example-github-repository">Example: GitHub repository<a class="headerlink" href="#example-github-repository" title="Permanent link">&para;</a></h3>
+<p>Suppose you have a GitHub repo <code>myorg/crs-definitions</code> with the following structure:</p>
+<div class="highlight"><pre><span></span><code>crs-definitions/
+  epsg/
+    990001.proj
+    990002.proj
+</code></pre></div>
+<p>where <code>epsg/990001.proj</code> contains a PROJ string like:</p>
+<div class="highlight"><pre><span></span><code>+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +no_defs
+</code></pre></div>
+<p>Point Sedona to the raw GitHub content URL:</p>
+<div class="highlight"><pre><span></span><code><span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span>
+        <span class="s2">&quot;spark.sedona.crs.url.base&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;https://raw.githubusercontent.com/myorg/crs-definitions/main&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.pathTemplate&quot;</span><span class="p">,</span> <span class="s2">&quot;/epsg/</span><span class="si">{code}</span><span class="s2">.proj&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.format&quot;</span><span class="p">,</span> <span class="s2">&quot;proj&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># Resolves EPSG:990001 from:</span>
+<span class="c1"># https://raw.githubusercontent.com/myorg/crs-definitions/main/epsg/990001.proj</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    SELECT ST_Transform(</span>
+<span class="s2">        ST_GeomFromText(&#39;POINT(-122.4194 37.7749)&#39;),</span>
+<span class="s2">        &#39;EPSG:4326&#39;,</span>
+<span class="s2">        &#39;EPSG:990001&#39;</span>
+<span class="s2">    ) AS transformed_point</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="example-self-hosted-crs-server">Example: self-hosted CRS server<a class="headerlink" href="#example-self-hosted-crs-server" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.base&quot;</span><span class="p">,</span> <span class="s2">&quot;https://crs.mycompany.com&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.pathTemplate&quot;</span><span class="p">,</span> <span class="s2">&quot;/epsg/</span><span class="si">{code}</span><span class="s2">.proj&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.format&quot;</span><span class="p">,</span> <span class="s2">&quot;proj&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># Now ST_Transform will try https://crs.mycompany.com/epsg/3857.proj</span>
+<span class="c1"># before falling back to built-in definitions</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    SELECT ST_Transform(</span>
+<span class="s2">        ST_GeomFromText(&#39;POINT(-122.4194 37.7749)&#39;),</span>
+<span class="s2">        &#39;EPSG:4326&#39;,</span>
+<span class="s2">        &#39;EPSG:3857&#39;</span>
+<span class="s2">    ) AS transformed_point</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="example-custom-authority-codes">Example: custom authority codes<a class="headerlink" href="#example-custom-authority-codes" title="Permanent link">&para;</a></h3>
+<p>The URL provider is especially useful for custom or internal authority codes that are not in any public database. With the default path template <code>/{authority}/{code}.json</code>, the <code>{authority}</code> placeholder is replaced by the authority name from the CRS string (lowercased):</p>
+<div class="highlight"><pre><span></span><code><span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.base&quot;</span><span class="p">,</span> <span class="s2">&quot;https://crs.mycompany.com&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.format&quot;</span><span class="p">,</span> <span class="s2">&quot;proj&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># Resolves MYORG:1001 from:</span>
+<span class="c1"># https://crs.mycompany.com/myorg/1001.json</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    SELECT ST_Transform(</span>
+<span class="s2">        ST_GeomFromText(&#39;POINT(-122.4194 37.7749)&#39;),</span>
+<span class="s2">        &#39;EPSG:4326&#39;,</span>
+<span class="s2">        &#39;MYORG:1001&#39;</span>
+<span class="s2">    ) AS transformed_point</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="example-using-geometry-srid-with-url-provider">Example: using geometry SRID with URL provider<a class="headerlink" href="#example-using-geometry-srid-with-url-provider" title="Permanent link">&para;</a></h3>
+<p>If the geometry already has an SRID set (e.g., via <code>ST_SetSRID</code>), you can omit the source CRS parameter. The source CRS is derived from the geometry's SRID as an EPSG code:</p>
+<div class="highlight"><pre><span></span><code><span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.base&quot;</span><span class="p">,</span> <span class="s2">&quot;https://crs.mycompany.com&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.format&quot;</span><span class="p">,</span> <span class="s2">&quot;proj&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># The source CRS is taken from the geometry&#39;s SRID (4326 → EPSG:4326).</span>
+<span class="c1"># Only the target CRS string is needed.</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    SELECT ST_Transform(</span>
+<span class="s2">        ST_SetSRID(ST_GeomFromText(&#39;POINT(-122.4194 37.7749)&#39;), 4326),</span>
+<span class="s2">        &#39;EPSG:3857&#39;</span>
+<span class="s2">    ) AS transformed_point</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="disabling-the-url-provider">Disabling the URL provider<a class="headerlink" href="#disabling-the-url-provider" title="Permanent link">&para;</a></h3>
+<p>To avoid enabling the URL provider, omit <code>spark.sedona.crs.url.base</code> or leave it as an empty string (the default). Note that once a URL provider has been registered in an executor JVM, it remains active for the lifetime of that JVM.</p>
+<p>See also: <a href="../Parameter/#crs-transformation">Configuration parameters</a> for the full list of URL CRS provider settings.</p>
 <h2 id="grid-file-support">Grid File Support<a class="headerlink" href="#grid-file-support" title="Permanent link">&para;</a></h2>
 <p>Grid files enable high-accuracy datum transformations, such as NAD27 to NAD83 or OSGB36 to ETRS89. Sedona supports loading grid files from multiple sources.</p>
 <h3 id="grid-file-sources">Grid File Sources<a class="headerlink" href="#grid-file-sources" title="Permanent link">&para;</a></h3>
@@ -6405,7 +6767,7 @@ You're not viewing the latest stable version.
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 12, 2026 20:06:10 UTC">February 12, 2026 20:06:10</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 18, 2026 22:50:27 UTC">February 18, 2026 22:50:27</span>
   </span>
 
     
