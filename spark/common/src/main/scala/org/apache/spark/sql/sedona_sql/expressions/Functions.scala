@@ -331,11 +331,6 @@ private[apache] case class ST_Transform(
     this(inputExpressions, ST_Transform.readConfig())
   }
 
-  // Register URL CRS provider on executor if configured (lazy, once per JVM)
-  if (crsUrlBase.nonEmpty) {
-    FunctionsProj4.registerUrlCrsProvider(crsUrlBase, crsUrlPathTemplate, crsUrlFormat)
-  }
-
   // Define proj4sedona function overloads (2, 3, 4-arg versions)
   // Note: 4-arg version ignores the lenient parameter
   private lazy val proj4Functions: Seq[InferrableFunction] = Seq(
@@ -350,6 +345,13 @@ private[apache] case class ST_Transform(
     inferrableFunction2(FunctionsGeoTools.transform))
 
   override lazy val f: InferrableFunction = {
+    // Register URL CRS provider on executor if configured (lazy, once per JVM).
+    // This runs inside lazy val f so it only executes on executors during row
+    // evaluation, never on the driver during query planning.
+    if (crsUrlBase.nonEmpty) {
+      FunctionsProj4.registerUrlCrsProvider(crsUrlBase, crsUrlPathTemplate, crsUrlFormat)
+    }
+
     // Check config to decide between proj4sedona and GeoTools
     // Note: 4-arg lenient parameter is ignored by proj4sedona
     val candidateFunctions = if (useGeoTools) geoToolsFunctions else proj4Functions

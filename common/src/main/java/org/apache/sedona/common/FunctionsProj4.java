@@ -81,8 +81,9 @@ public class FunctionsProj4 {
    * Register a URL-based CRS provider with proj4sedona's Defs registry. This provider will be
    * consulted before the built-in provider when resolving EPSG codes.
    *
-   * <p>This method is safe to call multiple times — it only registers once per JVM (or re-registers
-   * if the config changes). It is called lazily on executors before the first CRS transformation.
+   * <p>This method is safe to call concurrently from multiple threads — it uses double-checked
+   * locking so the fast path (already registered with the same config) is lock-free, and the
+   * synchronized slow path executes at most once per JVM (or once per config change).
    *
    * @param baseUrl The base URL of the CRS definition server
    * @param pathTemplate The URL path template (e.g., "/{authority}/{code}.json")
@@ -94,30 +95,40 @@ public class FunctionsProj4 {
     }
 
     String configKey = baseUrl + "|" + pathTemplate + "|" + format;
-    String current = registeredUrlCrsConfig.get();
 
-    if (configKey.equals(current)) {
-      // Already registered with the same config
+    // Fast path (lock-free): already registered with the same config.
+    // This handles 99.999%+ of calls with just a volatile read + String.equals().
+    if (configKey.equals(registeredUrlCrsConfig.get())) {
       return;
     }
 
-    // Remove existing provider if config changed
-    if (current != null) {
-      Defs.removeProvider(URL_CRS_PROVIDER_NAME);
+    // Slow path: synchronize to make the remove-register-set sequence atomic.
+    // Only the first thread per JVM (or per config change) enters this block.
+    synchronized (registeredUrlCrsConfig) {
+      // Re-check after acquiring lock — another thread may have registered already
+      String current = registeredUrlCrsConfig.get();
+      if (configKey.equals(current)) {
+        return;
+      }
+
+      // Remove existing provider if config changed
+      if (current != null) {
+        Defs.removeProvider(URL_CRS_PROVIDER_NAME);
+      }
+
+      CRSResult.Format crsFormat = parseCrsFormat(format);
+
+      UrlCRSProvider provider =
+          UrlCRSProvider.builder(URL_CRS_PROVIDER_NAME)
+              .baseUrl(baseUrl)
+              .pathTemplate(pathTemplate)
+              .format(crsFormat)
+              .build();
+
+      // Priority 50: before built-in (100) and spatialreference.org (101)
+      Defs.registerProvider(provider, 50);
+      registeredUrlCrsConfig.set(configKey);
     }
-
-    CRSResult.Format crsFormat = parseCrsFormat(format);
-
-    UrlCRSProvider provider =
-        UrlCRSProvider.builder(URL_CRS_PROVIDER_NAME)
-            .baseUrl(baseUrl)
-            .pathTemplate(pathTemplate)
-            .format(crsFormat)
-            .build();
-
-    // Priority 50: before built-in (100) and spatialreference.org (101)
-    Defs.registerProvider(provider, 50);
-    registeredUrlCrsConfig.set(configKey);
   }
 
   /**

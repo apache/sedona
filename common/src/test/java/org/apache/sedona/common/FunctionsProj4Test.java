@@ -26,6 +26,12 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 import org.locationtech.jts.geom.*;
@@ -713,6 +719,51 @@ public class FunctionsProj4Test extends TestBase {
       assertTrue("Local HTTP server should have been hit", requestCount.get() > 0);
     } finally {
       server.stop(0);
+      org.datasyslab.proj4sedona.defs.Defs.removeProvider("sedona-url-crs");
+    }
+  }
+
+  @Test
+  public void testRegisterUrlCrsProviderConcurrentThreadSafety() throws Exception {
+    // Verify that concurrent calls to registerUrlCrsProvider do not produce
+    // duplicate providers or corrupt the registry. This exercises the
+    // synchronized double-checked locking path.
+    final int threadCount = 16;
+    final String testUrl = "https://concurrent-test.example.com";
+    final String pathTemplate = "/epsg/{code}.json";
+    final String format = "projjson";
+
+    ExecutorService pool = Executors.newFixedThreadPool(threadCount);
+    CyclicBarrier barrier = new CyclicBarrier(threadCount);
+
+    try {
+      List<Future<?>> futures = new ArrayList<>();
+      for (int i = 0; i < threadCount; i++) {
+        futures.add(
+            pool.submit(
+                () -> {
+                  try {
+                    // All threads wait at the barrier then race into registration
+                    barrier.await();
+                    FunctionsProj4.registerUrlCrsProvider(testUrl, pathTemplate, format);
+                  } catch (Exception e) {
+                    throw new RuntimeException(e);
+                  }
+                }));
+      }
+
+      // Wait for all threads to complete and propagate any exceptions
+      for (Future<?> f : futures) {
+        f.get();
+      }
+
+      // After all concurrent registrations, there should be exactly 1 provider
+      assertEquals(
+          "Concurrent registration must produce exactly 1 provider",
+          1,
+          countProvidersByName("sedona-url-crs"));
+    } finally {
+      pool.shutdown();
       org.datasyslab.proj4sedona.defs.Defs.removeProvider("sedona-url-crs");
     }
   }
