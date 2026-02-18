@@ -60,4 +60,57 @@ public class SedonaConfTest {
     // fromSparkEnv means we don't have access to default values so sometimes we get null as input
     assertEquals(0, SedonaConf.bytesFromString(null));
   }
+
+  // ==================== URL CRS Provider Config Tests ====================
+
+  @Test
+  public void testCrsUrlBaseDefault() {
+    // Default should be empty string (disabled)
+    assertEquals("", SedonaConf.fromActiveSession().getCrsUrlBase());
+  }
+
+  @Test
+  public void testCrsUrlPathTemplateDefault() {
+    // Default should be "/{authority}/{code}.json"
+    assertEquals(
+        "/{authority}/{code}.json", SedonaConf.fromActiveSession().getCrsUrlPathTemplate());
+  }
+
+  @Test
+  public void testCrsUrlFormatDefault() {
+    // Default should be "projjson"
+    assertEquals("projjson", SedonaConf.fromActiveSession().getCrsUrlFormat());
+  }
+
+  @Test
+  public void testCrsUrlBaseCustom() {
+    SparkSession.active().conf().set("spark.sedona.crs.url.base", "https://cdn.proj.org");
+    try {
+      assertEquals("https://cdn.proj.org", SedonaConf.fromActiveSession().getCrsUrlBase());
+    } finally {
+      SparkSession.active().conf().set("spark.sedona.crs.url.base", "");
+    }
+  }
+
+  @Test
+  public void testCrsUrlPathTemplateCustom() {
+    SparkSession.active().conf().set("spark.sedona.crs.url.pathTemplate", "/{authority}/{code}");
+    try {
+      assertEquals("/{authority}/{code}", SedonaConf.fromActiveSession().getCrsUrlPathTemplate());
+    } finally {
+      SparkSession.active()
+          .conf()
+          .set("spark.sedona.crs.url.pathTemplate", "/{authority}/{code}.json");
+    }
+  }
+
+  @Test
+  public void testCrsUrlFormatCustom() {
+    SparkSession.active().conf().set("spark.sedona.crs.url.format", "wkt2");
+    try {
+      assertEquals("wkt2", SedonaConf.fromActiveSession().getCrsUrlFormat());
+    } finally {
+      SparkSession.active().conf().set("spark.sedona.crs.url.format", "projjson");
+    }
+  }
 }

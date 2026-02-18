@@ -18,9 +18,14 @@
  */
 package org.apache.sedona.common;
 
+import java.util.Locale;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.datasyslab.proj4sedona.core.Proj;
+import org.datasyslab.proj4sedona.defs.CRSResult;
+import org.datasyslab.proj4sedona.defs.Defs;
+import org.datasyslab.proj4sedona.defs.UrlCRSProvider;
 import org.datasyslab.proj4sedona.jts.JTSGeometryTransformer;
 import org.datasyslab.proj4sedona.parser.CRSSerializer;
 import org.locationtech.jts.geom.Geometry;
@@ -61,6 +66,82 @@ public class FunctionsProj4 {
   /** Pattern to match EPSG codes (e.g., "EPSG:4326", "epsg:2154") */
   private static final Pattern EPSG_PATTERN =
       Pattern.compile("^EPSG:(\\d+)$", Pattern.CASE_INSENSITIVE);
+
+  /** Name used for the registered URL CRS provider. */
+  private static final String URL_CRS_PROVIDER_NAME = "sedona-url-crs";
+
+  /**
+   * Tracks the currently registered URL CRS provider config (baseUrl + "|" + pathTemplate + "|" +
+   * format). Null means no provider registered yet. Uses AtomicReference for thread-safe lazy
+   * initialization on executors.
+   */
+  private static final AtomicReference<String> registeredUrlCrsConfig = new AtomicReference<>(null);
+
+  /**
+   * Register a URL-based CRS provider with proj4sedona's Defs registry. This provider will be
+   * consulted before the built-in provider when resolving EPSG codes.
+   *
+   * <p>This method is safe to call multiple times — it only registers once per JVM (or re-registers
+   * if the config changes). It is called lazily on executors before the first CRS transformation.
+   *
+   * @param baseUrl The base URL of the CRS definition server
+   * @param pathTemplate The URL path template (e.g., "/{authority}/{code}.json")
+   * @param format The expected response format: "projjson", "proj", "wkt1", or "wkt2"
+   */
+  public static void registerUrlCrsProvider(String baseUrl, String pathTemplate, String format) {
+    if (baseUrl == null || baseUrl.isEmpty()) {
+      return;
+    }
+
+    String configKey = baseUrl + "|" + pathTemplate + "|" + format;
+    String current = registeredUrlCrsConfig.get();
+
+    if (configKey.equals(current)) {
+      // Already registered with the same config
+      return;
+    }
+
+    // Remove existing provider if config changed
+    if (current != null) {
+      Defs.removeProvider(URL_CRS_PROVIDER_NAME);
+    }
+
+    CRSResult.Format crsFormat = parseCrsFormat(format);
+
+    UrlCRSProvider provider =
+        UrlCRSProvider.builder(URL_CRS_PROVIDER_NAME)
+            .baseUrl(baseUrl)
+            .pathTemplate(pathTemplate)
+            .format(crsFormat)
+            .build();
+
+    // Priority 50: before built-in (100) and spatialreference.org (101)
+    Defs.registerProvider(provider, 50);
+    registeredUrlCrsConfig.set(configKey);
+  }
+
+  /**
+   * Parse the CRS format string from config to the CRSResult.Format enum.
+   *
+   * @param format Format string: "projjson", "proj", "wkt1", or "wkt2"
+   * @return The corresponding CRSResult.Format
+   */
+  private static CRSResult.Format parseCrsFormat(String format) {
+    if (format == null || format.isEmpty()) {
+      return CRSResult.Format.PROJJSON;
+    }
+    switch (format.toLowerCase(Locale.ROOT)) {
+      case "proj":
+        return CRSResult.Format.PROJ4;
+      case "wkt1":
+        return CRSResult.Format.WKT1;
+      case "wkt2":
+        return CRSResult.Format.WKT2;
+      case "projjson":
+      default:
+        return CRSResult.Format.PROJJSON;
+    }
+  }
 
   /**
    * Transform a geometry from the source CRS specified by the geometry's SRID to the target CRS.

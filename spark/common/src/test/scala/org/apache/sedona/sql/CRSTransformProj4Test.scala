@@ -18,6 +18,9 @@
  */
 package org.apache.sedona.sql
 
+import com.sun.net.httpserver.HttpServer
+import java.net.InetSocketAddress
+import java.util.concurrent.atomic.AtomicInteger
 import org.apache.spark.sql.functions.lit
 import org.apache.spark.sql.sedona_sql.expressions.st_functions._
 import org.junit.Assert.{assertEquals, assertNotNull, assertTrue}
@@ -853,6 +856,123 @@ class CRSTransformProj4Test extends TestBaseScala {
       println(f"\nResults: $successCount/40 passed")
 
       assertEquals("All 40 points should transform successfully", 40, successCount)
+    }
+  }
+
+  describe("URL CRS Provider config integration") {
+
+    it("should still transform correctly when URL provider is not configured") {
+      // Verify default behavior (no URL provider) still works
+      sparkSession.conf.set("spark.sedona.crs.url.base", "")
+      val result = sparkSession
+        .sql("SELECT ST_Transform(ST_SetSRID(ST_GeomFromWKT('POINT (-122.4194 37.7749)'), 4326), 'EPSG:4326', 'EPSG:3857')")
+        .first()
+        .getAs[Geometry](0)
+
+      assertNotNull(result)
+      assertEquals(3857, result.getSRID)
+      assertEquals(-13627665.27, result.getCoordinate.x, COORD_TOLERANCE)
+      assertEquals(4547675.35, result.getCoordinate.y, COORD_TOLERANCE)
+    }
+
+    it("should fall back to built-in when URL provider returns nothing") {
+      // Point to a non-existent server — provider will fail, should fall back to built-in
+      sparkSession.conf.set("spark.sedona.crs.url.base", "http://127.0.0.1:1")
+      sparkSession.conf.set("spark.sedona.crs.url.pathTemplate", "/epsg/{code}.json")
+      sparkSession.conf.set("spark.sedona.crs.url.format", "projjson")
+      try {
+        val result = sparkSession
+          .sql("SELECT ST_Transform(ST_SetSRID(ST_GeomFromWKT('POINT (-122.4194 37.7749)'), 4326), 'EPSG:4326', 'EPSG:3857')")
+          .first()
+          .getAs[Geometry](0)
+
+        // Should succeed via built-in fallback
+        assertNotNull(result)
+        assertEquals(3857, result.getSRID)
+        assertEquals(-13627665.27, result.getCoordinate.x, COORD_TOLERANCE)
+        assertEquals(4547675.35, result.getCoordinate.y, COORD_TOLERANCE)
+      } finally {
+        sparkSession.conf.set("spark.sedona.crs.url.base", "")
+        org.datasyslab.proj4sedona.defs.Defs.removeProvider("sedona-url-crs")
+      }
+    }
+
+    it("should register URL CRS provider when config is set") {
+      sparkSession.conf.set("spark.sedona.crs.url.base", "https://test.example.com")
+      sparkSession.conf.set("spark.sedona.crs.url.pathTemplate", "/epsg/{code}.json")
+      sparkSession.conf.set("spark.sedona.crs.url.format", "projjson")
+      try {
+        // Force a transform to trigger provider registration
+        val result = sparkSession
+          .sql("SELECT ST_Transform(ST_SetSRID(ST_GeomFromWKT('POINT (-122.4194 37.7749)'), 4326), 'EPSG:4326', 'EPSG:3857')")
+          .first()
+          .getAs[Geometry](0)
+
+        assertNotNull(result)
+
+        // Verify provider was registered
+        val providers = org.datasyslab.proj4sedona.defs.Defs.getProviders
+        val found = providers.stream().anyMatch(p => p.getName == "sedona-url-crs")
+        assertTrue("sedona-url-crs provider should be registered", found)
+      } finally {
+        sparkSession.conf.set("spark.sedona.crs.url.base", "")
+        org.datasyslab.proj4sedona.defs.Defs.removeProvider("sedona-url-crs")
+      }
+    }
+
+    it("should transform using local HTTP URL CRS provider with custom CRS") {
+      // Serve a deliberately wrong CRS definition for fake EPSG:990001 that no
+      // built-in provider knows. Uses Mercator with absurd false easting/northing.
+      // If the transform succeeds with shifted coordinates, the URL provider was used.
+      // If the URL provider didn't work, the transform would fail entirely.
+      val requestCount = new AtomicInteger(0)
+      val server = HttpServer.create(new InetSocketAddress(0), 0)
+      val port = server.getAddress.getPort
+
+      // Web Mercator with intentional 10M/20M false easting/northing
+      val weirdMercator =
+        "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0" +
+          " +x_0=10000000 +y_0=20000000 +k=1 +units=m +no_defs"
+
+      server.createContext(
+        "/epsg/",
+        exchange => {
+          val path = exchange.getRequestURI.getPath
+          if (path.contains("990001")) {
+            requestCount.incrementAndGet()
+            val body = weirdMercator.getBytes("UTF-8")
+            exchange.sendResponseHeaders(200, body.length)
+            exchange.getResponseBody.write(body)
+            exchange.getResponseBody.close()
+          } else {
+            // 404 for everything else — built-in providers handle known codes
+            exchange.sendResponseHeaders(404, -1)
+            exchange.getResponseBody.close()
+          }
+        })
+      server.start()
+
+      sparkSession.conf.set("spark.sedona.crs.url.base", s"http://localhost:$port")
+      sparkSession.conf.set("spark.sedona.crs.url.pathTemplate", "/epsg/{code}.json")
+      sparkSession.conf.set("spark.sedona.crs.url.format", "proj")
+      try {
+        val result = sparkSession
+          .sql("SELECT ST_Transform(ST_SetSRID(ST_GeomFromWKT('POINT (-122.4194 37.7749)'), 4326), 'EPSG:4326', 'EPSG:990001')")
+          .first()
+          .getAs[Geometry](0)
+
+        assertNotNull("Transform to fake EPSG:990001 should succeed via URL provider", result)
+        assertEquals(990001, result.getSRID)
+        // Standard Web Mercator: x = -13627665.27, y = 4547675.35
+        // Our weird definition adds +x_0=10000000, +y_0=20000000
+        assertEquals(-3627665.27, result.getCoordinate.x, COORD_TOLERANCE)
+        assertEquals(24547675.35, result.getCoordinate.y, COORD_TOLERANCE)
+        assertTrue("Local HTTP server should have been hit", requestCount.get() > 0)
+      } finally {
+        server.stop(0)
+        sparkSession.conf.set("spark.sedona.crs.url.base", "")
+        org.datasyslab.proj4sedona.defs.Defs.removeProvider("sedona-url-crs")
+      }
     }
   }
 }

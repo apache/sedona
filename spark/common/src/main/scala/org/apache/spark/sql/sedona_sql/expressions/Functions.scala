@@ -307,18 +307,33 @@ private[apache] case class ST_Centroid(inputExpressions: Seq[Expression])
  * @param inputExpressions
  * @param useGeoTools
  */
-private[apache] case class ST_Transform(inputExpressions: Seq[Expression], useGeoTools: Boolean)
+private[apache] case class ST_Transform(
+    inputExpressions: Seq[Expression],
+    useGeoTools: Boolean,
+    crsUrlBase: String,
+    crsUrlPathTemplate: String,
+    crsUrlFormat: String)
     extends InferredExpression(
       inferrableFunction4(FunctionsProj4.transform),
       inferrableFunction3(FunctionsProj4.transform),
       inferrableFunction2(FunctionsProj4.transform)) {
 
-  def this(inputExpressions: Seq[Expression]) {
-    // We decide whether to use GeoTools based on active session config.
-    // SparkSession may not be available on executors, so we need to
-    // construct ST_Transform on driver. useGeoTools will be passed down
-    // to executors through object serialization/deserialization.
-    this(inputExpressions, ST_Transform.useGeoTools())
+  private def this(
+      inputExpressions: Seq[Expression],
+      config: (Boolean, String, String, String)) = {
+    this(inputExpressions, config._1, config._2, config._3, config._4)
+  }
+
+  def this(inputExpressions: Seq[Expression]) = {
+    // Read all config from SedonaConf on the driver and pass to primary constructor.
+    // SparkSession may not be available on executors, so config is captured here
+    // and serialized to executors along with the expression node.
+    this(inputExpressions, ST_Transform.readConfig())
+  }
+
+  // Register URL CRS provider on executor if configured (lazy, once per JVM)
+  if (crsUrlBase.nonEmpty) {
+    FunctionsProj4.registerUrlCrsProvider(crsUrlBase, crsUrlPathTemplate, crsUrlFormat)
   }
 
   // Define proj4sedona function overloads (2, 3, 4-arg versions)
@@ -347,13 +362,23 @@ private[apache] case class ST_Transform(inputExpressions: Seq[Expression], useGe
 }
 
 object ST_Transform {
-  private def useGeoTools(): Boolean = {
+
+  /**
+   * Read all ST_Transform config from SedonaConf in one call. Defaults are handled by SedonaConf
+   * itself. Returns safe fallbacks (proj4sedona, no URL provider) when no active session exists.
+   */
+  private def readConfig(): (Boolean, String, String, String) = {
     try {
-      SedonaConf.fromActiveSession().getCRSTransformMode.useGeoToolsForVector()
+      val conf = SedonaConf.fromActiveSession()
+      (
+        conf.getCRSTransformMode.useGeoToolsForVector(),
+        conf.getCrsUrlBase,
+        conf.getCrsUrlPathTemplate,
+        conf.getCrsUrlFormat)
     } catch {
       case _: Exception =>
-        // If no active session, fall back to default (proj4sedona)
-        false
+        // No active session (e.g., during constant folding) — use safe defaults
+        (false, "", "", "")
     }
   }
 }

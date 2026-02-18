@@ -119,6 +119,11 @@ public class SedonaConf implements Serializable {
   // Parameter for CRS transformation mode
   private CRSTransformMode crsTransformMode;
 
+  // Parameters for URL-based CRS provider
+  private String crsUrlBase;
+  private String crsUrlPathTemplate;
+  private String crsUrlFormat;
+
   public static SedonaConf fromActiveSession() {
     return new SedonaConf(SparkSession.active().conf());
   }
@@ -234,6 +239,14 @@ public class SedonaConf implements Serializable {
     // - "all": Use GeoTools for all transformations (legacy behavior)
     this.crsTransformMode =
         CRSTransformMode.fromString(confGetter.get("spark.sedona.crs.geotools", "raster"));
+
+    // URL-based CRS provider configuration
+    // When spark.sedona.crs.url.base is set, a UrlCRSProvider is registered to resolve
+    // SRID definitions from the given HTTP(S) endpoint before falling back to built-in defs.
+    this.crsUrlBase = confGetter.get("spark.sedona.crs.url.base", "");
+    this.crsUrlPathTemplate =
+        confGetter.get("spark.sedona.crs.url.pathTemplate", "/{authority}/{code}.json");
+    this.crsUrlFormat = confGetter.get("spark.sedona.crs.url.format", "projjson");
   }
 
   // Helper method to prioritize `sedona.*` over `spark.sedona.*`
@@ -341,5 +354,37 @@ public class SedonaConf implements Serializable {
    */
   public CRSTransformMode getCRSTransformMode() {
     return crsTransformMode;
+  }
+
+  /**
+   * Get the base URL for the URL-based CRS provider. When non-empty, a {@code UrlCRSProvider} is
+   * registered to resolve SRID definitions from this HTTP(S) endpoint.
+   *
+   * @return The base URL, or empty string if disabled
+   * @since 1.9.0
+   */
+  public String getCrsUrlBase() {
+    return crsUrlBase;
+  }
+
+  /**
+   * Get the path template for the URL-based CRS provider. Supports placeholders: {@code
+   * {authority}}, {@code {AUTHORITY}}, {@code {code}}.
+   *
+   * @return The path template (default: "/{authority}/{code}.json")
+   * @since 1.9.0
+   */
+  public String getCrsUrlPathTemplate() {
+    return crsUrlPathTemplate;
+  }
+
+  /**
+   * Get the expected response format for the URL-based CRS provider.
+   *
+   * @return The format string: "projjson", "proj", "wkt1", or "wkt2" (default: "projjson")
+   * @since 1.9.0
+   */
+  public String getCrsUrlFormat() {
+    return crsUrlFormat;
   }
 }
