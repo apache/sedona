@@ -608,7 +608,7 @@ public class FunctionsProj4Test extends TestBase {
       assertEquals(
           "Provider should not be duplicated", countBefore, countProvidersByName("sedona-url-crs"));
     } finally {
-      org.datasyslab.proj4sedona.defs.Defs.removeProvider("sedona-url-crs");
+      FunctionsProj4.registerUrlCrsProvider("", null, null);
     }
   }
 
@@ -627,7 +627,7 @@ public class FunctionsProj4Test extends TestBase {
       assertEquals(
           org.datasyslab.proj4sedona.defs.CRSResult.Format.WKT2, findUrlCrsProvider().getFormat());
     } finally {
-      org.datasyslab.proj4sedona.defs.Defs.removeProvider("sedona-url-crs");
+      FunctionsProj4.registerUrlCrsProvider("", null, null);
     }
   }
 
@@ -646,7 +646,7 @@ public class FunctionsProj4Test extends TestBase {
             "https://test.example.com", "/epsg/{code}", (String) c[0]);
         assertEquals("Format '" + c[0] + "'", c[1], findUrlCrsProvider().getFormat());
       } finally {
-        org.datasyslab.proj4sedona.defs.Defs.removeProvider("sedona-url-crs");
+        FunctionsProj4.registerUrlCrsProvider("", null, null);
       }
     }
   }
@@ -663,7 +663,8 @@ public class FunctionsProj4Test extends TestBase {
             org.datasyslab.proj4sedona.defs.CRSResult.Format.PROJJSON,
             findUrlCrsProvider().getFormat());
       } finally {
-        org.datasyslab.proj4sedona.defs.Defs.removeProvider("sedona-url-crs");
+        // Use the unregister path (empty baseUrl) so registeredUrlCrsConfig is also reset
+        FunctionsProj4.registerUrlCrsProvider("", null, null);
       }
     }
   }
@@ -719,7 +720,7 @@ public class FunctionsProj4Test extends TestBase {
       assertTrue("Local HTTP server should have been hit", requestCount.get() > 0);
     } finally {
       server.stop(0);
-      org.datasyslab.proj4sedona.defs.Defs.removeProvider("sedona-url-crs");
+      FunctionsProj4.registerUrlCrsProvider("", null, null);
     }
   }
 
@@ -764,7 +765,7 @@ public class FunctionsProj4Test extends TestBase {
           countProvidersByName("sedona-url-crs"));
     } finally {
       pool.shutdown();
-      org.datasyslab.proj4sedona.defs.Defs.removeProvider("sedona-url-crs");
+      FunctionsProj4.registerUrlCrsProvider("", null, null);
     }
   }
 

@@ -20,6 +20,7 @@ package org.apache.sedona.sql
 
 import com.sun.net.httpserver.HttpServer
 import java.net.InetSocketAddress
+import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicInteger
 import org.apache.spark.sql.functions.lit
 import org.apache.spark.sql.sedona_sql.expressions.st_functions._
@@ -940,7 +941,7 @@ class CRSTransformProj4Test extends TestBaseScala {
           val path = exchange.getRequestURI.getPath
           if (path.contains("990001")) {
             requestCount.incrementAndGet()
-            val body = weirdMercator.getBytes("UTF-8")
+            val body = weirdMercator.getBytes(StandardCharsets.UTF_8)
             exchange.sendResponseHeaders(200, body.length)
             exchange.getResponseBody.write(body)
             exchange.getResponseBody.close()

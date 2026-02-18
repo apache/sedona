@@ -91,10 +91,19 @@ public class FunctionsProj4 {
    */
   public static void registerUrlCrsProvider(String baseUrl, String pathTemplate, String format) {
     if (baseUrl == null || baseUrl.isEmpty()) {
+      // Treat null/empty baseUrl as a signal to disable: unregister if previously registered.
+      synchronized (registeredUrlCrsConfig) {
+        if (registeredUrlCrsConfig.get() != null) {
+          Defs.removeProvider(URL_CRS_PROVIDER_NAME);
+          registeredUrlCrsConfig.set(null);
+        }
+      }
       return;
     }
 
-    String configKey = baseUrl + "|" + pathTemplate + "|" + format;
+    // Canonicalize format to avoid unnecessary re-registration for equivalent configs
+    String canonicalFormat = parseCrsFormat(format).name().toLowerCase(Locale.ROOT);
+    String configKey = baseUrl + "|" + pathTemplate + "|" + canonicalFormat;
 
     // Fast path (lock-free): already registered with the same config.
     // This handles 99.999%+ of calls with just a volatile read + String.equals().
