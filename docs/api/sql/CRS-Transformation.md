@@ -200,6 +200,172 @@ SELECT ST_Transform(
 ) AS transformed_point
 ```
 
+## URL CRS Provider
+
+Since v1.9.0, Sedona supports resolving CRS definitions from a remote HTTP server. This is useful when you need custom or internal CRS definitions that are not included in the built-in database, or when you want to use your own CRS definition service.
+
+When configured, the URL provider is consulted **before** the built-in CRS database. If the URL provider returns a valid CRS definition, it is used directly. If the URL returns a 404 or an error, Sedona falls back to the built-in definitions.
+
+### Hosting CRS definitions
+
+You can host your custom CRS definitions on any HTTP-accessible location. Two common approaches:
+
+- **GitHub repository**: Store CRS definition files in a public GitHub repo and use the raw content URL. This is the easiest way to get started — no server infrastructure required.
+- **Public S3 bucket**: Upload CRS definition files to an Amazon S3 bucket with public read access and use the S3 static website URL or CloudFront distribution.
+
+Each file should contain a single CRS definition in the format you specify via `spark.sedona.crs.url.format` (PROJJSON, PROJ string, WKT1, or WKT2).
+
+### Configuration
+
+Set the following Spark configuration properties when creating your Sedona session:
+
+```python
+config = (
+    SedonaContext.builder()
+    .config("spark.sedona.crs.url.base", "https://crs.example.com")
+    .config("spark.sedona.crs.url.pathTemplate", "/{authority}/{code}.json")
+    .config("spark.sedona.crs.url.format", "projjson")
+    .getOrCreate()
+)
+sedona = SedonaContext.create(config)
+```
+
+With the default path template, resolving `EPSG:4326` will fetch:
+
+```
+https://crs.example.com/epsg/4326.json
+```
+
+Only `spark.sedona.crs.url.base` is required. The other two properties have sensible defaults (`/{authority}/{code}.json` and `projjson`).
+
+### Supported response formats
+
+| Format value | Description | Content example |
+|-------------|-------------|----------------|
+| `projjson` | PROJJSON (default) | `{"type": "GeographicCRS", ...}` |
+| `proj` | PROJ string | `+proj=longlat +datum=WGS84 +no_defs` |
+| `wkt1` | OGC WKT1 | `GEOGCS["WGS 84", ...]` |
+| `wkt2` | ISO 19162 WKT2 | `GEOGCRS["WGS 84", ...]` |
+
+### Example: GitHub repository
+
+Suppose you have a GitHub repo `myorg/crs-definitions` with the following structure:
+
+```
+crs-definitions/
+  epsg/
+    990001.proj
+    990002.proj
+```
+
+where `epsg/990001.proj` contains a PROJ string like:
+
+```
++proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +no_defs
+```
+
+Point Sedona to the raw GitHub content URL:
+
+```python
+config = (
+    SedonaContext.builder()
+    .config(
+        "spark.sedona.crs.url.base",
+        "https://raw.githubusercontent.com/myorg/crs-definitions/main",
+    )
+    .config("spark.sedona.crs.url.pathTemplate", "/epsg/{code}.proj")
+    .config("spark.sedona.crs.url.format", "proj")
+    .getOrCreate()
+)
+sedona = SedonaContext.create(config)
+
+# Resolves EPSG:990001 from:
+# https://raw.githubusercontent.com/myorg/crs-definitions/main/epsg/990001.proj
+sedona.sql("""
+    SELECT ST_Transform(
+        ST_GeomFromText('POINT(-122.4194 37.7749)'),
+        'EPSG:4326',
+        'EPSG:990001'
+    ) AS transformed_point
+""").show()
+```
+
+### Example: self-hosted CRS server
+
+```python
+config = (
+    SedonaContext.builder()
+    .config("spark.sedona.crs.url.base", "https://crs.mycompany.com")
+    .config("spark.sedona.crs.url.pathTemplate", "/epsg/{code}.proj")
+    .config("spark.sedona.crs.url.format", "proj")
+    .getOrCreate()
+)
+sedona = SedonaContext.create(config)
+
+# Now ST_Transform will try https://crs.mycompany.com/epsg/3857.proj
+# before falling back to built-in definitions
+sedona.sql("""
+    SELECT ST_Transform(
+        ST_GeomFromText('POINT(-122.4194 37.7749)'),
+        'EPSG:4326',
+        'EPSG:3857'
+    ) AS transformed_point
+""").show()
+```
+
+### Example: custom authority codes
+
+The URL provider is especially useful for custom or internal authority codes that are not in any public database. With the default path template `/{authority}/{code}.json`, the `{authority}` placeholder is replaced by the authority name from the CRS string (lowercased):
+
+```python
+config = (
+    SedonaContext.builder()
+    .config("spark.sedona.crs.url.base", "https://crs.mycompany.com")
+    .config("spark.sedona.crs.url.format", "proj")
+    .getOrCreate()
+)
+sedona = SedonaContext.create(config)
+
+# Resolves MYORG:1001 from:
+# https://crs.mycompany.com/myorg/1001.json
+sedona.sql("""
+    SELECT ST_Transform(
+        ST_GeomFromText('POINT(-122.4194 37.7749)'),
+        'EPSG:4326',
+        'MYORG:1001'
+    ) AS transformed_point
+""").show()
+```
+
+### Example: using geometry SRID with URL provider
+
+If the geometry already has an SRID set (e.g., via `ST_SetSRID`), you can omit the source CRS parameter. The source CRS is derived from the geometry's SRID as an EPSG code:
+
+```python
+config = (
+    SedonaContext.builder()
+    .config("spark.sedona.crs.url.base", "https://crs.mycompany.com")
+    .config("spark.sedona.crs.url.format", "proj")
+    .getOrCreate()
+)
+sedona = SedonaContext.create(config)
+
+# The source CRS is taken from the geometry's SRID (4326 → EPSG:4326).
+# Only the target CRS string is needed.
+sedona.sql("""
+    SELECT ST_Transform(
+        ST_SetSRID(ST_GeomFromText('POINT(-122.4194 37.7749)'), 4326),
+        'EPSG:3857'
+    ) AS transformed_point
+""").show()
+```
+
+### Disabling the URL provider
+
+To disable, omit `spark.sedona.crs.url.base` or set it to an empty string (the default).
+
+See also: [Configuration parameters](Parameter.md#crs-transformation) for the full list of URL CRS provider settings.
+
 ## Grid File Support
 
 Grid files enable high-accuracy datum transformations, such as NAD27 to NAD83 or OSGB36 to ETRS89. Sedona supports loading grid files from multiple sources.

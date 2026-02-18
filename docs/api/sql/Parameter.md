@@ -111,3 +111,22 @@ If you set the same parameter through both `sedona` and `spark.sedona` prefixes,
 		* raster: Use proj4sedona for vector transformations, GeoTools for raster transformations
 		* all: Use GeoTools for all transformations (legacy behavior)
 	* Since: v1.9.0
+* spark.sedona.crs.url.base
+	* Base URL of a CRS definition server for resolving authority codes (e.g., EPSG) via HTTP. When set, ST_Transform will consult this URL provider before the built-in definitions.
+	* Default: (empty string — URL provider disabled)
+	* Example: `https://crs.example.com`
+	* Since: v1.9.0
+* spark.sedona.crs.url.pathTemplate
+	* URL path template appended to `spark.sedona.crs.url.base`. The placeholders `{authority}` and `{code}` are replaced with the authority name (e.g., `epsg`) and numeric code (e.g., `4326`) at runtime.
+	* Default: `/{authority}/{code}.json`
+	* Example: `/epsg/{code}.json` (for a server that only serves EPSG codes)
+	* Since: v1.9.0
+* spark.sedona.crs.url.format
+	* The CRS definition format returned by the URL provider.
+	* Default: projjson
+	* Possible values:
+		* projjson: PROJJSON format
+		* proj: PROJ string format
+		* wkt1: OGC WKT1 format
+		* wkt2: ISO 19162 WKT2 format
+	* Since: v1.9.0
