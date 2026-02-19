@@ -384,6 +384,24 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData#DEFAULT_SRID" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="DEFAULT_SRID:Int"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetMetaData$.html#DEFAULT_SRID:Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">DEFAULT_SRID</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Default SRID for GeoParquet files where the CRS field is omitted.</p><div class="fullcomment"><div class="comment cmt"><p>Default SRID for GeoParquet files where the CRS field is omitted. Per the GeoParquet spec,
+omitting the CRS implies OGC:CRS84, which is equivalent to EPSG:4326.
+</p></div></div>
     </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData#GEOPARQUET_COVERING_KEY" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="GEOPARQUET_COVERING_KEY:String"></a>
       <span class="permalink">
@@ -545,6 +563,27 @@ is applied to all geometry columns in the file.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData#extractSridFromCrs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="extractSridFromCrs(crs:Option[org.json4s.JValue]):Int"></a><a id="extractSridFromCrs(Option[JValue]):Int"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetMetaData$.html#extractSridFromCrs(crs:Option[org.json4s.JValue]):Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">extractSridFromCrs</span><span class="params">(<span name="crs">crs: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.json4s.JValue">JValue</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Extract SRID from a GeoParquet CRS metadata value.</p><div class="fullcomment"><div class="comment cmt"><p>Extract SRID from a GeoParquet CRS metadata value.</p><p>Per the GeoParquet specification:</p><ul><li>If the CRS field is absent (None), the CRS is OGC:CRS84 (EPSG:4326).</li><li>If the CRS field is explicitly null, the CRS is unknown (SRID 0).</li><li>If the CRS field is a PROJJSON object with an &quot;id&quot; containing &quot;authority&quot; and &quot;code&quot;, the
+    EPSG code is used as the SRID.
+</li></ul></div><dl class="paramcmts block"><dt class="param">crs</dt><dd class="cmt"><p>
+  The CRS field from GeoParquet column metadata.</p></dd><dt>returns</dt><dd class="cmt"><p>
+  The SRID corresponding to the CRS. Returns 4326 for omitted CRS, 0 for null or unrecognized
+  CRS, and the EPSG code for PROJJSON with an EPSG identifier.</p></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">

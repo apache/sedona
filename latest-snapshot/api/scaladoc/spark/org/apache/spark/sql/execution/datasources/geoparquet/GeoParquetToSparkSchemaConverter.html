@@ -567,6 +567,28 @@
                 <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetToSparkSchemaConverter#getSrid" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getSrid(columnName:String):Int"></a><a id="getSrid(String):Int"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetToSparkSchemaConverter.html#getSrid(columnName:String):Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getSrid</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns the SRID for a geometry column based on the CRS metadata in the GeoParquet file.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the SRID for a geometry column based on the CRS metadata in the GeoParquet file. The
+result is served from a pre-computed cache to avoid repeated PROJJSON parsing.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>
+  name of the geometry column</p></dd><dt>returns</dt><dd class="cmt"><p>
+  the SRID extracted from the CRS metadata. Returns 4326 if the CRS is omitted, 0 if the CRS
+  is null or unrecognized, or the EPSG code if the PROJJSON contains an EPSG identifier. If
+  the column name is not found in the GeoParquet metadata, returns 0.</p></dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
