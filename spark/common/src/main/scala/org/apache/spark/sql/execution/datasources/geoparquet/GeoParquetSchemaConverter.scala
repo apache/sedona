@@ -79,6 +79,21 @@ class GeoParquetToSparkSchemaConverter(
     parameters = parameters)
 
   /**
+   * Returns the SRID for a geometry column based on the CRS metadata in the GeoParquet file.
+   * @param columnName
+   *   name of the geometry column
+   * @return
+   *   the SRID extracted from the CRS metadata. Returns 4326 if the CRS is omitted, 0 if the CRS
+   *   is null or unrecognized, or the EPSG code if the PROJJSON contains an EPSG identifier.
+   */
+  def getSrid(columnName: String): Int = {
+    geoParquetMetaData.columns.get(columnName) match {
+      case Some(fieldMetadata) => GeoParquetMetaData.extractSridFromCrs(fieldMetadata.crs)
+      case None => 0
+    }
+  }
+
+  /**
    * Returns true if TIMESTAMP_NTZ type is enabled in this ParquetToSparkSchemaConverter.
    */
   def isTimestampNTZEnabled(): Boolean = {

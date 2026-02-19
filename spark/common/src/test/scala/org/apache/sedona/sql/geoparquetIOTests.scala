@@ -572,6 +572,194 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       }
     }
 
+    it("GeoParquet read should set SRID from PROJJSON CRS with EPSG identifier") {
+      val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation4)
+      val projjson =
+        """
+          |{
+          |  "$schema": "https://proj.org/schemas/v0.4/projjson.schema.json",
+          |  "type": "GeographicCRS",
+          |  "name": "NAD83(2011)",
+          |  "datum": {
+          |    "type": "GeodeticReferenceFrame",
+          |    "name": "NAD83 (National Spatial Reference System 2011)",
+          |    "ellipsoid": {
+          |      "name": "GRS 1980",
+          |      "semi_major_axis": 6378137,
+          |      "inverse_flattening": 298.257222101
+          |    }
+          |  },
+          |  "coordinate_system": {
+          |    "subtype": "ellipsoidal",
+          |    "axis": [
+          |      {
+          |        "name": "Geodetic latitude",
+          |        "abbreviation": "Lat",
+          |        "direction": "north",
+          |        "unit": "degree"
+          |      },
+          |      {
+          |        "name": "Geodetic longitude",
+          |        "abbreviation": "Lon",
+          |        "direction": "east",
+          |        "unit": "degree"
+          |      }
+          |    ]
+          |  },
+          |  "id": {
+          |    "authority": "EPSG",
+          |    "code": 6318
+          |  }
+          |}
+          |""".stripMargin
+      val geoParquetSavePath = geoparquetoutputlocation + "/gp_srid_epsg.parquet"
+      df.write
+        .format("geoparquet")
+        .option("geoparquet.crs", projjson)
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+      val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
+      val geoms = df2.select("geometry").collect().map(_.getAs[Geometry](0))
+      assert(geoms.nonEmpty)
+      geoms.foreach { geom =>
+        assert(geom.getSRID == 6318, s"Expected SRID 6318, got ${geom.getSRID}")
+      }
+    }
+
+    it("GeoParquet read should set SRID 4326 when CRS is omitted") {
+      val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation4)
+      val geoParquetSavePath = geoparquetoutputlocation + "/gp_srid_omit.parquet"
+      df.write
+        .format("geoparquet")
+        .option("geoparquet.crs", "")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+      val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
+      val geoms = df2.select("geometry").collect().map(_.getAs[Geometry](0))
+      assert(geoms.nonEmpty)
+      geoms.foreach { geom =>
+        assert(geom.getSRID == 4326, s"Expected SRID 4326 for omitted CRS, got ${geom.getSRID}")
+      }
+    }
+
+    it("GeoParquet read should set SRID 0 when CRS is null") {
+      val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation4)
+      val geoParquetSavePath = geoparquetoutputlocation + "/gp_srid_null.parquet"
+      df.write
+        .format("geoparquet")
+        .option("geoparquet.crs", "null")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+      val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
+      val geoms = df2.select("geometry").collect().map(_.getAs[Geometry](0))
+      assert(geoms.nonEmpty)
+      geoms.foreach { geom =>
+        assert(geom.getSRID == 0, s"Expected SRID 0 for null CRS, got ${geom.getSRID}")
+      }
+    }
+
+    it("GeoParquet read should set SRID 0 for CRS without EPSG identifier") {
+      val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation4)
+      // A PROJJSON without the "id" field
+      val projjsonNoId =
+        """
+          |{
+          |  "$schema": "https://proj.org/schemas/v0.4/projjson.schema.json",
+          |  "type": "GeographicCRS",
+          |  "name": "Unknown CRS",
+          |  "datum": {
+          |    "type": "GeodeticReferenceFrame",
+          |    "name": "Unknown datum",
+          |    "ellipsoid": {
+          |      "name": "GRS 1980",
+          |      "semi_major_axis": 6378137,
+          |      "inverse_flattening": 298.257222101
+          |    }
+          |  },
+          |  "coordinate_system": {
+          |    "subtype": "ellipsoidal",
+          |    "axis": [
+          |      {
+          |        "name": "Geodetic latitude",
+          |        "abbreviation": "Lat",
+          |        "direction": "north",
+          |        "unit": "degree"
+          |      },
+          |      {
+          |        "name": "Geodetic longitude",
+          |        "abbreviation": "Lon",
+          |        "direction": "east",
+          |        "unit": "degree"
+          |      }
+          |    ]
+          |  }
+          |}
+          |""".stripMargin
+      val geoParquetSavePath = geoparquetoutputlocation + "/gp_srid_no_id.parquet"
+      df.write
+        .format("geoparquet")
+        .option("geoparquet.crs", projjsonNoId)
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+      val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
+      val geoms = df2.select("geometry").collect().map(_.getAs[Geometry](0))
+      assert(geoms.nonEmpty)
+      geoms.foreach { geom =>
+        assert(geom.getSRID == 0, s"Expected SRID 0 for CRS without id, got ${geom.getSRID}")
+      }
+    }
+
+    it("GeoParquet read should set per-column SRID from different CRSes") {
+      val wktReader = new WKTReader()
+      val testData = Seq(
+        Row(
+          1,
+          wktReader.read("POINT (1 2)"),
+          wktReader.read("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))")))
+      val schema = StructType(
+        Seq(
+          StructField("id", IntegerType, nullable = false),
+          StructField("g0", GeometryUDT(), nullable = false),
+          StructField("g1", GeometryUDT(), nullable = false)))
+      val df = sparkSession.createDataFrame(testData.asJava, schema).repartition(1)
+
+      // g0: EPSG:4326, g1: EPSG:32632
+      val projjson4326 =
+        """{"type":"GeographicCRS","name":"WGS 84","id":{"authority":"EPSG","code":4326}}"""
+      val projjson32632 =
+        """{"type":"ProjectedCRS","name":"WGS 84 / UTM zone 32N",""" +
+          """"base_crs":{"name":"WGS 84","datum":{"type":"GeodeticReferenceFrame",""" +
+          """"name":"World Geodetic System 1984",""" +
+          """"ellipsoid":{"name":"WGS 84","semi_major_axis":6378137,"inverse_flattening":298.257223563}}},""" +
+          """"conversion":{"name":"UTM zone 32N","method":{"name":"Transverse Mercator"},""" +
+          """"parameters":[{"name":"Latitude of natural origin","value":0},""" +
+          """{"name":"Longitude of natural origin","value":9},""" +
+          """{"name":"Scale factor at natural origin","value":0.9996},""" +
+          """{"name":"False easting","value":500000},""" +
+          """{"name":"False northing","value":0}]},""" +
+          """"coordinate_system":{"subtype":"Cartesian","axis":[""" +
+          """{"name":"Easting","direction":"east","unit":"metre"},""" +
+          """{"name":"Northing","direction":"north","unit":"metre"}]},""" +
+          """"id":{"authority":"EPSG","code":32632}}"""
+
+      val geoParquetSavePath =
+        geoparquetoutputlocation + "/gp_srid_multi_column.parquet"
+      df.write
+        .format("geoparquet")
+        .option("geoparquet.crs", projjson4326)
+        .option("geoparquet.crs.g1", projjson32632)
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+
+      val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
+      val rows = df2.collect()
+      assert(rows.length == 1)
+      val g0 = rows(0).getAs[Geometry](rows(0).fieldIndex("g0"))
+      val g1 = rows(0).getAs[Geometry](rows(0).fieldIndex("g1"))
+      assert(g0.getSRID == 4326, s"Expected g0 SRID 4326, got ${g0.getSRID}")
+      assert(g1.getSRID == 32632, s"Expected g1 SRID 32632, got ${g1.getSRID}")
+    }
+
     it("GeoParquet load should raise exception when loading plain parquet files") {
       val e = intercept[SparkException] {
         sparkSession.read.format("geoparquet").load(resourceFolder + "geoparquet/plain.parquet")
@@ -882,6 +1070,59 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
 
       val result = readDf.collect()
       assert(result.length == 1)
+    }
+  }
+
+  describe("GeoParquetMetaData.extractSridFromCrs") {
+    it("should return 4326 when CRS is omitted (None)") {
+      assert(GeoParquetMetaData.extractSridFromCrs(None) == 4326)
+    }
+
+    it("should return 0 when CRS is null") {
+      assert(GeoParquetMetaData.extractSridFromCrs(Some(org.json4s.JNull)) == 0)
+    }
+
+    it("should extract EPSG code from PROJJSON") {
+      val projjson =
+        parseJson("""{"type":"GeographicCRS","id":{"authority":"EPSG","code":4326}}""")
+      assert(GeoParquetMetaData.extractSridFromCrs(Some(projjson)) == 4326)
+    }
+
+    it("should extract non-4326 EPSG code") {
+      // Use a complete ProjectedCRS PROJJSON so proj4sedona can parse it
+      val projjson = parseJson(
+        """{"type":"ProjectedCRS","name":"WGS 84 / UTM zone 32N",""" +
+          """"base_crs":{"name":"WGS 84","datum":{"type":"GeodeticReferenceFrame",""" +
+          """"name":"World Geodetic System 1984",""" +
+          """"ellipsoid":{"name":"WGS 84","semi_major_axis":6378137,"inverse_flattening":298.257223563}}},""" +
+          """"conversion":{"name":"UTM zone 32N","method":{"name":"Transverse Mercator"},""" +
+          """"parameters":[{"name":"Latitude of natural origin","value":0},""" +
+          """{"name":"Longitude of natural origin","value":9},""" +
+          """{"name":"Scale factor at natural origin","value":0.9996},""" +
+          """{"name":"False easting","value":500000},""" +
+          """{"name":"False northing","value":0}]},""" +
+          """"coordinate_system":{"subtype":"Cartesian","axis":[""" +
+          """{"name":"Easting","direction":"east","unit":"metre"},""" +
+          """{"name":"Northing","direction":"north","unit":"metre"}]},""" +
+          """"id":{"authority":"EPSG","code":32632}}""")
+      assert(GeoParquetMetaData.extractSridFromCrs(Some(projjson)) == 32632)
+    }
+
+    it("should return 4326 for OGC:CRS84") {
+      val projjson =
+        parseJson("""{"type":"GeographicCRS","id":{"authority":"OGC","code":"CRS84"}}""")
+      assert(GeoParquetMetaData.extractSridFromCrs(Some(projjson)) == 4326)
+    }
+
+    it("should return 0 for CRS without id field") {
+      val projjson = parseJson("""{"type":"GeographicCRS","name":"Unknown"}""")
+      assert(GeoParquetMetaData.extractSridFromCrs(Some(projjson)) == 0)
+    }
+
+    it("should return 0 for CRS with non-EPSG authority") {
+      val projjson =
+        parseJson("""{"type":"GeographicCRS","id":{"authority":"IAU","code":49900}}""")
+      assert(GeoParquetMetaData.extractSridFromCrs(Some(projjson)) == 0)
     }
   }
 

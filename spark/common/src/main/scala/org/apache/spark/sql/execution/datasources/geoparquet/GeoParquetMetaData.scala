@@ -19,6 +19,7 @@
 package org.apache.spark.sql.execution.datasources.geoparquet
 
 import org.apache.spark.sql.types.{DoubleType, FloatType, StructType}
+import org.datasyslab.proj4sedona.core.Proj
 import org.json4s.jackson.JsonMethods.parse
 import org.json4s.jackson.compactJson
 import org.json4s.{DefaultFormats, Extraction, JField, JNothing, JNull, JObject, JValue}
@@ -135,6 +136,57 @@ object GeoParquetMetaData {
       case field: Any => field
     }
     compactJson(serializedGeoObject)
+  }
+
+  /**
+   * Default SRID for GeoParquet files where the CRS field is omitted. Per the GeoParquet spec,
+   * omitting the CRS implies OGC:CRS84, which is equivalent to EPSG:4326.
+   */
+  val DEFAULT_SRID: Int = 4326
+
+  /**
+   * Extract SRID from a GeoParquet CRS metadata value.
+   *
+   * Per the GeoParquet specification:
+   *   - If the CRS field is absent (None), the CRS is OGC:CRS84 (EPSG:4326).
+   *   - If the CRS field is explicitly null, the CRS is unknown (SRID 0).
+   *   - If the CRS field is a PROJJSON object with an "id" containing "authority" and "code", the
+   *     EPSG code is used as the SRID.
+   *
+   * @param crs
+   *   The CRS field from GeoParquet column metadata.
+   * @return
+   *   The SRID corresponding to the CRS. Returns 4326 for omitted CRS, 0 for null or unrecognized
+   *   CRS, and the EPSG code for PROJJSON with an EPSG identifier.
+   */
+  def extractSridFromCrs(crs: Option[JValue]): Int = {
+    crs match {
+      case None =>
+        // CRS omitted: default to OGC:CRS84 (EPSG:4326) per GeoParquet spec
+        DEFAULT_SRID
+      case Some(JNull) =>
+        // CRS explicitly null: unknown CRS
+        0
+      case Some(projjson) =>
+        // Use proj4sedona to extract authority and code from PROJJSON
+        try {
+          val jsonStr = compactJson(projjson)
+          val result = new Proj(jsonStr).toAuthority()
+          if (result != null && result.length == 2) {
+            result(0) match {
+              case "EPSG" =>
+                try { result(1).toInt }
+                catch { case _: NumberFormatException => 0 }
+              case "OGC" if result(1) == "CRS84" => 4326
+              case _ => 0
+            }
+          } else {
+            0
+          }
+        } catch {
+          case _: Exception => 0
+        }
+    }
   }
 
   def createCoveringColumnMetadata(coveringColumnName: String, schema: StructType): Covering = {
