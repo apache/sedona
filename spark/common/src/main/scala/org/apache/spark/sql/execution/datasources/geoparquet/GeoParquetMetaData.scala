@@ -18,6 +18,8 @@
  */
 package org.apache.spark.sql.execution.datasources.geoparquet
 
+import scala.util.control.NonFatal
+
 import org.apache.spark.sql.types.{DoubleType, FloatType, StructType}
 import org.datasyslab.proj4sedona.core.Proj
 import org.json4s.jackson.JsonMethods.parse
@@ -177,14 +179,14 @@ object GeoParquetMetaData {
               case "EPSG" =>
                 try { result(1).toInt }
                 catch { case _: NumberFormatException => 0 }
-              case "OGC" if result(1) == "CRS84" => 4326
+              case "OGC" if result(1) == "CRS84" => DEFAULT_SRID
               case _ => 0
             }
           } else {
             0
           }
         } catch {
-          case _: Exception => 0
+          case NonFatal(_) => 0
         }
     }
   }
