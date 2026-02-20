@@ -36,7 +36,7 @@
     "gulp-sourcemaps": "^2.6.5",
     "gulp-uglify": "^3.0.2",
     "sass": "~1.77.6",
-    "swiper": "^11.2.8",
+    "swiper": "^12.1.2",
     "through2": "^4.0.2",
     "vinyl-named": "^1.1.0",
     "webpack": "^5.105.0",
