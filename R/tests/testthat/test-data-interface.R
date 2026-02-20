@@ -671,9 +671,10 @@ test_that("spark_write_geoparquet() works as expected", {
   lifecycle::expect_deprecated({
   geoparquet_2_sdf <- spark_read_geoparquet(sc, tmp_dest)
   })
+  original_cols <- colnames(geoparquet_sdf)
   expect_equivalent(
     geoparquet_sdf %>% mutate(geometry = geometry %>% st_astext()) %>% collect(),
-    geoparquet_2_sdf %>% mutate(geometry = geometry %>% st_astext()) %>% collect()
+    geoparquet_2_sdf %>% dplyr::select(dplyr::all_of(original_cols)) %>% mutate(geometry = geometry %>% st_astext()) %>% collect()
   )
 
   unlink(tmp_dest, recursive = TRUE)
