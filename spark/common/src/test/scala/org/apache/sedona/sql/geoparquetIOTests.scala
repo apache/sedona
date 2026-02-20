@@ -148,7 +148,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val geoParquetSavePath = geoparquetoutputlocation + "/gp_sample4.parquet"
       df.write.format("geoparquet").mode(SaveMode.Overwrite).save(geoParquetSavePath)
       val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
-      val newRows = df2.collect()
+      val newRows = df2.select(df.columns.map(col(_)): _*).collect()
       assert(rows.length == newRows.length)
       assert(newRows(0).getAs[AnyRef]("geometry").isInstanceOf[Geometry])
       assert(rows sameElements newRows)
@@ -182,7 +182,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val geoParquetSavePath = geoparquetoutputlocation + "/gp_sample5.parquet"
       df.write.format("geoparquet").mode(SaveMode.Overwrite).save(geoParquetSavePath)
       val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
-      val newRows = df2.collect()
+      val newRows = df2.select(df.columns.map(col(_)): _*).collect()
       assert(rows.length == newRows.length)
       assert(newRows(0).getAs[AnyRef]("geometry").isInstanceOf[Geometry])
       assert(rows sameElements newRows)
@@ -882,6 +882,100 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       }
     }
 
+    it("GeoParquet auto populates covering metadata for single geometry column") {
+      val df = sparkSession
+        .range(0, 100)
+        .toDF("id")
+        .withColumn("id", expr("CAST(id AS DOUBLE)"))
+        .withColumn("geometry", expr("ST_Point(id, id + 1)"))
+        .withColumn(
+          "geometry_bbox",
+          expr("struct(id AS xmin, id + 1 AS ymin, id AS xmax, id + 1 AS ymax)"))
+      val geoParquetSavePath =
+        geoparquetoutputlocation + "/gp_with_covering_metadata_auto_single.parquet"
+      df.write
+        .format("geoparquet")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
+        val coveringJsValue = geo \ "columns" \ "geometry" \ "covering"
+        val covering = coveringJsValue.extract[Covering]
+        assert(covering.bbox.xmin == Seq("geometry_bbox", "xmin"))
+        assert(covering.bbox.ymin == Seq("geometry_bbox", "ymin"))
+        assert(covering.bbox.xmax == Seq("geometry_bbox", "xmax"))
+        assert(covering.bbox.ymax == Seq("geometry_bbox", "ymax"))
+      }
+    }
+
+    it("GeoParquet auto generates covering column and metadata for GeoParquet 1.1.0") {
+      val df = sparkSession
+        .range(0, 100)
+        .toDF("id")
+        .withColumn("id", expr("CAST(id AS DOUBLE)"))
+        .withColumn("geometry", expr("ST_Point(id, id + 1)"))
+      val geoParquetSavePath =
+        geoparquetoutputlocation + "/gp_with_generated_covering_column.parquet"
+      df.write
+        .format("geoparquet")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+
+      val parquetDf = sparkSession.read.parquet(geoParquetSavePath)
+      assert(parquetDf.columns.contains("geometry_bbox"))
+
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
+        val coveringJsValue = geo \ "columns" \ "geometry" \ "covering"
+        val covering = coveringJsValue.extract[Covering]
+        assert(covering.bbox.xmin == Seq("geometry_bbox", "xmin"))
+        assert(covering.bbox.ymin == Seq("geometry_bbox", "ymin"))
+        assert(covering.bbox.xmax == Seq("geometry_bbox", "xmax"))
+        assert(covering.bbox.ymax == Seq("geometry_bbox", "ymax"))
+      }
+    }
+
+    it("GeoParquet covering mode legacy disables auto covering generation") {
+      val df = sparkSession
+        .range(0, 100)
+        .toDF("id")
+        .withColumn("id", expr("CAST(id AS DOUBLE)"))
+        .withColumn("geometry", expr("ST_Point(id, id + 1)"))
+      val geoParquetSavePath =
+        geoparquetoutputlocation + "/gp_without_generated_covering_column_legacy_mode.parquet"
+      df.write
+        .format("geoparquet")
+        .option("geoparquet.covering.mode", "legacy")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+
+      val parquetDf = sparkSession.read.parquet(geoParquetSavePath)
+      assert(!parquetDf.columns.contains("geometry_bbox"))
+
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        assert(geo \ "columns" \ "geometry" \ "covering" == org.json4s.JNothing)
+      }
+    }
+
+    it("GeoParquet covering mode should reject invalid value") {
+      val df = sparkSession
+        .range(0, 100)
+        .toDF("id")
+        .withColumn("id", expr("CAST(id AS DOUBLE)"))
+        .withColumn("geometry", expr("ST_Point(id, id + 1)"))
+
+      val e = intercept[SparkException] {
+        df.write
+          .format("geoparquet")
+          .option("geoparquet.covering.mode", "invalid-mode")
+          .mode("overwrite")
+          .save(geoparquetoutputlocation + "/gp_invalid_covering_mode.parquet")
+      }
+      assert(e.getMessage.contains("geoparquet.covering.mode"))
+      assert(e.getMessage.contains("auto"))
+      assert(e.getMessage.contains("legacy"))
+    }
+
     it("GeoParquet supports writing covering metadata for multiple columns") {
       val df = sparkSession
         .range(0, 100)
@@ -932,6 +1026,62 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         assert(covering.bbox.ymax == Seq("test_cov2", "ymax"))
       }
     }
+
+    it("GeoParquet auto populates covering metadata for multiple geometry columns") {
+      val df = sparkSession
+        .range(0, 100)
+        .toDF("id")
+        .withColumn("id", expr("CAST(id AS DOUBLE)"))
+        .withColumn("geom1", expr("ST_Point(id, id + 1)"))
+        .withColumn(
+          "geom1_bbox",
+          expr("struct(id AS xmin, id + 1 AS ymin, id AS xmax, id + 1 AS ymax)"))
+        .withColumn("geom2", expr("ST_Point(10 * id, 10 * id + 1)"))
+        .withColumn(
+          "geom2_bbox",
+          expr(
+            "struct(10 * id AS xmin, 10 * id + 1 AS ymin, 10 * id AS xmax, 10 * id + 1 AS ymax)"))
+      val geoParquetSavePath =
+        geoparquetoutputlocation + "/gp_with_covering_metadata_auto_multiple.parquet"
+      df.write
+        .format("geoparquet")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
+        Seq(("geom1", "geom1_bbox"), ("geom2", "geom2_bbox")).foreach {
+          case (geomName, coveringName) =>
+            val coveringJsValue = geo \ "columns" \ geomName \ "covering"
+            val covering = coveringJsValue.extract[Covering]
+            assert(covering.bbox.xmin == Seq(coveringName, "xmin"))
+            assert(covering.bbox.ymin == Seq(coveringName, "ymin"))
+            assert(covering.bbox.xmax == Seq(coveringName, "xmax"))
+            assert(covering.bbox.ymax == Seq(coveringName, "ymax"))
+        }
+      }
+    }
+
+    it("GeoParquet does not auto generate covering column for non-1.1.0 version") {
+      val df = sparkSession
+        .range(0, 100)
+        .toDF("id")
+        .withColumn("id", expr("CAST(id AS DOUBLE)"))
+        .withColumn("geometry", expr("ST_Point(id, id + 1)"))
+      val geoParquetSavePath =
+        geoparquetoutputlocation + "/gp_without_generated_covering_column.parquet"
+      df.write
+        .format("geoparquet")
+        .option("geoparquet.version", "1.0.0")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+
+      val parquetDf = sparkSession.read.parquet(geoParquetSavePath)
+      assert(!parquetDf.columns.contains("geometry_bbox"))
+
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        assert(geo \ "columns" \ "geometry" \ "covering" == org.json4s.JNothing)
+      }
+    }
   }
 
   describe("Spark types tests") {
@@ -952,7 +1102,11 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
 
       // Read it back
       val df2 =
-        sparkSession.read.format("geoparquet").load(geoparquetoutputlocation).sort(col("id"))
+        sparkSession.read
+          .format("geoparquet")
+          .load(geoparquetoutputlocation)
+          .select(df.columns.map(col(_)): _*)
+          .sort(col("id"))
       assert(df2.schema.fields(1).dataType == TimestampNTZType)
       val data1 = df.sort(col("id")).collect()
       val data2 = df2.collect()

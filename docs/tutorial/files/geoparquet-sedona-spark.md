@@ -173,7 +173,7 @@ The `columns` column contains bounding box information on each file in the GeoPa
 ## Write GeoParquet with CRS Metadata
 
 Since v`1.5.1`, Sedona supports writing GeoParquet files with custom GeoParquet spec version and crs.
-The default GeoParquet spec version is `1.0.0` and the default crs is `null`. You can specify the GeoParquet spec version and crs as follows:
+The default GeoParquet spec version is `1.1.0` (since `v1.9.0`) and the default crs is `null`. You can specify the GeoParquet spec version and crs as follows:
 
 ```scala
 val projjson = "{...}" // PROJJSON string for all geometry columns
@@ -223,6 +223,26 @@ If the DataFrame has only one geometry column, you can simply specify the `geopa
 df.write.format("geoparquet")
     .option("geoparquet.covering", "bbox")
     .save("/path/to/saved_geoparquet.parquet")
+```
+
+If you don't set a `geoparquet.covering` option, Sedona will automatically populate covering metadata for GeoParquet `1.1.0`.
+
+For each geometry column, Sedona uses `<geometryColumnName>_bbox` as the covering column:
+
+* If `<geometryColumnName>_bbox` already exists and is a valid covering struct (`xmin`, `ymin`, `xmax`, `ymax`), Sedona reuses it.
+* If `<geometryColumnName>_bbox` does not exist, Sedona generates it automatically while writing.
+
+Explicit `geoparquet.covering` or `geoparquet.covering.<geometryColumnName>` options take precedence over the default behavior.
+
+You can control this default behavior with `geoparquet.covering.mode`:
+
+* `auto` (default): enable automatic covering metadata/column generation for GeoParquet `1.1.0`.
+* `legacy`: disable automatic covering generation.
+
+```scala
+df.write.format("geoparquet")
+  .option("geoparquet.covering.mode", "legacy")
+  .save("/path/to/saved_geoparquet.parquet")
 ```
 
 If the DataFrame does not have a covering column, you can construct one using Sedona's SQL functions:

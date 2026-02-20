@@ -95,6 +95,18 @@ object GeoParquetMetaData {
    */
   val GEOPARQUET_COVERING_KEY = "geoparquet.covering"
 
+  /**
+   * Configuration key for controlling default covering behavior.
+   *
+   * Supported values:
+   *   - `auto`: automatically generate/reuse `<geometryColumnName>_bbox` covering columns for
+   *     GeoParquet 1.1.0 when explicit covering options are not provided.
+   *   - `legacy`: disable automatic covering generation and keep legacy behavior.
+   */
+  val GEOPARQUET_COVERING_MODE_KEY = "geoparquet.covering.mode"
+  val GEOPARQUET_COVERING_MODE_AUTO = "auto"
+  val GEOPARQUET_COVERING_MODE_LEGACY = "legacy"
+
   def parseKeyValueMetaData(
       keyValueMetaData: java.util.Map[String, String]): Option[GeoParquetMetaData] = {
     Option(keyValueMetaData.get("geo")).map { geo =>
