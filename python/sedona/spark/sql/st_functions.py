@@ -917,6 +917,143 @@ def ST_H3ToGeom(cells: Union[ColumnOrName, list]) -> Column:
     return _call_st_function("ST_H3ToGeom", cells)
 
 
+# =========================================================================
+# Bing Tile functions
+# =========================================================================
+
+
+@validate_argument_types
+def ST_BingTile(
+    tile_x: Union[ColumnOrName, int],
+    tile_y: Union[ColumnOrName, int],
+    zoom_level: Union[ColumnOrName, int],
+) -> Column:
+    """Create a Bing tile quadkey from XY coordinates and zoom level.
+    :param tile_x: Tile X coordinate
+    :type tile_x: Union[ColumnOrName, int]
+    :param tile_y: Tile Y coordinate
+    :type tile_y: Union[ColumnOrName, int]
+    :param zoom_level: Zoom level (1 to 23)
+    :type zoom_level: Union[ColumnOrName, int]
+    :return: Quadkey string
+    :rtype: Column
+    """
+    args = (tile_x, tile_y, zoom_level)
+    return _call_st_function("ST_BingTile", args)
+
+
+@validate_argument_types
+def ST_BingTileAt(
+    longitude: Union[ColumnOrName, float],
+    latitude: Union[ColumnOrName, float],
+    zoom_level: Union[ColumnOrName, int],
+) -> Column:
+    """Return the Bing tile quadkey containing the given point at the specified zoom level.
+    :param longitude: Longitude (-180 to 180)
+    :type longitude: Union[ColumnOrName, float]
+    :param latitude: Latitude (-85.05112878 to 85.05112878)
+    :type latitude: Union[ColumnOrName, float]
+    :param zoom_level: Zoom level (1 to 23)
+    :type zoom_level: Union[ColumnOrName, int]
+    :return: Quadkey string
+    :rtype: Column
+    """
+    args = (longitude, latitude, zoom_level)
+    return _call_st_function("ST_BingTileAt", args)
+
+
+@validate_argument_types
+def ST_BingTilesAround(
+    longitude: Union[ColumnOrName, float],
+    latitude: Union[ColumnOrName, float],
+    zoom_level: Union[ColumnOrName, int],
+) -> Column:
+    """Return the 3x3 neighborhood of Bing tiles around the tile containing the specified point.
+    :param longitude: Longitude
+    :type longitude: Union[ColumnOrName, float]
+    :param latitude: Latitude
+    :type latitude: Union[ColumnOrName, float]
+    :param zoom_level: Zoom level (1 to 23)
+    :type zoom_level: Union[ColumnOrName, int]
+    :return: Array of quadkey strings
+    :rtype: Column
+    """
+    args = (longitude, latitude, zoom_level)
+    return _call_st_function("ST_BingTilesAround", args)
+
+
+@validate_argument_types
+def ST_BingTileZoomLevel(quad_key: ColumnOrName) -> Column:
+    """Return the zoom level of a Bing tile quadkey.
+    :param quad_key: Quadkey string
+    :type quad_key: ColumnOrName
+    :return: Zoom level
+    :rtype: Column
+    """
+    return _call_st_function("ST_BingTileZoomLevel", quad_key)
+
+
+@validate_argument_types
+def ST_BingTileX(quad_key: ColumnOrName) -> Column:
+    """Return the X coordinate of a Bing tile from its quadkey.
+    :param quad_key: Quadkey string
+    :type quad_key: ColumnOrName
+    :return: Tile X coordinate
+    :rtype: Column
+    """
+    return _call_st_function("ST_BingTileX", quad_key)
+
+
+@validate_argument_types
+def ST_BingTileY(quad_key: ColumnOrName) -> Column:
+    """Return the Y coordinate of a Bing tile from its quadkey.
+    :param quad_key: Quadkey string
+    :type quad_key: ColumnOrName
+    :return: Tile Y coordinate
+    :rtype: Column
+    """
+    return _call_st_function("ST_BingTileY", quad_key)
+
+
+@validate_argument_types
+def ST_BingTilePolygon(quad_key: ColumnOrName) -> Column:
+    """Return the polygon representation of a Bing tile given its quadkey.
+    :param quad_key: Quadkey string
+    :type quad_key: ColumnOrName
+    :return: Tile polygon geometry
+    :rtype: Column
+    """
+    return _call_st_function("ST_BingTilePolygon", quad_key)
+
+
+@validate_argument_types
+def ST_BingTileCellIDs(
+    geometry: ColumnOrName,
+    zoom_level: Union[ColumnOrName, int],
+) -> Column:
+    """Return the minimum set of Bing tile quadkeys that fully cover a given geometry at the specified zoom level.
+    :param geometry: Geometry to cover
+    :type geometry: ColumnOrName
+    :param zoom_level: Zoom level (1 to 23)
+    :type zoom_level: Union[ColumnOrName, int]
+    :return: Array of quadkey strings
+    :rtype: Column
+    """
+    args = (geometry, zoom_level)
+    return _call_st_function("ST_BingTileCellIDs", args)
+
+
+@validate_argument_types
+def ST_BingTileToGeom(quad_keys: Union[ColumnOrName, list]) -> Column:
+    """Convert an array of Bing tile quadkeys to their polygon geometries.
+    :param quad_keys: Array of quadkey strings
+    :type quad_keys: Union[ColumnOrName, list]
+    :return: Array of polygon geometries
+    :rtype: Column
+    """
+    return _call_st_function("ST_BingTileToGeom", quad_keys)
+
+
 @validate_argument_types
 def ST_InteriorRingN(polygon: ColumnOrName, n: Union[ColumnOrName, int]) -> Column:
     """Return the index n (0-th based) interior ring of a polygon geometry column.

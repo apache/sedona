@@ -2659,5 +2659,112 @@ class dataFrameAPITestScala extends TestBaseScala {
       val medialAxis = result.asInstanceOf[Geometry]
       assert(medialAxis.getGeometryType == "MultiLineString")
     }
+
+    // Bing Tile functions
+    it("Passed ST_BingTile with literal overload") {
+      val df = sparkSession.sql("SELECT 1 AS dummy").select(ST_BingTile(3, 5, 3))
+      assert(df.first().getString(0) == "213")
+    }
+
+    it("Passed ST_BingTile with Column overload") {
+      val df = sparkSession
+        .sql("SELECT 3 AS tileX, 5 AS tileY, 3 AS zoom")
+        .select(ST_BingTile(col("tileX"), col("tileY"), col("zoom")))
+      assert(df.first().getString(0) == "213")
+    }
+
+    it("Passed ST_BingTileAt with literal overload") {
+      val df = sparkSession.sql("SELECT 1 AS dummy").select(ST_BingTileAt(60.0, 30.12, 15))
+      assert(df.first().getString(0) == "123030123010121")
+    }
+
+    it("Passed ST_BingTileAt with Column overload") {
+      val df = sparkSession
+        .sql("SELECT 60.0 AS lon, 30.12 AS lat, 15 AS zoom")
+        .select(ST_BingTileAt(col("lon"), col("lat"), col("zoom")))
+      assert(df.first().getString(0) == "123030123010121")
+    }
+
+    it("Passed ST_BingTilesAround with literal overload") {
+      val df = sparkSession.sql("SELECT 1 AS dummy").select(ST_BingTilesAround(60.0, 30.12, 1))
+      val result = df.first().getAs[WrappedArray[String]](0)
+      assert(result == WrappedArray.make(Array("0", "2", "1", "3")))
+    }
+
+    it("Passed ST_BingTilesAround with Column overload") {
+      val df = sparkSession
+        .sql("SELECT 60.0 AS lon, 30.12 AS lat, 1 AS zoom")
+        .select(ST_BingTilesAround(col("lon"), col("lat"), col("zoom")))
+      val result = df.first().getAs[WrappedArray[String]](0)
+      assert(result == WrappedArray.make(Array("0", "2", "1", "3")))
+    }
+
+    it("Passed ST_BingTileZoomLevel with String column name") {
+      val df = sparkSession
+        .sql("SELECT '123030123010121' AS qk")
+        .select(ST_BingTileZoomLevel("qk"))
+      assert(df.first().getInt(0) == 15)
+    }
+
+    it("Passed ST_BingTileZoomLevel with Column overload") {
+      val df = sparkSession
+        .sql("SELECT '123030123010121' AS qk")
+        .select(ST_BingTileZoomLevel(col("qk")))
+      assert(df.first().getInt(0) == 15)
+    }
+
+    it("Passed ST_BingTileX with String column name") {
+      val df = sparkSession.sql("SELECT '213' AS qk").select(ST_BingTileX("qk"))
+      assert(df.first().getInt(0) == 3)
+    }
+
+    it("Passed ST_BingTileX with Column overload") {
+      val df = sparkSession.sql("SELECT '213' AS qk").select(ST_BingTileX(col("qk")))
+      assert(df.first().getInt(0) == 3)
+    }
+
+    it("Passed ST_BingTileY with String column name") {
+      val df = sparkSession.sql("SELECT '213' AS qk").select(ST_BingTileY("qk"))
+      assert(df.first().getInt(0) == 5)
+    }
+
+    it("Passed ST_BingTileY with Column overload") {
+      val df = sparkSession.sql("SELECT '213' AS qk").select(ST_BingTileY(col("qk")))
+      assert(df.first().getInt(0) == 5)
+    }
+
+    it("Passed ST_BingTilePolygon with String column name") {
+      val df = sparkSession
+        .sql("SELECT '123030123010121' AS qk")
+        .select(ST_BingTilePolygon("qk"))
+      val geom = df.first().get(0).asInstanceOf[Geometry]
+      assert(geom != null)
+      assert(geom.toText.startsWith("POLYGON"))
+    }
+
+    it("Passed ST_BingTilePolygon with Column overload") {
+      val df = sparkSession
+        .sql("SELECT '123030123010121' AS qk")
+        .select(ST_BingTilePolygon(col("qk")))
+      val geom = df.first().get(0).asInstanceOf[Geometry]
+      assert(geom != null)
+      assert(geom.toText.startsWith("POLYGON"))
+    }
+
+    it("Passed ST_BingTileCellIDs with Column overload") {
+      val df = sparkSession
+        .sql("SELECT ST_GeomFromWKT('POINT (60 30.12)') AS geom, 10 AS zoom")
+        .select(ST_BingTileCellIDs(col("geom"), col("zoom")))
+      val result = df.first().getAs[WrappedArray[String]](0)
+      assert(result == WrappedArray.make(Array("1230301230")))
+    }
+
+    it("Passed ST_BingTileToGeom with Column overload") {
+      val df = sparkSession
+        .sql("SELECT array('0', '1', '2', '3') AS qks")
+        .select(ST_BingTileToGeom(col("qks")))
+      val result = df.first().getAs[WrappedArray[Any]](0)
+      assert(result.length == 4)
+    }
   }
 }

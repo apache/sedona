@@ -1547,6 +1547,83 @@ private[apache] case class ST_H3ToGeom(inputExpressions: Seq[Expression])
   }
 }
 
+// =========================================================================
+// Bing Tile expressions
+// =========================================================================
+
+private[apache] case class ST_BingTile(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.bingTile _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_BingTileAt(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.bingTileAt _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_BingTilesAround(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.bingTilesAround _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_BingTileZoomLevel(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.bingTileZoomLevel _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_BingTileX(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.bingTileX _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_BingTileY(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.bingTileY _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_BingTilePolygon(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.bingTilePolygon _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_BingTileCellIDs(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.bingTileCellIDs _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_BingTileToGeom(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.bingTileToGeom _)
+    with FoldableExpression {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 private[apache] case class ST_CollectionExtract(inputExpressions: Seq[Expression])
     extends InferredExpression(InferrableFunction.allowRightNull(Functions.collectionExtract)) {
 

@@ -1751,4 +1751,65 @@ public class UDFsV2 {
     return GeometrySerde.serGeoJson(
         Functions.rotate(GeometrySerde.deserGeoJson(geom), angle, originX, originY));
   }
+
+  // Bing Tile functions
+
+  @UDFAnnotations.ParamMeta(argNames = {"tileX", "tileY", "zoomLevel"})
+  public static String ST_BingTile(int tileX, int tileY, int zoomLevel) {
+    return Functions.bingTile(tileX, tileY, zoomLevel);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"longitude", "latitude", "zoomLevel"})
+  public static String ST_BingTileAt(double longitude, double latitude, int zoomLevel) {
+    return Functions.bingTileAt(longitude, latitude, zoomLevel);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"longitude", "latitude", "zoomLevel"})
+  public static String[] ST_BingTilesAround(double longitude, double latitude, int zoomLevel) {
+    return Functions.bingTilesAround(longitude, latitude, zoomLevel);
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"quadKey"},
+      argTypes = {"String"})
+  public static int ST_BingTileZoomLevel(String quadKey) {
+    return Functions.bingTileZoomLevel(quadKey);
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"quadKey"},
+      argTypes = {"String"})
+  public static int ST_BingTileX(String quadKey) {
+    return Functions.bingTileX(quadKey);
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"quadKey"},
+      argTypes = {"String"})
+  public static int ST_BingTileY(String quadKey) {
+    return Functions.bingTileY(quadKey);
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"quadKey"},
+      argTypes = {"String"},
+      returnTypes = "Geometry")
+  public static String ST_BingTilePolygon(String quadKey) {
+    return GeometrySerde.serGeoJson(Functions.bingTilePolygon(quadKey));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "zoomLevel"},
+      argTypes = {"Geometry", "int"})
+  public static String[] ST_BingTileCellIDs(String geometry, int zoomLevel) {
+    return Functions.bingTileCellIDs(GeometrySerde.deserGeoJson(geometry), zoomLevel);
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"quadKeys"},
+      returnTypes = "Geometry")
+  public static String ST_BingTileToGeom(String[] quadKeys) {
+    Geometry[] geoms = Functions.bingTileToGeom(quadKeys);
+    return GeometrySerde.serGeoJson(GeometrySerde.GEOMETRY_FACTORY.createGeometryCollection(geoms));
+  }
 }

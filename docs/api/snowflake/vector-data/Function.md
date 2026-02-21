@@ -497,6 +497,168 @@ Output:
 32618
 ```
 
+## ST_BingTile
+
+Introduction: Creates a Bing Tile quadkey from tile XY coordinates and a zoom level.
+
+Format: `ST_BingTile(tileX: Int, tileY: Int, zoomLevel: Int)`
+
+SQL example:
+
+```sql
+SELECT ST_BingTile(3, 5, 3)
+```
+
+Output:
+
+```
+213
+```
+
+## ST_BingTileAt
+
+Introduction: Returns the Bing Tile quadkey for a given point (longitude, latitude) at a specified zoom level.
+
+Format: `ST_BingTileAt(longitude: Double, latitude: Double, zoomLevel: Int)`
+
+SQL example:
+
+```sql
+SELECT ST_BingTileAt(60, 30.12, 15)
+```
+
+Output:
+
+```
+123030123010121
+```
+
+## ST_BingTileCellIDs
+
+Introduction: Returns an array of Bing Tile quadkey strings that cover the given geometry at the specified zoom level.
+
+Format: `ST_BingTileCellIDs(geom: geometry, zoomLevel: Int)`
+
+SQL example:
+
+```sql
+SELECT ST_BingTileCellIDs(ST_GeomFromText('POINT(60 30.12)'), 10)
+```
+
+Output:
+
+```
+[1230301230]
+```
+
+## ST_BingTilePolygon
+
+Introduction: Returns the bounding polygon (Geometry) of the Bing Tile identified by the given quadkey.
+
+Format: `ST_BingTilePolygon(quadKey: String)`
+
+SQL example:
+
+```sql
+SELECT ST_AsText(ST_BingTilePolygon('213'))
+```
+
+Output:
+
+```
+POLYGON ((0 0, 0 -40.97989806962013, 45 -40.97989806962013, 45 0, 0 0))
+```
+
+## ST_BingTilesAround
+
+Introduction: Returns an array of Bing Tile quadkey strings representing the neighborhood tiles around the tile that contains the given point (longitude, latitude) at the specified zoom level. Returns the 3×3 neighborhood (up to 9 tiles), or fewer tiles at the edges/corners of the map.
+
+Format: `ST_BingTilesAround(longitude: Double, latitude: Double, zoomLevel: Int)`
+
+SQL example:
+
+```sql
+SELECT ST_BingTilesAround(60, 30.12, 1)
+```
+
+Output:
+
+```
+[0, 2, 1, 3]
+```
+
+## ST_BingTileToGeom
+
+Introduction: Returns a GeometryCollection of Polygons for the corresponding Bing Tile quadkeys.
+
+Format: `ST_BingTileToGeom(quadKeys: Array)`
+
+SQL example:
+
+```sql
+SELECT ST_BingTileToGeom(ARRAY_CONSTRUCT('0', '1', '2', '3'))
+```
+
+Output:
+
+```
+GEOMETRYCOLLECTION (POLYGON ((-180 85.05112877980659, -180 0, 0 0, 0 85.05112877980659, -180 85.05112877980659)), ...)
+```
+
+## ST_BingTileX
+
+Introduction: Returns the tile X coordinate of the Bing Tile identified by the given quadkey.
+
+Format: `ST_BingTileX(quadKey: String)`
+
+SQL example:
+
+```sql
+SELECT ST_BingTileX('213')
+```
+
+Output:
+
+```
+3
+```
+
+## ST_BingTileY
+
+Introduction: Returns the tile Y coordinate of the Bing Tile identified by the given quadkey.
+
+Format: `ST_BingTileY(quadKey: String)`
+
+SQL example:
+
+```sql
+SELECT ST_BingTileY('213')
+```
+
+Output:
+
+```
+5
+```
+
+## ST_BingTileZoomLevel
+
+Introduction: Returns the zoom level of the Bing Tile identified by the given quadkey.
+
+Format: `ST_BingTileZoomLevel(quadKey: String)`
+
+SQL example:
+
+```sql
+SELECT ST_BingTileZoomLevel('213')
+```
+
+Output:
+
+```
+3
+```
+
 ## ST_Boundary
 
 Introduction: Returns the closure of the combinatorial boundary of this Geometry.

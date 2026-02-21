@@ -3077,4 +3077,182 @@ public class FunctionTest extends TestBase {
                 .getField(0);
     assertEquals("ST_MultiLineString", actual);
   }
+
+  // =========================================================================
+  // Bing Tile function tests
+  // =========================================================================
+
+  @Test
+  public void testBingTile() {
+    // bing_tile(3, 5, 3) = "213"
+    String result = (String) first(tableEnv.sqlQuery("SELECT ST_BingTile(3, 5, 3)")).getField(0);
+    assertEquals("213", result);
+
+    // bing_tile(21845, 13506, 15) = "123030123010121"
+    result = (String) first(tableEnv.sqlQuery("SELECT ST_BingTile(21845, 13506, 15)")).getField(0);
+    assertEquals("123030123010121", result);
+  }
+
+  @Test
+  public void testBingTileAt() {
+    // ST_BingTileAt(lon, lat, zoom) — longitude first
+    // bingTileAt(lon=60, lat=30.12, zoom=15) = tile(21845, 13506, 15) = "123030123010121"
+    String result =
+        (String) first(tableEnv.sqlQuery("SELECT ST_BingTileAt(60.0, 30.12, 15)")).getField(0);
+    assertEquals("123030123010121", result);
+
+    // bingTileAt(lon=-0.002, lat=0, zoom=1) = tile(0, 1, 1)
+    result = (String) first(tableEnv.sqlQuery("SELECT ST_BingTileAt(-0.002, 0.0, 1)")).getField(0);
+    int x = (int) first(tableEnv.sqlQuery("SELECT ST_BingTileX('" + result + "')")).getField(0);
+    int y = (int) first(tableEnv.sqlQuery("SELECT ST_BingTileY('" + result + "')")).getField(0);
+    assertEquals(0, x);
+    assertEquals(1, y);
+  }
+
+  @Test
+  public void testBingTilesAround() {
+    // ST_BingTilesAround(lon, lat, zoom) — longitude first
+    // bingTilesAround(lon=60, lat=30.12, zoom=1) = ["0", "2", "1", "3"]
+    String[] result =
+        (String[])
+            first(tableEnv.sqlQuery("SELECT ST_BingTilesAround(60.0, 30.12, 1)")).getField(0);
+    assertArrayEquals(new String[] {"0", "2", "1", "3"}, result);
+
+    // bingTilesAround(lon=60, lat=30.12, zoom=15) = 9 tiles
+    result =
+        (String[])
+            first(tableEnv.sqlQuery("SELECT ST_BingTilesAround(60.0, 30.12, 15)")).getField(0);
+    assertArrayEquals(
+        new String[] {
+          "123030123010102",
+          "123030123010120",
+          "123030123010122",
+          "123030123010103",
+          "123030123010121",
+          "123030123010123",
+          "123030123010112",
+          "123030123010130",
+          "123030123010132"
+        },
+        result);
+
+    // corner at (lon=-180, lat=-85.05112878, zoom=3) = 4 tiles
+    result =
+        (String[])
+            first(tableEnv.sqlQuery("SELECT ST_BingTilesAround(-180.0, -85.05112878, 3)"))
+                .getField(0);
+    assertArrayEquals(new String[] {"220", "222", "221", "223"}, result);
+
+    // edge at (lon=0, lat=-85.05112878, zoom=2) = 6 tiles
+    result =
+        (String[])
+            first(tableEnv.sqlQuery("SELECT ST_BingTilesAround(0.0, -85.05112878, 2)")).getField(0);
+    assertArrayEquals(new String[] {"21", "23", "30", "32", "31", "33"}, result);
+  }
+
+  @Test
+  public void testBingTileZoomLevel() {
+    int result = (int) first(tableEnv.sqlQuery("SELECT ST_BingTileZoomLevel('213')")).getField(0);
+    assertEquals(3, result);
+
+    result =
+        (int)
+            first(tableEnv.sqlQuery("SELECT ST_BingTileZoomLevel('123030123010121')")).getField(0);
+    assertEquals(15, result);
+  }
+
+  @Test
+  public void testBingTileXY() {
+    int x = (int) first(tableEnv.sqlQuery("SELECT ST_BingTileX('213')")).getField(0);
+    int y = (int) first(tableEnv.sqlQuery("SELECT ST_BingTileY('213')")).getField(0);
+    assertEquals(3, x);
+    assertEquals(5, y);
+
+    x = (int) first(tableEnv.sqlQuery("SELECT ST_BingTileX('123030123010121')")).getField(0);
+    y = (int) first(tableEnv.sqlQuery("SELECT ST_BingTileY('123030123010121')")).getField(0);
+    assertEquals(21845, x);
+    assertEquals(13506, y);
+
+    // round-trip bing_tile(x, y, zoom) = original quadkey
+    String reconstructed =
+        (String)
+            first(
+                    tableEnv.sqlQuery(
+                        "SELECT ST_BingTile(ST_BingTileX('123030123010121'), ST_BingTileY('123030123010121'), ST_BingTileZoomLevel('123030123010121'))"))
+                .getField(0);
+    assertEquals("123030123010121", reconstructed);
+  }
+
+  @Test
+  public void testBingTilePolygon() {
+    Geometry result =
+        (Geometry)
+            first(tableEnv.sqlQuery("SELECT ST_BingTilePolygon('123030123010121')")).getField(0);
+    assertNotNull(result);
+    assertTrue(result instanceof Polygon);
+    Envelope env = result.getEnvelopeInternal();
+    assertEquals(59.996337890625, env.getMinX(), 1e-10);
+    assertEquals(60.00732421875, env.getMaxX(), 1e-10);
+    assertEquals(30.11662158281937, env.getMinY(), 1e-10);
+    assertEquals(30.12612436422458, env.getMaxY(), 1e-10);
+  }
+
+  @Test
+  public void testBingTileCellIDs() {
+    // geometry_to_bing_tiles(POINT(60 30.12), 10) = ["1230301230"]
+    String[] result =
+        (String[])
+            first(
+                    tableEnv.sqlQuery(
+                        "SELECT ST_BingTileCellIDs(ST_GeomFromWKT('POINT (60 30.12)'), 10)"))
+                .getField(0);
+    assertArrayEquals(new String[] {"1230301230"}, result);
+
+    // geometry_to_bing_tiles(POINT(60 30.12), 15) = ["123030123010121"]
+    result =
+        (String[])
+            first(
+                    tableEnv.sqlQuery(
+                        "SELECT ST_BingTileCellIDs(ST_GeomFromWKT('POINT (60 30.12)'), 15)"))
+                .getField(0);
+    assertArrayEquals(new String[] {"123030123010121"}, result);
+
+    // geometry_to_bing_tiles(POLYGON((0 0, 0 10, 10 10, 10 0)), 6)
+    result =
+        (String[])
+            first(
+                    tableEnv.sqlQuery(
+                        "SELECT ST_BingTileCellIDs(ST_GeomFromWKT('POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))'), 6)"))
+                .getField(0);
+    assertArrayEquals(new String[] {"122220", "122222", "122221", "122223"}, result);
+
+    // POINT EMPTY → empty list
+    result =
+        (String[])
+            first(tableEnv.sqlQuery("SELECT ST_BingTileCellIDs(ST_GeomFromWKT('POINT EMPTY'), 10)"))
+                .getField(0);
+    assertEquals(0, result.length);
+
+    // round-trip tile polygon back to the same tile
+    result =
+        (String[])
+            first(
+                    tableEnv.sqlQuery(
+                        "SELECT ST_BingTileCellIDs(ST_BingTilePolygon('1230301230'), 10)"))
+                .getField(0);
+    assertArrayEquals(new String[] {"1230301230"}, result);
+  }
+
+  @Test
+  public void testBingTileToGeom() {
+    Geometry[] result =
+        (Geometry[])
+            first(tableEnv.sqlQuery("SELECT ST_BingTileToGeom(ARRAY['0', '1', '2', '3'])"))
+                .getField(0);
+    assertEquals(4, result.length);
+    for (Geometry g : result) {
+      assertTrue(g instanceof Polygon);
+      assertEquals(5, g.getCoordinates().length);
+    }
+  }
 }
