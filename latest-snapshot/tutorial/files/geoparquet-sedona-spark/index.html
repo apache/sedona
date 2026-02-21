@@ -1636,6 +1636,23 @@ You're not viewing the latest stable version.
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Write GeoParquet with CRS Metadata">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automatic-crs-from-srid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automatic CRS from SRID
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -5923,6 +5940,23 @@ You're not viewing the latest stable version.
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Write GeoParquet with CRS Metadata">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automatic-crs-from-srid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automatic CRS from SRID
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -6180,13 +6214,18 @@ For example, <code>g0</code> and <code>g1</code> are two geometry columns in the
 </code></pre></div>
 <p>The value of <code>geoparquet.crs</code> and <code>geoparquet.crs.&lt;column_name&gt;</code> can be one of the following:</p>
 <ul>
-<li><code>"null"</code>: Explicitly setting <code>crs</code> field to <code>null</code>. This is the default behavior.</li>
+<li><code>"null"</code>: Explicitly setting <code>crs</code> field to <code>null</code>. This is the default behavior when geometry SRID is 0.</li>
 <li><code>""</code> (empty string): Omit the <code>crs</code> field. This implies that the CRS is <a href="https://www.opengis.net/def/crs/OGC/1.3/CRS84">OGC:CRS84</a> for CRS-aware implementations.</li>
 <li><code>"{...}"</code> (PROJJSON string): The <code>crs</code> field will be set as the PROJJSON object representing the Coordinate Reference System (CRS) of the geometry. You can find the PROJJSON string of a specific CRS from here: <a href="https://epsg.io/">https://epsg.io/</a> (click the JSON option at the bottom of the page). You can also customize your PROJJSON string as needed.</li>
 </ul>
-<p>Please note that Sedona currently cannot set/get a projjson string to/from a CRS. Its geoparquet reader will ignore the projjson metadata and you will have to set your CRS via <a href="../../../api/sql/Function/#st_setsrid"><code>ST_SetSRID</code></a> after reading the file.
-Its geoparquet writer will not leverage the SRID field of a geometry so you will have to always set the <code>geoparquet.crs</code> option manually when writing the file, if you want to write a meaningful CRS field.</p>
-<p>Due to the same reason, Sedona geoparquet reader and writer do NOT check the axis order (lon/lat or lat/lon) and assume they are handled by the users themselves when writing / reading the files. You can always use <a href="../../../api/sql/Function/#st_flipcoordinates"><code>ST_FlipCoordinates</code></a> to swap the axis order of your geometries.</p>
+<h3 id="automatic-crs-from-srid">Automatic CRS from SRID<a class="headerlink" href="#automatic-crs-from-srid" title="Permanent link">&para;</a></h3>
+<p>When no <code>geoparquet.crs</code> option is explicitly provided, Sedona will automatically derive the CRS PROJJSON from the SRID of the geometry column. For example, if all geometries in a column have SRID 32632 (set via <a href="../../../api/sql/Function/#st_setsrid"><code>ST_SetSRID</code></a>), the writer will automatically produce the PROJJSON for EPSG:32632 in the GeoParquet metadata. For SRID 4326, the CRS field is omitted since this is the GeoParquet default (OGC:CRS84).</p>
+<ul>
+<li>If the SRID is 0 (the default for geometries without an explicit SRID), the <code>crs</code> field will be set to <code>null</code>.</li>
+<li>If geometries in a column have mixed SRIDs, the <code>crs</code> field defaults to <code>null</code>.</li>
+<li>If an explicit <code>geoparquet.crs</code> or <code>geoparquet.crs.&lt;column_name&gt;</code> option is provided, it always takes precedence over the SRID-derived CRS.</li>
+</ul>
+<p>Sedona geoparquet reader and writer do NOT check the axis order (lon/lat or lat/lon) and assume they are handled by the users themselves when writing / reading the files. You can always use <a href="../../../api/sql/Function/#st_flipcoordinates"><code>ST_FlipCoordinates</code></a> to swap the axis order of your geometries.</p>
 <h2 id="save-geoparquet-with-covering-metadata">Save GeoParquet with Covering Metadata<a class="headerlink" href="#save-geoparquet-with-covering-metadata" title="Permanent link">&para;</a></h2>
 <p>Since <code>v1.6.1</code>, Sedona supports writing the <a href="https://github.com/opengeospatial/geoparquet/blob/v1.1.0/format-specs/geoparquet.md#covering"><code>covering</code> field</a> to geometry column metadata. The <code>covering</code> field specifies a bounding box column to help accelerate spatial data retrieval. The bounding box column should be a top-level struct column containing <code>xmin</code>, <code>ymin</code>, <code>xmax</code>, <code>ymax</code> columns. If the DataFrame you are writing contains such columns, you can specify <code>.option("geoparquet.covering.&lt;geometryColumnName&gt;", "&lt;coveringColumnName&gt;")</code> option to write <code>covering</code> metadata to GeoParquet files:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">)</span>
@@ -6304,7 +6343,7 @@ ORDER BY geohash
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 21, 2026 03:00:49 UTC">February 21, 2026 03:00:49</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 21, 2026 10:27:04 UTC">February 21, 2026 10:27:04</span>
   </span>
 
     

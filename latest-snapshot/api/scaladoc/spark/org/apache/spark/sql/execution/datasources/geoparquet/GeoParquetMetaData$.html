@@ -766,6 +766,27 @@ is applied to all geometry columns in the file.
       </span>
       
       
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData#sridToProjJson" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sridToProjJson(srid:Int):Option[org.json4s.JValue]"></a><a id="sridToProjJson(Int):Option[JValue]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetMetaData$.html#sridToProjJson(srid:Int):Option[org.json4s.JValue]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sridToProjJson</span><span class="params">(<span name="srid">srid: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.json4s.JValue">JValue</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Convert an SRID to a PROJJSON JValue using proj4sedona.</p><div class="fullcomment"><div class="comment cmt"><p>Convert an SRID to a PROJJSON JValue using proj4sedona.</p><p>The generated PROJJSON includes an <code>id</code> field with the EPSG authority and code, which enables
+round-trip SRID preservation when reading the GeoParquet file back.
+</p></div><dl class="paramcmts block"><dt class="param">srid</dt><dd class="cmt"><p>
+  The SRID to convert (e.g., 4326 for WGS 84).</p></dd><dt>returns</dt><dd class="cmt"><p>
+  Some(JValue) containing the PROJJSON if conversion succeeds, None if the SRID is 0
+  (unknown), 4326 (GeoParquet default CRS), or if conversion fails.</p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
