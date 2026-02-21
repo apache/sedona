@@ -291,6 +291,46 @@ object st_functions {
 
   def ST_H3ToGeom(cellIds: Array[Long]): Column = wrapExpression[ST_H3ToGeom](cellIds)
 
+  // Bing Tile functions
+  def ST_BingTile(tileX: Column, tileY: Column, zoomLevel: Column): Column =
+    wrapExpression[ST_BingTile](tileX, tileY, zoomLevel)
+  def ST_BingTile(tileX: Int, tileY: Int, zoomLevel: Int): Column =
+    wrapExpression[ST_BingTile](tileX, tileY, zoomLevel)
+
+  def ST_BingTileAt(longitude: Column, latitude: Column, zoomLevel: Column): Column =
+    wrapExpression[ST_BingTileAt](longitude, latitude, zoomLevel)
+  def ST_BingTileAt(longitude: Double, latitude: Double, zoomLevel: Int): Column =
+    wrapExpression[ST_BingTileAt](longitude, latitude, zoomLevel)
+
+  def ST_BingTilesAround(longitude: Column, latitude: Column, zoomLevel: Column): Column =
+    wrapExpression[ST_BingTilesAround](longitude, latitude, zoomLevel)
+  def ST_BingTilesAround(longitude: Double, latitude: Double, zoomLevel: Int): Column =
+    wrapExpression[ST_BingTilesAround](longitude, latitude, zoomLevel)
+
+  def ST_BingTileZoomLevel(quadKey: Column): Column =
+    wrapExpression[ST_BingTileZoomLevel](quadKey)
+  def ST_BingTileZoomLevel(quadKey: String): Column =
+    wrapExpression[ST_BingTileZoomLevel](quadKey)
+
+  def ST_BingTileX(quadKey: Column): Column = wrapExpression[ST_BingTileX](quadKey)
+  def ST_BingTileX(quadKey: String): Column = wrapExpression[ST_BingTileX](quadKey)
+
+  def ST_BingTileY(quadKey: Column): Column = wrapExpression[ST_BingTileY](quadKey)
+  def ST_BingTileY(quadKey: String): Column = wrapExpression[ST_BingTileY](quadKey)
+
+  def ST_BingTilePolygon(quadKey: Column): Column =
+    wrapExpression[ST_BingTilePolygon](quadKey)
+  def ST_BingTilePolygon(quadKey: String): Column =
+    wrapExpression[ST_BingTilePolygon](quadKey)
+
+  def ST_BingTileCellIDs(geometry: Column, zoomLevel: Column): Column =
+    wrapExpression[ST_BingTileCellIDs](geometry, zoomLevel)
+  def ST_BingTileCellIDs(geometry: String, zoomLevel: Int): Column =
+    wrapExpression[ST_BingTileCellIDs](geometry, zoomLevel)
+
+  def ST_BingTileToGeom(quadKeys: Column): Column =
+    wrapExpression[ST_BingTileToGeom](quadKeys)
+
   def ST_InteriorRingN(polygon: Column, n: Column): Column =
     wrapExpression[ST_InteriorRingN](polygon, n)
   def ST_InteriorRingN(polygon: String, n: Int): Column =

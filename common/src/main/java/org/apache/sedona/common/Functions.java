@@ -1815,6 +1815,131 @@ public class Functions {
     return polygons.toArray(new Polygon[0]);
   }
 
+  // =========================================================================
+  // Bing Tile functions
+  // =========================================================================
+
+  /**
+   * Creates a Bing tile quadkey from tile XY coordinates and zoom level.
+   *
+   * @param tileX the tile X coordinate
+   * @param tileY the tile Y coordinate
+   * @param zoomLevel the zoom level (1 to 23)
+   * @return the quadkey string
+   */
+  public static String bingTile(int tileX, int tileY, int zoomLevel) {
+    return BingTile.fromCoordinates(tileX, tileY, zoomLevel).toQuadKey();
+  }
+
+  /**
+   * Returns the Bing tile quadkey at a given zoom level containing the specified point.
+   *
+   * @param longitude the longitude (-180 to 180)
+   * @param latitude the latitude (-85.05112878 to 85.05112878)
+   * @param zoomLevel the zoom level (1 to 23)
+   * @return the quadkey string
+   */
+  public static String bingTileAt(double longitude, double latitude, int zoomLevel) {
+    return BingTile.fromLatLon(latitude, longitude, zoomLevel).toQuadKey();
+  }
+
+  /**
+   * Returns the 3x3 neighborhood of Bing tiles around the tile containing the specified point.
+   *
+   * @param longitude the longitude
+   * @param latitude the latitude
+   * @param zoomLevel the zoom level (1 to 23)
+   * @return array of quadkey strings
+   */
+  public static String[] bingTilesAround(double longitude, double latitude, int zoomLevel) {
+    List<BingTile> tiles = BingTile.tilesAround(latitude, longitude, zoomLevel);
+    return tiles.stream().map(BingTile::toQuadKey).toArray(String[]::new);
+  }
+
+  /**
+   * Returns the zoom level of a Bing tile quadkey.
+   *
+   * @param quadKey the quadkey string
+   * @return the zoom level
+   */
+  public static int bingTileZoomLevel(String quadKey) {
+    // Validate the quadkey by parsing it
+    BingTile.fromQuadKey(quadKey);
+    return quadKey.length();
+  }
+
+  /**
+   * Returns the X coordinate of a Bing tile from its quadkey.
+   *
+   * @param quadKey the quadkey string
+   * @return the tile X coordinate
+   */
+  public static int bingTileX(String quadKey) {
+    return BingTile.fromQuadKey(quadKey).getX();
+  }
+
+  /**
+   * Returns the Y coordinate of a Bing tile from its quadkey.
+   *
+   * @param quadKey the quadkey string
+   * @return the tile Y coordinate
+   */
+  public static int bingTileY(String quadKey) {
+    return BingTile.fromQuadKey(quadKey).getY();
+  }
+
+  /**
+   * Returns the polygon representation of a Bing tile given its quadkey.
+   *
+   * @param quadKey the quadkey string
+   * @return the tile polygon
+   */
+  public static Geometry bingTilePolygon(String quadKey) {
+    return BingTile.fromQuadKey(quadKey).toPolygon();
+  }
+
+  /**
+   * Validates and normalizes a Bing tile quadkey string.
+   *
+   * <p>The input quadkey is parsed into a {@code BingTile} for validation, and the corresponding
+   * (possibly normalized) quadkey string is returned. Invalid quadkeys will cause {@code
+   * BingTile.fromQuadKey} to throw an exception.
+   *
+   * @param quadKey the quadkey string to validate and normalize
+   * @return the validated and normalized quadkey string
+   */
+  public static String bingTileQuadKey(String quadKey) {
+    // Validate and return. This serves as a validation/normalization function.
+    return BingTile.fromQuadKey(quadKey).toQuadKey();
+  }
+
+  /**
+   * Returns the minimum set of Bing tile quadkeys that fully cover a given geometry at the
+   * specified zoom level.
+   *
+   * @param geometry the geometry to cover
+   * @param zoomLevel the zoom level (1 to 23)
+   * @return array of quadkey strings
+   */
+  public static String[] bingTileCellIDs(Geometry geometry, int zoomLevel) {
+    List<BingTile> tiles = BingTile.tilesCovering(geometry, zoomLevel);
+    return tiles.stream().map(BingTile::toQuadKey).toArray(String[]::new);
+  }
+
+  /**
+   * Converts an array of Bing tile quadkeys to their polygon geometries.
+   *
+   * @param quadKeys the array of quadkey strings
+   * @return array of polygon geometries
+   */
+  public static Geometry[] bingTileToGeom(String[] quadKeys) {
+    Geometry[] polygons = new Geometry[quadKeys.length];
+    for (int i = 0; i < quadKeys.length; i++) {
+      polygons[i] = BingTile.fromQuadKey(quadKeys[i]).toPolygon();
+    }
+    return polygons;
+  }
+
   public static Geometry simplify(Geometry geom, double distanceTolerance) {
     return DouglasPeuckerSimplifier.simplify(geom, distanceTolerance);
   }

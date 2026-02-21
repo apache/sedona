@@ -2338,6 +2338,95 @@ public class Functions {
     }
   }
 
+  // =========================================================================
+  // Bing Tile functions
+  // =========================================================================
+
+  public static class ST_BingTile extends ScalarFunction {
+    @DataTypeHint("STRING")
+    public String eval(
+        @DataTypeHint("INT") Integer tileX,
+        @DataTypeHint("INT") Integer tileY,
+        @DataTypeHint("INT") Integer zoomLevel) {
+      return org.apache.sedona.common.Functions.bingTile(tileX, tileY, zoomLevel);
+    }
+  }
+
+  public static class ST_BingTileAt extends ScalarFunction {
+    @DataTypeHint("STRING")
+    public String eval(
+        @DataTypeHint("DOUBLE") Double longitude,
+        @DataTypeHint("DOUBLE") Double latitude,
+        @DataTypeHint("INT") Integer zoomLevel) {
+      return org.apache.sedona.common.Functions.bingTileAt(longitude, latitude, zoomLevel);
+    }
+  }
+
+  public static class ST_BingTilesAround extends ScalarFunction {
+    @DataTypeHint("ARRAY<STRING>")
+    public String[] eval(
+        @DataTypeHint("DOUBLE") Double longitude,
+        @DataTypeHint("DOUBLE") Double latitude,
+        @DataTypeHint("INT") Integer zoomLevel) {
+      return org.apache.sedona.common.Functions.bingTilesAround(longitude, latitude, zoomLevel);
+    }
+  }
+
+  public static class ST_BingTileZoomLevel extends ScalarFunction {
+    @DataTypeHint("INT")
+    public Integer eval(@DataTypeHint("STRING") String quadKey) {
+      return org.apache.sedona.common.Functions.bingTileZoomLevel(quadKey);
+    }
+  }
+
+  public static class ST_BingTileX extends ScalarFunction {
+    @DataTypeHint("INT")
+    public Integer eval(@DataTypeHint("STRING") String quadKey) {
+      return org.apache.sedona.common.Functions.bingTileX(quadKey);
+    }
+  }
+
+  public static class ST_BingTileY extends ScalarFunction {
+    @DataTypeHint("INT")
+    public Integer eval(@DataTypeHint("STRING") String quadKey) {
+      return org.apache.sedona.common.Functions.bingTileY(quadKey);
+    }
+  }
+
+  public static class ST_BingTilePolygon extends ScalarFunction {
+    @DataTypeHint(
+        value = "RAW",
+        rawSerializer = GeometryTypeSerializer.class,
+        bridgedTo = Geometry.class)
+    public Geometry eval(@DataTypeHint("STRING") String quadKey) {
+      return org.apache.sedona.common.Functions.bingTilePolygon(quadKey);
+    }
+  }
+
+  public static class ST_BingTileCellIDs extends ScalarFunction {
+    @DataTypeHint("ARRAY<STRING>")
+    public String[] eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object o,
+        @DataTypeHint("INT") Integer zoomLevel) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.bingTileCellIDs(geom, zoomLevel);
+    }
+  }
+
+  public static class ST_BingTileToGeom extends ScalarFunction {
+    @DataTypeHint(
+        value = "RAW",
+        rawSerializer = GeometryArrayTypeSerializer.class,
+        bridgedTo = Geometry[].class)
+    public Geometry[] eval(@DataTypeHint("ARRAY<STRING>") String[] quadKeys) {
+      return org.apache.sedona.common.Functions.bingTileToGeom(quadKeys);
+    }
+  }
+
   public static class ST_Simplify extends ScalarFunction {
     @DataTypeHint(
         value = "RAW",

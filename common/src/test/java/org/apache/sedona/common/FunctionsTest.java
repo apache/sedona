@@ -5387,4 +5387,315 @@ public class FunctionsTest extends TestBase {
     // 13 chars * 5 bits = 65 > 64 (MAX_BIT_PRECISION)
     Functions.geohashNeighbors("0123456789abc");
   }
+
+  // =========================================================================
+  // Bing Tile function tests
+  // =========================================================================
+
+  // --- ST_BingTile (from coordinates and from quadkey) ---
+
+  @Test
+  public void testBingTileFromCoordinates() {
+    // bing_tile(3, 5, 3) = quadkey "213"
+    assertEquals("213", Functions.bingTile(3, 5, 3));
+    // bing_tile(21845, 13506, 15) = quadkey "123030123010121"
+    assertEquals("123030123010121", Functions.bingTile(21845, 13506, 15));
+  }
+
+  @Test
+  public void testBingTileQuadKeyRoundTrip() {
+    assertEquals("213", Functions.bingTileQuadKey(Functions.bingTile(3, 5, 3)));
+    assertEquals(
+        "123030123010121", Functions.bingTileQuadKey(Functions.bingTile(21845, 13506, 15)));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileInvalidEmptyQuadKey() {
+    Functions.bingTileQuadKey("");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileInvalidQuadKeyDigits() {
+    Functions.bingTileQuadKey("test");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileInvalidQuadKeyDigits2() {
+    // "12345" contains '4' and '5' which are invalid
+    Functions.bingTileQuadKey("12345");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileQuadKeyTooLong() {
+    // quadkey > 23 chars
+    Functions.bingTileQuadKey("101010101010101010101010101010100101010101001010");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileXYOutOfRange() {
+    // x=10 at zoom 3 is out of [0, 8) range
+    Functions.bingTile(10, 2, 3);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileXYOutOfRange2() {
+    // y=10 at zoom 3 is out of [0, 8) range
+    Functions.bingTile(2, 10, 3);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileZoomOutOfRange() {
+    // zoom=37 > 23
+    Functions.bingTile(2, 7, 37);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileZoomZero() {
+    // zoom=0 is invalid
+    Functions.bingTile(0, 0, 0);
+  }
+
+  // --- ST_BingTileAt (point to tile) ---
+
+  @Test
+  public void testBingTileAt() {
+    // bingTileAt(lon=60, lat=30.12, zoom=15) = tile(21845, 13506, 15)
+    String qk = Functions.bingTileAt(60, 30.12, 15);
+    assertEquals("123030123010121", qk);
+    assertEquals(21845, Functions.bingTileX(qk));
+    assertEquals(13506, Functions.bingTileY(qk));
+
+    // bingTileAt(lon=-0.002, lat=0, zoom=1) = tile(0, 1, 1)
+    qk = Functions.bingTileAt(-0.002, 0, 1);
+    assertEquals(0, Functions.bingTileX(qk));
+    assertEquals(1, Functions.bingTileY(qk));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileAtLongitudeOutOfRange() {
+    // longitude 600 is out of range
+    Functions.bingTileAt(600, 30.12, 15);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileAtLatitudeOutOfRange() {
+    // latitude 300.12 is out of range
+    Functions.bingTileAt(60, 300.12, 15);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileAtZoomTooSmall() {
+    // zoom=0
+    Functions.bingTileAt(60, 30.12, 0);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileAtZoomTooLarge() {
+    // zoom=40
+    Functions.bingTileAt(60, 30.12, 40);
+  }
+
+  // --- ST_BingTileCoordinates (X, Y) ---
+
+  @Test
+  public void testBingTileCoordinates() {
+    // bing_tile_coordinates('213') = (3, 5)
+    assertEquals(3, Functions.bingTileX("213"));
+    assertEquals(5, Functions.bingTileY("213"));
+
+    // bing_tile_coordinates('123030123010121') = (21845, 13506)
+    assertEquals(21845, Functions.bingTileX("123030123010121"));
+    assertEquals(13506, Functions.bingTileY("123030123010121"));
+  }
+
+  // --- ST_BingTileZoomLevel ---
+
+  @Test
+  public void testBingTileZoomLevel() {
+    assertEquals(3, Functions.bingTileZoomLevel("213"));
+    assertEquals(15, Functions.bingTileZoomLevel("123030123010121"));
+  }
+
+  // --- ST_BingTilesAround ---
+
+  @Test
+  public void testBingTilesAround() {
+    // bingTilesAround(lon=60, lat=30.12, zoom=1) = ["0", "2", "1", "3"]
+    String[] tiles = Functions.bingTilesAround(60, 30.12, 1);
+    assertEquals(4, tiles.length);
+    assertArrayEquals(new String[] {"0", "2", "1", "3"}, tiles);
+
+    // bingTilesAround(lon=60, lat=30.12, zoom=15) = 9 tiles (3x3 neighborhood)
+    tiles = Functions.bingTilesAround(60, 30.12, 15);
+    assertEquals(9, tiles.length);
+    assertArrayEquals(
+        new String[] {
+          "123030123010102",
+          "123030123010120",
+          "123030123010122",
+          "123030123010103",
+          "123030123010121",
+          "123030123010123",
+          "123030123010112",
+          "123030123010130",
+          "123030123010132"
+        },
+        tiles);
+  }
+
+  @Test
+  public void testBingTilesAroundCorner() {
+    // corner case at (lon=-180, lat=-85.05112878, zoom=1) = all 4 tiles
+    String[] tiles = Functions.bingTilesAround(-180, -85.05112878, 1);
+    assertArrayEquals(new String[] {"0", "2", "1", "3"}, tiles);
+
+    // corner at (lon=-180, lat=-85.05112878, zoom=3) = 4 tiles
+    tiles = Functions.bingTilesAround(-180, -85.05112878, 3);
+    assertArrayEquals(new String[] {"220", "222", "221", "223"}, tiles);
+  }
+
+  @Test
+  public void testBingTilesAroundEdge() {
+    // edge case at (lon=0, lat=-85.05112878, zoom=2) = 6 tiles
+    String[] tiles = Functions.bingTilesAround(0, -85.05112878, 2);
+    assertArrayEquals(new String[] {"21", "23", "30", "32", "31", "33"}, tiles);
+
+    // edge at (lon=0, lat=85.05112878, zoom=2) = 6 tiles
+    tiles = Functions.bingTilesAround(0, 85.05112878, 2);
+    assertArrayEquals(new String[] {"01", "03", "10", "12", "11", "13"}, tiles);
+  }
+
+  // --- ST_BingTilePolygon ---
+
+  @Test
+  public void testBingTilePolygon() {
+    // bing_tile_polygon('123030123010121')
+    Geometry polygon = Functions.bingTilePolygon("123030123010121");
+    assertNotNull(polygon);
+    assertTrue(polygon instanceof Polygon);
+    assertEquals(5, polygon.getCoordinates().length);
+
+    // Expected envelope for tile '123030123010121'
+    Envelope env = polygon.getEnvelopeInternal();
+    assertEquals(59.996337890625, env.getMinX(), 1e-10);
+    assertEquals(60.00732421875, env.getMaxX(), 1e-10);
+    assertEquals(30.11662158281937, env.getMinY(), 1e-10);
+    assertEquals(30.12612436422458, env.getMaxY(), 1e-10);
+  }
+
+  @Test
+  public void testBingTilePolygonBottomRightCorner() {
+    // bottom-right corner of tile(1,1,1) = (180, -85.05112877980659)
+    Geometry polygon = Functions.bingTilePolygon(Functions.bingTile(1, 1, 1));
+    Envelope env = polygon.getEnvelopeInternal();
+    assertEquals(180.0, env.getMaxX(), 1e-10);
+    assertEquals(-85.05112877980659, env.getMinY(), 1e-10);
+
+    // bottom-right corner of tile(3,3,2) = (180, -85.05112877980659)
+    polygon = Functions.bingTilePolygon(Functions.bingTile(3, 3, 2));
+    env = polygon.getEnvelopeInternal();
+    assertEquals(180.0, env.getMaxX(), 1e-10);
+    assertEquals(-85.05112877980659, env.getMinY(), 1e-10);
+  }
+
+  @Test
+  public void testBingTilePolygonOriginCorner() {
+    // top-left corner of tile(0,0,1) bottom-right = (0, 0)
+    Geometry polygon = Functions.bingTilePolygon(Functions.bingTile(0, 0, 1));
+    Envelope env = polygon.getEnvelopeInternal();
+    assertEquals(0.0, env.getMaxX(), 1e-10);
+    assertEquals(0.0, env.getMinY(), 1e-10);
+
+    // top-left corner of tile(0,0,1) = (-180, 85.05112877980659)
+    assertEquals(-180.0, env.getMinX(), 1e-10);
+    assertEquals(85.05112877980659, env.getMaxY(), 1e-10);
+  }
+
+  // --- ST_BingTileCellIDs (geometry_to_bing_tiles) ---
+
+  @Test
+  public void testBingTileCellIDsPoint() {
+    // geometry_to_bing_tiles(POINT(60 30.12), 10) = ["1230301230"]
+    Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(60, 30.12));
+    String[] tiles = Functions.bingTileCellIDs(point, 10);
+    assertArrayEquals(new String[] {"1230301230"}, tiles);
+
+    // geometry_to_bing_tiles(POINT(60 30.12), 15) = ["123030123010121"]
+    tiles = Functions.bingTileCellIDs(point, 15);
+    assertArrayEquals(new String[] {"123030123010121"}, tiles);
+
+    // geometry_to_bing_tiles(POINT(60 30.12), 16) = ["1230301230101212"]
+    tiles = Functions.bingTileCellIDs(point, 16);
+    assertArrayEquals(new String[] {"1230301230101212"}, tiles);
+  }
+
+  @Test
+  public void testBingTileCellIDsPolygon() {
+    // geometry_to_bing_tiles(POLYGON((0 0, 0 10, 10 10, 10 0)), 6)
+    Geometry polygon =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 10.0, 0.0, 0.0, 0.0));
+    String[] tiles = Functions.bingTileCellIDs(polygon, 6);
+    assertArrayEquals(new String[] {"122220", "122222", "122221", "122223"}, tiles);
+  }
+
+  @Test
+  public void testBingTileCellIDsTriangle() {
+    // geometry_to_bing_tiles(POLYGON((10 10, -10 10, -20 -15, 10 10)), 3)
+    Geometry triangle =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(10.0, 10.0, -10.0, 10.0, -20.0, -15.0, 10.0, 10.0));
+    String[] tiles = Functions.bingTileCellIDs(triangle, 3);
+    assertArrayEquals(new String[] {"033", "211", "122"}, tiles);
+  }
+
+  @Test
+  public void testBingTileCellIDsEmpty() {
+    // POINT EMPTY, POLYGON EMPTY → empty list
+    Geometry emptyPoint = GEOMETRY_FACTORY.createPoint();
+    assertEquals(0, Functions.bingTileCellIDs(emptyPoint, 10).length);
+
+    Geometry emptyPolygon = GEOMETRY_FACTORY.createPolygon();
+    assertEquals(0, Functions.bingTileCellIDs(emptyPolygon, 10).length);
+  }
+
+  @Test
+  public void testBingTileCellIDsSelfRoundTrip() {
+    // geometry_to_bing_tiles(bing_tile_polygon('1230301230'), 10) = ["1230301230"]
+    Geometry tilePolygon = Functions.bingTilePolygon("1230301230");
+    String[] tiles = Functions.bingTileCellIDs(tilePolygon, 10);
+    assertArrayEquals(new String[] {"1230301230"}, tiles);
+
+    // expanding to zoom 11 = 4 child tiles
+    tiles = Functions.bingTileCellIDs(tilePolygon, 11);
+    assertArrayEquals(
+        new String[] {"12303012300", "12303012302", "12303012301", "12303012303"}, tiles);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileCellIDsZoomTooSmall() {
+    // zoom=0 is invalid
+    Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(60, 30.12));
+    Functions.bingTileCellIDs(point, 0);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileCellIDsZoomTooLarge() {
+    // zoom=40 is invalid
+    Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(60, 30.12));
+    Functions.bingTileCellIDs(point, 40);
+  }
+
+  // --- ST_BingTileToGeom ---
+
+  @Test
+  public void testBingTileToGeom() {
+    String[] quadkeys = new String[] {"0", "1", "2", "3"};
+    Geometry[] polygons = Functions.bingTileToGeom(quadkeys);
+    assertEquals(4, polygons.length);
+    for (Geometry g : polygons) {
+      assertTrue(g instanceof Polygon);
+      assertEquals(5, g.getCoordinates().length);
+    }
+  }
 }

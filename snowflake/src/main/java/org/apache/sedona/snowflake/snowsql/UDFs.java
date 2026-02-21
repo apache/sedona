@@ -1418,4 +1418,52 @@ public class UDFs {
     return GeometrySerde.serialize(
         Functions.rotate(GeometrySerde.deserialize(geom), angle, originX, originY));
   }
+
+  // Bing Tile functions
+
+  @UDFAnnotations.ParamMeta(argNames = {"tileX", "tileY", "zoomLevel"})
+  public static String ST_BingTile(int tileX, int tileY, int zoomLevel) {
+    return Functions.bingTile(tileX, tileY, zoomLevel);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"longitude", "latitude", "zoomLevel"})
+  public static String ST_BingTileAt(double longitude, double latitude, int zoomLevel) {
+    return Functions.bingTileAt(longitude, latitude, zoomLevel);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"longitude", "latitude", "zoomLevel"})
+  public static String[] ST_BingTilesAround(double longitude, double latitude, int zoomLevel) {
+    return Functions.bingTilesAround(longitude, latitude, zoomLevel);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"quadKey"})
+  public static int ST_BingTileZoomLevel(String quadKey) {
+    return Functions.bingTileZoomLevel(quadKey);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"quadKey"})
+  public static int ST_BingTileX(String quadKey) {
+    return Functions.bingTileX(quadKey);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"quadKey"})
+  public static int ST_BingTileY(String quadKey) {
+    return Functions.bingTileY(quadKey);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"quadKey"})
+  public static byte[] ST_BingTilePolygon(String quadKey) {
+    return GeometrySerde.serialize(Functions.bingTilePolygon(quadKey));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "zoomLevel"})
+  public static String[] ST_BingTileCellIDs(byte[] geometry, int zoomLevel) {
+    return Functions.bingTileCellIDs(GeometrySerde.deserialize(geometry), zoomLevel);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"quadKeys"})
+  public static byte[] ST_BingTileToGeom(String[] quadKeys) {
+    Geometry[] geoms = Functions.bingTileToGeom(quadKeys);
+    return GeometrySerde.serialize(GeometrySerde.GEOMETRY_FACTORY.createGeometryCollection(geoms));
+  }
 }
