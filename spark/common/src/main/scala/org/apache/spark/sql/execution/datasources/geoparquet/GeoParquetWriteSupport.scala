@@ -300,7 +300,7 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
 
     val generatedCoveringFields = mutable.ArrayBuffer.empty[StructField]
     val geometryColumns =
-      geometryColumnInfoMap.keys.toSeq.map(ordinal => ordinal -> schema(ordinal).name)
+      geometryColumnInfoMap.keys.toSeq.sorted.map(ordinal => ordinal -> schema(ordinal).name)
 
     geometryColumns.foreach { case (geometryOrdinal, geometryColumnName) =>
       if (!geoParquetColumnCoveringMap.contains(geometryColumnName)) {
@@ -314,7 +314,8 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
             case _: IllegalArgumentException =>
               logWarning(
                 s"Existing column '$coveringColumnName' is not a valid covering struct " +
-                  s"(expected struct<xmin, ymin, xmax, ymax> with float/double fields). " +
+                  s"(expected struct<xmin, ymin, xmax, ymax> with float/double fields; " +
+                  s"optional zmin/zmax fields are also supported). " +
                   s"Skipping automatic covering for geometry column '$geometryColumnName'.")
           }
         } else {

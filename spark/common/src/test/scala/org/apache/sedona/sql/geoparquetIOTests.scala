@@ -1082,6 +1082,32 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         assert(geo \ "columns" \ "geometry" \ "covering" == org.json4s.JNothing)
       }
     }
+
+    it("GeoParquet auto covering skips invalid existing _bbox column gracefully") {
+      // Create a DataFrame with a geometry_bbox column that has wrong field types (String instead of Double)
+      val df = sparkSession
+        .range(0, 10)
+        .toDF("id")
+        .withColumn("id", expr("CAST(id AS DOUBLE)"))
+        .withColumn("geometry", expr("ST_Point(id, id + 1)"))
+        .withColumn(
+          "geometry_bbox",
+          expr(
+            "struct(CAST(id AS STRING) AS xmin, CAST(id AS STRING) AS ymin, " +
+              "CAST(id AS STRING) AS xmax, CAST(id AS STRING) AS ymax)"))
+      val geoParquetSavePath =
+        geoparquetoutputlocation + "/gp_with_invalid_bbox_column.parquet"
+      // Should succeed without throwing
+      df.write
+        .format("geoparquet")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+
+      // No covering metadata should be generated for the invalid bbox column
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        assert(geo \ "columns" \ "geometry" \ "covering" == org.json4s.JNothing)
+      }
+    }
   }
 
   describe("Spark types tests") {
