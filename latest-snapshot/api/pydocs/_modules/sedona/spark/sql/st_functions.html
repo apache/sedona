@@ -1365,6 +1365,143 @@
     <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_H3ToGeom&quot;</span><span class="p">,</span> <span class="n">cells</span><span class="p">)</span></div>
 
 
+<span class="c1"># =========================================================================</span>
+<span class="c1"># Bing Tile functions</span>
+<span class="c1"># =========================================================================</span>
+
+
+<div class="viewcode-block" id="ST_BingTile"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_BingTile">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_BingTile</span><span class="p">(</span>
+    <span class="n">tile_x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+    <span class="n">tile_y</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+    <span class="n">zoom_level</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a Bing tile quadkey from XY coordinates and zoom level.</span>
+<span class="sd">    :param tile_x: Tile X coordinate</span>
+<span class="sd">    :type tile_x: Union[ColumnOrName, int]</span>
+<span class="sd">    :param tile_y: Tile Y coordinate</span>
+<span class="sd">    :type tile_y: Union[ColumnOrName, int]</span>
+<span class="sd">    :param zoom_level: Zoom level (1 to 23)</span>
+<span class="sd">    :type zoom_level: Union[ColumnOrName, int]</span>
+<span class="sd">    :return: Quadkey string</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">tile_x</span><span class="p">,</span> <span class="n">tile_y</span><span class="p">,</span> <span class="n">zoom_level</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_BingTile&quot;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ST_BingTileAt"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_BingTileAt">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_BingTileAt</span><span class="p">(</span>
+    <span class="n">longitude</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+    <span class="n">latitude</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+    <span class="n">zoom_level</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the Bing tile quadkey containing the given point at the specified zoom level.</span>
+<span class="sd">    :param longitude: Longitude (-180 to 180)</span>
+<span class="sd">    :type longitude: Union[ColumnOrName, float]</span>
+<span class="sd">    :param latitude: Latitude (-85.05112878 to 85.05112878)</span>
+<span class="sd">    :type latitude: Union[ColumnOrName, float]</span>
+<span class="sd">    :param zoom_level: Zoom level (1 to 23)</span>
+<span class="sd">    :type zoom_level: Union[ColumnOrName, int]</span>
+<span class="sd">    :return: Quadkey string</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">longitude</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">zoom_level</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_BingTileAt&quot;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ST_BingTilesAround"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_BingTilesAround">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_BingTilesAround</span><span class="p">(</span>
+    <span class="n">longitude</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+    <span class="n">latitude</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+    <span class="n">zoom_level</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the 3x3 neighborhood of Bing tiles around the tile containing the specified point.</span>
+<span class="sd">    :param longitude: Longitude</span>
+<span class="sd">    :type longitude: Union[ColumnOrName, float]</span>
+<span class="sd">    :param latitude: Latitude</span>
+<span class="sd">    :type latitude: Union[ColumnOrName, float]</span>
+<span class="sd">    :param zoom_level: Zoom level (1 to 23)</span>
+<span class="sd">    :type zoom_level: Union[ColumnOrName, int]</span>
+<span class="sd">    :return: Array of quadkey strings</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">longitude</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">zoom_level</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_BingTilesAround&quot;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ST_BingTileZoomLevel"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_BingTileZoomLevel">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_BingTileZoomLevel</span><span class="p">(</span><span class="n">quad_key</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the zoom level of a Bing tile quadkey.</span>
+<span class="sd">    :param quad_key: Quadkey string</span>
+<span class="sd">    :type quad_key: ColumnOrName</span>
+<span class="sd">    :return: Zoom level</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_BingTileZoomLevel&quot;</span><span class="p">,</span> <span class="n">quad_key</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ST_BingTileX"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_BingTileX">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_BingTileX</span><span class="p">(</span><span class="n">quad_key</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the X coordinate of a Bing tile from its quadkey.</span>
+<span class="sd">    :param quad_key: Quadkey string</span>
+<span class="sd">    :type quad_key: ColumnOrName</span>
+<span class="sd">    :return: Tile X coordinate</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_BingTileX&quot;</span><span class="p">,</span> <span class="n">quad_key</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ST_BingTileY"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_BingTileY">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_BingTileY</span><span class="p">(</span><span class="n">quad_key</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the Y coordinate of a Bing tile from its quadkey.</span>
+<span class="sd">    :param quad_key: Quadkey string</span>
+<span class="sd">    :type quad_key: ColumnOrName</span>
+<span class="sd">    :return: Tile Y coordinate</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_BingTileY&quot;</span><span class="p">,</span> <span class="n">quad_key</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ST_BingTilePolygon"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_BingTilePolygon">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_BingTilePolygon</span><span class="p">(</span><span class="n">quad_key</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the polygon representation of a Bing tile given its quadkey.</span>
+<span class="sd">    :param quad_key: Quadkey string</span>
+<span class="sd">    :type quad_key: ColumnOrName</span>
+<span class="sd">    :return: Tile polygon geometry</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_BingTilePolygon&quot;</span><span class="p">,</span> <span class="n">quad_key</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ST_BingTileCellIDs"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_BingTileCellIDs">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_BingTileCellIDs</span><span class="p">(</span>
+    <span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span>
+    <span class="n">zoom_level</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the minimum set of Bing tile quadkeys that fully cover a given geometry at the specified zoom level.</span>
+<span class="sd">    :param geometry: Geometry to cover</span>
+<span class="sd">    :type geometry: ColumnOrName</span>
+<span class="sd">    :param zoom_level: Zoom level (1 to 23)</span>
+<span class="sd">    :type zoom_level: Union[ColumnOrName, int]</span>
+<span class="sd">    :return: Array of quadkey strings</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">zoom_level</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_BingTileCellIDs&quot;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ST_BingTileToGeom"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_BingTileToGeom">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_BingTileToGeom</span><span class="p">(</span><span class="n">quad_keys</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">list</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert an array of Bing tile quadkeys to their polygon geometries.</span>
+<span class="sd">    :param quad_keys: Array of quadkey strings</span>
+<span class="sd">    :type quad_keys: Union[ColumnOrName, list]</span>
+<span class="sd">    :return: Array of polygon geometries</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_BingTileToGeom&quot;</span><span class="p">,</span> <span class="n">quad_keys</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="ST_InteriorRingN"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_InteriorRingN">[docs]</a><span class="nd">@validate_argument_types</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_InteriorRingN</span><span class="p">(</span><span class="n">polygon</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the index n (0-th based) interior ring of a polygon geometry column.</span>
