@@ -423,6 +423,56 @@ column metadata. The configuration key for geometry column named <code>x</code> 
 <code>geoparquet.covering.x</code>. If the parquet file contains only one geometry column, we can omit
 the column name and use <code>geoparquet.covering</code> directly.
 </p></div></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData#GEOPARQUET_COVERING_MODE_AUTO" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GEOPARQUET_COVERING_MODE_AUTO:String"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetMetaData$.html#GEOPARQUET_COVERING_MODE_AUTO:String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">GEOPARQUET_COVERING_MODE_AUTO</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData#GEOPARQUET_COVERING_MODE_KEY" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="GEOPARQUET_COVERING_MODE_KEY:String"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetMetaData$.html#GEOPARQUET_COVERING_MODE_KEY:String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">GEOPARQUET_COVERING_MODE_KEY</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Configuration key for controlling default covering behavior.</p><div class="fullcomment"><div class="comment cmt"><p>Configuration key for controlling default covering behavior.</p><p>Supported values:</p><ul><li><code>auto</code>: automatically generate/reuse <code>&lt;geometryColumnName&gt;_bbox</code> covering columns for
+    GeoParquet 1.1.0 when explicit covering options are not provided.</li><li><code>legacy</code>: disable automatic covering generation and keep legacy behavior.
+</li></ul></div></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData#GEOPARQUET_COVERING_MODE_LEGACY" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GEOPARQUET_COVERING_MODE_LEGACY:String"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetMetaData$.html#GEOPARQUET_COVERING_MODE_LEGACY:String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">GEOPARQUET_COVERING_MODE_LEGACY</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      
+      
     </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData#GEOPARQUET_CRS_KEY" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="GEOPARQUET_CRS_KEY:String"></a>
       <span class="permalink">
