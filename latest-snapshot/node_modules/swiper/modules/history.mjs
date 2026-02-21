@@ -1,11 +1,10 @@
 import { a as getWindow } from '../shared/ssr-window.esm.mjs';
 
-function History(_ref) {
-  let {
-    swiper,
-    extendParams,
-    on
-  } = _ref;
+function History({
+  swiper,
+  extendParams,
+  on
+}) {
   extendParams({
     history: {
       enabled: false,

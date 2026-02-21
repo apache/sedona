@@ -1,17 +1,18 @@
 import { c as createElementIfNotDefined } from '../shared/create-element-if-not-defined.mjs';
-import { m as makeElementsArray } from '../shared/utils.mjs';
+import { m as makeElementsArray, s as setInnerHTML } from '../shared/utils.mjs';
 
-function Navigation(_ref) {
-  let {
-    swiper,
-    extendParams,
-    on,
-    emit
-  } = _ref;
+const arrowSvg = `<svg class="swiper-navigation-icon" width="11" height="20" viewBox="0 0 11 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.38296 20.0762C0.111788 19.805 0.111788 19.3654 0.38296 19.0942L9.19758 10.2796L0.38296 1.46497C0.111788 1.19379 0.111788 0.754138 0.38296 0.482966C0.654131 0.211794 1.09379 0.211794 1.36496 0.482966L10.4341 9.55214C10.8359 9.9539 10.8359 10.6053 10.4341 11.007L1.36496 20.0762C1.09379 20.3474 0.654131 20.3474 0.38296 20.0762Z" fill="currentColor"/></svg>`;
+function Navigation({
+  swiper,
+  extendParams,
+  on,
+  emit
+}) {
   extendParams({
     navigation: {
       nextEl: null,
       prevEl: null,
+      addIcons: true,
       hideOnClick: false,
       disabledClass: 'swiper-button-disabled',
       hiddenClass: 'swiper-button-hidden',
@@ -21,7 +22,8 @@ function Navigation(_ref) {
   });
   swiper.navigation = {
     nextEl: null,
-    prevEl: null
+    prevEl: null,
+    arrowSvg
   };
   function getEl(el) {
     let res;
@@ -97,6 +99,12 @@ function Navigation(_ref) {
     prevEl = makeElementsArray(prevEl);
     const initButton = (el, dir) => {
       if (el) {
+        if (params.addIcons && el.matches('.swiper-button-next,.swiper-button-prev') && !el.querySelector('svg')) {
+          const tempEl = document.createElement('div');
+          setInnerHTML(tempEl, arrowSvg);
+          el.appendChild(tempEl.querySelector('svg'));
+          tempEl.remove();
+        }
         el.addEventListener('click', dir === 'next' ? onNextClick : onPrevClick);
       }
       if (!swiper.enabled && el) {

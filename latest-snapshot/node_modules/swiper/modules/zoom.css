@@ -6,15 +6,17 @@
   justify-content: center;
   align-items: center;
   text-align: center;
-}
-.swiper-zoom-container > img,
-.swiper-zoom-container > svg,
-.swiper-zoom-container > canvas {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+
+  > img,
+  > svg,
+  > canvas {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
 }
 /* Zoom container styles end */
+
 .swiper-slide-zoomed {
   cursor: move;
   touch-action: none;

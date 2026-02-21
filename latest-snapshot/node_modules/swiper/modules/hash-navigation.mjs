@@ -1,13 +1,12 @@
 import { g as getDocument, a as getWindow } from '../shared/ssr-window.esm.mjs';
 import { e as elementChildren } from '../shared/utils.mjs';
 
-function HashNavigation(_ref) {
-  let {
-    swiper,
-    extendParams,
-    emit,
-    on
-  } = _ref;
+function HashNavigation({
+  swiper,
+  extendParams,
+  emit,
+  on
+}) {
   let initialized = false;
   const document = getDocument();
   const window = getWindow();

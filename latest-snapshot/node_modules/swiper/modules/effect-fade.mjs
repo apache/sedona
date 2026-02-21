@@ -3,12 +3,11 @@ import { e as effectTarget } from '../shared/effect-target.mjs';
 import { e as effectVirtualTransitionEnd } from '../shared/effect-virtual-transition-end.mjs';
 import { g as getSlideTransformEl } from '../shared/utils.mjs';
 
-function EffectFade(_ref) {
-  let {
-    swiper,
-    extendParams,
-    on
-  } = _ref;
+function EffectFade({
+  swiper,
+  extendParams,
+  on
+}) {
   extendParams({
     fadeEffect: {
       crossFade: false

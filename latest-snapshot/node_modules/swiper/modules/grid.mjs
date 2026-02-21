@@ -1,9 +1,8 @@
-function Grid(_ref) {
-  let {
-    swiper,
-    extendParams,
-    on
-  } = _ref;
+function Grid({
+  swiper,
+  extendParams,
+  on
+}) {
   extendParams({
     grid: {
       rows: 1,
