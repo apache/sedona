@@ -78,3 +78,16 @@ private[apache] case class RS_AsImage(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 }
+
+private[apache] case class RS_AsCOG(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction6(RasterOutputs.asCOG),
+      inferrableFunction5(RasterOutputs.asCOG),
+      inferrableFunction4(RasterOutputs.asCOG),
+      inferrableFunction3(RasterOutputs.asCOG),
+      inferrableFunction2(RasterOutputs.asCOG),
+      inferrableFunction1(RasterOutputs.asCOG)) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}

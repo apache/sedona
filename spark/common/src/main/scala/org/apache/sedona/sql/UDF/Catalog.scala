@@ -314,6 +314,7 @@ object Catalog extends AbstractCatalog with Logging {
     function[RS_Intersects](),
     function[RS_Interpolate](),
     function[RS_AsGeoTiff](),
+    function[RS_AsCOG](),
     function[RS_AsRaster](),
     function[RS_AsArcGrid](),
     function[RS_AsBase64](),

@@ -527,6 +527,14 @@ Use [RS_AsGeoTiff](../api/sql/Raster-writer.md#rs_asgeotiff) to get the binary D
 SELECT RS_AsGeoTiff(raster)
 ```
 
+### As Cloud Optimized GeoTiff
+
+Use [RS_AsCOG](../api/sql/Raster-writer.md#rs_ascog) to get the binary Dataframe of the raster in [Cloud Optimized GeoTiff](https://www.cogeo.org/) (COG) format. COG is ideal for cloud-hosted raster data because it supports efficient range-read access over HTTP.
+
+```sql
+SELECT RS_AsCOG(raster)
+```
+
 ### As PNG
 
 Use [RS_AsPNG](../api/sql/Raster-writer.md#rs_aspng) to get the binary Dataframe of the raster in PNG format.

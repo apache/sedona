@@ -108,6 +108,62 @@ public class RasterOutputs {
     }
   }
 
+  // ---------- asCOG overloads (used by RS_AsCOG via InferredExpression) ----------
+
+  public static byte[] asCOG(GridCoverage2D raster) {
+    return asCloudOptimizedGeoTiff(raster, CogOptions.defaults());
+  }
+
+  public static byte[] asCOG(GridCoverage2D raster, String compression) {
+    return asCloudOptimizedGeoTiff(raster, CogOptions.builder().compression(compression).build());
+  }
+
+  public static byte[] asCOG(GridCoverage2D raster, String compression, int tileSize) {
+    return asCloudOptimizedGeoTiff(
+        raster, CogOptions.builder().compression(compression).tileSize(tileSize).build());
+  }
+
+  public static byte[] asCOG(
+      GridCoverage2D raster, String compression, int tileSize, double quality) {
+    return asCloudOptimizedGeoTiff(
+        raster,
+        CogOptions.builder()
+            .compression(compression)
+            .tileSize(tileSize)
+            .compressionQuality(quality)
+            .build());
+  }
+
+  public static byte[] asCOG(
+      GridCoverage2D raster, String compression, int tileSize, double quality, String resampling) {
+    return asCloudOptimizedGeoTiff(
+        raster,
+        CogOptions.builder()
+            .compression(compression)
+            .tileSize(tileSize)
+            .compressionQuality(quality)
+            .resampling(resampling)
+            .build());
+  }
+
+  public static byte[] asCOG(
+      GridCoverage2D raster,
+      String compression,
+      int tileSize,
+      double quality,
+      String resampling,
+      int overviewCount) {
+    return asCloudOptimizedGeoTiff(
+        raster,
+        CogOptions.builder()
+            .compression(compression)
+            .tileSize(tileSize)
+            .compressionQuality(quality)
+            .resampling(resampling)
+            .overviewCount(overviewCount)
+            .build());
+  }
+
   /**
    * Creates a GeoTiff file with the provided raster. Primarily used for testing.
    *
