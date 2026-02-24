@@ -1,0 +1,68 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ -->
+
+# RS_PixelAsPoints
+
+Introduction: Returns a list of the pixel's upper-left corner point geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band.
+
+Format: `RS_PixelAsPoints(raster: Raster, band: Integer)`
+
+Since: `v1.5.1`
+
+SQL Example
+
+```sql
+SELECT ST_AsText(RS_PixelAsPoints(raster, 1)) from rasters
+```
+
+Output:
+
+```
+[[POINT (-13065223 4021262.75),148.0,0,0], [POINT (-13065150 4021262.75),123.0,0,1], [POINT (-13065078 4021262.75),99.0,1,0], [POINT (-13065006 4021262.75),140.0,1,1]]
+```
+
+Spark SQL example for extracting Point, value, raster x and y coordinates:
+
+```scala
+val pointDf = sedona.read...
+val rasterDf = sedona.read.format("binaryFile").load("/some/path/*.tiff")
+var df = sedona.read.format("binaryFile").load("/some/path/*.tiff")
+df = df.selectExpr("RS_FromGeoTiff(content) as raster")
+
+df.selectExpr(
+  "explode(RS_PixelAsPoints(raster, 1)) as exploded"
+).selectExpr(
+  "exploded.geom as geom",
+  "exploded.value as value",
+  "exploded.x as x",
+  "exploded.y as y"
+).show(3)
+```
+
+Output:
+
+```
++--------------------------------------+-----+---+---+
+|geom                                  |value|x  |y  |
++--------------------------------------+-----+---+---+
+|POINT (-13095818 4021262.75)          |0.0  |1  |1  |
+|POINT (-13095745.67138728 4021262.75) |0.0  |2  |1  |
+|POINT (-13095673.342774557 4021262.75)|0.0  |3  |1  |
++--------------------------------------+-----+---+---+
+```

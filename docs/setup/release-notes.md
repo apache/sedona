@@ -1323,7 +1323,7 @@ Sedona 1.5.0 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 * Add 36 more RS functions in Sedona Spark to support [comprehensive raster data ETL and analytics](../tutorial/raster.md)
 	* You can now directly join vector and raster datasets together
 	* Flexible map algebra equations: `SELECT RS_MapAlgebra(rast, 'D', 'out = (rast[3] - rast[0]) / (rast[3] + rast[0]);') as ndvi FROM raster_table`
-* Add native support of [Uber H3 functions](../api/sql/Function.md#st_h3celldistance) in Sedona Spark and Sedona Flink.
+* Add native support of [Uber H3 functions](../api/sql/Spatial-Indexing/index.md) in Sedona Spark and Sedona Flink.
 * Add SedonaKepler and SedonaPyDeck for [interactive map visualization](../tutorial/sql.md#visualize-query-results) on Sedona Spark.
 
 ### Bug
@@ -1556,7 +1556,7 @@ Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 
 ### Highlights
 
-* [X] **Sedona Spark** More raster functions and bridge RasterUDT and Map Algebra operators. See [Raster based operators](../api/sql/Raster-operators.md#raster-based-operators) and [Raster to Map Algebra operators](../api/sql/Raster-operators.md#raster-to-map-algebra-operators).
+* [X] **Sedona Spark** More raster functions and bridge RasterUDT and Map Algebra operators. See [Raster based operators](../api/sql/Raster-Operators/index.md) and [Raster to Map Algebra operators](../api/sql/Raster-Map-Algebra-Operators/index.md).
 * [X] **Sedona Spark & Flink** Added geodesic / geography functions:
     * ST_DistanceSphere
     * ST_DistanceSpheroid

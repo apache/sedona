@@ -138,7 +138,7 @@ The output will be like this:
 ```
 
 !!!note
-	SedonaSQL provides lots of functions to create a Geometry column, please read [SedonaSQL constructor API](../../api/flink/Constructor.md).
+	SedonaSQL provides lots of functions to create a Geometry column, please read [SedonaSQL constructor API](../../api/flink/Geometry-Constructors/index.md).
 
 ## Transform the Coordinate Reference System
 
@@ -158,7 +158,7 @@ The second EPSG code EPSG:3857 in `ST_Transform` is the target CRS of the geomet
 This `ST_Transform` transform the CRS of these geometries from EPSG:4326 to EPSG:3857. The details CRS information can be found on [EPSG.io](https://epsg.io/)
 
 !!!note
-	Read [SedonaSQL ST_Transform API](../../api/flink/Function.md#st_transform) to learn different spatial query predicates.
+	Read [SedonaSQL ST_Transform API](../../api/flink/Spatial-Reference-System/ST_Transform.md) to learn different spatial query predicates.
 
 For example, a Table that has coordinates in the US will become like this.
 
@@ -219,7 +219,7 @@ geomTable.execute().print()
 ```
 
 !!!note
-	Read [SedonaSQL Predicate API](../../api/flink/Predicate.md) to learn different spatial query predicates.
+	Read [SedonaSQL Predicate API](../../api/flink/Predicates/index.md) to learn different spatial query predicates.
 
 ## KNN query
 
@@ -246,7 +246,7 @@ Please use the following steps:
 
 ### 1. Generate S2 ids for both tables
 
-Use [ST_S2CellIds](../../api/flink/Function.md#st_s2cellids) to generate cell IDs. Each geometry may produce one or more IDs.
+Use [ST_S2CellIds](../../api/flink/Spatial-Indexing/ST_S2CellIDs.md) to generate cell IDs. Each geometry may produce one or more IDs.
 
 ```sql
 SELECT id, geom, name, ST_S2CellIDs(geom, 15) as idarray
@@ -285,7 +285,7 @@ FROM lcs JOIN rcs ON lcs.cellId = rcs.cellId
 
 Due to the nature of S2 Cellid, the equi-join results might have a few false-positives depending on the S2 level you choose. A smaller level indicates bigger cells, less exploded rows, but more false positives.
 
-To ensure the correctness, you can use one of the [Spatial Predicates](../../api/sql/Predicate.md) to filter out them. Use this query as the query in Step 3.
+To ensure the correctness, you can use one of the [Spatial Predicates](../../api/sql/Predicates/index.md) to filter out them. Use this query as the query in Step 3.
 
 ```sql
 SELECT lcs.id as lcs_id, lcs.geom as lcs_geom, lcs.name as lcs_name, rcs.id as rcs_id, rcs.geom as rcs_geom, rcs.name as rcs_name

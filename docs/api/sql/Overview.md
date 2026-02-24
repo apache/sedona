@@ -35,16 +35,16 @@ myDataFrame.withColumn("geometry", expr("ST_*")).selectExpr("ST_*")
 
 * Constructor: Construct a Geometry given an input string or coordinates
 	* Example: ST_GeomFromWKT (string). Create a Geometry from a WKT String.
-	* Documentation: [Here](Constructor.md)
+	* Documentation: [Here](Geometry-Constructors/index.md)
 * Function: Execute a function on the given column or columns
 	* Example: ST_Distance (A, B). Given two Geometry A and B, return the Euclidean distance of A and B.
-	* Documentation: [Here](Function.md)
+	* Documentation: Functions are organized by category. See [Geometry Accessors](Geometry-Accessors/index.md), [Geometry Editors](Geometry-Editors/index.md), [Measurement Functions](Measurement-Functions/index.md), [Geometry Processing](Geometry-Processing/index.md), [Overlay Functions](Overlay-Functions/index.md), and other categories in the sidebar.
 * Aggregate function: Return the aggregated value on the given column
 	* Example: ST_Envelope_Aggr (Geometry column). Given a Geometry column, calculate the entire envelope boundary of this column.
-	* Documentation: [Here](AggregateFunction.md)
+	* Documentation: [Here](Aggregate-Functions/index.md)
 * Predicate: Execute a logic judgement on the given columns and return true or false
 	* Example: ST_Contains (A, B). Check if A fully contains B. Return "True" if yes, else return "False".
-	* Documentation: [Here](Predicate.md)
+	* Documentation: [Here](Predicates/index.md)
 
 Sedona also provides an Adapter to convert SpatialRDD <-> DataFrame. Please read [Adapter Scaladoc](../../scaladoc/spark/org/apache/sedona/sql/utils/index.html)
 

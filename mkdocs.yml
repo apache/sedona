@@ -73,15 +73,27 @@ nav:
               - Quick start: api/sql/Overview.md
               - Vector data:
                   - Geometry type:
-                      - Constructor: api/sql/Constructor.md
-                      - Function: api/sql/Function.md
-                      - Predicate: api/sql/Predicate.md
-                      - Aggregate function: api/sql/AggregateFunction.md
+                      - Geometry Constructors: api/sql/Geometry-Constructors/index.md
+                      - Geometry Accessors: api/sql/Geometry-Accessors/index.md
+                      - Geometry Editors: api/sql/Geometry-Editors/index.md
+                      - Geometry Output: api/sql/Geometry-Output/index.md
+                      - Predicates: api/sql/Predicates/index.md
+                      - Measurement Functions: api/sql/Measurement-Functions/index.md
+                      - Geometry Processing: api/sql/Geometry-Processing/index.md
+                      - Overlay Functions: api/sql/Overlay-Functions/index.md
+                      - Affine Transformations: api/sql/Affine-Transformations/index.md
+                      - Aggregate Functions: api/sql/Aggregate-Functions/index.md
+                      - Linear Referencing: api/sql/Linear-Referencing/index.md
+                      - Spatial Reference System: api/sql/Spatial-Reference-System/index.md
+                      - Geometry Validation: api/sql/Geometry-Validation/index.md
+                      - Bounding Box Functions: api/sql/Bounding-Box-Functions/index.md
+                      - Spatial Indexing: api/sql/Spatial-Indexing/index.md
+                      - Clustering Functions: api/sql/Clustering-Functions/index.md
+                      - Spatial Statistics: api/sql/Spatial-Statistics/index.md
+                      - Address Functions: api/sql/Address-Functions/index.md
                   - Geography type:
-                      - Constructor: api/sql/geography/Constructor.md
-                      - Function: api/sql/geography/Function.md
-                      - Predicate: api/sql/geography/Predicate.md
-                      - Aggregate function: api/sql/geography/AggregateFunction.md
+                      - Geography Constructors: api/sql/geography/Geography-Constructors/index.md
+                      - Geography Functions: api/sql/geography/Geography-Functions/index.md
                   - DataFrame Style functions: api/sql/DataFrameAPI.md
                   - Query optimization: api/sql/Optimizer.md
                   - CRS Transformation: api/sql/CRS-Transformation.md
@@ -93,11 +105,20 @@ nav:
                       - SedonaKepler: api/sql/Visualization-SedonaKepler.md
               - Raster data:
                   - Raster loader: api/sql/Raster-loader.md
-                  - Raster aggregates: api/sql/Raster-aggregate-function.md
+                  - Raster Constructors: api/sql/Raster-Constructors/index.md
+                  - Pixel Functions: api/sql/Pixel-Functions/index.md
+                  - Raster Geometry Functions: api/sql/Raster-Geometry-Functions/index.md
+                  - Raster Accessors: api/sql/Raster-Accessors/index.md
+                  - Raster Band Accessors: api/sql/Raster-Band-Accessors/index.md
+                  - Raster Predicates: api/sql/Raster-Predicates/index.md
+                  - Raster Operators: api/sql/Raster-Operators/index.md
+                  - Raster Tiles: api/sql/Raster-Tiles/index.md
+                  - Raster Map Algebra Operators: api/sql/Raster-Map-Algebra-Operators/index.md
+                  - Map Algebra Operators: api/sql/Map-Algebra-Operators/index.md
+                  - Raster Aggregate Functions: api/sql/Raster-Aggregate-Functions/index.md
+                  - Raster Output: api/sql/Raster-Output/index.md
                   - Raster writer: api/sql/Raster-writer.md
-                  - Raster operators: api/sql/Raster-operators.md
                   - Raster map algebra: api/sql/Raster-map-algebra.md
-                  - Raster visualization: api/sql/Raster-visualizer.md
                   - Raster affine transformation: api/sql/Raster-affine-transformation.md
               - Parameter: api/sql/Parameter.md
           - RDD (core):
@@ -127,10 +148,21 @@ nav:
       - API:
           - SQL:
               - Overview (Flink): api/flink/Overview.md
-              - Constructor (Flink): api/flink/Constructor.md
-              - Function (Flink): api/flink/Function.md
-              - Aggregator (Flink): api/flink/Aggregator.md
-              - Predicate (Flink): api/flink/Predicate.md
+              - Geometry Constructors: api/flink/Geometry-Constructors/index.md
+              - Geometry Accessors: api/flink/Geometry-Accessors/index.md
+              - Geometry Editors: api/flink/Geometry-Editors/index.md
+              - Geometry Output: api/flink/Geometry-Output/index.md
+              - Predicates: api/flink/Predicates/index.md
+              - Measurement Functions: api/flink/Measurement-Functions/index.md
+              - Geometry Processing: api/flink/Geometry-Processing/index.md
+              - Overlay Functions: api/flink/Overlay-Functions/index.md
+              - Affine Transformations: api/flink/Affine-Transformations/index.md
+              - Aggregate Functions: api/flink/Aggregate-Functions/index.md
+              - Linear Referencing: api/flink/Linear-Referencing/index.md
+              - Spatial Reference System: api/flink/Spatial-Reference-System/index.md
+              - Geometry Validation: api/flink/Geometry-Validation/index.md
+              - Bounding Box Functions: api/flink/Bounding-Box-Functions/index.md
+              - Spatial Indexing: api/flink/Spatial-Indexing/index.md
 
   - SedonaSnow:
       - Home: sedonasnow.md
@@ -141,10 +173,21 @@ nav:
       - API:
           - SQL:
               - Overview (Snowflake): api/snowflake/vector-data/Overview.md
-              - Constructor (Snowflake): api/snowflake/vector-data/Constructor.md
-              - Function (Snowflake): api/snowflake/vector-data/Function.md
-              - Aggregate Function (Snowflake): api/snowflake/vector-data/AggregateFunction.md
-              - Predicate (Snowflake): api/snowflake/vector-data/Predicate.md
+              - Geometry Constructors: api/snowflake/vector-data/Geometry-Constructors/index.md
+              - Geometry Accessors: api/snowflake/vector-data/Geometry-Accessors/index.md
+              - Geometry Editors: api/snowflake/vector-data/Geometry-Editors/index.md
+              - Geometry Output: api/snowflake/vector-data/Geometry-Output/index.md
+              - Predicates: api/snowflake/vector-data/Predicates/index.md
+              - Measurement Functions: api/snowflake/vector-data/Measurement-Functions/index.md
+              - Geometry Processing: api/snowflake/vector-data/Geometry-Processing/index.md
+              - Overlay Functions: api/snowflake/vector-data/Overlay-Functions/index.md
+              - Affine Transformations: api/snowflake/vector-data/Affine-Transformations/index.md
+              - Aggregate Functions: api/snowflake/vector-data/Aggregate-Functions/index.md
+              - Linear Referencing: api/snowflake/vector-data/Linear-Referencing/index.md
+              - Spatial Reference System: api/snowflake/vector-data/Spatial-Reference-System/index.md
+              - Geometry Validation: api/snowflake/vector-data/Geometry-Validation/index.md
+              - Bounding Box Functions: api/snowflake/vector-data/Bounding-Box-Functions/index.md
+              - Spatial Indexing: api/snowflake/vector-data/Spatial-Indexing/index.md
   - SpatialBench: 'https://sedona.apache.org/spatialbench/'
   - Blog: blog/index.md
   - Community:
