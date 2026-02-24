@@ -498,8 +498,8 @@ public class RasterConstructorsTest extends RasterTestBase {
   public void testInDbTileWithoutPadding() {
     GridCoverage2D raster =
         createRandomRaster(DataBuffer.TYPE_BYTE, 100, 100, 1000, 1010, 10, 1, "EPSG:3857");
-    RasterConstructors.Tile[] tiles =
-        RasterConstructors.generateTiles(raster, null, 10, 10, false, Double.NaN);
+    TileGenerator.Tile[] tiles =
+        collectTiles(RasterConstructors.generateTiles(raster, null, 10, 10, false, Double.NaN));
     assertTilesSameWithGridCoverage(tiles, raster, null, 10, 10, Double.NaN);
   }
 
@@ -507,8 +507,8 @@ public class RasterConstructorsTest extends RasterTestBase {
   public void testInDbTileWithoutPadding2() {
     GridCoverage2D raster =
         createRandomRaster(DataBuffer.TYPE_BYTE, 100, 100, 1000, 1010, 10, 1, "EPSG:3857");
-    RasterConstructors.Tile[] tiles =
-        RasterConstructors.generateTiles(raster, null, 9, 9, false, Double.NaN);
+    TileGenerator.Tile[] tiles =
+        collectTiles(RasterConstructors.generateTiles(raster, null, 9, 9, false, Double.NaN));
     assertTilesSameWithGridCoverage(tiles, raster, null, 9, 9, Double.NaN);
   }
 
@@ -516,8 +516,8 @@ public class RasterConstructorsTest extends RasterTestBase {
   public void testInDbTileWithPadding() {
     GridCoverage2D raster =
         createRandomRaster(DataBuffer.TYPE_BYTE, 100, 100, 1000, 1010, 10, 2, "EPSG:3857");
-    RasterConstructors.Tile[] tiles =
-        RasterConstructors.generateTiles(raster, null, 9, 9, true, 100);
+    TileGenerator.Tile[] tiles =
+        collectTiles(RasterConstructors.generateTiles(raster, null, 9, 9, true, 100));
     assertTilesSameWithGridCoverage(tiles, raster, null, 9, 9, 100);
   }
 
@@ -526,8 +526,8 @@ public class RasterConstructorsTest extends RasterTestBase {
     GridCoverage2D raster =
         createRandomRaster(DataBuffer.TYPE_BYTE, 100, 100, 1000, 1010, 10, 2, "EPSG:3857");
     int[] bandIndices = {2};
-    RasterConstructors.Tile[] tiles =
-        RasterConstructors.generateTiles(raster, bandIndices, 9, 9, true, 100);
+    TileGenerator.Tile[] tiles =
+        collectTiles(RasterConstructors.generateTiles(raster, bandIndices, 9, 9, true, 100));
     assertTilesSameWithGridCoverage(tiles, raster, bandIndices, 9, 9, 100);
   }
 
@@ -536,8 +536,8 @@ public class RasterConstructorsTest extends RasterTestBase {
     GridCoverage2D raster =
         createRandomRaster(DataBuffer.TYPE_BYTE, 100, 100, 1000, 1010, 10, 4, "EPSG:3857");
     int[] bandIndices = {3, 1};
-    RasterConstructors.Tile[] tiles =
-        RasterConstructors.generateTiles(raster, bandIndices, 8, 7, true, 100);
+    TileGenerator.Tile[] tiles =
+        collectTiles(RasterConstructors.generateTiles(raster, bandIndices, 8, 7, true, 100));
     assertTilesSameWithGridCoverage(tiles, raster, bandIndices, 8, 7, 100);
   }
 
@@ -546,8 +546,8 @@ public class RasterConstructorsTest extends RasterTestBase {
     GridCoverage2D raster =
         createRandomRaster(DataBuffer.TYPE_BYTE, 100, 100, 1000, 1010, 10, 1, "EPSG:3857");
     raster = MapAlgebra.addBandFromArray(raster, MapAlgebra.bandAsArray(raster, 1), 1, 13.0);
-    RasterConstructors.Tile[] tiles =
-        RasterConstructors.generateTiles(raster, null, 9, 9, true, Double.NaN);
+    TileGenerator.Tile[] tiles =
+        collectTiles(RasterConstructors.generateTiles(raster, null, 9, 9, true, Double.NaN));
     assertTilesSameWithGridCoverage(tiles, raster, null, 9, 9, 13);
   }
 
@@ -556,13 +556,21 @@ public class RasterConstructorsTest extends RasterTestBase {
     GridCoverage2D raster =
         createRandomRaster(DataBuffer.TYPE_BYTE, 100, 100, 1000, 1010, 10, 1, "EPSG:3857");
     raster = MapAlgebra.addBandFromArray(raster, MapAlgebra.bandAsArray(raster, 1), 1, 13.0);
-    RasterConstructors.Tile[] tiles =
-        RasterConstructors.generateTiles(raster, null, 9, 9, true, 42);
+    TileGenerator.Tile[] tiles =
+        collectTiles(RasterConstructors.generateTiles(raster, null, 9, 9, true, 42));
     assertTilesSameWithGridCoverage(tiles, raster, null, 9, 9, 42);
   }
 
+  private TileGenerator.Tile[] collectTiles(TileGenerator.TileIterator iter) {
+    java.util.List<TileGenerator.Tile> list = new java.util.ArrayList<>();
+    while (iter.hasNext()) {
+      list.add(iter.next());
+    }
+    return list.toArray(new TileGenerator.Tile[0]);
+  }
+
   private void assertTilesSameWithGridCoverage(
-      RasterConstructors.Tile[] tiles,
+      TileGenerator.Tile[] tiles,
       GridCoverage2D gridCoverage2D,
       int[] bandIndices,
       int tileWidth,
@@ -581,7 +589,7 @@ public class RasterConstructorsTest extends RasterTestBase {
     // in the grid
     //    coverage
     Set<Pair<Integer, Integer>> visitedTiles = new HashSet<>();
-    for (RasterConstructors.Tile tile : tiles) {
+    for (TileGenerator.Tile tile : tiles) {
       int tileX = tile.getTileX();
       int tileY = tile.getTileY();
       Pair<Integer, Integer> tilePosition = Pair.of(tileX, tileY);
