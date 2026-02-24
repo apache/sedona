@@ -254,7 +254,8 @@ repos:
             \.github/linters/\.shellcheckrc|
             \.github/CODEOWNERS|
             .*/\.gitignore|
-            tools/maven/scalafmt\.conf
+            tools/maven/scalafmt\.conf|
+            CITATION\.cff
           )$
         args:
           - --comment-style
