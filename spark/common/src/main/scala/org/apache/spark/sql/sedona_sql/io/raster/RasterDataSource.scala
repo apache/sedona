@@ -60,7 +60,7 @@ class RasterDataSource extends FileDataSourceV2 with TableProvider with DataSour
         // pathGlobFilter="some*glob*.tif". This is for avoiding listing .tif
         // files as directories when discovering files to load. Globs ends with
         // .tif or .tiff should be files in the context of raster data loading.
-        val loadTifPattern = "(.*)/([^/]*\\*[^/]*\\.(?:tif|tiff))$".r
+        val loadTifPattern = "(.*)/([^/]*\\*[^/]*\\.(?i:tif|tiff))$".r
         paths.head match {
           case loadTifPattern(prefix, glob) =>
             paths = Seq(prefix)
