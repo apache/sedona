@@ -301,7 +301,7 @@ World files are used to georeference and geolocate images by establishing an ima
 Since `v1.5.0` there have been many additions to manipulate raster data, we will show you a few example queries.
 
 !!!note
-    Read [SedonaSQL Raster operators](../api/sql/Raster-Operators/index.md) to learn how you can use Sedona for raster manipulation.
+    Read [SedonaSQL Raster operators](../api/sql/Raster-Functions.md#raster-operators) to learn how you can use Sedona for raster manipulation.
 
 ### Coordinate translation
 
@@ -446,7 +446,7 @@ SELECT r.rast, g.geom FROM rasterDf r, geomDf g WHERE RS_Interest(r.rast, g.geom
 !!!note
     These range and join queries will filter rasters using the provided geometric boundary and the spatial boundary of the raster.
 
-    Sedona offers more raster predicates to do spatial range queries and spatial join queries. Please refer to [raster predicates docs](../api/sql/Raster-Predicates/index.md).
+    Sedona offers more raster predicates to do spatial range queries and spatial join queries. Please refer to [raster predicates docs](../api/sql/Raster-Functions.md#raster-predicates).
 
 ## Visualize raster images
 
@@ -481,7 +481,7 @@ The output looks like this:
     SedonaUtils.display_image(rasterDf)
     ```
 
-    See [Display raster in Jupyter](../api/sql/Raster-Output/index.md) for details.
+    See [Display raster in Jupyter](../api/sql/Raster-Functions.md#raster-output) for details.
 
 ### 2-D Matrix
 
@@ -499,7 +499,7 @@ Output will be as follows:
 | 3   4   5   6|
 ```
 
-Please refer to [Raster visualizer docs](../api/sql/Raster-Output/index.md) to learn how to make the most of the visualizing APIs.
+Please refer to [Raster visualizer docs](../api/sql/Raster-Functions.md#raster-output) to learn how to make the most of the visualizing APIs.
 
 ## Save to permanent storage
 

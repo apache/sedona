@@ -1556,7 +1556,7 @@ Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 
 ### Highlights
 
-* [X] **Sedona Spark** More raster functions and bridge RasterUDT and Map Algebra operators. See [Raster based operators](../api/sql/Raster-Operators/index.md) and [Raster to Map Algebra operators](../api/sql/Raster-Map-Algebra-Operators/index.md).
+* [X] **Sedona Spark** More raster functions and bridge RasterUDT and Map Algebra operators. See [Raster based operators](../api/sql/Raster-Functions.md#raster-operators) and [Raster to Map Algebra operators](../api/sql/Raster-Functions.md#raster-map-algebra-operators).
 * [X] **Sedona Spark & Flink** Added geodesic / geography functions:
     * ST_DistanceSphere
     * ST_DistanceSpheroid

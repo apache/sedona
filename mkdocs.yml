@@ -72,11 +72,8 @@ nav:
           - SQL:
               - Quick start: api/sql/Overview.md
               - Vector data:
-                  - Geometry type:
-                      - Geometry Functions: api/sql/Geometry-Functions.md
-                  - Geography type:
-                      - Geography Constructors: api/sql/geography/Geography-Constructors/index.md
-                      - Geography Functions: api/sql/geography/Geography-Functions/index.md
+                  - Geometry Functions: api/sql/Geometry-Functions.md
+                  - Geography Functions: api/sql/geography/Geography-Functions.md
                   - DataFrame Style functions: api/sql/DataFrameAPI.md
                   - Query optimization: api/sql/Optimizer.md
                   - CRS Transformation: api/sql/CRS-Transformation.md
@@ -88,18 +85,7 @@ nav:
                       - SedonaKepler: api/sql/Visualization-SedonaKepler.md
               - Raster data:
                   - Raster loader: api/sql/Raster-loader.md
-                  - Raster Constructors: api/sql/Raster-Constructors/index.md
-                  - Pixel Functions: api/sql/Pixel-Functions/index.md
-                  - Raster Geometry Functions: api/sql/Raster-Geometry-Functions/index.md
-                  - Raster Accessors: api/sql/Raster-Accessors/index.md
-                  - Raster Band Accessors: api/sql/Raster-Band-Accessors/index.md
-                  - Raster Predicates: api/sql/Raster-Predicates/index.md
-                  - Raster Operators: api/sql/Raster-Operators/index.md
-                  - Raster Tiles: api/sql/Raster-Tiles/index.md
-                  - Raster Map Algebra Operators: api/sql/Raster-Map-Algebra-Operators/index.md
-                  - Map Algebra Operators: api/sql/Map-Algebra-Operators/index.md
-                  - Raster Aggregate Functions: api/sql/Raster-Aggregate-Functions/index.md
-                  - Raster Output: api/sql/Raster-Output/index.md
+                  - Raster Functions: api/sql/Raster-Functions.md
                   - Raster writer: api/sql/Raster-writer.md
                   - Raster map algebra: api/sql/Raster-map-algebra.md
                   - Raster affine transformation: api/sql/Raster-affine-transformation.md

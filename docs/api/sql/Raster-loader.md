@@ -91,7 +91,7 @@ One difference from other file source loaders is that when the loaded path ends 
 The raster loader of Sedona leverages Spark built-in binary data source and works with several RS constructors to produce Raster type. Each raster is a row in the resulting DataFrame and stored in a `Raster` format.
 
 !!!tip
-    After loading rasters, you can quickly visualize them in a Jupyter notebook using `SedonaUtils.display_image(df)`. It automatically detects raster columns and renders them as images. See [Raster visualizer docs](Raster-Output/index.md) for details.
+    After loading rasters, you can quickly visualize them in a Jupyter notebook using `SedonaUtils.display_image(df)`. It automatically detects raster columns and renders them as images. See [Raster visualizer docs](Raster-Functions.md#raster-output) for details.
 
 By default, these functions uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
 
@@ -111,4 +111,4 @@ Use one of the following raster constructors to create a Raster DataFrame:
 - [RS_FromGeoTiff](Raster-Constructors/RS_FromGeoTiff.md) - Create raster from GeoTiff files
 - [RS_MakeEmptyRaster](Raster-Constructors/RS_MakeEmptyRaster.md) - Create an empty raster geometry
 
-See the full list of [Raster Constructors](Raster-Constructors/index.md) for more options.
+See the full list of [Raster Constructors](Raster-Functions.md#raster-constructors) for more options.
