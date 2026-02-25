@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../../image/sedona_logo_symbol.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
     
     
       
@@ -75,7 +75,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#step-1-load-raster-to-a-binary-dataframe" class="md-skip">
+        <a href="#loading-raster-using-the-raster-data-source" class="md-skip">
           Skip to content
         </a>
       
@@ -3005,6 +3005,29 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#loading-raster-using-the-raster-data-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Loading raster using the raster data source
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loading-raster-using-binaryfile-loader-deprecated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Loading raster using binaryFile loader (Deprecated)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Loading raster using binaryFile loader (Deprecated)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#step-1-load-raster-to-a-binary-dataframe" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3014,8 +3037,8 @@ You're not viewing the latest stable version.
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#step-2-create-a-raster-type-column" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3024,8 +3047,7 @@ You're not viewing the latest stable version.
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Step 2: Create a raster type column">
-      <ul class="md-nav__list">
+</li>
         
           <li class="md-nav__item">
   <a href="#rs_fromarcinfoasciigrid" class="md-nav__link">
@@ -5862,6 +5884,29 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#loading-raster-using-the-raster-data-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Loading raster using the raster data source
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loading-raster-using-binaryfile-loader-deprecated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Loading raster using binaryFile loader (Deprecated)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Loading raster using binaryFile loader (Deprecated)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#step-1-load-raster-to-a-binary-dataframe" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5871,8 +5916,8 @@ You're not viewing the latest stable version.
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#step-2-create-a-raster-type-column" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5881,8 +5926,7 @@ You're not viewing the latest stable version.
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Step 2: Create a raster type column">
-      <ul class="md-nav__list">
+</li>
         
           <li class="md-nav__item">
   <a href="#rs_fromarcinfoasciigrid" class="md-nav__link">
@@ -6007,17 +6051,76 @@ You're not viewing the latest stable version.
 <p class="admonition-title">Note</p>
 <p>Sedona loader are available in Scala, Java and Python and have the same APIs.</p>
 </div>
+<h2 id="loading-raster-using-the-raster-data-source">Loading raster using the raster data source<a class="headerlink" href="#loading-raster-using-the-raster-data-source" title="Permanent link">&para;</a></h2>
+<p>The <code>raster</code> data source loads GeoTiff files and automatically splits them into smaller tiles. Each tile is a row in the resulting DataFrame stored in <code>Raster</code> format.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Scala</label><label for="__tabbed_1_2">Java</label><label for="__tabbed_1_3">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">rawDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;raster&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/some/path/*.tif&quot;</span><span class="p">)</span>
+<span class="n">rawDf</span><span class="p">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s">&quot;rawdf&quot;</span><span class="p">)</span>
+<span class="n">rawDf</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">rawDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">().</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;raster&quot;</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="s">&quot;/some/path/*.tif&quot;</span><span class="p">);</span>
+<span class="n">rawDf</span><span class="p">.</span><span class="na">createOrReplaceTempView</span><span class="p">(</span><span class="s">&quot;rawdf&quot;</span><span class="p">);</span>
+<span class="n">rawDf</span><span class="p">.</span><span class="na">show</span><span class="p">();</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">rawDf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/some/path/*.tif&quot;</span><span class="p">)</span>
+<span class="n">rawDf</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;rawdf&quot;</span><span class="p">)</span>
+<span class="n">rawDf</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>The output will look like this:</p>
+<div class="highlight"><pre><span></span><code>+--------------------+---+---+----+
+|                rast|  x|  y|name|
++--------------------+---+---+----+
+|GridCoverage2D[&quot;g...|  0|  0| ...|
+|GridCoverage2D[&quot;g...|  1|  0| ...|
+|GridCoverage2D[&quot;g...|  2|  0| ...|
+...
+</code></pre></div>
+<p>The output contains the following columns:</p>
+<ul>
+<li><code>rast</code>: The raster data in <code>Raster</code> format.</li>
+<li><code>x</code>: The 0-based x-coordinate of the tile. This column is only present when retile is not disabled.</li>
+<li><code>y</code>: The 0-based y-coordinate of the tile. This column is only present when retile is not disabled.</li>
+<li><code>name</code>: The name of the raster file.</li>
+</ul>
+<p>The size of the tile is determined by the internal tiling scheme of the raster data. It is recommended to use <a href="https://www.cogeo.org/">Cloud Optimized GeoTIFF (COG)</a> format for raster data since they usually organize pixel data as square tiles. You can also disable automatic tiling using <code>option("retile", "false")</code>, or specify the tile size manually using options such as <code>option("tileWidth", "256")</code> and <code>option("tileHeight", "256")</code>.</p>
+<p>The options for the <code>raster</code> data source are as follows:</p>
+<ul>
+<li><code>retile</code>: Whether to enable tiling. Default is <code>true</code>.</li>
+<li><code>tileWidth</code>: The width of the tile. If not specified, the size of internal tiles will be used.</li>
+<li><code>tileHeight</code>: The height of the tile. If not specified, will use <code>tileWidth</code> if <code>tileWidth</code> is explicitly set, otherwise the size of internal tiles will be used.</li>
+<li><code>padWithNoData</code>: Pad the right and bottom of the tile with NODATA values if the tile is smaller than the specified tile size. Default is <code>false</code>.</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the internal tiling scheme of raster data is not friendly for tiling, the <code>raster</code> data source will throw an error, and you can disable automatic tiling using <code>option("retile", "false")</code>, or specify the tile size manually to workaround this issue. A better solution is to translate the raster data into COG format using <code>gdal_translate</code> or other tools.</p>
+</div>
+<p>The <code>raster</code> data source also works with Spark generic file source options, such as <code>option("pathGlobFilter", "*.tif*")</code> and <code>option("recursiveFileLookup", "true")</code>. For instance, you can load all the <code>.tif</code> files recursively in a directory using</p>
+<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;recursiveFileLookup&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;pathGlobFilter&quot;</span><span class="p">,</span> <span class="s2">&quot;*.tif*&quot;</span>
+<span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path_to_raster_data_folder</span><span class="p">)</span>
+</code></pre></div>
+<p>One difference from other file source loaders is that when the loaded path ends with <code>/</code>, the <code>raster</code> data source will look up raster files in the directory and all its subdirectories recursively. This is equivalent to specifying a path without trailing <code>/</code> and setting <code>option("recursiveFileLookup", "true")</code>.</p>
+<h2 id="loading-raster-using-binaryfile-loader-deprecated">Loading raster using binaryFile loader (Deprecated)<a class="headerlink" href="#loading-raster-using-binaryfile-loader-deprecated" title="Permanent link">&para;</a></h2>
 <p>The raster loader of Sedona leverages Spark built-in binary data source and works with several RS constructors to produce Raster type. Each raster is a row in the resulting DataFrame and stored in a <code>Raster</code> format.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>After loading rasters, you can quickly visualize them in a Jupyter notebook using <code>SedonaUtils.display_image(df)</code>. It automatically detects raster columns and renders them as images. See <a href="../Raster-visualizer/#display-raster-in-jupyter">Raster visualizer docs</a> for details.</p>
 </div>
 <p>By default, these functions uses lon/lat order since <code>v1.5.0</code>. Before, it used lat/lon order.</p>
-<h2 id="step-1-load-raster-to-a-binary-dataframe">Step 1: Load raster to a binary DataFrame<a class="headerlink" href="#step-1-load-raster-to-a-binary-dataframe" title="Permanent link">&para;</a></h2>
+<h3 id="step-1-load-raster-to-a-binary-dataframe">Step 1: Load raster to a binary DataFrame<a class="headerlink" href="#step-1-load-raster-to-a-binary-dataframe" title="Permanent link">&para;</a></h3>
 <p>You can load any type of raster data using the code below. Then use the RS constructors below to create a Raster DataFrame.</p>
 <div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;binaryFile&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/some/path/*.asc&quot;</span><span class="p">)</span>
 </code></pre></div>
-<h2 id="step-2-create-a-raster-type-column">Step 2: Create a raster type column<a class="headerlink" href="#step-2-create-a-raster-type-column" title="Permanent link">&para;</a></h2>
+<h3 id="step-2-create-a-raster-type-column">Step 2: Create a raster type column<a class="headerlink" href="#step-2-create-a-raster-type-column" title="Permanent link">&para;</a></h3>
 <h3 id="rs_fromarcinfoasciigrid">RS_FromArcInfoAsciiGrid<a class="headerlink" href="#rs_fromarcinfoasciigrid" title="Permanent link">&para;</a></h3>
 <p>Introduction: Returns a raster geometry from an Arc Info Ascii Grid file.</p>
 <p>Format: <code>RS_FromArcInfoAsciiGrid(asc: ARRAY[Byte])</code></p>
@@ -6203,7 +6306,7 @@ NO2(time=2, z=2, lat=48, lon=80)
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 9, 2026 10:55:04 UTC">February 9, 2026 10:55:04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 25, 2026 09:13:28 UTC">February 25, 2026 09:13:28</span>
   </span>
 
     
