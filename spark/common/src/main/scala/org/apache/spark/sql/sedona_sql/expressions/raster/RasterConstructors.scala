@@ -30,6 +30,8 @@ import org.apache.spark.sql.sedona_sql.expressions.InferredExpression
 import org.apache.spark.sql.sedona_sql.expressions.raster.implicits.{RasterEnhancer, RasterInputExpressionEnhancer}
 import org.apache.spark.sql.types._
 
+import scala.collection.JavaConverters._
+
 private[apache] case class RS_FromArcInfoAsciiGrid(inputExpressions: Seq[Expression])
     extends InferredExpression(RasterConstructors.fromArcInfoAsciiGrid _) {
   override def foldable: Boolean = false
@@ -107,39 +109,38 @@ private[apache] case class RS_TileExplode(children: Seq[Expression])
 
   override def eval(input: InternalRow): TraversableOnce[InternalRow] = {
     val raster = arguments.rasterExpr.toRaster(input)
-    try {
-      val bandIndices = arguments.bandIndicesExpr.eval(input).asInstanceOf[ArrayData] match {
-        case null => null
-        case value: Any => value.toIntArray
-      }
-      val tileWidth = arguments.tileWidthExpr.eval(input).asInstanceOf[Int]
-      val tileHeight = arguments.tileHeightExpr.eval(input).asInstanceOf[Int]
-      val padWithNoDataValue = arguments.padWithNoDataExpr.eval(input).asInstanceOf[Boolean]
-      val noDataValue = arguments.noDataValExpr.eval(input) match {
-        case null => Double.NaN
-        case value: Integer => value.toDouble
-        case value: Decimal => value.toDouble
-        case value: Float => value.toDouble
-        case value: Double => value
-        case value: Any =>
-          throw new IllegalArgumentException(
-            "Unsupported class for noDataValue: " + value.getClass)
-      }
-      val tiles = RasterConstructors.generateTiles(
-        raster,
-        bandIndices,
-        tileWidth,
-        tileHeight,
-        padWithNoDataValue,
-        noDataValue)
-      tiles.map { tile =>
-        val gridCoverage2D = tile.getCoverage
-        val row = InternalRow(tile.getTileX, tile.getTileY, gridCoverage2D.serialize)
-        gridCoverage2D.dispose(true)
-        row
-      }
-    } finally {
-      raster.dispose(true)
+    if (raster == null) {
+      return Iterator.empty
+    }
+    val bandIndices = arguments.bandIndicesExpr.eval(input).asInstanceOf[ArrayData] match {
+      case null => null
+      case value: Any => value.toIntArray
+    }
+    val tileWidth = arguments.tileWidthExpr.eval(input).asInstanceOf[Int]
+    val tileHeight = arguments.tileHeightExpr.eval(input).asInstanceOf[Int]
+    val padWithNoDataValue = arguments.padWithNoDataExpr.eval(input).asInstanceOf[Boolean]
+    val noDataValue = arguments.noDataValExpr.eval(input) match {
+      case null => Double.NaN
+      case value: Integer => value.toDouble
+      case value: Decimal => value.toDouble
+      case value: Float => value.toDouble
+      case value: Double => value
+      case value: Any =>
+        throw new IllegalArgumentException("Unsupported class for noDataValue: " + value.getClass)
+    }
+    val tileIterator = RasterConstructors.generateTiles(
+      raster,
+      bandIndices,
+      tileWidth,
+      tileHeight,
+      padWithNoDataValue,
+      noDataValue)
+    tileIterator.setAutoDisposeSource(true)
+    tileIterator.asScala.map { tile =>
+      val gridCoverage2D = tile.getCoverage
+      val row = InternalRow(tile.getTileX, tile.getTileY, gridCoverage2D.serialize)
+      gridCoverage2D.dispose(true)
+      row
     }
   }
 
