@@ -29,22 +29,3 @@ For polygonal geometries, the function inscribes the circle within the boundary 
 
 Format: `ST_MaximumInscribedCircle(geometry: Geometry)`
 
-Since: `v1.6.1`
-
-SQL Example:
-
-```sql
-SELECT Sedona.ST_AsText(center) AS center, Sedona.ST_AsText(nearest) AS nearest, radius  FROM table(
-    SELECT ST_MaximumIncribedCircle(ST_GeomFromWKT('POLYGON ((62.11 19.68, 60.79 17.20, 61.30 15.96, 62.11 16.08, 65.93 16.95, 66.20 20.61, 63.08 21.43, 64.48 18.70, 62.11 19.68))'))
-)
-```
-
-Output:
-
-```
-+---------------------------------------------+-------------------------------------------+------------------+
-|center                                       |nearest                                    |radius            |
-+---------------------------------------------+-------------------------------------------+------------------+
-|POINT (62.794975585937514 17.774780273437496)|POINT (63.36773534817729 19.15992378007859)|1.4988916836219184|
-+---------------------------------------------+-------------------------------------------+------------------+
-```

@@ -25,8 +25,6 @@ The length calculation is performed in 2D. When a segment is longer than the spe
 
 Format: `ST_Segmentize(geom: Geometry, max_segment_length: Double)`
 
-Since: v1.8.0
-
 SQL Example
 Long segments are split evenly into subsegments no longer than the specified length. Shorter segments are not modified.
 

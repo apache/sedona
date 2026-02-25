@@ -65,27 +65,6 @@ ST_Buffer (A: Geometry, buffer: Double, useSpheroid: Boolean)
 ST_Buffer (A: Geometry, buffer: Double, useSpheroid: Boolean, bufferStyleParameters: String)
 ```
 
-Since: `v1.5.1`
-
-SQL Example:
-
-```sql
-SELECT ST_Buffer(ST_GeomFromWKT('POINT(0 0)'), 10)
-SELECT ST_Buffer(ST_GeomFromWKT('POINT(0 0)'), 10, false, 'quad_segs=2')
-```
-
-Output:
-
-![Point buffer with 8 quadrant segments](../../../../image/point-buffer-quad-8.png)
-![Point buffer with 2 quadrant segments](../../../../image/point-buffer-quad-2.png)
-
-8 Segments &ensp; 2 Segments
-
-SQL Example:
-
-```sql
-SELECT ST_Buffer(ST_GeomFromWKT('LINESTRING(0 0, 50 70, 100 100)'), 10, false, 'side=left')
-```
 
 Output:
 

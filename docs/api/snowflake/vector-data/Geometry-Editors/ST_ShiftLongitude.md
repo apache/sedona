@@ -26,16 +26,3 @@ Introduction: Modifies longitude coordinates in geometries, shifting values betw
 
 Format: `ST_ShiftLongitude (geom: geometry)`
 
-Since: `v1.6.0`
-
-SQL example:
-
-```sql
-SELECT ST_ShiftLongitude(ST_GeomFromText('LINESTRING(177 10, 179 10, -179 10, -177 10)'))
-```
-
-Output:
-
-```sql
-LINESTRING(177 10, 179 10, 181 10, 183 10)
-```

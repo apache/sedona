@@ -29,19 +29,6 @@ Introduction: This function determines if a given geometry crosses the Internati
 
 Format: `ST_CrossesDateLine(geometry: Geometry)`
 
-Since: `v1.6.0`
-
-SQL Example:
-
-```sql
-SELECT ST_CrossesDateLine(ST_GeomFromWKT('LINESTRING(170 30, -170 30)'))
-```
-
-Output:
-
-```sql
-true
-```
 
 !!!Warning
     For geometries that span more than 180 degrees in longitude without actually crossing the Date Line, this function may still return true, indicating a crossing.

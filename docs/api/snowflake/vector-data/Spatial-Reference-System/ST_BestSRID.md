@@ -31,16 +31,3 @@ Introduction: Returns the estimated most appropriate Spatial Reference Identifie
 
 Format: `ST_BestSRID(geom: Geometry)`
 
-Since: `v1.6.0`
-
-SQL Example:
-
-```sql
-SELECT ST_BestSRID(ST_GeomFromWKT('POLYGON((-73.9980 40.7265, -73.9970 40.7265, -73.9970 40.7255, -73.9980 40.7255, -73.9980 40.7265))'))
-```
-
-Output:
-
-```
-32618
-```
