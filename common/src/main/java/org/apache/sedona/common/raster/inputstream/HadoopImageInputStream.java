@@ -90,6 +90,11 @@ public class HadoopImageInputStream extends ImageInputStreamImpl {
     int remaining = len;
     while (remaining > 0) {
       int ret_len = stream.read(b, off, remaining);
+      if (ret_len == 0) {
+        // This should not happen per InputStream contract, but guard against non-progressing
+        // streams to avoid an infinite loop.
+        throw new IOException("Stream returned 0 bytes for a non-zero read request");
+      }
       if (ret_len < 0) {
         // Hit EOF, no more data to read.
         if (len - remaining > 0) {

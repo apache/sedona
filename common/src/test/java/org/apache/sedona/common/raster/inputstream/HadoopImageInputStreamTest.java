@@ -160,8 +160,12 @@ public class HadoopImageInputStreamTest {
 
       @Override
       public int read(byte[] b, int off, int len) throws IOException {
-        // Make this read unstable, i.e. sometimes return less data than requested.
-        int unstableLen = random.nextInt(len + 1);
+        // Make this read unstable, i.e. sometimes return less data than requested,
+        // but still obey InputStream's contract by not returning 0 when len > 0.
+        if (len == 0) {
+          return 0;
+        }
+        int unstableLen = 1 + random.nextInt(len);
         return wrapped.read(b, off, unstableLen);
       }
 

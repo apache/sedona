@@ -344,7 +344,6 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
         .load(tempDir)
         .sample(0.5, seed = 42)
         .limit(numUniqueFiles)
-      dfReTiledWithSampleAndLimit.explain(true)
       val planRetiled = queryPlan(dfReTiledWithSampleAndLimit)
       assert(planRetiled.collect { case e: LimitExec => e }.nonEmpty)
       assert(planRetiled.collect { case e: SampleExec => e }.nonEmpty)

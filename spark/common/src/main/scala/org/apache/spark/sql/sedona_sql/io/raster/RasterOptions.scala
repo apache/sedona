@@ -47,7 +47,9 @@ class RasterOptions(@transient private val parameters: CaseInsensitiveMap[String
   val tileHeight: Option[Int] = parameters
     .get("tileHeight")
     .map { value =>
-      require(tileWidth.isDefined, "tileWidth must be set when tileHeight is set")
+      if (retile) {
+        require(tileWidth.isDefined, "tileWidth must be set when tileHeight is set")
+      }
       value.toInt
     }
     .orElse(tileWidth)

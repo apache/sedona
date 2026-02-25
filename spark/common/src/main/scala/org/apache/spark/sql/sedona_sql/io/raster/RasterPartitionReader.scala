@@ -175,7 +175,7 @@ object RasterPartitionReader {
             throw new IllegalArgumentException(
               s"Internal tile size of $path contains zero ($tw x $th). " + tileSizeError)
           }
-          if (tw / th > 10 || th / tw > 10) {
+          if (tw.toDouble / th > 10.0 || th.toDouble / tw > 10.0) {
             throw new IllegalArgumentException(
               s"Internal tile shape of $path is too thin ($tw x $th). " + tileSizeError)
           }

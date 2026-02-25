@@ -109,6 +109,9 @@ private[apache] case class RS_TileExplode(children: Seq[Expression])
 
   override def eval(input: InternalRow): TraversableOnce[InternalRow] = {
     val raster = arguments.rasterExpr.toRaster(input)
+    if (raster == null) {
+      return Iterator.empty
+    }
     val bandIndices = arguments.bandIndicesExpr.eval(input).asInstanceOf[ArrayData] match {
       case null => null
       case value: Any => value.toIntArray
