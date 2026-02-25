@@ -138,7 +138,7 @@ The output will be like this:
 ```
 
 !!!note
-	SedonaSQL provides lots of functions to create a Geometry column, please read [SedonaSQL constructor API](../../api/flink/Geometry-Constructors/index.md).
+	SedonaSQL provides lots of functions to create a Geometry column, please read [SedonaSQL constructor API](../../api/flink/Geometry-Functions.md).
 
 ## Transform the Coordinate Reference System
 
@@ -219,7 +219,7 @@ geomTable.execute().print()
 ```
 
 !!!note
-	Read [SedonaSQL Predicate API](../../api/flink/Predicates/index.md) to learn different spatial query predicates.
+	Read [SedonaSQL Predicate API](../../api/flink/Geometry-Functions.md#predicates) to learn different spatial query predicates.
 
 ## KNN query
 
@@ -285,7 +285,7 @@ FROM lcs JOIN rcs ON lcs.cellId = rcs.cellId
 
 Due to the nature of S2 Cellid, the equi-join results might have a few false-positives depending on the S2 level you choose. A smaller level indicates bigger cells, less exploded rows, but more false positives.
 
-To ensure the correctness, you can use one of the [Spatial Predicates](../../api/sql/Predicates/index.md) to filter out them. Use this query as the query in Step 3.
+To ensure the correctness, you can use one of the [Spatial Predicates](../../api/sql/Geometry-Functions.md#predicates) to filter out them. Use this query as the query in Step 3.
 
 ```sql
 SELECT lcs.id as lcs_id, lcs.geom as lcs_geom, lcs.name as lcs_name, rcs.id as rcs_id, rcs.geom as rcs_geom, rcs.name as rcs_name

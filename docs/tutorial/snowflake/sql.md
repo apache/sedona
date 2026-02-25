@@ -99,7 +99,7 @@ FROM city_tbl
 ```
 
 !!!note
-	SedonaSQL provides lots of functions to create a Geometry column, please read [SedonaSQL API](../../api/snowflake/vector-data/Geometry-Constructors/index.md).
+	SedonaSQL provides lots of functions to create a Geometry column, please read [SedonaSQL API](../../api/snowflake/vector-data/Geometry-Functions.md).
 
 ## Check the lon/lat order
 
@@ -226,7 +226,7 @@ WHERE SEDONA.ST_Contains(SEDONA.ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0),
 ```
 
 !!!note
-	Read [SedonaSQL API](../../api/snowflake/vector-data/Geometry-Constructors/index.md) to learn how to create a Geometry type query window.
+	Read [SedonaSQL API](../../api/snowflake/vector-data/Geometry-Functions.md) to learn how to create a Geometry type query window.
 
 ## KNN query
 
@@ -419,7 +419,7 @@ FROM lcs JOIN rcs ON lcs.cellId = rcs.cellId
 
 Due to the nature of S2 Cellid, the equi-join results might have a few false-positives depending on the S2 level you choose. A smaller level indicates bigger cells, less exploded rows, but more false positives.
 
-To ensure the correctness, you can use one of the [Spatial Predicates](../../api/snowflake/vector-data/Predicates/index.md) to filter out them. Use this query instead of the query in Step 2.
+To ensure the correctness, you can use one of the [Spatial Predicates](../../api/snowflake/vector-data/Geometry-Functions.md#predicates) to filter out them. Use this query instead of the query in Step 2.
 
 ```sql
 SELECT lcs.id AS lcs_id, lcs.geom AS lcs_geom, lcs.name AS lcs_name, rcs.id AS rcs_id, rcs.geom AS rcs_geom, rcs.name AS rcs_name

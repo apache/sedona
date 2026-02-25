@@ -315,7 +315,7 @@ FROM lcs JOIN rcs ON lcs.cellId = rcs.cellId
 
 Due to the nature of S2 Cellid, the equi-join results might have a few false-positives depending on the S2 level you choose. A smaller level indicates bigger cells, less exploded rows, but more false positives.
 
-To ensure the correctness, you can use one of the [Spatial Predicates](Predicates/index.md) to filter out them. Use this query instead of the query in Step 2.
+To ensure the correctness, you can use one of the [Spatial Predicates](Geometry-Functions.md#predicates) to filter out them. Use this query instead of the query in Step 2.
 
 ```sql
 SELECT lcs.id as lcs_id, lcs.geom as lcs_geom, lcs.name as lcs_name, rcs.id as rcs_id, rcs.geom as rcs_geom, rcs.name as rcs_name

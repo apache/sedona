@@ -1323,7 +1323,7 @@ Sedona 1.5.0 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 * Add 36 more RS functions in Sedona Spark to support [comprehensive raster data ETL and analytics](../tutorial/raster.md)
 	* You can now directly join vector and raster datasets together
 	* Flexible map algebra equations: `SELECT RS_MapAlgebra(rast, 'D', 'out = (rast[3] - rast[0]) / (rast[3] + rast[0]);') as ndvi FROM raster_table`
-* Add native support of [Uber H3 functions](../api/sql/Spatial-Indexing/index.md) in Sedona Spark and Sedona Flink.
+* Add native support of [Uber H3 functions](../api/sql/Geometry-Functions.md#spatial-indexing) in Sedona Spark and Sedona Flink.
 * Add SedonaKepler and SedonaPyDeck for [interactive map visualization](../tutorial/sql.md#visualize-query-results) on Sedona Spark.
 
 ### Bug
