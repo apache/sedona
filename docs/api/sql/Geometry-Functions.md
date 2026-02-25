@@ -19,6 +19,8 @@
 
 # Geometry Functions
 
+The `Geometry` type in Sedona represents planar (2D Euclidean) spatial objects such as points, lines, and polygons. All coordinates are treated as Cartesian (x, y) values, and spatial operations — distance, area, intersection, etc. — use flat-plane math. If your data uses a geographic coordinate reference system (longitude/latitude), see [Geography Functions](geography/Geography-Functions.md) for geodesic operations that account for the curvature of the Earth.
+
 ## Geometry Constructors
 
 These functions create geometry objects from various textual or binary formats, or from coordinate values.

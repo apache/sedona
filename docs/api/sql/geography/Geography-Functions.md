@@ -19,6 +19,8 @@
 
 # Geography Functions
 
+The `Geography` type in Sedona represents spatial objects on a spherical (geodesic) model of the Earth. Unlike the planar [Geometry](../Geometry-Functions.md) type, distance, area, and other measurements performed on `Geography` objects account for the curvature of the Earth and return results in real-world units (e.g., meters). Use `Geography` when your data is in longitude/latitude coordinates and you need accurate geodesic calculations.
+
 ## Geography Constructors
 
 These functions create geography objects from various formats.
