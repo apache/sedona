@@ -21,6 +21,7 @@ package org.apache.spark.sql.sedona_sql.io.raster
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.sedona.common.raster.RasterConstructors
+import org.apache.sedona.common.raster.inputstream.HadoopImageInputStream
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.UnsafeRowWriter
 import org.apache.spark.sql.connector.read.PartitionReader
@@ -46,6 +47,9 @@ class RasterPartitionReader(
 
   // Current raster being processed
   private var currentRaster: GridCoverage2D = _
+
+  // Current image input stream (must be kept open while the raster is in use)
+  private var currentImageStream: HadoopImageInputStream = _
 
   // Current row
   private var currentRow: InternalRow = _
@@ -82,13 +86,21 @@ class RasterPartitionReader(
       currentRaster.dispose(true)
       currentRaster = null
     }
+    if (currentImageStream != null) {
+      currentImageStream.close()
+      currentImageStream = null
+    }
   }
 
   private def loadNextFile(): Unit = {
-    // Clean up previous raster if exists
+    // Clean up previous raster and stream if exists
     if (currentRaster != null) {
       currentRaster.dispose(true)
       currentRaster = null
+    }
+    if (currentImageStream != null) {
+      currentImageStream.close()
+      currentImageStream = null
     }
 
     if (currentFileIndex >= partitionedFiles.length) {
@@ -100,21 +112,13 @@ class RasterPartitionReader(
     val path = new Path(new URI(partition.filePath.toString()))
 
     try {
-      // Read file bytes from Hadoop FS
-      val fs = path.getFileSystem(configuration)
-      val fileStatus = fs.getFileStatus(path)
-      val fileLength = fileStatus.getLen.toInt
-      val bytes = new Array[Byte](fileLength)
-      val inputStream = fs.open(path)
-      try {
-        org.apache.hadoop.io.IOUtils.readFully(inputStream, bytes, 0, fileLength)
-      } finally {
-        inputStream.close()
-      }
+      // Open a stream-based reader instead of materializing the entire file as byte[].
+      // This avoids the 2 GB byte[] limit and reduces memory pressure for large files.
+      currentImageStream = new HadoopImageInputStream(path, configuration)
 
-      // Create in-db GridCoverage2D from GeoTiff bytes. The RenderedImage is lazy -
+      // Create in-db GridCoverage2D from GeoTiff stream. The RenderedImage is lazy -
       // pixel data will only be decoded when accessed via image.getData(Rectangle).
-      currentRaster = RasterConstructors.fromGeoTiff(bytes)
+      currentRaster = RasterConstructors.fromGeoTiff(currentImageStream)
       currentIterator = rasterToInternalRows(currentRaster, dataSchema, rasterOptions, path)
       currentFileIndex += 1
     } catch {
@@ -122,6 +126,10 @@ class RasterPartitionReader(
         if (currentRaster != null) {
           currentRaster.dispose(true)
           currentRaster = null
+        }
+        if (currentImageStream != null) {
+          currentImageStream.close()
+          currentImageStream = null
         }
         throw e
     }

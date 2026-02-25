@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import javax.imageio.stream.ImageInputStream;
 import javax.media.jai.RasterFactory;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.raster.inputstream.ByteArrayImageInputStream;
@@ -65,6 +66,21 @@ public class RasterConstructors {
         new GeoTiffReader(
             new ByteArrayImageInputStream(bytes),
             new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE));
+    return geoTiffReader.read(null);
+  }
+
+  /**
+   * Creates a GridCoverage2D from a GeoTIFF via an ImageInputStream. This avoids materializing the
+   * entire file as a byte[], which is critical for files larger than 2 GB.
+   *
+   * @param inputStream an ImageInputStream positioned at the start of the GeoTIFF data
+   * @return a GridCoverage2D with a lazily-decoded RenderedImage
+   * @throws IOException if the GeoTIFF cannot be read
+   */
+  public static GridCoverage2D fromGeoTiff(ImageInputStream inputStream) throws IOException {
+    GeoTiffReader geoTiffReader =
+        new GeoTiffReader(
+            inputStream, new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE));
     return geoTiffReader.read(null);
   }
 

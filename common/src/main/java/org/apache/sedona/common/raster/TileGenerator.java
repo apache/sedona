@@ -218,8 +218,8 @@ public class TileGenerator {
       int y0 = tileY * tileHeight + image.getMinY();
 
       // Rect to copy from the original image
-      int rectWidth = Math.min(tileWidth, imageWidth - x0);
-      int rectHeight = Math.min(tileHeight, imageHeight - y0);
+      int rectWidth = Math.min(tileWidth, image.getMinX() + imageWidth - x0);
+      int rectHeight = Math.min(tileHeight, image.getMinY() + imageHeight - y0);
 
       // If we don't pad with no data, the tiles on the boundary may have a different size
       int currentTileWidth = padWithNoData ? tileWidth : rectWidth;

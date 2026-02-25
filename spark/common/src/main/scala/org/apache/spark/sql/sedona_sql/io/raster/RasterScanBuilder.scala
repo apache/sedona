@@ -117,7 +117,10 @@ case class RasterScan(
       partitions = partitions.flatMap {
         case filePartition: FilePartition =>
           val files = filePartition.files
-          val sampledFiles = files.filter(_ => r.nextDouble() < tableSample.upperBound)
+          val sampledFiles = files.filter { _ =>
+            val v = r.nextDouble()
+            v >= tableSample.lowerBound && v < tableSample.upperBound
+          }
           if (sampledFiles.nonEmpty) {
             val index = partitionIndex
             partitionIndex += 1
