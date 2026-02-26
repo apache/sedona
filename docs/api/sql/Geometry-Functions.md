@@ -50,7 +50,7 @@ These functions create geometry objects from various textual or binary formats, 
 | [ST_MPointFromText](Geometry-Constructors/ST_MPointFromText.md) | Constructs a MultiPoint from the WKT with the given SRID. If SRID is not provided then it defaults to 0. It returns `null` if the WKT is not a `MULTIPOINT`. | v1.6.1 |
 | [ST_MPolyFromText](Geometry-Constructors/ST_MPolyFromText.md) | Construct a MultiPolygon from Wkt. If srid is not set, it defaults to 0 (unknown). | v1.3.1 |
 | [ST_Point](Geometry-Constructors/ST_Point.md) | Construct a Point from X and Y | v1.0.0 |
-| [ST_PointFromGeoHash](Geometry-Constructors/ST_PointFromGeoHash.md) | Generates a Point geometry representing the center of the GeoHash cell defined by the input string. If `precision` is not specified, the full GeoHash precision is used. Providing a `precision` valu... | v1.6.1 |
+| [ST_PointFromGeoHash](Geometry-Constructors/ST_PointFromGeoHash.md) | Generates a Point geometry representing the center of the GeoHash cell defined by the input string. If `precision` is not specified, the full GeoHash precision is used. Providing a `precision` value... | v1.6.1 |
 | [ST_PointFromText](Geometry-Constructors/ST_PointFromText.md) | Construct a Point from Text, delimited by Delimiter | v1.0.0 |
 | [ST_PointFromWKB](Geometry-Constructors/ST_PointFromWKB.md) | Construct a Point geometry from WKB string or Binary and an optional SRID. This function also supports EWKB format. | v1.6.1 |
 | [ST_PointM](Geometry-Constructors/ST_PointM.md) | Construct a Point from X, Y and M and an optional srid. If srid is not set, it defaults to 0 (unknown). Must use ST_AsEWKT function to print the Z and M coordinates. | v1.6.1 |
@@ -149,7 +149,7 @@ These functions convert geometry objects into various textual or binary formats.
 | [ST_AsEWKT](Geometry-Output/ST_AsEWKT.md) | Return the Extended Well-Known Text representation of a geometry. EWKT is an extended version of WKT which includes the SRID of the geometry. The format originated in PostGIS but is supported by ma... | v1.2.1 |
 | [ST_AsGeoJSON](Geometry-Output/ST_AsGeoJSON.md) | Return the [GeoJSON](https://geojson.org/) string representation of a geometry | v1.6.1 |
 | [ST_AsGML](Geometry-Output/ST_AsGML.md) | Return the [GML](https://www.ogc.org/standards/gml) string representation of a geometry | v1.3.0 |
-| [ST_AsHEXEWKB](Geometry-Output/ST_AsHEXEWKB.md) | This function returns the input geometry encoded to a text representation in HEXEWKB format. The HEXEWKB encoding can use either little-endian (NDR) or big-endian (XDR) byte ordering. If no encodin... | v1.6.1 |
+| [ST_AsHEXEWKB](Geometry-Output/ST_AsHEXEWKB.md) | This function returns the input geometry encoded to a text representation in HEXEWKB format. The HEXEWKB encoding can use either little-endian (NDR) or big-endian (XDR) byte ordering. If no encoding... | v1.6.1 |
 | [ST_AsKML](Geometry-Output/ST_AsKML.md) | Return the [KML](https://www.ogc.org/standards/kml) string representation of a geometry | v1.3.0 |
 | [ST_AsText](Geometry-Output/ST_AsText.md) | Return the Well-Known Text string representation of a geometry. It will support M coordinate if present since v1.5.0. | v1.0.0 |
 | [ST_GeoHash](Geometry-Output/ST_GeoHash.md) | Returns GeoHash of the geometry with given precision | v1.1.1 |
@@ -189,7 +189,7 @@ These functions compute measurements of distance, area, length, and angles.
 | [ST_ClosestPoint](Measurement-Functions/ST_ClosestPoint.md) | Returns the 2-dimensional point on geom1 that is closest to geom2. This is the first point of the shortest line between the geometries. If using 3D geometries, the Z coordinates will be ignored. If... | v1.5.0 |
 | [ST_Degrees](Measurement-Functions/ST_Degrees.md) | Convert an angle in radian to degrees. | v1.5.0 |
 | [ST_Distance](Measurement-Functions/ST_Distance.md) | Return the Euclidean distance between A and B | v1.0.0 |
-| [ST_DistanceSphere](Measurement-Functions/ST_DistanceSphere.md) | Return the haversine / great-circle distance of A using a given earth radius (default radius: 6371008.0). Unit is meter. Compared to `ST_Distance` + `ST_Transform`, it works better for datasets tha... | v1.4.1 |
+| [ST_DistanceSphere](Measurement-Functions/ST_DistanceSphere.md) | Return the haversine / great-circle distance of A using a given earth radius (default radius: 6371008.0). Unit is meter. Compared to `ST_Distance` + `ST_Transform`, it works better for datasets that... | v1.4.1 |
 | [ST_DistanceSpheroid](Measurement-Functions/ST_DistanceSpheroid.md) | Return the geodesic distance of A using WGS84 spheroid. Unit is meter. Compared to `ST_Distance` + `ST_Transform`, it works better for datasets that cover large regions such as continents or the en... | v1.4.1 |
 | [ST_FrechetDistance](Measurement-Functions/ST_FrechetDistance.md) | Computes and returns discrete [Frechet Distance](https://en.wikipedia.org/wiki/Fr%C3%A9chet_distance) between the given two geometries, based on [Computing Discrete Frechet Distance](http://www.kr.... | v1.5.0 |
 | [ST_HausdorffDistance](Measurement-Functions/ST_HausdorffDistance.md) | Returns a discretized (and hence approximate) [Hausdorff distance](https://en.wikipedia.org/wiki/Hausdorff_distance) between the given 2 geometries. Optionally, a densityFraction parameter can be s... | v1.5.0 |
@@ -285,7 +285,7 @@ These functions work with linear referencing, measures along lines, and trajecto
 | [ST_InterpolatePoint](Linear-Referencing/ST_InterpolatePoint.md) | Returns the interpolated measure value of a linear measured LineString at the point closest to the specified point. | v1.7.0 |
 | [ST_IsValidTrajectory](Linear-Referencing/ST_IsValidTrajectory.md) | This function checks if a geometry is a valid trajectory representation. For a trajectory to be considered valid, it must be a LineString that includes measure (M) values. The key requirement is th... | v1.6.1 |
 | [ST_LineInterpolatePoint](Linear-Referencing/ST_LineInterpolatePoint.md) | Returns a point interpolated along a line. First argument must be a LINESTRING. Second argument is a Double between 0 and 1 representing fraction of total linestring length the point has to be loca... | v1.0.1 |
-| [ST_LineLocatePoint](Linear-Referencing/ST_LineLocatePoint.md) | Returns a double between 0 and 1, representing the location of the closest point on the LineString as a fraction of its total length. The first argument must be a LINESTRING, and the second argumen... | v1.5.1 |
+| [ST_LineLocatePoint](Linear-Referencing/ST_LineLocatePoint.md) | Returns a double between 0 and 1, representing the location of the closest point on the LineString as a fraction of its total length. The first argument must be a LINESTRING, and the second argument... | v1.5.1 |
 | [ST_LineSubstring](Linear-Referencing/ST_LineSubstring.md) | Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length. Second and third arguments are Double values between 0 and 1. This only works w... | v1.0.1 |
 | [ST_LocateAlong](Linear-Referencing/ST_LocateAlong.md) | This function computes Point or MultiPoint geometries representing locations along a measured input geometry (LineString or MultiLineString) corresponding to the provided measure value(s). Polygona... | v1.6.1 |
 
@@ -317,7 +317,7 @@ These functions produce or operate on bounding boxes and compute extent values.
 
 | Function | Description | Since |
 | :--- | :--- | :--- |
-| [ST_BoundingDiagonal](Bounding-Box-Functions/ST_BoundingDiagonal.md) | Returns a linestring spanning minimum and maximum values of each dimension of the given geometry's coordinates as its start and end point respectively. If an empty geometry is provided, the returne... | v1.5.0 |
+| [ST_BoundingDiagonal](Bounding-Box-Functions/ST_BoundingDiagonal.md) | Returns a linestring spanning minimum and maximum values of each dimension of the given geometry's coordinates as its start and end point respectively. If an empty geometry is provided, the returned... | v1.5.0 |
 | [ST_Envelope](Bounding-Box-Functions/ST_Envelope.md) | Return the envelope boundary of A | v1.0.0 |
 | [ST_Expand](Bounding-Box-Functions/ST_Expand.md) | Returns a geometry expanded from the bounding box of the input. The expansion can be specified in two ways: | v1.6.1 |
 | [ST_MMax](Bounding-Box-Functions/ST_MMax.md) | Returns M maxima of the given geometry or null if there is no M coordinate. | v1.6.1 |
@@ -350,7 +350,7 @@ These functions work with spatial indexing systems including Bing Tiles, H3, S2,
 | [ST_H3CellIDs](Spatial-Indexing/ST_H3CellIDs.md) | Cover the geometry by H3 cell IDs with the given resolution(level). To understand the cell statistics please refer to [H3 Doc](https://h3geo.org/docs/core-library/restable) H3 native fill functions... | v1.5.0 |
 | [ST_H3KRing](Spatial-Indexing/ST_H3KRing.md) | return the result of H3 function [gridDisk(cell, k)](https://h3geo.org/docs/api/traversal#griddisk). | v1.5.0 |
 | [ST_H3ToGeom](Spatial-Indexing/ST_H3ToGeom.md) | Return the result of H3 function [cellsToMultiPolygon(cells)](https://h3geo.org/docs/api/regions#cellstolinkedmultipolygon--cellstomultipolygon). | v1.6.0 |
-| [ST_S2CellIDs](Spatial-Indexing/ST_S2CellIDs.md) | Cover the geometry with Google S2 Cells, return the corresponding cell IDs with the given level. The level indicates the [size of cells](https://s2geometry.io/resources/s2cell_statistics.html). Wit... | v1.4.0 |
+| [ST_S2CellIDs](Spatial-Indexing/ST_S2CellIDs.md) | Cover the geometry with Google S2 Cells, return the corresponding cell IDs with the given level. The level indicates the [size of cells](https://s2geometry.io/resources/s2cell_statistics.html). With... | v1.4.0 |
 | [ST_S2ToGeom](Spatial-Indexing/ST_S2ToGeom.md) | Returns an array of Polygons for the corresponding S2 cell IDs. | v1.6.0 |
 
 ## Clustering Functions

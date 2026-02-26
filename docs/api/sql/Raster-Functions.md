@@ -111,7 +111,7 @@ These functions perform operations on raster objects.
 
 | Function | Description | Since |
 | :--- | :--- | :--- |
-| [RS_AddBand](Raster-Operators/RS_AddBand.md) | Adds a new band to a raster `toRaster` at a specified index `toRasterIndex`. The new band's values are copied from `fromRaster` at a specified band index `fromBand`. If no `toRasterIndex` is provid... | v1.5.0 |
+| [RS_AddBand](Raster-Operators/RS_AddBand.md) | Adds a new band to a raster `toRaster` at a specified index `toRasterIndex`. The new band's values are copied from `fromRaster` at a specified band index `fromBand`. If no `toRasterIndex` is provided... | v1.5.0 |
 | [RS_Clip](Raster-Operators/RS_Clip.md) | Returns a raster that is clipped by the given geometry. | v1.5.1 |
 | [RS_Interpolate](Raster-Operators/RS_Interpolate.md) | This function performs interpolation on a raster using the Inverse Distance Weighted (IDW) method. This method estimates cell values by averaging the values of sample data points in the vicinity of... | v1.6.0 |
 | [RS_MetaData](Raster-Operators/RS_MetaData.md) | Returns the metadata of the raster as a struct. The struct has the following schema: | v1.4.1 |

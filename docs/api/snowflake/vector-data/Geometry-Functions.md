@@ -48,7 +48,7 @@ These functions create geometry objects from various textual or binary formats, 
 | [ST_MPointFromText](Geometry-Constructors/ST_MPointFromText.md) | Constructs a MultiPoint from the WKT with the given SRID. If SRID is not provided then it defaults to 0. It returns `null` if the WKT is not a `MULTIPOINT`. |
 | [ST_MPolyFromText](Geometry-Constructors/ST_MPolyFromText.md) | Construct a MultiPolygon from Wkt. If srid is not set, it defaults to 0 (unknown). |
 | [ST_Point](Geometry-Constructors/ST_Point.md) | Construct a Point from X and Y |
-| [ST_PointFromGeoHash](Geometry-Constructors/ST_PointFromGeoHash.md) | Generates a Point geometry representing the center of the GeoHash cell defined by the input string. If `precision` is not specified, the full GeoHash precision is used. Providing a `precision` valu... |
+| [ST_PointFromGeoHash](Geometry-Constructors/ST_PointFromGeoHash.md) | Generates a Point geometry representing the center of the GeoHash cell defined by the input string. If `precision` is not specified, the full GeoHash precision is used. Providing a `precision` value... |
 | [ST_PointFromText](Geometry-Constructors/ST_PointFromText.md) | Construct a Point from Text, delimited by Delimiter |
 | [ST_PointFromWKB](Geometry-Constructors/ST_PointFromWKB.md) | Construct a Point geometry from WKB string or Binary and an optional SRID. This function also supports EWKB format. |
 | [ST_PointZ](Geometry-Constructors/ST_PointZ.md) | Construct a Point from X, Y and Z and an optional srid. If srid is not set, it defaults to 0 (unknown). Must use ST_AsEWKT function to print the Z coordinate. |
@@ -140,7 +140,7 @@ These functions convert geometry objects into various textual or binary formats.
 | [ST_AsEWKT](Geometry-Output/ST_AsEWKT.md) | Return the Extended Well-Known Text representation of a geometry. EWKT is an extended version of WKT which includes the SRID of the geometry. The format originated in PostGIS but is supported by ma... |
 | [ST_AsGeoJSON](Geometry-Output/ST_AsGeoJSON.md) | Return the [GeoJSON](https://geojson.org/) string representation of a geometry |
 | [ST_AsGML](Geometry-Output/ST_AsGML.md) | Return the [GML](https://www.ogc.org/standards/gml) string representation of a geometry |
-| [ST_AsHEXEWKB](Geometry-Output/ST_AsHEXEWKB.md) | This function returns the input geometry encoded to a text representation in HEXEWKB format. The HEXEWKB encoding can use either little-endian (NDR) or big-endian (XDR) byte ordering. If no encodin... |
+| [ST_AsHEXEWKB](Geometry-Output/ST_AsHEXEWKB.md) | This function returns the input geometry encoded to a text representation in HEXEWKB format. The HEXEWKB encoding can use either little-endian (NDR) or big-endian (XDR) byte ordering. If no encoding... |
 | [ST_AsKML](Geometry-Output/ST_AsKML.md) | Return the [KML](https://www.ogc.org/standards/kml) string representation of a geometry |
 | [ST_AsText](Geometry-Output/ST_AsText.md) | Return the Well-Known Text string representation of a geometry |
 | [ST_GeoHash](Geometry-Output/ST_GeoHash.md) | Returns GeoHash of the geometry with given precision |
@@ -180,7 +180,7 @@ These functions compute measurements of distance, area, length, and angles.
 | [ST_ClosestPoint](Measurement-Functions/ST_ClosestPoint.md) | Returns the 2-dimensional point on geom1 that is closest to geom2. This is the first point of the shortest line between the geometries. If using 3D geometries, the Z coordinates will be ignored. If... |
 | [ST_Degrees](Measurement-Functions/ST_Degrees.md) | Convert an angle in radian to degrees. |
 | [ST_Distance](Measurement-Functions/ST_Distance.md) | Return the Euclidean distance between A and B |
-| [ST_DistanceSphere](Measurement-Functions/ST_DistanceSphere.md) | Return the haversine / great-circle distance of A using a given earth radius (default radius: 6371008.0). Unit is meter. Compared to `ST_Distance` + `ST_Transform`, it works better for datasets tha... |
+| [ST_DistanceSphere](Measurement-Functions/ST_DistanceSphere.md) | Return the haversine / great-circle distance of A using a given earth radius (default radius: 6371008.0). Unit is meter. Compared to `ST_Distance` + `ST_Transform`, it works better for datasets that... |
 | [ST_DistanceSpheroid](Measurement-Functions/ST_DistanceSpheroid.md) | Return the geodesic distance of A using WGS84 spheroid. Unit is meter. Compared to `ST_Distance` + `ST_Transform`, it works better for datasets that cover large regions such as continents or the en... |
 | [ST_FrechetDistance](Measurement-Functions/ST_FrechetDistance.md) | Computes and returns discrete [Frechet Distance](https://en.wikipedia.org/wiki/Fr%C3%A9chet_distance) between the given two geometries, based on [Computing Discrete Frechet Distance](http://www.kr.... |
 | [ST_HausdorffDistance](Measurement-Functions/ST_HausdorffDistance.md) | Returns a discretized (and hence approximate) [Hausdorff distance](https://en.wikipedia.org/wiki/Hausdorff_distance) between the given 2 geometries. Optionally, a densityFraction parameter can be s... |
@@ -272,7 +272,7 @@ These functions work with linear referencing, measures along lines, and trajecto
 | Function | Description |
 | :--- | :--- |
 | [ST_LineInterpolatePoint](Linear-Referencing/ST_LineInterpolatePoint.md) | Returns a point interpolated along a line. First argument must be a LINESTRING. Second argument is a Double between 0 and 1 representing fraction of total linestring length the point has to be loca... |
-| [ST_LineLocatePoint](Linear-Referencing/ST_LineLocatePoint.md) | Returns a double between 0 and 1, representing the location of the closest point on the LineString as a fraction of its total length. The first argument must be a LINESTRING, and the second argumen... |
+| [ST_LineLocatePoint](Linear-Referencing/ST_LineLocatePoint.md) | Returns a double between 0 and 1, representing the location of the closest point on the LineString as a fraction of its total length. The first argument must be a LINESTRING, and the second argument... |
 | [ST_LineSubstring](Linear-Referencing/ST_LineSubstring.md) | Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length. Second and third arguments are Double values between 0 and 1. This only works w... |
 
 ## Spatial Reference System
@@ -303,7 +303,7 @@ These functions produce or operate on bounding boxes and compute extent values.
 
 | Function | Description |
 | :--- | :--- |
-| [ST_BoundingDiagonal](Bounding-Box-Functions/ST_BoundingDiagonal.md) | Returns a linestring spanning minimum and maximum values of each dimension of the given geometry's coordinates as its start and end point respectively. If an empty geometry is provided, the returne... |
+| [ST_BoundingDiagonal](Bounding-Box-Functions/ST_BoundingDiagonal.md) | Returns a linestring spanning minimum and maximum values of each dimension of the given geometry's coordinates as its start and end point respectively. If an empty geometry is provided, the returned... |
 | [ST_Envelope](Bounding-Box-Functions/ST_Envelope.md) | Return the envelope boundary of A |
 | [ST_Expand](Bounding-Box-Functions/ST_Expand.md) | Returns a geometry expanded from the bounding box of the input. The expansion can be specified in two ways: |
 | [ST_XMax](Bounding-Box-Functions/ST_XMax.md) | Returns the maximum X coordinate of a geometry |
@@ -330,4 +330,4 @@ These functions work with spatial indexing systems including Bing Tiles, H3, S2,
 | [ST_BingTileZoomLevel](Spatial-Indexing/ST_BingTileZoomLevel.md) | Returns the zoom level of the Bing Tile identified by the given quadkey. |
 | [ST_GeoHashNeighbor](Spatial-Indexing/ST_GeoHashNeighbor.md) | Returns the neighbor geohash cell in the given direction. Valid directions are: `n`, `ne`, `e`, `se`, `s`, `sw`, `w`, `nw` (case-insensitive). |
 | [ST_GeoHashNeighbors](Spatial-Indexing/ST_GeoHashNeighbors.md) | Returns the 8 neighboring geohash cells of a given geohash string. The result is an array of 8 geohash strings in the order: N, NE, E, SE, S, SW, W, NW. |
-| [ST_S2CellIDs](Spatial-Indexing/ST_S2CellIDs.md) | Cover the geometry with Google S2 Cells, return the corresponding cell IDs with the given level. The level indicates the [size of cells](https://s2geometry.io/resources/s2cell_statistics.html). Wit... |
+| [ST_S2CellIDs](Spatial-Indexing/ST_S2CellIDs.md) | Cover the geometry with Google S2 Cells, return the corresponding cell IDs with the given level. The level indicates the [size of cells](https://s2geometry.io/resources/s2cell_statistics.html). With... |
