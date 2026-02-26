@@ -30,4 +30,3 @@ Introduction: Returns the estimated most appropriate Spatial Reference Identifie
     `ST_BestSRID` is designed to estimate a suitable SRID from a set of approximately 125 EPSG codes and works best for geometries that fit within the UTM zones. It should not be solely relied upon to determine the most accurate SRID, especially for specialized or high-precision spatial requirements.
 
 Format: `ST_BestSRID(geom: Geometry)`
-

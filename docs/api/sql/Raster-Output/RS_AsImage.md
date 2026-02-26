@@ -38,7 +38,7 @@ Output:
 "<img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAECAAAAABjWKqcAAAAIElEQVR42mPgPfGfkYUhhfcBNw+DT1KihS6DqLKztjcATWMFp9rkkJgAAAAASUVORK5CYII=\" width=\"200\" />";
 ```
 
-### Display raster in Jupyter
+## Display raster in Jupyter
 
 Introduction: `SedonaUtils.display_image(df)` is a Python wrapper that renders raster images directly in a Jupyter notebook. It automatically detects raster columns in the DataFrame and applies `RS_AsImage` under the hood, so you don't need to call `RS_AsImage` yourself. You can also pass a DataFrame with pre-applied `RS_AsImage` HTML.
 

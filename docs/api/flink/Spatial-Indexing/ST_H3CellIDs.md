@@ -23,7 +23,7 @@ Introduction: Cover the geometry by H3 cell IDs with the given resolution(level)
 To understand the cell statistics please refer to [H3 Doc](https://h3geo.org/docs/core-library/restable)
 H3 native fill functions doesn't guarantee full coverage on the shapes.
 
-### Cover Polygon
+## Cover Polygon
 
 When fullCover = false, for polygon sedona will use [polygonToCells](https://h3geo.org/docs/api/regions#polygontocells).
 This can't guarantee full coverage but will guarantee no false positive.
@@ -33,7 +33,7 @@ This will lead to redundancy but can guarantee full coverage.
 
 Choose the option according to your use case.
 
-### Cover LineString
+## Cover LineString
 
 For the lineString, sedona will call gridPathCells(https://h3geo.org/docs/api/traversal#gridpathcells) per segment.
 From H3's documentation
