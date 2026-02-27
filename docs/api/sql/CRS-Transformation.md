@@ -279,7 +279,7 @@ SELECT ST_Transform(
 
 ## See Also
 
-- [ST_Transform](Function.md#st_transform) - Function reference
-- [ST_SetSRID](Function.md#st_setsrid) - Set the SRID of a geometry
-- [ST_SRID](Function.md#st_srid) - Get the SRID of a geometry
-- [ST_FlipCoordinates](Function.md#st_flipcoordinates) - Swap X and Y coordinates
+- [ST_Transform](Spatial-Reference-System/ST_Transform.md) - Function reference
+- [ST_SetSRID](Spatial-Reference-System/ST_SetSRID.md) - Set the SRID of a geometry
+- [ST_SRID](Spatial-Reference-System/ST_SRID.md) - Get the SRID of a geometry
+- [ST_FlipCoordinates](Geometry-Editors/ST_FlipCoordinates.md) - Swap X and Y coordinates

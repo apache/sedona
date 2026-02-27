@@ -173,7 +173,7 @@ The `columns` column contains bounding box information on each file in the GeoPa
 ## Write GeoParquet with CRS Metadata
 
 Since v`1.5.1`, Sedona supports writing GeoParquet files with custom GeoParquet spec version and crs.
-The default GeoParquet spec version is `1.0.0` and the default crs is `null`. You can specify the GeoParquet spec version and crs as follows:
+The default GeoParquet spec version is `1.1.0` (since `v1.9.0`) and the default crs is `null`. You can specify the GeoParquet spec version and crs as follows:
 
 ```scala
 val projjson = "{...}" // PROJJSON string for all geometry columns
@@ -198,14 +198,19 @@ df.write.format("geoparquet")
 
 The value of `geoparquet.crs` and `geoparquet.crs.<column_name>` can be one of the following:
 
-* `"null"`: Explicitly setting `crs` field to `null`. This is the default behavior.
+* `"null"`: Explicitly setting `crs` field to `null`. This is the default behavior when geometry SRID is 0.
 * `""` (empty string): Omit the `crs` field. This implies that the CRS is [OGC:CRS84](https://www.opengis.net/def/crs/OGC/1.3/CRS84) for CRS-aware implementations.
 * `"{...}"` (PROJJSON string): The `crs` field will be set as the PROJJSON object representing the Coordinate Reference System (CRS) of the geometry. You can find the PROJJSON string of a specific CRS from here: https://epsg.io/ (click the JSON option at the bottom of the page). You can also customize your PROJJSON string as needed.
 
-Please note that Sedona currently cannot set/get a projjson string to/from a CRS. Its geoparquet reader will ignore the projjson metadata and you will have to set your CRS via [`ST_SetSRID`](../../api/sql/Function.md#st_setsrid) after reading the file.
-Its geoparquet writer will not leverage the SRID field of a geometry so you will have to always set the `geoparquet.crs` option manually when writing the file, if you want to write a meaningful CRS field.
+### Automatic CRS from SRID
 
-Due to the same reason, Sedona geoparquet reader and writer do NOT check the axis order (lon/lat or lat/lon) and assume they are handled by the users themselves when writing / reading the files. You can always use [`ST_FlipCoordinates`](../../api/sql/Function.md#st_flipcoordinates) to swap the axis order of your geometries.
+When no `geoparquet.crs` option is explicitly provided, Sedona will automatically derive the CRS PROJJSON from the SRID of the geometry column. For example, if all geometries in a column have SRID 32632 (set via [`ST_SetSRID`](../../api/sql/Spatial-Reference-System/ST_SetSRID.md)), the writer will automatically produce the PROJJSON for EPSG:32632 in the GeoParquet metadata. For SRID 4326, the CRS field is omitted since this is the GeoParquet default (OGC:CRS84).
+
+* If the SRID is 0 (the default for geometries without an explicit SRID), the `crs` field will be set to `null`.
+* If geometries in a column have mixed SRIDs, the `crs` field defaults to `null`.
+* If an explicit `geoparquet.crs` or `geoparquet.crs.<column_name>` option is provided, it always takes precedence over the SRID-derived CRS.
+
+Sedona geoparquet reader and writer do NOT check the axis order (lon/lat or lat/lon) and assume they are handled by the users themselves when writing / reading the files. You can always use [`ST_FlipCoordinates`](../../api/sql/Geometry-Editors/ST_FlipCoordinates.md) to swap the axis order of your geometries.
 
 ## Save GeoParquet with Covering Metadata
 
@@ -225,6 +230,26 @@ df.write.format("geoparquet")
     .save("/path/to/saved_geoparquet.parquet")
 ```
 
+If you don't set a `geoparquet.covering` option, Sedona will automatically populate covering metadata for GeoParquet `1.1.0`.
+
+For each geometry column, Sedona uses `<geometryColumnName>_bbox` as the covering column:
+
+* If `<geometryColumnName>_bbox` already exists and is a valid covering struct (`xmin`, `ymin`, `xmax`, `ymax`), Sedona reuses it.
+* If `<geometryColumnName>_bbox` does not exist, Sedona generates it automatically while writing.
+
+Explicit `geoparquet.covering` or `geoparquet.covering.<geometryColumnName>` options take precedence over the default behavior.
+
+You can control this default behavior with `geoparquet.covering.mode`:
+
+* `auto` (default): enable automatic covering metadata/column generation for GeoParquet `1.1.0`.
+* `legacy`: disable automatic covering generation.
+
+```scala
+df.write.format("geoparquet")
+  .option("geoparquet.covering.mode", "legacy")
+  .save("/path/to/saved_geoparquet.parquet")
+```
+
 If the DataFrame does not have a covering column, you can construct one using Sedona's SQL functions:
 
 ```scala
@@ -234,7 +259,7 @@ df_bbox.write.format("geoparquet").option("geoparquet.covering.geometry", "bbox"
 
 ## Sort then Save GeoParquet
 
-To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see [ST_GeoHash](../../api/sql/Function.md#st_geohash)) and then save as a GeoParquet file. An example is as follows:
+To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see [ST_GeoHash](../../api/sql/Geometry-Output/ST_GeoHash.md)) and then save as a GeoParquet file. An example is as follows:
 
 ```
 SELECT col1, col2, geom, ST_GeoHash(geom, 5) as geohash

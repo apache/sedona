@@ -21,6 +21,9 @@
 
 Map algebra is a way to perform raster calculations using mathematical expressions. The expression can be a simple arithmetic operation or a complex combination of multiple operations. The expression can be applied to a single raster band or multiple raster bands. The result of the expression is a new raster.
 
+!!!tip
+    To visually inspect the result of a map algebra operation in a Jupyter notebook, use `SedonaUtils.display_image(df)`. It automatically detects raster columns and renders them as images. See [Raster Output docs](Raster-Functions.md#raster-output) for details.
+
 Apache Sedona provides two ways to perform map algebra operations:
 
 1. Using the `RS_MapAlgebra` function.
@@ -139,4 +142,4 @@ FROM raster_table) t
 ### Further Reading
 
 * [Jiffle language summary](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle---language-summary)
-* [Raster operators](Raster-operators.md)
+* [Raster operators](Raster-Functions.md#raster-operators)

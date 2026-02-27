@@ -54,60 +54,31 @@ However, any parameter set through `spark` prefix will be honored by Spark, whic
 
 If you set the same parameter through both `sedona` and `spark.sedona` prefixes, the parameter set through `sedona` prefix will override the parameter set through `spark.sedona` prefix.
 
-## Explanation
+## General Parameters
 
-* sedona.global.index
-	* Use spatial index (currently, only supports in SQL range join and SQL distance join)
-	* Default: true
-	* Possible values: true, false
-* sedona.global.indextype
-	* Spatial index type, only valid when "sedona.global.index" is true
-	* Default: rtree
-	* Possible values: rtree, quadtree
-* sedona.join.autoBroadcastJoinThreshold
-	* Configures the maximum size in bytes for a table that will be broadcast to all worker nodes when performing a join.
-      By setting this value to -1 automatic broadcasting can be disabled.
-	* Default: The default value is the same as spark.sql.autoBroadcastJoinThreshold
-	* Possible values: any integer with a byte suffix i.e. 10MB or 512KB
-* sedona.join.gridtype
-	* Spatial partitioning grid type for join query
-	* Default: kdbtree
-	* Possible values: quadtree, kdbtree
-* spark.sedona.join.knn.includeTieBreakers
-	* KNN join will include all ties in the result, possibly returning more than k results
-	* Default: false
-	* Possible values: true, false
-* sedona.join.indexbuildside **(Advanced users only!)**
-	* The side which Sedona builds spatial indices on
-	* Default: left
-	* Possible values: left, right
-* sedona.join.numpartition **(Advanced users only!)**
-	* Number of partitions for both sides in a join query
-	* Default: -1, which means use the existing partitions
-	* Possible values: any integers
-* sedona.join.spatitionside **(Advanced users only!)**
-	* The dominant side in spatial partitioning stage
-	* Default: left
-	* Possible values: left, right
-* sedona.join.optimizationmode **(Advanced users only!)**
-	* When should Sedona optimize spatial join SQL queries
-	* Default: nonequi
-	* Possible values:
-		* all: Always optimize spatial join queries, even for equi-joins.
-		* none: Disable optimization for spatial joins.
-		* nonequi: Optimize spatial join queries that are not equi-joins.
-* spark.sedona.enableParserExtension
-	* Enable the parser extension to parse GEOMETRY data type in SQL DDL statements
-	* Default: true
-	* Possible values: true, false
+| Parameter | Description | Default | Possible Values |
+| :--- | :--- | :--- | :--- |
+| `sedona.global.index` | Use spatial index (currently, only supports in SQL range join and SQL distance join) | `true` | `true`, `false` |
+| `sedona.global.indextype` | Spatial index type, only valid when `sedona.global.index` is true | `rtree` | `rtree`, `quadtree` |
+| `spark.sedona.enableParserExtension` | Enable the parser extension to parse GEOMETRY data type in SQL DDL statements | `true` | `true`, `false` |
 
-## CRS Transformation
+## Join Parameters
 
-* spark.sedona.crs.geotools
-	* Controls which library is used for CRS transformations in ST_Transform
-	* Default: raster
-	* Possible values:
-		* none: Use proj4sedona for all transformations
-		* raster: Use proj4sedona for vector transformations, GeoTools for raster transformations
-		* all: Use GeoTools for all transformations (legacy behavior)
-	* Since: v1.9.0
+| Parameter | Description | Default | Possible Values |
+| :--- | :--- | :--- | :--- |
+| `sedona.join.autoBroadcastJoinThreshold` | Maximum size in bytes for a table that will be broadcast to all worker nodes when performing a join. Set to -1 to disable automatic broadcasting. | Same as `spark.sql.autoBroadcastJoinThreshold` | Any integer with a byte suffix, e.g. `10MB` or `512KB` |
+| `sedona.join.gridtype` | Spatial partitioning grid type for join query | `kdbtree` | `quadtree`, `kdbtree` |
+| `spark.sedona.join.knn.includeTieBreakers` | KNN join will include all ties in the result, possibly returning more than k results | `false` | `true`, `false` |
+| `sedona.join.indexbuildside` | **(Advanced)** The side which Sedona builds spatial indices on | `left` | `left`, `right` |
+| `sedona.join.numpartition` | **(Advanced)** Number of partitions for both sides in a join query | `-1` (use existing partitions) | Any integer |
+| `sedona.join.spatitionside` | **(Advanced)** The dominant side in spatial partitioning stage | `left` | `left`, `right` |
+| `sedona.join.optimizationmode` | **(Advanced)** When Sedona should optimize spatial join SQL queries | `nonequi` | `all` (always optimize, even equi-joins), `none` (disable optimization), `nonequi` (optimize non-equi-joins only) |
+
+## CRS Transformation Parameters
+
+| Parameter | Description | Default | Possible Values | Since |
+| :--- | :--- | :--- | :--- | :--- |
+| `spark.sedona.crs.geotools` | Controls which library is used for CRS transformations in ST_Transform | `raster` | `none` (proj4sedona for all), `raster` (proj4sedona for vector, GeoTools for raster), `all` (GeoTools for all — legacy) | v1.9.0 |
+| `spark.sedona.crs.url.base` | Base URL of a CRS definition server for resolving authority codes (e.g., EPSG) via HTTP. When set, ST_Transform will consult this URL provider before the built-in definitions. | _(empty — disabled)_ | e.g. `https://crs.example.com` | v1.9.0 |
+| `spark.sedona.crs.url.pathTemplate` | URL path template appended to `spark.sedona.crs.url.base`. Placeholders `{authority}` and `{code}` are replaced at runtime. | `/{authority}/{code}.json` | e.g. `/epsg/{code}.json` | v1.9.0 |
+| `spark.sedona.crs.url.format` | The CRS definition format returned by the URL provider | `projjson` | `projjson`, `proj`, `wkt1` (OGC WKT1), `wkt2` (ISO 19162 WKT2) | v1.9.0 |

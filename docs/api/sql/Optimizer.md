@@ -128,7 +128,7 @@ DistanceJoin pointshape1#12: geometry, pointshape2#33: geometry, 2.0, true
 ```
 
 !!!warning
-	If you use planar euclidean distance functions like `ST_Distance`, `ST_HausdorffDistance` or `ST_FrechetDistance` as the predicate, Sedona doesn't control the distance's unit (degree or meter). It is same with the geometry. If your coordinates are in the longitude and latitude system, the unit of `distance` should be degree instead of meter or mile. To change the geometry's unit, please either transform the coordinate reference system to a meter-based system. See [ST_Transform](Function.md#st_transform). If you don't want to transform your data, please consider using `ST_DistanceSpheroid` or `ST_DistanceSphere`.
+	If you use planar euclidean distance functions like `ST_Distance`, `ST_HausdorffDistance` or `ST_FrechetDistance` as the predicate, Sedona doesn't control the distance's unit (degree or meter). It is same with the geometry. If your coordinates are in the longitude and latitude system, the unit of `distance` should be degree instead of meter or mile. To change the geometry's unit, please either transform the coordinate reference system to a meter-based system. See [ST_Transform](Spatial-Reference-System/ST_Transform.md). If you don't want to transform your data, please consider using `ST_DistanceSpheroid` or `ST_DistanceSphere`.
 
 Spark SQL Example for meter-based geodesic distance `ST_DistanceSpheroid` (works for `ST_DistanceSphere` too):
 
@@ -290,7 +290,7 @@ Please use the following steps:
 
 ### 1. Generate S2 ids for both tables
 
-Use [ST_S2CellIds](Function.md#st_s2cellids) to generate cell IDs. Each geometry may produce one or more IDs.
+Use [ST_S2CellIDs](Spatial-Indexing/ST_S2CellIDs.md) to generate cell IDs. Each geometry may produce one or more IDs.
 
 ```sql
 SELECT id, geom, name, explode(ST_S2CellIDs(geom, 15)) as cellId
@@ -315,7 +315,7 @@ FROM lcs JOIN rcs ON lcs.cellId = rcs.cellId
 
 Due to the nature of S2 Cellid, the equi-join results might have a few false-positives depending on the S2 level you choose. A smaller level indicates bigger cells, less exploded rows, but more false positives.
 
-To ensure the correctness, you can use one of the [Spatial Predicates](Predicate.md) to filter out them. Use this query instead of the query in Step 2.
+To ensure the correctness, you can use one of the [Spatial Predicates](Geometry-Functions.md#predicates) to filter out them. Use this query instead of the query in Step 2.
 
 ```sql
 SELECT lcs.id as lcs_id, lcs.geom as lcs_geom, lcs.name as lcs_name, rcs.id as rcs_id, rcs.geom as rcs_geom, rcs.name as rcs_name
@@ -396,7 +396,7 @@ Sedona supports spatial predicate push-down for GeoParquet files. When spatial f
 to determine if all data in the file will be discarded by the spatial predicate. This optimization could reduce the number of files scanned
 when the queried GeoParquet dataset was partitioned by spatial proximity.
 
-To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see [ST_GeoHash](../../api/sql/Function.md#st_geohash)) and then save as a GeoParquet file. An example is as follows:
+To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see [ST_GeoHash](Geometry-Output/ST_GeoHash.md)) and then save as a GeoParquet file. An example is as follows:
 
 ```
 SELECT col1, col2, geom, ST_GeoHash(geom, 5) as geohash
