@@ -204,13 +204,13 @@ The value of `geoparquet.crs` and `geoparquet.crs.<column_name>` can be one of t
 
 ### Automatic CRS from SRID
 
-When no `geoparquet.crs` option is explicitly provided, Sedona will automatically derive the CRS PROJJSON from the SRID of the geometry column. For example, if all geometries in a column have SRID 32632 (set via [`ST_SetSRID`](../../api/sql/Function.md#st_setsrid)), the writer will automatically produce the PROJJSON for EPSG:32632 in the GeoParquet metadata. For SRID 4326, the CRS field is omitted since this is the GeoParquet default (OGC:CRS84).
+When no `geoparquet.crs` option is explicitly provided, Sedona will automatically derive the CRS PROJJSON from the SRID of the geometry column. For example, if all geometries in a column have SRID 32632 (set via [`ST_SetSRID`](../../api/sql/Spatial-Reference-System/ST_SetSRID.md)), the writer will automatically produce the PROJJSON for EPSG:32632 in the GeoParquet metadata. For SRID 4326, the CRS field is omitted since this is the GeoParquet default (OGC:CRS84).
 
 * If the SRID is 0 (the default for geometries without an explicit SRID), the `crs` field will be set to `null`.
 * If geometries in a column have mixed SRIDs, the `crs` field defaults to `null`.
 * If an explicit `geoparquet.crs` or `geoparquet.crs.<column_name>` option is provided, it always takes precedence over the SRID-derived CRS.
 
-Sedona geoparquet reader and writer do NOT check the axis order (lon/lat or lat/lon) and assume they are handled by the users themselves when writing / reading the files. You can always use [`ST_FlipCoordinates`](../../api/sql/Function.md#st_flipcoordinates) to swap the axis order of your geometries.
+Sedona geoparquet reader and writer do NOT check the axis order (lon/lat or lat/lon) and assume they are handled by the users themselves when writing / reading the files. You can always use [`ST_FlipCoordinates`](../../api/sql/Geometry-Editors/ST_FlipCoordinates.md) to swap the axis order of your geometries.
 
 ## Save GeoParquet with Covering Metadata
 
@@ -259,7 +259,7 @@ df_bbox.write.format("geoparquet").option("geoparquet.covering.geometry", "bbox"
 
 ## Sort then Save GeoParquet
 
-To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see [ST_GeoHash](../../api/sql/Function.md#st_geohash)) and then save as a GeoParquet file. An example is as follows:
+To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see [ST_GeoHash](../../api/sql/Geometry-Output/ST_GeoHash.md)) and then save as a GeoParquet file. An example is as follows:
 
 ```
 SELECT col1, col2, geom, ST_GeoHash(geom, 5) as geohash

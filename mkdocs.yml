@@ -72,16 +72,8 @@ nav:
           - SQL:
               - Quick start: api/sql/Overview.md
               - Vector data:
-                  - Geometry type:
-                      - Constructor: api/sql/Constructor.md
-                      - Function: api/sql/Function.md
-                      - Predicate: api/sql/Predicate.md
-                      - Aggregate function: api/sql/AggregateFunction.md
-                  - Geography type:
-                      - Constructor: api/sql/geography/Constructor.md
-                      - Function: api/sql/geography/Function.md
-                      - Predicate: api/sql/geography/Predicate.md
-                      - Aggregate function: api/sql/geography/AggregateFunction.md
+                  - Geometry Functions: api/sql/Geometry-Functions.md
+                  - Geography Functions: api/sql/geography/Geography-Functions.md
                   - DataFrame Style functions: api/sql/DataFrameAPI.md
                   - Query optimization: api/sql/Optimizer.md
                   - CRS Transformation: api/sql/CRS-Transformation.md
@@ -93,11 +85,9 @@ nav:
                       - SedonaKepler: api/sql/Visualization-SedonaKepler.md
               - Raster data:
                   - Raster loader: api/sql/Raster-loader.md
-                  - Raster aggregates: api/sql/Raster-aggregate-function.md
+                  - Raster Functions: api/sql/Raster-Functions.md
                   - Raster writer: api/sql/Raster-writer.md
-                  - Raster operators: api/sql/Raster-operators.md
                   - Raster map algebra: api/sql/Raster-map-algebra.md
-                  - Raster visualization: api/sql/Raster-visualizer.md
                   - Raster affine transformation: api/sql/Raster-affine-transformation.md
               - Parameter: api/sql/Parameter.md
           - RDD (core):
@@ -127,10 +117,7 @@ nav:
       - API:
           - SQL:
               - Overview (Flink): api/flink/Overview.md
-              - Constructor (Flink): api/flink/Constructor.md
-              - Function (Flink): api/flink/Function.md
-              - Aggregator (Flink): api/flink/Aggregator.md
-              - Predicate (Flink): api/flink/Predicate.md
+              - Geometry Functions: api/flink/Geometry-Functions.md
 
   - SedonaSnow:
       - Home: sedonasnow.md
@@ -141,10 +128,7 @@ nav:
       - API:
           - SQL:
               - Overview (Snowflake): api/snowflake/vector-data/Overview.md
-              - Constructor (Snowflake): api/snowflake/vector-data/Constructor.md
-              - Function (Snowflake): api/snowflake/vector-data/Function.md
-              - Aggregate Function (Snowflake): api/snowflake/vector-data/AggregateFunction.md
-              - Predicate (Snowflake): api/snowflake/vector-data/Predicate.md
+              - Geometry Functions: api/snowflake/vector-data/Geometry-Functions.md
   - SpatialBench: 'https://sedona.apache.org/spatialbench/'
   - Blog: blog/index.md
   - Community:

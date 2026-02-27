@@ -99,7 +99,7 @@ FROM city_tbl
 ```
 
 !!!note
-	SedonaSQL provides lots of functions to create a Geometry column, please read [SedonaSQL API](../../api/snowflake/vector-data/Constructor.md).
+	SedonaSQL provides lots of functions to create a Geometry column, please read [SedonaSQL API](../../api/snowflake/vector-data/Geometry-Functions.md).
 
 ## Check the lon/lat order
 
@@ -154,7 +154,7 @@ FROM city_tbl_geom
 ```
 
 !!!note
-	SedonaSQL provides lots of functions to save the Geometry column, please read [SedonaSQL API](../../api/snowflake/vector-data/Function.md).
+	SedonaSQL provides lots of functions to save the Geometry column, please read [SedonaSQL API](../../api/snowflake/vector-data/Overview.md).
 
 ## Transform the Coordinate Reference System
 
@@ -226,7 +226,7 @@ WHERE SEDONA.ST_Contains(SEDONA.ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0),
 ```
 
 !!!note
-	Read [SedonaSQL API](../../api/snowflake/vector-data/Constructor.md) to learn how to create a Geometry type query window.
+	Read [SedonaSQL API](../../api/snowflake/vector-data/Geometry-Functions.md) to learn how to create a Geometry type query window.
 
 ## KNN query
 
@@ -352,7 +352,7 @@ WHERE SEDONA.ST_FrechetDistance(polygondf.polygonshape, polygondf2.polygonshape)
 Note that only the Hausdorff distance takes in a third `densityFraction` parameter in $(0,1]$ with smaller values giving more accurate results.
 
 !!!warning
-	If you use planar Euclidean distance functions like `SEDONA.ST_Distance`, `SEDONA.ST_HausdorffDistance` or `SEDONA.ST_FrechetDistance` as the predicate, Sedona doesn't control the distance's unit (degree or meter). It is same with the geometry. If your coordinates are in the longitude and latitude system, the unit of `distance` should be degree instead of meter or mile. To change the geometry's unit, please either transform the coordinate reference system to a meter-based system. See [SEDONA.ST_Transform](../../api/snowflake/vector-data/Function.md#st_transform). If you don't want to transform your data, please consider using `SEDONA.ST_DistanceSpheroid` or `SEDONA.ST_DistanceSphere`.
+	If you use planar Euclidean distance functions like `SEDONA.ST_Distance`, `SEDONA.ST_HausdorffDistance` or `SEDONA.ST_FrechetDistance` as the predicate, Sedona doesn't control the distance's unit (degree or meter). It is same with the geometry. If your coordinates are in the longitude and latitude system, the unit of `distance` should be degree instead of meter or mile. To change the geometry's unit, please either transform the coordinate reference system to a meter-based system. See [SEDONA.ST_Transform](../../api/snowflake/vector-data/Spatial-Reference-System/ST_Transform.md). If you don't want to transform your data, please consider using `SEDONA.ST_DistanceSpheroid` or `SEDONA.ST_DistanceSphere`.
 
 For instance, the following returns roughly 78.45 kilometers, since the geometries are assumed to be in degrees of longitude and latitude, even if no CRS was explicitly set.
 
@@ -396,7 +396,7 @@ Please use the following steps:
 
 ### 1. Generate S2 ids for both tables
 
-Use [SEDONA.ST_S2CellIds](../../api/snowflake/vector-data/Function.md#st_s2cellids) to generate cell IDs. Each geometry may produce one or more IDs.
+Use [SEDONA.ST_S2CellIds](../../api/snowflake/vector-data/Spatial-Indexing/ST_S2CellIDs.md) to generate cell IDs. Each geometry may produce one or more IDs.
 
 ```sql
 SELECT * FROM lefts, TABLE(FLATTEN(SEDONA.ST_S2CellIDs(lefts.geom, 15))) s1
@@ -419,7 +419,7 @@ FROM lcs JOIN rcs ON lcs.cellId = rcs.cellId
 
 Due to the nature of S2 Cellid, the equi-join results might have a few false-positives depending on the S2 level you choose. A smaller level indicates bigger cells, less exploded rows, but more false positives.
 
-To ensure the correctness, you can use one of the [Spatial Predicates](../../api/snowflake/vector-data/Predicate.md) to filter out them. Use this query instead of the query in Step 2.
+To ensure the correctness, you can use one of the [Spatial Predicates](../../api/snowflake/vector-data/Geometry-Functions.md#predicates) to filter out them. Use this query instead of the query in Step 2.
 
 ```sql
 SELECT lcs.id AS lcs_id, lcs.geom AS lcs_geom, lcs.name AS lcs_name, rcs.id AS rcs_id, rcs.geom AS rcs_geom, rcs.name AS rcs_name
@@ -525,16 +525,16 @@ FROM lefts
 
 Sedona implements over 200 geospatial vector and raster functions, which are much more than what Snowflake native functions offer. For example:
 
-* [SEDONA.ST_3DDistance](../../api/snowflake/vector-data/Function.md#st_3ddistance)
-* [SEDONA.ST_Force2D](../../api/snowflake/vector-data/Function.md#st_force_2d)
-* [SEDONA.ST_GeometryN](../../api/snowflake/vector-data/Function.md#st_geometryn)
-* [SEDONA.ST_MakeValid](../../api/snowflake/vector-data/Function.md#st_makevalid)
-* [SEDONA.ST_Multi](../../api/snowflake/vector-data/Function.md#st_multi)
-* [SEDONA.ST_NumGeometries](../../api/snowflake/vector-data/Function.md#st_numgeometries)
-* [SEDONA.ST_ReducePrecision](../../api/snowflake/vector-data/Function.md#st_reduceprecision)
-* [SEDONA.ST_SubdivideExplode](../../api/snowflake/vector-data/Function.md#st_subdivideexplode)
+* [SEDONA.ST_3DDistance](../../api/snowflake/vector-data/Measurement-Functions/ST_3DDistance.md)
+* [SEDONA.ST_Force2D](../../api/snowflake/vector-data/Geometry-Editors/ST_Force_2D.md)
+* [SEDONA.ST_GeometryN](../../api/snowflake/vector-data/Geometry-Accessors/ST_GeometryN.md)
+* [SEDONA.ST_MakeValid](../../api/snowflake/vector-data/Geometry-Validation/ST_MakeValid.md)
+* [SEDONA.ST_Multi](../../api/snowflake/vector-data/Geometry-Editors/ST_Multi.md)
+* [SEDONA.ST_NumGeometries](../../api/snowflake/vector-data/Geometry-Accessors/ST_NumGeometries.md)
+* [SEDONA.ST_ReducePrecision](../../api/snowflake/vector-data/Geometry-Processing/ST_ReducePrecision.md)
+* [SEDONA.ST_SubdivideExplode](../../api/snowflake/vector-data/Overlay-Functions/ST_SubDivideExplode.md)
 
-You can click the links above to learn more about these functions. More functions can be found in [SedonaSQL API](../../api/snowflake/vector-data/Function.md).
+You can click the links above to learn more about these functions. More functions can be found in [SedonaSQL API](../../api/snowflake/vector-data/Overview.md).
 
 ## Interoperate with Snowflake native functions
 

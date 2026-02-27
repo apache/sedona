@@ -261,7 +261,7 @@ Sedona has a function to get the metadata for the raster, and also a function to
 
 ### Metadata
 
-This function will return an array of metadata, it will have all the necessary information about the raster, Please refer to [RS_MetaData](../api/sql/Raster-operators.md#rs_metadata).
+This function will return an array of metadata, it will have all the necessary information about the raster, Please refer to [RS_MetaData](../api/sql/Raster-Operators/RS_MetaData.md).
 
 ```sql
 SELECT RS_MetaData(rast) FROM rasterDf
@@ -277,7 +277,7 @@ The first two elements of the array represent the real-world geographic coordina
 
 ### World File
 
-There are two kinds of georeferences, GDAL and ESRI seen in [world files](https://en.wikipedia.org/wiki/World_file). For more information please refer to [RS_GeoReference](../api/sql/Raster-operators.md#rs_georeference).
+There are two kinds of georeferences, GDAL and ESRI seen in [world files](https://en.wikipedia.org/wiki/World_file). For more information please refer to [RS_GeoReference](../api/sql/Raster-Accessors/RS_GeoReference.md).
 
 ```sql
 SELECT RS_GeoReference(rast, "ESRI") FROM rasterDf
@@ -301,7 +301,7 @@ World files are used to georeference and geolocate images by establishing an ima
 Since `v1.5.0` there have been many additions to manipulate raster data, we will show you a few example queries.
 
 !!!note
-    Read [SedonaSQL Raster operators](../api/sql/Raster-operators.md) to learn how you can use Sedona for raster manipulation.
+    Read [SedonaSQL Raster operators](../api/sql/Raster-Functions.md#raster-operators) to learn how you can use Sedona for raster manipulation.
 
 ### Coordinate translation
 
@@ -309,7 +309,7 @@ Sedona allows you to translate coordinates as per your needs. It can translate p
 
 #### PixelAsPoint
 
-Use [RS_PixelAsPoint](../api/sql/Raster-operators.md#rs_pixelaspoint) to translate pixel coordinates to world location.
+Use [RS_PixelAsPoint](../api/sql/Pixel-Functions/RS_PixelAsPoint.md) to translate pixel coordinates to world location.
 
 ```sql
 SELECT RS_PixelAsPoint(rast, 450, 400) FROM rasterDf
@@ -323,7 +323,7 @@ POINT (-13063342 3992403.75)
 
 #### World to Raster Coordinate
 
-Use [RS_WorldToRasterCoord](../api/sql/Raster-operators.md#rs_worldtorastercoord) to translate world location to pixel coordinates. To just get X coordinate use [RS_WorldToRasterCoordX](../api/sql/Raster-operators.md#rs_worldtorastercoordx) and for just Y coordinate use [RS_WorldToRasterCoordY](../api/sql/Raster-operators.md#rs_worldtorastercoordy).
+Use [RS_WorldToRasterCoord](../api/sql/Raster-Accessors/RS_WorldToRasterCoord.md) to translate world location to pixel coordinates. To just get X coordinate use [RS_WorldToRasterCoordX](../api/sql/Raster-Accessors/RS_WorldToRasterCoordX.md) and for just Y coordinate use [RS_WorldToRasterCoordY](../api/sql/Raster-Accessors/RS_WorldToRasterCoordY.md).
 
 ```sql
 SELECT RS_WorldToRasterCoord(rast, -1.3063342E7, 3992403.75)
@@ -337,7 +337,7 @@ POINT (450 400)
 
 ### Pixel Manipulation
 
-Use [RS_Values](../api/sql/Raster-operators.md#rs_values) to fetch values for a specified array of Point Geometries. The coordinates in the point geometry are indicative of real-world location.
+Use [RS_Values](../api/sql/Raster-Operators/RS_Values.md) to fetch values for a specified array of Point Geometries. The coordinates in the point geometry are indicative of real-world location.
 
 ```sql
 SELECT RS_Values(rast, Array(ST_Point(-13063342, 3992403.75), ST_Point(-13074192, 3996020)))
@@ -349,7 +349,7 @@ Output:
 [132.0, 148.0]
 ```
 
-To change values over a grid or area defined by geometry, we will use [RS_SetValues](../api/sql/Raster-operators.md#rs_setvalues).
+To change values over a grid or area defined by geometry, we will use [RS_SetValues](../api/sql/Raster-Operators/RS_SetValues.md).
 
 ```sql
 SELECT RS_SetValues(
@@ -362,7 +362,7 @@ Follow the links to get more information on how to use the functions appropriate
 
 ### Band Manipulation
 
-Sedona provides APIs to select specific bands from a raster image and create a new raster. For example, to select 2 bands from a raster, you can use the [RS_Band](../api/sql/Raster-operators.md#rs_band) API to retrieve the desired multi-band raster.
+Sedona provides APIs to select specific bands from a raster image and create a new raster. For example, to select 2 bands from a raster, you can use the [RS_Band](../api/sql/Raster-Band-Accessors/RS_Band.md) API to retrieve the desired multi-band raster.
 
 Let's use a [multi-band raster](https://github.com/apache/sedona/blob/2a0b36989aa895c0781f9a10c907dd726506d0b7/spark/common/src/test/resources/raster_geotiff_color/FAA_UTM18N_NAD83.tif) for this example. The process of loading and converting it to raster type is the same.
 
@@ -370,7 +370,7 @@ Let's use a [multi-band raster](https://github.com/apache/sedona/blob/2a0b36989a
 SELECT RS_Band(colorRaster, Array(1, 2))
 ```
 
-Let's say you have many single-banded rasters and want to add a band to the raster to perform [map algebra operations](#execute-map-algebra-operations). You can do so using [RS_AddBand](../api/sql/Raster-operators.md#rs_addband) Sedona function.
+Let's say you have many single-banded rasters and want to add a band to the raster to perform [map algebra operations](#execute-map-algebra-operations). You can do so using [RS_AddBand](../api/sql/Raster-Operators/RS_AddBand.md) Sedona function.
 
 ```sql
 SELECT RS_AddBand(raster1, raster2, 1, 2)
@@ -380,7 +380,7 @@ This will result in `raster1` having `raster2`'s specified band.
 
 ### Resample raster data
 
-Sedona allows you to resample raster data using different interpolation methods like the nearest neighbor, bilinear, and bicubic to change the cell size or align raster grids, using [RS_Resample](../api/sql/Raster-operators.md#rs_resample).
+Sedona allows you to resample raster data using different interpolation methods like the nearest neighbor, bilinear, and bicubic to change the cell size or align raster grids, using [RS_Resample](../api/sql/Raster-Operators/RS_Resample.md).
 
 ```sql
 SELECT RS_Resample(rast, 50, -50, -13063342, 3992403.75, true, "bicubic")
@@ -429,7 +429,7 @@ The image created is as below for the vector:
 
 ### Spatial range query
 
-Sedona provides raster predicates to do a range query using a geometry window, for example, let's use [RS_Intersects](../api/sql/Raster-operators.md#rs_intersects).
+Sedona provides raster predicates to do a range query using a geometry window, for example, let's use [RS_Intersects](../api/sql/Raster-Predicates/RS_Intersects.md).
 
 ```sql
 SELECT rast FROM rasterDf WHERE RS_Intersect(rast, ST_GeomFromWKT('POLYGON((0 0, 0 10, 10 10, 10 0, 0 0))'))
@@ -446,7 +446,7 @@ SELECT r.rast, g.geom FROM rasterDf r, geomDf g WHERE RS_Interest(r.rast, g.geom
 !!!note
     These range and join queries will filter rasters using the provided geometric boundary and the spatial boundary of the raster.
 
-    Sedona offers more raster predicates to do spatial range queries and spatial join queries. Please refer to [raster predicates docs](../api/sql/Raster-operators.md#raster-predicates).
+    Sedona offers more raster predicates to do spatial range queries and spatial join queries. Please refer to [raster predicates docs](../api/sql/Raster-Functions.md#raster-predicates).
 
 ## Visualize raster images
 
@@ -454,7 +454,7 @@ Sedona provides APIs to visualize raster data in an image form.
 
 ### Base64 String
 
-The [RS_AsBase64](../api/sql/Raster-visualizer.md#rs_asbase64) encodes the raster data as a Base64 string and can be visualized using [online decoder](https://base64-viewer.onrender.com/).
+The [RS_AsBase64](../api/sql/Raster-Output/RS_AsBase64.md) encodes the raster data as a Base64 string and can be visualized using [online decoder](https://base64-viewer.onrender.com/).
 
 ```sql
 SELECT RS_AsBase64(rast) FROM rasterDf
@@ -462,7 +462,7 @@ SELECT RS_AsBase64(rast) FROM rasterDf
 
 ### HTML Image
 
-The [RS_AsImage](../api/sql/Raster-visualizer.md#rs_asimage) returns an HTML image tag, that can be visualized using an HTML viewer or in Jupyter Notebook. For more information please click on the link.
+The [RS_AsImage](../api/sql/Raster-Output/RS_AsImage.md) returns an HTML image tag, that can be visualized using an HTML viewer or in Jupyter Notebook. For more information please click on the link.
 
 ```sql
 SELECT RS_AsImage(rast, 500) FROM rasterDf
@@ -481,7 +481,7 @@ The output looks like this:
     SedonaUtils.display_image(rasterDf)
     ```
 
-    See [Display raster in Jupyter](../api/sql/Raster-visualizer.md#display-raster-in-jupyter) for details.
+    See [Display raster in Jupyter](../api/sql/Raster-Functions.md#raster-output) for details.
 
 ### 2-D Matrix
 
@@ -499,7 +499,7 @@ Output will be as follows:
 | 3   4   5   6|
 ```
 
-Please refer to [Raster visualizer docs](../api/sql/Raster-visualizer.md) to learn how to make the most of the visualizing APIs.
+Please refer to [Raster visualizer docs](../api/sql/Raster-Functions.md#raster-output) to learn how to make the most of the visualizing APIs.
 
 ## Save to permanent storage
 
