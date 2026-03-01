@@ -384,8 +384,7 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
   }
 
   @Test
-  public void testWkt2RoundTrip_LambertAzimuthalEqualArea_Spherical_2163()
-      throws FactoryException {
+  public void testWkt2RoundTrip_LambertAzimuthalEqualArea_Spherical_2163() throws FactoryException {
     assertWkt2RoundTrip(2163);
   }
 
@@ -524,9 +523,9 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
 
   /**
    * Assert a full PROJJSON format round trip: EPSG → RS_CRS("projjson") → RS_SetCRS →
-   * RS_CRS("projjson") → RS_SetCRS → RS_CRS("projjson"). The first export from EPSG may carry
-   * extra metadata (e.g., datum names), so we verify idempotency: the second and third exports
-   * (from PROJJSON string input) must be identical.
+   * RS_CRS("projjson") → RS_SetCRS → RS_CRS("projjson"). The first export from EPSG may carry extra
+   * metadata (e.g., datum names), so we verify idempotency: the second and third exports (from
+   * PROJJSON string input) must be identical.
    */
   private void assertProjJsonRoundTrip(int epsg) throws FactoryException {
     GridCoverage2D baseRaster = RasterConstructors.makeEmptyRaster(1, 4, 4, 0, 0, 1);
@@ -547,9 +546,7 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
     assertNotNull("EPSG:" + epsg + " third export to PROJJSON should not be null", export3);
 
     assertEquals(
-        "EPSG:"
-            + epsg
-            + " PROJJSON string should be stable after round trip (export2 == export3)",
+        "EPSG:" + epsg + " PROJJSON string should be stable after round trip (export2 == export3)",
         export2,
         export3);
   }
@@ -584,8 +581,8 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
   }
 
   /**
-   * Assert that WKT2 export succeeds but re-import fails for certain CRS types that proj4sedona
-   * can serialize to WKT2 but cannot re-parse.
+   * Assert that WKT2 export succeeds but re-import fails for certain CRS types that proj4sedona can
+   * serialize to WKT2 but cannot re-parse.
    */
   private void assertWkt2ImportFails(int epsg) throws FactoryException {
     GridCoverage2D baseRaster = RasterConstructors.makeEmptyRaster(1, 4, 4, 0, 0, 1);
@@ -649,8 +646,8 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
   }
 
   /**
-   * Assert a full WKT1 format round trip: EPSG → RS_CRS("wkt1") → RS_SetCRS → RS_CRS("wkt1").
-   * WKT1 includes AUTHORITY["EPSG","xxxx"] so SRID is always preserved.
+   * Assert a full WKT1 format round trip: EPSG → RS_CRS("wkt1") → RS_SetCRS → RS_CRS("wkt1"). WKT1
+   * includes AUTHORITY["EPSG","xxxx"] so SRID is always preserved.
    */
   private void assertWkt1RoundTrip(int epsg) throws FactoryException {
     GridCoverage2D baseRaster = RasterConstructors.makeEmptyRaster(1, 4, 4, 0, 0, 1);
@@ -682,7 +679,8 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
 
     // WKT1 always preserves SRID via AUTHORITY clause
     int sridAfter = RasterAccessors.srid(raster2);
-    assertEquals("EPSG:" + epsg + " SRID should be preserved after WKT1 round trip", epsg, sridAfter);
+    assertEquals(
+        "EPSG:" + epsg + " SRID should be preserved after WKT1 round trip", epsg, sridAfter);
   }
 
   // ---------------------------------------------------------------------------
@@ -690,8 +688,8 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
   // ---------------------------------------------------------------------------
 
   /**
-   * Extract PROJECTION name from WKT1, or "Geographic" for GEOGCS without PROJECTION.
-   * Handles both PROJECTION["name"] and PROJECTION["name", AUTHORITY[...]].
+   * Extract PROJECTION name from WKT1, or "Geographic" for GEOGCS without PROJECTION. Handles both
+   * PROJECTION["name"] and PROJECTION["name", AUTHORITY[...]].
    */
   private String extractWkt1ProjectionName(String wkt1) {
     Matcher m = WKT1_PROJECTION_PATTERN.matcher(wkt1);
@@ -702,13 +700,15 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
     if (wkt1.startsWith("GEOGCS[")) {
       return "Geographic";
     }
-    fail("WKT1 should contain PROJECTION or be GEOGCS: " + wkt1.substring(0, Math.min(80, wkt1.length())));
+    fail(
+        "WKT1 should contain PROJECTION or be GEOGCS: "
+            + wkt1.substring(0, Math.min(80, wkt1.length())));
     return null;
   }
 
   /**
-   * Extract the top-level AUTHORITY EPSG code from WKT1. The top-level AUTHORITY is the last one
-   * in the string (at the outermost nesting level).
+   * Extract the top-level AUTHORITY EPSG code from WKT1. The top-level AUTHORITY is the last one in
+   * the string (at the outermost nesting level).
    */
   private String extractTopLevelAuthority(String wkt1) {
     // Find the last AUTHORITY["EPSG","xxxx"] — that's the top-level one
@@ -720,5 +720,4 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
     assertNotNull("WKT1 should contain AUTHORITY[\"EPSG\",\"xxxx\"]", lastCode);
     return lastCode;
   }
-
 }
