@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.media.jai.Interpolation;
@@ -42,10 +43,12 @@ import org.geotools.api.coverage.grid.GridCoverage;
 import org.geotools.api.coverage.grid.GridGeometry;
 import org.geotools.api.metadata.spatial.PixelOrientation;
 import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.crs.CRSFactory;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.api.referencing.datum.PixelInCell;
 import org.geotools.api.referencing.operation.MathTransform;
 import org.geotools.api.referencing.operation.MathTransform2D;
+import org.geotools.api.referencing.operation.MathTransformFactory;
 import org.geotools.api.referencing.operation.OperationMethod;
 import org.geotools.api.referencing.operation.Projection;
 import org.geotools.api.referencing.operation.TransformException;
@@ -62,6 +65,7 @@ import org.geotools.referencing.ReferencingFactoryFinder;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.DefaultMathTransformFactory;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.geotools.util.factory.Hints;
 import org.locationtech.jts.index.strtree.STRtree;
 
 public class RasterEditors {
@@ -154,14 +158,17 @@ public class RasterEditors {
       // Not an authority code, continue
     }
 
-    // Step 2: Try GeoTools CRS.parseWKT (handles WKT1)
+    // Step 2: Try GeoTools WKT parsing with longitude-first axis order (handles WKT1)
     try {
-      return CRS.parseWKT(crsString);
+      Hints hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE);
+      CRSFactory crsFactory = ReferencingFactoryFinder.getCRSFactory(hints);
+      return crsFactory.createFromWKT(crsString);
     } catch (FactoryException e) {
       // Not WKT1, continue
     }
 
     // Step 3: Use proj4sedona (handles WKT2, PROJ, PROJJSON)
+    Exception lastError = null;
     try {
       Proj proj = new Proj(crsString);
 
@@ -183,9 +190,12 @@ public class RasterEditors {
       // 3. Strip unexpected parameters iteratively
       String wkt1 = proj.toWkt1();
       if (wkt1 != null && !wkt1.isEmpty()) {
+        Hints hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE);
+        CRSFactory crsFactory = ReferencingFactoryFinder.getCRSFactory(hints);
+
         // Strategy 1: Try raw WKT1 directly
         try {
-          return CRS.parseWKT(wkt1);
+          return crsFactory.createFromWKT(wkt1);
         } catch (FactoryException ex) {
           // Raw WKT1 failed, continue with normalization
         }
@@ -199,7 +209,7 @@ public class RasterEditors {
         String currentWkt = normalizedWkt;
         for (int attempt = 0; attempt < 5; attempt++) {
           try {
-            return CRS.parseWKT(currentWkt);
+            return crsFactory.createFromWKT(currentWkt);
           } catch (FactoryException ex) {
             String msg = ex.getMessage();
             if (msg != null) {
@@ -209,18 +219,24 @@ public class RasterEditors {
                 continue;
               }
             }
+            lastError = ex;
             break; // Different kind of error, give up
           }
         }
       }
-    } catch (Exception e) {
-      // proj4sedona could not parse it either
+    } catch (RuntimeException e) {
+      lastError = e;
     }
 
-    throw new IllegalArgumentException(
-        "Cannot parse CRS string. Supported formats: EPSG code (e.g. 'EPSG:4326'), "
-            + "WKT1, WKT2, PROJ string, PROJJSON. Input: "
-            + crsString);
+    IllegalArgumentException error =
+        new IllegalArgumentException(
+            "Cannot parse CRS string. Supported formats: EPSG code (e.g. 'EPSG:4326'), "
+                + "WKT1, WKT2, PROJ string, PROJJSON. Input: "
+                + crsString);
+    if (lastError != null) {
+      error.addSuppressed(lastError);
+    }
+    throw error;
   }
 
   // Fallback map for proj4sedona projection names that have no equivalent in GeoTools'
@@ -243,7 +259,8 @@ public class RasterEditors {
   }
 
   // Lazy-initialized caches built once from GeoTools' registered OperationMethod objects.
-  // aliasCache: exact alias string -> canonical OGC name
+  // aliasCache: exact alias string -> canonical OGC name (ConcurrentHashMap for thread-safe
+  // writes from Tier 2 normalized matching)
   // normalizedCache: normalized form (lowercase, no spaces/underscores) -> set of canonical names
   private static volatile Map<String, String> aliasCache;
   private static volatile Map<String, Set<String>> normalizedCache;
@@ -341,11 +358,16 @@ public class RasterEditors {
       if (aliasCache != null) {
         return;
       }
-      DefaultMathTransformFactory factory =
-          (DefaultMathTransformFactory) ReferencingFactoryFinder.getMathTransformFactory(null);
+      MathTransformFactory mtf = ReferencingFactoryFinder.getMathTransformFactory(null);
+      DefaultMathTransformFactory factory;
+      if (mtf instanceof DefaultMathTransformFactory) {
+        factory = (DefaultMathTransformFactory) mtf;
+      } else {
+        factory = new DefaultMathTransformFactory();
+      }
       Set<OperationMethod> methods = factory.getAvailableMethods(Projection.class);
 
-      Map<String, String> aliases = new HashMap<>();
+      Map<String, String> aliases = new ConcurrentHashMap<>();
       Map<String, Set<String>> normalized = new HashMap<>();
 
       for (OperationMethod method : methods) {

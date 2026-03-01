@@ -29,7 +29,7 @@ import org.junit.Test;
 /**
  * Round-trip compliance tests for RS_SetCRS and RS_CRS across representative EPSG codes.
  *
- * <p>For each EPSG code and each format (PROJ, PROJJSON, WKT1), this test:
+ * <p>For each EPSG code and each format (PROJ, PROJJSON, WKT1, WKT2), this test:
  *
  * <ol>
  *   <li>Creates a raster with that CRS via RS_SetCRS("EPSG:xxxx")

@@ -19,7 +19,7 @@
 
 # RS_SRID
 
-Introduction: Returns the spatial reference system identifier (SRID) of the raster geometry.
+Introduction: Returns the spatial reference system identifier (SRID) of the raster geometry. Returns 0 if the raster has no CRS defined or if the CRS is a custom (non-EPSG) coordinate reference system. To retrieve the full CRS definition for custom CRS, use [RS_CRS](RS_CRS.md).
 
 Format: `RS_SRID (raster: Raster)`
 

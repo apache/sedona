@@ -500,9 +500,13 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val wkt1 =
         "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433]]"
       val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
-      val result =
+      // WKT1 without AUTHORITY clause: RS_SRID returns 0, but RS_CRS still works
+      val srid =
         df.selectExpr(s"RS_SRID(RS_SetCRS(RS_FromGeoTiff(content), '${wkt1}'))").first().getInt(0)
-      assert(result == 4326)
+      assert(srid == 0)
+      val crs =
+        df.selectExpr(s"RS_CRS(RS_SetCRS(RS_FromGeoTiff(content), '${wkt1}'), 'wkt1')").first().getString(0)
+      assert(crs != null && crs.contains("WGS"))
     }
 
     it("Passed RS_CRS should handle null values") {

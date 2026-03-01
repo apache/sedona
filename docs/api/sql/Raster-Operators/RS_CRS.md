@@ -37,7 +37,7 @@ Since: `v1.9.0`
 
 | Format | Description |
 | :--- | :--- |
-| `'projjson'` | PROJJSON format (default). Modern, lossless, machine-readable JSON representation. |
+| `'projjson'` | PROJJSON format (default). Modern, machine-readable JSON representation. |
 | `'wkt2'` | Well-Known Text 2 (ISO 19162). Modern standard CRS representation. |
 | `'wkt1'` | Well-Known Text 1 (OGC 01-009). Legacy format, widely supported. |
 | `'proj'` | PROJ string format. Compact, human-readable representation. |

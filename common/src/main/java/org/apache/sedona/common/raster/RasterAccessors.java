@@ -381,6 +381,9 @@ public class RasterAccessors {
    * @return The CRS definition string in the requested format, or null if no CRS is set.
    */
   public static String crs(GridCoverage2D raster, String format) {
+    if (format == null || format.trim().isEmpty()) {
+      format = "projjson";
+    }
     CoordinateReferenceSystem crsDef = raster.getCoordinateReferenceSystem();
     if (crsDef instanceof DefaultEngineeringCRS) {
       if (((DefaultEngineeringCRS) crsDef).isWildcard()) {
