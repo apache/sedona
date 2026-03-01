@@ -470,4 +470,72 @@ public class RasterAccessorsTest extends RasterTestBase {
     assertEquals(heightInPixel, metadata[11], 1e-9);
     assertEquals(12, metadata.length);
   }
+
+  @Test
+  public void testCrsDefaultFormat() throws FactoryException {
+    // multiBandRaster has WGS84 CRS
+    String crs = RasterAccessors.crs(multiBandRaster);
+    assertNotNull(crs);
+    // Default format is PROJJSON - should be valid JSON containing CRS info
+    assertTrue(crs.contains("\"type\""));
+    assertTrue(crs.contains("WGS 84") || crs.contains("WGS84"));
+  }
+
+  @Test
+  public void testCrsWkt1Format() throws FactoryException {
+    String crs = RasterAccessors.crs(multiBandRaster, "wkt1");
+    assertNotNull(crs);
+    assertTrue(crs.contains("GEOGCS"));
+  }
+
+  @Test
+  public void testCrsWkt2Format() throws FactoryException {
+    String crs = RasterAccessors.crs(multiBandRaster, "wkt2");
+    assertNotNull(crs);
+    // WKT2 uses GEOGCRS or GEODCRS
+    assertTrue(crs.contains("GEOGCRS") || crs.contains("GEODCRS") || crs.contains("GeographicCRS"));
+  }
+
+  @Test
+  public void testCrsProjFormat() throws FactoryException {
+    String crs = RasterAccessors.crs(multiBandRaster, "proj");
+    assertNotNull(crs);
+    assertTrue(crs.contains("+proj="));
+  }
+
+  @Test
+  public void testCrsNullForNoCrs() throws FactoryException {
+    // oneBandRaster has no CRS (SRID=0)
+    String crs = RasterAccessors.crs(oneBandRaster);
+    assertNull(crs);
+  }
+
+  @Test
+  public void testCrsWithSetCrsRoundTrip() throws FactoryException {
+    // Set a CRS using a PROJ string, then read it back in various formats
+    String proj = "+proj=utm +zone=10 +datum=WGS84 +units=m +no_defs";
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 10, 10, 0, 0, 1);
+    GridCoverage2D withCrs = RasterEditors.setCrs(raster, proj);
+
+    // Should be able to retrieve CRS in all formats
+    String projjson = RasterAccessors.crs(withCrs, "projjson");
+    assertNotNull(projjson);
+    assertTrue(projjson.contains("\"type\""));
+
+    String wkt1 = RasterAccessors.crs(withCrs, "wkt1");
+    assertNotNull(wkt1);
+    assertTrue(wkt1.contains("PROJCS") || wkt1.contains("GEOGCS"));
+
+    String wkt2 = RasterAccessors.crs(withCrs, "wkt2");
+    assertNotNull(wkt2);
+
+    String projStr = RasterAccessors.crs(withCrs, "proj");
+    assertNotNull(projStr);
+    assertTrue(projStr.contains("+proj="));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testCrsInvalidFormat() throws FactoryException {
+    RasterAccessors.crs(multiBandRaster, "invalid_format");
+  }
 }

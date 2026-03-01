@@ -1,0 +1,95 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ -->
+
+# RS_CRS
+
+Introduction: Returns the coordinate reference system (CRS) of a raster as a string in the specified format. If no format is specified, the CRS is returned in PROJJSON format. Returns null if the raster has no CRS defined.
+
+Format:
+
+```
+RS_CRS (raster: Raster)
+```
+
+```
+RS_CRS (raster: Raster, format: String)
+```
+
+Since: `v1.9.0`
+
+## Supported output formats
+
+| Format | Description |
+| :--- | :--- |
+| `'projjson'` | PROJJSON format (default). Modern, lossless, machine-readable JSON representation. |
+| `'wkt2'` | Well-Known Text 2 (ISO 19162). Modern standard CRS representation. |
+| `'wkt1'` | Well-Known Text 1 (OGC 01-009). Legacy format, widely supported. |
+| `'proj'` | PROJ string format. Compact, human-readable representation. |
+
+## SQL Examples
+
+Getting CRS in default PROJJSON format:
+
+```sql
+SELECT RS_CRS(raster) FROM raster_table
+```
+
+Output:
+
+```json
+{
+  "$schema": "https://proj.org/schemas/v0.7/projjson.schema.json",
+  "type": "GeographicCRS",
+  "name": "WGS 84",
+  ...
+}
+```
+
+Getting CRS in WKT1 format:
+
+```sql
+SELECT RS_CRS(raster, 'wkt1') FROM raster_table
+```
+
+Output:
+
+```
+GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]
+```
+
+Getting CRS in PROJ string format:
+
+```sql
+SELECT RS_CRS(raster, 'proj') FROM raster_table
+```
+
+Output:
+
+```
++proj=longlat +datum=WGS84 +no_defs +type=crs
+```
+
+Getting CRS in WKT2 format:
+
+```sql
+SELECT RS_CRS(raster, 'wkt2') FROM raster_table
+```
+
+!!!note
+    Returns null if the raster has no CRS defined (e.g., when RS_SRID returns 0).

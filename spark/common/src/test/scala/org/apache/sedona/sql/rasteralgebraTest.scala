@@ -472,6 +472,71 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(metadata(9) == metadata_4326(9))
     }
 
+    it("Passed RS_SetCRS should handle null values") {
+      val result = sparkSession.sql("select RS_SetCRS(null, null)").first().get(0)
+      assert(result == null)
+    }
+
+    it("Passed RS_SetCRS with EPSG code string") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result = df
+        .selectExpr("RS_SRID(RS_SetCRS(RS_FromGeoTiff(content), 'EPSG:4326'))")
+        .first()
+        .getInt(0)
+      assert(result == 4326)
+    }
+
+    it("Passed RS_SetCRS with PROJ string") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result = df
+        .selectExpr(
+          "RS_SRID(RS_SetCRS(RS_FromGeoTiff(content), '+proj=longlat +datum=WGS84 +no_defs'))")
+        .first()
+        .getInt(0)
+      assert(result == 4326)
+    }
+
+    it("Passed RS_SetCRS with WKT1 string") {
+      val wkt1 =
+        "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433]]"
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result =
+        df.selectExpr(s"RS_SRID(RS_SetCRS(RS_FromGeoTiff(content), '${wkt1}'))").first().getInt(0)
+      assert(result == 4326)
+    }
+
+    it("Passed RS_CRS should handle null values") {
+      val result = sparkSession.sql("select RS_CRS(null)").first().get(0)
+      assert(result == null)
+    }
+
+    it("Passed RS_CRS returns PROJJSON by default") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result = df.selectExpr("RS_CRS(RS_FromGeoTiff(content))").first().getString(0)
+      assert(result != null)
+      assert(result.contains("\"type\""))
+    }
+
+    it("Passed RS_CRS with wkt1 format") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result = df.selectExpr("RS_CRS(RS_FromGeoTiff(content), 'wkt1')").first().getString(0)
+      assert(result != null)
+      assert(result.contains("PROJCS"))
+    }
+
+    it("Passed RS_CRS with proj format") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result = df.selectExpr("RS_CRS(RS_FromGeoTiff(content), 'proj')").first().getString(0)
+      assert(result != null)
+      assert(result.contains("+proj="))
+    }
+
+    it("Passed RS_CRS returns null for raster without CRS") {
+      val result =
+        sparkSession.sql("select RS_CRS(RS_MakeEmptyRaster(1, 10, 10, 0, 0, 1))").first().get(0)
+      assert(result == null)
+    }
+
     it("Passed RS_SetGeoReference should handle null values") {
       val result = sparkSession.sql("select RS_SetGeoReference(null, null)").first().get(0)
       assertNull(result)
