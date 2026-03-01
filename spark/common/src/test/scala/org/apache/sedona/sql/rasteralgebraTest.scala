@@ -505,7 +505,9 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         df.selectExpr(s"RS_SRID(RS_SetCRS(RS_FromGeoTiff(content), '${wkt1}'))").first().getInt(0)
       assert(srid == 0)
       val crs =
-        df.selectExpr(s"RS_CRS(RS_SetCRS(RS_FromGeoTiff(content), '${wkt1}'), 'wkt1')").first().getString(0)
+        df.selectExpr(s"RS_CRS(RS_SetCRS(RS_FromGeoTiff(content), '${wkt1}'), 'wkt1')")
+          .first()
+          .getString(0)
       assert(crs != null && crs.contains("WGS"))
     }
 
