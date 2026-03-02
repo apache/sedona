@@ -26,15 +26,19 @@ import java.awt.image.*;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.media.jai.Interpolation;
 import javax.media.jai.RasterFactory;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.utils.RasterInterpolate;
 import org.apache.sedona.common.utils.RasterUtils;
+import org.datasyslab.proj4sedona.core.Proj;
 import org.geotools.api.coverage.grid.GridCoverage;
 import org.geotools.api.coverage.grid.GridGeometry;
 import org.geotools.api.metadata.spatial.PixelOrientation;
 import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.crs.CRSFactory;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.api.referencing.datum.PixelInCell;
 import org.geotools.api.referencing.operation.MathTransform;
@@ -48,8 +52,11 @@ import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.coverage.processing.Operations;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.CRS;
+import org.geotools.referencing.ReferencingFactoryFinder;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.geotools.util.factory.Hints;
 import org.locationtech.jts.index.strtree.STRtree;
 
 public class RasterEditors {
@@ -102,7 +109,159 @@ public class RasterEditors {
     } else {
       crs = FunctionsGeoTools.sridToCRS(srid);
     }
+    return replaceCrs(raster, crs);
+  }
 
+  /**
+   * Sets the CRS of a raster using a CRS string. Accepts EPSG codes (e.g. "EPSG:4326"), WKT1, WKT2,
+   * PROJ strings, and PROJJSON.
+   *
+   * @param raster The input raster.
+   * @param crsString The CRS definition string.
+   * @return The raster with the new CRS.
+   */
+  public static GridCoverage2D setCrs(GridCoverage2D raster, String crsString) {
+    CoordinateReferenceSystem crs = parseCrsString(crsString);
+    return replaceCrs(raster, crs);
+  }
+
+  /**
+   * Parse a CRS string in any supported format into a GeoTools CoordinateReferenceSystem.
+   *
+   * <p>Parsing priority:
+   *
+   * <ol>
+   *   <li>GeoTools CRS.decode — handles authority codes like EPSG:4326
+   *   <li>GeoTools CRS.parseWKT — handles WKT1 strings
+   *   <li>proj4sedona — handles WKT2, PROJ strings, PROJJSON. If an EPSG authority can be resolved,
+   *       uses CRS.decode for a lossless result. Otherwise falls back to WKT1 conversion.
+   * </ol>
+   *
+   * @param crsString The CRS definition string.
+   * @return The parsed CoordinateReferenceSystem.
+   * @throws IllegalArgumentException if the CRS string cannot be parsed.
+   */
+  static CoordinateReferenceSystem parseCrsString(String crsString) {
+    if (crsString == null || crsString.trim().isEmpty()) {
+      throw new IllegalArgumentException(
+          "CRS string must not be null or empty. "
+              + "Supported formats: EPSG code (e.g. 'EPSG:4326'), WKT1, WKT2, PROJ string, PROJJSON.");
+    }
+
+    // Step 1: Try GeoTools CRS.decode (handles EPSG:xxxx, AUTO:xxxx, etc.)
+    try {
+      return CRS.decode(crsString, true);
+    } catch (FactoryException e) {
+      // Not an authority code, continue
+    }
+
+    // Step 2: Try GeoTools WKT parsing with longitude-first axis order (handles WKT1)
+    Hints hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE);
+    CRSFactory crsFactory = ReferencingFactoryFinder.getCRSFactory(hints);
+    try {
+      return crsFactory.createFromWKT(crsString);
+    } catch (FactoryException e) {
+      // Not WKT1, continue
+    }
+
+    // Step 3: Use proj4sedona (handles WKT2, PROJ, PROJJSON)
+    Exception lastError = null;
+    try {
+      Proj proj = new Proj(crsString);
+
+      // Try to resolve to an EPSG authority code for a lossless result
+      String authority = proj.toEpsgCode();
+      if (authority != null && !authority.isEmpty()) {
+        try {
+          return CRS.decode(authority, true);
+        } catch (FactoryException ex) {
+          // Authority code not recognized by GeoTools, fall through to WKT1
+        }
+      }
+
+      // Fallback: convert to WKT1 via proj4sedona and parse with GeoTools.
+      // proj4sedona may include parameters GeoTools doesn't expect (e.g. standard_parallel_1
+      // for projections that don't use it). We handle this by trying several parse strategies:
+      // 1. Raw WKT1 (proj4sedona's projection names may already be recognized by GeoTools)
+      // 2. Normalized WKT1 (resolve projection names to canonical OGC names)
+      // 3. Strip unexpected parameters iteratively
+      String wkt1 = proj.toWkt1();
+      if (wkt1 != null && !wkt1.isEmpty()) {
+
+        // Strategy 1: Try raw WKT1 directly
+        try {
+          return crsFactory.createFromWKT(wkt1);
+        } catch (FactoryException ex) {
+          // Raw WKT1 failed, continue with normalization
+        }
+
+        // Strategy 2: Try with normalized projection name
+        String normalizedWkt = CrsNormalization.normalizeWkt1ForGeoTools(wkt1);
+        // Strategy 3: If parsing fails due to unexpected parameters, strip them iteratively.
+        // proj4sedona sometimes includes parameters like standard_parallel_1 for projections
+        // that don't use it. We parse the error message to identify and remove the offending
+        // parameter, then retry.
+        String currentWkt = normalizedWkt;
+        for (int attempt = 0; attempt < 5; attempt++) {
+          try {
+            return crsFactory.createFromWKT(currentWkt);
+          } catch (FactoryException ex) {
+            lastError = ex;
+            String msg = ex.getMessage();
+            if (msg != null) {
+              Matcher paramMatcher = UNEXPECTED_PARAM_PATTERN.matcher(msg);
+              if (paramMatcher.find()) {
+                String stripped = stripWktParameter(currentWkt, paramMatcher.group(1));
+                if (stripped.equals(currentWkt)) {
+                  break; // Strip was a no-op, give up
+                }
+                currentWkt = stripped;
+                continue;
+              }
+            }
+            break; // Different kind of error, give up
+          }
+        }
+      }
+    } catch (RuntimeException e) {
+      lastError = e;
+    }
+
+    IllegalArgumentException error =
+        new IllegalArgumentException(
+            "Cannot parse CRS string. Supported formats: EPSG code (e.g. 'EPSG:4326'), "
+                + "WKT1, WKT2, PROJ string, PROJJSON. Input: "
+                + crsString);
+    if (lastError != null) {
+      error.addSuppressed(lastError);
+    }
+    throw error;
+  }
+
+  private static final Pattern UNEXPECTED_PARAM_PATTERN =
+      Pattern.compile("Parameter \"([^\"]+)\" was not expected");
+
+  /**
+   * Strip a named PARAMETER from a WKT1 string. Used to remove parameters that proj4sedona includes
+   * but GeoTools does not expect (e.g. standard_parallel_1 for Transverse Mercator).
+   *
+   * @param wkt The WKT1 string.
+   * @param paramName The parameter name to strip (e.g. "standard_parallel_1").
+   * @return The WKT1 string with the parameter removed.
+   */
+  private static String stripWktParameter(String wkt, String paramName) {
+    // Remove ,PARAMETER["paramName",value] or PARAMETER["paramName",value],
+    String escaped = Pattern.quote(paramName);
+    Pattern pattern = Pattern.compile(",\\s*PARAMETER\\[\"" + escaped + "\",[^\\]]*\\]");
+    String result = pattern.matcher(wkt).replaceAll("");
+    if (result.equals(wkt)) {
+      Pattern pattern2 = Pattern.compile("PARAMETER\\[\"" + escaped + "\",[^\\]]*\\]\\s*,?");
+      result = pattern2.matcher(wkt).replaceAll("");
+    }
+    return result;
+  }
+
+  private static GridCoverage2D replaceCrs(GridCoverage2D raster, CoordinateReferenceSystem crs) {
     GridCoverageFactory gridCoverageFactory = CoverageFactoryFinder.getGridCoverageFactory(null);
     MathTransform2D transform = raster.getGridGeometry().getGridToCRS2D();
     Map<?, ?> properties = raster.getProperties();

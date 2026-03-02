@@ -122,10 +122,12 @@ These functions perform operations on raster objects.
 | [RS_SetBandNoDataValue](Raster-Operators/RS_SetBandNoDataValue.md) | This sets the no data value for a specified band in the raster. If the band index is not provided, band 1 is assumed by default. Passing a `null` value for `noDataValue` will remove the no data val... | v1.5.0 |
 | [RS_SetGeoReference](Raster-Operators/RS_SetGeoReference.md) | Sets the Georeference information of an object in a single call. Accepts inputs in `GDAL` and `ESRI` format. Default format is `GDAL`. If all 6 parameters are not provided then will return null. | v1.5.0 |
 | [RS_SetPixelType](Raster-Operators/RS_SetPixelType.md) | Returns a modified raster with the desired pixel data type. | v1.6.0 |
+| [RS_SetCRS](Raster-Operators/RS_SetCRS.md) | Sets the coordinate reference system (CRS) of the raster using a CRS definition string. Accepts EPSG codes, WKT1, WKT2, PROJ strings, and PROJJSON. | v1.9.0 |
 | [RS_SetSRID](Raster-Operators/RS_SetSRID.md) | Sets the spatial reference system identifier (SRID) of the raster geometry. | v1.4.1 |
 | [RS_SetValue](Raster-Operators/RS_SetValue.md) | Returns a raster by replacing the value of pixel specified by `colX` and `rowY`. | v1.5.0 |
 | [RS_SetValues](Raster-Operators/RS_SetValues.md) | Returns a raster by replacing the values of pixels in a specified rectangular region. The top left corner of the region is defined by the `colX` and `rowY` coordinates. The `width` and `height` par... | v1.5.0 |
 | [RS_SRID](Raster-Operators/RS_SRID.md) | Returns the spatial reference system identifier (SRID) of the raster geometry. | v1.4.1 |
+| [RS_CRS](Raster-Operators/RS_CRS.md) | Returns the coordinate reference system (CRS) of the raster as a string in the specified format (projjson, wkt2, wkt1, proj). Defaults to PROJJSON. | v1.9.0 |
 | [RS_Union](Raster-Operators/RS_Union.md) | Returns a combined multi-band raster from 2 or more input Rasters. The order of bands in the resultant raster will be in the order of the input rasters. For example if `RS_Union` is called on two 2... | v1.6.0 |
 | [RS_Value](Raster-Operators/RS_Value.md) | Returns the value at the given point in the raster. If no band number is specified it defaults to 1. | v1.4.0 |
 | [RS_Values](Raster-Operators/RS_Values.md) | Returns the values at the given points or grid coordinates in the raster. If no band number is specified it defaults to 1. | v1.4.0 |
