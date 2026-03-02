@@ -4210,4 +4210,150 @@ public class RasterEditorsTest extends RasterTestBase {
       }
     }
   }
+
+  @Test
+  public void testSetCrsWithEpsgCode() throws FactoryException {
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 10, 10, 0, 0, 1);
+    assertEquals(0, RasterAccessors.srid(raster));
+
+    GridCoverage2D result = RasterEditors.setCrs(raster, "EPSG:4326");
+    assertEquals(4326, RasterAccessors.srid(result));
+  }
+
+  @Test
+  public void testSetCrsWithWkt1() throws FactoryException {
+    String wkt1 =
+        "GEOGCS[\"WGS 84\","
+            + "DATUM[\"WGS_1984\","
+            + "SPHEROID[\"WGS 84\",6378137,298.257223563]],"
+            + "PRIMEM[\"Greenwich\",0],"
+            + "UNIT[\"degree\",0.0174532925199433],"
+            + "AUTHORITY[\"EPSG\",\"4326\"]]";
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 10, 10, 0, 0, 1);
+    GridCoverage2D result = RasterEditors.setCrs(raster, wkt1);
+    assertEquals(4326, RasterAccessors.srid(result));
+  }
+
+  @Test
+  public void testSetCrsWithProjString() throws FactoryException {
+    String proj = "+proj=longlat +datum=WGS84 +no_defs";
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 10, 10, 0, 0, 1);
+    GridCoverage2D result = RasterEditors.setCrs(raster, proj);
+    assertEquals(4326, RasterAccessors.srid(result));
+  }
+
+  @Test
+  public void testSetCrsWithProjJson() throws FactoryException {
+    // PROJJSON for EPSG:3857
+    String projjson =
+        "{\"$schema\":\"https://proj.org/schemas/v0.7/projjson.schema.json\","
+            + "\"type\":\"ProjectedCRS\","
+            + "\"name\":\"WGS 84 / Pseudo-Mercator\","
+            + "\"base_crs\":{\"name\":\"WGS 84\","
+            + "\"datum\":{\"type\":\"GeodeticReferenceFrame\","
+            + "\"name\":\"World Geodetic System 1984\","
+            + "\"ellipsoid\":{\"name\":\"WGS 84\","
+            + "\"semi_major_axis\":6378137,"
+            + "\"inverse_flattening\":298.257223563}},"
+            + "\"coordinate_system\":{\"subtype\":\"ellipsoidal\","
+            + "\"axis\":[{\"name\":\"Geodetic latitude\",\"abbreviation\":\"Lat\","
+            + "\"direction\":\"north\",\"unit\":\"degree\"},"
+            + "{\"name\":\"Geodetic longitude\",\"abbreviation\":\"Lon\","
+            + "\"direction\":\"east\",\"unit\":\"degree\"}]}},"
+            + "\"conversion\":{\"name\":\"Popular Visualisation Pseudo-Mercator\","
+            + "\"method\":{\"name\":\"Popular Visualisation Pseudo Mercator\","
+            + "\"id\":{\"authority\":\"EPSG\",\"code\":1024}},"
+            + "\"parameters\":[{\"name\":\"Latitude of natural origin\",\"value\":0,"
+            + "\"unit\":\"degree\",\"id\":{\"authority\":\"EPSG\",\"code\":8801}},"
+            + "{\"name\":\"Longitude of natural origin\",\"value\":0,"
+            + "\"unit\":\"degree\",\"id\":{\"authority\":\"EPSG\",\"code\":8802}},"
+            + "{\"name\":\"False easting\",\"value\":0,"
+            + "\"unit\":\"metre\",\"id\":{\"authority\":\"EPSG\",\"code\":8806}},"
+            + "{\"name\":\"False northing\",\"value\":0,"
+            + "\"unit\":\"metre\",\"id\":{\"authority\":\"EPSG\",\"code\":8807}}]},"
+            + "\"coordinate_system\":{\"subtype\":\"Cartesian\","
+            + "\"axis\":[{\"name\":\"Easting\",\"abbreviation\":\"X\","
+            + "\"direction\":\"east\",\"unit\":\"metre\"},"
+            + "{\"name\":\"Northing\",\"abbreviation\":\"Y\","
+            + "\"direction\":\"north\",\"unit\":\"metre\"}]},"
+            + "\"id\":{\"authority\":\"EPSG\",\"code\":3857}}";
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 10, 10, 0, 0, 1);
+    GridCoverage2D result = RasterEditors.setCrs(raster, projjson);
+    assertEquals(3857, RasterAccessors.srid(result));
+  }
+
+  @Test
+  public void testSetCrsWithCustomProj() throws FactoryException {
+    // Custom Lambert Conformal Conic - no EPSG code
+    String proj =
+        "+proj=lcc +lat_1=25 +lat_2=60 +lat_0=42.5 +lon_0=-100 "
+            + "+x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs";
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 10, 10, 0, 0, 1);
+    GridCoverage2D result = RasterEditors.setCrs(raster, proj);
+    // Custom CRS has no EPSG code, SRID should be 0
+    assertEquals(0, RasterAccessors.srid(result));
+    // But the CRS should be valid and contain the projection info
+    String crsWkt = RasterAccessors.crs(result, "wkt1");
+    Assert.assertTrue(crsWkt.contains("Lambert_Conformal_Conic"));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testSetCrsWithInvalidString() throws FactoryException {
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 10, 10, 0, 0, 1);
+    RasterEditors.setCrs(raster, "NOT_A_VALID_CRS");
+  }
+
+  /**
+   * Comprehensive test: verify that RS_SetCRS works with every projection type that proj4sedona
+   * supports. Each projection short code is tested with appropriate parameters. proj4sedona outputs
+   * WKT1 with projection names that may differ from GeoTools conventions (e.g. "Azimuthal
+   * Equidistant" vs "Azimuthal_Equidistant"), and may include parameters not expected by GeoTools
+   * (e.g. standard_parallel_1 for Transverse Mercator). The normalization and parameter-stripping
+   * logic in parseCrsString handles both cases.
+   */
+  @Test
+  public void testSetCrsWithRepresentativeProj4SedonaProjections() throws FactoryException {
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 10, 10, 0, 0, 1);
+
+    // A representative set of projection short codes supported by proj4sedona, each with
+    // appropriate parameters.
+    // Format: {shortCode, projString}
+    String[][] projConfigs = {
+      {
+        "aea",
+        "+proj=aea +lat_0=0 +lon_0=0 +lat_1=30 +lat_2=60 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"
+      },
+      {"aeqd", "+proj=aeqd +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"},
+      {"cea", "+proj=cea +lat_ts=30 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"},
+      {"eqc", "+proj=eqc +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"},
+      {
+        "eqdc",
+        "+proj=eqdc +lat_0=0 +lon_0=0 +lat_1=30 +lat_2=60 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"
+      },
+      {
+        "etmerc", "+proj=etmerc +lat_0=0 +lon_0=0 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"
+      },
+      {"laea", "+proj=laea +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"},
+      {
+        "lcc",
+        "+proj=lcc +lat_0=0 +lon_0=0 +lat_1=30 +lat_2=60 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"
+      },
+      {"merc", "+proj=merc +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"},
+      {"moll", "+proj=moll +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"},
+      {"robin", "+proj=robin +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"},
+      {"sinu", "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"},
+      {"stere", "+proj=stere +lat_0=90 +lon_0=0 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"},
+      {"tmerc", "+proj=tmerc +lat_0=0 +lon_0=0 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"},
+      {"utm", "+proj=utm +zone=17 +datum=WGS84 +units=m +no_defs"},
+    };
+
+    for (String[] config : projConfigs) {
+      String code = config[0];
+      String projStr = config[1];
+      GridCoverage2D result = RasterEditors.setCrs(raster, projStr);
+      String wkt1 = RasterAccessors.crs(result, "wkt1");
+      Assert.assertNotNull("setCrs should produce a valid CRS for +proj=" + code, wkt1);
+      Assert.assertTrue("WKT1 should contain PROJCS for +proj=" + code, wkt1.contains("PROJCS"));
+    }
+  }
 }
