@@ -21,13 +21,8 @@ package org.apache.sedona.common.raster;
 import java.awt.geom.Point2D;
 import java.awt.image.RenderedImage;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.datasyslab.proj4sedona.core.Proj;
 import org.geotools.api.referencing.FactoryException;
@@ -45,18 +40,6 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 
 public class RasterAccessors {
-
-  private static final Pattern PROJECTION_PATTERN = Pattern.compile("PROJECTION\\[\"([^\"]+)\"\\]");
-
-  // GeoTools canonical names that proj4sedona does not recognize;
-  // mapped to proj4sedona-compatible equivalents for the export path.
-  private static final Map<String, String> GEOTOOLS_TO_PROJ4SEDONA;
-
-  static {
-    Map<String, String> m = new HashMap<>();
-    m.put("Mercator_2SP", "Mercator");
-    GEOTOOLS_TO_PROJ4SEDONA = Collections.unmodifiableMap(m);
-  }
 
   public static int srid(GridCoverage2D raster) throws FactoryException {
     CoordinateReferenceSystem crs = raster.getCoordinateReferenceSystem();
@@ -441,7 +424,7 @@ public class RasterAccessors {
         } catch (Exception wktError) {
           // proj4sedona may not recognize some GeoTools projection names (e.g. Mercator_2SP).
           // Normalize the projection name and retry.
-          String normalized = normalizeWkt1ForExport(wkt1);
+          String normalized = CrsNormalization.normalizeWkt1ForProj4sedona(wkt1);
           if (!normalized.equals(wkt1)) {
             proj = new Proj(normalized);
           } else {
@@ -469,21 +452,5 @@ public class RasterAccessors {
       throw new RuntimeException(
           "Failed to convert CRS to format '" + format + "': " + e.getMessage(), e);
     }
-  }
-
-  /**
-   * Normalize GeoTools WKT1 projection names to proj4sedona-compatible names. Some GeoTools
-   * canonical names (e.g. Mercator_2SP) are not recognized by proj4sedona.
-   */
-  private static String normalizeWkt1ForExport(String wkt1) {
-    Matcher m = PROJECTION_PATTERN.matcher(wkt1);
-    if (m.find()) {
-      String name = m.group(1);
-      String mapped = GEOTOOLS_TO_PROJ4SEDONA.get(name);
-      if (mapped != null) {
-        return wkt1.substring(0, m.start(1)) + mapped + wkt1.substring(m.end(1));
-      }
-    }
-    return wkt1;
   }
 }

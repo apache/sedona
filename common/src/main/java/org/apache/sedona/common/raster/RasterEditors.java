@@ -24,13 +24,8 @@ import static org.apache.sedona.common.raster.MapAlgebra.bandAsArray;
 import java.awt.geom.Point2D;
 import java.awt.image.*;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.media.jai.Interpolation;
@@ -48,9 +43,6 @@ import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.api.referencing.datum.PixelInCell;
 import org.geotools.api.referencing.operation.MathTransform;
 import org.geotools.api.referencing.operation.MathTransform2D;
-import org.geotools.api.referencing.operation.MathTransformFactory;
-import org.geotools.api.referencing.operation.OperationMethod;
-import org.geotools.api.referencing.operation.Projection;
 import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.GridSampleDimension;
@@ -63,7 +55,6 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.ReferencingFactoryFinder;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
-import org.geotools.referencing.operation.DefaultMathTransformFactory;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.geotools.util.factory.Hints;
 import org.locationtech.jts.index.strtree.STRtree;
@@ -169,13 +160,7 @@ public class RasterEditors {
 
     // Step 3: Use proj4sedona (handles WKT2, PROJ, PROJJSON)
     Exception lastError = null;
-    // Normalize PROJ string variants that proj4sedona outputs but cannot re-import.
-    // Specifically, +proj=sterea (Oblique Stereographic Alternative) maps to +proj=stere
-    // since proj4sedona's Stereographic class handles both via lat_0.
-    String normalizedInput = crsString;
-    if (crsString.contains("+proj=sterea")) {
-      normalizedInput = crsString.replace("+proj=sterea", "+proj=stere");
-    }
+    String normalizedInput = CrsNormalization.normalizeProjInput(crsString);
     try {
       Proj proj = new Proj(normalizedInput);
 
@@ -208,7 +193,7 @@ public class RasterEditors {
         }
 
         // Strategy 2: Try with normalized projection name
-        String normalizedWkt = normalizeWkt1ProjectionName(wkt1);
+        String normalizedWkt = CrsNormalization.normalizeWkt1ForGeoTools(wkt1);
         // Strategy 3: If parsing fails due to unexpected parameters, strip them iteratively.
         // proj4sedona sometimes includes parameters like standard_parallel_1 for projections
         // that don't use it. We parse the error message to identify and remove the offending
@@ -246,33 +231,6 @@ public class RasterEditors {
     throw error;
   }
 
-  // Fallback map for proj4sedona projection names that have no equivalent in GeoTools'
-  // alias database and cannot be resolved via normalized matching. These are proj4sedona-specific
-  // long-form alias names. Verified via exhaustive testing of all 58 proj4sedona registered names.
-  private static final Map<String, String> PROJECTION_NAME_FALLBACK;
-
-  static {
-    Map<String, String> m = new HashMap<>();
-    m.put("Lambert_Cylindrical_Equal_Area", "Cylindrical_Equal_Area");
-    m.put("Extended_Transverse_Mercator", "Transverse_Mercator");
-    m.put("Extended Transverse Mercator", "Transverse_Mercator");
-    m.put("Lambert Tangential Conformal Conic Projection", "Lambert_Conformal_Conic");
-    m.put("Mercator_Variant_A", "Mercator_1SP");
-    m.put("Polar_Stereographic_variant_A", "Polar_Stereographic");
-    m.put("Polar_Stereographic_variant_B", "Polar_Stereographic");
-    m.put("Universal Transverse Mercator System", "Transverse_Mercator");
-    m.put("Universal_Transverse_Mercator", "Transverse_Mercator");
-    PROJECTION_NAME_FALLBACK = Collections.unmodifiableMap(m);
-  }
-
-  // Lazy-initialized caches built once from GeoTools' registered OperationMethod objects.
-  // aliasCache: exact alias string -> canonical OGC name (ConcurrentHashMap for thread-safe
-  // writes from Tier 2 normalized matching)
-  // normalizedCache: normalized form (lowercase, no spaces/underscores) -> set of canonical names
-  private static volatile Map<String, String> aliasCache;
-  private static volatile Map<String, Set<String>> normalizedCache;
-
-  private static final Pattern PROJECTION_PATTERN = Pattern.compile("PROJECTION\\[\"([^\"]+)\"\\]");
   private static final Pattern UNEXPECTED_PARAM_PATTERN =
       Pattern.compile("Parameter \"([^\"]+)\" was not expected");
 
@@ -292,136 +250,6 @@ public class RasterEditors {
       result = wkt.replaceAll("PARAMETER\\[\"" + escaped + "\",[^\\]]*\\]\\s*,?", "");
     }
     return result;
-  }
-
-  /**
-   * Normalize a projection name for loose matching: lowercase, remove spaces and underscores.
-   *
-   * @param name The projection name to normalize.
-   * @return The normalized form (e.g. "Lambert_Conformal_Conic_2SP" → "lambertconformalconic2sp").
-   */
-  private static String normalizeForMatch(String name) {
-    return name.toLowerCase().replaceAll("[_ ]", "");
-  }
-
-  /**
-   * Resolve a projection name to its canonical OGC WKT1 name. Uses a three-tier strategy:
-   *
-   * <ol>
-   *   <li><b>Exact alias matching</b> — uses all aliases registered in GeoTools' {@link
-   *       OperationMethod} objects from OGC, EPSG, GeoTIFF, ESRI, and PROJ authorities. This is a
-   *       direct case-sensitive lookup into the alias cache.
-   *   <li><b>Normalized matching</b> — strips spaces, underscores, and lowercases both the input
-   *       and all known GeoTools projection names/aliases. If this yields exactly one canonical
-   *       name, it is used. This handles formatting differences (e.g. spaces vs underscores) that
-   *       arise when proj4sedona WKT1 output uses different conventions than GeoTools. Ambiguous
-   *       normalized forms (mapping to multiple canonical names) are skipped to avoid incorrect
-   *       resolution.
-   *   <li><b>Hardcoded fallback</b> — for proj4sedona-specific projection names that have no
-   *       equivalent in GeoTools' alias database (e.g. "Extended_Transverse_Mercator",
-   *       "Lambert_Cylindrical_Equal_Area").
-   * </ol>
-   *
-   * <p>Verified via exhaustive testing against all 58 proj4sedona registered projection names: 42
-   * resolve via exact alias matching, 5 via normalized matching, and 9 via hardcoded fallback. The
-   * remaining 2 (longlat, identity) are geographic CRS codes that produce no PROJECTION[] element
-   * in WKT1.
-   *
-   * @param projName The projection name to resolve (e.g. "Lambert Conformal Conic").
-   * @return The canonical OGC name (e.g. "Lambert_Conformal_Conic"), or the input unchanged.
-   */
-  private static String resolveProjectionName(String projName) {
-    ensureCachesBuilt();
-
-    // Tier 1: Exact alias match from GeoTools
-    String resolved = aliasCache.get(projName);
-    if (resolved != null) {
-      return resolved;
-    }
-
-    // Tier 2: Normalized match (handles space/underscore differences automatically)
-    String normalized = normalizeForMatch(projName);
-    Set<String> candidates = normalizedCache.get(normalized);
-    if (candidates != null && candidates.size() == 1) {
-      String canonical = candidates.iterator().next();
-      aliasCache.put(projName, canonical);
-      return canonical;
-    }
-
-    // Tier 3: Hardcoded fallback for proj4sedona-specific names not in GeoTools.
-    // Uses normalized matching (lowercase, no spaces/underscores) so both
-    // "Lambert_Cylindrical_Equal_Area" and "Lambert Cylindrical Equal Area" match.
-    String normalizedProj = normalizeForMatch(projName);
-    for (Map.Entry<String, String> entry : PROJECTION_NAME_FALLBACK.entrySet()) {
-      if (normalizeForMatch(entry.getKey()).equals(normalizedProj)) {
-        String canonical = entry.getValue();
-        aliasCache.put(projName, canonical);
-        return canonical;
-      }
-    }
-    return projName;
-  }
-
-  /**
-   * Build caches mapping projection aliases and normalized names to canonical OGC names. Scans all
-   * GeoTools {@link OperationMethod} objects registered for {@link Projection}. Thread-safe via
-   * double-checked locking.
-   */
-  private static void ensureCachesBuilt() {
-    if (aliasCache != null) {
-      return;
-    }
-    synchronized (RasterEditors.class) {
-      if (aliasCache != null) {
-        return;
-      }
-      MathTransformFactory mtf = ReferencingFactoryFinder.getMathTransformFactory(null);
-      DefaultMathTransformFactory factory;
-      if (mtf instanceof DefaultMathTransformFactory) {
-        factory = (DefaultMathTransformFactory) mtf;
-      } else {
-        factory = new DefaultMathTransformFactory();
-      }
-      Set<OperationMethod> methods = factory.getAvailableMethods(Projection.class);
-
-      Map<String, String> aliases = new ConcurrentHashMap<>();
-      Map<String, Set<String>> normalized = new HashMap<>();
-
-      for (OperationMethod method : methods) {
-        String canonical = method.getName().getCode();
-        aliases.put(canonical, canonical);
-        normalized
-            .computeIfAbsent(normalizeForMatch(canonical), k -> new HashSet<>())
-            .add(canonical);
-        if (method.getAlias() != null) {
-          for (Object alias : method.getAlias()) {
-            String aliasName = alias.toString().replaceAll("^[^:]+:", "");
-            aliases.put(aliasName, canonical);
-            normalized
-                .computeIfAbsent(normalizeForMatch(aliasName), k -> new HashSet<>())
-                .add(canonical);
-          }
-        }
-      }
-      aliasCache = aliases;
-      normalizedCache = normalized;
-    }
-  }
-
-  /**
-   * Normalize projection names in WKT1 strings generated by proj4sedona to be compatible with
-   * GeoTools. Uses GeoTools' alias-aware resolution with a small hardcoded fallback.
-   */
-  private static String normalizeWkt1ProjectionName(String wkt1) {
-    Matcher m = PROJECTION_PATTERN.matcher(wkt1);
-    if (m.find()) {
-      String projName = m.group(1);
-      String resolved = resolveProjectionName(projName);
-      if (!resolved.equals(projName)) {
-        return wkt1.substring(0, m.start(1)) + resolved + wkt1.substring(m.end(1));
-      }
-    }
-    return wkt1;
   }
 
   private static GridCoverage2D replaceCrs(GridCoverage2D raster, CoordinateReferenceSystem crs) {
