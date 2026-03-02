@@ -156,9 +156,9 @@ public class RasterEditors {
     }
 
     // Step 2: Try GeoTools WKT parsing with longitude-first axis order (handles WKT1)
+    Hints hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE);
+    CRSFactory crsFactory = ReferencingFactoryFinder.getCRSFactory(hints);
     try {
-      Hints hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE);
-      CRSFactory crsFactory = ReferencingFactoryFinder.getCRSFactory(hints);
       return crsFactory.createFromWKT(crsString);
     } catch (FactoryException e) {
       // Not WKT1, continue
@@ -187,8 +187,6 @@ public class RasterEditors {
       // 3. Strip unexpected parameters iteratively
       String wkt1 = proj.toWkt1();
       if (wkt1 != null && !wkt1.isEmpty()) {
-        Hints hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE);
-        CRSFactory crsFactory = ReferencingFactoryFinder.getCRSFactory(hints);
 
         // Strategy 1: Try raw WKT1 directly
         try {
@@ -254,9 +252,11 @@ public class RasterEditors {
   private static String stripWktParameter(String wkt, String paramName) {
     // Remove ,PARAMETER["paramName",value] or PARAMETER["paramName",value],
     String escaped = Pattern.quote(paramName);
-    String result = wkt.replaceAll(",\\s*PARAMETER\\[\"" + escaped + "\",[^\\]]*\\]", "");
+    Pattern pattern = Pattern.compile(",\\s*PARAMETER\\[\"" + escaped + "\",[^\\]]*\\]");
+    String result = pattern.matcher(wkt).replaceAll("");
     if (result.equals(wkt)) {
-      result = wkt.replaceAll("PARAMETER\\[\"" + escaped + "\",[^\\]]*\\]\\s*,?", "");
+      Pattern pattern2 = Pattern.compile("PARAMETER\\[\"" + escaped + "\",[^\\]]*\\]\\s*,?");
+      result = pattern2.matcher(wkt).replaceAll("");
     }
     return result;
   }

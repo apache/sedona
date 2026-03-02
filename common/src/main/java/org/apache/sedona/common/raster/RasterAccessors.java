@@ -382,8 +382,11 @@ public class RasterAccessors {
    * @return The CRS definition string in the requested format, or null if no CRS is set.
    */
   public static String crs(GridCoverage2D raster, String format) {
+    String fmt;
     if (format == null || format.trim().isEmpty()) {
-      format = "projjson";
+      fmt = "projjson";
+    } else {
+      fmt = format.toLowerCase(Locale.ROOT).trim();
     }
     CoordinateReferenceSystem crsDef = raster.getCoordinateReferenceSystem();
     if (crsDef instanceof DefaultEngineeringCRS) {
@@ -400,7 +403,6 @@ public class RasterAccessors {
       wkt1 = crsDef.toWKT();
     }
 
-    String fmt = format.toLowerCase(Locale.ROOT).trim();
     if ("wkt1".equals(fmt) || "wkt".equals(fmt)) {
       return wkt1;
     }
@@ -415,33 +417,11 @@ public class RasterAccessors {
         try {
           proj = new Proj("EPSG:" + srid);
         } catch (Exception e) {
-          // EPSG code not recognized by proj4sedona, fall back to WKT1.
-          // proj4sedona may not recognize some GeoTools projection names (e.g. Mercator_2SP),
-          // so normalize the projection name and retry if needed.
-          try {
-            proj = new Proj(wkt1);
-          } catch (Exception wktError) {
-            String normalized = CrsNormalization.normalizeWkt1ForProj4sedona(wkt1);
-            if (!normalized.equals(wkt1)) {
-              proj = new Proj(normalized);
-            } else {
-              throw wktError;
-            }
-          }
+          // EPSG code not recognized by proj4sedona, fall back to WKT1
+          proj = createProjFromWkt1(wkt1);
         }
       } else {
-        try {
-          proj = new Proj(wkt1);
-        } catch (Exception wktError) {
-          // proj4sedona may not recognize some GeoTools projection names (e.g. Mercator_2SP).
-          // Normalize the projection name and retry.
-          String normalized = CrsNormalization.normalizeWkt1ForProj4sedona(wkt1);
-          if (!normalized.equals(wkt1)) {
-            proj = new Proj(normalized);
-          } else {
-            throw wktError;
-          }
-        }
+        proj = createProjFromWkt1(wkt1);
       }
       switch (fmt) {
         case "projjson":
@@ -462,6 +442,22 @@ public class RasterAccessors {
     } catch (Exception e) {
       throw new RuntimeException(
           "Failed to convert CRS to format '" + format + "': " + e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Create a Proj object from GeoTools WKT1, with normalization fallback for projection names that
+   * proj4sedona does not recognize (e.g. Mercator_2SP).
+   */
+  private static Proj createProjFromWkt1(String wkt1) {
+    try {
+      return new Proj(wkt1);
+    } catch (Exception wktError) {
+      String normalized = CrsNormalization.normalizeWkt1ForProj4sedona(wkt1);
+      if (!normalized.equals(wkt1)) {
+        return new Proj(normalized);
+      }
+      throw wktError;
     }
   }
 }
