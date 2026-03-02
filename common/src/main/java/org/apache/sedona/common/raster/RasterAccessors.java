@@ -415,8 +415,19 @@ public class RasterAccessors {
         try {
           proj = new Proj("EPSG:" + srid);
         } catch (Exception e) {
-          // EPSG code not recognized by proj4sedona, fall back to WKT1
-          proj = new Proj(wkt1);
+          // EPSG code not recognized by proj4sedona, fall back to WKT1.
+          // proj4sedona may not recognize some GeoTools projection names (e.g. Mercator_2SP),
+          // so normalize the projection name and retry if needed.
+          try {
+            proj = new Proj(wkt1);
+          } catch (Exception wktError) {
+            String normalized = CrsNormalization.normalizeWkt1ForProj4sedona(wkt1);
+            if (!normalized.equals(wkt1)) {
+              proj = new Proj(normalized);
+            } else {
+              throw wktError;
+            }
+          }
         }
       } else {
         try {
