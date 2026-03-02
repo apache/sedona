@@ -21,8 +21,13 @@ package org.apache.sedona.common.raster;
 import java.awt.geom.Point2D;
 import java.awt.image.RenderedImage;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.datasyslab.proj4sedona.core.Proj;
 import org.geotools.api.referencing.FactoryException;
@@ -40,6 +45,19 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 
 public class RasterAccessors {
+
+  private static final Pattern PROJECTION_PATTERN = Pattern.compile("PROJECTION\\[\"([^\"]+)\"\\]");
+
+  // GeoTools canonical names that proj4sedona does not recognize;
+  // mapped to proj4sedona-compatible equivalents for the export path.
+  private static final Map<String, String> GEOTOOLS_TO_PROJ4SEDONA;
+
+  static {
+    Map<String, String> m = new HashMap<>();
+    m.put("Mercator_2SP", "Mercator");
+    GEOTOOLS_TO_PROJ4SEDONA = Collections.unmodifiableMap(m);
+  }
+
   public static int srid(GridCoverage2D raster) throws FactoryException {
     CoordinateReferenceSystem crs = raster.getCoordinateReferenceSystem();
     if (crs instanceof DefaultEngineeringCRS) {
@@ -404,9 +422,33 @@ public class RasterAccessors {
       return wkt1;
     }
 
-    // For all other formats, convert through proj4sedona
+    // For all other formats, convert through proj4sedona.
+    // Prefer EPSG SRID when available: GeoTools WKT1 projection names (e.g. Mercator_2SP)
+    // may not be recognized by proj4sedona, but EPSG codes always work.
     try {
-      Proj proj = new Proj(wkt1);
+      Proj proj;
+      int srid = srid(raster);
+      if (srid > 0) {
+        try {
+          proj = new Proj("EPSG:" + srid);
+        } catch (Exception e) {
+          // EPSG code not recognized by proj4sedona, fall back to WKT1
+          proj = new Proj(wkt1);
+        }
+      } else {
+        try {
+          proj = new Proj(wkt1);
+        } catch (Exception wktError) {
+          // proj4sedona may not recognize some GeoTools projection names (e.g. Mercator_2SP).
+          // Normalize the projection name and retry.
+          String normalized = normalizeWkt1ForExport(wkt1);
+          if (!normalized.equals(wkt1)) {
+            proj = new Proj(normalized);
+          } else {
+            throw wktError;
+          }
+        }
+      }
       switch (fmt) {
         case "projjson":
           return proj.toProjJson();
@@ -427,5 +469,21 @@ public class RasterAccessors {
       throw new RuntimeException(
           "Failed to convert CRS to format '" + format + "': " + e.getMessage(), e);
     }
+  }
+
+  /**
+   * Normalize GeoTools WKT1 projection names to proj4sedona-compatible names. Some GeoTools
+   * canonical names (e.g. Mercator_2SP) are not recognized by proj4sedona.
+   */
+  private static String normalizeWkt1ForExport(String wkt1) {
+    Matcher m = PROJECTION_PATTERN.matcher(wkt1);
+    if (m.find()) {
+      String name = m.group(1);
+      String mapped = GEOTOOLS_TO_PROJ4SEDONA.get(name);
+      if (mapped != null) {
+        return wkt1.substring(0, m.start(1)) + mapped + wkt1.substring(m.end(1));
+      }
+    }
+    return wkt1;
   }
 }

@@ -169,8 +169,15 @@ public class RasterEditors {
 
     // Step 3: Use proj4sedona (handles WKT2, PROJ, PROJJSON)
     Exception lastError = null;
+    // Normalize PROJ string variants that proj4sedona outputs but cannot re-import.
+    // Specifically, +proj=sterea (Oblique Stereographic Alternative) maps to +proj=stere
+    // since proj4sedona's Stereographic class handles both via lat_0.
+    String normalizedInput = crsString;
+    if (crsString.contains("+proj=sterea")) {
+      normalizedInput = crsString.replace("+proj=sterea", "+proj=stere");
+    }
     try {
-      Proj proj = new Proj(crsString);
+      Proj proj = new Proj(normalizedInput);
 
       // Try to resolve to an EPSG authority code for a lossless result
       String authority = proj.toEpsgCode();
@@ -341,8 +348,18 @@ public class RasterEditors {
       return canonical;
     }
 
-    // Tier 3: Hardcoded fallback for proj4sedona-specific names not in GeoTools
-    return PROJECTION_NAME_FALLBACK.getOrDefault(projName, projName);
+    // Tier 3: Hardcoded fallback for proj4sedona-specific names not in GeoTools.
+    // Uses normalized matching (lowercase, no spaces/underscores) so both
+    // "Lambert_Cylindrical_Equal_Area" and "Lambert Cylindrical Equal Area" match.
+    String normalizedProj = normalizeForMatch(projName);
+    for (Map.Entry<String, String> entry : PROJECTION_NAME_FALLBACK.entrySet()) {
+      if (normalizeForMatch(entry.getKey()).equals(normalizedProj)) {
+        String canonical = entry.getValue();
+        aliasCache.put(projName, canonical);
+        return canonical;
+      }
+    }
+    return projName;
   }
 
   /**

@@ -349,8 +349,6 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
   // ---------------------------------------------------------------------------
   // WKT2 format round-trip tests
   // WKT2 goes through proj4sedona for both export and import.
-  // Note: EPSG:28992 (Oblique Stereographic) is excluded due to floating-point
-  // drift in latitude parameters across round-trips.
   // ---------------------------------------------------------------------------
 
   @Test
@@ -433,19 +431,19 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
     assertWkt2RoundTrip(3413);
   }
 
-  // ---------------------------------------------------------------------------
-  // WKT2 import failures — WKT2 re-import fails for certain CRS
-  // ---------------------------------------------------------------------------
-
   @Test
-  public void testWkt2RoundTrip_PolarStereographicA_32661_importFails() throws FactoryException {
-    assertWkt2ImportFails(32661);
+  public void testWkt2RoundTrip_PolarStereographicA_32661() throws FactoryException {
+    assertWkt2RoundTrip(32661);
   }
 
   @Test
-  public void testWkt2RoundTrip_LambertAzimuthalEqualArea_EASE_6931_importFails()
-      throws FactoryException {
-    assertWkt2ImportFails(6931);
+  public void testWkt2RoundTrip_LambertAzimuthalEqualArea_EASE_6931() throws FactoryException {
+    assertWkt2RoundTrip(6931);
+  }
+
+  @Test
+  public void testWkt2RoundTrip_ObliqueStereographic_28992() throws FactoryException {
+    assertWkt2RoundTrip(28992);
   }
 
   // ---------------------------------------------------------------------------
@@ -459,9 +457,8 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
   }
 
   @Test
-  public void testProjJsonRoundTrip_Mercator1SP_Spherical_3785_importFails()
-      throws FactoryException {
-    assertProjJsonImportFails(3785);
+  public void testProjJsonRoundTrip_Mercator1SP_Spherical_3785() throws FactoryException {
+    assertProjJsonRoundTrip(3785);
   }
 
   // ---------------------------------------------------------------------------
@@ -469,13 +466,13 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
   // ---------------------------------------------------------------------------
 
   @Test
-  public void testSetCrsFails_LambertCylindricalEqualArea_6933() throws FactoryException {
-    // GeoTools cannot decode EPSG:6933 at all (no transform for Lambert Cylindrical Equal Area)
+  public void testSetCrs_LambertCylindricalEqualArea_6933() throws FactoryException {
+    // EPSG:6933 setCrs works; WKT1 may not contain AUTHORITY so we just verify it's parseable
     GridCoverage2D baseRaster = RasterConstructors.makeEmptyRaster(1, 4, 4, 0, 0, 1);
-    assertThrows(
-        "EPSG:6933 should fail at setCrs",
-        IllegalArgumentException.class,
-        () -> RasterEditors.setCrs(baseRaster, "EPSG:6933"));
+    GridCoverage2D result = RasterEditors.setCrs(baseRaster, "EPSG:6933");
+    String wkt1 = RasterAccessors.crs(result, "wkt1");
+    assertNotNull("EPSG:6933 should produce valid WKT1", wkt1);
+    assertTrue("WKT1 should contain PROJCS", wkt1.contains("PROJCS"));
   }
 
   @Test

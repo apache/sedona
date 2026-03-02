@@ -59,12 +59,9 @@ FROM raster_table
 
 ## Limitations
 
-Internally, Sedona stores raster CRS in WKT1 format (via GeoTools). When you provide a CRS in WKT2, PROJ, or PROJJSON format, it is converted to WKT1 using [proj4sedona](https://github.com/niclaslindstedt/proj4sedona). This conversion may cause the following limitations:
+Internally, Sedona stores raster CRS in WKT1 format (via GeoTools). When you provide a CRS in WKT2, PROJ, or PROJJSON format, it is converted to WKT1 using [proj4sedona](https://github.com/jiayuasu/proj4sedona). This conversion may cause the following limitations:
 
-- **Datum name loss**: Original datum names (e.g., `"World Geodetic System 1984"`) may be replaced with a generic name (e.g., `"BASE"`) after round-tripping through WKT2, PROJ, or PROJJSON formats.
 - **SRID not preserved for projected CRS**: When importing PROJ or PROJJSON strings, the EPSG SRID is often lost for projected coordinate systems. Only geographic CRS (e.g., EPSG:4326), Web Mercator (EPSG:3857), and UTM zones reliably preserve their SRID. Use `RS_SetSRID` after `RS_SetCRS` if you need to set a specific SRID.
-- **Polar Stereographic `lat_ts` drift**: For Polar Stereographic projections (e.g., EPSG:3031, EPSG:3413), the latitude of true scale (`+lat_ts`) may shift to the pole latitude after a PROJ round-trip.
-- **Ellipsoid name expansion**: Named ellipsoids (e.g., `+ellps=airy`) may be expanded to explicit semi-major axis values (e.g., `+a=6377563.396`) after PROJ round-trip.
 - **Unsupported projection types**: Some projection types (e.g., Krovak, Hotine Oblique Mercator) are not supported by proj4sedona and will fail for WKT2, PROJ, and PROJJSON formats. Use `'EPSG:xxxx'` or WKT1 for these.
 
 !!!note
