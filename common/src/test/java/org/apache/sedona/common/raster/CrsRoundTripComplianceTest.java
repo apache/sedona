@@ -578,29 +578,6 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
   }
 
   /**
-   * Assert that WKT2 export succeeds but re-import fails for certain CRS types that proj4sedona can
-   * serialize to WKT2 but cannot re-parse.
-   */
-  private void assertWkt2ImportFails(int epsg) throws FactoryException {
-    GridCoverage2D baseRaster = RasterConstructors.makeEmptyRaster(1, 4, 4, 0, 0, 1);
-    GridCoverage2D raster1 = RasterEditors.setCrs(baseRaster, "EPSG:" + epsg);
-
-    // Export should succeed
-    String exported = RasterAccessors.crs(raster1, "wkt2");
-    assertNotNull("EPSG:" + epsg + " export to WKT2 should succeed", exported);
-
-    // Re-import should fail
-    Exception thrown =
-        assertThrows(
-            "EPSG:" + epsg + " WKT2 re-import should fail",
-            IllegalArgumentException.class,
-            () -> RasterEditors.setCrs(baseRaster, exported));
-    assertTrue(
-        "Error message should mention CRS parsing",
-        thrown.getMessage().contains("Cannot parse CRS string"));
-  }
-
-  /**
    * Assert that PROJJSON export succeeds but re-import fails (spherical datum CRS that proj4sedona
    * can export but GeoTools cannot re-parse).
    */
