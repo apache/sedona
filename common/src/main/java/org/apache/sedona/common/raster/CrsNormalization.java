@@ -96,20 +96,6 @@ final class CrsNormalization {
   // =====================================================================
 
   /**
-   * Normalize a PROJ string before passing to proj4sedona. Handles tokens that proj4sedona outputs
-   * but cannot re-import (e.g. +proj=sterea → +proj=stere).
-   *
-   * @param crsString The raw CRS input string (may be PROJ, WKT, EPSG, etc.)
-   * @return The normalized string, or the input unchanged if no normalization is needed.
-   */
-  static String normalizeProjInput(String crsString) {
-    if (crsString.contains("+proj=sterea")) {
-      return crsString.replace("+proj=sterea", "+proj=stere");
-    }
-    return crsString;
-  }
-
-  /**
    * Normalize WKT1 projection names from proj4sedona output for GeoTools consumption. Uses a
    * three-tier resolution strategy:
    *

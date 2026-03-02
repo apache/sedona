@@ -160,9 +160,8 @@ public class RasterEditors {
 
     // Step 3: Use proj4sedona (handles WKT2, PROJ, PROJJSON)
     Exception lastError = null;
-    String normalizedInput = CrsNormalization.normalizeProjInput(crsString);
     try {
-      Proj proj = new Proj(normalizedInput);
+      Proj proj = new Proj(crsString);
 
       // Try to resolve to an EPSG authority code for a lossless result
       String authority = proj.toEpsgCode();
