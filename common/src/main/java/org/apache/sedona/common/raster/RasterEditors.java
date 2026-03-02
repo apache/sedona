@@ -142,6 +142,12 @@ public class RasterEditors {
    * @throws IllegalArgumentException if the CRS string cannot be parsed.
    */
   static CoordinateReferenceSystem parseCrsString(String crsString) {
+    if (crsString == null || crsString.trim().isEmpty()) {
+      throw new IllegalArgumentException(
+          "CRS string must not be null or empty. "
+              + "Supported formats: EPSG code (e.g. 'EPSG:4326'), WKT1, WKT2, PROJ string, PROJJSON.");
+    }
+
     // Step 1: Try GeoTools CRS.decode (handles EPSG:xxxx, AUTO:xxxx, etc.)
     try {
       return CRS.decode(crsString, true);
@@ -202,15 +208,19 @@ public class RasterEditors {
           try {
             return crsFactory.createFromWKT(currentWkt);
           } catch (FactoryException ex) {
+            lastError = ex;
             String msg = ex.getMessage();
             if (msg != null) {
               Matcher paramMatcher = UNEXPECTED_PARAM_PATTERN.matcher(msg);
               if (paramMatcher.find()) {
-                currentWkt = stripWktParameter(currentWkt, paramMatcher.group(1));
+                String stripped = stripWktParameter(currentWkt, paramMatcher.group(1));
+                if (stripped.equals(currentWkt)) {
+                  break; // Strip was a no-op, give up
+                }
+                currentWkt = stripped;
                 continue;
               }
             }
-            lastError = ex;
             break; // Different kind of error, give up
           }
         }

@@ -4312,10 +4312,11 @@ public class RasterEditorsTest extends RasterTestBase {
    * logic in parseCrsString handles both cases.
    */
   @Test
-  public void testSetCrsWithAllProj4SedonaProjections() throws FactoryException {
+  public void testSetCrsWithRepresentativeProj4SedonaProjections() throws FactoryException {
     GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 10, 10, 0, 0, 1);
 
-    // All projection short codes supported by proj4sedona, each with appropriate parameters.
+    // A representative set of projection short codes supported by proj4sedona, each with
+    // appropriate parameters.
     // Format: {shortCode, projString}
     String[][] projConfigs = {
       {

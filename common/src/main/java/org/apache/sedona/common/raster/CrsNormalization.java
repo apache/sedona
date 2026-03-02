@@ -20,6 +20,7 @@ package org.apache.sedona.common.raster;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -192,7 +193,7 @@ final class CrsNormalization {
    * @return Normalized form (e.g. "Lambert_Conformal_Conic_2SP" → "lambertconformalconic2sp").
    */
   static String normalizeForMatch(String name) {
-    return name.toLowerCase().replaceAll("[_ ]", "");
+    return name.toLowerCase(Locale.ROOT).replaceAll("[_ ]", "");
   }
 
   /**
