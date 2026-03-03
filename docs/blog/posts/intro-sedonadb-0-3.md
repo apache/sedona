@@ -33,6 +33,7 @@ title: "SedonaDB 0.3.0 Release"
 
 # SedonaDB 0.3.0 Release
 
+
 The Apache Sedona community is excited to announce the release of
 [SedonaDB](https://sedona.apache.org/sedonadb) version 0.3.0!
 
@@ -51,6 +52,8 @@ simplicity and speed that distributed systems often cannot.
 
 ## Release Highlights
 
+We’re excited to have so many things to highlight in this release!
+
 - Larger-than-memory spatial join
 - Item/row-level CRS support
 - Parameterized SQL queries
@@ -64,6 +67,7 @@ simplicity and speed that distributed systems often cannot.
 import sedona.db
 
 sd = sedona.db.connect()
+sd.options.interactive = True
 ```
 
 ## Out of Core Spatial Join
@@ -73,8 +77,52 @@ extremely flexible and performant spatial join. As a refresher, a
 spatial join finds the interaction between two tables based on some
 spatial relationship (e.g., intersects or within distance). For example,
 if you’re thinking of moving and you love pizza, SedonaDB can find you
-the list of addresses within 1km of a pizza restaurant in about XX
-seconds.
+the neighborhood with the most pizza restaurants about as fast as your
+internet connection/hard drive can load [Overture Maps
+Divisions](https://docs.overturemaps.org/guides/divisions/) and
+[Places](https://docs.overturemaps.org/guides/places/) data.
+
+``` python
+overture = "s3://overturemaps-us-west-2/release/2026-02-18.0"
+options = {"aws.skip_signature": True, "aws.region": "us-west-2"}
+sd.read_parquet(f"{overture}/theme=places/type=place/", options=options).to_view(
+    "places"
+)
+sd.read_parquet(
+    f"{overture}/theme=divisions/type=division_area/", options=options
+).to_view("divisions")
+
+sd.sql("""
+    SELECT
+        get_field(names, 'primary') AS name,
+        geometry
+    FROM places
+    WHERE get_field(categories, 'primary') = 'pizza_restaurant'
+""").to_view("pizza_restaurants")
+
+sd.sql("""
+    SELECT divisions.id, get_field(divisions.names, 'primary') AS name, COUNT(*) AS n
+    FROM divisions
+    INNER JOIN pizza_restaurants ON ST_Contains(divisions.geometry, pizza_restaurants.geometry)
+    WHERE divisions.subtype = 'neighborhood'
+    GROUP BY divisions.id, get_field(divisions.names, 'primary')
+    ORDER BY n DESC
+""").limit(5)
+#> ┌──────────────────────────────────────┬────────────────────────────┬───────┐
+#> │                  id                  ┆            name            ┆   n   │
+#> │                 utf8                 ┆            utf8            ┆ int64 │
+#> ╞══════════════════════════════════════╪════════════════════════════╪═══════╡
+#> │ 1373e423-efdc-471a-ae51-3e9d6c4231b2 ┆ UPZs de Bogotá             ┆   860 │
+#> ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┤
+#> │ 74e87dad-3b11-4fc5-bedd-cb51a617e141 ┆ Distrito-sede de Guarulhos ┆   388 │
+#> ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┤
+#> │ 76077e78-c0c0-48f4-9683-1a16a56dfaf9 ┆ Roma I                     ┆   346 │
+#> ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┤
+#> │ ee274c81-5b62-4e80-be67-e613b9219b17 ┆ Roma VII                   ┆   289 │
+#> ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┤
+#> │ bf762f01-cad0-46be-b47b-76435478035c ┆ Birmingham                 ┆   263 │
+#> └──────────────────────────────────────┴────────────────────────────┴───────┘
+```
 
 The way that this join algorithm worked was approximately (1) read all
 the batches in one side of the spatial join into memory, (2) build a
@@ -105,13 +153,51 @@ The result is a mostly rewritten implementation of the spatial join
 SedonaDB users to be truly fearless: if you can write the query,
 SedonaDB can finish the job. This is a complex enough feature that will
 be the subject of a dedicated future blog post, but as a quick example:
-SedonaDB can now find you the closest pizza restuarant to every address
-in the United States in XXX seconds.
+SedonaDB can identify duplicate (or nearly duplicate) points in a 130
+million point dataset in about 30 seconds with only 3 GB of memory!
+
+``` python
+import sedona.db
+
+sd = sedona.db.connect()
+sd.options.memory_limit = '3g'
+sd.options.memory_pool_type = "fair"
+
+url = "https://github.com/geoarrow/geoarrow-data/releases/download/v0.2.0/microsoft-buildings_point.parquet"
+sd.read_parquet(url).to_view("buildings")
+sd.sql(
+    """
+    SELECT ROW_NUMBER() OVER () AS building_id, geometry
+    FROM buildings
+    """
+).to_parquet("buildings_idx.parquet")
+
+sd.sql(
+    """
+    SELECT
+        l.building_id,
+        r.building_id AS nearest_building_id,
+        l.geometry AS geometry,
+        ST_Distance(l.geometry, r.geometry) AS dist
+    FROM "buildings_idx.parquet" AS l
+    JOIN "buildings_idx.parquet" AS r
+        ON l.building_id <> r.building_id
+        AND ST_DWithin(l.geometry, r.geometry, 1e-10)
+    """
+).to_memtable().to_view("duplicates", overwrite=True)
+
+sd.view("duplicates").count()
+#> 1017476
+```
+
+For some perspective, DuckDB 1.5.0 (beta) needs about 12 GB of memory to
+make this work and GeoPandas needs at least 28 GB.
 
 “Thank you” seems like a completely inadequate thing to say given the
 amount of work it took to make this happen, so we will just tell you
 that [@Kontinuation](https://github.com/Kontinuation) designed and
-implemented nearly all of this and let you be appropriately impressed.
+implemented nearly all of this and hope that you are appropriately
+impressed.
 
 ## Item/Row-level CRS Support
 
@@ -129,7 +215,77 @@ transform to a common CRS.
 
 Item level CRS support was added to SedonaDB in version 0.2; however, in
 the 0.3 release we added support throughout the stack such that columns
-of this type work in all functions.
+of this type work in all functions. For example, if you want to
+transform some input into a local CRS, SedonaDB can get you there:
+
+``` python
+import pandas as pd
+
+cities = pd.DataFrame(
+    {
+        "name": ["Ottawa", "Vancouver", "Toronto"],
+        "utm_code": ["EPSG:32618", "EPSG:32610", "EPSG:32617"],
+        "srid": [32618, 32610, 32617],
+        "longitude": [-75.7019612, -123.1235901, -79.38945855491194],
+        "latitude": [45.4186427, 49.2753624, 43.66464454743429],
+    }
+)
+
+sd.create_data_frame(cities).to_view("cities", overwrite=True)
+sd.sql(
+  """
+  SELECT
+    name,
+    ST_Transform(
+      ST_Point(longitude, latitude, 4326),
+      utm_code
+    ) AS geom
+  FROM cities
+  """
+).to_view("cities_item_crs")
+
+sd.view("cities_item_crs")
+```
+
+    ┌───────────┬───────────────────────────────────────────────────────────────────────┐
+    │    name   ┆                                  geom                                 │
+    │    utf8   ┆                                 struct                                │
+    ╞═══════════╪═══════════════════════════════════════════════════════════════════════╡
+    │ Ottawa    ┆ {item: POINT(445079.1082827766 5029697.641232558), crs: EPSG:32618}   │
+    ├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+    │ Vancouver ┆ {item: POINT(491010.24691805616 5458074.5942144925), crs: EPSG:32610} │
+    ├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+    │ Toronto   ┆ {item: POINT(629849.6255738225 4835886.955149793), crs: EPSG:32617}   │
+    └───────────┴───────────────────────────────────────────────────────────────────────┘
+
+Crucially, it can also get you back!
+
+``` python
+sd.sql(
+    "SELECT name, ST_Transform(geom, 4326) FROM cities_item_crs"
+)
+```
+
+    ┌───────────┬────────────────────────────────────────────────┐
+    │    name   ┆ st_transform(cities_item_crs.geom,Int64(4326)) │
+    │    utf8   ┆                    geometry                    │
+    ╞═══════════╪════════════════════════════════════════════════╡
+    │ Ottawa    ┆ POINT(-75.7019612 45.4186427)                  │
+    ├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+    │ Vancouver ┆ POINT(-123.1235901 49.275362399999985)         │
+    ├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+    │ Toronto   ┆ POINT(-79.38945855491194 43.664644547434285)   │
+    └───────────┴────────────────────────────────────────────────┘
+
+The main route to creating item-level CRSes is `ST_Transform()` and
+`ST_SetSRID()`, as well as the last argument of `ST_Point()`,
+`ST_GeomFromWKT()`, `ST_GeomFromWKB()`. The new functions
+`ST_GeomFromEWKT()` and `ST_GeomFromEKWB()` always return item-level
+CRSes (and SRIDs are preserved when exporting via `ST_AsEKWT()` and
+`ST_AsEWKB()`). Item-level CRSes should be preserved across calls to all
+other functions (just like type-level CRSes are in previous versions).
+We’d love to hear more use cases to ensure our support covers the full
+range of use cases in the wild!
 
 ## Parameterized queries
 
@@ -140,7 +296,34 @@ DataFusion’s excellent SQL parser; however, it made interacting with
 SedonaDB in a programmatic environment awkward and completely reliant on
 serializing query parameters to SQL.
 
-In SedonaDB 0.3.0, we added parameterized query support in R and Python.
+In SedonaDB 0.3.0, we added parameterized query support in R and Python
+along with converters for most geometry-like and/or CRS-like objects.
+For example, if you have some contextual information as a GeoPandas
+DataFrame, you can now insert that into any SQL query without worying
+about setting the CRS or serializing to SQL.
+
+``` python
+import geopandas
+
+url_countries = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries.fgb"
+countries = geopandas.read_file(url_countries)
+canada = countries.geometry[countries.name == "Canada"]
+
+url_cities = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities.fgb"
+sd.read_pyogrio(url_cities).to_view("cities", overwrite=True)
+sd.sql("SELECT * FROM cities WHERE ST_Contains($1, wkb_geometry)", params=(canada, ))
+```
+
+    ┌───────────┬─────────────────────────────────────────────┐
+    │    name   ┆                 wkb_geometry                │
+    │    utf8   ┆                   geometry                  │
+    ╞═══════════╪═════════════════════════════════════════════╡
+    │ Ottawa    ┆ POINT(-75.7019612 45.4186427)               │
+    ├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+    │ Vancouver ┆ POINT(-123.1235901 49.2753624)              │
+    ├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+    │ Toronto   ┆ POINT(-79.38945855491194 43.66464454743429) │
+    └───────────┴─────────────────────────────────────────────┘
 
 ## Parquet Improvements
 
@@ -170,8 +353,21 @@ Even though SedonaDB can now read such files, it cannot yet write them
 in Parquet, see [the recent deep dive on the Parquet
 blog](https://parquet.apache.org/blog/2026/02/13/native-geospatial-types-in-apache-parquet/).
 
-- geometry_columns override
-- writing improvements
+In addition to read improvements, we also improved the interface for
+writing Parquet files. In particular, writing friendly GeoParquet 1.1
+files that work nicely with SedonaDB, GeoPandas, and other engine’s
+spatial filter pushdown. This works nicely with SedonaDB’s GDAL/OGR read
+support to produce optimized GeoParquet files from just about anything:
+
+``` python
+url = "https://github.com/geoarrow/geoarrow-data/releases/download/v0.2.0/ns-water_water-point.fgb"
+sd.read_pyogrio(url).to_parquet(
+    "optimized.parquet",
+    geoparquet_version="1.1",
+    max_row_group_size=100_000,
+    sort_by="wkb_geometry"
+)
+```
 
 ## GDAL/OGR Write Support
 
@@ -182,6 +378,10 @@ package](https://github.com/geopandas/pyogrio)’s Arrow interface. In
 0.3.0 we added write support! Because both reads and writes are
 streaming, this makes SedonaDB an excellent choice for arbitrary
 read/write/convert workflows that scale to any size of input.
+
+``` python
+sd.read_parquet("optimized.parquet").to_pyogrio("water-point.fgb")
+```
 
 ## Improved spatial function coverage
 
@@ -196,7 +396,10 @@ st_force3d, st_force3dm, st_force4d, st_geomfromewkb, st_geomfromewkt,
 st_geomfromwkbunchecked, st_interiorringn, st_linemerge, st_nrings,
 st_numinteriorrings, st_numpoints, st_rotate, st_rotatex, st_rotatey,
 and st_scale will be pleased to know that these functions are now
-available in SedonaDB workflows.
+available in SedonaDB workflows. This brings the total `ST_` and `RS_`
+function count to 143, all of which are tested against PostGIS for
+compatibility with the full matrix of geometry types and XY, XYZ, XYM,
+and XYZM wherever possible.
 
 In the process of adding some of these new functions, we discovered that
 GEOS-based functions that return large geometries (e.g., `ST_Buffer()`
@@ -219,10 +422,54 @@ contributions!
 Last but not least, we added the building blocks for a
 [dplyr](https://dplyr.tidyverse.org) backend to SedonaDB, including
 basic expression translation and support for most geometry-like objects
-in the r-spatial ecosystem. You can now
+in the r-spatial ecosystem. This API is experimental and feedback is
+welcome!
+
+``` r
+library(sedonadb)
+```
+
+    Warning: package 'sedonadb' was built under R version 4.5.2
+
+``` r
+url <- "https://github.com/geoarrow/geoarrow-data/releases/download/v0.2.0/ns-water_water-point.parquet"
+df <- sd_read_parquet(url)
+
+df |>
+  sd_group_by(FEAT_CODE) |>
+  sd_summarise(
+    n = n(),
+    geometry = st_collect_agg(geometry)
+  ) |>
+  sd_arrange(desc(n))
+```
+
+    <sedonab_dataframe: NA x 3>
+    ┌───────────┬───────┬──────────────────────────────────────────────────────────┐
+    │ FEAT_CODE ┆   n   ┆                         geometry                         │
+    │    utf8   ┆ int64 ┆                         geometry                         │
+    ╞═══════════╪═══════╪══════════════════════════════════════════════════════════╡
+    │ WARK60    ┆ 44406 ┆ MULTIPOINT Z((534300.0192 4986233.3817 82.3999999999941… │
+    ├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+    │ WARA60    ┆   193 ┆ MULTIPOINT Z((291828.02660000045 4851581.779999999 18.3… │
+    ├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+    │ WAFA60    ┆    90 ┆ MULTIPOINT Z((552953.3191 4974220.8818 0.95799999999871… │
+    ├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+    │ WADM60    ┆     1 ┆ MULTIPOINT Z((421205.36319999956 4983412.968 22.8999999… │
+    └───────────┴───────┴──────────────────────────────────────────────────────────┘
+    Preview of up to 6 row(s)
 
 Thank you to [e-kotov](https://github.com/e-kotov) for the detailed
 feature request and motivating use case!
+
+## What’s Next?
+
+During the 0.3.0 development cycle we merged the first steps of two
+exciting contributions: A GPU-accellerated spatial join and support for
+reading point cloud formats LAS and LAZ. In 0.4.0 we hope to have these
+components polished and ready to go! Finally, we hope to broaden our
+support for the Geography data type throughout the engine and
+accellerate its current implementation.
 
 ## Contributors
 
