@@ -21,6 +21,8 @@
 
 Introduction: Generates a specified quantity of pseudo-random points within the boundaries of the provided polygonal geometry. When `seed` is either zero or not defined then output will be random.
 
+![ST_GeneratePoints](../../../image/ST_GeneratePoints/ST_GeneratePoints.svg "ST_GeneratePoints")
+
 Format:
 
 `ST_GeneratePoints(geom: Geometry, numPoints: Integer, seed: Long = 0)`

@@ -21,6 +21,8 @@
 
 Introduction: This function computes the [Delaunay triangulation](https://en.wikipedia.org/wiki/Delaunay_triangulation) for the set of vertices in the input geometry. An optional `tolerance` parameter allows snapping nearby input vertices together prior to triangulation and can improve robustness in certain scenarios by handling near-coincident vertices. The default for  `tolerance` is 0. The Delaunay triangulation geometry is bounded by the convex hull of the input vertex set.
 
+![ST_DelaunayTriangles](../../../../image/ST_DelaunayTriangles/ST_DelaunayTriangles.svg "ST_DelaunayTriangles")
+
 The output geometry representation depends on the provided `flag`:
 
 - `0` - a GeometryCollection of triangular Polygons (default option)

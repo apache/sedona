@@ -21,6 +21,8 @@
 
 Introduction: Return the Convex Hull of polygon A
 
+![ST_ConvexHull](../../../image/ST_ConvexHull/ST_ConvexHull.svg "ST_ConvexHull")
+
 Format: `ST_ConvexHull (A: Geometry)`
 
 Return type: `Geometry`

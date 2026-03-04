@@ -21,6 +21,8 @@
 
 Introduction: Reduce the decimals places in the coordinates of the geometry to the given number of decimal places. The last decimal place will be rounded.
 
+![ST_ReducePrecision](../../../image/ST_ReducePrecision/ST_ReducePrecision.svg "ST_ReducePrecision")
+
 Format: `ST_ReducePrecision (A: Geometry, B: Integer)`
 
 Return type: `Geometry`

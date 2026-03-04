@@ -21,6 +21,8 @@
 
 Introduction: This function simplifies the input geometry by applying the Visvalingam-Whyatt algorithm.
 
+![ST_SimplifyVW](../../../../image/ST_SimplifyVW/ST_SimplifyVW.svg "ST_SimplifyVW")
+
 !!!Note
     The simplification may not preserve topology, potentially producing invalid geometries. Use [ST_SimplifyPreserveTopology](ST_SimplifyPreserveTopology.md) to retain valid topology after simplification.
 

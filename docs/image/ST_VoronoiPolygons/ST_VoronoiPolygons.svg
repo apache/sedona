@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_VoronoiPolygons</text>
+  <path d="M 165.38 234.62 L 250.0 234.62 L 250.0 150.0 L 165.38 150.0 L 165.38 234.62 Z" fill="rgba(46,204,113,0.35)" stroke="#2ecc71" stroke-width="2" fill-rule="evenodd" />
+  <path d="M 250.0 234.62 L 334.62 234.62 L 334.62 150.0 L 250.0 150.0 L 250.0 234.62 Z" fill="rgba(46,204,113,0.35)" stroke="#2ecc71" stroke-width="2" fill-rule="evenodd" />
+  <path d="M 250.0 150.0 L 334.62 150.0 L 334.62 65.38 L 250.0 65.38 L 250.0 150.0 Z" fill="rgba(46,204,113,0.35)" stroke="#2ecc71" stroke-width="2" fill-rule="evenodd" />
+  <path d="M 165.38 150.0 L 250.0 150.0 L 250.0 65.38 L 165.38 65.38 L 165.38 150.0 Z" fill="rgba(46,204,113,0.35)" stroke="#2ecc71" stroke-width="2" fill-rule="evenodd" />
+  <circle cx="207.69" cy="192.31" r="5" fill="#4a90d9" stroke="#4a90d9" stroke-width="1.5" />
+  <circle cx="292.31" cy="192.31" r="5" fill="#4a90d9" stroke="#4a90d9" stroke-width="1.5" />
+  <circle cx="292.31" cy="107.69" r="5" fill="#4a90d9" stroke="#4a90d9" stroke-width="1.5" />
+  <circle cx="207.69" cy="107.69" r="5" fill="#4a90d9" stroke="#4a90d9" stroke-width="1.5" />
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Returns Voronoi diagram from the vertices of the geometry</text>
+  <rect x="176" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="192" y="266" font-size="13" fill="#333333">Input</text>
+  <rect x="246" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="262" y="266" font-size="13" fill="#333333">Result</text>
+</svg>

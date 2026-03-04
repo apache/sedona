@@ -21,6 +21,8 @@
 
 Introduction: Returns the minimum-area rotated rectangle enclosing a geometry. The rectangle may be rotated relative to the coordinate axes. Degenerate inputs may result in a Point or LineString being returned.
 
+![ST_OrientedEnvelope](../../../../image/ST_OrientedEnvelope/ST_OrientedEnvelope.svg "ST_OrientedEnvelope")
+
 Format: `ST_OrientedEnvelope(geometry: Geometry)`
 
 Return type: `Geometry`
