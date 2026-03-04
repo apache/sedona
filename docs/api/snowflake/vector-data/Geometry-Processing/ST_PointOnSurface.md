@@ -21,6 +21,8 @@
 
 Introduction: Returns a POINT guaranteed to lie on the surface.
 
+![ST_PointOnSurface](../../../../image/ST_PointOnSurface/ST_PointOnSurface.svg "ST_PointOnSurface")
+
 Format: `ST_PointOnSurface(A:geometry)`
 
 Return type: `Geometry`

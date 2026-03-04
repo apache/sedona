@@ -21,6 +21,8 @@
 
 Introduction: Return the Concave Hull of polygon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true
 
+![ST_ConcaveHull](../../../../image/ST_ConcaveHull/ST_ConcaveHull.svg "ST_ConcaveHull")
+
 Format: `ST_ConcaveHull (A:geometry, pctConvex:float)`
 
 Format: `ST_ConcaveHull (A:geometry, pctConvex:float, allowHoles:Boolean)`

@@ -21,6 +21,8 @@
 
 Introduction: Returns two columns containing the center point and radius of the smallest circle that contains a geometry.
 
+![ST_MinimumBoundingRadius](../../../../image/ST_MinimumBoundingRadius/ST_MinimumBoundingRadius.svg "ST_MinimumBoundingRadius")
+
 Format: `ST_MinimumBoundingRadius(geom: geometry)`
 
 Return type: `Struct<center: Geometry, radius: Double>`

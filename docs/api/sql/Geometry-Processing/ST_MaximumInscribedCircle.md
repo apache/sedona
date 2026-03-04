@@ -21,6 +21,8 @@
 
 Introduction: Finds the largest circle that is contained within a (multi)polygon, or which does not overlap any lines and points. Returns a row with fields:
 
+![ST_MaximumInscribedCircle](../../../image/ST_MaximumInscribedCircle/ST_MaximumInscribedCircle.svg "ST_MaximumInscribedCircle")
+
 - `center` - center point of the circle
 - `nearest` - nearest point from the center of the circle
 - `radius` - radius of the circle

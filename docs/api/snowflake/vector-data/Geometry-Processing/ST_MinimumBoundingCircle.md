@@ -21,6 +21,8 @@
 
 Introduction: Returns the smallest circle polygon that contains a geometry.
 
+![ST_MinimumBoundingCircle](../../../../image/ST_MinimumBoundingCircle/ST_MinimumBoundingCircle.svg "ST_MinimumBoundingCircle")
+
 Format: `ST_MinimumBoundingCircle(geom: geometry, [Optional] quadrantSegments:int)`
 
 Return type: `Geometry`

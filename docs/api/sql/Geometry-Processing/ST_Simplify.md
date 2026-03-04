@@ -21,6 +21,8 @@
 
 Introduction: This function simplifies the input geometry by applying the Douglas-Peucker algorithm.
 
+![ST_Simplify](../../../image/ST_Simplify/ST_Simplify.svg "ST_Simplify")
+
 !!!Note
     The simplification may not preserve topology, potentially producing invalid geometries. Use [ST_SimplifyPreserveTopology](ST_SimplifyPreserveTopology.md) to retain valid topology after simplification.
 

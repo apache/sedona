@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_OrientedEnvelope</text>
+  <path d="M 168.99 226.74 L 360.85 141.47 L 331.01 73.26 L 139.15 158.53 L 168.99 226.74 Z" fill="rgba(46,204,113,0.35)" stroke="#2ecc71" stroke-width="3" fill-rule="evenodd" />
+  <circle cx="154.07" cy="192.64" r="5" fill="#4a90d9" stroke="#4a90d9" stroke-width="1.5" />
+  <circle cx="196.71" cy="213.95" r="5" fill="#4a90d9" stroke="#4a90d9" stroke-width="1.5" />
+  <circle cx="345.93" cy="107.36" r="5" fill="#4a90d9" stroke="#4a90d9" stroke-width="1.5" />
+  <circle cx="303.29" cy="86.05" r="5" fill="#4a90d9" stroke="#4a90d9" stroke-width="1.5" />
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Returns the minimum-area rotated bounding rectangle</text>
+  <rect x="176" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="192" y="266" font-size="13" fill="#333333">Input</text>
+  <rect x="246" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="262" y="266" font-size="13" fill="#333333">Result</text>
+</svg>

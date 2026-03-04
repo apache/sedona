@@ -21,6 +21,8 @@
 
 Introduction: Generates a GeometryCollection composed of polygons that are formed from the linework of an input GeometryCollection. When the input does not contain any linework that forms a polygon, the function will return an empty GeometryCollection.
 
+![ST_Polygonize](../../../image/ST_Polygonize/ST_Polygonize.svg "ST_Polygonize")
+
 !!!note
     `ST_Polygonize` function assumes that the input geometries form a valid and simple closed linestring that can be turned into a polygon. If the input geometries are not noded or do not form such linestrings, the resulting GeometryCollection may be empty or may not contain the expected polygons.
 
