@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <marker id="arrowResult" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#2ecc71" />
+    </marker>
+    <marker id="arrowA" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+      <path d="M0,0 L7,2.5 L0,5" fill="#4a90d9" />
+    </marker>
+    <marker id="arrowGray" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+      <path d="M0,0 L7,2.5 L0,5" fill="#999999" />
+    </marker>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_LineSegments</text>
+  <polyline points="88.46,203.85 196.15,123.08 303.85,176.92 411.54,96.15" fill="none" stroke="#4a90d9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6,3" />
+  <circle cx="88.46" cy="203.85" r="3" fill="#4a90d9" />
+  <circle cx="196.15" cy="123.08" r="3" fill="#4a90d9" />
+  <circle cx="303.85" cy="176.92" r="3" fill="#4a90d9" />
+  <circle cx="411.54" cy="96.15" r="3" fill="#4a90d9" />
+  <polyline points="88.46,203.85 196.15,123.08" fill="none" stroke="#2ecc71" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="88.46" cy="203.85" r="3" fill="#2ecc71" />
+  <circle cx="196.15" cy="123.08" r="3" fill="#2ecc71" />
+  <text x="142" y="153" text-anchor="middle" font-size="13" fill="#2ecc71" font-weight="bold">seg 1</text>
+  <polyline points="196.15,123.08 303.85,176.92" fill="none" stroke="#27ae60" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="196.15" cy="123.08" r="3" fill="#27ae60" />
+  <circle cx="303.85" cy="176.92" r="3" fill="#27ae60" />
+  <text x="250" y="140" text-anchor="middle" font-size="13" fill="#27ae60" font-weight="bold">seg 2</text>
+  <polyline points="303.85,176.92 411.54,96.15" fill="none" stroke="#1abc9c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="303.85" cy="176.92" r="3" fill="#1abc9c" />
+  <circle cx="411.54" cy="96.15" r="3" fill="#1abc9c" />
+  <text x="358" y="127" text-anchor="middle" font-size="13" fill="#1abc9c" font-weight="bold">seg 3</text>
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Splits a LineString into an array of two-point segments</text>
+  <rect x="168" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="184" y="266" font-size="13" fill="#333333">Input</text>
+  <rect x="238" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="254" y="266" font-size="13" fill="#333333">Segments</text>
+</svg>

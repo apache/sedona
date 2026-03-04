@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <marker id="arrowResult" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#2ecc71" />
+    </marker>
+    <marker id="arrowA" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+      <path d="M0,0 L7,2.5 L0,5" fill="#4a90d9" />
+    </marker>
+    <marker id="arrowGray" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+      <path d="M0,0 L7,2.5 L0,5" fill="#999999" />
+    </marker>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_Collect</text>
+  <path d="M 112.5 218.75 L 222.5 218.75 L 222.5 108.75 L 112.5 108.75 L 112.5 218.75 Z" fill="rgba(74,144,217,0.15)" stroke="#4a90d9" stroke-width="2.5" fill-rule="evenodd" />
+  <path d="M 277.5 191.25 L 387.5 191.25 L 387.5 81.25 L 277.5 81.25 L 277.5 191.25 Z" fill="rgba(217,74,74,0.15)" stroke="#d94a4a" stroke-width="2.5" fill-rule="evenodd" />
+  <path d="M 98.75 232.5 L 401.25 232.5 L 401.25 67.5 L 98.75 67.5 L 98.75 232.5 Z" fill="none" stroke="#2ecc71" stroke-width="2" fill-rule="evenodd" stroke-dasharray="8,4" />
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Collects geometries into a multi-geometry</text>
+  <rect x="89" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="105" y="266" font-size="13" fill="#333333">Geometry A</text>
+  <rect x="199" y="255" width="12" height="12" rx="2" fill="#d94a4a" stroke="#d94a4a" stroke-width="1" />
+  <text x="215" y="266" font-size="13" fill="#333333">Geometry B</text>
+  <rect x="309" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="325" y="266" font-size="13" fill="#333333">Collected</text>
+</svg>
