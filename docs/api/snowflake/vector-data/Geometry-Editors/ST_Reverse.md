@@ -21,6 +21,8 @@
 
 Introduction: Return the geometry with vertex order reversed
 
+![ST_Reverse](../../../../image/ST_Reverse/ST_Reverse.svg "ST_Reverse")
+
 Format: `ST_Reverse (A:geometry)`
 
 Return type: `Geometry`

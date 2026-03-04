@@ -30,6 +30,8 @@ Build an appropriate `Geometry`, `MultiGeometry`, or `GeometryCollection` to con
 
 Note that this method does not "flatten" Geometries in the input, and hence if any MultiGeometries are contained in the input, a GeometryCollection containing them will be returned.
 
+![ST_Collect](../../../../image/ST_Collect/ST_Collect.svg "ST_Collect")
+
 Format
 
 `ST_Collect(*geom: geometry)`

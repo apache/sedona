@@ -29,6 +29,8 @@ The type numbers are:
 
 If the type parameter is omitted a multi-geometry of the highest dimension is returned.
 
+![ST_CollectionExtract](../../../../image/ST_CollectionExtract/ST_CollectionExtract.svg "ST_CollectionExtract")
+
 Format: `ST_CollectionExtract (A:geometry)`
 
 Format: `ST_CollectionExtract (A:geometry, type:Int)`

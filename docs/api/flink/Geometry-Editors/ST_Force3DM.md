@@ -24,6 +24,8 @@ Introduction: Forces the geometry into XYM mode. Retains any existing M coordina
 !!!Note
 Example output is after calling ST_AsText() on returned geometry, which adds M for in the WKT.
 
+![ST_Force3DM](../../../image/ST_Force3DM/ST_Force3DM.svg "ST_Force3DM")
+
 Format: `ST_Force3DM(geometry: Geometry, mValue: Double = 0.0)`
 
 Return type: `Geometry`

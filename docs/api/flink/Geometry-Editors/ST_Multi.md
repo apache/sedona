@@ -22,6 +22,8 @@
 Introduction: Returns a MultiGeometry object based on the geometry input.
 ST_Multi is basically an alias for ST_Collect with one geometry.
 
+![ST_Multi](../../../image/ST_Multi/ST_Multi.svg "ST_Multi")
+
 Format: `ST_Multi(geom: Geometry)`
 
 Return type: `Geometry`

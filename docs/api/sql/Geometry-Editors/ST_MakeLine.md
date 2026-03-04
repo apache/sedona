@@ -21,6 +21,8 @@
 
 Introduction: Creates a LineString containing the points of Point, MultiPoint, or LineString geometries. Other geometry types cause an error.
 
+![ST_MakeLine](../../../image/ST_MakeLine/ST_MakeLine.svg "ST_MakeLine")
+
 Format:
 
 `ST_MakeLine(geom1: Geometry, geom2: Geometry)`

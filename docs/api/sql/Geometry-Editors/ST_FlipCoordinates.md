@@ -21,6 +21,8 @@
 
 Introduction: Returns a version of the given geometry with X and Y axis flipped.
 
+![ST_FlipCoordinates](../../../image/ST_FlipCoordinates/ST_FlipCoordinates.svg "ST_FlipCoordinates")
+
 Format: `ST_FlipCoordinates(A: Geometry)`
 
 Return type: `Geometry`

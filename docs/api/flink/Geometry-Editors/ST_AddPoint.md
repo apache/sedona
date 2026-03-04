@@ -21,6 +21,8 @@
 
 Introduction: Return Linestring with additional point at the given index, if position is not available the point will be added at the end of line.
 
+![ST_AddPoint](../../../image/ST_AddPoint/ST_AddPoint.svg "ST_AddPoint")
+
 Format:
 
 `ST_AddPoint(geom: Geometry, point: Geometry, position: Integer)`
