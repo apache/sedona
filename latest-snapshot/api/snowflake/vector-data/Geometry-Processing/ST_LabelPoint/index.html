@@ -5240,8 +5240,8 @@ You're not viewing the latest stable version.
  -->
 
 <h1 id="st_labelpoint">ST_LabelPoint<a class="headerlink" href="#st_labelpoint" title="Permanent link">&para;</a></h1>
-<p>Introduction: <code>ST_LabelPoint</code> computes and returns a label point for a given polygon or geometry collection. The label point is chosen to be sufficiently far from boundaries of the geometry. For a regular Polygon this will be the
-centroid.</p>
+<p>Introduction: <code>ST_LabelPoint</code> computes and returns a label point for a given polygon or geometry collection. The label point is chosen to be sufficiently far from boundaries of the geometry. For a regular Polygon this will be the centroid.</p>
+<p><img alt="ST_LabelPoint" src="../../../../../image/ST_LabelPoint/ST_LabelPoint.svg" title="ST_LabelPoint" /></p>
 <p>The algorithm is derived from Tippecanoe’s <code>polygon_to_anchor</code>, an approximate solution for label point generation, designed to be faster than optimal algorithms like <code>polylabel</code>. It searches for a “good enough” label point within a limited number of iterations. For geometry collections, only the largest Polygon by area is considered. While <code>ST_Centroid</code> is a fast algorithm to calculate the center of mass of a (Multi)Polygon, it may place the point outside of the Polygon or near a boundary for concave shapes, polygons with holes, or MultiPolygons.</p>
 <p><code>ST_LabelPoint</code> takes up to 3 arguments,</p>
 <ul>
@@ -5310,7 +5310,7 @@ centroid.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="March 4, 2026 08:31:50 UTC">March 4, 2026 08:31:50</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="March 4, 2026 20:54:39 UTC">March 4, 2026 20:54:39</span>
   </span>
 
     
