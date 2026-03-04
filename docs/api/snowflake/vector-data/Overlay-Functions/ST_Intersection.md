@@ -21,6 +21,8 @@
 
 Introduction: Return the intersection geometry of A and B
 
+![ST_Intersection](../../../../image/ST_Intersection/ST_Intersection.svg "ST_Intersection")
+
 Format: `ST_Intersection (A:geometry, B:geometry)`
 
 Return type: `Geometry`

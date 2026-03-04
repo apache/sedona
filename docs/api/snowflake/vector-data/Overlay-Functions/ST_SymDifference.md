@@ -21,6 +21,8 @@
 
 Introduction: Return the symmetrical difference between geometry A and B (return parts of geometries which are in either of the sets, but not in their intersection)
 
+![ST_SymDifference](../../../../image/ST_SymDifference/ST_SymDifference.svg "ST_SymDifference")
+
 Format: `ST_SymDifference (A:geometry, B:geometry)`
 
 Return type: `Geometry`

@@ -21,6 +21,8 @@
 
 Introduction: Return the union of geometry A and B
 
+![ST_Union](../../../../image/ST_Union/ST_Union.svg "ST_Union")
+
 Format: `ST_Union (A:geometry, B:geometry)`
 
 Return type: `Geometry`

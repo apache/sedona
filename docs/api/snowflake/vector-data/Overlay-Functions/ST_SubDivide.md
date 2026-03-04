@@ -23,6 +23,8 @@ Introduction: Returns a multi-geometry divided based of given maximum number of 
 
 A minimum of 5 vertices is required for maxVertices parameter to form a closed box.
 
+![ST_SubDivide](../../../../image/ST_SubDivide/ST_SubDivide.svg "ST_SubDivide")
+
 Format: `ST_SubDivide(geom: geometry, maxVertices: int)`
 
 Return type: `Array<Geometry>`
