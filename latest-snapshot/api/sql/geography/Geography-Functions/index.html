@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../../../image/sedona_logo_symbol.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -5363,6 +5363,7 @@ You're not viewing the latest stable version.
 <thead>
 <tr>
 <th style="text-align: left;">Function</th>
+<th style="text-align: left;">Return type</th>
 <th style="text-align: left;">Description</th>
 <th style="text-align: left;">Since</th>
 </tr>
@@ -5370,36 +5371,43 @@ You're not viewing the latest stable version.
 <tbody>
 <tr>
 <td style="text-align: left;"><a href="../Geography-Constructors/ST_GeogFromEWKB/">ST_GeogFromEWKB</a></td>
+<td style="text-align: left;">Geography</td>
 <td style="text-align: left;">Construct a Geography from EWKB Binary. This function is an alias of <a href="../Geography-Constructors/ST_GeogFromWKB/">ST_GeogFromWKB</a>.</td>
 <td style="text-align: left;">v1.8.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Geography-Constructors/ST_GeogFromEWKT/">ST_GeogFromEWKT</a></td>
+<td style="text-align: left;">Geography</td>
 <td style="text-align: left;">Construct a Geography from OGC Extended WKT.</td>
 <td style="text-align: left;">v1.8.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Geography-Constructors/ST_GeogFromGeoHash/">ST_GeogFromGeoHash</a></td>
+<td style="text-align: left;">Geography</td>
 <td style="text-align: left;">Create Geography from geohash string and optional precision</td>
 <td style="text-align: left;">v1.8.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Geography-Constructors/ST_GeogFromWKB/">ST_GeogFromWKB</a></td>
+<td style="text-align: left;">Geography</td>
 <td style="text-align: left;">Construct a Geography from WKB Binary.</td>
 <td style="text-align: left;">v1.8.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Geography-Constructors/ST_GeogFromWKT/">ST_GeogFromWKT</a></td>
+<td style="text-align: left;">Geography</td>
 <td style="text-align: left;">Construct a Geography from WKT. If SRID is not set, it defaults to 0 (unknown).</td>
 <td style="text-align: left;">v1.8.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Geography-Constructors/ST_GeogToGeometry/">ST_GeogToGeometry</a></td>
+<td style="text-align: left;">Geometry</td>
 <td style="text-align: left;">This function constructs a planar Geometry object from a Geography. While Sedona makes every effort to preserve the original spatial object, the conversion is not always exact because Geography and...</td>
 <td style="text-align: left;">v1.8.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Geography-Constructors/ST_GeomToGeography/">ST_GeomToGeography</a></td>
+<td style="text-align: left;">Geography</td>
 <td style="text-align: left;">This function constructs a Geography object from a planar Geometry. This function is intended for geometries defined in a Geographic Coordinate Reference System (CRS), most commonly WGS84 (EPSG:432...</td>
 <td style="text-align: left;">v1.8.0</td>
 </tr>
@@ -5411,6 +5419,7 @@ You're not viewing the latest stable version.
 <thead>
 <tr>
 <th style="text-align: left;">Function</th>
+<th style="text-align: left;">Return type</th>
 <th style="text-align: left;">Description</th>
 <th style="text-align: left;">Since</th>
 </tr>
@@ -5418,11 +5427,13 @@ You're not viewing the latest stable version.
 <tbody>
 <tr>
 <td style="text-align: left;"><a href="ST_AsEWKT/">ST_AsEWKT</a></td>
+<td style="text-align: left;">String</td>
 <td style="text-align: left;">Return the Extended Well-Known Text representation of a geography. EWKT is an extended version of WKT which includes the SRID of the geography. The format originated in PostGIS but is supported by ...</td>
 <td style="text-align: left;">v1.8.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="ST_Envelope/">ST_Envelope</a></td>
+<td style="text-align: left;">Geography</td>
 <td style="text-align: left;">This function returns the bounding box (envelope) of A. It's important to note that the bounding box is calculated using a cylindrical topology, not a spherical one. If the envelope crosses the ant...</td>
 <td style="text-align: left;">v1.8.0</td>
 </tr>
@@ -5448,7 +5459,7 @@ You're not viewing the latest stable version.
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 27, 2026 06:37:29 UTC">February 27, 2026 06:37:29</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="March 4, 2026 08:31:50 UTC">March 4, 2026 08:31:50</span>
   </span>
 
     

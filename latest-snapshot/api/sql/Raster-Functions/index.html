@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../../image/sedona_logo_symbol.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
@@ -5582,6 +5582,7 @@ You're not viewing the latest stable version.
 <thead>
 <tr>
 <th style="text-align: left;">Function</th>
+<th style="text-align: left;">Return type</th>
 <th style="text-align: left;">Description</th>
 <th style="text-align: left;">Since</th>
 </tr>
@@ -5589,31 +5590,37 @@ You're not viewing the latest stable version.
 <tbody>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Constructors/RS_FromArcInfoAsciiGrid/">RS_FromArcInfoAsciiGrid</a></td>
+<td style="text-align: left;">Raster</td>
 <td style="text-align: left;">Returns a raster geometry from an Arc Info Ascii Grid file.</td>
 <td style="text-align: left;">v1.4.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Constructors/RS_FromGeoTiff/">RS_FromGeoTiff</a></td>
+<td style="text-align: left;">Raster</td>
 <td style="text-align: left;">Returns a raster geometry from a GeoTiff file.</td>
 <td style="text-align: left;">v1.4.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Constructors/RS_FromNetCDF/">RS_FromNetCDF</a></td>
+<td style="text-align: left;">Raster</td>
 <td style="text-align: left;">Returns a raster geometry representing the given record variable short name from a NetCDF file. This API reads the array data of the record variable <em>in memory</em> along with all its dimensions Since ...</td>
 <td style="text-align: left;">v1.5.1</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Constructors/RS_MakeEmptyRaster/">RS_MakeEmptyRaster</a></td>
+<td style="text-align: left;">Raster</td>
 <td style="text-align: left;">Returns an empty raster geometry. Every band in the raster is initialized to <code>0.0</code>.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Constructors/RS_MakeRaster/">RS_MakeRaster</a></td>
+<td style="text-align: left;">Raster</td>
 <td style="text-align: left;">Creates a raster from the given array of pixel values. The width, height, geo-reference information, and the CRS will be taken from the given reference raster. The data type of the resulting raster...</td>
 <td style="text-align: left;">v1.6.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Constructors/RS_NetCDFInfo/">RS_NetCDFInfo</a></td>
+<td style="text-align: left;">String</td>
 <td style="text-align: left;">Returns a string containing names of the variables in a given netCDF file along with its dimensions.</td>
 <td style="text-align: left;"></td>
 </tr>
@@ -5625,6 +5632,7 @@ You're not viewing the latest stable version.
 <thead>
 <tr>
 <th style="text-align: left;">Function</th>
+<th style="text-align: left;">Return type</th>
 <th style="text-align: left;">Description</th>
 <th style="text-align: left;">Since</th>
 </tr>
@@ -5632,31 +5640,37 @@ You're not viewing the latest stable version.
 <tbody>
 <tr>
 <td style="text-align: left;"><a href="../Pixel-Functions/RS_PixelAsCentroid/">RS_PixelAsCentroid</a></td>
+<td style="text-align: left;">Geometry</td>
 <td style="text-align: left;">Returns the centroid (point geometry) of the specified pixel's area. The pixel coordinates specified are 1-indexed. If <code>colX</code> and <code>rowY</code> are out of bounds for the raster, they are interpolated assu...</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Pixel-Functions/RS_PixelAsCentroids/">RS_PixelAsCentroids</a></td>
+<td style="text-align: left;"><code>Array&lt;Struct&gt;</code></td>
 <td style="text-align: left;">Returns a list of the centroid point geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band. Each centroid represents the geometric center o...</td>
 <td style="text-align: left;">v1.5.1</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Pixel-Functions/RS_PixelAsPoint/">RS_PixelAsPoint</a></td>
+<td style="text-align: left;">Geometry</td>
 <td style="text-align: left;">Returns a point geometry of the specified pixel's upper-left corner. The pixel coordinates specified are 1-indexed.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Pixel-Functions/RS_PixelAsPoints/">RS_PixelAsPoints</a></td>
+<td style="text-align: left;"><code>Array&lt;Struct&gt;</code></td>
 <td style="text-align: left;">Returns a list of the pixel's upper-left corner point geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band.</td>
 <td style="text-align: left;">v1.5.1</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Pixel-Functions/RS_PixelAsPolygon/">RS_PixelAsPolygon</a></td>
+<td style="text-align: left;">Geometry</td>
 <td style="text-align: left;">Returns a polygon geometry that bounds the specified pixel. The pixel coordinates specified are 1-indexed. If <code>colX</code> and <code>rowY</code> are out of bounds for the raster, they are interpolated assuming the ...</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Pixel-Functions/RS_PixelAsPolygons/">RS_PixelAsPolygons</a></td>
+<td style="text-align: left;"><code>Array&lt;Struct&gt;</code></td>
 <td style="text-align: left;">Returns a list of the polygon geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band.</td>
 <td style="text-align: left;">v1.5.1</td>
 </tr>
@@ -5668,6 +5682,7 @@ You're not viewing the latest stable version.
 <thead>
 <tr>
 <th style="text-align: left;">Function</th>
+<th style="text-align: left;">Return type</th>
 <th style="text-align: left;">Description</th>
 <th style="text-align: left;">Since</th>
 </tr>
@@ -5675,16 +5690,19 @@ You're not viewing the latest stable version.
 <tbody>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Geometry-Functions/RS_ConvexHull/">RS_ConvexHull</a></td>
+<td style="text-align: left;">Geometry</td>
 <td style="text-align: left;">Return the convex hull geometry of the raster including the NoDataBandValue band pixels. For regular shaped and non-skewed rasters, this gives more or less the same result as RS_Envelope and hence ...</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Geometry-Functions/RS_Envelope/">RS_Envelope</a></td>
+<td style="text-align: left;">Geometry</td>
 <td style="text-align: left;">Returns the envelope of the raster as a Geometry.</td>
 <td style="text-align: left;">v1.4.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Geometry-Functions/RS_MinConvexHull/">RS_MinConvexHull</a></td>
+<td style="text-align: left;">Geometry</td>
 <td style="text-align: left;">Returns the min convex hull geometry of the raster <strong>excluding</strong> the NoDataBandValue band pixels, in the given band. If no band is specified, all the bands are considered when creating the min conv...</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
@@ -5696,6 +5714,7 @@ You're not viewing the latest stable version.
 <thead>
 <tr>
 <th style="text-align: left;">Function</th>
+<th style="text-align: left;">Return type</th>
 <th style="text-align: left;">Description</th>
 <th style="text-align: left;">Since</th>
 </tr>
@@ -5703,86 +5722,103 @@ You're not viewing the latest stable version.
 <tbody>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Accessors/RS_GeoReference/">RS_GeoReference</a></td>
+<td style="text-align: left;">String</td>
 <td style="text-align: left;">Returns the georeference metadata of raster as a string in GDAL or ESRI format. Default is GDAL if not specified.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Accessors/RS_GeoTransform/">RS_GeoTransform</a></td>
+<td style="text-align: left;">Struct</td>
 <td style="text-align: left;">Returns a struct of parameters that represent the GeoTransformation of the raster. The struct has the following schema:</td>
 <td style="text-align: left;">v1.5.1</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Accessors/RS_Height/">RS_Height</a></td>
+<td style="text-align: left;">Integer</td>
 <td style="text-align: left;">Returns the height of the raster.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Accessors/RS_RasterToWorldCoord/">RS_RasterToWorldCoord</a></td>
+<td style="text-align: left;">Geometry</td>
 <td style="text-align: left;">Returns the upper left X and Y coordinates of the given row and column of the given raster geometric units of the geo-referenced raster as a Point geometry. If any out of bounds values are given, t...</td>
 <td style="text-align: left;">v1.5.1</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Accessors/RS_RasterToWorldCoordX/">RS_RasterToWorldCoordX</a></td>
+<td style="text-align: left;">Double</td>
 <td style="text-align: left;">Returns the upper left X coordinate of the given row and column of the given raster geometric units of the geo-referenced raster. If any out of bounds values are given, the X coordinate of the assu...</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Accessors/RS_RasterToWorldCoordY/">RS_RasterToWorldCoordY</a></td>
+<td style="text-align: left;">Double</td>
 <td style="text-align: left;">Returns the upper left Y coordinate of the given row and column of the given raster geometric units of the geo-referenced raster. If any out of bounds values are given, the Y coordinate of the assu...</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Accessors/RS_Rotation/">RS_Rotation</a></td>
+<td style="text-align: left;">Double</td>
 <td style="text-align: left;">Returns the uniform rotation of the raster in radian.</td>
 <td style="text-align: left;">v1.5.1</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Accessors/RS_ScaleX/">RS_ScaleX</a></td>
+<td style="text-align: left;">Double</td>
 <td style="text-align: left;">Returns the pixel width of the raster in CRS units.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Accessors/RS_ScaleY/">RS_ScaleY</a></td>
+<td style="text-align: left;">Double</td>
 <td style="text-align: left;">Returns the pixel height of the raster in CRS units.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Accessors/RS_SkewX/">RS_SkewX</a></td>
+<td style="text-align: left;">Double</td>
 <td style="text-align: left;">Returns the X skew or rotation parameter.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Accessors/RS_SkewY/">RS_SkewY</a></td>
+<td style="text-align: left;">Double</td>
 <td style="text-align: left;">Returns the Y skew or rotation parameter.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Accessors/RS_UpperLeftX/">RS_UpperLeftX</a></td>
+<td style="text-align: left;">Double</td>
 <td style="text-align: left;">Returns the X coordinate of the upper-left corner of the raster.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Accessors/RS_UpperLeftY/">RS_UpperLeftY</a></td>
+<td style="text-align: left;">Double</td>
 <td style="text-align: left;">Returns the Y coordinate of the upper-left corner of the raster.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Accessors/RS_Width/">RS_Width</a></td>
+<td style="text-align: left;">Integer</td>
 <td style="text-align: left;">Returns the width of the raster.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Accessors/RS_WorldToRasterCoord/">RS_WorldToRasterCoord</a></td>
+<td style="text-align: left;">Geometry</td>
 <td style="text-align: left;">Returns the grid coordinate of the given world coordinates as a Point.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Accessors/RS_WorldToRasterCoordX/">RS_WorldToRasterCoordX</a></td>
+<td style="text-align: left;">Integer</td>
 <td style="text-align: left;">Returns the X coordinate of the grid coordinate of the given world coordinates as an integer.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Accessors/RS_WorldToRasterCoordY/">RS_WorldToRasterCoordY</a></td>
+<td style="text-align: left;">Integer</td>
 <td style="text-align: left;">Returns the Y coordinate of the grid coordinate of the given world coordinates as an integer.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
@@ -5794,6 +5830,7 @@ You're not viewing the latest stable version.
 <thead>
 <tr>
 <th style="text-align: left;">Function</th>
+<th style="text-align: left;">Return type</th>
 <th style="text-align: left;">Description</th>
 <th style="text-align: left;">Since</th>
 </tr>
@@ -5801,46 +5838,55 @@ You're not viewing the latest stable version.
 <tbody>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Band-Accessors/RS_Band/">RS_Band</a></td>
+<td style="text-align: left;">Raster</td>
 <td style="text-align: left;">Returns a new raster consisting 1 or more bands of an existing raster. It can build new rasters from existing ones, export only selected bands from a multiband raster, or rearrange the order of ban...</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Band-Accessors/RS_BandIsNoData/">RS_BandIsNoData</a></td>
+<td style="text-align: left;">Boolean</td>
 <td style="text-align: left;">Returns true if the band is filled with only nodata values. Band 1 is assumed if not specified.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Band-Accessors/RS_BandNoDataValue/">RS_BandNoDataValue</a></td>
+<td style="text-align: left;">Double</td>
 <td style="text-align: left;">Returns the no data value of the given band of the given raster. If no band is given, band 1 is assumed. The band parameter is 1-indexed. If there is no data value associated with the given band, R...</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Band-Accessors/RS_BandPixelType/">RS_BandPixelType</a></td>
+<td style="text-align: left;">String</td>
 <td style="text-align: left;">Returns the datatype of each pixel in the given band of the given raster in string format. The band parameter is 1-indexed. If no band is specified, band 1 is assumed.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Band-Accessors/RS_Count/">RS_Count</a></td>
+<td style="text-align: left;">Long</td>
 <td style="text-align: left;">Returns the number of pixels in a given band. If band is not specified then it defaults to <code>1</code>.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Band-Accessors/RS_SummaryStats/">RS_SummaryStats</a></td>
+<td style="text-align: left;">Double</td>
 <td style="text-align: left;">Returns summary statistic for a particular band based on the <code>statType</code> parameter. The function defaults to band index of <code>1</code> when <code>band</code> is not specified and excludes noDataValue if `excludeNoData...</td>
 <td style="text-align: left;">v1.6.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Band-Accessors/RS_SummaryStatsAll/">RS_SummaryStatsAll</a></td>
+<td style="text-align: left;">Struct</td>
 <td style="text-align: left;">Returns summary stats struct consisting of count, sum, mean, stddev, min, max for a given band in raster. If band is not specified then it defaults to <code>1</code>.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Band-Accessors/RS_ZonalStats/">RS_ZonalStats</a></td>
+<td style="text-align: left;">Double</td>
 <td style="text-align: left;">This returns a statistic value specified by <code>statType</code> over the region of interest defined by <code>zone</code>. It computes the statistic from the pixel values within the ROI geometry and returns the result....</td>
 <td style="text-align: left;">v1.5.1</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Band-Accessors/RS_ZonalStatsAll/">RS_ZonalStatsAll</a></td>
+<td style="text-align: left;">Struct</td>
 <td style="text-align: left;">Returns a struct of statistic values, where each statistic is computed over a region defined by the <code>zone</code> geometry. The struct has the following schema:</td>
 <td style="text-align: left;">v1.5.1</td>
 </tr>
@@ -5852,6 +5898,7 @@ You're not viewing the latest stable version.
 <thead>
 <tr>
 <th style="text-align: left;">Function</th>
+<th style="text-align: left;">Return type</th>
 <th style="text-align: left;">Description</th>
 <th style="text-align: left;">Since</th>
 </tr>
@@ -5859,16 +5906,19 @@ You're not viewing the latest stable version.
 <tbody>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Predicates/RS_Contains/">RS_Contains</a></td>
+<td style="text-align: left;">Boolean</td>
 <td style="text-align: left;">Returns true if the geometry or raster on the left side contains the geometry or raster on the right side. The convex hull of the raster is considered in the test.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Predicates/RS_Intersects/">RS_Intersects</a></td>
+<td style="text-align: left;">Boolean</td>
 <td style="text-align: left;">Returns true if raster or geometry on the left side intersects with the raster or geometry on the right side. The convex hull of the raster is considered in the test.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Predicates/RS_Within/">RS_Within</a></td>
+<td style="text-align: left;">Boolean</td>
 <td style="text-align: left;">Returns true if the geometry or raster on the left side is within the geometry or raster on the right side. The convex hull of the raster is considered in the test.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
@@ -5880,6 +5930,7 @@ You're not viewing the latest stable version.
 <thead>
 <tr>
 <th style="text-align: left;">Function</th>
+<th style="text-align: left;">Return type</th>
 <th style="text-align: left;">Description</th>
 <th style="text-align: left;">Since</th>
 </tr>
@@ -5887,101 +5938,121 @@ You're not viewing the latest stable version.
 <tbody>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Operators/RS_AddBand/">RS_AddBand</a></td>
+<td style="text-align: left;">Raster</td>
 <td style="text-align: left;">Adds a new band to a raster <code>toRaster</code> at a specified index <code>toRasterIndex</code>. The new band's values are copied from <code>fromRaster</code> at a specified band index <code>fromBand</code>. If no <code>toRasterIndex</code> is provided...</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Operators/RS_Clip/">RS_Clip</a></td>
+<td style="text-align: left;">Raster</td>
 <td style="text-align: left;">Returns a raster that is clipped by the given geometry.</td>
 <td style="text-align: left;">v1.5.1</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Operators/RS_Interpolate/">RS_Interpolate</a></td>
+<td style="text-align: left;">Raster</td>
 <td style="text-align: left;">This function performs interpolation on a raster using the Inverse Distance Weighted (IDW) method. This method estimates cell values by averaging the values of sample data points in the vicinity of...</td>
 <td style="text-align: left;">v1.6.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Operators/RS_MetaData/">RS_MetaData</a></td>
+<td style="text-align: left;"><code>Array&lt;Double&gt;</code></td>
 <td style="text-align: left;">Returns the metadata of the raster as a struct. The struct has the following schema:</td>
 <td style="text-align: left;">v1.4.1</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Operators/RS_NormalizeAll/">RS_NormalizeAll</a></td>
+<td style="text-align: left;">Raster</td>
 <td style="text-align: left;">Normalizes values in all bands of a raster between a given normalization range. The function maintains the data type of the raster values by ensuring that the normalized values are cast back to the...</td>
 <td style="text-align: left;">v1.6.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Operators/RS_NumBands/">RS_NumBands</a></td>
+<td style="text-align: left;">Integer</td>
 <td style="text-align: left;">Returns the number of the bands in the raster.</td>
 <td style="text-align: left;">v1.4.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Operators/RS_ReprojectMatch/">RS_ReprojectMatch</a></td>
+<td style="text-align: left;">Raster</td>
 <td style="text-align: left;">Reproject a raster to match the geo-reference, CRS, and envelope of a reference raster. The output raster always have the same extent and resolution as the reference raster. For pixels not covered ...</td>
 <td style="text-align: left;">v1.6.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Operators/RS_Resample/">RS_Resample</a></td>
+<td style="text-align: left;">Raster</td>
 <td style="text-align: left;">Resamples a raster using a given resampling algorithm and new dimensions (width and height), a new grid corner to pivot the raster at (gridX and gridY) and a set of georeferencing attributes (scale...</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Operators/RS_SetBandNoDataValue/">RS_SetBandNoDataValue</a></td>
+<td style="text-align: left;">Raster</td>
 <td style="text-align: left;">This sets the no data value for a specified band in the raster. If the band index is not provided, band 1 is assumed by default. Passing a <code>null</code> value for <code>noDataValue</code> will remove the no data val...</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Operators/RS_SetGeoReference/">RS_SetGeoReference</a></td>
+<td style="text-align: left;">Raster</td>
 <td style="text-align: left;">Sets the Georeference information of an object in a single call. Accepts inputs in <code>GDAL</code> and <code>ESRI</code> format. Default format is <code>GDAL</code>. If all 6 parameters are not provided then will return null.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Operators/RS_SetPixelType/">RS_SetPixelType</a></td>
+<td style="text-align: left;">Raster</td>
 <td style="text-align: left;">Returns a modified raster with the desired pixel data type.</td>
 <td style="text-align: left;">v1.6.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Operators/RS_SetCRS/">RS_SetCRS</a></td>
+<td style="text-align: left;">Raster</td>
 <td style="text-align: left;">Sets the coordinate reference system (CRS) of the raster using a CRS definition string. Accepts EPSG codes, WKT1, WKT2, PROJ strings, and PROJJSON.</td>
 <td style="text-align: left;">v1.9.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Operators/RS_SetSRID/">RS_SetSRID</a></td>
+<td style="text-align: left;">Raster</td>
 <td style="text-align: left;">Sets the spatial reference system identifier (SRID) of the raster geometry.</td>
 <td style="text-align: left;">v1.4.1</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Operators/RS_SetValue/">RS_SetValue</a></td>
+<td style="text-align: left;">Raster</td>
 <td style="text-align: left;">Returns a raster by replacing the value of pixel specified by <code>colX</code> and <code>rowY</code>.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Operators/RS_SetValues/">RS_SetValues</a></td>
+<td style="text-align: left;">Raster</td>
 <td style="text-align: left;">Returns a raster by replacing the values of pixels in a specified rectangular region. The top left corner of the region is defined by the <code>colX</code> and <code>rowY</code> coordinates. The <code>width</code> and <code>height</code> par...</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Operators/RS_SRID/">RS_SRID</a></td>
+<td style="text-align: left;">Integer</td>
 <td style="text-align: left;">Returns the spatial reference system identifier (SRID) of the raster geometry.</td>
 <td style="text-align: left;">v1.4.1</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Operators/RS_CRS/">RS_CRS</a></td>
+<td style="text-align: left;">String</td>
 <td style="text-align: left;">Returns the coordinate reference system (CRS) of the raster as a string in the specified format (projjson, wkt2, wkt1, proj). Defaults to PROJJSON.</td>
 <td style="text-align: left;">v1.9.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Operators/RS_Union/">RS_Union</a></td>
+<td style="text-align: left;">Raster</td>
 <td style="text-align: left;">Returns a combined multi-band raster from 2 or more input Rasters. The order of bands in the resultant raster will be in the order of the input rasters. For example if <code>RS_Union</code> is called on two 2...</td>
 <td style="text-align: left;">v1.6.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Operators/RS_Value/">RS_Value</a></td>
+<td style="text-align: left;">Double</td>
 <td style="text-align: left;">Returns the value at the given point in the raster. If no band number is specified it defaults to 1.</td>
 <td style="text-align: left;">v1.4.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Operators/RS_Values/">RS_Values</a></td>
+<td style="text-align: left;"><code>Array&lt;Double&gt;</code></td>
 <td style="text-align: left;">Returns the values at the given points or grid coordinates in the raster. If no band number is specified it defaults to 1.</td>
 <td style="text-align: left;">v1.4.0</td>
 </tr>
@@ -5993,6 +6064,7 @@ You're not viewing the latest stable version.
 <thead>
 <tr>
 <th style="text-align: left;">Function</th>
+<th style="text-align: left;">Return type</th>
 <th style="text-align: left;">Description</th>
 <th style="text-align: left;">Since</th>
 </tr>
@@ -6000,11 +6072,13 @@ You're not viewing the latest stable version.
 <tbody>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Tiles/RS_Tile/">RS_Tile</a></td>
+<td style="text-align: left;"><code>Array&lt;Raster&gt;</code></td>
 <td style="text-align: left;">Returns an array of rasters resulting from the split of the input raster based upon the desired dimensions of the output rasters.</td>
 <td style="text-align: left;">v1.5.1</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Tiles/RS_TileExplode/">RS_TileExplode</a></td>
+<td style="text-align: left;">Struct</td>
 <td style="text-align: left;">Generates records containing raster tiles resulting from the split of the input raster based upon the desired dimensions of the output rasters.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
@@ -6016,6 +6090,7 @@ You're not viewing the latest stable version.
 <thead>
 <tr>
 <th style="text-align: left;">Function</th>
+<th style="text-align: left;">Return type</th>
 <th style="text-align: left;">Description</th>
 <th style="text-align: left;">Since</th>
 </tr>
@@ -6023,16 +6098,19 @@ You're not viewing the latest stable version.
 <tbody>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Map-Algebra-Operators/RS_AddBandFromArray/">RS_AddBandFromArray</a></td>
+<td style="text-align: left;">Raster</td>
 <td style="text-align: left;">Add a band to a raster from an array of doubles.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Map-Algebra-Operators/RS_BandAsArray/">RS_BandAsArray</a></td>
+<td style="text-align: left;"><code>Array&lt;Double&gt;</code></td>
 <td style="text-align: left;">Extract a band from a raster as an array of doubles.</td>
 <td style="text-align: left;">v1.4.1</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Map-Algebra-Operators/RS_MapAlgebra/">RS_MapAlgebra</a></td>
+<td style="text-align: left;">Raster</td>
 <td style="text-align: left;">Apply a map algebra script on a raster.</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
@@ -6044,6 +6122,7 @@ You're not viewing the latest stable version.
 <thead>
 <tr>
 <th style="text-align: left;">Function</th>
+<th style="text-align: left;">Return type</th>
 <th style="text-align: left;">Description</th>
 <th style="text-align: left;">Since</th>
 </tr>
@@ -6051,111 +6130,133 @@ You're not viewing the latest stable version.
 <tbody>
 <tr>
 <td style="text-align: left;"><a href="../Map-Algebra-Operators/RS_Add/">RS_Add</a></td>
+<td style="text-align: left;"><code>Array&lt;Double&gt;</code></td>
 <td style="text-align: left;">Add two spectral bands in a Geotiff image</td>
 <td style="text-align: left;">v1.1.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Map-Algebra-Operators/RS_Array/">RS_Array</a></td>
+<td style="text-align: left;"><code>Array&lt;Double&gt;</code></td>
 <td style="text-align: left;">Create an array that is filled by the given value</td>
 <td style="text-align: left;">v1.1.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Map-Algebra-Operators/RS_BitwiseAND/">RS_BitwiseAND</a></td>
+<td style="text-align: left;"><code>Array&lt;Double&gt;</code></td>
 <td style="text-align: left;">Find Bitwise AND between two bands of Geotiff image</td>
 <td style="text-align: left;">v1.1.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Map-Algebra-Operators/RS_BitwiseOR/">RS_BitwiseOR</a></td>
+<td style="text-align: left;"><code>Array&lt;Double&gt;</code></td>
 <td style="text-align: left;">Find Bitwise OR between two bands of Geotiff image</td>
 <td style="text-align: left;">v1.1.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Map-Algebra-Operators/RS_CountValue/">RS_CountValue</a></td>
+<td style="text-align: left;">Integer</td>
 <td style="text-align: left;">Returns count of a particular value from a spectral band in a raster image</td>
 <td style="text-align: left;">v1.1.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Map-Algebra-Operators/RS_Divide/">RS_Divide</a></td>
+<td style="text-align: left;"><code>Array&lt;Double&gt;</code></td>
 <td style="text-align: left;">Divide band1 with band2 from a geotiff image</td>
 <td style="text-align: left;">v1.1.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Map-Algebra-Operators/RS_FetchRegion/">RS_FetchRegion</a></td>
+<td style="text-align: left;"><code>Array&lt;Double&gt;</code></td>
 <td style="text-align: left;">Fetch a subset of region from given Geotiff image based on minimumX, minimumY, maximumX and maximumY index as well original height and width of image</td>
 <td style="text-align: left;">v1.1.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Map-Algebra-Operators/RS_GreaterThan/">RS_GreaterThan</a></td>
+<td style="text-align: left;"><code>Array&lt;Double&gt;</code></td>
 <td style="text-align: left;">Mask all the values with 1 which are greater than a particular target value</td>
 <td style="text-align: left;">v1.1.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Map-Algebra-Operators/RS_GreaterThanEqual/">RS_GreaterThanEqual</a></td>
+<td style="text-align: left;"><code>Array&lt;Double&gt;</code></td>
 <td style="text-align: left;">Mask all the values with 1 which are greater than equal to a particular target value</td>
 <td style="text-align: left;">v1.1.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Map-Algebra-Operators/RS_LessThan/">RS_LessThan</a></td>
+<td style="text-align: left;"><code>Array&lt;Double&gt;</code></td>
 <td style="text-align: left;">Mask all the values with 1 which are less than a particular target value</td>
 <td style="text-align: left;">v1.1.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Map-Algebra-Operators/RS_LessThanEqual/">RS_LessThanEqual</a></td>
+<td style="text-align: left;"><code>Array&lt;Double&gt;</code></td>
 <td style="text-align: left;">Mask all the values with 1 which are less than equal to a particular target value</td>
 <td style="text-align: left;">v1.1.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Map-Algebra-Operators/RS_LogicalDifference/">RS_LogicalDifference</a></td>
+<td style="text-align: left;"><code>Array&lt;Double&gt;</code></td>
 <td style="text-align: left;">Return value from band 1 if a value in band1 and band2 are different, else return 0</td>
 <td style="text-align: left;">v1.1.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Map-Algebra-Operators/RS_LogicalOver/">RS_LogicalOver</a></td>
+<td style="text-align: left;"><code>Array&lt;Double&gt;</code></td>
 <td style="text-align: left;">Return value from band1 if it's not equal to 0, else return band2 value</td>
 <td style="text-align: left;">v1.1.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Map-Algebra-Operators/RS_Mean/">RS_Mean</a></td>
+<td style="text-align: left;">Double</td>
 <td style="text-align: left;">Returns Mean value for a spectral band in a Geotiff image</td>
 <td style="text-align: left;">v1.1.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Map-Algebra-Operators/RS_Mode/">RS_Mode</a></td>
+<td style="text-align: left;"><code>Array&lt;Double&gt;</code></td>
 <td style="text-align: left;">Returns Mode from a spectral band in a Geotiff image in form of an array</td>
 <td style="text-align: left;">v1.1.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Map-Algebra-Operators/RS_Modulo/">RS_Modulo</a></td>
+<td style="text-align: left;"><code>Array&lt;Double&gt;</code></td>
 <td style="text-align: left;">Find modulo of pixels with respect to a particular value</td>
 <td style="text-align: left;">v1.1.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Map-Algebra-Operators/RS_Multiply/">RS_Multiply</a></td>
+<td style="text-align: left;"><code>Array&lt;Double&gt;</code></td>
 <td style="text-align: left;">Multiply two spectral bands in a Geotiff image</td>
 <td style="text-align: left;">v1.1.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Map-Algebra-Operators/RS_MultiplyFactor/">RS_MultiplyFactor</a></td>
+<td style="text-align: left;"><code>Array&lt;Double&gt;</code></td>
 <td style="text-align: left;">Multiply a factor to a spectral band in a geotiff image</td>
 <td style="text-align: left;">v1.1.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Map-Algebra-Operators/RS_Normalize/">RS_Normalize</a></td>
+<td style="text-align: left;"><code>Array&lt;Double&gt;</code></td>
 <td style="text-align: left;">Normalize the value in the array to [0, 255]. Uniform arrays are set to 0 after normalization.</td>
 <td style="text-align: left;">v1.1.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Map-Algebra-Operators/RS_NormalizedDifference/">RS_NormalizedDifference</a></td>
+<td style="text-align: left;"><code>Array&lt;Double&gt;</code></td>
 <td style="text-align: left;">Returns Normalized Difference between two bands(band2 and band1) in a Geotiff image(example: NDVI, NDBI)</td>
 <td style="text-align: left;">v1.1.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Map-Algebra-Operators/RS_SquareRoot/">RS_SquareRoot</a></td>
+<td style="text-align: left;"><code>Array&lt;Double&gt;</code></td>
 <td style="text-align: left;">Find Square root of band values in a geotiff image</td>
 <td style="text-align: left;">v1.1.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Map-Algebra-Operators/RS_Subtract/">RS_Subtract</a></td>
+<td style="text-align: left;"><code>Array&lt;Double&gt;</code></td>
 <td style="text-align: left;">Subtract two spectral bands in a Geotiff image(band2 - band1)</td>
 <td style="text-align: left;">v1.1.0</td>
 </tr>
@@ -6167,6 +6268,7 @@ You're not viewing the latest stable version.
 <thead>
 <tr>
 <th style="text-align: left;">Function</th>
+<th style="text-align: left;">Return type</th>
 <th style="text-align: left;">Description</th>
 <th style="text-align: left;">Since</th>
 </tr>
@@ -6174,6 +6276,7 @@ You're not viewing the latest stable version.
 <tbody>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Aggregate-Functions/RS_Union_Aggr/">RS_Union_Aggr</a></td>
+<td style="text-align: left;">Raster</td>
 <td style="text-align: left;">This function combines multiple rasters into a single multiband raster by stacking the bands of each input raster sequentially. The function arranges the bands in the output raster according to the...</td>
 <td style="text-align: left;">v1.5.1</td>
 </tr>
@@ -6185,6 +6288,7 @@ You're not viewing the latest stable version.
 <thead>
 <tr>
 <th style="text-align: left;">Function</th>
+<th style="text-align: left;">Return type</th>
 <th style="text-align: left;">Description</th>
 <th style="text-align: left;">Since</th>
 </tr>
@@ -6192,16 +6296,19 @@ You're not viewing the latest stable version.
 <tbody>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Output/RS_AsBase64/">RS_AsBase64</a></td>
+<td style="text-align: left;">String</td>
 <td style="text-align: left;">Returns a base64 encoded string of the given raster. If the datatype is integral then this function internally takes the first 4 bands as RGBA, and converts them to the PNG format, finally produces...</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Output/RS_AsImage/">RS_AsImage</a></td>
+<td style="text-align: left;">String</td>
 <td style="text-align: left;">Returns a HTML that when rendered using an HTML viewer or via a Jupyter Notebook, displays the raster as a square image of side length <code>imageWidth</code>. Optionally, an imageWidth parameter can be passe...</td>
 <td style="text-align: left;">v1.5.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Raster-Output/RS_AsMatrix/">RS_AsMatrix</a></td>
+<td style="text-align: left;">String</td>
 <td style="text-align: left;">Returns a string, that when printed, outputs the raster band as a pretty printed 2D matrix. All the values of the raster are cast to double for the string. RS_AsMatrix allows specifying the number ...</td>
 <td style="text-align: left;"></td>
 </tr>
@@ -6227,7 +6334,7 @@ You're not viewing the latest stable version.
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="March 2, 2026 19:23:47 UTC">March 2, 2026 19:23:47</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="March 4, 2026 08:31:50 UTC">March 4, 2026 08:31:50</span>
   </span>
 
     
