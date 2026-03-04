@@ -45,6 +45,8 @@ ST_GeometricMedian(geom: Geometry)
 
 Default parameters: `tolerance: 1e-6, maxIter: 1000, failIfNotConverged: false`
 
+Return type: `Geometry`
+
 Since: `v1.4.1`
 
 SQL Example

@@ -37,6 +37,8 @@ RS_SetValues(raster: Raster, bandIndex: Integer, colX: Integer, rowY: Integer, w
 RS_SetValues(raster: Raster, bandIndex: Integer, colX: Integer, rowY: Integer, width: Integer, height: Integer, newValues: ARRAY[Double])
 ```
 
+Return type: `Raster`
+
 Since: `v1.5.0`
 
 The `colX`, `rowY`, and `bandIndex` are 1-indexed. If `keepNoData` is `true`, the pixels with NoData value will not be

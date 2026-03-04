@@ -23,6 +23,8 @@ Introduction: Returns GeoHash of the geometry with given precision
 
 Format: `ST_GeoHash(geom: Geometry, precision: Integer)`
 
+Return type: `String`
+
 Since: `v1.1.1`
 
 SQL Example

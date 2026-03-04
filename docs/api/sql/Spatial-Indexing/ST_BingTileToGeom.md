@@ -26,6 +26,8 @@ Introduction: Returns an array of Polygons for the corresponding Bing Tile quadk
 
 Format: `ST_BingTileToGeom(quadKeys: Array[String])`
 
+Return type: `Array<Geometry>`
+
 Since: `v1.9.0`
 
 SQL Example

@@ -27,6 +27,8 @@ Format:
 
 `ST_LineSegments(geom: Geometry)`
 
+Return type: `Array<Geometry>`
+
 Since: `v1.7.1`
 
 SQL Example:

@@ -23,6 +23,8 @@ Introduction: Return value from band 1 if a value in band1 and band2 are differe
 
 Format: `RS_LogicalDifference (Band1: ARRAY[Double], Band2: ARRAY[Double])`
 
+Return type: `Array<Double>`
+
 Since: `v1.1.0`
 
 SQL Example

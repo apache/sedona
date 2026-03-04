@@ -23,6 +23,8 @@ Introduction: Returns the envelope of the raster as a Geometry.
 
 Format: `RS_Envelope (raster: Raster)`
 
+Return type: `Geometry`
+
 Since: `v1.4.0`
 
 SQL Example

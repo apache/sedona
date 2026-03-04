@@ -42,6 +42,8 @@ Formats:
 
 `RS_SummaryStats(raster: Raster, statType: String)`
 
+Return type: `Double`
+
 Since: `v1.6.0`
 
 SQL Example

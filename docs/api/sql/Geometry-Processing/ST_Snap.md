@@ -23,6 +23,8 @@ Introduction: Snaps the vertices and segments of the `input` geometry to `refere
 
 If the minimum distance between the geometries exceeds the `tolerance`, the `input` geometry is returned unmodified. Adjusting the `tolerance` value allows tuning which vertices should snap to the `reference` and which remain untouched.
 
+Return type: `Geometry`
+
 Since: `v1.6.0`
 
 Format: `ST_Snap(input: Geometry, reference: Geometry, tolerance: double)`

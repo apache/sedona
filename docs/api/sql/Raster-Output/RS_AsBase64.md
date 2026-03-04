@@ -30,6 +30,8 @@ Format:
 
 `RS_AsBase64(raster: Raster)`
 
+Return type: `String`
+
 Since: `v1.5.0`
 
 SQL Example

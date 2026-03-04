@@ -48,6 +48,8 @@ For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Af
 
 Format: `RS_GeoReference(raster: Raster, format: String = "GDAL")`
 
+Return type: `String`
+
 Since: `v1.5.0`
 
 Difference between format representation is as follows:

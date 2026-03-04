@@ -23,6 +23,8 @@ Introduction: Find Square root of band values in a geotiff image
 
 Format: `RS_SquareRoot (Band: ARRAY[Double])`
 
+Return type: `Array<Double>`
+
 Since: `v1.1.0`
 
 SQL Example

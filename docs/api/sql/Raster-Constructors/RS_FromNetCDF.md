@@ -35,6 +35,8 @@ Format 1: `RS_FromNetCDF(netCDF: ARRAY[Byte], recordVariableName: String)`
 
 Format 2: `RS_FromNetCDF(netCDF: ARRAY[Byte], recordVariableName: String, lonDimensionName: String, latDimensionName: String)`
 
+Return type: `Raster`
+
 Since: `v1.5.1`
 
 Spark Example:

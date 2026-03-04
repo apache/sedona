@@ -43,6 +43,8 @@ RS_AddBand(toRaster: Raster, fromRaster: Raster, fromBand: Integer = 1)
 RS_AddBand(toRaster: Raster, fromRaster: Raster)
 ```
 
+Return type: `Raster`
+
 Since: `v1.5.0`
 
 SQL Example

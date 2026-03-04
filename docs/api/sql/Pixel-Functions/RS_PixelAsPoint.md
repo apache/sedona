@@ -26,6 +26,8 @@ Introduction: Returns a point geometry of the specified pixel's upper-left corne
 
 Format: `RS_PixelAsPoint(raster: Raster, colX: Integer, rowY: Integer)`
 
+Return type: `Geometry`
+
 Since: `v1.5.0`
 
 SQL Example

@@ -28,6 +28,8 @@ It will support M coordinate if present since v1.5.0.
 
 Format: `ST_AsEWKT (A: Geometry)`
 
+Return type: `String`
+
 Since: `v1.2.1`
 
 SQL Example

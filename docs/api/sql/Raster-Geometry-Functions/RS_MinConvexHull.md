@@ -32,6 +32,8 @@ Format:
 
 `RS_MinConvexHull(raster: Raster, band: Integer)`
 
+Return type: `Geometry`
+
 Since: `v1.5.0`
 
 SQL Example

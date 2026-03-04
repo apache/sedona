@@ -23,6 +23,8 @@ Introduction: Returns Normalized Difference between two bands(band2 and band1) i
 
 Format: `RS_NormalizedDifference (Band1: ARRAY[Double], Band2: ARRAY[Double])`
 
+Return type: `Array<Double>`
+
 Since: `v1.1.0`
 
 SQL Example

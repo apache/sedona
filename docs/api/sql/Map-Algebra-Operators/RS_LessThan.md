@@ -23,6 +23,8 @@ Introduction: Mask all the values with 1 which are less than a particular target
 
 Format: `RS_LessThan (Band: ARRAY[Double], Target: Double)`
 
+Return type: `Array<Double>`
+
 Since: `v1.1.0`
 
 SQL Example

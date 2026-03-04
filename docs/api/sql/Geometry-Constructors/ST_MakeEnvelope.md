@@ -31,6 +31,8 @@ ST_MakeEnvelope(MinX: Double, MinY: Double, MaxX: Double, MaxY: Double)
 ST_MakeEnvelope(MinX: Double, MinY: Double, MaxX: Double, MaxY: Double, srid: Integer)
 ```
 
+Return type: `Geometry`
+
 Since: `v1.7.0`
 
 SQL Example

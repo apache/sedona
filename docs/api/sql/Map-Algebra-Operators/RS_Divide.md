@@ -23,6 +23,8 @@ Introduction: Divide band1 with band2 from a geotiff image
 
 Format: `RS_Divide (Band1: ARRAY[Double], Band2: ARRAY[Double])`
 
+Return type: `Array<Double>`
+
 Since: `v1.1.0`
 
 SQL Example

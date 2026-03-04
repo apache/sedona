@@ -37,6 +37,8 @@ Format:
 RS_Values (raster: Raster, xCoordinates: ARRAY[Integer], yCoordinates: ARRAY[Integer], band: Integer)
 ```
 
+Return type: `Array<Double>`
+
 Since: `v1.4.0`
 
 SQL Example

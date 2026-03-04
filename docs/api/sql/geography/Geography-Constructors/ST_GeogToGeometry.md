@@ -39,6 +39,8 @@ Format:
 
 `ST_GeogToGeometry (geog: Geography)`
 
+Return type: `Geometry`
+
 Since: `v1.8.0`
 
 SQL example:

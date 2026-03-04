@@ -23,6 +23,8 @@ Introduction: Return true if A is covered by B
 
 Format: `ST_CoveredBy (A: Geometry, B: Geometry)`
 
+Return type: `Boolean`
+
 Since: `v1.3.0`
 
 SQL Example

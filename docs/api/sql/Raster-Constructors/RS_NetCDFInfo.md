@@ -23,6 +23,8 @@ Introduction: Returns a string containing names of the variables in a given netC
 
 Format: `RS_NetCDFInfo(netCDF: ARRAY[Byte])`
 
+Return type: `String`
+
 Since: `1.5.1`
 
 Spark Example:

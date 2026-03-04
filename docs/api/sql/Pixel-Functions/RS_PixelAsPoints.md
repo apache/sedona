@@ -23,6 +23,8 @@ Introduction: Returns a list of the pixel's upper-left corner point geometry, th
 
 Format: `RS_PixelAsPoints(raster: Raster, band: Integer)`
 
+Return type: `Array<Struct<geom: Geometry, val: Double, x: Integer, y: Integer>>`
+
 Since: `v1.5.1`
 
 SQL Example

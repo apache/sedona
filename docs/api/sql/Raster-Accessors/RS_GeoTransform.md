@@ -33,6 +33,8 @@ Introduction: Returns a struct of parameters that represent the GeoTransformatio
 
 Format: `RS_GeoTransform(raster: Raster)`
 
+Return type: `Struct<Double, Double, Double, Double, Double, Double>`
+
 Since: `v1.5.1`
 
 SQL Example

@@ -29,6 +29,8 @@ Format:
 
 `RS_AddBandFromArray (raster: Raster, band: ARRAY[Double], bandIndex: Integer, noDataValue: Double)`
 
+Return type: `Raster`
+
 Since: `v1.5.0`
 
 The bandIndex is 1-based and must be between 1 and RS_NumBands(raster) + 1. It throws an exception if the bandIndex is out of range or the raster is null. If not specified, the noDataValue of the band is assumed to be null.

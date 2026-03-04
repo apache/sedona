@@ -27,6 +27,8 @@ Format:
 
 `ST_GeneratePoints(geom: Geometry, numPoints: Integer)`
 
+Return type: `Geometry`
+
 Since: `v1.6.1`
 
 SQL Example:

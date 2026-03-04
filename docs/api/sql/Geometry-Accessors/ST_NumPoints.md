@@ -30,6 +30,8 @@ Introduction: Returns number of points in a LineString
 
 Format: `ST_NumPoints(geom: Geometry)`
 
+Return type: `Integer`
+
 Since: `v1.4.1`
 
 SQL Example

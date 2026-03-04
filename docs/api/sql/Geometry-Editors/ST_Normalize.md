@@ -25,6 +25,8 @@ Format:
 
 `ST_Normalize(geom: Geometry)`
 
+Return type: `Geometry`
+
 Since: `v1.3.0`
 
 SQL Example

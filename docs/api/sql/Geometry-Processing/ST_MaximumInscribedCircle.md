@@ -29,6 +29,8 @@ For polygonal geometries, the function inscribes the circle within the boundary 
 
 Format: `ST_MaximumInscribedCircle(geometry: Geometry)`
 
+Return type: `Struct<center: Geometry, nearest: Geometry, radius: Double>`
+
 Since: `v1.6.1`
 
 SQL Example:

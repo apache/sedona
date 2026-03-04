@@ -23,6 +23,8 @@ Introduction: Return points of the geometry
 
 Format: `ST_NPoints (A: Geometry)`
 
+Return type: `Integer`
+
 Since: `v1.0.0`
 
 SQL Example

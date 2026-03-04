@@ -39,6 +39,8 @@ Format:
 RS_SetPixelType(raster: Raster, dataType: String)
 ```
 
+Return type: `Raster`
+
 Since: `v1.6.0`
 
 SQL Example:

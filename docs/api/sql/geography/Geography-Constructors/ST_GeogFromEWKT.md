@@ -25,6 +25,8 @@ Format:
 
 `ST_GeogFromEWKT (EWkt: String)`
 
+Return type: `Geography`
+
 Since: `v1.8.0`
 
 SQL example:

@@ -23,6 +23,8 @@ Introduction: Returns the Nth interior linestring ring of the polygon geometry. 
 
 Format: `ST_InteriorRingN(geom: Geometry, n: Integer)`
 
+Return type: `Geometry`
+
 Since: `v1.0.0`
 
 SQL Example

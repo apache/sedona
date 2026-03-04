@@ -23,6 +23,8 @@ Introduction: This variant of [ST_Union](ST_Union.md) operates on a single geome
 
 Format: `ST_UnaryUnion(geometry: Geometry)`
 
+Return type: `Geometry`
+
 Since: `v1.6.1`
 
 SQL Example

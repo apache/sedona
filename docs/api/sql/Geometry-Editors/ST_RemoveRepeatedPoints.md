@@ -27,6 +27,8 @@ Format:
 
 `ST_RemoveRepeatedPoints(geom: Geometry)`
 
+Return type: `Geometry`
+
 Since: `v1.7.0`
 
 SQL Example:

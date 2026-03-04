@@ -23,6 +23,8 @@ Introduction: Returns a list of the polygon geometry, the pixel value and its ra
 
 Format: `RS_PixelAsPolygons(raster: Raster, band: Integer)`
 
+Return type: `Array<Struct<geom: Geometry, val: Double, x: Integer, y: Integer>>`
+
 Since: `v1.5.1`
 
 SQL Example

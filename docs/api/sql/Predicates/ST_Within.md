@@ -23,6 +23,8 @@ Introduction: Return true if A is fully contained by B
 
 Format: `ST_Within (A: Geometry, B: Geometry)`
 
+Return type: `Boolean`
+
 Since: `v1.0.0`
 
 SQL Example

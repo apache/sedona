@@ -23,6 +23,8 @@ Introduction: Returns Mode from a spectral band in a Geotiff image in form of an
 
 Format: `RS_Mode (Band: ARRAY[Double])`
 
+Return type: `Array<Double>`
+
 Since: `v1.1.0`
 
 SQL Example

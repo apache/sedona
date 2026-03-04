@@ -23,6 +23,8 @@ Introduction: Returns a HTML that when rendered using an HTML viewer or via a Ju
 
 Format: `RS_AsImage(raster: Raster, imageWidth: Integer = 200)`
 
+Return type: `String`
+
 Since: `v1.5.0`
 
 SQL Example

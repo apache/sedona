@@ -23,6 +23,8 @@ Introduction: Extract a band from a raster as an array of doubles.
 
 Format: `RS_BandAsArray (raster: Raster, bandIndex: Integer)`.
 
+Return type: `Array<Double>`
+
 Since: `v1.4.1`
 
 BandIndex is 1-based and must be between 1 and RS_NumBands(raster). It returns null if the bandIndex is out of range or the raster is null.

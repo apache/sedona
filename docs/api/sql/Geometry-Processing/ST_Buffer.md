@@ -65,6 +65,8 @@ ST_Buffer (A: Geometry, buffer: Double, useSpheroid: Boolean)
 ST_Buffer (A: Geometry, buffer: Double, useSpheroid: Boolean, bufferStyleParameters: String)
 ```
 
+Return type: `Geometry`
+
 Since: `v1.5.1`
 
 SQL Example:

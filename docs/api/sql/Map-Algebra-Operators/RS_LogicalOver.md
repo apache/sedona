@@ -23,6 +23,8 @@ Introduction: Return value from band1 if it's not equal to 0, else return band2 
 
 Format: `RS_LogicalOver (Band1: ARRAY[Double], Band2: ARRAY[Double])`
 
+Return type: `Array<Double>`
+
 Since: `v1.1.0`
 
 SQL Example

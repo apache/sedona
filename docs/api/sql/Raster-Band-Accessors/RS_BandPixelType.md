@@ -33,6 +33,8 @@ Following are the possible values returned by RS_BandPixelType:
 
 Format: `RS_BandPixelType(rast: Raster, band: Integer = 1)`
 
+Return type: `String`
+
 Since: `v1.5.0`
 
 SQL Example

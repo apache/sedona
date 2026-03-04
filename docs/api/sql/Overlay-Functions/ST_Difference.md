@@ -23,6 +23,8 @@ Introduction: Return the difference between geometry A and B (return part of geo
 
 Format: `ST_Difference (A: Geometry, B: Geometry)`
 
+Return type: `Geometry`
+
 Since: `v1.2.0`
 
 SQL Example

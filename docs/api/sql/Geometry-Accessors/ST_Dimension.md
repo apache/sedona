@@ -23,6 +23,8 @@ Introduction: Return the topological dimension of this Geometry object, which mu
 
 Format: `ST_Dimension (A: Geometry) | ST_Dimension (C: Geometrycollection)`
 
+Return type: `Integer`
+
 Since: `v1.5.0`
 
 SQL Example

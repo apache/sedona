@@ -43,6 +43,8 @@ Format:
 
 `ST_Affine(geometry, a, b, d, e, xOff, yOff)`
 
+Return type: `Geometry`
+
 ```sql
 ST_Affine(geometry, 1, 2, 4, 1, 1, 2, 3, 2, 5, 4, 8, 3)
 ```

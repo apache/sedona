@@ -23,6 +23,8 @@ Introduction: Returns the width of the raster.
 
 Format: `RS_Width(raster: Raster)`
 
+Return type: `Integer`
+
 Since: `v1.5.0`
 
 SQL Example

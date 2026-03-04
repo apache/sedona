@@ -25,6 +25,8 @@ Format:
 
 `ST_GeogFromWKB (Wkb: Binary)`
 
+Return type: `Geography`
+
 Since: `v1.8.0`
 
 SQL Example

@@ -23,6 +23,8 @@ Introduction: Return the spatial reference system identifier (SRID) of the geome
 
 Format: `ST_SRID (A: Geometry)`
 
+Return type: `Integer`
+
 Since: `v1.1.1`
 
 SQL Example

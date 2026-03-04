@@ -31,6 +31,8 @@ Format:
 
 `ST_Union (geoms: Array(Geometry))`
 
+Return type: `Geometry`
+
 Since: `v1.2.0`
 
 SQL Example

@@ -23,6 +23,8 @@ Introduction: Returns the upper left Y coordinate of the given row and column of
 
 Format: `RS_RasterToWorldCoordY(raster: Raster, colX: Integer, rowY: Integer)`
 
+Return type: `Double`
+
 Since: `v1.5.0`
 
 SQL Example

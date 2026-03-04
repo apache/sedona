@@ -44,6 +44,8 @@ Computes the angle formed by vectors S1 - E1 and S2 - E2, where S and E denote s
 
 Format: `ST_Angle(p1, p2, p3, p4) | ST_Angle(p1, p2, p3) | ST_Angle(line1, line2)`
 
+Return type: `Double`
+
 Since: `v1.5.0`
 
 SQL Example
