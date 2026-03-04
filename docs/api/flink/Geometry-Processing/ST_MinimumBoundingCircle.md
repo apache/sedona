@@ -21,6 +21,8 @@
 
 Introduction: Returns the smallest circle polygon that contains a geometry. The optional quadrantSegments parameter determines how many segments to use per quadrant and the default number of segments is 48.
 
+![ST_MinimumBoundingCircle](../../../image/ST_MinimumBoundingCircle/ST_MinimumBoundingCircle.svg "ST_MinimumBoundingCircle")
+
 Format:
 
 `ST_MinimumBoundingCircle(geom: Geometry, [Optional] quadrantSegments: Integer)`

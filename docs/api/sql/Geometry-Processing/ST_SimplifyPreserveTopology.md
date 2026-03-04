@@ -20,6 +20,8 @@
 # ST_SimplifyPreserveTopology
 
 Introduction: Simplifies a geometry and ensures that the result is a valid geometry having the same dimension and number of components as the input,
+
+![ST_SimplifyPreserveTopology](../../../image/ST_SimplifyPreserveTopology/ST_SimplifyPreserveTopology.svg "ST_SimplifyPreserveTopology")
 and with the components having the same topological relationship.
 
 Return type: `Geometry`

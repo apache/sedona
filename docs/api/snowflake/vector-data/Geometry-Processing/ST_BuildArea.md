@@ -21,6 +21,8 @@
 
 Introduction: Returns the areal geometry formed by the constituent linework of the input geometry.
 
+![ST_BuildArea](../../../../image/ST_BuildArea/ST_BuildArea.svg "ST_BuildArea")
+
 Format: `ST_BuildArea (A:geometry)`
 
 Return type: `Geometry`

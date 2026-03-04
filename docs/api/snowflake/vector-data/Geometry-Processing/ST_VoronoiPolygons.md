@@ -21,6 +21,8 @@
 
 Introduction: Returns a two-dimensional Voronoi diagram from the vertices of the supplied geometry. The result is a GeometryCollection of Polygons that covers an envelope larger than the extent of the input vertices. Returns null if input geometry is null. Returns an empty geometry collection if the input geometry contains only one vertex. Returns an empty geometry collection if the extend_to envelope has zero area.
 
+![ST_VoronoiPolygons](../../../../image/ST_VoronoiPolygons/ST_VoronoiPolygons.svg "ST_VoronoiPolygons")
+
 Format: `ST_VoronoiPolygons(g1: Geometry, tolerance: Double, extend_to: Geometry)`
 
 Return type: `Geometry`

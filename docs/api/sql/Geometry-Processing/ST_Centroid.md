@@ -21,6 +21,8 @@
 
 Introduction: Return the centroid point of A
 
+![ST_Centroid](../../../image/ST_Centroid/ST_Centroid.svg "ST_Centroid")
+
 Format: `ST_Centroid (A: Geometry)`
 
 Return type: `Geometry`

@@ -21,6 +21,8 @@
 
 Introduction: Computes the approximate geometric median of a MultiPoint geometry using the Weiszfeld algorithm. The geometric median provides a centrality measure that is less sensitive to outlier points than the centroid.
 
+![ST_GeometricMedian](../../../image/ST_GeometricMedian/ST_GeometricMedian.svg "ST_GeometricMedian")
+
 The algorithm will iterate until the distance change between successive iterations is less than the supplied `tolerance` parameter. If this condition has not been met after `maxIter` iterations, the function will produce an error and exit, unless `failIfNotConverged` is set to `false`.
 
 If a `tolerance` value is not provided, a default `tolerance` value is `1e-6`.

@@ -21,6 +21,8 @@
 
 Introduction: Generates the constrained Delaunay triangulation for the input Polygon. The constrained Delaunay triangulation is a set of triangles created from the Polygon's vertices that covers the Polygon area precisely, while maximizing the combined interior angles across all triangles compared to other possible triangulations. This produces the highest quality triangulation representation of the Polygon geometry. The function returns a GeometryCollection of Polygon geometries comprising this optimized constrained Delaunay triangulation. Polygons with holes and MultiPolygon types are supported. For any other geometry type provided, such as Point, LineString, etc., an empty GeometryCollection will be returned.
 
+![ST_TriangulatePolygon](../../../../image/ST_TriangulatePolygon/ST_TriangulatePolygon.svg "ST_TriangulatePolygon")
+
 Format: `ST_TriangulatePolygon(geom: Geometry)`
 
 Return type: `Geometry`
