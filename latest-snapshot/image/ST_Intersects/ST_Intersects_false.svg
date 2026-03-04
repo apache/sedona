@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="200" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_Intersects(A, B)</text>
+  <rect x="325" y="8" width="60" height="22" rx="4" fill="#c0392b" />
+  <text x="355" y="24" text-anchor="middle" font-size="12" font-weight="bold" fill="white">FALSE</text>
+  <path d="M 230.77 211.54 L 323.08 211.54 L 323.08 88.46 L 230.77 88.46 L 230.77 211.54 Z" fill="rgba(217,74,74,0.25)" stroke="#d94a4a" stroke-width="2.5" fill-rule="evenodd" />
+  <text x="267.69" y="162.31" text-anchor="middle" font-size="15" font-weight="bold" fill="#d94a4a">B</text>
+  <path d="M 76.92 211.54 L 169.23 211.54 L 169.23 88.46 L 76.92 88.46 L 76.92 211.54 Z" fill="rgba(74,144,217,0.25)" stroke="#4a90d9" stroke-width="2.5" fill-rule="evenodd" />
+  <text x="113.85" y="162.31" text-anchor="middle" font-size="15" font-weight="bold" fill="#4a90d9">A</text>
+  <text x="200" y="290" text-anchor="middle" font-size="12" fill="#666666" font-style="italic">A and B share no points</text>
+</svg>
