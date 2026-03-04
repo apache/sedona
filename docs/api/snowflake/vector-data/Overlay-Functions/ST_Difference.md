@@ -21,6 +21,8 @@
 
 Introduction: Return the difference between geometry A and B (return part of geometry A that does not intersect geometry B)
 
+![ST_Difference](../../../../image/ST_Difference/ST_Difference.svg "ST_Difference")
+
 Format: `ST_Difference (A:geometry, B:geometry)`
 
 Return type: `Geometry`

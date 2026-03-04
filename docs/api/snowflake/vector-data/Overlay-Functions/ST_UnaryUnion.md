@@ -21,6 +21,8 @@
 
 Introduction: This variant of [ST_Union](ST_Union.md) operates on a single geometry input. The input geometry can be a simple Geometry type, a MultiGeometry, or a GeometryCollection. The function calculates the geometric union across all components and elements within the provided geometry object.
 
+![ST_UnaryUnion](../../../../image/ST_UnaryUnion/ST_UnaryUnion.svg "ST_UnaryUnion")
+
 Format: `ST_UnaryUnion(geometry: Geometry)`
 
 Return type: `Geometry`
