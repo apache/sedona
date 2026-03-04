@@ -45,6 +45,8 @@ Computes the angle formed by vectors S1 - E1 and S2 - E2, where S and E denote s
 !!!Tip
     ST_Angle returns the angle in radian between 0 and 2\Pi. To convert the angle to degrees, use [ST_Degrees](ST_Degrees.md).
 
+![ST_Angle](../../../image/ST_Angle/ST_Angle.svg "ST_Angle")
+
 Format: `ST_Angle(p1, p2, p3, p4) | ST_Angle(p1, p2, p3) | ST_Angle(line1, line2)`
 
 Return type: `Double`

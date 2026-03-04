@@ -21,6 +21,8 @@
 
 Introduction: Calculates and returns the length value representing the maximum distance between any two points across the input geometries. This function is an alias for `ST_LongestDistance`.
 
+![ST_MaxDistance](../../../image/ST_MaxDistance/ST_MaxDistance.svg "ST_MaxDistance")
+
 Format: `ST_MaxDistance(geom1: Geometry, geom2: Geometry)`
 
 Return type: `Double`

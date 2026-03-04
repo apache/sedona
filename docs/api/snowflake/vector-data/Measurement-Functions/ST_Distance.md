@@ -21,6 +21,8 @@
 
 Introduction: Return the Euclidean distance between A and B
 
+![ST_Distance](../../../../image/ST_Distance/ST_Distance.svg "ST_Distance")
+
 Format: `ST_Distance (A:geometry, B:geometry)`
 
 Return type: `Double`

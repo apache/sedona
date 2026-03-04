@@ -22,6 +22,8 @@
 Introduction: Returns the 2-dimensional point on geom1 that is closest to geom2. This is the first point of the shortest line between the geometries. If using 3D geometries, the Z coordinates will be ignored. If you have a 3D Geometry, you may prefer to use ST_3DClosestPoint.
 It will throw an exception indicates illegal argument if one of the params is an empty geometry.
 
+![ST_ClosestPoint](../../../image/ST_ClosestPoint/ST_ClosestPoint.svg "ST_ClosestPoint")
+
 Format: `ST_ClosestPoint(g1: Geometry, g2: Geometry)`
 
 Return type: `Geometry`

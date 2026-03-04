@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <marker id="arrowG" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#2ecc71" />
+    </marker>
+    <marker id="arrowGrev" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
+      <path d="M8,0 L0,3 L8,6" fill="#2ecc71" />
+    </marker>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_DistanceSphere</text>
+  <circle cx="88.46" cy="210.58" r="5" fill="#4a90d9" stroke="#4a90d9" stroke-width="1.5" />
+  <text x="97.46" y="203.58" font-size="15" font-weight="bold" fill="#4a90d9">A</text>
+  <circle cx="411.54" cy="89.42" r="5" fill="#d94a4a" stroke="#d94a4a" stroke-width="1.5" />
+  <text x="420.54" y="82.42" font-size="15" font-weight="bold" fill="#d94a4a">B</text>
+  <line x1="88.46" y1="210.58" x2="411.54" y2="89.42" stroke="#2ecc71" stroke-width="2" stroke-dasharray="6,3" marker-start="url(#arrowGrev)" marker-end="url(#arrowG)" />
+  <text x="258" y="144" font-size="15" font-weight="bold" fill="#2ecc71" font-style="italic">d</text>
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Returns the great-circle distance (meters) on a sphere</text>
+  <rect x="93" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="109" y="266" font-size="13" fill="#333333">Geometry A</text>
+  <rect x="203" y="255" width="12" height="12" rx="2" fill="#d94a4a" stroke="#d94a4a" stroke-width="1" />
+  <text x="219" y="266" font-size="13" fill="#333333">Geometry B</text>
+  <rect x="313" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="329" y="266" font-size="13" fill="#333333">Distance</text>
+</svg>

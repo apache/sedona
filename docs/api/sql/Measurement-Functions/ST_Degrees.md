@@ -21,6 +21,8 @@
 
 Introduction: Convert an angle in radian to degrees.
 
+![ST_Degrees](../../../image/ST_Degrees/ST_Degrees.svg "ST_Degrees")
+
 Format: `ST_Degrees(angleInRadian)`
 
 Return type: `Double`

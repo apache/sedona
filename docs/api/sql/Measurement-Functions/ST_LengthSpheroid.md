@@ -29,6 +29,8 @@ Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lon/lat== orde
 !!!Warning
     Since `v1.7.0`, this function only supports LineString, MultiLineString, and GeometryCollections containing linear geometries. Use [ST_Perimeter](ST_Perimeter.md) for polygons.
 
+![ST_LengthSpheroid](../../../image/ST_LengthSpheroid/ST_LengthSpheroid.svg "ST_LengthSpheroid")
+
 Format: `ST_LengthSpheroid (A: Geometry)`
 
 Return type: `Double`
