@@ -19,10 +19,9 @@
 
 # ST_LabelPoint
 
-Introduction: `ST_LabelPoint` computes and returns a label point for a given polygon or geometry collection. The label point is chosen to be sufficiently far from boundaries of the geometry. For a regular Polygon this will be the
+Introduction: `ST_LabelPoint` computes and returns a label point for a given polygon or geometry collection. The label point is chosen to be sufficiently far from boundaries of the geometry. For a regular Polygon this will be the centroid.
 
 ![ST_LabelPoint](../../../image/ST_LabelPoint/ST_LabelPoint.svg "ST_LabelPoint")
-centroid.
 
 The algorithm is derived from Tippecanoe’s `polygon_to_anchor`, an approximate solution for label point generation, designed to be faster than optimal algorithms like `polylabel`. It searches for a “good enough” label point within a limited number of iterations. For geometry collections, only the largest Polygon by area is considered. While `ST_Centroid` is a fast algorithm to calculate the center of mass of a (Multi)Polygon, it may place the point outside of the Polygon or near a boundary for concave shapes, polygons with holes, or MultiPolygons.
 
