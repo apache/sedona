@@ -21,6 +21,8 @@
 
 Introduction: Construct a Polygon from MinX, MinY, MaxX, MaxY.
 
+![ST_PolygonFromEnvelope](../../../../image/ST_PolygonFromEnvelope/ST_PolygonFromEnvelope.svg "ST_PolygonFromEnvelope")
+
 Format: `ST_PolygonFromEnvelope (MinX:decimal, MinY:decimal, MaxX:decimal, MaxY:decimal)`
 
 Return type: `Geometry`

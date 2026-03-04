@@ -21,6 +21,8 @@
 
 Introduction: Creates a point with X, Y, and M coordinate. Use [ST_MakePoint](ST_MakePoint.md) to make points with XY, XYZ, or XYZM coordinates.
 
+![ST_MakePointM](../../../image/ST_MakePointM/ST_MakePointM.svg "ST_MakePointM")
+
 Format: `ST_MakePointM(x: Double, y: Double, m: Double)`
 
 Return type: `Geometry`

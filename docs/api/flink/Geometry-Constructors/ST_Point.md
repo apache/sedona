@@ -21,6 +21,8 @@
 
 Introduction: Construct a Point from X and Y
 
+![ST_Point](../../../image/ST_Point/ST_Point.svg "ST_Point")
+
 Format: `ST_Point (X: Double, Y: Double)`
 
 Return type: `Geometry`

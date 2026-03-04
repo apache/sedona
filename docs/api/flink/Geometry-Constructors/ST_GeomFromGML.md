@@ -24,6 +24,8 @@ Introduction: Construct a Geometry from GML.
 !!!note
     This function only supports GML1 and GML2. GML3 is not supported.
 
+![ST_GeomFromGML](../../../image/ST_GeomFromGML/ST_GeomFromGML.svg "ST_GeomFromGML")
+
 Format:
 `ST_GeomFromGML (gml: String)`
 

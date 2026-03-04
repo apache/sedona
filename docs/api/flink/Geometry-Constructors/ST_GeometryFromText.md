@@ -21,6 +21,8 @@
 
 Introduction: Construct a Geometry from WKT. If SRID is not set, it defaults to 0 (unknown). Alias of [ST_GeomFromWKT](ST_GeomFromWKT.md)
 
+![ST_GeometryFromText](../../../image/ST_GeometryFromText/ST_GeometryFromText.svg "ST_GeometryFromText")
+
 Format:
 
 `ST_GeometryFromText (Wkt: String)`

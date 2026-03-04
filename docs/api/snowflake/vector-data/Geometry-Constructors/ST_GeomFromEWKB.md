@@ -21,6 +21,8 @@
 
 Introduction: Construct a Geometry from EWKB string or Binary. This function is an alias of [ST_GeomFromWKB](ST_GeomFromWKB.md).
 
+![ST_GeomFromEWKB](../../../../image/ST_GeomFromEWKB/ST_GeomFromEWKB.svg "ST_GeomFromEWKB")
+
 Format:
 
 `ST_GeomFromEWKB (Wkb: String)`

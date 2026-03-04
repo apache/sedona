@@ -21,6 +21,8 @@
 
 Introduction: Construct a LineString from Text
 
+![ST_LineFromText](../../../image/ST_LineFromText/ST_LineFromText.svg "ST_LineFromText")
+
 Format: `ST_LineFromText (Text: String)`
 
 Return type: `Geometry`

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_GeomFromMySQL</text>
+  <rect x="42" y="38" width="56" height="24" rx="4" fill="#8e44ad" opacity="0.12" stroke="#8e44ad" stroke-width="1.2" />
+  <text x="70" y="55" text-anchor="middle" font-size="13" font-weight="bold" fill="#8e44ad">MySQL</text>
+  <line x1="70" y1="62" x2="177.7" y2="152.2" stroke="#2ecc71" stroke-width="2" />
+  <polygon points="180,154.1 174.9,144.6 169.8,150.7" fill="#2ecc71" />
+  <path d="M 151.28 220.51 L 348.72 220.51 L 348.72 79.49 L 151.28 79.49 L 151.28 220.51 Z" fill="rgba(46,204,113,0.18)" stroke="#2ecc71" stroke-width="2.5" fill-rule="evenodd" />
+  <circle cx="151.28" cy="220.51" r="3" fill="#2ecc71" stroke="white" stroke-width="1" />
+  <circle cx="348.72" cy="220.51" r="3" fill="#2ecc71" stroke="white" stroke-width="1" />
+  <circle cx="348.72" cy="79.49" r="3" fill="#2ecc71" stroke="white" stroke-width="1" />
+  <circle cx="151.28" cy="79.49" r="3" fill="#2ecc71" stroke="white" stroke-width="1" />
+  <circle cx="151.28" cy="220.51" r="3" fill="#2ecc71" stroke="white" stroke-width="1" />
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Constructs a Geometry from MySQL Geometry binary</text>
+  <rect x="112" y="255" width="12" height="12" rx="2" fill="#8e44ad" stroke="#8e44ad" stroke-width="1" />
+  <text x="128" y="266" font-size="13" fill="#333333">Input Format</text>
+  <rect x="238" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="254" y="266" font-size="13" fill="#333333">Result Geometry</text>
+</svg>

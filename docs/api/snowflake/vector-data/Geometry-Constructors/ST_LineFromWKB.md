@@ -24,6 +24,8 @@ Introduction: Construct a LineString geometry from WKB string or Binary and an o
 !!!note
     Returns null if geometry is not of type LineString.
 
+![ST_LineFromWKB](../../../../image/ST_LineFromWKB/ST_LineFromWKB.svg "ST_LineFromWKB")
+
 Format:
 
 `ST_LineFromWKB (Wkb: String)`

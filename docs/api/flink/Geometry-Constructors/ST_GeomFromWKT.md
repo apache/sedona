@@ -21,6 +21,8 @@
 
 Introduction: Construct a Geometry from WKT
 
+![ST_GeomFromWKT](../../../image/ST_GeomFromWKT/ST_GeomFromWKT.svg "ST_GeomFromWKT")
+
 Format:
 `ST_GeomFromWKT (Wkt: String)`
 

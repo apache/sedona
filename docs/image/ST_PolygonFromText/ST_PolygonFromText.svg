@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_PolygonFromText</text>
+  <rect x="46" y="38" width="48" height="24" rx="4" fill="#8e44ad" opacity="0.12" stroke="#8e44ad" stroke-width="1.2" />
+  <text x="70" y="55" text-anchor="middle" font-size="13" font-weight="bold" fill="#8e44ad">Text</text>
+  <line x1="70" y1="62" x2="210.2" y2="152.8" stroke="#2ecc71" stroke-width="2" />
+  <polygon points="212.8,154.4 206.5,145.6 202.2,152.3" fill="#2ecc71" />
+  <path d="M 163.73 225.49 L 336.27 225.49 L 293.14 96.08 L 206.86 74.51 L 163.73 225.49 Z" fill="rgba(46,204,113,0.18)" stroke="#2ecc71" stroke-width="2.5" fill-rule="evenodd" />
+  <circle cx="163.73" cy="225.49" r="3.5" fill="#2ecc71" stroke="white" stroke-width="1" />
+  <circle cx="336.27" cy="225.49" r="3.5" fill="#2ecc71" stroke="white" stroke-width="1" />
+  <circle cx="293.14" cy="96.08" r="3.5" fill="#2ecc71" stroke="white" stroke-width="1" />
+  <circle cx="206.86" cy="74.51" r="3.5" fill="#2ecc71" stroke="white" stroke-width="1" />
+  <circle cx="163.73" cy="225.49" r="3.5" fill="#2ecc71" stroke="white" stroke-width="1" />
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Constructs a Polygon from delimited text</text>
+  <rect x="112" y="255" width="12" height="12" rx="2" fill="#8e44ad" stroke="#8e44ad" stroke-width="1" />
+  <text x="128" y="266" font-size="13" fill="#333333">Input Format</text>
+  <rect x="238" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="254" y="266" font-size="13" fill="#333333">Result Geometry</text>
+</svg>

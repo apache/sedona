@@ -21,6 +21,8 @@
 
 Introduction: Constructs a MultiPoint from the WKT with the given SRID. If SRID is not provided then it defaults to 0. It returns `null` if the WKT is not a `MULTIPOINT`.
 
+![ST_MPointFromText](../../../../image/ST_MPointFromText/ST_MPointFromText.svg "ST_MPointFromText")
+
 Format:
 
 `ST_MPointFromText (Wkt: String)`

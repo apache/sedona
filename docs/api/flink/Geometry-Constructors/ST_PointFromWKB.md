@@ -24,6 +24,8 @@ Introduction: Construct a Point geometry from WKB string or Binary and an option
 !!!note
     Returns null if geometry is not of type Point.
 
+![ST_PointFromWKB](../../../image/ST_PointFromWKB/ST_PointFromWKB.svg "ST_PointFromWKB")
+
 Format:
 
 `ST_PointFromWKB (Wkb: String)`

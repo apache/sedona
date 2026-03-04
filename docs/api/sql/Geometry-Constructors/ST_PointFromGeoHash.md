@@ -21,6 +21,8 @@
 
 Introduction: Generates a Point geometry representing the center of the GeoHash cell defined by the input string. If `precision` is not specified, the full GeoHash precision is used. Providing a `precision` value limits the GeoHash characters used to determine the Point coordinates.
 
+![ST_PointFromGeoHash](../../../image/ST_PointFromGeoHash/ST_PointFromGeoHash.svg "ST_PointFromGeoHash")
+
 Format: `ST_PointFromGeoHash(geoHash: String, precision: Integer)`
 
 Return type: `Geometry`

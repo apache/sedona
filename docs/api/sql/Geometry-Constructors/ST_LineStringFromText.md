@@ -21,6 +21,8 @@
 
 Introduction: Construct a LineString from Text, delimited by Delimiter
 
+![ST_LineStringFromText](../../../image/ST_LineStringFromText/ST_LineStringFromText.svg "ST_LineStringFromText")
+
 Format: `ST_LineStringFromText (Text: String, Delimiter: Char)`
 
 Return type: `Geometry`

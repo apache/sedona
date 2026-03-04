@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_MakeEnvelope</text>
+  <path d="M 136.76 214.71 L 363.24 214.71 L 363.24 85.29 L 136.76 85.29 L 136.76 214.71 Z" fill="rgba(46,204,113,0.18)" stroke="#2ecc71" stroke-width="2.5" fill-rule="evenodd" />
+  <text x="129" y="154" text-anchor="end" font-size="13" font-weight="bold" fill="#e67e22">minX=2</text>
+  <text x="371" y="154" text-anchor="start" font-size="13" font-weight="bold" fill="#e67e22">maxX=9</text>
+  <text x="250" y="233" text-anchor="middle" font-size="13" font-weight="bold" fill="#e67e22">minY=1</text>
+  <text x="250" y="77" text-anchor="middle" font-size="13" font-weight="bold" fill="#e67e22">maxY=5</text>
+  <circle cx="136.76" cy="214.71" r="4" fill="#2ecc71" stroke="white" stroke-width="1.5" />
+  <circle cx="363.24" cy="214.71" r="4" fill="#2ecc71" stroke="white" stroke-width="1.5" />
+  <circle cx="136.76" cy="85.29" r="4" fill="#2ecc71" stroke="white" stroke-width="1.5" />
+  <circle cx="363.24" cy="85.29" r="4" fill="#2ecc71" stroke="white" stroke-width="1.5" />
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Constructs a Polygon from MinX, MinY, MaxX, MaxY with optional SRID</text>
+  <rect x="140" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="156" y="266" font-size="13" fill="#333333">Result Polygon</text>
+  <rect x="282" y="255" width="12" height="12" rx="2" fill="#e67e22" stroke="#e67e22" stroke-width="1" />
+  <text x="298" y="266" font-size="13" fill="#333333">Bounds</text>
+</svg>

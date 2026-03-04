@@ -21,6 +21,8 @@
 
 Introduction: Construct a Polygon from MinX, MinY, MaxX, MaxY, and an optional SRID.
 
+![ST_MakeEnvelope](../../../../image/ST_MakeEnvelope/ST_MakeEnvelope.svg "ST_MakeEnvelope")
+
 Format:
 
 ```

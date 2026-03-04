@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_PointZ</text>
+  <line x1="171.43" y1="228.57" x2="171.43" y2="71.43" stroke="#e8e8e8" stroke-width="1" />
+  <line x1="210.71" y1="228.57" x2="210.71" y2="71.43" stroke="#e8e8e8" stroke-width="1" />
+  <line x1="250.0" y1="228.57" x2="250.0" y2="71.43" stroke="#e8e8e8" stroke-width="1" />
+  <line x1="289.29" y1="228.57" x2="289.29" y2="71.43" stroke="#e8e8e8" stroke-width="1" />
+  <line x1="328.57" y1="228.57" x2="328.57" y2="71.43" stroke="#e8e8e8" stroke-width="1" />
+  <line x1="171.43" y1="228.57" x2="328.57" y2="228.57" stroke="#e8e8e8" stroke-width="1" />
+  <line x1="171.43" y1="189.29" x2="328.57" y2="189.29" stroke="#e8e8e8" stroke-width="1" />
+  <line x1="171.43" y1="150.0" x2="328.57" y2="150.0" stroke="#e8e8e8" stroke-width="1" />
+  <line x1="171.43" y1="110.71" x2="328.57" y2="110.71" stroke="#e8e8e8" stroke-width="1" />
+  <line x1="171.43" y1="71.43" x2="328.57" y2="71.43" stroke="#e8e8e8" stroke-width="1" />
+  <circle cx="230.36" cy="130.36" r="10" fill="#2ecc71" stroke="white" stroke-width="1.5" />
+  <text x="244" y="118" text-anchor="start" font-size="13" fill="#e67e22" font-weight="bold">X=3, Y=5, Z=2</text>
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Constructs a Point from X, Y, and Z coordinates</text>
+  <rect x="128" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="144" y="266" font-size="13" fill="#333333">Result Point</text>
+  <rect x="254" y="255" width="12" height="12" rx="2" fill="#e67e22" stroke="#e67e22" stroke-width="1" />
+  <text x="270" y="266" font-size="13" fill="#333333">Coordinates</text>
+</svg>

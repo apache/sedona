@@ -21,6 +21,8 @@
 
 Introduction: Construct a MultiLineString from Text and Optional SRID
 
+![ST_MLineFromText](../../../image/ST_MLineFromText/ST_MLineFromText.svg "ST_MLineFromText")
+
 Format:
 
 `ST_MLineFromText (Wkt: String)`

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_MPolyFromText</text>
+  <rect x="50" y="38" width="40" height="24" rx="4" fill="#8e44ad" opacity="0.12" stroke="#8e44ad" stroke-width="1.2" />
+  <text x="70" y="55" text-anchor="middle" font-size="13" font-weight="bold" fill="#8e44ad">WKT</text>
+  <line x1="70" y1="62" x2="157.9" y2="147.7" stroke="#2ecc71" stroke-width="2" />
+  <polygon points="160,149.8 155.6,139.9 150.0,145.7" fill="#2ecc71" />
+  <path d="M 127.78 211.11 L 225.56 211.11 L 225.56 113.33 L 127.78 113.33 L 127.78 211.11 Z" fill="rgba(46,204,113,0.18)" stroke="#2ecc71" stroke-width="2.5" fill-rule="evenodd" />
+  <path d="M 274.44 186.67 L 372.22 186.67 L 372.22 88.89 L 274.44 88.89 L 274.44 186.67 Z" fill="rgba(46,204,113,0.18)" stroke="#2ecc71" stroke-width="2.5" fill-rule="evenodd" />
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Constructs a MultiPolygon from WKT</text>
+  <rect x="112" y="255" width="12" height="12" rx="2" fill="#8e44ad" stroke="#8e44ad" stroke-width="1" />
+  <text x="128" y="266" font-size="13" fill="#333333">Input Format</text>
+  <rect x="238" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="254" y="266" font-size="13" fill="#333333">Result Geometry</text>
+</svg>

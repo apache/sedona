@@ -21,6 +21,8 @@
 
 Introduction: Create Geometry from geohash string and optional precision
 
+![ST_GeomFromGeoHash](../../../../image/ST_GeomFromGeoHash/ST_GeomFromGeoHash.svg "ST_GeomFromGeoHash")
+
 Format: `ST_GeomFromGeoHash(geohash: string, precision: int)`
 
 Return type: `Geometry`

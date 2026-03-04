@@ -21,6 +21,8 @@
 
 Introduction: Construct a Geometry from WKB string or Binary. This function also supports EWKB format.
 
+![ST_GeomFromWKB](../../../../image/ST_GeomFromWKB/ST_GeomFromWKB.svg "ST_GeomFromWKB")
+
 Format:
 `ST_GeomFromWKB (Wkb:string)`
 `ST_GeomFromWKB (Wkb:binary)`

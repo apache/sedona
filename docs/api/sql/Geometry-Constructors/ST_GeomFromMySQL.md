@@ -21,6 +21,8 @@
 
 Introduction: Construct a Geometry from MySQL Geometry binary.
 
+![ST_GeomFromMySQL](../../../image/ST_GeomFromMySQL/ST_GeomFromMySQL.svg "ST_GeomFromMySQL")
+
 Format: `ST_GeomFromMySQL (binary: Binary)`
 
 Return type: `Geometry`

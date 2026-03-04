@@ -21,6 +21,8 @@
 
 Introduction: Construct a Geometry from OGC Extended WKT
 
+![ST_GeomFromEWKT](../../../../image/ST_GeomFromEWKT/ST_GeomFromEWKT.svg "ST_GeomFromEWKT")
+
 Format:
 `ST_GeomFromEWKT (EWkt:string)`
 

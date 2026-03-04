@@ -21,6 +21,8 @@
 
 Introduction: Construct a MultiPolygon from Text and Optional SRID
 
+![ST_MPolyFromText](../../../image/ST_MPolyFromText/ST_MPolyFromText.svg "ST_MPolyFromText")
+
 Format:
 
 `ST_MPolyFromText (Wkt: String)`

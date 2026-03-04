@@ -21,6 +21,8 @@
 
 Introduction: Creates a 2D, 3D Z or 4D ZM Point geometry. Use [ST_MakePointM](ST_MakePointM.md) to make points with XYM coordinates. Z and M values are optional.
 
+![ST_MakePoint](../../../image/ST_MakePoint/ST_MakePoint.svg "ST_MakePoint")
+
 Format: `ST_MakePoint (X: Double, Y: Double, Z: Double, M: Double)`
 
 Return type: `Geometry`

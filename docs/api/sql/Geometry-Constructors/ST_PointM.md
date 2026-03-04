@@ -22,6 +22,8 @@
 Introduction: Construct a Point from X, Y and M and an optional srid. If srid is not set, it defaults to 0 (unknown).
 Must use ST_AsEWKT function to print the Z and M coordinates.
 
+![ST_PointM](../../../image/ST_PointM/ST_PointM.svg "ST_PointM")
+
 Format:
 
 `ST_PointM (X: Double, Y: Double, M: Double)`

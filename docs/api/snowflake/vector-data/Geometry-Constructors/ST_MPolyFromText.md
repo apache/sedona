@@ -21,6 +21,8 @@
 
 Introduction: Construct a MultiPolygon from Wkt. If srid is not set, it defaults to 0 (unknown).
 
+![ST_MPolyFromText](../../../../image/ST_MPolyFromText/ST_MPolyFromText.svg "ST_MPolyFromText")
+
 Format:
 `ST_MPolyFromText (Wkt:string)`
 `ST_MPolyFromText (Wkt:string, srid:integer)`

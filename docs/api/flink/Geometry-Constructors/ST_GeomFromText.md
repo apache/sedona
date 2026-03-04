@@ -21,6 +21,8 @@
 
 Introduction: Construct a Geometry from WKT. Alias of  [ST_GeomFromWKT](ST_GeomFromWKT.md)
 
+![ST_GeomFromText](../../../image/ST_GeomFromText/ST_GeomFromText.svg "ST_GeomFromText")
+
 Format:
 `ST_GeomFromText (Wkt: String)`
 

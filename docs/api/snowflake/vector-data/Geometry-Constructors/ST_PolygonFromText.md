@@ -21,6 +21,8 @@
 
 Introduction: Construct a Polygon from Text, delimited by Delimiter. Path must be closed
 
+![ST_PolygonFromText](../../../../image/ST_PolygonFromText/ST_PolygonFromText.svg "ST_PolygonFromText")
+
 Format: `ST_PolygonFromText (Text:string, Delimiter:char)`
 
 Return type: `Geometry`

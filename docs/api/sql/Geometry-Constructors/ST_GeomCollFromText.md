@@ -21,6 +21,8 @@
 
 Introduction: Constructs a GeometryCollection from the WKT with the given SRID. If SRID is not provided then it defaults to 0. It returns `null` if the WKT is not a `GEOMETRYCOLLECTION`.
 
+![ST_GeomCollFromText](../../../image/ST_GeomCollFromText/ST_GeomCollFromText.svg "ST_GeomCollFromText")
+
 Format:
 
 `ST_GeomCollFromText (Wkt: String)`

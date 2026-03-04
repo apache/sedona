@@ -21,6 +21,8 @@
 
 Introduction: Construct a Geometry from GeoJson
 
+![ST_GeomFromGeoJSON](../../../../image/ST_GeomFromGeoJSON/ST_GeomFromGeoJSON.svg "ST_GeomFromGeoJSON")
+
 Format: `ST_GeomFromGeoJSON (GeoJson:string)`
 
 Return type: `Geometry`

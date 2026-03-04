@@ -21,6 +21,8 @@
 
 Introduction: Construct a Line from Wkt text
 
+![ST_LineFromText](../../../../image/ST_LineFromText/ST_LineFromText.svg "ST_LineFromText")
+
 Format:
 `ST_LineFromText (Wkt:string)`
 

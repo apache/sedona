@@ -21,6 +21,8 @@
 
 Introduction: Construct a Geometry from KML.
 
+![ST_GeomFromKML](../../../../image/ST_GeomFromKML/ST_GeomFromKML.svg "ST_GeomFromKML")
+
 Format:
 `ST_GeomFromKML (kml:string)`
 

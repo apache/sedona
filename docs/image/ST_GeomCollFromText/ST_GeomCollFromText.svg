@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_GeomCollFromText</text>
+  <rect x="50" y="38" width="40" height="24" rx="4" fill="#8e44ad" opacity="0.12" stroke="#8e44ad" stroke-width="1.2" />
+  <text x="70" y="55" text-anchor="middle" font-size="13" font-weight="bold" fill="#8e44ad">WKT</text>
+  <line x1="70" y1="62" x2="157.7" y2="135.1" stroke="#2ecc71" stroke-width="2" />
+  <polygon points="160,137.1 154.9,127.6 149.8,133.7" fill="#2ecc71" />
+  <circle cx="121.28" cy="91.49" r="6" fill="#2ecc71" stroke="white" stroke-width="1.5" />
+  <polyline points="168.09,208.51 261.7,138.3" fill="none" stroke="#2ecc71" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="168.09" cy="208.51" r="3.5" fill="#2ecc71" stroke="white" stroke-width="1" />
+  <circle cx="261.7" cy="138.3" r="3.5" fill="#2ecc71" stroke="white" stroke-width="1" />
+  <path d="M 285.11 185.11 L 378.72 185.11 L 378.72 91.49 L 285.11 91.49 L 285.11 185.11 Z" fill="rgba(46,204,113,0.18)" stroke="#2ecc71" stroke-width="2.5" fill-rule="evenodd" />
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Constructs a GeometryCollection from WKT</text>
+  <rect x="112" y="255" width="12" height="12" rx="2" fill="#8e44ad" stroke="#8e44ad" stroke-width="1" />
+  <text x="128" y="266" font-size="13" fill="#333333">Input Format</text>
+  <rect x="238" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="254" y="266" font-size="13" fill="#333333">Result Geometry</text>
+</svg>

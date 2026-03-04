@@ -21,6 +21,8 @@
 
 Introduction: Construct a Point from Text, delimited by Delimiter
 
+![ST_PointFromText](../../../../image/ST_PointFromText/ST_PointFromText.svg "ST_PointFromText")
+
 Format: `ST_PointFromText (Text:string, Delimiter:char)`
 
 Return type: `Geometry`

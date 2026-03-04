@@ -21,6 +21,8 @@
 
 Introduction: Construct a MultiLineString from Wkt. If srid is not set, it defaults to 0 (unknown).
 
+![ST_MLineFromText](../../../image/ST_MLineFromText/ST_MLineFromText.svg "ST_MLineFromText")
+
 Format:
 
 `ST_MLineFromText (Wkt: String)`

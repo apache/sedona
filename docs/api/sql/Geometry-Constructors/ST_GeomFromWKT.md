@@ -21,6 +21,8 @@
 
 Introduction: Construct a Geometry from WKT. If SRID is not set, it defaults to 0 (unknown).
 
+![ST_GeomFromWKT](../../../image/ST_GeomFromWKT/ST_GeomFromWKT.svg "ST_GeomFromWKT")
+
 Format:
 
 `ST_GeomFromWKT (Wkt: String)`
