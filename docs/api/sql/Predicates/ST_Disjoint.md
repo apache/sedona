@@ -21,6 +21,9 @@
 
 Introduction: Return true if A and B are disjoint
 
+![ST_Disjoint returning true](../../../image/ST_Disjoint/ST_Disjoint_true.svg "ST_Disjoint returning true")
+![ST_Disjoint returning false](../../../image/ST_Disjoint/ST_Disjoint_false.svg "ST_Disjoint returning false")
+
 Format: `ST_Disjoint (A: Geometry, B: Geometry)`
 
 Return type: `Boolean`

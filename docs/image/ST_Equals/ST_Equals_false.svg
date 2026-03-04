@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="200" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_Equals(A, B)</text>
+  <rect x="325" y="8" width="60" height="22" rx="4" fill="#c0392b" />
+  <text x="355" y="24" text-anchor="middle" font-size="12" font-weight="bold" fill="white">FALSE</text>
+  <polyline points="76.92,180.77 200.0,88.46 323.08,150.0" fill="none" stroke="#d94a4a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="76.92" cy="180.77" r="3" fill="#d94a4a" />
+  <circle cx="200.0" cy="88.46" r="3" fill="#d94a4a" />
+  <circle cx="323.08" cy="150.0" r="3" fill="#d94a4a" />
+  <text x="206.0" y="80.46" font-size="15" font-weight="bold" fill="#d94a4a">B</text>
+  <polyline points="76.92,211.54 200.0,119.23 323.08,180.77" fill="none" stroke="#4a90d9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="76.92" cy="211.54" r="3" fill="#4a90d9" />
+  <circle cx="200.0" cy="119.23" r="3" fill="#4a90d9" />
+  <circle cx="323.08" cy="180.77" r="3" fill="#4a90d9" />
+  <text x="206.0" y="111.23" font-size="15" font-weight="bold" fill="#4a90d9">A</text>
+  <text x="200" y="290" text-anchor="middle" font-size="12" fill="#666666" font-style="italic">A and B are different geometries</text>
+</svg>

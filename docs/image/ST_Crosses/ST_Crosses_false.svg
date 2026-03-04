@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="200" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_Crosses(A, B)</text>
+  <rect x="325" y="8" width="60" height="22" rx="4" fill="#c0392b" />
+  <text x="355" y="24" text-anchor="middle" font-size="12" font-weight="bold" fill="white">FALSE</text>
+  <path d="M 140.54 224.32 L 259.46 224.32 L 259.46 135.14 L 140.54 135.14 L 140.54 224.32 Z" fill="rgba(217,74,74,0.25)" stroke="#d94a4a" stroke-width="2.5" fill-rule="evenodd" />
+  <text x="188.11" y="188.65" text-anchor="middle" font-size="15" font-weight="bold" fill="#d94a4a">B</text>
+  <polyline points="81.08,75.68 318.92,75.68" fill="none" stroke="#4a90d9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="81.08" cy="75.68" r="3" fill="#4a90d9" />
+  <circle cx="318.92" cy="75.68" r="3" fill="#4a90d9" />
+  <text x="324.92" y="67.68" font-size="15" font-weight="bold" fill="#4a90d9">A</text>
+  <text x="200" y="290" text-anchor="middle" font-size="12" fill="#666666" font-style="italic">A does not cross B</text>
+</svg>

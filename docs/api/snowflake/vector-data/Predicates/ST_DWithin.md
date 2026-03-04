@@ -21,6 +21,9 @@
 
 Introduction: Returns true if 'leftGeometry' and 'rightGeometry' are within a specified 'distance'. This function essentially checks if the shortest distance between the envelope of the two geometries is <= the provided distance.
 
+![ST_DWithin returning true](../../../../image/ST_DWithin/ST_DWithin_true.svg "ST_DWithin returning true")
+![ST_DWithin returning false](../../../../image/ST_DWithin/ST_DWithin_false.svg "ST_DWithin returning false")
+
 Format: `ST_DWithin (leftGeometry: Geometry, rightGeometry: Geometry, distance: Double)`
 
 Return type: `Boolean`

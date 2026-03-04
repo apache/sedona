@@ -21,6 +21,9 @@
 
 Introduction: The first variant of the function computes and returns the [Dimensionally Extended 9-Intersection Model (DE-9IM)](https://en.wikipedia.org/wiki/DE-9IM) matrix string representing the spatial relationship between the two input geometry objects.
 
+![ST_Relate returning true](../../../image/ST_Relate/ST_Relate_true.svg "ST_Relate returning true")
+![ST_Relate returning false](../../../image/ST_Relate/ST_Relate_false.svg "ST_Relate returning false")
+
 The second variant of the function evaluates whether the two input geometries satisfy a specific spatial relationship defined by the provided `intersectionMatrix` pattern.
 
 !!!Note

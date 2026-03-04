@@ -21,6 +21,9 @@
 
 Introduction: Return true if A touches B
 
+![ST_Touches returning true](../../../../image/ST_Touches/ST_Touches_true.svg "ST_Touches returning true")
+![ST_Touches returning false](../../../../image/ST_Touches/ST_Touches_false.svg "ST_Touches returning false")
+
 Format: `ST_Touches (A:geometry, B:geometry)`
 
 Return type: `Boolean`

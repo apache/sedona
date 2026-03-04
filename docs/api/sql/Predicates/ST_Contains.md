@@ -21,6 +21,9 @@
 
 Introduction: Return true if A fully contains B
 
+![ST_Contains returning true](../../../image/ST_Contains/ST_Contains_true.svg "ST_Contains returning true")
+![ST_Contains returning false](../../../image/ST_Contains/ST_Contains_false.svg "ST_Contains returning false")
+
 Format: `ST_Contains (A: Geometry, B: Geometry)`
 
 Return type: `Boolean`
