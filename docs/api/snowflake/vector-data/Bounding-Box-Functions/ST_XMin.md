@@ -23,6 +23,8 @@ Introduction: Returns the minimum X coordinate of a geometry
 
 Format: `ST_XMin (A:geometry)`
 
+Return type: `Double`
+
 Example:
 
 ```sql

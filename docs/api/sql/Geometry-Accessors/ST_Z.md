@@ -23,6 +23,8 @@ Introduction: Returns Z Coordinate of given Point, null otherwise.
 
 Format: `ST_Z(pointA: Point)`
 
+Return type: `Double`
+
 Since: `v1.2.0`
 
 SQL Example

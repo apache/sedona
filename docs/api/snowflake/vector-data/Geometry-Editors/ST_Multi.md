@@ -26,6 +26,8 @@ Format
 
 `ST_Multi(geom: geometry)`
 
+Return type: `Geometry`
+
 Example:
 
 ```sql

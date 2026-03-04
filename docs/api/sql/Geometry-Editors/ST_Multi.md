@@ -24,6 +24,8 @@ ST_Multi is basically an alias for ST_Collect with one geometry.
 
 Format: `ST_Multi(geom: Geometry)`
 
+Return type: `Geometry`
+
 Since: `v1.2.0`
 
 SQL Example

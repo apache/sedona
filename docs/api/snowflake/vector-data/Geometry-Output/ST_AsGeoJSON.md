@@ -33,6 +33,8 @@ Format:
 
 `ST_AsGeoJSON (A:geometry, type: String)`
 
+Return type: `String`
+
 SQL Example (Simple GeoJSON):
 
 ```sql

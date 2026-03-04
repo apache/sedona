@@ -23,6 +23,8 @@ Introduction: Creates a point with X, Y, and M coordinate. Use [ST_MakePoint](ST
 
 Format: `ST_MakePointM(x: Double, y: Double, m: Double)`
 
+Return type: `Geometry`
+
 Since: `v1.6.1`
 
 Example:

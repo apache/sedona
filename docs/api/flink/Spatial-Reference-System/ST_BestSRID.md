@@ -31,6 +31,8 @@ Introduction: Returns the estimated most appropriate Spatial Reference Identifie
 
 Format: `ST_BestSRID(geom: Geometry)`
 
+Return type: `Integer`
+
 Since: `v1.6.0`
 
 SQL Example:

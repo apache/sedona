@@ -23,6 +23,8 @@ Introduction: Returns the coordinate dimension of the geometry.
 
 Format: `ST_NDims(geom: geometry)`
 
+Return type: `Integer`
+
 SQL example with z coordinate:
 
 ```sql

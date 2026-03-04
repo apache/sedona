@@ -23,6 +23,8 @@ Introduction: This function checks if a geometry is a valid trajectory represent
 
 Format: `ST_IsValidTrajectory(geom: Geometry)`
 
+Return type: `Boolean`
+
 Since: `v1.6.1`
 
 SQL Example:

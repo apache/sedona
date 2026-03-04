@@ -23,6 +23,8 @@ Introduction: Create an array that is filled by the given value
 
 Format: `RS_Array(length: Integer, value: Double)`
 
+Return type: `Array<Double>`
+
 Since: `v1.1.0`
 
 SQL Example

@@ -25,6 +25,8 @@ Format:
 `ST_GeomFromWKB (Wkb:string)`
 `ST_GeomFromWKB (Wkb:binary)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

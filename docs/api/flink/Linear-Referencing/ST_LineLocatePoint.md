@@ -24,6 +24,8 @@ The first argument must be a LINESTRING, and the second argument is a POINT geom
 
 Format: `ST_LineLocatePoint(linestring: Geometry, point: Geometry)`
 
+Return type: `Double`
+
 Since: `v1.5.1`
 
 SQL Example:

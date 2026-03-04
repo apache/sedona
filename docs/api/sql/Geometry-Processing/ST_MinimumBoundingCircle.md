@@ -25,6 +25,8 @@ Format:
 
 `ST_MinimumBoundingCircle(geom: Geometry, [Optional] quadrantSegments: Integer)`
 
+Return type: `Geometry`
+
 Since: `v1.0.1`
 
 SQL Example

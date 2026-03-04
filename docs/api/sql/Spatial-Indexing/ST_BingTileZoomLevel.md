@@ -23,6 +23,8 @@ Introduction: Returns the zoom level of the Bing Tile identified by the given qu
 
 Format: `ST_BingTileZoomLevel(quadKey: String)`
 
+Return type: `Integer`
+
 Since: `v1.9.0`
 
 SQL Example

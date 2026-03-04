@@ -23,6 +23,8 @@ Introduction: Checks for the presence of M coordinate values representing measur
 
 Format: `ST_HasM(geom: Geometry)`
 
+Return type: `Boolean`
+
 Since: `v1.6.1`
 
 SQL Example

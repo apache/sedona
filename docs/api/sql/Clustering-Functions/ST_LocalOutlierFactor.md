@@ -31,6 +31,8 @@ the record is an outlier.
 
 Format: `ST_LocalOutlierFactor(geometry: Geometry, k: Int, useSphere: Boolean)`
 
+Return type: `Double`
+
 Since: `v1.7.1`
 
 SQL Example

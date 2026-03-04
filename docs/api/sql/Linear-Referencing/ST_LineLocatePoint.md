@@ -23,6 +23,8 @@ Introduction: Returns a double between 0 and 1, representing the location of the
 
 Format: `ST_LineLocatePoint(linestring: Geometry, point: Geometry)`
 
+Return type: `Double`
+
 Since: `v1.5.1`
 
 SQL Example:

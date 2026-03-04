@@ -33,6 +33,8 @@ Format: `ST_GeometricMedian(geom: geometry, tolerance: float)`
 
 Format: `ST_GeometricMedian(geom: geometry)`
 
+Return type: `Geometry`
+
 Default parameters: `tolerance: 1e-6, maxIter: 1000, failIfNotConverged: false`
 
 Example:

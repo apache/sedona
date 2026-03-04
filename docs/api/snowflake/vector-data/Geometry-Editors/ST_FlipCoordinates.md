@@ -23,6 +23,8 @@ Introduction: Returns a version of the given geometry with X and Y axis flipped.
 
 Format: `ST_FlipCoordinates(A:geometry)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

@@ -23,6 +23,8 @@ Introduction: Generates a Point geometry representing the center of the GeoHash 
 
 Format: `ST_PointFromGeoHash(geoHash: String, precision: Integer)`
 
+Return type: `Geometry`
+
 SQL Example
 
 ```sql

@@ -26,6 +26,8 @@ Format:
 
 `RS_Band(raster: Raster, bands: ARRAY[Integer])`
 
+Return type: `Raster`
+
 Since: `v1.5.0`
 
 SQL Example

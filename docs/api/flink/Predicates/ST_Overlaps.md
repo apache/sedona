@@ -23,6 +23,8 @@ Introduction: Return true if A overlaps B
 
 Format: `ST_Overlaps (A: Geometry, B: Geometry)`
 
+Return type: `Boolean`
+
 Since: `v1.5.0`
 
 Example:

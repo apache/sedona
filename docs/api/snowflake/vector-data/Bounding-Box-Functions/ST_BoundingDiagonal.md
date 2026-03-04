@@ -25,6 +25,8 @@ If a single vertex (POINT) is provided, the returned LineString has both the sta
 
 Format: `ST_BoundingDiagonal(geom: Geometry)`
 
+Return type: `Geometry`
+
 SQL Example:
 
 ```sql

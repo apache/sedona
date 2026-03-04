@@ -25,6 +25,8 @@ Format:
 `ST_GeomFromWKT (Wkt:string)`
 `ST_GeomFromWKT (Wkt:string, srid:integer)`
 
+Return type: `Geometry`
+
 The optional srid parameter was added in `v1.3.1`
 
 SQL example:

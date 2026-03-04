@@ -40,6 +40,8 @@ RS_SetBandNoDataValue(raster: Raster, bandIndex: Integer, noDataValue: Double, r
 RS_SetBandNoDataValue(raster: Raster, bandIndex: Integer = 1, noDataValue: Double)
 ```
 
+Return type: `Raster`
+
 Since: `v1.5.0`
 
 SQL Example

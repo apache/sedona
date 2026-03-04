@@ -23,6 +23,8 @@ Introduction: Returns the type of the geometry as a string. Eg: 'LINESTRING', 'P
 
 Format: `GeometryType (A: Geometry)`
 
+Return type: `String`
+
 SQL Example:
 
 ```sql

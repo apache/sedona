@@ -26,6 +26,8 @@ If any of the geometries is empty, returns 0.0
 
 Format: `ST_FrechetDistance(g1: Geometry, g2: Geometry)`
 
+Return type: `Double`
+
 SQL Example:
 
 ```sql

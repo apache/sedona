@@ -29,6 +29,8 @@ If the given geometry is empty, no change is performed on it.
 
 Format: `ST_Force3D(geometry: Geometry, zValue: Double)`
 
+Return type: `Geometry`
+
 Since: `v1.4.1`
 
 Example:

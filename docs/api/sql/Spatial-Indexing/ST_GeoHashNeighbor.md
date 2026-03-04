@@ -23,6 +23,8 @@ Introduction: Returns the neighbor geohash cell in the given direction. Valid di
 
 Format: `ST_GeoHashNeighbor(geohash: String, direction: String)`
 
+Return type: `String`
+
 Since: `v1.9.0`
 
 SQL Example

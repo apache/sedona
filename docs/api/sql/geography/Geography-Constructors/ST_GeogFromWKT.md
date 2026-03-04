@@ -27,6 +27,8 @@ Format:
 
 `ST_GeogFromWKT (Wkt: String, srid: Integer)`
 
+Return type: `Geography`
+
 Since: `v1.8.0`
 
 SQL Example

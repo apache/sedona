@@ -29,6 +29,8 @@ Returns a struct containing the cluster ID and a boolean indicating if the recor
 
 Format: `ST_DBSCAN(geom: Geometry, epsilon: Double, minPoints: Integer, useSpheroid: Boolean)`
 
+Return type: `Struct<isCore: Boolean, cluster: Long>`
+
 Since: `v1.7.1`
 
 SQL Example

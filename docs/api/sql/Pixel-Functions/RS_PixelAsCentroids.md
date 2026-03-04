@@ -24,6 +24,8 @@ Each centroid represents the geometric center of the corresponding pixel's area.
 
 Format: `RS_PixelAsCentroids(raster: Raster, band: Integer)`
 
+Return type: `Array<Struct<geom: Geometry, val: Double, x: Integer, y: Integer>>`
+
 Since: `v1.5.1`
 
 SQL Example

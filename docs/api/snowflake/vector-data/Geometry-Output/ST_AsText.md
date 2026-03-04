@@ -23,6 +23,8 @@ Introduction: Return the Well-Known Text string representation of a geometry
 
 Format: `ST_AsText (A:geometry)`
 
+Return type: `String`
+
 SQL example:
 
 ```sql

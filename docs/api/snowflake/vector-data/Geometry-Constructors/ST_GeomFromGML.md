@@ -27,6 +27,8 @@ Introduction: Construct a Geometry from GML.
 Format:
 `ST_GeomFromGML (gml:string)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

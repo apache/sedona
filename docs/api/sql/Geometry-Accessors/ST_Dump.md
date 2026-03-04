@@ -24,6 +24,8 @@ itself, if the geometry is collection or multi it returns record for each of col
 
 Format: `ST_Dump(geom: Geometry)`
 
+Return type: `Array<Geometry>`
+
 Since: `v1.0.0`
 
 SQL Example

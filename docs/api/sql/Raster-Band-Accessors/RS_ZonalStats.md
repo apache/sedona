@@ -68,6 +68,8 @@ RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String)
 RS_ZonalStats(raster: Raster, zone: Geometry, statType: String)
 ```
 
+Return type: `Double`
+
 Since: `v1.5.1`
 
 SQL Example

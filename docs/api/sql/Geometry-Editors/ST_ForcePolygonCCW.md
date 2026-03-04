@@ -23,6 +23,8 @@ Introduction: For (Multi)Polygon geometries, this function sets the exterior rin
 
 Format: `ST_ForcePolygonCCW(geom: Geometry)`
 
+Return type: `Geometry`
+
 Since: `v1.6.0`
 
 SQL Example:

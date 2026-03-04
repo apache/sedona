@@ -23,6 +23,8 @@ Introduction: Mask all the values with 1 which are less than equal to a particul
 
 Format: `RS_LessThanEqual (Band: ARRAY[Double], Target: Double)`
 
+Return type: `Array<Double>`
+
 Since: `v1.1.0`
 
 SQL Example

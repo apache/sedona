@@ -24,6 +24,8 @@ and with the components having the same topological relationship.
 
 Format: `ST_SimplifyPreserveTopology (A:geometry, distanceTolerance: Double)`
 
+Return type: `Geometry`
+
 ```sql
 SELECT ST_SimplifyPreserveTopology(polygondf.countyshape, 10.0)
 FROM polygondf

@@ -27,6 +27,8 @@ Format:
 
 `ST_MakeLine(geoms: ARRAY[Geometry])`
 
+Return type: `Geometry`
+
 Since: `v1.5.0`
 
 SQL Example

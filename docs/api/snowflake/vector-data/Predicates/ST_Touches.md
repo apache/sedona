@@ -23,6 +23,8 @@ Introduction: Return true if A touches B
 
 Format: `ST_Touches (A:geometry, B:geometry)`
 
+Return type: `Boolean`
+
 ```sql
 SELECT *
 FROM pointdf

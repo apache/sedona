@@ -23,6 +23,8 @@ Introduction: Creates a raster from the given array of pixel values. The width, 
 the CRS will be taken from the given reference raster. The data type of the resulting raster will be DOUBLE and the
 number of bands of the resulting raster will be `data.length / (refRaster.width * refRaster.height)`.
 
+Return type: `Raster`
+
 Since: `v1.6.0`
 
 Format: `RS_MakeRaster(refRaster: Raster, bandDataType: String, data: ARRAY[Double])`

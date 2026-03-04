@@ -48,6 +48,8 @@ If you seek to get the shortest path between cells, you can call this function w
 
 Format: `ST_H3CellIDs(geom: geometry, level: Int, fullCover: true)`
 
+Return type: `Array<Long>`
+
 Since: `v1.5.0`
 
 Example:

@@ -27,6 +27,8 @@ In this case, Sedona use in-house implementation of estimation the shortest path
 
 Format: `ST_H3CellDistance(cell1: Long, cell2: Long)`
 
+Return type: `Long`
+
 Since: `v1.5.0`
 
 Example:

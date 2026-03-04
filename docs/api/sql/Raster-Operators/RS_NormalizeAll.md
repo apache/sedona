@@ -58,6 +58,8 @@ RS_NormalizeAll (raster: Raster, minLim: Double, maxLim: Double, noDataValue: Do
 RS_NormalizeAll (raster: Raster, minLim: Double, maxLim: Double, normalizeAcrossBands: Boolean, noDataValue: Double, minValue: Double, maxValue: Double )
 ```
 
+Return type: `Raster`
+
 Since: `v1.6.0`
 
 SQL Example

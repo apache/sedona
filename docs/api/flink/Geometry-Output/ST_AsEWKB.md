@@ -27,6 +27,8 @@ It will ignore the M coordinate if present.
 
 Format: `ST_AsEWKB (A: Geometry)`
 
+Return type: `Binary`
+
 Since: `v1.3.0`
 
 Example:

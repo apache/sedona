@@ -23,6 +23,8 @@ Introduction: RETURNS number of interior rings of polygon geometries.
 
 Format: `ST_NumInteriorRings(geom: Geometry)`
 
+Return type: `Integer`
+
 Since: `v1.0.0`
 
 SQL Example

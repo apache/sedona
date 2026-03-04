@@ -23,6 +23,8 @@ Introduction: Returns the Y skew or rotation parameter.
 
 Format: `RS_SkewY(raster: Raster)`
 
+Return type: `Double`
+
 Since: `v1.5.0`
 
 SQL Example

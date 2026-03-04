@@ -23,6 +23,8 @@ Introduction: Forces the geometries into a "2-dimensional mode" so that all outp
 
 Format: `ST_Force_2D (A: Geometry)`
 
+Return type: `Geometry`
+
 Since: `v1.2.1`
 
 Example:

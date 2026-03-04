@@ -23,6 +23,8 @@ Introduction: Test if geometry's only self-intersections are at boundary points.
 
 Format: `ST_IsSimple (A: Geometry)`
 
+Return type: `Boolean`
+
 Since: `v1.3.0`
 
 Example:

@@ -23,6 +23,8 @@ Introduction: Return the Well-Known Binary representation of a geometry
 
 Format: `ST_AsBinary (A: Geometry)`
 
+Return type: `Binary`
+
 Since: `v1.1.1`
 
 SQL Example

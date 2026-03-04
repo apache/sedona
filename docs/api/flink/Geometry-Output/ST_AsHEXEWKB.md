@@ -23,6 +23,8 @@ Introduction: This function returns the input geometry encoded to a text represe
 
 Format: `ST_AsHEXEWKB(geom: Geometry, endian: String = NDR)`
 
+Return type: `String`
+
 Since: `v1.6.1`
 
 SQL Example

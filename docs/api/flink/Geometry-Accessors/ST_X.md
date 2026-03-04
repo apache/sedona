@@ -23,6 +23,8 @@ Introduction: Returns X Coordinate of given Point, null otherwise.
 
 Format: `ST_X(pointA: Point)`
 
+Return type: `Double`
+
 Since: `v1.3.0`
 
 Example:

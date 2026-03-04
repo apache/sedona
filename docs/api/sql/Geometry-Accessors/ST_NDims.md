@@ -23,6 +23,8 @@ Introduction: Returns the coordinate dimension of the geometry.
 
 Format: `ST_NDims(geom: Geometry)`
 
+Return type: `Integer`
+
 Since: `v1.3.1`
 
 Spark SQL example with z coordinate:

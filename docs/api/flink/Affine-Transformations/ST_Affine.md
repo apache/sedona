@@ -43,6 +43,8 @@ Format:
 
 `ST_Affine(geometry, a, b, d, e, xOff, yOff)`
 
+Return type: `Geometry`
+
 Since: `v1.5.0`
 
 Examples:

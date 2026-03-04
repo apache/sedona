@@ -28,6 +28,8 @@ Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lat/lon== orde
 
 Format: `ST_LengthSpheroid (A:geometry)`
 
+Return type: `Double`
+
 SQL example:
 
 ```sql

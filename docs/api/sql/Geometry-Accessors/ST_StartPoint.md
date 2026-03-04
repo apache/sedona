@@ -23,6 +23,8 @@ Introduction: Returns first point of given linestring.
 
 Format: `ST_StartPoint(geom: Geometry)`
 
+Return type: `Geometry`
+
 Since: `v1.0.0`
 
 SQL Example

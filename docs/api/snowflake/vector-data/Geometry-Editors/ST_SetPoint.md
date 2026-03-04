@@ -23,6 +23,8 @@ Introduction: Replace Nth point of linestring with given point. Index is 0-based
 
 Format: `ST_SetPoint (linestring: geometry, index: integer, point: geometry)`
 
+Return type: `Geometry`
+
 Example:
 
 ```sql

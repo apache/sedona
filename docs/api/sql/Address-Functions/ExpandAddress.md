@@ -33,6 +33,8 @@ To prepare the libpostal data for a remote filesystem, first download it to a lo
 
 Format: `ExpandAddress (address: String)`
 
+Return type: `Array<String>`
+
 Since: `v1.8.0`
 
 SQL Example

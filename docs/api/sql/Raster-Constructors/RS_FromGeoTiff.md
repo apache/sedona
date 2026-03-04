@@ -23,6 +23,8 @@ Introduction: Returns a raster geometry from a GeoTiff file.
 
 Format: `RS_FromGeoTiff(asc: ARRAY[Byte])`
 
+Return type: `Raster`
+
 Since: `v1.4.0`
 
 SQL Example

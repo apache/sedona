@@ -25,6 +25,8 @@ Format:
 
 `ST_PolygonFromEnvelope (MinX: Double, MinY: Double, MaxX: Double, MaxY: Double)`
 
+Return type: `Geometry`
+
 Since: `v1.0.0`
 
 SQL Example

@@ -23,6 +23,8 @@ Introduction: Returns the height of the raster.
 
 Format: `RS_Height(raster: Raster)`
 
+Return type: `Integer`
+
 Since: `v1.5.0`
 
 SQL Example

@@ -23,6 +23,8 @@ Introduction: Return the Euclidean distance between A and B
 
 Format: `ST_Distance (A:geometry, B:geometry)`
 
+Return type: `Double`
+
 SQL example:
 
 ```sql

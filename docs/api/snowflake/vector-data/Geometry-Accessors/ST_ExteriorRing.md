@@ -23,6 +23,8 @@ Introduction: Returns a line string representing the exterior ring of the POLYGO
 
 Format: `ST_ExteriorRing(geom: geometry)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

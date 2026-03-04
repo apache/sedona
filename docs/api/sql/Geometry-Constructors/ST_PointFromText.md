@@ -23,6 +23,8 @@ Introduction: Construct a Point from Text, delimited by Delimiter
 
 Format: `ST_PointFromText (Text: String, Delimiter: Char)`
 
+Return type: `Geometry`
+
 Since: `v1.0.0`
 
 SQL Example

@@ -23,6 +23,8 @@ Introduction: Creates a 2D, 3D Z or 4D ZM Point geometry. Use [ST_MakePointM](ST
 
 Format: `ST_MakePoint (X: Double, Y: Double, Z: Double, M: Double)`
 
+Return type: `Geometry`
+
 Since: `v1.5.0`
 
 Example:

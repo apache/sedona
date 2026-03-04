@@ -31,6 +31,8 @@ Format:
 
 `ST_Perimeter(geom: Geometry, use_spheroid: Boolean, lenient: Boolean = True)`
 
+Return type: `Double`
+
 Since: `v1.7.0`
 
 SQL Example:

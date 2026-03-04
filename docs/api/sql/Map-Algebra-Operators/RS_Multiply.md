@@ -23,6 +23,8 @@ Introduction: Multiply two spectral bands in a Geotiff image
 
 Format: `RS_Multiply (Band1: ARRAY[Double], Band2: ARRAY[Double])`
 
+Return type: `Array<Double>`
+
 Since: `v1.1.0`
 
 SQL Example

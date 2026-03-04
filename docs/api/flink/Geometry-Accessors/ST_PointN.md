@@ -23,6 +23,8 @@ Introduction: Return the Nth point in a single linestring or circular linestring
 
 Format: `ST_PointN(A: Geometry, B: Integer)`
 
+Return type: `Geometry`
+
 Since: `v1.2.1`
 
 Examples:

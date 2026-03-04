@@ -23,6 +23,8 @@ Introduction: Return the union of geometry A and B
 
 Format: `ST_Union (A:geometry, B:geometry)`
 
+Return type: `Geometry`
+
 Example:
 
 ```sql

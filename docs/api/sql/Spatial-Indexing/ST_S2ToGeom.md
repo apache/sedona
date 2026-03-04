@@ -28,6 +28,8 @@ Introduction: Returns an array of Polygons for the corresponding S2 cell IDs.
 
 Format: `ST_S2ToGeom(cellIds: Array[Long])`
 
+Return type: `Array<Geometry>`
+
 Since: `v1.6.0`
 
 SQL Example:

@@ -23,6 +23,8 @@ Introduction: Returns the Y coordinate of the upper-left corner of the raster.
 
 Format: `RS_UpperLeftY(raster: Raster)`
 
+Return type: `Double`
+
 Since: `v1.5.0`
 
 SQL Example

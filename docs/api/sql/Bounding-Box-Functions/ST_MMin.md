@@ -23,6 +23,8 @@ Introduction: Returns M minima of the given geometry or null if there is no M co
 
 Format: `ST_MMin(geom: Geometry)`
 
+Return type: `Double`
+
 Since: `v1.6.1`
 
 SQL Example:

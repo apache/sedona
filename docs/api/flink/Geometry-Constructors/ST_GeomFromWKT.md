@@ -26,6 +26,8 @@ Format:
 
 `ST_GeomFromWKT (Wkt: String, srid: Integer)`
 
+Return type: `Geometry`
+
 Since: `v1.2.0`
 
 Example:

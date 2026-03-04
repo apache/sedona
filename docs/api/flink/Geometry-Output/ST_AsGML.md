@@ -23,6 +23,8 @@ Introduction: Return the [GML](https://www.ogc.org/standards/gml) string represe
 
 Format: `ST_AsGML (A: Geometry)`
 
+Return type: `String`
+
 Since: `v1.3.0`
 
 Example:

@@ -23,6 +23,8 @@ Introduction: Returns the maximum X coordinate of a geometry
 
 Format: `ST_XMax (A:geometry)`
 
+Return type: `Double`
+
 Example:
 
 ```sql

@@ -31,6 +31,8 @@ Format:
 
 `ST_Translate(geometry: Geometry, deltaX: Double, deltaY: Double, deltaZ: Double)`
 
+Return type: `Geometry`
+
 Since: `v1.4.1`
 
 Example:

@@ -36,6 +36,8 @@ Format:
 
 `RS_Count(raster: Raster)`
 
+Return type: `Long`
+
 Since: `v1.5.0`
 
 SQL Example

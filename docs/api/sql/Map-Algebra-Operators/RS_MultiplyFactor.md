@@ -23,6 +23,8 @@ Introduction: Multiply a factor to a spectral band in a geotiff image
 
 Format: `RS_MultiplyFactor (Band1: ARRAY[Double], Factor: Double)`
 
+Return type: `Array<Double>`
+
 Since: `v1.1.0`
 
 SQL Example

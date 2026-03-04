@@ -30,6 +30,8 @@ Converts an array of Uber H3 cell indices into an array of Polygon geometries, w
 
 Format: `ST_H3ToGeom(cells: Array[Long])`
 
+Return type: `Array<Geometry>`
+
 Since: `v1.6.0`
 
 Example:

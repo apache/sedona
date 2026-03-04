@@ -27,6 +27,8 @@ This function may have significant performance limitations when processing polyg
 
 Format: `ST_StraightSkeleton(geom: Geometry)`
 
+Return type: `Geometry`
+
 Since: `v1.8.0`
 
 Example:

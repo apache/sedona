@@ -23,6 +23,8 @@ Introduction: Returns the 8 neighboring geohash cells of a given geohash string.
 
 Format: `ST_GeoHashNeighbors(geohash: String)`
 
+Return type: `Array<String>`
+
 Example:
 
 Query:

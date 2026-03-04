@@ -24,6 +24,8 @@ Introduction: Construct a Geometry from OGC Extended WKT
 Format:
 `ST_GeomFromEWKT (EWkt:string)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

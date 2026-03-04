@@ -32,6 +32,8 @@ Format:
 
 `RS_Contains(raster0: Raster, raster1: Raster)`
 
+Return type: `Boolean`
+
 Since: `v1.5.0`
 
 SQL Example

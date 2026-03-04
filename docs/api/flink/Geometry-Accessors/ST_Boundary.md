@@ -23,6 +23,8 @@ Introduction: Returns the closure of the combinatorial boundary of this Geometry
 
 Format: `ST_Boundary(geom: Geometry)`
 
+Return type: `Geometry`
+
 Since: `v1.3.0`
 
 Example:

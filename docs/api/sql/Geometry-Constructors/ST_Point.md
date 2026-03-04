@@ -23,6 +23,8 @@ Introduction: Construct a Point from X and Y
 
 Format: `ST_Point (X: Double, Y: Double)`
 
+Return type: `Geometry`
+
 Since: `v1.0.0`
 
 In `v1.4.0` an optional Z parameter was removed to be more consistent with other spatial SQL implementations.

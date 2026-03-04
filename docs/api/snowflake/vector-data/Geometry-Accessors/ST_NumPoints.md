@@ -23,6 +23,8 @@ Introduction: Returns number of points in a LineString
 
 Format: `ST_NumPoints(geom: geometry)`
 
+Return type: `Integer`
+
 !!!note
     If any other geometry is provided as an argument, an IllegalArgumentException is thrown.
 

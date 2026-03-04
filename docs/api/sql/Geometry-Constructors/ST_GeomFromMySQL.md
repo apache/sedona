@@ -23,6 +23,8 @@ Introduction: Construct a Geometry from MySQL Geometry binary.
 
 Format: `ST_GeomFromMySQL (binary: Binary)`
 
+Return type: `Geometry`
+
 Since: `v1.8.0`
 
 SQL Example

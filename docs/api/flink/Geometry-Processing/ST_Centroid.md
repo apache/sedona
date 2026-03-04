@@ -23,6 +23,8 @@ Introduction: Return the centroid point of A
 
 Format: `ST_Centroid (A: Geometry)`
 
+Return type: `Geometry`
+
 Since: `v1.5.0`
 
 Example:

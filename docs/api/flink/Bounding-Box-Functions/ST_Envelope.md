@@ -23,6 +23,8 @@ Introduction: Return the envelope boundary of A
 
 Format: `ST_Envelope (A: Geometry)`
 
+Return type: `Geometry`
+
 Since: `v1.3.0`
 
 Example:

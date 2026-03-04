@@ -36,6 +36,8 @@ Formats:
 
 `RS_SummaryStatsAll(raster: Raster)`
 
+Return type: `Struct<count: Long, sum: Double, mean: Double, stddev: Double, min: Double, max: Double>`
+
 Since: `v1.5.0`
 
 SQL Example

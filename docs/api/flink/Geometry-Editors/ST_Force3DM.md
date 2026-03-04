@@ -26,6 +26,8 @@ Example output is after calling ST_AsText() on returned geometry, which adds M f
 
 Format: `ST_Force3DM(geometry: Geometry, mValue: Double = 0.0)`
 
+Return type: `Geometry`
+
 Since: `v1.6.1`
 
 SQL Example

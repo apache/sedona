@@ -23,6 +23,8 @@ Introduction: Returns the bounding polygon (Geometry) of the Bing Tile identifie
 
 Format: `ST_BingTilePolygon(quadKey: String)`
 
+Return type: `Geometry`
+
 Since: `v1.9.0`
 
 SQL Example

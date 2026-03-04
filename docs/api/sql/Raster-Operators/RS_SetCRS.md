@@ -23,6 +23,8 @@ Introduction: Sets the coordinate reference system (CRS) of a raster using a CRS
 
 Format: `RS_SetCRS (raster: Raster, crsString: String)`
 
+Return type: `Raster`
+
 Since: `v1.9.0`
 
 ## Supported CRS formats

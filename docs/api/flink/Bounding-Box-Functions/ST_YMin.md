@@ -23,6 +23,8 @@ Introduction: Return the minimum Y coordinate of A
 
 Format: `ST_Y_Min (A: Geometry)`
 
+Return type: `Double`
+
 Since: `v1.2.1`
 
 Example:

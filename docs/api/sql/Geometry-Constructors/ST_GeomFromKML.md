@@ -24,6 +24,8 @@ Introduction: Construct a Geometry from KML.
 Format:
 `ST_GeomFromKML (kml: String)`
 
+Return type: `Geometry`
+
 Since: `v1.3.0`
 
 SQL example:

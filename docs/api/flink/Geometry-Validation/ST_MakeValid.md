@@ -30,6 +30,8 @@ Format:
 
 `ST_MakeValid (A: Geometry, keepCollapsed: Boolean)`
 
+Return type: `Geometry`
+
 Since: `v1.5.0`
 
 Example:

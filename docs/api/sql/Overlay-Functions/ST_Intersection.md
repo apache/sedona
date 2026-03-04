@@ -23,6 +23,8 @@ Introduction: Return the intersection geometry of A and B
 
 Format: `ST_Intersection (A: Geometry, B: Geometry)`
 
+Return type: `Geometry`
+
 Since: `v1.0.0`
 
 !!!note

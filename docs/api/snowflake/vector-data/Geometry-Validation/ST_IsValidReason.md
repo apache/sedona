@@ -34,6 +34,8 @@ ST_IsValidReason (A: Geometry)
 ST_IsValidReason (A: Geometry, flag: Integer)
 ```
 
+Return type: `String`
+
 SQL Example for valid geometry:
 
 ```sql

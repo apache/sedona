@@ -23,6 +23,8 @@ Introduction: Returns M maxima of the given geometry or null if there is no M co
 
 Format: `ST_MMax(geom: Geometry)`
 
+Return type: `Double`
+
 Since: `v1.6.1`
 
 SQL Example

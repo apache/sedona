@@ -57,6 +57,8 @@ Format:
 RS_AsMatrix(raster: Raster, band: Integer = 1, postDecimalPrecision: Integer = 6)
 ```
 
+Return type: `String`
+
 Since: `1.5.0`
 
 SQL Example

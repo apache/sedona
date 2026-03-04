@@ -25,6 +25,8 @@ Format:
 
 `ST_GeogFromGeoHash(geohash: String, precision: Integer)`
 
+Return type: `Geography`
+
 Since: `v1.8.0`
 
 SQL Example

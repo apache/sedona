@@ -26,6 +26,8 @@ Introduction: This function scales the geometry to a new size by multiplying the
 
 Format: `ST_Scale(geometry: Geometry, scaleX: Double, scaleY: Double)`
 
+Return type: `Geometry`
+
 SQL Example:
 
 ```sql

@@ -23,6 +23,8 @@ Introduction: This function returns a two-point LineString geometry representing
 
 Format: `ST_MinimumClearanceLine(geometry: Geometry)`
 
+Return type: `Geometry`
+
 SQL Example:
 
 ```sql

@@ -23,6 +23,8 @@ Introduction: Returns two columns containing the center point and radius of the 
 
 Format: `ST_MinimumBoundingRadius(geom: geometry)`
 
+Return type: `Struct<center: Geometry, radius: Double>`
+
 SQL example:
 
 ```sql

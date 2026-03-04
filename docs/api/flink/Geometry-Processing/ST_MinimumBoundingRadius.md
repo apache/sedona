@@ -23,6 +23,8 @@ Introduction: Returns a struct containing the center point and radius of the sma
 
 Format: `ST_MinimumBoundingRadius(geom: Geometry)`
 
+Return type: `Struct<center: Geometry, radius: Double>`
+
 Since: `v1.5.0`
 
 Example:

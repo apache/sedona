@@ -25,6 +25,8 @@ If `colX` and `rowY` are out of bounds for the raster, they are interpolated ass
 
 Format: `RS_PixelAsPolygon(raster: Raster, colX: Integer, rowY: Integer)`
 
+Return type: `Geometry`
+
 Since: `v1.5.0`
 
 SQL Example

@@ -23,6 +23,8 @@ Introduction: Mask all the values with 1 which are greater than a particular tar
 
 Format: `RS_GreaterThan (Band: ARRAY[Double], Target: Double)`
 
+Return type: `Array<Double>`
+
 Since: `v1.1.0`
 
 SQL Example

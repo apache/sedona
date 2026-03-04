@@ -23,6 +23,8 @@ Introduction: Return true if A and B are disjoint
 
 Format: `ST_Disjoint (A: Geometry, B: Geometry)`
 
+Return type: `Boolean`
+
 Since: `v1.2.1`
 
 SQL Example

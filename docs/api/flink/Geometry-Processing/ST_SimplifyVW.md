@@ -26,6 +26,8 @@ Introduction: This function simplifies the input geometry by applying the Visval
 
 Format: `ST_SimplifyVW(geom: Geometry, tolerance: Double)`
 
+Return type: `Geometry`
+
 Since: `v1.6.1`
 
 SQL Example

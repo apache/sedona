@@ -23,6 +23,8 @@ Introduction: Creates a Bing Tile quadkey from tile XY coordinates and a zoom le
 
 Format: `ST_BingTile(tileX: Integer, tileY: Integer, zoomLevel: Integer)`
 
+Return type: `String`
+
 Since: `v1.9.0`
 
 Example:

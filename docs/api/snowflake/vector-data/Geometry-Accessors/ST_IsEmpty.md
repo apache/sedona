@@ -23,6 +23,8 @@ Introduction: Test if a geometry is empty geometry
 
 Format: `ST_IsEmpty (A:geometry)`
 
+Return type: `Boolean`
+
 SQL example:
 
 ```sql

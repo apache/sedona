@@ -23,6 +23,8 @@ Introduction: Sets the spatial reference system identifier (SRID) of the geometr
 
 Format: `ST_SetSRID (A:geometry, srid: Integer)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

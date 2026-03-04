@@ -23,6 +23,8 @@ Introduction: Function to create a polygon built from the given LineString and s
 
 Format: `ST_Polygon(geom: Geometry, srid: Integer)`
 
+Return type: `Geometry`
+
 Since: `v1.5.0`
 
 Example:

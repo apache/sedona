@@ -30,6 +30,8 @@ Introduction: This function combines multiple rasters into a single multiband ra
 
 Format: `RS_Union_Aggr(A: rasterColumn, B: indexColumn)`
 
+Return type: `Raster`
+
 Since: `v1.5.1`
 
 SQL Example:

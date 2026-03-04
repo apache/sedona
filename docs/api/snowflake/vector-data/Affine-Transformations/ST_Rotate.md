@@ -29,6 +29,8 @@ Formats;
 
 `ST_Rotate (geometry: Geometry, angle: Double, pointOrigin: Geometry)`
 
+Return type: `Geometry`
+
 SQL Example:
 
 ```sql

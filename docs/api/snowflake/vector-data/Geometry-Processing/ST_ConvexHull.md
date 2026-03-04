@@ -23,6 +23,8 @@ Introduction: Return the Convex Hull of polygon A
 
 Format: `ST_ConvexHull (A:geometry)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

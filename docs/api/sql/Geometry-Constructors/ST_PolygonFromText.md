@@ -23,6 +23,8 @@ Introduction: Construct a Polygon from Text, delimited by Delimiter. Path must b
 
 Format: `ST_PolygonFromText (Text: String, Delimiter: Char)`
 
+Return type: `Geometry`
+
 Since: `v1.0.0`
 
 SQL Example

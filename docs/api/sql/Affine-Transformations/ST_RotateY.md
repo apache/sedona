@@ -23,6 +23,8 @@ Introduction: Performs a counter-clockwise rotation of the specified geometry ar
 
 Format: `ST_RotateY(geometry: Geometry, angle: Double)`
 
+Return type: `Geometry`
+
 Since: `v1.7.0`
 
 SQL Example:

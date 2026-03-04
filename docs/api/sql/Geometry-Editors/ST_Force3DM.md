@@ -26,6 +26,8 @@ Introduction: Forces the geometry into XYM mode. Retains any existing M coordina
 
 Format: `ST_Force3DM(geometry: Geometry, mValue: Double = 0.0)`
 
+Return type: `Geometry`
+
 Since: `v1.6.1`
 
 SQL Example

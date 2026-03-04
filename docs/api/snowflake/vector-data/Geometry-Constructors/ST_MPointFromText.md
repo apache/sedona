@@ -27,6 +27,8 @@ Format:
 
 `ST_MPointFromText (Wkt: String, srid: Integer)`
 
+Return type: `Geometry`
+
 SQL Example:
 
 ```sql

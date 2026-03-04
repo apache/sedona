@@ -27,6 +27,8 @@ Format:
 
 `ST_ConcaveHull (A: Geometry, pctConvex: Double, allowHoles: Boolean)`
 
+Return type: `Geometry`
+
 Since: `v1.4.0`
 
 Example:

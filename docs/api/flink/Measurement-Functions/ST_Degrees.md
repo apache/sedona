@@ -23,6 +23,8 @@ Introduction: Convert an angle in radian to degrees.
 
 Format: `ST_Degrees(angleInRadian)`
 
+Return type: `Double`
+
 Since: `v1.5.0`
 
 Example:

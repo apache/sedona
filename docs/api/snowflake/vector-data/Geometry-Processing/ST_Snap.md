@@ -25,6 +25,8 @@ If the minimum distance between the geometries exceeds the `tolerance`, the `inp
 
 Format: `ST_Snap(input: Geometry, reference: Geometry, tolerance: double)`
 
+Return type: `Geometry`
+
 Input geometry:
 
 ![ST_Snap Base example](../../../../image/st_snap/st-snap-base-example.png "ST_Snap Base example")

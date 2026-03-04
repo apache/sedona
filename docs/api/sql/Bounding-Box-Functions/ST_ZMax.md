@@ -23,6 +23,8 @@ Introduction: Returns Z maxima of the given geometry or null if there is no Z co
 
 Format: `ST_ZMax(geom: Geometry)`
 
+Return type: `Double`
+
 Since: `v1.3.1`
 
 SQL Example
