@@ -21,6 +21,8 @@
 
 Introduction: Returns the number of Geometries. If geometry is a GEOMETRYCOLLECTION (or MULTI*) return the number of geometries, for single geometries will return 1.
 
+![ST_NumGeometries](../../../../image/ST_NumGeometries/ST_NumGeometries.svg "ST_NumGeometries")
+
 Format: `ST_NumGeometries (A:geometry)`
 
 Return type: `Integer`

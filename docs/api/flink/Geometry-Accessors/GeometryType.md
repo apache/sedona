@@ -21,6 +21,8 @@
 
 Introduction: Returns the type of the geometry as a string. Eg: 'LINESTRING', 'POLYGON', 'MULTIPOINT', etc. This function also indicates if the geometry is measured, by returning a string of the form 'POINTM'.
 
+![GeometryType](../../../image/GeometryType/GeometryType.svg "GeometryType")
+
 Format: `GeometryType (A: Geometry)`
 
 Return type: `String`

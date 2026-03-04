@@ -21,6 +21,8 @@
 
 Introduction: Returns a MultiPoint geometry consisting of all the coordinates of the input geometry. It preserves duplicate points as well as M and Z coordinates.
 
+![ST_Points](../../../../image/ST_Points/ST_Points.svg "ST_Points")
+
 Format: `ST_Points(geom: Geometry)`
 
 Return type: `Geometry`

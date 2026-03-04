@@ -21,6 +21,8 @@
 
 Introduction: RETURNS true if the LINESTRING start and end point are the same.
 
+![ST_IsClosed](../../../../image/ST_IsClosed/ST_IsClosed.svg "ST_IsClosed")
+
 Format: `ST_IsClosed(geom: geometry)`
 
 Return type: `Boolean`

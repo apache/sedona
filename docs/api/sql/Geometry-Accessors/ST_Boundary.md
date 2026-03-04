@@ -21,6 +21,8 @@
 
 Introduction: Returns the closure of the combinatorial boundary of this Geometry.
 
+![ST_Boundary](../../../image/ST_Boundary/ST_Boundary.svg "ST_Boundary")
+
 Format: `ST_Boundary(geom: Geometry)`
 
 Return type: `Geometry`

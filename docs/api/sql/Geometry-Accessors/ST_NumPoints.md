@@ -28,6 +28,8 @@ Introduction: Returns number of points in a LineString
 
     Output: `IllegalArgumentException: Unsupported geometry type: MultiPoint, only LineString geometry is supported.`
 
+![ST_NumPoints](../../../image/ST_NumPoints/ST_NumPoints.svg "ST_NumPoints")
+
 Format: `ST_NumPoints(geom: Geometry)`
 
 Return type: `Integer`

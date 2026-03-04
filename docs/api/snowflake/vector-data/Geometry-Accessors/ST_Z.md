@@ -21,6 +21,8 @@
 
 Introduction: Returns Z Coordinate of given Point, null otherwise.
 
+![ST_Z](../../../../image/ST_Z/ST_Z.svg "ST_Z")
+
 Format: `ST_Z(pointA: Point)`
 
 Return type: `Double`

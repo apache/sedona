@@ -21,6 +21,8 @@
 
 Introduction: Returns the Nth interior linestring ring of the polygon geometry. Returns NULL if the geometry is not a polygon or the given N is out of range
 
+![ST_InteriorRingN](../../../image/ST_InteriorRingN/ST_InteriorRingN.svg "ST_InteriorRingN")
+
 Format: `ST_InteriorRingN(geom: Geometry, n: Integer)`
 
 Return type: `Geometry`

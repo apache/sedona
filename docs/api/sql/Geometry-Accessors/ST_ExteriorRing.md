@@ -21,6 +21,8 @@
 
 Introduction: Returns a line string representing the exterior ring of the POLYGON geometry. Return NULL if the geometry is not a polygon.
 
+![ST_ExteriorRing](../../../image/ST_ExteriorRing/ST_ExteriorRing.svg "ST_ExteriorRing")
+
 Format: `ST_ExteriorRing(geom: Geometry)`
 
 Return type: `Geometry`

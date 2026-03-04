@@ -22,6 +22,8 @@
 Introduction: It expands the geometries. If the geometry is simple (Point, Polygon Linestring etc.) it returns the geometry
 itself, if the geometry is collection or multi it returns record for each of collection components.
 
+![ST_Dump](../../../image/ST_Dump/ST_Dump.svg "ST_Dump")
+
 Format: `ST_Dump(geom: Geometry)`
 
 Return type: `Array<Geometry>`

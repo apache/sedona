@@ -27,6 +27,8 @@ Introduction: This function determines if a given geometry crosses the Internati
 !!!note
     For multi-geometries (e.g., MultiPolygon, MultiLineString), this function will return true if any one of the geometries within the multi-geometry crosses the International Date Line.
 
+![ST_CrossesDateLine](../../../image/ST_CrossesDateLine/ST_CrossesDateLine.svg "ST_CrossesDateLine")
+
 Format: `ST_CrossesDateLine(geometry: Geometry)`
 
 Return type: `Boolean`

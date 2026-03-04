@@ -21,6 +21,8 @@
 
 Introduction: Returns first point of given linestring.
 
+![ST_StartPoint](../../../image/ST_StartPoint/ST_StartPoint.svg "ST_StartPoint")
+
 Format: `ST_StartPoint(geom: Geometry)`
 
 Return type: `Geometry`

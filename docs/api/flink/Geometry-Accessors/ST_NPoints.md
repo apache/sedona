@@ -21,6 +21,8 @@
 
 Introduction: Returns the number of points of the geometry
 
+![ST_NPoints](../../../image/ST_NPoints/ST_NPoints.svg "ST_NPoints")
+
 Format: `ST_NPoints (A: Geometry)`
 
 Return type: `Integer`
