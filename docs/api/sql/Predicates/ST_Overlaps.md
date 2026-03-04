@@ -21,6 +21,9 @@
 
 Introduction: Return true if A overlaps B
 
+![ST_Overlaps returning true](../../../image/ST_Overlaps/ST_Overlaps_true.svg "ST_Overlaps returning true")
+![ST_Overlaps returning false](../../../image/ST_Overlaps/ST_Overlaps_false.svg "ST_Overlaps returning false")
+
 Format: `ST_Overlaps (A: Geometry, B: Geometry)`
 
 Return type: `Boolean`

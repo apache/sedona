@@ -21,6 +21,9 @@
 
 Introduction: Return true if A intersects B
 
+![ST_Intersects returning true](../../../../image/ST_Intersects/ST_Intersects_true.svg "ST_Intersects returning true")
+![ST_Intersects returning false](../../../../image/ST_Intersects/ST_Intersects_false.svg "ST_Intersects returning false")
+
 Format: `ST_Intersects (A:geometry, B:geometry)`
 
 Return type: `Boolean`

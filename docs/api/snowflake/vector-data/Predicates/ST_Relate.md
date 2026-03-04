@@ -23,6 +23,9 @@ Introduction: The first variant of the function computes and returns the [Dimens
 
 The second variant of the function evaluates whether the two input geometries satisfy a specific spatial relationship defined by the provided `intersectionMatrix` pattern.
 
+![ST_Relate with intersectionMatrix pattern returning true](../../../../image/ST_Relate/ST_Relate_true.svg "ST_Relate with intersectionMatrix pattern returning true")
+![ST_Relate with intersectionMatrix pattern returning false](../../../../image/ST_Relate/ST_Relate_false.svg "ST_Relate with intersectionMatrix pattern returning false")
+
 !!!Note
     It is important to note that this function is not optimized for use in spatial join operations. Certain DE-9IM relationships can hold true for geometries that do not intersect or are disjoint. As a result, it is recommended to utilize other dedicated spatial functions specifically optimized for spatial join processing.
 

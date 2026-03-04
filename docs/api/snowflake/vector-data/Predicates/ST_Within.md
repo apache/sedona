@@ -21,6 +21,9 @@
 
 Introduction: Return true if A is fully contained by B
 
+![ST_Within returning true](../../../../image/ST_Within/ST_Within_true.svg "ST_Within returning true")
+![ST_Within returning false](../../../../image/ST_Within/ST_Within_false.svg "ST_Within returning false")
+
 Format: `ST_Within (A:geometry, B:geometry)`
 
 Return type: `Boolean`

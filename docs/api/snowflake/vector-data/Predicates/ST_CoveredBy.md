@@ -21,6 +21,9 @@
 
 Introduction: Return true if A is covered by B
 
+![ST_CoveredBy returning true](../../../../image/ST_CoveredBy/ST_CoveredBy_true.svg "ST_CoveredBy returning true")
+![ST_CoveredBy returning false](../../../../image/ST_CoveredBy/ST_CoveredBy_false.svg "ST_CoveredBy returning false")
+
 Format: `ST_CoveredBy (A:geometry, B:geometry)`
 
 Return type: `Boolean`

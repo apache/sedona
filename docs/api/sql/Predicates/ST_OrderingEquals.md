@@ -21,6 +21,9 @@
 
 Introduction: Returns true if the geometries are equal and the coordinates are in the same order
 
+![ST_OrderingEquals returning true](../../../image/ST_OrderingEquals/ST_OrderingEquals_true.svg "ST_OrderingEquals returning true")
+![ST_OrderingEquals returning false](../../../image/ST_OrderingEquals/ST_OrderingEquals_false.svg "ST_OrderingEquals returning false")
+
 Format: `ST_OrderingEquals(A: geometry, B: geometry)`
 
 Return type: `Boolean`
