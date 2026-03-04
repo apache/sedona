@@ -23,6 +23,8 @@ Introduction: Sets the spatial reference system identifier (SRID) of the raster 
 
 Format: `RS_SetSRID (raster: Raster, srid: Integer)`
 
+Return type: `Raster`
+
 Since: `v1.4.1`
 
 SQL Example

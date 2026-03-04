@@ -29,6 +29,8 @@ If the given geometry is empty, no change is performed on it.
 
 Format: `ST_Force3D(geometry, zValue)`
 
+Return type: `Geometry`
+
 SQL Example:
 
 ```sql

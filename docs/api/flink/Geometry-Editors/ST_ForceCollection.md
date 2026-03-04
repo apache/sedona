@@ -23,6 +23,8 @@ Introduction: This function converts the input geometry into a GeometryCollectio
 
 Format: `ST_ForceCollection(geom: Geometry)`
 
+Return type: `Geometry`
+
 Since: `v1.6.1`
 
 SQL Example

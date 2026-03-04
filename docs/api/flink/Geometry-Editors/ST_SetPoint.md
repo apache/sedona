@@ -23,6 +23,8 @@ Introduction: Replace Nth point of linestring with given point. Index is 0-based
 
 Format: `ST_SetPoint (linestring: Geometry, index: Integer, point: Geometry)`
 
+Return type: `Geometry`
+
 Since: `v1.3.0`
 
 Example:

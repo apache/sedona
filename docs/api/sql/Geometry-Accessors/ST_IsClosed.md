@@ -23,6 +23,8 @@ Introduction: RETURNS true if the LINESTRING start and end point are the same.
 
 Format: `ST_IsClosed(geom: Geometry)`
 
+Return type: `Boolean`
+
 Since: `v1.0.0`
 
 SQL Example

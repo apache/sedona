@@ -35,6 +35,8 @@ Format:
 
 `RS_ReprojectMatch (raster: Raster, reference: Raster, algorithm: String)`
 
+Return type: `Raster`
+
 Since: `v1.6.0`
 
 SQL Example

@@ -27,6 +27,8 @@ If the geometry is not a Polygon or MultiPolygon, an IllegalArgument Exception i
 
 Format: `ST_NRings(geom: Geometry)`
 
+Return type: `Integer`
+
 Since: `v1.4.1`
 
 Examples:

@@ -23,6 +23,8 @@ Introduction: Returns the uniform rotation of the raster in radian.
 
 Format: `RS_Rotation(raster: Raster)`
 
+Return type: `Double`
+
 Since: `v1.5.1`
 
 SQL Example

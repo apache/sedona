@@ -58,6 +58,8 @@ RS_Resample(raster: Raster, widthOrScale: Double, heightOrScale: Double, useScal
 RS_Resample(raster: Raster, referenceRaster: Raster, useScale: Boolean, algorithm: String)
 ```
 
+Return type: `Raster`
+
 Since: `v1.5.0`
 
 SQL Example

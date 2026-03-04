@@ -23,6 +23,8 @@ Introduction: Returns the minimum-area rotated rectangle enclosing a geometry. T
 
 Format: `ST_OrientedEnvelope(geometry: Geometry)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

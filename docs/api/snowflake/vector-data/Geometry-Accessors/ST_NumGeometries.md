@@ -23,6 +23,8 @@ Introduction: Returns the number of Geometries. If geometry is a GEOMETRYCOLLECT
 
 Format: `ST_NumGeometries (A:geometry)`
 
+Return type: `Integer`
+
 ```sql
 SELECT ST_NumGeometries(df.geometry)
 FROM df

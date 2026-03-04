@@ -28,6 +28,8 @@ It will ignore the M coordinate if present.
 
 Format: `ST_AsEWKB (A: Geometry)`
 
+Return type: `Binary`
+
 Since: `v1.1.1`
 
 SQL Example

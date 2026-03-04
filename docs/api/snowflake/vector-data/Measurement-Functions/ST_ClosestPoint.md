@@ -24,6 +24,8 @@ It will throw an exception indicates illegal argument if one of the params is an
 
 Format: `ST_ClosestPoint(g1: Geometry, g2: Geometry)`
 
+Return type: `Geometry`
+
 SQL Example:
 
 ```sql

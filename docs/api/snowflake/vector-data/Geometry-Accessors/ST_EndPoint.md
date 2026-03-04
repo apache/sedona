@@ -23,6 +23,8 @@ Introduction: Returns last point of given linestring.
 
 Format: `ST_EndPoint(geom: geometry)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

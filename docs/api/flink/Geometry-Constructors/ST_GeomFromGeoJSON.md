@@ -23,6 +23,8 @@ Introduction: Construct a Geometry from GeoJson
 
 Format: `ST_GeomFromGeoJSON (GeoJson: String)`
 
+Return type: `Geometry`
+
 Since: `v1.2.0`
 
 Example:

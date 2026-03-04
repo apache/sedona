@@ -23,6 +23,8 @@ Returns true if the band is filled with only nodata values. Band 1 is assumed if
 
 Format: `RS_BandIsNoData(raster: Raster, band: Integer = 1)`
 
+Return type: `Boolean`
+
 Since: `v1.5.0`
 
 SQL Example

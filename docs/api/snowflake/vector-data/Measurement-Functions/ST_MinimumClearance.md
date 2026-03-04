@@ -30,6 +30,8 @@ For geometries with no definable minimum clearance, such as single Point geometr
 
 Format: `ST_MinimumClearance(geometry: Geometry)`
 
+Return type: `Double`
+
 SQL Example
 
 ```sql

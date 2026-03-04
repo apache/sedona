@@ -23,6 +23,8 @@ Introduction: Create Geometry from geohash string and optional precision
 
 Format: `ST_GeomFromGeoHash(geohash: string, precision: int)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

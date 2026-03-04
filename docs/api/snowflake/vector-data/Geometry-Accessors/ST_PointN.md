@@ -23,6 +23,8 @@ Introduction: Return the Nth point in a single linestring or circular linestring
 
 Format: `ST_PointN(geom: geometry, n: integer)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

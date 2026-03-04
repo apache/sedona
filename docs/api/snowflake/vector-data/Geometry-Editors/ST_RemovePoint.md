@@ -25,6 +25,8 @@ Format: `ST_RemovePoint(geom: geometry, position: integer)`
 
 Format: `ST_RemovePoint(geom: geometry)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

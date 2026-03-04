@@ -23,6 +23,8 @@ Introduction: Find modulo of pixels with respect to a particular value
 
 Format: `RS_Modulo (Band: ARRAY[Double], Target: Double)`
 
+Return type: `Array<Double>`
+
 Since: `v1.1.0`
 
 SQL Example

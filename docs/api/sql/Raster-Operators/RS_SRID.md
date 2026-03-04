@@ -23,6 +23,8 @@ Introduction: Returns the spatial reference system identifier (SRID) of the rast
 
 Format: `RS_SRID (raster: Raster)`
 
+Return type: `Integer`
+
 Since: `v1.4.1`
 
 SQL Example

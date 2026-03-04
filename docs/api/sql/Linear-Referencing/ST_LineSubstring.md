@@ -25,6 +25,8 @@ Format:
 
 `ST_LineSubstring (geom: Geometry, startfraction: Double, endfraction: Double)`
 
+Return type: `Geometry`
+
 Since: `v1.0.1`
 
 SQL Example

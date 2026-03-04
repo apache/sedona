@@ -23,6 +23,8 @@ Introduction: Return the polygon intersection of all polygons in A
 
 Format: `ST_Intersection_Agg (A: geometryColumn)`
 
+Return type: `Geometry`
+
 Since: `v1.0.0`
 
 !!!note

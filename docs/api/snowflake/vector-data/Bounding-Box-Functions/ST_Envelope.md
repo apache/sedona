@@ -23,6 +23,8 @@ Introduction: Return the envelope boundary of A
 
 Format: `ST_Envelope (A:geometry)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

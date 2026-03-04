@@ -31,6 +31,8 @@ ST_Project(point: Geometry, distance: Double, azimuth: Double, lenient: Boolean 
 ST_Project(point: Geometry, distance: Double, Azimuth: Double)
 ```
 
+Return type: `Geometry`
+
 Since: `v1.7.0`
 
 SQL Example:

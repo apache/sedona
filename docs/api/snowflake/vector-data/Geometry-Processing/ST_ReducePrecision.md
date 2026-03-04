@@ -23,6 +23,8 @@ Introduction: Reduce the decimals places in the coordinates of the geometry to t
 
 Format: `ST_ReducePrecision (A: Geometry, B: Integer)`
 
+Return type: `Geometry`
+
 SQL Example:
 
 ```sql

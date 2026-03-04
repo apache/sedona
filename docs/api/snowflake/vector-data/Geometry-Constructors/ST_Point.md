@@ -23,6 +23,8 @@ Introduction: Construct a Point from X and Y
 
 Format: `ST_Point (X:decimal, Y:decimal)`
 
+Return type: `Geometry`
+
 In `v1.4.0` an optional Z parameter was removed to be more consistent with other spatial SQL implementations.
 If you are upgrading from an older version of Sedona - please use ST_PointZ or ST_PointZM to create 3D points.
 

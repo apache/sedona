@@ -23,6 +23,8 @@ Introduction: Returns true if all polygonal components in the input geometry hav
 
 Format: `ST_IsPolygonCW(geom: Geometry)`
 
+Return type: `Boolean`
+
 SQL Example:
 
 ```sql

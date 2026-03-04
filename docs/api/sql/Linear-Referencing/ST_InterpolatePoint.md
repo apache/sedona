@@ -26,6 +26,8 @@ Introduction: Returns the interpolated measure value of a linear measured LineSt
 
 Format: `ST_InterpolatePoint(linestringM: Geometry, point: Geometry)`
 
+Return type: `Double`
+
 Since: `v1.7.0`
 
 SQL Example

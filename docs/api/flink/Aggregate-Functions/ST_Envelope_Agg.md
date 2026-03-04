@@ -23,6 +23,8 @@ Introduction: Return the entire envelope boundary of all geometries in A
 
 Format: `ST_Envelope_Agg (A: geometryColumn)`
 
+Return type: `Geometry`
+
 Since: `v1.3.0`
 
 !!!note

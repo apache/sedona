@@ -26,6 +26,8 @@ Introduction: This function simplifies the input geometry by applying the Dougla
 
 Format: `ST_Simplify(geom: Geometry, tolerance: Double)`
 
+Return type: `Geometry`
+
 Since: `v1.7.0`
 
 SQL Example:

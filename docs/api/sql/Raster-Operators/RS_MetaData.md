@@ -42,6 +42,8 @@ rasters written by `RS_FromGeoTiff` uses the tiling scheme of the loaded GeoTIFF
 
 Format: `RS_MetaData (raster: Raster)`
 
+Return type: `Array<Double>`
+
 Since: `v1.4.1`
 
 SQL Example

@@ -23,6 +23,8 @@ Introduction: Returns Z minima of the given geometry or null if there is no Z co
 
 Format: `ST_ZMin(geom: geometry)`
 
+Return type: `Double`
+
 SQL example:
 
 ```sql

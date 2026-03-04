@@ -27,6 +27,8 @@ Format:
 
 `ST_AddPoint(geom: Geometry, point: Geometry)`
 
+Return type: `Geometry`
+
 Since: `v1.0.0`
 
 SQL Example

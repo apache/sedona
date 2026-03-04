@@ -23,6 +23,8 @@ Introduction: Return true if A is within B
 
 Format: `ST_Within (A: Geometry, B: Geometry)`
 
+Return type: `Boolean`
+
 Since: `v1.3.0`
 
 Example:

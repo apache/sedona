@@ -23,6 +23,8 @@ Introduction: Returns an array of Bing Tile quadkey strings that cover the given
 
 Format: `ST_BingTileCellIDs(geom: Geometry, zoomLevel: Integer)`
 
+Return type: `Array<String>`
+
 Since: `v1.9.0`
 
 Example:

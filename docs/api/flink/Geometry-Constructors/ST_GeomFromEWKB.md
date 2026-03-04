@@ -27,6 +27,8 @@ Format:
 
 `ST_GeomFromEWKB (Wkb: Binary)`
 
+Return type: `Geometry`
+
 Since: `v1.6.1`
 
 SQL Example

@@ -23,6 +23,8 @@ Introduction: Checks for the presence of Z coordinate values representing measur
 
 Format: `ST_HasZ(geom: Geometry)`
 
+Return type: `Boolean`
+
 Since: `v1.6.1`
 
 SQL Example

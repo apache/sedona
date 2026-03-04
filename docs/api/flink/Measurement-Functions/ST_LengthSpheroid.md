@@ -31,6 +31,8 @@ Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lon/lat== orde
 
 Format: `ST_LengthSpheroid (A: Geometry)`
 
+Return type: `Double`
+
 Since: `v1.4.1`
 
 Example:

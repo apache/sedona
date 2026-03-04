@@ -31,6 +31,8 @@ RS_CRS (raster: Raster)
 RS_CRS (raster: Raster, format: String)
 ```
 
+Return type: `String`
+
 Since: `v1.9.0`
 
 ## Supported output formats

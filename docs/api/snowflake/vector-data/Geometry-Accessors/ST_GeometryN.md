@@ -23,6 +23,8 @@ Introduction: Return the 0-based Nth geometry if the geometry is a GEOMETRYCOLLE
 
 Format: `ST_GeometryN(geom: geometry, n: Int)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

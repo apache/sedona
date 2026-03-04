@@ -23,6 +23,8 @@ Introduction: Returns a LINESTRING representing the exterior ring (shell) of a P
 
 Format: `ST_ExteriorRing(A: Geometry)`
 
+Return type: `Geometry`
+
 Since: `v1.2.1`
 
 Example:

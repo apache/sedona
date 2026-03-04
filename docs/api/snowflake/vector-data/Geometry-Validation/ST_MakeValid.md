@@ -28,6 +28,8 @@ Format: `ST_MakeValid (A:geometry)`
 
 Format: `ST_MakeValid (A:geometry, keepCollapsed:Boolean)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

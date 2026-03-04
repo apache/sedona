@@ -27,6 +27,8 @@ Format:
 
 `ST_GeomFromText (Wkt: String, srid: Integer)`
 
+Return type: `Geometry`
+
 Since: `v1.0.0`
 
 The optional srid parameter was added in `v1.3.1`

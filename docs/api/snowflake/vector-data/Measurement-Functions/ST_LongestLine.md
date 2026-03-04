@@ -23,6 +23,8 @@ Introduction: Returns the LineString geometry representing the maximum distance 
 
 Format: `ST_LongestLine(geom1: Geometry, geom2: Geometry)`
 
+Return type: `Geometry`
+
 SQL Example:
 
 ```sql

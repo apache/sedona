@@ -27,6 +27,8 @@ Format:
 
 `ST_GeomCollFromText (Wkt: String, srid: Integer)`
 
+Return type: `Geometry`
+
 Since: `v1.6.1`
 
 SQL Example:

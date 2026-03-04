@@ -35,6 +35,8 @@ If any of the geometry is empty, 0.0 is returned.
 
 Format: `ST_HausdorffDistance(g1: Geometry, g2: Geometry, densityFrac: Double)`
 
+Return type: `Double`
+
 SQL Example:
 
 ```sql

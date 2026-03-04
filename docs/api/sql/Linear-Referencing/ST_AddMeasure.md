@@ -23,6 +23,8 @@ Introduction: Computes a new geometry with measure (M) values linearly interpola
 
 Format: `ST_AddMeasure(geom: Geometry, measureStart: Double, measureEnd: Double)`
 
+Return type: `Geometry`
+
 Since: `v1.6.1`
 
 SQL Example:

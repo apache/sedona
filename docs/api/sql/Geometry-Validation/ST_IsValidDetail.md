@@ -38,6 +38,8 @@ ST_IsValidDetail(geom: Geometry)
 ST_IsValidDetail(geom: Geometry, flag: Integer)
 ```
 
+Return type: `Struct<valid: Boolean, reason: String, location: Geometry>`
+
 Since: `v1.6.1`
 
 SQL Example:

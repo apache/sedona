@@ -23,6 +23,8 @@ Introduction: Returns Mean value for a spectral band in a Geotiff image
 
 Format: `RS_Mean (Band: ARRAY[Double])`
 
+Return type: `Double`
+
 Since: `v1.1.0`
 
 SQL Example

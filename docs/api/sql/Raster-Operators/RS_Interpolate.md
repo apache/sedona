@@ -52,6 +52,8 @@ RS_Interpolate(raster: Raster, power: Double, mode: String, numPointsOrRadius: D
 RS_Interpolate(raster: Raster, power: Double, mode: String, numPointsOrRadius: Double, maxRadiusOrMinPoints: Double, band: Integer)
 ```
 
+Return type: `Raster`
+
 Since: `v1.6.0`
 
 Parameters:

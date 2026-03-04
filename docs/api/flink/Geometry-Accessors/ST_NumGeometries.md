@@ -23,6 +23,8 @@ Introduction: Returns the number of Geometries. If geometry is a GEOMETRYCOLLECT
 
 Format: `ST_NumGeometries (A: Geometry)`
 
+Return type: `Integer`
+
 Since: `v1.3.0`
 
 Example

@@ -21,6 +21,8 @@
 
 Introduction: Returns an empty raster geometry. Every band in the raster is initialized to `0.0`.
 
+Return type: `Raster`
+
 Since: `v1.5.0`
 
 Format:

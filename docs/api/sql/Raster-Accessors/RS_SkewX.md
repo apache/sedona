@@ -23,6 +23,8 @@ Introduction: Returns the X skew or rotation parameter.
 
 Format: `RS_SkewX(raster: Raster)`
 
+Return type: `Double`
+
 Since: `v1.5.0`
 
 SQL Example

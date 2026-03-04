@@ -23,6 +23,8 @@ Introduction: Construct a LineString from Text, delimited by Delimiter (Optional
 
 Format: `ST_LineStringFromText (Text: String, Delimiter: Char)`
 
+Return type: `Geometry`
+
 Since: `v1.2.1`
 
 Example:

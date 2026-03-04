@@ -27,6 +27,8 @@ Format:
 
 `RS_WorldToRasterCoord(raster: Raster, x: Double, y: Double)`
 
+Return type: `Integer`
+
 Since: `v1.5.0`
 
 SQL Example

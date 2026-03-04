@@ -23,6 +23,8 @@ Introduction: Returns a raster geometry from an Arc Info Ascii Grid file.
 
 Format: `RS_FromArcInfoAsciiGrid(asc: ARRAY[Byte])`
 
+Return type: `Raster`
+
 Since: `v1.4.0`
 
 SQL Example

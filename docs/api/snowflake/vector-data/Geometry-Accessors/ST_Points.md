@@ -23,6 +23,8 @@ Introduction: Returns a MultiPoint geometry consisting of all the coordinates of
 
 Format: `ST_Points(geom: Geometry)`
 
+Return type: `Geometry`
+
 SQL Example
 
 ```sql

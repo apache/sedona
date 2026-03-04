@@ -28,6 +28,8 @@ means only keep the cells with distance exactly `k` from the original cell
 
 Format: `ST_H3KRing(cell: Long, k: Int, exactRing: Boolean)`
 
+Return type: `Array<Long>`
+
 Since: `v1.5.0`
 
 SQL Example

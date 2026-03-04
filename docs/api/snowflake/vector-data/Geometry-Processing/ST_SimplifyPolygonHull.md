@@ -35,6 +35,8 @@ ST_SimplifyPolygonHull(geom: Geometry, vertexFactor: Double, isOuter: Boolean = 
 ST_SimplifyPolygonHull(geom: Geometry, vertexFactor: Double)
 ```
 
+Return type: `Geometry`
+
 SQL Example
 
 ```sql

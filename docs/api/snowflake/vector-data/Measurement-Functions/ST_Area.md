@@ -23,6 +23,8 @@ Introduction: Return the area of A
 
 Format: `ST_Area (A:geometry)`
 
+Return type: `Double`
+
 SQL example:
 
 ```sql

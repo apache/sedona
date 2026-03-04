@@ -23,6 +23,8 @@ Introduction: Return the symmetrical difference between geometry A and B (return
 
 Format: `ST_SymDifference (A:geometry, B:geometry)`
 
+Return type: `Geometry`
+
 Example:
 
 ```sql

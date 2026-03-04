@@ -23,6 +23,8 @@ Introduction: Normalize the value in the array to [0, 255]. Uniform arrays are s
 
 Format: `RS_Normalize (Band: ARRAY[Double])`
 
+Return type: `Array<Double>`
+
 Since: `v1.1.0`
 
 SQL Example

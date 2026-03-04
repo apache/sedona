@@ -34,6 +34,8 @@ Format:
 
 `ST_LineFromWKB (Wkb: Binary, srid: Integer)`
 
+Return type: `Geometry`
+
 Example:
 
 ```sql

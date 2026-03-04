@@ -23,6 +23,8 @@ Introduction: Returns the areal geometry formed by the constituent linework of t
 
 Format: `ST_BuildArea (A:geometry)`
 
+Return type: `Geometry`
+
 Example:
 
 ```sql

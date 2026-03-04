@@ -23,6 +23,8 @@ Introduction: Returns true if 'leftGeometry' and 'rightGeometry' are within a sp
 
 Format: `ST_DWithin (leftGeometry: Geometry, rightGeometry: Geometry, distance: Double)`
 
+Return type: `Boolean`
+
 SQL Example:
 
 ```sql

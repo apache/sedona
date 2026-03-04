@@ -32,6 +32,8 @@ Format:
 
 `RS_Value (raster: Raster, colX: Integer, colY: Integer, band: Integer)`
 
+Return type: `Double`
+
 Since: `v1.4.0`
 
 Spark SQL Examples:

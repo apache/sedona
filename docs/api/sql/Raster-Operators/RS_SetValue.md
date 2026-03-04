@@ -27,6 +27,8 @@ Format:
 RS_SetValue(raster: Raster, bandIndex: Integer = 1, colX: Integer, rowY: Integer, newValue: Double)
 ```
 
+Return type: `Raster`
+
 Since: `v1.5.0`
 
 SQL Example

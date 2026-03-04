@@ -34,6 +34,8 @@ ST_IsValid (A: Geometry)
 ST_IsValid (A: Geometry, flag: Integer)
 ```
 
+Return type: `Boolean`
+
 SQL Example:
 
 ```sql

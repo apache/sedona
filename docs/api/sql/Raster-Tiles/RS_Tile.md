@@ -25,6 +25,8 @@ Format: `RS_Tile(raster: Raster, width: Int, height: Int, padWithNoData: Boolean
 
 Format: `RS_Tile(raster: Raster, bandIndices: Array[Int], width: Int, height: Int, padWithNoData: Boolean = false, noDataVal: Double = null)`
 
+Return type: `Array<Raster>`
+
 Since: `v1.5.1`
 
 `width` and `height` specifies the size of generated tiles. If `bandIndices` is NULL or not specified, all bands will be included in the output tiles,

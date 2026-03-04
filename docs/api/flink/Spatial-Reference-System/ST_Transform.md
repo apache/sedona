@@ -34,6 +34,8 @@ Format:
 ST_Transform (A: Geometry, SourceCRS: String, TargetCRS: String)
 ```
 
+Return type: `Geometry`
+
 Since: `v1.2.0`
 
 Example:

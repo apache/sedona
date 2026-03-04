@@ -27,6 +27,8 @@ Format:
 
 `ST_MPolyFromText (Wkt: String, Srid: Integer)`
 
+Return type: `Geometry`
+
 Since: `1.3.1`
 
 Example:

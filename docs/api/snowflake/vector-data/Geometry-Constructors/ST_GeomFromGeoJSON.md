@@ -23,6 +23,8 @@ Introduction: Construct a Geometry from GeoJson
 
 Format: `ST_GeomFromGeoJSON (GeoJson:string)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

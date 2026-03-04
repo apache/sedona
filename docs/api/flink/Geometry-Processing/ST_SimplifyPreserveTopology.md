@@ -22,6 +22,8 @@
 Introduction: Simplifies a geometry and ensures that the result is a valid geometry having the same dimension and number of components as the input,
 and with the components having the same topological relationship.
 
+Return type: `Geometry`
+
 Since: `v1.5.0`
 
 Format: `ST_SimplifyPreserveTopology (A: Geometry, distanceTolerance: Double)`

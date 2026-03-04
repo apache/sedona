@@ -25,6 +25,8 @@ The `weights` column is an array of structs containing the `attributes` from eac
 
 Format: `ST_WeightedDistanceBandColumn(geometry:Geometry, threshold: Double, alpha: Double, includeZeroDistanceNeighbors: boolean, includeSelf: boolean, selfWeight: Double, useSpheroid: boolean, attributes: Struct)`
 
+Return type: `Array<Struct<neighbor: Integer, value: Double>>`
+
 Since: `v1.7.1`
 
 SQL Example

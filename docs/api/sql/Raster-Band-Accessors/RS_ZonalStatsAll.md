@@ -68,6 +68,8 @@ RS_ZonalStatsAll(raster: Raster, zone: Geometry, band: Integer)
 RS_ZonalStatsAll(raster: Raster, zone: Geometry)
 ```
 
+Return type: `Struct<count: Long, sum: Double, mean: Double, median: Double, mode: Double, stddev: Double, variance: Double, min: Double, max: Double>`
+
 Since: `v1.5.1`
 
 SQL Example

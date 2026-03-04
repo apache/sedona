@@ -23,6 +23,8 @@ Introduction: Returns true if the geometries are equal and the coordinates are i
 
 Format: `ST_OrderingEquals(A: geometry, B: geometry)`
 
+Return type: `Boolean`
+
 SQL example 1:
 
 ```sql

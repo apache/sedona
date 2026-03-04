@@ -25,6 +25,8 @@ The format originated in PostGIS but is supported by many GIS tools.
 
 Format: `ST_AsEWKT (A: Geography)`
 
+Return type: `String`
+
 Since: `v1.8.0`
 
 SQL Example

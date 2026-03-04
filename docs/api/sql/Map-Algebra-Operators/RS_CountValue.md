@@ -23,6 +23,8 @@ Introduction: Returns count of a particular value from a spectral band in a rast
 
 Format: `RS_CountValue (Band1: ARRAY[Double], Target: Double)`
 
+Return type: `Integer`
+
 Since: `v1.1.0`
 
 SQL Example

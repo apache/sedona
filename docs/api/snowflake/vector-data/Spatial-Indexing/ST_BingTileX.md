@@ -23,6 +23,8 @@ Introduction: Returns the tile X coordinate of the Bing Tile identified by the g
 
 Format: `ST_BingTileX(quadKey: String)`
 
+Return type: `Integer`
+
 SQL example:
 
 ```sql

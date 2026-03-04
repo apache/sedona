@@ -25,6 +25,8 @@ Format:
 
 `ST_MakeLine(geom1: Geometry, geom2: Geometry)`
 
+Return type: `Geometry`
+
 `ST_MakeLine(geoms: Geometry)` This Geometry must be a GeometryCollection of the geometry types listed above.
 
 SQL Example:

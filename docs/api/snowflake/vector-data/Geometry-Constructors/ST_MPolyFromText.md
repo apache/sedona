@@ -25,6 +25,8 @@ Format:
 `ST_MPolyFromText (Wkt:string)`
 `ST_MPolyFromText (Wkt:string, srid:integer)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

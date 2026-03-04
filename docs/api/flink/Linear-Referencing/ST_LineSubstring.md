@@ -23,6 +23,8 @@ Introduction: Return a linestring being a substring of the input one starting an
 
 Format: `ST_LineSubstring (geom: Geometry, startfraction: Double, endfraction: Double)`
 
+Return type: `Geometry`
+
 Since: `v1.5.0`
 
 Example:

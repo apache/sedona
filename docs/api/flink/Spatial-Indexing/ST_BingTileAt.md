@@ -23,6 +23,8 @@ Introduction: Returns the Bing Tile quadkey for a given point (longitude, latitu
 
 Format: `ST_BingTileAt(longitude: Double, latitude: Double, zoomLevel: Integer)`
 
+Return type: `String`
+
 Since: `v1.9.0`
 
 Example:

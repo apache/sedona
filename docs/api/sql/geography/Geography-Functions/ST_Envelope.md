@@ -25,6 +25,8 @@ Format:
 
 `ST_Envelope (A: Geography, splitAtAntiMeridian: Boolean)`
 
+Return type: `Geography`
+
 Since: `v1.8.0`
 
 SQL Example

@@ -23,6 +23,8 @@ Introduction: Calculates and returns the length value representing the maximum d
 
 Format: `ST_MaxDistance(geom1: Geometry, geom2: Geometry)`
 
+Return type: `Double`
+
 SQL Example:
 
 ```sql

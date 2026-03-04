@@ -54,6 +54,8 @@ RS_Clip(raster: Raster, band: Integer, geom: Geometry, allTouched: Boolean)
 RS_Clip(raster: Raster, band: Integer, geom: Geometry)
 ```
 
+Return type: `Raster`
+
 Since: `v1.5.1`
 
 Original Raster:

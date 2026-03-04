@@ -23,6 +23,8 @@ Introduction: Return true if A crosses B
 
 Format: `ST_Crosses (A: Geometry, B: Geometry)`
 
+Return type: `Boolean`
+
 Since: `v1.5.0`
 
 Example:

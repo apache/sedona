@@ -23,6 +23,8 @@ Introduction: Return true if A crosses B
 
 Format: `ST_Crosses (A:geometry, B:geometry)`
 
+Return type: `Boolean`
+
 SQL example:
 
 ```sql

@@ -23,6 +23,8 @@ Introduction: Return true if A equals to B
 
 Format: `ST_Equals (A:geometry, B:geometry)`
 
+Return type: `Boolean`
+
 SQL example:
 
 ```sql

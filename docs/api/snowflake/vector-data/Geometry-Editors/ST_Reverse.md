@@ -23,6 +23,8 @@ Introduction: Return the geometry with vertex order reversed
 
 Format: `ST_Reverse (A:geometry)`
 
+Return type: `Geometry`
+
 Example:
 
 ```sql

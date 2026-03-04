@@ -29,6 +29,8 @@ Optional parameters:
 
 `extend_to` : If a geometry is supplied as the "extend_to" parameter, the diagram will be extended to cover the envelope of the "extend_to" geometry, unless that envelope is smaller than the default envelope (default = NULL. By default, we extend the bounding box of the diagram by the max between bounding box's height and bounding box's width).
 
+Return type: `Geometry`
+
 Since: `v1.5.0`
 
 Example:

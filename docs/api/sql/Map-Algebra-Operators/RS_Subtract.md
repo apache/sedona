@@ -23,6 +23,8 @@ Introduction: Subtract two spectral bands in a Geotiff image(band2 - band1)
 
 Format: `RS_Subtract (Band1: ARRAY[Double], Band2: ARRAY[Double])`
 
+Return type: `Array<Double>`
+
 Since: `v1.1.0`
 
 SQL Example

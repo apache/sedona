@@ -25,3 +25,4 @@ Introduction: Modifies longitude coordinates in geometries, shifting values betw
     This function is only applicable to geometries that use lon/lat coordinate systems.
 
 Format: `ST_ShiftLongitude (geom: geometry)`
+Return type: `Geometry`

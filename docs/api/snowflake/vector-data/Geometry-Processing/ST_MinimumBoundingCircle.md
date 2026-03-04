@@ -23,6 +23,8 @@ Introduction: Returns the smallest circle polygon that contains a geometry.
 
 Format: `ST_MinimumBoundingCircle(geom: geometry, [Optional] quadrantSegments:int)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

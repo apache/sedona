@@ -28,6 +28,8 @@ The `ST_WeightedDistanceBand` and `ST_BinaryDistanceBand` functions can be used 
 
 Format: `ST_GLocal(geom: Geometry, weights: Struct, level: Int)`
 
+Return type: `Struct<G: Double, EG: Double, VG: Double, Z: Double, P: Double>`
+
 Since: `v1.7.1`
 
 SQL Example

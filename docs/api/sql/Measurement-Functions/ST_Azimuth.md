@@ -23,6 +23,8 @@ Introduction: Returns Azimuth for two given points in radians. Returns null if t
 
 Format: `ST_Azimuth(pointA: Point, pointB: Point)`
 
+Return type: `Double`
+
 Since: `v1.0.0`
 
 SQL Example

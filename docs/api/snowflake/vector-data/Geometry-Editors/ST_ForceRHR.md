@@ -23,6 +23,8 @@ Introduction: Sets the orientation of polygon vertex orderings to follow the Rig
 
 Format: `ST_ForceRHR(geom: Geometry)`
 
+Return type: `Geometry`
+
 SQL Example:
 
 ```sql

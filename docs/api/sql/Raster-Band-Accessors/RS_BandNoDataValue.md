@@ -26,6 +26,8 @@ Introduction: Returns the no data value of the given band of the given raster. I
 
 Format: `RS_BandNoDataValue (raster: Raster, band: Integer = 1)`
 
+Return type: `Double`
+
 Since: `v1.5.0`
 
 SQL Example

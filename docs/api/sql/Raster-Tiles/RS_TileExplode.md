@@ -27,6 +27,8 @@ Format: `RS_TileExplode(raster: Raster, bandIndex: Int, width: Int, height: Int,
 
 Format: `RS_TileExplode(raster: Raster, bandIndices: Array[Int], width: Int, height: Int, padWithNoData: Boolean = false, noDataVal: Double = null)`
 
+Return type: `Struct<x: Integer, y: Integer, tile: Raster>`
+
 Since: `v1.5.0`
 
 `width` and `height` specifies the size of generated tiles. If `bandIndices` is NULL or not specified, all bands will be included in the output tiles,

@@ -23,6 +23,8 @@ Introduction: Returns the number of the bands in the raster.
 
 Format: `RS_NumBands (raster: Raster)`
 
+Return type: `Integer`
+
 Since: `v1.4.0`
 
 SQL Example

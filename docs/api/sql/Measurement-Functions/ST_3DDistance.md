@@ -23,6 +23,8 @@ Introduction: Return the 3-dimensional minimum cartesian distance between A and 
 
 Format: `ST_3DDistance (A: Geometry, B: Geometry)`
 
+Return type: `Double`
+
 Since: `v1.2.0`
 
 SQL Example

@@ -35,6 +35,8 @@ RS_MapAlgebra (raster: Raster, pixelType: String, script: String, noDataValue: D
 RS_MapAlgebra(rast0: Raster, rast1: Raster, pixelType: String, script: String, noDataValue: Double)
 ```
 
+Return type: `Raster`
+
 Since: `v1.5.0`
 
 `RS_MapAlgebra` runs a script on a raster. The script is written in a map algebra language called [Jiffle](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle). The script takes a raster

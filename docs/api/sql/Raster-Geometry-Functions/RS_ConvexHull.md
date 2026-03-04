@@ -24,6 +24,8 @@ For regular shaped and non-skewed rasters, this gives more or less the same resu
 
 Format: `RS_ConvexHull(raster: Raster)`
 
+Return type: `Geometry`
+
 Since: `v1.5.0`
 
 SQL Example

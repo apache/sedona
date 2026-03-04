@@ -23,6 +23,8 @@ Introduction: Return true if A intersects B
 
 Format: `ST_Intersects (A:geometry, B:geometry)`
 
+Return type: `Boolean`
+
 SQL example:
 
 ```sql

@@ -27,6 +27,8 @@ Format:
 
 `ST_MLineFromText (Wkt: String, srid: Integer)`
 
+Return type: `Geometry`
+
 Since: `v1.3.1`
 
 SQL Example

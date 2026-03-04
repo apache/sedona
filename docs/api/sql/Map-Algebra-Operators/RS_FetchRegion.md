@@ -27,6 +27,8 @@ Format:
 RS_FetchRegion (Band: ARRAY[Double], coordinates: ARRAY[Integer], dimensions: ARRAY[Integer])
 ```
 
+Return type: `Array<Double>`
+
 Since: `v1.1.0`
 
 SQL Example

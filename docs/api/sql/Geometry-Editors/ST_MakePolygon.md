@@ -23,6 +23,8 @@ Introduction: Function to convert closed linestring to polygon including holes. 
 
 Format: `ST_MakePolygon(geom: Geometry, holes: ARRAY[Geometry])`
 
+Return type: `Geometry`
+
 Since: `v1.1.0`
 
 SQL Example

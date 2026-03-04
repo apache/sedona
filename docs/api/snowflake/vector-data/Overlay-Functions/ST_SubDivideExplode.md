@@ -24,6 +24,8 @@ Introduction: It works the same as ST_SubDivide but returns new rows with geomet
 A minimum of 5 vertices is required for maxVertices parameter to form a closed box.
 
 Format: `
+Return type: `Geometry`
+
 SELECT SEDONA.ST_AsText(GEOM)
 FROM table(SEDONA.ST_SubDivideExplode(geom: geometry, maxVertices: int))`
 
