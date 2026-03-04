@@ -21,6 +21,8 @@
 
 Introduction: Returns Azimuth for two given points in radians. Returns null if the two points are identical.
 
+![ST_Azimuth](../../../../image/ST_Azimuth/ST_Azimuth.svg "ST_Azimuth")
+
 Format: `ST_Azimuth(pointA: Point, pointB: Point)`
 
 Return type: `Double`

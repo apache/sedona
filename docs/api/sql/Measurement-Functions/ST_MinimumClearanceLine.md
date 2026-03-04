@@ -21,6 +21,8 @@
 
 Introduction: This function returns a two-point LineString geometry representing the minimum clearance distance of the input geometry. If the input geometry does not have a defined minimum clearance, such as for single Points or coincident MultiPoints, an empty LineString geometry is returned instead.
 
+![ST_MinimumClearanceLine](../../../image/ST_MinimumClearanceLine/ST_MinimumClearanceLine.svg "ST_MinimumClearanceLine")
+
 Format: `ST_MinimumClearanceLine(geometry: Geometry)`
 
 Return type: `Geometry`

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <marker id="arrowG" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#2ecc71" />
+    </marker>
+    <marker id="arrowGrev" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
+      <path d="M8,0 L0,3 L8,6" fill="#2ecc71" />
+    </marker>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_ClosestPoint</text>
+  <path d="M 131.08 224.32 L 279.73 224.32 L 279.73 75.68 L 131.08 75.68 L 131.08 224.32 Z" fill="rgba(74,144,217,0.15)" stroke="#4a90d9" stroke-width="2.5" fill-rule="evenodd" />
+  <text x="190.54" y="164.86" text-anchor="middle" font-size="15" font-weight="bold" fill="#4a90d9">A</text>
+  <circle cx="368.92" cy="135.14" r="5" fill="#d94a4a" stroke="#d94a4a" stroke-width="1.5" />
+  <text x="377.92" y="128.14" font-size="15" font-weight="bold" fill="#d94a4a">B</text>
+  <circle cx="279.73" cy="135.14" r="8" fill="white" stroke="#2ecc71" stroke-width="2.5" />
+  <circle cx="279.73" cy="135.14" r="4" fill="#2ecc71" />
+  <line x1="279.73" y1="135.14" x2="368.92" y2="135.14" stroke="#2ecc71" stroke-width="2" stroke-dasharray="6,3" marker-start="url(#arrowGrev)" marker-end="url(#arrowG)" />
+  <text x="332" y="129" font-size="15" font-weight="bold" fill="#2ecc71" font-style="italic">d</text>
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Returns the point on A that is closest to B</text>
+  <rect x="73" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="89" y="266" font-size="13" fill="#333333">Geometry A</text>
+  <rect x="183" y="255" width="12" height="12" rx="2" fill="#d94a4a" stroke="#d94a4a" stroke-width="1" />
+  <text x="199" y="266" font-size="13" fill="#333333">Geometry B</text>
+  <rect x="293" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="309" y="266" font-size="13" fill="#333333">Closest point</text>
+</svg>

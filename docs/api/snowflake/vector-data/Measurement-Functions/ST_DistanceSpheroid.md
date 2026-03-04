@@ -23,6 +23,8 @@ Introduction: Return the geodesic distance of A using WGS84 spheroid. Unit is me
 
 Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lat/lon== order. You can use ==ST_FlipCoordinates== to swap lat and lon. For non-point data, we first take the centroids of both geometries and then compute the distance.
 
+![ST_DistanceSpheroid](../../../../image/ST_DistanceSpheroid/ST_DistanceSpheroid.svg "ST_DistanceSpheroid")
+
 Format: `ST_DistanceSpheroid (A:geometry)`
 
 Return type: `Double`

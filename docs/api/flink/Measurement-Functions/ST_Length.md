@@ -24,6 +24,8 @@ Introduction: Returns the perimeter of A.
 !!!Warning
     Since `v1.7.0`, this function only supports LineString, MultiLineString, and GeometryCollections containing linear geometries. Use [ST_Perimeter](ST_Perimeter.md) for polygons.
 
+![ST_Length](../../../image/ST_Length/ST_Length.svg "ST_Length")
+
 Format: `ST_Length (A: Geometry)`
 
 Return type: `Double`

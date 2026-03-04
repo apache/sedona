@@ -23,6 +23,8 @@ Introduction: Return the geodesic area of A using WGS84 spheroid. Unit is square
 
 Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lat/lon== order. You can use ==ST_FlipCoordinates== to swap lat and lon.
 
+![ST_AreaSpheroid](../../../../image/ST_AreaSpheroid/ST_AreaSpheroid.svg "ST_AreaSpheroid")
+
 Format: `ST_AreaSpheroid (A:geometry)`
 
 Return type: `Double`
