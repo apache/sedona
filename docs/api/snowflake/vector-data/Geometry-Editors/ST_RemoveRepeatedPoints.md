@@ -21,6 +21,8 @@
 
 Introduction: This function eliminates consecutive duplicate points within a geometry, preserving endpoints of LineStrings. It operates on (Multi)LineStrings, (Multi)Polygons, and MultiPoints, processing GeometryCollection elements individually. When an optional 'tolerance' value is provided, vertices within that distance are also considered duplicates.
 
+![ST_RemoveRepeatedPoints](../../../../image/ST_RemoveRepeatedPoints/ST_RemoveRepeatedPoints.svg "ST_RemoveRepeatedPoints")
+
 Format:
 
 `ST_RemoveRepeatedPoints(geom: Geometry, tolerance: Double)`

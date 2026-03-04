@@ -21,6 +21,8 @@
 
 Introduction: For (Multi)Polygon geometries, this function sets the exterior ring orientation to counter-clockwise and interior rings to clockwise orientation. Non-polygonal geometries are returned unchanged.
 
+![ST_ForcePolygonCCW](../../../image/ST_ForcePolygonCCW/ST_ForcePolygonCCW.svg "ST_ForcePolygonCCW")
+
 Format: `ST_ForcePolygonCCW(geom: Geometry)`
 
 Return type: `Geometry`
