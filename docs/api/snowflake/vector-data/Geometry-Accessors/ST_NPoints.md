@@ -23,6 +23,8 @@ Introduction: Return points of the geometry
 
 Format: `ST_NPoints (A:geometry)`
 
+Return type: `Integer`
+
 ```sql
 SELECT ST_NPoints(polygondf.countyshape)
 FROM polygondf

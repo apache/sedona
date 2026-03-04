@@ -28,6 +28,8 @@ If the given geometry contains sub-geometries (GEOMETRY COLLECTION, MULTI POLYGO
 
 Format: `ST_Translate(geometry: geometry, deltaX: deltaX, deltaY: deltaY, deltaZ: deltaZ)`
 
+Return type: `Geometry`
+
 Example:
 
 Input: `ST_Translate(GEOMETRYCOLLECTION(MULTIPOLYGON (((1 0, 1 1, 2 1, 2 0, 1 0)), ((1 2, 3 4, 3 5, 1 2))), POINT(1, 1, 1), LINESTRING EMPTY), 2, 2, 3)`

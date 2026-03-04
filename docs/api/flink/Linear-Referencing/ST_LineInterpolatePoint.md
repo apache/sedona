@@ -23,6 +23,8 @@ Introduction: Returns a point interpolated along a line. First argument must be 
 
 Format: `ST_LineInterpolatePoint (geom: Geometry, fraction: Double)`
 
+Return type: `Geometry`
+
 Since: `v1.5.0`
 
 Example:

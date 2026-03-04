@@ -53,6 +53,8 @@ ST_LabelPoint(geometry: Geometry, gridResolution: Integer)
 ST_LabelPoint(geometry: Geometry, gridResolution: Integer, goodnessThreshold: Double)
 ```
 
+Return type: `Geometry`
+
 SQL Example:
 
 ```

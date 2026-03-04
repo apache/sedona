@@ -23,6 +23,8 @@ Introduction: This function takes a GeometryCollection/Multi Geometry object and
 
 Format: `ST_Dump(geom: geometry)`
 
+Return type: `Array<Geometry>`
+
 SQL example:
 
 ```sql

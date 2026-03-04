@@ -23,6 +23,8 @@ Introduction: Return true if A overlaps B
 
 Format: `ST_Overlaps (A:geometry, B:geometry)`
 
+Return type: `Boolean`
+
 SQL example:
 
 ```sql

@@ -47,6 +47,8 @@ Format:
 ST_Affine(geometry, 1, 2, 4, 1, 1, 2, 3, 2, 5, 4, 8, 3)
 ```
 
+Return type: `Geometry`
+
 Input: `LINESTRING EMPTY`
 
 Output: `LINESTRING EMPTY`

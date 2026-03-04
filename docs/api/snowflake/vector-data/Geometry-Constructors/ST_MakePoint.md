@@ -23,6 +23,8 @@ Introduction: Creates a 2D, 3D Z or 4D ZM Point geometry. Use ST_MakePointM to m
 
 Format: `ST_MakePoint (X:decimal, Y:decimal, Z:decimal, M:decimal)`
 
+Return type: `Geometry`
+
 Example:
 
 ```sql

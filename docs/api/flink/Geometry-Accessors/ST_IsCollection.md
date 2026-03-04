@@ -27,6 +27,8 @@ Collection types are the following:
 
 Format: `ST_IsCollection(geom: Geometry)`
 
+Return type: `Boolean`
+
 Since: `v1.5.0`
 
 Example:

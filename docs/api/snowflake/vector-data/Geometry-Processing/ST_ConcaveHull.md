@@ -25,6 +25,8 @@ Format: `ST_ConcaveHull (A:geometry, pctConvex:float)`
 
 Format: `ST_ConcaveHull (A:geometry, pctConvex:float, allowHoles:Boolean)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

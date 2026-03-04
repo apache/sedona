@@ -23,6 +23,8 @@ Introduction: Returns the type of the geometry as a string. EG: 'ST_Linestring',
 
 Format: `ST_GeometryType (A:geometry)`
 
+Return type: `String`
+
 SQL example:
 
 ```sql

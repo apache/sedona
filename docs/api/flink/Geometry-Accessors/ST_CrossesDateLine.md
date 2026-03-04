@@ -29,6 +29,8 @@ Introduction: This function determines if a given geometry crosses the Internati
 
 Format: `ST_CrossesDateLine(geometry: Geometry)`
 
+Return type: `Boolean`
+
 Since: `v1.6.0`
 
 SQL Example:

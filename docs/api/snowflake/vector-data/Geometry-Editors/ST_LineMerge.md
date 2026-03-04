@@ -26,6 +26,8 @@ Introduction: Returns a LineString or MultiLineString formed by sewing together 
 
 Format: `ST_LineMerge (A:geometry)`
 
+Return type: `Geometry`
+
 ```sql
 SELECT ST_LineMerge(geometry)
 FROM df

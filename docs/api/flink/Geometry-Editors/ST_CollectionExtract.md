@@ -35,6 +35,8 @@ Format:
 
 `ST_CollectionExtract (A: Geometry, type: Integer)`
 
+Return type: `Geometry`
+
 Since: `v1.5.0`
 
 Example:

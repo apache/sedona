@@ -23,6 +23,8 @@ Introduction: Returns a point interpolated along a line. First argument must be 
 
 Format: `ST_LineInterpolatePoint (geom: geometry, fraction: Double)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

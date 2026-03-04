@@ -29,6 +29,8 @@ If useSpheroid is not given, it defaults to false
 
 Format: `ST_DWithin (leftGeometry: Geometry, rightGeometry: Geometry, distance: Double, useSpheroid: Optional(Boolean) = false)`
 
+Return type: `Boolean`
+
 Since: `v1.5.1`
 
 Example:

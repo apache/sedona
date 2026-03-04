@@ -32,6 +32,8 @@ Format:
 
 `ST_ScaleGeom(geometry: Geometry, factor: Geometry)`
 
+Return type: `Geometry`
+
 SQL Example:
 
 ```sql

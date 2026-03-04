@@ -23,6 +23,8 @@ Introduction: Return the minimum Y coordinate of A
 
 Format: `ST_YMax (A:geometry)`
 
+Return type: `Double`
+
 SQL example:
 
 ```sql

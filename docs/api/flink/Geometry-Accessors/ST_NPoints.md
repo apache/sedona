@@ -23,6 +23,8 @@ Introduction: Returns the number of points of the geometry
 
 Format: `ST_NPoints (A: Geometry)`
 
+Return type: `Integer`
+
 Since: `v1.3.0`
 
 Example:

@@ -33,6 +33,8 @@ Format: `ST_CollectionExtract (A:geometry)`
 
 Format: `ST_CollectionExtract (A:geometry, type:Int)`
 
+Return type: `Geometry`
+
 Example:
 
 ```sql

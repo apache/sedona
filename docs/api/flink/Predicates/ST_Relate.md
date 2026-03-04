@@ -32,6 +32,8 @@ Format:
 
 `ST_Relate(geom1: Geometry, geom2: Geometry, intersectionMatrix: String)`
 
+Return type: `String`
+
 Since: `v1.6.1`
 
 SQL Example

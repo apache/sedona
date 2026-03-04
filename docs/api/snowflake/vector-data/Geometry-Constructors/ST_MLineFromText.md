@@ -25,6 +25,8 @@ Format:
 `ST_MLineFromText (Wkt:string)`
 `ST_MLineFromText (Wkt:string, srid:integer)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

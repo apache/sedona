@@ -23,6 +23,8 @@ Introduction: Construct a Point from X and Y
 
 Format: `ST_Point (X: Double, Y: Double)`
 
+Return type: `Geometry`
+
 Since: `v1.2.1`
 
 Example:

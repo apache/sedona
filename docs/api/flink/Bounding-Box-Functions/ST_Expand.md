@@ -39,6 +39,8 @@ Format:
 
 `ST_Expand(geometry: Geometry, deltaX: Double, deltaY: Double, deltaZ: Double)`
 
+Return type: `Geometry`
+
 Since: `v1.6.1`
 
 SQL Example:

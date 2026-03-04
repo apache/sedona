@@ -34,6 +34,8 @@ Format:
 
 `ST_PointFromWKB (Wkb: Binary, srid: Integer)`
 
+Return type: `Geometry`
+
 Example:
 
 ```sql

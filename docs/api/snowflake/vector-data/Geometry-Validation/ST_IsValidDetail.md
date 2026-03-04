@@ -35,6 +35,8 @@ SELECT valid, reason, Sedonm.ST_AsText(location) AS location
 FROM table(Sedona.ST_IsValidDetail(geom: Geometry, flag: Integer))
 ```
 
+Return type: `Struct<valid: Boolean, reason: String, location: Geometry>`
+
 SQL Example:
 
 ```sql

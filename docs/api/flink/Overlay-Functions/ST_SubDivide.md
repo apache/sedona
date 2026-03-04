@@ -25,6 +25,8 @@ A minimum of 5 vertices is required for maxVertices parameter to form a closed b
 
 Format: `ST_SubDivide(geom: Geometry, maxVertices: Integer)`
 
+Return type: `Array<Geometry>`
+
 Since: `v1.5.0`
 
 Example:

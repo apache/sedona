@@ -23,6 +23,8 @@ Introduction: Returns a POINT guaranteed to lie on the surface.
 
 Format: `ST_PointOnSurface(A: Geometry)`
 
+Return type: `Geometry`
+
 Since: `v1.2.1`
 
 Examples:

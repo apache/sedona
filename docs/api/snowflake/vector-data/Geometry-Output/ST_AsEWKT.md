@@ -27,6 +27,8 @@ If the geometry is lacking SRID a WKT format is produced.
 
 Format: `ST_AsEWKT (A:geometry)`
 
+Return type: `String`
+
 SQL example:
 
 ```sql

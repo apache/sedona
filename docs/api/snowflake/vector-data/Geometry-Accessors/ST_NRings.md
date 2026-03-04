@@ -27,6 +27,8 @@ If the geometry is not a Polygon or MultiPolygon, an IllegalArgument Exception i
 
 Format: `ST_NRings(geom: geometry)`
 
+Return type: `Integer`
+
 Examples:
 
 Input: `POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))`

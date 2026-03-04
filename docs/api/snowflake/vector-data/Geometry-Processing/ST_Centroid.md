@@ -23,6 +23,8 @@ Introduction: Return the centroid point of A
 
 Format: `ST_Centroid (A:geometry)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

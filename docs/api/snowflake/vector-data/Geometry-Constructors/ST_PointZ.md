@@ -26,6 +26,8 @@ Format: `ST_PointZ (X:decimal, Y:decimal, Z:decimal)`
 
 Format: `ST_PointZ (X:decimal, Y:decimal, Z:decimal, srid:integer)`
 
+Return type: `Geometry`
+
 ```sql
 SELECT ST_AsEWKT(ST_PointZ(1.2345, 2.3456, 3.4567))
 ```

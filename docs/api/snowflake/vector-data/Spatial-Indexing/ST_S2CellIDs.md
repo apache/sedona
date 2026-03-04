@@ -25,6 +25,8 @@ the cells will be smaller, the coverage will be more accurate, but the result si
 
 Format: `ST_S2CellIDs(geom: geometry, level: Int)`
 
+Return type: `Array<Long>`
+
 SQL example:
 
 ```sql

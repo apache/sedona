@@ -27,6 +27,8 @@ If the geometry is lacking SRID a WKB format is produced.
 
 Format: `ST_AsEWKB (A:geometry)`
 
+Return type: `Binary`
+
 SQL example:
 
 ```sql

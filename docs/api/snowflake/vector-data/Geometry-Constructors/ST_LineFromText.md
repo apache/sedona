@@ -24,6 +24,8 @@ Introduction: Construct a Line from Wkt text
 Format:
 `ST_LineFromText (Wkt:string)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

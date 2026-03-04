@@ -25,6 +25,8 @@ Values are: 0 = 2D, 1 = 3D-M, 2 = 3D-Z, 3 = 4D.
 
 Format: `ST_Zmflag(geom: Geometry)`
 
+Return type: `Integer`
+
 Since: `v1.6.1`
 
 SQL Example

@@ -23,6 +23,8 @@ Introduction: Returns Y Coordinate of given Point, null otherwise.
 
 Format: `ST_Y(pointA: Point)`
 
+Return type: `Double`
+
 Since: `v1.3.0`
 
 Example:

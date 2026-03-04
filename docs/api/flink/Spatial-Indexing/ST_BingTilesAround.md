@@ -23,6 +23,8 @@ Introduction: Returns an array of Bing Tile quadkey strings representing the nei
 
 Format: `ST_BingTilesAround(longitude: Double, latitude: Double, zoomLevel: Integer)`
 
+Return type: `Array<String>`
+
 Since: `v1.9.0`
 
 Example:

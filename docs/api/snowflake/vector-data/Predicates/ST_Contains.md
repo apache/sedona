@@ -23,6 +23,8 @@ Introduction: Return true if A fully contains B
 
 Format: `ST_Contains (A:geometry, B:geometry)`
 
+Return type: `Boolean`
+
 SQL example:
 
 ```sql

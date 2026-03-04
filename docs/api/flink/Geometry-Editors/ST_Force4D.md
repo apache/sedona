@@ -30,6 +30,8 @@ Format:
 
 `ST_Force4D(geom: Geometry`
 
+Return type: `Geometry`
+
 Since: `v1.6.1`
 
 SQL Example

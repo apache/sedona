@@ -23,6 +23,8 @@ Introduction: Returns a two-dimensional Voronoi diagram from the vertices of the
 
 Format: `ST_VoronoiPolygons(g1: Geometry, tolerance: Double, extend_to: Geometry)`
 
+Return type: `Geometry`
+
 Optional parameters:
 
 `tolerance` : The distance within which vertices will be considered equivalent. Robustness of the algorithm can be improved by supplying a nonzero tolerance distance. (default = 0.0)

@@ -23,6 +23,8 @@ Introduction: Return the polygon union of all polygons in A
 
 Format: `ST_Union_Agg (A:geometryColumn)`
 
+Return type: `Geometry`
+
 !!!note
     This function was previously named `ST_Union_Aggr`, which is deprecated since `v1.8.1`.
 

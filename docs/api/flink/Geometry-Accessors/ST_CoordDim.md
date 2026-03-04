@@ -23,6 +23,8 @@ Introduction: Returns the coordinate dimensions of the geometry. It is an alias 
 
 Format: `ST_CoordDim(geom: Geometry)`
 
+Return type: `Integer`
+
 Since: `v1.5.0`
 
 Example with x, y, z coordinate:

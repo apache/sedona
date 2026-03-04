@@ -25,6 +25,8 @@ Format: `ST_AddPoint(geom: geometry, point: geometry, position: integer)`
 
 Format: `ST_AddPoint(geom: geometry, point: geometry)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

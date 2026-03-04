@@ -26,6 +26,8 @@ Introduction: Modifies longitude coordinates in geometries, shifting values betw
 
 Format: `ST_ShiftLongitude (geom: geometry)`
 
+Return type: `Geometry`
+
 Since: `v1.6.0`
 
 SQL example:

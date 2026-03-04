@@ -34,6 +34,8 @@ Format:
 
 `ST_DelaunayTriangles(geometry: Geometry, tolerance: Double, flag: Integer)`
 
+Return type: `Geometry`
+
 Since: `v1.6.1`
 
 SQL Example

@@ -23,6 +23,8 @@ Introduction: Return the [KML](https://www.ogc.org/standards/kml) string represe
 
 Format: `ST_AsKML (A:geometry)`
 
+Return type: `String`
+
 SQL example:
 
 ```sql

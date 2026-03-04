@@ -29,6 +29,8 @@ For example, if a GeometryCollection of only Point geometries is passed as a bla
 
 Format: `ST_Split (input: geometry, blade: geometry)`
 
+Return type: `Geometry`
+
 SQL Example:
 
 ```sql

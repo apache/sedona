@@ -23,6 +23,8 @@ Introduction: Construct a Polygon from MinX, MinY, MaxX, MaxY.
 
 Format: `ST_PolygonFromEnvelope (MinX:decimal, MinY:decimal, MaxX:decimal, MaxY:decimal)`
 
+Return type: `Geometry`
+
 ```sql
 SELECT ST_PolygonFromEnvelope(double(1.234),double(2.234),double(3.345),double(3.345))
 ```

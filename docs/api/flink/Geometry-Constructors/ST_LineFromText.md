@@ -23,6 +23,8 @@ Introduction: Construct a LineString from Text
 
 Format: `ST_LineFromText (Text: String)`
 
+Return type: `Geometry`
+
 Since: `v1.2.1`
 
 Example:

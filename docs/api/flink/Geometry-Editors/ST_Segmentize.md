@@ -25,6 +25,8 @@ The length calculation is performed in 2D. When a segment is longer than the spe
 
 Format: `ST_Segmentize(geom: Geometry, max_segment_length: Double)`
 
+Return type: `Geometry`
+
 Since: v1.8.0
 
 SQL Example

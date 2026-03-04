@@ -27,6 +27,8 @@ Format:
 
 `ST_GeomFromWKB (Wkb: Binary)`
 
+Return type: `Geometry`
+
 Since: `v1.2.0`
 
 Example:

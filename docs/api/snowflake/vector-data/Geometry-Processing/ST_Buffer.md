@@ -65,6 +65,8 @@ ST_Buffer (A: Geometry, buffer: Double, useSpheroid: Boolean)
 ST_Buffer (A: Geometry, buffer: Double, useSpheroid: Boolean, bufferStyleParameters: String)
 ```
 
+Return type: `Geometry`
+
 Output:
 
 ![Original Linestring](../../../../image/linestring-og.png "Original Linestring")

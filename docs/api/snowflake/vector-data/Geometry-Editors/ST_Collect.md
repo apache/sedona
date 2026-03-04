@@ -34,6 +34,8 @@ Format
 
 `ST_Collect(*geom: geometry)`
 
+Return type: `Geometry`
+
 Example:
 
 ```sql

@@ -23,6 +23,8 @@ Introduction: Generates the constrained Delaunay triangulation for the input Pol
 
 Format: `ST_TriangulatePolygon(geom: Geometry)`
 
+Return type: `Geometry`
+
 SQL Example
 
 ```sql

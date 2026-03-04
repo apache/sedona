@@ -26,6 +26,8 @@ Format:
 
 `ST_GeomFromText (Wkt: String, srid: Integer)`
 
+Return type: `Geometry`
+
 Since: `v1.2.1`
 
 Example:

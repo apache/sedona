@@ -23,6 +23,8 @@ Introduction: Return the Euclidean distance between A and B
 
 Format: `ST_Distance (A: Geometry, B: Geometry)`
 
+Return type: `Double`
+
 Since: `v1.2.0`
 
 Example:

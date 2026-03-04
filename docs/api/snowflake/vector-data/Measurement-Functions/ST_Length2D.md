@@ -26,6 +26,8 @@ Introduction: Returns the perimeter of A. This function is an alias of [ST_Lengt
 
 Format: ST_Length2D (A:geometry)
 
+Return type: `Double`
+
 SQL example:
 
 ```sql

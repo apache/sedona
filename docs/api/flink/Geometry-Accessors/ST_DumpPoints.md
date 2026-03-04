@@ -23,6 +23,8 @@ Introduction: Returns list of Points which geometry consists of.
 
 Format: `ST_DumpPoints(geom: Geometry)`
 
+Return type: `Array<Geometry>`
+
 Since: `v1.5.0`
 
 Example:

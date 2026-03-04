@@ -33,6 +33,8 @@ Since `v1.9.0`, Sedona supports multiple CRS formats including EPSG codes, WKT1,
 
 Format: `ST_Transform (A:geometry, SourceCRS:string, TargetCRS:string)`
 
+Return type: `Geometry`
+
 SQL example:
 
 ```sql

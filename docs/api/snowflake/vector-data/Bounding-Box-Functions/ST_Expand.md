@@ -32,6 +32,8 @@ Format:
 
 `ST_Expand(geometry: Geometry, deltaX: Double, deltaY: Double, deltaZ: Double)`
 
+Return type: `Geometry`
+
 !!!Note
     Things to consider when using this function:
 

@@ -23,6 +23,8 @@ Introduction: Creates a LineString from a MultiPoint geometry.
 
 Format: `ST_LineFromMultiPoint (A:geometry)`
 
+Return type: `Geometry`
+
 Example:
 
 ```sql

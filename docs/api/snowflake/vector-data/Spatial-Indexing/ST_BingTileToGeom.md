@@ -23,6 +23,8 @@ Introduction: Returns a GeometryCollection of Polygons for the corresponding Bin
 
 Format: `ST_BingTileToGeom(quadKeys: Array)`
 
+Return type: `Array<Geometry>`
+
 SQL example:
 
 ```sql

@@ -23,6 +23,8 @@ Introduction: RETURN true if LINESTRING is ST_IsClosed and ST_IsSimple.
 
 Format: `ST_IsRing(geom: Geometry)`
 
+Return type: `Boolean`
+
 Since: `v1.3.0`
 
 Example:

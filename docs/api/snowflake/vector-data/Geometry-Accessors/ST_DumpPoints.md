@@ -23,6 +23,8 @@ Introduction: Returns a MultiPoint geometry which consists of individual points 
 
 Format: `ST_DumpPoints(geom: geometry)`
 
+Return type: `Array<Geometry>`
+
 SQL example:
 
 ```sql

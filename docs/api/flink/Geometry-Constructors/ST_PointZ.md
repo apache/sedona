@@ -28,6 +28,8 @@ Format:
 
 `ST_PointZ (X: Double, Y: Double, Z: Double, srid: Integer)`
 
+Return type: `Geometry`
+
 Since: `v1.5.0`
 
 Example:
