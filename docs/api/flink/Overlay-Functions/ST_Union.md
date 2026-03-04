@@ -25,6 +25,8 @@ Variant 1: Return the union of geometry A and B.
 
 Variant 2: This function accepts an array of Geometry objects and returns the geometric union of all geometries in the input array. If the polygons within the input array do not share common boundaries, the ST_Union result will be a MultiPolygon geometry.
 
+![ST_Union](../../../image/ST_Union/ST_Union.svg "ST_Union")
+
 Format:
 
 `ST_Union (A: Geometry, B: Geometry)`

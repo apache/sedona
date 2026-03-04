@@ -27,6 +27,8 @@ ST_Split will always return either a MultiLineString or MultiPolygon even if the
 Homogeneous GeometryCollections are treated as a multi-geometry of the type it contains.
 For example, if a GeometryCollection of only Point geometries is passed as a blade it is the same as passing a MultiPoint of the same geometries.
 
+![ST_Split](../../../image/ST_Split/ST_Split.svg "ST_Split")
+
 Return type: `Geometry`
 
 Since: `v1.4.0`

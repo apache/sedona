@@ -23,6 +23,8 @@ Introduction: It works the same as ST_SubDivide but returns new rows with geomet
 
 A minimum of 5 vertices is required for maxVertices parameter to form a closed box.
 
+![ST_SubDivideExplode](../../../image/ST_SubDivide/ST_SubDivide.svg "ST_SubDivideExplode")
+
 Format: `ST_SubDivideExplode(geom: Geometry, maxVertices: Integer)`
 
 Return type: `Geometry`
