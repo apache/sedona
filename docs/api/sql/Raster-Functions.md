@@ -39,11 +39,11 @@ These functions work with individual pixel geometry representations.
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |
 | [RS_PixelAsCentroid](Pixel-Functions/RS_PixelAsCentroid.md) | Geometry | Returns the centroid (point geometry) of the specified pixel's area. The pixel coordinates specified are 1-indexed. If `colX` and `rowY` are out of bounds for the raster, they are interpolated assu... | v1.5.0 |
-| [RS_PixelAsCentroids](Pixel-Functions/RS_PixelAsCentroids.md) | Array<Struct> | Returns a list of the centroid point geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band. Each centroid represents the geometric center o... | v1.5.1 |
+| [RS_PixelAsCentroids](Pixel-Functions/RS_PixelAsCentroids.md) | `Array<Struct>` | Returns a list of the centroid point geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band. Each centroid represents the geometric center o... | v1.5.1 |
 | [RS_PixelAsPoint](Pixel-Functions/RS_PixelAsPoint.md) | Geometry | Returns a point geometry of the specified pixel's upper-left corner. The pixel coordinates specified are 1-indexed. | v1.5.0 |
-| [RS_PixelAsPoints](Pixel-Functions/RS_PixelAsPoints.md) | Array<Struct> | Returns a list of the pixel's upper-left corner point geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band. | v1.5.1 |
+| [RS_PixelAsPoints](Pixel-Functions/RS_PixelAsPoints.md) | `Array<Struct>` | Returns a list of the pixel's upper-left corner point geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band. | v1.5.1 |
 | [RS_PixelAsPolygon](Pixel-Functions/RS_PixelAsPolygon.md) | Geometry | Returns a polygon geometry that bounds the specified pixel. The pixel coordinates specified are 1-indexed. If `colX` and `rowY` are out of bounds for the raster, they are interpolated assuming the ... | v1.5.0 |
-| [RS_PixelAsPolygons](Pixel-Functions/RS_PixelAsPolygons.md) | Array<Struct> | Returns a list of the polygon geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band. | v1.5.1 |
+| [RS_PixelAsPolygons](Pixel-Functions/RS_PixelAsPolygons.md) | `Array<Struct>` | Returns a list of the polygon geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band. | v1.5.1 |
 
 ## Raster Geometry Functions
 

@@ -244,7 +244,7 @@ These functions compute results arising from the overlay of two geometries. Thes
 | [ST_Difference](Overlay-Functions/ST_Difference.md) | Geometry | Return the difference between geometry A and B (return part of geometry A that does not intersect geometry B) | v1.2.0 |
 | [ST_Intersection](Overlay-Functions/ST_Intersection.md) | Geometry | Return the intersection geometry of A and B | v1.0.0 |
 | [ST_Split](Overlay-Functions/ST_Split.md) | Geometry | Split an input geometry by another geometry (called the blade). Linear (LineString or MultiLineString) geometry can be split by a Point, MultiPoint, LineString, MultiLineString, Polygon, or MultiPo... | v1.4.0 |
-| [ST_SubDivide](Overlay-Functions/ST_SubDivide.md) | Array<Geometry> | Returns list of geometries divided based of given maximum number of vertices. | v1.1.0 |
+| [ST_SubDivide](Overlay-Functions/ST_SubDivide.md) | `Array<Geometry>` | Returns list of geometries divided based of given maximum number of vertices. | v1.1.0 |
 | [ST_SubDivideExplode](Overlay-Functions/ST_SubDivideExplode.md) | Geometry | It works the same as ST_SubDivide but returns new rows with geometries instead of list. | v1.1.0 |
 | [ST_SymDifference](Overlay-Functions/ST_SymDifference.md) | Geometry | Return the symmetrical difference between geometry A and B (return parts of geometries which are in either of the sets, but not in their intersection) | v1.2.0 |
 | [ST_UnaryUnion](Overlay-Functions/ST_UnaryUnion.md) | Geometry | This variant of [ST_Union](Overlay-Functions/ST_Union.md) operates on a single geometry input. The input geometry can be a simple Geometry type, a MultiGeometry, or a GeometryCollection. The function calculates the ge... | v1.6.1 |
@@ -378,5 +378,5 @@ These functions parse and expand street addresses using the libpostal library.
 
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |
-| [ExpandAddress](Address-Functions/ExpandAddress.md) | Array<String> | Returns an array of expanded forms of the input address string. This is backed by the [libpostal](https://github.com/openvenues/libpostal) library's address expanding functionality. | v1.8.0 |
-| [ParseAddress](Address-Functions/ParseAddress.md) | Array<Struct> | Returns an array of the components (e.g. street, postal code) of the input address string. This is backed by the [libpostal](https://github.com/openvenues/libpostal) library's address parsing funct... | v1.8.0 |
+| [ExpandAddress](Address-Functions/ExpandAddress.md) | `Array<String>` | Returns an array of expanded forms of the input address string. This is backed by the [libpostal](https://github.com/openvenues/libpostal) library's address expanding functionality. | v1.8.0 |
+| [ParseAddress](Address-Functions/ParseAddress.md) | `Array<Struct>` | Returns an array of the components (e.g. street, postal code) of the input address string. This is backed by the [libpostal](https://github.com/openvenues/libpostal) library's address parsing funct... | v1.8.0 |

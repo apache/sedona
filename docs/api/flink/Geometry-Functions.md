@@ -241,7 +241,7 @@ These functions compute results arising from the overlay of two geometries. Thes
 | :--- | :--- | :--- | :--- |
 | [ST_Difference](Overlay-Functions/ST_Difference.md) | Geometry | Return the difference between geometry A and B (return part of geometry A that does not intersect geometry B) | v1.5.0 |
 | [ST_Intersection](Overlay-Functions/ST_Intersection.md) | Geometry | Return the intersection geometry of A and B | v1.5.0 |
-| [ST_SubDivide](Overlay-Functions/ST_SubDivide.md) | Array<Geometry> | Returns list of geometries divided based of given maximum number of vertices. | v1.5.0 |
+| [ST_SubDivide](Overlay-Functions/ST_SubDivide.md) | `Array<Geometry>` | Returns list of geometries divided based of given maximum number of vertices. | v1.5.0 |
 | [ST_SymDifference](Overlay-Functions/ST_SymDifference.md) | Geometry | Return the symmetrical difference between geometry A and B (return parts of geometries which are in either of the sets, but not in their intersection) | v1.5.0 |
 | [ST_UnaryUnion](Overlay-Functions/ST_UnaryUnion.md) | Geometry | This variant of [ST_Union](Overlay-Functions/ST_Union.md) operates on a single geometry input. The input geometry can be a simple Geometry type, a MultiGeometry, or a GeometryCollection. The function calculates the ge... | v1.6.1 |
 | [ST_Union](Overlay-Functions/ST_Union.md) | Geometry | Variant 1: Return the union of geometry A and B. | v1.6.0 |
