@@ -25,6 +25,7 @@ Introduction: Returns a LineString or MultiLineString formed by sewing together 
     Only works for MULTILINESTRING. Using other geometry will return a GEOMETRYCOLLECTION EMPTY. If no merging can be performed, the original MULTILINESTRING is returned.
 
 ![ST_LineMerge](../../../../image/ST_LineMerge/ST_LineMerge.svg "ST_LineMerge")
+
 Format: `ST_LineMerge (A:geometry)`
 
 Return type: `Geometry`

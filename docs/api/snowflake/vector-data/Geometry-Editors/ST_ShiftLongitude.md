@@ -25,5 +25,6 @@ Introduction: Modifies longitude coordinates in geometries, shifting values betw
     This function is only applicable to geometries that use lon/lat coordinate systems.
 
 ![ST_ShiftLongitude](../../../../image/ST_ShiftLongitude/ST_ShiftLongitude.svg "ST_ShiftLongitude")
+
 Format: `ST_ShiftLongitude (geom: geometry)`
 Return type: `Geometry`

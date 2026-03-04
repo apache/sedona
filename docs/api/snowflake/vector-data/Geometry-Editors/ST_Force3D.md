@@ -28,6 +28,7 @@ If the given geometry is empty, no change is performed on it.
     Example output is after calling ST_AsText() on returned geometry, which adds Z for in the WKT for 3D geometries
 
 ![ST_Force3D](../../../../image/ST_Force3D/ST_Force3D.svg "ST_Force3D")
+
 Format: `ST_Force3D(geometry, zValue)`
 
 Return type: `Geometry`

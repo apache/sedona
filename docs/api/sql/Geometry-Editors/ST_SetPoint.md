@@ -22,6 +22,7 @@
 Introduction: Replace Nth point of linestring with given point. Index is 0-based. Negative index are counted backwards, e.g., -1 is last point.
 
 ![ST_SetPoint](../../../image/ST_SetPoint/ST_SetPoint.svg "ST_SetPoint")
+
 Format: `ST_SetPoint (linestring: Geometry, index: Integer, point: Geometry)`
 
 Return type: `Geometry`

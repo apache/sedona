@@ -24,6 +24,7 @@ Introduction: Returns a modified geometry having no segment longer than the give
 The length calculation is performed in 2D. When a segment is longer than the specified maximum length, it is split into multiple, equal-length subsegments.
 
 ![ST_Segmentize](../../../../image/ST_Segmentize/ST_Segmentize.svg "ST_Segmentize")
+
 Format: `ST_Segmentize(geom: Geometry, max_segment_length: Double)`
 
 Return type: `Geometry`
