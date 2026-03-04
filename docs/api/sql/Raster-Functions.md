@@ -39,11 +39,11 @@ These functions work with individual pixel geometry representations.
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |
 | [RS_PixelAsCentroid](Pixel-Functions/RS_PixelAsCentroid.md) | Geometry | Returns the centroid (point geometry) of the specified pixel's area. The pixel coordinates specified are 1-indexed. If `colX` and `rowY` are out of bounds for the raster, they are interpolated assu... | v1.5.0 |
-| [RS_PixelAsCentroids](Pixel-Functions/RS_PixelAsCentroids.md) | Array\<Struct\> | Returns a list of the centroid point geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band. Each centroid represents the geometric center o... | v1.5.1 |
+| [RS_PixelAsCentroids](Pixel-Functions/RS_PixelAsCentroids.md) | Array<Struct> | Returns a list of the centroid point geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band. Each centroid represents the geometric center o... | v1.5.1 |
 | [RS_PixelAsPoint](Pixel-Functions/RS_PixelAsPoint.md) | Geometry | Returns a point geometry of the specified pixel's upper-left corner. The pixel coordinates specified are 1-indexed. | v1.5.0 |
-| [RS_PixelAsPoints](Pixel-Functions/RS_PixelAsPoints.md) | Array\<Struct\> | Returns a list of the pixel's upper-left corner point geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band. | v1.5.1 |
+| [RS_PixelAsPoints](Pixel-Functions/RS_PixelAsPoints.md) | Array<Struct> | Returns a list of the pixel's upper-left corner point geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band. | v1.5.1 |
 | [RS_PixelAsPolygon](Pixel-Functions/RS_PixelAsPolygon.md) | Geometry | Returns a polygon geometry that bounds the specified pixel. The pixel coordinates specified are 1-indexed. If `colX` and `rowY` are out of bounds for the raster, they are interpolated assuming the ... | v1.5.0 |
-| [RS_PixelAsPolygons](Pixel-Functions/RS_PixelAsPolygons.md) | Array\<Struct\> | Returns a list of the polygon geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band. | v1.5.1 |
+| [RS_PixelAsPolygons](Pixel-Functions/RS_PixelAsPolygons.md) | Array<Struct> | Returns a list of the polygon geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band. | v1.5.1 |
 
 ## Raster Geometry Functions
 
@@ -114,7 +114,7 @@ These functions perform operations on raster objects.
 | [RS_AddBand](Raster-Operators/RS_AddBand.md) | Raster | Adds a new band to a raster `toRaster` at a specified index `toRasterIndex`. The new band's values are copied from `fromRaster` at a specified band index `fromBand`. If no `toRasterIndex` is provided... | v1.5.0 |
 | [RS_Clip](Raster-Operators/RS_Clip.md) | Raster | Returns a raster that is clipped by the given geometry. | v1.5.1 |
 | [RS_Interpolate](Raster-Operators/RS_Interpolate.md) | Raster | This function performs interpolation on a raster using the Inverse Distance Weighted (IDW) method. This method estimates cell values by averaging the values of sample data points in the vicinity of... | v1.6.0 |
-| [RS_MetaData](Raster-Operators/RS_MetaData.md) | Array\<Double\> | Returns the metadata of the raster as a struct. The struct has the following schema: | v1.4.1 |
+| [RS_MetaData](Raster-Operators/RS_MetaData.md) | `Array<Double>` | Returns the metadata of the raster as a struct. The struct has the following schema: | v1.4.1 |
 | [RS_NormalizeAll](Raster-Operators/RS_NormalizeAll.md) | Raster | Normalizes values in all bands of a raster between a given normalization range. The function maintains the data type of the raster values by ensuring that the normalized values are cast back to the... | v1.6.0 |
 | [RS_NumBands](Raster-Operators/RS_NumBands.md) | Integer | Returns the number of the bands in the raster. | v1.4.0 |
 | [RS_ReprojectMatch](Raster-Operators/RS_ReprojectMatch.md) | Raster | Reproject a raster to match the geo-reference, CRS, and envelope of a reference raster. The output raster always have the same extent and resolution as the reference raster. For pixels not covered ... | v1.6.0 |
@@ -130,7 +130,7 @@ These functions perform operations on raster objects.
 | [RS_CRS](Raster-Operators/RS_CRS.md) | String | Returns the coordinate reference system (CRS) of the raster as a string in the specified format (projjson, wkt2, wkt1, proj). Defaults to PROJJSON. | v1.9.0 |
 | [RS_Union](Raster-Operators/RS_Union.md) | Raster | Returns a combined multi-band raster from 2 or more input Rasters. The order of bands in the resultant raster will be in the order of the input rasters. For example if `RS_Union` is called on two 2... | v1.6.0 |
 | [RS_Value](Raster-Operators/RS_Value.md) | Double | Returns the value at the given point in the raster. If no band number is specified it defaults to 1. | v1.4.0 |
-| [RS_Values](Raster-Operators/RS_Values.md) | Array\<Double\> | Returns the values at the given points or grid coordinates in the raster. If no band number is specified it defaults to 1. | v1.4.0 |
+| [RS_Values](Raster-Operators/RS_Values.md) | `Array<Double>` | Returns the values at the given points or grid coordinates in the raster. If no band number is specified it defaults to 1. | v1.4.0 |
 
 ## Raster Tiles
 
@@ -138,7 +138,7 @@ These functions split rasters into tiles.
 
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |
-| [RS_Tile](Raster-Tiles/RS_Tile.md) | Array\<Raster\> | Returns an array of rasters resulting from the split of the input raster based upon the desired dimensions of the output rasters. | v1.5.1 |
+| [RS_Tile](Raster-Tiles/RS_Tile.md) | `Array<Raster>` | Returns an array of rasters resulting from the split of the input raster based upon the desired dimensions of the output rasters. | v1.5.1 |
 | [RS_TileExplode](Raster-Tiles/RS_TileExplode.md) | Struct | Generates records containing raster tiles resulting from the split of the input raster based upon the desired dimensions of the output rasters. | v1.5.0 |
 
 ## Raster Map Algebra Operators
@@ -148,7 +148,7 @@ These functions convert between raster bands and arrays for map algebra operatio
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |
 | [RS_AddBandFromArray](Raster-Map-Algebra-Operators/RS_AddBandFromArray.md) | Raster | Add a band to a raster from an array of doubles. | v1.5.0 |
-| [RS_BandAsArray](Raster-Map-Algebra-Operators/RS_BandAsArray.md) | Array\<Double\> | Extract a band from a raster as an array of doubles. | v1.4.1 |
+| [RS_BandAsArray](Raster-Map-Algebra-Operators/RS_BandAsArray.md) | `Array<Double>` | Extract a band from a raster as an array of doubles. | v1.4.1 |
 | [RS_MapAlgebra](Raster-Map-Algebra-Operators/RS_MapAlgebra.md) | Raster | Apply a map algebra script on a raster. | v1.5.0 |
 
 ## Map Algebra Operators
@@ -157,28 +157,28 @@ These functions perform per-pixel mathematical operations on raster band arrays.
 
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |
-| [RS_Add](Map-Algebra-Operators/RS_Add.md) | Array\<Double\> | Add two spectral bands in a Geotiff image | v1.1.0 |
-| [RS_Array](Map-Algebra-Operators/RS_Array.md) | Array\<Double\> | Create an array that is filled by the given value | v1.1.0 |
-| [RS_BitwiseAND](Map-Algebra-Operators/RS_BitwiseAND.md) | Array\<Double\> | Find Bitwise AND between two bands of Geotiff image | v1.1.0 |
-| [RS_BitwiseOR](Map-Algebra-Operators/RS_BitwiseOR.md) | Array\<Double\> | Find Bitwise OR between two bands of Geotiff image | v1.1.0 |
+| [RS_Add](Map-Algebra-Operators/RS_Add.md) | `Array<Double>` | Add two spectral bands in a Geotiff image | v1.1.0 |
+| [RS_Array](Map-Algebra-Operators/RS_Array.md) | `Array<Double>` | Create an array that is filled by the given value | v1.1.0 |
+| [RS_BitwiseAND](Map-Algebra-Operators/RS_BitwiseAND.md) | `Array<Double>` | Find Bitwise AND between two bands of Geotiff image | v1.1.0 |
+| [RS_BitwiseOR](Map-Algebra-Operators/RS_BitwiseOR.md) | `Array<Double>` | Find Bitwise OR between two bands of Geotiff image | v1.1.0 |
 | [RS_CountValue](Map-Algebra-Operators/RS_CountValue.md) | Integer | Returns count of a particular value from a spectral band in a raster image | v1.1.0 |
-| [RS_Divide](Map-Algebra-Operators/RS_Divide.md) | Array\<Double\> | Divide band1 with band2 from a geotiff image | v1.1.0 |
-| [RS_FetchRegion](Map-Algebra-Operators/RS_FetchRegion.md) | Array\<Double\> | Fetch a subset of region from given Geotiff image based on minimumX, minimumY, maximumX and maximumY index as well original height and width of image | v1.1.0 |
-| [RS_GreaterThan](Map-Algebra-Operators/RS_GreaterThan.md) | Array\<Double\> | Mask all the values with 1 which are greater than a particular target value | v1.1.0 |
-| [RS_GreaterThanEqual](Map-Algebra-Operators/RS_GreaterThanEqual.md) | Array\<Double\> | Mask all the values with 1 which are greater than equal to a particular target value | v1.1.0 |
-| [RS_LessThan](Map-Algebra-Operators/RS_LessThan.md) | Array\<Double\> | Mask all the values with 1 which are less than a particular target value | v1.1.0 |
-| [RS_LessThanEqual](Map-Algebra-Operators/RS_LessThanEqual.md) | Array\<Double\> | Mask all the values with 1 which are less than equal to a particular target value | v1.1.0 |
-| [RS_LogicalDifference](Map-Algebra-Operators/RS_LogicalDifference.md) | Array\<Double\> | Return value from band 1 if a value in band1 and band2 are different, else return 0 | v1.1.0 |
-| [RS_LogicalOver](Map-Algebra-Operators/RS_LogicalOver.md) | Array\<Double\> | Return value from band1 if it's not equal to 0, else return band2 value | v1.1.0 |
+| [RS_Divide](Map-Algebra-Operators/RS_Divide.md) | `Array<Double>` | Divide band1 with band2 from a geotiff image | v1.1.0 |
+| [RS_FetchRegion](Map-Algebra-Operators/RS_FetchRegion.md) | `Array<Double>` | Fetch a subset of region from given Geotiff image based on minimumX, minimumY, maximumX and maximumY index as well original height and width of image | v1.1.0 |
+| [RS_GreaterThan](Map-Algebra-Operators/RS_GreaterThan.md) | `Array<Double>` | Mask all the values with 1 which are greater than a particular target value | v1.1.0 |
+| [RS_GreaterThanEqual](Map-Algebra-Operators/RS_GreaterThanEqual.md) | `Array<Double>` | Mask all the values with 1 which are greater than equal to a particular target value | v1.1.0 |
+| [RS_LessThan](Map-Algebra-Operators/RS_LessThan.md) | `Array<Double>` | Mask all the values with 1 which are less than a particular target value | v1.1.0 |
+| [RS_LessThanEqual](Map-Algebra-Operators/RS_LessThanEqual.md) | `Array<Double>` | Mask all the values with 1 which are less than equal to a particular target value | v1.1.0 |
+| [RS_LogicalDifference](Map-Algebra-Operators/RS_LogicalDifference.md) | `Array<Double>` | Return value from band 1 if a value in band1 and band2 are different, else return 0 | v1.1.0 |
+| [RS_LogicalOver](Map-Algebra-Operators/RS_LogicalOver.md) | `Array<Double>` | Return value from band1 if it's not equal to 0, else return band2 value | v1.1.0 |
 | [RS_Mean](Map-Algebra-Operators/RS_Mean.md) | Double | Returns Mean value for a spectral band in a Geotiff image | v1.1.0 |
-| [RS_Mode](Map-Algebra-Operators/RS_Mode.md) | Array\<Double\> | Returns Mode from a spectral band in a Geotiff image in form of an array | v1.1.0 |
-| [RS_Modulo](Map-Algebra-Operators/RS_Modulo.md) | Array\<Double\> | Find modulo of pixels with respect to a particular value | v1.1.0 |
-| [RS_Multiply](Map-Algebra-Operators/RS_Multiply.md) | Array\<Double\> | Multiply two spectral bands in a Geotiff image | v1.1.0 |
-| [RS_MultiplyFactor](Map-Algebra-Operators/RS_MultiplyFactor.md) | Array\<Double\> | Multiply a factor to a spectral band in a geotiff image | v1.1.0 |
-| [RS_Normalize](Map-Algebra-Operators/RS_Normalize.md) | Array\<Double\> | Normalize the value in the array to [0, 255]. Uniform arrays are set to 0 after normalization. | v1.1.0 |
-| [RS_NormalizedDifference](Map-Algebra-Operators/RS_NormalizedDifference.md) | Array\<Double\> | Returns Normalized Difference between two bands(band2 and band1) in a Geotiff image(example: NDVI, NDBI) | v1.1.0 |
-| [RS_SquareRoot](Map-Algebra-Operators/RS_SquareRoot.md) | Array\<Double\> | Find Square root of band values in a geotiff image | v1.1.0 |
-| [RS_Subtract](Map-Algebra-Operators/RS_Subtract.md) | Array\<Double\> | Subtract two spectral bands in a Geotiff image(band2 - band1) | v1.1.0 |
+| [RS_Mode](Map-Algebra-Operators/RS_Mode.md) | `Array<Double>` | Returns Mode from a spectral band in a Geotiff image in form of an array | v1.1.0 |
+| [RS_Modulo](Map-Algebra-Operators/RS_Modulo.md) | `Array<Double>` | Find modulo of pixels with respect to a particular value | v1.1.0 |
+| [RS_Multiply](Map-Algebra-Operators/RS_Multiply.md) | `Array<Double>` | Multiply two spectral bands in a Geotiff image | v1.1.0 |
+| [RS_MultiplyFactor](Map-Algebra-Operators/RS_MultiplyFactor.md) | `Array<Double>` | Multiply a factor to a spectral band in a geotiff image | v1.1.0 |
+| [RS_Normalize](Map-Algebra-Operators/RS_Normalize.md) | `Array<Double>` | Normalize the value in the array to [0, 255]. Uniform arrays are set to 0 after normalization. | v1.1.0 |
+| [RS_NormalizedDifference](Map-Algebra-Operators/RS_NormalizedDifference.md) | `Array<Double>` | Returns Normalized Difference between two bands(band2 and band1) in a Geotiff image(example: NDVI, NDBI) | v1.1.0 |
+| [RS_SquareRoot](Map-Algebra-Operators/RS_SquareRoot.md) | `Array<Double>` | Find Square root of band values in a geotiff image | v1.1.0 |
+| [RS_Subtract](Map-Algebra-Operators/RS_Subtract.md) | `Array<Double>` | Subtract two spectral bands in a Geotiff image(band2 - band1) | v1.1.0 |
 
 ## Raster Aggregate Functions
 

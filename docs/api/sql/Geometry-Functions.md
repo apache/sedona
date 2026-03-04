@@ -70,8 +70,8 @@ These functions extract information and properties from geometry objects.
 | [ST_CoordDim](Geometry-Accessors/ST_CoordDim.md) | Integer | Returns the coordinate dimensions of the geometry. It is an alias of `ST_NDims`. | v1.5.0 |
 | [ST_CrossesDateLine](Geometry-Accessors/ST_CrossesDateLine.md) | Boolean | This function determines if a given geometry crosses the International Date Line. It operates by checking if the difference in longitude between any pair of consecutive points in the geometry excee... | v1.6.0 |
 | [ST_Dimension](Geometry-Accessors/ST_Dimension.md) | Integer | Return the topological dimension of this Geometry object, which must be less than or equal to the coordinate dimension. OGC SPEC s2.1.1.1 - returns 0 for POINT, 1 for LINESTRING, 2 for POLYGON, and... | v1.5.0 |
-| [ST_Dump](Geometry-Accessors/ST_Dump.md) | Array\<Geometry\> | It expands the geometries. If the geometry is simple (Point, Polygon Linestring etc.) it returns the geometry itself, if the geometry is collection or multi it returns record for each of collection... | v1.0.0 |
-| [ST_DumpPoints](Geometry-Accessors/ST_DumpPoints.md) | Array\<Geometry\> | Returns list of Points which geometry consists of. | v1.0.0 |
+| [ST_Dump](Geometry-Accessors/ST_Dump.md) | `Array<Geometry>` | It expands the geometries. If the geometry is simple (Point, Polygon Linestring etc.) it returns the geometry itself, if the geometry is collection or multi it returns record for each of collection... | v1.0.0 |
+| [ST_DumpPoints](Geometry-Accessors/ST_DumpPoints.md) | `Array<Geometry>` | Returns list of Points which geometry consists of. | v1.0.0 |
 | [ST_EndPoint](Geometry-Accessors/ST_EndPoint.md) | Geometry | Returns last point of given linestring. | v1.0.0 |
 | [ST_ExteriorRing](Geometry-Accessors/ST_ExteriorRing.md) | Geometry | Returns a line string representing the exterior ring of the POLYGON geometry. Return NULL if the geometry is not a polygon. | v1.0.0 |
 | [ST_GeometryN](Geometry-Accessors/ST_GeometryN.md) | Geometry | Return the 0-based Nth geometry if the geometry is a GEOMETRYCOLLECTION, (MULTI)POINT, (MULTI)LINESTRING, MULTICURVE or (MULTI)POLYGON. Otherwise, return null | v1.0.0 |
@@ -124,7 +124,7 @@ These functions create modified geometries by changing type, structure, or verti
 | [ST_ForceRHR](Geometry-Editors/ST_ForceRHR.md) | Geometry | Sets the orientation of polygon vertex orderings to follow the Right-Hand-Rule convention. The exterior ring will have a clockwise winding order, while any interior rings are oriented counter-clock... | v1.6.1 |
 | [ST_LineFromMultiPoint](Geometry-Editors/ST_LineFromMultiPoint.md) | Geometry | Creates a LineString from a MultiPoint geometry. | v1.3.0 |
 | [ST_LineMerge](Geometry-Editors/ST_LineMerge.md) | Geometry | Returns a LineString or MultiLineString formed by sewing together the constituent line work of a MULTILINESTRING. | v1.0.0 |
-| [ST_LineSegments](Geometry-Editors/ST_LineSegments.md) | Array\<Geometry\> | This function transforms a LineString containing multiple coordinates into an array of LineStrings, each with precisely two coordinates. The `lenient` argument, true by default, prevents an excepti... | v1.7.1 |
+| [ST_LineSegments](Geometry-Editors/ST_LineSegments.md) | `Array<Geometry>` | This function transforms a LineString containing multiple coordinates into an array of LineStrings, each with precisely two coordinates. The `lenient` argument, true by default, prevents an excepti... | v1.7.1 |
 | [ST_MakeLine](Geometry-Editors/ST_MakeLine.md) | Geometry | Creates a LineString containing the points of Point, MultiPoint, or LineString geometries. Other geometry types cause an error. | v1.5.0 |
 | [ST_MakePolygon](Geometry-Editors/ST_MakePolygon.md) | Geometry | Function to convert closed linestring to polygon including holes. If holes are provided, they should be fully contained within the shell. Holes outside the shell will produce an invalid polygon (ma... | v1.1.0 |
 | [ST_Multi](Geometry-Editors/ST_Multi.md) | Geometry | Returns a MultiGeometry object based on the geometry input. ST_Multi is basically an alias for ST_Collect with one geometry. | v1.2.0 |
@@ -244,7 +244,7 @@ These functions compute results arising from the overlay of two geometries. Thes
 | [ST_Difference](Overlay-Functions/ST_Difference.md) | Geometry | Return the difference between geometry A and B (return part of geometry A that does not intersect geometry B) | v1.2.0 |
 | [ST_Intersection](Overlay-Functions/ST_Intersection.md) | Geometry | Return the intersection geometry of A and B | v1.0.0 |
 | [ST_Split](Overlay-Functions/ST_Split.md) | Geometry | Split an input geometry by another geometry (called the blade). Linear (LineString or MultiLineString) geometry can be split by a Point, MultiPoint, LineString, MultiLineString, Polygon, or MultiPo... | v1.4.0 |
-| [ST_SubDivide](Overlay-Functions/ST_SubDivide.md) | Array\<Geometry\> | Returns list of geometries divided based of given maximum number of vertices. | v1.1.0 |
+| [ST_SubDivide](Overlay-Functions/ST_SubDivide.md) | Array<Geometry> | Returns list of geometries divided based of given maximum number of vertices. | v1.1.0 |
 | [ST_SubDivideExplode](Overlay-Functions/ST_SubDivideExplode.md) | Geometry | It works the same as ST_SubDivide but returns new rows with geometries instead of list. | v1.1.0 |
 | [ST_SymDifference](Overlay-Functions/ST_SymDifference.md) | Geometry | Return the symmetrical difference between geometry A and B (return parts of geometries which are in either of the sets, but not in their intersection) | v1.2.0 |
 | [ST_UnaryUnion](Overlay-Functions/ST_UnaryUnion.md) | Geometry | This variant of [ST_Union](Overlay-Functions/ST_Union.md) operates on a single geometry input. The input geometry can be a simple Geometry type, a MultiGeometry, or a GeometryCollection. The function calculates the ge... | v1.6.1 |
@@ -337,21 +337,21 @@ These functions work with spatial indexing systems including Bing Tiles, H3, S2,
 | :--- | :--- | :--- | :--- |
 | [ST_BingTile](Spatial-Indexing/ST_BingTile.md) | String | Creates a Bing Tile quadkey from tile XY coordinates and a zoom level. | v1.9.0 |
 | [ST_BingTileAt](Spatial-Indexing/ST_BingTileAt.md) | String | Returns the Bing Tile quadkey for a given point (longitude, latitude) at a specified zoom level. | v1.9.0 |
-| [ST_BingTileCellIDs](Spatial-Indexing/ST_BingTileCellIDs.md) | Array\<String\> | Returns an array of Bing Tile quadkey strings that cover the given geometry at the specified zoom level. | v1.9.0 |
+| [ST_BingTileCellIDs](Spatial-Indexing/ST_BingTileCellIDs.md) | `Array<String>` | Returns an array of Bing Tile quadkey strings that cover the given geometry at the specified zoom level. | v1.9.0 |
 | [ST_BingTilePolygon](Spatial-Indexing/ST_BingTilePolygon.md) | Geometry | Returns the bounding polygon (Geometry) of the Bing Tile identified by the given quadkey. | v1.9.0 |
-| [ST_BingTilesAround](Spatial-Indexing/ST_BingTilesAround.md) | Array\<String\> | Returns an array of Bing Tile quadkey strings representing the neighborhood tiles around the tile that contains the given point (longitude, latitude) at the specified zoom level. Returns the 3×3 ne... | v1.9.0 |
-| [ST_BingTileToGeom](Spatial-Indexing/ST_BingTileToGeom.md) | Array\<Geometry\> | Returns an array of Polygons for the corresponding Bing Tile quadkeys. | v1.9.0 |
+| [ST_BingTilesAround](Spatial-Indexing/ST_BingTilesAround.md) | `Array<String>` | Returns an array of Bing Tile quadkey strings representing the neighborhood tiles around the tile that contains the given point (longitude, latitude) at the specified zoom level. Returns the 3×3 ne... | v1.9.0 |
+| [ST_BingTileToGeom](Spatial-Indexing/ST_BingTileToGeom.md) | `Array<Geometry>` | Returns an array of Polygons for the corresponding Bing Tile quadkeys. | v1.9.0 |
 | [ST_BingTileX](Spatial-Indexing/ST_BingTileX.md) | Integer | Returns the tile X coordinate of the Bing Tile identified by the given quadkey. | v1.9.0 |
 | [ST_BingTileY](Spatial-Indexing/ST_BingTileY.md) | Integer | Returns the tile Y coordinate of the Bing Tile identified by the given quadkey. | v1.9.0 |
 | [ST_BingTileZoomLevel](Spatial-Indexing/ST_BingTileZoomLevel.md) | Integer | Returns the zoom level of the Bing Tile identified by the given quadkey. | v1.9.0 |
 | [ST_GeoHashNeighbor](Spatial-Indexing/ST_GeoHashNeighbor.md) | String | Returns the neighbor geohash cell in the given direction. Valid directions are: `n`, `ne`, `e`, `se`, `s`, `sw`, `w`, `nw` (case-insensitive). | v1.9.0 |
-| [ST_GeoHashNeighbors](Spatial-Indexing/ST_GeoHashNeighbors.md) | Array\<String\> | Returns the 8 neighboring geohash cells of a given geohash string. The result is an array of 8 geohash strings in the order: N, NE, E, SE, S, SW, W, NW. | v1.9.0 |
+| [ST_GeoHashNeighbors](Spatial-Indexing/ST_GeoHashNeighbors.md) | `Array<String>` | Returns the 8 neighboring geohash cells of a given geohash string. The result is an array of 8 geohash strings in the order: N, NE, E, SE, S, SW, W, NW. | v1.9.0 |
 | [ST_H3CellDistance](Spatial-Indexing/ST_H3CellDistance.md) | Long | return result of h3 function [gridDistance(cel1, cell2)](https://h3geo.org/docs/api/traversal#griddistance). As described by H3 documentation > Finding the distance can fail because the two indexes... | v1.5.0 |
-| [ST_H3CellIDs](Spatial-Indexing/ST_H3CellIDs.md) | Array\<Long\> | Cover the geometry by H3 cell IDs with the given resolution(level). To understand the cell statistics please refer to [H3 Doc](https://h3geo.org/docs/core-library/restable) H3 native fill functions... | v1.5.0 |
-| [ST_H3KRing](Spatial-Indexing/ST_H3KRing.md) | Array\<Long\> | return the result of H3 function [gridDisk(cell, k)](https://h3geo.org/docs/api/traversal#griddisk). | v1.5.0 |
-| [ST_H3ToGeom](Spatial-Indexing/ST_H3ToGeom.md) | Array\<Geometry\> | Return the result of H3 function [cellsToMultiPolygon(cells)](https://h3geo.org/docs/api/regions#cellstolinkedmultipolygon--cellstomultipolygon). | v1.6.0 |
-| [ST_S2CellIDs](Spatial-Indexing/ST_S2CellIDs.md) | Array\<Long\> | Cover the geometry with Google S2 Cells, return the corresponding cell IDs with the given level. The level indicates the [size of cells](https://s2geometry.io/resources/s2cell_statistics.html). With... | v1.4.0 |
-| [ST_S2ToGeom](Spatial-Indexing/ST_S2ToGeom.md) | Array\<Geometry\> | Returns an array of Polygons for the corresponding S2 cell IDs. | v1.6.0 |
+| [ST_H3CellIDs](Spatial-Indexing/ST_H3CellIDs.md) | `Array<Long>` | Cover the geometry by H3 cell IDs with the given resolution(level). To understand the cell statistics please refer to [H3 Doc](https://h3geo.org/docs/core-library/restable) H3 native fill functions... | v1.5.0 |
+| [ST_H3KRing](Spatial-Indexing/ST_H3KRing.md) | `Array<Long>` | return the result of H3 function [gridDisk(cell, k)](https://h3geo.org/docs/api/traversal#griddisk). | v1.5.0 |
+| [ST_H3ToGeom](Spatial-Indexing/ST_H3ToGeom.md) | `Array<Geometry>` | Return the result of H3 function [cellsToMultiPolygon(cells)](https://h3geo.org/docs/api/regions#cellstolinkedmultipolygon--cellstomultipolygon). | v1.6.0 |
+| [ST_S2CellIDs](Spatial-Indexing/ST_S2CellIDs.md) | `Array<Long>` | Cover the geometry with Google S2 Cells, return the corresponding cell IDs with the given level. The level indicates the [size of cells](https://s2geometry.io/resources/s2cell_statistics.html). With... | v1.4.0 |
+| [ST_S2ToGeom](Spatial-Indexing/ST_S2ToGeom.md) | `Array<Geometry>` | Returns an array of Polygons for the corresponding S2 cell IDs. | v1.6.0 |
 
 ## Clustering Functions
 
@@ -368,9 +368,9 @@ These functions compute spatial statistics and spatial weights.
 
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |
-| [ST_BinaryDistanceBandColumn](Spatial-Statistics/ST_BinaryDistanceBandColumn.md) | Array\<Struct\> | Introduction: Returns a `weights` column containing every record in a dataframe within a specified `threshold` distance. | v1.7.1 |
+| [ST_BinaryDistanceBandColumn](Spatial-Statistics/ST_BinaryDistanceBandColumn.md) | `Array<Struct>` | Introduction: Returns a `weights` column containing every record in a dataframe within a specified `threshold` distance. | v1.7.1 |
 | [ST_GLocal](Spatial-Statistics/ST_GLocal.md) | Struct | Runs Getis and Ord's G Local (Gi or Gi*) statistic on the geometry given the `weights` and `level`. | v1.7.1 |
-| [ST_WeightedDistanceBandColumn](Spatial-Statistics/ST_WeightedDistanceBandColumn.md) | Array\<Struct\> | Introduction: Returns a `weights` column containing every record in a dataframe within a specified `threshold` distance. | v1.7.1 |
+| [ST_WeightedDistanceBandColumn](Spatial-Statistics/ST_WeightedDistanceBandColumn.md) | `Array<Struct>` | Introduction: Returns a `weights` column containing every record in a dataframe within a specified `threshold` distance. | v1.7.1 |
 
 ## Address Functions
 
@@ -378,5 +378,5 @@ These functions parse and expand street addresses using the libpostal library.
 
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |
-| [ExpandAddress](Address-Functions/ExpandAddress.md) | Array\<String\> | Returns an array of expanded forms of the input address string. This is backed by the [libpostal](https://github.com/openvenues/libpostal) library's address expanding functionality. | v1.8.0 |
-| [ParseAddress](Address-Functions/ParseAddress.md) | Array\<Struct\> | Returns an array of the components (e.g. street, postal code) of the input address string. This is backed by the [libpostal](https://github.com/openvenues/libpostal) library's address parsing funct... | v1.8.0 |
+| [ExpandAddress](Address-Functions/ExpandAddress.md) | Array<String> | Returns an array of expanded forms of the input address string. This is backed by the [libpostal](https://github.com/openvenues/libpostal) library's address expanding functionality. | v1.8.0 |
+| [ParseAddress](Address-Functions/ParseAddress.md) | Array<Struct> | Returns an array of the components (e.g. street, postal code) of the input address string. This is backed by the [libpostal](https://github.com/openvenues/libpostal) library's address parsing funct... | v1.8.0 |
