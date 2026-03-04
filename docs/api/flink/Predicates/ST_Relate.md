@@ -21,10 +21,10 @@
 
 Introduction: The first variant of the function computes and returns the [Dimensionally Extended 9-Intersection Model (DE-9IM)](https://en.wikipedia.org/wiki/DE-9IM) matrix string representing the spatial relationship between the two input geometry objects.
 
+The second variant of the function evaluates whether the two input geometries satisfy a specific spatial relationship defined by the provided `intersectionMatrix` pattern.
+
 ![ST_Relate returning true](../../../image/ST_Relate/ST_Relate_true.svg "ST_Relate returning true")
 ![ST_Relate returning false](../../../image/ST_Relate/ST_Relate_false.svg "ST_Relate returning false")
-
-The second variant of the function evaluates whether the two input geometries satisfy a specific spatial relationship defined by the provided `intersectionMatrix` pattern.
 
 !!!Note
     It is important to note that this function is not optimized for use in spatial join operations. Certain DE-9IM relationships can hold true for geometries that do not intersect or are disjoint. As a result, it is recommended to utilize other dedicated spatial functions specifically optimized for spatial join processing.
