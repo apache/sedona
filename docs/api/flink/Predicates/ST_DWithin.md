@@ -21,6 +21,9 @@
 
 Introduction: Returns true if 'leftGeometry' and 'rightGeometry' are within a specified 'distance'.
 
+![ST_DWithin returning true](../../../image/ST_DWithin/ST_DWithin_true.svg "ST_DWithin returning true")
+![ST_DWithin returning false](../../../image/ST_DWithin/ST_DWithin_false.svg "ST_DWithin returning false")
+
 If `useSpheroid` is passed true, ST_DWithin uses Sedona's ST_DistanceSpheroid to check the spheroid distance between the centroids of two geometries. The unit of the distance in this case is meter.
 
 If `useSpheroid` is passed false, ST_DWithin uses Euclidean distance and the unit of the distance is the same as the CRS of the geometries. To obtain the correct result, please consider using ST_Transform to put data in an appropriate CRS.

@@ -21,6 +21,9 @@
 
 Introduction: Return true if A covers B
 
+![ST_Covers returning true](../../../image/ST_Covers/ST_Covers_true.svg "ST_Covers returning true")
+![ST_Covers returning false](../../../image/ST_Covers/ST_Covers_false.svg "ST_Covers returning false")
+
 Format: `ST_Covers (A: Geometry, B: Geometry)`
 
 Return type: `Boolean`

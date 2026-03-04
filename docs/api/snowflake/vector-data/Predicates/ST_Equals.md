@@ -21,6 +21,9 @@
 
 Introduction: Return true if A equals to B
 
+![ST_Equals returning true](../../../../image/ST_Equals/ST_Equals_true.svg "ST_Equals returning true")
+![ST_Equals returning false](../../../../image/ST_Equals/ST_Equals_false.svg "ST_Equals returning false")
+
 Format: `ST_Equals (A:geometry, B:geometry)`
 
 Return type: `Boolean`
