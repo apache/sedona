@@ -21,6 +21,8 @@
 
 Introduction: Returns the LineString geometry representing the maximum distance between any two points from the input geometries.
 
+![ST_LongestLine](../../../image/ST_LongestLine/ST_LongestLine.svg "ST_LongestLine")
+
 Format: `ST_LongestLine(geom1: Geometry, geom2: Geometry)`
 
 Return type: `Geometry`

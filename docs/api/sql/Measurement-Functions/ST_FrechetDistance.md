@@ -24,6 +24,8 @@ based on [Computing Discrete Frechet Distance](http://www.kr.tuwien.ac.at/staff/
 
 If any of the geometries is empty, returns 0.0
 
+![ST_FrechetDistance](../../../image/ST_FrechetDistance/ST_FrechetDistance.svg "ST_FrechetDistance")
+
 Format: `ST_FrechetDistance(g1: Geometry, g2: Geometry)`
 
 Return type: `Double`

@@ -33,6 +33,8 @@ If any of the geometry is empty, 0.0 is returned.
 !!!Note
     Even though the function accepts 3D geometry, the z ordinate is ignored and the computed hausdorff distance is equivalent to the geometries not having the z ordinate.
 
+![ST_HausdorffDistance](../../../image/ST_HausdorffDistance/ST_HausdorffDistance.svg "ST_HausdorffDistance")
+
 Format: `ST_HausdorffDistance(g1: Geometry, g2: Geometry, densityFrac: Double)`
 
 Return type: `Double`

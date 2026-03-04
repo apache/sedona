@@ -26,6 +26,8 @@ To get the perimeter in meters, set `use_spheroid` to `true`. This calculates th
 !!!Info
     This function is an alias for [ST_Perimeter](ST_Perimeter.md).
 
+![ST_Perimeter2D](../../../../image/ST_Perimeter2D/ST_Perimeter2D.svg "ST_Perimeter2D")
+
 Format:
 
 `ST_Perimeter2D(geom: Geometry)`

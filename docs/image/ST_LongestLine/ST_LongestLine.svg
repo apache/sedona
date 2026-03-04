@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <marker id="arrowG" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#2ecc71" />
+    </marker>
+    <marker id="arrowGrev" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
+      <path d="M8,0 L0,3 L8,6" fill="#2ecc71" />
+    </marker>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_LongestLine</text>
+  <path d="M 132.52 224.76 L 217.96 224.76 L 217.96 139.32 L 132.52 139.32 L 132.52 224.76 Z" fill="rgba(74,144,217,0.15)" stroke="#4a90d9" stroke-width="2.5" fill-rule="evenodd" />
+  <text x="166.7" y="190.58" text-anchor="middle" font-size="15" font-weight="bold" fill="#4a90d9">A</text>
+  <path d="M 282.04 160.68 L 367.48 160.68 L 367.48 75.24 L 282.04 75.24 L 282.04 160.68 Z" fill="rgba(217,74,74,0.15)" stroke="#d94a4a" stroke-width="2.5" fill-rule="evenodd" />
+  <text x="316.21" y="126.5" text-anchor="middle" font-size="15" font-weight="bold" fill="#d94a4a">B</text>
+  <line x1="132.52" y1="224.76" x2="367.48" y2="75.24" stroke="#2ecc71" stroke-width="2.5" stroke-dasharray="6,3" marker-start="url(#arrowGrev)" marker-end="url(#arrowG)" />
+  <text x="258" y="144" font-size="15" font-weight="bold" fill="#2ecc71" font-style="italic">longest</text>
+  <circle cx="132.52" cy="224.76" r="4" fill="#2ecc71" />
+  <circle cx="367.48" cy="75.24" r="4" fill="#2ecc71" />
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Returns the longest line between any two points of A and B</text>
+  <rect x="77" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="93" y="266" font-size="13" fill="#333333">Geometry A</text>
+  <rect x="187" y="255" width="12" height="12" rx="2" fill="#d94a4a" stroke="#d94a4a" stroke-width="1" />
+  <text x="203" y="266" font-size="13" fill="#333333">Geometry B</text>
+  <rect x="297" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="313" y="266" font-size="13" fill="#333333">Longest line</text>
+</svg>

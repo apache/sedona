@@ -23,6 +23,8 @@ Introduction: Return the haversine / great-circle distance of A using a given ea
 
 Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lat/lon== order. You can use ==ST_FlipCoordinates== to swap lat and lon. For non-point data, we first take the centroids of both geometries and then compute the distance.
 
+![ST_DistanceSphere](../../../../image/ST_DistanceSphere/ST_DistanceSphere.svg "ST_DistanceSphere")
+
 Format: `ST_DistanceSphere (A:geometry)`
 
 Return type: `Double`

@@ -21,6 +21,8 @@
 
 Introduction: Return the area of A
 
+![ST_Area](../../../../image/ST_Area/ST_Area.svg "ST_Area")
+
 Format: `ST_Area (A:geometry)`
 
 Return type: `Double`

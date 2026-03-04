@@ -26,6 +26,8 @@ Geometry must be in EPSG:4326 (WGS84) projection and must be in ==lon/lat== orde
 !!!note
     By default, this function uses lon/lat order since `v1.5.0`. Before, it used lat/lon order.
 
+![ST_DistanceSpheroid](../../../image/ST_DistanceSpheroid/ST_DistanceSpheroid.svg "ST_DistanceSpheroid")
+
 Format: `ST_DistanceSpheroid (A: Geometry)`
 
 Return type: `Double`

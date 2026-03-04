@@ -28,6 +28,8 @@ For a geometry with a minimum clearance of `x`, the following conditions hold:
 
 For geometries with no definable minimum clearance, such as single Point geometries or MultiPoint geometries where all points occupy the same location, the function returns `Double.MAX_VALUE`.
 
+![ST_MinimumClearance](../../../image/ST_MinimumClearance/ST_MinimumClearance.svg "ST_MinimumClearance")
+
 Format: `ST_MinimumClearance(geometry: Geometry)`
 
 Return type: `Double`

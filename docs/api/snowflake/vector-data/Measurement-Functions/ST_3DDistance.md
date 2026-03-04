@@ -21,6 +21,8 @@
 
 Introduction: Return the 3-dimensional minimum cartesian distance between A and B
 
+![ST_3DDistance](../../../../image/ST_3DDistance/ST_3DDistance.svg "ST_3DDistance")
+
 Format: `ST_3DDistance (A:geometry, B:geometry)`
 
 Return type: `Double`
