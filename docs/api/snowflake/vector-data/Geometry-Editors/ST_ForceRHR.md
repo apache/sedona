@@ -21,6 +21,7 @@
 
 Introduction: Sets the orientation of polygon vertex orderings to follow the Right-Hand-Rule convention. The exterior ring will have a clockwise winding order, while any interior rings are oriented counter-clockwise. This ensures the area bounded by the polygon falls on the right-hand side relative to the ring directions. The function is an alias for [ST_ForcePolygonCW](ST_ForcePolygonCW.md).
 
+![ST_ForceRHR](../../../../image/ST_ForceRHR/ST_ForceRHR.svg "ST_ForceRHR")
 Format: `ST_ForceRHR(geom: Geometry)`
 
 Return type: `Geometry`

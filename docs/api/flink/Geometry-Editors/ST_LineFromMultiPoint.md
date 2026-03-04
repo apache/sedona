@@ -21,6 +21,7 @@
 
 Introduction: Creates a LineString from a MultiPoint geometry.
 
+![ST_LineFromMultiPoint](../../../image/ST_LineFromMultiPoint/ST_LineFromMultiPoint.svg "ST_LineFromMultiPoint")
 Format: `ST_LineFromMultiPoint (A: Geometry)`
 
 Return type: `Geometry`

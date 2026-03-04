@@ -21,6 +21,7 @@
 
 Introduction: This function transforms a LineString containing multiple coordinates into an array of LineStrings, each with precisely two coordinates. The `lenient` argument, true by default, prevents an exception from being raised if the input geometry is not a LineString.
 
+![ST_LineSegments](../../../image/ST_LineSegments/ST_LineSegments.svg "ST_LineSegments")
 Format:
 
 `ST_LineSegments(geom: Geometry, lenient: Boolean)`

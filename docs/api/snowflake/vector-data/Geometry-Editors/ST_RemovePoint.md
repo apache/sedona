@@ -21,6 +21,7 @@
 
 Introduction: RETURN Line with removed point at given index, position can be omitted and then last one will be removed.
 
+![ST_RemovePoint](../../../../image/ST_RemovePoint/ST_RemovePoint.svg "ST_RemovePoint")
 Format: `ST_RemovePoint(geom: geometry, position: integer)`
 
 Format: `ST_RemovePoint(geom: geometry)`

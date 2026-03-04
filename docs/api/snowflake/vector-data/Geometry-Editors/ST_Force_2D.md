@@ -21,6 +21,7 @@
 
 Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates. This function is an alias of [ST_Force2D](ST_Force2D.md).
 
+![ST_Force_2D](../../../../image/ST_Force_2D/ST_Force_2D.svg "ST_Force_2D")
 Format: `ST_Force_2D (A:geometry)`
 
 Return type: `Geometry`

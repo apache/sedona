@@ -24,6 +24,7 @@ Introduction: Converts the input geometry to 4D XYZM representation. Retains ori
 !!!Note
     Example output is after calling ST_AsText() on returned geometry, which adds Z for in the WKT for 3D geometries
 
+![ST_Force4D](../../../image/ST_Force4D/ST_Force4D.svg "ST_Force4D")
 Format:
 
 `ST_Force4D(geom: Geometry, zValue: Double, mValue: Double)`

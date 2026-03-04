@@ -21,6 +21,7 @@
 
 Introduction: Calculates a new point location given a starting point, distance, and azimuth. The azimuth indicates the direction, expressed in radians, and is measured in a clockwise manner starting from true north. The system can handle azimuth values that are negative or exceed 2π (360 degrees). The optional `lenient` parameter prevents an error if the input geometry is not a Point. Its default value is `false`.
 
+![ST_Project](../../../../image/ST_Project/ST_Project.svg "ST_Project")
 Format:
 
 ```

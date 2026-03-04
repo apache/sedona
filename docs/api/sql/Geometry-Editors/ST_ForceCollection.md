@@ -21,6 +21,7 @@
 
 Introduction: This function converts the input geometry into a GeometryCollection, regardless of the original geometry type. If the input is a multipart geometry, such as a MultiPolygon or MultiLineString, it will be decomposed into a GeometryCollection containing each individual Polygon or LineString element from the original multipart geometry.
 
+![ST_ForceCollection](../../../image/ST_ForceCollection/ST_ForceCollection.svg "ST_ForceCollection")
 Format: `ST_ForceCollection(geom: Geometry)`
 
 Return type: `Geometry`

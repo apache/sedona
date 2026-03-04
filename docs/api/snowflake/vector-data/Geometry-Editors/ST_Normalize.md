@@ -21,6 +21,7 @@
 
 Introduction: Returns the input geometry in its normalized form.
 
+![ST_Normalize](../../../../image/ST_Normalize/ST_Normalize.svg "ST_Normalize")
 Format
 
 `ST_Normalize(geom: geometry)`

@@ -21,6 +21,7 @@
 
 Introduction: Function to convert closed linestring to polygon including holes. The holes must be a MultiLinestring. If holes are provided, they should be fully contained within the shell. Holes outside the shell will produce an invalid polygon (matching PostGIS behavior). Use `ST_IsValid` to check the result.
 
+![ST_MakePolygon](../../../../image/ST_MakePolygon/ST_MakePolygon.svg "ST_MakePolygon")
 Format: `ST_MakePolygon(geom: geometry, holes: <geometry>)`
 
 Return type: `Geometry`

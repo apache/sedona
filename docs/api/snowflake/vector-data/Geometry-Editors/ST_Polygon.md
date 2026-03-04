@@ -21,6 +21,7 @@
 
 Introduction: Function to create a polygon built from the given LineString and sets the spatial reference system from the srid
 
+![ST_Polygon](../../../../image/ST_Polygon/ST_Polygon.svg "ST_Polygon")
 Format: `ST_Polygon(geom: Geometry, srid: Integer)`
 
 Return type: `Geometry`

@@ -21,6 +21,7 @@
 
 Introduction: Returns MultiGeometry object based on geometry column/s or array with geometries
 
+![ST_Collect](../../../image/ST_Collect/ST_Collect.svg "ST_Collect")
 Format:
 
 `ST_Collect(*geom: Geometry)`
